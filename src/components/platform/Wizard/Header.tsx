@@ -24,9 +24,12 @@ import {
 } from "~/components/ui/collapsible";
 import numberToWords from "./Utils/steptoWords";
 import { NumberWords } from "./type";
+import { camelCase } from "lodash";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function Header() {
   const { state, actions } = useContext(WizardContext);
+
   const {
     currentStep = 1,
     totalSteps = 5,
@@ -38,6 +41,7 @@ export default function Header() {
     saveNewLoading,
     saveCloseLoading,
     debugOn,
+    entityName,
     stepsNavigation,
   } = state ?? {};
 
@@ -80,6 +84,7 @@ export default function Header() {
             <CollapsibleTrigger asChild>
               <Button
                 name="toggleStepper"
+                data-test-id={testIDFormatter(`${entityName}-wizard-toggle-stepper`)}
                 variant={"ghost"}
                 className="items-end gap-2 p-0"
               >
@@ -105,6 +110,7 @@ export default function Header() {
         <div className="my-auto flex flex-row space-x-2 px-4">
           <Button
             name="wizardDebugButton"
+            data-test-id={testIDFormatter(`${entityName}-wizard-debug-btn`)}
             size={"icon"}
             variant={"ghost"}
             className="m-auto h-6 w-6 rounded-full bg-rose-200"
@@ -113,21 +119,20 @@ export default function Header() {
             <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-red-500" />
           </Button>
           <Button
-            data-test-id="wizardPrevButton"
+            data-test-id={testIDFormatter(`${entityName}-wizard-prev-btn`)}
             disabled={!enabled_prev || currentStep === 1 || prevLoading}
+            variant={"outline"}
             loading={prevLoading}
             onClick={handlePrev}
-            size={"sm"}
-            Icon={ChevronLeftIcon}
-            iconPlacement="left"
-            className="border bg-secondary text-foreground hover:bg-secondary/80"
+            className="gap-1"
           >
-            <span className="m-auto text-foreground">Prev</span>
+            <ChevronLeftIcon className="h-3 w-3 text-slate-400" strokeWidth={4} />
+            <span className="text-foreground">Prev</span>
           </Button>
           {currentStep === totalSteps ? (
             <div className="flex flex-row space-x-0.5">
               <Button
-                data-test-id="wizardSaveContinueButton"
+                data-test-id={testIDFormatter(`${entityName}-wizard-save-continue-btn`)}
                 className="rounded-r-none"
                 loading={saveContinueLoading}
                 Icon={BookmarkSquareIcon}
@@ -140,6 +145,7 @@ export default function Header() {
                 <span>Save & Continue</span>
               </Button>
               <ButtonWithDropdown
+              entity={entityName}
                 buttonClassName="rounded-l-none"
                 buttonVariant={"default"}
                 dropdownOptions={[
@@ -163,37 +169,38 @@ export default function Header() {
           ) : (
             <>
               <Button
-                data-test-id="wizardSkipButton"
+                data-test-id={testIDFormatter(`${entityName}-wizard-skip-btn`)}
+                variant={"outline"}
                 loading={skipLoading}
                 disabled={
                   !enabled_skip || currentStep === totalSteps || skipLoading
                 }
                 onClick={handleSkip}
-                size={"sm"}
-                className="m-auto border bg-secondary text-foreground hover:bg-secondary/80"
-                Icon={ChevronRightIcon}
               >
-                <span className=" ">Skip</span>
+                <span className="text-foreground">Skip</span>
+                <ChevronRightIcon className="h-3 w-3 text-slate-400" strokeWidth={4} />
               </Button>
               <Button
-                data-test-id="wizardNextButton"
+                data-test-id={testIDFormatter(`${entityName}-wizard-next-btn`)}
                 loading={nextLoading}
                 disabled={
                   !enabled_next || currentStep === totalSteps || nextLoading
                 }
                 onClick={handleNext}
-                size={"sm"}
-                className="m-auto"
-                Icon={ChevronRightIcon}
+                className="gap-1"
               >
-                <span className=" ">Next</span>
+                <span >Next</span>
+                <ChevronRightIcon className="h-3 w-3 " strokeWidth={4} />
+
               </Button>
             </>
           )}
         </div>
       </div>
       {debugOn && <DebuggerComponent />}
-      <Validation messages={errorMessage ?? {}} />
+      <Validation 
+        dataTestId={testIDFormatter(`${entityName}-wizard-validation-msg`)}
+        messages={errorMessage ?? {}} />
     </>
   );
 }

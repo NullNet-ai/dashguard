@@ -8,11 +8,14 @@ import { ChevronLeftIcon } from "lucide-react";
 const FORM_HEADER_HEIGHT = "3.5rem";
 import { Button as Button2 } from "@headlessui/react";
 import Stepper from "./Stepper";
+import { camelCase } from "lodash";
+import { testIDFormatter } from "~/utils/formatter";
 
 const SummaryComponent = () => {
 
     const summaryContext = useContext(WizardContext)
     const {state,actions} = summaryContext;
+    const { entityName  } = state ?? {}
     const screenType = useScreenType()
   
     useEffect(() => {
@@ -32,6 +35,7 @@ const SummaryComponent = () => {
         state?.isSummaryOpen ? 'lg:w-64 md:w-52 sm:w-48' : 'w-8 pt-2' )}
         >
         <div
+          data-test-id={testIDFormatter(`${entityName}-wizard-summary`)}
           className={cn('flex items-center justify-between  z-10',
             state?.isSummaryOpen ? 'flex-row px-4 border-b' : 'flex-col-reverse justify-end gap-6 border-b mb-2'
   
@@ -39,9 +43,13 @@ const SummaryComponent = () => {
           style={{ height:  (state?.isSummaryOpen ) ? FORM_HEADER_HEIGHT : 110 }}
         >
           <span className={cn('text-sm font-bold', !state?.isSummaryOpen ? '-rotate-90 w-[80px] ml-[-3px]' : '')}>Summary</span>
-          <Button2 onClick={() => {
-            handleToggle()
-          }} className="font-bold flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-primary">
+          <Button2 
+            onClick={() => {
+              handleToggle()
+            }} 
+            className="font-bold flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-primary"
+            data-test-id={testIDFormatter(`${entityName}-wizard-summary-toggle-btn`)}
+          >
             <ChevronLeftIcon className="h-3 w-3" />
           </Button2>
         </div>
