@@ -8,12 +8,20 @@ import { FileUploaderContent } from "./FileUploaderContent";
 
 interface FileProps extends FileUploaderProps {
   children?: ReactNode;
+  fileUploaderProps?: Record<string, string>;
+  fileInputProps?: Record<string, string>;
+  fileUploaderContentProps?: Record<string, string>;
 }
 const FileUpload = ({
   value,
   orientation,
   onUploadFile,
   dropzoneOptions,
+  formRenderProps,
+  fileUploaderProps,
+  fileInputProps,
+  fileUploaderContentProps,
+  ...props
 }: FileProps) => {
   return (
     <FileUploader
@@ -21,7 +29,7 @@ const FileUpload = ({
       value={value}
       orientation={orientation}
       onUploadFile={onUploadFile}
-      className="h-80"
+      formRenderProps={formRenderProps}
     >
       <FileInput
         id="fileInput"
