@@ -2,17 +2,17 @@ export const steps_navigation = {
   one: {
     next: true,
     prev: false,
-    skip: true,
+    skip: false,
   },
   two: {
     next: true,
-    prev: false,
-    skip: true,
+    prev: true,
+    skip: false,
   },
   three: {
     next: true,
-    prev: false,
-    skip: true,
+    prev: true,
+    skip: false,
   },
   four: {
     next: true,
