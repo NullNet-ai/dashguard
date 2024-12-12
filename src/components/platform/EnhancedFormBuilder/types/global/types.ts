@@ -10,6 +10,7 @@ type TFormType =
   | "radio"
   | "checkbox"
   | "date"
+  | "smart-date"
   | "file"
   | "multi-select"
   | "inputs"

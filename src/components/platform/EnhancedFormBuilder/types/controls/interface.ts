@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
-import { IButtonConfig, IFilterGridConfig } from "../global/interfaces";
+import { IButtonConfig, IFeatures, IFilterGridConfig } from "../global/interfaces";
 import { TDisplayType, TFormSchema } from "../global/types";
 
 interface IFormHeaderProps {
@@ -25,6 +25,9 @@ interface IFormHeaderProps {
   onSubmitFormGrid(data: z.infer<TFormSchema>): Promise<void>;
   selectedRecords: any[];
   handleUpdateDisplayType: (type: TDisplayType) => void;
+  formKey: string,
+  features : IFeatures | undefined;
+  formProps?: any
 }
 
 export type {

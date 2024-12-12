@@ -1,15 +1,25 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { HTMLAttributes, HTMLInputTypeAttribute, ReactElement, ReactNode } from "react";
+import {
+  HTMLAttributes,
+  HTMLInputTypeAttribute,
+  ReactElement,
+  ReactNode,
+} from "react";
 import { DropzoneOptions } from "react-dropzone";
 import { UseFormReturn } from "react-hook-form";
 
 import { TActionType } from "~/components/platform/Grid/types";
-import { DateTimeGranularity, TFormSchema, TFormType, TSelectionType } from "./types";
+import {
+  DateTimeGranularity,
+  TFormSchema,
+  TFormType,
+  TSelectionType,
+} from "./types";
 
 interface OptionType {
   label: string;
   value: string;
-};
+}
 
 interface IField {
   id: string;
@@ -53,6 +63,13 @@ interface IField {
     phoneEmailType?: TSelectionType;
     inputsType?: TSelectionType;
   };
+  textAreaMaxHeight?: number;
+  textAreaMinHeight?: number;
+  textAreaIcon?: React.ElementType;
+  textAreaMaxLines?: number;
+  textAreaLineWrapping?: boolean;
+  textAreaShowCharCount?: boolean;
+  textAreaMaxCharCount?: number;
 }
 
 interface ISelectOptions {
@@ -75,7 +92,7 @@ interface IHandleSubmit<T = Record<string, any>> {
   form?: UseFormReturn<Record<string, any>, any, undefined>;
   main_entity_id?: string;
   filter_entity?: string;
-  action_type?: string
+  action_type?: string;
 }
 
 interface IOnFormListen
@@ -102,6 +119,28 @@ interface IUserFormField {
     value: { message: string };
   }[];
 }
+
+export interface IFeatures {
+  enableLockFormView? : boolean,
+  enableLockFormCopy? : boolean,
+  enableLockFormEllipsis? : boolean,
+  enableViewFormEllipsis? : boolean,
+  enableViewFormCopy? : boolean,
+  enableViewFormPaste? : boolean,
+  enableViewFormClear? : boolean,
+  enableUnlockFormFilter? : boolean,
+  enableFormHostViewActions? : boolean,
+  enableFormHostLockActions? : boolean,
+}
+
+export interface ICustomActions {
+  label: string;
+  icon?: ReactElement;
+  onClick: () => void;
+  disabled?: boolean;
+  hidden?: boolean;
+}
+
 
 interface IFilterGridConfig {
   selectedRecords?: any[];
@@ -177,11 +216,26 @@ interface IPropsForms {
     options?: {
       appendButtonKey?: string;
     },
-  // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
+    // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
+  features? : IFeatures;
+  customFormHostViewFormActions?: ICustomActions[];
+  customFormHostLockFormActions?: ICustomActions[];
+  customFormFilterViewFormActions?: ICustomActions[];
+  customFormFilterLockFormActions?: ICustomActions[];
 }
 
 export type {
-  IButtonConfig, ICheckboxOptions, IField, IFilterGridConfig, IHandleSubmit,
-  IOnFormListen, IPropsForms, IRadioOptions, IReturnOnSelectRecords, ISelectOptions, IUserFormField, OptionType
+  IButtonConfig,
+  ICheckboxOptions,
+  IField,
+  IFilterGridConfig,
+  IHandleSubmit,
+  IOnFormListen,
+  IPropsForms,
+  IRadioOptions,
+  IReturnOnSelectRecords,
+  ISelectOptions,
+  IUserFormField,
+  OptionType,
 };

@@ -1,17 +1,18 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { SetStateAction, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Card } from '~/components/ui/card';
-import { Collapsible } from '~/components/ui/collapsible';
-import { useEventEmitter } from '~/context/EventEmitterProvider';
-import { useToast } from '~/context/ToastProvider';
-import { cn } from '~/lib/utils';
-import { useWizard } from '../Wizard/Provider';
-import { FormBuilderLayout } from './components/ui';
-import { IPropsForms, TDisplayType } from './types';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SetStateAction, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Card } from "~/components/ui/card";
+import { Collapsible } from "~/components/ui/collapsible";
+import { useEventEmitter } from "~/context/EventEmitterProvider";
+import { useToast } from "~/context/ToastProvider";
+import { cn } from "~/lib/utils";
+import { useWizard } from "../Wizard/Provider";
+import { FormBuilderLayout } from "./components/ui";
+import { IPropsForms, TDisplayType } from "./types";
+import { testIDFormatter } from "~/utils/formatter";
 
-const EnhancedFormBuilder = (props: IPropsForms) => {
+export const FormBuilder = (props: IPropsForms) => {
   const {
     //* data
     formSchema,
@@ -30,6 +31,8 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
     filterGridConfig,
     defaultDisplay = "expanded",
     customRender,
+    formProps,
+    features
   } = props;
 
   const { actions } = useWizard();
@@ -38,18 +41,20 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema), // is this where the validation relies?
     defaultValues,
-    shouldFocusError: true,
+    shouldFocusError: false,
   });
 
   //* LOCAL STATES
-  const [isOpenGrid, setOpenGrid] = useState('');
+  const [isOpenGrid, setOpenGrid] = useState("");
   const [formGridSelected, setFormGridSelected] = useState<any[]>([]);
   const [displayType, setDisplayType] = useState<TDisplayType>("form");
-  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false)
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [isListLoading, setIsListLoading] = useState(false);
   const [debugOn, setDebugOn] = useState(false);
-  const [isFormOpened, setIsFormOpened] = useState(defaultDisplay === "expanded");
+  const [isFormOpened, setIsFormOpened] = useState(
+    defaultDisplay === "expanded",
+  );
   const [showFormActions, setShowFormActions] = useState(false);
 
   //* EFFECTS
@@ -117,6 +122,7 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
       reject: (reason: any) => any,
     ) => {
       try {
+        // console.log("SUBMITTING FORM");
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -143,8 +149,8 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
 
   //* handler to disable form
   const handleCloseGrid = () => {
-    setOpenGrid('');
-  }
+    setOpenGrid("");
+  };
 
   const handleRemovedSelectedRecords = (records: any[]) => {
     if (!filterGridConfig?.onRemoveSelectedRecords) {
@@ -174,12 +180,12 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
   const handleAccordionChange = (value: string) => {
     setIsAccordionExpanded(value === "item-1");
     setOpenGrid(value);
-  }
+  };
 
   const handleOpenForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsFormOpened(!isFormOpened);
-  }
+  };
 
   const handleListLoading = (loading: boolean) => {
     setIsListLoading(loading);
@@ -203,23 +209,22 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
 
   const handleNewRecordFormFilterGrid = () => {
     setDisplayType("form");
-  }; 
+  };
 
   const handleAppendForm = () => {
     if (!enableAppendForm) return;
     eventEmitter.emit(`${formKey}:${appendFormKey}`);
-  }
+  };
 
   const handleUpdateDisplayType = (type: SetStateAction<TDisplayType>) => {
     setDisplayType(type);
   };
-  
 
   //* ACTIONS
   const disableForm = () => {
     form.clearErrors();
     form.control._disableForm(!form.formState.disabled);
-  }
+  };
 
   const saveForm = async (data: z.infer<typeof formSchema>) => {
     if (!customRender) {
@@ -231,7 +236,7 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
       return;
     }
     await onSubmit(data);
-  }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSaveLoading(true);
@@ -297,8 +302,9 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
       setIsSaveLoading(false);
     } catch (error) {
       setIsSaveLoading(false);
+      console.error("[Form-Filter] Failed to create new record", error);
     }
-  }
+  };
 
   const onSubmitFormGrid = async (data: z.infer<typeof formSchema>) => {
     if (!handleSubmitFormGrid) return;
@@ -315,21 +321,20 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
       setIsSaveLoading(false);
     } catch (error) {
       setIsSaveLoading(false);
-      toast.error("[Form-Filter] Failed to create new record");
+      console.error("[Form-Filter] Failed to create new record", error);
     }
-  }
+  };
 
   //* RENDER
   return (
-    <form>
-      <Collapsible open={defaultDisplay === 'expanded'} className="space-y-2">
-        <Card
-          className={cn(
-            "border-none shadow-none",
-            `p-0 sm:p-2`,
-          )}
-        >
-          <FormBuilderLayout 
+    <form
+      data-test-id={testIDFormatter(
+        `${formProps?.entity}-${formProps?.shell_type}-${formKey}-form`,
+      )}
+    >
+      <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
+        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+          <FormBuilderLayout
             {...props}
             form={form}
             debugOn={debugOn}
@@ -356,11 +361,10 @@ const EnhancedFormBuilder = (props: IPropsForms) => {
             handleUpdateDisplayType={handleUpdateDisplayType}
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             handleOpenForm={handleOpenForm}
+            features={features}
           />
         </Card>
       </Collapsible>
     </form>
   );
-}
-
-export default EnhancedFormBuilder
+};
