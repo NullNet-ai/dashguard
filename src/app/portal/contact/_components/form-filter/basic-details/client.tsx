@@ -32,7 +32,7 @@ export default function ContactDetails({
     return response;
   };
 
-  const handRemoveRecord = async ({
+  const handleRemoveRecord = async ({
     filter_entity,
     main_entity_id,
     rows,
@@ -110,7 +110,7 @@ export default function ContactDetails({
           };
         },
         async onRemoveSelectedRecords({ filter_entity, main_entity_id, rows }) {
-          const response = (await handRemoveRecord({
+          const response = (await handleRemoveRecord({
             rows,
             filter_entity,
             main_entity_id,

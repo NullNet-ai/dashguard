@@ -161,7 +161,7 @@ export const contactRouter = createTRPCRouter({
         })
         .execute();
     }),
-  updateContactPhoneEmail: privateProcedure
+  saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, email, phone } = input;
@@ -181,8 +181,10 @@ export const contactRouter = createTRPCRouter({
             },
           })
           .execute();
-        contact_id = record?.data?.[0]?.id;
-        contact_code = record?.data?.[0]?.code;
+
+        const [contact] = record?.data || [];
+        contact_id = contact?.id;
+        contact_code = contact?.code;
       }
 
       const insert = async (entity: string, data: any, pluck: string[]) => {
@@ -218,12 +220,10 @@ export const contactRouter = createTRPCRouter({
       console.info("[Insert Contact Phone Email]", response);
 
       return {
-        data: {
-          id: contact_id,
-          code: contact_code,
-          email: [response[0]],
-          phone: [response[1]],
-        },
+        id: contact_id,
+        code: contact_code,
+        email: [response[0]],
+        phone: [response[1]],
       };
     }),
   fetchContactPhoneEmail: privateProcedure
