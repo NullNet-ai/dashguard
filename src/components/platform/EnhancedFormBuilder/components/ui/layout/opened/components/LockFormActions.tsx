@@ -18,7 +18,7 @@ import { camelCase } from "lodash";
 import { ICustomActions, IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
 import { testIDFormatter } from "~/utils/formatter";
 
-const ViewFormActions = ({
+const LockFormActions = ({
   saveForm,
   form,
   formKey,
@@ -26,7 +26,7 @@ const ViewFormActions = ({
   isButtonLoading,
   features,
   formProps,
-  customFormHostViewFormActions = []
+  customFormHostLockFormActions = []
 }: {
   saveForm: any;
   form: any;
@@ -35,29 +35,14 @@ const ViewFormActions = ({
   formKey: string;
   features : IFeatures | undefined;
   formProps?: any;
-  customFormHostViewFormActions: ICustomActions[] | undefined;
+  customFormHostLockFormActions: ICustomActions[] | undefined;
 }) => {
-  console.log("%c 😲: customFormHostViewFormActions ", "font-size:16px;background-color:#486c6b;color:white;", customFormHostViewFormActions)
 
-  const { enableFormHostViewActions = true } = features ?? {};
+  const { enableFormHostLockActions = true } = features ?? {};
 
-  if(!enableFormHostViewActions) return null
+  if(!enableFormHostLockActions) return null
   return (
     <div className="flex flex-row gap-2">
-      <SubmitForm
-        saveForm={saveForm}
-        data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-save-form-btn`)}
-        form={form}
-        formSchema={formSchema}
-        isLoading={isButtonLoading}
-      />
-      <CancelFormButton
-        saveForm={saveForm}
-        form={form}
-        data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-cancel-form-btn`)}
-        formSchema={formSchema}
-        isLoading={isButtonLoading}
-      />
       <DropdownMenu>
         <DropdownMenuTrigger
           data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-more-actions-menu`)}
@@ -65,19 +50,8 @@ const ViewFormActions = ({
           <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-           data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-more-actions-clear-form`)}
-            onClick={() => {
-              const currentValues = form.getValues();
-              Object.keys(currentValues).forEach((key) => form.setValue(key, ""));
-            }}
-            className="flex gap-2"
-          >
-            <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3}/>
-            Clear
-          </DropdownMenuItem>
         {
-          !!customFormHostViewFormActions.length && customFormHostViewFormActions.map((action, index) => (
+          !!customFormHostLockFormActions.length && customFormHostLockFormActions.map((action, index) => (
             <DropdownMenuItem
               key={index}
               data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-more-actions-${camelCase(action.label)}`)}
@@ -96,4 +70,4 @@ const ViewFormActions = ({
   );
 };
 
-export default ViewFormActions;
+export default LockFormActions;

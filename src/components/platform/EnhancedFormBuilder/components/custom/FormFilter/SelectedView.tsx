@@ -34,31 +34,7 @@ export default function SelectedView({
               className={"flex flex-row items-center justify-between"}
             >
               <CardTitle className="text-sm">CO{record.id}</CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                    onClick={() => {
-                      handleUpdateDisplayType('form');
-                    }}
-                    className="flex gap-2"
-                  >
-                    <MinusCircleIcon className="h-4 w-4 text-rose-500" />
-                    <span>Update selected record</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      handleRemovedSelectedRecords([record]);
-                    }}
-                    className="flex gap-2"
-                  >
-                    <MinusCircleIcon className="h-4 w-4 text-rose-500" />
-                    <span>Remove selected record</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              
             </CardHeader>
             <CardContent>
               {renderComponentSelected ? (

@@ -55,7 +55,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
       className={cn(
         customDesign?.formClassName
           ? customDesign?.formClassName
-          : "grid grid-cols-1 gap-4 sm:grid-cols-2",
+          : "grid grid-cols-1 gap-4 sm:grid-cols-2 pt-8",
         !customRender ? "grid grid-cols-1 gap-4 sm:grid-cols-2" : "",
         "shadow-none",
       )}
@@ -74,6 +74,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
                 selectOptions,
                 currencyInputOptions,
               }}
+              formKey={formKey}
             />
           ) : (
             customRender(form, {

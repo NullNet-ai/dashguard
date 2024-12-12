@@ -1,4 +1,5 @@
-import { XCircleIcon } from "@heroicons/react/24/outline";
+import { XCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { XIcon } from "lucide-react";
 import { type z } from "zod";
 import { Button } from "~/components/ui/button";
 
@@ -7,11 +8,13 @@ export default function CancelFormButton({
   form,
   saveForm,
   formSchema,
+  ...props
 }: {
   saveForm(data: z.infer<typeof formSchema>): Promise<void>;
   isLoading: boolean;
   form: any;
   formSchema: z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
+
 }) {
   return (
     <Button
@@ -29,9 +32,10 @@ export default function CancelFormButton({
         form.clearErrors();
         form.control._disableForm(!form.formState.disabled);
       }}
+      {...props}
     >
       {!isLoading && (
-        <XCircleIcon className="h-4 w-4 cursor-pointer text-red-800" />
+        <XIcon className="h-3 w-3 cursor-pointer text-red-800" strokeWidth={4} />
       )}
     </Button>
   );

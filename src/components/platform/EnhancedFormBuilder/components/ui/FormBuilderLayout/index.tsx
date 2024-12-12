@@ -1,4 +1,8 @@
-import { Accordion, AccordionItem } from "~/components/ui/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { CollapsibleContent } from "~/components/ui/collapsible";
 import { IAccordionLayoutProps } from "../../../types/ui/interfaces";
 import FormHeader from "../../controls/FormHeader";
@@ -7,6 +11,19 @@ import OpenedFormLayout from "../layout/opened";
 import SelectedViewLayout from "../layout/selected";
 import { CardContent } from "~/components/ui/card";
 import ViewFormActions from "../layout/opened/components/ViewFormActions";
+import { Loader2 } from "lucide-react";
+import {
+  MagnifyingGlassCircleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
+import { cn } from "~/lib/utils";
+import SelectedActions from "../layout/selected/components/SelectedActions";
+import FormFilterOpenedActions from "../layout/opened/components/FormFilterOpenedActions";
+import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import FormBodyMainActions from "../layout/opened/components/FormBodyMainActions";
+import LockFormActions from "../layout/opened/components/LockFormActions";
 
 const FormBuilderLayout = ({
   //* data
@@ -33,6 +50,7 @@ const FormBuilderLayout = ({
   showFormActions,
   debugOn,
   formProps,
+  features,
   //* actions
   handleAccordionChange,
   enableAppendForm,
@@ -41,6 +59,7 @@ const FormBuilderLayout = ({
   handleDebug,
   handleLock,
   handleAccordionExpand,
+  handleRemovedSelectedRecords,
   onSubmitFormGrid,
   handleNewRecordFormFilterGrid,
   handleAppendForm,
@@ -52,7 +71,12 @@ const FormBuilderLayout = ({
   buttonHeaderRender,
   customDesign,
   customRender,
+  customFormFilterLockFormActions,
+  customFormFilterViewFormActions,
+  customFormHostLockFormActions,
+  customFormHostViewFormActions
 }: IAccordionLayoutProps) => {
+
   return (
     <Accordion
       type="single"
@@ -63,6 +87,7 @@ const FormBuilderLayout = ({
     >
       <AccordionItem value="item-1">
         <FormHeader
+          formProps={formProps}
           enableAppendForm={enableAppendForm}
           displayType={displayType}
           buttonHeaderRender={buttonHeaderRender}
@@ -79,36 +104,77 @@ const FormBuilderLayout = ({
           handleDebug={handleDebug}
           handleLock={handleLock}
           handleOpen={handleOpenForm}
+          features={features}
           onSubmitFormGrid={onSubmitFormGrid}
           handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
           handleAppendForm={handleAppendForm}
           selectedRecords={formGridSelected}
           handleUpdateDisplayType={handleUpdateDisplayType}
+          formKey={formKey}
         />
         {filterGridConfig && (
-          <FormFilterGridLayout
-            isFormOpen={isFormOpened}
-            handleListLoading={handleListLoading}
-            handleSelectedGridRecords={handleNewRecordFormFilterGrid}
-            handleCloseGrid={handleCloseGrid}
-            filterGridConfig={filterGridConfig}
-          />
+          <>
+            <FormBodyMainActions
+              isListLoading={isListLoading}
+              displayType={displayType}
+              filterGridConfig={filterGridConfig}
+              formGridSelected={formGridSelected}
+              handleUpdateDisplayType={handleUpdateDisplayType}
+              handleAppendForm={handleAppendForm}
+              form={form}
+              formLabel={formLabel!}
+              isButtonLoading={isSaveLoading}
+              features={features}
+              onSubmitFormGrid={onSubmitFormGrid}
+              selectedRecords={formGridSelected}
+              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+              customFormFilterViewFormActions={customFormFilterViewFormActions}
+              customFormFilterLockFormActions={customFormFilterLockFormActions}
+            />
+            <FormFilterGridLayout
+              isFormOpen={isFormOpened}
+              handleListLoading={handleListLoading}
+              handleSelectedGridRecords={handleNewRecordFormFilterGrid}
+              handleCloseGrid={handleCloseGrid}
+              filterGridConfig={filterGridConfig}
+            />
+          </>
         )}
-        <CollapsibleContent>
+        <CollapsibleContent className="relative">
           {displayType === "form" && (
             <>
-            {
-              !form?.formState?.disabled &&
-               <CardContent className="absolute right-2">
-               <ViewFormActions
-                 saveForm={saveForm}
-                 isButtonLoading={isSaveLoading}
-                 form={form}
-                 formSchema={formSchema}
-               />
-             </CardContent>
-            }
-              
+              {!form?.formState?.disabled && !filterGridConfig && (
+                <CardContent className="absolute right-2">
+                  <ViewFormActions
+                    formProps={formProps}
+                    saveForm={saveForm}
+                    isButtonLoading={isSaveLoading}
+                    form={form}
+                    formSchema={formSchema}
+                    formKey={formKey}
+                    features={features}
+                    customFormHostViewFormActions={customFormHostViewFormActions}
+                  />
+                </CardContent>
+              )}
+
+              {
+                form?.formState?.disabled && !filterGridConfig && (
+                  <CardContent className="absolute right-2">
+                    <LockFormActions
+                      formProps={formProps}
+                      saveForm={saveForm}
+                      isButtonLoading={isSaveLoading}
+                      form={form}
+                      formSchema={formSchema}
+                      formKey={formKey}
+                      features={features}
+                      customFormHostLockFormActions={customFormHostLockFormActions}
+                    />
+                  </CardContent>
+                 )
+              }
+
               <OpenedFormLayout
                 customDesign={customDesign}
                 customRender={customRender}
@@ -136,7 +202,7 @@ const FormBuilderLayout = ({
               formGridSelected={formGridSelected}
               handleUpdateDisplayType={handleUpdateDisplayType}
               filterGridConfig={filterGridConfig}
-              handleRemovedSelectedRecords={handleAppendForm}
+              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             />
           )}
         </CollapsibleContent>

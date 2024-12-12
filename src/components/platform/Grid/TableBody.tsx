@@ -10,7 +10,9 @@ import { ScrollContainerContext } from "./Server/views/common/GridScrollContaine
 export default function MyTableBody() {
   const { state, actions } = useContext(GridContext);
 
-  const { isEndReached } = useContext(ScrollContainerContext);
+  const context = useContext(ScrollContainerContext);
+
+  const { isEndReached = false } = context ?? {}
   return (
     <>
       <TableBody
