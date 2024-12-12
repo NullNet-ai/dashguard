@@ -23,6 +23,18 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontSize: {
+        // Custom font sizes with default line heights
+        'sm': '12px',
+        'md': '14px',
+        'lg': '16px',
+        'xl': '18px',
+        'xl-2': '20px',
+        'xl-3': '24px',
+        'xl-4': '30px',
+        'xl-5': '36px',
+        'xl-6': '48px'
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

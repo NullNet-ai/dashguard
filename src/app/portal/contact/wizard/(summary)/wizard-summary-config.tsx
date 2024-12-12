@@ -1,5 +1,8 @@
 import StepOneBasicDetails from "./_1";
+import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
+import ContactOrganizationSummary from "./_4";
+import ConfirmationSummary from "./_5";
 
 const contactWizardSummary = ({
   identifier,
@@ -24,6 +27,22 @@ const contactWizardSummary = ({
         },
       ],
     },
+    two: {
+      label: "Step 2",
+      required: true,
+      components: [
+        {
+          label: "Contact Details",
+          component: (
+            <ContactDetailsSummary
+              form_key={"contact_details"}
+              identifier={identifier!}
+              main_entity={mainEntity!}
+            />
+          ),
+        },
+      ],
+    },
     three: {
       label: "Step 3",
       required: false,
@@ -37,6 +56,32 @@ const contactWizardSummary = ({
               main_entity={mainEntity!}
             />
           ),
+        },
+      ],
+    },
+    four: {
+      label: "Step 4",
+      required: false,
+      components: [
+        {
+          label: "Organization",
+          component: (
+            <ContactOrganizationSummary
+              form_key={""}
+              identifier={identifier!}
+              main_entity={mainEntity!}
+            />
+          ),
+        },
+      ],
+    },
+    five: {
+      label: "Step 5",
+      required: false,
+      components: [
+        {
+          label: "Confirmation",
+          component: <ConfirmationSummary />,
         },
       ],
     },

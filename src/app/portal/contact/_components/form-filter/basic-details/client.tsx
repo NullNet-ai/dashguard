@@ -18,6 +18,7 @@ export default function ContactDetails({
 }: IFormProps) {
   const router = useRouter();
   const toast = useToast();
+
   const handleSave = async ({
     data,
     action_type,
@@ -26,12 +27,12 @@ export default function ContactDetails({
   > => {
     const response = await saveContactDetails(data, action_type);
     if (action_type === "Create") {
-      router.push(`/portal/contacts/wizard/${response?.[0]?.code}/1`);
+      router.push(`/portal/contact/wizard/${response?.[0]?.code}/1`);
     }
     return response;
   };
 
-  const handRemoveRecord = async ({
+  const handleRemoveRecord = async ({
     filter_entity,
     main_entity_id,
     rows,
@@ -82,7 +83,7 @@ export default function ContactDetails({
     <FormBuilder
       filterGridConfig={{
         selectedRecords,
-        statusesIncluded: ["Draft"], // Enable Select Record Status
+        statusesIncluded: ["Draft"], // Enable Selectable Record Status
         actionType: "single-select",
         pluck: params?.pluck_fields,
         filter_entity: "contact",
@@ -109,7 +110,7 @@ export default function ContactDetails({
           };
         },
         async onRemoveSelectedRecords({ filter_entity, main_entity_id, rows }) {
-          const response = (await handRemoveRecord({
+          const response = (await handleRemoveRecord({
             rows,
             filter_entity,
             main_entity_id,

@@ -17,6 +17,7 @@ import ButtonPlayGround from "./_form-controls/button-playground";
 import { Separator } from "~/components/ui/separator";
 import AddressDetails from "./_form-controls/address";
 import InputsGrid from "./_form-controls/inputs-grid";
+import SelectDetails from "./_form-controls/select-details";
 
 export default function PlatformPlayGround() {
   return (
@@ -26,8 +27,8 @@ export default function PlatformPlayGround() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <InputsGrid />
         <AddressDetails />
-        <AmountDetails />
         <MultiSelectDetails />
+        <AmountDetails />
         <SmartDateDetails />
         <TextAreaDetails />
         <PasswordDetails />
@@ -39,6 +40,7 @@ export default function PlatformPlayGround() {
         <AmountDetails />
         <CheckboxDetails />
         <RichTextEditorDetails />
+        <SelectDetails />
         {/* <DateRangeDetails />
         <FileDetails />
         <InputsDetails />

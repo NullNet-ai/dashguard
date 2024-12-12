@@ -22,6 +22,7 @@ import * as _ICON from "@heroicons/react/24/outline";
 import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { StarIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { testIDFormatter } from "~/utils/formatter";
 
 interface IProps {
   groups: ISidebarMenu[];
@@ -60,9 +61,7 @@ export default function GroupMenu({ groups }: IProps) {
                   <SidebarMenuButton
                     tooltip={item.title}
                     data-test-id={
-                      "sidebarGroupMenu" +
-                      item.title?.charAt(0).toUpperCase() +
-                      item.title?.slice(1).toLowerCase()
+                      testIDFormatter(`sidebar-grp-menu-${  item.title?.charAt(0).toUpperCase()}${item.title?.slice(1).toLowerCase()}`)
                     }
                   >
                     {item.icon && <ICON className="mr-2 h-5 w-5" />}
@@ -101,7 +100,8 @@ export default function GroupMenu({ groups }: IProps) {
                             <a
                               className={`group/item flex items-center gap-2`}
                               href={subItem.url || "#"}
-                              data-test-id={`sidebarSubMenu${item.title ?? "default"}${formattedTitle}`}
+                              data-test-id={testIDFormatter(`sidebar-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`)}
+                              
                             >
                               {subItem.icon && (
                                 <SUB_ICON className="mr-2 h-5 w-5" />
@@ -114,6 +114,7 @@ export default function GroupMenu({ groups }: IProps) {
                                   onClick={(e) =>
                                     toggleFavorite(e, subItem.title ?? "")
                                   }
+                                  data-test-id={testIDFormatter(`sidebar-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-fav-btn`)}
                                   className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                                 />
                               ) : (

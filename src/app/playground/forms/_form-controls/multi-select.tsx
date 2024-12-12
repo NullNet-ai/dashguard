@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   multi_select_with_options: z
     .array(

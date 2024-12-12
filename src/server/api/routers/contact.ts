@@ -161,7 +161,7 @@ export const contactRouter = createTRPCRouter({
         })
         .execute();
     }),
-  updateContactPhoneEmail: privateProcedure
+  saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, email, phone } = input;
@@ -176,13 +176,16 @@ export const contactRouter = createTRPCRouter({
             mutation: {
               params: {
                 status: "Draft",
+                categories: ["Contact"],
               },
               pluck: ["id", "code"],
             },
           })
           .execute();
-        contact_id = record?.data?.[0]?.id;
-        contact_code = record?.data?.[0]?.code;
+
+        const [contact] = record?.data || [];
+        contact_id = contact?.id;
+        contact_code = contact?.code;
       }
 
       const insert = async (entity: string, data: any, pluck: string[]) => {
@@ -218,44 +221,45 @@ export const contactRouter = createTRPCRouter({
       console.info("[Insert Contact Phone Email]", response);
 
       return {
-        data: {
-          id: contact_id,
-          code: contact_code,
-          email: [response[0]],
-          phone: [response[1]],
-        },
+        id: contact_id,
+        code: contact_code,
+        email: [response[0]],
+        phone: [response[1]],
       };
     }),
   fetchContactPhoneEmail: privateProcedure
     .input(
       z.object({
-        id: z.string().min(1),
+        code: z
+          .string({ message: "Contact Code is required." })
+          .min(1, { message: "Contact Code is required." }),
         pluck_fields: z.array(z.string()),
-        main_entity: z.string().min(1),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+      const { code: contact_code, pluck_fields } = input;
+      const { data: items } = await ctx.dnaClient
         .findAll({
-          entity: input.main_entity,
+          entity: "contact",
           token: ctx.token.value,
           query: {
-            pluck: input.pluck_fields,
+            pluck: pluck_fields,
             pluck_object: {
-              contact_emails: ["email", "is_primary"],
+              contact_emails: ["id", "email", "is_primary"],
               contact_phone_numbers: [
+                "id",
                 "raw_phone_number",
                 "iso_code",
                 "country_code",
                 "is_primary",
               ],
-              contacts: input.pluck_fields,
+              contacts: pluck_fields,
             },
             advance_filters: [
               {
                 field: "code",
                 operator: EOperator.EQUAL,
-                values: [input.id],
+                values: [contact_code],
               },
             ] as IAdvanceFilters[],
             order: {
@@ -294,14 +298,15 @@ export const contactRouter = createTRPCRouter({
         })
         .execute();
 
+      const [contact] = items || [];
+      const { contact_emails, contact_phone_numbers, contacts } = contact || {};
+      const { id: contact_id = "", code = "" } = contacts || {};
+
       return {
-        data: {
-          id: items?.[0]?.contacts?.id,
-          email: items?.[0]?.contact_emails ? [items?.[0]?.contact_emails] : [],
-          phone: items?.[0]?.contact_phone_numbers
-            ? [items?.[0]?.contact_phone_numbers]
-            : [],
-        },
+        id: contact_id,
+        code: code,
+        email: contact_emails ? [contact_emails] : [],
+        phone: contact_phone_numbers ? [contact_phone_numbers] : [],
       };
     }),
   getBasicDetails: privateProcedure

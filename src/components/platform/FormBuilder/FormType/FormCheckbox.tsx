@@ -12,21 +12,31 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type ICheckboxOptions, type IField } from "../type";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
 
 interface IProps {
   fieldConfig: IField;
   checkboxOptions: Record<string, ICheckboxOptions[]> | undefined;
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey: string;
 }
 
 export default function FormCheckbox({
   fieldConfig,
   checkboxOptions,
   form,
+  formKey,
 }: IProps) {
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} className="text-base">
+      <FormLabel
+        required={fieldConfig?.required}
+        className="text-base"
+        data-test-id={kebabCase(
+          formKey + " "+ (fieldConfig.name) + "CheckboxFormLabel",
+        )}
+      >
         {fieldConfig?.label}
       </FormLabel>
       {checkboxOptions?.[fieldConfig?.name]?.map((item, index) => (
@@ -43,7 +53,9 @@ export default function FormCheckbox({
                 <FormControl>
                   <Checkbox
                     disabled={field.disabled || fieldConfig?.disabled}
-                    data-test-id={fieldConfig?.name + index}
+                    data-test-id={kebabCase(
+                      formKey + fieldConfig?.name + "Checkbox" + (index + 1),
+                    )}
                     checked={field?.value?.includes(item.value)}
                     onCheckedChange={(checked) => {
                       return checked
@@ -57,13 +69,24 @@ export default function FormCheckbox({
                     {...form.register(fieldConfig?.name)}
                   />
                 </FormControl>
-                <FormLabel className="font-normal">{item.label}</FormLabel>
+                <FormLabel
+                  className="font-normal"
+                  data-test-id={kebabCase(
+                    formKey + " "+ (fieldConfig.name) + "CheckboxLabel" + item.label,
+                  )}
+                >
+                  {item.label}
+                </FormLabel>
               </FormItem>
             );
           }}
         />
       ))}
-      <FormMessage />
+      <FormMessage
+        data-test-id={kebabCase(
+          formKey + " "+ (fieldConfig.name) + "CheckboxErrorMessage",
+        )}
+      />
     </FormItem>
   );
 }

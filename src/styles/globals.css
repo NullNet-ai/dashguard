@@ -8,7 +8,7 @@
     --grid-footer: 0 0% 100%;
 
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 217 33% 17%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -33,12 +33,12 @@
     --success-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215 20% 65%  ; 
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51% ;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;

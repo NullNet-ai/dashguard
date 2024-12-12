@@ -23,6 +23,9 @@ const CategoryDetailsSummary = ({
 
   const { data } = record || {};
   const { categories } = data || {};
+  const filtered_categories = categories?.filter(
+    (category: string) => category !== "Contact",
+  );
 
   useRefetchRecord({
     refetch,
@@ -36,8 +39,9 @@ const CategoryDetailsSummary = ({
   return (
     <div>
       <p>
-        <strong> Categories: </strong>
-        &nbsp; {categories?.length ? categories.join(", ") : "None"}
+        <strong> Category: </strong>
+        &nbsp;{" "}
+        {filtered_categories?.length ? filtered_categories.join(", ") : "None"}
       </p>
     </div>
   );
