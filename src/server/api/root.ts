@@ -18,6 +18,11 @@ import { organizationRouter } from "./routers/organization";
 import { contactCertificateRouter } from "./routers/contact_certificate";
 import { contactSkillRouter } from "./routers/contact_skill";
 import { contactFileRouter } from "./routers/contact_file";
+import { accountInformationRouter } from "./routers/account_information";
+import { educationRouter } from "./routers/education";
+import { degreeLevelRouter } from "./routers/degree_level";
+import { countryRouter } from "./routers/country";
+import { googleRouter } from "./routers/google";
 
 /**
  * This is the primary router for your server.
@@ -44,6 +49,11 @@ export const appRouter = createTRPCRouter({
   contactCertificate: contactCertificateRouter,
   contactSkill: contactSkillRouter,
   contactFile: contactFileRouter,
+  accountInformation: accountInformationRouter,
+  education: educationRouter,
+  degreeLevel: degreeLevelRouter,
+  country: countryRouter,
+  google: googleRouter,
 });
 
 // export type definition of API

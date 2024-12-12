@@ -6,10 +6,6 @@ export interface IMenuOptionConfig {
   children: IMenuOptionConfig[];
 }
 
-export interface RecordProps extends PropsWithChildren {
-  test?: any;
-}
-
 export interface RecordContextProps {
   state?: ConfigProps;
   action?: unknown;
@@ -30,4 +26,10 @@ export interface ConfigProps {
 }
 export interface RecordProps extends PropsWithChildren {
   config: ConfigProps;
+}
+
+export interface IPlatformRecordLayoutProps { 
+  record: React.ReactNode;
+  record_summary: React.ReactNode;
+  children: React.ReactNode;
 }
