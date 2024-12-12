@@ -12,6 +12,7 @@ export default function RegionName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+              formKey="RegionName"
               fieldConfig={{
                 ...formRenderProps?.field,
                 label: "Region",

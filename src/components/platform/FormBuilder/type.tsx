@@ -104,6 +104,7 @@ export interface IField {
   textAreaLineWrapping?: boolean;
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
+  selectSearchable?: boolean;
 }
 
 export interface ISelectOptions {

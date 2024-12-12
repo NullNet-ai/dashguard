@@ -43,7 +43,7 @@ export default function MyVerticalStepper() {
   const { state, actions } = useContext(WizardContext);
   const router = useRouter();
   const toast = useToast();
-  const { entityName } = state ?? {};
+  const { entityName  } = state ?? {}
 
   const traverseSteps = useMemo(() => {
     return state?.traverseSteps;
@@ -94,9 +94,7 @@ export default function MyVerticalStepper() {
         // }}
         defaultValue={defaultValueAccordionItems}
         type="multiple"
-        data-test-id={testIDFormatter(
-          `${entityName}-wizard-summary-stepper-accordion`,
-        )}
+        data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion`)}
       >
         <div
           className={cn(
@@ -142,9 +140,7 @@ export default function MyVerticalStepper() {
               return (
                 <li
                   key={stepIndex}
-                  data-test-id={testIDFormatter(
-                    `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}`,
-                  )}
+                  data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}`)}
                   className={cn(
                     stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
                   )}
@@ -174,10 +170,8 @@ export default function MyVerticalStepper() {
                       )}
                       <button
                         onClick={() => navigateLink(index)}
-                        data-test-id={testIDFormatter(
-                          `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-link`,
-                        )}
-                        className="group relative flex cursor-pointer items-start"
+                        data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-link`)}
+                        className="group relative flex items-start cursor-pointer"
                       >
                         <span className="flex h-9 items-center">
                           {isCurrent ? (
@@ -200,7 +194,9 @@ export default function MyVerticalStepper() {
                         {/* Hidden on mobile, visible from small screens (sm) and up */}
                         {/* this is the title */}
                         <span className="text-gray text-xs sm:block">
-                          {summaryTitle ? summaryTitle : ""}
+                          {summaryTitle
+                            ? summaryTitle
+                            : "Description of Step " + stepIndex}
                         </span>
                         {summaryComponents?.map(
                           (
@@ -214,12 +210,12 @@ export default function MyVerticalStepper() {
                                 className="flex flex-col pt-2"
                               >
                                 <AccordionTrigger
-                                  data-test-id={testIDFormatter(
-                                    `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
-                                  )}
+                                  data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-trigger-${label}`)}
                                 >
                                   <span className="text-sm font-medium sm:block">
-                                    {label ? label : ""}
+                                    {label
+                                      ? label
+                                      : "Description of Step " + stepIndex}
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
@@ -264,7 +260,9 @@ export default function MyVerticalStepper() {
                           </span>
                           {/* This will be hidden on mobile screens */}
                           <span className="text-sm text-gray-500 sm:block">
-                            {summaryTitle ? summaryTitle : ""}
+                            {summaryTitle
+                              ? summaryTitle
+                              : "Description of Step " + stepIndex}
                           </span>
                         </span>
                       </div>

@@ -25,6 +25,7 @@ export default function StateName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormSelect
+            formKey="StateName"
               fieldConfig={{
                 selectSearchable: true,
                 ...formRenderProps?.field,

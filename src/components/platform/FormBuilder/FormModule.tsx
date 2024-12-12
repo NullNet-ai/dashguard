@@ -16,6 +16,7 @@ export default function FormModule({
   fields,
   form,
   subConfig,
+  formKey,
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -27,6 +28,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
+  formKey: string;
 }) {
   return (
     <Fragment>
@@ -35,7 +37,9 @@ export default function FormModule({
           case "address-input":
             // AddressInput is a custom form type that has other fields inside it
             // So we need to wrap each of them in a FormField rather than just rendering the component
-            return <FormAddress key={_field.id + index} form={form} />;
+            return (
+              <FormAddress key={_field.id + index} form={form} formKey={formKey} />
+            );
           default:
             return (
               <div key={_field.id}>
@@ -45,7 +49,7 @@ export default function FormModule({
                   control={form.control}
                   name={_field.name}
                   render={(formProps) =>
-                    RenderFormType(_field, formProps, form, {
+                    RenderFormType(_field, formProps, form, formKey, {
                       checkboxOptions: subConfig?.checkboxOptions,
                       multiSelectOptions: subConfig?.multiSelectOptions,
                       multiSelectOnSearch: subConfig?.multiSelectOnSearch,

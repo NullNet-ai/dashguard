@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
+import { testIDFormatter } from "~/utils/formatter";
 
 interface DropdownOption {
   label: string;
@@ -28,6 +29,7 @@ interface ButtonWithDropdownProps {
   buttonClassName?: string; // Custom className for the button
   buttonVariant?: ButtonProps["variant"]; // Optional button variant (from Button component)
   disabled?: boolean; // Optional disabled state for the main button
+  entity?: string; // Optional entity name for test IDs
 }
 
 export function ButtonWithDropdown({
@@ -38,12 +40,13 @@ export function ButtonWithDropdown({
   buttonClassName,
   buttonVariant = "outline", // Default to 'outline' variant
   disabled = false,
+  entity
 }: ButtonWithDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          data-test-id="buttonWithDropdown"
+          data-test-id={testIDFormatter(`${entity}-wizard-drd-trigger-btn`)}
           variant={buttonVariant} // Use the provided button variant
           className={cn("flex items-center", buttonClassName)} // Allow custom className
           disabled={disabled}
@@ -71,7 +74,7 @@ export function ButtonWithDropdown({
       >
         {dropdownOptions.map((option, index) => (
           <button
-            data-test-id={`dropdownOption-${option?.label?.replace(/\s/g, "")}`}
+            data-test-id={testIDFormatter(`${entity}-wizard-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
             key={index}
             onClick={() => {
               if (disabled) return; // Ignore disabled or loading options

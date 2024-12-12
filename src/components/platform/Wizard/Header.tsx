@@ -145,7 +145,7 @@ export default function Header() {
                 <span>Save & Continue</span>
               </Button>
               <ButtonWithDropdown
-              entity={entityName}
+                entity={entityName}
                 buttonClassName="rounded-l-none"
                 buttonVariant={"default"}
                 dropdownOptions={[

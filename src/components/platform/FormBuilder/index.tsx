@@ -421,6 +421,7 @@ export function FormBuilder({
                       <Fragment>
                         {!customRender ? (
                           <FormModule
+                            formKey={formKey}
                             fields={fields}
                             form={form}
                             subConfig={{

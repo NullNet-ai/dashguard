@@ -62,6 +62,7 @@ export default function Apply() {
               render={(formProps) => {
                 return (
                   <FormInput
+                  formKey="Apply"
                     fieldConfig={{
                       id: "name",
                       name: "name",

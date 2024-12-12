@@ -11,6 +11,7 @@ export default function StreetName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+              formKey="StreetName"
               fieldConfig={{
                 ...formRenderProps?.field,
                 label: "Street",

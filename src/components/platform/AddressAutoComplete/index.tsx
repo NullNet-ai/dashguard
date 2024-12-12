@@ -2,10 +2,11 @@
 
 import { Fragment, useState } from "react";
 
-import { type UseFormReturn } from "react-hook-form";
+import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 import { AddressAutoCompleteInput } from "./address-autocomplete-input";
 import AddressForm from "./address-form";
 import { api } from "~/trpc/react";
+import { IField } from "../FormBuilder/type";
 import CountryToCities from "./countriesToCities.json";
 import States from "./states.json";
 
@@ -27,6 +28,12 @@ export interface AddressType {
 interface AddressAutoCompleteProps {
   dialogTitle: string;
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldConfig: IField;
+  formRenderProps: {
+    field: ControllerRenderProps<Record<string, any>, string>;
+    fieldState: ControllerFieldState;
+  };
+  formKey: string;
 }
 
 export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
@@ -89,10 +96,19 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
       <AddressAutoCompleteInput
         handleSelectAddress={handleSelectAddress}
         form={form}
+        formKey={props.formKey}
+        fieldConfig={props.fieldConfig}
+        formRenderProps={props.formRenderProps}
       />
       {address?.place_id ? (
         <div className="items-center">
-          <AddressForm isLoading={isLoading} form={form} />
+          <AddressForm
+            isLoading={isLoading}
+            form={form}
+            formKey={props.formKey}
+            fieldConfig={props.fieldConfig}
+            formRenderProps={props.formRenderProps}
+          />
         </div>
       ) : null}
     </Fragment>
