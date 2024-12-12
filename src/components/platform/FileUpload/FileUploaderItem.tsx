@@ -271,7 +271,11 @@ export const FileUploaderItem = forwardRef<
             {stillInProgress ? (
               <Progress className="mt-2" value={currentProgressState} />
             ) : (
-              <div className="text-sm font-medium">{`${formattedSize} - ${currentProgressState}%`}</div>
+              <div className="text-sm font-medium">
+                {isDisabled
+                  ? `${formattedSize}`
+                  : `${formattedSize} - ${currentProgressState}% uploaded`}
+              </div>
             )}
           </div>
           <div className="flex items-center space-x-2">
