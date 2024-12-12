@@ -64,7 +64,7 @@ export const useAutosizeTextArea = ({
         textAreaElement.style.overflow = 'hidden';
       }
     }
-  }, [textAreaRef.current, triggerAutoSize, maxLines, lineWrapping]);
+  }, [triggerAutoSize, maxLines, lineWrapping, textAreaRef, init, minHeight, maxHeight]);
 };
 
 
