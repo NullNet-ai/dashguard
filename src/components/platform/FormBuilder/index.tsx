@@ -316,6 +316,7 @@ export function FormBuilder({
       setSaveLoading(false);
     } catch (error) {
       setSaveLoading(false);
+      console.error(error)
     }
   }
 
@@ -423,6 +424,7 @@ export function FormBuilder({
                           <FormModule
                             fields={fields}
                             form={form}
+                            formKey={formKey}
                             subConfig={{
                               checkboxOptions,
                               multiSelectOptions,

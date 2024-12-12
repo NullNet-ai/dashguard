@@ -10,13 +10,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 border-none",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         soft:
-        "bg-indigo-50 hover:bg-indigo-100 text-primary",
+        "bg-primary/10 hover:bg-primary/20 text-primary",
+        softPrimary:
+        "bg-primary/10 hover:bg-primary/20 text-primary",
+        softDestructive:
+        "bg-destructive/10 hover:bg-destructive/20 text-destructive",
+        softAccent:
+        "bg-accent/10 hover:bg-accent/20 text-accent",
+        softSecondary:
+        "bg-secondary/10 hover:bg-secondary/20 text-secondary",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-slate-50 border border-[#E2E8F0]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
@@ -35,12 +43,13 @@ const buttonVariants = cva(
           "relative after:absolute after:bg-primary after:bottom-2 after:h-[1px] after:w-2/3 after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300",
       },
       size: {
-        default: "h-10 px-2 py-2",
-        sm: "h-9  px-1",
-        xs: "h-7  px-1",
-        lg: "h-11  px-4",
+        default: "h-10 px-2 py-1",
+        xs: "h-7  px-2",
+        sm: "h-9  px-2",
+        lg: "h-11  px-3",
         icon: "h-10 w-10",
       },
+      
     },
     defaultVariants: {
       variant: "default",
@@ -55,11 +64,11 @@ interface IconProps {
   iconClassName?: React.HTMLAttributes<HTMLDivElement>["className"];
 }
 
-interface IconRefProps {
-  Icon?: never;
-  iconPlacement?: undefined;
-  iconClassName?: undefined;
-}
+// interface IconRefProps {
+//   Icon?: never;
+//   iconPlacement?: undefined;
+//   iconClassName?: undefined;
+// }
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,

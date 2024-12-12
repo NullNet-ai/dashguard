@@ -12,6 +12,9 @@ import {
 } from "~/components/ui/form";
 import { type IField } from "../type";
 import moment from "moment";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+
 
 interface IProps {
   fieldConfig: IField;
@@ -20,12 +23,15 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey:string;
 }
+
 
 export default function FormDatePicker({
   fieldConfig,
   formRenderProps,
   form,
+  formKey
 }: IProps) {
   const {
     label,
@@ -55,15 +61,16 @@ export default function FormDatePicker({
     }
   }
   return (
-    <FormItem className="flex w-full flex-col">
-      <FormLabel required={required}>{label}</FormLabel>
+    <FormItem className="flex w-full flex-col" >
+      <FormLabel required={required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateFormLabel")}>{label}</FormLabel>
       <FormControl>
         <DateTimePicker
           {...(form.register(fieldConfig?.name),
           {
             valueAsDate: true,
           })}
-          name={fieldConfig.name}
+          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateTimePicker")}
+          name={(fieldConfig.name)}
           minDate={fieldConfig.dateMinDate}
           maxDate={fieldConfig.dateMaxDate}
           placeholder={fieldConfig.placeholder}
@@ -84,7 +91,7 @@ export default function FormDatePicker({
           granularity={dateGranularity ?? "day"}
         />
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateErrorMessage")}/>
     </FormItem>
   );
 }
