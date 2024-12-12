@@ -1,8 +1,7 @@
-import StepOneBasicDetails from "../(summary)/_1";
-import StepTwoCategory from "./_2";
-import WizardSummaryStepThreeApplicant from "./_3/wizardSummaryStepThreeEmployee";
+import StepOneBasicDetails from "./_1";
+import CategoryDetailsSummary from "./_3";
 
-const contactWizardSummaryApplicant = ({
+const contactWizardSummary = ({
   identifier,
   mainEntity,
 }: {
@@ -25,14 +24,14 @@ const contactWizardSummaryApplicant = ({
         },
       ],
     },
-    two: {
-      label: "Step 2",
+    three: {
+      label: "Step 3",
       required: false,
       components: [
         {
           label: "Category Details",
           component: (
-            <StepTwoCategory
+            <CategoryDetailsSummary
               form_key={"ContactCategoryDetails"}
               identifier={identifier!}
               main_entity={mainEntity!}
@@ -41,23 +40,7 @@ const contactWizardSummaryApplicant = ({
         },
       ],
     },
-    three: {
-      label: "Step 3",
-      required: true,
-      components: [
-        {
-          component: (
-            <WizardSummaryStepThreeApplicant
-              form_key={"ContactsThree"}
-              identifier={identifier!}
-              main_entity={mainEntity!}
-            />
-          ),
-          label: "Basic Details 2",
-        },
-      ],
-    },
   };
 };
 
-export default contactWizardSummaryApplicant;
+export default contactWizardSummary;

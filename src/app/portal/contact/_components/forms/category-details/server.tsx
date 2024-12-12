@@ -20,7 +20,9 @@ const FormServerFetch = async () => {
   const contact_id = fetched_category_details?.data?.id;
 
   const default_values = {
-    categories: formatted_categories?.[0]?.value,
+    categories: formatted_categories?.[0]?.value
+      ? formatted_categories?.[0]?.value
+      : "Employee",
   };
 
   return (
