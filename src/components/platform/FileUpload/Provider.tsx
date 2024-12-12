@@ -20,7 +20,7 @@ import {
 } from "react-dropzone";
 import { toast } from "sonner";
 import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
-import axios, { AxiosProgressEvent } from "axios";
+import axios from "axios";
 import Bluebird from "bluebird";
 import { UploadState } from "./FileUploaderItem";
 
@@ -42,7 +42,7 @@ type FileUploaderContextType = {
     field: ControllerRenderProps<Record<string, string[]>>;
     fieldState: ControllerFieldState;
   };
-  progressState?: number;
+  progressState?: number[];
   state?: any;
 };
 
@@ -91,8 +91,8 @@ export const FileUploader = forwardRef<
     const [isFileTooBig, setIsFileTooBig] = useState(false);
     const [isLOF, setIsLOF] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
-    const [progressState, setProgressState] = useState(0);
     const [state, setState] = useState<UploadState>(UploadState.IDLE);
+    const [progressState, setProgressState] = useState<number[]>([]);
 
     const {
       accept = {
@@ -122,9 +122,31 @@ export const FileUploader = forwardRef<
         setValue(newFiles);
 
         setFilesUploaded(filesUploaded.filter((_, index) => index !== i));
+        setProgressState(progressState.filter((_, index) => index !== i));
       },
       [value, onValueChange, filesUploaded, setFilesUploaded],
     );
+
+    const startProgressUpdate = (index: number) => {
+      const interval = setInterval(() => {
+        setProgressState((prev) => {
+          const newProgressStates = [...prev];
+          const currentProgress = newProgressStates[index] || 0;
+          const randomIncrement = Math.floor(Math.random() * 10) + 1;
+          const updatedProgress = Math.min(
+            currentProgress + randomIncrement,
+            100,
+          );
+          newProgressStates[index] = updatedProgress;
+
+          if (updatedProgress >= 100) {
+            clearInterval(interval);
+          }
+
+          return newProgressStates;
+        });
+      }, 1000);
+    };
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -191,13 +213,6 @@ export const FileUploader = forwardRef<
       }),
     );
 
-    const onProgress = (progressEvent: AxiosProgressEvent) => {
-      const percentCompleted = Math.round(
-        (progressEvent.loaded * 100) / (progressEvent?.total || 1),
-      );
-
-      setProgressState(percentCompleted);
-    };
     const onDrop = useCallback(
       async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
         const files = acceptedFiles;
@@ -218,11 +233,14 @@ export const FileUploader = forwardRef<
             newValues.push(file);
             setTimeout(async () => {
               setState(UploadState.UPLOADING);
+
+              const fileIndex = newValues.indexOf(file);
+              startProgressUpdate(fileIndex);
               const formData = new FormData();
               formData.append("file", file);
               await uploader.current
                 .post("/", formData, {
-                  onUploadProgress: onProgress,
+                  onUploadProgress: () => startProgressUpdate(fileIndex),
                 })
                 .then((response) => {
                   setState(UploadState.UPLOADED);
@@ -238,7 +256,7 @@ export const FileUploader = forwardRef<
 
         onValueChange(newValues);
 
-        if (rejectedFiles.length > 0) {
+        if (rejectedFiles.length) {
           for (const file of rejectedFiles) {
             const error = file.errors?.[0];
 

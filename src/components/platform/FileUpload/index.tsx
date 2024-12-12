@@ -34,6 +34,7 @@ const FileUpload = ({
       <FileInput
         id="fileInput"
         className="h-full content-center border border-dashed border-border/75"
+        disabled={formRenderProps?.field.disabled}
       >
         <div className="flex w-full flex-col items-center justify-center p-8">
           <CloudUpload className="h-10 w-10 text-primary" />

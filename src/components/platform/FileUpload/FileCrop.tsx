@@ -58,7 +58,9 @@ export const FileCrop = ({
               onCropComplete={onCropComplete}
               minZoom={1}
               showGrid={false}
-              onRotationChange={(newRotation) => rotateImage([newRotation])}
+              onRotationChange={(newRotation: number) =>
+                rotateImage([newRotation])
+              }
             />
           )}
         </div>

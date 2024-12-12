@@ -20,12 +20,17 @@ export const FileUploaderContent = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ children, className, ...props }, ref) => {
-  const { orientation, value: files, removeFileFromSet } = useFileUpload();
+  const {
+    orientation,
+    value: files,
+    removeFileFromSet,
+    progressState,
+  } = useFileUpload();
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
-      className={cn("w-full px-1 max-h-60 overflow-y-auto")}
+      className={cn("max-h-60 w-full overflow-y-auto px-1")}
       ref={containerRef}
       aria-description="content file holder"
     >
@@ -72,9 +77,10 @@ export const FileUploaderContent = forwardRef<
             return (
               <FileUploaderItem
                 file={file}
-                className="flex items-center justify-center rounded-lg border py-8 px-2"
+                className="flex items-center justify-center rounded-lg border px-2 py-8"
                 key={file.name}
                 index={i}
+                progressState={progressState}
                 onRemove={() => removeFileFromSet(i)}
               >
                 <Image src={ImagePath} width={40} height={40} alt="FileImage" />

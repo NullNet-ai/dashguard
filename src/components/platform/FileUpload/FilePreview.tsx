@@ -1,8 +1,9 @@
+import { GifIcon } from "@heroicons/react/20/solid";
 import {
   FileIcon,
   FileSpreadsheetIcon,
+  FileText as FilePDFIcon,
   ImageIcon,
-  FileText as FilePdfIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -32,6 +33,10 @@ export const FILE_TYPES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ],
   GIF: ["image/gif"],
+  JPEG: ["image/jpeg"],
+  JPG: ["image/jpg"],
+  MSWORD: ["application/msword"],
+  PPT: ["application/vnd.ms-powerpoint"],
 };
 
 export function getFileTypeIcon(file: File) {
@@ -39,7 +44,7 @@ export function getFileTypeIcon(file: File) {
     return <ImageIcon className="h-6 w-6 text-blue-500" />;
   }
   if (FILE_TYPES.PDF.includes(file.type)) {
-    return <FilePdfIcon className="h-6 w-6 text-red-500" />;
+    return <FilePDFIcon className="h-6 w-6 text-red-500" />;
   }
   if (FILE_TYPES.EXCEL.includes(file.type)) {
     return <FileSpreadsheetIcon className="h-6 w-6 text-green-500" />;
