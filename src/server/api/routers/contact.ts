@@ -374,7 +374,9 @@ export const contactRouter = createTRPCRouter({
 
       const { raw_phone_number = "" } = contact_phone_numbers?.data?.[0] || {};
 
-      const primary_phone_number: string = "+" + raw_phone_number;
+      const primary_phone_number: string = raw_phone_number
+        ? "+" + raw_phone_number
+        : "";
 
       return {
         data: {
