@@ -27,27 +27,20 @@ export default function ContactDetails({
   > => {
     const response = await saveContactDetails(data, action_type);
     if (action_type === "Create") {
-      router.push(`/portal/contact/wizard/${response?.[0]?.code}/1`);
+      const code = response?.[0]?.code;
+      router.push(`/portal/contact/wizard/${code}/1`);
     }
     return response;
   };
 
   const handleRemoveRecord = async ({
     filter_entity,
-    main_entity_id,
-    rows,
   }: {
     rows: any[];
     main_entity_id: string;
     filter_entity: string;
   }) => {
     try {
-      // console.log("REMOVE RECORD", {
-      //   filter_entity,
-      //   main_entity_id,
-      //   rows,
-      // })
-      // removeRecord();
       return {
         rows: [],
         filter_entity,

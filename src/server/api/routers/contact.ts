@@ -175,6 +175,19 @@ export const contactRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id, email, phone } = input;
 
+      const email_pluck = ["email", "id", "contact_id", "is_primary"];
+      const phone_pluck = [
+        "raw_phone_number",
+        "id",
+        "contact_id",
+        "is_primary",
+        "iso_code",
+        "country_code",
+      ];
+      const email_data = email?.[0];
+
+      const phone_data = phone?.[0];
+
       let contact_id = id;
       let contact_code = "";
       if (!contact_id) {
@@ -211,29 +224,68 @@ export const contactRouter = createTRPCRouter({
         return record?.data?.[0];
       };
 
-      const response = await Promise.all([
-        insert("contact_email", email?.[0], [
-          "email",
-          "id",
-          "contact_id",
-          "is_primary",
-        ]),
-        insert("contact_phone_number", phone?.[0], [
-          "raw_phone_number",
-          "id",
-          "contact_id",
-          "is_primary",
-          "iso_code",
-          "country_code",
-        ]),
+      const update = async (entity: string, data: any, pluck: string[]) => {
+        const record = await ctx.dnaClient
+          .update(data.id, {
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: data,
+              pluck,
+            },
+          })
+          .execute();
+        return record?.data?.[0];
+      };
+
+      const getRecordByContactId = async (
+        entity: string,
+        contact_id: string,
+        record_id: string,
+      ) => {
+        const advance_filters = createAdvancedFilter({
+          contact_id,
+          id: record_id,
+        });
+        const record = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              advance_filters,
+            },
+          })
+          .execute();
+        return record?.data?.[0];
+      };
+
+      const [contact_email, contact_phone] = await Promise.all([
+        getRecordByContactId("contact_email", contact_id!, email_data?.id!),
+        getRecordByContactId(
+          "contact_phone_number",
+          contact_id!,
+          phone_data?.id!,
+        ),
       ]);
-      console.info("[Insert Contact Phone Email]", response);
+
+      // Since not multiple
+      const email_id = contact_email?.id;
+      const phone_id = contact_phone?.id;
+
+      const [email_record, phone_record] = await Promise.all([
+        email_id
+          ? update("contact_email", email_data, email_pluck)
+          : insert("contact_email", email_data, email_pluck),
+        phone_id
+          ? update("contact_phone_number", phone_data, phone_pluck)
+          : insert("contact_phone_number", phone_data, phone_pluck),
+      ]);
 
       return {
         id: contact_id,
         code: contact_code,
-        email: [response[0]],
-        phone: [response[1]],
+        email: [email_record],
+        phone: [phone_record],
       };
     }),
   fetchContactPhoneEmail: privateProcedure
