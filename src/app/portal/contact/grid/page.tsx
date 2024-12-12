@@ -51,6 +51,7 @@ export default async function Page({
         defaultValues: {
           categories: ["Contact"],
         },
+        enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         // editCustomComponent: EditComponent,
       }}

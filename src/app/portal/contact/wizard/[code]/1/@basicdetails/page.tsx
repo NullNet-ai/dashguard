@@ -1,4 +1,4 @@
-import { ContactDetails } from "~/app/portal/contact/_components/form-filter";
+import { BasicDetails } from "~/app/portal/contact/_components/form-filter";
 
-const FormContainer = async () => <ContactDetails />;
+const FormContainer = async () => <BasicDetails />;
 export default FormContainer;
