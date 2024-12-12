@@ -10,7 +10,6 @@ import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
 import { useRouter } from "next/navigation";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
-import { XIcon } from "lucide-react";
 
 export default function ContactDetails({
   params,
@@ -83,7 +82,7 @@ export default function ContactDetails({
     <FormBuilder
       filterGridConfig={{
         selectedRecords,
-        statusesIncluded: ["Draft"],
+        statusesIncluded: ["Draft"], // Enable Select Record Status
         actionType: "single-select",
         pluck: params?.pluck_fields,
         filter_entity: "contact",
@@ -126,6 +125,7 @@ export default function ContactDetails({
           };
         },
         renderComponentSelected: (record) => {
+          // Selected View Component
           return (
             <div>
               <div>
@@ -160,31 +160,30 @@ export default function ContactDetails({
           label: "Email Address",
         },
       ]}
-      customFormFilterViewFormActions={[
-        {
-          label: "Custom Action",
-          onClick: () => {
-            console.log("Custom Action Clicked");
-          },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
-      customFormFilterLockFormActions={[
-        {
-          label: "Custom Action",
-          onClick: () => {
-            console.log("Custom Action Clicked");
-          },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
+      // customFormFilterViewFormActions={[
+      //   {
+      //     label: "Custom Action",
+      //     onClick: () => {
+      //       console.log("Custom Action Clicked");
+      //     },
+      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+      //     disabled: false,
+      //     hidden: false,
+      //   },
+      // ]}
+      // customFormFilterLockFormActions={[
+      //   {
+      //     label: "Custom Action",
+      //     onClick: () => {
+      //       console.log("Custom Action Clicked");
+      //     },
+      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+      //     disabled: false,
+      //     hidden: false,
+      //   },
+      // ]}
       // features={{
-      //   enableLockFormEllipsis: false,
-      //   enableViewFormEllipsis: false,
+
       // }}
     />
   );
