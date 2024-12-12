@@ -10,23 +10,10 @@ import { testIDFormatter } from "~/utils/formatter";
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
+  const wizard_step_title = `${entityName} > Step ${state?.currentStep} - `;
   return (
-    <Breadcrumb data-test-id={camelCase(entityName)+'Breadcrumb'}>
-      <BreadcrumbList >
-        <BreadcrumbItem>
-          <BreadcrumbLink 
-            data-test-id={testIDFormatter(`${entityName}-wizard-breadcrumb-home-link`)}
-          href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-        <BreadcrumbPage>
-          {entityName
-            ?.split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ')}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div>
+      
+    </div>
   );
 }
