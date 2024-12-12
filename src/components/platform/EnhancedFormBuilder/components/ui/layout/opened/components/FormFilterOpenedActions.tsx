@@ -22,6 +22,7 @@ export default function FormFilterOpenedActions({
   features,
   handleRemovedSelectedRecords,
   customFormFilterViewFormActions = [],
+  selectedRecords
 }: {
   form: any;
   selectedRecords: any;
@@ -37,14 +38,6 @@ export default function FormFilterOpenedActions({
     enableViewFormPaste = true,
   } = features ?? {};
   const actions = [
-    // {
-    //   icon: <Eye className="h-4 w-4 text-slate-500" />,
-    //   label: "View",
-    //   handleClick: () => {
-    //     console.info("I am viewing the form");
-    //     const currentValues = form.getValues();
-    //   },
-    // },
     {
       icon: <Copy className="h-4 w-4 text-slate-500" />,
       label: "Copy",
@@ -127,6 +120,7 @@ export default function FormFilterOpenedActions({
         const currentValues = form.formState.defaultValues;
         handleRemovedSelectedRecords([currentValues]);
       },
+      hidden : !selectedRecords?.length 
     },
     ...customFormFilterViewFormActions
   ];
@@ -142,6 +136,7 @@ export default function FormFilterOpenedActions({
           if (action.label === "Copy" && !enableViewFormCopy) return null;
           if (action.label === "Paste" && !enableViewFormPaste) return null;
           if (action.label === "Clear" && !enableViewFormClear) return null;
+          if(action.hidden) return null;
           return (
             <DropdownMenuItem
               key={index}
