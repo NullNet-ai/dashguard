@@ -7,17 +7,17 @@ import {
   EmailArraySchema,
   EmailSchema,
   PhoneArraySchema,
-  PhoneSchema,
-} from "~/server/zodSchema/contact/basicDetails";
+  PhoneSchemaValidation,
+} from "~/server/zodSchema/contact/contactPhoneEmail";
 
 export const validatorRouter = createTRPCRouter({
   validatePhoneAndEmail: privateProcedure
     .input(
       z.object({
-        primary_phone: PhoneSchema,
+        primary_phone: PhoneSchemaValidation,
         primary_email: EmailSchema,
         contact_id: z.string(),
-        phones: z.array(PhoneSchema),
+        phones: z.array(PhoneSchemaValidation),
         emails: z.array(EmailSchema),
       }),
     )

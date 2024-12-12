@@ -7,8 +7,6 @@ import { menuRouter } from "./routers/menu";
 import { recordRouter } from "./routers/record";
 import { userRolesRouter } from "./routers/user_role";
 import { notificationsRouter } from "./routers/notification";
-import { contactEmailRouter } from "./routers/contact_email";
-import { contactPhoneNumberRouter } from "./routers/contact_phone_number";
 import { validatorRouter } from "./routers/validator";
 import { contactOrganizationsRouter } from "./routers/contact_organizations";
 import { contactSubOrganizationRouter } from "./routers/contact_sub_organizations";
@@ -32,8 +30,6 @@ export const appRouter = createTRPCRouter({
   record: recordRouter,
   notification: notificationsRouter,
   contact: contactRouter,
-  contactEmail: contactEmailRouter,
-  contactPhoneNumber: contactPhoneNumberRouter,
   validator: validatorRouter,
   contactOrganization: contactOrganizationsRouter,
   contactSubOrganization: contactSubOrganizationRouter,

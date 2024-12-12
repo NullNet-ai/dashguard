@@ -2,13 +2,15 @@
 
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { removeRecord, saveContactDetails, selectRecord } from "./actions";
+import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
 import { useRouter } from "next/navigation";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contacts/contactPhoneEmail";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+import { XIcon } from "lucide-react";
 
 export default function ContactDetails({
   params,
@@ -32,13 +34,20 @@ export default function ContactDetails({
 
   const handRemoveRecord = async ({
     filter_entity,
+    main_entity_id,
+    rows,
   }: {
     rows: any[];
     main_entity_id: string;
     filter_entity: string;
   }) => {
     try {
-      removeRecord();
+      // console.log("REMOVE RECORD", {
+      //   filter_entity,
+      //   main_entity_id,
+      //   rows,
+      // })
+      // removeRecord();
       return {
         rows: [],
         filter_entity,
@@ -151,6 +160,32 @@ export default function ContactDetails({
           label: "Email Address",
         },
       ]}
+      customFormFilterViewFormActions={[
+        {
+          label: "Custom Action",
+          onClick: () => {
+            console.log("Custom Action Clicked");
+          },
+          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+          disabled: false,
+          hidden: false,
+        },
+      ]}
+      customFormFilterLockFormActions={[
+        {
+          label: "Custom Action",
+          onClick: () => {
+            console.log("Custom Action Clicked");
+          },
+          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+          disabled: false,
+          hidden: false,
+        },
+      ]}
+      // features={{
+      //   enableLockFormEllipsis: false,
+      //   enableViewFormEllipsis: false,
+      // }}
     />
   );
 }
