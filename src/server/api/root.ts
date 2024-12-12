@@ -7,7 +7,6 @@ import { menuRouter } from "./routers/menu";
 import { recordRouter } from "./routers/record";
 import { userRolesRouter } from "./routers/user_role";
 import { notificationsRouter } from "./routers/notification";
-import { contactRouter } from "./routers/contact";
 import { contactEmailRouter } from "./routers/contact_email";
 import { contactPhoneNumberRouter } from "./routers/contact_phone_number";
 import { validatorRouter } from "./routers/validator";
@@ -23,6 +22,7 @@ import { educationRouter } from "./routers/education";
 import { degreeLevelRouter } from "./routers/degree_level";
 import { countryRouter } from "./routers/country";
 import { googleRouter } from "./routers/google";
+import { contactRouter } from "./routers/contact";
 
 /**
  * This is the primary router for your server.
