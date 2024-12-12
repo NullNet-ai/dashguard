@@ -58,24 +58,6 @@ export const menuRouter = createTRPCRouter({
         }),
       },
       {
-        title: "Positions",
-        icon: "DocumentMagnifyingGlassIcon",
-        isActive: pathName.includes("/position"),
-        items: [],
-        url: getGridLink({
-          mainEntity: "position",
-        }),
-      },
-      {
-        title: "Bookings",
-        icon: "CalendarDaysIcon",
-        isActive: pathName.includes("/booking"),
-        items: [],
-        url: getGridLink({
-          mainEntity: "booking",
-        }),
-      },
-      {
         title: "Organizations",
         icon: "UserGroupIcon",
         isActive: pathName.includes("/organization"),
