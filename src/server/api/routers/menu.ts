@@ -47,7 +47,6 @@ export const menuRouter = createTRPCRouter({
         isActive: pathName.includes("/activity_log"),
         items: [],
         url: "/portal/coming-soon",
-
       },
       {
         title: "Contacts",
@@ -109,102 +108,6 @@ export const menuRouter = createTRPCRouter({
                 }),
                 icon: "UserIcon",
                 isActive: pathName.includes("/user_role"),
-              },
-              {
-                title: "Position Roles",
-                url: getGridLink({
-                  mainEntity: "position_role",
-                }),
-                icon: "BriefcaseIcon",
-                isActive: pathName.includes("/position_role"),
-              },
-              {
-                title: "Position Types",
-                url: getGridLink({
-                  mainEntity: "position_type",
-                }),
-                icon: "BriefcaseIcon",
-                isActive: pathName.includes("/position_type"),
-              },
-              {
-                title: "Degree Levels",
-                url: getGridLink({
-                  mainEntity: "degree_level",
-                }),
-                icon: "AcademicCapIcon",
-                isActive: pathName.includes("/degree_level"),
-              },
-              {
-                title: "Country",
-                url: getGridLink({
-                  mainEntity: "country",
-                }),
-                icon: "MapIcon",
-                isActive: pathName.includes("/country"),
-              },
-              {
-                title: "City",
-                url: getGridLink({
-                  mainEntity: "city",
-                }),
-                icon: "MapIcon",
-                isActive: pathName.includes("/city"),
-              },
-              {
-                title: "Employment Types",
-                url: getGridLink({
-                  mainEntity: "employment_type",
-                }),
-                icon: "BuildingOfficeIcon",
-                isActive: pathName.includes("/employment_type"),
-              },
-              {
-                title: "Benefits",
-                url: getGridLink({
-                  mainEntity: "benefit",
-                }),
-                icon: "ClipboardDocumentCheckIcon",
-                isActive: pathName.includes("/benefit"),
-              },
-              {
-                title: "Pay Periods",
-                url: getGridLink({
-                  mainEntity: "pay_period",
-                }),
-                icon: "CalendarDaysIcon",
-                isActive: pathName.includes("/pay_period"),
-              },
-              {
-                title: "Work Setups",
-                url: getGridLink({
-                  mainEntity: "work_setup",
-                }),
-                icon: "WorkIcon",
-                isActive: pathName.includes("/work_setup"),
-              },
-              {
-                title: "Requirement Types",
-                url: getGridLink({
-                  mainEntity: "requirement_type",
-                }),
-                icon: "DocumentTextIcon",
-                isActive: pathName.includes("/requirement_type"),
-              },
-              {
-                title: "Reminders",
-                url: getGridLink({
-                  mainEntity: "reminder",
-                }),
-                icon: "DocumentTextIcon",
-                isActive: pathName.includes("/reminder"),
-              },
-              {
-                title: "Timezones",
-                url: getGridLink({
-                  mainEntity: "timezone",
-                }),
-                icon: "DocumentTextIcon",
-                isActive: pathName.includes("/timezone"),
               },
             ],
           },
