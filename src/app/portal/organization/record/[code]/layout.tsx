@@ -6,11 +6,13 @@ import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import RecordShellSummary from "../_components/RecordShellSummary";
 import Options from "../_components/IdentifierOption";
+import { IPlatformRecordLayoutProps } from "~/components/platform/RecordV2/types";
+import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
 
-const Layout = async ({ children }: { children: React.ReactNode }) => {
+const Layout = async ({ children, record, record_summary }: IPlatformRecordLayoutProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const [, , mainEntity, , identifier] = pathname.split("/");
+  const [, , main_entity, , identifier] = pathname.split("/");
 
   if (identifier === "new") {
     return notFound();
@@ -52,9 +54,9 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
       tabName: "organization",
     },
     {
-      id: "sub-organization",
-      name: "Sub-Organization",
-      tabName: "sub-organization",
+      id: "suborganizations",
+      name: "Sub-Organizations",
+      tabName: "suborganizations",
     },
     {
       id: "contact",
@@ -64,19 +66,19 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   ];
 
   return (
-    <PlatformRecord
-      config={{
-        entityCode: identifier!,
-        entityName: mainEntity,
-        tabs: tabs,
-        identifierOption: Options,
+    <RecordWrapper
+      record={record}
+      record_summary={record_summary}
+      entity_code={identifier!}
+      entity_name={main_entity!}
+      tabs={tabs}
+      customProps={{
+        config: {
+          entityCode: identifier!,
+          entityName: main_entity!,
+        },
       }}
-    >
-      {children}
-      <RecordSummaryViewContent>
-        <RecordShellSummary name={name} />
-      </RecordSummaryViewContent>
-    </PlatformRecord>
+    />
   );
 };
 

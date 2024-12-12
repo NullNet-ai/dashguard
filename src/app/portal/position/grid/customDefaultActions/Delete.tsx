@@ -1,7 +1,0 @@
-"use client";
-
-import { DefaultRowActions } from "~/components/platform/Grid/types";
-
-export default function DeleteComponent({ row, config }: DefaultRowActions) {
-  return null
-}
