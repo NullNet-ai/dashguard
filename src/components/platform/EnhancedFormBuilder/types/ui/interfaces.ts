@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
-import { IPropsForms } from "../global/interfaces";
+import { IFeatures, IPropsForms } from "../global/interfaces";
 import { TDisplayType, TFormSchema } from "../global/types";
 import { SetState } from "./types";
 

@@ -1,4 +1,4 @@
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
 import { type z } from "zod";
 import { Button } from "~/components/ui/button";
 
@@ -7,6 +7,7 @@ export default function SubmitForm({
   form,
   saveForm,
   formSchema,
+  ...props
 }: {
   saveForm(data: z.infer<typeof formSchema>): Promise<void>;
   isLoading: boolean;
@@ -15,7 +16,6 @@ export default function SubmitForm({
 }) {
   return (
     <Button
-      data-test-id="submitFormButton"
       className={
         "m-auto h-6 w-6 rounded-full bg-green-100 hover:disabled:cursor-not-allowed"
       }
@@ -24,9 +24,10 @@ export default function SubmitForm({
       variant={"ghost"}
       size={"icon"}
       onClick={form.handleSubmit(saveForm)}
+      {...props}
     >
       {!isLoading && (
-        <CheckIcon className="h-4 w-4 cursor-pointer text-green-800" />
+        <Check className="h-3 w-3 cursor-pointer text-green-800" strokeWidth={4} />
       )}
     </Button>
   );

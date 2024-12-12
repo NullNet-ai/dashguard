@@ -4,6 +4,7 @@ import ZodItems from "~/server/zodSchema/grid/items";
 import { EOperator, IAdvanceFilters } from "@dna-platform/common-orm";
 import { formatSorting } from "~/server/utils/formatSorting";
 import { pick } from "lodash";
+import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 
 const ENTITY = "contact";
 
@@ -141,4 +142,25 @@ export const contactRouter = createTRPCRouter({
       totalPages, // Total number of pages
     };
   }),
+  updateCategoryDetails: privateProcedure
+    .input(
+      ContactCategoryDetailsSchema.extend({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { categories } = input;
+
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: ENTITY,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              categories: [...new Set([categories, "Contact"])],
+            },
+          },
+        })
+        .execute();
+    }),
 });
