@@ -3,8 +3,8 @@
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { PhoneArraySchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
-import { PhoneArraySchema } from "~/server/zodSchema/contacts/basicDetails";
 export default function PhoneInputDetails({}) {
 
 const PhoneSchema = z.object({

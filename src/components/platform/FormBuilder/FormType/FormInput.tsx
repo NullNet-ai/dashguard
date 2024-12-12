@@ -11,9 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-
 
 interface IProps {
   fieldConfig: IField;
@@ -24,7 +21,6 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
-  formKey:string;
 }
 
 export default function FormInput({
@@ -32,7 +28,6 @@ export default function FormInput({
   formRenderProps,
   icon,
   value,
-  formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const isHidden = fieldConfig.hidden;
@@ -51,13 +46,12 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputFormLabel")}>
+      <FormLabel required={fieldConfig?.required}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "Input")}
           readOnly={fieldConfig?.readonly ?? false}
           className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
           disabled={isDisabled}
@@ -71,8 +65,12 @@ export default function FormInput({
           {...formRenderProps.field}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputErrorMessage")}/>
+      <FormMessage />
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );
+}
+
+function UnitIconComponent() {
+  return <span className="pr-4 text-muted-foreground">Unit</span>;
 }

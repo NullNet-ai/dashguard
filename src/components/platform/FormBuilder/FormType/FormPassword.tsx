@@ -14,9 +14,6 @@ import { Input } from "~/components/ui/input";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -27,7 +24,6 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
-  formKey: string;
 }
 
 export default function FormPassword({
@@ -36,30 +32,21 @@ export default function FormPassword({
   icon,
   form,
   value,
-  formKey,
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
   const [showPassword, setShowPassword] = useState(false);
   return (
     <FormItem>
-      <FormLabel
-        required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "FormLabel",
-        )}
-      >
+      <FormLabel required={fieldConfig?.required}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="relative group">
+        <div className="relative">
           <Input
-            data-test-id={kebabCase(
-              formKey +" "+ (fieldConfig.name) + "Input",
-            )}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
             readOnly={fieldConfig?.readonly ?? false}
-            className={`${isDisabled && " border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
+            className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
             disabled={isDisabled}
             placeholder={fieldConfig?.placeholder}
             iconPlacement="left"
@@ -68,14 +55,11 @@ export default function FormPassword({
             value={value}
           />
           <Button
-            data-test-id={kebabCase(
-              formKey + " "+ (fieldConfig.name) + "Toggle",
-            )}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
             type="button"
             variant="ghost"
             size="sm"
-            className="absolute right-0 top-0 mr-4 h-full py-2 hidden group-hover:block hover:bg-transparent"
+            className="absolute right-0 top-0 mr-2 h-full py-2 hover:bg-transparent"
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={formRenderProps?.field?.disabled}
           >
@@ -85,11 +69,7 @@ export default function FormPassword({
           </Button>
         </div>
       </FormControl>
-      <FormMessage
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "PasswordErrorMessage",
-        )}
-      />
+      <FormMessage />
     </FormItem>
   );
 }

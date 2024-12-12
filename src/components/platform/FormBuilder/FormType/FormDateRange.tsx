@@ -21,9 +21,6 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { type IField } from "../type";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-
 
 interface IProps {
   fieldConfig: IField;
@@ -36,29 +33,26 @@ interface IProps {
     unknown,
     undefined
   >;
-  formKey:string
 }
 
 export default function FormDateRange({
   fieldConfig,
   formRenderProps,
-  form,
-  formKey
+  form
 }: IProps) {
   const {field} = formRenderProps;
   const {disabled,value,onChange} = field;
   const {description,label,required,name,disabled:isfieldConfigDisabled} = fieldConfig
   return (
     <FormItem>
-      <FormLabel required={required}  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateRangeFormLabel")}>
+      <FormLabel required={required}>
         {label}
       </FormLabel>
-    <div className={cn("grid gap-2")}>
+      <div className={cn("grid gap-2")}>
         <Popover>
           <PopoverTrigger asChild>
             <Button
             {...form.register(name)}
-            data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateRangeTrigger")}
               disabled={disabled}
               id="date"
               variant={"outline"}
@@ -82,10 +76,9 @@ export default function FormDateRange({
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start" data-test-id={kebabCase(formKey+(fieldConfig.name) + "DateRangeContent")}>
+          <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               {...field}
-              data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateRangeCalendar")}
               mode="range"
               defaultMonth={value?.from}
               selected={value}
@@ -97,7 +90,7 @@ export default function FormDateRange({
         </Popover>
       </div>
       <FormDescription>{description}</FormDescription>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "DateRangeErrorMessage")}/>
+      <FormMessage />
     </FormItem>
   );
 }

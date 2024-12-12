@@ -20,6 +20,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
   const { shell_type } = params;
   const { categories } = defaultValues || {};
 
+
   useEffect(() => {
     if (shell_type === "wizard" && categories !== "Contact")
       router.replace(`${pathname}?categories=${categories}`);

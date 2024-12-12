@@ -24,7 +24,6 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
 
 interface IProps {
   fieldConfig: IField;
@@ -37,7 +36,6 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
-  formKey: string;
 }
 
 export default function FormCurrencyInput({
@@ -47,7 +45,6 @@ export default function FormCurrencyInput({
   icon,
   form,
   value,
-  formKey,
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -140,12 +137,7 @@ export default function FormCurrencyInput({
   const error = form.formState.errors[fieldConfig.name];
   return (
     <FormItem>
-      <FormLabel
-        required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey +fieldConfig.name + "CurrencyInputFormLabel",
-        )}
-      >
+      <FormLabel required={fieldConfig?.required}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
@@ -160,9 +152,7 @@ export default function FormCurrencyInput({
 
           <CurrencyInput
             {...register(fieldConfig.name)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencyInput",
-            )}
+            data-test-id={fieldConfig.name + "CurrencyInput"}
             ref={inputRef}
             placeholder="Currency"
             className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
@@ -173,7 +163,7 @@ export default function FormCurrencyInput({
               }
             }}
             onFocus={() => normalInputRef.current?.focus()}
-            value={formRenderProps.field.value?values.value : "0.00"}
+            value={values.value}
             step={1}
             prefix={selectedCurrency.value}
             decimalSeparator="."
@@ -185,38 +175,26 @@ export default function FormCurrencyInput({
               ?.findIndex((option) => option.label === selectedCurrency.label)
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencySelect",
-            )}
           >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
-              data-test-id={kebabCase(
-                formKey + fieldConfig.name + "CurrencyTrigger",
-              )}
+              data-test-id={fieldConfig.name + "CurrencyTrigger"}
             >
               <SelectValue
                 placeholder="Unit"
-                data-test-id={kebabCase(
-                  formKey + fieldConfig.name + "CurrencySelectValue",
-                )}
+                data-test-id={fieldConfig.name + "CurrencySelectValue"}
               >
                 {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent
-              data-test-id={formKey + fieldConfig.name + "CurrencyContent"}
-            >
+            <SelectContent>
               {options?.map((option, i) => (
                 <SelectItem
                   key={option.label}
                   value={i.toString()}
-                  data-test-id={kebabCase(
-                    formKey +
-                      fieldConfig.name+
-                      "CurrencySelectOption" +
-                      option.label,
-                  )}
+                  data-test-id={
+                    fieldConfig.name + "CurrencySelectOption" + option.label
+                  }
                 >
                   {option.label}
                 </SelectItem>
@@ -230,10 +208,7 @@ export default function FormCurrencyInput({
       "amount" in error &&
       error.amount &&
       typeof error.amount.message === "string" ? (
-        <p className={cn("py-1 text-md font-medium text-destructive")}
-        data-test-id={
-          kebabCase(formKey + fieldConfig.name + "CurrencyInputErrorMessage")
-        }>
+        <p className={cn("py-1 text-sm font-medium text-destructive")}>
           {error.amount.message}
         </p>
       ) : (
