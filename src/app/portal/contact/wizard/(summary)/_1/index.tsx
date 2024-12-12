@@ -5,10 +5,6 @@ import { api } from "~/trpc/react";
 const fields = {
   "Phone Number": "primary_phone_number",
   Email: "email",
-  "First Name": "first_name",
-  "Middle Name": "middle_name",
-  "Last Name": "last_name",
-  "Goes By": "goes_by",
 };
 
 const StepOneBasicDetails = ({
