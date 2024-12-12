@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
 export const saveContactDetails = async (data: any, action_type?: string) => {
-  const response = await api.contact.updateContactPhoneEmail(data);
+  const response = await api.contact.saveContactPhoneEmail(data);
 
-  if(action_type === 'Create') {
+  if (action_type === "Create") {
     const headerList = headers();
     const pathname = headerList.get("x-pathname") || "";
     const [, portal, mainEntity] = pathname.split("/");
@@ -16,7 +16,7 @@ export const saveContactDetails = async (data: any, action_type?: string) => {
       current_context: currentContext,
     });
   }
-  return [response.data];
+  return [response];
 };
 
 export const selectRecord = async (rows: any[]) => {
