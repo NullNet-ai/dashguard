@@ -3,8 +3,8 @@
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { EmailArraySchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
-import { EmailArraySchema } from "~/server/zodSchema/contacts/basicDetails";
 const FormSchema = z.object({
   email_input: EmailArraySchema,
   emails: EmailArraySchema,

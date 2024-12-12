@@ -20,6 +20,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
         render={(formProps) => {
           return (
             <FormRadio
+              formKey="ContactCategoryDetails"
               fieldConfig={{
                 id: `categories`,
                 formType: "radio",

@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import React from "react";
 
 const WizardLayout: React.FC<any> = (props) => {
