@@ -2,7 +2,7 @@
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
-const StepTwoCategory = ({
+const CategoryDetailsSummary = ({
   form_key,
   identifier,
   main_entity,
@@ -23,6 +23,9 @@ const StepTwoCategory = ({
 
   const { data } = record || {};
   const { categories } = data || {};
+  const filtered_categories = categories?.filter(
+    (category: string) => category !== "Contact",
+  );
 
   useRefetchRecord({
     refetch,
@@ -36,11 +39,12 @@ const StepTwoCategory = ({
   return (
     <div>
       <p>
-        <strong> Categories: </strong>
-        &nbsp; {categories?.length ? categories.join(", ") : "None"}
+        <strong> Category: </strong>
+        &nbsp;{" "}
+        {filtered_categories?.length ? filtered_categories.join(", ") : "None"}
       </p>
     </div>
   );
 };
 
-export default StepTwoCategory;
+export default CategoryDetailsSummary;

@@ -293,7 +293,8 @@ export default ExampleForm;
 
 ```tsx
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 
 const schema = z.object({
   hobbies: z.string(),
@@ -405,7 +406,8 @@ export default MyForm;
 
 ```tsx
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 
 const schema = z.object({
   name: z.array(z.string()),
@@ -444,7 +446,8 @@ export default MyForm;
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 
 const schema = z.object({
   skills: z.array(z.string()),

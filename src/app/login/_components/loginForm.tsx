@@ -35,7 +35,7 @@ export default function LoginForm() {
 
   return (
     <Form {...form}>
-      <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="space-y-6 " onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           name="email"
           control={form.control}
@@ -47,10 +47,11 @@ export default function LoginForm() {
                   name: "email",
                   label: "Email address",
                   required: true,
-                  placeholder: "Email",
+                  placeholder: "Enter Valid Email Address",
                   type: "email",
                 }}
                 form={form}
+                formKey={"Login"}
                 formRenderProps={formProps}
               />
             );
@@ -68,8 +69,10 @@ export default function LoginForm() {
                   label: "Password",
                   required: true,
                   placeholder: "Password",
+                  
                 }}
                 form={form}
+                formKey={"Login"}
                 formRenderProps={formProps}
               />
             );
@@ -80,16 +83,32 @@ export default function LoginForm() {
             {error}
           </FormMessage>
         )}
-        <div className="py-2">
+        <div className="flex justify-between items-center w-full">
+          <div className="flex items-center">
+            <input
+              id="rememberMe"
+              name="rememberMe"
+              type="checkbox"
+              className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="rememberMe" className="ml-2 block text-md text-foreground font-semibold">
+              Remember me
+            </label>
+          </div>
+          <div className="text-md">
+            <a href="#" className="font-semibold text-primary ">
+              Forgot password?
+            </a>
+          </div>
+        </div>
           <Button
-            name="loginSubmitButton"
+          data-test-id={'login-submit-button'}
             loading={isSubmitting}
             type="submit"
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="!mt-8 rounded flex  text-md w-full justify-center items-center font-semibold text-white shadow-sm h-auto py-1.5"
           >
             Sign in
           </Button>
-        </div>
       </form>
     </Form>
   );

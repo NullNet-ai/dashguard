@@ -21,6 +21,10 @@ import { cn } from "~/lib/utils";
 import { type IField } from "../type";
 import { ulid } from "ulid";
 import { useToast } from "~/context/ToastProvider";
+// import capitalize from "lodash/capitalize";
+import kebabCase from "lodash/kebabCase";
+// import { DevTool } from "@hookform/devtools";
+
 export interface IEmailData {
   id?: string;
   email: string;
@@ -34,6 +38,7 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey: string;
 }
 interface IUseFieldArrayEmail {
   fields: Record<keyof IEmailData, string>[];
@@ -54,6 +59,7 @@ export default function FormEmailInput({
   fieldConfig,
   formRenderProps,
   form,
+  formKey,
 }: IProps) {
   const { error }: any = useFormField();
   const toast = useToast();
@@ -97,7 +103,12 @@ export default function FormEmailInput({
   const values = form.watch(name);
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel
+        required={fieldConfig?.required}
+        data-test-id={kebabCase(
+          formKey + " "+ (fieldConfig.name) + "FormLabel",
+        )}
+      >
         {fieldConfig?.label}
       </FormLabel>
 
@@ -107,17 +118,23 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"}`}
+                  className={`flex items-center focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:border-primary  ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
                     readOnly={fieldConfig?.readonly ?? false}
                     id={data?.id}
-                    data-test-id={fieldConfig.name + (index + 1)}
+                    data-test-id={
+                      formKey +
+                      (fieldConfig.name) +
+                      "Input" +
+                      (index + 1)
+                    }
                     name={data?.id}
+                    value={`${values[index]?.email || ""}`}
                     iconPlacement="left"
-                    hasError={!!formRenderProps.fieldState.error}
-                    className="rounded-none border-transparent"
+                    // hasError={!!formRenderProps.fieldState.error}
+                    className={`rounded-none border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent  focus-visible:ring-offset-[-4] focus-visible:border-transparent`}
                     disabled={isDisabled}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
@@ -127,10 +144,12 @@ export default function FormEmailInput({
                   {data?.is_primary && isMultiple && (
                     <Badge
                       variant={"outline"}
-                      className="mr-1 bg-primary/10 py-1 font-normal text-primary"
-                      data-test-id={
-                        fieldConfig.name + `_is_primary_badge_${index + 1}`
-                      }
+                      className={` bg-primary/10 py-1 font-normal text-primary mx-auto hover:bg-primary/10`}
+                      data-test-id={kebabCase(
+                        formKey +
+                          (fieldConfig.name) +
+                          `IsPrimaryBadge${index + 1}`,
+                      )}
                     >
                       Primary
                     </Badge>
@@ -140,13 +159,15 @@ export default function FormEmailInput({
                     <Button
                       name={`${name}.${index}.isPrimaryButton`}
                       disabled={formRenderProps?.field?.disabled}
-                      data-test-id={
-                        fieldConfig.name + `_is_primary_button_${index + 1}`
-                      }
+                      data-test-id={kebabCase(
+                        formKey +
+                          (fieldConfig.name) +
+                          `isPrimaryButton${index + 1}`,
+                      )}
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
-                      className="rounded-none border-l"
+                      className={`rounded-none ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
                         const updatedFields = values.map(
                           (field: IEmailData, i: number) => ({
@@ -168,23 +189,32 @@ export default function FormEmailInput({
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
-                      data-test-id={
-                        fieldConfig.name + `_remove_button_${index + 1}`
-                      }
-                      className="rounded-none border-l"
+                      data-test-id={kebabCase(
+                        formKey +
+                          (fieldConfig.name) +
+                          `_remove_button_${index + 1}`,
+                      )}
+                      className={`rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
-                        const _values = form.getValues(fieldConfig.name);
+                        const _values = form.getValues(
+                          (fieldConfig.name),
+                        );
                         handleRemoveEmail(index, _values);
                       }}
                     >
-                      <TrashIcon className="h-5 w-5 text-[#93a3b7]" />
+                      <TrashIcon className="h-5 w-5 text-muted-foreground" />
                     </Button>
                   )}
                 </div>
                 {error?.[index] && (
                   <p
                     id={data?.id}
-                    className={cn("py-1 text-sm font-medium text-destructive")}
+                    className={cn("py-1 text-md font-medium text-destructive")}
+                    data-test-id={kebabCase(
+                      formKey +
+                        (fieldConfig.name) +
+                        `EmailErrorMessage${index + 1}`,
+                    )}
                   >
                     {error?.[index]?.email?.message}
                   </p>
@@ -195,10 +225,14 @@ export default function FormEmailInput({
         );
       })}
 
+      {/* <DevTool control={form.control} /> */}
+
       {!isDisabled && isMultiple && (
         <Button
           name={`${name}.AddEmailButton`}
-          data-test-id={fieldConfig.name + "AddEmailButton"}
+          data-test-id={kebabCase(
+            formKey + " "+ (fieldConfig.name) + "AddEmailButton",
+          )}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           Icon={PlusIcon}
@@ -211,7 +245,13 @@ export default function FormEmailInput({
         </Button>
       )}
 
-      {error?.root?.message && <FormMessage />}
+      {error?.root?.message && (
+        <FormMessage
+          data-test-id={kebabCase(
+            formKey + " "+ (fieldConfig.name) + "EmailErrorMessage",
+          )}
+        />
+      )}
     </FormItem>
   );
 }

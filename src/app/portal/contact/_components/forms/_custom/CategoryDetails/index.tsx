@@ -1,7 +1,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment } from "react";
 import { type UseFormReturn } from "react-hook-form";
-import FormSelect from "~/components/platform/FormBuilder/FormType/FormSelect";
+import FormRadio from "~/components/platform/FormBuilder/FormType/FormRadio";
 import { FormField } from "~/components/ui/form";
 
 interface ICategoryDetails {
@@ -19,15 +19,12 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
         control={form.control}
         render={(formProps) => {
           return (
-            <FormSelect
-            formKey="categories"
-              pillOptions={["Contact"]}
+            <FormRadio
               fieldConfig={{
-                id: "categories",
-                formType: "select",
-                name: "categories",
+                id: `categories`,
+                formType: "radio",
+                name: `categories`,
                 label: "Category",
-                required: true,
               }}
               formRenderProps={{
                 ...formProps,
@@ -43,11 +40,8 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
                 },
               }}
               form={form}
-              selectOptions={{
-                categories: [
-                  { label: "Employee", value: "Employee" },
-                  { label: "Applicant", value: "Applicant" },
-                ],
+              radioOptions={{
+                categories: [{ label: "Employee", value: "Employee" }],
               }}
             />
           );

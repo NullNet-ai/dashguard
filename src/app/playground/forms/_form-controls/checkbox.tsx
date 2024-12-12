@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   checkbox: z
     .array(z.string(), { message: "At least one checkbox must be selected" })

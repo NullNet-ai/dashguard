@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   number_input: z
     .number({ message: "Number Input is required" })

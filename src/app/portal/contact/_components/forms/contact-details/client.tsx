@@ -45,6 +45,7 @@ export default function ContactDetails({
       defaultValues={defaultValues}
       multiSelectOptions={multiSelectOptions}
       selectOptions={selectOptions}
+      enableFormRegisterToParent={true}
       fields={[
         {
           id: "first_name",

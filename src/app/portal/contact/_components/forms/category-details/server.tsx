@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import CategoryDetails from "./client";
+import { IDropdown } from "./types";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -18,10 +19,12 @@ const FormServerFetch = async () => {
     },
   );
   const contact_id = fetched_category_details?.data?.id;
-
-  const default_values = {
-    categories: formatted_categories?.[0]?.value,
-  };
+  const filtered_categories = formatted_categories?.filter(
+    (category: IDropdown) => category?.value !== "Contact",
+  );
+  const default_values = filtered_categories?.[0]?.value
+    ? { categories: filtered_categories?.[0]?.value }
+    : { categories: "Employee" };
 
   return (
     <div className="space-y-2">

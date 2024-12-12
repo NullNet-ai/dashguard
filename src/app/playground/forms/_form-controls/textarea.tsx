@@ -2,7 +2,8 @@
 
 import { UserIcon } from "lucide-react";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   textarea: z
     .string({ required_error: "Textarea is required" })

@@ -1,6 +1,7 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
 import { Button } from "~/components/ui/button";
+import { CollapsibleTrigger } from "~/components/ui/collapsible";
 
 export default function ShowHideForm({
   handleOpen,
@@ -17,25 +18,30 @@ export default function ShowHideForm({
   return (
     <Fragment>
       {open ? (
-        <Button
-          size={"icon"}
-          variant={"ghost"}
-          onClick={handleOpen}
-          className="m-auto h-6 w-6 rounded-full bg-gray-200"
-          {...props}
-        >
-          <ChevronUpIcon className="h-4 w-4 cursor-pointer" />
-        </Button>
+      
+        <CollapsibleTrigger asChild>
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            onClick={handleOpen}
+            className="m-auto h-6 w-6 rounded-full bg-gray-200"
+            {...props}
+          >
+            <ChevronUpIcon className="h-4 w-4 cursor-pointer" />
+          </Button>
+        </CollapsibleTrigger>
       ) : (
-        <Button
-          size={"icon"}
-          variant={"ghost"}
-          onClick={handleOpen}
-          className="m-auto h-6 w-6 rounded-full"
-          {...props}
-        >
-          <ChevronDownIcon className="h-4 w-4 cursor-pointer" />
-        </Button>
+        <CollapsibleTrigger asChild>
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            onClick={handleOpen}
+            className="m-auto h-6 w-6 rounded-full"
+            {...props}
+          >
+            <ChevronDownIcon className="h-4 w-4 cursor-pointer" />
+          </Button>
+        </CollapsibleTrigger>
       )}
     </Fragment>
   );

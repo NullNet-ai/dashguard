@@ -11,6 +11,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 
 interface IProps {
   fieldConfig: IField;
@@ -20,6 +23,7 @@ interface IProps {
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
+  formKey:string;
   value?: string;
 }
 
@@ -28,6 +32,7 @@ export default function FormNumber({
   formRenderProps,
   icon,
   form,
+  formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
 
@@ -55,13 +60,14 @@ export default function FormNumber({
   }
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputFormLabel")}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // {...form.register(fieldConfig?.name)}
           {...formRenderProps.field}
+          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInput")}
           readOnly={fieldConfig?.readonly ?? false}
           type="number"
           inputMode="decimal"
@@ -74,7 +80,8 @@ export default function FormNumber({
           onChange={handleChange}
         />
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputErrorMessage")}/>
+
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

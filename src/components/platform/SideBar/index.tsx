@@ -31,6 +31,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import * as _ICON from "@heroicons/react/24/outline";
 import { Separator } from "~/components/ui/separator";
 import useWindowSize from "~/hooks/use-resize";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function AppSideBar(config: ISideBarProps) {
   const {
@@ -62,7 +63,7 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarTrigger
               Icon={TriggerOpenCloseSidebarComponent}
               className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? 'lg:hidden': "lg:flex"}`}
-
+              data-test-id="sidebar-trigger-btn"
             />
           )}
           <SidebarMenu>
@@ -137,7 +138,7 @@ export default function AppSideBar(config: ISideBarProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
-                    data-test-id={"sidebarFooterMenuDropdownButton"}
+                    data-test-id={"sidebar-ftr-btn"}
                     size={"lg"}
                     className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
@@ -168,7 +169,7 @@ export default function AppSideBar(config: ISideBarProps) {
                     // @ts-expect-error - TS doesn't know about dynamic imports
                     const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
                     return (
-                      <DropdownMenuItem key={index} data-test-id={"sidebarFooterMenu"+item.title?.split("").join("")}>
+                      <DropdownMenuItem key={index} data-test-id={testIDFormatter("sidebar-ftr-"+item.title?.split("").join(""))}>
                         <ICON className="mr-2 h-5 w-5" />
                         {item.title}
                       </DropdownMenuItem>
@@ -176,7 +177,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   })}
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    data-test-id={"sidebarFooterMenuLogOut"}
+                    data-test-id={"sidebar-ftr-logout-btn"}
                     className="text-destructive"
                   >
                     <ArrowLeftStartOnRectangleIcon className="mr-2 h-5 w-5 text-destructive" />
