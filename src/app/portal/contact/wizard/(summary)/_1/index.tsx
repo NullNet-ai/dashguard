@@ -39,7 +39,7 @@ const StepOneBasicDetails = ({
         <p key={key}>
           <strong> {key}: </strong>
           {/* @ts-expect-error - Required for the icon to work */}
-          &nbsp; {data[value] || "None"}
+          &nbsp; {data?.[value] || "None"}
         </p>
       ))}
     </div>

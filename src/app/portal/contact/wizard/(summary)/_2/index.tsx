@@ -43,7 +43,7 @@ const ContactDetailsSummary = ({
       {Object.entries(fields).map(([key, value]) => (
         <p key={key}>
           <strong> {key}: </strong>
-          &nbsp; {data[value] || "None"}
+          &nbsp; {data?.[value] || "None"}
         </p>
       ))}
     </div>
