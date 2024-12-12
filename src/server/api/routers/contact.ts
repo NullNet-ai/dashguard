@@ -48,7 +48,16 @@ export const contactRouter = createTRPCRouter({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
-          pluck: input.pluck,
+          pluck_object: {
+            contact_emails: ["email", "is_primary"],
+            contact_phone_numbers: [
+              "raw_phone_number",
+              "iso_code",
+              "country_code",
+              "is_primary",
+            ],
+            contacts: input.pluck,
+          },
           advance_filters: [
             // {
             //   type: "criteria",
