@@ -12,11 +12,7 @@ import CustomCategoryDetails from "../_custom/CategoryDetails";
 import { IFormProps } from "../types";
 import { XIcon } from "lucide-react";
 
-export default function CategoryDetails({
-  params,
-  defaultValues,
-  selectOptions,
-}: IFormProps) {
+export default function CategoryDetails({ params, defaultValues }: IFormProps) {
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
@@ -37,10 +33,10 @@ export default function CategoryDetails({
         id: params.id,
         categories: data.categories ?? "",
       });
-      toast.success("Category Details submit successfully");
+      toast.success("Category Details submitted successfully.");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to submit Category Details");
+      toast.error("Failed to submit Category Details.");
     }
   };
 
@@ -53,16 +49,10 @@ export default function CategoryDetails({
       handleSubmit={handleSave}
       formKey="ContactCategoryDetails"
       formSchema={ContactCategoryDetailsSchema}
-      defaultValues={
-        defaultValues?.categories === "Contact"
-          ? { categories: "" }
-          : defaultValues
-      }
+      defaultValues={defaultValues}
       selectOptions={{}}
       fields={[]}
-      customRender={(form) => (
-        <CustomCategoryDetails form={form} selectOptions={selectOptions} />
-      )}
+      customRender={(form) => <CustomCategoryDetails form={form} />}
       customFormHostViewFormActions={[
         {
           label: "Custom Action",

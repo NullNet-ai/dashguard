@@ -19,9 +19,9 @@ const FormServerFetch = async () => {
     },
   );
   const contact_id = fetched_category_details?.data?.id;
-  const filtered_categories = formatted_categories?.filter(
-    (category: IDropdown) => category?.value !== "Contact",
-  );
+  const filtered_categories = formatted_categories
+    ?.filter((category: IDropdown) => category?.value !== "Contact")
+    ?.filter(Boolean);
   const default_values = filtered_categories?.[0]?.value
     ? { categories: filtered_categories?.[0]?.value }
     : { categories: "Employee" };
