@@ -2,16 +2,14 @@
 
 import { type z } from "zod";
 import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
-
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { useToast } from "~/context/ToastProvider";
-import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contacts/categoryDetails";
+import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import UpdateCategory from "./actions/updateCategory";
 import CustomCategoryDetails from "../custom/CategoryDetails";
 import { IFormProps } from "../types";
-import { on } from "events";
 import { XIcon } from "lucide-react";
 
 export default function CategoryDetails({
