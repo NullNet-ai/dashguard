@@ -62,7 +62,7 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarTrigger
               Icon={TriggerOpenCloseSidebarComponent}
               className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? 'lg:hidden': "lg:flex"}`}
-
+              data-test-id="sidebar-trigger-btn"
             />
           )}
           <SidebarMenu>
