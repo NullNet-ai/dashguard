@@ -18,6 +18,7 @@ import { Separator } from "~/components/ui/separator";
 import AddressDetails from "./_form-controls/address";
 import InputsGrid from "./_form-controls/inputs-grid";
 import SelectDetails from "./_form-controls/select-details";
+import FileDetails from "./_form-controls/file";
 
 export default function PlatformPlayGround() {
   return (
@@ -25,6 +26,7 @@ export default function PlatformPlayGround() {
       <ButtonPlayGround />
       <Separator className="my-6" />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <FileDetails/>
         <InputsGrid />
         <AddressDetails />
         <MultiSelectDetails />

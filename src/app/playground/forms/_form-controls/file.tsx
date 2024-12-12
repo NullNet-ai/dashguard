@@ -18,6 +18,9 @@ export default function FileDetails({}) {
         formLabel="File Form Builder"
         formKey="FormBuilderFile"
         formSchema={FormSchema}
+        customDesign={{
+          formClassName:"sm:grid-cols-1"
+        }}
         fields={[
           {
             id: "file",

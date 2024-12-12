@@ -35,9 +35,6 @@ import { useDebounce } from "~/components/ui/multi-select";
 import { IField } from "../type";
 import Grid from "../../Grid/Client";
 import gridColumns from "~/app/portal/contact/grid/_config/columns";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -48,7 +45,6 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
-  formKey: string;
 }
 
 export default function FormInputGrid({
@@ -56,7 +52,6 @@ export default function FormInputGrid({
   formRenderProps,
   value,
   form,
-  formKey
 }: IProps) {
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -100,17 +95,15 @@ export default function FormInputGrid({
   const { items: predictions } = data ?? {};
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridLabel")}>
+      <FormLabel required={fieldConfig?.required}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Combobox>
-          <div className="">
+          <div className="relative">
             <ComboboxInput
               {...formRenderProps?.field}
-              autoComplete="off"
-              data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridInput")}
-              className="h-10 rounded-md border border-gray-200 bg-transparent text-gray-900 placeholder:text-gray-400 focus:border sm:text-xs w-full"
+              className="h-10 rounded-md border border-gray-200 bg-transparent text-gray-900 placeholder:text-gray-400 focus:border sm:text-xs"
               placeholder={fieldConfig?.placeholder || fieldConfig?.label}
               onChange={(event) => {
                 handleSearch(event.target.value);
@@ -123,8 +116,7 @@ export default function FormInputGrid({
               <ComboboxOptions
                 static
                 as="ul"
-                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridOptions")}
-                className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
+                className="absolute z-[100] mt-1 max-h-80 w-[700px] overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
               >
                 <li className="p-2">
                   <>
@@ -137,7 +129,7 @@ export default function FormInputGrid({
                     )}
                     <ul className="text-xs text-gray-700">
                       <Fragment>
-                        <div>
+                        <div className="flow-root">
                           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                               <div className="overflow-hidden shadow ring-1 ring-black/5 sm:rounded-lg">
@@ -219,7 +211,7 @@ export default function FormInputGrid({
           </div>
         </Combobox>
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridErrorMessage")}/>
+      <FormMessage />
     </FormItem>
   );
 }

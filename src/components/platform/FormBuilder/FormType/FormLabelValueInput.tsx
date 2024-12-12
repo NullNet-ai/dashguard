@@ -15,9 +15,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 export interface InputData {
   id?: string;
@@ -32,14 +29,12 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
-  formKey:string;
-  }
+}
 
 export default function FormLabelValueInput({
   fieldConfig,
   formRenderProps,
   form,
-  formKey
 }: IProps) {
   const { error } = useFormField() as IUserFormField;
   const { fields, append, remove } = useFieldArray({
@@ -69,7 +64,7 @@ export default function FormLabelValueInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInput")}>
+      <FormLabel required={fieldConfig?.required}>
         {fieldConfig?.label}
       </FormLabel>
 
@@ -80,7 +75,6 @@ export default function FormLabelValueInput({
               <div className="w-full">
                 <Input
                   {...register(`${formRenderProps.field.name}[${index}].label`)}
-                  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueLabelComponent" + (index + 1))}
                   readOnly={fieldConfig?.readonly ?? false}
                   placeholder="Label"
                   disabled={formRenderProps?.field?.disabled || fieldConfig?.disabled}
@@ -90,8 +84,7 @@ export default function FormLabelValueInput({
                 />
                 {error?.[index]?.label && (
                   <p
-                    className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputErrorMessage" + (index + 1))}
+                    className={cn("py-1 text-sm font-medium text-destructive")}
                   >
                     {error?.[index]?.label?.message}
                   </p>
@@ -101,7 +94,7 @@ export default function FormLabelValueInput({
             <FormControl>
               <div className="w-full">
                 <Input
-                  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputComponent" + (index + 1))}
+
                   placeholder="Value"
                   readOnly={fieldConfig?.readonly ?? false}
                   onChange={(e) =>
@@ -110,8 +103,7 @@ export default function FormLabelValueInput({
                 />
                 {error?.[index]?.value && (
                   <p
-                    className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputErrorMessage" + (index + 1))}
+                    className={cn("py-1 text-sm font-medium text-destructive")}
                   >
                     {error?.[index]?.value?.message}
                   </p>
@@ -120,7 +112,6 @@ export default function FormLabelValueInput({
             </FormControl>
             {index > 0 && (
               <Button
-                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputRemoveButton" + (index + 1))}
                 disabled={formRenderProps?.field?.disabled}
                 type="button"
                 variant="destructive"
@@ -135,7 +126,6 @@ export default function FormLabelValueInput({
       })}
 
       <Button
-        data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputAddButton")}
         disabled={formRenderProps?.field?.disabled}
         type="button"
         onClick={handleAddInput}

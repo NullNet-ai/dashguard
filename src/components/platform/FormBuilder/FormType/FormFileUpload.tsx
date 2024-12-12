@@ -13,9 +13,6 @@ import {
 } from "~/components/ui/form";
 
 import FileUpload from "../../FileUpload";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-
 // import { DevTool } from "@hookform/devtools";
 
 interface IProps {
@@ -27,14 +24,12 @@ interface IProps {
   form: UseFormReturn<Record<string, string[]>, string, undefined>;
   accept?: string; // Optional accept prop for file types
   multiple?: boolean; // Optional multiple files prop
-  formKey: string;
 }
 
 export default function FormFile({
   formRenderProps,
   form,
   fieldConfig,
-  formKey,
 }: IProps) {
   const { field } = formRenderProps;
   const { register } = form;
@@ -46,19 +41,14 @@ export default function FormFile({
   };
 
   const defaultDropzoneOptions = {
-    maxFiles: 100,
+    maxFiles: 5,
     maxSize: 1024 * 1024 * 10,
     multiple: true,
   };
   return (
     <FormItem>
       {fieldConfig?.label && (
-        <FormLabel
-          required={fieldConfig?.required}
-          data-test-id={kebabCase(
-            formKey + " " + fieldConfig.name + "FileFormLabel",
-          )}
-        >
+        <FormLabel required={fieldConfig?.required}>
           {fieldConfig?.label}
         </FormLabel>
       )}
@@ -66,18 +56,13 @@ export default function FormFile({
       <FormControl>
         <FileUpload
           {...register(field.name)}
-          fileInputProps={{}}
           onUploadFile={handleChangeUpload}
           dropzoneOptions={
             fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
           }
         />
       </FormControl>
-      <FormMessage
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "FileErrorMessage",
-        )}
-      />
+      <FormMessage />
     </FormItem>
   );
 }
