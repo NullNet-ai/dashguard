@@ -1,6 +1,7 @@
 import StepOneBasicDetails from "./_1";
 import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
+import ContactOrganizationSummary from "./_4";
 
 const contactWizardSummary = ({
   identifier,
@@ -50,6 +51,22 @@ const contactWizardSummary = ({
           component: (
             <CategoryDetailsSummary
               form_key={"ContactCategoryDetails"}
+              identifier={identifier!}
+              main_entity={mainEntity!}
+            />
+          ),
+        },
+      ],
+    },
+    four: {
+      label: "Step 4",
+      required: false,
+      components: [
+        {
+          label: "Organization",
+          component: (
+            <ContactOrganizationSummary
+              form_key={""}
               identifier={identifier!}
               main_entity={mainEntity!}
             />
