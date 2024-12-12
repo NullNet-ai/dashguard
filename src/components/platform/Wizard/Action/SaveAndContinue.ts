@@ -29,5 +29,5 @@ export async function SaveAndContinue({
     current_context: currentContext,
   })
 
-  redirect(`/portal/${entity}/record/${identifier}/dashboard`);
+  redirect(`/portal/${entity}/record/${identifier}/?current_tab=dashboard`);
 }
