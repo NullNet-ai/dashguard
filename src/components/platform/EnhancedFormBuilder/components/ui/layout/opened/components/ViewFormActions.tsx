@@ -37,7 +37,6 @@ const ViewFormActions = ({
   formProps?: any;
   customFormHostViewFormActions: ICustomActions[] | undefined;
 }) => {
-  console.log("%c 😲: customFormHostViewFormActions ", "font-size:16px;background-color:#486c6b;color:white;", customFormHostViewFormActions)
 
   const { enableFormHostViewActions = true } = features ?? {};
 
