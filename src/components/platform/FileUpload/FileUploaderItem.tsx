@@ -78,9 +78,16 @@ export const FileUploaderItem = forwardRef<
     const readFile = (file: File) => {
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        const result = reader.result?.toString() || null;
-        setImageSrc(result);
-        setPreviewSrc(result);
+        // const result = reader.result?.toString() || null;
+        let resultString: string;
+
+        if (typeof reader.result === "object") {
+          resultString = JSON.stringify(reader.result);
+        } else {
+          resultString = reader.result as string;
+        }
+        setImageSrc(resultString);
+        setPreviewSrc(resultString);
       });
       reader.readAsDataURL(file);
     };
@@ -150,9 +157,16 @@ export const FileUploaderItem = forwardRef<
 
         const reader = new FileReader();
         reader.onloadend = () => {
-          const result = reader.result?.toString() || null;
-          setImageSrc(result);
-          setPreviewSrc(result);
+          // const result = reader.result?.toString() || null;
+          let resultString: string;
+
+          if (typeof reader.result === "object") {
+            resultString = JSON.stringify(reader.result);
+          } else {
+            resultString = reader.result as string;
+          }
+          setImageSrc(resultString);
+          setPreviewSrc(resultString);
         };
         reader.readAsDataURL(newCroppedFile);
 
