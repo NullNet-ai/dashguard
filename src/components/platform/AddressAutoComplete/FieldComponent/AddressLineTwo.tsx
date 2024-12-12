@@ -12,6 +12,7 @@ export default function AddressLineTwo({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+            formKey="AddressLineTwo"
               fieldConfig={{
                 ...formRenderProps?.field,
                 placeholder: "Suite, Floor and Landmarks.",

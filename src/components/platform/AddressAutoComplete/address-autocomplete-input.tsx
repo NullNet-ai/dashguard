@@ -32,9 +32,16 @@ import {
 } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import { IField } from "../FormBuilder/type";
 
 interface CommonProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldConfig: IField;
+  formRenderProps: {
+    field: ControllerRenderProps<Record<string, any>, string>;
+    fieldState: ControllerFieldState;
+  };
+  formKey: string;
   handleSelectAddress: (address: {
     name: string;
     description: string;

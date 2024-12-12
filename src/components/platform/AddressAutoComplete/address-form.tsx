@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { type UseFormReturn } from "react-hook-form";
+import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 
 import CountryName from "./FieldComponent/Country";
 import CityName from "./FieldComponent/City";
@@ -8,10 +8,17 @@ import StateName from "./FieldComponent/State";
 import PostalName from "./FieldComponent/PostalCode";
 import AddressLineOne from "./FieldComponent/AddressLineOne";
 import AddressLineTwo from "./FieldComponent/AddressLineTwo";
+import { IField } from "../FormBuilder/type";
 
 interface AddressFormProps {
   isLoading: boolean;
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldConfig: IField;
+  formRenderProps: {
+    field: ControllerRenderProps<Record<string, any>, string>;
+    fieldState: ControllerFieldState;
+  };
+  formKey: string;
 }
 interface IAddressDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;

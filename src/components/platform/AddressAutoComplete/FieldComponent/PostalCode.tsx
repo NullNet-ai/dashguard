@@ -16,6 +16,7 @@ export default function PostalName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+              formKey="PostalCode"
               fieldConfig={{
                 ...formRenderProps?.field,
                 required: true,

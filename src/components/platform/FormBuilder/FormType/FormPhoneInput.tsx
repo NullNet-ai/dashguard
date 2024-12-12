@@ -23,9 +23,8 @@ import { ulid } from "ulid";
 import { toast } from "sonner";
 import kebabCase from "lodash/kebabCase";
 import capitalize from "lodash/capitalize";
-import { isPhoneValid } from "../utils/phoneValidator";
-;
 import { DevTool } from "@hookform/devtools";
+import { isPhoneValid } from "../Utils/phoneValidator";
 
 interface IPhoneData {
   id?: string;
