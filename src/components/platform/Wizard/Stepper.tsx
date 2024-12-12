@@ -14,6 +14,9 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import numberToWords from "./Utils/steptoWords";
 import useDeepCompareEffect from "./Hooks/useDeepCompareEffect";
 import { Summary, TSummaryComponents } from "./type";
+import { camelCase } from "lodash";
+import { toPascalCase } from "~/lib/capitalize";
+import { testIDFormatter } from "~/utils/formatter";
 
 const getNotRequiredSteps = (steps: Summary) => {
   if (!steps) return [];
@@ -40,6 +43,7 @@ export default function MyVerticalStepper() {
   const { state, actions } = useContext(WizardContext);
   const router = useRouter();
   const toast = useToast();
+  const { entityName  } = state ?? {}
 
   const traverseSteps = useMemo(() => {
     return state?.traverseSteps;
@@ -90,6 +94,7 @@ export default function MyVerticalStepper() {
         // }}
         defaultValue={defaultValueAccordionItems}
         type="multiple"
+        data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion`)}
       >
         <div
           className={cn(
@@ -135,6 +140,7 @@ export default function MyVerticalStepper() {
               return (
                 <li
                   key={stepIndex}
+                  data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}`)}
                   className={cn(
                     stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
                   )}
@@ -162,11 +168,10 @@ export default function MyVerticalStepper() {
                           className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-primary"
                         />
                       )}
-                      <div
+                      <button
                         onClick={() => navigateLink(index)}
-                        // href={"#"}
-                        // href={completeLink(index)}
-                        className="group relative flex items-start"
+                        data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-link`)}
+                        className="group relative flex items-start cursor-pointer"
                       >
                         <span className="flex h-9 items-center">
                           {isCurrent ? (
@@ -180,7 +185,7 @@ export default function MyVerticalStepper() {
                             <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 bg-primary group-hover:bg-primary" />
                           )}
                         </span>
-                      </div>
+                      </button>
                       <span
                         className={cn("ml-3 flex min-w-0 flex-col", {
                           "hidden h-0 w-0": !isSummOpen,
@@ -204,7 +209,9 @@ export default function MyVerticalStepper() {
                                 value={idx + label}
                                 className="flex flex-col pt-2"
                               >
-                                <AccordionTrigger>
+                                <AccordionTrigger
+                                  data-test-id={testIDFormatter(`${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-trigger-${label}`)}
+                                >
                                   <span className="text-sm font-medium sm:block">
                                     {label
                                       ? label

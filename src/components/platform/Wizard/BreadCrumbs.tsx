@@ -3,16 +3,20 @@
 import { useContext } from "react";
 import { WizardContext } from "./Provider";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "~/components/ui/breadcrumb";
+import { camelCase } from "lodash";
+import { testIDFormatter } from "~/utils/formatter";
 
 
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb data-test-id={camelCase(entityName)+'Breadcrumb'}>
+      <BreadcrumbList >
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          <BreadcrumbLink 
+            data-test-id={testIDFormatter(`${entityName}-wizard-breadcrumb-home-link`)}
+          href="/">Home</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

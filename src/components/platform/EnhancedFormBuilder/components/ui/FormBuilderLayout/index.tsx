@@ -143,7 +143,7 @@ const FormBuilderLayout = ({
         <CollapsibleContent className="relative">
           {displayType === "form" && (
             <>
-              {!form?.formState?.disabled && !filterGridConfig && (
+              {!form?.formState?.disabled && !filterGridConfig ? (
                 <CardContent className="absolute right-2">
                   <ViewFormActions
                     formProps={formProps}
@@ -156,24 +156,20 @@ const FormBuilderLayout = ({
                     customFormHostViewFormActions={customFormHostViewFormActions}
                   />
                 </CardContent>
+              ) : (
+                <CardContent className="absolute right-2">
+                  <LockFormActions
+                    formProps={formProps}
+                    saveForm={saveForm}
+                    isButtonLoading={isSaveLoading}
+                    form={form}
+                    formSchema={formSchema}
+                    formKey={formKey}
+                    features={features}
+                    customFormHostLockFormActions={customFormHostLockFormActions}
+                  />
+                </CardContent>
               )}
-
-              {
-                form?.formState?.disabled && !filterGridConfig && (
-                  <CardContent className="absolute right-2">
-                    <LockFormActions
-                      formProps={formProps}
-                      saveForm={saveForm}
-                      isButtonLoading={isSaveLoading}
-                      form={form}
-                      formSchema={formSchema}
-                      formKey={formKey}
-                      features={features}
-                      customFormHostLockFormActions={customFormHostLockFormActions}
-                    />
-                  </CardContent>
-                 )
-              }
 
               <OpenedFormLayout
                 customDesign={customDesign}
