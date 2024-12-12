@@ -2,7 +2,13 @@
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
-const CategoryDetailsSummary = ({
+const fields = {
+  "First Name": "first_name",
+  "Last Name": "last_name",
+  "Middle Name": "middle_name",
+};
+
+const ContactDetailsSummary = ({
   form_key,
   identifier,
   main_entity,
@@ -18,14 +24,10 @@ const CategoryDetailsSummary = ({
   } = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "code", "categories"],
+    pluck_fields: ["id", "first_name", "last_name", "middle_name"],
   });
 
   const { data } = record || {};
-  const { categories } = data || {};
-  const filtered_categories = categories?.filter(
-    (category: string) => category !== "Contact",
-  );
 
   useRefetchRecord({
     refetch,
@@ -38,13 +40,14 @@ const CategoryDetailsSummary = ({
 
   return (
     <div>
-      <p>
-        <strong> Category: </strong>
-        &nbsp;{" "}
-        {filtered_categories?.length ? filtered_categories.join(", ") : "None"}
-      </p>
+      {Object.entries(fields).map(([key, value]) => (
+        <p key={key}>
+          <strong> {key}: </strong>
+          &nbsp; {data[value] || "None"}
+        </p>
+      ))}
     </div>
   );
 };
 
-export default CategoryDetailsSummary;
+export default ContactDetailsSummary;
