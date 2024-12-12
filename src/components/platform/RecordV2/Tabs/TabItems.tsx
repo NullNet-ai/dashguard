@@ -82,7 +82,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 py-3 text-sm font-medium text-gray-500 hover:text-primary"
-            data-test-id={"innerTabDropdownButton"}
+            data-test-id={"intb-dropdown-btn"}
           >
             <ChevronDownIcon
               className="h-6 w-6 text-muted-foreground group-hover:text-primary"
@@ -99,8 +99,8 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
               >
                 <a
                   data-test-id={
-                    "innerTab" +
-                    formatAndCapitalize(tab.name).split(" ").join("")
+                    "mntb-" +
+                    tab.name.split(" ").join("-").toLowerCase()
                   }
                   href={tab.href}
                   aria-current={searchParams.get('current_tab') === tab.id ? "page" : undefined}
