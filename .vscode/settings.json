@@ -1,0 +1,23 @@
+{
+    "prettier.singleQuote": false,
+    "files.exclude": {
+      "node_modules": false,
+      "package-lock.json": true,
+      "build": true,
+      ".eslintrc.js": true,
+      ".npmrc": false,
+      ".gitignore": true,
+      ".npmignore": true,
+      ".prettierrc": true,
+      "tsconfig.json": false,
+      "nest-cli.json": true,
+      "yarn.lock": true,
+      ".orm.env": false,
+      "src/auto-generated": false
+    },
+    "cSpell.words": [
+      "previeous",
+      "TRPC"
+    ],
+    "compile-hero.disable-compile-files-on-did-save-code": true
+  }

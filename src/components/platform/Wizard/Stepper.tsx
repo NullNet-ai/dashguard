@@ -1,0 +1,272 @@
+"use client";
+import { useContext, useMemo, useState } from "react";
+import { WizardContext } from "./Provider";
+import { cn } from "~/lib/utils";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useToast } from "~/context/ToastProvider";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+import { AccordionContent } from "@radix-ui/react-accordion";
+import numberToWords from "./Utils/steptoWords";
+import useDeepCompareEffect from "./Hooks/useDeepCompareEffect";
+import { Summary, TSummaryComponents } from "./type";
+
+const getNotRequiredSteps = (steps: Summary) => {
+  if (!steps) return [];
+
+  const result = [];
+  let found_required_step = false;
+
+  for (const [key, value] of Object.entries(steps)) {
+    if (value.required) {
+      found_required_step = true;
+    }
+    if (!value.required) {
+      if (found_required_step) {
+        break;
+      }
+      result.push(key);
+    }
+  }
+
+  return result;
+};
+
+export default function MyVerticalStepper() {
+  const { state, actions } = useContext(WizardContext);
+  const router = useRouter();
+  const toast = useToast();
+
+  const traverseSteps = useMemo(() => {
+    return state?.traverseSteps;
+  }, [state?.traverseSteps]);
+
+  const stepsArray = useMemo(() => {
+    return Array.from({ length: state?.totalSteps || 0 }, (_, i) => i + 1);
+  }, [state?.totalSteps]);
+
+  const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const fullSearchQueryParams = searchParams.toString();
+  const pathArray = pathName.split("/");
+  const [availableSteps, setAvailableSteps] = useState<string[]>([]);
+
+  useDeepCompareEffect(() => {
+    const available_steps = getNotRequiredSteps(state?.summary!);
+    const stepped = Object.keys(traverseSteps || {});
+
+    setAvailableSteps([...new Set([...stepped, ...available_steps])]);
+  }, [state?.traverseSteps]);
+
+  const defaultValueAccordionItems = useMemo(() => {
+    return Object.values(state?.summary || {}).reduce(
+      (acc: string[], { components }) => {
+        const labels = components.map(
+          (
+            {
+              label,
+            }: {
+              label: string;
+            },
+            idx: number,
+          ) => idx + label,
+        );
+        return [...acc, ...labels];
+      },
+      [],
+    );
+  }, []);
+
+  const isSummOpen = state?.isSummaryOpen;
+
+  return (
+    <div className="scrollbar-hide h-[calc(100vh-10rem)] overflow-y-auto">
+      <Accordion
+        // onValueChange={(value) => {
+        // }}
+        defaultValue={defaultValueAccordionItems}
+        type="multiple"
+      >
+        <div
+          className={cn(
+            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-3",
+            { "text-center sm:p-0": !isSummOpen },
+          )}
+        >
+          <ol role="list" className="overflow-hidden">
+            {stepsArray?.map((step, stepIdx) => {
+              const stepIndex = stepIdx + 1;
+              const index = numberToWords(stepIndex);
+              const isStepped = traverseSteps?.[index] === "Stepped";
+              const isCurrent = state?.currentStep === stepIndex;
+
+              pathArray.pop();
+              pathArray.push(`${step}`);
+
+              const _completeLink = pathArray.join("/");
+
+              const navigateLink = (index: string) => {
+                if (!availableSteps.includes(index)) {
+                  toast.error("Prior steps must be completed first.");
+                  return;
+                }
+                actions?.setFormSave({});
+                router.push(
+                  fullSearchQueryParams
+                    ? `${_completeLink}?${fullSearchQueryParams}`
+                    : _completeLink,
+                );
+              };
+
+              const summaryTitle =
+                // @ts-expect-error - SummaryComponent is not defined
+                state?.summary?.[index]?.label;
+              // @ts-expect-error - SummaryComponent is not defined
+              const summaryComponents = state?.summary?.[index]?.components
+                ?.length
+                ? // @ts-expect-error - SummaryComponent is not defined
+                  state?.summary?.[index]?.components
+                : null;
+
+              return (
+                <li
+                  key={stepIndex}
+                  className={cn(
+                    stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
+                  )}
+                >
+                  {isStepped ? (
+                    <div className="flex flex-1">
+                      {isCurrent ? (
+                        stepIdx !== stepsArray.length - 1 ? (
+                          <div
+                            aria-hidden="true"
+                            className={cn(
+                              "absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-primary",
+                              { "-ml-px": isSummOpen },
+                            )}
+                          />
+                        ) : (
+                          <div
+                            aria-hidden="true"
+                            className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
+                          />
+                        )
+                      ) : (
+                        <div
+                          aria-hidden="true"
+                          className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-primary"
+                        />
+                      )}
+                      <div
+                        onClick={() => navigateLink(index)}
+                        // href={"#"}
+                        // href={completeLink(index)}
+                        className="group relative flex items-start"
+                      >
+                        <span className="flex h-9 items-center">
+                          {isCurrent ? (
+                            <span
+                              aria-hidden="true"
+                              className="flex h-9 items-center"
+                            >
+                              <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-primary bg-white" />
+                            </span>
+                          ) : (
+                            <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 bg-primary group-hover:bg-primary" />
+                          )}
+                        </span>
+                      </div>
+                      <span
+                        className={cn("ml-3 flex min-w-0 flex-col", {
+                          "hidden h-0 w-0": !isSummOpen,
+                        })}
+                      >
+                        {/* Hidden on mobile, visible from small screens (sm) and up */}
+                        {/* this is the title */}
+                        <span className="text-gray text-xs sm:block">
+                          {summaryTitle
+                            ? summaryTitle
+                            : "Description of Step " + stepIndex}
+                        </span>
+                        {summaryComponents?.map(
+                          (
+                            { component, label }: TSummaryComponents,
+                            idx: number,
+                          ) => {
+                            return (
+                              <AccordionItem
+                                key={idx + label}
+                                value={idx + label}
+                                className="flex flex-col pt-2"
+                              >
+                                <AccordionTrigger>
+                                  <span className="text-sm font-medium sm:block">
+                                    {label
+                                      ? label
+                                      : "Description of Step " + stepIndex}
+                                  </span>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="text-sm font-medium sm:block">
+                                    {component}
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            );
+                          },
+                        )}
+                        {/* This will be hidden on mobile screens */}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      {
+                        // Last  step should not have a line
+                        stepIdx !== stepsArray.length - 1 && (
+                          <div
+                            aria-hidden="true"
+                            className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
+                          />
+                        )
+                      }
+                      <div
+                        // href={completeLink(index)}
+                        onClick={() => navigateLink(index)}
+                        // href={"#"}
+                        className="group relative flex items-start"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="flex h-9 items-center"
+                        >
+                          <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400"></span>
+                        </span>
+                        <span className="ml-3 flex min-w-0 flex-col">
+                          {/* Hidden on mobile, visible from small screens (sm) and up */}
+                          <span className="text-xs font-medium text-default/50 sm:block">
+                            {"Step  " + stepIndex}
+                          </span>
+                          {/* This will be hidden on mobile screens */}
+                          <span className="text-sm text-gray-500 sm:block">
+                            {summaryTitle
+                              ? summaryTitle
+                              : "Description of Step " + stepIndex}
+                          </span>
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </Accordion>
+    </div>
+  );
+}

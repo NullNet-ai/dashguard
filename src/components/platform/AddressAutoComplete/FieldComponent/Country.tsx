@@ -1,0 +1,50 @@
+import FormSelect from "../../FormBuilder/FormType/FormSelect";
+import { IFieldComponentProps } from "./type";
+import CountryToCities from "../countriesToCities.json";
+import { FormField } from "~/components/ui/form";
+
+export default function CountryName({ form }: IFieldComponentProps) {
+  const handleSelect = (value: string) => {
+    form.setValue(`details.country`, value);
+    form.setValue(`details.city`, "");
+    form.setValue(`details.state`, "");
+  };
+
+  return (
+    <FormField
+      name="details.country"
+      control={form.control}
+      render={(formRenderProps) => {
+        return (
+          <FormSelect
+            fieldConfig={{
+              selectSearchable: true,
+              ...formRenderProps?.field,
+              required: true,
+              placeholder: "Select Country",
+              label: "Country",
+              id: `details.country`,
+            }}
+            form={form}
+            formRenderProps={{
+              ...formRenderProps,
+              field: {
+                ...formRenderProps.field,
+                onChange: (value) => {
+                  handleSelect(value);
+                },
+              },
+            }}
+            selectOptions={{
+              [`details.country`]: Object.keys(CountryToCities ?? {})?.map(
+                (country) => {
+                  return { label: country, value: country };
+                },
+              ),
+            }}
+          />
+        );
+      }}
+    />
+  );
+}

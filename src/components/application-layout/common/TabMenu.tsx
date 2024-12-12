@@ -1,0 +1,82 @@
+'use client'
+
+import {  EllipsisVertical, FileX, FileX2, StarIcon } from "lucide-react";
+import { closeAllInnerClassTabs, closeInnerClassTab, closeOtherInnerClassTabs } from "~/components/platform/Tab/Actions/InnerTabActions";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuSeparator,
+    DropdownMenuItem,
+  } from "~/components/ui/dropdown-menu";
+
+
+
+const TabMenu  = ({ current, href, tabs, name } : {
+    current: boolean;
+    href: string;
+    tabs: any;
+    name : string;
+}) => {
+    if(name === "Grid") return null;
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm group-hover:opacity-100 opacity-0">
+                    <EllipsisVertical 
+                        className={`h-4 w-4 text-default/60 font-semibold`}
+                        aria-hidden="true"
+                        
+                    />
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+                <DropdownMenuItem 
+                    className="flex gap-2 relative"  
+                    onClick={() => {
+                        closeInnerClassTab({
+                        pathname: href,
+                        current,
+                        tabs
+                        });
+                    }}>
+                    <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
+                   <span>Close current tab</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                    className="flex gap-2"
+                    onClick={() => {
+                        closeOtherInnerClassTabs({
+                        pathname: href,
+                        current,
+                        tabs
+                        });
+                    }}
+                >
+                    <FileX2 className={`h-4 w-4 text-default/60`} aria-hidden="true" />
+                   <span>Close other tabs</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                    className="flex gap-2"
+                    onClick={() => {
+                        closeAllInnerClassTabs({
+                        pathname: href,
+                        current,
+                        tabs
+                        });
+                    }}
+                >
+                    <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
+                   <span>Close all tabs</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex gap-2">
+                        <StarIcon className="h-4 w-4"/>
+                        <span>Add to Favorites</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
+export default TabMenu;

@@ -1,0 +1,46 @@
+import FormSelect from "../../FormBuilder/FormType/FormSelect";
+import { IFieldComponentProps } from "./type";
+import CountryToCities from "../countriesToCities.json";
+import { useMemo } from "react";
+import { FormField } from "~/components/ui/form";
+export default function CityName({ form }: IFieldComponentProps) {
+  const address_values_country = form.getValues("details.country");
+
+  const city_list = useMemo(() => {
+    return (
+      // @ts-expect-error - TS can't infer that address_values is a string
+      CountryToCities?.[address_values_country]?.map((city) => ({
+        label: city,
+        value: city,
+      })) ?? []
+    );
+  }, [address_values_country]);
+
+  return (
+    <div>
+      <FormField
+        name="details.city"
+        control={form.control}
+        render={(formRenderProps) => {
+          return (
+            <FormSelect
+              fieldConfig={{
+                selectSearchable: true,
+                ...formRenderProps?.field,
+                required: true,
+                placeholder: "Select City",
+                label: "City",
+                id: `details.city`,
+              }}
+              form={form}
+              formRenderProps={formRenderProps}
+              selectOptions={{
+                [`details.city`]: city_list,
+              }}
+            />
+          );
+        }}
+      />
+    </div>
+  );
+}
