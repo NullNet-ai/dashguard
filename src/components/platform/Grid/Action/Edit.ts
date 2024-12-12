@@ -25,10 +25,5 @@ export async function Edit({
     redirect(`/portal/${entity}/wizard/${identifier}/`);
   }
 
-  // HOTFIX!!!
-  if (entity !== "contact") {
-    redirect(`/portal/${entity}/record/${code}/dashboard`);
-  }
-
   redirect(`/portal/${entity}/record/${code}?current_tab=dashboard`);
 }
