@@ -46,6 +46,7 @@ export default function RenderFormType(
     fieldState: ControllerFieldState;
   },
   form: UseFormReturn<Record<string, any>, any, undefined>,
+  formKey: string,
   subConfig: {
     selectOptions?: Record<string, ISelectOptions[]>;
     multiSelectOptions?: Record<string, Option[]>;
@@ -62,11 +63,13 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "input-grid":
       return (
         <FormInputGrid
+          formKey={formKey}
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
@@ -78,6 +81,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "select":
@@ -87,6 +91,7 @@ export default function RenderFormType(
           formRenderProps={formRenderProps}
           selectOptions={subConfig?.selectOptions}
           form={form}
+          formKey={formKey}
         />
       );
     case "multi-select":
@@ -97,6 +102,7 @@ export default function RenderFormType(
           multiselectOptions={subConfig?.multiSelectOptions}
           multiSelectOnSearch={subConfig?.multiSelectOnSearch}
           form={form}
+          formKey={formKey}
         />
       );
     case "radio":
@@ -106,6 +112,7 @@ export default function RenderFormType(
           formRenderProps={formRenderProps}
           radioOptions={subConfig?.radioOptions}
           form={form}
+          formKey={formKey}
         />
       );
     case "checkbox":
@@ -114,6 +121,7 @@ export default function RenderFormType(
           form={form}
           checkboxOptions={subConfig?.checkboxOptions}
           fieldConfig={fieldConfig}
+          formKey={formKey}
         />
       );
     case "date":
@@ -122,6 +130,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "date-range":
@@ -130,6 +139,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "smart-date":
@@ -138,6 +148,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "phone-input":
@@ -146,6 +157,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "email-input":
@@ -154,6 +166,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "inputs":
@@ -162,6 +175,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "input-label-value":
@@ -170,6 +184,16 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
+        />
+      );
+    case "address-input":
+      return (
+        <FormAddress
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
+          form={form}
+          formKey={formKey}
         />
       );
     case "file":
@@ -178,6 +202,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "slider":
@@ -186,6 +211,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "rich-text-editor":
@@ -194,6 +220,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "number-input":
@@ -202,6 +229,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "password":
@@ -210,6 +238,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
         />
       );
     case "currency-input":
@@ -218,6 +247,7 @@ export default function RenderFormType(
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
           currencyInputOptions={subConfig?.currencyInputOptions}
         />
       );

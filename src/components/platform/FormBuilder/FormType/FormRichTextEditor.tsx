@@ -13,6 +13,9 @@ import {
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
 import { useState } from "react";
 import { type Content } from "@tiptap/react";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -22,6 +25,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
+  formKey: string;
 }
 
 export default function FormRichTextEditor({
@@ -29,6 +33,7 @@ export default function FormRichTextEditor({
   formRenderProps,
   icon,
   form,
+  formKey,
   // value,
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
@@ -51,7 +56,12 @@ export default function FormRichTextEditor({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel
+        required={fieldConfig?.required}
+        data-test-id={kebabCase(
+          formKey + " "+ (fieldConfig.name) + "RichTextEditorFormLabel",
+        )}
+      >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
@@ -59,9 +69,11 @@ export default function FormRichTextEditor({
           {...form.register(fieldConfig?.name)}
           editorProps={{
             editable: () => !isDisabled && !fieldConfig?.readonly,
-            attributes:{
-              "data-test-id":  fieldConfig?.name + "RichTextEditor"
-            }
+            attributes: {
+              "data-test-id": kebabCase(
+                formKey + fieldConfig?.name + "RichTextEditor",
+              ),
+            },
           }}
           throttleDelay={0}
           value={content}
@@ -80,7 +92,8 @@ export default function FormRichTextEditor({
           }}
         />
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "RichTextEditorErrorMessage")}/>
+
       {/* <span>{JSON.stringify(content, null, 2)}</span> */}
     </FormItem>
   );
