@@ -10,14 +10,8 @@ import { notificationsRouter } from "./routers/notification";
 import { contactEmailRouter } from "./routers/contact_email";
 import { contactPhoneNumberRouter } from "./routers/contact_phone_number";
 import { validatorRouter } from "./routers/validator";
-import { contactLinkRouter } from "./routers/contact_link";
 import { contactOrganizationsRouter } from "./routers/contact_organizations";
 import { contactSubOrganizationRouter } from "./routers/contact_sub_organizations";
-import { organizationRouter } from "./routers/organization";
-import { contactCertificateRouter } from "./routers/contact_certificate";
-import { contactSkillRouter } from "./routers/contact_skill";
-import { contactFileRouter } from "./routers/contact_file";
-import { educationRouter } from "./routers/education";
 import { degreeLevelRouter } from "./routers/degree_level";
 import { countryRouter } from "./routers/country";
 import { googleRouter } from "./routers/google";
@@ -41,14 +35,8 @@ export const appRouter = createTRPCRouter({
   contactEmail: contactEmailRouter,
   contactPhoneNumber: contactPhoneNumberRouter,
   validator: validatorRouter,
-  contactLink: contactLinkRouter,
   contactOrganization: contactOrganizationsRouter,
   contactSubOrganization: contactSubOrganizationRouter,
-  organization: organizationRouter,
-  contactCertificate: contactCertificateRouter,
-  contactSkill: contactSkillRouter,
-  contactFile: contactFileRouter,
-  education: educationRouter,
   degreeLevel: degreeLevelRouter,
   country: countryRouter,
   google: googleRouter,

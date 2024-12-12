@@ -2,7 +2,7 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { createDefineRoutes } from "../baseCrud";
 
 import { z } from "zod";
-import { PhoneSchema } from "../../zodSchema/contacts/basicDetails";
+import { PhoneSchema } from "../../zodSchema/contact/basicDetails";
 import { TRPCError } from "@trpc/server";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 const entity = "contact_phone_number";

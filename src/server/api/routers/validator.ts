@@ -8,7 +8,7 @@ import {
   EmailSchema,
   PhoneArraySchema,
   PhoneSchema,
-} from "~/server/zodSchema/contacts/basicDetails";
+} from "~/server/zodSchema/contact/basicDetails";
 
 export const validatorRouter = createTRPCRouter({
   validatePhoneAndEmail: privateProcedure

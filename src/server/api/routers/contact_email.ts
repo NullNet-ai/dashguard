@@ -2,7 +2,7 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { createDefineRoutes } from "../baseCrud";
 
 import { z } from "zod";
-import { EmailSchema } from "../../zodSchema/contacts/basicDetails";
+import { EmailSchema } from "../../zodSchema/contact/basicDetails";
 import { TRPCError } from "@trpc/server";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 const entity = "contact_email";
