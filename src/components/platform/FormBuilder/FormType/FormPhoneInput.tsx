@@ -21,7 +21,11 @@ import "react-international-phone/style.css";
 import { Badge } from "~/components/ui/badge";
 import { ulid } from "ulid";
 import { toast } from "sonner";
-import { isPhoneValid } from "../Utils/phoneValidator";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+import { isPhoneValid } from "../utils/phoneValidator";
+;
+import { DevTool } from "@hookform/devtools";
 
 interface IPhoneData {
   id?: string;
@@ -38,12 +42,14 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey: string;
 }
 
 export default function FormPhoneInput({
   fieldConfig,
   formRenderProps,
   form,
+  formKey,
 }: IProps) {
   interface IUseFieldArrayPhone {
     fields: Record<keyof IPhoneData, string>[];
@@ -144,7 +150,10 @@ export default function FormPhoneInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel
+        required={fieldConfig?.required}
+        data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "PhoneFormLabel")}
+      >
         {fieldConfig?.label}
       </FormLabel>
       {fields?.map((field, index) => (
@@ -154,24 +163,32 @@ export default function FormPhoneInput({
         >
           <FormControl>
             <>
-              <div className="flex items-center border">
+              <div className={`flex items-center border ${error && "border-destructive"}`}>
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
-                  data-test-id={fieldConfig.name + (index + 1)}
+                  data-test-id={kebabCase(
+                    formKey + " "+ (fieldConfig.name) + "PhoneInput" + (index + 1),
+                  )}
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
-                    "data-test-id": fieldConfig.name + (index + 1),
+                    "data-test-id": kebabCase(
+                      formKey + " "+ (fieldConfig.name) + (index + 1) + "PhoneInput",
+                    ),
                   }}
                   countrySelectorStyleProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
-                    "data-test-id":
-                      "countrySelector" + fieldConfig.name + (index + 1),
+                    "data-test-id": kebabCase(
+                      formKey +
+                        (fieldConfig.name) +
+                        (index + 1) +
+                        "PhoneCountrySelector",
+                    ),
                     buttonStyle: {
                       padding: "1.2rem",
                       paddingInline: "0.5rem",
                       backgroundColor: "inherit",
                       borderColor: "transparent",
-                      borderRightColor: "inherit",
+                      borderRightColor: `${error ?"#DC2626" : "inherit"}`,
                       colorScheme: "normal",
                     },
                   }}
@@ -189,7 +206,7 @@ export default function FormPhoneInput({
                     width: "100%",
                     backgroundColor: "transparent",
                     color: "inherit",
-                    borderColor: "transparent",
+                    borderColor: `transparent`,
                     padding: "1.2rem",
                     opacity: "inherit",
                   }}
@@ -199,9 +216,9 @@ export default function FormPhoneInput({
                   <Badge
                     variant={"outline"}
                     className="mr-1 bg-primary/10 py-1 font-normal text-primary"
-                    data-test-id={
-                      fieldConfig.name + `_is_primary_badge_${index + 1}`
-                    }
+                    data-test-id={kebabCase(
+                      formKey + " "+ (fieldConfig.name) + `IsPrimaryBadge${index + 1}`,
+                    )}
                   >
                     Primary
                   </Badge>
@@ -211,9 +228,11 @@ export default function FormPhoneInput({
                   <Button
                     name={`${name}.${index}.isPrimaryButton`}
                     disabled={isDisabled}
-                    data-test-id={
-                      fieldConfig.name + `_is_primary_button_${index + 1}`
-                    }
+                    data-test-id={kebabCase(
+                      formKey +
+                        (fieldConfig.name) +
+                        `isPrimaryButton${index + 1}`,
+                    )}
                     type="button"
                     variant={"ghost"}
                     size={"icon"}
@@ -239,12 +258,12 @@ export default function FormPhoneInput({
                     type="button"
                     variant={"ghost"}
                     size={"icon"}
-                    data-test-id={
-                      fieldConfig.name + `_remove_button_${index + 1}`
-                    }
+                    data-test-id={kebabCase(
+                      formKey + " "+ (fieldConfig.name) + `RemoveButton${index + 1}`,
+                    )}
                     className="rounded-none border-l"
                     onClick={() => {
-                      const _values = form.getValues(fieldConfig.name);
+                      const _values = form.getValues((fieldConfig.name));
                       handleRemovePhoneNumber(index, _values);
                     }}
                   >
@@ -255,7 +274,12 @@ export default function FormPhoneInput({
               {error?.[index] && (
                 <p
                   id={field.id}
-                  className={cn("py-1 text-sm font-medium text-destructive")}
+                  className={cn("py-1 text-md font-medium text-destructive")}
+                  data-test-id={kebabCase(
+                    formKey +
+                      (fieldConfig.name) +
+                      `PhoneErrorMessage${index + 1}`,
+                  )}
                 >
                   {error[index]?.raw_phone_number?.message}
                 </p>
@@ -268,7 +292,9 @@ export default function FormPhoneInput({
       {!isDisabled && isMultiple && (
         <Button
           name={`${name}.AddPhoneNumberButton`}
-          data-test-id={fieldConfig.name + "AddPhoneButton"}
+          data-test-id={kebabCase(
+            formKey + " "+ (fieldConfig.name) + "AddPhoneButton",
+          )}
           type="button"
           Icon={PlusIcon}
           variant={"link"}
@@ -279,7 +305,13 @@ export default function FormPhoneInput({
           Add Phone Number
         </Button>
       )}
-      {(error?.root?.message || error?.message) && <FormMessage />}
+      {(error?.root?.message || error?.message) && (
+        <FormMessage
+          data-test-id={kebabCase(
+            formKey + " "+ (fieldConfig.name) + "PhoneErrorMessage",
+          )}
+        />
+      )}
 
       {/* <DevTool control={form.control} /> */}
     </FormItem>

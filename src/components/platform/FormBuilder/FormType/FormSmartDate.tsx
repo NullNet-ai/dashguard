@@ -13,6 +13,9 @@ import {
 import { type IField } from "../type";
 import moment from "moment";
 import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 
 interface IProps {
   fieldConfig: IField;
@@ -21,12 +24,15 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey:string;
 }
+
 
 export default function FormSmartDate({
   fieldConfig,
   formRenderProps,
   form,
+  formKey
 }: IProps) {
   const {
     label,
@@ -57,11 +63,11 @@ export default function FormSmartDate({
   };
   return (
     <FormItem className="flex w-full flex-col">
-      <FormLabel required={required}>{label}</FormLabel>
+      <FormLabel required={required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "S,artDateFormLabel")} >{label}</FormLabel>
       <FormControl>
         <SmartDatetimeInput
-          datePickerTestID={fieldConfig.name + "DatePicker"}
-          inputTestID={fieldConfig.name + "DateInput"}
+          datePickerTestID={kebabCase(formKey+ (fieldConfig.name) + "SmartDatePicker")}
+          inputTestID={kebabCase(formKey+(fieldConfig.name) + "SmartDateInput")}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
           placeholder="e.g. Tomorrow"
@@ -69,7 +75,8 @@ export default function FormSmartDate({
           inputProps={fieldConfig.dateInputProps}
         />
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "SmartDateErrorMessage")}/>
+
     </FormItem>
   );
 }

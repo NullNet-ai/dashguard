@@ -4,38 +4,22 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { type IField, type ISelectOptions } from "../type";
+import { FormItem, FormLabel, FormMessage, useFormField } from "~/components/ui/form";
 import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
-import { Check, ChevronsUpDown } from "lucide-react";
-import React, { Fragment, useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { cn } from "~/lib/utils";
+import camelCase from "lodash/camelCase";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 
 interface IProps {
   fieldConfig: IField;
@@ -46,6 +30,7 @@ interface IProps {
   selectOptions: Record<string, ISelectOptions[]> | undefined;
   form: UseFormReturn<Record<string, any>, any, undefined>;
   pillOptions?: any[];
+  formKey: string;
 }
 
 export default function FormSelect({
@@ -53,25 +38,50 @@ export default function FormSelect({
   formRenderProps,
   selectOptions,
   pillOptions,
+  formKey,
   form,
 }: IProps) {
   form.watch(fieldConfig?.name);
+  const { error } = useFormField();
 
-  const selectedOption = useMemo(() => {
-    return selectOptions?.[fieldConfig?.name]?.find(
-      (option) => option.value === formRenderProps?.field.value,
-    )?.label;
+  const [query, setQuery] = useState("");
+  form.watch();
+  const filteredOptions = useMemo(() => {
+    return query === ""
+      ? selectOptions?.[fieldConfig?.name]
+          // Sort by label
+          ?.sort((a, b) => a.label.localeCompare(b.label))
+          ?.slice(0, 250)
+      : selectOptions?.[fieldConfig?.name]
+          ?.filter((opt) => {
+            return opt.value.toLowerCase().includes(query.toLowerCase());
+          })
+          ?.sort((a, b) => a.label.localeCompare(b.label))
+          .slice(0, 5);
+  }, [query, selectOptions?.[fieldConfig?.name]]);
+  const label = useMemo(() => {
+    return filteredOptions?.find(
+      (opt) => opt.value === formRenderProps?.field.value,
+    );
   }, [formRenderProps?.field.value]);
   return (
     <FormItem>
       <div>
-        <FormLabel required={fieldConfig?.required}>
+        <FormLabel
+          required={fieldConfig?.required}
+          data-test-id={kebabCase(
+            formKey + " "+ (fieldConfig.name) + "SelectFormLabel",
+          )}
+        >
           {fieldConfig?.label}
         </FormLabel>
         {!!pillOptions?.length ? (
           <>
             {pillOptions.map((option, index) => (
               <Badge
+                data-test-id={kebabCase(
+                  formKey + " "+ (fieldConfig.name) + "Option" + option,
+                )}
                 key={index}
                 className="mx-2 border border-green-800 bg-green-50 text-green-800"
               >
@@ -81,91 +91,113 @@ export default function FormSelect({
           </>
         ) : null}
       </div>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <FormControl>
-            <Button
-              variant="outline"
-              role="combobox"
+      <Combobox
+        as="div"
+        value={
+          label || {
+            label: fieldConfig?.placeholder,
+            value: "",
+          }
+        }
+        onChange={(value) => {
+          setQuery("");
+          formRenderProps?.field.onChange(value?.value);
+        }}
+        disabled={fieldConfig?.disabled}
+      >
+        <div className="relative mt-2">
+          <ComboboxButton
+            disabled={formRenderProps?.field?.disabled}
+            className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
+          >
+            <ComboboxInput
+              readOnly={
+                fieldConfig?.selectSearchable
+                  ? !fieldConfig?.selectSearchable
+                  : true
+              }
               className={cn(
-                "w-[250px] justify-between",
-                !formRenderProps?.field.value && "text-muted-foreground",
+                "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+                {
+                  "outline-destructive": error,
+                },
+              )}
+              onChange={(event) => setQuery(event.target.value)}
+              onBlur={() => setQuery("")}
+              data-test-id={camelCase(
+                formKey + " "+ (fieldConfig.name) + "SelectFormInput",
+              )}
+              // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
+              displayValue={(value) => value?.label}
+            />
+            <ChevronUpDownIcon
+              className="absolute right-2 size-5 text-gray-400"
+              aria-hidden="true"
+            />
+          </ComboboxButton>
+
+          {filteredOptions?.length ? (
+            <ComboboxOptions
+              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+              data-test-id={camelCase(
+                formKey + " "+ (fieldConfig.name) + "SelectFormOptions",
               )}
             >
-              {selectedOption ? selectedOption : `Select ${fieldConfig?.label}`}
-              <ChevronsUpDown className="opacity-50" />
-            </Button>
-          </FormControl>
-        </PopoverTrigger>
-        <PopoverContent className="w-[250px] p-0">
-          <Command>
-            <CommandInput
-              placeholder={`Select ${fieldConfig?.label}`}
-              className="my-1 h-8"
-            />
-            <CommandList>
-              <CommandEmpty>No {fieldConfig?.label} found.</CommandEmpty>
-              <CommandGroup>
-                {selectOptions?.[fieldConfig?.name]
-                  ?.slice(0, 999) // Temporary fix for large data
-                  .map((option, index) => (
-                    <Fragment key={option.value + index}>
-                      <CommandItem
-                        value={option.value}
-                        onSelect={(currentValue) => {
-                          formRenderProps?.field.onChange(currentValue);
-                        }}
-                      >
-                        {option.label}
-                        <Check
-                          className={cn(
-                            "ml-auto",
-                            formRenderProps?.field.value === option.value
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
-                    </Fragment>
-                  ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      {/* <Select
-        {...register(fieldConfig.name)}
-        disabled={formRenderProps?.field.disabled || fieldConfig?.disabled}
-        onValueChange={formRenderProps?.field.onChange}
-        value={formRenderProps?.field.value ?? undefined}
-        defaultValue={formRenderProps?.field.value ?? undefined}
-      >
-        <FormControl>
-          <SelectTrigger
-            data-test-id={fieldConfig?.name}
-            className={
-              !!formRenderProps?.fieldState.error ? "border-destructive" : ""
-            }
-          >
-            <SelectValue placeholder={fieldConfig?.placeholder} />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent data-test-id={fieldConfig?.name + "Options"}>
-          {selectOptions?.[fieldConfig?.name]?.map((option, index) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              data-test-id={(fieldConfig.name + option.label)
-                .split(" ")
-                .join("")}
-            >
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select> */}
-      <FormMessage />
+              {filteredOptions?.slice(0, 700).map((opt, index) => (
+                <ComboboxOption
+                  key={opt?.value}
+                  value={opt}
+                  className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
+                  data-test-id={kebabCase(
+                    formKey +
+                      (fieldConfig.name) +
+                      "SelectFormOption" +
+                      opt.value,
+                  )}
+                >
+                  <span
+                    className="block truncate group-data-[selected]:font-semibold"
+                    data-test-id={kebabCase(
+                      formKey +
+                        (fieldConfig.name) +
+                        "SelectFormOption" +
+                        opt.value +
+                        "Label",
+                    )}
+                  >
+                    {opt.label}
+                  </span>
+
+                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
+                    <CheckIcon className="size-5" aria-hidden="true" />
+                  </span>
+                </ComboboxOption>
+              ))}
+            </ComboboxOptions>
+          ) : (
+            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
+              <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
+                <span
+                  className="block truncate group-data-[selected]:font-semibold"
+                  data-test-id={kebabCase(
+                    formKey +
+                      (fieldConfig.name) +
+                      "SelectFormOptionNotFound",
+                  )}
+                >
+                  No {fieldConfig?.label} found.
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </Combobox>
+
+      <FormMessage
+        data-test-id={kebabCase(
+          formKey + " "+ (fieldConfig.name) + "SelectErrorMessage",
+        )}
+      />
     </FormItem>
   );
 }
