@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   amount: z.object({
     amount: z.number({ message: "Amount is required" }),

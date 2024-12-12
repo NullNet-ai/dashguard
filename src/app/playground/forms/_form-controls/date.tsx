@@ -1,7 +1,8 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 const FormSchema = z.object({
   date: z
     .string({ message: "Date is required" })
