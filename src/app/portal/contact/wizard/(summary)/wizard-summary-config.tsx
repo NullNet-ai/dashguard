@@ -2,6 +2,7 @@ import StepOneBasicDetails from "./_1";
 import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
 import ContactOrganizationSummary from "./_4";
+import ConfirmationSummary from "./_5";
 
 const contactWizardSummary = ({
   identifier,
@@ -71,6 +72,16 @@ const contactWizardSummary = ({
               main_entity={mainEntity!}
             />
           ),
+        },
+      ],
+    },
+    five: {
+      label: "Step 5",
+      required: false,
+      components: [
+        {
+          label: "Confirmation",
+          component: <ConfirmationSummary />,
         },
       ],
     },

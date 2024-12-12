@@ -1,32 +1,35 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
-import ContactDetails from "./client";
+import BasicDetails from "./client";
 
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const pluck_fields = ["id", "code", "role", "status"];
   const [, , main_entity, application, identifier] = pathname.split("/");
-  const fetched_user_role = await api.contact.fetchContactPhoneEmail({
-    main_entity: main_entity!,
-    id: identifier!,
+
+  const record_data = await api.contact.fetchContactPhoneEmail({
+    code: identifier!,
     pluck_fields,
   });
-  const defaultValues = fetched_user_role?.data;
+
+  const default_values = record_data;
+
+  const contact_id = default_values?.id;
 
   return (
     <div className="space-y-2">
-      <ContactDetails
+      <BasicDetails
         defaultValues={{
-          ...defaultValues,
+          ...default_values,
         }}
         params={{
-          id: defaultValues?.id!,
+          id: contact_id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
           pluck_fields,
         }}
-        selectedRecords={defaultValues?.id ? [defaultValues] : []}
+        selectedRecords={contact_id ? [default_values] : []}
       />
     </div>
   );
