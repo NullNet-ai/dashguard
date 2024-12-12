@@ -7,7 +7,7 @@ import StatusCell from "~/components/ui/status-cell";
 // ? You can add or remove columns as per your requirement
 const gridColumns = [
   {
-    header: "Status",
+    header: "State",
     accessorKey: "status",
     enableResizing: false,
     cell: ({ row }) => {
@@ -35,15 +35,16 @@ const gridColumns = [
     accessorKey: "first_name",
   },
   {
-    header: "Middle Name",
-    accessorKey: "middle_name",
-  },
-  {
     header: "Last Name",
     accessorKey: "last_name",
   },
   {
-    header: "Primary Phone No.",
+    header: "Middle Name",
+    accessorKey: "middle_name",
+  },
+
+  {
+    header: "Primary Phone Number",
     accessorKey: "raw_phone_number",
   },
   {
@@ -51,8 +52,12 @@ const gridColumns = [
     accessorKey: "email",
   },
   {
-    header: "Contact Status",
-    accessorKey: "contact_status",
+    header: "Organization",
+    accessorKey: "organization",
+  },
+  {
+    header: "Role",
+    accessorKey: "role",
   },
   {
     header: "Updated Date",

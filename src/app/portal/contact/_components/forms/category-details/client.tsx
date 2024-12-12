@@ -1,14 +1,14 @@
 "use client";
 
 import { type z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { useToast } from "~/context/ToastProvider";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import UpdateCategory from "./actions/updateCategory";
-import CustomCategoryDetails from "../custom/CategoryDetails";
+import CustomCategoryDetails from "../_custom/CategoryDetails";
 import { IFormProps } from "../types";
 import { XIcon } from "lucide-react";
 
@@ -63,33 +63,33 @@ export default function CategoryDetails({
       customRender={(form) => (
         <CustomCategoryDetails form={form} selectOptions={selectOptions} />
       )}
-      customFormHostViewFormActions={
-        [
-          {
-            label: "Custom Action",
-            onClick: () => {
-              console.log("Custom Action Clicked");
-            },
-            icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3}/>,
-            disabled: false,
-            hidden: false
-          }
-        ]
-      }
+      customFormHostViewFormActions={[
+        {
+          label: "Custom Action",
+          onClick: () => {
+            console.log("Custom Action Clicked");
+          },
+          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+          disabled: false,
+          hidden: false,
+        },
+      ]}
       customFormHostLockFormActions={[
         {
           label: "Custom Action",
           onClick: () => {
             console.log("Custom Action Clicked");
           },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3}/>,
+          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
           disabled: false,
-          hidden: false
-        }
+          hidden: false,
+        },
       ]}
-      features={{
-        // enableFormHostLockActions: false,
-      }}
+      features={
+        {
+          // enableFormHostLockActions: false,
+        }
+      }
     />
   );
 }

@@ -5,34 +5,25 @@ import { EOperator, IAdvanceFilters } from "@dna-platform/common-orm";
 import { formatSorting } from "~/server/utils/formatSorting";
 import { pick } from "lodash";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
+import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 
 const ENTITY = "contact";
 
 export const contactRouter = createTRPCRouter({
-  updateBasiDetails: privateProcedure
-    .input(
-      z.object({
-        id: z.string().min(1),
-        pluck_fields: z.array(z.string()),
-        main_entity: z.string().min(1),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      if (!input?.id) return null;
-      const record = await ctx.dnaClient
-        .findOne(input.id, {
-          entity: input.main_entity,
+  updateContactDetails: privateProcedure
+    .input(contactDetailsSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...rest } = input;
+
+      return ctx.dnaClient
+        .update(id, {
+          entity: ENTITY,
           token: ctx.token.value,
-          query: {
-            pluck: input.pluck_fields,
+          mutation: {
+            params: rest,
           },
         })
         .execute();
-
-      return {
-        ...record,
-        data: record?.data?.[0],
-      };
     }),
   mainGrid: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
     const hasAdvanceFilters = input?.advance_filters?.length
