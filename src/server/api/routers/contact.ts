@@ -176,6 +176,7 @@ export const contactRouter = createTRPCRouter({
             mutation: {
               params: {
                 status: "Draft",
+                categories: ["Contact"],
               },
               pluck: ["id", "code"],
             },
