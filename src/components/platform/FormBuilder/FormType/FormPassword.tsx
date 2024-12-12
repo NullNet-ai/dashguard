@@ -45,7 +45,7 @@ export default function FormPassword({
       <FormLabel
         required={fieldConfig?.required}
         data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "FormLabel",
+          formKey + " "+ (fieldConfig.name) + "-lbl",
         )}
       >
         {fieldConfig?.label}
@@ -54,7 +54,7 @@ export default function FormPassword({
         <div className="relative group">
           <Input
             data-test-id={kebabCase(
-              formKey +" "+ (fieldConfig.name) + "Input",
+              formKey +" "+ (fieldConfig.name) + "-inp",
             )}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
@@ -69,7 +69,7 @@ export default function FormPassword({
           />
           <Button
             data-test-id={kebabCase(
-              formKey + " "+ (fieldConfig.name) + "Toggle",
+              formKey + " "+ (fieldConfig.name) + "-pwdtgl",
             )}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
             type="button"
@@ -87,7 +87,7 @@ export default function FormPassword({
       </FormControl>
       <FormMessage
         data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "PasswordErrorMessage",
+          formKey + " "+ (fieldConfig.name) + "-errmsg",
         )}
       />
     </FormItem>

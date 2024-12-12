@@ -51,13 +51,13 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputFormLabel")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-lbl")}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "Input")}
+          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "-inp")}
           readOnly={fieldConfig?.readonly ?? false}
           className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
           disabled={isDisabled}
@@ -71,7 +71,7 @@ export default function FormInput({
           {...formRenderProps.field}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputErrorMessage")}/>
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-errmsg")}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );
