@@ -10,6 +10,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import {
   useDropzone,
@@ -18,6 +19,10 @@ import {
   type DropzoneOptions,
 } from "react-dropzone";
 import { toast } from "sonner";
+import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
+import axios, { AxiosProgressEvent } from "axios";
+import Bluebird from "bluebird";
+import { UploadState } from "./FileUploaderItem";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -33,6 +38,12 @@ type FileUploaderContextType = {
   orientation: "horizontal" | "vertical";
   direction: DirectionOptions;
   value?: File[] | null;
+  formRenderProps?: {
+    field: ControllerRenderProps<Record<string, string[]>>;
+    fieldState: ControllerFieldState;
+  };
+  progressState?: number;
+  state?: any;
 };
 
 const FileUploaderContext = createContext<FileUploaderContextType | null>(null);
@@ -51,6 +62,10 @@ export type FileUploaderProps = {
   onUploadFile?: (file_ids: string[]) => void;
   dropzoneOptions: DropzoneOptions;
   orientation?: "horizontal" | "vertical";
+  formRenderProps?: {
+    field: ControllerRenderProps<Record<string, string[]>>;
+    fieldState: ControllerFieldState;
+  };
 };
 
 export const FileUploader = forwardRef<
@@ -66,6 +81,7 @@ export const FileUploader = forwardRef<
       children,
       dir,
       onUploadFile,
+      formRenderProps,
       ...props
     },
     ref,
@@ -75,6 +91,9 @@ export const FileUploader = forwardRef<
     const [isFileTooBig, setIsFileTooBig] = useState(false);
     const [isLOF, setIsLOF] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
+    const [progressState, setProgressState] = useState(0);
+    const [state, setState] = useState<UploadState>(UploadState.IDLE);
+
     const {
       accept = {
         "image/*": [".jpg", ".jpeg", ".png", ".gif"],
@@ -100,9 +119,11 @@ export const FileUploader = forwardRef<
         if (!value) return;
         const newFiles = value.filter((_, index) => index !== i);
         onValueChange(newFiles);
+        setValue(newFiles);
+
         setFilesUploaded(filesUploaded.filter((_, index) => index !== i));
       },
-      [value, onValueChange],
+      [value, onValueChange, filesUploaded, setFilesUploaded],
     );
 
     const handleKeyDown = useCallback(
@@ -161,8 +182,24 @@ export const FileUploader = forwardRef<
       [value, activeIndex, removeFileFromSet],
     );
 
+    const uploader = useRef(
+      axios.create({
+        baseURL: "/api/upload",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }),
+    );
+
+    const onProgress = (progressEvent: AxiosProgressEvent) => {
+      const percentCompleted = Math.round(
+        (progressEvent.loaded * 100) / (progressEvent?.total || 1),
+      );
+
+      setProgressState(percentCompleted);
+    };
     const onDrop = useCallback(
-      (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      async (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
         const files = acceptedFiles;
 
         if (!files) {
@@ -176,9 +213,26 @@ export const FileUploader = forwardRef<
           newValues.splice(0, newValues.length);
         }
 
-        files.forEach((file) => {
+        await Bluebird.map(files, async (file) => {
           if (newValues.length < maxFiles) {
             newValues.push(file);
+            setTimeout(async () => {
+              setState(UploadState.UPLOADING);
+              const formData = new FormData();
+              formData.append("file", file);
+              await uploader.current
+                .post("/", formData, {
+                  onUploadProgress: onProgress,
+                })
+                .then((response) => {
+                  setState(UploadState.UPLOADED);
+                  handleSetFilesUploaded(response.data.data[0].id);
+                })
+                .catch(() => {
+                  setState(UploadState.ERROR);
+                  toast.error("Error uploading file");
+                });
+            }, 1000);
           }
         });
 
@@ -244,6 +298,9 @@ export const FileUploader = forwardRef<
           orientation,
           direction,
           value,
+          formRenderProps,
+          progressState,
+          state,
         }}
       >
         <div
