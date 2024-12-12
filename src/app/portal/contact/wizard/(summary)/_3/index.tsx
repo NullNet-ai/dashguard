@@ -2,7 +2,7 @@
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
-const StepTwoCategory = ({
+const CategoryDetailsSummary = ({
   form_key,
   identifier,
   main_entity,
@@ -43,4 +43,4 @@ const StepTwoCategory = ({
   );
 };
 
-export default StepTwoCategory;
+export default CategoryDetailsSummary;
