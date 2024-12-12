@@ -14,6 +14,7 @@ import { degreeLevelRouter } from "./routers/degree_level";
 import { countryRouter } from "./routers/country";
 import { googleRouter } from "./routers/google";
 import { contactRouter } from "./routers/contact";
+import { organizationRouter } from "./routers/organization";
 
 /**
  * This is the primary router for your server.
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   degreeLevel: degreeLevelRouter,
   country: countryRouter,
   google: googleRouter,
+  organization: organizationRouter,
 });
 
 // export type definition of API
