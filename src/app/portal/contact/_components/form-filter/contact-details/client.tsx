@@ -8,7 +8,7 @@ import { type IFormProps } from "../types";
 import { removeRecord, saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
 import { useRouter } from "next/navigation";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contacts/contactPhoneEmail";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
 export default function ContactDetails({
   params,
