@@ -35,6 +35,9 @@ import { useDebounce } from "~/components/ui/multi-select";
 import { IField } from "../type";
 import Grid from "../../Grid/Client";
 import gridColumns from "~/app/portal/contact/grid/_config/columns";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 
 interface IProps {
   fieldConfig: IField;
@@ -45,6 +48,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
+  formKey: string;
 }
 
 export default function FormInputGrid({
@@ -52,6 +56,7 @@ export default function FormInputGrid({
   formRenderProps,
   value,
   form,
+  formKey
 }: IProps) {
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -95,7 +100,7 @@ export default function FormInputGrid({
   const { items: predictions } = data ?? {};
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridLabel")}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
@@ -103,6 +108,7 @@ export default function FormInputGrid({
           <div className="relative">
             <ComboboxInput
               {...formRenderProps?.field}
+              data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridInput")}
               className="h-10 rounded-md border border-gray-200 bg-transparent text-gray-900 placeholder:text-gray-400 focus:border sm:text-xs"
               placeholder={fieldConfig?.placeholder || fieldConfig?.label}
               onChange={(event) => {
@@ -116,6 +122,7 @@ export default function FormInputGrid({
               <ComboboxOptions
                 static
                 as="ul"
+                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridOptions")}
                 className="absolute z-[100] mt-1 max-h-80 w-[700px] overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
               >
                 <li className="p-2">
@@ -211,7 +218,7 @@ export default function FormInputGrid({
           </div>
         </Combobox>
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputGridErrorMessage")}/>
     </FormItem>
   );
 }

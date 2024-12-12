@@ -11,6 +11,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import kebabCase from "lodash/kebabCase";
+import capitalize from "lodash/capitalize";
+;
 
 interface IProps {
   fieldConfig: IField;
@@ -20,18 +23,18 @@ interface IProps {
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
+  formKey:string;
   value?: string;
-  formKey?: string;
 }
 
-export default function FormInput({
+export default function FormNumber({
   fieldConfig,
   formRenderProps,
   icon,
-  value,
+  form,
+  formKey
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
-  const isHidden = fieldConfig.hidden;
+  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,37 +44,45 @@ export default function FormInput({
   //     shouldTouch: true,
   //   });
   // };
-  if (isHidden) {
-    return null;
-  }
 
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+
+    // If the input is empty (user cleared it), set to undefined
+    // Otherwise convert to number
+    const finalValue = value === "" ? undefined : +value;
+
+    form.setValue(fieldConfig?.name, finalValue, {
+      shouldDirty: true,
+      shouldValidate: true,
+      shouldTouch: true,
+    });
+  }
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
+      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputFormLabel")}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
-          // onChange={handleChange}
+          // {...form.register(fieldConfig?.name)}
+          {...formRenderProps.field}
+          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInput")}
           readOnly={fieldConfig?.readonly ?? false}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
+          type="number"
+          inputMode="decimal"
+          className={`no-spinner ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
           disabled={isDisabled}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
           hasError={!!formRenderProps.fieldState.error}
-          defaultValue={value}
-          leftAddon={fieldConfig.inputLeftAddOns}
-          rightAddon={fieldConfig.inputRightAddOns}
-          {...formRenderProps.field}
+          onChange={handleChange}
         />
       </FormControl>
-      <FormMessage />
+      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputErrorMessage")}/>
+
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );
-}
-
-function UnitIconComponent() {
-  return <span className="pr-4 text-muted-foreground">Unit</span>;
 }
