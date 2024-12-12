@@ -21,6 +21,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
+  formKey?: string;
 }
 
 export default function FormInput({
