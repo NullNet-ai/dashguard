@@ -96,7 +96,7 @@ export async function canvasPreview(
     crop.height,
   );
 
-  return new Promise((resolve, reject) => {
+  return new Promise<Blob>((resolve, reject) => {
     croppedCanvas.toBlob(
       (blob) => {
         if (blob) {
