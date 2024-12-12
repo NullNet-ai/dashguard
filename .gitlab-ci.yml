@@ -20,6 +20,7 @@ master_build:
     - 'docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
   only:
     - 'development'
+    - 'qa'
 
 pusher_dev:
   stage: pusher-dev
@@ -43,6 +44,7 @@ pusher_dev:
     # - 'docker restart recruitment-recruitment-portal-4'
   only:
     - 'development'
+    - 'qa'
   tags:
     - 'recruitment'
 
