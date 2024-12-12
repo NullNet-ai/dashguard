@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+
 import { PhoneArraySchema } from "~/server/zodSchema/contacts/basicDetails";
 export default function PhoneInputDetails({}) {
 

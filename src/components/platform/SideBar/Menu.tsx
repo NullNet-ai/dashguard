@@ -16,6 +16,7 @@ import {
 } from "~/components/ui/collapsible";
 import { StarIcon } from "@heroicons/react/24/outline";
 import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
+import { testIDFormatter } from "~/utils/formatter";
 interface IProps {
   item: ISidebarMenu;
 }
@@ -51,7 +52,7 @@ export default function Menu({ item }: IProps) {
                     <a
                       href={item.url || "#"}
                       className="flex items-center gap-2"
-                      data-test-id={"sidebarMainMenu"+item.title}
+                      data-test-id={testIDFormatter(`sidebar-menu-${item.title}`)}
                     >
                       <span className="font-semibold">{item.title}</span>
                     </a>
@@ -67,11 +68,12 @@ export default function Menu({ item }: IProps) {
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             asChild
-                            data-test-id={`sidebar${item.title ?? "default"}${subItem.title}`}
+                            data-test-id={testIDFormatter(`sidebar-menu-${item.title ?? "default"}-${subItem.title}`)}
+                            
                           >
                             <a
                               href={subItem.url || "#"}
-                              data-test-id={`sidebar${item.title ?? "default"}${subItem.title}`}
+                              data-test-id={testIDFormatter(`sidebar-menu-${item.title ?? "default"}-${subItem.title}-link`)}
                             >
                               <span>{subItem.title}</span>
                             </a>
@@ -86,19 +88,23 @@ export default function Menu({ item }: IProps) {
               <a
                 href={item.url || "#"}
                 className={`flex items-center gap-2 group/item ${isActive && "bg-muted text-primary"}`}
-                data-test-id={"sidebarMainMenu"+item.title}
+                data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}`)}
                 >
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton tooltip={item.title}
+                  data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-btn`)}
+                >
                   <ICON className="mr-2 h-5 w-5" />
                   <span className="font-semibold">{item.title}</span>
                   {isFavorite ? (
                     <SolidStarIcon
                       onClick={toggleFavorite}
+                      data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-fav-btn`)}
                       className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                     />
                   ) : (
                     <StarIcon
                       onClick={toggleFavorite}
+                      data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-fav-btn`)}
                       className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                     />
                   )}
