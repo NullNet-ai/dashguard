@@ -41,7 +41,7 @@ export interface IConfigGrid {
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
-  archiveCustomAction?: (args: Record<string, any>) => void | Promise<void>;
+  archiveCustomAction?: (args: Record<string, any>) => void | Promise<void | string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
   layer?: TLayerType
@@ -77,13 +77,11 @@ export interface IAction {
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>
-  handleCustomArchiveAction: (args: DefaultRowActions) => void;
 }
 
 export interface ICreateContext {
   state?: IState;
   actions?: IAction;
-  config: any;
 }
 
 export interface IPropsGrid {
