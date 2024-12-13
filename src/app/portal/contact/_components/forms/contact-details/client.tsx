@@ -71,6 +71,23 @@ export default function ContactDetails({
           placeholder: "Middle Name",
           required: false,
         },
+        {
+          id: "date_of_birth",
+          formType: "smart-date",
+          name: "date_of_birth",
+          label: "Date of Birth",
+          placeholder: "Date of Birth",
+          dateTimePickerProps: {
+            maxDate: new Date(),
+          },
+        },
+        // {
+        //   id: "address",
+        //   formType: "address-input",
+        //   name: "Address",
+        //   placeholder: "Address",
+        //   label: "Address",
+        // },
       ]}
     />
   );
