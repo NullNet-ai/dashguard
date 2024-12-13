@@ -241,6 +241,7 @@ export const FileUploaderItem = forwardRef<
             "relative flex cursor-pointer items-center justify-between p-2",
             className,
             isSelected ? "bg-muted" : "",
+            stillInProgress ? "cursor-not-allowed" : "cursor-pointer",
           )}
           {...props}
         >

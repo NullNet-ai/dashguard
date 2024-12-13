@@ -39,14 +39,14 @@ export const menuRouter = createTRPCRouter({
         icon: "StarIcon",
         isActive: pathName.includes("/favorites"),
         items: [],
-        url: "/portal/coming-soon",
+        url: "/portal/favorites",
       },
       {
         title: "Activity Log",
         icon: "DocumentTextIcon",
         isActive: pathName.includes("/activity_log"),
         items: [],
-        url: "/portal/coming-soon",
+        url: "/portal/activity-log",
       },
       {
         title: "Contacts",
@@ -69,15 +69,6 @@ export const menuRouter = createTRPCRouter({
       {
         groupTitle: "Platform",
         groups: [
-          {
-            title: "Reports",
-            icon: "AcademicCapIcon",
-            isActive: pathName.endsWith("/report"),
-            items: [],
-            url: getGridLink({
-              mainEntity: "report",
-            }),
-          },
           {
             title: "Settings",
             icon: "Cog8ToothIcon",

@@ -99,6 +99,7 @@
 .minimal-tiptap-editor .ProseMirror {
   @apply flex max-w-full cursor-text flex-col;
   @apply z-0 outline-0;
+  font-family: inherit !important;
 }
 
 .minimal-tiptap-editor .ProseMirror > div.editor {
