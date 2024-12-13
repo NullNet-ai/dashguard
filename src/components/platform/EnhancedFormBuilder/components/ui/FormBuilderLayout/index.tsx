@@ -11,21 +11,10 @@ import OpenedFormLayout from "../layout/opened";
 import SelectedViewLayout from "../layout/selected";
 import { CardContent } from "~/components/ui/card";
 import ViewFormActions from "../layout/opened/components/ViewFormActions";
-import { Loader2 } from "lucide-react";
-import {
-  MagnifyingGlassCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/solid";
-import { cn } from "~/lib/utils";
-import SelectedActions from "../layout/selected/components/SelectedActions";
-import FormFilterOpenedActions from "../layout/opened/components/FormFilterOpenedActions";
-import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 import FormBodyMainActions from "../layout/opened/components/FormBodyMainActions";
 import LockFormActions from "../layout/opened/components/LockFormActions";
 import { AccordionContent } from "@radix-ui/react-accordion";
-import { useSearchParams } from "next/navigation";
 
 const FormBuilderLayout = ({
   //* data
@@ -76,15 +65,16 @@ const FormBuilderLayout = ({
   customFormFilterLockFormActions,
   customFormFilterViewFormActions,
   customFormHostLockFormActions,
-  customFormHostViewFormActions
+  customFormHostViewFormActions,
+  handleSearchOpen,
+  isOpenSearch,
 }: IAccordionLayoutProps) => {
 
-  const searchParams = useSearchParams();
-  const searchActive = searchParams.get('search') === 'true';
-
-
+  const searchActive = isOpenSearch || false;
+  
   return (
-    <Accordion
+
+      <Accordion
       type="single"
       collapsible
       className="w-full"
@@ -95,7 +85,11 @@ const FormBuilderLayout = ({
       <AccordionItem value="item-1">
         
         <FormHeader
-          formProps={formProps}
+          formProps={
+            {...formProps, 
+              handleSearchOpen,
+            isOpenSearch,}
+          }
           enableAppendForm={enableAppendForm}
           displayType={displayType}
           buttonHeaderRender={buttonHeaderRender}
@@ -124,6 +118,9 @@ const FormBuilderLayout = ({
         {filterGridConfig && (
           <>
             <FormBodyMainActions
+              formProps={   {...formProps, 
+                handleSearchOpen,
+              isOpenSearch,}}
               searchActive={searchActive}
               isListLoading={isListLoading}
               displayType={displayType}
@@ -222,6 +219,7 @@ const FormBuilderLayout = ({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+
   );
 };
 
