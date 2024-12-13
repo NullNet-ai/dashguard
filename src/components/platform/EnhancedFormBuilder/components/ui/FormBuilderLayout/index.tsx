@@ -1,3 +1,4 @@
+'use client'
 import {
   Accordion,
   AccordionItem,
@@ -42,6 +43,7 @@ const FormBuilderLayout = ({
   debugOn,
   formProps,
   features,
+  myParent,
   //* actions
   handleAccordionChange,
   enableAppendForm,
@@ -187,6 +189,7 @@ const FormBuilderLayout = ({
               )}
 
               <OpenedFormLayout
+                myParent={myParent}
                 customDesign={customDesign}
                 customRender={customRender}
                 fields={fields}
