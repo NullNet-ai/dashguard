@@ -27,7 +27,9 @@ interface Wizard {
   stepsNavigation?: TStepsNavigationButtons;
 }
 
+
 export default function Wizard(props: Wizard) {
+
   const { children, summary, config, stepsNavigation = {} } = props || {};
   return (
     <WizardProvider
@@ -82,7 +84,7 @@ export default function Wizard(props: Wizard) {
             </div>
 
           <div className="flex-grow bg-transparent">
-            <div className="border-b" style={{ height: FORM_HEADER_HEIGHT }}>
+            <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
               <Header />
             </div>
             <div className="h-[calc(100vh-10rem)] overflow-y-auto">
