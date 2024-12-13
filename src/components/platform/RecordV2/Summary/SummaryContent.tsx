@@ -32,7 +32,7 @@ const RecordSummaryContent = async () => {
   });
 
   if (recordDetails?.status_code === 500) {
-    throw recordDetails.message
+    throw recordDetails.message;
   }
 
   return (
@@ -49,28 +49,46 @@ const RecordSummaryContent = async () => {
         created_time={recordDetails?.data?.created_time!}
         updated_date={recordDetails?.data?.updated_date!}
         updated_time={recordDetails?.data?.updated_time!}
-        created_by_first_name={recordDetails?.data?.created_by_data?.first_name || ''}
-        created_by_last_name={recordDetails?.data?.created_by_data?.last_name || ''}
-        updated_by_first_name={recordDetails?.data?.updated_by_data?.first_name || ''}
-        updated_by_last_name={recordDetails?.data?.updated_by_data?.last_name || ''}
+        created_by_first_name={
+          recordDetails?.data?.created_by_data?.first_name || ""
+        }
+        created_by_last_name={
+          recordDetails?.data?.created_by_data?.last_name || ""
+        }
+        updated_by_first_name={
+          recordDetails?.data?.updated_by_data?.first_name || ""
+        }
+        updated_by_last_name={
+          recordDetails?.data?.updated_by_data?.last_name || ""
+        }
       />
-            <Separator />
-      <div className=" p-2 px-4 text-sm">
+      <Separator />
+      <div className="p-2 px-4 text-sm">
         <div className="mb-2 px-2">
           <span className="text-slate-400">Category</span>
           <div>
-          {
-            recordDetails && recordDetails.data?.categories?.map((e: string) => {
-              return <Badge key={e} className="m-1" variant="primary">{e}</Badge>
-            })
-          }
-
+            {recordDetails &&
+              recordDetails.data?.categories?.map((e: string) => {
+                return (
+                  <Badge
+                    key={e}
+                    className="m-1"
+                    variant="primary"
+                    data-test-id={
+                      mainEntity +
+                      "-rcrd-category-" +
+                      e.split(" ").join("-").toLowerCase()
+                    }
+                  >
+                    {e}
+                  </Badge>
+                );
+              })}
           </div>
         </div>
       </div>
-        <Separator />
+      <Separator />
     </div>
-    
   );
 };
 
