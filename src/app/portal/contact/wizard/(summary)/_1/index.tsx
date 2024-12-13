@@ -38,7 +38,6 @@ const StepOneBasicDetails = ({
       {Object.entries(fields).map(([key, value]) => (
         <p key={key}>
           <strong> {key}: </strong>
-          {/* @ts-expect-error - Required for the icon to work */}
           &nbsp; {data?.[value] || "None"}
         </p>
       ))}
