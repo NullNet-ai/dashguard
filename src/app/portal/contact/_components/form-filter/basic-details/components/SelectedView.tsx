@@ -1,7 +1,8 @@
+import { PhoneInput } from "react-international-phone";
+import { EnvelopeIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/lib/utils";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
-import { PhoneInput } from "react-international-phone";
 
 const SelectedView = ({ record }: Record<string, any>) => {
   const { phone, email } = record || {};
@@ -52,6 +53,8 @@ const SelectedView = ({ record }: Record<string, any>) => {
           disabled={true}
           placeholder={"Primary Email"}
           value={email_data?.email}
+          Icon={EnvelopeIcon}
+          iconPlacement="left"
         />
       </div>
     </div>
