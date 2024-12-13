@@ -9,8 +9,9 @@ import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhone
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { saveContactDetails, selectRecord } from "./actions";
-import gridColumns from "./_config/columns";
+import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
+import { api } from "~/trpc/react";
 
 export default function ContactDetails({
   params,
@@ -96,6 +97,7 @@ export default function ContactDetails({
         filter_entity: "contact",
         main_entity_id: params.id,
         gridColumns: gridColumns,
+        fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
         label: "Contacts",
@@ -132,6 +134,33 @@ export default function ContactDetails({
             main_entity_id: response.main_entity_id,
           };
         },
+        onFilterFieldChange: (search_params, options) => {
+          const { data } = api.contact.mainGrid.useQuery(
+            search_params,
+            options,
+          );
+          return data;
+        },
+        handleSelectFieldFilterGrid: (data) => {
+          const { raw_phone_number, iso_code, country_code, email, ...rest } =
+            data ?? {};
+          const resolvedData = {
+            ...rest,
+            phone: [
+              {
+                raw_phone_number,
+                iso_code,
+                country_code,
+              },
+            ],
+            email: [
+              {
+                email,
+              },
+            ],
+          };
+          return resolvedData;
+        },
         renderComponentSelected: (record) => {
           // Selected View Component
           return <SelectedView record={record} />;
@@ -153,6 +182,11 @@ export default function ContactDetails({
           name: "phone",
           label: "Phone Number",
           required: true,
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: "contact_phone_numbers",
+            field: "raw_phone_number",
+          },
         },
         {
           id: "email",
@@ -161,6 +195,11 @@ export default function ContactDetails({
           name: "email",
           label: "Email",
           required: true,
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: "contact_emails",
+            field: "email",
+          },
         },
       ]}
       // customFormFilterViewFormActions={[

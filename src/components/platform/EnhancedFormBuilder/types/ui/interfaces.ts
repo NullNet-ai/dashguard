@@ -31,6 +31,7 @@ interface IAccordionLayoutProps extends IPropsForms {
   handleRemovedSelectedRecords: (records: any[]) => void;
   handleOpenForm: (e: React.MouseEvent<HTMLButtonElement>) => void;
   setShowFormActions: SetState<boolean>;
+  onSelectFieldFilterGrid:  (data: z.infer<TFormSchema>) => Promise<void>;
 }
 
 export type {

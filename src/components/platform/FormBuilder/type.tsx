@@ -50,6 +50,7 @@ export interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
   formType?: TFormType;
+  withGridFilter?: boolean;
   creatable?: boolean;
   name: string;
   label?: string;
@@ -147,9 +148,14 @@ interface IReturnOnSelectRecords {
   filter_entity: string;
 }
 
+interface IReturnOnFieldFilterRecords {
+  items: any[];
+}
+
 export interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
+  pluck_object?: Record<string, string[]>;
   current?: number;
   limit?: number;
   filter_entity: string;
@@ -180,6 +186,16 @@ export interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  onFieldFilterRecords?: ({
+    filter_value,
+  }: {
+    filter_value: string | number;
+  }) => Promise<IReturnOnFieldFilterRecords>;
+  onSelectFieldFilterRecords?: ({
+    filter_value,
+  }: {
+    filter_value: string | number;
+  }) => Promise<IReturnOnFieldFilterRecords>;
 }
 export interface IPropsForms {
   customDesign?: {
@@ -226,4 +242,10 @@ export interface IUserFormField {
     label: { message: string };
     value: { message: string };
   }[];
+}
+
+export interface IFieldFilterActions {
+  onBlur?: () => void;
+  onFocus?: () => void;
+  handleSearch?: (search: string) => void;
 }

@@ -5,18 +5,25 @@ import type {
   ICheckboxOptions,
   IRadioOptions,
   ISelectOptions,
-  IField,
   OptionType,
+  IFilterGridConfig,
 } from "./type";
 import { Fragment } from "react";
 import RenderFormType from "./RenderFormType";
 import { FormField } from "~/components/ui/form";
 import FormAddress from "./FormType/FormAddress";
+import { ColumnDef } from "@tanstack/react-table";
+import { z } from "zod";
+import { IField, TFormSchema } from "../EnhancedFormBuilder/types";
+import FormInputGridWrapper from "../EnhancedFormBuilder/components/custom/FormFilter/FormInputGridWrapper";
 export default function FormModule({
   fields,
   form,
   subConfig,
   formKey,
+  gridConfig,
+  onSelectFieldFilterGrid,
+  formSchema
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -29,6 +36,9 @@ export default function FormModule({
     currencyInputOptions?: Record<string, OptionType[]>;
   };
   formKey: string;
+  gridConfig?: IFilterGridConfig;
+  formSchema: TFormSchema;
+  onSelectFieldFilterGrid?: (data: z.infer<TFormSchema>) => Promise<void>;
 }) {
   return (
     <Fragment>
@@ -49,14 +59,33 @@ export default function FormModule({
                   control={form.control}
                   name={_field.name}
                   render={(formProps) =>
-                    RenderFormType(_field, formProps, form, formKey, {
-                      checkboxOptions: subConfig?.checkboxOptions,
-                      multiSelectOptions: subConfig?.multiSelectOptions,
-                      multiSelectOnSearch: subConfig?.multiSelectOnSearch,
-                      radioOptions: subConfig?.radioOptions,
-                      selectOptions: subConfig?.selectOptions,
-                      currencyInputOptions: subConfig?.currencyInputOptions,
-                    })
+                    _field.withGridFilter ? (
+                      <FormInputGridWrapper
+                        fieldConfig={_field!}
+                        gridConfig={gridConfig!}
+                        form={form}
+                        formSchema={formSchema}
+                        onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+                      >
+                        {RenderFormType(_field, formProps, form, formKey, {
+                          checkboxOptions: subConfig?.checkboxOptions,
+                          multiSelectOptions: subConfig?.multiSelectOptions,
+                          multiSelectOnSearch: subConfig?.multiSelectOnSearch,
+                          radioOptions: subConfig?.radioOptions,
+                          selectOptions: subConfig?.selectOptions,
+                          currencyInputOptions: subConfig?.currencyInputOptions,
+                        })}
+                      </FormInputGridWrapper>
+                    ) : (
+                      RenderFormType(_field, formProps, form, formKey, {
+                        checkboxOptions: subConfig?.checkboxOptions,
+                        multiSelectOptions: subConfig?.multiSelectOptions,
+                        multiSelectOnSearch: subConfig?.multiSelectOnSearch,
+                        radioOptions: subConfig?.radioOptions,
+                        selectOptions: subConfig?.selectOptions,
+                        currencyInputOptions: subConfig?.currencyInputOptions,
+                      })
+                    )
                   }
                 />
               </div>

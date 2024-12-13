@@ -6,7 +6,7 @@ import GridProvider from "../Provider";
 import { GridDesktop } from "./views";
 
 interface IClientProps extends IPropsGrid {
-  parentType?: "grid" | "form";
+  parentType?: "grid" | "form" | "field";
 }
 
 function MainClient({

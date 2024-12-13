@@ -5,7 +5,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import { IFieldFilterActions, type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -41,6 +41,7 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldFilterActions?: IFieldFilterActions;
   formKey: string;
 }
 
@@ -48,6 +49,7 @@ export default function FormPhoneInput({
   fieldConfig,
   formRenderProps,
   form,
+  fieldFilterActions,
   formKey,
 }: IProps) {
   interface IUseFieldArrayPhone {
@@ -146,6 +148,7 @@ export default function FormPhoneInput({
   const isDisabled = formRenderProps?.field?.disabled;
   const isMultiple = fieldConfig?.options?.phoneNumberType === "multiple";
   const values = form.watch(name);
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   return (
     <FormItem>
@@ -194,9 +197,12 @@ export default function FormPhoneInput({
                   defaultCountry="us"
                   disabled={isDisabled || fieldConfig?.disabled}
                   value={`+${values[index]?.raw_phone_number || ""}`}
-                  onChange={(phone, meta) =>
-                    handlePhoneNumberChange(index, phone, meta)
-                  }
+                  onChange={(phone, meta) => {
+                    handlePhoneNumberChange(index, phone, meta);
+                    if (handleSearch) {
+                      handleSearch(phone);
+                    }
+                  }}
                   className={cn(
                     "mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
                     `${isDisabled && "pointer-events-none border-transparent opacity-100"}`,
@@ -210,6 +216,7 @@ export default function FormPhoneInput({
                     opacity: "inherit",
                   }}
                   inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
+                  {...(restFieldFilterActions ?? {})}
                 />
                 {field.is_primary && isMultiple && (
                   <Badge

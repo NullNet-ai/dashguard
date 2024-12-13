@@ -11,6 +11,7 @@ import { useWizard } from "../Wizard/Provider";
 import { FormBuilderLayout } from "./components/ui";
 import { IPropsForms, TDisplayType } from "./types";
 import { testIDFormatter } from "~/utils/formatter";
+import { useRouter, usePathname } from "next/navigation";
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -36,6 +37,9 @@ export const FormBuilder = (props: IPropsForms) => {
   } = props;
 
   const { actions } = useWizard();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -327,6 +331,22 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
+  const onSelectFieldFilterGrid = async (
+    data: z.infer<typeof formSchema>,
+  ) => {
+    try {
+      const [, , , , identifier] = pathname.split("/");
+      if (identifier === 'new' && data?.code) {
+        const newPathname = pathname.replace("/new/", `/${data?.code}/`);
+        router.push(newPathname);
+      }
+      setFormGridSelected([data]);
+      setDisplayType("selected");
+    } catch (error) {
+      console.error("[Form-Filter] Failed onSelectFieldFilterGrid", error);
+    }
+  };
+
   //* RENDER
   return (
     <form
@@ -364,6 +384,7 @@ export const FormBuilder = (props: IPropsForms) => {
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             handleOpenForm={handleOpenForm}
             features={features}
+            onSelectFieldFilterGrid={onSelectFieldFilterGrid}
           />
         </Card>
       </Collapsible>

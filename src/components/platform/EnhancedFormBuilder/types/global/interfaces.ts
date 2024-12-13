@@ -70,6 +70,11 @@ interface IField {
   textAreaLineWrapping?: boolean;
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
+  withGridFilter?: boolean;
+  filterFieldConfig?: {// for field filter grid
+    entity?: string;
+    field?: string;
+  };
 }
 
 interface ISelectOptions {
@@ -121,16 +126,16 @@ interface IUserFormField {
 }
 
 export interface IFeatures {
-  enableLockFormView? : boolean,
-  enableLockFormCopy? : boolean,
-  enableLockFormEllipsis? : boolean,
-  enableViewFormEllipsis? : boolean,
-  enableViewFormCopy? : boolean,
-  enableViewFormPaste? : boolean,
-  enableViewFormClear? : boolean,
-  enableUnlockFormFilter? : boolean,
-  enableFormHostViewActions? : boolean,
-  enableFormHostLockActions? : boolean,
+  enableLockFormView?: boolean;
+  enableLockFormCopy?: boolean;
+  enableLockFormEllipsis?: boolean;
+  enableViewFormEllipsis?: boolean;
+  enableViewFormCopy?: boolean;
+  enableViewFormPaste?: boolean;
+  enableViewFormClear?: boolean;
+  enableUnlockFormFilter?: boolean;
+  enableFormHostViewActions?: boolean;
+  enableFormHostLockActions?: boolean;
 }
 
 export interface ICustomActions {
@@ -141,10 +146,10 @@ export interface ICustomActions {
   hidden?: boolean;
 }
 
-
 interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
+  pluck_object?: Record<string, string[]>;
   current?: number;
   limit?: number;
   filter_entity: string;
@@ -175,6 +180,36 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  onFilterFieldChange?: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) =>
+    | {
+        totalCount: number;
+        items: any[];
+        currentPage: number;
+        totalPages: number;
+      }
+    | undefined;
+  handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
+  fieldFilterGridColumns?: string[];
+}
+
+export interface ISearchParams {
+  entity: string;
+  pluck?: any;
+  pluck_object?: any;
+  current?: number;
+  limit?: number;
+  advance_filters?: {
+    type: string;
+    values: string[];
+    field: string;
+    operator: string;
+    entity?: string;
+  }[];
+
+  sorting?: any[];
 }
 
 interface IPropsForms {
@@ -218,7 +253,7 @@ interface IPropsForms {
     },
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
-  features? : IFeatures;
+  features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];

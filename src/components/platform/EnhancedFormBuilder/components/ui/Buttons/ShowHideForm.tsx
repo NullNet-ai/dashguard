@@ -20,29 +20,29 @@ export default function ShowHideForm({
             className="m-auto h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gray-200"
         >
           {/* <Button
-            size={"icon"}
-            variant={"ghost"}
+          size={"icon"}
+          variant={"ghost"}
             // onClick={handleOpen}
-            className="m-auto h-6 w-6 rounded-full bg-gray-200"
-            {...props}
-          >
-            <ChevronUpIcon className="h-4 w-4 cursor-pointer" />
+          className="m-auto h-6 w-6 rounded-full bg-gray-200"
+          {...props}
+        >
+          <ChevronUpIcon className="h-4 w-4 cursor-pointer" />
           </Button> */}
         </AccordionTrigger>
       ) : (
         <AccordionTrigger
           // hideTriggerIcon
         >
-          <Button
+        <Button
             
-            size={"icon"}
-            variant={"ghost"}
-            onClick={handleOpen}
-            className="m-auto h-6 w-6 rounded-full"
-            {...props}
-          >
+          size={"icon"}
+          variant={"ghost"}
+          onClick={handleOpen}
+          className="m-auto h-6 w-6 rounded-full"
+          {...props}
+        >
             {/* <ChevronDownIcon className="h-4 w-4 cursor-pointer" /> */}
-          </Button>
+        </Button>
         </AccordionTrigger>
       )}
     </Fragment>

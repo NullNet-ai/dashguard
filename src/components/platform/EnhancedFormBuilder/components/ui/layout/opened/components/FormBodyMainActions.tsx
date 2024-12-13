@@ -77,22 +77,22 @@ const FormBodyMainActions = ({
           )}
           {!searchActive && (
             <>
-              <Button
-                variant={"default"}
-                name={
-                  formLabel.split(" ").join("") +
-                  `${selectedRecords.length ? "FormUpdateButton" : "FormCreateButton"}`
-                }
-                onClick={form.handleSubmit(onSubmitFormGrid)}
-                type="button"
-                loading={isButtonLoading}
-                size={"xs"}
-                className="gap-1 items-center text-sm"
-              >
-                <PlusIcon className="h-4 w-4" />
-                {selectedRecords.length ? "Update" : "Create"}
-              </Button>
-              <Separator orientation="vertical" className="py-3 mr-1"/>
+          <Button
+            variant={"default"}
+            name={
+              formLabel.split(" ").join("") +
+              `${selectedRecords.length ? "FormUpdateButton" : "FormCreateButton"}`
+            }
+            onClick={form.handleSubmit(onSubmitFormGrid)}
+            type="button"
+            loading={isButtonLoading}
+            size={"xs"}
+            className="gap-1 items-center text-sm"
+          >
+            <PlusIcon className="h-4 w-4" />
+            {selectedRecords.length ? "Update" : "Create"}
+          </Button>
+          <Separator orientation="vertical" className="py-3 mr-1"/>
             </>
           )}
           

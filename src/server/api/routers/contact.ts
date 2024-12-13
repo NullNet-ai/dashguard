@@ -41,10 +41,10 @@ export const contactRouter = createTRPCRouter({
   mainGrid: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
     const hasAdvanceFilters = input?.advance_filters?.length
       ? [
-          {
-            type: "operator",
-            operator: EOperator.AND,
-          },
+          // {
+          //   type: "operator",
+          //   operator: EOperator.AND,
+          // },
           ...(input?.advance_filters ?? []),
         ]
       : [...(input?.advance_filters ?? [])];

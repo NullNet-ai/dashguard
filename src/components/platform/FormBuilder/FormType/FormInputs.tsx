@@ -5,7 +5,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IUserFormField, type IField } from "../type";
+import { type IUserFormField, type IField, IFieldFilterActions } from "../type";
 import {
   FormControl,
   FormItem,
@@ -31,6 +31,7 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldFilterActions?: IFieldFilterActions;
   formKey: string;
 }
 
@@ -38,6 +39,7 @@ export default function FormTextInputs({
   fieldConfig,
   formRenderProps,
   form,
+  fieldFilterActions,
   formKey,
 }: IProps) {
   const { error } = useFormField() as IUserFormField;
@@ -65,6 +67,8 @@ export default function FormTextInputs({
   }, []);
 
   const { register } = form;
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
+
   return (
     <FormItem>
       {fields?.map((data, index) => (
@@ -81,7 +85,13 @@ export default function FormTextInputs({
                 type={fieldConfig?.type || "text"}
                 data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "Inputs")}
                 {...fieldConfig}
-                onChange={(e) => handleInputChange(index, e.target.value)}
+                onChange={(e) => {
+                  handleInputChange(index, e.target.value);
+                  if (handleSearch) {
+                    handleSearch(e.target.value);
+                  }
+                }}
+                {...(restFieldFilterActions ?? {})}
               />
               {error?.[index] && (
                 <p
