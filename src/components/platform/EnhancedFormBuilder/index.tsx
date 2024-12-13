@@ -371,6 +371,7 @@ export const FormBuilder = (props: IPropsForms) => {
               features={features}
               myParent={myParent}
               handleSearchOpen={handleSearchOpen}
+              isOpenSearch={isOpenSearch}
             />
           </Card>
       </Collapsible>
