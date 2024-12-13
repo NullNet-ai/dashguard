@@ -299,6 +299,7 @@ export default function WizardProvider({
     debugOn,
     currentStep,
     errorMessage,
+    stepLabels:config?.stepLabels,
     nextLoading,
     prevLoading,
     skipLoading,
