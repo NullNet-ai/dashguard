@@ -76,7 +76,7 @@ export default function FormSmartDate({
           inputTestID={kebabCase(formKey + fieldConfig.name + "SmartDateInput")}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
-          placeholder="e.g. Tomorrow"
+          placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
           disabled={isDisable}
