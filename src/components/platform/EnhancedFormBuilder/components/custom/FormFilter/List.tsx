@@ -56,6 +56,7 @@ export default function FormFilterGrid({
   const initialSelectedRecords = selectedRecords.reduce((acc, id) => ({...acc, [id]: true}), {});
   return (
     <Grid
+      height="300px"
       onSelectRecords={(rows) => {
         if (!onSelectRecords) return;
         Promise.resolve(
