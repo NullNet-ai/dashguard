@@ -26,6 +26,9 @@ export default function PlatformPlayGround() {
       <ButtonPlayGround />
       <Separator className="my-6" />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <CheckboxDetails />
+        <AmountDetails />
+        <EmailInputDetails />
         <FileDetails/>
         <InputsGrid />
         <AddressDetails />
@@ -37,10 +40,7 @@ export default function PlatformPlayGround() {
         <RadioDetails />
         <NumberInputDetails />
         <PhoneInputDetails />
-        <EmailInputDetails />
         <InputDetails />
-        <AmountDetails />
-        <CheckboxDetails />
         <RichTextEditorDetails />
         <SelectDetails />
         {/* <DateRangeDetails />
