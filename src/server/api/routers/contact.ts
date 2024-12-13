@@ -18,6 +18,7 @@ import {
 import { EStatus } from "../types";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 import { getContactsWithPhoneAndEmail } from "../../../utils/phone-email-validation";
+import { formatPhoneNumber } from "~/utils/formatter";
 
 const ENTITY = "contact";
 
@@ -133,12 +134,19 @@ export const contactRouter = createTRPCRouter({
 
         if (existing_contact) return acc;
 
+        const { raw_phone_number, iso_code } = phones;
+        const primary_phone_number = formatPhoneNumber({
+          raw_phone_number,
+          iso_code,
+        });
+
         return [
           ...acc,
           {
             ...contacts,
             ...emails,
             ...phones,
+            primary_phone_number,
           },
         ];
       },

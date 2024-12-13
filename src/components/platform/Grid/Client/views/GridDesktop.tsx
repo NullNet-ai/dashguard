@@ -12,9 +12,10 @@ import { Badge } from "~/components/ui/badge";
 
 interface IGridDesktopProps {
   parentType: "grid" | "form";
+  hideSearch?: boolean;
 }
 
-function GridDesktop({ parentType }: IGridDesktopProps) {
+function GridDesktop({ parentType, hideSearch }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
   return (
@@ -34,9 +35,10 @@ function GridDesktop({ parentType }: IGridDesktopProps) {
               Submit
             </Button>
           )}
-          <div style={{ width: parentType ? '100%' : "calc(100vw - 29rem)" }}>
+          {hideSearch ? null : <div style={{ width: parentType ? '100%' : "calc(100vw - 29rem)" }}>
             <Search />
-          </div>
+          </div>}
+          
         </div>
       </CardHeader>
       <ScrollArea

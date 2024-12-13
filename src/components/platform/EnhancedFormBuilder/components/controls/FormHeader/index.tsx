@@ -34,7 +34,7 @@ const FormHeader = (props: IFormHeaderProps) => {
     handleUpdateDisplayType,
     formKey,
     features,
-    formProps
+    formProps,
   } = props;
 
   const { enableUnlockFormFilter = true } = features ?? {}

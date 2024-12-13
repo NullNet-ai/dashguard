@@ -37,7 +37,7 @@ export default function AddressDetails({}) {
         }}
         enableFormRegisterToParent
         formLabel="TextField Form Builder"
-        formKey="FormBuilderTextField"
+        formKey="address-details"
         handleSubmit={handleSave}
         formSchema={FormSchema}
         // defaultValues={{

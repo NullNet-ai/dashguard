@@ -18,7 +18,6 @@ export const FormBuilder = (props: IPropsForms) => {
     formSchema,
     defaultValues,
     formKey,
-    myParent,
     appendFormKey,
     //* actions
     onFormChange,
@@ -33,6 +32,7 @@ export const FormBuilder = (props: IPropsForms) => {
     customRender,
     formProps,
     features,
+    myParent
   } = props;
 
   const { actions } = useWizard();
@@ -56,6 +56,7 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay === "expanded",
   );
   const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
 
   //* EFFECTS
 
@@ -176,6 +177,10 @@ export const FormBuilder = (props: IPropsForms) => {
       setDisplayType("selected");
     });
   };
+
+  const handleSearchOpen = () => {
+    setIsOpenSearch(!isOpenSearch);
+  }
 
   const handleAccordionChange = (value: string) => {
     setIsAccordionExpanded(value === "item-1");
@@ -335,37 +340,39 @@ export const FormBuilder = (props: IPropsForms) => {
       )}
     >
       <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
-        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
-          <FormBuilderLayout
-            {...props}
-            form={form}
-            debugOn={debugOn}
-            showFormActions={showFormActions}
-            formGridSelected={formGridSelected}
-            isListLoading={isListLoading}
-            isSaveLoading={isSaveLoading}
-            isFormOpened={isFormOpened}
-            isOpenGrid={isOpenGrid}
-            isAccordionExpanded={isAccordionExpanded}
-            displayType={displayType}
-            saveForm={saveForm}
-            onSubmitFormGrid={onSubmitFormGrid}
-            setIsSaveLoading={setIsSaveLoading}
-            setShowFormActions={setShowFormActions}
-            handleCloseGrid={handleCloseGrid}
-            handleAccordionChange={handleAccordionChange}
-            handleListLoading={handleListLoading}
-            handleDebug={handleDebug}
-            handleLock={handleLock}
-            handleAccordionExpand={handleAccordionExpand}
-            handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
-            handleAppendForm={handleAppendForm}
-            handleUpdateDisplayType={handleUpdateDisplayType}
-            handleRemovedSelectedRecords={handleRemovedSelectedRecords}
-            handleOpenForm={handleOpenForm}
-            features={features}
-          />
-        </Card>
+          <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+            <FormBuilderLayout
+              {...props}
+              form={form}
+              debugOn={debugOn}
+              showFormActions={showFormActions}
+              formGridSelected={formGridSelected}
+              isListLoading={isListLoading}
+              isSaveLoading={isSaveLoading}
+              isFormOpened={isFormOpened}
+              isOpenGrid={isOpenGrid}
+              isAccordionExpanded={isAccordionExpanded}
+              displayType={displayType}
+              saveForm={saveForm}
+              onSubmitFormGrid={onSubmitFormGrid}
+              setIsSaveLoading={setIsSaveLoading}
+              setShowFormActions={setShowFormActions}
+              handleCloseGrid={handleCloseGrid}
+              handleAccordionChange={handleAccordionChange}
+              handleListLoading={handleListLoading}
+              handleDebug={handleDebug}
+              handleLock={handleLock}
+              handleAccordionExpand={handleAccordionExpand}
+              handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+              handleAppendForm={handleAppendForm}
+              handleUpdateDisplayType={handleUpdateDisplayType}
+              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+              handleOpenForm={handleOpenForm}
+              features={features}
+              myParent={myParent}
+              handleSearchOpen={handleSearchOpen}
+            />
+          </Card>
       </Collapsible>
     </form>
   );

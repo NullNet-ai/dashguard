@@ -6,6 +6,7 @@ import Bluebird from "bluebird";
 import React from "react"; // Import React if needed
 import DeleteComponent from "./customDefaultActions/Delete";
 import { defaultSorting } from "./_config/sorting";
+import { customArchive } from "./customArchiveAction";
 export default async function OrganizationGridPage({
   searchParams = {},
   params,
@@ -76,6 +77,7 @@ export default async function OrganizationGridPage({
         columns: gridColumns,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
+        archiveCustomAction: customArchive,
       }}
     />
   );

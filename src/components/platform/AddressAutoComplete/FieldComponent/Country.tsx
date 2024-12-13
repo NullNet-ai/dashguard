@@ -1,9 +1,9 @@
 import FormSelect from "../../FormBuilder/FormType/FormSelect";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 import CountryToCities from "../countriesToCities.json";
 import { FormField } from "~/components/ui/form";
 
-export default function CountryName({ form }: IFieldComponentProps) {
+export default function CountryName({ form,formKey }: IFieldComponentProps) {
   const handleSelect = (value: string) => {
     form.setValue(`details.country`, value);
     form.setValue(`details.city`, "");
@@ -17,7 +17,7 @@ export default function CountryName({ form }: IFieldComponentProps) {
       render={(formRenderProps) => {
         return (
           <FormSelect
-            formKey="CountryName"
+            formKey={formKey}
             fieldConfig={{
               selectSearchable: true,
               ...formRenderProps?.field,

@@ -3,7 +3,7 @@ import { IFieldComponentProps } from "./type";
 import CountryToCities from "../countriesToCities.json";
 import { useMemo } from "react";
 import { FormField } from "~/components/ui/form";
-export default function CityName({ form }: IFieldComponentProps) {
+export default function CityName({ form,formKey }: IFieldComponentProps) {
   const address_values_country = form.getValues("details.country");
 
   const city_list = useMemo(() => {
@@ -24,7 +24,7 @@ export default function CityName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormSelect
-              formKey="CityName"
+              formKey={formKey}
               fieldConfig={{
                 selectSearchable: true,
                 ...formRenderProps?.field,

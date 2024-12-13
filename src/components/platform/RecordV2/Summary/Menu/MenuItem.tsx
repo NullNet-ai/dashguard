@@ -6,7 +6,7 @@ interface IMenuItemProps {
   onClick: () => void;
 }
 
-export default function MenuItem({ children, onClick  }: IMenuItemProps) {
+export default function MenuItem({ children, onClick,...props  }: IMenuItemProps) {
   const handleClick = () => {
     // ? Feel free to add your logic here
     onClick();
@@ -14,7 +14,7 @@ export default function MenuItem({ children, onClick  }: IMenuItemProps) {
 
   return (
     <Fragment>
-      <DropdownMenuItem onClick={handleClick}>{children}</DropdownMenuItem>
+      <DropdownMenuItem onClick={handleClick} {...props}>{children}</DropdownMenuItem>
       <DropdownMenuSeparator />
     </Fragment>
   );

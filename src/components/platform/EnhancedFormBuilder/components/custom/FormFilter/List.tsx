@@ -66,7 +66,6 @@ export default function FormFilterGrid({
   }
 
   const initialSelectedRecords = selectedRecords.reduce((acc, id) => ({...acc, [id]: true}), {});
-
   return (
     <Grid
       onSelectRecords={(rows) => {
