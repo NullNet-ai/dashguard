@@ -2,11 +2,15 @@
 
 import { Fragment, useState } from "react";
 
-import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
+import type {
+  ControllerFieldState,
+  ControllerRenderProps,
+  UseFormReturn,
+} from "react-hook-form";
 import { AddressAutoCompleteInput } from "./address-autocomplete-input";
 import AddressForm from "./address-form";
 import { api } from "~/trpc/react";
-import { IField } from "../FormBuilder/type";
+import type { IField } from "../FormBuilder/type";
 import CountryToCities from "./countriesToCities.json";
 import States from "./states.json";
 
@@ -93,24 +97,26 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
 
   return (
     <Fragment>
-      <AddressAutoCompleteInput
-        handleSelectAddress={handleSelectAddress}
-        form={form}
-        formKey={props.formKey}
-        fieldConfig={props.fieldConfig}
-        formRenderProps={props.formRenderProps}
-      />
-      {address?.place_id ? (
-        <div className="items-center">
-          <AddressForm
-            isLoading={isLoading}
-            form={form}
-            formKey={props.formKey}
-            fieldConfig={props.fieldConfig}
-            formRenderProps={props.formRenderProps}
-          />
-        </div>
-      ) : null}
+      <div className="flex flex-col">
+        <AddressAutoCompleteInput
+          handleSelectAddress={handleSelectAddress}
+          form={form}
+          formKey={props.formKey}
+          fieldConfig={props.fieldConfig}
+          formRenderProps={props.formRenderProps}
+        />
+        {address?.place_id ? (
+          <div className="items-center">
+            <AddressForm
+              isLoading={isLoading}
+              form={form}
+              formKey={props.formKey}
+              fieldConfig={props.fieldConfig}
+              formRenderProps={props.formRenderProps}
+            />
+          </div>
+        ) : null}
+      </div>
     </Fragment>
   );
 }
