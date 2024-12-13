@@ -44,7 +44,6 @@ interface IUseFieldArrayEmail {
   replace: (data: IEmailData[]) => void;
 }
 
-
 export default function FormEmailInput({
   fieldConfig,
   formRenderProps,
@@ -106,7 +105,7 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center focus-within:outline-none focus-within:ring-1 focus-within:ring-ring focus-within:border-primary  ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
@@ -117,7 +116,7 @@ export default function FormEmailInput({
                     value={`${values[index]?.email || ""}`}
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
-                    className={`rounded-none border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent  focus-visible:ring-offset-[-4] focus-visible:border-transparent`}
+                    className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
                     disabled={isDisabled}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
@@ -127,7 +126,7 @@ export default function FormEmailInput({
                   {data?.is_primary && isMultiple && (
                     <Badge
                       variant={"outline"}
-                      className={` bg-primary/10 py-1 font-normal text-primary mx-auto hover:bg-primary/10`}
+                      className={`mx-auto bg-primary/10 py-1 font-normal text-primary hover:bg-primary/10`}
                       data-test-id={`${formKey}-${fieldConfig.name}-IsPrimaryBadge${index + 1}`}
                     >
                       Primary
@@ -167,9 +166,7 @@ export default function FormEmailInput({
                       data-test-id={`${formKey}-${fieldConfig.name}-remove_button_${index + 1}`}
                       className={`rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
-                        const _values = form.getValues(
-                          (fieldConfig.name),
-                        );
+                        const _values = form.getValues(fieldConfig.name);
                         handleRemoveEmail(index, _values);
                       }}
                     >
@@ -210,10 +207,8 @@ export default function FormEmailInput({
         </Button>
       )}
 
-      {error?.root?.message && (
-        <FormMessage
-          data-test-id={`${formKey}-${fieldConfig.name}-errmsg`}
-        />
+      {(error?.root?.message || error?.message) && (
+        <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-errmsg`} />
       )}
     </FormItem>
   );
