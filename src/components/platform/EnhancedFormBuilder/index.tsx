@@ -3,7 +3,11 @@ import { SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Card } from "~/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import { cn } from "~/lib/utils";
@@ -32,7 +36,7 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay = "expanded",
     customRender,
     formProps,
-    features
+    features,
   } = props;
 
   const { actions } = useWizard();
@@ -316,6 +320,8 @@ export const FormBuilder = (props: IPropsForms) => {
         filter_entity: filterGridConfig?.filter_entity,
         action_type: formGridSelected.length ? "Update" : "Create",
       });
+      //TODO: Please cater setting error message in field and don't proceed to view mode.
+      if (!response?.length) throw new Error("Failed to submit form grid");
       setFormGridSelected(response);
       setDisplayType("selected");
       setIsSaveLoading(false);
@@ -333,37 +339,37 @@ export const FormBuilder = (props: IPropsForms) => {
       )}
     >
       <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
-          <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
-            <FormBuilderLayout
-              {...props}
-              form={form}
-              debugOn={debugOn}
-              showFormActions={showFormActions}
-              formGridSelected={formGridSelected}
-              isListLoading={isListLoading}
-              isSaveLoading={isSaveLoading}
-              isFormOpened={isFormOpened}
-              isOpenGrid={isOpenGrid}
-              isAccordionExpanded={isAccordionExpanded}
-              displayType={displayType}
-              saveForm={saveForm}
-              onSubmitFormGrid={onSubmitFormGrid}
-              setIsSaveLoading={setIsSaveLoading}
-              setShowFormActions={setShowFormActions}
-              handleCloseGrid={handleCloseGrid}
-              handleAccordionChange={handleAccordionChange}
-              handleListLoading={handleListLoading}
-              handleDebug={handleDebug}
-              handleLock={handleLock}
-              handleAccordionExpand={handleAccordionExpand}
-              handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
-              handleAppendForm={handleAppendForm}
-              handleUpdateDisplayType={handleUpdateDisplayType}
-              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
-              handleOpenForm={handleOpenForm}
-              features={features}
-            />
-          </Card>
+        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+          <FormBuilderLayout
+            {...props}
+            form={form}
+            debugOn={debugOn}
+            showFormActions={showFormActions}
+            formGridSelected={formGridSelected}
+            isListLoading={isListLoading}
+            isSaveLoading={isSaveLoading}
+            isFormOpened={isFormOpened}
+            isOpenGrid={isOpenGrid}
+            isAccordionExpanded={isAccordionExpanded}
+            displayType={displayType}
+            saveForm={saveForm}
+            onSubmitFormGrid={onSubmitFormGrid}
+            setIsSaveLoading={setIsSaveLoading}
+            setShowFormActions={setShowFormActions}
+            handleCloseGrid={handleCloseGrid}
+            handleAccordionChange={handleAccordionChange}
+            handleListLoading={handleListLoading}
+            handleDebug={handleDebug}
+            handleLock={handleLock}
+            handleAccordionExpand={handleAccordionExpand}
+            handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleAppendForm={handleAppendForm}
+            handleUpdateDisplayType={handleUpdateDisplayType}
+            handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+            handleOpenForm={handleOpenForm}
+            features={features}
+          />
+        </Card>
       </Collapsible>
     </form>
   );

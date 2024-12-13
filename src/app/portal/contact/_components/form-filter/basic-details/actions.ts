@@ -6,6 +6,10 @@ import { api } from "~/trpc/server";
 export const saveContactDetails = async (data: any, action_type?: string) => {
   const response = await api.contact.saveContactPhoneEmail(data);
 
+  if (response?.existing) {
+    return response;
+  }
+
   if (action_type === "Create") {
     const headerList = headers();
     const pathname = headerList.get("x-pathname") || "";
@@ -16,7 +20,7 @@ export const saveContactDetails = async (data: any, action_type?: string) => {
       current_context: currentContext,
     });
   }
-  return [response];
+  return response;
 };
 
 export const selectRecord = async (rows: any[]) => {

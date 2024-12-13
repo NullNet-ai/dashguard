@@ -1,15 +1,15 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { useRouter } from "next/navigation";
 
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
-import { useRouter } from "next/navigation";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
 export default function ContactDetails({
   params,
@@ -25,12 +25,25 @@ export default function ContactDetails({
   }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
     any[]
   > => {
-    const response = await saveContactDetails(data, action_type);
-    if (action_type === "Create") {
-      const code = response?.[0]?.code;
-      router.push(`/portal/contact/wizard/${code}/1`);
+    try {
+      const response = await saveContactDetails(data, action_type);
+      if (response?.existing) {
+        // const { data } = response;
+        // const { phones, emails } = data || {};
+        //TODO: Add error message in field and don't proceed to view mode.
+        toast.error(`Contact already exists.`);
+        return [];
+      }
+
+      if (action_type === "Create") {
+        const code = response?.code;
+        router.push(`/portal/contact/wizard/${code}/1`);
+      }
+      return [response];
+    } catch (error) {
+      toast.error("Failed to submit Basic Details");
+      return [];
     }
-    return response;
   };
 
   const handleRemoveRecord = async ({
