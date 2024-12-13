@@ -88,23 +88,23 @@ export default function Menu({ item }: IProps) {
               <a
                 href={item.url || "#"}
                 className={`flex items-center gap-2 group/item ${isActive && "bg-muted text-primary"}`}
-                data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}`)}
+                data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}`)}
                 >
                 <SidebarMenuButton tooltip={item.title}
-                  data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-btn`)}
+                  data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-btn`)}
                 >
                   <ICON className="mr-2 h-5 w-5" />
                   <span className="font-semibold">{item.title}</span>
                   {isFavorite ? (
                     <SolidStarIcon
                       onClick={toggleFavorite}
-                      data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-fav-btn`)}
+                      data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-fav-btn`)}
                       className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                     />
                   ) : (
                     <StarIcon
                       onClick={toggleFavorite}
-                      data-test-id={testIDFormatter(`sidebar-menu-itm-${item.title}-fav-btn`)}
+                      data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-fav-btn`)}
                       className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                     />
                   )}

@@ -2,7 +2,7 @@ import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
 import { IFieldComponentProps } from "./type";
 
-export default function AddressLineTwo({ form }: IFieldComponentProps) {
+export default function AddressLineTwo({ form,formKey }: IFieldComponentProps) {
   const address_values = form.getValues("details.address_line_two");
   return (
     <div className="space-y-0.5">
@@ -12,7 +12,7 @@ export default function AddressLineTwo({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
-            formKey="AddressLineTwo"
+            formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,
                 placeholder: "Suite, Floor and Landmarks.",

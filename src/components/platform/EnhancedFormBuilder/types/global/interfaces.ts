@@ -1,20 +1,21 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef } from "@tanstack/react-table";
 import {
-  HTMLAttributes,
-  HTMLInputTypeAttribute,
-  ReactElement,
-  ReactNode,
+  type HTMLAttributes,
+  type HTMLInputTypeAttribute,
+  type ReactElement,
+  type ReactNode,
 } from "react";
-import { DropzoneOptions } from "react-dropzone";
-import { UseFormReturn } from "react-hook-form";
+import { type DropzoneOptions } from "react-dropzone";
+import { type UseFormReturn } from "react-hook-form";
 
-import { TActionType } from "~/components/platform/Grid/types";
+import { type TActionType } from "~/components/platform/Grid/types";
 import {
-  DateTimeGranularity,
-  TFormSchema,
-  TFormType,
-  TSelectionType,
+  type DateTimeGranularity,
+  type TFormSchema,
+  type TFormType,
+  type TSelectionType,
 } from "./types";
+import { type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;
@@ -35,6 +36,13 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
+  dateTimePickerProps?: DateTimeLocalInputProps & {
+    minDate?: Date;
+    maxDate?: Date;
+    disablePastDates?: boolean;
+    disableFutureDates?: boolean;
+    includeTime?: boolean;
+  };
   description?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
@@ -121,16 +129,16 @@ interface IUserFormField {
 }
 
 export interface IFeatures {
-  enableLockFormView? : boolean,
-  enableLockFormCopy? : boolean,
-  enableLockFormEllipsis? : boolean,
-  enableViewFormEllipsis? : boolean,
-  enableViewFormCopy? : boolean,
-  enableViewFormPaste? : boolean,
-  enableViewFormClear? : boolean,
-  enableUnlockFormFilter? : boolean,
-  enableFormHostViewActions? : boolean,
-  enableFormHostLockActions? : boolean,
+  enableLockFormView?: boolean;
+  enableLockFormCopy?: boolean;
+  enableLockFormEllipsis?: boolean;
+  enableViewFormEllipsis?: boolean;
+  enableViewFormCopy?: boolean;
+  enableViewFormPaste?: boolean;
+  enableViewFormClear?: boolean;
+  enableUnlockFormFilter?: boolean;
+  enableFormHostViewActions?: boolean;
+  enableFormHostLockActions?: boolean;
 }
 
 export interface ICustomActions {
@@ -140,7 +148,6 @@ export interface ICustomActions {
   disabled?: boolean;
   hidden?: boolean;
 }
-
 
 interface IFilterGridConfig {
   selectedRecords?: any[];
@@ -175,6 +182,10 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  grid_data?: {
+    items: Record<string, any>[];
+    totalCount: number;
+  }
 }
 
 interface IPropsForms {
@@ -218,7 +229,7 @@ interface IPropsForms {
     },
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
-  features? : IFeatures;
+  features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];

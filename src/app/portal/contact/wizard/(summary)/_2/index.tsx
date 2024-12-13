@@ -6,6 +6,7 @@ const fields = {
   "First Name": "first_name",
   "Last Name": "last_name",
   "Middle Name": "middle_name",
+  "Date of Birth": "date_of_birth",
 };
 
 const ContactDetailsSummary = ({
@@ -24,7 +25,13 @@ const ContactDetailsSummary = ({
   } = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "first_name", "last_name", "middle_name"],
+    pluck_fields: [
+      "id",
+      "first_name",
+      "last_name",
+      "middle_name",
+      "date_of_birth",
+    ],
   });
 
   const { data } = record || {};

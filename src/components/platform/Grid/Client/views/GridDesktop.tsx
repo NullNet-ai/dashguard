@@ -12,9 +12,11 @@ import { Badge } from "~/components/ui/badge";
 
 interface IGridDesktopProps {
   parentType: "grid" | "form";
+  hideSearch?: boolean;
+  height?: string;
 }
 
-function GridDesktop({ parentType }: IGridDesktopProps) {
+function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
   return (
@@ -34,9 +36,10 @@ function GridDesktop({ parentType }: IGridDesktopProps) {
               Submit
             </Button>
           )}
-          <div style={{ width: parentType ? '100%' : "calc(100vw - 29rem)" }}>
+          {hideSearch ? null : <div style={{ width: parentType ? '100%' : "calc(100vw - 29rem)" }}>
             <Search />
-          </div>
+          </div>}
+          
         </div>
       </CardHeader>
       <ScrollArea
@@ -46,9 +49,10 @@ function GridDesktop({ parentType }: IGridDesktopProps) {
             : {
                 // width: "calc(100vw - 40rem)",
                 width: "auto",
+                height: height || "auto",
               }
         }
-        className="rounded-md border bg-card text-card-foreground"
+        className="rounded-md border bg-card text-card-foreground overflox-y-auto"
       >
      <Table>
           <TableHeader>

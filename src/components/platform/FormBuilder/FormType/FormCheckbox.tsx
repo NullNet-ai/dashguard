@@ -12,8 +12,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type ICheckboxOptions, type IField } from "../type";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 interface IProps {
   fieldConfig: IField;
@@ -33,9 +31,7 @@ export default function FormCheckbox({
       <FormLabel
         required={fieldConfig?.required}
         className="text-base"
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "CheckboxFormLabel",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -53,9 +49,7 @@ export default function FormCheckbox({
                 <FormControl>
                   <Checkbox
                     disabled={field.disabled || fieldConfig?.disabled}
-                    data-test-id={kebabCase(
-                      formKey + fieldConfig?.name + "Checkbox" + (index + 1),
-                    )}
+                    data-test-id={`${formKey}-${fieldConfig?.name}-chk-${index + 1}`}
                     checked={field?.value?.includes(item.value)}
                     onCheckedChange={(checked) => {
                       return checked
@@ -71,9 +65,7 @@ export default function FormCheckbox({
                 </FormControl>
                 <FormLabel
                   className="font-normal"
-                  data-test-id={kebabCase(
-                    formKey + " "+ (fieldConfig.name) + "CheckboxLabel" + item.label,
-                  )}
+                  data-test-id={`${formKey}-${fieldConfig.name}-chk-lbl${index + 1}`}
                 >
                   {item.label}
                 </FormLabel>
@@ -83,9 +75,7 @@ export default function FormCheckbox({
         />
       ))}
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "CheckboxErrorMessage",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
       />
     </FormItem>
   );

@@ -2,60 +2,55 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
-  checkbox: z
-    .array(z.string(), { message: "At least one checkbox must be selected" })
-    .refine((val) => val.length > 0, {
-      message: "At least one checkbox must be selected",
-    }),
+  favoriteFruits: z
+    .array(z.string())
+    .min(1, { message: "At least one fruit must be selected" }),
 });
 
-export default function CheckboxDetails({}) {
+export default function FavoriteFruitsForm() {
   const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        toast(
-          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            <code className="text-white">
-              {JSON.stringify(values.data, null, 2)}
-            </code>
-          </pre>,
-        );
-        resolve();
-      } catch (error) {
-        console.error("Form submission error", error);
-        toast.error("Failed to submit the form. Please try again.");
-        reject(new Error("Form submission error"));
-      }
-    });
+    try {
+      toast(
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">
+            {JSON.stringify(values.data, null, 2)}
+          </code>
+        </pre>
+      );
+    } catch (error) {
+      console.error("Form submission error", error);
+      toast.error("Failed to submit the form. Please try again.");
+    }
   };
 
   return (
     <>
-      {/* FormBuilder 4: Checkbox */}
       <FormBuilder
         enableFormRegisterToParent
-        formLabel="Checkbox Form Builder"
-        formKey="FormBuilderCheckbox"
+        formLabel="Favorite Fruits Form"
+        formKey="favorite fruits"
         formSchema={FormSchema}
         handleSubmit={handleSave}
         checkboxOptions={{
-          checkbox: [
-            { label: "Checkbox 1", value: "checkbox1" },
-            { label: "Checkbox 2", value: "checkbox2" },
-            { label: "Checkbox 3", value: "checkbox3" },
+          favoriteFruits: [
+            { label: "Apple", value: "apple" },
+            { label: "Banana", value: "banana" },
+            { label: "Cherry", value: "cherry" },
+            { label: "Date", value: "date" },
+            { label: "Elderberry", value: "elderberry" },
           ],
         }}
         fields={[
           {
-            id: "checkbox",
+            id: "favoriteFruits",
             formType: "checkbox",
-            name: "checkbox",
-            label: "Checkbox",
+            name: "favoriteFruits",
+            label: "Select Your Favorite Fruits",
             required: true,
-            placeholder: "Checkbox",
+            placeholder: "Select at least one fruit",
           },
         ]}
       />
