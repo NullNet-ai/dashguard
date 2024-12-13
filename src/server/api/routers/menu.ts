@@ -70,15 +70,6 @@ export const menuRouter = createTRPCRouter({
         groupTitle: "Platform",
         groups: [
           {
-            title: "Reports",
-            icon: "AcademicCapIcon",
-            isActive: pathName.endsWith("/report"),
-            items: [],
-            url: getGridLink({
-              mainEntity: "report",
-            }),
-          },
-          {
             title: "Settings",
             icon: "Cog8ToothIcon",
             isActive: pathName.includes("/setting"),
