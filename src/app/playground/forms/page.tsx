@@ -22,35 +22,35 @@ import FileDetails from "./_form-controls/file";
 
 export default function PlatformPlayGround() {
   return (
-    // <>
-    //   <ButtonPlayGround />
-    //   <Separator className="my-6" />
-    //   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-    //     <FileDetails/>
-    //     <InputsGrid />
-    //     <AddressDetails />
-    //     <MultiSelectDetails />
-    //     <AmountDetails />
-    //     <SmartDateDetails />
-    //     <TextAreaDetails />
-    //     <PasswordDetails />
-    //     <RadioDetails />
-    //     <NumberInputDetails />
-    //     <PhoneInputDetails />
-    //     <EmailInputDetails />
-    //     <InputDetails />
-    //     <AmountDetails />
-    //     <CheckboxDetails />
-    //     <RichTextEditorDetails />
-    //     <SelectDetails />
-    //     {/* <DateRangeDetails />
-    //     <FileDetails />
-    //     <InputsDetails />
-    //     <InputLabelValueDetails />
-    //     <SliderDetails /> */}
-    //     <Toaster />
-    //   </div>
-    // </>
-    <></>
+    <>
+      <ButtonPlayGround />
+      <Separator className="my-6" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <FileDetails/>
+        <InputsGrid />
+        <AddressDetails />
+        <MultiSelectDetails />
+        <AmountDetails />
+        <SmartDateDetails />
+        <TextAreaDetails />
+        <PasswordDetails />
+        <RadioDetails />
+        <NumberInputDetails />
+        <PhoneInputDetails />
+        <EmailInputDetails />
+        <InputDetails />
+        <AmountDetails />
+        <CheckboxDetails />
+        <RichTextEditorDetails />
+        <SelectDetails />
+        {/* <DateRangeDetails />
+        <FileDetails />
+        <InputsDetails />
+        <InputLabelValueDetails />
+        <SliderDetails /> */}
+        <Toaster />
+      </div>
+    </>
+
   );
 }

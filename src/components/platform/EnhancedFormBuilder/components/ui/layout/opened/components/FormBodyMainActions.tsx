@@ -30,6 +30,7 @@ const FormBodyMainActions = ({
   customFormFilterLockFormActions,
   features,
   searchActive,
+  formProps
 }: {
   isListLoading: boolean;
   displayType: string;
@@ -47,9 +48,9 @@ const FormBodyMainActions = ({
   customFormFilterViewFormActions: ICustomActions[] | undefined;
   customFormFilterLockFormActions: ICustomActions[] | undefined;
   searchActive: boolean;
+  formProps?: any
 }) => {
 
-  const router = useRouter();
 
 
   return (
@@ -75,7 +76,7 @@ const FormBodyMainActions = ({
               Cancel
             </Button>
           )}
-          {!searchActive && (
+          {!formProps?.isOpenSearch && (
             <>
               <Button
                 variant={"default"}
@@ -104,11 +105,7 @@ const FormBodyMainActions = ({
               <>
               <Button2
                 onClick={() => {
-                  if(searchActive) {
-                    router.push('?');
-                    return;
-                  }
-                  router.push('?search=true');
+                    formProps?.handleSearchOpen()
                 }}
               className="bg-indigo-100 hover:bg-indigo-200 text-primary px-2 inline-flex text-sm py-2 h-7 items-center  gap-1 rounded">
                 <MagnifyingGlassIcon className="h-4 w-4  text-primary transition-none" />
