@@ -1,6 +1,5 @@
 "use client";
 
-import { capitalize } from "lodash";
 import { ChevronDownIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useSidebar } from "~/components/ui/sidebar";
 import useWindowSize from "~/hooks/use-resize";
 import useScreenType from "~/hooks/use-screen-type";
-import { cn } from "~/lib/utils";
+import { cn, formatTabName } from "~/lib/utils";
 import { remToPx } from "~/utils/fetcher";
 
 type TabItemProps = {
@@ -71,7 +70,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                         "flex items-center space-x-2",
                     )}
                     >
-                    {capitalize(tab.name)}
+                    {formatTabName(tab.name)}
                     </a>
                 </div>
                 );
@@ -110,7 +109,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                     "hover:border-t-primary hover:text-primary",
                   )}
                 >
-                  {capitalize(tab.name)}
+                  {formatTabName(tab.name)}
                 </a>
               </DropdownMenuItem>
             ))}

@@ -1,18 +1,17 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import PlatformRecord from "~/components/platform/RecordV2";
-import { RecordSummaryViewContent } from "~/components/platform/RecordV2/Summary/SummaryViewContent";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
-import RecordShellSummary from "../_components/RecordShellSummary";
-import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
-import { IPlatformRecordLayoutProps } from "~/components/platform/RecordV2/types";
-import { handleOnClick } from "../_actions";
+import RecordWrapper from "./_components/RecordWrapper";
 
-
-
-
-const Layout = async ({ children, record, record_summary }: IPlatformRecordLayoutProps) => {
+const Layout = async ({
+  record,
+  record_summary,
+}: {
+  record: React.ReactNode;
+  record_summary: React.ReactNode;
+  children: React.ReactNode;
+}) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
@@ -33,6 +32,12 @@ const Layout = async ({ children, record, record_summary }: IPlatformRecordLayou
       "updated_time",
     ],
   });
+  if (record_details?.errors?.length) {
+    throw new Error(record_details.message as string);
+  }
+  if (!record_details?.data) {
+    throw new Error("Record not found");
+  }
 
   const { status } = record_details?.data || {};
 
@@ -41,18 +46,11 @@ const Layout = async ({ children, record, record_summary }: IPlatformRecordLayou
     return notFound();
   }
 
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard",
-    },
-    {
-      id: "user_role",
-      name: "User Role",
-      tabName: "user_role",
-    },
-  ];
+
+  //Record Shell Guard for Draft Records
+  if (["Draft", "draft", "Pending"].includes(status)) {
+    return notFound();
+  }
 
   return (
     <RecordWrapper
@@ -60,20 +58,6 @@ const Layout = async ({ children, record, record_summary }: IPlatformRecordLayou
       record_summary={record_summary}
       entity_code={identifier!}
       entity_name={main_entity!}
-      tabs={tabs}
-      customProps={{
-        config: {
-          entityCode: identifier!,
-          entityName: main_entity!,
-          // sample usage of custom record actions
-          // identifierOption: [
-          //   {
-          //     label: "Edit",
-          //     onClick: handleOnClick
-          //   }
-          // ],
-        },
-      }}
     />
   );
 };

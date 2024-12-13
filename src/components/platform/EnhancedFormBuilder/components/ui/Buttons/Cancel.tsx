@@ -20,7 +20,7 @@ export default function CancelFormButton({
     <Button
       data-test-id="cancelFormButton"
       className={
-        "m-auto h-6 w-6 rounded-full bg-red-100 hover:disabled:cursor-not-allowed"
+        "m-auto h-6 w-6 rounded-full group bg-red-200 hover:bg-red-100"
       }
       loading={isLoading}
       type="submit"
@@ -35,7 +35,7 @@ export default function CancelFormButton({
       {...props}
     >
       {!isLoading && (
-        <XIcon className="h-3 w-3 cursor-pointer text-red-800" strokeWidth={4} />
+        <XIcon className="h-3 w-3 cursor-pointer text-red-700 group-hover:text-red-500" strokeWidth={4} />
       )}
     </Button>
   );
