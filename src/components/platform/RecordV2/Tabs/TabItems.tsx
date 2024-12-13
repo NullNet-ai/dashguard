@@ -4,12 +4,11 @@ import { capitalize } from "lodash";
 import { ChevronDownIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import TabMenu from "~/components/application-layout/common/TabMenu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { useSidebar } from "~/components/ui/sidebar";
 import useWindowSize from "~/hooks/use-resize";
 import useScreenType from "~/hooks/use-screen-type";
-import { cn, formatAndCapitalize } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { remToPx } from "~/utils/fetcher";
 
 type TabItemProps = {
