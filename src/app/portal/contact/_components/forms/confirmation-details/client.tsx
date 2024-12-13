@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
@@ -15,18 +15,18 @@ export default function ConfirmationDetails({
   params,
   defaultValues,
 }: IFormProps) {
-  const updateContact = api.contact.updateContactWithTags.useMutation();
+  // const updateContact = api.contact.updateContactWithTags.useMutation();
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      const tags = data?.tags?.map((tag) => tag.value);
-      await updateContact.mutateAsync({
-        id: params.id,
-        ...data,
-        tags,
-      });
+      // const tags = data?.tags?.map((tag) => tag.value);
+      // await updateContact.mutateAsync({
+      //   id: params.id,
+      //   ...data,
+      //   tags,
+      // });
     } catch (error) {
       throw error;
     }

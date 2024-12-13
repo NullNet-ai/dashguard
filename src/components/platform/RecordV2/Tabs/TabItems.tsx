@@ -1,15 +1,13 @@
 "use client";
 
-import { capitalize } from "lodash";
 import { ChevronDownIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import TabMenu from "~/components/application-layout/common/TabMenu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { useSidebar } from "~/components/ui/sidebar";
 import useWindowSize from "~/hooks/use-resize";
 import useScreenType from "~/hooks/use-screen-type";
-import { cn, formatAndCapitalize } from "~/lib/utils";
+import { cn, formatTabName } from "~/lib/utils";
 import { remToPx } from "~/utils/fetcher";
 
 type TabItemProps = {
@@ -72,7 +70,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                         "flex items-center space-x-2",
                     )}
                     >
-                    {capitalize(tab.name)}
+                    {formatTabName(tab.name)}
                     </a>
                 </div>
                 );
@@ -82,7 +80,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 py-3 text-sm font-medium text-gray-500 hover:text-primary"
-            data-test-id={"innerTabDropdownButton"}
+            data-test-id={"intb-dropdown-btn"}
           >
             <ChevronDownIcon
               className="h-6 w-6 text-muted-foreground group-hover:text-primary"
@@ -99,8 +97,8 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
               >
                 <a
                   data-test-id={
-                    "innerTab" +
-                    formatAndCapitalize(tab.name).split(" ").join("")
+                    "mntb-" +
+                    tab.name.split(" ").join("-").toLowerCase()
                   }
                   href={tab.href}
                   aria-current={searchParams.get('current_tab') === tab.id ? "page" : undefined}
@@ -111,7 +109,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                     "hover:border-t-primary hover:text-primary",
                   )}
                 >
-                  {capitalize(tab.name)}
+                  {formatTabName(tab.name)}
                 </a>
               </DropdownMenuItem>
             ))}

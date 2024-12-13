@@ -1,10 +1,21 @@
 import React from "react";
 
-export default function RecordShellSummary({ code }: { code: string }) {
+interface IProps {
+  email: string;
+  phone: string;
+  full_name: string;
+  categories: string[];
+}
+
+export default function RecordShellSummary(props: IProps) {
   return (
-    <div className="px-1">
-      <strong>Code:</strong>
-      {code}
-    </div>
+    <>
+      {Object.entries(props || {}).map(([key, value], idx) => (
+        <div className="px-1" key={idx}>
+          <strong>{key}:</strong>
+          &nbsp; {value || "None"}
+        </div>
+      ))}
+    </>
   );
 }

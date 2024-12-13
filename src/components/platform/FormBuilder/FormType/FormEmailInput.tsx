@@ -106,7 +106,7 @@ export default function FormEmailInput({
       <FormLabel
         required={fieldConfig?.required}
         data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "FormLabel",
+          formKey + " "+ (fieldConfig.name) + "lbl",
         )}
       >
         {fieldConfig?.label}
@@ -127,7 +127,7 @@ export default function FormEmailInput({
                     data-test-id={
                       formKey +
                       (fieldConfig.name) +
-                      "Input" +
+                      "inp" +
                       (index + 1)
                     }
                     name={data?.id}
@@ -248,7 +248,7 @@ export default function FormEmailInput({
       {error?.root?.message && (
         <FormMessage
           data-test-id={kebabCase(
-            formKey + " "+ (fieldConfig.name) + "EmailErrorMessage",
+            formKey + " "+ (fieldConfig.name) + "errmsg",
           )}
         />
       )}
