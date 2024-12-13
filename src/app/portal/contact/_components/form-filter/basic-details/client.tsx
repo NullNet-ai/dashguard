@@ -16,6 +16,7 @@ export default function ContactDetails({
   params,
   defaultValues,
   selectedRecords,
+  grid_data
 }: IFormProps) {
   const router = useRouter();
   const toast = useToast();
@@ -136,6 +137,7 @@ export default function ContactDetails({
           // Selected View Component
           return <SelectedView record={record} />;
         },
+        grid_data: grid_data
       }}
       myParent={params.shell_type}
       enableFormRegisterToParent
