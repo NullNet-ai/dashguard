@@ -11,7 +11,7 @@ const roleWizardSummary = ({
   return {
     one: {
       label: "Step 1",
-      required: false,
+      required: true,
       components: [
         {
           label: "Basic Details",
