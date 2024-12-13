@@ -1,20 +1,21 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef } from "@tanstack/react-table";
 import {
-  HTMLAttributes,
-  HTMLInputTypeAttribute,
-  ReactElement,
-  ReactNode,
+  type HTMLAttributes,
+  type HTMLInputTypeAttribute,
+  type ReactElement,
+  type ReactNode,
 } from "react";
-import { DropzoneOptions } from "react-dropzone";
-import { UseFormReturn } from "react-hook-form";
+import { type DropzoneOptions } from "react-dropzone";
+import { type UseFormReturn } from "react-hook-form";
 
-import { TActionType } from "~/components/platform/Grid/types";
+import { type TActionType } from "~/components/platform/Grid/types";
 import {
-  DateTimeGranularity,
-  TFormSchema,
-  TFormType,
-  TSelectionType,
+  type DateTimeGranularity,
+  type TFormSchema,
+  type TFormType,
+  type TSelectionType,
 } from "./types";
+import { type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;
@@ -35,6 +36,13 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
+  dateTimePickerProps?: DateTimeLocalInputProps & {
+    minDate?: Date;
+    maxDate?: Date;
+    disablePastDates?: boolean;
+    disableFutureDates?: boolean;
+    includeTime?: boolean;
+  };
   description?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
