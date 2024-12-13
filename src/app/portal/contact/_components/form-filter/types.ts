@@ -13,4 +13,8 @@ export interface IFormProps<T = Record<string, any>> {
   defaultValues?: any;
   selectOptions?: Record<string, any>;
   selectedRecords?: any;
+  grid_data?: {
+    items: Record<string, any>[];
+    totalCount: number;
+  }
 }

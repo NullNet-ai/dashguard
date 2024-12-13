@@ -182,6 +182,10 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  grid_data?: {
+    items: Record<string, any>[];
+    totalCount: number;
+  }
 }
 
 interface IPropsForms {

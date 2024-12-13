@@ -27,18 +27,30 @@ export default function FormFilterGrid({
     main_entity_id,
     onSelectRecords,
     filter_entity,
+    grid_data
   } = config;
   const selectedRecords = (config.selectedRecords || [])
   ?.map((record: any) => record?.id)
   .filter(Boolean) as string[];
-  const [_, list] = api.grid.items.useSuspenseQuery({
-    entity: filter_entity!,
-    current,
-    limit: limit || 100,
-    pluck,
-  });
-  const { isLoading, data } = list ?? {};
-  const { items, totalCount } = data ?? {};
+  let grid_items: any[] = [];
+  let grid_total_count = 0;
+  let isLoading = false;
+  if(grid_data){
+    grid_items = grid_data.items;
+    grid_total_count = grid_data.totalCount;
+  }else {
+    const [_, list] = api.grid.items.useSuspenseQuery({
+      entity: filter_entity!,
+      current,
+      limit: limit || 100,
+      pluck,
+    });
+    const { isLoading: list_is_loading, data } = list ?? {};
+    isLoading = list_is_loading
+    const { items, totalCount } = data ?? {};
+    grid_items = items || [];
+    grid_total_count = totalCount || 0;
+  }
   handleListLoading(isLoading);
   if (isLoading) {
     return (
@@ -70,8 +82,8 @@ export default function FormFilterGrid({
         });
       }}
       parentType="form"
-      totalCount={totalCount || 0}
-      data={items}
+      totalCount={grid_total_count || 0}
+      data={grid_items}
       config={{
         statusesIncluded: config?.statusesIncluded ?? [
           "draft",

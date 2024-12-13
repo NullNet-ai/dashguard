@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
+import { defaultSorting } from "../../../grid/_config/sorting";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -11,6 +12,31 @@ const FormServerFetch = async () => {
   const record_data = await api.contact.fetchContactPhoneEmail({
     code: identifier!,
     pluck_fields,
+  });
+  const _pluck = [
+    "id",
+    "code",
+    "categories",
+    "organization_id",
+    "first_name",
+    "middle_name",
+    "last_name",
+    "email_address",
+    "contact_status",
+    "status",
+    "created_date",
+    "updated_date",
+    "created_time",
+    "updated_time",
+  ];
+  const sorting = await api.grid.getReportSorting();
+
+  const { items = [], totalCount } = await api.contact.formFilterGrid({
+    entity: "contact",
+    pluck: _pluck,
+    sorting: sorting?.length ? sorting : defaultSorting,
+    current: 0,
+    limit: 100,
   });
 
   const default_values = record_data;
@@ -30,6 +56,7 @@ const FormServerFetch = async () => {
           pluck_fields,
         }}
         selectedRecords={contact_id ? [default_values] : []}
+        grid_data={{ items, totalCount }}
       />
     </div>
   );
