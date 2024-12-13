@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 
 import PlatformWizard from "~/components/platform/Wizard";
 import { type IWizardLayoutProps } from "../types";
+import organizationWizardSummary from "../(summary)/wizard-summary-config";
 
 const WizardLayout = (props: IWizardLayoutProps) => {
   const { children } = props;
@@ -10,6 +11,12 @@ const WizardLayout = (props: IWizardLayoutProps) => {
   const pathname = headerList.get("x-pathname") || "";
 
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
+
+  const _params = {
+    identifier: identifier!,
+    mainEntity: mainEntity!,
+  };
+  const wizard_summary = organizationWizardSummary(_params);
 
   return (
     <div>
@@ -21,6 +28,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           enableAutoCreate: false,
           entityName: mainEntity,
         }}
+        summary={wizard_summary}
       >
         {children}
       </PlatformWizard>
