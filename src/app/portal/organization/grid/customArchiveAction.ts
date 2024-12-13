@@ -4,9 +4,8 @@ import { DefaultRowActions } from "~/components/platform/Grid/types";
 import { api } from "~/trpc/server";
 import { redirect } from "next/navigation";
 
-export const customArchive = async (args: DefaultRowActions) => {
-  const { row } = args;
-  const { id } = row?.original;
+export const customArchive = async (args: Record<string, any>) => {
+  const { id } = args;
   const entity = "organization";
   return await api.organization
     .getOrganizationByParentIds({ parent_organization_ids: [id] })
