@@ -40,7 +40,7 @@ export default async function Page() {
       <RecordSummary />
       <RecordShellSummary
         email={_email?.email}
-        phone={format_phone}
+        phone={format_phone || ""}
         full_name={full_name}
         categories={_categories}
       />

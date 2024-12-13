@@ -1,10 +1,10 @@
 import React from "react";
 
 interface IProps {
-  email: string;
-  phone: string;
-  full_name: string;
-  categories: string[];
+  email?: string;
+  phone?: string;
+  full_name?: string;
+  categories?: string[];
 }
 
 export default function RecordShellSummary(props: IProps) {
