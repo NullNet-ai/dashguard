@@ -1,24 +1,53 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import type { IErrorProps } from "./types"
+import { XCircleIcon } from "@heroicons/react/24/outline";
+import { useEffect } from "react";
+import { Button } from "~/components/ui/button";
 
-const Error = (props: IErrorProps) => {
+const ErrorContainer = ({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string; statusCode?: number };
+  reset: () => void;
+}) => {
+  
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
 
-    const { error, reset } = props
+  const clearError = () => {
+    reset();
+  }
 
-     useEffect(() => {
-         console.error(error)
-     },[error])
-
-    return (
-        <div>
-            <h2>Something went wrong!</h2>
-            <button onClick={reset}>
-                 Try again
-            </button>
+  return (
+    <div className="rounded-md bg-red-100 p-4">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <XCircleIcon aria-hidden="true" className="h-5 w-5 text-red-400" />
         </div>
-    );
-}
+        <div className="ml-3">
+          <h1 className="text-sm font-medium text-red-800">Something Went Wrong!</h1>
+          <h3 className="text-sm font-medium text-red-800">Error Details:</h3>
+          <p className="text-sm text-red-700">Message: {error.message}</p>
+          {error.statusCode && (
+            <p className="text-sm text-red-700">
+              Status Code: {error.statusCode}
+            </p>
+          )}
+          {error.digest && (
+            <p className="text-sm text-red-700">Error ID: {error.digest}</p>
+          )}
+          {/* {error.stack && (
+            <p className="text-sm text-red-700">Stack Trace: {error.stack}</p>
+          )} */}
+          <div className="mt-4">
+            <Button onClick={clearError}>Try again</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-export default Error;
+export default ErrorContainer;
