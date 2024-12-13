@@ -6,6 +6,7 @@ const fields = {
   "First Name": "first_name",
   "Last Name": "last_name",
   "Middle Name": "middle_name",
+  "Date of Birth": "date_of_birth",
 };
 
 const ContactDetailsSummary = ({
