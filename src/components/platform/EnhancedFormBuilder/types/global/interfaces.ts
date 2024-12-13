@@ -15,6 +15,7 @@ import {
   TFormType,
   TSelectionType,
 } from "./types";
+import { DateTimeLocalInputProps } from "../../../../ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;
@@ -35,6 +36,13 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
+  dateTimePickerProps?: DateTimeLocalInputProps & {
+    minDate?: Date;
+    maxDate?: Date;
+    disablePastDates?: boolean;
+    disableFutureDates?: boolean;
+    includeTime?: boolean;
+  };
   description?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
@@ -121,16 +129,16 @@ interface IUserFormField {
 }
 
 export interface IFeatures {
-  enableLockFormView? : boolean,
-  enableLockFormCopy? : boolean,
-  enableLockFormEllipsis? : boolean,
-  enableViewFormEllipsis? : boolean,
-  enableViewFormCopy? : boolean,
-  enableViewFormPaste? : boolean,
-  enableViewFormClear? : boolean,
-  enableUnlockFormFilter? : boolean,
-  enableFormHostViewActions? : boolean,
-  enableFormHostLockActions? : boolean,
+  enableLockFormView?: boolean;
+  enableLockFormCopy?: boolean;
+  enableLockFormEllipsis?: boolean;
+  enableViewFormEllipsis?: boolean;
+  enableViewFormCopy?: boolean;
+  enableViewFormPaste?: boolean;
+  enableViewFormClear?: boolean;
+  enableUnlockFormFilter?: boolean;
+  enableFormHostViewActions?: boolean;
+  enableFormHostLockActions?: boolean;
 }
 
 export interface ICustomActions {
@@ -140,7 +148,6 @@ export interface ICustomActions {
   disabled?: boolean;
   hidden?: boolean;
 }
-
 
 interface IFilterGridConfig {
   selectedRecords?: any[];
@@ -218,7 +225,7 @@ interface IPropsForms {
     },
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
-  features? : IFeatures;
+  features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];
