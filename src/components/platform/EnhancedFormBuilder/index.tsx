@@ -316,6 +316,8 @@ export const FormBuilder = (props: IPropsForms) => {
         filter_entity: filterGridConfig?.filter_entity,
         action_type: formGridSelected.length ? "Update" : "Create",
       });
+      //TODO: Please cater setting error message in field and don't proceed to view mode.
+      if (!response?.length) throw new Error("Failed to submit form grid");
       setFormGridSelected(response);
       setDisplayType("selected");
       setIsSaveLoading(false);

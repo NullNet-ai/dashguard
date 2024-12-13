@@ -10,9 +10,14 @@ import { formatSorting } from "~/server/utils/formatSorting";
 import { pick } from "lodash";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
-import { ContactPhoneEmailSchema } from "../../zodSchema/contact/contactPhoneEmail";
+import {
+  ContactPhoneEmailSchema,
+  EmailSchema,
+  PhoneNumberSchema,
+} from "../../zodSchema/contact/contactPhoneEmail";
 import { EStatus } from "../types";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
+import { getContactsWithPhoneAndEmail } from "../../../utils/phone-email-validation";
 
 const ENTITY = "contact";
 
@@ -175,8 +180,120 @@ export const contactRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id, email, phone } = input;
 
+      const email_pluck = ["email", "id", "contact_id", "is_primary"];
+      const phone_pluck = [
+        "raw_phone_number",
+        "id",
+        "contact_id",
+        "is_primary",
+        "iso_code",
+        "country_code",
+      ];
+      const email_data = email?.[0];
+
+      const phone_data = phone?.[0];
+
       let contact_id = id;
       let contact_code = "";
+
+      // Validate phone and email exists
+      const fetchRecordData = async (
+        entity: string,
+        filters: IAdvanceFilters[],
+        pluckFields: string[],
+      ) => {
+        const response = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              advance_filters: filters,
+              pluck: pluckFields,
+            },
+          })
+          .execute();
+
+        return response?.data;
+      };
+
+      const getContactData = async (
+        item: z.infer<typeof PhoneNumberSchema> | z.infer<typeof EmailSchema>,
+
+        entity: string,
+        fieldKey: string,
+        pluckFields: string[],
+      ) => {
+        const field_value = (item as { [key: string]: any })?.[fieldKey];
+
+        if (!field_value) return null;
+
+        const filters = [
+          ...createAdvancedFilter({
+            [fieldKey]: field_value,
+            status: "Active",
+          }),
+          ...(contact_id
+            ? [
+                {
+                  operator: EOperator.AND,
+                  type: "operator",
+                },
+                {
+                  field: "contact_id",
+                  operator: EOperator.NOT_EQUAL,
+                  type: "criteria",
+                  values: [contact_id],
+                },
+              ]
+            : []),
+        ];
+
+        return fetchRecordData(entity, filters, pluckFields);
+      };
+
+      const [phones_exist, email_exist] = await Promise.all([
+        getContactData(
+          phone_data as z.infer<typeof PhoneNumberSchema>,
+          "contact_phone_numbers",
+          "raw_phone_number",
+          [
+            "id",
+            "raw_phone_number",
+            "is_primary",
+            "contact_id",
+            "country_code",
+            "iso_code",
+          ],
+        ),
+        getContactData(
+          email_data as z.infer<typeof EmailSchema>,
+          "contact_emails",
+          "email",
+          ["id", "email", "is_primary", "contact_id"],
+        ),
+      ]);
+
+      //AND condition for now.
+      const contact_ids = getContactsWithPhoneAndEmail({
+        phones_exist: phones_exist || [],
+        email_exist: email_exist || [],
+      });
+
+      if (contact_ids?.length) {
+        return {
+          message: "",
+          data: {
+            phones: phones_exist,
+            emails: email_exist,
+          },
+
+          status_code: 200,
+          total_count: 0,
+          record_count: 0,
+          existing: true,
+        };
+      }
+
       if (!contact_id) {
         const record = await ctx.dnaClient
           .create({
@@ -197,13 +314,19 @@ export const contactRouter = createTRPCRouter({
         contact_code = contact?.code;
       }
 
+      // Suppose to create once only
       const insert = async (entity: string, data: any, pluck: string[]) => {
         const record = await ctx.dnaClient
           .create({
             entity,
             token: ctx.token.value,
             mutation: {
-              params: { ...data, contact_id, status: "Active" },
+              params: {
+                ...data,
+                contact_id,
+                status: "Active",
+                is_primary: true,
+              },
               pluck,
             },
           })
@@ -211,29 +334,68 @@ export const contactRouter = createTRPCRouter({
         return record?.data?.[0];
       };
 
-      const response = await Promise.all([
-        insert("contact_email", email?.[0], [
-          "email",
-          "id",
-          "contact_id",
-          "is_primary",
-        ]),
-        insert("contact_phone_number", phone?.[0], [
-          "raw_phone_number",
-          "id",
-          "contact_id",
-          "is_primary",
-          "iso_code",
-          "country_code",
-        ]),
+      const update = async (entity: string, data: any, pluck: string[]) => {
+        const record = await ctx.dnaClient
+          .update(data.id, {
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: data,
+              pluck,
+            },
+          })
+          .execute();
+        return record?.data?.[0];
+      };
+
+      const getRecordByContactId = async (
+        entity: string,
+        contact_id: string,
+        record_id: string,
+      ) => {
+        const advance_filters = createAdvancedFilter({
+          contact_id,
+          id: record_id,
+        });
+        const record = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              advance_filters,
+            },
+          })
+          .execute();
+        return record?.data?.[0];
+      };
+
+      const [contact_email, contact_phone] = await Promise.all([
+        getRecordByContactId("contact_email", contact_id!, email_data?.id!),
+        getRecordByContactId(
+          "contact_phone_number",
+          contact_id!,
+          phone_data?.id!,
+        ),
       ]);
-      console.info("[Insert Contact Phone Email]", response);
+
+      // Since not multiple
+      const email_id = contact_email?.id;
+      const phone_id = contact_phone?.id;
+
+      const [email_record, phone_record] = await Promise.all([
+        email_id
+          ? update("contact_email", email_data, email_pluck)
+          : insert("contact_email", email_data, email_pluck),
+        phone_id
+          ? update("contact_phone_number", phone_data, phone_pluck)
+          : insert("contact_phone_number", phone_data, phone_pluck),
+      ]);
 
       return {
         id: contact_id,
         code: contact_code,
-        email: [response[0]],
-        phone: [response[1]],
+        email: [email_record],
+        phone: [phone_record],
       };
     }),
   fetchContactPhoneEmail: privateProcedure

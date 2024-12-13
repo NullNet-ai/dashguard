@@ -1,15 +1,16 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { useRouter } from "next/navigation";
 
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
-import { useRouter } from "next/navigation";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+import SelectedView from "./components/SelectedView";
 
 export default function ContactDetails({
   params,
@@ -25,29 +26,35 @@ export default function ContactDetails({
   }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
     any[]
   > => {
-    const response = await saveContactDetails(data, action_type);
-    if (action_type === "Create") {
-      router.push(`/portal/contact/wizard/${response?.[0]?.code}/1`);
+    try {
+      const response = await saveContactDetails(data, action_type);
+      if (response?.existing) {
+        // const { data } = response;
+        // const { phones, emails } = data || {};
+        //TODO: Add error message in field and don't proceed to view mode.
+        toast.error(`Contact already exists.`);
+        return [];
+      }
+
+      if (action_type === "Create") {
+        const code = response?.code;
+        router.push(`/portal/contact/wizard/${code}/1`);
+      }
+      return [response];
+    } catch (error) {
+      toast.error("Failed to submit Basic Details");
+      return [];
     }
-    return response;
   };
 
   const handleRemoveRecord = async ({
     filter_entity,
-    main_entity_id,
-    rows,
   }: {
     rows: any[];
     main_entity_id: string;
     filter_entity: string;
   }) => {
     try {
-      // console.log("REMOVE RECORD", {
-      //   filter_entity,
-      //   main_entity_id,
-      //   rows,
-      // })
-      // removeRecord();
       return {
         rows: [],
         filter_entity,
@@ -127,14 +134,7 @@ export default function ContactDetails({
         },
         renderComponentSelected: (record) => {
           // Selected View Component
-          return (
-            <div>
-              <div>
-                Primary Phone Number: {record.phone?.[0]?.raw_phone_number}
-              </div>
-              <div>Primary Email: {record.email?.[0]?.email}</div>
-            </div>
-          );
+          return <SelectedView record={record} />;
         },
       }}
       myParent={params.shell_type}
@@ -152,13 +152,15 @@ export default function ContactDetails({
           placeholder: "Phone Number",
           name: "phone",
           label: "Phone Number",
+          required: true,
         },
         {
           id: "email",
           formType: "email-input",
-          placeholder: "email address",
+          placeholder: "Email",
           name: "email",
-          label: "Email Address",
+          label: "Email",
+          required: true,
         },
       ]}
       // customFormFilterViewFormActions={[
