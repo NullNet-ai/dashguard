@@ -1,103 +1,108 @@
-import * as React from 'react'
-import type { Editor } from '@tiptap/react'
-import type { FormatAction } from '../../types'
-import type { toggleVariants } from '~/components/ui/toggle'
-import type { VariantProps } from 'class-variance-authority'
-import { RemoveFormattingIcon as TextNoneIcon } from 'lucide-react'
-import { CommandLineIcon as CodeIcon,EllipsisHorizontalIcon as DotsHorizontalIcon,BoldIcon as FontBoldIcon,ItalicIcon as FontItalicIcon,StrikethroughIcon,UnderlineIcon } from '@heroicons/react/20/solid'
-import { ToolbarSection } from '../toolbar-section'
+import * as React from "react";
+import type { Editor } from "@tiptap/react";
+import { cn } from "~/lib/utils";
+import { ChevronDownIcon as CaretDownIcon } from "@heroicons/react/20/solid";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { ToolbarButton } from "../toolbar-button";
 
-type TextStyleAction = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | 'clearFormatting'
+import type { toggleVariants } from "~/components/ui/toggle";
+import type { VariantProps } from "class-variance-authority";
+import { ALargeSmall } from "lucide-react";
 
-interface TextStyle extends FormatAction {
-  value: TextStyleAction
+interface TextStyle {
+  label: string;
+  fontFamily: string;
 }
 
 const formatActions: TextStyle[] = [
   {
-    value: 'bold',
-    label: 'Bold',
-    icon: <FontBoldIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleBold().run(),
-    isActive: editor => editor.isActive('bold'),
-    canExecute: editor => editor.can().chain().focus().toggleBold().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', 'B']
+    label: "Times New Roman",
+    fontFamily: "Times New Roman, serif",
   },
   {
-    value: 'italic',
-    label: 'Italic',
-    icon: <FontItalicIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleItalic().run(),
-    isActive: editor => editor.isActive('italic'),
-    canExecute: editor => editor.can().chain().focus().toggleItalic().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', 'I']
+    label: "Georgia",
+    fontFamily: "Georgia, serif",
   },
   {
-    value: 'underline',
-    label: 'Underline',
-    icon: <UnderlineIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleUnderline().run(),
-    isActive: editor => editor.isActive('underline'),
-    canExecute: editor => editor.can().chain().focus().toggleUnderline().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', 'U']
+    label: "Arial",
+    fontFamily: "Arial, sans-serif",
   },
   {
-    value: 'strikethrough',
-    label: 'Strikethrough',
-    icon: <StrikethroughIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleStrike().run(),
-    isActive: editor => editor.isActive('strike'),
-    canExecute: editor => editor.can().chain().focus().toggleStrike().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', 'shift', 'S']
+    label: "Helvetica",
+    fontFamily: "Helvetica, sans-serif",
   },
   {
-    value: 'code',
-    label: 'Code',
-    icon: <CodeIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleCode().run(),
-    isActive: editor => editor.isActive('code'),
-    canExecute: editor => editor.can().chain().focus().toggleCode().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', 'E']
+    label: "Courier New",
+    fontFamily: "Courier New, monospace",
   },
-  {
-    value: 'clearFormatting',
-    label: 'Clear formatting',
-    icon: <TextNoneIcon className="size-5" />,
-    action: editor => editor.chain().focus().unsetAllMarks().run(),
-    isActive: () => false,
-    canExecute: editor => editor.can().chain().focus().unsetAllMarks().run() && !editor.isActive('codeBlock'),
-    shortcuts: ['mod', '\\']
-  }
-]
+];
 
 interface SectionTwoProps extends VariantProps<typeof toggleVariants> {
-  editor: Editor
-  activeActions?: TextStyleAction[]
-  mainActionCount?: number
+  editor: Editor;
+  disabled?: boolean;
 }
 
-export const SectionTwo: React.FC<SectionTwoProps> = ({
-  editor,
-  activeActions = formatActions.map(action => action.value),
-  mainActionCount = 2,
-  size,
-  variant
-}) => {
-  return (
-    <ToolbarSection
-      editor={editor}
-      actions={formatActions}
-      activeActions={activeActions}
-      mainActionCount={mainActionCount}
-      dropdownIcon={<DotsHorizontalIcon className="size-5" />}
-      dropdownTooltip="More formatting"
-      dropdownClassName="w-8"
-      size={size}
-      variant={variant}
-    />
-  )
-}
+export const SectionTwo: React.FC<SectionTwoProps> = React.memo(
+  ({ editor, size, variant, disabled }) => {
+    const handleFontFamilyChange = React.useCallback(
+      (fontFamily: string) => {
+        editor.chain().focus().setMark("textStyle", { fontFamily }).run();
+      },
+      [editor],
+    );
 
-SectionTwo.displayName = 'SectionTwo'
+    const renderMenuItem = React.useCallback(
+      ({ label, fontFamily }: TextStyle) => {
+        const fontFamilyWithoutType = fontFamily.split(",")[0];
+        return (
+          <DropdownMenuItem
+            key={fontFamily}
+            onClick={() => handleFontFamilyChange(fontFamily)}
+            className={cn("flex flex-row items-center justify-between gap-4 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background")}
+            aria-label={label}
+            disabled={disabled}
+          >
+            <span style={{ fontFamily }}>{fontFamilyWithoutType}</span>
+          </DropdownMenuItem>
+        );
+      },
+      [handleFontFamilyChange],
+    );
 
-export default SectionTwo
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <ToolbarButton
+            isActive={editor.isActive("textStyle", {
+              fontFamily: editor.getAttributes("textStyle").fontFamily,
+            })}
+            tooltip="Font Family"
+            aria-label="Font Family"
+            pressed={editor.isActive("textStyle", {
+              fontFamily: editor.getAttributes("textStyle").fontFamily,
+            })}
+            className="w-12 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background"
+            disabled={disabled || editor.isActive("codeBlock")}
+            variant={variant}
+            size={size}
+          >
+            <ALargeSmall className="h-5 w-5" />
+            <CaretDownIcon className="h-5 w-5" />
+          </ToolbarButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-full disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background">
+          {formatActions.map(renderMenuItem)}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+SectionTwo.displayName = "SectionTwo";
+
+export default SectionTwo;

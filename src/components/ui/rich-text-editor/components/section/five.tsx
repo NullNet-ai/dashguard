@@ -1,85 +1,87 @@
-import * as React from 'react'
-import type { Editor } from '@tiptap/react'
-import type { FormatAction } from '../../types'
-import type { toggleVariants } from '~/components/ui/toggle'
-import type { VariantProps } from 'class-variance-authority'
-import { Quote as QuoteIcon } from 'lucide-react'
-import { ChevronDownIcon as CaretDownIcon,CommandLineIcon as CodeIcon,PlusIcon,MinusIcon as DividerHorizontalIcon } from '@heroicons/react/20/solid'
-import { LinkEditPopover } from '../link/link-edit-popover'
-import { ImageEditDialog } from '../image/image-edit-dialog'
-import { ToolbarSection } from '../toolbar-section'
+import * as React from "react";
+import type { Editor } from "@tiptap/react";
+import type { FormatAction } from "../../types";
+import type { toggleVariants } from "~/components/ui/toggle";
+import type { VariantProps } from "class-variance-authority";
+import {
+  ChevronDownIcon as CaretDownIcon,
+  ListBulletIcon,
+} from "@heroicons/react/20/solid";
+import { ToolbarSection } from "../toolbar-section";
 
-type InsertElementAction = 'codeBlock' | 'blockquote' | 'horizontalRule'
-interface InsertElement extends FormatAction {
-  value: InsertElementAction
+type ListItemAction = "orderedList" | "bulletList";
+interface ListItem extends FormatAction {
+  value: ListItemAction;
 }
 
-const formatActions: InsertElement[] = [
+const formatActions: ListItem[] = [
   {
-    value: 'codeBlock',
-    label: 'Code block',
-    icon: <CodeIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleCodeBlock().run(),
-    isActive: editor => editor.isActive('codeBlock'),
-    canExecute: editor => editor.can().chain().focus().toggleCodeBlock().run(),
-    shortcuts: ['mod', 'alt', 'C']
+    value: "orderedList",
+    label: "Numbered list",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="20px"
+        viewBox="0 -960 960 960"
+        width="20px"
+        fill="currentColor"
+      >
+        <path d="M144-144v-48h96v-24h-48v-48h48v-24h-96v-48h120q10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v48q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9 10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v48q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9H144Zm0-240v-96q0-10.2 6.9-17.1 6.9-6.9 17.1-6.9h72v-24h-96v-48h120q10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v72q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9h-72v24h96v48H144Zm48-240v-144h-48v-48h96v192h-48Zm168 384v-72h456v72H360Zm0-204v-72h456v72H360Zm0-204v-72h456v72H360Z" />
+      </svg>
+    ),
+    isActive: (editor) => editor.isActive("orderedList"),
+    action: (editor) => editor.chain().focus().toggleOrderedList().run(),
+    canExecute: (editor) =>
+      editor.can().chain().focus().toggleOrderedList().run(),
+    shortcuts: ["mod", "shift", "7"],
   },
   {
-    value: 'blockquote',
-    label: 'Blockquote',
-    icon: <QuoteIcon className="size-5" />,
-    action: editor => editor.chain().focus().toggleBlockquote().run(),
-    isActive: editor => editor.isActive('blockquote'),
-    canExecute: editor => editor.can().chain().focus().toggleBlockquote().run(),
-    shortcuts: ['mod', 'shift', 'B']
+    value: "bulletList",
+    label: "Bullet list",
+    icon: <ListBulletIcon className="size-5" />,
+    isActive: (editor) => editor.isActive("bulletList"),
+    action: (editor) => editor.chain().focus().toggleBulletList().run(),
+    canExecute: (editor) =>
+      editor.can().chain().focus().toggleBulletList().run(),
+    shortcuts: ["mod", "shift", "8"],
   },
-  {
-    value: 'horizontalRule',
-    label: 'Divider',
-    icon: <DividerHorizontalIcon className="size-5" />,
-    action: editor => editor.chain().focus().setHorizontalRule().run(),
-    isActive: () => false,
-    canExecute: editor => editor.can().chain().focus().setHorizontalRule().run(),
-    shortcuts: ['mod', 'alt', '-']
-  }
-]
+];
 
 interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
-  editor: Editor
-  activeActions?: InsertElementAction[]
-  mainActionCount?: number
+  editor: Editor;
+  activeActions?: ListItemAction[];
+  mainActionCount?: number;
+  disabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
   editor,
-  activeActions = formatActions.map(action => action.value),
+  activeActions = formatActions.map((action) => action.value),
   mainActionCount = 0,
   size,
-  variant
+  variant,
+  disabled,
 }) => {
   return (
-    <>
-      <LinkEditPopover editor={editor} size={size} variant={variant} />
-      <ImageEditDialog editor={editor} size={size} variant={variant} />
-      <ToolbarSection
-        editor={editor}
-        actions={formatActions}
-        activeActions={activeActions}
-        mainActionCount={mainActionCount}
-        dropdownIcon={
-          <>
-            <PlusIcon className="size-5" />
-            <CaretDownIcon className="size-5" />
-          </>
-        }
-        dropdownTooltip="Insert elements"
-        size={size}
-        variant={variant}
-      />
-    </>
-  )
-}
+    <ToolbarSection
+      editor={editor}
+      actions={formatActions}
+      activeActions={activeActions}
+      mainActionCount={mainActionCount}
+      dropdownIcon={
+        <>
+          <ListBulletIcon className="size-5" />
+          <CaretDownIcon className="size-5" />
+        </>
+      }
+      dropdownTooltip="Lists"
+      size={size}
+      variant={variant}
+      disabled={disabled}
+    />
+  );
+};
 
-SectionFive.displayName = 'SectionFive'
+SectionFive.displayName = "SectionFive";
 
-export default SectionFive
+export default SectionFive;
