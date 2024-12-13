@@ -10,6 +10,7 @@ import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns from "./_config/columns";
+import SelectedView from "./components/SelectedView";
 
 export default function ContactDetails({
   params,
@@ -133,14 +134,7 @@ export default function ContactDetails({
         },
         renderComponentSelected: (record) => {
           // Selected View Component
-          return (
-            <div>
-              <div>
-                Primary Phone Number: {record.phone?.[0]?.raw_phone_number}
-              </div>
-              <div>Primary Email: {record.email?.[0]?.email}</div>
-            </div>
-          );
+          return <SelectedView record={record} />;
         },
       }}
       myParent={params.shell_type}
@@ -158,13 +152,15 @@ export default function ContactDetails({
           placeholder: "Phone Number",
           name: "phone",
           label: "Phone Number",
+          required: true,
         },
         {
           id: "email",
           formType: "email-input",
-          placeholder: "email address",
+          placeholder: "Email",
           name: "email",
-          label: "Email Address",
+          label: "Email",
+          required: true,
         },
       ]}
       // customFormFilterViewFormActions={[
