@@ -27,6 +27,7 @@ const ErrorContainer = ({
           <XCircleIcon aria-hidden="true" className="h-5 w-5 text-red-400" />
         </div>
         <div className="ml-3">
+          <h1 className="text-sm font-medium text-red-800">Something Went Wrong!</h1>
           <h3 className="text-sm font-medium text-red-800">Error Details:</h3>
           <p className="text-sm text-red-700">Message: {error.message}</p>
           {error.statusCode && (

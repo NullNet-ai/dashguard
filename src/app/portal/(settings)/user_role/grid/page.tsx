@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import gridColumns from "./_config/columns";
 import Grid from "~/components/platform/Grid/Server";
 import { headers } from "next/headers";
+import { defaultSorting } from "./_config/sorting";
 
 export default async function UserRoleGridPage({
   searchParams = {},
@@ -27,16 +28,21 @@ export default async function UserRoleGridPage({
     "updated_by",
   ];
 
+  const sorting = await api.grid.getReportSorting();
+
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
     pluck: _pluck,
     current: +(searchParams.page ?? "0"),
     limit: +(searchParams.perPage ?? "100"),
+    sorting: sorting?.length ? sorting : defaultSorting,
   });
 
   return (
     <Grid
       totalCount={totalCount || 0}
+      defaultSorting={defaultSorting}
+      sorting={sorting?.length ? sorting : []}
       data={items}
       config={{
         entity: main_entity!,

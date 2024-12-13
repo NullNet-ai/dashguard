@@ -17,7 +17,7 @@ export default function SubmitForm({
   return (
     <Button
       className={
-        "m-auto h-6 w-6 rounded-full bg-green-100 hover:disabled:cursor-not-allowed"
+        "m-auto h-6 w-6 rounded-full bg-green-200 hover:bg-green-100"
       }
       loading={isLoading}
       type="submit"

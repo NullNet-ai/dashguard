@@ -24,6 +24,8 @@ import { Separator } from "~/components/ui/separator";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import FormBodyMainActions from "../layout/opened/components/FormBodyMainActions";
 import LockFormActions from "../layout/opened/components/LockFormActions";
+import { AccordionContent } from "@radix-ui/react-accordion";
+import { useSearchParams } from "next/navigation";
 
 const FormBuilderLayout = ({
   //* data
@@ -77,15 +79,21 @@ const FormBuilderLayout = ({
   customFormHostViewFormActions
 }: IAccordionLayoutProps) => {
 
+  const searchParams = useSearchParams();
+  const searchActive = searchParams.get('search') === 'true';
+
+
   return (
     <Accordion
       type="single"
       collapsible
       className="w-full"
-      value={isOpenGrid}
+      // value={isOpenGrid}
       onValueChange={handleAccordionChange}
+      defaultValue="item-1"
     >
       <AccordionItem value="item-1">
+        
         <FormHeader
           formProps={formProps}
           enableAppendForm={enableAppendForm}
@@ -112,9 +120,11 @@ const FormBuilderLayout = ({
           handleUpdateDisplayType={handleUpdateDisplayType}
           formKey={formKey}
         />
+        <AccordionContent className="relative">
         {filterGridConfig && (
           <>
             <FormBodyMainActions
+              searchActive={searchActive}
               isListLoading={isListLoading}
               displayType={displayType}
               filterGridConfig={filterGridConfig}
@@ -131,19 +141,22 @@ const FormBuilderLayout = ({
               customFormFilterViewFormActions={customFormFilterViewFormActions}
               customFormFilterLockFormActions={customFormFilterLockFormActions}
             />
-            <FormFilterGridLayout
-              isFormOpen={isFormOpened}
-              handleListLoading={handleListLoading}
-              handleSelectedGridRecords={handleNewRecordFormFilterGrid}
-              handleCloseGrid={handleCloseGrid}
-              filterGridConfig={filterGridConfig}
-            />
+            {
+              searchActive && (
+                <FormFilterGridLayout
+                  isFormOpen={isFormOpened}
+                  handleListLoading={handleListLoading}
+                  handleSelectedGridRecords={handleNewRecordFormFilterGrid}
+                  handleCloseGrid={handleCloseGrid}
+                  filterGridConfig={filterGridConfig}
+                />
+              )
+            }
           </>
         )}
-        <CollapsibleContent className="relative">
-          {displayType === "form" && (
+          {displayType === "form" && !searchActive && (
             <>
-              {!form?.formState?.disabled && !filterGridConfig ? (
+              {!form?.formState?.disabled && !filterGridConfig  ? (
                 <CardContent className="absolute right-2">
                   <ViewFormActions
                     formProps={formProps}
@@ -157,18 +170,23 @@ const FormBuilderLayout = ({
                   />
                 </CardContent>
               ) : (
-                <CardContent className="absolute right-2">
-                  <LockFormActions
-                    formProps={formProps}
-                    saveForm={saveForm}
-                    isButtonLoading={isSaveLoading}
-                    form={form}
-                    formSchema={formSchema}
-                    formKey={formKey}
-                    features={features}
-                    customFormHostLockFormActions={customFormHostLockFormActions}
-                  />
-                </CardContent>
+                <>
+                 {!filterGridConfig && (
+                  <CardContent className="absolute right-2">
+                    <LockFormActions
+                      formProps={formProps}
+                      saveForm={saveForm}
+                      isButtonLoading={isSaveLoading}
+                      form={form}
+                      formSchema={formSchema}
+                      formKey={formKey}
+                      features={features}
+                      customFormHostLockFormActions={customFormHostLockFormActions}
+                    />
+                  </CardContent>
+                 )}
+                  
+                </>
               )}
 
               <OpenedFormLayout
@@ -201,7 +219,7 @@ const FormBuilderLayout = ({
               handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             />
           )}
-        </CollapsibleContent>
+        </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
