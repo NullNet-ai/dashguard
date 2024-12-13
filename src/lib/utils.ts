@@ -13,3 +13,12 @@ export function formatAndCapitalize(entityName: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
+
+export function formatTabName(tab_name: string): string {
+  if (!tab_name) return "";
+  if (tab_name.charAt(0) === tab_name.charAt(0).toUpperCase()) return tab_name;
+  return tab_name
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}

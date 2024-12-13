@@ -1,17 +1,22 @@
 "use client";
 
-import { Button } from "~/components/ui/button";
 import { XCircleIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import { useEffect } from "react";
+import { Button } from "~/components/ui/button";
 
-export default function ErrorPage({ 
-  error, 
-  reset 
-}: { 
-  error: Error & { digest?: string; statusCode?: number }; 
+const ErrorContainer = ({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string; statusCode?: number };
   reset: () => void;
-}) {
-  function clearError() {
+}) => {
+  
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
+  const clearError = () => {
     reset();
   }
 
@@ -22,11 +27,12 @@ export default function ErrorPage({
           <XCircleIcon aria-hidden="true" className="h-5 w-5 text-red-400" />
         </div>
         <div className="ml-3">
-          <h1 className="text-sm font-medium text-red-800">Something Went Wrong!</h1>
           <h3 className="text-sm font-medium text-red-800">Error Details:</h3>
           <p className="text-sm text-red-700">Message: {error.message}</p>
           {error.statusCode && (
-            <p className="text-sm text-red-700">Status Code: {error.statusCode}</p>
+            <p className="text-sm text-red-700">
+              Status Code: {error.statusCode}
+            </p>
           )}
           {error.digest && (
             <p className="text-sm text-red-700">Error ID: {error.digest}</p>
@@ -35,12 +41,12 @@ export default function ErrorPage({
             <p className="text-sm text-red-700">Stack Trace: {error.stack}</p>
           )} */}
           <div className="mt-4">
-            <Button onClick={clearError}>
-              Try again
-            </Button>
+            <Button onClick={clearError}>Try again</Button>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ErrorContainer;

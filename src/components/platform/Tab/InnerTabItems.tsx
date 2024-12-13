@@ -1,6 +1,5 @@
 "use client";
 
-import { capitalize } from "lodash";
 import { ChevronDownIcon } from "lucide-react";
 import { useMemo } from "react";
 import TabMenu from "~/components/application-layout/common/TabMenu";
@@ -13,7 +12,7 @@ import {
 import { useSidebar } from "~/components/ui/sidebar";
 import useWindowSize from "~/hooks/use-resize";
 import useScreenType from "~/hooks/use-screen-type";
-import { cn } from "~/lib/utils";
+import { cn, formatTabName } from "~/lib/utils";
 import { remToPx } from "~/utils/fetcher";
 
 type InnerTabItemsProps = {
@@ -72,7 +71,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               "hover:border-t-primary hover:text-primary",
               )}
             >
-              {capitalize(tab.name)}
+              {formatTabName(tab.name)}
               <span className="absolute right-0 h-[50%] w-[1px] bg-default/20"></span>
             </a>
             <TabMenu
@@ -112,7 +111,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
                     "hover:border-t-primary hover:text-primary",
                   )}
                 >
-                  {capitalize(tab.name)}
+                  {formatTabName(tab.name)}
                 </a>
                 <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
                 <TabMenu
