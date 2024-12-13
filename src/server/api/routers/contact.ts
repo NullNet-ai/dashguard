@@ -252,7 +252,6 @@ export const contactRouter = createTRPCRouter({
           entity: "contact",
           token: ctx.token.value,
           query: {
-            pluck: pluck_fields,
             pluck_object: {
               contact_emails: ["id", "email", "is_primary"],
               contact_phone_numbers: [
@@ -309,13 +308,14 @@ export const contactRouter = createTRPCRouter({
 
       const [contact] = items || [];
       const { contact_emails, contact_phone_numbers, contacts } = contact || {};
-      const { id: contact_id = "", code = "" } = contacts || {};
+      const { id: contact_id = "", code = "", ...rest } = contacts || {};
 
       return {
         id: contact_id,
         code: code,
         email: contact_emails ? [contact_emails] : [],
         phone: contact_phone_numbers ? [contact_phone_numbers] : [],
+        ...rest,
       };
     }),
   getBasicDetails: privateProcedure
@@ -364,7 +364,7 @@ export const contactRouter = createTRPCRouter({
             query: {
               advance_filters,
               order,
-              pluck: ["email"],
+              pluck: ["email", "contact_id", "is_primary", "id"],
             },
           })
           .execute(),
@@ -375,24 +375,25 @@ export const contactRouter = createTRPCRouter({
             query: {
               advance_filters,
               order,
-              pluck: ["raw_phone_number"],
+              pluck: [
+                "raw_phone_number",
+                "id",
+                "contact_id",
+                "is_primary",
+                "iso_code",
+                "country_code",
+              ],
             },
           })
           .execute(),
       ]);
 
-      const { raw_phone_number = "" } = contact_phone_numbers?.data?.[0] || {};
-
-      const primary_phone_number: string = raw_phone_number
-        ? "+" + raw_phone_number
-        : "";
-
       return {
         data: {
           ...record?.data?.[0],
-          ...contact_emails?.data?.[0],
-          primary_phone_number,
-        },
+          email: contact_emails?.data?.[0],
+          phone: contact_phone_numbers?.data?.[0],
+        } as Record<string, any>,
       };
     }),
 });

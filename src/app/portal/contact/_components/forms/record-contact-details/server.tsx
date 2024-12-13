@@ -7,13 +7,12 @@ const FormServerFetch = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , , application, identifier] = pathname.split("/");
 
-  const response = await api.record.getByCode({
-    id: identifier!,
+  const response = await api.contact.fetchContactPhoneEmail({
+    code: identifier!,
     pluck_fields: ["id", "first_name", "last_name", "middle_name"],
-    main_entity: "contact",
   });
 
-  const default_values = response?.data;
+  const default_values = response;
   return (
     <div className="space-y-2">
       <RecordContactDetails
