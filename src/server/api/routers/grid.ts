@@ -136,8 +136,8 @@ export const gridRouter = createTRPCRouter({
                   : (input.current || 1) * (input.limit || 100) -
                     (input.limit || 100),
               limit: input.limit || 1,
-              by_field: "id",
-              by_direction: EOrderDirection.ASC,
+              by_field: "code",
+              by_direction: EOrderDirection.DESC,
             },
             multiple_sort: input.sorting?.length
               ? formatSorting(input.sorting)

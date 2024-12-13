@@ -31,6 +31,8 @@ interface IAccordionLayoutProps extends IPropsForms {
   handleRemovedSelectedRecords: (records: any[]) => void;
   handleOpenForm: (e: React.MouseEvent<HTMLButtonElement>) => void;
   setShowFormActions: SetState<boolean>;
+  handleSearchOpen: () => void;
+  isOpenSearch?: boolean;
 }
 
 export type {

@@ -1,73 +1,220 @@
-import * as React from 'react'
-import type { Editor } from '@tiptap/react'
-import type { FormatAction } from '../../types'
-import type { toggleVariants } from '~/components/ui/toggle'
-import type { VariantProps } from 'class-variance-authority'
-import { ChevronDownIcon as CaretDownIcon,ListBulletIcon } from '@heroicons/react/20/solid'
-import { ToolbarSection } from '../toolbar-section'
+import * as React from "react";
+import type { Editor } from "@tiptap/react";
+import type { toggleVariants } from "~/components/ui/toggle";
+import type { VariantProps } from "class-variance-authority";
+import {
+  ChevronDownIcon as CaretDownIcon,
+  CheckIcon,
+} from "@heroicons/react/20/solid";
+import { ToolbarButton } from "../toolbar-button";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "~/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { useTheme } from "../../hooks/use-theme";
 
-type ListItemAction = 'orderedList' | 'bulletList'
-interface ListItem extends FormatAction {
-  value: ListItemAction
+interface ColorItem {
+  cssVar: string;
+  label: string;
+  darkLabel?: string;
 }
 
-const formatActions: ListItem[] = [
+interface ColorPalette {
+  label: string;
+  colors: ColorItem[];
+  inverse: string;
+}
+
+const COLORS: ColorPalette[] = [
   {
-    value: 'orderedList',
-    label: 'Numbered list',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
-        <path d="M144-144v-48h96v-24h-48v-48h48v-24h-96v-48h120q10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v48q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9 10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v48q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9H144Zm0-240v-96q0-10.2 6.9-17.1 6.9-6.9 17.1-6.9h72v-24h-96v-48h120q10.2 0 17.1 6.9 6.9 6.9 6.9 17.1v72q0 10.2-6.9 17.1-6.9 6.9-17.1 6.9h-72v24h96v48H144Zm48-240v-144h-48v-48h96v192h-48Zm168 384v-72h456v72H360Zm0-204v-72h456v72H360Zm0-204v-72h456v72H360Z" />
-      </svg>
-    ),
-    isActive: editor => editor.isActive('orderedList'),
-    action: editor => editor.chain().focus().toggleOrderedList().run(),
-    canExecute: editor => editor.can().chain().focus().toggleOrderedList().run(),
-    shortcuts: ['mod', 'shift', '7']
+    label: "Palette 1",
+    inverse: "hsl(var(--background))",
+    colors: [
+      { cssVar: "hsl(var(--foreground))", label: "Default" },
+      { cssVar: "var(--mt-accent-bold-blue)", label: "Bold blue" },
+      { cssVar: "var(--mt-accent-bold-teal)", label: "Bold teal" },
+      { cssVar: "var(--mt-accent-bold-green)", label: "Bold green" },
+      { cssVar: "var(--mt-accent-bold-orange)", label: "Bold orange" },
+      { cssVar: "var(--mt-accent-bold-red)", label: "Bold red" },
+      { cssVar: "var(--mt-accent-bold-purple)", label: "Bold purple" },
+    ],
   },
   {
-    value: 'bulletList',
-    label: 'Bullet list',
-    icon: <ListBulletIcon className="size-5" />,
-    isActive: editor => editor.isActive('bulletList'),
-    action: editor => editor.chain().focus().toggleBulletList().run(),
-    canExecute: editor => editor.can().chain().focus().toggleBulletList().run(),
-    shortcuts: ['mod', 'shift', '8']
-  }
-]
+    label: "Palette 2",
+    inverse: "hsl(var(--background))",
+    colors: [
+      { cssVar: "var(--mt-accent-gray)", label: "Gray" },
+      { cssVar: "var(--mt-accent-blue)", label: "Blue" },
+      { cssVar: "var(--mt-accent-teal)", label: "Teal" },
+      { cssVar: "var(--mt-accent-green)", label: "Green" },
+      { cssVar: "var(--mt-accent-orange)", label: "Orange" },
+      { cssVar: "var(--mt-accent-red)", label: "Red" },
+      { cssVar: "var(--mt-accent-purple)", label: "Purple" },
+    ],
+  },
+  {
+    label: "Palette 3",
+    inverse: "hsl(var(--foreground))",
+    colors: [
+      { cssVar: "hsl(var(--background))", label: "White", darkLabel: "Black" },
+      { cssVar: "var(--mt-accent-blue-subtler)", label: "Blue subtle" },
+      { cssVar: "var(--mt-accent-teal-subtler)", label: "Teal subtle" },
+      { cssVar: "var(--mt-accent-green-subtler)", label: "Green subtle" },
+      { cssVar: "var(--mt-accent-yellow-subtler)", label: "Yellow subtle" },
+      { cssVar: "var(--mt-accent-red-subtler)", label: "Red subtle" },
+      { cssVar: "var(--mt-accent-purple-subtler)", label: "Purple subtle" },
+    ],
+  },
+];
+
+const MemoizedColorButton = React.memo<{
+  color: ColorItem;
+  isSelected: boolean;
+  inverse: string;
+  onClick: (value: string) => void;
+}>(({ color, isSelected, inverse, onClick }) => {
+  const isDarkMode = useTheme();
+  const label = isDarkMode && color.darkLabel ? color.darkLabel : color.label;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <ToggleGroupItem
+          tabIndex={0}
+          className="relative size-7 rounded-md p-0"
+          value={color.cssVar}
+          aria-label={label}
+          style={{ backgroundColor: color.cssVar }}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            onClick(color.cssVar);
+          }}
+        >
+          {isSelected && (
+            <CheckIcon
+              className="absolute inset-0 m-auto size-6"
+              style={{ color: inverse }}
+            />
+          )}
+        </ToggleGroupItem>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">
+        <p>{label}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+});
+
+MemoizedColorButton.displayName = "MemoizedColorButton";
+
+const MemoizedColorPicker = React.memo<{
+  palette: ColorPalette;
+  selectedColor: string;
+  inverse: string;
+  onColorChange: (value: string) => void;
+}>(({ palette, selectedColor, inverse, onColorChange }) => (
+  <ToggleGroup
+    type="single"
+    value={selectedColor}
+    onValueChange={(value: string) => {
+      if (value) onColorChange(value);
+    }}
+    className="gap-1.5"
+  >
+    {palette.colors.map((color, index) => (
+      <MemoizedColorButton
+        key={index}
+        inverse={inverse}
+        color={color}
+        isSelected={selectedColor === color.cssVar}
+        onClick={onColorChange}
+      />
+    ))}
+  </ToggleGroup>
+));
+
+MemoizedColorPicker.displayName = "MemoizedColorPicker";
 
 interface SectionFourProps extends VariantProps<typeof toggleVariants> {
-  editor: Editor
-  activeActions?: ListItemAction[]
-  mainActionCount?: number
+  editor: Editor;
+  disabled?: boolean;
 }
 
 export const SectionFour: React.FC<SectionFourProps> = ({
   editor,
-  activeActions = formatActions.map(action => action.value),
-  mainActionCount = 0,
   size,
-  variant
+  variant,
+  disabled,
 }) => {
+  const color =
+    editor.getAttributes("textStyle")?.color || "hsl(var(--foreground))";
+  const [selectedColor, setSelectedColor] = React.useState(color);
+
+  const handleColorChange = React.useCallback(
+    (value: string) => {
+      setSelectedColor(value);
+      editor.chain().focus().setMark("textStyle", { color: value }).run();
+    },
+    [editor],
+  );
+
+  React.useEffect(() => {
+    setSelectedColor(color);
+  }, [color]);
+
   return (
-    <ToolbarSection
-      editor={editor}
-      actions={formatActions}
-      activeActions={activeActions}
-      mainActionCount={mainActionCount}
-      dropdownIcon={
-        <>
-          <ListBulletIcon className="size-5" />
+    <Popover>
+      <PopoverTrigger asChild>
+        <ToolbarButton
+          tooltip="Text color"
+          aria-label="Text color"
+          className="w-12 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background"
+          disabled={disabled}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-5"
+            style={{ color: selectedColor }}
+          >
+            <path d="M4 20h16" />
+            <path d="m6 16 6-12 6 12" />
+            <path d="M8 12h8" />
+          </svg>
           <CaretDownIcon className="size-5" />
-        </>
-      }
-      dropdownTooltip="Lists"
-      size={size}
-      variant={variant}
-    />
-  )
-}
+        </ToolbarButton>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-full disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background">
+        <div className="space-y-1.5">
+          {COLORS.map((palette, index) => (
+            <MemoizedColorPicker
+              key={index}
+              palette={palette}
+              inverse={palette.inverse}
+              selectedColor={selectedColor}
+              onColorChange={handleColorChange}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
-SectionFour.displayName = 'SectionFour'
+SectionFour.displayName = "SectionFour";
 
-export default SectionFour
+export default SectionFour;

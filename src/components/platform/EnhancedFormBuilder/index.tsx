@@ -56,6 +56,7 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay === "expanded",
   );
   const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
 
   //* EFFECTS
 
@@ -176,6 +177,10 @@ export const FormBuilder = (props: IPropsForms) => {
       setDisplayType("selected");
     });
   };
+
+  const handleSearchOpen = () => {
+    setIsOpenSearch(!isOpenSearch);
+  }
 
   const handleAccordionChange = (value: string) => {
     setIsAccordionExpanded(value === "item-1");
@@ -364,6 +369,8 @@ export const FormBuilder = (props: IPropsForms) => {
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             handleOpenForm={handleOpenForm}
             features={features}
+            handleSearchOpen={handleSearchOpen}
+            isOpenSearch={isOpenSearch}
           />
         </Card>
       </Collapsible>
