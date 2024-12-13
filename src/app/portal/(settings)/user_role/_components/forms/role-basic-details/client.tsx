@@ -44,7 +44,7 @@ export default function RoleBasicDetails({
         formProps={params}
         formLabel="Basic Details"
         handleSubmit={handleSave}
-        formKey="UserRoles"
+        formKey="UserRolesBasicDetails"
         formSchema={FormSchema}
         defaultValues={defaultValues}
         fields={[
