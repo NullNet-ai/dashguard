@@ -48,7 +48,7 @@ export default function FormSmartDate({
           ? moment(date).format("YYYY")
           : dateGranularity === "month"
             ? moment(date).format("YYYY-MM")
-            : moment(date).format("YYYY-MM-DD");
+            : moment(date).format("MM/DD/YYYY");
       form.setValue(name, formattedDate, {
         shouldValidate: true,
         shouldDirty: true,
