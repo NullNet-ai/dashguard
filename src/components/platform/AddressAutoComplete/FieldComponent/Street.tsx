@@ -2,7 +2,7 @@ import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
 import { IFieldComponentProps } from "./type";
 
-export default function StreetName({ form }: IFieldComponentProps) {
+export default function StreetName({ form,formKey }: IFieldComponentProps) {
   return (
     <div className="space-y-0.5">
       <FormField
@@ -11,7 +11,7 @@ export default function StreetName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
-              formKey="StreetName"
+              formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,
                 label: "Street",

@@ -3,15 +3,13 @@ import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
 const fields = {
-  "First Name": "first_name",
-  "Last Name": "last_name",
-  "Middle Name": "middle_name",
+  "Parent Organization": "parent_organization",
+  Name: "name",
 };
 
-const ContactDetailsSummary = ({
+const OrganizationSummary = ({
   form_key,
   identifier,
-  main_entity,
 }: {
   form_key: string;
   identifier: string;
@@ -21,19 +19,12 @@ const ContactDetailsSummary = ({
     data: record = { data: { id: null } },
     refetch,
     error,
-  } = api.record.getByCode.useQuery({
-    main_entity: main_entity!,
-    id: identifier!,
-    pluck_fields: [
-      "id",
-      "first_name",
-      "last_name",
-      "middle_name",
-      "date_of_birth",
-    ],
+  } = api.organization.getOrgSummary.useQuery({
+    code: identifier!,
+    pluck_fields: ["id", "name", "parent_organization_id"],
   });
 
-  const { data } = record || {};
+  const { data } = record ?? {};
 
   useRefetchRecord({
     refetch,
@@ -49,11 +40,11 @@ const ContactDetailsSummary = ({
       {Object.entries(fields).map(([key, value]) => (
         <p key={key}>
           <strong> {key}: </strong>
-          &nbsp; {data?.[value] || "None"}
+          &nbsp; {(data as { [key: string]: any })?.[value] || "None"}
         </p>
       ))}
     </div>
   );
 };
 
-export default ContactDetailsSummary;
+export default OrganizationSummary;

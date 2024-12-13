@@ -58,10 +58,7 @@ export const getDateTimeLocal = (timestamp?: Date): string => {
  * @param datetime - {Date | string}
  * @returns A string representation of the date and time
  */
-export const formatDateTime = (
-  datetime: Date | string,
-  includeTime = true,
-) => {
+export const formatDateTime = (datetime: Date | string, includeTime = true) => {
   const options: Intl.DateTimeFormatOptions = {
     month: "2-digit",
     day: "2-digit",
@@ -139,7 +136,7 @@ export const SmartDatetimeInput = React.forwardRef<
     value,
     onValueChange,
     placeholder,
-    disabled,
+    disabled = false,
     datePickerTestID,
     inputTestID,
     inputProps,
@@ -171,6 +168,7 @@ export const SmartDatetimeInput = React.forwardRef<
         >
           <DateTimeLocalInput
             datePickerTestID={datePickerTestID}
+            disabled={disabled as boolean}
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -331,7 +329,6 @@ const TimePicker = () => {
       const formatIndex =
         PM_AM === "AM" ? hours : hours === 12 ? hours : hours + 12;
       const formattedHours = formatIndex;
-
 
       for (let j = 0; j <= 3; j++) {
         const diff = Math.abs(j * timestamp - minutes);
@@ -592,7 +589,9 @@ const NaturalLanguageInput = React.forwardRef<
 
 NaturalLanguageInput.displayName = "NaturalLanguageInput";
 
-export type DateTimeLocalInputProps = {} & CalendarProps;
+export type DateTimeLocalInputProps = {
+  disabled?: boolean;
+} & CalendarProps;
 
 const DateTimeLocalInput = ({
   className,
@@ -602,6 +601,7 @@ const DateTimeLocalInput = ({
   disableFutureDates = false,
   includeTime = false,
   datePickerTestID,
+  disabled,
   ...props
 }: DateTimeLocalInputProps & {
   minDate?: Date;
@@ -639,6 +639,7 @@ const DateTimeLocalInput = ({
         <Button
           variant={"outline"}
           size={"icon"}
+          disabled={disabled}
           className={cn(
             "flex size-9 items-center justify-center font-normal",
             !value && "text-muted-foreground",

@@ -59,11 +59,12 @@ export default function IdentifierComponent({
     }
   };
 
+  const entityName = state?.entityName
   return (
     <div className="flex flex-row items-center justify-between p-2 px-4 text-sm">
       <div className="flex flex-row items-center gap-x-1">
         <StatusPoint variant={"success"} />
-        <span>{ellipsis(JSON.stringify(code), 8)}</span>{" "}
+        <span data-test-id={entityName + '-rcrd-code' }>{ellipsis(JSON.stringify(code), 8)}</span>{" "}
         <Badge variant={"success"}>{capitalize(status)}</Badge>
       </div>
       <div className="flex flex-row items-center gap-x-1">
@@ -91,7 +92,9 @@ export default function IdentifierComponent({
         ]} */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm" data-test-id={
+              entityName + "-rcrd-trg"
+            }>
               <EllipsisVertical className={`h-4 w-4`} aria-hidden="true" />
             </div>
           </DropdownMenuTrigger>

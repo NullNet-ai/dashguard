@@ -8,15 +8,18 @@ import type {
   IField,
   OptionType,
 } from "./type";
-import { Fragment } from "react";
+import { Fragment, useContext } from "react";
 import RenderFormType from "./RenderFormType";
 import { FormField } from "~/components/ui/form";
 import FormAddress from "./FormType/FormAddress";
+import { WizardContext } from "../Wizard/Provider";
+import { formatFormTestID } from "~/lib/utils";
 export default function FormModule({
   fields,
   form,
   subConfig,
   formKey,
+  myParent,
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -29,7 +32,13 @@ export default function FormModule({
     currencyInputOptions?: Record<string, OptionType[]>;
   };
   formKey: string;
+  myParent?: "record" | "wizard";
 }) {
+  const { state } = useContext(WizardContext);
+  const { entityName } = state ?? {};
+  const formattedFormKey = formatFormTestID(
+    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+  );
   return (
     <Fragment>
       {fields.map((_field, index) => {
@@ -38,7 +47,11 @@ export default function FormModule({
             // AddressInput is a custom form type that has other fields inside it
             // So we need to wrap each of them in a FormField rather than just rendering the component
             return (
-              <FormAddress key={_field.id + index} form={form} formKey={formKey} />
+              <FormAddress
+                key={_field.id + index}
+                form={form}
+                formKey={formattedFormKey}
+              />
             );
           default:
             return (
@@ -49,7 +62,7 @@ export default function FormModule({
                   control={form.control}
                   name={_field.name}
                   render={(formProps) =>
-                    RenderFormType(_field, formProps, form, formKey, {
+                    RenderFormType(_field, formProps, form, formattedFormKey, {
                       checkboxOptions: subConfig?.checkboxOptions,
                       multiSelectOptions: subConfig?.multiSelectOptions,
                       multiSelectOnSearch: subConfig?.multiSelectOnSearch,
