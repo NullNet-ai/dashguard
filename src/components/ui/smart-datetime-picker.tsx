@@ -136,7 +136,7 @@ export const SmartDatetimeInput = React.forwardRef<
     value,
     onValueChange,
     placeholder,
-    disabled,
+    disabled = false,
     datePickerTestID,
     inputTestID,
     inputProps,
@@ -168,7 +168,7 @@ export const SmartDatetimeInput = React.forwardRef<
         >
           <DateTimeLocalInput
             datePickerTestID={datePickerTestID}
-            disabled={disabled}
+            disabled={disabled as boolean}
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -589,7 +589,9 @@ const NaturalLanguageInput = React.forwardRef<
 
 NaturalLanguageInput.displayName = "NaturalLanguageInput";
 
-export type DateTimeLocalInputProps = {} & CalendarProps;
+export type DateTimeLocalInputProps = {
+  disabled?: boolean;
+} & CalendarProps;
 
 const DateTimeLocalInput = ({
   className,
@@ -608,7 +610,6 @@ const DateTimeLocalInput = ({
   disableFutureDates?: boolean;
   includeTime?: boolean;
   datePickerTestID?: string;
-  disabled?: boolean;
 }) => {
   const { value, onValueChange, Time } = useSmartDateInput();
 
