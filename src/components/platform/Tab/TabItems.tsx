@@ -74,7 +74,7 @@ const TabItems = ({ items } : TabItemsProps) => {
                     className="group relative flex items-center p-2 py-3"
                   >
                     <a
-                      data-test-id={"mainTab" + formatAndCapitalize(tab.name).split(" ").join("")}
+                      data-test-id={"mntb-" + tab.name.split(" ").join("")}
                       href={tab.href}
                       aria-current={tab.current ? "page" : undefined}
                       className={cn(

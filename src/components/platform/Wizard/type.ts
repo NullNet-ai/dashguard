@@ -11,6 +11,7 @@ export interface IConfigWizard {
   entityCode?: string;
   entityIdentifier: string;
   enableAutoCreate?: boolean;
+  stepLabels?: Record<number, string>;
   errorMessage?: Record<string, string[]> | null;
   nextLoading?: boolean;
   prevLoading?: boolean;

@@ -5,8 +5,14 @@ import { RecordSummaryViewContent } from "~/components/platform/RecordV2/Summary
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import RecordShellSummary from "../_components/RecordShellSummary";
+import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
+import { IPlatformRecordLayoutProps } from "~/components/platform/RecordV2/types";
+import { handleOnClick } from "../_actions";
 
-const Layout = async ({ children }: { children: React.ReactNode }) => {
+
+
+
+const Layout = async ({ children, record, record_summary }: IPlatformRecordLayoutProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
@@ -28,7 +34,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     ],
   });
 
-  const { role, status } = record_details?.data || {};
+  const { status } = record_details?.data || {};
 
   //Record Shell Guard for Draft Records
   if (status === "draft") {
@@ -49,18 +55,26 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   ];
 
   return (
-    <PlatformRecord
-      config={{
-        entityCode: identifier!,
-        entityName: main_entity!,
-        tabs: tabs,
+    <RecordWrapper
+      record={record}
+      record_summary={record_summary}
+      entity_code={identifier!}
+      entity_name={main_entity!}
+      tabs={tabs}
+      customProps={{
+        config: {
+          entityCode: identifier!,
+          entityName: main_entity!,
+          // sample usage of custom record actions
+          // identifierOption: [
+          //   {
+          //     label: "Edit",
+          //     onClick: handleOnClick
+          //   }
+          // ],
+        },
       }}
-    >
-      {children}
-      <RecordSummaryViewContent>
-        <RecordShellSummary role={role} />
-      </RecordSummaryViewContent>
-    </PlatformRecord>
+    />
   );
 };
 

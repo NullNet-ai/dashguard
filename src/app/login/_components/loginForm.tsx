@@ -24,7 +24,7 @@ export default function LoginForm() {
     try {
       await LoginSubmit(data);
     } catch (error: any) {
-      console.error("Error Details:",error.message);
+      console.error("Error Details:", error.message);
       setIsSubmitting(false);
       setError(error.message);
     }
@@ -35,7 +35,7 @@ export default function LoginForm() {
 
   return (
     <Form {...form}>
-      <form className="space-y-6 " onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           name="email"
           control={form.control}
@@ -69,7 +69,6 @@ export default function LoginForm() {
                   label: "Password",
                   required: true,
                   placeholder: "Password",
-                  
                 }}
                 form={form}
                 formKey={"Login"}
@@ -78,37 +77,36 @@ export default function LoginForm() {
             );
           }}
         />
-        {error && (
-          <FormMessage>
-            {error}
-          </FormMessage>
-        )}
-        <div className="flex justify-between items-center w-full">
+        {error && <FormMessage>{error}</FormMessage>}
+        <div className="flex w-full items-center justify-between">
           <div className="flex items-center">
             <input
               id="rememberMe"
               name="rememberMe"
               type="checkbox"
-              className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600"
             />
-            <label htmlFor="rememberMe" className="ml-2 block text-md text-foreground font-semibold">
+            <label
+              htmlFor="rememberMe"
+              className="ml-2 block text-md font-semibold text-foreground"
+            >
               Remember me
             </label>
           </div>
           <div className="text-md">
-            <a href="#" className="font-semibold text-primary ">
+            <a href="#" className="font-semibold text-primary">
               Forgot password?
             </a>
           </div>
         </div>
-          <Button
-          data-test-id={'login-submit-button'}
-            loading={isSubmitting}
-            type="submit"
-            className="!mt-8 rounded flex  text-md w-full justify-center items-center font-semibold text-white shadow-sm h-auto py-1.5"
-          >
-            Sign in
-          </Button>
+        <Button
+          data-test-id={"login-submit-btn"}
+          loading={isSubmitting}
+          type="submit"
+          className="!mt-8 flex h-auto w-full items-center justify-center rounded py-1.5 text-md font-semibold text-white shadow-sm"
+        >
+          Sign in
+        </Button>
       </form>
     </Form>
   );
