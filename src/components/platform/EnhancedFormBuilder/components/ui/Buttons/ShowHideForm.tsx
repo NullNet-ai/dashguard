@@ -1,7 +1,6 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
+import { AccordionTrigger } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
-import { CollapsibleTrigger } from "~/components/ui/collapsible";
 
 export default function ShowHideForm({
   handleOpen,
@@ -14,34 +13,37 @@ export default function ShowHideForm({
   hideAccordions: boolean;
 }) {
   if (hideAccordions) return null;
-
   return (
     <Fragment>
       {open ? (
-      
-        <CollapsibleTrigger asChild>
-          <Button
+        <AccordionTrigger
+            className="m-auto h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gray-200"
+        >
+          {/* <Button
             size={"icon"}
             variant={"ghost"}
-            onClick={handleOpen}
+            // onClick={handleOpen}
             className="m-auto h-6 w-6 rounded-full bg-gray-200"
             {...props}
           >
             <ChevronUpIcon className="h-4 w-4 cursor-pointer" />
-          </Button>
-        </CollapsibleTrigger>
+          </Button> */}
+        </AccordionTrigger>
       ) : (
-        <CollapsibleTrigger asChild>
+        <AccordionTrigger
+          // hideTriggerIcon
+        >
           <Button
+            
             size={"icon"}
             variant={"ghost"}
             onClick={handleOpen}
             className="m-auto h-6 w-6 rounded-full"
             {...props}
           >
-            <ChevronDownIcon className="h-4 w-4 cursor-pointer" />
+            {/* <ChevronDownIcon className="h-4 w-4 cursor-pointer" /> */}
           </Button>
-        </CollapsibleTrigger>
+        </AccordionTrigger>
       )}
     </Fragment>
   );

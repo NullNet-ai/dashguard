@@ -22,7 +22,7 @@ const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
   return (
     <AccordionContent
         className={cn(
-          "fixed z-50 w-full",
+          "relative w-full z-50",
           isFormOpen
             ? "accordion-content-enter accordion-content-enter-active"
             : "accordion-content-exit accordion-content-exit-active",
