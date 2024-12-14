@@ -19,7 +19,7 @@ export default function CreateButton({ className, title="" }: CreateButtonProps)
   const entity = state?.config.entity
   return (
     <Button
-      data-test-id={testIDFormatter(`${entity}-grd-create-btn`)}
+      data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
       className={cn("flex", className)}
       loading={state?.createLoading}
       onClick={() => actions?.handleCreate()}

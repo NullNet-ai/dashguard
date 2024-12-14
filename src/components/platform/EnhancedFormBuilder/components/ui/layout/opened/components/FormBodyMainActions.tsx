@@ -54,7 +54,7 @@ const FormBodyMainActions = ({
   formProps?: any;
 }) => {
   const { state } = useContext(WizardContext);
-  const {entityName,} = state ?? {}
+  const { entityName } = state ?? {};
 
   return (
     <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
@@ -63,13 +63,10 @@ const FormBodyMainActions = ({
           {!!selectedRecords?.length && !formProps?.isOpenSearch && (
             <Button
               variant={"outline"}
-             
-              data-test-id={
-               entityName + "-cancel-btn"
-              }
+              data-test-id={entityName + "-cancel-btn"}
               onClick={() => {
-              form.reset(form.formState.defaultValues);
-              handleUpdateDisplayType("selected");
+                form.reset(form.formState.defaultValues);
+                handleUpdateDisplayType("selected");
               }}
               type="button"
               loading={isButtonLoading}
@@ -89,8 +86,8 @@ const FormBodyMainActions = ({
                 }
                 data-test-id={
                   selectedRecords.length
-                    ? entityName + "-update-btn"
-                    : entityName + "-create-btn"
+                    ? entityName + "wzrd" + "-update-btn"
+                    : entityName + "wzrd" + "-create-btn"
                 }
                 onClick={form.handleSubmit(onSubmitFormGrid)}
                 type="button"
@@ -113,15 +110,15 @@ const FormBodyMainActions = ({
                 <Button2
                   onClick={() => {
                     formProps?.handleSearchOpen();
-                    }}
-                    data-test-id={
+                  }}
+                  data-test-id={
                     !formProps?.isOpenSearch
                       ? entityName + "-show-grd-btn"
                       : entityName + "-hide-grd-btn"
-                    }
-                    className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
-                  >
-                    <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                  }
+                  className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
                   <span className="text-primary">
                     {!formProps?.isOpenSearch ? "Show Grid" : "Hide Grid"}
                   </span>
