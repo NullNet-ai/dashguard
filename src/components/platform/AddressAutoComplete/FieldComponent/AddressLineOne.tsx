@@ -16,6 +16,7 @@ export default function AddressLineOne({
           return (
             <FormInput
               formKey={formKey}
+              data-test-id={formKey + "-" + formRenderProps.field.name + "-inp"}
               fieldConfig={{
                 ...formRenderProps?.field,
                 required: true,

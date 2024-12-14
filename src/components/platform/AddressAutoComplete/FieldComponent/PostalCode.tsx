@@ -16,6 +16,7 @@ export default function PostalName({ form,formKey }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+            data-test-id={formKey + "-" + formRenderProps.field.name + "-inp"}
               formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,
