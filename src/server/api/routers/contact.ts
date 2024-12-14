@@ -812,4 +812,54 @@ export const contactRouter = createTRPCRouter({
         } as Record<string, any>,
       };
     }),
+  getContactWithAddress: privateProcedure
+    .input(
+      z.object({
+        code: z.string(),
+        pluck_fields: z.array(z.string()),
+        address_pluck_fields: z.array(z.string()).optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (!input?.code) return null;
+
+      const advance_filters = createAdvancedFilter({ code: input.code });
+
+      const record = await ctx.dnaClient
+        .findAll({
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              addresses: input.address_pluck_fields || ["address"],
+              contacts: input.pluck_fields,
+            },
+            advance_filters,
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "address",
+              field: "id",
+            },
+            from: {
+              entity: ENTITY,
+              field: "address_id",
+            },
+          },
+        })
+        .execute();
+
+      const [contact] = record?.data || [];
+      const { addresses = {}, contacts } = contact || {};
+      const data = {
+        ...(contacts || {}),
+        ...(input?.address_pluck_fields?.length
+          ? { address: addresses }
+          : addresses),
+      };
+      return data;
+    }),
 });
