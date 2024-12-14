@@ -20,6 +20,7 @@ export default function FormModule({
   subConfig,
   formKey,
   myParent,
+  fieldConfig,
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -31,6 +32,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
+  fieldConfig: IField,
   formKey: string;
   myParent?: "record" | "wizard";
 }) {
@@ -51,6 +53,7 @@ export default function FormModule({
                 key={_field.id + index}
                 form={form}
                 formKey={formattedFormKey}
+                fieldConfig={fieldConfig}
               />
             );
           default:
