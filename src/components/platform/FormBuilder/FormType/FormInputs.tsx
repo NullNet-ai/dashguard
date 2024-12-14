@@ -13,11 +13,7 @@ import {
   useFormField,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 export interface InputData {
   id?: string;
@@ -62,7 +58,7 @@ export default function FormTextInputs({
     if (!fields?.length) {
       handleAddInput();
     }
-  }, []);
+  });
 
   const { register } = form;
   return (
@@ -79,20 +75,15 @@ export default function FormTextInputs({
                   formRenderProps?.field?.disabled || fieldConfig?.disabled
                 }
                 type={fieldConfig?.type || "text"}
-                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "Inputs")}
+                data-test-id={`${formKey}-${fieldConfig.name}-inp`}
                 {...fieldConfig}
                 onChange={(e) => handleInputChange(index, e.target.value)}
               />
               {error?.[index] && (
                 <p
                   id={data?.id}
-                  className={cn("py-1 text-md font-medium text-destructive")}
-                  data-test-id={kebabCase(
-                    formKey +
-                      (fieldConfig.name) +
-                      "InputsErrorMessage" +
-                      (index + 1),
-                  )}
+                  className="py-1 text-md font-medium text-destructive"
+                  data-test-id={`${formKey}-${fieldConfig.name}-inp-error-msg${index > 0 ? `-${index + 1}` : ""}`}
                 >
                   {error?.[index]?.value?.message}
                 </p>
@@ -101,9 +92,7 @@ export default function FormTextInputs({
           </FormControl>
           {index > 0 && (
             <Button
-              data-test-id={kebabCase(
-                formKey + " "+ (fieldConfig.name) + "InputsRemoveButton" + (index + 1),
-              )}
+              data-test-id={`${formKey}-${fieldConfig.name}-inp-remove-btn-${index + 1}`}
               disabled={formRenderProps?.field?.disabled}
               type="button"
               variant="destructive"
@@ -118,7 +107,7 @@ export default function FormTextInputs({
 
       {fieldConfig?.options?.inputsType === "multiple" && (
         <Button
-          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputsAddButton")}
+          data-test-id={`${formKey}-${fieldConfig.name}-inp-add-btn`}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           onClick={handleAddInput}
@@ -130,3 +119,4 @@ export default function FormTextInputs({
     </FormItem>
   );
 }
+
