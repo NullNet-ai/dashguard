@@ -4,7 +4,7 @@ import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
 
-const StepOneBasicDetails = ({
+const BasicDetailsSummary = ({
   form_key,
   identifier,
 }: {
@@ -63,4 +63,4 @@ const StepOneBasicDetails = ({
   );
 };
 
-export default StepOneBasicDetails;
+export default BasicDetailsSummary;
