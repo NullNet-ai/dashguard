@@ -13,11 +13,13 @@ const ZodItems = z.object({
   limit: z.number().min(1).optional(), // Limit of items per page
   current: z.number().optional(), // Current page number
   pluck: z.any().optional(), // Optional fields to pluck
+  pluck_object: z.any().optional(), // Optional fields to pluck
   advance_filters: z
     .array(
       z.object({
         type: z.string(),
         field: z.string(),
+        entity: z.string().optional(),
         operator: z.string(),
         values: z.array(z.string()),
       }),

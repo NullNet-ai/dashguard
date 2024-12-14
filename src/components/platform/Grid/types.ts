@@ -48,6 +48,7 @@ export interface IConfigGrid {
   enableAutoCreate?: boolean;
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
+  rowClickCustomAction?: (args: DefaultRowActions) => void;
 }
 
 export interface IState {
