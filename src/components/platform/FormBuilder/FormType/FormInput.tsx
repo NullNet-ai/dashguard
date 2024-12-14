@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import {IFieldFilterActions,  type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -24,6 +24,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
+  fieldFilterActions?: IFieldFilterActions
   formKey:string;
 }
 
@@ -32,10 +33,12 @@ export default function FormInput({
   formRenderProps,
   icon,
   value,
+  fieldFilterActions,
   formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const isHidden = fieldConfig.hidden;
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +72,13 @@ export default function FormInput({
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
           {...formRenderProps.field}
+          onChange={(e) => {
+            formRenderProps.field.onChange(e.target.value);
+            if(handleSearch){
+              handleSearch(e.target.value);
+            }
+          }}
+          {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
       <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-errmsg")}/>

@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { type IField } from "../type";
+import { IFieldFilterActions, type IField } from "../type";
 import { ulid } from "ulid";
 import { useToast } from "~/context/ToastProvider";
 
@@ -35,6 +35,7 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  fieldFilterActions?: IFieldFilterActions;
   formKey: string;
 }
 interface IUseFieldArrayEmail {
@@ -48,6 +49,7 @@ export default function FormEmailInput({
   fieldConfig,
   formRenderProps,
   form,
+  fieldFilterActions,
   formKey,
 }: IProps) {
   const { error }: any = useFormField();
@@ -90,6 +92,7 @@ export default function FormEmailInput({
   const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
   const { register } = form;
   const values = form.watch(name);
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
   return (
     <FormItem>
       <FormLabel
@@ -121,7 +124,13 @@ export default function FormEmailInput({
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
                     type={"email"}
-                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                    onChange={(e) => {
+                      handleEmailChange(index, e.target.value);
+                      if (handleSearch) {
+                        handleSearch(e.target.value);
+                      }
+                    }}
+                    {...(restFieldFilterActions ?? {})}
                   />
                   {data?.is_primary && isMultiple && (
                     <Badge

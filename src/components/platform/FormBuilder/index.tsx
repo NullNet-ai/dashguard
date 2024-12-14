@@ -424,6 +424,7 @@ export function FormBuilder({
                             formKey={formKey}
                             fields={fields}
                             form={form}
+                            formSchema={formSchema}
                             subConfig={{
                               checkboxOptions,
                               multiSelectOptions,
@@ -432,6 +433,7 @@ export function FormBuilder({
                               selectOptions,
                               currencyInputOptions,
                             }}
+                            gridConfig={filterGridConfig!}
                           />
                         ) : (
                           customRender(form, {

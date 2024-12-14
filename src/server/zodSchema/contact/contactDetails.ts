@@ -70,5 +70,31 @@ export const contactDetailsSchema = z.object({
       state: z.string().optional(),
       city: z.string().optional(),
     })
-    .optional(),
+    .superRefine((details, ctx) => {
+      // Check if the object is empty; skip validation if true
+      if (!Object.values(details || {}).length) {
+        return;
+      }
+
+      // List of required fields and their display names
+      const required_fields: Record<string, string> = {
+        address_line_one: "Address Line 1",
+        postal_code: "ZIP Code",
+        country: "Country",
+        state: "State",
+        city: "City",
+      };
+
+      // Validate required fields
+      Object.entries(required_fields).forEach(([field, display_name]) => {
+        //@ts-expect-error - details is an object
+        if (!details[field]) {
+          ctx.addIssue({
+            path: [field],
+            code: z.ZodIssueCode.custom,
+            message: `${display_name} is required.`,
+          });
+        }
+      });
+    }),
 });
