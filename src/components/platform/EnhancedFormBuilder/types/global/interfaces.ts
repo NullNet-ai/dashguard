@@ -78,6 +78,17 @@ interface IField {
   textAreaLineWrapping?: boolean;
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
+  withGridFilter?: boolean;
+  gridPosition?: "left" | "right";
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the field filter grid.
+   */
+  filterFieldConfig?: {
+    // for field filter grid
+    entity?: string;
+    field?: string;
+  };
 }
 
 interface ISelectOptions {
@@ -152,6 +163,7 @@ export interface ICustomActions {
 interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
+  pluck_object?: Record<string, string[]>;
   current?: number;
   limit?: number;
   filter_entity: string;
@@ -185,7 +197,37 @@ interface IFilterGridConfig {
   grid_data?: {
     items: Record<string, any>[];
     totalCount: number;
-  }
+  };
+  onFilterFieldChange?: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) =>
+    | {
+        totalCount: number;
+        items: any[];
+        currentPage: number;
+        totalPages: number;
+      }
+    | undefined;
+  handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
+  fieldFilterGridColumns?: string[];
+}
+
+export interface ISearchParams {
+  entity: string;
+  pluck?: any;
+  pluck_object?: any;
+  current?: number;
+  limit?: number;
+  advance_filters?: {
+    type: string;
+    values: string[];
+    field: string;
+    operator: string;
+    entity?: string;
+  }[];
+
+  sorting?: any[];
 }
 
 interface IPropsForms {
@@ -235,6 +277,13 @@ interface IPropsForms {
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];
   customFormFilterLockFormActions?: ICustomActions[];
+  /**
+   * @description
+   * This prop is used to determine if the form filter will override the current wizard record.
+   * If true, the form filter will override the current wizard record which includes the tab name and the url identifier.
+   * Else, the form filter will not override the current wizard record.
+   */
+  create_mode?: boolean;
 }
 
 export type {

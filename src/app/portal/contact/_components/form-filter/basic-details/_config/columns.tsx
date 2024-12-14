@@ -91,3 +91,13 @@ export default gridColumns;
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
 export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];
+export const FIELD_FILTER_GRID_COLUMNS = [
+  "status",
+  "code",
+  "categories",
+  "first_name",
+  "middle_name",
+  "last_name",
+  "raw_phone_number",
+  "email",
+];

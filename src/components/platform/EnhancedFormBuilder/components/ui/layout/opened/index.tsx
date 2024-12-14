@@ -4,6 +4,9 @@ import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
 import DebuggerComponent from "../../../custom/Debugger";
+import { IFilterGridConfig } from "~/components/platform/FormBuilder/type";
+import { z } from "zod";
+import { TFormSchema } from "~/components/platform/EnhancedFormBuilder/types";
 import FormModule from "~/components/platform/FormBuilder/FormModule";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
 
@@ -29,6 +32,9 @@ interface IOpenedFormLayoutProps {
   formProps: any;
   handleDebug: any;
   handleLock: any;
+  filterGridConfig?: IFilterGridConfig;
+  onSelectFieldFilterGrid: (data: z.infer<TFormSchema>) => Promise<void>;
+  formSchema: TFormSchema;
 }
 
 const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
@@ -52,7 +58,10 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     formProps,
     handleDebug,
     handleLock,
-    myParent,
+    filterGridConfig,
+    onSelectFieldFilterGrid,
+    formSchema,
+    myParent
   } = props;
 
   const { state } = useContext(WizardContext);
@@ -83,6 +92,9 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
                 currencyInputOptions,
               }}
               formKey={formKey}
+              gridConfig={filterGridConfig}
+              onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+              formSchema={formSchema}
             />
           ) : (
             customRender(form, {

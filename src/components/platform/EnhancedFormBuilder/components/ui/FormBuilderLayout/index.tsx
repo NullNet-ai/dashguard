@@ -67,6 +67,7 @@ const FormBuilderLayout = ({
   customFormFilterViewFormActions,
   customFormHostLockFormActions,
   customFormHostViewFormActions,
+  onSelectFieldFilterGrid,
   handleSearchOpen,
   isOpenSearch,
 }: IAccordionLayoutProps) => {
@@ -141,13 +142,13 @@ const FormBuilderLayout = ({
             />
             {
               searchActive && (
-                <FormFilterGridLayout
-                  isFormOpen={isFormOpened}
-                  handleListLoading={handleListLoading}
-                  handleSelectedGridRecords={handleNewRecordFormFilterGrid}
-                  handleCloseGrid={handleCloseGrid}
-                  filterGridConfig={filterGridConfig}
-                />
+            <FormFilterGridLayout
+              isFormOpen={isFormOpened}
+              handleListLoading={handleListLoading}
+              handleSelectedGridRecords={handleNewRecordFormFilterGrid}
+              handleCloseGrid={handleCloseGrid}
+              filterGridConfig={filterGridConfig}
+            />
               )
             }
           </>
@@ -170,18 +171,18 @@ const FormBuilderLayout = ({
               ) : (
                 <>
                  {!filterGridConfig && (
-                  <CardContent className="absolute right-2">
-                    <LockFormActions
-                      formProps={formProps}
-                      saveForm={saveForm}
-                      isButtonLoading={isSaveLoading}
-                      form={form}
-                      formSchema={formSchema}
-                      formKey={formKey}
-                      features={features}
-                      customFormHostLockFormActions={customFormHostLockFormActions}
-                    />
-                  </CardContent>
+                <CardContent className="absolute right-2">
+                  <LockFormActions
+                    formProps={formProps}
+                    saveForm={saveForm}
+                    isButtonLoading={isSaveLoading}
+                    form={form}
+                    formSchema={formSchema}
+                    formKey={formKey}
+                    features={features}
+                    customFormHostLockFormActions={customFormHostLockFormActions}
+                  />
+                </CardContent>
                  )}
                   
                 </>
@@ -208,6 +209,9 @@ const FormBuilderLayout = ({
                 formProps={formProps}
                 handleDebug={handleDebug}
                 handleLock={handleLock}
+                filterGridConfig={filterGridConfig}
+                onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+                formSchema={formSchema}
               />
             </>
           )}

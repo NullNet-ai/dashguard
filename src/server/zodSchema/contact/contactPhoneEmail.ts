@@ -94,6 +94,7 @@ export const EmailArraySchema = z
 
 export const ContactPhoneEmailSchema = z.object({
   id: z.string().optional(),
+  code: z.string().optional(),
   phone: PhoneArraySchema,
   email: EmailArraySchema,
 });

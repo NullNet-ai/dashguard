@@ -11,7 +11,7 @@ import { GridContext } from "../../Provider";
 import { Badge } from "~/components/ui/badge";
 
 interface IGridDesktopProps {
-  parentType: "grid" | "form";
+  parentType: "grid" | "form" | "field";
   hideSearch?: boolean;
   height?: string;
 }
@@ -21,27 +21,32 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
 
   return (
     <Card className="col-span-full border-0 shadow-none">
-      <CardHeader>
-        <div className="flex flex-row space-x-2">
-          {state?.config?.actionType === "multi-select" && (
-            <Button
-              onClick={() => {
-                actions?.handleMultiSelect();
-              }}
-              type="button"
-            >
-              <Badge color="green" className="mx-2 text-white">
-                {state?.totalCountSelected || 0}
-              </Badge>
-              Submit
-            </Button>
-          )}
-          {hideSearch ? null : <div style={{ width: parentType ? '100%' : "calc(100vw - 29rem)" }}>
-            <Search />
-          </div>}
-          
-        </div>
-      </CardHeader>
+      {parentType !== "field" && (
+        <CardHeader>
+          <div className="flex flex-row space-x-2">
+            {state?.config?.actionType === "multi-select" && (
+              <Button
+                onClick={() => {
+                  actions?.handleMultiSelect();
+                }}
+                type="button"
+              >
+                <Badge color="green" className="mx-2 text-white">
+                  {state?.totalCountSelected || 0}
+                </Badge>
+                Submit
+              </Button>
+            )}
+            {hideSearch ? null : (
+              <div
+                style={{ width: parentType ? "100%" : "calc(100vw - 29rem)" }}
+              >
+                <Search />
+              </div>
+            )}
+          </div>
+        </CardHeader>
+      )}
       <ScrollArea
         style={
           parentType === "grid"
@@ -52,9 +57,9 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
                 height: height || "auto",
               }
         }
-        className="rounded-md border bg-card text-card-foreground overflox-y-auto"
+        className="overflox-y-auto rounded-md border bg-card text-card-foreground"
       >
-     <Table>
+        <Table>
           <TableHeader>
             <MyTableHead />
           </TableHeader>

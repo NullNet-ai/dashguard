@@ -11,6 +11,8 @@ import { useWizard } from "../Wizard/Provider";
 import { FormBuilderLayout } from "./components/ui";
 import { IPropsForms, TDisplayType } from "./types";
 import { testIDFormatter } from "~/utils/formatter";
+import { useRouter, usePathname } from "next/navigation";
+import { UpdateCurrentSubTab } from "./Actions/UpdateCurrentSubTab";
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -32,11 +34,15 @@ export const FormBuilder = (props: IPropsForms) => {
     customRender,
     formProps,
     features,
+    create_mode = true,
     myParent,
     fieldConfig,
   } = props;
 
   const { actions } = useWizard();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -334,6 +340,20 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
+  const onSelectFieldFilterGrid = async (
+    data: z.infer<typeof formSchema>,
+  ) => {
+    try {
+      if(data?.code && create_mode) {
+        UpdateCurrentSubTab({ tab_name: data.code });
+      }
+      setFormGridSelected([data]);
+      setDisplayType("selected");
+    } catch (error) {
+      console.error("[Form-Filter] Failed onSelectFieldFilterGrid", error);
+    }
+  };
+
   //* RENDER
   return (
     <form
@@ -372,6 +392,7 @@ export const FormBuilder = (props: IPropsForms) => {
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             handleOpenForm={handleOpenForm}
             features={features}
+            onSelectFieldFilterGrid={onSelectFieldFilterGrid}
             myParent={myParent}
             handleSearchOpen={handleSearchOpen}
             isOpenSearch={isOpenSearch}

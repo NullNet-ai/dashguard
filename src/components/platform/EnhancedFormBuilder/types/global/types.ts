@@ -6,6 +6,7 @@ type TFormType =
   | "input"
   | "input-grid"
   | "number-input"
+  | "input-grid"
   | "textarea"
   | "select"
   | "radio"

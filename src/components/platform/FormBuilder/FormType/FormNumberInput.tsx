@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import { IFieldFilterActions, type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -22,6 +22,7 @@ interface IProps {
   icon?: React.ElementType;
   formKey: string;
   value?: string;
+  fieldFilterActions?: IFieldFilterActions
 }
 
 export default function FormNumber({
@@ -29,9 +30,11 @@ export default function FormNumber({
   formRenderProps,
   icon,
   form,
+  fieldFilterActions,
   formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -45,6 +48,9 @@ export default function FormNumber({
       shouldValidate: true,
       shouldTouch: true,
     });
+    if(handleSearch){
+      handleSearch(e.target.value);
+    }
   }
 
   return (
@@ -66,6 +72,7 @@ export default function FormNumber({
           Icon={icon}
           hasError={!!formRenderProps.fieldState.error}
           onChange={handleChange}
+          {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}/>
