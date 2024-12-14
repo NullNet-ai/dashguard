@@ -35,8 +35,9 @@ const getSessionTabs = async () => {
       _application === "record" &&
       !_current?.includes("current_tab")
     ) {
-      path = `${main}/?current_tab=dashboard`;
-      href = `${tab.href}/?current_tab=dashboard`;
+      const curr_tab = "?current_tab=dashboard";
+      path = `${main}/${curr_tab}`;
+      href = `${tab.href}/${curr_tab}`;
     } else {
       path = `${main}`;
       href = tab.href;
