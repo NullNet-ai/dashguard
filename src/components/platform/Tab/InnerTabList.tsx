@@ -1,15 +1,5 @@
 import { headers } from "next/headers";
-import { capitalize } from "lodash";
-import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
-
-import TabMenu from "~/components/application-layout/common/TabMenu";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
 import { type IPropsTabList } from "./type";
 import InnerTabItems from "./InnerTabItems";
 
@@ -33,12 +23,29 @@ const getSessionTabs = async () => {
   const grid = stateTabs.find((item) => item.name === "Grid");
   const hasIdentifier = stateTabs?.find((item) => item.name === identifier);
   const newTabs = stateTabs.map((tab) => {
-    const path = tab?.name === "Grid" ? pathname : `/${portal}/${mainEntity}/${application}/${identifier}` ;
-    const href = tab?.name === "Grid" ? tab.href.replace(/\/\d+$/, '') : tab.href; 
+    let path;
+    let href;
+    const main = `/${portal}/${mainEntity}/${application}/${identifier}`;
+    const [, , , _application, _current] = tab.href?.split("/");
+
+    if (tab?.name === "Grid") {
+      path = pathname;
+      href = tab.href.replace(/\/\d+$/, "");
+    } else if (
+      _application === "record" &&
+      !_current?.includes("current_tab")
+    ) {
+      path = `${main}/?current_tab=dashboard`;
+      href = `${tab.href}/?current_tab=dashboard`;
+    } else {
+      path = `${main}`;
+      href = tab.href;
+    }
+
     return {
       name: tab.name,
-      href: tab.href,
-      current : href.match(path) ? true : false,
+      href,
+      current: href.match(path) ? true : false,
     };
   });
 
@@ -61,7 +68,7 @@ const getSessionTabs = async () => {
   if (application === "record" && !hasIdentifier && identifier) {
     newTabs.push({
       name: identifier,
-      href: pathname,
+      href: `${pathname}?current_tab=dashboard`,
       current: true,
     });
   }
@@ -83,12 +90,7 @@ const InnerTabs = async () => {
   // const mainTabs = newTabs.slice(0, 6);
   // const dropdownTabs = newTabs.slice(6);
 
-  return (
-   <InnerTabItems 
-      tabs={newTabs}
-      pathname={pathname}
-   />
-  );
+  return <InnerTabItems tabs={newTabs} pathname={pathname} />;
 };
 
 export default InnerTabs;
