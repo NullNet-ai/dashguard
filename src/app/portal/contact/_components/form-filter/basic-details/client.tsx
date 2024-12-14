@@ -182,6 +182,7 @@ export default function ContactDetails({
           name: "phone",
           label: "Phone Number",
           required: true,
+          gridPosition: "left",
           withGridFilter: true,
           filterFieldConfig: {
             entity: "contact_phone_numbers",
@@ -196,6 +197,7 @@ export default function ContactDetails({
           label: "Email",
           required: true,
           withGridFilter: true,
+          gridPosition: "right",
           filterFieldConfig: {
             entity: "contact_emails",
             field: "email",

@@ -71,6 +71,7 @@ interface IField {
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
   withGridFilter?: boolean;
+  gridPosition?: "left" | "right";
   filterFieldConfig?: {// for field filter grid
     entity?: string;
     field?: string;
