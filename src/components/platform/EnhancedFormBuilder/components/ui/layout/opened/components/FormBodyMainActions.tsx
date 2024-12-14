@@ -63,7 +63,7 @@ const FormBodyMainActions = ({
           {!!selectedRecords?.length && !formProps?.isOpenSearch && (
             <Button
               variant={"outline"}
-              data-test-id={entityName + "-cancel-btn"}
+              data-test-id={entityName + "-wzrd" +"-cancel-btn"}
               onClick={() => {
                 form.reset(form.formState.defaultValues);
                 handleUpdateDisplayType("selected");
@@ -86,8 +86,8 @@ const FormBodyMainActions = ({
                 }
                 data-test-id={
                   selectedRecords.length
-                    ? entityName + "wzrd" + "-update-btn"
-                    : entityName + "wzrd" + "-create-btn"
+                    ? entityName + "-wzrd" + "-update-btn"
+                    : entityName + "-wzrd" + "-create-btn"
                 }
                 onClick={form.handleSubmit(onSubmitFormGrid)}
                 type="button"
@@ -113,8 +113,8 @@ const FormBodyMainActions = ({
                   }}
                   data-test-id={
                     !formProps?.isOpenSearch
-                      ? entityName + "-show-grd-btn"
-                      : entityName + "-hide-grd-btn"
+                      ? entityName + "-wzrd" + "-show-grd-btn"
+                      : entityName + "-wzrd" + "-hide-grd-btn"
                   }
                   className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
                 >
