@@ -3,7 +3,6 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { DateTimePicker } from "~/components/ui/date-picker";
 import {
   FormControl,
   FormItem,
@@ -14,7 +13,6 @@ import { type IField } from "../type";
 import moment from "moment";
 import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
 import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {

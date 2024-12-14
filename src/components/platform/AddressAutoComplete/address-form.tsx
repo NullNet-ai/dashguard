@@ -27,7 +27,7 @@ interface IAddressDetails {
 
 const AddressDetails = ({ form,formKey }: IAddressDetails) => {
   return (
-    <div className="space-y-4 py-7">
+    <div className="space-y-4 py-7 pt-4">
       <CountryName form={form} formKey={formKey}/>
       <AddressLineOne form={form} formKey={formKey}/>
       <AddressLineTwo form={form} formKey={formKey}/>
