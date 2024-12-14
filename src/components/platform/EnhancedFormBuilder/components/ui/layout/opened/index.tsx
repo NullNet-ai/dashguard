@@ -2,7 +2,7 @@ import { EllipsisVertical } from "lucide-react";
 import { Fragment, useContext } from "react";
 import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { cn } from "~/lib/utils";
+import { cn, formatFormTestID } from "~/lib/utils";
 import DebuggerComponent from "../../../custom/Debugger";
 import { IFilterGridConfig } from "~/components/platform/FormBuilder/type";
 import { z } from "zod";
@@ -66,7 +66,9 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
 
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
-
+  const formattedFormKey = formatFormTestID(
+    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+  );
   return (
     <CardContent
       className={cn(
@@ -79,7 +81,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
         <Fragment>
           {!customRender ? (
             <FormModule
-              fieldConfig={fieldConfig}
+              // fieldConfig={fieldConfig}
               fields={fields}
               form={form}
               myParent={myParent}
@@ -91,7 +93,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
                 selectOptions,
                 currencyInputOptions,
               }}
-              formKey={formKey}
+              formKey={formattedFormKey}
               gridConfig={filterGridConfig}
               onSelectFieldFilterGrid={onSelectFieldFilterGrid}
               formSchema={formSchema}
