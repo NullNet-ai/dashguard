@@ -12,6 +12,7 @@ import { FormBuilderLayout } from "./components/ui";
 import { IPropsForms, TDisplayType } from "./types";
 import { testIDFormatter } from "~/utils/formatter";
 import { useRouter, usePathname } from "next/navigation";
+import { UpdateCurrentSubTab } from "./Actions/UpdateCurrentSubTab";
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -34,6 +35,7 @@ export const FormBuilder = (props: IPropsForms) => {
     customRender,
     formProps,
     features,
+    create_mode = true
   } = props;
 
   const { actions } = useWizard();
@@ -335,10 +337,8 @@ export const FormBuilder = (props: IPropsForms) => {
     data: z.infer<typeof formSchema>,
   ) => {
     try {
-      const [, , , , identifier] = pathname.split("/");
-      if (identifier === 'new' && data?.code) {
-        const newPathname = pathname.replace("/new/", `/${data?.code}/`);
-        router.push(newPathname);
+      if(data?.code && create_mode) {
+        UpdateCurrentSubTab({ tab_name: data.code });
       }
       setFormGridSelected([data]);
       setDisplayType("selected");

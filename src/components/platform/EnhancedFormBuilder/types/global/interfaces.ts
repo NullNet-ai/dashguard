@@ -72,6 +72,10 @@ interface IField {
   textAreaMaxCharCount?: number;
   withGridFilter?: boolean;
   gridPosition?: "left" | "right";
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the field filter grid.
+   */
   filterFieldConfig?: {// for field filter grid
     entity?: string;
     field?: string;
@@ -259,6 +263,13 @@ interface IPropsForms {
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];
   customFormFilterLockFormActions?: ICustomActions[];
+   /**
+   * @description
+   * This prop is used to determine if the form filter will override the current wizard record.
+   * If true, the form filter will override the current wizard record which includes the tab name and the url identifier.
+   * Else, the form filter will not override the current wizard record.
+   */
+   create_mode?: boolean; 
 }
 
 export type {
