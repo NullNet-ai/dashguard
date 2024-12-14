@@ -7,23 +7,43 @@ const FormServerFetch = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , , application, identifier] = pathname.split("/");
 
-  const response = await api.record.getByCode({
-    id: identifier!,
+  const response = await api.contact.getContactWithAddress({
+    code: identifier!,
     pluck_fields: [
       "id",
       "first_name",
       "last_name",
       "middle_name",
       "date_of_birth",
+      "address_id",
     ],
-    main_entity: "contact",
+    address_pluck_fields: [
+      "address",
+      "address_line_one",
+      "address_line_two",
+      "latitude",
+      "longitude",
+      "place_id",
+      "street_number",
+      "street",
+      "region",
+      "region_code",
+      "country_code",
+      "postal_code",
+      "country",
+      "state",
+      "city",
+    ],
   });
 
-  const default_values = response?.data;
+  const default_values = response || {};
+
+  const { address, ...rest } = default_values;
+
   return (
     <div className="space-y-2">
       <ContactDetails
-        defaultValues={default_values}
+        defaultValues={{ ...rest, details: address || {} }}
         params={{
           id: default_values?.id!,
           shell_type: application! as "record" | "wizard",
