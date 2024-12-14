@@ -23,8 +23,7 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import numberToWords from "./Utils/steptoWords";
-import { NumberWords } from "./type";
-import { camelCase } from "lodash";
+import { type NumberWords } from "./type";
 import { testIDFormatter } from "~/utils/formatter";
 
 export default function Header() {
@@ -71,7 +70,7 @@ export default function Header() {
         skip: false,
       }
     );
-  }, [currentStep]);
+  }, [currentStep, stepsNavigation]);
 
   return (
     <>
@@ -85,7 +84,7 @@ export default function Header() {
               <Button
                 name="toggleStepper"
                 data-test-id={testIDFormatter(
-                  `${entityName}-wizard-toggle-stepper`,
+                  `${entityName}-wzrd-toggle-stepper`,
                 )}
                 variant={"ghost"}
                 className="items-end gap-2 p-0"
@@ -112,7 +111,7 @@ export default function Header() {
         <div className="flex items-center space-x-2 ">
           <Button
             name="wizardDebugButton"
-            data-test-id={testIDFormatter(`${entityName}-wizard-debug-btn`)}
+            data-test-id={testIDFormatter(`${entityName}-wzrd-debug-btn`)}
             size={"icon"}
             variant={"ghost"}
             className="m-auto h-6 w-6 rounded-full bg-rose-200"
@@ -121,7 +120,7 @@ export default function Header() {
             <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-red-500" />
           </Button>
           <Button
-            data-test-id={testIDFormatter(`${entityName}-wizard-prev-btn`)}
+            data-test-id={testIDFormatter(`${entityName}-wzrd-prev-btn`)}
             disabled={!enabled_prev || currentStep === 1 || prevLoading}
             variant={"outline"}
             loading={prevLoading}
@@ -139,7 +138,7 @@ export default function Header() {
             <div className="flex flex-row space-x-0.5">
               <Button
                 data-test-id={testIDFormatter(
-                  `${entityName}-wizard-save-continue-btn`,
+                  `${entityName}-wzrd-save-continue-btn`,
                 )}
                 className="rounded-r-none"
                 loading={saveContinueLoading}
@@ -178,7 +177,7 @@ export default function Header() {
           ) : (
             <>
               <Button
-                data-test-id={testIDFormatter(`${entityName}-wizard-skip-btn`)}
+                data-test-id={testIDFormatter(`${entityName}-wzrd-skip-btn`)}
                 variant={"outline"}
                 loading={skipLoading}
                 size={"sm"}
@@ -194,7 +193,7 @@ export default function Header() {
                 />
               </Button>
               <Button
-                data-test-id={testIDFormatter(`${entityName}-wizard-next-btn`)}
+                data-test-id={testIDFormatter(`${entityName}-wzrd-next-btn`)}
                 loading={nextLoading}
                 size={"sm"}
                 disabled={
@@ -212,7 +211,7 @@ export default function Header() {
       </div>
       {debugOn && <DebuggerComponent />}
       <Validation
-        dataTestId={testIDFormatter(`${entityName}-wizard-validation-msg`)}
+        dataTestId={testIDFormatter(`${entityName}-wzrd-validation-msg`)}
         messages={errorMessage ?? {}}
       />
     </>

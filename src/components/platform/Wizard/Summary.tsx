@@ -35,7 +35,7 @@ const SummaryComponent = () => {
         state?.isSummaryOpen ? 'lg:w-64 md:w-52 sm:w-48' : 'w-8 pt-2' )}
         >
         <div
-          data-test-id={testIDFormatter(`${entityName}-wizard-summary`)}
+          data-test-id={testIDFormatter(`${entityName}-wzrdsum`)}
           className={cn('flex items-center justify-between  z-10',
             state?.isSummaryOpen ? 'flex-row px-4 border-b' : 'flex-col-reverse justify-end gap-6 border-b mb-2'
   
@@ -48,7 +48,7 @@ const SummaryComponent = () => {
               handleToggle()
             }} 
             className="font-bold flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-primary"
-            data-test-id={testIDFormatter(`${entityName}-wizard-summary-toggle-btn`)}
+            data-test-id={testIDFormatter(`${entityName}-wzrdsum-toggle-btn`)}
           >
             <ChevronLeftIcon className="h-3 w-3" />
           </Button2>
