@@ -153,6 +153,7 @@ export default function FormCurrencyInput({
             onChange={(e) =>
               handleOnValueChange(e.target.value, fieldConfig.name, values)
             }
+            value={values.value}
           />
 
           <CurrencyInput
@@ -167,7 +168,7 @@ export default function FormCurrencyInput({
                 normalInputRef.current.focus(); // Focus on normal input when currency input is clicked
               }
             }}
-            onFocus={() => normalInputRef.current?.focus()}
+            // onFocus={() => normalInputRef.current?.focus()}
             value={formRenderProps.field.value ? values.value : "0.00"}
             step={1}
             prefix={selectedCurrency.value}
@@ -193,9 +194,7 @@ export default function FormCurrencyInput({
                 {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent
-              data-test-id={`${formKey}-${fieldConfig.name}-cnt`}
-            >
+            <SelectContent data-test-id={`${formKey}-${fieldConfig.name}-cnt`}>
               {options?.map((option, i) => (
                 <SelectItem
                   key={option.label}
