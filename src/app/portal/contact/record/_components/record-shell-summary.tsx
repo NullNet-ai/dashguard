@@ -6,6 +6,8 @@ type TProps = Partial<{
   phone: string;
   full_name: string;
   categories: string[];
+  date_of_birth: string;
+  address: string;
 }>;
 
 const fields = {
@@ -14,6 +16,7 @@ const fields = {
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
   Category: "categories",
+  Address: "address",
 };
 
 export default function RecordShellSummary(props: TProps) {

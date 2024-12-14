@@ -11,10 +11,36 @@ export default async function Page() {
 
   const record_details = await api.contact.fetchContactPhoneEmail({
     code: identifier!,
-    pluck_fields: ["id", "first_name", "last_name", "categories"],
+    pluck_fields: [
+      "id",
+      "first_name",
+      "last_name",
+      "categories",
+      "date_of_birth",
+      "address_id",
+    ],
   });
 
-  const { categories, first_name, last_name, email, phone } = record_details;
+  const {
+    categories,
+    first_name,
+    last_name,
+    email,
+    date_of_birth,
+    phone,
+    address_id,
+  } = record_details;
+
+  let address = "";
+  if (address_id) {
+    const response = await api.record.getById({
+      id: address_id,
+      main_entity: "address",
+      pluck_fields: ["address"],
+    });
+
+    address = response?.data?.address;
+  }
 
   const full_name = `${first_name} ${last_name}`;
 
@@ -35,6 +61,7 @@ export default async function Page() {
     raw_phone_number,
     iso_code,
   });
+
   return (
     <div>
       <RecordSummary />
@@ -43,6 +70,8 @@ export default async function Page() {
         phone={format_phone || ""}
         full_name={full_name}
         categories={_categories}
+        date_of_birth={date_of_birth}
+        address={address || ""}
       />
     </div>
   );
