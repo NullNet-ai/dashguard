@@ -1,8 +1,9 @@
 import { ComboboxOption } from "@headlessui/react";
 import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
+import { testIDFormatter } from "~/utils/formatter";
 
-export default function RecentSearch({ projects }: { projects: any[] }) {
+export default function RecentSearch({ projects, entity }: { projects: any[], entity?: string }) {
   const { actions } = useContext(SearchGridContext);
   return (
     <>
@@ -16,6 +17,7 @@ export default function RecentSearch({ projects }: { projects: any[] }) {
               actions?.handleSearchSelected(project);
             }}
             as="li"
+            data-test-id={testIDFormatter(`${entity}-grd-search-inp-drd-itm`)}
             key={project.id}
             value={project}
             className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-indigo-600 hover:text-white"
