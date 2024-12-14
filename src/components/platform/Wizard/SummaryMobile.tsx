@@ -86,7 +86,7 @@ const SummaryMobile = () => {
         <DrawerFooter>
           <div className="fixed bottom-0 z-20 left-0 flex w-full justify-between bg-muted text-default/60 lg:hidden">
             <Button
-              data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-toggle-btn`)}
+              data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-toggle-btn`)}
               onClick={() => {
                 setSelected("summary");
               }}
@@ -95,7 +95,7 @@ const SummaryMobile = () => {
               <ListCheckIcon className={cn('h-5 w-5', {'text-primary': selected === "summary"})} /> Summary 
             </Button>
             <Button
-              data-test-id={testIDFormatter(`${entity}-wizard-summary-smart-mobile-toggle-btn`)}
+              data-test-id={testIDFormatter(`${entity}-wzrdsum-smart-mobile-toggle-btn`)}
               onClick={() => {
                 setSelected("smart");
               }}
@@ -121,7 +121,7 @@ const SummaryMobile = () => {
               onClick={() => {
                 setSelected(null);
               }}
-              data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-drawer-toggle-btn`)}
+              data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-drawer-toggle-btn`)}
               className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200"
             >
               <ChevronDown className="h-6 w-6 text-primary" />
@@ -169,7 +169,7 @@ const SummaryMobile = () => {
                         <AccordionItem
                           key={stepIdx}
                           value={stepIndex.toString()}
-                          data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-stepper-itm-${stepIndex}`)}
+                          data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}`)}
                         >
                           <li
                             className={cn(
@@ -206,7 +206,7 @@ const SummaryMobile = () => {
                                 <Link
                                   href={completeLink}
                                   className="group relative flex items-start"
-                                  data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-stepper-itm-${stepIndex}-completed-link`)}
+                                  data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-completed-link`)}
                                 >
                                   <span className="flex h-9 items-center">
                                     {isCurrent ? (
@@ -241,7 +241,7 @@ const SummaryMobile = () => {
                                   </span>
                                   {/* This will be hidden on mobile screens */}
                                   <AccordionTrigger
-                                    data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-stepper-itm-${stepIndex}-accordion-trigger`)}
+                                    data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-accordion-trigger`)}
                                   >
                                     <span className="text-left text-sm font-medium sm:block">
                                       {summaryTitle
@@ -269,7 +269,7 @@ const SummaryMobile = () => {
                                 }
                                 <a
                                   href={completeLink}
-                                  data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-stepper-itm-${stepIndex}-link`)}
+                                  data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-link`)}
                                   className="group relative flex items-start"
                                 >
                                   <span
@@ -434,7 +434,7 @@ const SummaryMobile = () => {
             "flex w-1/2 items-center justify-center gap-2 p-4",
             widthClass,
           )}
-          data-test-id={testIDFormatter(`${entity}-wizard-summary-mobile-ftr-toggle-btn`)}
+          data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-ftr-toggle-btn`)}
           onClick={() => {
             setSelected("summary");
           }}
@@ -447,7 +447,7 @@ const SummaryMobile = () => {
             "flex w-1/2 items-center justify-center gap-2 p-4",
             widthClass,
           )}
-          data-test-id={testIDFormatter(`${entity}-wizard-summary-smart-mobile-ftr-toggle-btn`)}
+          data-test-id={testIDFormatter(`${entity}-wzrdsum-smart-mobile-ftr-toggle-btn`)}
           onClick={() => {
             setSelected("smart");
           }}

@@ -11,8 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 
 interface IProps {
@@ -54,13 +52,13 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-lbl")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={formKey + "-" + (fieldConfig.name) + "-lbl"}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "-inp")}
+          data-test-id={formKey + "-" + (fieldConfig.name) + "-inp"}
           readOnly={fieldConfig?.readonly ?? false}
           className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
           disabled={isDisabled}
@@ -81,7 +79,7 @@ export default function FormInput({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-errmsg")}/>
+      <FormMessage data-test-id={formKey + "-" + (fieldConfig.name) + "-err-msg"}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

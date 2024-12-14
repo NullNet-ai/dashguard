@@ -2,12 +2,12 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
-  number_input: z
-    .number({ message: "Number Input is required" })
-    .min(1, { message: "Number Input must be at least 1" }),
+  age: z
+    .number({ message: "Age is required" })
+    .min(1, { message: "Age must be at least 1" }),
 });
 
 export default function NumberInputDetails({}) {
@@ -31,23 +31,24 @@ export default function NumberInputDetails({}) {
       }
     });
   }
+
   return (
     <>
       {/* FormBuilder 8: Number */}
       <FormBuilder
         enableFormRegisterToParent
-        formLabel="Number Form Builder"
-        formKey="FormBuilderNumber"
+        formLabel="Age Form Builder"
+        formKey="employee"
         formSchema={FormSchema}
         handleSubmit={handleSave}
         fields={[
           {
-            id: "number_input",
+            id: "age",
             formType: "number-input",
-            name: "number_input",
-            label: "Number",
+            name: "age",
+            label: "Age",
             required: true,
-            placeholder: "Number",
+            placeholder: "Enter your age",
           },
         ]}
       />

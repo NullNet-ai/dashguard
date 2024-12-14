@@ -38,6 +38,7 @@ export default function SubmitForm({
       loading={isLoading}
       size={"xs"}
       className="gap-1 items-center text-sm"
+      {...props}
       >
       <SaveIcon className="h-4 w-4" />
       Save

@@ -6,11 +6,16 @@ import { GridContext } from "../Provider";
 import { formatAndCapitalize } from "~/lib/utils";
 import { X } from "lucide-react";
 import { ColumnSort } from "@tanstack/react-table";
+import { testIDFormatter } from "~/utils/formatter";
 
 
 const Sorting = () => {
   const { state, actions } = useContext(GridContext);
   if (!state?.sorting?.length) return null;
+
+
+  const entity = state?.config?.entity;
+
   return (
     <div className="flex flex-1 items-center gap-2">
       <span className="text-xs text-black">Sort By</span>
@@ -21,6 +26,7 @@ const Sorting = () => {
             variant="ghost"
             size="xs"
             name="removeSortingButton"
+            data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
             key={`${item.id}-remove`}
             className="h-auto w-auto p-0 focus:outline-none"
             onClick={() => {
@@ -33,6 +39,7 @@ const Sorting = () => {
       ))}
       <Button
         name="resetSortButton"
+        data-test-id={testIDFormatter(`${entity}-grd-sorting-reset`)}
         variant={"link"}
         onClick={() => {
           actions?.handleResetSorting();

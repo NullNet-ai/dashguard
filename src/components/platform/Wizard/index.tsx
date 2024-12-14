@@ -2,7 +2,6 @@
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import { Button } from "~/components/ui/button";
-import { Button as Button2 } from "@headlessui/react";
 import { Card } from "~/components/ui/card";
 import {
   Drawer,
@@ -12,7 +11,7 @@ import {
 } from "~/components/ui/drawer";
 import Header from "./Header";
 import WizardProvider from "./Provider";
-import { Summary, TStepsNavigationButtons, type IState } from "./type";
+import { type Summary, type TStepsNavigationButtons, type IState } from "./type";
 
 import WizardNavigator from "./BreadCrumbs";
 import SummaryComponent from "./Summary";

@@ -12,7 +12,7 @@ import {
 import { type IField } from "../type";
 import moment from "moment";
 import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
-import kebabCase from "lodash/kebabCase";
+
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -60,18 +60,14 @@ export default function FormSmartDate({
     <FormItem className="flex w-full flex-col">
       <FormLabel
         required={required}
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "S,artDateFormLabel",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
       >
         {label}
       </FormLabel>
       <FormControl>
         <SmartDatetimeInput
-          datePickerTestID={kebabCase(
-            formKey + fieldConfig.name + "SmartDatePicker",
-          )}
-          inputTestID={kebabCase(formKey + fieldConfig.name + "SmartDateInput")}
+          datePickerTestID={`${formKey}-${fieldConfig.name}-dte-picker`}
+          inputTestID={`${formKey}-${fieldConfig.name}-input`}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
@@ -81,9 +77,7 @@ export default function FormSmartDate({
         />
       </FormControl>
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "SmartDateErrorMessage",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
       />
     </FormItem>
   );

@@ -11,6 +11,7 @@ export default function StreetName({ form,formKey }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+              data-test-id={formKey + "-" + formRenderProps.field.name + "-inp"}
               formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,

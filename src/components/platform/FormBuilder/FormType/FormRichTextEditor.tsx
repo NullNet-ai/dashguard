@@ -13,9 +13,7 @@ import {
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
 import { useState } from "react";
 import { type Content } from "@tiptap/react";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
+
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -31,7 +29,6 @@ interface IProps {
 export default function FormRichTextEditor({
   fieldConfig,
   formRenderProps,
-  icon,
   form,
   formKey,
   // value,
@@ -58,9 +55,7 @@ export default function FormRichTextEditor({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "RichTextEditorFormLabel",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -70,9 +65,7 @@ export default function FormRichTextEditor({
           editorProps={{
             editable: () => !isDisabled && !fieldConfig?.readonly,
             attributes: {
-              "data-test-id": kebabCase(
-                formKey + fieldConfig?.name + "RichTextEditor",
-              ),
+              "data-test-id": `${formKey}-${fieldConfig.name}-editor`,
             },
           }}
           throttleDelay={0}
@@ -92,7 +85,7 @@ export default function FormRichTextEditor({
           }}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "RichTextEditorErrorMessage")}/>
+      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-error-msg`} />
 
       {/* <span>{JSON.stringify(content, null, 2)}</span> */}
     </FormItem>

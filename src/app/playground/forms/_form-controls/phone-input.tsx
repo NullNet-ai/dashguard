@@ -33,24 +33,35 @@ const handleSave = async (values: { data: z.infer<typeof PhoneSchema> }) => {
     <>
       {/* FormBuilder 16: Phone Input */}
       <FormBuilder
-        handleSubmit={handleSave}
-        enableFormRegisterToParent
-        formLabel="Phone Input Form Builder"
-        formKey="FormBuilderPhoneInput"
-        formSchema={PhoneSchema}
-        fields={[
-          {
-            id: "phone-input",
-            formType: "phone-input",
-            name: "phone-input",
-            label: "Phone Input",
-            required: true,
-            placeholder: "Phone Input",
-            options: {
-              phoneNumberType: "multiple",
-            }
-          },
-        ]}
+      handleSubmit={handleSave}
+      enableFormRegisterToParent
+      formLabel="Phone Input Form Builder"
+      formKey="FormBuilderPhoneInput"
+      formSchema={PhoneSchema}
+      fields={[
+        {
+        id: "phone-input",
+        formType: "phone-input",
+        name: "phone-input",
+        label: "Phone Input",
+        required: true,
+        placeholder: "Phone Input",
+        options: {
+          phoneNumberType: "multiple",
+        }
+        },
+        {
+        id: "single-phone-input",
+        formType: "phone-input",
+        name: "single-phone-input",
+        label: "Single Phone Input",
+        required: true,
+        placeholder: "Single Phone Input",
+        options: {
+          phoneNumberType: "single",
+        }
+        }
+      ]}
       />
     </>
   );

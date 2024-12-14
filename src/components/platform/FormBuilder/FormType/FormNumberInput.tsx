@@ -11,9 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -23,7 +20,7 @@ interface IProps {
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
-  formKey:string;
+  formKey: string;
   value?: string;
   fieldFilterActions?: IFieldFilterActions
 }
@@ -38,15 +35,6 @@ export default function FormNumber({
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
-
-  //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   form.setValue(`${fieldConfig?.name}`, e.target.value, {
-  //     shouldDirty: true,
-  //     shouldValidate: true,
-  //     shouldTouch: true,
-  //   });
-  // };
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -64,16 +52,16 @@ export default function FormNumber({
       handleSearch(e.target.value);
     }
   }
+
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputFormLabel")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-${fieldConfig.name}-lbl`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
-          // {...form.register(fieldConfig?.name)}
           {...formRenderProps.field}
-          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInput")}
+          data-test-id={`${formKey}-${fieldConfig.name}-inp`}
           readOnly={fieldConfig?.readonly ?? false}
           type="number"
           inputMode="decimal"
@@ -87,9 +75,7 @@ export default function FormNumber({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputErrorMessage")}/>
-
-      {/* <DevTool  control={form.control} /> */}
+      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}/>
     </FormItem>
   );
 }

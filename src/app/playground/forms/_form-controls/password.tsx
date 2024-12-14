@@ -2,8 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
-
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
   password: z
@@ -47,11 +46,11 @@ export default function PasswordDetails({}) {
 
   return (
     <>
-      {/* FormBuilder 9: Password */}
+      {/* FormBuilder: User Registration Password */}
       <FormBuilder
         enableFormRegisterToParent
-        formLabel="Password Form Builder"
-        formKey="FormBuilderPassword"
+        formLabel="User Registration"
+        formKey="user-registration"
         formSchema={FormSchema}
         handleSubmit={handleSave}
         fields={[
@@ -59,9 +58,9 @@ export default function PasswordDetails({}) {
             id: "password",
             formType: "password",
             name: "password",
-            label: "Password",
+            label: "Create Password",
             required: true,
-            placeholder: "Password",
+            placeholder: "Enter your password",
           },
         ]}
       />

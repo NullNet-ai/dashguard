@@ -36,6 +36,7 @@ export const FormBuilder = (props: IPropsForms) => {
     features,
     create_mode = true,
     myParent,
+    fieldConfig,
   } = props;
 
   const { actions } = useWizard();
@@ -364,6 +365,7 @@ export const FormBuilder = (props: IPropsForms) => {
         <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
           <FormBuilderLayout
             {...props}
+            fieldConfig={fieldConfig}
             form={form}
             debugOn={debugOn}
             showFormActions={showFormActions}
