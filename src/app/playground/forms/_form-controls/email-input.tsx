@@ -42,7 +42,7 @@ export default function EmailInputDetails({}) {
           {
             id: "email_input",
             formType: "email-input",
-            name: "email_input",
+            name: "email-input",
             label: "Email Multiple Input",
             required: true,
             placeholder: "Email Multiple Input",

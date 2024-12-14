@@ -1,6 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
 import { Fragment } from "react";
-import FormModule from "~/components/platform/FormBuilder/FormModule";
 import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { cn } from "~/lib/utils";
@@ -8,9 +7,11 @@ import DebuggerComponent from "../../../custom/Debugger";
 import { IFilterGridConfig } from "~/components/platform/FormBuilder/type";
 import { z } from "zod";
 import { TFormSchema } from "~/components/platform/EnhancedFormBuilder/types";
+import FormModule from "~/components/platform/FormBuilder/FormModule";
 
 // TODO: replace any with the correct type
 interface IOpenedFormLayoutProps {
+  myParent?: "wizard" | "record" 
   customDesign?: any;
   customRender?: any;
   fields: any;
@@ -56,7 +57,8 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     handleLock,
     filterGridConfig,
     onSelectFieldFilterGrid,
-    formSchema
+    formSchema,
+    myParent
   } = props;
 
   return (
@@ -73,6 +75,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
             <FormModule
               fields={fields}
               form={form}
+              myParent={myParent}
               subConfig={{
                 checkboxOptions,
                 multiSelectOptions,

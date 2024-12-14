@@ -99,6 +99,16 @@ export default function RecordContactDetails({
           placeholder: "Middle Name",
           required: false,
         },
+        {
+          id: "date_of_birth",
+          formType: "smart-date",
+          name: "date_of_birth",
+          label: "Date of Birth",
+          placeholder: "MM/DD/YYYY",
+          dateTimePickerProps: {
+            maxDate: new Date(),
+          },
+        },
       ]}
     />
   );

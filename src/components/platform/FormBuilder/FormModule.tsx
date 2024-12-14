@@ -8,7 +8,7 @@ import type {
   OptionType,
   IFilterGridConfig,
 } from "./type";
-import { Fragment } from "react";
+import { Fragment, useContext } from "react";
 import RenderFormType from "./RenderFormType";
 import { FormField } from "~/components/ui/form";
 import FormAddress from "./FormType/FormAddress";
@@ -16,6 +16,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { z } from "zod";
 import { IField, TFormSchema } from "../EnhancedFormBuilder/types";
 import FormInputGridWrapper from "../EnhancedFormBuilder/components/custom/FormFilter/FormInputGridWrapper";
+import { WizardContext } from "../Wizard/Provider";
+import { formatFormTestID } from "~/lib/utils";
 export default function FormModule({
   fields,
   form,
@@ -23,7 +25,8 @@ export default function FormModule({
   formKey,
   gridConfig,
   onSelectFieldFilterGrid,
-  formSchema
+  formSchema,
+  myParent,
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -39,7 +42,13 @@ export default function FormModule({
   gridConfig?: IFilterGridConfig;
   formSchema: TFormSchema;
   onSelectFieldFilterGrid?: (data: z.infer<TFormSchema>) => Promise<void>;
+  myParent?: "record" | "wizard";
 }) {
+  const { state } = useContext(WizardContext);
+  const { entityName } = state ?? {};
+  const formattedFormKey = formatFormTestID(
+    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+  );
   return (
     <Fragment>
       {fields.map((_field, index) => {
@@ -48,7 +57,11 @@ export default function FormModule({
             // AddressInput is a custom form type that has other fields inside it
             // So we need to wrap each of them in a FormField rather than just rendering the component
             return (
-              <FormAddress key={_field.id + index} form={form} formKey={formKey} />
+              <FormAddress
+                key={_field.id + index}
+                form={form}
+                formKey={formattedFormKey}
+              />
             );
           default:
             return (

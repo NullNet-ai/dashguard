@@ -7,14 +7,14 @@ import CurrencyInput, {
   type CurrencyInputOnChangeValues,
   type CurrencyInputProps,
 } from "~/components/ui/currency-input";
-import { OptionType, type IField } from "../type";
+import { type OptionType, type IField } from "../type";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -24,7 +24,6 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
 
 interface IProps {
   fieldConfig: IField;
@@ -142,9 +141,7 @@ export default function FormCurrencyInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey +fieldConfig.name + "CurrencyInputFormLabel",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -160,9 +157,7 @@ export default function FormCurrencyInput({
 
           <CurrencyInput
             {...register(fieldConfig.name)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencyInput",
-            )}
+            data-test-id={`${formKey}-${fieldConfig.name}-inp`}
             ref={inputRef}
             placeholder="Currency"
             className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
@@ -173,7 +168,7 @@ export default function FormCurrencyInput({
               }
             }}
             onFocus={() => normalInputRef.current?.focus()}
-            value={formRenderProps.field.value?values.value : "0.00"}
+            value={formRenderProps.field.value ? values.value : "0.00"}
             step={1}
             prefix={selectedCurrency.value}
             decimalSeparator="."
@@ -185,38 +180,27 @@ export default function FormCurrencyInput({
               ?.findIndex((option) => option.label === selectedCurrency.label)
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencySelect",
-            )}
+            data-test-id={`${formKey}-${fieldConfig.name}-sel`}
           >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
-              data-test-id={kebabCase(
-                formKey + fieldConfig.name + "CurrencyTrigger",
-              )}
+              data-test-id={`${formKey}-${fieldConfig.name}-trg`}
             >
               <SelectValue
                 placeholder="Unit"
-                data-test-id={kebabCase(
-                  formKey + fieldConfig.name + "CurrencySelectValue",
-                )}
+                data-test-id={`${formKey}-${fieldConfig.name}-sel-val`}
               >
                 {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
             <SelectContent
-              data-test-id={formKey + fieldConfig.name + "CurrencyContent"}
+              data-test-id={`${formKey}-${fieldConfig.name}-cnt`}
             >
               {options?.map((option, i) => (
                 <SelectItem
                   key={option.label}
                   value={i.toString()}
-                  data-test-id={kebabCase(
-                    formKey +
-                      fieldConfig.name+
-                      "CurrencySelectOption" +
-                      option.label,
-                  )}
+                  data-test-id={`${formKey}-${fieldConfig.name}-sel-opt-${option.label}`}
                 >
                   {option.label}
                 </SelectItem>
@@ -230,10 +214,10 @@ export default function FormCurrencyInput({
       "amount" in error &&
       error.amount &&
       typeof error.amount.message === "string" ? (
-        <p className={cn("py-1 text-md font-medium text-destructive")}
-        data-test-id={
-          kebabCase(formKey + fieldConfig.name + "CurrencyInputErrorMessage")
-        }>
+        <p
+          className={cn("py-1 text-md font-medium text-destructive")}
+          data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        >
           {error.amount.message}
         </p>
       ) : (

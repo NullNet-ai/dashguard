@@ -20,7 +20,6 @@ export const FormBuilder = (props: IPropsForms) => {
     formSchema,
     defaultValues,
     formKey,
-    myParent,
     appendFormKey,
     //* actions
     onFormChange,
@@ -35,7 +34,8 @@ export const FormBuilder = (props: IPropsForms) => {
     customRender,
     formProps,
     features,
-    create_mode = true
+    create_mode = true,
+    myParent,
   } = props;
 
   const { actions } = useWizard();
@@ -62,6 +62,7 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay === "expanded",
   );
   const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
 
   //* EFFECTS
 
@@ -183,6 +184,10 @@ export const FormBuilder = (props: IPropsForms) => {
     });
   };
 
+  const handleSearchOpen = () => {
+    setIsOpenSearch(!isOpenSearch);
+  };
+
   const handleAccordionChange = (value: string) => {
     setIsAccordionExpanded(value === "item-1");
     setOpenGrid(value);
@@ -263,7 +268,7 @@ export const FormBuilder = (props: IPropsForms) => {
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
         const res = (await handleSubmit({ data, form })) as any;
-        const { errors = {}, existing_record, existing = false } = res || {};
+        const { errors = {}, existing = false } = res || {};
 
         const form_errors = errors?.form || [];
         setIsSaveLoading(false);
@@ -321,6 +326,7 @@ export const FormBuilder = (props: IPropsForms) => {
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
         action_type: formGridSelected.length ? "Update" : "Create",
+        form,
       });
       //TODO: Please cater setting error message in field and don't proceed to view mode.
       if (!response?.length) throw new Error("Failed to submit form grid");
@@ -385,6 +391,9 @@ export const FormBuilder = (props: IPropsForms) => {
             handleOpenForm={handleOpenForm}
             features={features}
             onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+            myParent={myParent}
+            handleSearchOpen={handleSearchOpen}
+            isOpenSearch={isOpenSearch}
           />
         </Card>
       </Collapsible>

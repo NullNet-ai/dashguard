@@ -9,7 +9,13 @@ const FormServerFetch = async () => {
 
   const response = await api.contact.fetchContactPhoneEmail({
     code: identifier!,
-    pluck_fields: ["id", "first_name", "last_name", "middle_name"],
+    pluck_fields: [
+      "id",
+      "first_name",
+      "last_name",
+      "middle_name",
+      "date_of_birth",
+    ],
   });
 
   const default_values = response;

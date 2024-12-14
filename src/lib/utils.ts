@@ -22,3 +22,6 @@ export function formatTabName(tab_name: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
+export function formatFormTestID(id: string) {
+  return id.split(" ").join("-").toLowerCase();
+}

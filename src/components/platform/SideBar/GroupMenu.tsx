@@ -100,7 +100,7 @@ export default function GroupMenu({ groups }: IProps) {
                             <a
                               className={`group/item flex items-center gap-2`}
                               href={subItem.url || "#"}
-                              data-test-id={testIDFormatter(`sidebar-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`)}
+                              data-test-id={testIDFormatter(`sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`)}
                               
                             >
                               {subItem.icon && (
@@ -114,7 +114,7 @@ export default function GroupMenu({ groups }: IProps) {
                                   onClick={(e) =>
                                     toggleFavorite(e, subItem.title ?? "")
                                   }
-                                  data-test-id={testIDFormatter(`sidebar-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-fav-btn`)}
+                                  data-test-id={testIDFormatter(`sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-fav-btn`)}
                                   className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                                 />
                               ) : (

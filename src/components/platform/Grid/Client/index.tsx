@@ -7,6 +7,7 @@ import { GridDesktop } from "./views";
 
 interface IClientProps extends IPropsGrid {
   parentType?: "grid" | "form" | "field";
+  height?: string;
 }
 
 function MainClient({
@@ -16,7 +17,11 @@ function MainClient({
   totalCount,
   onSelectRecords,
   initialSelectedRecords = {},
+  height,
 }: IClientProps) {
+
+
+
   return (
     <GridProvider
       totalCount={totalCount}
@@ -26,7 +31,7 @@ function MainClient({
       initialSelectedRecords={initialSelectedRecords}
     >
       <div className="hidden lg:block">
-        <GridDesktop parentType={parentType} />
+        <GridDesktop parentType={parentType} hideSearch height={height}/>
       </div>
       <div className="h-full lg:hidden">{/* <GridMobile /> */}</div>
     </GridProvider>

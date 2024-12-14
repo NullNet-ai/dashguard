@@ -17,6 +17,7 @@ export default function ContactDetails({
   params,
   defaultValues,
   selectedRecords,
+  grid_data,
 }: IFormProps) {
   const router = useRouter();
   const toast = useToast();
@@ -24,6 +25,7 @@ export default function ContactDetails({
   const handleSave = async ({
     data,
     action_type,
+    form,
   }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
     any[]
   > => {
@@ -32,8 +34,14 @@ export default function ContactDetails({
       if (response?.existing) {
         // const { data } = response;
         // const { phones, emails } = data || {};
-        //TODO: Add error message in field and don't proceed to view mode.
-        toast.error(`Contact already exists.`);
+        form?.setError("phone", {
+          type: "manual",
+          message: "Phone Number already exists.",
+        });
+        form?.setError("email", {
+          type: "manual",
+          message: "Email already exists.",
+        });
         return [];
       }
 
@@ -165,6 +173,7 @@ export default function ContactDetails({
           // Selected View Component
           return <SelectedView record={record} />;
         },
+        grid_data: grid_data,
       }}
       myParent={params.shell_type}
       enableFormRegisterToParent
