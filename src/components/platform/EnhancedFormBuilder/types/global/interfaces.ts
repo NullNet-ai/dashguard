@@ -79,6 +79,7 @@ interface IField {
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
   withGridFilter?: boolean;
+  gridPosition?: "left" | "right";
   /**
    * @description
    * This prop is used to determine the entity and field that will be used for the field filter grid.

@@ -37,7 +37,8 @@ export type TFormType =
   | "slider"
   | "password"
   | "rich-text-editor"
-  | "currency-input";
+  | "currency-input"
+  
 
 // Single |  Multiple
 export type TType = "single" | "multiple";
@@ -248,4 +249,5 @@ export interface IFieldFilterActions {
   onBlur?: () => void;
   onFocus?: () => void;
   handleSearch?: (search: string) => void;
+  ref?: any
 }
