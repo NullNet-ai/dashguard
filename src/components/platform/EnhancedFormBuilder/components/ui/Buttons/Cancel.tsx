@@ -67,6 +67,7 @@ export default function CancelFormButton({
       // loading={isLoading}
       disabled={isLoading}
       size={"xs"}
+      {...props}
     >
       {" "}
       <XMarkIcon className="h-4 w-4" />

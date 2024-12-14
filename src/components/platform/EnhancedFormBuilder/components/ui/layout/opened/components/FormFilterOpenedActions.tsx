@@ -7,8 +7,9 @@ import {
   MinusCircleIcon,
   XIcon,
 } from "lucide-react";
-import React from "react";
-import { ICustomActions, IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import React, { useContext } from "react";
+import { type ICustomActions, type IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import { WizardContext } from "~/components/platform/Wizard/Provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -125,11 +126,13 @@ export default function FormFilterOpenedActions({
     ...customFormFilterViewFormActions
   ];
 
+  const {state} = useContext(WizardContext);
+  const {entityName} = state ?? {};
   if (!enableViewFormEllipsis) return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+        <EllipsisVertical className="h-4 w-4 text-muted-foreground" data-test-id={entityName + "-wzrd-form-filter-ddn-trg"}/>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {actions.map((action, index) => {
@@ -142,6 +145,7 @@ export default function FormFilterOpenedActions({
               key={index}
               onClick={() => action.onClick()}
               className="flex gap-2"
+              data-tes-id={entityName + "-wzrd-form-filter-ddn-itm-" + action.label }
             >
               {action.icon}
               <span>{action.label}</span>

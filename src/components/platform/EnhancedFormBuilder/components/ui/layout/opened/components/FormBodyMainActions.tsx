@@ -1,17 +1,20 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Loader2 } from "lucide-react";
-import React from "react";
-import {Button as Button2} from '@headlessui/react'
+import React, { useContext } from "react";
+import { Button as Button2 } from "@headlessui/react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import SelectedActions from "../../selected/components/SelectedActions";
 import FormFilterOpenedActions from "./FormFilterOpenedActions";
 import { AccordionTrigger } from "~/components/ui/accordion";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { ICustomActions, IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import {
+  type ICustomActions,
+  type IFeatures,
+} from "~/components/platform/EnhancedFormBuilder/types";
 import { Separator } from "~/components/ui/separator";
-import { useRouter } from 'next/navigation';
-
+import { useRouter } from "next/navigation";
+import { WizardContext } from "~/components/platform/Wizard/Provider";
 
 const FormBodyMainActions = ({
   isListLoading,
@@ -30,7 +33,7 @@ const FormBodyMainActions = ({
   customFormFilterLockFormActions,
   features,
   searchActive,
-  formProps
+  formProps,
 }: {
   isListLoading: boolean;
   displayType: string;
@@ -48,10 +51,10 @@ const FormBodyMainActions = ({
   customFormFilterViewFormActions: ICustomActions[] | undefined;
   customFormFilterLockFormActions: ICustomActions[] | undefined;
   searchActive: boolean;
-  formProps?: any
+  formProps?: any;
 }) => {
-
-
+  const { state } = useContext(WizardContext);
+  const {entityName,} = state ?? {}
 
   return (
     <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
@@ -60,13 +63,13 @@ const FormBodyMainActions = ({
           {!!selectedRecords?.length && !formProps?.isOpenSearch && (
             <Button
               variant={"outline"}
-              name={
-                formLabel.split(" ").join("") +
-                `${selectedRecords.length ? "FormUpdateButton" : "FormCreateButton"}`
+             
+              data-test-id={
+               entityName + "-cancel-btn"
               }
               onClick={() => {
-                form.reset(form.formState.defaultValues)
-                handleUpdateDisplayType("selected")
+              form.reset(form.formState.defaultValues);
+              handleUpdateDisplayType("selected");
               }}
               type="button"
               loading={isButtonLoading}
@@ -84,33 +87,45 @@ const FormBodyMainActions = ({
                   formLabel.split(" ").join("") +
                   `${selectedRecords.length ? "FormUpdateButton" : "FormCreateButton"}`
                 }
+                data-test-id={
+                  selectedRecords.length
+                    ? entityName + "-update-btn"
+                    : entityName + "-create-btn"
+                }
                 onClick={form.handleSubmit(onSubmitFormGrid)}
                 type="button"
                 loading={isButtonLoading}
                 size={"xs"}
-                className="gap-1 items-center text-sm"
+                className="items-center gap-1 text-sm"
               >
                 <PlusIcon className="h-4 w-4" />
                 {selectedRecords.length ? "Update" : "Create"}
               </Button>
-              <Separator orientation="vertical" className="py-3 mr-1"/>
+              <Separator orientation="vertical" className="mr-1 py-3" />
             </>
           )}
-          
 
           <div>
             {isListLoading ? (
               <Loader2 className={cn("h-5 w-5 animate-spin text-gray-400")} />
             ) : (
               <>
-              <Button2
-                onClick={() => {
-                    formProps?.handleSearchOpen()
-                }}
-              className="bg-indigo-100 hover:bg-indigo-200 text-primary px-2 inline-flex text-sm py-2 h-7 items-center  gap-1 rounded">
-                <MagnifyingGlassIcon className="h-4 w-4  text-primary transition-none" />
-                <span className="text-primary">{!formProps?.isOpenSearch ? 'Show Grid' : 'Hide Grid' }</span>
-              </Button2>
+                <Button2
+                  onClick={() => {
+                    formProps?.handleSearchOpen();
+                    }}
+                    data-test-id={
+                    !formProps?.isOpenSearch
+                      ? entityName + "-show-grd-btn"
+                      : entityName + "-hide-grd-btn"
+                    }
+                    className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
+                  >
+                    <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                  <span className="text-primary">
+                    {!formProps?.isOpenSearch ? "Show Grid" : "Hide Grid"}
+                  </span>
+                </Button2>
               </>
             )}
           </div>
