@@ -7,7 +7,7 @@ import {
   IAdvanceFilters,
 } from "@dna-platform/common-orm";
 import { formatSorting } from "~/server/utils/formatSorting";
-import { pick } from "lodash";
+import { get, pick } from "lodash";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 import {
@@ -26,14 +26,142 @@ export const contactRouter = createTRPCRouter({
   updateContactDetails: privateProcedure
     .input(contactDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, ...rest } = input;
+      const { id, address_id, details = {}, ...rest } = input;
+
+      let _address_id = address_id || null;
+
+      const getRecord = async (
+        entity: string,
+        advance_filters: IAdvanceFilters[],
+        pluck?: string[],
+      ) => {
+        const response = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: ["id", ...(pluck || [])],
+              advance_filters,
+              order: {
+                limit: 1,
+                by_field: "created_date",
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute();
+        const [data] = response.data || [];
+
+        return data ? data : null;
+      };
+
+      const getAddressByContactId = async (
+        address_id: string | null,
+        contact_id: string,
+      ) => {
+        if (!address_id) {
+          // Double check if contact has no address_id
+          const advance_filters = createAdvancedFilter({ id: contact_id });
+          const response = await getRecord("contact", advance_filters, [
+            "address_id",
+          ]);
+          _address_id = response?.address_id;
+          if (_address_id) {
+            return { id: _address_id };
+          }
+          return null;
+        }
+
+        const advance_filters = createAdvancedFilter({ address_id });
+        const response = await getRecord("address", advance_filters);
+        return response;
+      };
+
+      const insertAddress = async (
+        entity: string,
+        data: any,
+        pluck: string[],
+      ) => {
+        const record = await ctx.dnaClient
+          .create({
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                ...data,
+                status: "Active",
+              },
+              pluck,
+            },
+          })
+          .execute();
+        const [address] = record?.data || [];
+        return address;
+      };
+
+      const updateAddress = async (
+        entity: string,
+        data: any,
+        pluck: string[],
+      ) => {
+        const record = await ctx.dnaClient
+          .update(data.id, {
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: data,
+              pluck,
+            },
+          })
+          .execute();
+        const [address] = record?.data || [];
+        return address;
+      };
+
+      if (Object.values(details).length) {
+        const address = await getAddressByContactId(_address_id, id);
+
+        if (address?.id) {
+          await updateAddress("address", { ...details, id: address?.id }, [
+            "id",
+            "address",
+            "address_line_one",
+            "address_line_two",
+            "latitude",
+            "longitude",
+            "place_id",
+            "street_number",
+            "street",
+            "region",
+            "region_code",
+            "country_code",
+          ]);
+        } else {
+          const address = await insertAddress("address", details, [
+            "id",
+            "address",
+            "address_line_one",
+            "address_line_two",
+            "latitude",
+            "longitude",
+            "place_id",
+            "street_number",
+            "street",
+            "region",
+            "region_code",
+            "country_code",
+          ]);
+          if (address) _address_id = address?.id;
+        }
+      }
 
       return ctx.dnaClient
         .update(id, {
           entity: ENTITY,
           token: ctx.token.value,
           mutation: {
-            params: rest,
+            params: { ...rest, address_id: _address_id },
+            pluck: ["id", "address_id"],
           },
         })
         .execute();

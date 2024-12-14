@@ -22,13 +22,17 @@ export default function ContactDetails({
     data,
   }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
     try {
-      await updateContact.mutateAsync({
+      const response = await updateContact.mutateAsync({
         ...data,
         id: params.id,
       });
+      if (response?.success) {
+        const { data } = response;
+        toast.success("Contact Details submit successfully");
+        return data;
+      }
       await utils.contact.invalidate();
-
-      toast.success("Contact Details submit successfully");
+      throw new Error("Failed to submit Contact Details");
     } catch (error) {
       toast.error("Failed to submit Contact Details");
     }
@@ -81,13 +85,13 @@ export default function ContactDetails({
             maxDate: new Date(),
           },
         },
-        // {
-        //   id: "address",
-        //   formType: "address-input",
-        //   name: "Address",
-        //   placeholder: "Address",
-        //   label: "Address",
-        // },
+        {
+          id: "address",
+          formType: "address-input",
+          name: "Address",
+          placeholder: "Address",
+          label: "Address",
+        },
       ]}
     />
   );

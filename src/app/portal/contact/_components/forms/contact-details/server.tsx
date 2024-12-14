@@ -15,6 +15,7 @@ const FormServerFetch = async () => {
       "last_name",
       "middle_name",
       "date_of_birth",
+      "address_id",
     ],
     main_entity: "contact",
   });
