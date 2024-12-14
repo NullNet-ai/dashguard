@@ -1,4 +1,4 @@
-import { type UseFormReturn } from "react-hook-form";
+import { Field, type UseFormReturn } from "react-hook-form";
 import { type Option } from "~/components/ui/multi-select";
 
 import type {
@@ -32,7 +32,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
-  fieldConfig: IField,
+  fieldConfig?:Field,
   formKey: string;
   myParent?: "record" | "wizard";
 }) {

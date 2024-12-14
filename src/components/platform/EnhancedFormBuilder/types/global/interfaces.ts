@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { type DropzoneOptions } from "react-dropzone";
-import { type UseFormReturn } from "react-hook-form";
+import { Field, type UseFormReturn } from "react-hook-form";
 
 import { type TActionType } from "~/components/platform/Grid/types";
 import {
@@ -193,6 +193,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  fieldConfig?:Field;
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
