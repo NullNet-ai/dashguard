@@ -18,7 +18,8 @@ const Header: React.FC = () => {
           <MainTab className="hidden md:flex" />
           <Logo />
           <div className="flex w-full items-center justify-end gap-3 sm:justify-normal md:justify-end">
-            <Search />
+            {/* // Hide search bar for now */}
+            {/* <Search /> */}
             <RecordDetails />
           </div>
           <SidebarTrigger
