@@ -89,7 +89,7 @@ const DEFAULT_SIZE = 96;
 
 interface SmartDatetimeInputProps {
   value?: Date;
-  onValueChange: (date: Date) => void;
+  onValueChange: (date: Date | null) => void;
   inputProps?: NaturalLanguageInputProps;
   timePickerProps?: DateTimeLocalInputProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
@@ -566,6 +566,8 @@ const NaturalLanguageInput = React.forwardRef<
               }
             }
           }
+          onValueChange(null);
+          setInputValue(formatDateTime("", includeTime));
         }
       },
       [value, includeTime],

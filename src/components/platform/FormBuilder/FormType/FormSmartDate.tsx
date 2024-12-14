@@ -41,7 +41,7 @@ export default function FormSmartDate({
   const { disabled } = formRenderProps.field;
   const isDisable = isFieldDisable || disabled;
 
-  const handleChange = (date: Date | undefined) => {
+  const handleChange = (date: Date | null) => {
     if (date) {
       const formattedDate =
         dateGranularity === "year"
