@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
+import { type ControllerFieldState, type ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 
 import CountryName from "./FieldComponent/Country";
 import CityName from "./FieldComponent/City";
