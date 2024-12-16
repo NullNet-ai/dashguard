@@ -5,7 +5,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { IFieldFilterActions, type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -164,7 +164,7 @@ export default function FormPhoneInput({
           <FormControl>
             <>
               <div
-                className={`flex items-center border ${error && "border-destructive"} focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring`}
+                className={`flex items-center border ${error?.[index] && "border-destructive"} focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring`}
               >
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
