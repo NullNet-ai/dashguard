@@ -106,6 +106,7 @@ const Button = React.forwardRef<
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={loading}
+        type="button"
         {...props}
       >
         <Fragment>

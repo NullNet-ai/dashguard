@@ -4,6 +4,8 @@ import { Button } from "~/components/ui/button";
 import { GridContext } from "../Provider";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/lib/utils";
+import { camelCase } from "lodash";
+import { testIDFormatter } from "~/utils/formatter";
 
 type CreateButtonProps = { 
   className?: string 
@@ -12,9 +14,12 @@ type CreateButtonProps = {
 
 export default function CreateButton({ className, title="" }: CreateButtonProps) {
   const { state, actions } = React.useContext(GridContext);
+
+
+  const entity = state?.config.entity
   return (
     <Button
-      data-test-id="gridCreateButton"
+      data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
       className={cn("flex", className)}
       loading={state?.createLoading}
       onClick={() => actions?.handleCreate()}

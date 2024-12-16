@@ -27,6 +27,7 @@ import { EllipsisVertical } from "lucide-react";
 
 export function FormBuilder({
   fields,
+  fieldConfig,
   selectOptions,
   currencyInputOptions,
   defaultValues,
@@ -421,6 +422,7 @@ export function FormBuilder({
                       <Fragment>
                         {!customRender ? (
                           <FormModule
+                            fieldConfig={fieldConfig}
                             formKey={formKey}
                             fields={fields}
                             form={form}

@@ -3,9 +3,11 @@ import React from "react";
 import { Button } from "~/components/ui/button";
 import { TableIcon } from "lucide-react";
 import { GridContext } from "../Provider";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function TableViewButton() {
   const { state, actions } = React.useContext(GridContext);
+
 
   const active = state?.viewMode === "table";
 
@@ -15,6 +17,7 @@ export default function TableViewButton() {
       className="rounded-r-none"
       loading={state?.createLoading}
       onClick={() => actions?.handleSwitchViewMode("table")}
+      data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-view-btn`)}
     >
       <TableIcon className="h-4 w-4" />
     </Button>

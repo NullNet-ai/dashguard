@@ -46,7 +46,7 @@ export function ButtonWithDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          data-test-id={testIDFormatter(`${entity}-wizard-drd-trigger-btn`)}
+          data-test-id={testIDFormatter(`${entity}-wzrd-drd-trigger-btn`)}
           variant={buttonVariant} // Use the provided button variant
           className={cn("flex items-center", buttonClassName)} // Allow custom className
           disabled={disabled}
@@ -74,7 +74,7 @@ export function ButtonWithDropdown({
       >
         {dropdownOptions.map((option, index) => (
           <button
-            data-test-id={testIDFormatter(`${entity}-wizard-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
+            data-test-id={testIDFormatter(`${entity}-wzrd-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
             key={index}
             onClick={() => {
               if (disabled) return; // Ignore disabled or loading options

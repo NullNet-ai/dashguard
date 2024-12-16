@@ -12,9 +12,6 @@ import {
 } from "~/components/ui/form";
 import MultipleSelector, { type Option } from "~/components/ui/multi-select";
 import { type IField } from "../type";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -48,14 +45,14 @@ export default function FormMultiSelect({
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
   return (
     <FormItem className="overflow-visible">
-      <FormLabel required={fieldConfig.required}  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "MultipleSelectFormLabel")}>{fieldConfig.label}</FormLabel>
+      <FormLabel required={fieldConfig.required} data-test-id={`${formKey}-${fieldConfig.name}-lbl`}>
+        {fieldConfig.label}
+      </FormLabel>
       <FormControl>
         <MultipleSelector
-          {...register((fieldConfig.name))}
+          {...register(fieldConfig.name)}
           {...formRenderProps.field}
-          data-test-id={kebabCase(
-            formKey + " "+ (fieldConfig.name) + "MultipleSelector",
-          )}
+          data-test-id={`${formKey}-${fieldConfig.name}-msel`}
           disabled={isDisabled}
           className={
             !!formRenderProps?.fieldState.error
@@ -64,11 +61,11 @@ export default function FormMultiSelect({
           }
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
-            "data-test-id": kebabCase(`${formKey+(fieldConfig.name)}MultipleSelectorInput`),
-            "data-selected-value": kebabCase(`${formKey+formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`),
-            className: `flex w-full rounded-md border  bg-background px-4 text-md  file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent  ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "} `,
+            "data-test-id": `${formKey}-${fieldConfig.name}-inp`,
+            "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`,
+            className: `flex w-full rounded-md border bg-background px-4 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
           }}
-          onSearch={multiSelectOnSearch?.[(fieldConfig.name)]}
+          onSearch={multiSelectOnSearch?.[fieldConfig.name]}
           loadingIndicator={
             fieldConfig.multiSelectLoadingIndicator ?? (
               <p className="py-2 text-center text-lg leading-10 text-muted-foreground">
@@ -89,17 +86,17 @@ export default function FormMultiSelect({
           }
           defaultOptions={
             isAlphabeticalSorting
-              ? multiselectOptions?.[fieldConfig?.name]?.sort((a, b) =>
+              ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
                   a.label.localeCompare(b.label),
                 )
-              : multiselectOptions?.[fieldConfig?.name]
+              : multiselectOptions?.[fieldConfig.name]
           }
           options={
             isAlphabeticalSorting
-              ? multiselectOptions?.[fieldConfig?.name]?.sort((a, b) =>
+              ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
                   a.label.localeCompare(b.label),
                 )
-              : multiselectOptions?.[fieldConfig?.name]
+              : multiselectOptions?.[fieldConfig.name]
           }
           placeholder={fieldConfig.placeholder}
           hideClearAllButton={
@@ -108,8 +105,7 @@ export default function FormMultiSelect({
           }
         />
       </FormControl>
-      <FormMessage  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "MultipleSelectErrorMessage")}/>
-
+      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`} />
     </FormItem>
   );
 }

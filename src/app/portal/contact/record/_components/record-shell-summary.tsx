@@ -30,7 +30,7 @@ export default function RecordShellSummary(props: TProps) {
           className="px-5"
           key={idx}
           data-test-id={
-            `${mainEntity}-rcrd-summary-` +
+            `${mainEntity}-rcrdsum-` +
             key.split(" ").join("-").toLowerCase()
           }
         >

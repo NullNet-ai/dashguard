@@ -41,7 +41,7 @@ interface AddressAutoCompleteProps {
 }
 
 export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
-  const { form } = props;
+  const { form,dialogTitle,fieldConfig,formKey,formRenderProps} = props;
   // const googleAutoComplete = api.google.place.useMutation();
   const googleAutoComplete = api.google.getAddressDetails.useMutation();
   const [isLoading, setIsLoading] = useState(false);
@@ -101,18 +101,18 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
         <AddressAutoCompleteInput
           handleSelectAddress={handleSelectAddress}
           form={form}
-          formKey={props.formKey}
-          fieldConfig={props.fieldConfig}
-          formRenderProps={props.formRenderProps}
+          formKey={formKey}
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
         />
         {address?.place_id ? (
           <div className="items-center">
             <AddressForm
               isLoading={isLoading}
               form={form}
-              formKey={props.formKey}
-              fieldConfig={props.fieldConfig}
-              formRenderProps={props.formRenderProps}
+              formKey={formKey}
+              fieldConfig={fieldConfig}
+              formRenderProps={formRenderProps}
             />
           </div>
         ) : null}

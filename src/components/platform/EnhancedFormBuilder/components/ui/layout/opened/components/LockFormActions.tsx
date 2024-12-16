@@ -45,7 +45,7 @@ const LockFormActions = ({
     <div className="flex flex-row gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger
-          data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-more-actions-menu`)}
+          data-test-id={testIDFormatter(`${formProps?.entity}-wzrd-${formKey}-more-actions-menu`)}
         >
           <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
         </DropdownMenuTrigger>
@@ -54,7 +54,7 @@ const LockFormActions = ({
           !!customFormHostLockFormActions.length && customFormHostLockFormActions.map((action, index) => (
             <DropdownMenuItem
               key={index}
-              data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-more-actions-${camelCase(action.label)}`)}
+              data-test-id={testIDFormatter(`${formProps?.entity}-wzrd-${formKey}-more-actions-${camelCase(action.label)}`)}
               onClick={action.onClick}
               className="flex gap-2"
               disabled={action.disabled}

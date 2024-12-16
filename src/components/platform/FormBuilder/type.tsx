@@ -4,15 +4,15 @@ import {
   type HTMLInputTypeAttribute,
   type ReactElement,
 } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { type Field, type UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
 import { type FormField } from "~/components/ui/form";
 import { type Option } from "~/components/ui/multi-select";
 import { type TActionType } from "../Grid/types";
 import { type DropzoneOptions } from "react-dropzone";
 import {
-  DateTimeLocalInputProps,
-  NaturalLanguageInputProps,
+  type DateTimeLocalInputProps,
+  type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
 
 export type TDisplayType = "form" | "selected";
@@ -203,6 +203,7 @@ export interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  fieldConfig?:Field
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
