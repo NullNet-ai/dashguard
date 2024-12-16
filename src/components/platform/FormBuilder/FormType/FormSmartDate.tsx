@@ -67,7 +67,7 @@ export default function FormSmartDate({
       <FormControl>
         <SmartDatetimeInput
           datePickerTestID={`${formKey}-${fieldConfig.name}-dte-picker`}
-          inputTestID={`${formKey}-${fieldConfig.name}-input`}
+          inputTestID={`${formKey}-${fieldConfig.name}-inp`}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}

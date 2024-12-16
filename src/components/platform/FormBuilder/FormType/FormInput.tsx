@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import {IFieldFilterActions,  type IField } from "../type";
+import {type IFieldFilterActions,  type IField } from "../type";
 import {
   FormControl,
   FormItem,
