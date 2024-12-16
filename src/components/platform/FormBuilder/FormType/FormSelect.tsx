@@ -85,10 +85,7 @@ export default function FormSelect({
       <Combobox
         as="div"
         value={
-          label || {
-            label: fieldConfig?.placeholder,
-            value: "",
-          }
+          label 
         }
         onChange={(value) => {
           setQuery("");
@@ -103,6 +100,7 @@ export default function FormSelect({
             data-test-id={`${formKey}-${fieldConfig.name}-btn`}
           >
             <ComboboxInput
+            placeholder={fieldConfig.placeholder}
               readOnly={
                 fieldConfig?.selectSearchable
                   ? !fieldConfig?.selectSearchable
@@ -131,7 +129,7 @@ export default function FormSelect({
               className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
               data-test-id={`${formKey}-${fieldConfig.name}-opts`}
             >
-              {filteredOptions?.slice(0, 700).map((opt, index) => (
+              {filteredOptions?.slice(0, 700).map((opt) => (
                 <ComboboxOption
                   key={opt?.value}
                   value={opt}
