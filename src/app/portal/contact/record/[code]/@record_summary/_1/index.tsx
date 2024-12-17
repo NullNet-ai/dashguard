@@ -9,7 +9,7 @@ const fields = {
   Email: "email",
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
-  Category: "categories",
+  Address: "address",
 };
 
 const RecordShellSummary = ({
@@ -62,14 +62,13 @@ const RecordShellSummary = ({
       "middle_name",
       "date_of_birth",
       "address_id",
-      "categories",
     ],
   });
 
   const record_details = {
     ...data,
     full_name:
-      `${data?.first_name ? data?.first_name : ""} ${data?.middle_name ? data?.middle_name : ""} ${data?.last_name ? data?.last_name : ""}` ||
+      `${data?.first_name || ""} ${data?.middle_name || ""} ${data?.last_name || ""}`.trim() ||
       "None",
     phone,
     email,
