@@ -33,7 +33,7 @@ export default function FormRichTextEditor({
   formKey,
   // value,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+  const isDisabled = formRenderProps.field.disabled;
   let defaultValue = form.getValues(fieldConfig?.name) && "";
   const isToFormat = true; // Set to true if to include like how the tipTapEditor is formatted
   if (isToFormat) {
@@ -63,7 +63,7 @@ export default function FormRichTextEditor({
         <MinimalTiptapEditor
           {...form.register(fieldConfig?.name)}
           editorProps={{
-            editable: () => !isDisabled && !fieldConfig?.readonly,
+            editable: () => !(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false,
             attributes: {
               "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
             },
@@ -78,7 +78,7 @@ export default function FormRichTextEditor({
             fieldConfig?.placeholder ?? "Type your description here..."
           }
           autofocus={true}
-          editable={!isDisabled}
+          editable={!(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           editorClassName="focus:outline-none"
           onBlur={() => {
             formRenderProps.field.onBlur();
