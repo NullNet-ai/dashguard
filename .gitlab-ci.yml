@@ -84,6 +84,7 @@ update_stack_qa:
     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
     REGISTRY_USERNAME: 'dna'
     REGISTRY_PASSWORD: '3QFh6zZ2u2fnHbnt3pwy'
+    BASE_REF_NAME: development
     FILE_PATH: /var/apps/portainer
   script:
     - docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
