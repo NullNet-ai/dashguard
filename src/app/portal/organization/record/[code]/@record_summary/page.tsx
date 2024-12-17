@@ -1,25 +1,20 @@
 import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
-import RecordShellSummary from "../../_components/RecordShellSummary";
 import { headers } from "next/headers";
-import { api } from "~/trpc/server";
+import RecordShellSummary from "./_1";
 
 export default async function Page() {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
 
-  const record_details = await api.record.getByCode({
-    main_entity: main_entity!,
-    id: identifier!,
-    pluck_fields: [
-      "name",
-    ],
-  });
-
   return (
     <div>
       <RecordSummary />
-      <RecordShellSummary name={record_details?.data?.name} />
+      <RecordShellSummary
+        form_key={"OrganizationOne"}
+        identifier={identifier!}
+        main_entity={main_entity!}
+      />
     </div>
   );
 }
