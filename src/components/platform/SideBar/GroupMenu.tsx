@@ -1,3 +1,5 @@
+'use client'
+
 import { type ISidebarMenu } from "./type";
 import {
   SidebarGroup,
@@ -7,6 +9,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  useSidebar,
 } from "~/components/ui/sidebar";
 import {
   ChevronRightIcon,
@@ -23,6 +26,7 @@ import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { StarIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { testIDFormatter } from "~/utils/formatter";
+
 
 interface IProps {
   groups: ISidebarMenu[];
@@ -42,8 +46,13 @@ export default function GroupMenu({ groups }: IProps) {
     }));
   };
 
+  const {open} = useSidebar();
+
   return (
-    <SidebarGroup>
+    <SidebarGroup 
+      className={`${!open ? 'px-0' : ''}`}
+
+    >
       <Separator className="mb-3" />
       {groups?.map((item, index) => {
         // @ts-expect-error - TS doesn't know about dynamic imports
@@ -56,18 +65,21 @@ export default function GroupMenu({ groups }: IProps) {
               defaultOpen={item.isActive}
               className="group/collapsible"
             >
-              <SidebarMenuItem>
+              <SidebarMenuItem
+                className={`${!open ? 'w-full flex items-center justify-center flex-col' : ''}`}
+              >
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
+                    className="relative flex justify-center  flex-1 overflow-visible"
                     data-test-id={
                       testIDFormatter(`sidebar-grp-menu-${  item.title?.charAt(0).toUpperCase()}${item.title?.slice(1).toLowerCase()}`)
                     }
                   >
-                    {item.icon && <ICON className="mr-2 h-5 w-5" />}
-                    <span className="font-semibold">{item.title}</span>
+                    {item.icon && <ICON className={`h-5 w-5 ${open ? 'mr-2' : ''}`} />}
+                    {open ? <span className="font-semibold">{item.title}</span> : null}
                     {!!item?.items?.length && (
-                      <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <ChevronRightIcon className={`ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 ${!open ? 'absolute -right-4 z-[50]' : ''}`} />
                     )}
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
@@ -104,11 +116,13 @@ export default function GroupMenu({ groups }: IProps) {
                               
                             >
                               {subItem.icon && (
-                                <SUB_ICON className="mr-2 h-5 w-5" />
+                                <SUB_ICON className={`h-5 w-5 ${open ? 'mr-2' : ''}`} />
                               )}
-                              <span className="grow text-nowrap font-semibold">
+                              {open && <span className="grow text-nowrap font-semibold">
                                 {subItem.title}
-                              </span>
+                              </span>}
+                             <>
+                             {open ? (<>
                               {isFavorite ? (
                                 <SolidStarIcon
                                   onClick={(e) =>
@@ -125,6 +139,9 @@ export default function GroupMenu({ groups }: IProps) {
                                   className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                                 />
                               )}
+                             </>) : null}
+                             
+                             </>
                             </a>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
