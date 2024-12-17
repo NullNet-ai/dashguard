@@ -100,7 +100,7 @@
   },
   {
     "id": 3888,
-    "name": "Ghōr",
+    "name": "Ghor",
     "country_id": 1,
     "country_code": "AF",
     "country_name": "Afghanistan",
@@ -386,7 +386,7 @@
   },
   {
     "id": 607,
-    "name": "Bulqizë District",
+    "name": "Bulqize District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -397,7 +397,7 @@
   },
   {
     "id": 618,
-    "name": "Delvinë District",
+    "name": "Delvine District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -419,7 +419,7 @@
   },
   {
     "id": 610,
-    "name": "Dibër County",
+    "name": "Diber County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -430,7 +430,7 @@
   },
   {
     "id": 605,
-    "name": "Dibër District",
+    "name": "Diber District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -441,7 +441,7 @@
   },
   {
     "id": 632,
-    "name": "Durrës County",
+    "name": "Durres County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -452,7 +452,7 @@
   },
   {
     "id": 639,
-    "name": "Durrës District",
+    "name": "Durres District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -496,7 +496,7 @@
   },
   {
     "id": 604,
-    "name": "Gjirokastër County",
+    "name": "Gjirokaster County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -507,7 +507,7 @@
   },
   {
     "id": 621,
-    "name": "Gjirokastër District",
+    "name": "Gjirokaster District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -540,7 +540,7 @@
   },
   {
     "id": 594,
-    "name": "Kavajë District",
+    "name": "Kavaje District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -551,7 +551,7 @@
   },
   {
     "id": 628,
-    "name": "Kolonjë District",
+    "name": "Kolonje District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -562,7 +562,7 @@
   },
   {
     "id": 630,
-    "name": "Korçë County",
+    "name": "Korce County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -573,7 +573,7 @@
   },
   {
     "id": 597,
-    "name": "Korçë District",
+    "name": "Korce District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -584,7 +584,7 @@
   },
   {
     "id": 614,
-    "name": "Krujë District",
+    "name": "Kruje District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -595,7 +595,7 @@
   },
   {
     "id": 612,
-    "name": "Kuçovë District",
+    "name": "Kucove District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -606,7 +606,7 @@
   },
   {
     "id": 601,
-    "name": "Kukës County",
+    "name": "Kukes County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -617,7 +617,7 @@
   },
   {
     "id": 623,
-    "name": "Kukës District",
+    "name": "Kukes District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -639,7 +639,7 @@
   },
   {
     "id": 609,
-    "name": "Lezhë County",
+    "name": "Lezhe County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -650,7 +650,7 @@
   },
   {
     "id": 595,
-    "name": "Lezhë District",
+    "name": "Lezhe District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -672,7 +672,7 @@
   },
   {
     "id": 599,
-    "name": "Lushnjë District",
+    "name": "Lushnje District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -683,7 +683,7 @@
   },
   {
     "id": 602,
-    "name": "Malësi e Madhe District",
+    "name": "Malesi e Madhe District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -694,7 +694,7 @@
   },
   {
     "id": 637,
-    "name": "Mallakastër District",
+    "name": "Mallakaster District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -716,7 +716,7 @@
   },
   {
     "id": 638,
-    "name": "Mirditë District",
+    "name": "Mirdite District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -738,7 +738,7 @@
   },
   {
     "id": 625,
-    "name": "Përmet District",
+    "name": "Permet District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -760,7 +760,7 @@
   },
   {
     "id": 620,
-    "name": "Pukë District",
+    "name": "Puke District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -771,7 +771,7 @@
   },
   {
     "id": 624,
-    "name": "Sarandë District",
+    "name": "Sarande District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -782,7 +782,7 @@
   },
   {
     "id": 611,
-    "name": "Shkodër County",
+    "name": "Shkoder County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -793,7 +793,7 @@
   },
   {
     "id": 626,
-    "name": "Shkodër District",
+    "name": "Shkoder District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -815,7 +815,7 @@
   },
   {
     "id": 616,
-    "name": "Tepelenë District",
+    "name": "Tepelene District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -848,7 +848,7 @@
   },
   {
     "id": 636,
-    "name": "Tropojë District",
+    "name": "Tropoje District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -859,7 +859,7 @@
   },
   {
     "id": 634,
-    "name": "Vlorë County",
+    "name": "Vlore County",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -870,7 +870,7 @@
   },
   {
     "id": 613,
-    "name": "Vlorë District",
+    "name": "Vlore District",
     "country_id": 3,
     "country_code": "AL",
     "country_name": "Albania",
@@ -892,7 +892,7 @@
   },
   {
     "id": 1119,
-    "name": "Aïn Defla",
+    "name": "Ain Defla",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -903,7 +903,7 @@
   },
   {
     "id": 1122,
-    "name": "Aïn Témouchent",
+    "name": "Ain Temouchent",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -947,7 +947,7 @@
   },
   {
     "id": 1108,
-    "name": "Béchar",
+    "name": "Bechar",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -958,7 +958,7 @@
   },
   {
     "id": 1128,
-    "name": "Béjaïa",
+    "name": "Bejaia",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -969,7 +969,7 @@
   },
   {
     "id": 4909,
-    "name": "Béni Abbès",
+    "name": "Beni Abbes",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1013,7 +1013,7 @@
   },
   {
     "id": 1116,
-    "name": "Bordj Bou Arréridj",
+    "name": "Bordj Bou Arreridj",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1024,7 +1024,7 @@
   },
   {
     "id": 1104,
-    "name": "Bouïra",
+    "name": "Bouira",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1035,7 +1035,7 @@
   },
   {
     "id": 1125,
-    "name": "Boumerdès",
+    "name": "Boumerdes",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1145,7 +1145,7 @@
   },
   {
     "id": 1127,
-    "name": "Ghardaïa",
+    "name": "Ghardaia",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1255,7 +1255,7 @@
   },
   {
     "id": 1109,
-    "name": "Médéa",
+    "name": "Medea",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1354,7 +1354,7 @@
   },
   {
     "id": 1123,
-    "name": "Saïda",
+    "name": "Saida",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1365,7 +1365,7 @@
   },
   {
     "id": 1141,
-    "name": "Sétif",
+    "name": "Setif",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1376,7 +1376,7 @@
   },
   {
     "id": 4902,
-    "name": "Sidi Bel Abbès",
+    "name": "Sidi Bel Abbes",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1420,7 +1420,7 @@
   },
   {
     "id": 1117,
-    "name": "Tébessa",
+    "name": "Tebessa",
     "country_id": 4,
     "country_code": "DZ",
     "country_name": "Algeria",
@@ -1585,7 +1585,7 @@
   },
   {
     "id": 490,
-    "name": "Sant Julià de Lòria",
+    "name": "Sant Julia de Loria",
     "country_id": 6,
     "country_code": "AD",
     "country_name": "Andorra",
@@ -1618,7 +1618,7 @@
   },
   {
     "id": 212,
-    "name": "Bié Province",
+    "name": "Bie Province",
     "country_id": 7,
     "country_code": "AO",
     "country_name": "Angola",
@@ -1695,7 +1695,7 @@
   },
   {
     "id": 225,
-    "name": "Huíla Province",
+    "name": "Huila Province",
     "country_id": 7,
     "country_code": "AO",
     "country_name": "Angola",
@@ -1761,7 +1761,7 @@
   },
   {
     "id": 224,
-    "name": "Uíge Province",
+    "name": "Uige Province",
     "country_id": 7,
     "country_code": "AO",
     "country_name": "Angola",
@@ -1915,7 +1915,7 @@
   },
   {
     "id": 4880,
-    "name": "Ciudad Autónoma de Buenos Aires",
+    "name": "Ciudad Autonoma de Buenos Aires",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -1926,7 +1926,7 @@
   },
   {
     "id": 3642,
-    "name": "Córdoba",
+    "name": "Cordoba",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -1948,7 +1948,7 @@
   },
   {
     "id": 3654,
-    "name": "Entre Ríos",
+    "name": "Entre Rios",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -2025,7 +2025,7 @@
   },
   {
     "id": 3648,
-    "name": "Neuquén",
+    "name": "Neuquen",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -2036,7 +2036,7 @@
   },
   {
     "id": 3639,
-    "name": "Río Negro",
+    "name": "Rio Negro",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -2124,7 +2124,7 @@
   },
   {
     "id": 3637,
-    "name": "Tucumán",
+    "name": "Tucuman",
     "country_id": 11,
     "country_code": "AR",
     "country_name": "Argentina",
@@ -4357,7 +4357,7 @@
   },
   {
     "id": 1384,
-    "name": "Liège",
+    "name": "Liege",
     "country_id": 22,
     "country_code": "BE",
     "country_name": "Belgium",
@@ -4599,7 +4599,7 @@
   },
   {
     "id": 3080,
-    "name": "Ouémé Department",
+    "name": "Oueme Department",
     "country_id": 24,
     "country_code": "BJ",
     "country_name": "Benin",
@@ -5006,7 +5006,7 @@
   },
   {
     "id": 3383,
-    "name": "Potosí Department",
+    "name": "Potosi Department",
     "country_id": 27,
     "country_code": "BO",
     "country_name": "Bolivia",
@@ -5083,7 +5083,7 @@
   },
   {
     "id": 460,
-    "name": "Brčko District",
+    "name": "Brcko District",
     "country_id": 28,
     "country_code": "BA",
     "country_name": "Bosnia and Herzegovina",
@@ -5347,7 +5347,7 @@
   },
   {
     "id": 1999,
-    "name": "Amapá",
+    "name": "Amapa",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5380,7 +5380,7 @@
   },
   {
     "id": 2016,
-    "name": "Ceará",
+    "name": "Ceara",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5402,7 +5402,7 @@
   },
   {
     "id": 2018,
-    "name": "Espírito Santo",
+    "name": "Espirito Santo",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5413,7 +5413,7 @@
   },
   {
     "id": 2000,
-    "name": "Goiás",
+    "name": "Goias",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5424,7 +5424,7 @@
   },
   {
     "id": 2015,
-    "name": "Maranhão",
+    "name": "Maranhao",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5468,7 +5468,7 @@
   },
   {
     "id": 2009,
-    "name": "Pará",
+    "name": "Para",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5479,7 +5479,7 @@
   },
   {
     "id": 2005,
-    "name": "Paraíba",
+    "name": "Paraiba",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5490,7 +5490,7 @@
   },
   {
     "id": 2022,
-    "name": "Paraná",
+    "name": "Parana",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5512,7 +5512,7 @@
   },
   {
     "id": 2008,
-    "name": "Piauí",
+    "name": "Piaui",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5556,7 +5556,7 @@
   },
   {
     "id": 2013,
-    "name": "Rondônia",
+    "name": "Rondonia",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5589,7 +5589,7 @@
   },
   {
     "id": 2021,
-    "name": "São Paulo",
+    "name": "Sao Paulo",
     "country_id": 31,
     "country_code": "BR",
     "country_name": "Brazil",
@@ -5974,7 +5974,7 @@
   },
   {
     "id": 3160,
-    "name": "Balé Province",
+    "name": "Bale Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6007,7 +6007,7 @@
   },
   {
     "id": 3152,
-    "name": "Bazèga Province",
+    "name": "Bazega Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6117,7 +6117,7 @@
   },
   {
     "id": 3167,
-    "name": "Comoé Province",
+    "name": "Comoe Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6216,7 +6216,7 @@
   },
   {
     "id": 3112,
-    "name": "Kénédougou Province",
+    "name": "Kenedougou Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6260,7 +6260,7 @@
   },
   {
     "id": 3133,
-    "name": "Koulpélogo Province",
+    "name": "Koulpelogo Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6282,7 +6282,7 @@
   },
   {
     "id": 3147,
-    "name": "Kourwéogo Province",
+    "name": "Kourweogo Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6293,7 +6293,7 @@
   },
   {
     "id": 3159,
-    "name": "Léraba Province",
+    "name": "Leraba Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6403,7 +6403,7 @@
   },
   {
     "id": 3117,
-    "name": "Passoré Province",
+    "name": "Passore Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6447,7 +6447,7 @@
   },
   {
     "id": 3154,
-    "name": "Sanguié Province",
+    "name": "Sanguie Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6469,7 +6469,7 @@
   },
   {
     "id": 3139,
-    "name": "Séno Province",
+    "name": "Seno Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -6590,7 +6590,7 @@
   },
   {
     "id": 3118,
-    "name": "Zoundwéogo Province",
+    "name": "Zoundweogo Province",
     "country_id": 35,
     "country_code": "BF",
     "country_name": "Burkina Faso",
@@ -7481,7 +7481,7 @@
   },
   {
     "id": 2986,
-    "name": "São Domingos",
+    "name": "Sao Domingos",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7492,7 +7492,7 @@
   },
   {
     "id": 3000,
-    "name": "São Filipe",
+    "name": "Sao Filipe",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7503,7 +7503,7 @@
   },
   {
     "id": 2993,
-    "name": "São Lourenço dos Órgãos",
+    "name": "Sao Lourenco dos Orgaos",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7514,7 +7514,7 @@
   },
   {
     "id": 2990,
-    "name": "São Miguel",
+    "name": "Sao Miguel",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7525,7 +7525,7 @@
   },
   {
     "id": 3001,
-    "name": "São Vicente",
+    "name": "Sao Vicente",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7558,7 +7558,7 @@
   },
   {
     "id": 3003,
-    "name": "Tarrafal de São Nicolau",
+    "name": "Tarrafal de Sao Nicolau",
     "country_id": 40,
     "country_code": "CV",
     "country_name": "Cape Verde",
@@ -7624,7 +7624,7 @@
   },
   {
     "id": 1263,
-    "name": "Kémo Prefecture",
+    "name": "Kemo Prefecture",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7646,7 +7646,7 @@
   },
   {
     "id": 1257,
-    "name": "Mambéré-Kadéï",
+    "name": "Mambere-Kadei",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7668,7 +7668,7 @@
   },
   {
     "id": 1253,
-    "name": "Nana-Grébizi Economic Prefecture",
+    "name": "Nana-Grebizi Economic Prefecture",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7679,7 +7679,7 @@
   },
   {
     "id": 1260,
-    "name": "Nana-Mambéré Prefecture",
+    "name": "Nana-Mambere Prefecture",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7723,7 +7723,7 @@
   },
   {
     "id": 1267,
-    "name": "Ouham-Pendé Prefecture",
+    "name": "Ouham-Pende Prefecture",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7734,7 +7734,7 @@
   },
   {
     "id": 1252,
-    "name": "Sangha-Mbaéré",
+    "name": "Sangha-Mbaere",
     "country_id": 42,
     "country_code": "CF",
     "country_name": "Central African Republic",
@@ -7822,7 +7822,7 @@
   },
   {
     "id": 3576,
-    "name": "Guéra",
+    "name": "Guera",
     "country_id": 43,
     "country_code": "TD",
     "country_name": "Chad",
@@ -7943,7 +7943,7 @@
   },
   {
     "id": 3582,
-    "name": "Ouaddaï",
+    "name": "Ouaddai",
     "country_id": 43,
     "country_code": "TD",
     "country_name": "Chad",
@@ -7976,7 +7976,7 @@
   },
   {
     "id": 3579,
-    "name": "Tandjilé",
+    "name": "Tandjile",
     "country_id": 43,
     "country_code": "TD",
     "country_name": "Chad",
@@ -8009,7 +8009,7 @@
   },
   {
     "id": 2828,
-    "name": "Aisén del General Carlos Ibañez del Campo",
+    "name": "Aisen del General Carlos Ibanez del Campo",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8053,7 +8053,7 @@
   },
   {
     "id": 2827,
-    "name": "Biobío",
+    "name": "Biobio",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8075,7 +8075,7 @@
   },
   {
     "id": 2826,
-    "name": "La Araucanía",
+    "name": "La Araucania",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8108,7 +8108,7 @@
   },
   {
     "id": 2834,
-    "name": "Los Ríos",
+    "name": "Los Rios",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8119,7 +8119,7 @@
   },
   {
     "id": 2836,
-    "name": "Magallanes y de la Antártica Chilena",
+    "name": "Magallanes y de la Antartica Chilena",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8141,7 +8141,7 @@
   },
   {
     "id": 2831,
-    "name": "Ñuble",
+    "name": "Nuble",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8152,7 +8152,7 @@
   },
   {
     "id": 2824,
-    "name": "Región Metropolitana de Santiago",
+    "name": "Region Metropolitana de Santiago",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8163,7 +8163,7 @@
   },
   {
     "id": 2837,
-    "name": "Tarapacá",
+    "name": "Tarapaca",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8174,7 +8174,7 @@
   },
   {
     "id": 2830,
-    "name": "Valparaíso",
+    "name": "Valparaiso",
     "country_id": 44,
     "country_code": "CL",
     "country_name": "Chile",
@@ -8592,7 +8592,7 @@
   },
   {
     "id": 2900,
-    "name": "Archipiélago de San Andrés, Providencia y Santa Catalina",
+    "name": "Archipielago de San Andres, Providencia y Santa Catalina",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8603,7 +8603,7 @@
   },
   {
     "id": 2880,
-    "name": "Atlántico",
+    "name": "Atlantico",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8614,7 +8614,7 @@
   },
   {
     "id": 4921,
-    "name": "Bogotá D.C.",
+    "name": "Bogota D.C.",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8625,7 +8625,7 @@
   },
   {
     "id": 2893,
-    "name": "Bolívar",
+    "name": "Bolivar",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8636,7 +8636,7 @@
   },
   {
     "id": 2903,
-    "name": "Boyacá",
+    "name": "Boyaca",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8658,7 +8658,7 @@
   },
   {
     "id": 2891,
-    "name": "Caquetá",
+    "name": "Caqueta",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8702,7 +8702,7 @@
   },
   {
     "id": 2876,
-    "name": "Chocó",
+    "name": "Choco",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8713,7 +8713,7 @@
   },
   {
     "id": 2898,
-    "name": "Córdoba",
+    "name": "Cordoba",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8735,7 +8735,7 @@
   },
   {
     "id": 2882,
-    "name": "Guainía",
+    "name": "Guainia",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8801,7 +8801,7 @@
   },
   {
     "id": 2897,
-    "name": "Nariño",
+    "name": "Narino",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8834,7 +8834,7 @@
   },
   {
     "id": 2874,
-    "name": "Quindío",
+    "name": "Quindio",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8900,7 +8900,7 @@
   },
   {
     "id": 2885,
-    "name": "Vaupés",
+    "name": "Vaupes",
     "country_id": 48,
     "country_code": "CO",
     "country_name": "Colombia",
@@ -8944,7 +8944,7 @@
   },
   {
     "id": 2820,
-    "name": "Mohéli",
+    "name": "Moheli",
     "country_id": 49,
     "country_code": "KM",
     "country_name": "Comoros",
@@ -9010,7 +9010,7 @@
   },
   {
     "id": 2868,
-    "name": "Lékoumou Department",
+    "name": "Lekoumou Department",
     "country_id": 50,
     "country_code": "CG",
     "country_name": "Congo",
@@ -9120,7 +9120,7 @@
   },
   {
     "id": 1213,
-    "name": "Limón Province",
+    "name": "Limon Province",
     "country_id": 53,
     "country_code": "CR",
     "country_name": "Costa Rica",
@@ -9153,7 +9153,7 @@
   },
   {
     "id": 1214,
-    "name": "San José Province",
+    "name": "San Jose Province",
     "country_id": 53,
     "country_code": "CR",
     "country_name": "Costa Rica",
@@ -9175,7 +9175,7 @@
   },
   {
     "id": 2626,
-    "name": "Agnéby",
+    "name": "Agneby",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9219,7 +9219,7 @@
   },
   {
     "id": 2654,
-    "name": "Comoé District",
+    "name": "Comoe District",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9230,7 +9230,7 @@
   },
   {
     "id": 2644,
-    "name": "Denguélé District",
+    "name": "Denguele District",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9241,7 +9241,7 @@
   },
   {
     "id": 2642,
-    "name": "Denguélé Region",
+    "name": "Denguele Region",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9274,7 +9274,7 @@
   },
   {
     "id": 2651,
-    "name": "Gôh-Djiboua District",
+    "name": "Goh-Djiboua District",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9340,7 +9340,7 @@
   },
   {
     "id": 2631,
-    "name": "Marahoué Region",
+    "name": "Marahoue Region",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9373,7 +9373,7 @@
   },
   {
     "id": 2630,
-    "name": "Moyen-Comoé",
+    "name": "Moyen-Comoe",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9384,7 +9384,7 @@
   },
   {
     "id": 2655,
-    "name": "N'zi-Comoé",
+    "name": "N'zi-Comoe",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9395,7 +9395,7 @@
   },
   {
     "id": 2648,
-    "name": "Sassandra-Marahoué District",
+    "name": "Sassandra-Marahoue District",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9428,7 +9428,7 @@
   },
   {
     "id": 2652,
-    "name": "Sud-Comoé",
+    "name": "Sud-Comoe",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9439,7 +9439,7 @@
   },
   {
     "id": 2637,
-    "name": "Vallée du Bandama District",
+    "name": "Vallee du Bandama District",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9450,7 +9450,7 @@
   },
   {
     "id": 2647,
-    "name": "Vallée du Bandama Region",
+    "name": "Vallee du Bandama Region",
     "country_id": 54,
     "country_code": "CI",
     "country_name": "Cote D'Ivoire (Ivory Coast)",
@@ -9560,7 +9560,7 @@
   },
   {
     "id": 742,
-    "name": "Koprivnica-Križevci",
+    "name": "Koprivnica-Krizevci",
     "country_id": 55,
     "country_code": "HR",
     "country_name": "Croatia",
@@ -9593,7 +9593,7 @@
   },
   {
     "id": 726,
-    "name": "Međimurje",
+    "name": "Medimurje",
     "country_id": 55,
     "country_code": "HR",
     "country_name": "Croatia",
@@ -9615,7 +9615,7 @@
   },
   {
     "id": 724,
-    "name": "Požega-Slavonia",
+    "name": "Pozega-Slavonia",
     "country_id": 55,
     "country_code": "HR",
     "country_name": "Croatia",
@@ -9637,7 +9637,7 @@
   },
   {
     "id": 730,
-    "name": "Šibenik-Knin",
+    "name": "Sibenik-Knin",
     "country_id": 55,
     "country_code": "HR",
     "country_name": "Croatia",
@@ -9670,7 +9670,7 @@
   },
   {
     "id": 739,
-    "name": "Varaždin",
+    "name": "Varazdin",
     "country_id": 55,
     "country_code": "HR",
     "country_name": "Croatia",
@@ -9747,7 +9747,7 @@
   },
   {
     "id": 286,
-    "name": "Camagüey Province",
+    "name": "Camaguey Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9758,7 +9758,7 @@
   },
   {
     "id": 282,
-    "name": "Ciego de Ávila Province",
+    "name": "Ciego de Avila Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9791,7 +9791,7 @@
   },
   {
     "id": 285,
-    "name": "Guantánamo Province",
+    "name": "Guantanamo Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9813,7 +9813,7 @@
   },
   {
     "id": 279,
-    "name": "Holguín Province",
+    "name": "Holguin Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9868,7 +9868,7 @@
   },
   {
     "id": 277,
-    "name": "Pinar del Río Province",
+    "name": "Pinar del Rio Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9879,7 +9879,7 @@
   },
   {
     "id": 274,
-    "name": "Sancti Spíritus Province",
+    "name": "Sancti Spiritus Province",
     "country_id": 56,
     "country_code": "CU",
     "country_name": "Cuba",
@@ -9912,7 +9912,7 @@
   },
   {
     "id": 749,
-    "name": "Famagusta District (Mağusa)",
+    "name": "Famagusta District (Magusa)",
     "country_id": 57,
     "country_code": "CY",
     "country_name": "Cyprus",
@@ -9956,7 +9956,7 @@
   },
   {
     "id": 745,
-    "name": "Nicosia District (Lefkoşa)",
+    "name": "Nicosia District (Lefkosa)",
     "country_id": 57,
     "country_code": "CY",
     "country_name": "Cyprus",
@@ -9978,7 +9978,7 @@
   },
   {
     "id": 4627,
-    "name": "Benešov",
+    "name": "Benesov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10011,7 +10011,7 @@
   },
   {
     "id": 4542,
-    "name": "Břeclav",
+    "name": "Breclav",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10022,7 +10022,7 @@
   },
   {
     "id": 4568,
-    "name": "Brno-město",
+    "name": "Brno-mesto",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10044,7 +10044,7 @@
   },
   {
     "id": 4644,
-    "name": "Bruntál",
+    "name": "Bruntal",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10055,7 +10055,7 @@
   },
   {
     "id": 4633,
-    "name": "Česká Lípa",
+    "name": "Ceska Lipa",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10066,7 +10066,7 @@
   },
   {
     "id": 4556,
-    "name": "České Budějovice",
+    "name": "Ceske Budejovice",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10077,7 +10077,7 @@
   },
   {
     "id": 4543,
-    "name": "Český Krumlov",
+    "name": "Cesky Krumlov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10121,7 +10121,7 @@
   },
   {
     "id": 4609,
-    "name": "Děčín",
+    "name": "Decin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10132,7 +10132,7 @@
   },
   {
     "id": 4641,
-    "name": "Domažlice",
+    "name": "Domazlice",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10143,7 +10143,7 @@
   },
   {
     "id": 4559,
-    "name": "Frýdek-Místek",
+    "name": "Frydek-Mistek",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10154,7 +10154,7 @@
   },
   {
     "id": 4611,
-    "name": "Havlíčkův Brod",
+    "name": "Havlickuv Brod",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10165,7 +10165,7 @@
   },
   {
     "id": 4561,
-    "name": "Hodonín",
+    "name": "Hodonin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10176,7 +10176,7 @@
   },
   {
     "id": 4580,
-    "name": "Hradec Králové",
+    "name": "Hradec Kralove",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10198,7 +10198,7 @@
   },
   {
     "id": 4625,
-    "name": "Jeseník",
+    "name": "Jesenik",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10209,7 +10209,7 @@
   },
   {
     "id": 4640,
-    "name": "Jičín",
+    "name": "Jicin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10231,7 +10231,7 @@
   },
   {
     "id": 4639,
-    "name": "Jihočeský kraj",
+    "name": "Jihocesky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10242,7 +10242,7 @@
   },
   {
     "id": 4602,
-    "name": "Jihomoravský kraj",
+    "name": "Jihomoravsky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10253,7 +10253,7 @@
   },
   {
     "id": 4624,
-    "name": "Jindřichův Hradec",
+    "name": "Jindrichuv Hradec",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10264,7 +10264,7 @@
   },
   {
     "id": 4581,
-    "name": "Karlovarský kraj",
+    "name": "Karlovarsky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10286,7 +10286,7 @@
   },
   {
     "id": 4586,
-    "name": "Karviná",
+    "name": "Karvina",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10319,7 +10319,7 @@
   },
   {
     "id": 4618,
-    "name": "Kolín",
+    "name": "Kolin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10330,7 +10330,7 @@
   },
   {
     "id": 4575,
-    "name": "Kraj Vysočina",
+    "name": "Kraj Vysocina",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10341,7 +10341,7 @@
   },
   {
     "id": 4614,
-    "name": "Královéhradecký kraj",
+    "name": "Kralovehradecky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10352,7 +10352,7 @@
   },
   {
     "id": 4593,
-    "name": "Kroměříž",
+    "name": "Kromeriz",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10363,7 +10363,7 @@
   },
   {
     "id": 4923,
-    "name": "Kutná Hora",
+    "name": "Kutna Hora",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10385,7 +10385,7 @@
   },
   {
     "id": 4601,
-    "name": "Liberecký kraj",
+    "name": "Liberecky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10396,7 +10396,7 @@
   },
   {
     "id": 4605,
-    "name": "Litoměřice",
+    "name": "Litomerice",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10418,7 +10418,7 @@
   },
   {
     "id": 4638,
-    "name": "Mělník",
+    "name": "Melnik",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10429,7 +10429,7 @@
   },
   {
     "id": 4643,
-    "name": "Mladá Boleslav",
+    "name": "Mlada Boleslav",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10440,7 +10440,7 @@
   },
   {
     "id": 4600,
-    "name": "Moravskoslezský kraj",
+    "name": "Moravskoslezsky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10462,7 +10462,7 @@
   },
   {
     "id": 4550,
-    "name": "Náchod",
+    "name": "Nachod",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10473,7 +10473,7 @@
   },
   {
     "id": 4548,
-    "name": "Nový Jičín",
+    "name": "Novy Jicin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10506,7 +10506,7 @@
   },
   {
     "id": 4589,
-    "name": "Olomoucký kraj",
+    "name": "Olomoucky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10528,7 +10528,7 @@
   },
   {
     "id": 4584,
-    "name": "Ostrava-město",
+    "name": "Ostrava-mesto",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10550,7 +10550,7 @@
   },
   {
     "id": 4588,
-    "name": "Pardubický kraj",
+    "name": "Pardubicky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10561,7 +10561,7 @@
   },
   {
     "id": 4645,
-    "name": "Pelhřimov",
+    "name": "Pelhrimov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10572,7 +10572,7 @@
   },
   {
     "id": 4560,
-    "name": "Písek",
+    "name": "Pisek",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10583,7 +10583,7 @@
   },
   {
     "id": 4608,
-    "name": "Plzeň-jih",
+    "name": "Plzen-jih",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10594,7 +10594,7 @@
   },
   {
     "id": 4544,
-    "name": "Plzeň-město",
+    "name": "Plzen-mesto",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10605,7 +10605,7 @@
   },
   {
     "id": 4564,
-    "name": "Plzeň-sever",
+    "name": "Plzen-sever",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10616,7 +10616,7 @@
   },
   {
     "id": 4607,
-    "name": "Plzeňský kraj",
+    "name": "Plzensky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10638,7 +10638,7 @@
   },
   {
     "id": 4606,
-    "name": "Praha-východ",
+    "name": "Praha-vychod",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10649,7 +10649,7 @@
   },
   {
     "id": 4619,
-    "name": "Praha-západ",
+    "name": "Praha-zapad",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10660,7 +10660,7 @@
   },
   {
     "id": 4598,
-    "name": "Praha, Hlavní město",
+    "name": "Praha, Hlavni mesto",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10671,7 +10671,7 @@
   },
   {
     "id": 4626,
-    "name": "Přerov",
+    "name": "Prerov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10682,7 +10682,7 @@
   },
   {
     "id": 4546,
-    "name": "Příbram",
+    "name": "Pribram",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10693,7 +10693,7 @@
   },
   {
     "id": 4551,
-    "name": "Prostějov",
+    "name": "Prostejov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10704,7 +10704,7 @@
   },
   {
     "id": 4558,
-    "name": "Rakovník",
+    "name": "Rakovnik",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10726,7 +10726,7 @@
   },
   {
     "id": 4636,
-    "name": "Rychnov nad Kněžnou",
+    "name": "Rychnov nad Kneznou",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10770,7 +10770,7 @@
   },
   {
     "id": 4554,
-    "name": "Středočeský kraj",
+    "name": "Stredocesky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10781,7 +10781,7 @@
   },
   {
     "id": 4642,
-    "name": "Šumperk",
+    "name": "Sumperk",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10803,7 +10803,7 @@
   },
   {
     "id": 4565,
-    "name": "Tábor",
+    "name": "Tabor",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10836,7 +10836,7 @@
   },
   {
     "id": 4597,
-    "name": "Třebíč",
+    "name": "Trebic",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10858,7 +10858,7 @@
   },
   {
     "id": 4592,
-    "name": "Uherské Hradiště",
+    "name": "Uherske Hradiste",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10869,7 +10869,7 @@
   },
   {
     "id": 4576,
-    "name": "Ústecký kraj",
+    "name": "Ustecky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10880,7 +10880,7 @@
   },
   {
     "id": 4599,
-    "name": "Ústí nad Labem",
+    "name": "Usti nad Labem",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10891,7 +10891,7 @@
   },
   {
     "id": 4647,
-    "name": "Ústí nad Orlicí",
+    "name": "Usti nad Orlici",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10902,7 +10902,7 @@
   },
   {
     "id": 4572,
-    "name": "Vsetín",
+    "name": "Vsetin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10913,7 +10913,7 @@
   },
   {
     "id": 4622,
-    "name": "Vyškov",
+    "name": "Vyskov",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10924,7 +10924,7 @@
   },
   {
     "id": 4648,
-    "name": "Žďár nad Sázavou",
+    "name": "Zdar nad Sazavou",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10935,7 +10935,7 @@
   },
   {
     "id": 4563,
-    "name": "Zlín",
+    "name": "Zlin",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10946,7 +10946,7 @@
   },
   {
     "id": 4552,
-    "name": "Zlínský kraj",
+    "name": "Zlinsky kraj",
     "country_id": 58,
     "country_code": "CZ",
     "country_name": "Czech Republic",
@@ -10968,7 +10968,7 @@
   },
   {
     "id": 2753,
-    "name": "Bas-Uélé",
+    "name": "Bas-Uele",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -10979,7 +10979,7 @@
   },
   {
     "id": 2744,
-    "name": "Équateur",
+    "name": "Equateur",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -11012,7 +11012,7 @@
   },
   {
     "id": 2734,
-    "name": "Haut-Uélé",
+    "name": "Haut-Uele",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -11034,7 +11034,7 @@
   },
   {
     "id": 2757,
-    "name": "Kasaï",
+    "name": "Kasai",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -11045,7 +11045,7 @@
   },
   {
     "id": 2742,
-    "name": "Kasaï Central",
+    "name": "Kasai Central",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -11056,7 +11056,7 @@
   },
   {
     "id": 2735,
-    "name": "Kasaï Oriental",
+    "name": "Kasai Oriental",
     "country_id": 51,
     "country_code": "CD",
     "country_name": "Democratic Republic of the Congo",
@@ -11518,7 +11518,7 @@
   },
   {
     "id": 4107,
-    "name": "Dajabón Province",
+    "name": "Dajabon Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11639,7 +11639,7 @@
   },
   {
     "id": 4094,
-    "name": "María Trinidad Sánchez Province",
+    "name": "Maria Trinidad Sanchez Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11650,7 +11650,7 @@
   },
   {
     "id": 4099,
-    "name": "Monseñor Nouel Province",
+    "name": "Monsenor Nouel Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11716,7 +11716,7 @@
   },
   {
     "id": 4103,
-    "name": "Samaná Province",
+    "name": "Samana Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11727,7 +11727,7 @@
   },
   {
     "id": 4091,
-    "name": "San Cristóbal Province",
+    "name": "San Cristobal Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11738,7 +11738,7 @@
   },
   {
     "id": 4112,
-    "name": "San José de Ocoa Province",
+    "name": "San Jose de Ocoa Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11760,7 +11760,7 @@
   },
   {
     "id": 4110,
-    "name": "San Pedro de Macorís",
+    "name": "San Pedro de Macoris",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11771,7 +11771,7 @@
   },
   {
     "id": 4088,
-    "name": "Sánchez Ramírez Province",
+    "name": "Sanchez Ramirez Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11793,7 +11793,7 @@
   },
   {
     "id": 4100,
-    "name": "Santiago Rodríguez Province",
+    "name": "Santiago Rodriguez Province",
     "country_id": 62,
     "country_code": "DO",
     "country_name": "Dominican Republic",
@@ -11903,7 +11903,7 @@
   },
   {
     "id": 4523,
-    "name": "Lautém Municipality",
+    "name": "Lautem Municipality",
     "country_id": 63,
     "country_code": "TL",
     "country_name": "East Timor",
@@ -11914,7 +11914,7 @@
   },
   {
     "id": 4515,
-    "name": "Liquiçá Municipality",
+    "name": "Liquica Municipality",
     "country_id": 63,
     "country_code": "TL",
     "country_name": "East Timor",
@@ -11969,7 +11969,7 @@
   },
   {
     "id": 2920,
-    "name": "Bolívar",
+    "name": "Bolivar",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -11980,7 +11980,7 @@
   },
   {
     "id": 2917,
-    "name": "Cañar",
+    "name": "Canar",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12046,7 +12046,7 @@
   },
   {
     "id": 2905,
-    "name": "Galápagos",
+    "name": "Galapagos",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12090,7 +12090,7 @@
   },
   {
     "id": 2910,
-    "name": "Los Ríos",
+    "name": "Los Rios",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12101,7 +12101,7 @@
   },
   {
     "id": 2913,
-    "name": "Manabí",
+    "name": "Manabi",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12178,7 +12178,7 @@
   },
   {
     "id": 2919,
-    "name": "Santo Domingo de los Tsáchilas",
+    "name": "Santo Domingo de los Tsachilas",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12189,7 +12189,7 @@
   },
   {
     "id": 2906,
-    "name": "Sucumbíos",
+    "name": "Sucumbios",
     "country_id": 64,
     "country_code": "EC",
     "country_name": "Ecuador",
@@ -12519,7 +12519,7 @@
   },
   {
     "id": 4139,
-    "name": "Ahuachapán Department",
+    "name": "Ahuachapan Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12530,7 +12530,7 @@
   },
   {
     "id": 4132,
-    "name": "Cabañas Department",
+    "name": "Cabanas Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12552,7 +12552,7 @@
   },
   {
     "id": 4137,
-    "name": "Cuscatlán Department",
+    "name": "Cuscatlan Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12585,7 +12585,7 @@
   },
   {
     "id": 4138,
-    "name": "La Unión Department",
+    "name": "La Union Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12596,7 +12596,7 @@
   },
   {
     "id": 4130,
-    "name": "Morazán Department",
+    "name": "Morazan Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12662,7 +12662,7 @@
   },
   {
     "id": 4129,
-    "name": "Usulután Department",
+    "name": "Usulutan Department",
     "country_id": 66,
     "country_code": "SV",
     "country_name": "El Salvador",
@@ -12673,7 +12673,7 @@
   },
   {
     "id": 3444,
-    "name": "Annobón Province",
+    "name": "Annobon Province",
     "country_id": 67,
     "country_code": "GQ",
     "country_name": "Equatorial Guinea",
@@ -12728,7 +12728,7 @@
   },
   {
     "id": 3439,
-    "name": "Kié-Ntem Province",
+    "name": "Kie-Ntem Province",
     "country_id": 67,
     "country_code": "GQ",
     "country_name": "Equatorial Guinea",
@@ -12750,7 +12750,7 @@
   },
   {
     "id": 3438,
-    "name": "Río Muni",
+    "name": "Rio Muni",
     "country_id": 67,
     "country_code": "GQ",
     "country_name": "Equatorial Guinea",
@@ -12871,7 +12871,7 @@
   },
   {
     "id": 3566,
-    "name": "Järva County",
+    "name": "Jarva County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12882,7 +12882,7 @@
   },
   {
     "id": 3565,
-    "name": "Jõgeva County",
+    "name": "Jogeva County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12893,7 +12893,7 @@
   },
   {
     "id": 3568,
-    "name": "Lääne County",
+    "name": "Laane County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12904,7 +12904,7 @@
   },
   {
     "id": 3564,
-    "name": "Lääne-Viru County",
+    "name": "Laane-Viru County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12915,7 +12915,7 @@
   },
   {
     "id": 3562,
-    "name": "Pärnu County",
+    "name": "Parnu County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12926,7 +12926,7 @@
   },
   {
     "id": 3563,
-    "name": "Põlva County",
+    "name": "Polva County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -12992,7 +12992,7 @@
   },
   {
     "id": 3560,
-    "name": "Võru County",
+    "name": "Voru County",
     "country_id": 69,
     "country_code": "EE",
     "country_name": "Estonia",
@@ -13333,7 +13333,7 @@
   },
   {
     "id": 1509,
-    "name": "Åland Islands",
+    "name": "Aland Islands",
     "country_id": 74,
     "country_code": "FI",
     "country_name": "Finland",
@@ -13454,7 +13454,7 @@
   },
   {
     "id": 1502,
-    "name": "Päijänne Tavastia",
+    "name": "Paijanne Tavastia",
     "country_id": 74,
     "country_code": "FI",
     "country_name": "Finland",
@@ -13608,7 +13608,7 @@
   },
   {
     "id": 4973,
-    "name": "Ardèche",
+    "name": "Ardeche",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13630,7 +13630,7 @@
   },
   {
     "id": 4975,
-    "name": "Ariège",
+    "name": "Ariege",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13663,7 +13663,7 @@
   },
   {
     "id": 4798,
-    "name": "Auvergne-Rhône-Alpes",
+    "name": "Auvergne-Rhone-Alpes",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13696,7 +13696,7 @@
   },
   {
     "id": 4979,
-    "name": "Bouches-du-Rhône",
+    "name": "Bouches-du-Rhone",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13707,7 +13707,7 @@
   },
   {
     "id": 4825,
-    "name": "Bourgogne-Franche-Comté",
+    "name": "Bourgogne-Franche-Comte",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13806,7 +13806,7 @@
   },
   {
     "id": 4986,
-    "name": "Corrèze",
+    "name": "Correze",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13839,7 +13839,7 @@
   },
   {
     "id": 4987,
-    "name": "Côte-d'Or",
+    "name": "Cote-d'Or",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13850,7 +13850,7 @@
   },
   {
     "id": 4988,
-    "name": "Côtes-d'Armor",
+    "name": "Cotes-d'Armor",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13872,7 +13872,7 @@
   },
   {
     "id": 5047,
-    "name": "Deux-Sèvres",
+    "name": "Deux-Sevres",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13905,7 +13905,7 @@
   },
   {
     "id": 4992,
-    "name": "Drôme",
+    "name": "Drome",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -13949,7 +13949,7 @@
   },
   {
     "id": 4995,
-    "name": "Finistère",
+    "name": "Finistere",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14103,7 +14103,7 @@
   },
   {
     "id": 5039,
-    "name": "Haute-Saône",
+    "name": "Haute-Saone",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14147,7 +14147,7 @@
   },
   {
     "id": 5033,
-    "name": "Hautes-Pyrénées",
+    "name": "Hautes-Pyrenees",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14180,7 +14180,7 @@
   },
   {
     "id": 5002,
-    "name": "Hérault",
+    "name": "Herault",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14191,7 +14191,7 @@
   },
   {
     "id": 4796,
-    "name": "Île-de-France",
+    "name": "Ile-de-France",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14235,7 +14235,7 @@
   },
   {
     "id": 5006,
-    "name": "Isère",
+    "name": "Isere",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14257,7 +14257,7 @@
   },
   {
     "id": 4823,
-    "name": "La Réunion",
+    "name": "La Reunion",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14345,7 +14345,7 @@
   },
   {
     "id": 5016,
-    "name": "Lozère",
+    "name": "Lozere",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14422,7 +14422,7 @@
   },
   {
     "id": 5038,
-    "name": "Métropole de Lyon",
+    "name": "Metropole de Lyon",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14477,7 +14477,7 @@
   },
   {
     "id": 5026,
-    "name": "Nièvre",
+    "name": "Nievre",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14587,7 +14587,7 @@
   },
   {
     "id": 4812,
-    "name": "Provence-Alpes-Côte-d’Azur",
+    "name": "Provence-Alpes-Cote-d’Azur",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14598,7 +14598,7 @@
   },
   {
     "id": 5031,
-    "name": "Puy-de-Dôme",
+    "name": "Puy-de-Dome",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14609,7 +14609,7 @@
   },
   {
     "id": 5032,
-    "name": "Pyrénées-Atlantiques",
+    "name": "Pyrenees-Atlantiques",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14620,7 +14620,7 @@
   },
   {
     "id": 5034,
-    "name": "Pyrénées-Orientales",
+    "name": "Pyrenees-Orientales",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14631,7 +14631,7 @@
   },
   {
     "id": 5037,
-    "name": "Rhône",
+    "name": "Rhone",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14653,7 +14653,7 @@
   },
   {
     "id": 4794,
-    "name": "Saint-Barthélemy",
+    "name": "Saint-Barthelemy",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14675,7 +14675,7 @@
   },
   {
     "id": 5040,
-    "name": "Saône-et-Loire",
+    "name": "Saone-et-Loire",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14829,7 +14829,7 @@
   },
   {
     "id": 5053,
-    "name": "Vendée",
+    "name": "Vendee",
     "country_id": 75,
     "country_code": "FR",
     "country_name": "France",
@@ -14906,7 +14906,7 @@
   },
   {
     "id": 2726,
-    "name": "Haut-Ogooué Province",
+    "name": "Haut-Ogooue Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -14917,7 +14917,7 @@
   },
   {
     "id": 2730,
-    "name": "Moyen-Ogooué Province",
+    "name": "Moyen-Ogooue Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -14928,7 +14928,7 @@
   },
   {
     "id": 2731,
-    "name": "Ngounié Province",
+    "name": "Ngounie Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -14950,7 +14950,7 @@
   },
   {
     "id": 2724,
-    "name": "Ogooué-Ivindo Province",
+    "name": "Ogooue-Ivindo Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -14961,7 +14961,7 @@
   },
   {
     "id": 2729,
-    "name": "Ogooué-Lolo Province",
+    "name": "Ogooue-Lolo Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -14972,7 +14972,7 @@
   },
   {
     "id": 2728,
-    "name": "Ogooué-Maritime Province",
+    "name": "Ogooue-Maritime Province",
     "country_id": 79,
     "country_code": "GA",
     "country_name": "Gabon",
@@ -15214,7 +15214,7 @@
   },
   {
     "id": 3006,
-    "name": "Baden-Württemberg",
+    "name": "Baden-Wurttemberg",
     "country_id": 82,
     "country_code": "DE",
     "country_name": "Germany",
@@ -16182,7 +16182,7 @@
   },
   {
     "id": 3669,
-    "name": "Petén Department",
+    "name": "Peten Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16204,7 +16204,7 @@
   },
   {
     "id": 3657,
-    "name": "Quiché Department",
+    "name": "Quiche Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16226,7 +16226,7 @@
   },
   {
     "id": 3676,
-    "name": "Sacatepéquez Department",
+    "name": "Sacatepequez Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16259,7 +16259,7 @@
   },
   {
     "id": 3661,
-    "name": "Sololá Department",
+    "name": "Solola Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16270,7 +16270,7 @@
   },
   {
     "id": 3660,
-    "name": "Suchitepéquez Department",
+    "name": "Suchitepequez Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16281,7 +16281,7 @@
   },
   {
     "id": 3663,
-    "name": "Totonicapán Department",
+    "name": "Totonicapan Department",
     "country_id": 90,
     "country_code": "GT",
     "country_name": "Guatemala",
@@ -16314,7 +16314,7 @@
   },
   {
     "id": 2709,
-    "name": "Boké Prefecture",
+    "name": "Boke Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16325,7 +16325,7 @@
   },
   {
     "id": 2676,
-    "name": "Boké Region",
+    "name": "Boke Region",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16391,7 +16391,7 @@
   },
   {
     "id": 2681,
-    "name": "Dubréka Prefecture",
+    "name": "Dubreka Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16413,7 +16413,7 @@
   },
   {
     "id": 2683,
-    "name": "Forécariah Prefecture",
+    "name": "Forecariah Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16446,7 +16446,7 @@
   },
   {
     "id": 2711,
-    "name": "Guéckédou Prefecture",
+    "name": "Gueckedou Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16479,7 +16479,7 @@
   },
   {
     "id": 2710,
-    "name": "Kérouané Prefecture",
+    "name": "Kerouane Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16556,7 +16556,7 @@
   },
   {
     "id": 2680,
-    "name": "Labé Prefecture",
+    "name": "Labe Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16567,7 +16567,7 @@
   },
   {
     "id": 2677,
-    "name": "Labé Region",
+    "name": "Labe Region",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16578,7 +16578,7 @@
   },
   {
     "id": 2690,
-    "name": "Lélouma Prefecture",
+    "name": "Lelouma Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16655,7 +16655,7 @@
   },
   {
     "id": 2678,
-    "name": "Nzérékoré Prefecture",
+    "name": "Nzerekore Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16666,7 +16666,7 @@
   },
   {
     "id": 2684,
-    "name": "Nzérékoré Region",
+    "name": "Nzerekore Region",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16699,7 +16699,7 @@
   },
   {
     "id": 2687,
-    "name": "Télimélé Prefecture",
+    "name": "Telimele Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16710,7 +16710,7 @@
   },
   {
     "id": 2696,
-    "name": "Tougué Prefecture",
+    "name": "Tougue Prefecture",
     "country_id": 92,
     "country_code": "GN",
     "country_name": "Guinea",
@@ -16732,7 +16732,7 @@
   },
   {
     "id": 2720,
-    "name": "Bafatá",
+    "name": "Bafata",
     "country_id": 93,
     "country_code": "GW",
     "country_name": "Guinea-Bissau",
@@ -16776,7 +16776,7 @@
   },
   {
     "id": 2719,
-    "name": "Gabú Region",
+    "name": "Gabu Region",
     "country_id": 93,
     "country_code": "GW",
     "country_name": "Guinea-Bissau",
@@ -17073,7 +17073,7 @@
   },
   {
     "id": 4047,
-    "name": "Atlántida Department",
+    "name": "Atlantida Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17106,7 +17106,7 @@
   },
   {
     "id": 4051,
-    "name": "Colón Department",
+    "name": "Colon Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17128,7 +17128,7 @@
   },
   {
     "id": 4049,
-    "name": "Copán Department",
+    "name": "Copan Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17139,7 +17139,7 @@
   },
   {
     "id": 4046,
-    "name": "Cortés Department",
+    "name": "Cortes Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17150,7 +17150,7 @@
   },
   {
     "id": 4043,
-    "name": "El Paraíso Department",
+    "name": "El Paraiso Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17161,7 +17161,7 @@
   },
   {
     "id": 4052,
-    "name": "Francisco Morazán Department",
+    "name": "Francisco Morazan Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17183,7 +17183,7 @@
   },
   {
     "id": 4044,
-    "name": "Intibucá Department",
+    "name": "Intibuca Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17238,7 +17238,7 @@
   },
   {
     "id": 4053,
-    "name": "Santa Bárbara Department",
+    "name": "Santa Barbara Department",
     "country_id": 97,
     "country_code": "HN",
     "country_name": "Honduras",
@@ -17469,7 +17469,7 @@
   },
   {
     "id": 1048,
-    "name": "Bács-Kiskun",
+    "name": "Bacs-Kiskun",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17491,7 +17491,7 @@
   },
   {
     "id": 1060,
-    "name": "Békés",
+    "name": "Bekes",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17502,7 +17502,7 @@
   },
   {
     "id": 1036,
-    "name": "Békéscsaba",
+    "name": "Bekescsaba",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17513,7 +17513,7 @@
   },
   {
     "id": 1058,
-    "name": "Borsod-Abaúj-Zemplén",
+    "name": "Borsod-Abauj-Zemplen",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17535,7 +17535,7 @@
   },
   {
     "id": 1031,
-    "name": "Csongrád County",
+    "name": "Csongrad County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17557,7 +17557,7 @@
   },
   {
     "id": 1049,
-    "name": "Dunaújváros",
+    "name": "Dunaujvaros",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17579,7 +17579,7 @@
   },
   {
     "id": 1028,
-    "name": "Érd",
+    "name": "Erd",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17590,7 +17590,7 @@
   },
   {
     "id": 1044,
-    "name": "Fejér County",
+    "name": "Fejer County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17601,7 +17601,7 @@
   },
   {
     "id": 1041,
-    "name": "Győr",
+    "name": "Gyor",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17612,7 +17612,7 @@
   },
   {
     "id": 1042,
-    "name": "Győr-Moson-Sopron County",
+    "name": "Gyor-Moson-Sopron County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17623,7 +17623,7 @@
   },
   {
     "id": 1063,
-    "name": "Hajdú-Bihar County",
+    "name": "Hajdu-Bihar County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17645,7 +17645,7 @@
   },
   {
     "id": 1027,
-    "name": "Hódmezővásárhely",
+    "name": "Hodmezovasarhely",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17656,7 +17656,7 @@
   },
   {
     "id": 1043,
-    "name": "Jász-Nagykun-Szolnok County",
+    "name": "Jasz-Nagykun-Szolnok County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17667,7 +17667,7 @@
   },
   {
     "id": 1067,
-    "name": "Kaposvár",
+    "name": "Kaposvar",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17678,7 +17678,7 @@
   },
   {
     "id": 1056,
-    "name": "Kecskemét",
+    "name": "Kecskemet",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17689,7 +17689,7 @@
   },
   {
     "id": 5085,
-    "name": "Komárom-Esztergom",
+    "name": "Komarom-Esztergom",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17722,7 +17722,7 @@
   },
   {
     "id": 1051,
-    "name": "Nógrád County",
+    "name": "Nograd County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17733,7 +17733,7 @@
   },
   {
     "id": 1034,
-    "name": "Nyíregyháza",
+    "name": "Nyiregyhaza",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17744,7 +17744,7 @@
   },
   {
     "id": 1053,
-    "name": "Pécs",
+    "name": "Pecs",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17766,7 +17766,7 @@
   },
   {
     "id": 1068,
-    "name": "Salgótarján",
+    "name": "Salgotarjan",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17799,7 +17799,7 @@
   },
   {
     "id": 1045,
-    "name": "Szabolcs-Szatmár-Bereg County",
+    "name": "Szabolcs-Szatmar-Bereg County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17821,7 +17821,7 @@
   },
   {
     "id": 1033,
-    "name": "Székesfehérvár",
+    "name": "Szekesfehervar",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17832,7 +17832,7 @@
   },
   {
     "id": 1061,
-    "name": "Szekszárd",
+    "name": "Szekszard",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17865,7 +17865,7 @@
   },
   {
     "id": 1066,
-    "name": "Tatabánya",
+    "name": "Tatabanya",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17898,7 +17898,7 @@
   },
   {
     "id": 1062,
-    "name": "Veszprém",
+    "name": "Veszprem",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -17909,7 +17909,7 @@
   },
   {
     "id": 1054,
-    "name": "Veszprém County",
+    "name": "Veszprem County",
     "country_id": 99,
     "country_code": "HU",
     "country_name": "Hungary",
@@ -19163,7 +19163,7 @@
   },
   {
     "id": 3956,
-    "name": "Al-Qādisiyyah",
+    "name": "Al-Qadisiyyah",
     "country_id": 104,
     "country_code": "IQ",
     "country_name": "Iraq",
@@ -20098,7 +20098,7 @@
   },
   {
     "id": 1779,
-    "name": "Forlì-Cesena",
+    "name": "Forli-Cesena",
     "country_id": 107,
     "country_code": "IT",
     "country_name": "Italy",
@@ -21220,7 +21220,7 @@
   },
   {
     "id": 832,
-    "name": "Hokkaidō Prefecture",
+    "name": "Hokkaido Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -21231,7 +21231,7 @@
   },
   {
     "id": 831,
-    "name": "Hyōgo Prefecture",
+    "name": "Hyogo Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -21308,7 +21308,7 @@
   },
   {
     "id": 4924,
-    "name": "Kōchi Prefecture",
+    "name": "Kochi Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -21330,7 +21330,7 @@
   },
   {
     "id": 834,
-    "name": "Kyōto Prefecture",
+    "name": "Kyoto Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -21418,7 +21418,7 @@
   },
   {
     "id": 822,
-    "name": "Ōita Prefecture",
+    "name": "Oita Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -21451,7 +21451,7 @@
   },
   {
     "id": 859,
-    "name": "Ōsaka Prefecture",
+    "name": "Osaka Prefecture",
     "country_id": 109,
     "country_code": "JP",
     "country_name": "Japan",
@@ -22485,7 +22485,7 @@
   },
   {
     "id": 4876,
-    "name": "Đakovica District (Gjakove)",
+    "name": "Dakovica District (Gjakove)",
     "country_id": 248,
     "country_code": "XK",
     "country_name": "Kosovo",
@@ -22518,7 +22518,7 @@
   },
   {
     "id": 3738,
-    "name": "Peć District",
+    "name": "Pec District",
     "country_id": 248,
     "country_code": "XK",
     "country_name": "Kosovo",
@@ -22529,7 +22529,7 @@
   },
   {
     "id": 4879,
-    "name": "Pristina (Priştine)",
+    "name": "Pristina (Pristine)",
     "country_id": 248,
     "country_code": "XK",
     "country_name": "Kosovo",
@@ -22551,7 +22551,7 @@
   },
   {
     "id": 4874,
-    "name": "Uroševac District (Ferizaj)",
+    "name": "Urosevac District (Ferizaj)",
     "country_id": 248,
     "country_code": "XK",
     "country_name": "Kosovo",
@@ -22969,7 +22969,7 @@
   },
   {
     "id": 4499,
-    "name": "Aknīste Municipality",
+    "name": "Akniste Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23002,7 +23002,7 @@
   },
   {
     "id": 4487,
-    "name": "Alūksne Municipality",
+    "name": "Aluksne Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23046,7 +23046,7 @@
   },
   {
     "id": 4427,
-    "name": "Babīte Municipality",
+    "name": "Babite Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23101,7 +23101,7 @@
   },
   {
     "id": 4471,
-    "name": "Beverīna Municipality",
+    "name": "Beverina Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23112,7 +23112,7 @@
   },
   {
     "id": 4468,
-    "name": "Brocēni Municipality",
+    "name": "Broceni Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23145,7 +23145,7 @@
   },
   {
     "id": 4469,
-    "name": "Cēsis Municipality",
+    "name": "Cesis Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23255,7 +23255,7 @@
   },
   {
     "id": 4444,
-    "name": "Ērgļi Municipality",
+    "name": "Ergli Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23277,7 +23277,7 @@
   },
   {
     "id": 4470,
-    "name": "Grobiņa Municipality",
+    "name": "Grobina Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23310,7 +23310,7 @@
   },
   {
     "id": 4511,
-    "name": "Ikšķile Municipality",
+    "name": "Ikskile Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23321,7 +23321,7 @@
   },
   {
     "id": 4399,
-    "name": "Ilūkste Municipality",
+    "name": "Ilukste Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23332,7 +23332,7 @@
   },
   {
     "id": 4449,
-    "name": "Inčukalns Municipality",
+    "name": "Incukalns Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23376,7 +23376,7 @@
   },
   {
     "id": 4464,
-    "name": "Jēkabpils",
+    "name": "Jekabpils",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23387,7 +23387,7 @@
   },
   {
     "id": 4438,
-    "name": "Jēkabpils Municipality",
+    "name": "Jekabpils Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23420,7 +23420,7 @@
   },
   {
     "id": 4446,
-    "name": "Jūrmala",
+    "name": "Jurmala",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23442,7 +23442,7 @@
   },
   {
     "id": 4453,
-    "name": "Kārsava Municipality",
+    "name": "Karsava Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23453,7 +23453,7 @@
   },
   {
     "id": 4412,
-    "name": "Ķegums Municipality",
+    "name": "Kegums Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23464,7 +23464,7 @@
   },
   {
     "id": 4435,
-    "name": "Ķekava Municipality",
+    "name": "Kekava Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23475,7 +23475,7 @@
   },
   {
     "id": 4495,
-    "name": "Kocēni Municipality",
+    "name": "Koceni Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23497,7 +23497,7 @@
   },
   {
     "id": 4474,
-    "name": "Krāslava Municipality",
+    "name": "Kraslava Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23530,7 +23530,7 @@
   },
   {
     "id": 4490,
-    "name": "Kuldīga Municipality",
+    "name": "Kuldiga Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23541,7 +23541,7 @@
   },
   {
     "id": 4512,
-    "name": "Lielvārde Municipality",
+    "name": "Lielvarde Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23552,7 +23552,7 @@
   },
   {
     "id": 4460,
-    "name": "Liepāja",
+    "name": "Liepaja",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23563,7 +23563,7 @@
   },
   {
     "id": 4488,
-    "name": "Līgatne Municipality",
+    "name": "Ligatne Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23574,7 +23574,7 @@
   },
   {
     "id": 4418,
-    "name": "Limbaži Municipality",
+    "name": "Limbazi Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23585,7 +23585,7 @@
   },
   {
     "id": 4401,
-    "name": "Līvāni Municipality",
+    "name": "Livani Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23596,7 +23596,7 @@
   },
   {
     "id": 4419,
-    "name": "Lubāna Municipality",
+    "name": "Lubana Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23629,7 +23629,7 @@
   },
   {
     "id": 4461,
-    "name": "Mālpils Municipality",
+    "name": "Malpils Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23640,7 +23640,7 @@
   },
   {
     "id": 4450,
-    "name": "Mārupe Municipality",
+    "name": "Marupe Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23662,7 +23662,7 @@
   },
   {
     "id": 4451,
-    "name": "Mērsrags Municipality",
+    "name": "Mersrags Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23673,7 +23673,7 @@
   },
   {
     "id": 4398,
-    "name": "Naukšēni Municipality",
+    "name": "Naukseni Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23695,7 +23695,7 @@
   },
   {
     "id": 4436,
-    "name": "Nīca Municipality",
+    "name": "Nica Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23739,7 +23739,7 @@
   },
   {
     "id": 4507,
-    "name": "Pārgauja Municipality",
+    "name": "Pargauja Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23750,7 +23750,7 @@
   },
   {
     "id": 4467,
-    "name": "Pāvilosta Municipality",
+    "name": "Pavilosta Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23761,7 +23761,7 @@
   },
   {
     "id": 4405,
-    "name": "Pļaviņas Municipality",
+    "name": "Plavinas Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23772,7 +23772,7 @@
   },
   {
     "id": 4483,
-    "name": "Preiļi Municipality",
+    "name": "Preili Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23794,7 +23794,7 @@
   },
   {
     "id": 4506,
-    "name": "Priekuļi Municipality",
+    "name": "Priekuli Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23816,7 +23816,7 @@
   },
   {
     "id": 4509,
-    "name": "Rēzekne",
+    "name": "Rezekne",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23827,7 +23827,7 @@
   },
   {
     "id": 4455,
-    "name": "Rēzekne Municipality",
+    "name": "Rezekne Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23838,7 +23838,7 @@
   },
   {
     "id": 4502,
-    "name": "Riebiņi Municipality",
+    "name": "Riebini Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23871,7 +23871,7 @@
   },
   {
     "id": 4493,
-    "name": "Ropaži Municipality",
+    "name": "Ropazi Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23893,7 +23893,7 @@
   },
   {
     "id": 4423,
-    "name": "Rugāji Municipality",
+    "name": "Rugaji Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23904,7 +23904,7 @@
   },
   {
     "id": 4426,
-    "name": "Rūjiena Municipality",
+    "name": "Rujiena Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23915,7 +23915,7 @@
   },
   {
     "id": 4404,
-    "name": "Rundāle Municipality",
+    "name": "Rundale Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23937,7 +23937,7 @@
   },
   {
     "id": 4396,
-    "name": "Salacgrīva Municipality",
+    "name": "Salacgriva Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -23981,7 +23981,7 @@
   },
   {
     "id": 4408,
-    "name": "Sēja Municipality",
+    "name": "Seja Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24003,7 +24003,7 @@
   },
   {
     "id": 4415,
-    "name": "Skrīveri Municipality",
+    "name": "Skriveri Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24036,7 +24036,7 @@
   },
   {
     "id": 4478,
-    "name": "Stopiņi Municipality",
+    "name": "Stopini Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24047,7 +24047,7 @@
   },
   {
     "id": 4494,
-    "name": "Strenči Municipality",
+    "name": "Strenci Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24069,7 +24069,7 @@
   },
   {
     "id": 4480,
-    "name": "Tērvete Municipality",
+    "name": "Tervete Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24091,7 +24091,7 @@
   },
   {
     "id": 4508,
-    "name": "Vaiņode Municipality",
+    "name": "Vainode Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24124,7 +24124,7 @@
   },
   {
     "id": 4431,
-    "name": "Varakļāni Municipality",
+    "name": "Varaklani Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24135,7 +24135,7 @@
   },
   {
     "id": 4406,
-    "name": "Vārkava Municipality",
+    "name": "Varkava Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24190,7 +24190,7 @@
   },
   {
     "id": 4456,
-    "name": "Viesīte Municipality",
+    "name": "Viesite Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24201,7 +24201,7 @@
   },
   {
     "id": 4477,
-    "name": "Viļaka Municipality",
+    "name": "Vilaka Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24212,7 +24212,7 @@
   },
   {
     "id": 4486,
-    "name": "Viļāni Municipality",
+    "name": "Vilani Municipality",
     "country_id": 120,
     "country_code": "LV",
     "country_name": "Latvia",
@@ -24949,7 +24949,7 @@
   },
   {
     "id": 1561,
-    "name": "Akmenė District Municipality",
+    "name": "Akmene District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -24993,7 +24993,7 @@
   },
   {
     "id": 1603,
-    "name": "Birštonas Municipality",
+    "name": "Birstonas Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25004,7 +25004,7 @@
   },
   {
     "id": 1566,
-    "name": "Biržai District Municipality",
+    "name": "Birzai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25026,7 +25026,7 @@
   },
   {
     "id": 1559,
-    "name": "Elektrėnai municipality",
+    "name": "Elektrenai municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25059,7 +25059,7 @@
   },
   {
     "id": 1581,
-    "name": "Joniškis District Municipality",
+    "name": "Joniskis District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25081,7 +25081,7 @@
   },
   {
     "id": 1583,
-    "name": "Kaišiadorys District Municipality",
+    "name": "Kaisiadorys District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25136,7 +25136,7 @@
   },
   {
     "id": 1575,
-    "name": "Kazlų Rūda municipality",
+    "name": "Kazlu Ruda municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25147,7 +25147,7 @@
   },
   {
     "id": 1584,
-    "name": "Kėdainiai District Municipality",
+    "name": "Kedainiai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25158,7 +25158,7 @@
   },
   {
     "id": 1618,
-    "name": "Kelmė District Municipality",
+    "name": "Kelme District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25180,7 +25180,7 @@
   },
   {
     "id": 1600,
-    "name": "Klaipėda County",
+    "name": "Klaipeda County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25191,7 +25191,7 @@
   },
   {
     "id": 1604,
-    "name": "Klaipėda District Municipality",
+    "name": "Klaipeda District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25213,7 +25213,7 @@
   },
   {
     "id": 1585,
-    "name": "Kupiškis District Municipality",
+    "name": "Kupiskis District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25235,7 +25235,7 @@
   },
   {
     "id": 1570,
-    "name": "Marijampolė County",
+    "name": "Marijampole County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25246,7 +25246,7 @@
   },
   {
     "id": 1610,
-    "name": "Marijampolė Municipality",
+    "name": "Marijampole Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25257,7 +25257,7 @@
   },
   {
     "id": 1557,
-    "name": "Mažeikiai District Municipality",
+    "name": "Mazeikiai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25268,7 +25268,7 @@
   },
   {
     "id": 1582,
-    "name": "Molėtai District Municipality",
+    "name": "Moletai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25290,7 +25290,7 @@
   },
   {
     "id": 1612,
-    "name": "Pagėgiai municipality",
+    "name": "Pagegiai municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25323,7 +25323,7 @@
   },
   {
     "id": 1589,
-    "name": "Panevėžys City Municipality",
+    "name": "Panevezys City Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25334,7 +25334,7 @@
   },
   {
     "id": 1558,
-    "name": "Panevėžys County",
+    "name": "Panevezys County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25345,7 +25345,7 @@
   },
   {
     "id": 1614,
-    "name": "Panevėžys District Municipality",
+    "name": "Panevezys District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25367,7 +25367,7 @@
   },
   {
     "id": 1553,
-    "name": "Plungė District Municipality",
+    "name": "Plunge District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25389,7 +25389,7 @@
   },
   {
     "id": 1568,
-    "name": "Radviliškis District Municipality",
+    "name": "Radviliskis District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25422,7 +25422,7 @@
   },
   {
     "id": 1615,
-    "name": "Rokiškis District Municipality",
+    "name": "Rokiskis District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25433,7 +25433,7 @@
   },
   {
     "id": 1576,
-    "name": "Šakiai District Municipality",
+    "name": "Sakiai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25444,7 +25444,7 @@
   },
   {
     "id": 1577,
-    "name": "Šalčininkai District Municipality",
+    "name": "Salcininkai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25455,7 +25455,7 @@
   },
   {
     "id": 1609,
-    "name": "Šiauliai City Municipality",
+    "name": "Siauliai City Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25466,7 +25466,7 @@
   },
   {
     "id": 1586,
-    "name": "Šiauliai County",
+    "name": "Siauliai County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25477,7 +25477,7 @@
   },
   {
     "id": 1554,
-    "name": "Šiauliai District Municipality",
+    "name": "Siauliai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25488,7 +25488,7 @@
   },
   {
     "id": 1613,
-    "name": "Šilalė District Municipality",
+    "name": "Silale District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25499,7 +25499,7 @@
   },
   {
     "id": 1607,
-    "name": "Šilutė District Municipality",
+    "name": "Silute District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25510,7 +25510,7 @@
   },
   {
     "id": 1594,
-    "name": "Širvintos District Municipality",
+    "name": "Sirvintos District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25532,7 +25532,7 @@
   },
   {
     "id": 1560,
-    "name": "Švenčionys District Municipality",
+    "name": "Svencionys District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25543,7 +25543,7 @@
   },
   {
     "id": 1573,
-    "name": "Tauragė County",
+    "name": "Taurage County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25554,7 +25554,7 @@
   },
   {
     "id": 1572,
-    "name": "Tauragė District Municipality",
+    "name": "Taurage District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25565,7 +25565,7 @@
   },
   {
     "id": 1569,
-    "name": "Telšiai County",
+    "name": "Telsiai County",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25576,7 +25576,7 @@
   },
   {
     "id": 1608,
-    "name": "Telšiai District Municipality",
+    "name": "Telsiai District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25598,7 +25598,7 @@
   },
   {
     "id": 1596,
-    "name": "Ukmergė District Municipality",
+    "name": "Ukmerge District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25631,7 +25631,7 @@
   },
   {
     "id": 1602,
-    "name": "Varėna District Municipality",
+    "name": "Varena District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -25642,7 +25642,7 @@
   },
   {
     "id": 1620,
-    "name": "Vilkaviškis District Municipality",
+    "name": "Vilkaviskis District Municipality",
     "country_id": 126,
     "country_code": "LT",
     "country_name": "Lithuania",
@@ -26599,7 +26599,7 @@
   },
   {
     "id": 2609,
-    "name": "Malé",
+    "name": "Male",
     "country_id": 133,
     "country_code": "MV",
     "country_name": "Maldives",
@@ -26786,7 +26786,7 @@
   },
   {
     "id": 251,
-    "name": "Ménaka Region",
+    "name": "Menaka Region",
     "country_id": 134,
     "country_code": "ML",
     "country_name": "Mali",
@@ -26808,7 +26808,7 @@
   },
   {
     "id": 249,
-    "name": "Ségou Region",
+    "name": "Segou Region",
     "country_id": 134,
     "country_code": "ML",
     "country_name": "Mali",
@@ -26830,7 +26830,7 @@
   },
   {
     "id": 256,
-    "name": "Taoudénit Region",
+    "name": "Taoudenit Region",
     "country_id": 134,
     "country_code": "ML",
     "country_name": "Mali",
@@ -26896,7 +26896,7 @@
   },
   {
     "id": 88,
-    "name": "Birżebbuġa",
+    "name": "Birzebbuga",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -26962,7 +26962,7 @@
   },
   {
     "id": 130,
-    "name": "Għajnsielem",
+    "name": "Ghajnsielem",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -26973,7 +26973,7 @@
   },
   {
     "id": 92,
-    "name": "Għarb",
+    "name": "Gharb",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -26984,7 +26984,7 @@
   },
   {
     "id": 120,
-    "name": "Għargħur",
+    "name": "Gharghur",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -26995,7 +26995,7 @@
   },
   {
     "id": 106,
-    "name": "Għasri",
+    "name": "Ghasri",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27006,7 +27006,7 @@
   },
   {
     "id": 124,
-    "name": "Għaxaq",
+    "name": "Ghaxaq",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27028,7 +27028,7 @@
   },
   {
     "id": 113,
-    "name": "Gżira",
+    "name": "Gzira",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27039,7 +27039,7 @@
   },
   {
     "id": 105,
-    "name": "Ħamrun",
+    "name": "Hamrun",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27072,7 +27072,7 @@
   },
   {
     "id": 91,
-    "name": "Kerċem",
+    "name": "Kercem",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27160,7 +27160,7 @@
   },
   {
     "id": 102,
-    "name": "Mellieħa",
+    "name": "Mellieha",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27171,7 +27171,7 @@
   },
   {
     "id": 109,
-    "name": "Mġarr",
+    "name": "Mgarr",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27281,7 +27281,7 @@
   },
   {
     "id": 127,
-    "name": "Pietà",
+    "name": "Pieta",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27347,7 +27347,7 @@
   },
   {
     "id": 75,
-    "name": "San Ġwann",
+    "name": "San Gwann",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27369,7 +27369,7 @@
   },
   {
     "id": 94,
-    "name": "Santa Luċija",
+    "name": "Santa Lucija",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27402,7 +27402,7 @@
   },
   {
     "id": 98,
-    "name": "Siġġiewi",
+    "name": "Siggiewi",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27501,7 +27501,7 @@
   },
   {
     "id": 114,
-    "name": "Xagħra",
+    "name": "Xaghra",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27523,7 +27523,7 @@
   },
   {
     "id": 81,
-    "name": "Xgħajra",
+    "name": "Xghajra",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27534,7 +27534,7 @@
   },
   {
     "id": 123,
-    "name": "Żabbar",
+    "name": "Zabbar",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27545,7 +27545,7 @@
   },
   {
     "id": 85,
-    "name": "Żebbuġ Gozo",
+    "name": "Zebbug Gozo",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27556,7 +27556,7 @@
   },
   {
     "id": 80,
-    "name": "Żebbuġ Malta",
+    "name": "Zebbug Malta",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27567,7 +27567,7 @@
   },
   {
     "id": 135,
-    "name": "Żejtun",
+    "name": "Zejtun",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27578,7 +27578,7 @@
   },
   {
     "id": 76,
-    "name": "Żurrieq",
+    "name": "Zurrieq",
     "country_id": 135,
     "country_code": "MT",
     "country_name": "Malta",
@@ -27864,7 +27864,7 @@
   },
   {
     "id": 3261,
-    "name": "Rivière du Rempart",
+    "name": "Riviere du Rempart",
     "country_id": 140,
     "country_code": "MU",
     "country_name": "Mauritius",
@@ -27974,7 +27974,7 @@
   },
   {
     "id": 3473,
-    "name": "Ciudad de México",
+    "name": "Ciudad de Mexico",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28018,7 +28018,7 @@
   },
   {
     "id": 3450,
-    "name": "Estado de México",
+    "name": "Estado de Mexico",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28073,7 +28073,7 @@
   },
   {
     "id": 3474,
-    "name": "Michoacán de Ocampo",
+    "name": "Michoacan de Ocampo",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28106,7 +28106,7 @@
   },
   {
     "id": 3452,
-    "name": "Nuevo León",
+    "name": "Nuevo Leon",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28139,7 +28139,7 @@
   },
   {
     "id": 3455,
-    "name": "Querétaro",
+    "name": "Queretaro",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28161,7 +28161,7 @@
   },
   {
     "id": 3461,
-    "name": "San Luis Potosí",
+    "name": "San Luis Potosi",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28238,7 +28238,7 @@
   },
   {
     "id": 3466,
-    "name": "Yucatán",
+    "name": "Yucatan",
     "country_id": 142,
     "country_code": "MX",
     "country_name": "Mexico",
@@ -28315,7 +28315,7 @@
   },
   {
     "id": 4393,
-    "name": "Bălți Municipality",
+    "name": "Balți Municipality",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28370,7 +28370,7 @@
   },
   {
     "id": 4366,
-    "name": "Călărași District",
+    "name": "Calarași District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28392,7 +28392,7 @@
   },
   {
     "id": 4365,
-    "name": "Căușeni District",
+    "name": "Caușeni District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28403,7 +28403,7 @@
   },
   {
     "id": 4373,
-    "name": "Chișinău Municipality",
+    "name": "Chișinau Municipality",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28458,7 +28458,7 @@
   },
   {
     "id": 4383,
-    "name": "Dubăsari District",
+    "name": "Dubasari District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28480,7 +28480,7 @@
   },
   {
     "id": 4381,
-    "name": "Fălești District",
+    "name": "Falești District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28524,7 +28524,7 @@
   },
   {
     "id": 4382,
-    "name": "Hîncești District",
+    "name": "Hincești District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28590,7 +28590,7 @@
   },
   {
     "id": 4376,
-    "name": "Rîșcani District",
+    "name": "Rișcani District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28601,7 +28601,7 @@
   },
   {
     "id": 4364,
-    "name": "Sîngerei District",
+    "name": "Singerei District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28612,7 +28612,7 @@
   },
   {
     "id": 4388,
-    "name": "Șoldănești District",
+    "name": "Șoldanești District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28634,7 +28634,7 @@
   },
   {
     "id": 4378,
-    "name": "Ștefan Vodă District",
+    "name": "Ștefan Voda District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28645,7 +28645,7 @@
   },
   {
     "id": 4377,
-    "name": "Strășeni District",
+    "name": "Strașeni District",
     "country_id": 144,
     "country_code": "MD",
     "country_name": "Moldova",
@@ -28744,7 +28744,7 @@
   },
   {
     "id": 1969,
-    "name": "Bayan-Ölgii Province",
+    "name": "Bayan-Olgii Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28832,7 +28832,7 @@
   },
   {
     "id": 1978,
-    "name": "Govisümber Province",
+    "name": "Govisumber Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28865,7 +28865,7 @@
   },
   {
     "id": 1975,
-    "name": "Khövsgöl Province",
+    "name": "Khovsgol Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28876,7 +28876,7 @@
   },
   {
     "id": 1967,
-    "name": "Ömnögovi Province",
+    "name": "Omnogovi Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28898,7 +28898,7 @@
   },
   {
     "id": 1965,
-    "name": "Övörkhangai Province",
+    "name": "Ovorkhangai Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28920,7 +28920,7 @@
   },
   {
     "id": 1977,
-    "name": "Sükhbaatar Province",
+    "name": "Sukhbaatar Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -28931,7 +28931,7 @@
   },
   {
     "id": 1968,
-    "name": "Töv Province",
+    "name": "Tov Province",
     "country_id": 146,
     "country_code": "MN",
     "country_name": "Mongolia",
@@ -29041,7 +29041,7 @@
   },
   {
     "id": 31,
-    "name": "Kolašin Municipality",
+    "name": "Kolasin Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29074,7 +29074,7 @@
   },
   {
     "id": 17,
-    "name": "Nikšić Municipality",
+    "name": "Niksic Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29129,7 +29129,7 @@
   },
   {
     "id": 16,
-    "name": "Plužine Municipality",
+    "name": "Pluzine Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29151,7 +29151,7 @@
   },
   {
     "id": 15,
-    "name": "Rožaje Municipality",
+    "name": "Rozaje Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29162,7 +29162,7 @@
   },
   {
     "id": 18,
-    "name": "Šavnik Municipality",
+    "name": "Savnik Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29195,7 +29195,7 @@
   },
   {
     "id": 32,
-    "name": "Žabljak Municipality",
+    "name": "Zabljak Municipality",
     "country_id": 147,
     "country_code": "ME",
     "country_name": "Montenegro",
@@ -29228,7 +29228,7 @@
   },
   {
     "id": 3267,
-    "name": "Al Hoceïma",
+    "name": "Al Hoceima",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29272,7 +29272,7 @@
   },
   {
     "id": 3272,
-    "name": "Béni Mellal",
+    "name": "Beni Mellal",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29283,7 +29283,7 @@
   },
   {
     "id": 3278,
-    "name": "Béni Mellal-Khénifra",
+    "name": "Beni Mellal-Khenifra",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29415,7 +29415,7 @@
   },
   {
     "id": 3290,
-    "name": "Drâa-Tafilalet",
+    "name": "Draa-Tafilalet",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29459,7 +29459,7 @@
   },
   {
     "id": 3309,
-    "name": "El Kelâa des Sraghna",
+    "name": "El Kelaa des Sraghna",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29514,7 +29514,7 @@
   },
   {
     "id": 4932,
-    "name": "Fès",
+    "name": "Fes",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29525,7 +29525,7 @@
   },
   {
     "id": 3313,
-    "name": "Fès-Meknès",
+    "name": "Fes-Meknes",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29624,7 +29624,7 @@
   },
   {
     "id": 3308,
-    "name": "Kénitra",
+    "name": "Kenitra",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29635,7 +29635,7 @@
   },
   {
     "id": 3276,
-    "name": "Khémisset",
+    "name": "Khemisset",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29646,7 +29646,7 @@
   },
   {
     "id": 3317,
-    "name": "Khénifra",
+    "name": "Khenifra",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29679,7 +29679,7 @@
   },
   {
     "id": 3293,
-    "name": "Laâyoune (EH)",
+    "name": "Laayoune (EH)",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29690,7 +29690,7 @@
   },
   {
     "id": 3298,
-    "name": "Laâyoune-Sakia El Hamra (EH-partial)",
+    "name": "Laayoune-Sakia El Hamra (EH-partial)",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29745,7 +29745,7 @@
   },
   {
     "id": 3284,
-    "name": "Médiouna",
+    "name": "Mediouna",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29756,7 +29756,7 @@
   },
   {
     "id": 4937,
-    "name": "Meknès",
+    "name": "Meknes",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29877,7 +29877,7 @@
   },
   {
     "id": 4927,
-    "name": "Rabat-Salé-Kénitra",
+    "name": "Rabat-Sale-Kenitra",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29910,7 +29910,7 @@
   },
   {
     "id": 4944,
-    "name": "Salé",
+    "name": "Sale",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -29987,7 +29987,7 @@
   },
   {
     "id": 4947,
-    "name": "Skhirate-Témara",
+    "name": "Skhirate-Temara",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -30031,7 +30031,7 @@
   },
   {
     "id": 3324,
-    "name": "Tanger-Tétouan-Al Hoceïma",
+    "name": "Tanger-Tetouan-Al Hoceima",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -30108,7 +30108,7 @@
   },
   {
     "id": 3318,
-    "name": "Tétouan",
+    "name": "Tetouan",
     "country_id": 149,
     "country_code": "MA",
     "country_name": "Morocco",
@@ -31395,7 +31395,7 @@
   },
   {
     "id": 945,
-    "name": "Estelí",
+    "name": "Esteli",
     "country_id": 159,
     "country_code": "NI",
     "country_name": "Nicaragua",
@@ -31428,7 +31428,7 @@
   },
   {
     "id": 944,
-    "name": "León",
+    "name": "Leon",
     "country_id": 159,
     "country_code": "NI",
     "country_name": "Nicaragua",
@@ -31505,7 +31505,7 @@
   },
   {
     "id": 949,
-    "name": "Río San Juan",
+    "name": "Rio San Juan",
     "country_id": 159,
     "country_code": "NI",
     "country_name": "Nicaragua",
@@ -31593,7 +31593,7 @@
   },
   {
     "id": 67,
-    "name": "Tillabéri Region",
+    "name": "Tillaberi Region",
     "country_id": 160,
     "country_code": "NE",
     "country_name": "Niger",
@@ -32154,7 +32154,7 @@
   },
   {
     "id": 656,
-    "name": "Aračinovo Municipality",
+    "name": "Aracinovo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32242,7 +32242,7 @@
   },
   {
     "id": 704,
-    "name": "Čair Municipality",
+    "name": "Cair Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32253,7 +32253,7 @@
   },
   {
     "id": 676,
-    "name": "Čaška Municipality",
+    "name": "Caska Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32275,7 +32275,7 @@
   },
   {
     "id": 720,
-    "name": "Centar Župa Municipality",
+    "name": "Centar Zupa Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32286,7 +32286,7 @@
   },
   {
     "id": 644,
-    "name": "Češinovo-Obleševo Municipality",
+    "name": "Cesinovo-Oblesevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32297,7 +32297,7 @@
   },
   {
     "id": 715,
-    "name": "Čučer-Sandevo Municipality",
+    "name": "Cucer-Sandevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32319,7 +32319,7 @@
   },
   {
     "id": 695,
-    "name": "Delčevo Municipality",
+    "name": "Delcevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32407,7 +32407,7 @@
   },
   {
     "id": 722,
-    "name": "Gjorče Petrov Municipality",
+    "name": "Gjorce Petrov Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32484,7 +32484,7 @@
   },
   {
     "id": 681,
-    "name": "Karpoš Municipality",
+    "name": "Karpos Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32506,7 +32506,7 @@
   },
   {
     "id": 688,
-    "name": "Kičevo Municipality",
+    "name": "Kicevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32528,7 +32528,7 @@
   },
   {
     "id": 723,
-    "name": "Kočani Municipality",
+    "name": "Kocani Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32539,7 +32539,7 @@
   },
   {
     "id": 665,
-    "name": "Konče Municipality",
+    "name": "Konce Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32572,7 +32572,7 @@
   },
   {
     "id": 647,
-    "name": "Krivogaštani Municipality",
+    "name": "Krivogastani Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32583,7 +32583,7 @@
   },
   {
     "id": 714,
-    "name": "Kruševo Municipality",
+    "name": "Krusevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32649,7 +32649,7 @@
   },
   {
     "id": 669,
-    "name": "Mavrovo and Rostuša Municipality",
+    "name": "Mavrovo and Rostusa Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32726,7 +32726,7 @@
   },
   {
     "id": 685,
-    "name": "Pehčevo Municipality",
+    "name": "Pehcevo Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32770,7 +32770,7 @@
   },
   {
     "id": 646,
-    "name": "Probištip Municipality",
+    "name": "Probistip Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32781,7 +32781,7 @@
   },
   {
     "id": 709,
-    "name": "Radoviš Municipality",
+    "name": "Radovis Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32836,7 +32836,7 @@
   },
   {
     "id": 719,
-    "name": "Sopište Municipality",
+    "name": "Sopiste Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32847,7 +32847,7 @@
   },
   {
     "id": 643,
-    "name": "Staro Nagoričane Municipality",
+    "name": "Staro Nagoricane Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32858,7 +32858,7 @@
   },
   {
     "id": 661,
-    "name": "Štip Municipality",
+    "name": "Stip Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32891,7 +32891,7 @@
   },
   {
     "id": 711,
-    "name": "Studeničani Municipality",
+    "name": "Studenicani Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32902,7 +32902,7 @@
   },
   {
     "id": 680,
-    "name": "Šuto Orizari Municipality",
+    "name": "Suto Orizari Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -32979,7 +32979,7 @@
   },
   {
     "id": 662,
-    "name": "Vevčani Municipality",
+    "name": "Vevcani Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -33001,7 +33001,7 @@
   },
   {
     "id": 650,
-    "name": "Vraneštica Municipality",
+    "name": "Vranestica Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -33012,7 +33012,7 @@
   },
   {
     "id": 689,
-    "name": "Vrapčište Municipality",
+    "name": "Vrapciste Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -33045,7 +33045,7 @@
   },
   {
     "id": 668,
-    "name": "Želino Municipality",
+    "name": "Zelino Municipality",
     "country_id": 129,
     "country_code": "MK",
     "country_name": "North Macedonia",
@@ -33100,7 +33100,7 @@
   },
   {
     "id": 1020,
-    "name": "Møre og Romsdal",
+    "name": "More og Romsdal",
     "country_id": 165,
     "country_code": "NO",
     "country_name": "Norway",
@@ -33166,7 +33166,7 @@
   },
   {
     "id": 1006,
-    "name": "Trøndelag",
+    "name": "Trondelag",
     "country_id": 165,
     "country_code": "NO",
     "country_name": "Norway",
@@ -33804,7 +33804,7 @@
   },
   {
     "id": 1397,
-    "name": "Chiriquí Province",
+    "name": "Chiriqui Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33815,7 +33815,7 @@
   },
   {
     "id": 1387,
-    "name": "Coclé Province",
+    "name": "Cocle Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33826,7 +33826,7 @@
   },
   {
     "id": 1386,
-    "name": "Colón Province",
+    "name": "Colon Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33837,7 +33837,7 @@
   },
   {
     "id": 1385,
-    "name": "Darién Province",
+    "name": "Darien Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33848,7 +33848,7 @@
   },
   {
     "id": 1396,
-    "name": "Emberá-Wounaan Comarca",
+    "name": "Embera-Wounaan Comarca",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33892,7 +33892,7 @@
   },
   {
     "id": 1391,
-    "name": "Ngöbe-Buglé Comarca",
+    "name": "Ngobe-Bugle Comarca",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33903,7 +33903,7 @@
   },
   {
     "id": 1394,
-    "name": "Panamá Oeste Province",
+    "name": "Panama Oeste Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -33914,7 +33914,7 @@
   },
   {
     "id": 1395,
-    "name": "Panamá Province",
+    "name": "Panama Province",
     "country_id": 170,
     "country_code": "PA",
     "country_name": "Panama",
@@ -34178,7 +34178,7 @@
   },
   {
     "id": 2784,
-    "name": "Alto Paraná Department",
+    "name": "Alto Parana Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34211,7 +34211,7 @@
   },
   {
     "id": 2780,
-    "name": "Boquerón Department",
+    "name": "Boqueron Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34222,7 +34222,7 @@
   },
   {
     "id": 2773,
-    "name": "Caaguazú",
+    "name": "Caaguazu",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34233,7 +34233,7 @@
   },
   {
     "id": 2775,
-    "name": "Caazapá",
+    "name": "Caazapa",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34244,7 +34244,7 @@
   },
   {
     "id": 2771,
-    "name": "Canindeyú",
+    "name": "Canindeyu",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34266,7 +34266,7 @@
   },
   {
     "id": 2779,
-    "name": "Concepción Department",
+    "name": "Concepcion Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34288,7 +34288,7 @@
   },
   {
     "id": 2772,
-    "name": "Guairá Department",
+    "name": "Guaira Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34299,7 +34299,7 @@
   },
   {
     "id": 2778,
-    "name": "Itapúa",
+    "name": "Itapua",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34321,7 +34321,7 @@
   },
   {
     "id": 2781,
-    "name": "Ñeembucú Department",
+    "name": "Neembucu Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34332,7 +34332,7 @@
   },
   {
     "id": 2774,
-    "name": "Paraguarí Department",
+    "name": "Paraguari Department",
     "country_id": 172,
     "country_code": "PY",
     "country_name": "Paraguay",
@@ -34376,7 +34376,7 @@
   },
   {
     "id": 3680,
-    "name": "Áncash",
+    "name": "Ancash",
     "country_id": 173,
     "country_code": "PE",
     "country_name": "Peru",
@@ -34387,7 +34387,7 @@
   },
   {
     "id": 3699,
-    "name": "Apurímac",
+    "name": "Apurimac",
     "country_id": 173,
     "country_code": "PE",
     "country_name": "Peru",
@@ -34486,7 +34486,7 @@
   },
   {
     "id": 3693,
-    "name": "Junín",
+    "name": "Junin",
     "country_id": 173,
     "country_code": "PE",
     "country_name": "Peru",
@@ -34596,7 +34596,7 @@
   },
   {
     "id": 3694,
-    "name": "San Martín",
+    "name": "San Martin",
     "country_id": 173,
     "country_code": "PE",
     "country_name": "Peru",
@@ -35784,7 +35784,7 @@
   },
   {
     "id": 1636,
-    "name": "Łódź Voivodeship",
+    "name": "Lodz Voivodeship",
     "country_id": 176,
     "country_code": "PL",
     "country_name": "Poland",
@@ -35861,7 +35861,7 @@
   },
   {
     "id": 1630,
-    "name": "Świętokrzyskie Voivodeship",
+    "name": "Swietokrzyskie Voivodeship",
     "country_id": 176,
     "country_code": "PL",
     "country_name": "Poland",
@@ -35894,7 +35894,7 @@
   },
   {
     "id": 2233,
-    "name": "Açores",
+    "name": "Acores",
     "country_id": 177,
     "country_code": "PT",
     "country_name": "Portugal",
@@ -35938,7 +35938,7 @@
   },
   {
     "id": 2229,
-    "name": "Bragança",
+    "name": "Braganca",
     "country_id": 177,
     "country_code": "PT",
     "country_name": "Portugal",
@@ -35971,7 +35971,7 @@
   },
   {
     "id": 2236,
-    "name": "Évora",
+    "name": "Evora",
     "country_id": 177,
     "country_code": "PT",
     "country_name": "Portugal",
@@ -36059,7 +36059,7 @@
   },
   {
     "id": 2238,
-    "name": "Santarém",
+    "name": "Santarem",
     "country_id": 177,
     "country_code": "PT",
     "country_name": "Portugal",
@@ -36070,7 +36070,7 @@
   },
   {
     "id": 2242,
-    "name": "Setúbal",
+    "name": "Setubal",
     "country_id": 177,
     "country_code": "PT",
     "country_name": "Portugal",
@@ -36169,7 +36169,7 @@
   },
   {
     "id": 5139,
-    "name": "Añasco",
+    "name": "Anasco",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36246,7 +36246,7 @@
   },
   {
     "id": 5144,
-    "name": "Bayamón",
+    "name": "Bayamon",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36301,7 +36301,7 @@
   },
   {
     "id": 5148,
-    "name": "Canóvanas",
+    "name": "Canovanas",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36334,7 +36334,7 @@
   },
   {
     "id": 5150,
-    "name": "Cataño",
+    "name": "Catano",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36400,7 +36400,7 @@
   },
   {
     "id": 5156,
-    "name": "Comerío",
+    "name": "Comerio",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36466,7 +36466,7 @@
   },
   {
     "id": 5162,
-    "name": "Guánica",
+    "name": "Guanica",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36587,7 +36587,7 @@
   },
   {
     "id": 5172,
-    "name": "Juana Díaz",
+    "name": "Juana Diaz",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36631,7 +36631,7 @@
   },
   {
     "id": 5176,
-    "name": "Las Marías",
+    "name": "Las Marias",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36653,7 +36653,7 @@
   },
   {
     "id": 5178,
-    "name": "Loíza",
+    "name": "Loiza",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36675,7 +36675,7 @@
   },
   {
     "id": 5180,
-    "name": "Manatí",
+    "name": "Manati",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36708,7 +36708,7 @@
   },
   {
     "id": 5083,
-    "name": "Mayagüez",
+    "name": "Mayaguez",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36719,7 +36719,7 @@
   },
   {
     "id": 5183,
-    "name": "Mayagüez",
+    "name": "Mayaguez",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36796,7 +36796,7 @@
   },
   {
     "id": 5190,
-    "name": "Peñuelas",
+    "name": "Penuelas",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36840,7 +36840,7 @@
   },
   {
     "id": 5193,
-    "name": "Rincón",
+    "name": "Rincon",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36851,7 +36851,7 @@
   },
   {
     "id": 5194,
-    "name": "Río Grande",
+    "name": "Rio Grande",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36884,7 +36884,7 @@
   },
   {
     "id": 5197,
-    "name": "San Germán",
+    "name": "San German",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -36928,7 +36928,7 @@
   },
   {
     "id": 5200,
-    "name": "San Sebastián",
+    "name": "San Sebastian",
     "country_id": 178,
     "country_code": "PR",
     "country_name": "Puerto Rico",
@@ -37203,7 +37203,7 @@
   },
   {
     "id": 4744,
-    "name": "Bacău County",
+    "name": "Bacau County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37225,7 +37225,7 @@
   },
   {
     "id": 4733,
-    "name": "Bistrița-Năsăud County",
+    "name": "Bistrița-Nasaud County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37280,7 +37280,7 @@
   },
   {
     "id": 4756,
-    "name": "Buzău County",
+    "name": "Buzau County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37291,7 +37291,7 @@
   },
   {
     "id": 4732,
-    "name": "Călărași County",
+    "name": "Calarași County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37346,7 +37346,7 @@
   },
   {
     "id": 4745,
-    "name": "Dâmbovița County",
+    "name": "Dambovița County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37522,7 +37522,7 @@
   },
   {
     "id": 4741,
-    "name": "Sălaj County",
+    "name": "Salaj County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -37599,7 +37599,7 @@
   },
   {
     "id": 4757,
-    "name": "Vâlcea County",
+    "name": "Valcea County",
     "country_id": 181,
     "country_code": "RO",
     "country_name": "Romania",
@@ -38875,7 +38875,7 @@
   },
   {
     "id": 3764,
-    "name": "Soufrière Quarter",
+    "name": "Soufriere Quarter",
     "country_id": 186,
     "country_code": "LC",
     "country_name": "Saint Lucia",
@@ -39183,7 +39183,7 @@
   },
   {
     "id": 270,
-    "name": "Príncipe Province",
+    "name": "Principe Province",
     "country_id": 193,
     "country_code": "ST",
     "country_name": "Sao Tome and Principe",
@@ -39194,7 +39194,7 @@
   },
   {
     "id": 271,
-    "name": "São Tomé Province",
+    "name": "Sao Tome Province",
     "country_id": 193,
     "country_code": "ST",
     "country_name": "Sao Tome and Principe",
@@ -39403,7 +39403,7 @@
   },
   {
     "id": 481,
-    "name": "Kédougou",
+    "name": "Kedougou",
     "country_id": 195,
     "country_code": "SN",
     "country_name": "Senegal",
@@ -39458,7 +39458,7 @@
   },
   {
     "id": 482,
-    "name": "Sédhiou",
+    "name": "Sedhiou",
     "country_id": 195,
     "country_code": "SN",
     "country_name": "Senegal",
@@ -39480,7 +39480,7 @@
   },
   {
     "id": 484,
-    "name": "Thiès Region",
+    "name": "Thies Region",
     "country_id": 195,
     "country_code": "SN",
     "country_name": "Senegal",
@@ -39524,7 +39524,7 @@
   },
   {
     "id": 3732,
-    "name": "Braničevo District",
+    "name": "Branicevo District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39568,7 +39568,7 @@
   },
   {
     "id": 3719,
-    "name": "Mačva District",
+    "name": "Macva District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39590,7 +39590,7 @@
   },
   {
     "id": 3722,
-    "name": "Nišava District",
+    "name": "Nisava District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39601,7 +39601,7 @@
   },
   {
     "id": 3714,
-    "name": "North Bačka District",
+    "name": "North Backa District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39623,7 +39623,7 @@
   },
   {
     "id": 3721,
-    "name": "Pčinja District",
+    "name": "Pcinja District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39678,7 +39678,7 @@
   },
   {
     "id": 3725,
-    "name": "Raška District",
+    "name": "Raska District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39689,7 +39689,7 @@
   },
   {
     "id": 3711,
-    "name": "South Bačka District",
+    "name": "South Backa District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39722,7 +39722,7 @@
   },
   {
     "id": 3734,
-    "name": "Šumadija District",
+    "name": "Sumadija District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39755,7 +39755,7 @@
   },
   {
     "id": 3726,
-    "name": "West Bačka District",
+    "name": "West Backa District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39766,7 +39766,7 @@
   },
   {
     "id": 3731,
-    "name": "Zaječar District",
+    "name": "Zajecar District",
     "country_id": 196,
     "country_code": "RS",
     "country_name": "Serbia",
@@ -39909,7 +39909,7 @@
   },
   {
     "id": 500,
-    "name": "Grand'Anse Mahé",
+    "name": "Grand'Anse Mahe",
     "country_id": 197,
     "country_code": "SC",
     "country_name": "Seychelles",
@@ -39942,7 +39942,7 @@
   },
   {
     "id": 516,
-    "name": "La Rivière Anglaise",
+    "name": "La Riviere Anglaise",
     "country_id": 197,
     "country_code": "SC",
     "country_name": "Seychelles",
@@ -40151,7 +40151,7 @@
   },
   {
     "id": 4352,
-    "name": "Banská Bystrica Region",
+    "name": "Banska Bystrica Region",
     "country_id": 200,
     "country_code": "SK",
     "country_name": "Slovakia",
@@ -40173,7 +40173,7 @@
   },
   {
     "id": 4353,
-    "name": "Košice Region",
+    "name": "Kosice Region",
     "country_id": 200,
     "country_code": "SK",
     "country_name": "Slovakia",
@@ -40195,7 +40195,7 @@
   },
   {
     "id": 4354,
-    "name": "Prešov Region",
+    "name": "Presov Region",
     "country_id": 200,
     "country_code": "SK",
     "country_name": "Slovakia",
@@ -40206,7 +40206,7 @@
   },
   {
     "id": 4358,
-    "name": "Trenčín Region",
+    "name": "Trencin Region",
     "country_id": 200,
     "country_code": "SK",
     "country_name": "Slovakia",
@@ -40228,7 +40228,7 @@
   },
   {
     "id": 4359,
-    "name": "Žilina Region",
+    "name": "Zilina Region",
     "country_id": 200,
     "country_code": "SK",
     "country_name": "Slovakia",
@@ -40239,7 +40239,7 @@
   },
   {
     "id": 4183,
-    "name": "Ajdovščina Municipality",
+    "name": "Ajdovscina Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40349,7 +40349,7 @@
   },
   {
     "id": 4141,
-    "name": "Braslovče Municipality",
+    "name": "Braslovce Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40371,7 +40371,7 @@
   },
   {
     "id": 4215,
-    "name": "Brežice Municipality",
+    "name": "Brezice Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40470,7 +40470,7 @@
   },
   {
     "id": 4151,
-    "name": "Črenšovci Municipality",
+    "name": "Crensovci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40481,7 +40481,7 @@
   },
   {
     "id": 4232,
-    "name": "Črna na Koroškem Municipality",
+    "name": "Crna na Koroskem Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40492,7 +40492,7 @@
   },
   {
     "id": 4291,
-    "name": "Črnomelj Municipality",
+    "name": "Crnomelj Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40514,7 +40514,7 @@
   },
   {
     "id": 4167,
-    "name": "Divača Municipality",
+    "name": "Divaca Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40602,7 +40602,7 @@
   },
   {
     "id": 4159,
-    "name": "Domžale Municipality",
+    "name": "Domzale Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40657,7 +40657,7 @@
   },
   {
     "id": 4210,
-    "name": "Gorišnica Municipality",
+    "name": "Gorisnica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40745,7 +40745,7 @@
   },
   {
     "id": 4175,
-    "name": "Hoče–Slivnica Municipality",
+    "name": "Hoce–Slivnica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40756,7 +40756,7 @@
   },
   {
     "id": 4327,
-    "name": "Hodoš Municipality",
+    "name": "Hodos Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40822,7 +40822,7 @@
   },
   {
     "id": 4305,
-    "name": "Ivančna Gorica Municipality",
+    "name": "Ivancna Gorica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40866,7 +40866,7 @@
   },
   {
     "id": 4266,
-    "name": "Juršinci Municipality",
+    "name": "Jursinci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40888,7 +40888,7 @@
   },
   {
     "id": 4227,
-    "name": "Kanal ob Soči Municipality",
+    "name": "Kanal ob Soci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40899,7 +40899,7 @@
   },
   {
     "id": 4150,
-    "name": "Kidričevo Municipality",
+    "name": "Kidricevo Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -40932,7 +40932,7 @@
   },
   {
     "id": 4335,
-    "name": "Kočevje Municipality",
+    "name": "Kocevje Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41031,7 +41031,7 @@
   },
   {
     "id": 4238,
-    "name": "Križevci Municipality",
+    "name": "Krizevci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41064,7 +41064,7 @@
   },
   {
     "id": 4338,
-    "name": "Laško Municipality",
+    "name": "Lasko Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41163,7 +41163,7 @@
   },
   {
     "id": 4174,
-    "name": "Loška Dolina Municipality",
+    "name": "Loska Dolina Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41174,7 +41174,7 @@
   },
   {
     "id": 4158,
-    "name": "Loški Potok Municipality",
+    "name": "Loski Potok Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41196,7 +41196,7 @@
   },
   {
     "id": 4219,
-    "name": "Luče Municipality",
+    "name": "Luce Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41218,7 +41218,7 @@
   },
   {
     "id": 4157,
-    "name": "Majšperk Municipality",
+    "name": "Majsperk Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41273,7 +41273,7 @@
   },
   {
     "id": 4348,
-    "name": "Mengeš Municipality",
+    "name": "Menges Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41295,7 +41295,7 @@
   },
   {
     "id": 4265,
-    "name": "Mežica Municipality",
+    "name": "Mezica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41306,7 +41306,7 @@
   },
   {
     "id": 4223,
-    "name": "Miklavž na Dravskem Polju Municipality",
+    "name": "Miklavz na Dravskem Polju Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41339,7 +41339,7 @@
   },
   {
     "id": 4237,
-    "name": "Mirna Peč Municipality",
+    "name": "Mirna Pec Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41372,7 +41372,7 @@
   },
   {
     "id": 4168,
-    "name": "Moravče Municipality",
+    "name": "Moravce Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41405,7 +41405,7 @@
   },
   {
     "id": 4318,
-    "name": "Municipality of Apače",
+    "name": "Municipality of Apace",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41438,7 +41438,7 @@
   },
   {
     "id": 4314,
-    "name": "Municipality of Krško",
+    "name": "Municipality of Krsko",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41449,7 +41449,7 @@
   },
   {
     "id": 4187,
-    "name": "Municipality of Škofljica",
+    "name": "Municipality of Skofljica",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41537,7 +41537,7 @@
   },
   {
     "id": 4221,
-    "name": "Ormož Municipality",
+    "name": "Ormoz Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41592,7 +41592,7 @@
   },
   {
     "id": 4146,
-    "name": "Podčetrtek Municipality",
+    "name": "Podcetrtek Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41625,7 +41625,7 @@
   },
   {
     "id": 4239,
-    "name": "Poljčane Municipality",
+    "name": "Poljcane Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41713,7 +41713,7 @@
   },
   {
     "id": 4204,
-    "name": "Rače–Fram Municipality",
+    "name": "Race–Fram Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41724,7 +41724,7 @@
   },
   {
     "id": 4195,
-    "name": "Radeče Municipality",
+    "name": "Radece Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41768,7 +41768,7 @@
   },
   {
     "id": 4155,
-    "name": "Ravne na Koroškem Municipality",
+    "name": "Ravne na Koroskem Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41779,7 +41779,7 @@
   },
   {
     "id": 4206,
-    "name": "Razkrižje Municipality",
+    "name": "Razkrizje Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41790,7 +41790,7 @@
   },
   {
     "id": 4160,
-    "name": "Rečica ob Savinji Municipality",
+    "name": "Recica ob Savinji Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41801,7 +41801,7 @@
   },
   {
     "id": 4253,
-    "name": "Renče–Vogrsko Municipality",
+    "name": "Rence–Vogrsko Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41834,7 +41834,7 @@
   },
   {
     "id": 4233,
-    "name": "Rogaška Slatina Municipality",
+    "name": "Rogaska Slatina Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41845,7 +41845,7 @@
   },
   {
     "id": 4264,
-    "name": "Rogašovci Municipality",
+    "name": "Rogasovci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41867,7 +41867,7 @@
   },
   {
     "id": 4280,
-    "name": "Ruše Municipality",
+    "name": "Ruse Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41878,7 +41878,7 @@
   },
   {
     "id": 4222,
-    "name": "Šalovci Municipality",
+    "name": "Salovci Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41900,7 +41900,7 @@
   },
   {
     "id": 4346,
-    "name": "Semič Municipality",
+    "name": "Semic Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41911,7 +41911,7 @@
   },
   {
     "id": 4317,
-    "name": "Šempeter–Vrtojba Municipality",
+    "name": "Sempeter–Vrtojba Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41922,7 +41922,7 @@
   },
   {
     "id": 4299,
-    "name": "Šenčur Municipality",
+    "name": "Sencur Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41933,7 +41933,7 @@
   },
   {
     "id": 4324,
-    "name": "Šentilj Municipality",
+    "name": "Sentilj Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41944,7 +41944,7 @@
   },
   {
     "id": 4241,
-    "name": "Šentjernej Municipality",
+    "name": "Sentjernej Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41955,7 +41955,7 @@
   },
   {
     "id": 4171,
-    "name": "Šentjur Municipality",
+    "name": "Sentjur Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41966,7 +41966,7 @@
   },
   {
     "id": 4311,
-    "name": "Šentrupert Municipality",
+    "name": "Sentrupert Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41988,7 +41988,7 @@
   },
   {
     "id": 4149,
-    "name": "Sežana Municipality",
+    "name": "Sezana Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -41999,7 +41999,7 @@
   },
   {
     "id": 4170,
-    "name": "Škocjan Municipality",
+    "name": "Skocjan Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42010,7 +42010,7 @@
   },
   {
     "id": 4316,
-    "name": "Škofja Loka Municipality",
+    "name": "Skofja Loka Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42054,7 +42054,7 @@
   },
   {
     "id": 4285,
-    "name": "Šmarje pri Jelšah Municipality",
+    "name": "Smarje pri Jelsah Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42065,7 +42065,7 @@
   },
   {
     "id": 4289,
-    "name": "Šmarješke Toplice Municipality",
+    "name": "Smarjeske Toplice Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42076,7 +42076,7 @@
   },
   {
     "id": 4296,
-    "name": "Šmartno ob Paki Municipality",
+    "name": "Smartno ob Paki Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42087,7 +42087,7 @@
   },
   {
     "id": 4279,
-    "name": "Šmartno pri Litiji Municipality",
+    "name": "Smartno pri Litiji Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42098,7 +42098,7 @@
   },
   {
     "id": 4277,
-    "name": "Sodražica Municipality",
+    "name": "Sodrazica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42109,7 +42109,7 @@
   },
   {
     "id": 4261,
-    "name": "Solčava Municipality",
+    "name": "Solcava Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42120,7 +42120,7 @@
   },
   {
     "id": 4248,
-    "name": "Šoštanj Municipality",
+    "name": "Sostanj Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42131,7 +42131,7 @@
   },
   {
     "id": 4263,
-    "name": "Središče ob Dravi",
+    "name": "Sredisce ob Dravi",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42142,7 +42142,7 @@
   },
   {
     "id": 4259,
-    "name": "Starše Municipality",
+    "name": "Starse Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42153,7 +42153,7 @@
   },
   {
     "id": 4185,
-    "name": "Štore Municipality",
+    "name": "Store Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42164,7 +42164,7 @@
   },
   {
     "id": 4333,
-    "name": "Straža Municipality",
+    "name": "Straza Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42197,7 +42197,7 @@
   },
   {
     "id": 4229,
-    "name": "Sveti Andraž v Slovenskih Goricah Municipality",
+    "name": "Sveti Andraz v Slovenskih Goricah Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42208,7 +42208,7 @@
   },
   {
     "id": 4255,
-    "name": "Sveti Jurij ob Ščavnici Municipality",
+    "name": "Sveti Jurij ob Scavnici Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42230,7 +42230,7 @@
   },
   {
     "id": 4273,
-    "name": "Sveti Tomaž Municipality",
+    "name": "Sveti Tomaz Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42252,7 +42252,7 @@
   },
   {
     "id": 4312,
-    "name": "Tišina Municipality",
+    "name": "Tisina Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42307,7 +42307,7 @@
   },
   {
     "id": 4250,
-    "name": "Tržič Municipality",
+    "name": "Trzic Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42329,7 +42329,7 @@
   },
   {
     "id": 4251,
-    "name": "Turnišče Municipality",
+    "name": "Turnisce Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42351,7 +42351,7 @@
   },
   {
     "id": 4144,
-    "name": "Velike Lašče Municipality",
+    "name": "Velike Lasce Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42362,7 +42362,7 @@
   },
   {
     "id": 4257,
-    "name": "Veržej Municipality",
+    "name": "Verzej Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42472,7 +42472,7 @@
   },
   {
     "id": 4258,
-    "name": "Žalec Municipality",
+    "name": "Zalec Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42483,7 +42483,7 @@
   },
   {
     "id": 4182,
-    "name": "Zavrč Municipality",
+    "name": "Zavrc Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42494,7 +42494,7 @@
   },
   {
     "id": 4256,
-    "name": "Železniki Municipality",
+    "name": "Zelezniki Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42505,7 +42505,7 @@
   },
   {
     "id": 4249,
-    "name": "Žetale Municipality",
+    "name": "Zetale Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42516,7 +42516,7 @@
   },
   {
     "id": 4192,
-    "name": "Žiri Municipality",
+    "name": "Ziri Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42527,7 +42527,7 @@
   },
   {
     "id": 4276,
-    "name": "Žirovnica Municipality",
+    "name": "Zirovnica Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42538,7 +42538,7 @@
   },
   {
     "id": 4342,
-    "name": "Zreče Municipality",
+    "name": "Zrece Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -42549,7 +42549,7 @@
   },
   {
     "id": 4307,
-    "name": "Žužemberk Municipality",
+    "name": "Zuzemberk Municipality",
     "country_id": 201,
     "country_code": "SI",
     "country_name": "Slovenia",
@@ -43242,7 +43242,7 @@
   },
   {
     "id": 5089,
-    "name": "A Coruña",
+    "name": "A Coruna",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43308,7 +43308,7 @@
   },
   {
     "id": 1189,
-    "name": "Ávila",
+    "name": "Avila",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43374,7 +43374,7 @@
   },
   {
     "id": 5096,
-    "name": "Cádiz",
+    "name": "Cadiz",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43407,7 +43407,7 @@
   },
   {
     "id": 5110,
-    "name": "Castellón",
+    "name": "Castellon",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43440,7 +43440,7 @@
   },
   {
     "id": 5097,
-    "name": "Córdoba",
+    "name": "Cordoba",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43539,7 +43539,7 @@
   },
   {
     "id": 5100,
-    "name": "Jaén",
+    "name": "Jaen",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43572,7 +43572,7 @@
   },
   {
     "id": 1200,
-    "name": "Léon",
+    "name": "Leon",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -43616,7 +43616,7 @@
   },
   {
     "id": 5101,
-    "name": "Málaga",
+    "name": "Malaga",
     "country_id": 207,
     "country_code": "ES",
     "country_name": "Spain",
@@ -44562,7 +44562,7 @@
   },
   {
     "id": 1533,
-    "name": "Gävleborg County",
+    "name": "Gavleborg County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44595,7 +44595,7 @@
   },
   {
     "id": 5117,
-    "name": "Jämtland County",
+    "name": "Jamtland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44606,7 +44606,7 @@
   },
   {
     "id": 1550,
-    "name": "Jönköping County",
+    "name": "Jonkoping County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44650,7 +44650,7 @@
   },
   {
     "id": 1539,
-    "name": "Örebro County",
+    "name": "Orebro County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44661,7 +44661,7 @@
   },
   {
     "id": 1536,
-    "name": "Östergötland County",
+    "name": "Ostergotland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44672,7 +44672,7 @@
   },
   {
     "id": 1541,
-    "name": "Skåne County",
+    "name": "Skane County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44683,7 +44683,7 @@
   },
   {
     "id": 1540,
-    "name": "Södermanland County",
+    "name": "Sodermanland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44716,7 +44716,7 @@
   },
   {
     "id": 1535,
-    "name": "Värmland County",
+    "name": "Varmland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44727,7 +44727,7 @@
   },
   {
     "id": 1543,
-    "name": "Västerbotten County",
+    "name": "Vasterbotten County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44738,7 +44738,7 @@
   },
   {
     "id": 1552,
-    "name": "Västernorrland County",
+    "name": "Vasternorrland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44749,7 +44749,7 @@
   },
   {
     "id": 1549,
-    "name": "Västmanland County",
+    "name": "Vastmanland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44760,7 +44760,7 @@
   },
   {
     "id": 1547,
-    "name": "Västra Götaland County",
+    "name": "Vastra Gotaland County",
     "country_id": 213,
     "country_code": "SE",
     "country_name": "Sweden",
@@ -44870,7 +44870,7 @@
   },
   {
     "id": 1660,
-    "name": "Graubünden",
+    "name": "Graubunden",
     "country_id": 214,
     "country_code": "CH",
     "country_name": "Switzerland",
@@ -44903,7 +44903,7 @@
   },
   {
     "id": 1659,
-    "name": "Neuchâtel",
+    "name": "Neuchatel",
     "country_id": 214,
     "country_code": "CH",
     "country_name": "Switzerland",
@@ -45046,7 +45046,7 @@
   },
   {
     "id": 1656,
-    "name": "Zürich",
+    "name": "Zurich",
     "country_id": 214,
     "country_code": "CH",
     "country_name": "Switzerland",
@@ -47455,7 +47455,7 @@
   },
   {
     "id": 2572,
-    "name": "Béja",
+    "name": "Beja",
     "country_id": 224,
     "country_code": "TN",
     "country_name": "Tunisia",
@@ -47488,7 +47488,7 @@
   },
   {
     "id": 2558,
-    "name": "Gabès",
+    "name": "Gabes",
     "country_id": 224,
     "country_code": "TN",
     "country_name": "Tunisia",
@@ -47719,7 +47719,7 @@
   },
   {
     "id": 2155,
-    "name": "Adıyaman",
+    "name": "Adiyaman",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47741,7 +47741,7 @@
   },
   {
     "id": 2193,
-    "name": "Ağrı",
+    "name": "Agri",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47818,7 +47818,7 @@
   },
   {
     "id": 2187,
-    "name": "Aydın",
+    "name": "Aydin",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47829,7 +47829,7 @@
   },
   {
     "id": 2175,
-    "name": "Balıkesir",
+    "name": "Balikesir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47840,7 +47840,7 @@
   },
   {
     "id": 2148,
-    "name": "Bartın",
+    "name": "Bartin",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47884,7 +47884,7 @@
   },
   {
     "id": 2153,
-    "name": "Bingöl",
+    "name": "Bingol",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47939,7 +47939,7 @@
   },
   {
     "id": 2216,
-    "name": "Çanakkale",
+    "name": "Canakkale",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47950,7 +47950,7 @@
   },
   {
     "id": 2168,
-    "name": "Çankırı",
+    "name": "Cankiri",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47961,7 +47961,7 @@
   },
   {
     "id": 2173,
-    "name": "Çorum",
+    "name": "Corum",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47983,7 +47983,7 @@
   },
   {
     "id": 2226,
-    "name": "Diyarbakır",
+    "name": "Diyarbakir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -47994,7 +47994,7 @@
   },
   {
     "id": 2202,
-    "name": "Düzce",
+    "name": "Duzce",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48016,7 +48016,7 @@
   },
   {
     "id": 2159,
-    "name": "Elazığ",
+    "name": "Elazig",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48049,7 +48049,7 @@
   },
   {
     "id": 2164,
-    "name": "Eskişehir",
+    "name": "Eskisehir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48082,7 +48082,7 @@
   },
   {
     "id": 2204,
-    "name": "Gümüşhane",
+    "name": "Gumushane",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48093,7 +48093,7 @@
   },
   {
     "id": 2190,
-    "name": "Hakkâri",
+    "name": "Hakkari",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48115,7 +48115,7 @@
   },
   {
     "id": 2166,
-    "name": "Iğdır",
+    "name": "Igdir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48137,7 +48137,7 @@
   },
   {
     "id": 2170,
-    "name": "İstanbul",
+    "name": "Istanbul",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48148,7 +48148,7 @@
   },
   {
     "id": 2205,
-    "name": "İzmir",
+    "name": "Izmir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48159,7 +48159,7 @@
   },
   {
     "id": 2227,
-    "name": "Kahramanmaraş",
+    "name": "Kahramanmaras",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48170,7 +48170,7 @@
   },
   {
     "id": 2223,
-    "name": "Karabük",
+    "name": "Karabuk",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48236,7 +48236,7 @@
   },
   {
     "id": 2178,
-    "name": "Kırıkkale",
+    "name": "Kirikkale",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48247,7 +48247,7 @@
   },
   {
     "id": 2176,
-    "name": "Kırklareli",
+    "name": "Kirklareli",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48258,7 +48258,7 @@
   },
   {
     "id": 2180,
-    "name": "Kırşehir",
+    "name": "Kirsehir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48291,7 +48291,7 @@
   },
   {
     "id": 2149,
-    "name": "Kütahya",
+    "name": "Kutahya",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48346,7 +48346,7 @@
   },
   {
     "id": 2182,
-    "name": "Muğla",
+    "name": "Mugla",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48357,7 +48357,7 @@
   },
   {
     "id": 2162,
-    "name": "Muş",
+    "name": "Mus",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48368,7 +48368,7 @@
   },
   {
     "id": 2196,
-    "name": "Nevşehir",
+    "name": "Nevsehir",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48379,7 +48379,7 @@
   },
   {
     "id": 2189,
-    "name": "Niğde",
+    "name": "Nigde",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48445,7 +48445,7 @@
   },
   {
     "id": 2183,
-    "name": "Şanlıurfa",
+    "name": "Sanliurfa",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48489,7 +48489,7 @@
   },
   {
     "id": 2225,
-    "name": "Şırnak",
+    "name": "Sirnak",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48500,7 +48500,7 @@
   },
   {
     "id": 2167,
-    "name": "Tekirdağ",
+    "name": "Tekirdag",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48544,7 +48544,7 @@
   },
   {
     "id": 2201,
-    "name": "Uşak",
+    "name": "Usak",
     "country_id": 225,
     "country_code": "TR",
     "country_name": "Turkey",
@@ -48632,7 +48632,7 @@
   },
   {
     "id": 3373,
-    "name": "Daşoguz Region",
+    "name": "Dasoguz Region",
     "country_id": 226,
     "country_code": "TM",
     "country_name": "Turkmenistan",
@@ -54154,7 +54154,7 @@
   },
   {
     "id": 3212,
-    "name": "Paysandú",
+    "name": "Paysandu",
     "country_id": 235,
     "country_code": "UY",
     "country_name": "Uruguay",
@@ -54165,7 +54165,7 @@
   },
   {
     "id": 3210,
-    "name": "Río Negro",
+    "name": "Rio Negro",
     "country_id": 235,
     "country_code": "UY",
     "country_name": "Uruguay",
@@ -54209,7 +54209,7 @@
   },
   {
     "id": 3204,
-    "name": "San José",
+    "name": "San Jose",
     "country_id": 235,
     "country_code": "UY",
     "country_name": "Uruguay",
@@ -54231,7 +54231,7 @@
   },
   {
     "id": 3221,
-    "name": "Tacuarembó",
+    "name": "Tacuarembo",
     "country_id": 235,
     "country_code": "UY",
     "country_name": "Uruguay",
@@ -54484,7 +54484,7 @@
   },
   {
     "id": 2050,
-    "name": "Anzoátegui",
+    "name": "Anzoategui",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54528,7 +54528,7 @@
   },
   {
     "id": 2039,
-    "name": "Bolívar",
+    "name": "Bolivar",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54583,7 +54583,7 @@
   },
   {
     "id": 2035,
-    "name": "Falcón",
+    "name": "Falcon",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54605,7 +54605,7 @@
   },
   {
     "id": 2045,
-    "name": "Guárico",
+    "name": "Guarico",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54638,7 +54638,7 @@
   },
   {
     "id": 2053,
-    "name": "Mérida",
+    "name": "Merida",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54704,7 +54704,7 @@
   },
   {
     "id": 2048,
-    "name": "Táchira",
+    "name": "Tachira",
     "country_id": 239,
     "country_code": "VE",
     "country_name": "Venezuela",
@@ -54759,7 +54759,7 @@
   },
   {
     "id": 3770,
-    "name": "Bà Rịa-Vũng Tàu",
+    "name": "Ba Rịa-Vung Tau",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54792,7 +54792,7 @@
   },
   {
     "id": 3804,
-    "name": "Bạc Liêu",
+    "name": "Bạc Lieu",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54825,7 +54825,7 @@
   },
   {
     "id": 3785,
-    "name": "Bình Dương",
+    "name": "Binh Dương",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54836,7 +54836,7 @@
   },
   {
     "id": 3830,
-    "name": "Bình Định",
+    "name": "Binh Dịnh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54847,7 +54847,7 @@
   },
   {
     "id": 3797,
-    "name": "Bình Phước",
+    "name": "Binh Phước",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54858,7 +54858,7 @@
   },
   {
     "id": 3787,
-    "name": "Bình Thuận",
+    "name": "Binh Thuận",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54869,7 +54869,7 @@
   },
   {
     "id": 3778,
-    "name": "Cà Mau",
+    "name": "Ca Mau",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54902,7 +54902,7 @@
   },
   {
     "id": 3806,
-    "name": "Đà Nẵng",
+    "name": "Da Nẵng",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54913,7 +54913,7 @@
   },
   {
     "id": 3829,
-    "name": "Đắk Lắk",
+    "name": "Dắk Lắk",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54924,7 +54924,7 @@
   },
   {
     "id": 3823,
-    "name": "Đắk Nông",
+    "name": "Dắk Nong",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54935,7 +54935,7 @@
   },
   {
     "id": 3773,
-    "name": "Điện Biên",
+    "name": "Diện Bien",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54946,7 +54946,7 @@
   },
   {
     "id": 3821,
-    "name": "Đồng Nai",
+    "name": "Dồng Nai",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54957,7 +54957,7 @@
   },
   {
     "id": 3769,
-    "name": "Đồng Tháp",
+    "name": "Dồng Thap",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54979,7 +54979,7 @@
   },
   {
     "id": 3779,
-    "name": "Hà Giang",
+    "name": "Ha Giang",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -54990,7 +54990,7 @@
   },
   {
     "id": 3802,
-    "name": "Hà Nam",
+    "name": "Ha Nam",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55001,7 +55001,7 @@
   },
   {
     "id": 3810,
-    "name": "Hà Nội",
+    "name": "Ha Nội",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55012,7 +55012,7 @@
   },
   {
     "id": 3816,
-    "name": "Hà Tĩnh",
+    "name": "Ha Tinh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55034,7 +55034,7 @@
   },
   {
     "id": 3783,
-    "name": "Hải Phòng",
+    "name": "Hải Phong",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55056,7 +55056,7 @@
   },
   {
     "id": 3811,
-    "name": "Hồ Chí Minh",
+    "name": "Hồ Chi Minh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55067,7 +55067,7 @@
   },
   {
     "id": 3799,
-    "name": "Hòa Bình",
+    "name": "Hoa Binh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55078,7 +55078,7 @@
   },
   {
     "id": 3768,
-    "name": "Hưng Yên",
+    "name": "Hưng Yen",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55089,7 +55089,7 @@
   },
   {
     "id": 3793,
-    "name": "Khánh Hòa",
+    "name": "Khanh Hoa",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55100,7 +55100,7 @@
   },
   {
     "id": 3800,
-    "name": "Kiên Giang",
+    "name": "Kien Giang",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55122,7 +55122,7 @@
   },
   {
     "id": 3825,
-    "name": "Lai Châu",
+    "name": "Lai Chau",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55133,7 +55133,7 @@
   },
   {
     "id": 3818,
-    "name": "Lâm Đồng",
+    "name": "Lam Dồng",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55155,7 +55155,7 @@
   },
   {
     "id": 3817,
-    "name": "Lào Cai",
+    "name": "Lao Cai",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55177,7 +55177,7 @@
   },
   {
     "id": 3789,
-    "name": "Nam Định",
+    "name": "Nam Dịnh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55199,7 +55199,7 @@
   },
   {
     "id": 3786,
-    "name": "Ninh Bình",
+    "name": "Ninh Binh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55221,7 +55221,7 @@
   },
   {
     "id": 3801,
-    "name": "Phú Thọ",
+    "name": "Phu Thọ",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55232,7 +55232,7 @@
   },
   {
     "id": 3824,
-    "name": "Phú Yên",
+    "name": "Phu Yen",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55243,7 +55243,7 @@
   },
   {
     "id": 3809,
-    "name": "Quảng Bình",
+    "name": "Quảng Binh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55265,7 +55265,7 @@
   },
   {
     "id": 3828,
-    "name": "Quảng Ngãi",
+    "name": "Quảng Ngai",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55298,7 +55298,7 @@
   },
   {
     "id": 3819,
-    "name": "Sóc Trăng",
+    "name": "Soc Trang",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55320,7 +55320,7 @@
   },
   {
     "id": 3826,
-    "name": "Tây Ninh",
+    "name": "Tay Ninh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55331,7 +55331,7 @@
   },
   {
     "id": 3775,
-    "name": "Thái Bình",
+    "name": "Thai Binh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55342,7 +55342,7 @@
   },
   {
     "id": 3807,
-    "name": "Thái Nguyên",
+    "name": "Thai Nguyen",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55353,7 +55353,7 @@
   },
   {
     "id": 3771,
-    "name": "Thanh Hóa",
+    "name": "Thanh Hoa",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55364,7 +55364,7 @@
   },
   {
     "id": 3798,
-    "name": "Thừa Thiên-Huế",
+    "name": "Thừa Thien-Huế",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55386,7 +55386,7 @@
   },
   {
     "id": 3805,
-    "name": "Trà Vinh",
+    "name": "Tra Vinh",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55397,7 +55397,7 @@
   },
   {
     "id": 3795,
-    "name": "Tuyên Quang",
+    "name": "Tuyen Quang",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55408,7 +55408,7 @@
   },
   {
     "id": 3790,
-    "name": "Vĩnh Long",
+    "name": "Vinh Long",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55419,7 +55419,7 @@
   },
   {
     "id": 3774,
-    "name": "Vĩnh Phúc",
+    "name": "Vinh Phuc",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
@@ -55430,7 +55430,7 @@
   },
   {
     "id": 3784,
-    "name": "Yên Bái",
+    "name": "Yen Bai",
     "country_id": 240,
     "country_code": "VN",
     "country_name": "Vietnam",
