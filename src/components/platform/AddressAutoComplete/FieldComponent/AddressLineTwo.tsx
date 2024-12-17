@@ -1,6 +1,6 @@
 import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 
 export default function AddressLineTwo({
   form,
@@ -15,7 +15,7 @@ export default function AddressLineTwo({
         render={(formRenderProps) => {
           return (
             <FormInput
-              data-test-id={formKey + "-" + formRenderProps.field.name + "-inp"}
+              data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name }
               formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,

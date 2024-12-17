@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  ControllerFieldState,
-  ControllerRenderProps,
   type UseFormReturn,
 } from "react-hook-form";
 import AddressAutoComplete from "~/components/platform/AddressAutoComplete";
-import { IField } from "../type";
 
 interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
