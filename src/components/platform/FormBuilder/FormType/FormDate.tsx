@@ -13,7 +13,7 @@ import {
 import { type IField } from "../type";
 import moment from "moment";
 import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
+
 
 
 interface IProps {

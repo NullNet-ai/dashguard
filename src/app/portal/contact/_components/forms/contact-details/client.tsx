@@ -7,7 +7,6 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
-import { XIcon } from "lucide-react";
 
 export default function ContactDetails({
   params,
@@ -23,13 +22,16 @@ export default function ContactDetails({
     data,
   }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
     try {
-      await updateContact.mutateAsync({
+      const response = await updateContact.mutateAsync({
         ...data,
         id: params.id,
       });
-
+      if (response?.success) {
+        const { data } = response;
+        toast.success("Contact Details submit successfully");
+        return data;
+      }
       await utils.contact.invalidate();
-      toast.success("Contact Details submit successfully");
       throw new Error("Failed to submit Contact Details");
     } catch (error) {
       toast.error("Failed to submit Contact Details");
@@ -55,7 +57,7 @@ export default function ContactDetails({
           name: "first_name",
           label: "First Name",
           placeholder: "First Name",
-          required: true,
+          required: true
         },
         {
           id: "last_name",
@@ -91,33 +93,6 @@ export default function ContactDetails({
           label: "Address",
         },
       ]}
-      customFormHostViewFormActions={[
-        {
-          label: "Custom Action",
-          onClick: () => {
-            // console.log("Custom Action Clicked");
-          },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
-      customFormHostLockFormActions={[
-        {
-          label: "Custom Action",
-          onClick: () => {
-            // console.log("Custom Action Clicked");
-          },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
-      features={
-        {
-          // enableFormHostLockActions: false,
-        }
-      }
     />
   );
 }

@@ -88,7 +88,7 @@ export default function FormEmailInput({
     }
   });
   const { name } = formRenderProps.field;
-  const isDisabled = formRenderProps?.field?.disabled || fieldConfig?.disabled;
+  const isDisabled = formRenderProps?.field?.disabled
   const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
   const { register } = form;
   const values = form.watch(name);
@@ -112,7 +112,7 @@ export default function FormEmailInput({
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
-                    readOnly={fieldConfig?.readonly ?? false}
+                    readOnly={isDisabled}
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
@@ -120,7 +120,7 @@ export default function FormEmailInput({
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
                     className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
-                    disabled={isDisabled}
+                    disabled={undefined}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
                     type={"email"}

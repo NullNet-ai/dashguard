@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import {
@@ -295,8 +295,13 @@ export default function WizardProvider({
     }
   }, [formSave]);
 
+  useEffect(() => {
+    if (savedStep) return;
+    setSavedStep(currentStep);
+  }, [currentStep, savedStep]);
+
   usePrefetchWizardTraverse(
-    `${mainEntity}:wizard:${savedStep}`,
+    `${mainEntity}:wizard:${identifier}`,
     setTraverseStep,
   );
   useTraverseSteppedSaved(traverseSteps);
