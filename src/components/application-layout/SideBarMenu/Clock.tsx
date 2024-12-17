@@ -5,6 +5,7 @@ import moment from "moment";
 import { useSidebar } from "~/components/ui/sidebar";
 const Clock = () => {
   const [date, setDate] = useState<Date | null>(null);
+
   let interval: any = null;
 
   useEffect(() => {
@@ -21,6 +22,8 @@ const Clock = () => {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const { open } = useSidebar();
+
+  if(!open) return null
   return (
     <div
       className={`grid flex-1 px-2 text-right text-sm leading-tight ${!open && "hidden"}`}
