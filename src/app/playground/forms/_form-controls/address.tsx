@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { AddressSchema } from "~/components/platform/AddressAutoComplete/autocomplete-validator";
 
@@ -36,7 +36,7 @@ export default function AddressDetails({}) {
           headerClassName: "w-full",
         }}
         enableFormRegisterToParent
-        formLabel="TextField Form Builder"
+        formLabel="Address Form Builder"
         formKey="address-details"
         handleSubmit={handleSave}
         formSchema={FormSchema}
