@@ -42,7 +42,7 @@ export default function FormRadio({
       </FormLabel>
       <FormControl>
         <Controller
-          name={capitalize(fieldConfig.name)}
+          name={fieldConfig.name}
           control={form.control}
           rules={fieldConfig.required ? { required: true } : {}}
           render={({ field }) => (
