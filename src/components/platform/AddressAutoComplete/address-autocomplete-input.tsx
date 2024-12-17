@@ -96,11 +96,12 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     {...formRenderProps?.field}
                     data-test-id={formKey + "-" + formRenderProps.field.name}
                     ref={inputRef}
-                    className="relative h-10 flex-grow w-full rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
+                    className="relative h-10 w-full flex-grow rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
                     placeholder="Search..."
                     onChange={(event) => {
                       handleSearch(event.target.value);
                     }}
+                    value={searchedAddress}
                     onBlur={close}
                     onFocus={open}
                   />
@@ -109,10 +110,11 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     variant={"outline"}
                     onClick={() => {
                       form.setValue("details", {});
+                      handleSearch("");
                     }}
                     disabled={formRenderProps.field.disabled}
                   >
-                    <RotateCcw className="h-4 w-4 " strokeWidth={3}/>
+                    <RotateCcw className="h-4 w-4" strokeWidth={3} />
                     Reset
                   </Button>
                   {isOpen && (
@@ -140,7 +142,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                                   <Fragment key={place.place_id + index}>
                                     <ComboboxOption
                                       onClick={() => {
-                                        handleSearch("");
+                                        // handleSearch("");
                                         handleSelectAddress(place);
                                         inputRef.current?.blur();
                                       }}
