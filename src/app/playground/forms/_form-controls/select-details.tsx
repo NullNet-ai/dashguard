@@ -3,16 +3,9 @@
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
-
 const FormSchema = z.object({
-    select_with_options: z.object({
-        label: z.string({ message: "Label is required" }),
-        value: z.string({ message: "Value is required" }),
-    }).refine(data => data.label && data.value, { message: "Select with Options is required" }),
-    select_single: z.object({
-        label: z.string({ message: "Label is required" }),
-        value: z.string({ message: "Value is required" }),
-    }).refine(data => data.label && data.value, { message: "Select Single is required" }),
+    select_with_options: z.string({ message: "Select with Options is required" }),
+    select_single: z.string({ message: "Select Single is required" }),
 });
 
 function handleSubmit(values: {

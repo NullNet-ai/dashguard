@@ -78,9 +78,9 @@ export default function FormLabelValueInput({
                 <Input
                   {...register(`${formRenderProps.field.name}[${index}].label`)}
                     data-test-id={`${formKey}-lbl-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
-                    readOnly={fieldConfig?.readonly ?? false}
+                    readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     placeholder="Label"
-                    disabled={formRenderProps?.field?.disabled || fieldConfig?.disabled}
+                    disabled={undefined}
                     onChange={(e) =>
                     handleInputChange(index, "label", e.target.value)
                     }
@@ -100,7 +100,8 @@ export default function FormLabelValueInput({
                 <Input
                   data-test-id={`${formKey}-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                   placeholder="Value"
-                  readOnly={fieldConfig?.readonly ?? false}
+                  readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+                  disabled={undefined}
                   onChange={(e) =>
                   handleInputChange(index, "value", e.target.value)
                   }

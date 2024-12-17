@@ -57,6 +57,7 @@ interface MultipleSelectorProps {
   onMaxSelected?: (maxLimit: number) => void;
   /** Hide the placeholder when there are options selected. */
   hidePlaceholderWhenSelected?: boolean;
+  readOnly?:boolean;
   disabled?: boolean;
   /** Group the options base on provided key. */
   groupBy?: string;
@@ -191,6 +192,7 @@ const MultipleSelector = React.forwardRef<
       defaultOptions: arrayDefaultOptions = [],
       options: arrayOptions,
       delay,
+      readOnly,
       onSearch,
       onSearchSync,
       loadingIndicator,

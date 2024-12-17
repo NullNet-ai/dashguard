@@ -162,6 +162,7 @@ export const SmartDatetimeInput = React.forwardRef<
     disabled = false,
     datePickerTestID,
     inputTestID,
+    readOnly,
     inputProps,
     dateTimePickerProps,
   } = props;
@@ -192,6 +193,7 @@ export const SmartDatetimeInput = React.forwardRef<
           <DateTimeLocalInput
             datePickerTestID={datePickerTestID}
             disabled={disabled as boolean}
+            readOnly={readOnly}
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -199,6 +201,7 @@ export const SmartDatetimeInput = React.forwardRef<
             placeholder={placeholder}
             disabled={disabled}
             ref={ref}
+            readOnly={readOnly}
             {...inputProps}
           />
         </div>
@@ -455,6 +458,7 @@ const TimePicker = () => {
 export interface NaturalLanguageInputProps {
   placeholder?: string;
   disabled?: boolean;
+  readOnly?:boolean;
   includeTime?: boolean; // New prop to control time handling
   onDateChange?: (date: Date) => void; // Optional callback for date change
   onTimeChange?: (time: string) => void; // Optional callback for time change
@@ -470,6 +474,7 @@ const NaturalLanguageInput = React.forwardRef<
       includeTime = false, // Default to including time
       onDateChange,
       onTimeChange,
+      readOnly=false,
       ...props
     },
     ref,
@@ -660,6 +665,7 @@ const NaturalLanguageInput = React.forwardRef<
       <Input
         ref={ref}
         type="text"
+        readOnly={readOnly}
         placeholder={_placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.currentTarget.value)}
@@ -676,6 +682,7 @@ NaturalLanguageInput.displayName = "NaturalLanguageInput";
 
 export type DateTimeLocalInputProps = {
   disabled?: boolean;
+  readOnly?:boolean;
 } & CalendarProps;
 
 const DateTimeLocalInput = ({
@@ -686,6 +693,7 @@ const DateTimeLocalInput = ({
   disableFutureDates = false,
   includeTime = false,
   datePickerTestID,
+  readOnly,
   disabled,
   ...props
 }: DateTimeLocalInputProps & {
@@ -724,9 +732,9 @@ const DateTimeLocalInput = ({
         <Button
           variant={"outline"}
           size={"icon"}
-          disabled={disabled}
+          disabled={readOnly}
           className={cn(
-            "flex size-9 items-center justify-center font-normal",
+            "flex size-9 items-center justify-center font-normal disabled:opacity-100",
             !value && "text-muted-foreground",
           )}
           data-test-id={datePickerTestID}

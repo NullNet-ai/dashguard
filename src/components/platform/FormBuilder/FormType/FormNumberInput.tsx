@@ -33,7 +33,7 @@ export default function FormNumber({
   fieldFilterActions,
   formKey
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+  const isDisabled = formRenderProps.field.disabled;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -62,11 +62,11 @@ export default function FormNumber({
         <Input
           {...formRenderProps.field}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          readOnly={fieldConfig?.readonly ?? false}
+          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          disabled={undefined}
           type="number"
           inputMode="decimal"
-          className={`no-spinner ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={isDisabled}
+          className={`no-spinner`}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
