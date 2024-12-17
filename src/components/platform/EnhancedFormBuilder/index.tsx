@@ -148,7 +148,7 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, []);
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
 
   //* HANDLERS
 
@@ -168,7 +168,7 @@ export const FormBuilder = (props: IPropsForms) => {
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((data) => {
+    ).then(() => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
