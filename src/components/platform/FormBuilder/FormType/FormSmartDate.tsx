@@ -39,7 +39,7 @@ export default function FormSmartDate({
   const { disabled } = formRenderProps.field;
   const isDisable = isFieldDisable || disabled;
 
-  const handleChange = (date: Date | null) => {
+  const handleChange = (date: Date | null | string) => {
     if (date) {
       const formattedDate =
         dateGranularity === "year"
@@ -47,7 +47,12 @@ export default function FormSmartDate({
           : dateGranularity === "month"
             ? moment(date).format("YYYY-MM")
             : moment(date).format("MM/DD/YYYY");
-      form.setValue(name, formattedDate, {
+
+      const formatted_date = formattedDate?.includes("Invalid date")
+        ? date
+        : formattedDate;
+
+      form.setValue(name, formatted_date, {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
