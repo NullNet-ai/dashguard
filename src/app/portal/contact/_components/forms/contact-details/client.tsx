@@ -14,7 +14,6 @@ export default function ContactDetails({
   selectOptions,
   multiSelectOptions,
 }: IFormProps) {
-  const utils = api.useUtils();
   const toast = useToast();
   const updateContact = api.contact.updateContactDetails.useMutation();
 
@@ -31,7 +30,6 @@ export default function ContactDetails({
         toast.success("Contact Details submit successfully");
         return data;
       }
-      await utils.contact.invalidate();
       throw new Error("Failed to submit Contact Details");
     } catch (error) {
       toast.error("Failed to submit Contact Details");
@@ -57,7 +55,7 @@ export default function ContactDetails({
           name: "first_name",
           label: "First Name",
           placeholder: "First Name",
-          required: true
+          required: true,
         },
         {
           id: "last_name",

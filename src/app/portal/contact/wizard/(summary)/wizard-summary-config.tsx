@@ -80,6 +80,7 @@ const contactWizardSummary = ({
     five: {
       label: "Step 5",
       required: false,
+      show_summary: true,
       components: [
         {
           label: "Confirmation",
