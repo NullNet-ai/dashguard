@@ -9,7 +9,7 @@ const fields = {
   Email: "email",
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
-  Category: "categories",
+  Address: "address",
 };
 
 const RecordShellSummary = ({
@@ -62,7 +62,6 @@ const RecordShellSummary = ({
       "middle_name",
       "date_of_birth",
       "address_id",
-      "categories",
     ],
   });
 
