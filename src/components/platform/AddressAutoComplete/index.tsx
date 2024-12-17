@@ -85,12 +85,15 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
     const state = response.data.state;
     const city = response.data.city;
     const cities = (CountryToCities as Record<string, string[]>)?.[country];
+    const countries = Object.keys(CountryToCities ?? {});
+
+    const foundCountry = countries?.find((_country) => _country === country);
     const foundState = States?.find(
       (_state) => _state.name === state && _state.country_name === country,
     );
     const foundCity = cities?.find((_city: string) => _city === city);
 
-    form.setValue("details.country", country);
+    form.setValue("details.country", foundCountry || "");
     form.setValue("details.state", foundState ? foundState?.name : "");
     form.setValue("details.city", foundCity ? foundCity : "");
 
