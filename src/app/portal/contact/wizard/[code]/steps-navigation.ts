@@ -11,8 +11,8 @@ export const steps_navigation = {
   },
   three: {
     next: true,
-    prev: false,
-    skip: false,
+    prev: true,
+    skip: true,
   },
   four: {
     next: true,
