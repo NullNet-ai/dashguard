@@ -75,7 +75,7 @@ export const contactDetailsSchema = z.object({
         address_line_one: "Address Line 1",
         postal_code: "ZIP Code",
         country: "Country",
-        state: "State",
+        // state: "State",
         city: "City",
       };
 

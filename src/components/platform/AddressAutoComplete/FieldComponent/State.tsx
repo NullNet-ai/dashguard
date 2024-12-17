@@ -30,7 +30,7 @@ export default function StateName({ form,formKey }: IFieldComponentProps) {
               fieldConfig={{
                 selectSearchable: true,
                 ...formRenderProps?.field,
-                required: true,
+                // required: true,
                 placeholder: "Select State",
                 label: "State",
                 id: `details.state`,
