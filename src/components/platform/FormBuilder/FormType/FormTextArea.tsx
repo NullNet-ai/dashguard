@@ -34,14 +34,14 @@ export default function FormTextArea({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <AutosizeTextarea
           {...register(fieldConfig.name)}
-          data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           icon={UserIcon}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight}
@@ -61,7 +61,7 @@ export default function FormTextArea({
       </FormControl>
 
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );
