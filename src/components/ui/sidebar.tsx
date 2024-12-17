@@ -20,9 +20,9 @@ import {
 import useScreenType from "~/hooks/use-screen-type";
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
+const SIDEBAR_WIDTH = "255px";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_ICON = "80px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "d";
 
 type SidebarContext = {
@@ -781,7 +781,7 @@ const SidebarMenuSub = React.forwardRef<
     data-sidebar="menu-sub"
     className={cn(
       "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 px-2.5 py-0.5",
-      "group-data-[collapsible=icon]:hidden",
+      // "group-data-[collapsible=icon]:hidden",
       className,
     )}
     {...props}
@@ -816,7 +816,7 @@ const SidebarMenuSubButton = React.forwardRef<
         "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
         size === "sm" && "text-xs",
         size === "md" && "text-sm",
-        "group-data-[collapsible=icon]:hidden",
+        // "group-data-[collapsible=icon]:hidden",
         className,
       )}
       {...props}
