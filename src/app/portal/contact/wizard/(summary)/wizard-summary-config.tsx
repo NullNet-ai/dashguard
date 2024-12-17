@@ -14,7 +14,7 @@ const contactWizardSummary = ({
   return {
     one: {
       label: "Step 1",
-      required: false,
+      required: true,
       components: [
         {
           label: "Basic Details",
@@ -45,7 +45,8 @@ const contactWizardSummary = ({
     },
     three: {
       label: "Step 3",
-      required: false,
+      required: true,
+      show_summary: true,
       components: [
         {
           label: "Category Details",
@@ -61,7 +62,7 @@ const contactWizardSummary = ({
     },
     four: {
       label: "Step 4",
-      required: false,
+      required: true,
       components: [
         {
           label: "Organization",

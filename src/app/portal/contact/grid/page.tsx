@@ -49,7 +49,7 @@ export default async function Page({
         title: "Contacts",
         columns: gridColumns,
         defaultValues: {
-          categories: ["Contact"],
+          categories: ["Contact", "Employee"],
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
