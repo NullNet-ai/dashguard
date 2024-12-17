@@ -82,6 +82,8 @@ update_stack_qa:
     PORTAINER_HOST: https://portainer.platform.dnadev.net
     PORTAINER_YML_FILE: recruitment.yml
     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
+    REGISTRY_USERNAME: 'dna'
+    REGISTRY_PASSWORD: '3QFh6zZ2u2fnHbnt3pwy'
     FILE_PATH: /var/apps/portainer
   script:
     - docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
