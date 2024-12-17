@@ -71,7 +71,7 @@ export const FormBuilder = (props: IPropsForms) => {
       status: "dirty",
       form_key: formKey,
     });
-  }, [eventEmitter, form?.formState?.isDirty, formKey]);
+  }, [form?.formState?.isDirty]);
 
   //* Effect to listen to form errors
   useEffect(() => {
@@ -97,7 +97,7 @@ export const FormBuilder = (props: IPropsForms) => {
 
     // Clean up the subscription on unmount
     return () => subscription.unsubscribe();
-  }, [form, form.watch, onDataChange]);
+  }, [form.watch, onDataChange]);
 
   //* Effect to listen to filter grid config changes
   useEffect(() => {
@@ -168,9 +168,7 @@ export const FormBuilder = (props: IPropsForms) => {
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((
-    //  data
-    ) => {
+    ).then((data) => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
@@ -339,11 +337,9 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSelectFieldFilterGrid = async (
-    data: z.infer<typeof formSchema>,
-  ) => {
+  const onSelectFieldFilterGrid = async (data: z.infer<typeof formSchema>) => {
     try {
-      if(data?.code && create_mode) {
+      if (data?.code && create_mode) {
         UpdateCurrentSubTab({ tab_name: data.code });
       }
       setFormGridSelected([data]);
