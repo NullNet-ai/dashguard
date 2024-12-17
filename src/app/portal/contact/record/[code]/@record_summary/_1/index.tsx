@@ -69,7 +69,7 @@ const RecordShellSummary = ({
   const record_details = {
     ...data,
     full_name:
-      `${data?.first_name ? data?.first_name : ""} ${data?.middle_name ? data?.middle_name : ""} ${data?.last_name ? data?.last_name : ""}` ||
+      `${data?.first_name || ""} ${data?.middle_name || ""} ${data?.last_name || ""}`.trim() ||
       "None",
     phone,
     email,
