@@ -65,7 +65,7 @@ export default function FormSelect({
     return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
-  }, [formRenderProps?.field.value]);
+  }, [fieldConfig?.name, formRenderProps?.field.value, selectOptions]);
 
   return (
     <FormItem>
@@ -100,23 +100,22 @@ export default function FormSelect({
         disabled={fieldConfig?.disabled}
       >
         <div className="relative mt-2">
-          <ComboboxButton
+            <ComboboxButton
             disabled={formRenderProps?.field?.disabled}
             className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
-          >
+            >
             <ComboboxInput
               placeholder={fieldConfig.placeholder}
               readOnly={
-                fieldConfig?.selectSearchable
-                  ? !fieldConfig?.selectSearchable
-                  : true
+              (formRenderProps.field.disabled || fieldConfig?.readonly) ?? 
+              (fieldConfig?.selectSearchable ? !fieldConfig?.selectSearchable : true)
               }
               className={cn(
-                "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
-                {
-                  "outline-destructive": error,
-                },
+              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+              {
+                "outline-destructive": error,
+              },
               )}
               onChange={(event) => setQuery(event.target.value)}
               onBlur={() => setQuery("")}
@@ -128,7 +127,7 @@ export default function FormSelect({
               className="absolute right-2 size-5 text-gray-400"
               aria-hidden="true"
             />
-          </ComboboxButton>
+            </ComboboxButton>
 
           {filteredOptions?.length ? (
             <ComboboxOptions
