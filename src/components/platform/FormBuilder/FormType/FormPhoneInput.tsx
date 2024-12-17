@@ -152,7 +152,7 @@ export default function FormPhoneInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -168,14 +168,14 @@ export default function FormPhoneInput({
               >
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
-                  data-test-id={`${formKey}-${fieldConfig.name}-input${index > 0 ? `-${index + 1}` : ""}`}
+                  data-test-id={`${formKey}-inp-${index > 0 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
-                    "data-test-id": `${formKey}-${fieldConfig.name}-inp${index > 1 ? `-${index + 1}` : ""}`,
+                    "data-test-id": `${formKey}-inp-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
                   }}
                   countrySelectorStyleProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
-                    "data-test-id": `${formKey}-${fieldConfig.name}-country-sel${index > 1 ? `-${index + 1}` : ""}`,
+                    "data-test-id": `${formKey}-country-sel-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
                     buttonStyle: {
                       padding: "1.2rem",
                       paddingInline: "0.5rem",
@@ -215,7 +215,7 @@ export default function FormPhoneInput({
                   <Badge
                     variant={"outline"}
                     className="mr-1 bg-primary/10 py-1 font-normal text-primary"
-                    data-test-id={`${formKey}-${fieldConfig.name}-prim-badge${index > 1 ? `-${index + 1}` : ""}`}
+                    data-test-id={`${formKey}-prim-badge-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                   >
                     Primary
                   </Badge>
@@ -225,7 +225,7 @@ export default function FormPhoneInput({
                   <Button
                     name={`${name}.${index}.isPrimaryButton`}
                     disabled={isDisabled}
-                    data-test-id={`${formKey}-${fieldConfig.name}-prim-btn${index > 1 ? `-${index + 1}` : ""}`}
+                    data-test-id={`${formKey}-prim-btn-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                     variant={"ghost"}
                     size={"icon"}
                     className="rounded-none"
@@ -250,7 +250,7 @@ export default function FormPhoneInput({
                     type="button"
                     variant={"ghost"}
                     size={"icon"}
-                    data-test-id={`${formKey}-${fieldConfig.name}-rmv-btn${index > 1 ? `-${index + 1}` : ""}`}
+                    data-test-id={`${formKey}-rmv-btn-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                     className="rounded-none"
                     onClick={() => {
                       const _values = form.getValues(fieldConfig.name);
@@ -265,7 +265,7 @@ export default function FormPhoneInput({
                 <p
                   id={field.id}
                   className={cn("py-1 text-md font-medium text-destructive")}
-                  data-test-id={`${formKey}-${fieldConfig.name}-err-msg${index > 1 ? `-${index + 1}` : ""}`}
+                  data-test-id={`${formKey}-err-msg-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                 >
                   {error[index]?.raw_phone_number?.message}
                 </p>
@@ -278,7 +278,7 @@ export default function FormPhoneInput({
       {!isDisabled && isMultiple && (
         <Button
           name={`${name}.AddPhoneNumberButton`}
-          data-test-id={`${formKey}-${fieldConfig.name}-add-btn`}
+          data-test-id={`${formKey}-add-btn-${fieldConfig.name}`}
           type="button"
           Icon={PlusIcon}
           variant={"link"}
@@ -290,7 +290,7 @@ export default function FormPhoneInput({
         </Button>
       )}
       {(error?.root?.message || error?.message) && (
-        <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`} />
+        <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
       )}
 
       {/* <DevTool control={form.control} /> */}

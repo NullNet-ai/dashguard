@@ -36,7 +36,7 @@ export default function FormRadio({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig.label}
       </FormLabel>
@@ -48,7 +48,7 @@ export default function FormRadio({
           render={({ field }) => (
             <RadioGroup
               {...field}
-              data-test-id={`${formKey}-${fieldConfig.name}-rdio`}
+              data-test-id={`${formKey}-rdio-${fieldConfig.name}`}
               disabled={formRenderProps.field.disabled}
               onValueChange={(value) => {
                 field.onChange(value);
@@ -64,12 +64,12 @@ export default function FormRadio({
                   <FormControl>
                     <RadioGroupItem
                       value={option.value}
-                      data-test-id={`${formKey}-${fieldConfig.name}-opt-${index + 1}`}
+                      data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
                     />
                   </FormControl>
                   <FormLabel
                     className="font-normal"
-                    data-test-id={`${formKey}-${fieldConfig.name}-lbl-${option.label}`}
+                    data-test-id={`${formKey}-lbl-${option.label}-${fieldConfig.name}`}
                   >
                     {option.label}
                   </FormLabel>
@@ -80,7 +80,7 @@ export default function FormRadio({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

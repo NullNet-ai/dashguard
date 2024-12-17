@@ -53,7 +53,7 @@ export default function FormFile({
       {fieldConfig?.label && (
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
         >
           {fieldConfig?.label}
         </FormLabel>
@@ -63,13 +63,13 @@ export default function FormFile({
         <FileUpload
           {...register(field.name)}
           fileInputProps={{
-            "data-test-id": `${formKey}-${fieldConfig.name}-file-inp`,
+            "data-test-id": `${formKey}-file-inp-${fieldConfig.name}`,
           }}
           fileUploaderProps={{
-            "data-test-id": `${formKey}-${fieldConfig.name}-file-upl`,
+            "data-test-id": `${formKey}-file-upl-${fieldConfig.name}`,
           }}
           fileUploaderContentProps={{
-            "data-test-id": `${formKey}-${fieldConfig.name}-file-cnt`,
+            "data-test-id": `${formKey}-file-cnt-${fieldConfig.name}`,
           }}
           onUploadFile={handleChangeUpload}
           dropzoneOptions={
@@ -79,7 +79,7 @@ export default function FormFile({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

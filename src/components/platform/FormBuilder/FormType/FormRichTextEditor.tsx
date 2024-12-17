@@ -55,7 +55,7 @@ export default function FormRichTextEditor({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -65,7 +65,7 @@ export default function FormRichTextEditor({
           editorProps={{
             editable: () => !isDisabled && !fieldConfig?.readonly,
             attributes: {
-              "data-test-id": `${formKey}-${fieldConfig.name}-editor`,
+              "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
             },
           }}
           throttleDelay={0}
@@ -85,7 +85,7 @@ export default function FormRichTextEditor({
           }}
         />
       </FormControl>
-      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-error-msg`} />
+      <FormMessage data-test-id={`${formKey}-error-msg-${fieldConfig.name}`} />
 
       {/* <span>{JSON.stringify(content, null, 2)}</span> */}
     </FormItem>

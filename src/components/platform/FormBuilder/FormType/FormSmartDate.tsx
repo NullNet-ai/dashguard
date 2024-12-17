@@ -60,14 +60,14 @@ export default function FormSmartDate({
     <FormItem className="flex w-full flex-col">
       <FormLabel
         required={required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {label}
       </FormLabel>
       <FormControl>
         <SmartDatetimeInput
-          datePickerTestID={`${formKey}-${fieldConfig.name}-dte-picker`}
-          inputTestID={`${formKey}-${fieldConfig.name}-inp`}
+          datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
+          inputTestID={`${formKey}-inp-${fieldConfig.name}`}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
@@ -77,7 +77,7 @@ export default function FormSmartDate({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );
