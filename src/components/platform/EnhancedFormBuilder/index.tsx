@@ -148,7 +148,7 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  });
+  }, []);
 
   //* HANDLERS
 
