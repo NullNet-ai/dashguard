@@ -46,13 +46,7 @@ export const contactDetailsSchema = z.object({
       address_line_one: z.string().optional(),
       address_line_two: z.string().optional(),
       latitude: z.number().optional(),
-      // .refine((lat) => lat === undefined || (lat >= -90 && lat <= 90), {
-      //   message: "Latitude must be between -90 and 90.",
-      // })
       longitude: z.number().optional(),
-      // .refine((lng) => lng === undefined || (lng >= -180 && lng <= 180), {
-      //   message: "Longitude must be between -180 and 180.",
-      // })
       place_id: z.string().optional(),
       street_number: z.string().optional(),
       street: z.string().optional(),
@@ -96,5 +90,38 @@ export const contactDetailsSchema = z.object({
           });
         }
       });
+
+      // Transform `address` field if all relevant fields are provided
+      const {
+        address_line_one,
+        address_line_two,
+        city,
+        state,
+        postal_code,
+        country,
+      } = details || {};
+      if (
+        address_line_one ||
+        address_line_two ||
+        city ||
+        state ||
+        postal_code ||
+        country
+      ) {
+        const formatted_address = [
+          address_line_one,
+          address_line_two,
+          city,
+          state && postal_code
+            ? `${state} ${postal_code}`
+            : state || postal_code,
+          country,
+        ]
+          .filter(Boolean) // Remove undefined or empty parts
+          .join(", ");
+
+        // Update the `address` field
+        details.address = formatted_address;
+      }
     }),
 });
