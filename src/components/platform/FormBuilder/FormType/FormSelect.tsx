@@ -4,7 +4,12 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { type IField, type ISelectOptions } from "../type";
-import { FormItem, FormLabel, FormMessage, useFormField } from "~/components/ui/form";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from "~/components/ui/form";
 import {
   Combobox,
   ComboboxButton,
@@ -84,9 +89,7 @@ export default function FormSelect({
       </div>
       <Combobox
         as="div"
-        value={
-          label 
-        }
+        value={label}
         onChange={(value) => {
           setQuery("");
           formRenderProps?.field.onChange(value?.value);
@@ -100,7 +103,7 @@ export default function FormSelect({
             data-test-id={`${formKey}-${fieldConfig.name}-btn`}
           >
             <ComboboxInput
-            placeholder={fieldConfig.placeholder}
+              placeholder={fieldConfig.placeholder}
               readOnly={
                 fieldConfig?.selectSearchable
                   ? !fieldConfig?.selectSearchable
@@ -164,9 +167,7 @@ export default function FormSelect({
         </div>
       </Combobox>
 
-      <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
-      />
+      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`} />
     </FormItem>
   );
 }
