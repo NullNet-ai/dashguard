@@ -15,7 +15,7 @@ export default function MenuItem({ children, onClick,...props  }: IMenuItemProps
   return (
     <Fragment>
       <DropdownMenuItem onClick={handleClick} {...props}>{children}</DropdownMenuItem>
-      <DropdownMenuSeparator />
+      {/* TODO: add item separator */}
     </Fragment>
   );
 }

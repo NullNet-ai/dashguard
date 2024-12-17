@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookmarkSquareIcon,
   BugAntIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -25,6 +24,7 @@ import {
 import numberToWords from "./Utils/steptoWords";
 import { type NumberWords } from "./type";
 import { testIDFormatter } from "~/utils/formatter";
+import { SaveIcon } from "lucide-react";
 
 export default function Header() {
   const { state, actions } = useContext(WizardContext);
@@ -135,21 +135,20 @@ export default function Header() {
             <span className="text-foreground">Prev</span>
           </Button>
           {currentStep === totalSteps ? (
-            <div className="flex flex-row space-x-0.5">
+            <div className="flex flex-row  items-center">
               <Button
                 data-test-id={testIDFormatter(
                   `${entityName}-wzrd-save-continue-btn`,
                 )}
-                className="rounded-r-none"
+                className="rounded-r-none gap-1"
                 loading={saveContinueLoading}
-                Icon={BookmarkSquareIcon}
-                iconPlacement="right"
                 size={"sm"}
                 onClick={handleSaveAndContinue}
                 disabled={
                   saveContinueLoading || saveCloseLoading || saveNewLoading
                 }
               >
+                <SaveIcon className="h-4 w-4"/>
                 <span>Save & Continue</span>
               </Button>
               <ButtonWithDropdown

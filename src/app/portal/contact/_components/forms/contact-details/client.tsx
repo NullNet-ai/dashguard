@@ -57,8 +57,7 @@ export default function ContactDetails({
           name: "first_name",
           label: "First Name",
           placeholder: "First Name",
-          required: true,
-          readonly:true
+          required: true
         },
         {
           id: "last_name",

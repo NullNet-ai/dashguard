@@ -20,7 +20,7 @@ export default function CountryName({ form, formKey }: IFieldComponentProps) {
       render={(formRenderProps) => {
         return (
           <FormSelect
-            data-test-id={formKey + "-" + formRenderProps.field.name + "-sel"}
+            data-test-id={formKey + "-" + "sel-" + formRenderProps.field.name }
             formKey={formKey}
             fieldConfig={{
               selectSearchable: true,

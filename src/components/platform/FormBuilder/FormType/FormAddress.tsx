@@ -1,4 +1,7 @@
-import { type UseFormReturn } from "react-hook-form";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  type UseFormReturn,
+} from "react-hook-form";
 import AddressAutoComplete from "~/components/platform/AddressAutoComplete";
 
 interface IProps {

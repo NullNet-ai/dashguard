@@ -44,7 +44,7 @@ interface CommonProps {
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
-  const { handleSelectAddress, form,formKey,fieldConfig } = props;
+  const { handleSelectAddress, form,formKey } = props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -74,11 +74,11 @@ export function AddressAutoCompleteInput(props: CommonProps) {
   return (
     <FormField
       control={form.control}
-      name="addr-inp"
+      name="inp-addr"
       render={(formRenderProps) => {
         return (
           <FormItem>
-            <FormLabel data-test-id={formKey   + "-" + formRenderProps.field.name + "-lbl"}>
+            <FormLabel data-test-id={formKey   + "-"+ "lbl-" + formRenderProps.field.name }>
               Address
             </FormLabel>
             <FormControl>

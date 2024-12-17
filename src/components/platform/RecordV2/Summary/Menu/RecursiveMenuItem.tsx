@@ -20,17 +20,20 @@ export default function RecursiveMenuItem({
   recordId,
   entityName,
 }: IRecursiveMenuItemProps) {
-  // return a JSX that expands the menu item to the left if it has children and isExpanded is true
   // ! All iterations should wrap the MenuItem component with a Fragment
   return menuOptionConfig.map((option) => (
     <Fragment key={recordId}>
-      {(option.children.length > 0 && (
+      {(option.children && option.children.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <MenuItem
                 onClick={option.onClick.bind(null, recordId, entityName)}
-                data-test-id={entityName + "-rcrd-ddn-menu-" + formatFormTestID(option.label)}
+                data-test-id={
+                  entityName +
+                  "-rcrd-ddn-menu-" +
+                  formatFormTestID(option.label)
+                }
               >
                 {option.label}
               </MenuItem>
@@ -45,11 +48,16 @@ export default function RecursiveMenuItem({
           </DropdownMenuContent>
         </DropdownMenu>
       )) || (
-        <MenuItem onClick={option.onClick.bind(null, recordId, entityName)} data-test-id={
-          entityName + "-rcrd-menu-" + formatFormTestID(option.label)
-        }>
-          {option.label}
-        </MenuItem>
+        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+          <MenuItem
+            onClick={option.onClick.bind(null, recordId, entityName)}
+            data-test-id={
+              entityName + "-rcrd-menu-" + formatFormTestID(option.label)
+            }
+          >
+            {option.label}
+          </MenuItem>
+        </div>
       )}
     </Fragment>
   ));
