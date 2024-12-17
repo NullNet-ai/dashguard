@@ -35,7 +35,7 @@ export default function FormPassword({
   value,
   formKey,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+  const isDisabled = formRenderProps.field.disabled;
   const [showPassword, setShowPassword] = useState(false);
   return (
     <FormItem>
@@ -46,14 +46,15 @@ export default function FormPassword({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="relative group">
+        <div className="group relative">
           <Input
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
-            readOnly={fieldConfig?.readonly ?? false}
-            className={`${isDisabled && " border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-            disabled={isDisabled}
+            readOnly={
+              (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+            }
+            disabled={undefined}
             placeholder={fieldConfig?.placeholder}
             iconPlacement="left"
             Icon={icon}
@@ -66,7 +67,7 @@ export default function FormPassword({
             type="button"
             variant="ghost"
             size="sm"
-            className="absolute right-0 top-0 mr-4 h-full py-2 hidden group-hover:block hover:bg-transparent"
+            className={`absolute right-0 top-0 mr-4 hidden h-full py-2 hover:bg-transparent ${isDisabled ? "":"group-hover:block"}`}
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={formRenderProps?.field?.disabled}
           >
@@ -76,9 +77,7 @@ export default function FormPassword({
           </Button>
         </div>
       </FormControl>
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }
