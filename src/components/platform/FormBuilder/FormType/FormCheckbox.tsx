@@ -26,6 +26,7 @@ export default function FormCheckbox({
   form,
   formKey,
 }: IProps) {
+
   return (
     <FormItem>
       <FormLabel
@@ -48,7 +49,7 @@ export default function FormCheckbox({
               >
                 <FormControl>
                   <Checkbox
-                    disabled={field.disabled || fieldConfig?.disabled}
+                    disabled={field.disabled}
                     data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
                     checked={field?.value?.includes(item.value)}
                     onCheckedChange={(checked) => {

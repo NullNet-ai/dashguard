@@ -172,6 +172,7 @@ export default function FormPhoneInput({
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
                     "data-test-id": `${formKey}-inp-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
+                    readOnly:(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
                   }}
                   countrySelectorStyleProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
@@ -181,14 +182,13 @@ export default function FormPhoneInput({
                       paddingInline: "0.5rem",
                       backgroundColor: "inherit",
                       borderColor: "transparent",
-                      // borderRightColor: `${error ?"#DC2626" : "inherit"}`,
                       colorScheme: "normal",
                     },
                     buttonClassName: "!focus-visible:border-r-primary ",
                   }}
                   defaultCountry="us"
-                  disabled={isDisabled || fieldConfig?.disabled}
-                  value={`+${values[index]?.raw_phone_number || ""}`}
+                  disabled={undefined}
+                  value={values && values[index] ? `+${values[index].raw_phone_number || ""}` : ""}
                   onChange={(phone, meta) => {
                     handlePhoneNumberChange(index, phone, meta);
                     if (handleSearch) {
@@ -196,7 +196,7 @@ export default function FormPhoneInput({
                     }
                   }}
                   className={cn(
-                    "focus-visible:ring-offset-[-4]disabled:cursor-not-allowed mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:border-transparent disabled:opacity-100",
+                    "focus-visible:ring-offset-[-4] disabled:cursor-not-allowed mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:border-transparent disabled:opacity-100",
                     `${isDisabled && "pointer-events-none border-transparent opacity-100"}`,
                   )}
                   inputStyle={{
@@ -285,6 +285,7 @@ export default function FormPhoneInput({
           iconPlacement="left"
           onClick={handleAddPhoneNumber}
           className="mt-2"
+          disabled={isDisabled}
         >
           Add Phone Number
         </Button>
