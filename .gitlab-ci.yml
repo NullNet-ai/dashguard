@@ -21,7 +21,6 @@ master_build:
     - 'docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
   only:
     - 'development'
-    - 'qa'
 
 pusher_dev:
   stage: pusher-dev
@@ -45,7 +44,6 @@ pusher_dev:
     # - 'docker restart recruitment-recruitment-portal-4'
   only:
     - 'development'
-    - 'qa'
   tags:
     - 'recruitment'
 
@@ -75,7 +73,7 @@ update_stack:
 update_stack_qa:
   stage: update_portainer-qa
   tags:
-    - 'recruitment'
+    - 'qa'
   variables:
     ENDPOINT_ID: 5
     STACK_ID: 20
@@ -86,6 +84,13 @@ update_stack_qa:
     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
     FILE_PATH: /var/apps/portainer
   script:
+    - docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
+    - docker pull $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$BASE_REF_NAME
+    - docker tag $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$BASE_REF_NAME $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+    - docker tag $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$BASE_REF_NAME $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    - docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+    - docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+
     - PORTAINER_HOST=$PORTAINER_HOST portainer login -u $PORTAINER_USERNAME -p $PORTAINER_PASSWORD
     - touch $FILE_PATH/$PORTAINER_YML_FILE
     - rm -rf  $FILE_PATH/$PORTAINER_YML_FILE && PORTAINER_HOST=$PORTAINER_HOST portainer stackfile $STACK_ID $FILE_PATH/$PORTAINER_YML_FILE
