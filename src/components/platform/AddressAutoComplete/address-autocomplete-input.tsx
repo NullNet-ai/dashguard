@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, PencilIcon } from "lucide-react";
 import { Fragment, useCallback, useRef, useState } from "react";
 import {
   type UseFormReturn,
@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import {
+  Button,
   Combobox,
   ComboboxInput,
   ComboboxOption,
@@ -44,7 +45,7 @@ interface CommonProps {
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
-  const { handleSelectAddress, form,formKey } = props;
+  const { handleSelectAddress, form, formKey } = props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -78,7 +79,9 @@ export function AddressAutoCompleteInput(props: CommonProps) {
       render={(formRenderProps) => {
         return (
           <FormItem>
-            <FormLabel data-test-id={formKey   + "-"+ "lbl-" + formRenderProps.field.name }>
+            <FormLabel
+              data-test-id={formKey + "-" + "lbl-" + formRenderProps.field.name}
+            >
               Address
             </FormLabel>
             <FormControl>
@@ -91,7 +94,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
 
                   <ComboboxInput
                     {...formRenderProps?.field}
-                    data-test-id={formKey   + "-" + formRenderProps.field.name}
+                    data-test-id={formKey + "-" + formRenderProps.field.name}
                     ref={inputRef}
                     className="h-10 w-full rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
                     placeholder="Search..."
@@ -131,7 +134,12 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                                         inputRef.current?.blur();
                                       }}
                                       as="li"
-                                      data-test-id={formKey   + formRenderProps.field.name + "-opt-" + formatFormTestID(place?.name)}
+                                      data-test-id={
+                                        formKey +
+                                        formRenderProps.field.name +
+                                        "-opt-" +
+                                        formatFormTestID(place?.name)
+                                      }
                                       value={place?.name}
                                       className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-indigo-500 hover:text-white"
                                     >
@@ -154,6 +162,13 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                 </div>
               </Combobox>
             </FormControl>
+            <Button
+              onClick={() => {
+                form.setValue("details", {});
+              }}
+            >
+              Reset
+            </Button>
             <FormMessage />
           </FormItem>
         );
