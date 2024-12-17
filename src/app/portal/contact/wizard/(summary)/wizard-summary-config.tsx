@@ -46,6 +46,7 @@ const contactWizardSummary = ({
     three: {
       label: "Step 3",
       required: false,
+      show_summary: true,
       components: [
         {
           label: "Category Details",

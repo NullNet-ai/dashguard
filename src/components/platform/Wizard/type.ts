@@ -98,6 +98,7 @@ export interface IAction {
   handleSummaryToggle: (isOpen: boolean) => void;
   handleSkip: () => Promise<void> | void;
   setFormSave: (formSave: Record<string, string>) => void;
+  setSavedStep: (step: number) => void;
 }
 
 export interface ICreateContext {

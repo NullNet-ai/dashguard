@@ -14,8 +14,6 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import numberToWords from "./Utils/steptoWords";
 import useDeepCompareEffect from "./Hooks/useDeepCompareEffect";
 import { Summary, TSummaryComponents } from "./type";
-import { camelCase } from "lodash";
-import { toPascalCase } from "~/lib/capitalize";
 import { testIDFormatter } from "~/utils/formatter";
 
 const getNotRequiredSteps = (steps: Summary) => {
@@ -122,21 +120,22 @@ export default function MyVerticalStepper() {
                   return;
                 }
                 actions?.setFormSave({});
+
                 router.push(
                   fullSearchQueryParams
                     ? `${_completeLink}?${fullSearchQueryParams}`
                     : _completeLink,
                 );
               };
-
-              const summaryTitle =
-                // @ts-expect-error - SummaryComponent is not defined
-                state?.summary?.[index]?.label;
               // @ts-expect-error - SummaryComponent is not defined
-              const summaryComponents = state?.summary?.[index]?.components
-                ?.length
-                ? // @ts-expect-error - SummaryComponent is not defined
-                  state?.summary?.[index]?.components
+              const summary_details = state?.summary?.[index];
+              if (isCurrent && !!summary_details?.show_summary) {
+                actions?.setSavedStep(stepIndex);
+              }
+
+              const summaryTitle = summary_details?.label;
+              const summaryComponents = summary_details?.components?.length
+                ? summary_details?.components
                 : null;
 
               return (
@@ -149,7 +148,7 @@ export default function MyVerticalStepper() {
                     stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
                   )}
                 >
-                  {isStepped ? (
+                  {isStepped || isCurrent ? (
                     <div className="flex flex-1">
                       {isCurrent ? (
                         stepIdx !== stepsArray.length - 1 ? (
