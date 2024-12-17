@@ -13,8 +13,6 @@ import {
 } from "~/components/ui/form";
 
 import FileUpload from "../../FileUpload";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 // import { DevTool } from "@hookform/devtools";
 
@@ -27,14 +25,14 @@ interface IProps {
   form: UseFormReturn<Record<string, string[]>, string, undefined>;
   accept?: string; // Optional accept prop for file types
   multiple?: boolean; // Optional multiple files prop
-  formKey:string
+  formKey: string;
 }
 
 export default function FormFile({
   formRenderProps,
   form,
   fieldConfig,
-  formKey
+  formKey,
 }: IProps) {
   const { field } = formRenderProps;
   const { register } = form;
@@ -53,7 +51,10 @@ export default function FormFile({
   return (
     <FormItem>
       {fieldConfig?.label && (
-        <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "FileFormLabel")} >
+        <FormLabel
+          required={fieldConfig?.required}
+          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+        >
           {fieldConfig?.label}
         </FormLabel>
       )}
@@ -61,15 +62,25 @@ export default function FormFile({
       <FormControl>
         <FileUpload
           {...register(field.name)}
-          fileInputProps={{}}
+          fileInputProps={{
+            "data-test-id": `${formKey}-file-inp-${fieldConfig.name}`,
+          }}
+          fileUploaderProps={{
+            "data-test-id": `${formKey}-file-upl-${fieldConfig.name}`,
+          }}
+          fileUploaderContentProps={{
+            "data-test-id": `${formKey}-file-cnt-${fieldConfig.name}`,
+          }}
           onUploadFile={handleChangeUpload}
           dropzoneOptions={
             fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
           }
+          formRenderProps={formRenderProps}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "FileErrorMessage")}/>
-
+      <FormMessage
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+      />
     </FormItem>
   );
 }

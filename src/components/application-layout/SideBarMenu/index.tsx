@@ -27,7 +27,7 @@ export default async function SideBarMenu() {
             width={50}
             height={50}
             alt="Company Logo"
-            src="/tailwind logo.svg"
+            src="/tailwindLogo.svg"
             className="h-8 w-auto"
           />
           <Clock />

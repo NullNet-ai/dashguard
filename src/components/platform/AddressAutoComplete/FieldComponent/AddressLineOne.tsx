@@ -1,8 +1,11 @@
 import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 
-export default function AddressLineOne({ form }: IFieldComponentProps) {
+export default function AddressLineOne({
+  form,
+  formKey,
+}: IFieldComponentProps) {
   const address_values = form.getValues("details.address_line_one");
   return (
     <div className="space-y-0.5">
@@ -12,7 +15,8 @@ export default function AddressLineOne({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
-            formKey="AddressLineOne"
+              formKey={formKey}
+              data-test-id={formKey + "-" + "inp-" +formRenderProps.field.name }
               fieldConfig={{
                 ...formRenderProps?.field,
                 required: true,

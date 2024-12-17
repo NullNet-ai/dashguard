@@ -11,43 +11,53 @@ import { GridContext } from "../../Provider";
 import { Badge } from "~/components/ui/badge";
 
 interface IGridDesktopProps {
-  parentType: "grid" | "form";
+  parentType: "grid" | "form" | "field";
+  hideSearch?: boolean;
+  height?: string;
 }
 
-function GridDesktop({ parentType }: IGridDesktopProps) {
+function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
   return (
     <Card className="col-span-full border-0 shadow-none">
-      <CardHeader>
-        <div className="flex flex-row space-x-2">
-          {state?.config?.actionType === "multi-select" && (
-            <Button
-              onClick={() => {
-                actions?.handleMultiSelect();
-              }}
-              type="button"
-            >
-              <Badge color="green" className="mx-2 text-white">
-                {state?.totalCountSelected || 0}
-              </Badge>
-              Submit
-            </Button>
-          )}
-          <div style={{ width: "calc(100vw - 29rem)" }}>
-            <Search />
+      {parentType !== "field" && (
+        <CardHeader>
+          <div className="flex flex-row space-x-2">
+            {state?.config?.actionType === "multi-select" && (
+              <Button
+                onClick={() => {
+                  actions?.handleMultiSelect();
+                }}
+                type="button"
+              >
+                <Badge color="green" className="mx-2 text-white">
+                  {state?.totalCountSelected || 0}
+                </Badge>
+                Submit
+              </Button>
+            )}
+            {hideSearch ? null : (
+              <div
+                style={{ width: parentType ? "100%" : "calc(100vw - 29rem)" }}
+              >
+                <Search />
+              </div>
+            )}
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
       <ScrollArea
         style={
           parentType === "grid"
             ? { height: "calc(100vh - 16rem)" }
             : {
-                width: "calc(100vw - 40rem)",
+                // width: "calc(100vw - 40rem)",
+                width: "auto",
+                height: height || "auto",
               }
         }
-        className="rounded-md border bg-card text-card-foreground"
+        className="overflox-y-auto rounded-md border bg-card text-card-foreground"
       >
         <Table>
           <TableHeader>

@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
@@ -44,7 +44,7 @@ export default function RoleBasicDetails({
         formProps={params}
         formLabel="Basic Details"
         handleSubmit={handleSave}
-        formKey="UserRoles"
+        formKey="UserRolesBasicDetails"
         formSchema={FormSchema}
         defaultValues={defaultValues}
         fields={[

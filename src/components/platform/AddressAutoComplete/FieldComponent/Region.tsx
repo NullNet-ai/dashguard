@@ -1,8 +1,8 @@
 import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 
-export default function RegionName({ form }: IFieldComponentProps) {
+export default function RegionName({ form, formKey }: IFieldComponentProps) {
   const address_values = form.getValues("details.region");
   return (
     <div className="space-y-0.5">
@@ -12,7 +12,8 @@ export default function RegionName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
-              formKey="RegionName"
+              data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name }
+              formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,
                 label: "Region",

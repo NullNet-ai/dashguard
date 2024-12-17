@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -11,9 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -23,8 +20,9 @@ interface IProps {
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
-  formKey:string;
+  formKey: string;
   value?: string;
+  fieldFilterActions?: IFieldFilterActions
 }
 
 export default function FormNumber({
@@ -32,18 +30,11 @@ export default function FormNumber({
   formRenderProps,
   icon,
   form,
+  fieldFilterActions,
   formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
-
-  //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   form.setValue(`${fieldConfig?.name}`, e.target.value, {
-  //     shouldDirty: true,
-  //     shouldValidate: true,
-  //     shouldTouch: true,
-  //   });
-  // };
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -57,17 +48,20 @@ export default function FormNumber({
       shouldValidate: true,
       shouldTouch: true,
     });
+    if(handleSearch){
+      handleSearch(e.target.value);
+    }
   }
+
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputFormLabel")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
-          // {...form.register(fieldConfig?.name)}
           {...formRenderProps.field}
-          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInput")}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           readOnly={fieldConfig?.readonly ?? false}
           type="number"
           inputMode="decimal"
@@ -78,11 +72,11 @@ export default function FormNumber({
           Icon={icon}
           hasError={!!formRenderProps.fieldState.error}
           onChange={handleChange}
+          {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "NumberInputErrorMessage")}/>
-
-      {/* <DevTool  control={form.control} /> */}
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
     </FormItem>
   );
 }
+

@@ -1,13 +1,10 @@
 "use client";
+import { useMemo } from "react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
+import { formatPhoneNumber } from "~/utils/formatter";
 
-const fields = {
-  "Phone Number": "primary_phone_number",
-  Email: "email",
-};
-
-const StepOneBasicDetails = ({
+const BasicDetailsSummary = ({
   form_key,
   identifier,
 }: {
@@ -18,11 +15,30 @@ const StepOneBasicDetails = ({
     data: record = { data: { id: null } },
     refetch,
     error,
-  } = api.contact.getBasicDetails.useQuery({
+  } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
+    pluck_fields: [],
   });
+  const { email: _email, phone: _phone } = record;
 
-  const { data } = record || {};
+  const email = useMemo(() => {
+    const primary_email = _email?.find(
+      ({ is_primary }: { is_primary: boolean }) => is_primary,
+    );
+    return primary_email?.email || "None";
+  }, [_email]);
+
+  const phone = useMemo(() => {
+    const primary_phone = _phone?.find(
+      ({ is_primary }: { is_primary: boolean }) => is_primary,
+    );
+    const { raw_phone_number, iso_code } = primary_phone || {};
+    const format_phone = formatPhoneNumber({
+      raw_phone_number,
+      iso_code,
+    });
+    return format_phone || "None";
+  }, [_phone]);
 
   useRefetchRecord({
     refetch,
@@ -35,15 +51,16 @@ const StepOneBasicDetails = ({
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value]) => (
-        <p key={key}>
-          <strong> {key}: </strong>
-          {/* @ts-expect-error - Required for the icon to work */}
-          &nbsp; {data?.[value] || "None"}
-        </p>
-      ))}
+      <p>
+        <strong> Phone Number: </strong>
+        &nbsp; {phone}
+      </p>
+      <p>
+        <strong> Email: </strong>
+        &nbsp; {email}
+      </p>
     </div>
   );
 };
 
-export default StepOneBasicDetails;
+export default BasicDetailsSummary;

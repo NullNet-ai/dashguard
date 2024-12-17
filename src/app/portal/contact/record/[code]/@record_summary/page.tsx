@@ -1,7 +1,20 @@
 import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
+import { headers } from "next/headers";
+import RecordShellSummary from "./_1";
 
-export default function Page() {
-    return (
-        <RecordSummary />
-    );
+export default async function Page() {
+  const headerList = headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const [, , main_entity, , identifier] = pathname.split("/");
+
+  return (
+    <div>
+      <RecordSummary />
+      <RecordShellSummary
+        form_key={"contact_details"}
+        identifier={identifier!}
+        main_entity={main_entity!}
+      />
+    </div>
+  );
 }

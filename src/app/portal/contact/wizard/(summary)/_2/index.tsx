@@ -6,28 +6,29 @@ const fields = {
   "First Name": "first_name",
   "Last Name": "last_name",
   "Middle Name": "middle_name",
+  "Date of Birth": "date_of_birth",
+  Address: "address",
 };
 
 const ContactDetailsSummary = ({
   form_key,
   identifier,
-  main_entity,
 }: {
   form_key: string;
   identifier: string;
   main_entity: string;
 }) => {
-  const {
-    data: record = { data: { id: null } },
-    refetch,
-    error,
-  } = api.record.getByCode.useQuery({
-    main_entity: main_entity!,
-    id: identifier!,
-    pluck_fields: ["id", "first_name", "last_name", "middle_name"],
+  const { data, refetch, error } = api.contact.getContactWithAddress.useQuery({
+    code: identifier!,
+    pluck_fields: [
+      "id",
+      "first_name",
+      "last_name",
+      "middle_name",
+      "date_of_birth",
+      "address_id",
+    ],
   });
-
-  const { data } = record || {};
 
   useRefetchRecord({
     refetch,

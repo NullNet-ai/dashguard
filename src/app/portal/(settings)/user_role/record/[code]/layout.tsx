@@ -1,12 +1,17 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import PlatformRecord from "~/components/platform/RecordV2";
-import { RecordSummaryViewContent } from "~/components/platform/RecordV2/Summary/SummaryViewContent";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
-import RecordShellSummary from "../_components/RecordShellSummary";
+import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
 
-const Layout = async ({ children }: { children: React.ReactNode }) => {
+const Layout = async ({
+  record,
+  record_summary,
+}: {
+  record: React.ReactNode;
+  record_summary: React.ReactNode;
+  children: React.ReactNode;
+}) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
@@ -27,11 +32,23 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
       "updated_time",
     ],
   });
+  if (record_details?.errors?.length) {
+    throw new Error(record_details.message as string);
+  }
+  if (!record_details?.data) {
+    throw new Error("Record not found");
+  }
 
-  const { role, status } = record_details?.data || {};
+  const { status } = record_details?.data || {};
 
   //Record Shell Guard for Draft Records
   if (status === "draft") {
+    return notFound();
+  }
+
+
+  //Record Shell Guard for Draft Records
+  if (["Draft", "draft", "Pending"].includes(status)) {
     return notFound();
   }
 
@@ -49,18 +66,17 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   ];
 
   return (
-    <PlatformRecord
-      config={{
-        entityCode: identifier!,
-        entityName: main_entity!,
-        tabs: tabs,
+    <RecordWrapper
+      record={record}
+      record_summary={record_summary}
+      tabs={tabs}
+      customProps={{
+        config: {
+          entityCode: identifier!,
+          entityName: main_entity!,
+        },
       }}
-    >
-      {children}
-      <RecordSummaryViewContent>
-        <RecordShellSummary role={role} />
-      </RecordSummaryViewContent>
-    </PlatformRecord>
+    />
   );
 };
 

@@ -33,7 +33,7 @@ export default function SelectedView({
             <CardHeader
               className={"flex flex-row items-center justify-between"}
             >
-              <CardTitle className="text-sm">CO{record.id}</CardTitle>
+              <CardTitle className="text-sm">{record.code}</CardTitle>
               
             </CardHeader>
             <CardContent>

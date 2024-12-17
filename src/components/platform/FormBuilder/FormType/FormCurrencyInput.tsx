@@ -7,14 +7,14 @@ import CurrencyInput, {
   type CurrencyInputOnChangeValues,
   type CurrencyInputProps,
 } from "~/components/ui/currency-input";
-import { OptionType, type IField } from "../type";
+import { type OptionType, type IField } from "../type";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -24,7 +24,6 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
 
 interface IProps {
   fieldConfig: IField;
@@ -44,12 +43,10 @@ export default function FormCurrencyInput({
   fieldConfig,
   formRenderProps,
   currencyInputOptions,
-  icon,
   form,
-  value,
   formKey,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
+  // const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const options =
@@ -87,7 +84,7 @@ export default function FormCurrencyInput({
 
   const handleOnValueChange: CurrencyInputProps["onValueChange"] = (
     input,
-    name,
+    _name,
     _values,
   ) => {
     // Remove any non-numeric characters to sanitize input
@@ -142,9 +139,7 @@ export default function FormCurrencyInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey +fieldConfig.name + "CurrencyInputFormLabel",
-        )}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -156,13 +151,12 @@ export default function FormCurrencyInput({
             onChange={(e) =>
               handleOnValueChange(e.target.value, fieldConfig.name, values)
             }
+            value={values.value}
           />
 
           <CurrencyInput
             {...register(fieldConfig.name)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencyInput",
-            )}
+            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
             className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
@@ -172,57 +166,44 @@ export default function FormCurrencyInput({
                 normalInputRef.current.focus(); // Focus on normal input when currency input is clicked
               }
             }}
-            onFocus={() => normalInputRef.current?.focus()}
-            value={formRenderProps.field.value?values.value : "0.00"}
+            // onFocus={() => normalInputRef.current?.focus()}
+            value={formRenderProps.field.value ? values.value : "0.00"}
             step={1}
             prefix={selectedCurrency.value}
             decimalSeparator="."
             groupSeparator=","
             decimalsLimit={2}
           />
-          <Select
+            <Select
             value={options
               ?.findIndex((option) => option.label === selectedCurrency.label)
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
-            data-test-id={kebabCase(
-              formKey + fieldConfig.name + "CurrencySelect",
-            )}
-          >
+            data-test-id={`${formKey}-sel-${fieldConfig.name}`}
+            >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
-              data-test-id={kebabCase(
-                formKey + fieldConfig.name + "CurrencyTrigger",
-              )}
+              data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue
-                placeholder="Unit"
-                data-test-id={kebabCase(
-                  formKey + fieldConfig.name + "CurrencySelectValue",
-                )}
+              placeholder="Unit"
+              data-test-id={`${formKey}-sel-val-${fieldConfig.name}`}
               >
-                {selectedCurrency.label}
+              {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent
-              data-test-id={formKey + fieldConfig.name + "CurrencyContent"}
-            >
+            <SelectContent data-test-id={`${formKey}-cnt-${fieldConfig.name}`}>
               {options?.map((option, i) => (
-                <SelectItem
-                  key={option.label}
-                  value={i.toString()}
-                  data-test-id={kebabCase(
-                    formKey +
-                      fieldConfig.name+
-                      "CurrencySelectOption" +
-                      option.label,
-                  )}
-                >
-                  {option.label}
-                </SelectItem>
+              <SelectItem
+                key={option.label}
+                value={i.toString()}
+                data-test-id={`${formKey}-sel-opt-${option.label}-${fieldConfig.name}`}
+              >
+                {option.label}
+              </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+            </Select>
         </div>
       </FormControl>
 
@@ -230,10 +211,10 @@ export default function FormCurrencyInput({
       "amount" in error &&
       error.amount &&
       typeof error.amount.message === "string" ? (
-        <p className={cn("py-1 text-md font-medium text-destructive")}
-        data-test-id={
-          kebabCase(formKey + fieldConfig.name + "CurrencyInputErrorMessage")
-        }>
+        <p
+          className={cn("py-1 text-md font-medium text-destructive")}
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        >
           {error.amount.message}
         </p>
       ) : (

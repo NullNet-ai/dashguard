@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import {type IFieldFilterActions,  type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -11,8 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 
 interface IProps {
@@ -24,6 +22,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
+  fieldFilterActions?: IFieldFilterActions
   formKey:string;
 }
 
@@ -32,10 +31,12 @@ export default function FormInput({
   formRenderProps,
   icon,
   value,
+  fieldFilterActions,
   formKey
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const isHidden = fieldConfig.hidden;
+  const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,16 +52,15 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputFormLabel")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "Input")}
-          readOnly={fieldConfig?.readonly ?? false}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={isDisabled}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+          readOnly={isDisabled && fieldConfig?.readonly }
+          // disabled={isDisabled}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -69,9 +69,16 @@ export default function FormInput({
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
           {...formRenderProps.field}
+          onChange={(e) => {
+            formRenderProps.field.onChange(e.target.value);
+            if(handleSearch){
+              handleSearch(e.target.value);
+            }
+          }}
+          {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputErrorMessage")}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

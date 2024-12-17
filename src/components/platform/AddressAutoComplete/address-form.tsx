@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
+import {
+  type ControllerFieldState,
+  type ControllerRenderProps,
+  type UseFormReturn,
+} from "react-hook-form";
 
 import CountryName from "./FieldComponent/Country";
 import CityName from "./FieldComponent/City";
@@ -8,7 +12,8 @@ import StateName from "./FieldComponent/State";
 import PostalName from "./FieldComponent/PostalCode";
 import AddressLineOne from "./FieldComponent/AddressLineOne";
 import AddressLineTwo from "./FieldComponent/AddressLineTwo";
-import { IField } from "../FormBuilder/type";
+import { type IField } from "../FormBuilder/type";
+import { formatAddress } from "../../../server/utils/addresses";
 
 interface AddressFormProps {
   isLoading: boolean;
@@ -22,18 +27,26 @@ interface AddressFormProps {
 }
 interface IAddressDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
+  formKey: string;
 }
 
-const AddressDetails = ({ form }: IAddressDetails) => {
+const AddressDetails = ({ form, formKey }: IAddressDetails) => {
+  const address_details = form.getValues("details");
+  const address = formatAddress(address_details);
+
+  useEffect(() => {
+    form.setValue("details.address", address);
+  }, [address]);
+
   return (
-    <div className="space-y-4 py-7">
-      <CountryName form={form} />
-      <AddressLineOne form={form} />
-      <AddressLineTwo form={form} />
+    <div className="space-y-4 py-7 pt-4">
+      <CountryName form={form} formKey={formKey} />
+      <AddressLineOne form={form} formKey={formKey} />
+      <AddressLineTwo form={form} formKey={formKey} />
       <div className="flex w-full flex-grow flex-row gap-2">
-        <CityName form={form} />
-        <StateName form={form} />
-        <PostalName form={form} />
+        <CityName form={form} formKey={formKey} />
+        <StateName form={form} formKey={formKey} />
+        <PostalName form={form} formKey={formKey} />
       </div>
     </div>
   );
@@ -42,7 +55,7 @@ const AddressDetails = ({ form }: IAddressDetails) => {
 export default function AddressForm(
   props: React.PropsWithChildren<AddressFormProps>,
 ) {
-  const { isLoading, form } = props;
+  const { isLoading, form, formKey } = props;
 
   if (isLoading) {
     return (
@@ -54,5 +67,5 @@ export default function AddressForm(
     );
   }
 
-  return <AddressDetails form={form} />;
+  return <AddressDetails form={form} formKey={formKey} />;
 }

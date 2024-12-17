@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { Button } from "~/components/ui/button";
 import { CardDescription, CardHeader } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-import { IFormHeaderProps } from "../../../types/controls/interface";
+import { type IFormHeaderProps } from "../../../types/controls/interface";
 import { DebugButton, UnlockButton } from "../../ui";
 import ShowHideForm from "../../ui/Buttons/ShowHideForm";
 import { testIDFormatter } from "~/utils/formatter";
@@ -34,7 +34,7 @@ const FormHeader = (props: IFormHeaderProps) => {
     handleUpdateDisplayType,
     formKey,
     features,
-    formProps
+    formProps,
   } = props;
 
   const { enableUnlockFormFilter = true } = features ?? {}
@@ -53,7 +53,7 @@ const FormHeader = (props: IFormHeaderProps) => {
         <DebugButton
           handleDebug={handleDebug}
           // dataTestID={`${formKey}${formLabel.split(" ").join("")}FormDebugButton`}
-          dataTestID={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-clear-form-btn`)}
+          dataTestID={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-debug-btn`)}
         />
 
         {displayType === "selected" && enableUnlockFormFilter && <Button
@@ -63,7 +63,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
           size={"icon"}
           // data-test-id={`${formKey}${formLabel.split(" ").join("")}FormLockButton`}
-          data-test-id={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-lock-btn`)}
+          data-test-id={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-lock-btn`)}
         >
           <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-primary" />
         </Button>}
@@ -73,7 +73,7 @@ const FormHeader = (props: IFormHeaderProps) => {
             {buttonConfig?.hideLockButton ? null : (
               <UnlockButton
                 handleLock={handleLock}
-                dataTestID={testIDFormatter(`${formProps?.entity}-wizard-${formKey}-unlock-btn`)}
+                dataTestID={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-unlock-btn`)}
               />
             )}
           </Fragment>
@@ -84,7 +84,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           filterGridConfig?.actionType === "multi-select" && (
             <Button
               data-test-id={
-                testIDFormatter(`${formProps?.entity}-wizard-${formKey}-form-filter-grid-add-btn`)
+                testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-form-filter-grd-add-btn`)
               }
               onClick={() => {
                 handleNewRecordFormFilterGrid();
@@ -98,7 +98,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           )}
         {enableAppendForm && (
           <Button
-            data-test-id={  testIDFormatter(`${formProps?.entity}-wizard-${formKey}-form-append-btn`)}
+            data-test-id={  testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-form-append-btn`)}
             onClick={() => {
               handleAppendForm();
             }}
@@ -118,7 +118,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           handleOpen={handleOpen}
           open={open}
           hideAccordions={!!buttonConfig?.hideAccordions}
-          data-test-id={  testIDFormatter(`${formProps?.entity}-wizard-${formKey}-${open ? "hide" : "show"}-form-btn`)}
+          data-test-id={  testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-${open ? "hide" : "show"}-form-btn`)}
         />
       </div>
     </CardHeader>

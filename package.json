@@ -14,7 +14,7 @@
     "test-local": "cypress open"
   },
   "dependencies": {
-    "@dna-platform/common-orm": "1.0.0-rc37",
+    "@dna-platform/common-orm": "1.0.0-rc41",
     "@faker-js/faker": "^9.2.0",
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
@@ -52,6 +52,7 @@
     "@tiptap/extension-image": "^2.9.1",
     "@tiptap/extension-link": "^2.9.1",
     "@tiptap/extension-placeholder": "^2.9.1",
+    "@tiptap/extension-text-align": "^2.10.3",
     "@tiptap/extension-text-style": "^2.9.1",
     "@tiptap/extension-typography": "^2.9.1",
     "@tiptap/extension-underline": "^2.9.1",

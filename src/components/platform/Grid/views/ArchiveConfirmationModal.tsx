@@ -53,7 +53,11 @@ const ArchiveConfirmationModal = ({
           </Button>
           <Button
             onClick={() => {
-              handleArchive({ row: record, config });
+              if (config?.archiveCustomAction) {
+                config?.archiveCustomAction(record.original);
+              } else {
+                handleArchive({ row: record,  config});
+              }
               setOpen(false);
             }}
             variant="destructive"

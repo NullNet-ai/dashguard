@@ -5,15 +5,7 @@ import StatusCell from "~/components/ui/status-cell";
 
 const gridColumns = [
   {
-    header: "ID",
-    accessorKey: "code",
-  },
-  {
-    header: "Role",
-    accessorKey: "role",
-  },
-  {
-    header: "Status",
+    header: "State",
     accessorKey: "status",
     enableResizing: false,
     cell: ({ row }) => {
@@ -22,7 +14,33 @@ const gridColumns = [
     },
   },
   {
-    header: "Created Date Time",
+    header: "ID",
+    accessorKey: "code",
+  },
+  {
+    header: "Role",
+    accessorKey: "role",
+  },
+  {
+    header: "Updated Date",
+    accessorKey: "updated_date",
+    cell: ({ row }) => {
+      const date = row?.original?.updated_date;
+      const time = row?.original?.updated_time;
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      );
+    },
+  },
+  {
+    header: "Updated By",
+    accessorKey: "updated_by",
+  },
+  {
+    header: "Created Date",
     accessorKey: "created_date",
     cell: ({ row }) => {
       const date = row?.original?.created_date;
@@ -36,18 +54,8 @@ const gridColumns = [
     },
   },
   {
-    header: "Updated Date Time",
-    accessorKey: "updated_date",
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    header: "Created By",
+    accessorKey: "created_by",
   },
 ] as ColumnDef<any>[];
 

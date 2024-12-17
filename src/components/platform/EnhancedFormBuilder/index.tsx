@@ -1,16 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { Card } from "~/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
+import { Collapsible } from "~/components/ui/collapsible";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import { cn } from "~/lib/utils";
 import { useWizard } from "../Wizard/Provider";
 import { FormBuilderLayout } from "./components/ui";
-import { IPropsForms, TDisplayType } from "./types";
+import { type IPropsForms, type TDisplayType } from "./types";
 import { testIDFormatter } from "~/utils/formatter";
+import { UpdateCurrentSubTab } from "./Actions/UpdateCurrentSubTab";
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -18,7 +19,6 @@ export const FormBuilder = (props: IPropsForms) => {
     formSchema,
     defaultValues,
     formKey,
-    myParent,
     appendFormKey,
     //* actions
     onFormChange,
@@ -32,10 +32,14 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay = "expanded",
     customRender,
     formProps,
-    features
+    features,
+    create_mode = true,
+    myParent,
+    fieldConfig,
   } = props;
 
   const { actions } = useWizard();
+
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,6 +60,7 @@ export const FormBuilder = (props: IPropsForms) => {
     defaultDisplay === "expanded",
   );
   const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
 
   //* EFFECTS
 
@@ -66,7 +71,7 @@ export const FormBuilder = (props: IPropsForms) => {
       status: "dirty",
       form_key: formKey,
     });
-  }, [form?.formState?.isDirty]);
+  }, [eventEmitter, form?.formState?.isDirty, formKey]);
 
   //* Effect to listen to form errors
   useEffect(() => {
@@ -92,7 +97,7 @@ export const FormBuilder = (props: IPropsForms) => {
 
     // Clean up the subscription on unmount
     return () => subscription.unsubscribe();
-  }, [form.watch, onDataChange]);
+  }, [form, form.watch, onDataChange]);
 
   //* Effect to listen to filter grid config changes
   useEffect(() => {
@@ -163,7 +168,9 @@ export const FormBuilder = (props: IPropsForms) => {
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((data) => {
+    ).then((
+    //  data
+    ) => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
@@ -175,6 +182,10 @@ export const FormBuilder = (props: IPropsForms) => {
       }
       setDisplayType("selected");
     });
+  };
+
+  const handleSearchOpen = () => {
+    setIsOpenSearch(!isOpenSearch);
   };
 
   const handleAccordionChange = (value: string) => {
@@ -257,7 +268,7 @@ export const FormBuilder = (props: IPropsForms) => {
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
         const res = (await handleSubmit({ data, form })) as any;
-        const { errors = {}, existing_record, existing = false } = res || {};
+        const { errors = {}, existing = false } = res || {};
 
         const form_errors = errors?.form || [];
         setIsSaveLoading(false);
@@ -315,13 +326,30 @@ export const FormBuilder = (props: IPropsForms) => {
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
         action_type: formGridSelected.length ? "Update" : "Create",
+        form,
       });
+      //TODO: Please cater setting error message in field and don't proceed to view mode.
+      if (!response?.length) throw new Error("Failed to submit form grid");
       setFormGridSelected(response);
       setDisplayType("selected");
       setIsSaveLoading(false);
     } catch (error) {
       setIsSaveLoading(false);
       console.error("[Form-Filter] Failed to create new record", error);
+    }
+  };
+
+  const onSelectFieldFilterGrid = async (
+    data: z.infer<typeof formSchema>,
+  ) => {
+    try {
+      if(data?.code && create_mode) {
+        UpdateCurrentSubTab({ tab_name: data.code });
+      }
+      setFormGridSelected([data]);
+      setDisplayType("selected");
+    } catch (error) {
+      console.error("[Form-Filter] Failed onSelectFieldFilterGrid", error);
     }
   };
 
@@ -333,37 +361,42 @@ export const FormBuilder = (props: IPropsForms) => {
       )}
     >
       <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
-          <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
-            <FormBuilderLayout
-              {...props}
-              form={form}
-              debugOn={debugOn}
-              showFormActions={showFormActions}
-              formGridSelected={formGridSelected}
-              isListLoading={isListLoading}
-              isSaveLoading={isSaveLoading}
-              isFormOpened={isFormOpened}
-              isOpenGrid={isOpenGrid}
-              isAccordionExpanded={isAccordionExpanded}
-              displayType={displayType}
-              saveForm={saveForm}
-              onSubmitFormGrid={onSubmitFormGrid}
-              setIsSaveLoading={setIsSaveLoading}
-              setShowFormActions={setShowFormActions}
-              handleCloseGrid={handleCloseGrid}
-              handleAccordionChange={handleAccordionChange}
-              handleListLoading={handleListLoading}
-              handleDebug={handleDebug}
-              handleLock={handleLock}
-              handleAccordionExpand={handleAccordionExpand}
-              handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
-              handleAppendForm={handleAppendForm}
-              handleUpdateDisplayType={handleUpdateDisplayType}
-              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
-              handleOpenForm={handleOpenForm}
-              features={features}
-            />
-          </Card>
+        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+          <FormBuilderLayout
+            {...props}
+            fieldConfig={fieldConfig}
+            form={form}
+            debugOn={debugOn}
+            showFormActions={showFormActions}
+            formGridSelected={formGridSelected}
+            isListLoading={isListLoading}
+            isSaveLoading={isSaveLoading}
+            isFormOpened={isFormOpened}
+            isOpenGrid={isOpenGrid}
+            isAccordionExpanded={isAccordionExpanded}
+            displayType={displayType}
+            saveForm={saveForm}
+            onSubmitFormGrid={onSubmitFormGrid}
+            setIsSaveLoading={setIsSaveLoading}
+            setShowFormActions={setShowFormActions}
+            handleCloseGrid={handleCloseGrid}
+            handleAccordionChange={handleAccordionChange}
+            handleListLoading={handleListLoading}
+            handleDebug={handleDebug}
+            handleLock={handleLock}
+            handleAccordionExpand={handleAccordionExpand}
+            handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleAppendForm={handleAppendForm}
+            handleUpdateDisplayType={handleUpdateDisplayType}
+            handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+            handleOpenForm={handleOpenForm}
+            features={features}
+            onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+            myParent={myParent}
+            handleSearchOpen={handleSearchOpen}
+            isOpenSearch={isOpenSearch}
+          />
+        </Card>
       </Collapsible>
     </form>
   );

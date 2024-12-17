@@ -6,18 +6,18 @@ import { getCommonPinningStyles } from "./ColumnPining";
 import { cn } from "~/lib/utils";
 import ArchiveConfirmationModal from "./views/ArchiveConfirmationModal";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function MyTableBody() {
   const { state, actions } = useContext(GridContext);
 
   const context = useContext(ScrollContainerContext);
-
-  const { isEndReached = false } = context ?? {}
+  const { isEndReached = false } = context ?? {};
   return (
     <>
       <TableBody
         className="overflow-y-auto"
-        data-test-id={state?.config.entity + "_grid_body"}
+        data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody`)}
       >
         {state?.table.getRowModel().rows?.length ? (
           state?.table.getRowModel().rows.map((row, index) => (
@@ -25,9 +25,7 @@ export default function MyTableBody() {
               className="group relative border-b hover:bg-border/50"
               key={row.id + index}
               data-state={row.getIsSelected() && "selected"}
-              data-state-id={
-                state.config.entity + "grid_body_row_" + row.id + (index + 1)
-              }
+              data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`)}
             >
               {row.getVisibleCells().map((cell, index) => {
                 if (cell.column.id === "action") {
@@ -67,13 +65,7 @@ export default function MyTableBody() {
                     row={cell?.row}
                     config={state?.config}
                     column_id={cell?.column?.id}
-                    data-test-id={
-                      state.config.entity +
-                      "_" +
-                      cell.column.id +
-                      "_" +
-                      (index + 1)
-                    }
+                    data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id  +"-"+ (index + 1)}`)}
                     style={{
                       width: cell.column.getSize(),
                       minWidth: cell.column.columnDef.minSize,

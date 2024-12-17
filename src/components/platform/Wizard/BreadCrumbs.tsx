@@ -2,31 +2,47 @@
 
 import { useContext } from "react";
 import { WizardContext } from "./Provider";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "~/components/ui/breadcrumb";
+import { BreadcrumbSeparator } from "~/components/ui/breadcrumb";
 import { camelCase } from "lodash";
 import { testIDFormatter } from "~/utils/formatter";
 
-
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
-  const { entityName } = state ?? {};
+  const { entityName, stepLabels } = state ?? {};
+  const formatEntitiyName = entityName
+    ?.split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+  const wizard_step_title = `${formatEntitiyName} `;
+  const currentStep = state?.currentStep;
+
   return (
-    <Breadcrumb data-test-id={camelCase(entityName)+'Breadcrumb'}>
-      <BreadcrumbList >
-        <BreadcrumbItem>
-          <BreadcrumbLink 
-            data-test-id={testIDFormatter(`${entityName}-wizard-breadcrumb-home-link`)}
-          href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-        <BreadcrumbPage>
-          {entityName
-            ?.split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ')}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div>
+      <nav aria-label="breadcrumb"  data-test-id={camelCase(entityName) + "Breadcrumb"}>
+        <ol className="flex items-center gap-2 font-semibold">
+          <li>
+            <span
+              className="text-md"
+              data-test-id={testIDFormatter(
+                `${entityName}-wzrd-breadcrumb-home-link`
+              )}
+            >
+              {wizard_step_title}
+            </span>
+          </li>
+          <BreadcrumbSeparator className="text-foreground" />
+          <li>
+            <span
+              className="text-md"
+              data-test-id={testIDFormatter(
+                `${entityName}-wzrd-breadcrumb-${currentStep}-link`
+              )}
+            >
+              Step {currentStep} - {currentStep !== undefined ? stepLabels?.[currentStep] ?? "" : ""}
+            </span>
+          </li>
+        </ol>
+      </nav>
+    </div>
   );
 }

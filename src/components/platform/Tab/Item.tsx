@@ -16,7 +16,7 @@ const Item = ({ tab }: ItemProps) => {
     <Fragment key={tab.name}>
       <div className="group relative flex items-center">
         <a
-          data-test-id={"mainTab" + formatAndCapitalize(tab.name).split(" ").join("")}
+          data-test-id={"mntab-" + tab.name.split(" ").join("-").toLowerCase()}
           href={tab.href}
           aria-current={tab.current ? "page" : undefined}
           className={cn(

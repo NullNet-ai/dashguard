@@ -1,20 +1,23 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { useRouter } from "next/navigation";
 
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { saveContactDetails, selectRecord } from "./actions";
-import gridColumns from "./_config/columns";
-import { useRouter } from "next/navigation";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
+import SelectedView from "./components/SelectedView";
+import { api } from "~/trpc/react";
 
 export default function ContactDetails({
   params,
   defaultValues,
   selectedRecords,
+  grid_data,
 }: IFormProps) {
   const router = useRouter();
   const toast = useToast();
@@ -22,32 +25,45 @@ export default function ContactDetails({
   const handleSave = async ({
     data,
     action_type,
+    form,
   }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
     any[]
   > => {
-    const response = await saveContactDetails(data, action_type);
-    if (action_type === "Create") {
-      router.push(`/portal/contact/wizard/${response?.[0]?.code}/1`);
+    try {
+      const response = await saveContactDetails(data, action_type);
+      if (response?.existing) {
+        // const { data } = response;
+        // const { phones, emails } = data || {};
+        form?.setError("phone", {
+          type: "manual",
+          message: "Phone Number already exists.",
+        });
+        form?.setError("email", {
+          type: "manual",
+          message: "Email already exists.",
+        });
+        return [];
+      }
+
+      if (action_type === "Create") {
+        const code = response?.code;
+        router.push(`/portal/contact/wizard/${code}/1`);
+      }
+      return [response];
+    } catch (error) {
+      toast.error("Failed to submit Basic Details");
+      return [];
     }
-    return response;
   };
 
   const handleRemoveRecord = async ({
     filter_entity,
-    main_entity_id,
-    rows,
   }: {
     rows: any[];
     main_entity_id: string;
     filter_entity: string;
   }) => {
     try {
-      // console.log("REMOVE RECORD", {
-      //   filter_entity,
-      //   main_entity_id,
-      //   rows,
-      // })
-      // removeRecord();
       return {
         rows: [],
         filter_entity,
@@ -89,6 +105,7 @@ export default function ContactDetails({
         filter_entity: "contact",
         main_entity_id: params.id,
         gridColumns: gridColumns,
+        fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
         label: "Contacts",
@@ -125,17 +142,38 @@ export default function ContactDetails({
             main_entity_id: response.main_entity_id,
           };
         },
+        onFilterFieldChange: (search_params, options) => {
+          const { data } = api.contact.mainGrid.useQuery(
+            search_params,
+            options,
+          );
+          return data;
+        },
+        handleSelectFieldFilterGrid: (data) => {
+          const { raw_phone_number, iso_code, country_code, email, ...rest } =
+            data ?? {};
+          const resolvedData = {
+            ...rest,
+            phone: [
+              {
+                raw_phone_number,
+                iso_code,
+                country_code,
+              },
+            ],
+            email: [
+              {
+                email,
+              },
+            ],
+          };
+          return resolvedData;
+        },
         renderComponentSelected: (record) => {
           // Selected View Component
-          return (
-            <div>
-              <div>
-                Primary Phone Number: {record.phone?.[0]?.raw_phone_number}
-              </div>
-              <div>Primary Email: {record.email?.[0]?.email}</div>
-            </div>
-          );
+          return <SelectedView record={record} />;
         },
+        grid_data: grid_data,
       }}
       myParent={params.shell_type}
       enableFormRegisterToParent
@@ -152,13 +190,27 @@ export default function ContactDetails({
           placeholder: "Phone Number",
           name: "phone",
           label: "Phone Number",
+          required: true,
+          gridPosition: "left",
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: "contact_phone_numbers",
+            field: "raw_phone_number",
+          },
         },
         {
           id: "email",
           formType: "email-input",
-          placeholder: "email address",
+          placeholder: "Email",
           name: "email",
-          label: "Email Address",
+          label: "Email",
+          required: true,
+          withGridFilter: true,
+          gridPosition: "right",
+          filterFieldConfig: {
+            entity: "contact_emails",
+            field: "email",
+          },
         },
       ]}
       // customFormFilterViewFormActions={[

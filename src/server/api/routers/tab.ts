@@ -1,4 +1,4 @@
-import { EOperator, EOrderDirection } from "@dna-platform/common-orm";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
@@ -257,5 +257,34 @@ export const tabRouter = createTRPCRouter({
       };
 
       await tabs.cacheData(key, response, 90000000);
+    }),
+  updateCurrentSubTab: privateProcedure
+    .input(
+      z.object({
+        tab_name: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const headerList = headers();
+      const pathName = headerList.get("x-pathname") || "";
+      const [, portal, mainEntity] =
+        pathName.split("/");
+      const current_context = "/" + portal + "/" + mainEntity;
+      const key = `sub-tabs:${current_context}:${ctx.session.account.contact?.id}`;
+
+      const response = await ctx.redisClient.getCachedData(key);
+      const isTabExist = response?.tabs?.find((tab: any) => tab.name === input.tab_name);
+      const tabs = response?.tabs?.map((tab: Record<string, any>) => {
+        if (tab.current && !isTabExist) {
+          return {
+            ...tab,
+            name: input.tab_name,
+            href: tab.href.replace(tab.name, input.tab_name),
+          };
+        }
+        return tab;
+      });
+
+      await ctx.redisClient.cacheData(key, { current_context, tabs }, 90000000);
     }),
 });

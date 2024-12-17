@@ -3,7 +3,6 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { DateTimePicker } from "~/components/ui/date-picker";
 import {
   FormControl,
   FormItem,
@@ -13,9 +12,6 @@ import {
 import { type IField } from "../type";
 import moment from "moment";
 import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -24,15 +20,14 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
-  formKey:string;
+  formKey: string;
 }
-
 
 export default function FormSmartDate({
   fieldConfig,
   formRenderProps,
   form,
-  formKey
+  formKey,
 }: IProps) {
   const {
     label,
@@ -41,18 +36,23 @@ export default function FormSmartDate({
     name,
     required,
   } = fieldConfig;
-  const { disabled, value } = formRenderProps.field;
+  const { disabled } = formRenderProps.field;
   const isDisable = isFieldDisable || disabled;
 
-  const handleChange = (date: Date | undefined) => {
+  const handleChange = (date: Date | null | string) => {
     if (date) {
       const formattedDate =
         dateGranularity === "year"
           ? moment(date).format("YYYY")
           : dateGranularity === "month"
             ? moment(date).format("YYYY-MM")
-            : moment(date).format("YYYY-MM-DD");
-      form.setValue(name, formattedDate, {
+            : moment(date).format("MM/DD/YYYY");
+
+      const formatted_date = formattedDate?.includes("Invalid date")
+        ? date
+        : formattedDate;
+
+      form.setValue(name, formatted_date, {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
@@ -63,20 +63,27 @@ export default function FormSmartDate({
   };
   return (
     <FormItem className="flex w-full flex-col">
-      <FormLabel required={required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "S,artDateFormLabel")} >{label}</FormLabel>
+      <FormLabel
+        required={required}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+      >
+        {label}
+      </FormLabel>
       <FormControl>
         <SmartDatetimeInput
-          datePickerTestID={kebabCase(formKey+ (fieldConfig.name) + "SmartDatePicker")}
-          inputTestID={kebabCase(formKey+(fieldConfig.name) + "SmartDateInput")}
+          datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
+          inputTestID={`${formKey}-inp-${fieldConfig.name}`}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
-          placeholder="e.g. Tomorrow"
+          placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
+          disabled={isDisable}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "SmartDateErrorMessage")}/>
-
+      <FormMessage
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+      />
     </FormItem>
   );
 }

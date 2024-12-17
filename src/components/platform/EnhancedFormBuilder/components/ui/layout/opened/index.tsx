@@ -1,17 +1,23 @@
 import { EllipsisVertical } from "lucide-react";
-import { Fragment } from "react";
-import FormModule from "~/components/platform/FormBuilder/FormModule";
+import { Fragment, useContext } from "react";
 import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { cn } from "~/lib/utils";
+import { cn, formatFormTestID } from "~/lib/utils";
 import DebuggerComponent from "../../../custom/Debugger";
+import { IFilterGridConfig } from "~/components/platform/FormBuilder/type";
+import { z } from "zod";
+import { TFormSchema } from "~/components/platform/EnhancedFormBuilder/types";
+import FormModule from "~/components/platform/FormBuilder/FormModule";
+import { WizardContext } from "~/components/platform/Wizard/Provider";
 
 // TODO: replace any with the correct type
 interface IOpenedFormLayoutProps {
+  myParent?: "wizard" | "record";
   customDesign?: any;
   customRender?: any;
   fields: any;
   form: any;
+  fieldConfig: any;
   formKey: string;
   appendFormKey: string;
   checkboxOptions: any;
@@ -26,6 +32,9 @@ interface IOpenedFormLayoutProps {
   formProps: any;
   handleDebug: any;
   handleLock: any;
+  filterGridConfig?: IFilterGridConfig;
+  onSelectFieldFilterGrid: (data: z.infer<TFormSchema>) => Promise<void>;
+  formSchema: TFormSchema;
 }
 
 const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
@@ -35,6 +44,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     fields,
     form,
     formKey,
+    fieldConfig,
     appendFormKey,
     checkboxOptions,
     multiSelectOptions,
@@ -48,22 +58,33 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     formProps,
     handleDebug,
     handleLock,
+    filterGridConfig,
+    onSelectFieldFilterGrid,
+    formSchema,
+    myParent
   } = props;
 
+  const { state } = useContext(WizardContext);
+  const { entityName } = state ?? {};
+  const formattedFormKey = formatFormTestID(
+    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+  );
   return (
     <CardContent
       className={cn(
-        "grid grid-cols-1 gap-4 sm:grid-cols-2 pt-8",
+        "grid grid-cols-1 gap-4 pt-8 sm:grid-cols-2",
         "shadow-none",
         customDesign?.formClassName,
       )}
     >
-      <Form {...form}>
+      <Form {...form} data-test-id={entityName + "-" + myParent + "-" + formKey}>
         <Fragment>
           {!customRender ? (
             <FormModule
+              // fieldConfig={fieldConfig}
               fields={fields}
               form={form}
+              myParent={myParent}
               subConfig={{
                 checkboxOptions,
                 multiSelectOptions,
@@ -72,7 +93,10 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
                 selectOptions,
                 currencyInputOptions,
               }}
-              formKey={formKey}
+              formKey={formattedFormKey}
+              gridConfig={filterGridConfig}
+              onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+              formSchema={formSchema}
             />
           ) : (
             customRender(form, {

@@ -39,7 +39,7 @@ export default function AmountDetails({}) {
       <FormBuilder
         enableFormRegisterToParent
         formLabel="Amount Form Builder"
-        formKey="FormBuilderDate"
+        formKey="FormBuilderCurrency"
         handleSubmit={handleSave}
         formSchema={FormSchema}
         fields={[

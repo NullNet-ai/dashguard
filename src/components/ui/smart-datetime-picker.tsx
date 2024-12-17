@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { parseDate } from "chrono-node";
 import {
   Popover,
@@ -12,9 +12,9 @@ import { Calendar, CalendarProps } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { Calendar as CalendarIcon, LucideTextCursorInput } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { format } from "date-fns";
+import { isValidDate } from "~/server/zodSchema/contact/contactDetails";
 
 /* -------------------------------------------------------------------------- */
 /*                               Inspired By:                                 */
@@ -30,8 +30,17 @@ import { format } from "date-fns";
  * @returns A `Date` object representing the parsed date and time, or `null` if the string could not be parsed.
  */
 export const parseDateTime = (str: Date | string) => {
+  const is_valid_date = isValidDate(str);
+  if (
+    !is_valid_date &&
+    typeof str == "string" &&
+    str?.includes("Invalid Date")
+  ) {
+    return parseDate(str as string);
+  }
   if (str instanceof Date) return str;
-  return parseDate(str);
+  const parsed_date = parseDate(str);
+  return parsed_date ? parsed_date : str;
 };
 
 /**
@@ -58,10 +67,7 @@ export const getDateTimeLocal = (timestamp?: Date): string => {
  * @param datetime - {Date | string}
  * @returns A string representation of the date and time
  */
-export const formatDateTime = (
-  datetime: Date | string,
-  includeTime = true,
-) => {
+export const formatDateTime = (datetime: Date | string, includeTime = true) => {
   const options: Intl.DateTimeFormatOptions = {
     month: "2-digit",
     day: "2-digit",
@@ -92,7 +98,7 @@ const DEFAULT_SIZE = 96;
 
 interface SmartDatetimeInputProps {
   value?: Date;
-  onValueChange: (date: Date) => void;
+  onValueChange: (date: Date | null | string) => void;
   inputProps?: NaturalLanguageInputProps;
   timePickerProps?: DateTimeLocalInputProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
@@ -126,6 +132,20 @@ const useSmartDateInput = () => {
   return context;
 };
 
+function useDebounce<T>(value: T, delay?: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export const SmartDatetimeInput = React.forwardRef<
   HTMLInputElement,
   Omit<
@@ -139,7 +159,7 @@ export const SmartDatetimeInput = React.forwardRef<
     value,
     onValueChange,
     placeholder,
-    disabled,
+    disabled = false,
     datePickerTestID,
     inputTestID,
     inputProps,
@@ -171,6 +191,7 @@ export const SmartDatetimeInput = React.forwardRef<
         >
           <DateTimeLocalInput
             datePickerTestID={datePickerTestID}
+            disabled={disabled as boolean}
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -203,14 +224,14 @@ const TimePicker = () => {
 
       if (!newVal) return;
 
-      newVal.setHours(
+      (newVal as Date).setHours(
         hour,
         partStamp === 0 ? parseInt("00") : timestamp * partStamp,
       );
 
       // ? refactor needed check if we want to use the new date
 
-      onValueChange(newVal);
+      onValueChange(newVal as Date);
     },
     [value],
   );
@@ -331,7 +352,6 @@ const TimePicker = () => {
       const formatIndex =
         PM_AM === "AM" ? hours : hours === 12 ? hours : hours + 12;
       const formattedHours = formatIndex;
-
 
       for (let j = 0; j <= 3; j++) {
         const diff = Math.abs(j * timestamp - minutes);
@@ -468,7 +488,11 @@ const NaturalLanguageInput = React.forwardRef<
 
     React.useEffect(() => {
       if (value) {
-        setInputValue(formatDateTime(value, includeTime));
+        const formatted_date_time = formatDateTime(value, includeTime);
+        const formatted_date = formatted_date_time?.includes("Invalid Date")
+          ? value
+          : formatted_date_time;
+        setInputValue(formatted_date as string);
 
         if (includeTime) {
           const hour = value.getHours();
@@ -506,18 +530,65 @@ const NaturalLanguageInput = React.forwardRef<
       }
     }, [value, includeTime]);
 
-    const handleParse = React.useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleParse = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const parsedDateTime = parseDateTime(e.currentTarget.value);
+      if (parsedDateTime) {
+        const formatted = formatDateTime(parsedDateTime, includeTime);
+        const formatted_date = formatted?.includes("Invalid Date")
+          ? parsedDateTime
+          : formatted;
+
+        onValueChange(formatted_date);
+        // onValueChange(parsedDateTime as Date);
+
+        // Format with or without time based on includeTime
+        setInputValue(formatted_date as string);
+
+        if (includeTime) {
+          const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
+          const PM_AM_hour = (parsedDateTime as Date).getHours();
+
+          const hour =
+            PM_AM_hour > 12
+              ? PM_AM_hour % 12
+              : PM_AM_hour === 0 || PM_AM_hour === 12
+                ? 12
+                : PM_AM_hour;
+
+          const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
+
+          if (onTimeChange) {
+            onTimeChange(formattedTime);
+          } else {
+            contextOnTimeChange(formattedTime);
+          }
+        }
+      } else {
+        const formatted = new Date(e.currentTarget.value);
+        onValueChange(formatted);
+        setInputValue(formatDateTime(formatted, includeTime));
+      }
+    };
+
+    const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
         const parsedDateTime = parseDateTime(e.currentTarget.value);
+
         if (parsedDateTime) {
-          onValueChange(parsedDateTime);
+          const formatted = formatDateTime(parsedDateTime, includeTime);
+          const formatted_date = formatted?.includes("Invalid Date")
+            ? parsedDateTime
+            : formatted;
+          onValueChange(formatted_date);
+          // onValueChange(parsedDateTime as Date);
 
           // Format with or without time based on includeTime
-          setInputValue(formatDateTime(parsedDateTime, includeTime));
+          setInputValue(formatted_date as string);
 
           if (includeTime) {
-            const PM_AM = parsedDateTime.getHours() >= 12 ? "PM" : "AM";
-            const PM_AM_hour = parsedDateTime.getHours();
+            const PM_AM =
+              (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
+            const PM_AM_hour = (parsedDateTime as Date).getHours();
 
             const hour =
               PM_AM_hour > 12
@@ -526,7 +597,7 @@ const NaturalLanguageInput = React.forwardRef<
                   ? 12
                   : PM_AM_hour;
 
-            const formattedTime = `${hour}:${parsedDateTime.getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
+            const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
 
             if (onTimeChange) {
               onTimeChange(formattedTime);
@@ -534,45 +605,56 @@ const NaturalLanguageInput = React.forwardRef<
               contextOnTimeChange(formattedTime);
             }
           }
+        } else {
+          onValueChange(null);
+          setInputValue(formatDateTime("", includeTime));
         }
-      },
-      [value, includeTime],
-    );
+      }
+    };
 
-    const handleKeydown = React.useCallback(
-      (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-          const parsedDateTime = parseDateTime(e.currentTarget.value);
-          if (parsedDateTime) {
-            onValueChange(parsedDateTime);
+    const debouncedValue = useDebounce(inputValue, 500); // 500ms debounce delay
+    const memoizedOnValueChange = useCallback(onValueChange, []);
 
-            // Format with or without time based on includeTime
-            setInputValue(formatDateTime(parsedDateTime, includeTime));
+    useEffect(() => {
+      if (debouncedValue) {
+        const parsedDateTime = parseDateTime(debouncedValue as Date | string);
+        if (parsedDateTime) {
+          const formatted = formatDateTime(parsedDateTime, includeTime);
+          const formatted_date = formatted?.includes("Invalid Date")
+            ? parsedDateTime
+            : formatted;
+          memoizedOnValueChange(formatted_date);
+          // onValueChange(parsedDateTime as Date);
 
-            if (includeTime) {
-              const PM_AM = parsedDateTime.getHours() >= 12 ? "PM" : "AM";
-              const PM_AM_hour = parsedDateTime.getHours();
+          // Format with or without time based on includeTime
+          setInputValue(formatted_date as string);
 
-              const hour =
-                PM_AM_hour > 12
-                  ? PM_AM_hour % 12
-                  : PM_AM_hour === 0 || PM_AM_hour === 12
-                    ? 12
-                    : PM_AM_hour;
+          if (includeTime) {
+            const PM_AM =
+              (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
+            const PM_AM_hour = (parsedDateTime as Date).getHours();
 
-              const formattedTime = `${hour}:${parsedDateTime.getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
+            const hour =
+              PM_AM_hour > 12
+                ? PM_AM_hour % 12
+                : PM_AM_hour === 0 || PM_AM_hour === 12
+                  ? 12
+                  : PM_AM_hour;
 
-              if (onTimeChange) {
-                onTimeChange(formattedTime);
-              } else {
-                contextOnTimeChange(formattedTime);
-              }
+            const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
+
+            if (onTimeChange) {
+              onTimeChange(formattedTime);
+            } else {
+              contextOnTimeChange(formattedTime);
             }
           }
+        } else {
+          memoizedOnValueChange(null);
+          setInputValue(formatDateTime("", includeTime));
         }
-      },
-      [value, includeTime],
-    );
+      }
+    }, [debouncedValue, includeTime, memoizedOnValueChange]);
 
     return (
       <Input
@@ -592,7 +674,9 @@ const NaturalLanguageInput = React.forwardRef<
 
 NaturalLanguageInput.displayName = "NaturalLanguageInput";
 
-export type DateTimeLocalInputProps = {} & CalendarProps;
+export type DateTimeLocalInputProps = {
+  disabled?: boolean;
+} & CalendarProps;
 
 const DateTimeLocalInput = ({
   className,
@@ -602,6 +686,7 @@ const DateTimeLocalInput = ({
   disableFutureDates = false,
   includeTime = false,
   datePickerTestID,
+  disabled,
   ...props
 }: DateTimeLocalInputProps & {
   minDate?: Date;
@@ -613,7 +698,7 @@ const DateTimeLocalInput = ({
 }) => {
   const { value, onValueChange, Time } = useSmartDateInput();
 
-  const formateSelectedDate = React.useCallback(
+  const formatSelectedDate = React.useCallback(
     (
       date: Date | undefined,
       selectedDate: Date,
@@ -623,11 +708,11 @@ const DateTimeLocalInput = ({
       const parsedDateTime = parseDateTime(selectedDate);
 
       if (parsedDateTime) {
-        parsedDateTime.setHours(
+        (parsedDateTime as Date).setHours(
           parseInt(Time?.split(":")[0] || "0"),
           parseInt(Time?.split(":")[1] || "0"),
         );
-        onValueChange(parsedDateTime);
+        onValueChange(parsedDateTime as Date);
       }
     },
     [value, Time],
@@ -639,6 +724,7 @@ const DateTimeLocalInput = ({
         <Button
           variant={"outline"}
           size={"icon"}
+          disabled={disabled}
           className={cn(
             "flex size-9 items-center justify-center font-normal",
             !value && "text-muted-foreground",
@@ -657,7 +743,7 @@ const DateTimeLocalInput = ({
             className={cn("peer flex justify-end", inputBase, className)}
             mode="single"
             selected={value}
-            onSelect={formateSelectedDate}
+            onSelect={formatSelectedDate}
             initialFocus
             disabled={(date) => {
               // If specific min/max dates are provided, use those first

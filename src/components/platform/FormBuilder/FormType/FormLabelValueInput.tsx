@@ -15,9 +15,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 export interface InputData {
   id?: string;
@@ -32,8 +29,8 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
-  formKey:string;
-  }
+  formKey: string;
+}
 
 export default function FormLabelValueInput({
   fieldConfig,
@@ -63,13 +60,13 @@ export default function FormLabelValueInput({
     if (!fields?.length) {
       handleAddInput();
     }
-  }, []);
+  });
 
   const { register } = form;
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInput")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
 
@@ -80,62 +77,62 @@ export default function FormLabelValueInput({
               <div className="w-full">
                 <Input
                   {...register(`${formRenderProps.field.name}[${index}].label`)}
-                  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueLabelComponent" + (index + 1))}
-                  readOnly={fieldConfig?.readonly ?? false}
-                  placeholder="Label"
-                  disabled={formRenderProps?.field?.disabled || fieldConfig?.disabled}
-                  onChange={(e) =>
+                    data-test-id={`${formKey}-lbl-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
+                    readOnly={fieldConfig?.readonly ?? false}
+                    placeholder="Label"
+                    disabled={formRenderProps?.field?.disabled || fieldConfig?.disabled}
+                    onChange={(e) =>
                     handleInputChange(index, "label", e.target.value)
-                  }
-                />
+                    }
+                  />
                 {error?.[index]?.label && (
-                  <p
+                    <p
                     className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputErrorMessage" + (index + 1))}
-                  >
+                    data-test-id={`${formKey}-err-msg${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
+                    >
                     {error?.[index]?.label?.message}
-                  </p>
+                    </p>
                 )}
               </div>
             </FormControl>
             <FormControl>
-              <div className="w-full">
+                <div className="w-full">
                 <Input
-                  data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputComponent" + (index + 1))}
+                  data-test-id={`${formKey}-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                   placeholder="Value"
                   readOnly={fieldConfig?.readonly ?? false}
                   onChange={(e) =>
-                    handleInputChange(index, "value", e.target.value)
+                  handleInputChange(index, "value", e.target.value)
                   }
                 />
                 {error?.[index]?.value && (
                   <p
-                    className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputErrorMessage" + (index + 1))}
+                  className={cn("py-1 text-md font-medium text-destructive")}
+                  data-test-id={`${formKey}-err-msg${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                   >
-                    {error?.[index]?.value?.message}
+                  {error?.[index]?.value?.message}
                   </p>
                 )}
-              </div>
+                </div>
             </FormControl>
             {index > 0 && (
-              <Button
-                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputRemoveButton" + (index + 1))}
+                <Button
+                data-test-id={`${formKey}-remove-btn${index > 1 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                 disabled={formRenderProps?.field?.disabled}
                 type="button"
                 variant="destructive"
                 onClick={() => handleRemoveInput(index)}
                 className="ml-2"
-              >
+                >
                 Remove
-              </Button>
+                </Button>
             )}
           </div>
         );
       })}
 
       <Button
-        data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "LabelValueInputAddButton")}
+        data-test-id={`${formKey}-add-btn-${fieldConfig.name}`}
         disabled={formRenderProps?.field?.disabled}
         type="button"
         onClick={handleAddInput}

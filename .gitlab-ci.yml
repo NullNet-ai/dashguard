@@ -55,7 +55,7 @@ update_stack:
     - 'recruitment'
   variables:
     ENDPOINT_ID: 2
-    STACK_ID: 14
+    STACK_ID: 16
     PORTAINER_USERNAME: 'ci'
     PORTAINER_PASSWORD: 'hcb2VfQ8SgM9QMWWJo9n'
     PORTAINER_HOST: https://portainer.cebu.dnadev.net

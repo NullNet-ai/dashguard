@@ -6,7 +6,7 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { IFormProps } from "../types";
-import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
+import { recordContactDetailsSchema } from "~/server/zodSchema/contact/recordContactDetails";
 
 export default function RecordContactDetails({
   params,
@@ -16,16 +16,28 @@ export default function RecordContactDetails({
 }: IFormProps) {
   const utils = api.useUtils();
   const toast = useToast();
-  const updateContact = api.contact.updateContactDetails.useMutation();
+  const updateContactDetails = api.contact.updateContactDetails.useMutation();
+  const updatePhoneEmail = api.contact.saveContactPhoneEmail.useMutation();
 
   const handleSave = async ({
     data,
-  }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
+  }: IHandleSubmit<z.infer<typeof recordContactDetailsSchema>>) => {
     try {
-      await updateContact.mutateAsync({
-        ...data,
-        id: params.id,
-      });
+      const { phone, email } = data || {};
+      const contact_id = params.id;
+
+      await Promise.all([
+        updatePhoneEmail.mutateAsync({
+          phone: phone?.map((item) => ({ ...item, contact_id })),
+          email: email?.map((item) => ({ ...item, contact_id })),
+          id: contact_id,
+        }),
+        updateContactDetails.mutateAsync({
+          ...data,
+          id: contact_id,
+        }),
+      ]);
+
       await utils.contact.invalidate();
 
       toast.success("Contact Details submit successfully");
@@ -41,26 +53,26 @@ export default function RecordContactDetails({
       formLabel="Contact Details"
       handleSubmit={handleSave}
       formKey="contact_details"
-      formSchema={contactDetailsSchema}
+      formSchema={recordContactDetailsSchema}
       defaultValues={defaultValues}
       multiSelectOptions={multiSelectOptions}
       selectOptions={selectOptions}
       enableFormRegisterToParent={true}
       fields={[
         {
-          id: "phone_number",
+          id: "phone",
           formType: "phone-input",
-          name: "phone_number",
-          label: "Phone Number",
           placeholder: "Phone Number",
+          name: "phone",
+          label: "Phone Number",
           required: true,
         },
         {
           id: "email",
-          formType: "input",
+          formType: "email-input",
+          placeholder: "email address",
           name: "email",
-          label: "Email",
-          placeholder: "Email",
+          label: "Email Address",
           required: true,
         },
         {
@@ -86,6 +98,23 @@ export default function RecordContactDetails({
           label: "Middle Name",
           placeholder: "Middle Name",
           required: false,
+        },
+        {
+          id: "date_of_birth",
+          formType: "smart-date",
+          name: "date_of_birth",
+          label: "Date of Birth",
+          placeholder: "MM/DD/YYYY",
+          dateTimePickerProps: {
+            maxDate: new Date(),
+          },
+        },
+        {
+          id: "address",
+          formType: "address-input",
+          name: "Address",
+          placeholder: "Address",
+          label: "Address",
         },
       ]}
     />

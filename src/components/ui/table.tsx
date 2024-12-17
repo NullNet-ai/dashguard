@@ -91,6 +91,10 @@ const TableCell = React.forwardRef<
     ref={ref}
     onClick={() => {
       if (!["select", "action"].includes(column_id) && config?.enableRowClick) {
+        if (config?.rowClickCustomAction) {
+          config.rowClickCustomAction({ row, config });
+          return;
+        }
         handleEdit({ row, config });
       }
     }}

@@ -31,6 +31,10 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   throttleDelay?: number;
   onUpdate?: (content: Content) => void;
   onBlur?: (content: Content) => void;
+  formRenderProps?: {
+    field: ControllerRenderProps<Record<string, string[]>>;
+    fieldState: ControllerFieldState;
+  };
 }
 
 const createExtensions = (placeholder: string) => [
@@ -195,6 +199,7 @@ export const useMinimalTiptapEditor = ({
 export default useMinimalTiptapEditor;
 
 import { Extension } from "@tiptap/react";
+import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
 
 /**
  * FontSize - Custom Extension

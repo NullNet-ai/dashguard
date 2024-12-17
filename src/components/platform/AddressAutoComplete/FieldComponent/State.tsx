@@ -1,10 +1,10 @@
 import FormSelect from "../../FormBuilder/FormType/FormSelect";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 import States from "../states.json";
 import { useMemo } from "react";
 import { FormField } from "~/components/ui/form";
 
-export default function StateName({ form }: IFieldComponentProps) {
+export default function StateName({ form,formKey }: IFieldComponentProps) {
   const address_values_country = form.getValues("details.country");
 
   const state_list = useMemo(() => {
@@ -25,11 +25,12 @@ export default function StateName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormSelect
-            formKey="StateName"
+            data-test-id={formKey + "-" +  "sel-" + formRenderProps.field.name }
+            formKey={formKey}
               fieldConfig={{
                 selectSearchable: true,
                 ...formRenderProps?.field,
-                required: true,
+                // required: true,
                 placeholder: "Select State",
                 label: "State",
                 id: `details.state`,

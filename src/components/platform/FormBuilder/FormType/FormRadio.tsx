@@ -12,9 +12,7 @@ import {
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { type IRadioOptions, type IField } from "../type";
-import kebabCase from "lodash/kebabCase";
 import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -38,7 +36,7 @@ export default function FormRadio({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={kebabCase(formKey + capitalize(fieldConfig.name) + "RadioFormLabel")}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig.label}
       </FormLabel>
@@ -50,9 +48,7 @@ export default function FormRadio({
           render={({ field }) => (
             <RadioGroup
               {...field}
-              data-test-id={kebabCase(
-                formKey + fieldConfig?.name + "RadioGroup",
-              )}
+              data-test-id={`${formKey}-rdio-${fieldConfig.name}`}
               disabled={formRenderProps.field.disabled}
               onValueChange={(value) => {
                 field.onChange(value);
@@ -68,16 +64,12 @@ export default function FormRadio({
                   <FormControl>
                     <RadioGroupItem
                       value={option.value}
-                      data-test-id={kebabCase(
-                        formKey + capitalize(fieldConfig.name) + "option" + (index + 1),
-                      )}
+                      data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
                     />
                   </FormControl>
                   <FormLabel
                     className="font-normal"
-                    data-test-id={kebabCase(
-                      formKey + capitalize(fieldConfig.name) + "FormLabel" + option.label,
-                    )}
+                    data-test-id={`${formKey}-lbl-${option.label}-${fieldConfig.name}`}
                   >
                     {option.label}
                   </FormLabel>
@@ -88,9 +80,7 @@ export default function FormRadio({
         />
       </FormControl>
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + capitalize(fieldConfig.name) + "RadioErrorMessage",
-        )}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

@@ -4,15 +4,15 @@ import {
   type HTMLInputTypeAttribute,
   type ReactElement,
 } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { type Field, type UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
 import { type FormField } from "~/components/ui/form";
 import { type Option } from "~/components/ui/multi-select";
 import { type TActionType } from "../Grid/types";
 import { type DropzoneOptions } from "react-dropzone";
 import {
-  DateTimeLocalInputProps,
-  NaturalLanguageInputProps,
+  type DateTimeLocalInputProps,
+  type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
 
 export type TDisplayType = "form" | "selected";
@@ -37,7 +37,8 @@ export type TFormType =
   | "slider"
   | "password"
   | "rich-text-editor"
-  | "currency-input";
+  | "currency-input"
+  
 
 // Single |  Multiple
 export type TType = "single" | "multiple";
@@ -50,6 +51,7 @@ export interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
   formType?: TFormType;
+  withGridFilter?: boolean;
   creatable?: boolean;
   name: string;
   label?: string;
@@ -147,9 +149,14 @@ interface IReturnOnSelectRecords {
   filter_entity: string;
 }
 
+interface IReturnOnFieldFilterRecords {
+  items: any[];
+}
+
 export interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
+  pluck_object?: Record<string, string[]>;
   current?: number;
   limit?: number;
   filter_entity: string;
@@ -180,12 +187,23 @@ export interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  onFieldFilterRecords?: ({
+    filter_value,
+  }: {
+    filter_value: string | number;
+  }) => Promise<IReturnOnFieldFilterRecords>;
+  onSelectFieldFilterRecords?: ({
+    filter_value,
+  }: {
+    filter_value: string | number;
+  }) => Promise<IReturnOnFieldFilterRecords>;
 }
 export interface IPropsForms {
   customDesign?: {
     formClassName?: string;
     headerClassName?: string;
   };
+  fieldConfig?:Field
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
@@ -226,4 +244,11 @@ export interface IUserFormField {
     label: { message: string };
     value: { message: string };
   }[];
+}
+
+export interface IFieldFilterActions {
+  onBlur?: () => void;
+  onFocus?: () => void;
+  handleSearch?: (search: string) => void;
+  ref?: any
 }

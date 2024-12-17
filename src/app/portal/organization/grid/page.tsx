@@ -5,6 +5,8 @@ import Grid from "~/components/platform/Grid/Server";
 import Bluebird from "bluebird";
 import React from "react"; // Import React if needed
 import DeleteComponent from "./customDefaultActions/Delete";
+import { defaultSorting } from "./_config/sorting";
+import { customArchive } from "./customArchiveAction";
 export default async function OrganizationGridPage({
   searchParams = {},
   params,
@@ -31,6 +33,8 @@ export default async function OrganizationGridPage({
     "updated_by",
   ];
 
+  const sorting = await api.grid.getReportSorting();
+
   const { items = [], totalCount } = await api.grid
     .items({
       current: +(searchParams.page ?? "0"),
@@ -38,6 +42,7 @@ export default async function OrganizationGridPage({
       entity: "organization",
       pluck: _pluck,
       advance_filters: [],
+      sorting: sorting?.length ? sorting : defaultSorting,
     })
     .then(async (res) => {
       const final_items = await Bluebird.map(res.items, async (item) => {
@@ -63,6 +68,8 @@ export default async function OrganizationGridPage({
   return (
     <Grid
       totalCount={totalCount || 0}
+      defaultSorting={defaultSorting}
+      sorting={sorting?.length ? sorting : []}
       data={items}
       config={{
         entity: "organization",
@@ -70,6 +77,7 @@ export default async function OrganizationGridPage({
         columns: gridColumns,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
+        archiveCustomAction: customArchive,
       }}
     />
   );

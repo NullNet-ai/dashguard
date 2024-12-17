@@ -1,29 +1,19 @@
+'use client'
 import {
   Accordion,
   AccordionItem,
-  AccordionTrigger,
 } from "~/components/ui/accordion";
-import { CollapsibleContent } from "~/components/ui/collapsible";
-import { IAccordionLayoutProps } from "../../../types/ui/interfaces";
+import { type IAccordionLayoutProps } from "../../../types/ui/interfaces";
 import FormHeader from "../../controls/FormHeader";
 import FormFilterGridLayout from "../FormFilterGridLayout";
 import OpenedFormLayout from "../layout/opened";
 import SelectedViewLayout from "../layout/selected";
 import { CardContent } from "~/components/ui/card";
 import ViewFormActions from "../layout/opened/components/ViewFormActions";
-import { Loader2 } from "lucide-react";
-import {
-  MagnifyingGlassCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/solid";
-import { cn } from "~/lib/utils";
-import SelectedActions from "../layout/selected/components/SelectedActions";
-import FormFilterOpenedActions from "../layout/opened/components/FormFilterOpenedActions";
-import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 import FormBodyMainActions from "../layout/opened/components/FormBodyMainActions";
 import LockFormActions from "../layout/opened/components/LockFormActions";
+import { AccordionContent } from "@radix-ui/react-accordion";
 
 const FormBuilderLayout = ({
   //* data
@@ -31,6 +21,7 @@ const FormBuilderLayout = ({
   displayType,
   formLabel,
   form,
+  fieldConfig,
   buttonConfig,
   formSchema,
   isSaveLoading,
@@ -51,6 +42,7 @@ const FormBuilderLayout = ({
   debugOn,
   formProps,
   features,
+  myParent,
   //* actions
   handleAccordionChange,
   enableAppendForm,
@@ -74,20 +66,31 @@ const FormBuilderLayout = ({
   customFormFilterLockFormActions,
   customFormFilterViewFormActions,
   customFormHostLockFormActions,
-  customFormHostViewFormActions
+  customFormHostViewFormActions,
+  onSelectFieldFilterGrid,
+  handleSearchOpen,
+  isOpenSearch,
 }: IAccordionLayoutProps) => {
 
+  const searchActive = isOpenSearch || false;
+  
   return (
-    <Accordion
+
+      <Accordion
       type="single"
       collapsible
       className="w-full"
-      value={isOpenGrid}
+      // value={isOpenGrid}
       onValueChange={handleAccordionChange}
+      defaultValue="item-1"
     >
       <AccordionItem value="item-1">
         <FormHeader
-          formProps={formProps}
+          formProps={
+            {...formProps, 
+              handleSearchOpen,
+            isOpenSearch,}
+          }
           enableAppendForm={enableAppendForm}
           displayType={displayType}
           buttonHeaderRender={buttonHeaderRender}
@@ -112,9 +115,14 @@ const FormBuilderLayout = ({
           handleUpdateDisplayType={handleUpdateDisplayType}
           formKey={formKey}
         />
+        <AccordionContent className="relative">
         {filterGridConfig && (
           <>
             <FormBodyMainActions
+              formProps={   {...formProps, 
+                handleSearchOpen,
+              isOpenSearch,}}
+              searchActive={searchActive}
               isListLoading={isListLoading}
               displayType={displayType}
               filterGridConfig={filterGridConfig}
@@ -131,6 +139,8 @@ const FormBuilderLayout = ({
               customFormFilterViewFormActions={customFormFilterViewFormActions}
               customFormFilterLockFormActions={customFormFilterLockFormActions}
             />
+            {
+              searchActive && (
             <FormFilterGridLayout
               isFormOpen={isFormOpened}
               handleListLoading={handleListLoading}
@@ -138,12 +148,13 @@ const FormBuilderLayout = ({
               handleCloseGrid={handleCloseGrid}
               filterGridConfig={filterGridConfig}
             />
+              )
+            }
           </>
         )}
-        <CollapsibleContent className="relative">
-          {displayType === "form" && (
+          {displayType === "form" && !searchActive && (
             <>
-              {!form?.formState?.disabled && !filterGridConfig ? (
+              {!form?.formState?.disabled && !filterGridConfig  ? (
                 <CardContent className="absolute right-2">
                   <ViewFormActions
                     formProps={formProps}
@@ -157,6 +168,8 @@ const FormBuilderLayout = ({
                   />
                 </CardContent>
               ) : (
+                <>
+                 {!filterGridConfig && (
                 <CardContent className="absolute right-2">
                   <LockFormActions
                     formProps={formProps}
@@ -169,9 +182,14 @@ const FormBuilderLayout = ({
                     customFormHostLockFormActions={customFormHostLockFormActions}
                   />
                 </CardContent>
+                 )}
+                  
+                </>
               )}
 
               <OpenedFormLayout
+                fieldConfig={fieldConfig}
+                myParent={myParent}
                 customDesign={customDesign}
                 customRender={customRender}
                 fields={fields}
@@ -190,6 +208,9 @@ const FormBuilderLayout = ({
                 formProps={formProps}
                 handleDebug={handleDebug}
                 handleLock={handleLock}
+                filterGridConfig={filterGridConfig}
+                onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+                formSchema={formSchema}
               />
             </>
           )}
@@ -201,9 +222,10 @@ const FormBuilderLayout = ({
               handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             />
           )}
-        </CollapsibleContent>
+        </AccordionContent>
       </AccordionItem>
     </Accordion>
+
   );
 };
 

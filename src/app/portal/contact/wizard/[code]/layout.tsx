@@ -25,7 +25,6 @@ const WizardLayout = (props: IWizardLayoutProps) => {
     mainEntity: mainEntity!,
   };
   const wizard_summary = contactWizardSummary(_params);
-
   return (
     <div className="p-1">
       <PlatformWizard
@@ -35,6 +34,13 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           totalSteps: totalSteps,
           enableAutoCreate: false,
           entityName: mainEntity,
+          stepLabels: {
+            1: "Basic Details",
+            2: "Contact Details",
+            3: "Category Details",
+            4: "Organization",
+            5: "Confirmation",
+          },
         }}
         summary={wizard_summary}
         stepsNavigation={steps_navigation}

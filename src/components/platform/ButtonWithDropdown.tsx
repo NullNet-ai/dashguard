@@ -46,10 +46,11 @@ export function ButtonWithDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          data-test-id={testIDFormatter(`${entity}-wizard-drd-trigger-btn`)}
+          data-test-id={testIDFormatter(`${entity}-wzrd-drd-trigger-btn`)}
           variant={buttonVariant} // Use the provided button variant
           className={cn("flex items-center", buttonClassName)} // Allow custom className
           disabled={disabled}
+          size={'sm'}
         >
           {buttonLabel || ""}
           {ButtonIcon && <ButtonIcon className="mr-2 h-5 w-5" />}{" "}
@@ -57,8 +58,9 @@ export function ButtonWithDropdown({
           {loading && <Loader2 className={cn("h-4 w-4 animate-spin")} />}
           {/* Display loading spinner if in loading state */}
           <ChevronDownIcon
-            className={`${buttonLabel ? "ml-2" : ""} h-4 w-4`}
+            className={`${buttonLabel ? "ml-2" : ""} h-3 w-4 text-primary-freground`}
             aria-hidden="true"
+            strokeWidth={3}
           />
           {/* Arrow icon for dropdown */}
         </Button>
@@ -74,7 +76,7 @@ export function ButtonWithDropdown({
       >
         {dropdownOptions.map((option, index) => (
           <button
-            data-test-id={testIDFormatter(`${entity}-wizard-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
+            data-test-id={testIDFormatter(`${entity}-wzrd-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
             key={index}
             onClick={() => {
               if (disabled) return; // Ignore disabled or loading options

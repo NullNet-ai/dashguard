@@ -7,7 +7,6 @@ import {
   type IAdvanceFilters,
 } from "@dna-platform/common-orm";
 import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
-
 const ENTITY = "organization";
 
 export const organizationRouter = createTRPCRouter({
@@ -402,5 +401,45 @@ export const organizationRouter = createTRPCRouter({
           },
         })
         .execute();
+    }),
+
+  getOrgSummary: privateProcedure
+    .input(
+      z.object({
+        code: z.string(),
+        pluck_fields: z.array(z.string()),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (!input?.code) return null;
+
+      const record = await ctx.dnaClient
+        .findByCode(input.code, {
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck_fields,
+          },
+        })
+        .execute();
+
+      const advance_filters = createAdvancedFilter({
+        id: record?.data?.[0]?.parent_organization_id,
+      });
+      const { data } = await ctx.dnaClient
+        .findAll({
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck_fields,
+            advance_filters,
+          },
+        })
+        .execute();
+
+      return {
+        ...record,
+        data: { ...record?.data?.[0], parent_organization: data?.[0]?.name },
+      };
     }),
 });

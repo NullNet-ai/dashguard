@@ -5,7 +5,7 @@ import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
-import { IFormProps } from "../types";
+import { type IFormProps } from "../types";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 
 export default function ContactDetails({
@@ -22,13 +22,17 @@ export default function ContactDetails({
     data,
   }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
     try {
-      await updateContact.mutateAsync({
+      const response = await updateContact.mutateAsync({
         ...data,
         id: params.id,
       });
+      if (response?.success) {
+        const { data } = response;
+        toast.success("Contact Details submit successfully");
+        return data;
+      }
       await utils.contact.invalidate();
-
-      toast.success("Contact Details submit successfully");
+      throw new Error("Failed to submit Contact Details");
     } catch (error) {
       toast.error("Failed to submit Contact Details");
     }
@@ -53,7 +57,7 @@ export default function ContactDetails({
           name: "first_name",
           label: "First Name",
           placeholder: "First Name",
-          required: true,
+          required: true
         },
         {
           id: "last_name",
@@ -70,6 +74,23 @@ export default function ContactDetails({
           label: "Middle Name",
           placeholder: "Middle Name",
           required: false,
+        },
+        {
+          id: "date_of_birth",
+          formType: "smart-date",
+          name: "date_of_birth",
+          label: "Date of Birth",
+          placeholder: "MM/DD/YYYY",
+          dateTimePickerProps: {
+            maxDate: new Date(),
+          },
+        },
+        {
+          id: "address",
+          formType: "address-input",
+          name: "Address",
+          placeholder: "Address",
+          label: "Address",
         },
       ]}
     />

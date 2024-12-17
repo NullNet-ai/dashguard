@@ -1,12 +1,12 @@
 import FormInput from "../../FormBuilder/FormType/FormInput";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 import { FormField, FormMessage } from "~/components/ui/form";
 
-export default function PostalName({ form }: IFieldComponentProps) {
+export default function PostalName({ form,formKey }: IFieldComponentProps) {
   const address_values = form.getValues("details.postal_code");
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setValue(`details.postal_code`, e.target.value);
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   form.setValue(`details.postal_code`, e.target.value);
+  // };
 
   return (
     <div className="space-y-0.5">
@@ -16,7 +16,8 @@ export default function PostalName({ form }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
-              formKey="PostalCode"
+            data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name }
+              formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,
                 required: true,

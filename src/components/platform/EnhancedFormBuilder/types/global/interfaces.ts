@@ -1,20 +1,21 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef } from "@tanstack/react-table";
 import {
-  HTMLAttributes,
-  HTMLInputTypeAttribute,
-  ReactElement,
-  ReactNode,
+  type HTMLAttributes,
+  type HTMLInputTypeAttribute,
+  type ReactElement,
+  type ReactNode,
 } from "react";
-import { DropzoneOptions } from "react-dropzone";
-import { UseFormReturn } from "react-hook-form";
+import { type DropzoneOptions } from "react-dropzone";
+import { Field, type UseFormReturn } from "react-hook-form";
 
-import { TActionType } from "~/components/platform/Grid/types";
+import { type TActionType } from "~/components/platform/Grid/types";
 import {
-  DateTimeGranularity,
-  TFormSchema,
-  TFormType,
-  TSelectionType,
+  type DateTimeGranularity,
+  type TFormSchema,
+  type TFormType,
+  type TSelectionType,
 } from "./types";
+import { type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;
@@ -35,6 +36,13 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
+  dateTimePickerProps?: DateTimeLocalInputProps & {
+    minDate?: Date;
+    maxDate?: Date;
+    disablePastDates?: boolean;
+    disableFutureDates?: boolean;
+    includeTime?: boolean;
+  };
   description?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
@@ -70,6 +78,17 @@ interface IField {
   textAreaLineWrapping?: boolean;
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
+  withGridFilter?: boolean;
+  gridPosition?: "left" | "right";
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the field filter grid.
+   */
+  filterFieldConfig?: {
+    // for field filter grid
+    entity?: string;
+    field?: string;
+  };
 }
 
 interface ISelectOptions {
@@ -121,16 +140,16 @@ interface IUserFormField {
 }
 
 export interface IFeatures {
-  enableLockFormView? : boolean,
-  enableLockFormCopy? : boolean,
-  enableLockFormEllipsis? : boolean,
-  enableViewFormEllipsis? : boolean,
-  enableViewFormCopy? : boolean,
-  enableViewFormPaste? : boolean,
-  enableViewFormClear? : boolean,
-  enableUnlockFormFilter? : boolean,
-  enableFormHostViewActions? : boolean,
-  enableFormHostLockActions? : boolean,
+  enableLockFormView?: boolean;
+  enableLockFormCopy?: boolean;
+  enableLockFormEllipsis?: boolean;
+  enableViewFormEllipsis?: boolean;
+  enableViewFormCopy?: boolean;
+  enableViewFormPaste?: boolean;
+  enableViewFormClear?: boolean;
+  enableUnlockFormFilter?: boolean;
+  enableFormHostViewActions?: boolean;
+  enableFormHostLockActions?: boolean;
 }
 
 export interface ICustomActions {
@@ -141,10 +160,10 @@ export interface ICustomActions {
   hidden?: boolean;
 }
 
-
 interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
+  pluck_object?: Record<string, string[]>;
   current?: number;
   limit?: number;
   filter_entity: string;
@@ -175,6 +194,40 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+  grid_data?: {
+    items: Record<string, any>[];
+    totalCount: number;
+  };
+  onFilterFieldChange?: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) =>
+    | {
+        totalCount: number;
+        items: any[];
+        currentPage: number;
+        totalPages: number;
+      }
+    | undefined;
+  handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
+  fieldFilterGridColumns?: string[];
+}
+
+export interface ISearchParams {
+  entity: string;
+  pluck?: any;
+  pluck_object?: any;
+  current?: number;
+  limit?: number;
+  advance_filters?: {
+    type: string;
+    values: string[];
+    field: string;
+    operator: string;
+    entity?: string;
+  }[];
+
+  sorting?: any[];
 }
 
 interface IPropsForms {
@@ -182,6 +235,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  fieldConfig?:Field;
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
@@ -218,11 +272,18 @@ interface IPropsForms {
     },
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
-  features? : IFeatures;
+  features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];
   customFormFilterViewFormActions?: ICustomActions[];
   customFormFilterLockFormActions?: ICustomActions[];
+  /**
+   * @description
+   * This prop is used to determine if the form filter will override the current wizard record.
+   * If true, the form filter will override the current wizard record which includes the tab name and the url identifier.
+   * Else, the form filter will not override the current wizard record.
+   */
+  create_mode?: boolean;
 }
 
 export type {

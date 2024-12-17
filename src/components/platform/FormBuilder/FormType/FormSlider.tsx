@@ -12,9 +12,6 @@ import {
 } from "~/components/ui/form";
 import { Slider } from "~/components/ui/slider";
 import { useState } from "react";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -25,7 +22,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: number[];
-  formKey:string;
+  formKey: string;
 }
 
 export default function FormSlider({
@@ -33,7 +30,7 @@ export default function FormSlider({
   formRenderProps,
   form,
   value,
-  formKey
+  formKey,
 }: IProps) {
   const { field } = formRenderProps;
   const {
@@ -56,19 +53,30 @@ export default function FormSlider({
 
   return (
     <FormItem>
-      <FormLabel required={required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "SliderFormLabel")}>{label}</FormLabel>
+      <FormLabel
+        required={required}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+      >
+        {label}
+      </FormLabel>
       <FormControl>
         <Slider
           {...form.register(name)}
-          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "Slider")}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
+          data-test-id={`${formKey}-sld-${fieldConfig.name}`}
+          className={`${
+            isDisabled &&
+            "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"
+          }`}
           disabled={isDisabled}
           label={
             sliderLabel ??
             ((value) => (
-              <span className="text-md text-muted-foreground" data-test-id={
-                kebabCase(formKey + " "+ (fieldConfig.name) + "SliderValueLabel")
-              }>{value}</span>
+              <span
+                className="text-md text-muted-foreground"
+                data-test-id={`${formKey}-val-lbl-${fieldConfig.name}`}
+              >
+                {value}
+              </span>
             ))
           }
           labelPosition={sliderLabelPosition}
@@ -79,8 +87,9 @@ export default function FormSlider({
           step={step}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "SliderErrorMessage")}/>
-
+      <FormMessage
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+      />
     </FormItem>
   );
 }
