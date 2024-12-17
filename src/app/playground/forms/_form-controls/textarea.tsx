@@ -17,7 +17,7 @@ export default function TextAreaDetails({}) {
       <FormBuilder
         enableFormRegisterToParent
         formLabel="Textarea Form Builder"
-        formKey="FormBuilderTextarea"
+        formKey="text-area"
         formSchema={FormSchema}
         fields={[
           {

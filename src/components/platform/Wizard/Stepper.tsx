@@ -95,7 +95,7 @@ export default function MyVerticalStepper() {
         defaultValue={defaultValueAccordionItems}
         type="multiple"
         data-test-id={testIDFormatter(
-          `${entityName}-wizard-summary-stepper-accordion`,
+          `${entityName}-wzrdsum-stepper-accordion`,
         )}
       >
         <div
@@ -143,7 +143,7 @@ export default function MyVerticalStepper() {
                 <li
                   key={stepIndex}
                   data-test-id={testIDFormatter(
-                    `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}`,
+                    `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}`,
                   )}
                   className={cn(
                     stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
@@ -184,7 +184,7 @@ export default function MyVerticalStepper() {
                       <button
                         onClick={() => navigateLink(index)}
                         data-test-id={testIDFormatter(
-                          `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-link`,
+                          `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-link`,
                         )}
                         className="group relative flex cursor-pointer items-start"
                       >
@@ -226,7 +226,7 @@ export default function MyVerticalStepper() {
                               >
                                 <AccordionTrigger
                                   data-test-id={testIDFormatter(
-                                    `${entityName}-wizard-summary-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
+                                    `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
                                   )}
                                 >
                                   <span className="text-sm font-medium sm:block">

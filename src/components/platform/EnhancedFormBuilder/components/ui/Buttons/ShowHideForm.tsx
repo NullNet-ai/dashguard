@@ -18,6 +18,7 @@ export default function ShowHideForm({
       {open ? (
         <AccordionTrigger
             className="m-auto h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gray-200"
+            {...props}
         >
           {/* <Button
           size={"icon"}
@@ -32,6 +33,7 @@ export default function ShowHideForm({
       ) : (
         <AccordionTrigger
           // hideTriggerIcon
+          {...props}
         >
           {/* <Button
             

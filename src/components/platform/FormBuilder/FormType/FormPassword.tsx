@@ -14,9 +14,6 @@ import { Input } from "~/components/ui/input";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 interface IProps {
   fieldConfig: IField;
@@ -44,18 +41,14 @@ export default function FormPassword({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "-lbl",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
       >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <div className="relative group">
           <Input
-            data-test-id={kebabCase(
-              formKey +" "+ (fieldConfig.name) + "-inp",
-            )}
+            data-test-id={`${formKey}-${fieldConfig.name}-inp`}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
             readOnly={fieldConfig?.readonly ?? false}
@@ -68,9 +61,7 @@ export default function FormPassword({
             value={value}
           />
           <Button
-            data-test-id={kebabCase(
-              formKey + " "+ (fieldConfig.name) + "-pwdtgl",
-            )}
+            data-test-id={`${formKey}-${fieldConfig.name}-show-pwd-btn`}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
             type="button"
             variant="ghost"
@@ -86,9 +77,7 @@ export default function FormPassword({
         </div>
       </FormControl>
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "-errmsg",
-        )}
+        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
       />
     </FormItem>
   );

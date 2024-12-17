@@ -26,6 +26,7 @@ export default function CityName({ form, formKey }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormSelect
+            data-test-id={formKey + "-" + formRenderProps.field.name + "-sel"}
               formKey={formKey}
               fieldConfig={{
                 selectSearchable: true,

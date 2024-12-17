@@ -2,17 +2,17 @@
 
 import { z } from "zod";
 import gridColumns from "~/app/portal/contact/grid/_config/columns";
-import { FormBuilder } from "~/components/platform/FormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 const FormSchema = z.object({
   first_name: z
-    .string({ message: "Inputs is required" })
-    .min(1, { message: "Inputs is required" }),
+    .string({ message: "Input is required" })
+    .min(1, { message: "Input is required" }),
 });
 
 export default function InputsGrid({}) {
   return (
     <>
-      {/* FormBuilder 12: Inputs */}
+      {/* FormBuilder 12: Input Grid */}
       <FormBuilder
         filterGridConfig={{
           statusesIncluded: ["Draft", "Active"],
@@ -26,8 +26,8 @@ export default function InputsGrid({}) {
           label: "Contacts",
         }}
         enableFormRegisterToParent
-        formLabel="Inputs Form Builder"
-        formKey="FormBuilderInputs"
+        formLabel="Input Grid Form Builder"
+        formKey="FormBuilderInputGrid"
         formSchema={FormSchema}
         fields={[
           {

@@ -2,17 +2,15 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
-
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
-  textfield: z
-    .string({ message: "Text Field is required" })
-    .min(1, { message: "Text Field is required" }),
+  fullName: z
+    .string({ message: "Full Name is required" })
+    .min(2, { message: "Full Name must be at least 2 characters long" }),
 });
 
-export default function InputDetails({}) {
-
+export default function UserProfileForm() {
   const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
     return new Promise<void>((resolve, reject) => {
       try {
@@ -25,32 +23,30 @@ export default function InputDetails({}) {
         );
         resolve();
       } catch (error) {
-        console.error("Form submission error", error);
-        toast.error("Failed to submit the form. Please try again.");
-        reject(new Error("Form submission error"));
+        console.error("Profile update error", error);
+        toast.error("Failed to update profile. Please try again.");
+        reject(new Error("Profile update error"));
       }
     });
   };
+
   return (
-    <>
-      {/* FormBuilder 1: TextField */}
       <FormBuilder
         enableFormRegisterToParent
-        formLabel="TextField Form Builder"
-        formKey="FormBuilderTextField"
+        formLabel="User Profile Form"
+        formKey="user-profile"
         handleSubmit={handleSave}
         formSchema={FormSchema}
         fields={[
           {
-            id: "textfield",
+            id: "fullName",
             formType: "input",
-            name: "textfield",
-            label: "TextField",
+            name: "full-name",
+            label: "Full Name",
             required: true,
-            placeholder: "TextField",
+            placeholder: "Enter your full name...",
           },
         ]}
       />
-    </>
   );
 }

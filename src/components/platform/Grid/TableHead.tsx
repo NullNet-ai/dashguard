@@ -9,6 +9,7 @@ import { flexRender } from "@tanstack/react-table";
 import { getCommonPinningStyles } from "./ColumnPining";
 import HeaderMenu from "./common/HeaderMenu";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
@@ -18,7 +19,7 @@ export default function MyTableHead() {
         <TableRow
           className="backdrop-blur-lg"
           key={headerGroup.id + "group" + index}
-          data-test-id={state.config.entity + "_grid_header_row"}
+          data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row`)}
         >
           {headerGroup.headers.map((header, index) => {
             const cellValue = header.isPlaceholder
@@ -27,9 +28,7 @@ export default function MyTableHead() {
             return (
               <TableHead
                 key={header.id + index}
-                data-test-id={
-                  state.config.entity + "_grid_header_" + header.column.id
-                }
+                data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row-${header.column.id}`)}
                 className={cn(
                   "group relative font-medium text-muted-foreground", // originally bg-grid-header
                   getCommonPinningStyles(header?.column).className,
@@ -59,6 +58,7 @@ export default function MyTableHead() {
                           onClick={() => {
                             // header.column.toggleSort();
                           }}
+                          data-test-id={state.config.entity + "_grid_header_" + header.column.id + "_sort_button"}
                         >
                           <ChevronsUpDown className="h-3 w-3" />
                         </Button>

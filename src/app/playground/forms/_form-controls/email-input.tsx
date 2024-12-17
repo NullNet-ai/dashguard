@@ -2,12 +2,12 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { EmailArraySchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
 const FormSchema = z.object({
-  email_input: EmailArraySchema,
-  emails: EmailArraySchema,
+"primary-email": z.string().email({ message: "Invalid email address" }),
+  "secondary-emails": EmailArraySchema.optional(),
 });
 
 export default function EmailInputDetails({}) {
@@ -29,39 +29,37 @@ export default function EmailInputDetails({}) {
       }
     });
   };
+
   return (
     <>
-      {/* FormBuilder 15: Email Input */}
+      {/* FormBuilder: Email Input */}
       <FormBuilder
-        enableFormRegisterToParent
-        handleSubmit={handleSave}
-        formLabel="Email Input Form Builder"
-        formKey="FormBuilderEmailInput"
-        formSchema={FormSchema}
-        fields={[
-          {
-            id: "email_input",
-            formType: "email-input",
-            name: "email-input",
-            label: "Email Multiple Input",
-            required: true,
-            placeholder: "Email Multiple Input",
-            options: {
-              phoneEmailType: "single",
-            },
-          },
-          {
-            id: "emails",
-            formType: "email-input",
-            name: "emails",
-            label: "Email Multiple Input",
-            required: true,
-            placeholder: "Email Multiple Input",
-            options: {
-              phoneEmailType: "multiple",
-            },
-          },
-        ]}
+      enableFormRegisterToParent
+      handleSubmit={handleSave}
+      formLabel="Email Input Form"
+      formKey="email-input-form"
+      formSchema={FormSchema}
+      fields={[
+        {
+        id: "primary_email",
+        formType: "email-input",
+        name: "primary-email",
+        label: "Primary Email",
+        required: true,
+        placeholder: "Enter your primary email",
+        },
+        {
+        id: "secondary_emails",
+        formType: "email-input",
+        name: "secondary-emails",
+        label: "Secondary Emails",
+        required: false,
+        placeholder: "Enter secondary emails",
+        options: {
+          phoneEmailType: "multiple",
+        },
+        },
+      ]}
       />
     </>
   );

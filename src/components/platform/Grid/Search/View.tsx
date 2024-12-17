@@ -6,9 +6,17 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import RecentSearch from "./RecentSearch";
 import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
+import { GridContext } from "../Provider";
+import { camelCase } from "lodash";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
+  const gridContext = useContext(GridContext);
+
+
+
+
   return (
     <Combobox>
       <div className="relative">
@@ -18,6 +26,7 @@ export default function Search() {
         />
 
         <ComboboxInput
+          data-test-id={testIDFormatter(`${gridContext?.state?.config?.entity}-grd-search-inp`)}
           className="h-10 w-full rounded-md border bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
           placeholder="Search..."
           onChange={(event) => {
@@ -37,7 +46,7 @@ export default function Search() {
             className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg"
           >
             <li className="p-2">
-              <RecentSearch projects={state?.recentView || []} />
+              <RecentSearch entity={gridContext?.state?.config?.entity} projects={state?.recentView || []} />
             </li>
           </ComboboxOptions>
         )}

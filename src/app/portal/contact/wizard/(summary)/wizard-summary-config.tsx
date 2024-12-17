@@ -1,4 +1,4 @@
-import StepOneBasicDetails from "./_1";
+import BasicDetailsSummary from "./_1";
 import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
 import ContactOrganizationSummary from "./_4";
@@ -19,7 +19,7 @@ const contactWizardSummary = ({
         {
           label: "Basic Details",
           component: (
-            <StepOneBasicDetails
+            <BasicDetailsSummary
               form_key={"ContactsOne"}
               identifier={identifier!}
             />

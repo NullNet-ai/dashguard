@@ -1,4 +1,4 @@
-import { type UseFormReturn } from "react-hook-form";
+import { Field, type UseFormReturn } from "react-hook-form";
 import { type Option } from "~/components/ui/multi-select";
 
 import type {
@@ -27,6 +27,7 @@ export default function FormModule({
   onSelectFieldFilterGrid,
   formSchema,
   myParent,
+  fieldConfig,
 }: {
   fields: IField[];
   form: UseFormReturn<Record<string, any>, any, undefined>;
@@ -38,6 +39,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
+  fieldConfig?:Field,
   formKey: string;
   gridConfig?: IFilterGridConfig;
   formSchema: TFormSchema;
@@ -61,6 +63,7 @@ export default function FormModule({
                 key={_field.id + index}
                 form={form}
                 formKey={formattedFormKey}
+                fieldConfig={fieldConfig}
               />
             );
           default:
