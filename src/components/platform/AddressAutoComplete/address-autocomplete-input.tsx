@@ -106,6 +106,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                   />
                   <Button
                     className="gap-1"
+                    variant={"outline"}
                     onClick={() => {
                       form.setValue("details", {});
                     }}
