@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookmarkSquareIcon,
   BugAntIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
