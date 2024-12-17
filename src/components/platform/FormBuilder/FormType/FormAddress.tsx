@@ -6,9 +6,9 @@ import AddressAutoComplete from "~/components/platform/AddressAutoComplete";
 
 interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
-  fieldConfig? : any
-  formKey : string
-  formRenderProps?: any
+  fieldConfig?: any;
+  formKey: string;
+  formRenderProps?: any;
 }
 
 export default function FormAddress({
