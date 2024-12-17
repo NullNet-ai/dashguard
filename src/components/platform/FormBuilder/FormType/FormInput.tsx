@@ -52,16 +52,15 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={formKey + "-" + (fieldConfig.name) + "-lbl"}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={formKey + "-" + (fieldConfig.name) + "-inp"}
-          readOnly={fieldConfig?.readonly ?? false}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={isDisabled}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+          readOnly={isDisabled && fieldConfig?.readonly }
+          // disabled={isDisabled}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -79,7 +78,7 @@ export default function FormInput({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={formKey + "-" + (fieldConfig.name) + "-err-msg"}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

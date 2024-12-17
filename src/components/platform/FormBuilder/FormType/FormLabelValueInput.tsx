@@ -66,7 +66,7 @@ export default function FormLabelValueInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-${fieldConfig.name}-lbl`}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
 
@@ -77,7 +77,7 @@ export default function FormLabelValueInput({
               <div className="w-full">
                 <Input
                   {...register(`${formRenderProps.field.name}[${index}].label`)}
-                    data-test-id={`${formKey}-${fieldConfig.name}-lbl-inp${index > 0 ? `-${index + 1}` : ""}`}
+                    data-test-id={`${formKey}-lbl-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                     readOnly={fieldConfig?.readonly ?? false}
                     placeholder="Label"
                     disabled={formRenderProps?.field?.disabled || fieldConfig?.disabled}
@@ -88,7 +88,7 @@ export default function FormLabelValueInput({
                 {error?.[index]?.label && (
                     <p
                     className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={`${formKey}-${fieldConfig.name}-err-msg${index > 0 ? `-${index + 1}` : ""}`}
+                    data-test-id={`${formKey}-err-msg${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                     >
                     {error?.[index]?.label?.message}
                     </p>
@@ -98,7 +98,7 @@ export default function FormLabelValueInput({
             <FormControl>
                 <div className="w-full">
                 <Input
-                  data-test-id={`${formKey}-${fieldConfig.name}-inp${index > 0 ? `-${index + 1}` : ""}`}
+                  data-test-id={`${formKey}-inp${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                   placeholder="Value"
                   readOnly={fieldConfig?.readonly ?? false}
                   onChange={(e) =>
@@ -108,7 +108,7 @@ export default function FormLabelValueInput({
                 {error?.[index]?.value && (
                   <p
                   className={cn("py-1 text-md font-medium text-destructive")}
-                  data-test-id={`${formKey}-${fieldConfig.name}-err-msg${index > 0 ? `-${index + 1}` : ""}`}
+                  data-test-id={`${formKey}-err-msg${index > 0 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                   >
                   {error?.[index]?.value?.message}
                   </p>
@@ -117,7 +117,7 @@ export default function FormLabelValueInput({
             </FormControl>
             {index > 0 && (
                 <Button
-                data-test-id={`${formKey}-${fieldConfig.name}-remove-btn${index > 1 ? `-${index + 1}` : ""}`}
+                data-test-id={`${formKey}-remove-btn${index > 1 ? `-${index + 1}` : ""}-${fieldConfig.name}`}
                 disabled={formRenderProps?.field?.disabled}
                 type="button"
                 variant="destructive"
@@ -132,7 +132,7 @@ export default function FormLabelValueInput({
       })}
 
       <Button
-        data-test-id={`${formKey}-${fieldConfig.name}-add-btn`}
+        data-test-id={`${formKey}-add-btn-${fieldConfig.name}`}
         disabled={formRenderProps?.field?.disabled}
         type="button"
         onClick={handleAddInput}

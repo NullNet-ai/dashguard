@@ -97,7 +97,7 @@ export default function FormEmailInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -114,7 +114,7 @@ export default function FormEmailInput({
                     {...register(`${fieldConfig.name}.${index}.email`)}
                     readOnly={fieldConfig?.readonly ?? false}
                     id={data?.id}
-                    data-test-id={`${formKey}-${fieldConfig.name}-inp${isMultiple ? index + 1 : ""}`}
+                    data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
                     value={`${values[index]?.email || ""}`}
                     iconPlacement="left"
@@ -136,7 +136,7 @@ export default function FormEmailInput({
                     <Badge
                       variant={"outline"}
                       className={` bg-primary/10 py-1 font-normal text-primary mx-auto hover:bg-primary/10`}
-                      data-test-id={`${formKey}-${fieldConfig.name}-prim-badge${isMultiple ? `-${index + 1}` : ""}`}
+                      data-test-id={`${formKey}-prim-badge-${index + 1}-${fieldConfig.name}`}
                     >
                       Primary
                     </Badge>
@@ -146,7 +146,7 @@ export default function FormEmailInput({
                     <Button
                       name={`${name}.${index}.setPrimaryButton`}
                       disabled={formRenderProps?.field?.disabled}
-                      data-test-id={`${formKey}-${fieldConfig.name}-set-prim-btn-${index + 1}`}
+                      data-test-id={`${formKey}-set-prim-btn-${index + 1}-${fieldConfig.name}`}
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
@@ -172,7 +172,7 @@ export default function FormEmailInput({
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
-                      data-test-id={`${formKey}-${fieldConfig.name}-rmv-btn-${index + 1}`}
+                      data-test-id={`${formKey}-rmv-btn-${index + 1}-${fieldConfig.name}`}
                       className={`rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
                         const _values = form.getValues(fieldConfig.name);
@@ -187,7 +187,7 @@ export default function FormEmailInput({
                   <p
                     id={data?.id}
                     className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={`${formKey}-${fieldConfig.name}-err-msg-${index + 1}`}
+                    data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}`}
                   >
                     {error?.[index]?.email?.message}
                   </p>
@@ -203,7 +203,7 @@ export default function FormEmailInput({
       {!isDisabled && isMultiple && (
         <Button
           name={`${name}.AddEmailButton`}
-          data-test-id={`${formKey}-${fieldConfig.name}-add-email-btn`}
+          data-test-id={`${formKey}-add-email-btn-${fieldConfig.name}`}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           Icon={PlusIcon}
@@ -218,7 +218,7 @@ export default function FormEmailInput({
 
       {error?.root?.message && (
         <FormMessage
-          data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
         />
       )}
     </FormItem>
