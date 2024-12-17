@@ -22,7 +22,7 @@ type TabItemsProps = {
 const TabItems = ({ items } : TabItemsProps) => {
     const winWidth = useWindowSize().width;
     const { open } = useSidebar();
-    let sidebar_width = remToPx(open ? 16 : 3);
+    let sidebar_width = remToPx(open ? 16 : 5);
     const size = useScreenType();
     if(size === "xs" || size === "sm" || size === "md") {  
         SEARCH_BAR_WIDTH = 0;
