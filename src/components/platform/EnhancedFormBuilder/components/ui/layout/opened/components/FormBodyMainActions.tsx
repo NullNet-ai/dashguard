@@ -139,7 +139,7 @@ const FormBodyMainActions = ({
 
       {!form?.formState?.disabled &&
         filterGridConfig &&
-        displayType !== "selected" && (
+        displayType !== "selected" && !formProps?.isOpenSearch && (
           <FormFilterOpenedActions
             features={features}
             selectedRecords={selectedRecords}
