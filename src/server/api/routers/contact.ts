@@ -118,7 +118,7 @@ export const contactRouter = createTRPCRouter({
         return address;
       };
 
-      if (Object.values(details).length) {
+      if (Object.values(details).length || _address_id) {
         const address = await getAddressByContactId(_address_id, id);
 
         if (address?.id) {
