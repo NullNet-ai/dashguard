@@ -100,6 +100,7 @@ export const contactDetailsSchema = z.object({
         postal_code,
         country,
       } = details || {};
+
       if (
         address_line_one ||
         address_line_two ||
