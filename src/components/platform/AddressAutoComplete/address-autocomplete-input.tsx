@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, PencilIcon } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
 import { Fragment, useCallback, useRef, useState } from "react";
 import {
   type UseFormReturn,
@@ -16,12 +16,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import {
-  Button,
   Combobox,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { Button } from "~/components/ui/button";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import { type IField } from "../FormBuilder/type";
@@ -96,7 +96,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     {...formRenderProps?.field}
                     data-test-id={formKey + "-" + formRenderProps.field.name}
                     ref={inputRef}
-                    className="h-10 w-full rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
+                    className="relative h-10 w-full rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
                     placeholder="Search..."
                     onChange={(event) => {
                       handleSearch(event.target.value);
@@ -104,6 +104,17 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     onBlur={close}
                     onFocus={open}
                   />
+                  <Button
+                    className="absolute right-0 gap-1"
+                    variant={'softDestructive'}
+                    onClick={() => {
+                      form.setValue("details", {});
+                    }}
+                    disabled={formRenderProps.field.disabled}
+                  >
+                    <RotateCcw className="h-4 w-4 text-destructive" strokeWidth={3}/>
+                    Reset
+                  </Button>
                   {isOpen && (
                     <ComboboxOptions
                       static
@@ -162,13 +173,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                 </div>
               </Combobox>
             </FormControl>
-            <Button
-              onClick={() => {
-                form.setValue("details", {});
-              }}
-            >
-              Reset
-            </Button>
+
             <FormMessage />
           </FormItem>
         );
