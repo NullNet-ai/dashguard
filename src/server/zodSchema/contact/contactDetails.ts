@@ -90,39 +90,5 @@ export const contactDetailsSchema = z.object({
           });
         }
       });
-
-      // Transform `address` field if all relevant fields are provided
-      const {
-        address_line_one,
-        address_line_two,
-        city,
-        state,
-        postal_code,
-        country,
-      } = details || {};
-
-      if (
-        address_line_one ||
-        address_line_two ||
-        city ||
-        state ||
-        postal_code ||
-        country
-      ) {
-        const formatted_address = [
-          address_line_one,
-          address_line_two,
-          city,
-          state && postal_code
-            ? `${state} ${postal_code}`
-            : state || postal_code,
-          country,
-        ]
-          .filter(Boolean) // Remove undefined or empty parts
-          .join(", ");
-
-        // Update the `address` field
-        details.address = formatted_address;
-      }
     }),
 });
