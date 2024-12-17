@@ -69,8 +69,6 @@ const Layout = async ({ children, record, record_summary }: IPlatformRecordLayou
     <RecordWrapper
       record={record}
       record_summary={record_summary}
-      entity_code={identifier!}
-      entity_name={main_entity!}
       tabs={tabs}
       customProps={{
         config: {
