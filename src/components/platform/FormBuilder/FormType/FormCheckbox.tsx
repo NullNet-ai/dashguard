@@ -26,12 +26,13 @@ export default function FormCheckbox({
   form,
   formKey,
 }: IProps) {
+
   return (
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
         className="text-base"
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -48,8 +49,8 @@ export default function FormCheckbox({
               >
                 <FormControl>
                   <Checkbox
-                    disabled={field.disabled || fieldConfig?.disabled}
-                    data-test-id={`${formKey}-${fieldConfig?.name}-chk-${index + 1}`}
+                    disabled={field.disabled}
+                    data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
                     checked={field?.value?.includes(item.value)}
                     onCheckedChange={(checked) => {
                       return checked
@@ -65,7 +66,7 @@ export default function FormCheckbox({
                 </FormControl>
                 <FormLabel
                   className="font-normal"
-                  data-test-id={`${formKey}-${fieldConfig.name}-chk-lbl${index + 1}`}
+                  data-test-id={`${formKey}-chk-lbl-${fieldConfig.name}-${index + 1}`}
                 >
                   {item.label}
                 </FormLabel>
@@ -75,7 +76,7 @@ export default function FormCheckbox({
         />
       ))}
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

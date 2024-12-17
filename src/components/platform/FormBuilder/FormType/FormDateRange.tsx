@@ -22,7 +22,7 @@ import {
 import { cn } from "~/lib/utils";
 import { type IField } from "../type";
 import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
+
 
 
 interface IProps {

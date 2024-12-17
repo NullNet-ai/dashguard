@@ -12,6 +12,7 @@ import { saveContactDetails, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
+import UpdateCategory from "../../forms/category-details/actions/updateCategory";
 
 export default function ContactDetails({
   params,
@@ -46,6 +47,11 @@ export default function ContactDetails({
       }
 
       if (action_type === "Create") {
+        await UpdateCategory({
+          id: response.id!,
+          categories: "Employee",
+        });
+
         const code = response?.code;
         router.push(`/portal/contact/wizard/${code}/1`);
       }

@@ -65,7 +65,7 @@ export default function FormInputGrid({
       <FormItem>
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={formKey + "-" + fieldConfig.name + "-inp-grd-label"}
+          data-test-id={formKey + "-inp-grd-label-" + fieldConfig.name}
         ></FormLabel>
         {fieldConfig?.label}
         <FormControl>
@@ -73,9 +73,11 @@ export default function FormInputGrid({
             <div className="relative">
               <ComboboxInput
                 {...formRenderProps?.field}
+                disabled={undefined}
+                readOnly={formRenderProps.field.disabled}
                 autoComplete="off"
                 data-test-id={
-                  formKey + "-" + fieldConfig.name + "-inp-grd-input"
+                  formKey + "-inp-grd-input-" + fieldConfig.name
                 }
                 className="h-10 rounded-md border border-gray-200 bg-transparent text-gray-900 placeholder:text-gray-400 focus:border sm:text-xs"
                 placeholder={fieldConfig?.placeholder || fieldConfig?.label}
@@ -91,7 +93,7 @@ export default function FormInputGrid({
                   static
                   as="ul"
                   data-test-id={
-                    formKey + "-" + fieldConfig.name + "-inp-grd-opts"
+                    formKey + "-inp-grd-opts-" + fieldConfig.name
                   }
                   className="absolute z-[100] mt-1 max-h-80 w-[700px] overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
                 >
@@ -190,7 +192,7 @@ export default function FormInputGrid({
         </FormControl>
         <FormMessage
           data-test-id={
-            formKey + "-" + fieldConfig.name + "-inp-grd-err-msg"
+            formKey + "-inp-grd-err-msg-" + fieldConfig.name
           }
         />
       </FormItem>

@@ -14,8 +14,6 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import numberToWords from "./Utils/steptoWords";
 import useDeepCompareEffect from "./Hooks/useDeepCompareEffect";
 import { Summary, TSummaryComponents } from "./type";
-import { camelCase } from "lodash";
-import { toPascalCase } from "~/lib/capitalize";
 import { testIDFormatter } from "~/utils/formatter";
 
 const getNotRequiredSteps = (steps: Summary) => {
@@ -122,21 +120,22 @@ export default function MyVerticalStepper() {
                   return;
                 }
                 actions?.setFormSave({});
+
                 router.push(
                   fullSearchQueryParams
                     ? `${_completeLink}?${fullSearchQueryParams}`
                     : _completeLink,
                 );
               };
-
-              const summaryTitle =
-                // @ts-expect-error - SummaryComponent is not defined
-                state?.summary?.[index]?.label;
               // @ts-expect-error - SummaryComponent is not defined
-              const summaryComponents = state?.summary?.[index]?.components
-                ?.length
-                ? // @ts-expect-error - SummaryComponent is not defined
-                  state?.summary?.[index]?.components
+              const summary_details = state?.summary?.[index];
+              if (isCurrent && !!summary_details?.show_summary) {
+                actions?.setSavedStep(stepIndex);
+              }
+
+              const summaryTitle = summary_details?.label;
+              const summaryComponents = summary_details?.components?.length
+                ? summary_details?.components
                 : null;
 
               return (
@@ -149,7 +148,7 @@ export default function MyVerticalStepper() {
                     stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
                   )}
                 >
-                  {isStepped ? (
+                  {isStepped || isCurrent ? (
                     <div className="flex flex-1">
                       {isCurrent ? (
                         stepIdx !== stepsArray.length - 1 ? (
@@ -162,17 +161,16 @@ export default function MyVerticalStepper() {
                           />
                         ) : (
                           <>
-                          {stepsArray.length > stepIdx + 1 ? (
-                            <div
-                              aria-hidden="true"
-                              className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
-                            />
-                          ) : null}
+                            {stepsArray.length > stepIdx + 1 ? (
+                              <div
+                                aria-hidden="true"
+                                className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
+                              />
+                            ) : null}
                           </>
                         )
                       ) : (
                         <>
-                   
                           {stepsArray.length > stepIdx + 1 ? (
                             <div
                               aria-hidden="true"
@@ -271,10 +269,6 @@ export default function MyVerticalStepper() {
                           <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400"></span>
                         </span>
                         <span className="ml-3 flex min-w-0 flex-col">
-                          {/* Hidden on mobile, visible from small screens (sm) and up */}
-                          <span className="text-xs font-medium text-default/50 sm:block">
-                            {"Step  " + stepIndex}
-                          </span>
                           {/* This will be hidden on mobile screens */}
                           <span className="text-sm text-gray-500 sm:block">
                             {summaryTitle

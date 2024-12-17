@@ -5,11 +5,10 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IUserFormField, type IField, IFieldFilterActions } from "../type";
+import { type IUserFormField, type IField, type IFieldFilterActions } from "../type";
 import {
   FormControl,
   FormItem,
-  FormLabel,
   useFormField,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
@@ -73,13 +72,13 @@ export default function FormTextInputs({
             <div className="w-full">
               <Input
                 {...register(`${formRenderProps.field.name}[${index}].value`)}
-                readOnly={fieldConfig?.readonly ?? false}
+                readOnly={formRenderProps.field.disabled}
                 placeholder={fieldConfig?.placeholder}
                 disabled={
-                  formRenderProps?.field?.disabled || fieldConfig?.disabled
+                 undefined
                 }
                 type={fieldConfig?.type || "text"}
-                data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+                data-test-id={`${formKey}-inp-${fieldConfig.name}`}
                 {...fieldConfig}
                 onChange={(e) => {
                   handleInputChange(index, e.target.value);
@@ -93,7 +92,7 @@ export default function FormTextInputs({
                 <p
                   id={data?.id}
                   className="py-1 text-md font-medium text-destructive"
-                  data-test-id={`${formKey}-${fieldConfig.name}-inp-error-msg${index > 0 ? `-${index + 1}` : ""}`}
+                  data-test-id={`${formKey}-inp-${fieldConfig.name}-error-msg${index > 0 ? `-${index + 1}` : ""}`}
                 >
                   {error?.[index]?.value?.message}
                 </p>
@@ -102,7 +101,7 @@ export default function FormTextInputs({
           </FormControl>
           {index > 0 && (
             <Button
-              data-test-id={`${formKey}-${fieldConfig.name}-inp-remove-btn-${index + 1}`}
+              data-test-id={`${formKey}-inp-${fieldConfig.name}-remove-btn-${index + 1}`}
               disabled={formRenderProps?.field?.disabled}
               type="button"
               variant="destructive"
@@ -117,7 +116,7 @@ export default function FormTextInputs({
 
       {fieldConfig?.options?.inputsType === "multiple" && (
         <Button
-          data-test-id={`${formKey}-${fieldConfig.name}-inp-add-btn`}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}-add-btn`}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           onClick={handleAddInput}

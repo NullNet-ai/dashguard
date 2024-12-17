@@ -32,6 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       hasError,
       leftAddon,
       rightAddon,
+      readOnly,
       ...props
     },
     ref,
@@ -77,6 +78,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               },
             )}
             ref={ref}
+            readOnly={readOnly}
             {...props}
           />
           {rightAddon && (

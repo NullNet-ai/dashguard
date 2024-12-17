@@ -31,9 +31,9 @@ export default {
         'xl': '18px',
         'xl-2': '20px',
         'xl-3': '24px',
-        'xl-4': '30px',
-        'xl-5': '36px',
-        'xl-6': '48px'
+        'xl-4': '28px',
+        'xl-5': '32px',
+        'xl-6': '36px'
       },
       colors: {
         background: "hsl(var(--background))",

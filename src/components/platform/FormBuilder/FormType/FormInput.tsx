@@ -34,7 +34,7 @@ export default function FormInput({
   fieldFilterActions,
   formKey
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
+  const isDisabled =  formRenderProps.field.disabled
   const isHidden = fieldConfig.hidden;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
@@ -52,16 +52,13 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={formKey + "-" + (fieldConfig.name) + "-lbl"}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={formKey + "-" + (fieldConfig.name) + "-inp"}
-          readOnly={fieldConfig?.readonly ?? false}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={isDisabled}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -69,7 +66,9 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
+          readOnly={isDisabled}
           {...formRenderProps.field}
+          disabled={undefined}
           onChange={(e) => {
             formRenderProps.field.onChange(e.target.value);
             if(handleSearch){
@@ -79,7 +78,7 @@ export default function FormInput({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={formKey + "-" + (fieldConfig.name) + "-err-msg"}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

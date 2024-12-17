@@ -12,7 +12,7 @@ export const steps_navigation = {
   three: {
     next: true,
     prev: true,
-    skip: false,
+    skip: true,
   },
   four: {
     next: true,

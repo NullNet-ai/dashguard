@@ -1,5 +1,5 @@
 import FormSelect from "../../FormBuilder/FormType/FormSelect";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 import CountryToCities from "../countriesToCities.json";
 import { useMemo } from "react";
 import { FormField } from "~/components/ui/form";
@@ -26,7 +26,7 @@ export default function CityName({ form, formKey }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormSelect
-            data-test-id={formKey + "-" + formRenderProps.field.name + "-sel"}
+            data-test-id={formKey + "-" +  "sel-" + formRenderProps.field.name }
               formKey={formKey}
               fieldConfig={{
                 selectSearchable: true,

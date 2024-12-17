@@ -26,7 +26,7 @@ let SUMMARY_TAB_WIDTH = 300;
 const TabItems = ({ tabs, pathname }: TabItemProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
-  let sidebar_width = remToPx(open ? 16 : 3);
+  let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   const router = useRouter();
   const searchParams = useSearchParams();
