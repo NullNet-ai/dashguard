@@ -2,8 +2,8 @@ import { type PropsWithChildren } from "react";
 
 export interface IMenuOptionConfig {
   label: string;
-  onClick: (recordId: string, entityName: string) => void;
-  children: IMenuOptionConfig[];
+  onClick: (recordId: string, entityName: string, ...args: any[]) => void;
+  children?: IMenuOptionConfig[];
 }
 
 export interface RecordContextProps {
@@ -20,7 +20,8 @@ export interface ConfigProps {
   entityCode: string;
   entityName?: string;
   tabs?: ITabs[];
-  identifierOption?: (...args: any) => React.ReactNode;
+  // identifierOption?: (...args: any) => React.ReactNode;
+  identifierOption?: IMenuOptionConfig[];
   categories?: string[];
   recordId?: string;
 }

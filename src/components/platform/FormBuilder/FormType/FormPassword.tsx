@@ -41,14 +41,14 @@ export default function FormPassword({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <div className="relative group">
           <Input
-            data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
             readOnly={fieldConfig?.readonly ?? false}
@@ -61,7 +61,7 @@ export default function FormPassword({
             value={value}
           />
           <Button
-            data-test-id={`${formKey}-${fieldConfig.name}-show-pwd-btn`}
+            data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
             type="button"
             variant="ghost"
@@ -77,7 +77,7 @@ export default function FormPassword({
         </div>
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

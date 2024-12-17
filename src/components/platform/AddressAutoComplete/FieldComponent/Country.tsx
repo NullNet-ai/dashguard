@@ -8,6 +8,9 @@ export default function CountryName({ form, formKey }: IFieldComponentProps) {
     form.setValue(`details.country`, value);
     form.setValue(`details.city`, "");
     form.setValue(`details.state`, "");
+    form.setValue(`details.postal_code`, "");
+    form.setValue(`details.address_line_one`, "");
+    form.setValue(`details.address_line_two`, "");
   };
 
   return (
@@ -17,7 +20,7 @@ export default function CountryName({ form, formKey }: IFieldComponentProps) {
       render={(formRenderProps) => {
         return (
           <FormSelect
-            data-test-id={formKey + "-" + formRenderProps.field.name + "-sel"}
+            data-test-id={formKey + "-" + "sel-" + formRenderProps.field.name }
             formKey={formKey}
             fieldConfig={{
               selectSearchable: true,

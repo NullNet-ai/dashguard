@@ -45,14 +45,14 @@ export default function FormMultiSelect({
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
   return (
     <FormItem className="overflow-visible">
-      <FormLabel required={fieldConfig.required} data-test-id={`${formKey}-${fieldConfig.name}-lbl`}>
+      <FormLabel required={fieldConfig.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig.label}
       </FormLabel>
       <FormControl>
         <MultipleSelector
           {...register(fieldConfig.name)}
           {...formRenderProps.field}
-          data-test-id={`${formKey}-${fieldConfig.name}-msel`}
+          data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={isDisabled}
           className={
             !!formRenderProps?.fieldState.error
@@ -61,7 +61,7 @@ export default function FormMultiSelect({
           }
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
-            "data-test-id": `${formKey}-${fieldConfig.name}-inp`,
+            "data-test-id": `${formKey}-inp-${fieldConfig.name}`,
             "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`,
             className: `flex w-full rounded-md border bg-background px-4 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
           }}
@@ -105,7 +105,7 @@ export default function FormMultiSelect({
           }
         />
       </FormControl>
-      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`} />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

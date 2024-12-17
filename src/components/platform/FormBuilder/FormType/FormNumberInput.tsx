@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { IFieldFilterActions, type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -55,13 +55,13 @@ export default function FormNumber({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-${fieldConfig.name}-lbl`}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           {...formRenderProps.field}
-          data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           readOnly={fieldConfig?.readonly ?? false}
           type="number"
           inputMode="decimal"
@@ -75,7 +75,8 @@ export default function FormNumber({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
     </FormItem>
   );
 }
+

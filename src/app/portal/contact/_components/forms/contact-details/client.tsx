@@ -5,7 +5,7 @@ import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
-import { IFormProps } from "../types";
+import { type IFormProps } from "../types";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 
 export default function ContactDetails({
@@ -57,7 +57,7 @@ export default function ContactDetails({
           name: "first_name",
           label: "First Name",
           placeholder: "First Name",
-          required: true,
+          required: true
         },
         {
           id: "last_name",

@@ -4,7 +4,12 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { type IField, type ISelectOptions } from "../type";
-import { FormItem, FormLabel, FormMessage, useFormField } from "~/components/ui/form";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from "~/components/ui/form";
 import {
   Combobox,
   ComboboxButton,
@@ -41,6 +46,7 @@ export default function FormSelect({
 
   const [query, setQuery] = useState("");
   form.watch();
+
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
@@ -54,17 +60,19 @@ export default function FormSelect({
           ?.sort((a, b) => a.label.localeCompare(b.label))
           .slice(0, 5);
   }, [fieldConfig?.name, query, selectOptions]);
+
   const label = useMemo(() => {
-    return filteredOptions?.find(
+    return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
-  }, [filteredOptions, formRenderProps?.field.value]);
+  }, [formRenderProps?.field.value]);
+
   return (
     <FormItem>
       <div>
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
         >
           {fieldConfig?.label}
         </FormLabel>
@@ -72,7 +80,7 @@ export default function FormSelect({
           <>
             {pillOptions.map((option, index) => (
               <Badge
-                data-test-id={`${formKey}-${fieldConfig.name}-opt-${option}`}
+                data-test-id={`${formKey}-opt-${option}-${fieldConfig.name}`}
                 key={index}
                 className="mx-2 border border-green-800 bg-green-50 text-green-800"
               >
@@ -84,12 +92,7 @@ export default function FormSelect({
       </div>
       <Combobox
         as="div"
-        value={
-          label || {
-            label: fieldConfig?.placeholder,
-            value: "",
-          }
-        }
+        value={label}
         onChange={(value) => {
           setQuery("");
           formRenderProps?.field.onChange(value?.value);
@@ -100,9 +103,10 @@ export default function FormSelect({
           <ComboboxButton
             disabled={formRenderProps?.field?.disabled}
             className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
-            data-test-id={`${formKey}-${fieldConfig.name}-btn`}
+            data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ComboboxInput
+              placeholder={fieldConfig.placeholder}
               readOnly={
                 fieldConfig?.selectSearchable
                   ? !fieldConfig?.selectSearchable
@@ -116,7 +120,7 @@ export default function FormSelect({
               )}
               onChange={(event) => setQuery(event.target.value)}
               onBlur={() => setQuery("")}
-              data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+              data-test-id={`${formKey}-inp-${fieldConfig.name}`}
               // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
               displayValue={(value) => value?.label}
             />
@@ -129,18 +133,18 @@ export default function FormSelect({
           {filteredOptions?.length ? (
             <ComboboxOptions
               className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-              data-test-id={`${formKey}-${fieldConfig.name}-opts`}
+              data-test-id={`${formKey}-opts-${fieldConfig.name}`}
             >
-              {filteredOptions?.slice(0, 700).map((opt, index) => (
+              {filteredOptions?.slice(0, 700).map((opt) => (
                 <ComboboxOption
                   key={opt?.value}
                   value={opt}
                   className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
-                  data-test-id={`${formKey}-${fieldConfig.name}-opt-${formatFormTestID(opt.value)}`}
+                  data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                 >
                   <span
                     className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={`${formKey}-${fieldConfig.name}-opt-${formatFormTestID(opt.value)}-lbl`}
+                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
                   >
                     {opt.label}
                   </span>
@@ -156,7 +160,7 @@ export default function FormSelect({
               <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
                 <span
                   className="block truncate group-data-[selected]:font-semibold"
-                  data-test-id={`${formKey}-${fieldConfig.name}-opt-not-found`}
+                  data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
                 >
                   No {fieldConfig?.label} found.
                 </span>
@@ -166,9 +170,7 @@ export default function FormSelect({
         </div>
       </Combobox>
 
-      <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }
