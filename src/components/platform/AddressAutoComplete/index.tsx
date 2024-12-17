@@ -13,6 +13,7 @@ import { api } from "~/trpc/react";
 import type { IField } from "../FormBuilder/type";
 import CountryToCities from "./countriesToCities.json";
 import States from "./states.json";
+import { deburr } from "lodash";
 
 export interface AddressType {
   address: string;
@@ -81,9 +82,10 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
       form.setValue(`details.${key}`, data);
     });
 
-    const country = response.data.country;
-    const state = response.data.state;
-    const city = response.data.city;
+    const country = deburr(response.data.country);
+    const state = deburr(response.data.state);
+    const city = deburr(response.data.city);
+
     const cities = (CountryToCities as Record<string, string[]>)?.[country];
     const countries = Object.keys(CountryToCities ?? {});
 
