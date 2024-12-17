@@ -46,6 +46,7 @@ export default function FormSelect({
 
   const [query, setQuery] = useState("");
   form.watch();
+
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
@@ -59,11 +60,13 @@ export default function FormSelect({
           ?.sort((a, b) => a.label.localeCompare(b.label))
           .slice(0, 5);
   }, [fieldConfig?.name, query, selectOptions]);
+
   const label = useMemo(() => {
-    return filteredOptions?.find(
+    return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
-  }, [filteredOptions, formRenderProps?.field.value]);
+  }, [formRenderProps?.field.value]);
+
   return (
     <FormItem>
       <div>
