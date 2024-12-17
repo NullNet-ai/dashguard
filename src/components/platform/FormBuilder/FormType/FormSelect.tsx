@@ -4,7 +4,12 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { type IField, type ISelectOptions } from "../type";
-import { FormItem, FormLabel, FormMessage, useFormField } from "~/components/ui/form";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from "~/components/ui/form";
 import {
   Combobox,
   ComboboxButton,
@@ -41,6 +46,7 @@ export default function FormSelect({
 
   const [query, setQuery] = useState("");
   form.watch();
+
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
@@ -54,11 +60,13 @@ export default function FormSelect({
           ?.sort((a, b) => a.label.localeCompare(b.label))
           .slice(0, 5);
   }, [fieldConfig?.name, query, selectOptions]);
+
   const label = useMemo(() => {
-    return filteredOptions?.find(
+    return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
-  }, [filteredOptions, formRenderProps?.field.value]);
+  }, [formRenderProps?.field.value]);
+
   return (
     <FormItem>
       <div>
@@ -84,9 +92,7 @@ export default function FormSelect({
       </div>
       <Combobox
         as="div"
-        value={
-          label 
-        }
+        value={label}
         onChange={(value) => {
           setQuery("");
           formRenderProps?.field.onChange(value?.value);
@@ -100,7 +106,7 @@ export default function FormSelect({
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ComboboxInput
-            placeholder={fieldConfig.placeholder}
+              placeholder={fieldConfig.placeholder}
               readOnly={
                 fieldConfig?.selectSearchable
                   ? !fieldConfig?.selectSearchable
@@ -164,9 +170,7 @@ export default function FormSelect({
         </div>
       </Combobox>
 
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

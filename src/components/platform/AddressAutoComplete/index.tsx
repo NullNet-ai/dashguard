@@ -41,7 +41,7 @@ interface AddressAutoCompleteProps {
 }
 
 export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
-  const { form,fieldConfig,formKey,formRenderProps} = props;
+  const { form, fieldConfig, formKey, formRenderProps } = props;
   // const googleAutoComplete = api.google.place.useMutation();
   const googleAutoComplete = api.google.getAddressDetails.useMutation();
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +59,7 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
       address: address,
     });
     setIsLoading(false);
+    form.setValue("details", {});
     [
       "address",
       "address_line_one",
@@ -83,11 +84,12 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
     const country = response.data.country;
     const state = response.data.state;
     const city = response.data.city;
-    const foundCountry = (CountryToCities as Record<string, string[]>)?.[
-      country
-    ];
-    const foundState = States?.find((_state) => _state.name === state);
-    const foundCity = foundCountry?.find((_city: string) => city === city);
+    const cities = (CountryToCities as Record<string, string[]>)?.[country];
+    const foundState = States?.find(
+      (_state) => _state.name === state && _state.country_name === country,
+    );
+    const foundCity = cities?.find((_city: string) => _city === city);
+
     form.setValue("details.country", country);
     form.setValue("details.state", foundState ? foundState?.name : "");
     form.setValue("details.city", foundCity ? foundCity : "");
