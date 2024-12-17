@@ -8,6 +8,9 @@ export default function CountryName({ form, formKey }: IFieldComponentProps) {
     form.setValue(`details.country`, value);
     form.setValue(`details.city`, "");
     form.setValue(`details.state`, "");
+    form.setValue(`details.postal_code`, "");
+    form.setValue(`details.address_line_one`, "");
+    form.setValue(`details.address_line_two`, "");
   };
 
   return (
