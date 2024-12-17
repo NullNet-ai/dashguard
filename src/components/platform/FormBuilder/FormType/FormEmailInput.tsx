@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { IFieldFilterActions, type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../type";
 import { ulid } from "ulid";
 import { useToast } from "~/context/ToastProvider";
 
@@ -108,7 +108,7 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${error?.[index] ? "border-destructive" : ""}`}
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}

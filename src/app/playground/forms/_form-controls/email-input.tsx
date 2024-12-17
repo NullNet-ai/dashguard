@@ -6,8 +6,8 @@ import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { EmailArraySchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
 const FormSchema = z.object({
-  primary_email: z.string().email({ message: "Invalid email address" }),
-  secondary_emails: EmailArraySchema.optional(),
+"primary-email": z.string().email({ message: "Invalid email address" }),
+  "secondary-emails": EmailArraySchema.optional(),
 });
 
 export default function EmailInputDetails({}) {
