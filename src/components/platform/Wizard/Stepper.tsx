@@ -162,17 +162,16 @@ export default function MyVerticalStepper() {
                           />
                         ) : (
                           <>
-                          {stepsArray.length > stepIdx + 1 ? (
-                            <div
-                              aria-hidden="true"
-                              className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
-                            />
-                          ) : null}
+                            {stepsArray.length > stepIdx + 1 ? (
+                              <div
+                                aria-hidden="true"
+                                className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
+                              />
+                            ) : null}
                           </>
                         )
                       ) : (
                         <>
-                   
                           {stepsArray.length > stepIdx + 1 ? (
                             <div
                               aria-hidden="true"
@@ -271,10 +270,6 @@ export default function MyVerticalStepper() {
                           <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400"></span>
                         </span>
                         <span className="ml-3 flex min-w-0 flex-col">
-                          {/* Hidden on mobile, visible from small screens (sm) and up */}
-                          <span className="text-xs font-medium text-default/50 sm:block">
-                            {"Step  " + stepIndex}
-                          </span>
                           {/* This will be hidden on mobile screens */}
                           <span className="text-sm text-gray-500 sm:block">
                             {summaryTitle

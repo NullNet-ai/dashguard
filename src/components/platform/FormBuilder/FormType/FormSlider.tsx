@@ -55,14 +55,14 @@ export default function FormSlider({
     <FormItem>
       <FormLabel
         required={required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {label}
       </FormLabel>
       <FormControl>
         <Slider
           {...form.register(name)}
-          data-test-id={`${formKey}-${fieldConfig.name}-sld`}
+          data-test-id={`${formKey}-sld-${fieldConfig.name}`}
           className={`${
             isDisabled &&
             "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"
@@ -73,7 +73,7 @@ export default function FormSlider({
             ((value) => (
               <span
                 className="text-md text-muted-foreground"
-                data-test-id={`${formKey}-${fieldConfig.name}-val-lbl`}
+                data-test-id={`${formKey}-val-lbl-${fieldConfig.name}`}
               >
                 {value}
               </span>
@@ -88,7 +88,7 @@ export default function FormSlider({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );
