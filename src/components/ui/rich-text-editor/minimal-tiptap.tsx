@@ -24,6 +24,7 @@ import Underline from "@tiptap/extension-underline";
 import { Link } from "./extensions/link/link";
 import ExtendedTextStyle from "./components/extended-text-style";
 import { Image } from "./extensions/image/image";
+import { useEffect, useRef } from "react";
 
 export interface MinimalTiptapProps
   extends Omit<UseMinimalTiptapEditorProps, "onUpdate"> {
@@ -31,20 +32,23 @@ export interface MinimalTiptapProps
   onChange?: (value: Content) => void;
   className?: string;
   editorContentClassName?: string;
+  readOnly?: boolean;
 }
 
 const Toolbar = ({
   editor,
   disabled = false,
+  readOnly = false,
 }: {
   editor: Editor;
   disabled: boolean;
+  readOnly: boolean;
 }) => {
   return (
-    <div className="shrink-0 overflow-x-auto border-b border-border p-2 bg-background">
+    <div className="shrink-0 overflow-x-auto border-b border-border bg-background p-2">
       <div className="flex w-max items-center gap-px">
         <FontSizeControl
-          className="disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent"
+          className="disabled:cursor-auto disabled:opacity-100 hover:disabled:bg-transparent"
           editor={editor}
           defaultSize={16}
           min={8}
@@ -72,7 +76,7 @@ const Toolbar = ({
             "code",
             "clearFormatting",
           ]}
-          mainActionCount={3}
+          mainActionCount={disabled ?0 : 3}
           disabled={disabled}
         />
         <Separator orientation="vertical" className="mx-2 h-7" />
@@ -117,6 +121,7 @@ export const MinimalTiptapEditor = React.forwardRef<
       value,
       onChange,
       className,
+      readOnly = false,
       editorContentClassName,
       enableCoreExtensions = false,
       ...props
@@ -140,6 +145,12 @@ export const MinimalTiptapEditor = React.forwardRef<
       ...props,
     });
 
+    useEffect(() => {
+      if (editor) {
+        editor.setEditable(!readOnly);
+      }
+    }, [readOnly, editor]);
+
     if (!editor) {
       return null;
     }
@@ -154,9 +165,10 @@ export const MinimalTiptapEditor = React.forwardRef<
           className,
         )}
       >
-        <Toolbar editor={editor} disabled={enableCoreExtensions as boolean} />
+        <Toolbar editor={editor} disabled={readOnly} readOnly={readOnly} />
         <EditorContent
           editor={editor}
+          readOnly={readOnly}
           className={cn("minimal-tiptap-editor", editorContentClassName)}
         />
         <LinkBubbleMenu editor={editor} />

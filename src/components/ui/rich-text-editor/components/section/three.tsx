@@ -30,7 +30,7 @@ const formatActions: TextStyle[] = [
   {
     value: "bold",
     label: "Bold",
-    icon: <FontBoldIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <FontBoldIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().toggleBold().run(),
     isActive: (editor) => editor.isActive("bold"),
     canExecute: (editor) =>
@@ -41,7 +41,7 @@ const formatActions: TextStyle[] = [
   {
     value: "italic",
     label: "Italic",
-    icon: <FontItalicIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <FontItalicIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().toggleItalic().run(),
     isActive: (editor) => editor.isActive("italic"),
     canExecute: (editor) =>
@@ -52,7 +52,7 @@ const formatActions: TextStyle[] = [
   {
     value: "underline",
     label: "Underline",
-    icon: <UnderlineIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <UnderlineIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().toggleUnderline().run(),
     isActive: (editor) => editor.isActive("underline"),
     canExecute: (editor) =>
@@ -63,7 +63,7 @@ const formatActions: TextStyle[] = [
   {
     value: "strikethrough",
     label: "Strikethrough",
-    icon: <StrikethroughIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <StrikethroughIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().toggleStrike().run(),
     isActive: (editor) => editor.isActive("strike"),
     canExecute: (editor) =>
@@ -74,7 +74,7 @@ const formatActions: TextStyle[] = [
   {
     value: "code",
     label: "Code",
-    icon: <CodeIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <CodeIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().toggleCode().run(),
     isActive: (editor) => editor.isActive("code"),
     canExecute: (editor) =>
@@ -85,7 +85,7 @@ const formatActions: TextStyle[] = [
   {
     value: "clearFormatting",
     label: "Clear formatting",
-    icon: <TextNoneIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />,
+    icon: <TextNoneIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground  disabled:border-muted disabled:bg-background" />,
     action: (editor) => editor.chain().focus().unsetAllMarks().run(),
     isActive: () => false,
     canExecute: (editor) =>
@@ -116,7 +116,7 @@ export const SectionThree: React.FC<SectionThreeProps> = ({
       actions={formatActions}
       activeActions={activeActions}
       mainActionCount={mainActionCount}
-      dropdownIcon={<DotsHorizontalIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background" />}
+      dropdownIcon={<DotsHorizontalIcon className="size-5 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:border-muted disabled:bg-background" />}
       dropdownTooltip="More formatting"
       dropdownClassName="w-8 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground disabled:bg-background disabled:border-muted disabled:bg-background"
       size={size}

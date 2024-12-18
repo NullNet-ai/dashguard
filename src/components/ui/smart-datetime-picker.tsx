@@ -7,8 +7,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { ActiveModifiers } from "react-day-picker";
-import { Calendar, CalendarProps } from "~/components/ui/calendar";
+import { type ActiveModifiers } from "react-day-picker";
+import { Calendar, type CalendarProps } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -184,7 +184,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className="flex items-center justify-center">
         <div
           className={cn(
-            "flex w-full items-center justify-between gap-1 rounded-md border p-1 transition-all",
+            "flex w-full focus-within:border-primary focus-within:ring-ring focus-within:ring-1 focus-within:ring-offset-0 ring-offset-background items-center justify-between gap-1 rounded-md border p-1 transition-all",
             "focus-within:outline-0 focus:outline-0 focus:ring-0",
             "placeholder:text-muted-foreground focus-visible:outline-0",
             className,
@@ -671,7 +671,7 @@ const NaturalLanguageInput = React.forwardRef<
         onChange={(e) => setInputValue(e.currentTarget.value)}
         onKeyDown={handleKeydown}
         onBlur={handleParse}
-        className={cn("mr-0.5 h-8 flex-1 rounded border-none px-2", inputBase)}
+        className={cn("mr-0.5 h-8 flex-1 rounded border-none px-2 read-only:focus-visible:border-transparent focus-visible:ring-transparent focus-visible:ring-0", inputBase)}
         {...props}
       />
     );
