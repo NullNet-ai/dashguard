@@ -47,6 +47,7 @@ export default function EmailInputDetails({}) {
         label: "Primary Email",
         required: true,
         placeholder: "Enter your primary email",
+        
         },
         {
         id: "secondary_emails",
