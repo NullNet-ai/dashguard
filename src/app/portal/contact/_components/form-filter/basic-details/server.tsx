@@ -43,6 +43,8 @@ const FormServerFetch = async () => {
 
   const contact_id = default_values?.id;
 
+
+  
   return (
     <div className="space-y-2">
       <BasicDetails
@@ -53,7 +55,7 @@ const FormServerFetch = async () => {
           id: contact_id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
-          pluck_fields,
+          pluck_fields,s
         }}
         selectedRecords={contact_id ? [default_values] : []}
         grid_data={{ items, totalCount }}
