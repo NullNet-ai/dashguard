@@ -11,8 +11,8 @@ import { Button } from "~/components/ui/button";
 import LoginSubmit from "../actions/loginSubmit";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
+  password: z.string({required_error:"Please enter your password"}).min(5, "Password must be at least 5 characters long"),
 });
 
 export default function LoginForm() {
