@@ -153,7 +153,13 @@ export function FormBuilder({
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, []);
+  }, [
+    enableFormRegisterToParent,
+    eventEmitter,
+    // form, //!causing re-render
+    formKey,
+    myParent,
+  ]);
 
   const handleListLoading = (loading: boolean) => {
     setListLoading(loading);
