@@ -34,7 +34,7 @@ export default function SearchResult({
                   actions?.handleAddSearchItem(result);
                 }}
               >
-                {result?.label} ({result?.count})
+                {result?.label}
               </Badge>
             </ComboboxOption>
           ))}
