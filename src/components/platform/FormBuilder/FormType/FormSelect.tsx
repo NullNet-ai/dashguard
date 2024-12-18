@@ -71,6 +71,7 @@ export default function FormSelect({
       (opt) => opt.value === formRenderProps?.field.value,
     );
   }, [formRenderProps?.field.value]);
+
   return (
     <FormItem>
       <div>
@@ -124,6 +125,8 @@ export default function FormSelect({
               },
             )}
             onClick={() => {
+              if (formRenderProps.field.disabled || fieldConfig?.readonly)
+                return;
               setOpen(true);
             }}
             onChange={(event) => setQuery(event.target.value)}
@@ -148,6 +151,7 @@ export default function FormSelect({
           {!(formRenderProps.field.disabled || fieldConfig?.readonly) &&
             (filteredOptions?.length ? (
               <ComboboxOptions
+                static={open}
                 className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                 data-test-id={`${formKey}-opts-${fieldConfig.name}`}
               >
@@ -158,7 +162,7 @@ export default function FormSelect({
                     disabled={
                       (formRenderProps.field.disabled ||
                         fieldConfig?.readonly) ??
-                      true
+                      false
                     }
                     className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
