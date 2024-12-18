@@ -73,6 +73,8 @@ export default function FormInputGrid({
             <div className="relative">
               <ComboboxInput
                 {...formRenderProps?.field}
+                disabled={undefined}
+                readOnly={formRenderProps.field.disabled}
                 autoComplete="off"
                 data-test-id={
                   formKey + "-inp-grd-input-" + fieldConfig.name

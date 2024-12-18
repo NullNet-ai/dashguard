@@ -12,7 +12,7 @@ import LoginSubmit from "../actions/loginSubmit";
 
 const formSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(5, "Password must be at least 5 characters long"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
 export default function LoginForm() {
@@ -45,9 +45,9 @@ export default function LoginForm() {
                 fieldConfig={{
                   id: "email",
                   name: "email",
-                  label: "Email address",
+                  label: "Email Address",
                   required: true,
-                  placeholder: "Enter Valid Email Address",
+                  placeholder: "Enter valid email address",
                   type: "email",
                 }}
                 form={form}
@@ -68,7 +68,7 @@ export default function LoginForm() {
                   name: "password",
                   label: "Password",
                   required: true,
-                  placeholder: "Password",
+                  placeholder: "Enter at least 8 characters",
                 }}
                 form={form}
                 formKey={"Login"}
@@ -95,7 +95,7 @@ export default function LoginForm() {
           </div>
           <div className="text-md">
             <a href="#" className="font-semibold text-primary">
-              Forgot password?
+              Forgot Password?
             </a>
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function FormInput({
   fieldFilterActions,
   formKey
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
+  const isDisabled =  formRenderProps.field.disabled
   const isHidden = fieldConfig.hidden;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
@@ -59,8 +59,6 @@ export default function FormInput({
         <Input
           // onChange={handleChange}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          readOnly={isDisabled && fieldConfig?.readonly }
-          // disabled={isDisabled}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -68,7 +66,9 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
+          readOnly={isDisabled}
           {...formRenderProps.field}
+          disabled={undefined}
           onChange={(e) => {
             formRenderProps.field.onChange(e.target.value);
             if(handleSearch){
