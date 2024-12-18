@@ -50,19 +50,19 @@ export default function FormTextArea({
           lineWrapping={fieldConfig.textAreaLineWrapping}
           maxLines={fieldConfig.textAreaMaxLines}
           autoComplete="off"
-          readOnly={fieldConfig?.readonly ?? false}
-          disabled={formRenderProps.field.disabled || fieldConfig.disabled}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
           placeholder={fieldConfig?.placeholder}
           className={`${
             form.formState.errors[fieldConfig.name] && "border-destructive"
-          }`}
+          } `}
           {...formRenderProps?.field}
+          disabled={fieldConfig.disabled}
         />
       </FormControl>
 
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

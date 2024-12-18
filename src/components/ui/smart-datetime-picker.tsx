@@ -7,8 +7,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { ActiveModifiers } from "react-day-picker";
-import { Calendar, CalendarProps } from "~/components/ui/calendar";
+import { type ActiveModifiers } from "react-day-picker";
+import { Calendar, type CalendarProps } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -162,6 +162,7 @@ export const SmartDatetimeInput = React.forwardRef<
     disabled = false,
     datePickerTestID,
     inputTestID,
+    readOnly,
     inputProps,
     dateTimePickerProps,
   } = props;
@@ -183,7 +184,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className="flex items-center justify-center">
         <div
           className={cn(
-            "flex w-full items-center justify-between gap-1 rounded-md border p-1 transition-all",
+            "flex w-full focus-within:border-primary focus-within:ring-ring focus-within:ring-1 focus-within:ring-offset-0 ring-offset-background items-center justify-between gap-1 rounded-md border p-1 transition-all",
             "focus-within:outline-0 focus:outline-0 focus:ring-0",
             "placeholder:text-muted-foreground focus-visible:outline-0",
             className,
@@ -192,6 +193,7 @@ export const SmartDatetimeInput = React.forwardRef<
           <DateTimeLocalInput
             datePickerTestID={datePickerTestID}
             disabled={disabled as boolean}
+            readOnly={readOnly}
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -199,6 +201,7 @@ export const SmartDatetimeInput = React.forwardRef<
             placeholder={placeholder}
             disabled={disabled}
             ref={ref}
+            readOnly={readOnly}
             {...inputProps}
           />
         </div>
@@ -455,6 +458,7 @@ const TimePicker = () => {
 export interface NaturalLanguageInputProps {
   placeholder?: string;
   disabled?: boolean;
+  readOnly?:boolean;
   includeTime?: boolean; // New prop to control time handling
   onDateChange?: (date: Date) => void; // Optional callback for date change
   onTimeChange?: (time: string) => void; // Optional callback for time change
@@ -470,6 +474,7 @@ const NaturalLanguageInput = React.forwardRef<
       includeTime = false, // Default to including time
       onDateChange,
       onTimeChange,
+      readOnly=false,
       ...props
     },
     ref,
@@ -660,12 +665,13 @@ const NaturalLanguageInput = React.forwardRef<
       <Input
         ref={ref}
         type="text"
+        readOnly={readOnly}
         placeholder={_placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.currentTarget.value)}
         onKeyDown={handleKeydown}
         onBlur={handleParse}
-        className={cn("mr-0.5 h-8 flex-1 rounded border-none px-2", inputBase)}
+        className={cn("mr-0.5 h-8 flex-1 rounded border-none px-2 read-only:focus-visible:border-transparent focus-visible:ring-transparent focus-visible:ring-0", inputBase)}
         {...props}
       />
     );
@@ -676,6 +682,7 @@ NaturalLanguageInput.displayName = "NaturalLanguageInput";
 
 export type DateTimeLocalInputProps = {
   disabled?: boolean;
+  readOnly?:boolean;
 } & CalendarProps;
 
 const DateTimeLocalInput = ({
@@ -686,6 +693,7 @@ const DateTimeLocalInput = ({
   disableFutureDates = false,
   includeTime = false,
   datePickerTestID,
+  readOnly,
   disabled,
   ...props
 }: DateTimeLocalInputProps & {
@@ -724,9 +732,9 @@ const DateTimeLocalInput = ({
         <Button
           variant={"outline"}
           size={"icon"}
-          disabled={disabled}
+          disabled={readOnly}
           className={cn(
-            "flex size-9 items-center justify-center font-normal",
+            "flex size-9 items-center justify-center font-normal disabled:opacity-100",
             !value && "text-muted-foreground",
           )}
           data-test-id={datePickerTestID}

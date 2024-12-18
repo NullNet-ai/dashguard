@@ -72,10 +72,10 @@ export default function FormTextInputs({
             <div className="w-full">
               <Input
                 {...register(`${formRenderProps.field.name}[${index}].value`)}
-                readOnly={fieldConfig?.readonly ?? false}
+                 readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                 placeholder={fieldConfig?.placeholder}
                 disabled={
-                  formRenderProps?.field?.disabled || fieldConfig?.disabled
+                 undefined
                 }
                 type={fieldConfig?.type || "text"}
                 data-test-id={`${formKey}-inp-${fieldConfig.name}`}

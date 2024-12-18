@@ -5,7 +5,7 @@ import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
-  fullName: z
+  "full-name": z
     .string({ message: "Full Name is required" })
     .min(2, { message: "Full Name must be at least 2 characters long" }),
 });
@@ -45,6 +45,7 @@ export default function UserProfileForm() {
             label: "Full Name",
             required: true,
             placeholder: "Enter your full name...",
+            readonly:true
           },
         ]}
       />

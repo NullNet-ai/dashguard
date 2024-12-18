@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import {
@@ -72,8 +72,9 @@ export default function WizardProvider({
   const [traverseSteps, setTraverseStep] = React.useState<
     Record<string, "Stepped">
   >({
-    one: "Stepped",
+    // one: "Stepped",
   });
+
   const [debugOn, setDebugOn] = React.useState(false);
   // const [currentStep, setCurrentStep] = React.useState(+(step || "1"));
   const [errorMessage] = React.useState<Record<string, string[]> | null>(null);
@@ -89,6 +90,7 @@ export default function WizardProvider({
   const [isSummaryOpen, setIsSummaryOpen] = React.useState(true);
   const [nextLoading, setNextLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
+  const [savedStep, setSavedStep] = useState<null | number>(null);
 
   /** @STATES */
   const nextStep = api.wizard.wizardCreateStep.useMutation();
@@ -135,6 +137,10 @@ export default function WizardProvider({
       ...prev,
       [field_name]: status,
     }));
+
+    if (status !== "done") return;
+
+    setSavedStep(currentStep);
   };
 
   const handlePrev = async () => {
@@ -212,7 +218,7 @@ export default function WizardProvider({
       await SaveAndClose({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
-        currentContext: currentContext
+        currentContext: currentContext,
       });
       setSaveCloseLoading(false);
     } catch (error) {
@@ -288,18 +294,24 @@ export default function WizardProvider({
       }
     }
   }, [formSave]);
+
+  useEffect(() => {
+    if (savedStep) return;
+    setSavedStep(currentStep);
+  }, [currentStep, savedStep]);
+
   usePrefetchWizardTraverse(
     `${mainEntity}:wizard:${identifier}`,
     setTraverseStep,
   );
   useTraverseSteppedSaved(traverseSteps);
-  useTraverseStepped(currentStep, setTraverseStep);
-
+  useTraverseStepped(savedStep, setTraverseStep);
+  //get other way don't listen to currentStep
   const state_context = {
     debugOn,
     currentStep,
     errorMessage,
-    stepLabels:config?.stepLabels,
+    stepLabels: config?.stepLabels,
     nextLoading,
     prevLoading,
     skipLoading,
@@ -330,6 +342,7 @@ export default function WizardProvider({
     handleSummaryToggle,
     handleSkip,
     setFormSave,
+    setSavedStep,
   } as IAction;
 
   return (

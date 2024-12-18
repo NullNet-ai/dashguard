@@ -146,6 +146,8 @@ export default function FormCurrencyInput({
       <FormControl>
         <div className="flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
           <Input
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             containerClassName="opacity-0 pointer-events-none absolute right-0"
             ref={normalInputRef}
             onChange={(e) =>
@@ -156,6 +158,8 @@ export default function FormCurrencyInput({
 
           <CurrencyInput
             {...register(fieldConfig.name)}
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
@@ -180,6 +184,7 @@ export default function FormCurrencyInput({
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
             data-test-id={`${formKey}-sel-${fieldConfig.name}`}
+            disabled={formRenderProps.field.disabled}
             >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"

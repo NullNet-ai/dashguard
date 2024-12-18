@@ -41,7 +41,7 @@ export default function FormMultiSelect({
 }: IProps) {
   const { register } = form;
 
-  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+  const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
   return (
     <FormItem className="overflow-visible">
@@ -52,8 +52,9 @@ export default function FormMultiSelect({
         <MultipleSelector
           {...register(fieldConfig.name)}
           {...formRenderProps.field}
+          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
-          disabled={isDisabled}
+          disabled={fieldConfig.disabled}
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"
