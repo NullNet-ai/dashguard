@@ -54,7 +54,7 @@ export default function FormPassword({
             readOnly={
               (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
             }
-            disabled={undefined}
+            disabled={fieldConfig.disabled}
             placeholder={fieldConfig?.placeholder}
             iconPlacement="left"
             Icon={icon}

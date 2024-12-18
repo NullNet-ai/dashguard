@@ -187,7 +187,7 @@ export default function FormPhoneInput({
                     buttonClassName: "!focus-visible:border-r-primary ",
                   }}
                   defaultCountry="us"
-                  disabled={undefined}
+                  disabled={fieldConfig.disabled}
                   value={values && values[index] ? `+${values[index].raw_phone_number || ""}` : ""}
                   onChange={(phone, meta) => {
                     handlePhoneNumberChange(index, phone, meta);

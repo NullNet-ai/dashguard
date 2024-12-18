@@ -68,7 +68,7 @@ export default function FormInput({
           rightAddon={fieldConfig.inputRightAddOns}
           readOnly={isDisabled}
           {...formRenderProps.field}
-          disabled={undefined}
+          disabled={fieldConfig.disabled}
           onChange={(e) => {
             formRenderProps.field.onChange(e.target.value);
             if(handleSearch){

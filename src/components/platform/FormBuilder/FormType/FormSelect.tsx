@@ -97,7 +97,7 @@ export default function FormSelect({
           setQuery("");
           formRenderProps?.field.onChange(value?.value);
         }}
-        disabled={undefined}
+        disabled={fieldConfig.disabled}
       >
         <div className="relative mt-2">
             <ComboboxButton
