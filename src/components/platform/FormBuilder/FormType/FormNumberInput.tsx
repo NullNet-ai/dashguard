@@ -62,7 +62,7 @@ export default function FormNumber({
         <Input
           {...formRenderProps.field}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          readOnly={formRenderProps.field.disabled}
           disabled={undefined}
           type="number"
           inputMode="decimal"
