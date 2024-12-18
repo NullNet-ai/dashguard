@@ -51,7 +51,7 @@ export default function Pagination() {
   };
   const width = open
     ? " md:w-[calc(100%-265px)] md:left-[258px]"
-    : "md:w-[calc(100%-60px)] md:left-[52px]";
+    : "md:w-[calc(100%-60px)] md:left-[80px]";
   return (
     <div
       className={cn(

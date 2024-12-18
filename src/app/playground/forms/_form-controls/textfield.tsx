@@ -45,6 +45,7 @@ export default function UserProfileForm() {
             label: "Full Name",
             required: true,
             placeholder: "Enter your full name...",
+            readonly:true
           },
         ]}
       />

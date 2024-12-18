@@ -58,7 +58,7 @@ export default function FormTextArea({
             form.formState.errors[fieldConfig.name] && "border-destructive"
           } `}
           {...formRenderProps?.field}
-          disabled={undefined}
+          disabled={fieldConfig.disabled}
         />
       </FormControl>
 

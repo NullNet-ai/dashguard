@@ -79,7 +79,7 @@ export default function FormRichTextEditor({
           onBlur={() => {
             formRenderProps.field.onBlur();
           }}
-          readOnly={formRenderProps.field.disabled}
+           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           immediatelyRender={false}
         />
       </FormControl>

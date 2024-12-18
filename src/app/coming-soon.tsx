@@ -1,23 +1,62 @@
 import Image from "next/image";
 
-export default function NewComingSoon() {
+type TComingProps = {
+  type: "page" | "component";
+};
+
+export default function NewComingSoon({ type = "page" }: TComingProps) {
+  if (type === "component") {
+    return (
+      <div className="w-full p-4  px-8 h-[calc(100vh-150px)]  relative">
+        <div className="w-full flex h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-center">
+            <div>
+            <a href="#" className="text-center justify-center lg:justify-start flex ">
+                <Image
+                    width={60}
+                    height={60}
+                    alt=""
+                    src="/tailwindLogo.svg"
+                    className="h-8 w-auto relative lg:-top-40"
+                />
+                </a>
+                <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
+                Coming Soon
+                </h1>
+                <p className="mt-2 text-xl leading-7 text-gray-400">
+                Thank you for your patient!
+                </p>
+            </div>
+            <div className="hidden   lg:block relative -top-0 -right-10">
+                <Image
+                    alt=""
+                    width={"1080"}
+                    height={"720"}
+                    src="/coming-soon.png"
+                    className="w-[100%] relative object-cover md:inset-0"
+                />
+                </div>
+          </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="grid grid-cols-1 grid-rows-[1fr,auto,1fr] bg-white lg:grid-cols-[max(50%,36rem),1fr] h-screen overflow-hidden">
-        <header className="mx-auto w-full  px-6 pt-16 sm:pt-16 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:px-14">
+      <div className="grid h-screen grid-cols-1 grid-rows-[1fr,auto,1fr] overflow-hidden bg-white lg:grid-cols-[max(50%,36rem),1fr]">
+        <header className="mx-auto w-full px-6 pt-16 sm:pt-16 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:px-14">
           <a href="#">
             <Image
               width={60}
               height={60}
               alt=""
-               src="/tailwindLogo.svg"
+              src="/tailwindLogo.svg"
               className="h-8 w-auto"
             />
           </a>
         </header>
-        <main className="mx-auto w-full  px-6 py-2 sm:py-32 lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:px-14">
-          <div className="w-full text-center lg:text-left relative z-10">
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
+        <main className="mx-auto w-full px-6 py-2 sm:py-32 lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:px-14">
+          <div className="relative z-10 w-full text-center lg:text-left">
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
               Coming Soon
             </h1>
             <p className="mt-2 text-xl leading-7 text-gray-400">
@@ -25,19 +64,22 @@ export default function NewComingSoon() {
             </p>
           </div>
         </main>
-        <div className=" lg:relative lg:col-start-2 lg:row-start-1 lg:row-end-4 lg:block">
+        <div className="lg:relative lg:col-start-2 lg:row-start-1 lg:row-end-4 lg:block">
           <Image
             alt=""
             width={"1080"}
             height={"720"}
             src="/coming-soon.png"
-            className="absolute md:inset-0  inset-auto h-full w-full object-cover bottom-[-200px]"
+            className="absolute inset-auto bottom-[-200px] h-full w-full object-cover md:inset-0"
           />
         </div>
         <footer>
-            <div className="bg-gray-200 fixed bottom-0 py-4 text-xs w-full text-center text-gray-400">
-                <span>All Right Reserved {new Date().getFullYear()} DNA Micro<sup>TM</sup></span>
-            </div>
+          <div className="fixed bottom-0 w-full bg-gray-200 py-4 text-center text-xs text-gray-400">
+            <span>
+              All Right Reserved {new Date().getFullYear()} DNA Micro
+              <sup>TM</sup>
+            </span>
+          </div>
         </footer>
       </div>
     </>

@@ -66,6 +66,7 @@ export default function SelectDetails({}) {
                         name: "select_with_options",
                         label: "Select with Options",
                         required: true,
+                        readonly:true
                     },
                     {
                         id: "select_single",
