@@ -52,3 +52,6 @@ pnpm-lock.yaml
 dump
 
 dump.rdb
+
+
+/src/app/playground
