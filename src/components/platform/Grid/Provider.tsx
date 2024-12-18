@@ -53,6 +53,8 @@ export default function GridProvider({
   initialSelectedRecords = {},
   sorting: initialSorting = [],
   defaultSorting,
+  advanceFilter = [],
+  defaultAdvanceFilter = [],
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -120,7 +122,7 @@ export default function GridProvider({
   };
 
   const handleResetSorting = () => {
-    setSorting(_defaultSorting); 
+    setSorting(_defaultSorting);
     handleUpdateReportSorting(_defaultSorting);
   };
 
@@ -375,6 +377,7 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
+    advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
     rowSelection,
   } as IState;
   const actions = {
