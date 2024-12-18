@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type IField } from "../type";
-import { UserIcon } from "lucide-react";
 import AutosizeTextarea from "~/components/ui/autosize-textarea";
 
 interface IProps {
