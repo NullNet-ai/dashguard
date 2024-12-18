@@ -27,6 +27,7 @@ import { EllipsisVertical } from "lucide-react";
 
 export function FormBuilder({
   fields,
+  fieldConfig,
   selectOptions,
   currencyInputOptions,
   defaultValues,
@@ -152,7 +153,13 @@ export function FormBuilder({
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, []);
+  }, [
+    enableFormRegisterToParent,
+    eventEmitter,
+    // form, //!causing re-render
+    formKey,
+    myParent,
+  ]);
 
   const handleListLoading = (loading: boolean) => {
     setListLoading(loading);
@@ -421,6 +428,7 @@ export function FormBuilder({
                       <Fragment>
                         {!customRender ? (
                           <FormModule
+                            fieldConfig={fieldConfig}
                             formKey={formKey}
                             fields={fields}
                             form={form}

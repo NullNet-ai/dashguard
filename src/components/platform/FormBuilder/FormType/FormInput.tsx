@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import {IFieldFilterActions,  type IField } from "../type";
+import {type IFieldFilterActions,  type IField } from "../type";
 import {
   FormControl,
   FormItem,
@@ -11,8 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 
 interface IProps {
@@ -36,7 +34,7 @@ export default function FormInput({
   fieldFilterActions,
   formKey
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
+  const isDisabled =  formRenderProps.field.disabled
   const isHidden = fieldConfig.hidden;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
@@ -54,16 +52,13 @@ export default function FormInput({
 
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-lbl")}>
+      <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={kebabCase(formKey +" "+ (fieldConfig.name) + "-inp")}
-          readOnly={fieldConfig?.readonly ?? false}
-          className={`${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={isDisabled}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -71,7 +66,9 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
+          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           {...formRenderProps.field}
+          disabled={fieldConfig.disabled}
           onChange={(e) => {
             formRenderProps.field.onChange(e.target.value);
             if(handleSearch){
@@ -81,7 +78,7 @@ export default function FormInput({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "-errmsg")}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

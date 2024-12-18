@@ -2,7 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
-import RecordWrapper from "./_components/RecordWrapper";
+import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
 
 const Layout = async ({
   record,
@@ -52,12 +52,30 @@ const Layout = async ({
     return notFound();
   }
 
+  const tabs = [
+    {
+      id: "dashboard",
+      name: "Dashboard",
+      tabName: "dashboard",
+    },
+    {
+      id: "user_role",
+      name: "User Role",
+      tabName: "user_role",
+    },
+  ];
+
   return (
     <RecordWrapper
       record={record}
       record_summary={record_summary}
-      entity_code={identifier!}
-      entity_name={main_entity!}
+      tabs={tabs}
+      customProps={{
+        config: {
+          entityCode: identifier!,
+          entityName: main_entity!,
+        },
+      }}
     />
   );
 };

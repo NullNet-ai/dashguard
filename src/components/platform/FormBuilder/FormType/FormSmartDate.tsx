@@ -12,7 +12,7 @@ import {
 import { type IField } from "../type";
 import moment from "moment";
 import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
-import kebabCase from "lodash/kebabCase";
+
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -39,7 +39,7 @@ export default function FormSmartDate({
   const { disabled } = formRenderProps.field;
   const isDisable = isFieldDisable || disabled;
 
-  const handleChange = (date: Date | null) => {
+  const handleChange = (date: Date | null | string) => {
     if (date) {
       const formattedDate =
         dateGranularity === "year"
@@ -47,7 +47,12 @@ export default function FormSmartDate({
           : dateGranularity === "month"
             ? moment(date).format("YYYY-MM")
             : moment(date).format("MM/DD/YYYY");
-      form.setValue(name, formattedDate, {
+
+      const formatted_date = formattedDate?.includes("Invalid date")
+        ? date
+        : formattedDate;
+
+      form.setValue(name, formatted_date, {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
@@ -60,30 +65,25 @@ export default function FormSmartDate({
     <FormItem className="flex w-full flex-col">
       <FormLabel
         required={required}
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "S,artDateFormLabel",
-        )}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {label}
       </FormLabel>
       <FormControl>
         <SmartDatetimeInput
-          datePickerTestID={kebabCase(
-            formKey + fieldConfig.name + "SmartDatePicker",
-          )}
-          inputTestID={kebabCase(formKey + fieldConfig.name + "SmartDateInput")}
+          datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
+          inputTestID={`${formKey}-inp-${fieldConfig.name}`}
           value={formRenderProps.field.value}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
-          disabled={isDisable}
+          disabled={fieldConfig.disabled}
+           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
         />
       </FormControl>
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "SmartDateErrorMessage",
-        )}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

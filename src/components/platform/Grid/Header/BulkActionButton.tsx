@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "~/components/ui/button";
 import { GridContext } from "../Provider";
 import { TrashIcon } from "@heroicons/react/20/solid";
+import { testIDFormatter } from "~/utils/formatter";
 
 export default function BulkActionButton() {
   const { state, actions } = React.useContext(GridContext);
@@ -13,7 +14,8 @@ export default function BulkActionButton() {
 
   return (
     <Button
-      data-test-id="gridBulkActionButton"
+    data-test-id={testIDFormatter(`${state?.config.entity}-grd-bulk-action-btn`)}
+
       className={"flex lg:inline-flex"}
       variant={"destructive"}
       loading={state?.archiveBulkLoading}

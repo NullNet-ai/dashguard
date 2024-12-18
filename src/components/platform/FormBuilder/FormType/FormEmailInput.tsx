@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { IFieldFilterActions, type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../type";
 import { ulid } from "ulid";
 import { useToast } from "~/context/ToastProvider";
 
@@ -88,7 +88,7 @@ export default function FormEmailInput({
     }
   });
   const { name } = formRenderProps.field;
-  const isDisabled = formRenderProps?.field?.disabled || fieldConfig?.disabled;
+  const isDisabled = formRenderProps?.field?.disabled
   const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
   const { register } = form;
   const values = form.watch(name);
@@ -97,7 +97,7 @@ export default function FormEmailInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -108,19 +108,19 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${error?.[index] ? "border-destructive" : ""}`}
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
-                    readOnly={fieldConfig?.readonly ?? false}
+                     readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     id={data?.id}
-                    data-test-id={`${formKey}-${fieldConfig.name}-inp${index + 1}`}
+                    data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
                     value={`${values[index]?.email || ""}`}
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
                     className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
-                    disabled={isDisabled}
+                    disabled={fieldConfig.disabled}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
                     type={"email"}
@@ -135,8 +135,8 @@ export default function FormEmailInput({
                   {data?.is_primary && isMultiple && (
                     <Badge
                       variant={"outline"}
-                      className={`mx-auto bg-primary/10 py-1 font-normal text-primary hover:bg-primary/10`}
-                      data-test-id={`${formKey}-${fieldConfig.name}-IsPrimaryBadge${index + 1}`}
+                      className={` bg-primary/10 py-1 font-normal text-primary mx-auto hover:bg-primary/10`}
+                      data-test-id={`${formKey}-prim-badge-${index + 1}-${fieldConfig.name}`}
                     >
                       Primary
                     </Badge>
@@ -144,21 +144,21 @@ export default function FormEmailInput({
 
                   {!data.is_primary && isMultiple && (
                     <Button
-                      name={`${name}.${index}.isPrimaryButton`}
+                      name={`${name}.${index}.setPrimaryButton`}
                       disabled={formRenderProps?.field?.disabled}
-                      data-test-id={`${formKey}-${fieldConfig.name}-isPrimaryButton${index + 1}`}
+                      data-test-id={`${formKey}-set-prim-btn-${index + 1}-${fieldConfig.name}`}
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
                       className={`rounded-none ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
-                        const updatedFields = values.map(
-                          (field: IEmailData, i: number) => ({
-                            ...field,
-                            is_primary: i === index,
-                          }),
-                        );
-                        replace(updatedFields);
+                      const updatedFields = values.map(
+                        (field: IEmailData, i: number) => ({
+                        ...field,
+                        is_primary: i === index,
+                        }),
+                      );
+                      replace(updatedFields);
                       }}
                     >
                       <CheckIcon className="h-5 w-5 text-[#a3a3a3]" />
@@ -172,7 +172,7 @@ export default function FormEmailInput({
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
-                      data-test-id={`${formKey}-${fieldConfig.name}-remove_button_${index + 1}`}
+                      data-test-id={`${formKey}-rmv-btn-${index + 1}-${fieldConfig.name}`}
                       className={`rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
                         const _values = form.getValues(fieldConfig.name);
@@ -187,7 +187,7 @@ export default function FormEmailInput({
                   <p
                     id={data?.id}
                     className={cn("py-1 text-md font-medium text-destructive")}
-                    data-test-id={`${formKey}-${fieldConfig.name}-EmailErrorMessage${index + 1}`}
+                    data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}`}
                   >
                     {error?.[index]?.email?.message}
                   </p>
@@ -203,7 +203,7 @@ export default function FormEmailInput({
       {!isDisabled && isMultiple && (
         <Button
           name={`${name}.AddEmailButton`}
-          data-test-id={`${formKey}-${fieldConfig.name}-AddEmailButton`}
+          data-test-id={`${formKey}-add-email-btn-${fieldConfig.name}`}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           Icon={PlusIcon}
@@ -216,8 +216,10 @@ export default function FormEmailInput({
         </Button>
       )}
 
-      {(error?.root?.message || error?.message) && (
-        <FormMessage data-test-id={`${formKey}-${fieldConfig.name}-errmsg`} />
+      {error?.root?.message && (
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        />
       )}
     </FormItem>
   );

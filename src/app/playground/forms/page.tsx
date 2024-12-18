@@ -19,38 +19,79 @@ import AddressDetails from "./_form-controls/address";
 import InputsGrid from "./_form-controls/inputs-grid";
 import SelectDetails from "./_form-controls/select-details";
 import FileDetails from "./_form-controls/file";
+import SliderDetails from "./_form-controls/slider";
 
 export default function PlatformPlayGround() {
   return (
     <>
       <ButtonPlayGround />
       <Separator className="my-6" />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <CheckboxDetails />
-        <AmountDetails />
-        <EmailInputDetails />
-        <FileDetails/>
+      <div className="space-y-20 p-5">
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Basic Inputs</h2>
+          <div className="grid gap-4">
+            <InputDetails />
+            <TextAreaDetails />
+            <NumberInputDetails />
+            <PasswordDetails />
+            <PhoneInputDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
+          <div className="grid gap-4">
+            <SmartDateDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Choices and Selections</h2>
+          <div className="grid gap-4">
+            <RadioDetails />
+            <CheckboxDetails />
+            <SelectDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Specialized Inputs</h2>
+          <div className="grid gap-4">
+            <EmailInputDetails />
+            <AmountDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Complex Inputs</h2>
+          <div className="grid gap-4">
+            <AddressDetails />
+            <RichTextEditorDetails />
+            <FileDetails />
+          </div>
+        </section>
+
+        {/* <Separator />
+
+        <section>
+          <h2 className="text-xl font-bold mb-4">Other Inputs</h2>
+          <div className="grid gap-4">
+        <SliderDetails />
         <InputsGrid />
-        <AddressDetails />
         <MultiSelectDetails />
-        <AmountDetails />
-        <SmartDateDetails />
-        <TextAreaDetails />
-        <PasswordDetails />
-        <RadioDetails />
-        <NumberInputDetails />
-        <PhoneInputDetails />
-        <InputDetails />
-        <RichTextEditorDetails />
-        <SelectDetails />
-        {/* <DateRangeDetails />
-        <FileDetails />
-        <InputsDetails />
-        <InputLabelValueDetails />
-        <SliderDetails /> */}
+          </div>
+        </section> */}
+
         <Toaster />
       </div>
     </>
-
   );
 }

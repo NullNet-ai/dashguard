@@ -3,11 +3,14 @@ import { type IFieldComponentProps } from "./type";
 import CountryToCities from "../countriesToCities.json";
 import { FormField } from "~/components/ui/form";
 
-export default function CountryName({ form,formKey }: IFieldComponentProps) {
+export default function CountryName({ form, formKey }: IFieldComponentProps) {
   const handleSelect = (value: string) => {
     form.setValue(`details.country`, value);
     form.setValue(`details.city`, "");
     form.setValue(`details.state`, "");
+    form.setValue(`details.postal_code`, "");
+    form.setValue(`details.address_line_one`, "");
+    form.setValue(`details.address_line_two`, "");
   };
 
   return (
@@ -17,6 +20,7 @@ export default function CountryName({ form,formKey }: IFieldComponentProps) {
       render={(formRenderProps) => {
         return (
           <FormSelect
+            data-test-id={formKey + "-" + "sel-" + formRenderProps.field.name}
             formKey={formKey}
             fieldConfig={{
               selectSearchable: true,

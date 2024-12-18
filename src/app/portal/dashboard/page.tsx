@@ -2,6 +2,7 @@
 // import { PositionsChart } from "./_cards/PositionsCard";
 // import { BookingsCard } from "./_cards/BookingsCard";
 
+import NewComingSoon from "~/app/coming-soon";
 import ComingSoon from "../coming-soon/_components/coming_soon";
 
 // export default function Page() {
@@ -24,6 +25,6 @@ import ComingSoon from "../coming-soon/_components/coming_soon";
 
 export default function Page() {
   return (
-    <ComingSoon/>
+    <NewComingSoon type="component"/>
   );
 }

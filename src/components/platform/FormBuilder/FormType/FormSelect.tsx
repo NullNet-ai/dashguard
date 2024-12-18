@@ -4,7 +4,12 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { type IField, type ISelectOptions } from "../type";
-import { FormItem, FormLabel, FormMessage, useFormField } from "~/components/ui/form";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from "~/components/ui/form";
 import {
   Combobox,
   ComboboxButton,
@@ -15,11 +20,7 @@ import {
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
-import { cn } from "~/lib/utils";
-import camelCase from "lodash/camelCase";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
+import { cn, formatFormTestID } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -45,33 +46,50 @@ export default function FormSelect({
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  form.watch();
+  const [open, setOpen] = useState(false);
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
-          // Sort by label
           ?.sort((a, b) => a.label.localeCompare(b.label))
           ?.slice(0, 250)
+          ?.filter((opt) => {
+            return !!opt?.label;
+          })
       : selectOptions?.[fieldConfig?.name]
           ?.filter((opt) => {
             return opt.value.toLowerCase().includes(query.toLowerCase());
           })
           ?.sort((a, b) => a.label.localeCompare(b.label))
-          .slice(0, 5);
-  }, [query, selectOptions?.[fieldConfig?.name]]);
+          .slice(0, 5)
+          ?.filter((opt) => {
+            return !!opt?.label;
+          });
+  }, [fieldConfig?.name, query, selectOptions]);
+
   const label = useMemo(() => {
-    return filteredOptions?.find(
+    return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
   }, [formRenderProps?.field.value]);
+
+  const inputReadOnly = useMemo(() => {
+    return (
+      !fieldConfig?.selectSearchable ||
+      fieldConfig?.readonly ||
+      formRenderProps?.field.disabled
+    );
+  }, [
+    fieldConfig?.selectSearchable,
+    fieldConfig?.readonly,
+    formRenderProps?.field.disabled,
+  ]);
+
   return (
     <FormItem>
       <div>
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={kebabCase(
-            formKey + " "+ (fieldConfig.name) + "SelectFormLabel",
-          )}
+          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
         >
           {fieldConfig?.label}
         </FormLabel>
@@ -79,9 +97,7 @@ export default function FormSelect({
           <>
             {pillOptions.map((option, index) => (
               <Badge
-                data-test-id={kebabCase(
-                  formKey + " "+ (fieldConfig.name) + "Option" + option,
-                )}
+                data-test-id={`${formKey}-opt-${option}-${fieldConfig.name}`}
                 key={index}
                 className="mx-2 border border-green-800 bg-green-50 text-green-800"
               >
@@ -95,109 +111,99 @@ export default function FormSelect({
         as="div"
         value={
           label || {
-            label: fieldConfig?.placeholder,
+            label: "",
             value: "",
           }
         }
         onChange={(value) => {
+          setTimeout(() => setOpen(false), 100);
           setQuery("");
-          formRenderProps?.field.onChange(value?.value);
+          formRenderProps?.field.onChange(value?.value || "");
         }}
-        disabled={fieldConfig?.disabled}
+        disabled={fieldConfig.disabled}
       >
         <div className="relative mt-2">
+          <ComboboxInput
+            placeholder={fieldConfig.placeholder}
+            readOnly={inputReadOnly}
+            className={cn(
+              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+              {
+                "outline-destructive": error,
+              },
+            )}
+            onClick={() => {
+              if (formRenderProps.field.disabled || fieldConfig?.readonly)
+                return;
+              setOpen(true);
+            }}
+            onChange={(event) => setQuery(event.target.value)}
+            onBlur={() => {
+              setTimeout(() => setOpen(false), 100);
+              setQuery("");
+            }}
+            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+            // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
+            displayValue={(value) => value?.label}
+          />
           <ComboboxButton
             disabled={formRenderProps?.field?.disabled}
             className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
+            data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
-            <ComboboxInput
-              readOnly={
-                fieldConfig?.selectSearchable
-                  ? !fieldConfig?.selectSearchable
-                  : true
-              }
-              className={cn(
-                "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
-                {
-                  "outline-destructive": error,
-                },
-              )}
-              onChange={(event) => setQuery(event.target.value)}
-              onBlur={() => setQuery("")}
-              data-test-id={camelCase(
-                formKey + " "+ (fieldConfig.name) + "SelectFormInput",
-              )}
-              // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
-              displayValue={(value) => value?.label}
-            />
             <ChevronUpDownIcon
-              className="absolute right-2 size-5 text-gray-400"
+              className="absolute right-2 top-2.5 size-5 text-gray-400"
               aria-hidden="true"
             />
           </ComboboxButton>
+          {!(formRenderProps.field.disabled || fieldConfig?.readonly) &&
+            (filteredOptions?.length ? (
+              <ComboboxOptions
+                static={open}
+                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+              >
+                {filteredOptions?.slice(0, 700).map((opt) => (
+                  <ComboboxOption
+                    key={opt?.value}
+                    value={opt}
+                    disabled={
+                      (formRenderProps.field.disabled ||
+                        fieldConfig?.readonly) ??
+                      false
+                    }
+                    className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
+                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+                  >
+                    <span
+                      className="block truncate group-data-[selected]:font-semibold"
+                      data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                    >
+                      {opt.label}
+                    </span>
 
-          {filteredOptions?.length ? (
-            <ComboboxOptions
-              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-              data-test-id={camelCase(
-                formKey + " "+ (fieldConfig.name) + "SelectFormOptions",
-              )}
-            >
-              {filteredOptions?.slice(0, 700).map((opt, index) => (
-                <ComboboxOption
-                  key={opt?.value}
-                  value={opt}
-                  className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
-                  data-test-id={kebabCase(
-                    formKey +
-                      (fieldConfig.name) +
-                      "SelectFormOption" +
-                      opt.value,
-                  )}
-                >
+                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
+                      <CheckIcon className="size-5" aria-hidden="true" />
+                    </span>
+                  </ComboboxOption>
+                ))}
+              </ComboboxOptions>
+            ) : (
+              <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
+                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
                   <span
                     className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={kebabCase(
-                      formKey +
-                        (fieldConfig.name) +
-                        "SelectFormOption" +
-                        opt.value +
-                        "Label",
-                    )}
+                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
                   >
-                    {opt.label}
+                    No {fieldConfig?.label} found.
                   </span>
-
-                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
-                    <CheckIcon className="size-5" aria-hidden="true" />
-                  </span>
-                </ComboboxOption>
-              ))}
-            </ComboboxOptions>
-          ) : (
-            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-              <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
-                <span
-                  className="block truncate group-data-[selected]:font-semibold"
-                  data-test-id={kebabCase(
-                    formKey +
-                      (fieldConfig.name) +
-                      "SelectFormOptionNotFound",
-                  )}
-                >
-                  No {fieldConfig?.label} found.
-                </span>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
         </div>
       </Combobox>
 
-      <FormMessage
-        data-test-id={kebabCase(
-          formKey + " "+ (fieldConfig.name) + "SelectErrorMessage",
-        )}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

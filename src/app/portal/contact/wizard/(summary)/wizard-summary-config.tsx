@@ -1,4 +1,4 @@
-import StepOneBasicDetails from "./_1";
+import BasicDetailsSummary from "./_1";
 import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
 import ContactOrganizationSummary from "./_4";
@@ -14,12 +14,12 @@ const contactWizardSummary = ({
   return {
     one: {
       label: "Step 1",
-      required: false,
+      required: true,
       components: [
         {
           label: "Basic Details",
           component: (
-            <StepOneBasicDetails
+            <BasicDetailsSummary
               form_key={"ContactsOne"}
               identifier={identifier!}
             />
@@ -45,7 +45,8 @@ const contactWizardSummary = ({
     },
     three: {
       label: "Step 3",
-      required: false,
+      required: true,
+      show_summary: true,
       components: [
         {
           label: "Category Details",
@@ -62,6 +63,7 @@ const contactWizardSummary = ({
     four: {
       label: "Step 4",
       required: false,
+      show_summary: true,
       components: [
         {
           label: "Organization",
@@ -78,6 +80,7 @@ const contactWizardSummary = ({
     five: {
       label: "Step 5",
       required: false,
+      show_summary: true,
       components: [
         {
           label: "Confirmation",

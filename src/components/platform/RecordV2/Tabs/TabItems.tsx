@@ -26,7 +26,7 @@ let SUMMARY_TAB_WIDTH = 300;
 const TabItems = ({ tabs, pathname }: TabItemProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
-  let sidebar_width = remToPx(open ? 16 : 3);
+  let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -61,7 +61,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
               <a
                 data-test-id={
                   entityName +
-                  "-rcrd-tab-" +
+                  "-rcrdtab-" +
                   tab.name.split(" ").join("-").toLowerCase()
                 }
                 key={tab.name}
@@ -91,7 +91,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 py-3 text-sm font-medium text-gray-500 hover:text-primary"
-            data-test-id={"intb-dropdown-btn"}
+            data-test-id={"rcrdtab-ddn-btn"}
           >
             <ChevronDownIcon
               className="h-6 w-6 text-muted-foreground group-hover:text-primary"
@@ -107,7 +107,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                 <a
                   data-test-id={
                     entityName +
-                    "-rcrd-tab-" +
+                    "-rcrdtab-" +
                     tab.name.split(" ").join("-").toLowerCase()
                   }
                   href={tab.href}

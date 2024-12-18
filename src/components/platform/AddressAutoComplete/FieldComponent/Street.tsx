@@ -1,6 +1,6 @@
 import { FormField } from "~/components/ui/form";
 import FormInput from "../../FormBuilder/FormType/FormInput";
-import { IFieldComponentProps } from "./type";
+import { type IFieldComponentProps } from "./type";
 
 export default function StreetName({ form,formKey }: IFieldComponentProps) {
   return (
@@ -11,6 +11,7 @@ export default function StreetName({ form,formKey }: IFieldComponentProps) {
         render={(formRenderProps) => {
           return (
             <FormInput
+              data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name}
               formKey={formKey}
               fieldConfig={{
                 ...formRenderProps?.field,

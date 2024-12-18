@@ -2,10 +2,8 @@
 import {
   Accordion,
   AccordionItem,
-  AccordionTrigger,
 } from "~/components/ui/accordion";
-import { CollapsibleContent } from "~/components/ui/collapsible";
-import { IAccordionLayoutProps } from "../../../types/ui/interfaces";
+import { type IAccordionLayoutProps } from "../../../types/ui/interfaces";
 import FormHeader from "../../controls/FormHeader";
 import FormFilterGridLayout from "../FormFilterGridLayout";
 import OpenedFormLayout from "../layout/opened";
@@ -23,6 +21,7 @@ const FormBuilderLayout = ({
   displayType,
   formLabel,
   form,
+  fieldConfig,
   buttonConfig,
   formSchema,
   isSaveLoading,
@@ -86,7 +85,6 @@ const FormBuilderLayout = ({
       defaultValue="item-1"
     >
       <AccordionItem value="item-1">
-        
         <FormHeader
           formProps={
             {...formProps, 
@@ -190,6 +188,7 @@ const FormBuilderLayout = ({
               )}
 
               <OpenedFormLayout
+                fieldConfig={fieldConfig}
                 myParent={myParent}
                 customDesign={customDesign}
                 customRender={customRender}

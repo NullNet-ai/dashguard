@@ -5,10 +5,10 @@ import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
-  file: z.array(
+  resume: z.array(
     z
-      .string({ message: "File is required" })
-      .min(1, { message: "File is required" }),
+      .string({ message: "Resume is required" })
+      .min(1, { message: "Resume is required" }),
   ),
 });
 
@@ -37,8 +37,8 @@ export default function FileDetails({}) {
       {/* FormBuilder 11: File */}
       <FormBuilder
         enableFormRegisterToParent
-        formLabel="File Form Builder"
-        formKey="FormBuilderFile"
+        formLabel="Resume Upload Form"
+        formKey="employee-details"
         formSchema={FormSchema}
         handleSubmit={handleSave}
         customDesign={{
@@ -46,12 +46,12 @@ export default function FileDetails({}) {
         }}
         fields={[
           {
-            id: "file",
+            id: "resume",
             formType: "file",
-            name: "file",
-            label: "File",
+            name: "resume",
+            label: "Resume",
             required: true,
-            placeholder: "File",
+            placeholder: "Upload your resume",
           },
         ]}
       />

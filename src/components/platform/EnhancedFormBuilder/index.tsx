@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { Card } from "~/components/ui/card";
 import { Collapsible } from "~/components/ui/collapsible";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
@@ -9,9 +9,8 @@ import { useToast } from "~/context/ToastProvider";
 import { cn } from "~/lib/utils";
 import { useWizard } from "../Wizard/Provider";
 import { FormBuilderLayout } from "./components/ui";
-import { IPropsForms, TDisplayType } from "./types";
+import { type IPropsForms, type TDisplayType } from "./types";
 import { testIDFormatter } from "~/utils/formatter";
-import { useRouter, usePathname } from "next/navigation";
 import { UpdateCurrentSubTab } from "./Actions/UpdateCurrentSubTab";
 
 export const FormBuilder = (props: IPropsForms) => {
@@ -36,11 +35,10 @@ export const FormBuilder = (props: IPropsForms) => {
     features,
     create_mode = true,
     myParent,
+    fieldConfig,
   } = props;
 
   const { actions } = useWizard();
-  const router = useRouter();
-  const pathname = usePathname();
 
   const eventEmitter = useEventEmitter();
   const toast = useToast();
@@ -150,7 +148,7 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, []);
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
 
   //* HANDLERS
 
@@ -170,7 +168,7 @@ export const FormBuilder = (props: IPropsForms) => {
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((data) => {
+    ).then(() => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
@@ -339,11 +337,9 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSelectFieldFilterGrid = async (
-    data: z.infer<typeof formSchema>,
-  ) => {
+  const onSelectFieldFilterGrid = async (data: z.infer<typeof formSchema>) => {
     try {
-      if(data?.code && create_mode) {
+      if (data?.code && create_mode) {
         UpdateCurrentSubTab({ tab_name: data.code });
       }
       setFormGridSelected([data]);
@@ -364,6 +360,7 @@ export const FormBuilder = (props: IPropsForms) => {
         <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
           <FormBuilderLayout
             {...props}
+            fieldConfig={fieldConfig}
             form={form}
             debugOn={debugOn}
             showFormActions={showFormActions}

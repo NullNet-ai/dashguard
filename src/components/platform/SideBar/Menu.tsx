@@ -7,6 +7,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  useSidebar,
 } from "~/components/ui/sidebar";
 import * as _ICON from "@heroicons/react/24/outline";
 import {
@@ -23,6 +24,7 @@ interface IProps {
 
 export default function Menu({ item }: IProps) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const {open} = useSidebar();
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the star
@@ -87,27 +89,31 @@ export default function Menu({ item }: IProps) {
             ) : (
               <a
                 href={item.url || "#"}
-                className={`flex items-center gap-2 group/item ${isActive && "bg-muted text-primary"}`}
-                data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}`)}
+                className={`flex items-center  gap-2 group/item ${isActive && "bg-muted text-primary"} ${open ? '' : 'justify-center bg-transparent'} `}
+                data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
                 >
                 <SidebarMenuButton tooltip={item.title}
-                  data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-btn`)}
+                  data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}-btn`)}
                 >
                   <ICON className="mr-2 h-5 w-5" />
-                  <span className="font-semibold">{item.title}</span>
-                  {isFavorite ? (
-                    <SolidStarIcon
-                      onClick={toggleFavorite}
-                      data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-fav-btn`)}
-                      className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                    />
-                  ) : (
-                    <StarIcon
-                      onClick={toggleFavorite}
-                      data-test-id={testIDFormatter(`sdnavmenu-menu-itm-${item.title}-fav-btn`)}
-                      className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                    />
-                  )}
+                  {open ?     <span className="font-semibold">{item.title}</span> : null}
+                  <> {!open ? (
+                      isFavorite ? (
+                        <SolidStarIcon
+                          onClick={toggleFavorite}
+                          data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}-fav-btn`)}
+                          className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
+                        />
+                      ) : (
+                        <StarIcon
+                          onClick={toggleFavorite}
+                          data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}-fav-btn`)}
+                          className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
+                        />
+                      )
+                  ) : null}
+                  
+                  </>
                 </SidebarMenuButton>
               </a>
             )}

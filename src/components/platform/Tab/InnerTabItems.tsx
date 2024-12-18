@@ -25,7 +25,7 @@ let SEARCH_BAR_WIDTH = 528;
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
-  let sidebar_width = remToPx(open ? 16 : 3);
+  let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   if (size === "xs" || size === "sm" || size === "md") {
     SEARCH_BAR_WIDTH = 0;
@@ -61,7 +61,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
             className="group relative flex items-center px-2 py-2 pr-1"
           >
             <a
-              data-test-id={entity + "-aptab-" + tab.name.split(" ").join("-").toLowerCase()}
+              data-test-id={entity + "-apptab-" + tab.name.split(" ").join("-").toLowerCase()}
               href={tab.href}
               aria-current={tab.current ? "page" : undefined}
               className={cn(
@@ -87,7 +87,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
-            data-test-id={"aptab-dropdown-btn"}
+            data-test-id={"apptab-ddn-btn"}
           >
             <ChevronDownIcon
               className="h-6 w-6 text-muted-foreground group-hover:text-primary"
@@ -101,7 +101,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
                 className="group relative flex items-center p-2 py-3"
               >
                 <a
-                  data-test-id={"aptab-" + tab.name.split(" ").join("-").toLowerCase()}
+                  data-test-id={"apptab-" + tab.name.split(" ").join("-").toLowerCase()}
                   href={tab.href}
                   aria-current={tab.current ? "page" : undefined}
                   className={cn(

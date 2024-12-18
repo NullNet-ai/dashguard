@@ -16,9 +16,8 @@ export const FileInput = forwardRef<HTMLDivElement, FileInputProps>(
     return (
       <div
         ref={ref}
-        {...props}
         className={`relative w-full ${
-          isLOF || disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          isLOF || disabled ? "cursor-not-allowed" : "cursor-pointer"
         }`}
       >
         <div
@@ -45,7 +44,9 @@ export const FileInput = forwardRef<HTMLDivElement, FileInputProps>(
         </div>
         <Input
           ref={dropzoneState.inputRef}
+          readOnly={disabled || isLOF}
           disabled={isLOF || disabled}
+          {...props}
           {...dropzoneState.getInputProps()}
           className={`${isLOF || disabled ? "cursor-not-allowed" : ""}`}
         />

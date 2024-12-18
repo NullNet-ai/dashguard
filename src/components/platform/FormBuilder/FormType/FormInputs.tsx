@@ -5,19 +5,14 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IUserFormField, type IField, IFieldFilterActions } from "../type";
+import { type IUserFormField, type IField, type IFieldFilterActions } from "../type";
 import {
   FormControl,
   FormItem,
-  FormLabel,
   useFormField,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
 
 export interface InputData {
   id?: string;
@@ -64,7 +59,7 @@ export default function FormTextInputs({
     if (!fields?.length) {
       handleAddInput();
     }
-  }, []);
+  });
 
   const { register } = form;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
@@ -77,13 +72,13 @@ export default function FormTextInputs({
             <div className="w-full">
               <Input
                 {...register(`${formRenderProps.field.name}[${index}].value`)}
-                readOnly={fieldConfig?.readonly ?? false}
+                 readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                 placeholder={fieldConfig?.placeholder}
                 disabled={
-                  formRenderProps?.field?.disabled || fieldConfig?.disabled
+                 undefined
                 }
                 type={fieldConfig?.type || "text"}
-                data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "Inputs")}
+                data-test-id={`${formKey}-inp-${fieldConfig.name}`}
                 {...fieldConfig}
                 onChange={(e) => {
                   handleInputChange(index, e.target.value);
@@ -96,13 +91,8 @@ export default function FormTextInputs({
               {error?.[index] && (
                 <p
                   id={data?.id}
-                  className={cn("py-1 text-md font-medium text-destructive")}
-                  data-test-id={kebabCase(
-                    formKey +
-                      (fieldConfig.name) +
-                      "InputsErrorMessage" +
-                      (index + 1),
-                  )}
+                  className="py-1 text-md font-medium text-destructive"
+                  data-test-id={`${formKey}-inp-${fieldConfig.name}-error-msg${index > 0 ? `-${index + 1}` : ""}`}
                 >
                   {error?.[index]?.value?.message}
                 </p>
@@ -111,9 +101,7 @@ export default function FormTextInputs({
           </FormControl>
           {index > 0 && (
             <Button
-              data-test-id={kebabCase(
-                formKey + " "+ (fieldConfig.name) + "InputsRemoveButton" + (index + 1),
-              )}
+              data-test-id={`${formKey}-inp-${fieldConfig.name}-remove-btn-${index + 1}`}
               disabled={formRenderProps?.field?.disabled}
               type="button"
               variant="destructive"
@@ -128,7 +116,7 @@ export default function FormTextInputs({
 
       {fieldConfig?.options?.inputsType === "multiple" && (
         <Button
-          data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "InputsAddButton")}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}-add-btn`}
           disabled={formRenderProps?.field?.disabled}
           type="button"
           onClick={handleAddInput}
@@ -140,3 +128,4 @@ export default function FormTextInputs({
     </FormItem>
   );
 }
+

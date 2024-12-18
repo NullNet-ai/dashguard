@@ -35,7 +35,6 @@ export const FileUploaderContent = forwardRef<
       aria-description="content file holder"
     >
       <div
-        {...props}
         ref={ref}
         className={cn(
           "flex gap-1 rounded-xl",
@@ -82,6 +81,7 @@ export const FileUploaderContent = forwardRef<
                 index={i}
                 progressState={progressState}
                 onRemove={() => removeFileFromSet(i)}
+                {...props}
               >
                 <Image src={ImagePath} width={40} height={40} alt="FileImage" />
                 <span>{file.name}</span>

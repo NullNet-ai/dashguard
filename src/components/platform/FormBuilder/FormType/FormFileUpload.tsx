@@ -13,8 +13,6 @@ import {
 } from "~/components/ui/form";
 
 import FileUpload from "../../FileUpload";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
 
 // import { DevTool } from "@hookform/devtools";
 
@@ -55,9 +53,7 @@ export default function FormFile({
       {fieldConfig?.label && (
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={kebabCase(
-            formKey + " " + fieldConfig.name + "FileFormLabel",
-          )}
+          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
         >
           {fieldConfig?.label}
         </FormLabel>
@@ -66,7 +62,15 @@ export default function FormFile({
       <FormControl>
         <FileUpload
           {...register(field.name)}
-          fileInputProps={{}}
+          fileInputProps={{
+            "data-test-id": `${formKey}-file-inp-${fieldConfig.name}`,
+          }}
+          fileUploaderProps={{
+            "data-test-id": `${formKey}-file-upl-${fieldConfig.name}`,
+          }}
+          fileUploaderContentProps={{
+            "data-test-id": `${formKey}-file-cnt-${fieldConfig.name}`,
+          }}
           onUploadFile={handleChangeUpload}
           dropzoneOptions={
             fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
@@ -75,9 +79,7 @@ export default function FormFile({
         />
       </FormControl>
       <FormMessage
-        data-test-id={kebabCase(
-          formKey + " " + fieldConfig.name + "FileErrorMessage",
-        )}
+        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>
   );

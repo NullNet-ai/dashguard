@@ -10,12 +10,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type IField } from "../type";
-import { Textarea } from "~/components/ui/textarea";
 import { UserIcon } from "lucide-react";
 import AutosizeTextarea from "~/components/ui/autosize-textarea";
-import kebabCase from "lodash/kebabCase";
-import capitalize from "lodash/capitalize";
-;
+
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -23,24 +20,28 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   form: UseFormReturn<Record<string, any>, any, undefined>;
-  formKey:string
+  formKey: string;
 }
+
 export default function FormTextArea({
   fieldConfig,
   formRenderProps,
   form,
-  formKey
+  formKey,
 }: IProps) {
   const { register } = form;
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required} data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "TextAreaFormLabel")}>
+      <FormLabel
+        required={fieldConfig?.required}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+      >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <AutosizeTextarea
-          {...register((fieldConfig.name))}
-          data-test-id={kebabCase(formKey+ (fieldConfig.name) + "TextAreaInput")}
+          {...register(fieldConfig.name)}
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           icon={UserIcon}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight}
@@ -49,15 +50,19 @@ export default function FormTextArea({
           lineWrapping={fieldConfig.textAreaLineWrapping}
           maxLines={fieldConfig.textAreaMaxLines}
           autoComplete="off"
-          readOnly={fieldConfig?.readonly ?? false}
-          disabled={formRenderProps.field.disabled || fieldConfig.disabled}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
           placeholder={fieldConfig?.placeholder}
-          className={`${form.formState.errors[(fieldConfig.name)] && "border-destructive"}`}
+          className={`${
+            form.formState.errors[fieldConfig.name] && "border-destructive"
+          } `}
           {...formRenderProps?.field}
+          disabled={fieldConfig.disabled}
         />
       </FormControl>
 
-      <FormMessage data-test-id={kebabCase(formKey + " "+ (fieldConfig.name) + "TextAreaErrorMessage")}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

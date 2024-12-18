@@ -23,5 +23,5 @@ export function formatTabName(tab_name: string): string {
     .join(" ");
 }
 export function formatFormTestID(id: string) {
-  return id.split(" ").join("-").toLowerCase();
+  return id.replace(/[\s,]+/g, "-").toLowerCase();
 }

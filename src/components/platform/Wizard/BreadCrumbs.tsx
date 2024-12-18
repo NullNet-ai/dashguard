@@ -24,7 +24,7 @@ export default function WizardNavigator() {
             <span
               className="text-md"
               data-test-id={testIDFormatter(
-                `${entityName}-wizard-breadcrumb-home-link`
+                `${entityName}-wzrd-breadcrumb-home-link`
               )}
             >
               {wizard_step_title}
@@ -35,7 +35,7 @@ export default function WizardNavigator() {
             <span
               className="text-md"
               data-test-id={testIDFormatter(
-                `${entityName}-wizard-breadcrumb-${currentStep}-link`
+                `${entityName}-wzrd-breadcrumb-${currentStep}-link`
               )}
             >
               Step {currentStep} - {currentStep !== undefined ? stepLabels?.[currentStep] ?? "" : ""}

@@ -43,12 +43,10 @@ export default function FormCurrencyInput({
   fieldConfig,
   formRenderProps,
   currencyInputOptions,
-  icon,
   form,
-  value,
   formKey,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
+  // const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const options =
@@ -86,7 +84,7 @@ export default function FormCurrencyInput({
 
   const handleOnValueChange: CurrencyInputProps["onValueChange"] = (
     input,
-    name,
+    _name,
     _values,
   ) => {
     // Remove any non-numeric characters to sanitize input
@@ -141,13 +139,15 @@ export default function FormCurrencyInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-${fieldConfig.name}-lbl`}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
       >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <div className="flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
           <Input
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             containerClassName="opacity-0 pointer-events-none absolute right-0"
             ref={normalInputRef}
             onChange={(e) =>
@@ -158,7 +158,9 @@ export default function FormCurrencyInput({
 
           <CurrencyInput
             {...register(fieldConfig.name)}
-            data-test-id={`${formKey}-${fieldConfig.name}-inp`}
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
             className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
@@ -176,36 +178,37 @@ export default function FormCurrencyInput({
             groupSeparator=","
             decimalsLimit={2}
           />
-          <Select
+            <Select
             value={options
               ?.findIndex((option) => option.label === selectedCurrency.label)
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
-            data-test-id={`${formKey}-${fieldConfig.name}-sel`}
-          >
+            data-test-id={`${formKey}-sel-${fieldConfig.name}`}
+            disabled={formRenderProps.field.disabled}
+            >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
-              data-test-id={`${formKey}-${fieldConfig.name}-trg`}
+              data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue
-                placeholder="Unit"
-                data-test-id={`${formKey}-${fieldConfig.name}-sel-val`}
+              placeholder="Unit"
+              data-test-id={`${formKey}-sel-val-${fieldConfig.name}`}
               >
-                {selectedCurrency.label}
+              {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent data-test-id={`${formKey}-${fieldConfig.name}-cnt`}>
+            <SelectContent data-test-id={`${formKey}-cnt-${fieldConfig.name}`}>
               {options?.map((option, i) => (
-                <SelectItem
-                  key={option.label}
-                  value={i.toString()}
-                  data-test-id={`${formKey}-${fieldConfig.name}-sel-opt-${option.label}`}
-                >
-                  {option.label}
-                </SelectItem>
+              <SelectItem
+                key={option.label}
+                value={i.toString()}
+                data-test-id={`${formKey}-sel-opt-${option.label}-${fieldConfig.name}`}
+              >
+                {option.label}
+              </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+            </Select>
         </div>
       </FormControl>
 
@@ -215,7 +218,7 @@ export default function FormCurrencyInput({
       typeof error.amount.message === "string" ? (
         <p
           className={cn("py-1 text-md font-medium text-destructive")}
-          data-test-id={`${formKey}-${fieldConfig.name}-err-msg`}
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
         >
           {error.amount.message}
         </p>

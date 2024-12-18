@@ -5,7 +5,7 @@ import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
-import { IFormProps } from "../types";
+import { type IFormProps } from "../types";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 
 export default function ContactDetails({
@@ -14,7 +14,6 @@ export default function ContactDetails({
   selectOptions,
   multiSelectOptions,
 }: IFormProps) {
-  const utils = api.useUtils();
   const toast = useToast();
   const updateContact = api.contact.updateContactDetails.useMutation();
 
@@ -31,7 +30,6 @@ export default function ContactDetails({
         toast.success("Contact Details submit successfully");
         return data;
       }
-      await utils.contact.invalidate();
       throw new Error("Failed to submit Contact Details");
     } catch (error) {
       toast.error("Failed to submit Contact Details");
@@ -41,15 +39,15 @@ export default function ContactDetails({
   return (
     <FormBuilder
       myParent={params.shell_type}
+      enableFormRegisterToParent
       formProps={params}
       formLabel="Contact Details"
       handleSubmit={handleSave}
-      formKey="contact_details"
+      formKey="ContactDetails"
       formSchema={contactDetailsSchema}
       defaultValues={defaultValues}
       multiSelectOptions={multiSelectOptions}
       selectOptions={selectOptions}
-      enableFormRegisterToParent={true}
       fields={[
         {
           id: "first_name",
