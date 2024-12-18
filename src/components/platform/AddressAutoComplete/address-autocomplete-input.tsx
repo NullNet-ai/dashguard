@@ -86,17 +86,20 @@ export function AddressAutoCompleteInput(props: CommonProps) {
             </FormLabel>
             <FormControl>
               <Combobox>
-                <div className="relative flex gap-2">
+                <div className="relative flex gap-2 ">
                   <MagnifyingGlassIcon
-                    className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-400"
+                    className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-muted-foreground"
                     aria-hidden="true"
                   />
 
                   <ComboboxInput
                     {...formRenderProps?.field}
+                    disabled={undefined}
                     data-test-id={formKey + "-" + formRenderProps.field.name}
+                    readOnly={formRenderProps.field.disabled}
+                    autoComplete="off"
                     ref={inputRef}
-                    className="relative h-10 w-full flex-grow rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
+                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm "
                     placeholder="Search..."
                     onChange={(event) => {
                       handleSearch(event.target.value);
@@ -117,15 +120,15 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     <RotateCcw className="h-4 w-4" strokeWidth={3} />
                     Reset
                   </Button>
-                  {isOpen && (
+                  {isOpen  && !formRenderProps.field.disabled &&(
                     <ComboboxOptions
                       static
                       as="ul"
-                      className="absolute z-[100] mt-12 max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
+                      className="absolute z-[100] mt-12 max-h-80 w-full overflow-y-auto rounded-md border border-border bg-background shadow-lg"
                     >
                       {isOpen && (
                         <div className="flex flex-row items-center">
-                          <h2 className="mb-2 mt-2 px-3 text-xs font-semibold text-gray-500">
+                          <h2 className="mb-2 mt-2 px-3 text-xs font-semibold text-muted-foreground">
                             Search Address{" "}
                           </h2>
                           {isLoading && (
@@ -135,7 +138,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                       )}
                       <li className="p-2">
                         <Fragment>
-                          <ul className="text-sm text-gray-700">
+                          <ul className="text-sm text-muted-foreground">
                             {predictions?.length ? (
                               <Fragment>
                                 {predictions?.map((place, index) => (
@@ -154,7 +157,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                                         formatFormTestID(place?.name)
                                       }
                                       value={place?.name}
-                                      className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-indigo-500 hover:text-white"
+                                      className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-primary/90 hover:text-white"
                                     >
                                       <div className="flex flex-row">
                                         <MapPinIcon className="h-5 w-5 text-sky-500" />

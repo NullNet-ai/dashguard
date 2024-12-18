@@ -97,7 +97,7 @@ export default function FormSelect({
           setQuery("");
           formRenderProps?.field.onChange(value?.value);
         }}
-        disabled={fieldConfig?.disabled}
+        disabled={undefined}
       >
         <div className="relative mt-2">
             <ComboboxButton
@@ -112,7 +112,7 @@ export default function FormSelect({
               (fieldConfig?.selectSearchable ? !fieldConfig?.selectSearchable : true)
               }
               className={cn(
-              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-offset-0 focus:outline-primary sm:text-sm/6 focus:border-transparent  focus:ring-0",
               {
                 "outline-destructive": error,
               },

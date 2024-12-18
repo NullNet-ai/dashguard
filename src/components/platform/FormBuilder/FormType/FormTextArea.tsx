@@ -56,7 +56,7 @@ export default function FormTextArea({
           placeholder={fieldConfig?.placeholder}
           className={`${
             form.formState.errors[fieldConfig.name] && "border-destructive"
-          }`}
+          } `}
           {...formRenderProps?.field}
           disabled={undefined}
         />
