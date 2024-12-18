@@ -66,7 +66,7 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
-          readOnly={isDisabled}
+          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           {...formRenderProps.field}
           disabled={fieldConfig.disabled}
           onChange={(e) => {

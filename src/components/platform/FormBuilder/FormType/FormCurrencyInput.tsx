@@ -147,7 +147,7 @@ export default function FormCurrencyInput({
         <div className="flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
           <Input
             disabled={fieldConfig.disabled}
-            readOnly={formRenderProps.field.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             containerClassName="opacity-0 pointer-events-none absolute right-0"
             ref={normalInputRef}
             onChange={(e) =>
@@ -159,7 +159,7 @@ export default function FormCurrencyInput({
           <CurrencyInput
             {...register(fieldConfig.name)}
             disabled={fieldConfig.disabled}
-            readOnly={formRenderProps.field.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"

@@ -112,7 +112,7 @@ export default function FormEmailInput({
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
-                    readOnly={isDisabled}
+                     readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
