@@ -27,7 +27,7 @@ export const FormBuilder = (props: IPropsForms) => {
     handleSubmit,
     enableAppendForm,
     //* other
-    enableFormRegisterToParent,
+    enableFormRegisterToParent : _enableFormRegisterToParent,
     filterGridConfig,
     defaultDisplay = "expanded",
     customRender,
@@ -39,6 +39,10 @@ export const FormBuilder = (props: IPropsForms) => {
   } = props;
 
   const { actions } = useWizard();
+
+
+  // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
+  const enableFormRegisterToParent = myParent === "record" ? false : _enableFormRegisterToParent;
 
   const eventEmitter = useEventEmitter();
   const toast = useToast();
