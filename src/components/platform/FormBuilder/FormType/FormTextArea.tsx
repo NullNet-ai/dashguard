@@ -42,7 +42,7 @@ export default function FormTextArea({
         <AutosizeTextarea
           {...register(fieldConfig.name)}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          icon={UserIcon}
+          icon={fieldConfig.textAreaIcon}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight}
           showCharCount={fieldConfig.textAreaShowCharCount}
