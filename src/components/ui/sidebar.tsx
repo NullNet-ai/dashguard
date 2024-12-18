@@ -18,12 +18,12 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import useScreenType from "~/hooks/use-screen-type";
-const SIDEBAR_COOKIE_NAME = "sidebar:state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "255px";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "80px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "d";
+import Cookies from 'js-cookie';
+
 
 type SidebarContext = {
   state: "expanded" | "collapsed";
@@ -49,7 +49,7 @@ function useSidebar() {
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
-    defaultOpen?: boolean;
+    defaultOpen: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
   }
@@ -68,18 +68,8 @@ const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
-
-    // This is the internal state of the sidebar.
-    // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen);
 
-    React.useEffect(() => {
-      if (typeof window !== "undefined") {
-        const value =  localStorage.getItem("sidebar_state") || 'true'
-        _setOpen(value === 'true')
-      }
-      
-  }, []);
     const open = openProp ?? _open;
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -88,8 +78,7 @@ const SidebarProvider = React.forwardRef<
             typeof value === "function" ? value(open) : value,
           );
         }
-
-         localStorage.setItem('sidebar_state', `${!open}`)
+        Cookies.set('sidebar_state', `${open}` , { expires: 7 }); // Expires in 7 days
         _setOpen(value);
 
         // This sets the cookie to keep the sidebar state.
