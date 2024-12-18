@@ -112,7 +112,7 @@ export default function FormEmailInput({
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
-                    readOnly={isDisabled}
+                     readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
@@ -120,7 +120,7 @@ export default function FormEmailInput({
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
                     className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
-                    disabled={undefined}
+                    disabled={fieldConfig.disabled}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
                     type={"email"}

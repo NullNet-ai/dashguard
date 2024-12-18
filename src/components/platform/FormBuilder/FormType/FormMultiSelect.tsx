@@ -54,7 +54,7 @@ export default function FormMultiSelect({
           {...formRenderProps.field}
           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
-          disabled={undefined}
+          disabled={fieldConfig.disabled}
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"

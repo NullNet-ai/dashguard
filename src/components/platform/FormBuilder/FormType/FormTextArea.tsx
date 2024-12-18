@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type IField } from "../type";
-import { UserIcon } from "lucide-react";
 import AutosizeTextarea from "~/components/ui/autosize-textarea";
 
 interface IProps {
@@ -42,7 +41,7 @@ export default function FormTextArea({
         <AutosizeTextarea
           {...register(fieldConfig.name)}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          icon={UserIcon}
+          icon={fieldConfig.textAreaIcon}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight}
           showCharCount={fieldConfig.textAreaShowCharCount}
@@ -58,7 +57,7 @@ export default function FormTextArea({
             form.formState.errors[fieldConfig.name] && "border-destructive"
           } `}
           {...formRenderProps?.field}
-          disabled={undefined}
+          disabled={fieldConfig.disabled}
         />
       </FormControl>
 
