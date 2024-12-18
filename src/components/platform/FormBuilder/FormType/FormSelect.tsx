@@ -72,6 +72,18 @@ export default function FormSelect({
     );
   }, [formRenderProps?.field.value]);
 
+  const inputReadOnly = useMemo(() => {
+    return (
+      !fieldConfig?.selectSearchable ||
+      fieldConfig?.readonly ||
+      formRenderProps?.field.disabled
+    );
+  }, [
+    fieldConfig?.selectSearchable,
+    fieldConfig?.readonly,
+    formRenderProps?.field.disabled,
+  ]);
+
   return (
     <FormItem>
       <div>
@@ -113,11 +125,7 @@ export default function FormSelect({
         <div className="relative mt-2">
           <ComboboxInput
             placeholder={fieldConfig.placeholder}
-            readOnly={
-              fieldConfig?.selectSearchable
-                ? !fieldConfig?.selectSearchable
-                : true
-            }
+            readOnly={inputReadOnly}
             className={cn(
               "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
               {

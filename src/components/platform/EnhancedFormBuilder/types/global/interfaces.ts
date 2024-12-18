@@ -89,6 +89,7 @@ interface IField {
     entity?: string;
     field?: string;
   };
+  selectSearchable?: boolean;
 }
 
 interface ISelectOptions {
@@ -235,7 +236,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
-  fieldConfig?:Field;
+  fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
