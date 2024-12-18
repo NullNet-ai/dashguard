@@ -140,7 +140,7 @@ export default function FormSelect({
                     value={opt}
                     disabled={
                       (formRenderProps.field.disabled || fieldConfig?.readonly) ??
-                      true
+                      false
                     }
                     className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
