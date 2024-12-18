@@ -48,6 +48,7 @@ export default function SmartDateDetails({}) {
             label: "Smart Date",
             required: true,
             placeholder: "Smart Date",
+            
           },
         ]}
       />

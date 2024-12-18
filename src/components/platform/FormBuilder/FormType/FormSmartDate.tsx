@@ -78,8 +78,8 @@ export default function FormSmartDate({
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
-          disabled={undefined}
-          readOnly={formRenderProps.field.disabled}
+          disabled={fieldConfig.disabled}
+           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
         />
       </FormControl>
       <FormMessage
