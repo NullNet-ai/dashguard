@@ -72,6 +72,8 @@ export default function FormNumber({
           Icon={icon}
           hasError={!!formRenderProps.fieldState.error}
           onChange={handleChange}
+          leftAddon={fieldConfig.inputLeftAddOns}
+          rightAddon={fieldConfig.inputRightAddOns}
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
