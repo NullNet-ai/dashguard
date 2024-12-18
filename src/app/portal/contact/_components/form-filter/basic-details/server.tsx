@@ -55,7 +55,7 @@ const FormServerFetch = async () => {
           id: contact_id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
-          pluck_fields,s
+          pluck_fields,
         }}
         selectedRecords={contact_id ? [default_values] : []}
         grid_data={{ items, totalCount }}
