@@ -151,17 +151,20 @@ export default function WizardProvider({
 
   const handleIncrementStep = async (setLoading: (loading: any) => void) => {
     setLoading(true);
-
-    const steps = currentStep + 1;
-    nextStep.mutateAsync({
-      entity: mainEntity!,
-      identifier: identifier!,
-      step: steps.toString(),
-    });
+    // const steps = currentStep + 1;
+    // nextStep.mutateAsync({
+    //   entity: mainEntity!,
+    //   identifier: identifier!,
+    //   step: steps.toString(),
+    // }).then(() => {
+    //   setLoading(false)
+    //   router.push()
+    // });
 
     NextPage()
       .then(() => {
         setLoading(false);
+        setFormSave({});
       })
       .catch(() => {
         setLoading(false);
