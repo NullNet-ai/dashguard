@@ -27,18 +27,19 @@ export default function FormFilterGrid({
     main_entity_id,
     onSelectRecords,
     filter_entity,
-    grid_data
+    grid_data,
+    selectedRecords: _form_filter_selected_record,
   } = config;
   const selectedRecords = (config.selectedRecords || [])
-  ?.map((record: any) => record?.id)
-  .filter(Boolean) as string[];
+    ?.map((record: any) => record?.id)
+    .filter(Boolean) as string[];
   let grid_items: any[] = [];
   let grid_total_count = 0;
   let isLoading = false;
-  if(grid_data){
+  if (grid_data) {
     grid_items = grid_data.items;
     grid_total_count = grid_data.totalCount;
-  }else {
+  } else {
     const [_, list] = api.grid.items.useSuspenseQuery({
       entity: filter_entity!,
       current,
@@ -46,7 +47,7 @@ export default function FormFilterGrid({
       pluck,
     });
     const { isLoading: list_is_loading, data } = list ?? {};
-    isLoading = list_is_loading
+    isLoading = list_is_loading;
     const { items, totalCount } = data ?? {};
     grid_items = items || [];
     grid_total_count = totalCount || 0;
@@ -65,7 +66,10 @@ export default function FormFilterGrid({
     );
   }
 
-  const initialSelectedRecords = selectedRecords.reduce((acc, id) => ({...acc, [id]: true}), {});
+  const initialSelectedRecords = selectedRecords.reduce(
+    (acc, id) => ({ ...acc, [id]: true }),
+    {},
+  );
   return (
     <Grid
       height="300px"
@@ -96,6 +100,22 @@ export default function FormFilterGrid({
         title: label,
         columns: gridColumns!,
         actionType,
+        rowClickCustomAction: ({ row, config }) => {
+          if (row.original.id === _form_filter_selected_record?.[0]?.id) return;
+          if (!config?.statusesIncluded?.includes(row.original.status)) return;
+
+          if (!onSelectRecords) return;
+          Promise.resolve(
+            onSelectRecords({
+              rows: [row?.original],
+              main_entity_id: main_entity_id || "",
+              filter_entity: config?.entity,
+            }),
+          )?.then((data) => {
+            handleSelectedGridRecords([data?.rows] || []);
+            handleCloseGrid();
+          });
+        },
       }}
       initialSelectedRecords={initialSelectedRecords}
     />
