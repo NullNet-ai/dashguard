@@ -38,7 +38,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
-  fieldConfig?:Field,
+  fieldConfig?: Field;
   formKey: string;
   gridConfig?: IFilterGridConfig;
   formSchema: TFormSchema;
@@ -48,7 +48,11 @@ export default function FormModule({
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   const formattedFormKey = formatFormTestID(
-    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+    (entityName ?? "no-entity") +
+      " " +
+      (myParent ?? "no-parent") +
+      " " +
+      formKey,
   );
   return (
     <Fragment>
@@ -62,7 +66,7 @@ export default function FormModule({
                 key={_field.id + index}
                 form={form}
                 formKey={formattedFormKey}
-                fieldConfig={fieldConfig}
+                fieldConfig={fieldConfig || _field}
               />
             );
           default:
