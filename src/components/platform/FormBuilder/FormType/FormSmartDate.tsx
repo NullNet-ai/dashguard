@@ -79,12 +79,12 @@ export default function FormSmartDate({
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
           disabled={fieldConfig.disabled}
-           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
         />
       </FormControl>
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }
