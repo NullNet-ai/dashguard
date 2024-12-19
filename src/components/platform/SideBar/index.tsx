@@ -55,6 +55,7 @@ export default function AppSideBar(config: ISideBarProps) {
   };
 
   const {width} = useWindowSize();
+  
   return (
     <Sidebar collapsible="icon">
       {headerComponent && (

@@ -58,7 +58,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
         key={action.label}
         className="disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground"
         onClick={() => action.action(editor)}
-        disabled={!action.canExecute(editor) || disabled}
+        disabled={disabled}
         isActive={action.isActive(editor)}
         tooltip={`${action.label} ${action.shortcuts.map((s) => getShortcutKey(s).symbol).join(" ")}`}
         aria-label={action.label}
@@ -76,7 +76,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
       <DropdownMenuItem
         key={action.label}
         onClick={() => action.action(editor)}
-        disabled={!action.canExecute(editor) || disabled}
+        disabled={!action.canExecute(editor) && disabled}
         className={cn("flex flex-row items-center justify-between gap-4 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground", {
           "bg-accent": action.isActive(editor),
         })}

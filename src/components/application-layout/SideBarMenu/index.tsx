@@ -22,7 +22,7 @@ export default async function SideBarMenu() {
     <AppSideBar
       mainMenuConfig={mainConfig}
       headerComponent={
-        <div className="flex items-center gap-2 py-1.5 text-sm">
+        <div className="flex items-center justify-start lg:justify-center  py-1.5 text-sm">
           <Image
             width={50}
             height={50}

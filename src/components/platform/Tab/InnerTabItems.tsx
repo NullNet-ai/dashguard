@@ -25,7 +25,7 @@ let SEARCH_BAR_WIDTH = 528;
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
-  let sidebar_width = remToPx(open ? 16 : 3);
+  let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   if (size === "xs" || size === "sm" || size === "md") {
     SEARCH_BAR_WIDTH = 0;

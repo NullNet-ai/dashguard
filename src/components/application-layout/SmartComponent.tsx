@@ -42,7 +42,7 @@ export default function SmartComponent() {
   
   return (
     <Card
-      className={`${openSmart ? "right-0" : `-right-[25dvw]`} transition-right fixed top-0 hidden h-screen w-[25dvw] duration-500 lg:block`}
+      className={`${openSmart ? "right-0" : `-right-[25dvw]`} transition-right fixed top-0 hidden z-50 h-screen w-[25dvw] duration-500 lg:block`}
     >
       <Button
         className="absolute left-[-3.5rem] top-3/4 -rotate-90 rounded-lg bg-primary/15 text-primary  hover:bg-primary/40 active:translate-x-0"

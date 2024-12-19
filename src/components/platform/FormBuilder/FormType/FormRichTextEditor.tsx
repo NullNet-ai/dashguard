@@ -33,15 +33,17 @@ export default function FormRichTextEditor({
   formKey,
   // value,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
-  let defaultValue = form.getValues(fieldConfig?.name) && "";
+  const isDisabled = formRenderProps.field.disabled;
+  let defaultValue: string = Array.isArray(formRenderProps.field.value)
+    ? formRenderProps.field.value.join("")
+    : formRenderProps.field.value;
   const isToFormat = true; // Set to true if to include like how the tipTapEditor is formatted
   if (isToFormat) {
     defaultValue = `<p class="text-node">${defaultValue ?? ""}</p>`;
   } else {
     defaultValue;
   }
-  const [content, setContent] = useState<Content>(defaultValue ?? "");
+  const [content, setContent] = useState<Content>(defaultValue);
   function handleChange(newValue: Content) {
     form.setValue(`${fieldConfig?.name}`, newValue, {
       shouldDirty: true,
@@ -63,7 +65,8 @@ export default function FormRichTextEditor({
         <MinimalTiptapEditor
           {...form.register(fieldConfig?.name)}
           editorProps={{
-            editable: () => !isDisabled && !fieldConfig?.readonly,
+            editable: () =>
+              !(formRenderProps.field.disabled || fieldConfig?.readonly),
             attributes: {
               "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
             },
@@ -78,7 +81,11 @@ export default function FormRichTextEditor({
             fieldConfig?.placeholder ?? "Type your description here..."
           }
           autofocus={true}
-          editable={!isDisabled}
+          editable={
+            formRenderProps.field.disabled ||
+            fieldConfig?.readonly ||
+            fieldConfig?.disabled
+          }
           editorClassName="focus:outline-none"
           onBlur={() => {
             formRenderProps.field.onBlur();

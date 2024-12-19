@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
+import { DevTool } from "@hookform/devtools";
 
 interface IProps {
   fieldConfig: IField;
@@ -48,6 +49,7 @@ export default function FormCurrencyInput({
 }: IProps) {
   // const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
+  const defaultValues = form.watch(fieldConfig.name);
 
   const options =
     currencyInputOptions && currencyInputOptions[fieldConfig.name]
@@ -146,16 +148,21 @@ export default function FormCurrencyInput({
       <FormControl>
         <div className="flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
           <Input
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             containerClassName="opacity-0 pointer-events-none absolute right-0"
             ref={normalInputRef}
             onChange={(e) =>
               handleOnValueChange(e.target.value, fieldConfig.name, values)
             }
-            value={values.value}
+            defaultValue={values.value}
+            // value={values.value}
           />
 
           <CurrencyInput
             {...register(fieldConfig.name)}
+            disabled={fieldConfig.disabled}
+             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
@@ -167,7 +174,7 @@ export default function FormCurrencyInput({
               }
             }}
             // onFocus={() => normalInputRef.current?.focus()}
-            value={formRenderProps.field.value ? values.value : "0.00"}
+            value={defaultValues?.amount}
             step={1}
             prefix={selectedCurrency.value}
             decimalSeparator="."
@@ -180,6 +187,7 @@ export default function FormCurrencyInput({
               .toString()}
             onValueChange={(value) => handleCurrencySelect(value)}
             data-test-id={`${formKey}-sel-${fieldConfig.name}`}
+            disabled={formRenderProps.field.disabled}
             >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"

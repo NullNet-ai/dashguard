@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { type IRadioOptions, type IField } from "../type";
-import capitalize from "lodash/capitalize";
+
 
 interface IProps {
   fieldConfig: IField;
@@ -42,7 +42,7 @@ export default function FormRadio({
       </FormLabel>
       <FormControl>
         <Controller
-          name={capitalize(fieldConfig.name)}
+          name={fieldConfig.name}
           control={form.control}
           rules={fieldConfig.required ? { required: true } : {}}
           render={({ field }) => (
@@ -54,12 +54,12 @@ export default function FormRadio({
                 field.onChange(value);
               }}
               value={field.value}
-              className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex space-y-1`}
+              className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
             >
               {radioOptions?.[fieldConfig?.id]?.map((option, index) => (
                 <FormItem
                   key={index}
-                  className="flex items-center space-x-3 space-y-0"
+                  className="flex items-center gap-2 space-y-0"
                 >
                   <FormControl>
                     <RadioGroupItem

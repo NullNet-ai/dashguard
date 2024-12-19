@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
 import { Fragment, useCallback, useRef, useState } from "react";
 import {
   type UseFormReturn,
@@ -21,6 +21,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { Button } from "~/components/ui/button";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import { type IField } from "../FormBuilder/type";
@@ -44,7 +45,7 @@ interface CommonProps {
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
-  const { handleSelectAddress, form,formKey } = props;
+  const { handleSelectAddress, form, formKey } = props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -78,38 +79,56 @@ export function AddressAutoCompleteInput(props: CommonProps) {
       render={(formRenderProps) => {
         return (
           <FormItem>
-            <FormLabel data-test-id={formKey   + "-"+ "lbl-" + formRenderProps.field.name }>
+            <FormLabel
+              data-test-id={formKey + "-" + "lbl-" + formRenderProps.field.name}
+            >
               Address
             </FormLabel>
             <FormControl>
               <Combobox>
-                <div className="relative">
+                <div className="relative flex gap-2 ">
                   <MagnifyingGlassIcon
-                    className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-400"
+                    className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-muted-foreground"
                     aria-hidden="true"
                   />
 
                   <ComboboxInput
                     {...formRenderProps?.field}
-                    data-test-id={formKey   + "-" + formRenderProps.field.name}
+                    disabled={undefined}
+                    data-test-id={formKey + "-" + formRenderProps.field.name}
+                    readOnly={formRenderProps.field.disabled}
+                    autoComplete="off"
                     ref={inputRef}
-                    className="h-10 w-full rounded-md border border-gray-200 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
+                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm "
                     placeholder="Search..."
                     onChange={(event) => {
                       handleSearch(event.target.value);
                     }}
+                    value={searchedAddress}
                     onBlur={close}
                     onFocus={open}
                   />
-                  {isOpen && (
+                  <Button
+                    className="gap-1"
+                    variant={"outline"}
+                    onClick={() => {
+                      form.setValue("details", {});
+                      handleSearch("");
+                    }}
+                    disabled={formRenderProps.field.disabled}
+                  >
+                    <RotateCcw className="h-4 w-4" strokeWidth={3} />
+                    Reset
+                  </Button>
+                  {isOpen  && !formRenderProps.field.disabled &&(
                     <ComboboxOptions
                       static
                       as="ul"
-                      className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg"
+                      className="absolute z-[100] mt-12 max-h-80 w-full overflow-y-auto rounded-md border border-border bg-background shadow-lg"
                     >
                       {isOpen && (
                         <div className="flex flex-row items-center">
-                          <h2 className="mb-2 mt-2 px-3 text-xs font-semibold text-gray-500">
+                          <h2 className="mb-2 mt-2 px-3 text-xs font-semibold text-muted-foreground">
                             Search Address{" "}
                           </h2>
                           {isLoading && (
@@ -119,21 +138,26 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                       )}
                       <li className="p-2">
                         <Fragment>
-                          <ul className="text-sm text-gray-700">
+                          <ul className="text-sm text-muted-foreground">
                             {predictions?.length ? (
                               <Fragment>
                                 {predictions?.map((place, index) => (
                                   <Fragment key={place.place_id + index}>
                                     <ComboboxOption
                                       onClick={() => {
-                                        handleSearch("");
+                                        // handleSearch("");
                                         handleSelectAddress(place);
                                         inputRef.current?.blur();
                                       }}
                                       as="li"
-                                      data-test-id={formKey   + formRenderProps.field.name + "-opt-" + formatFormTestID(place?.name)}
+                                      data-test-id={
+                                        formKey +
+                                        formRenderProps.field.name +
+                                        "-opt-" +
+                                        formatFormTestID(place?.name)
+                                      }
                                       value={place?.name}
-                                      className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-indigo-500 hover:text-white"
+                                      className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-primary/90 hover:text-white"
                                     >
                                       <div className="flex flex-row">
                                         <MapPinIcon className="h-5 w-5 text-sky-500" />
@@ -154,6 +178,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                 </div>
               </Combobox>
             </FormControl>
+
             <FormMessage />
           </FormItem>
         );

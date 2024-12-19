@@ -23,12 +23,12 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
           totalSteps: 2,
-          enableAutoCreate: false,
+          enableAutoCreate: true,
           entityName: main_entity,
           stepLabels: {
             1: "Basic Details",
             2: "Confirmation",
-          }
+          },
         }}
         summary={wizard_summary}
       >

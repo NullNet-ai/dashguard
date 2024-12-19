@@ -27,7 +27,7 @@ export const FormBuilder = (props: IPropsForms) => {
     handleSubmit,
     enableAppendForm,
     //* other
-    enableFormRegisterToParent,
+    enableFormRegisterToParent : _enableFormRegisterToParent,
     filterGridConfig,
     defaultDisplay = "expanded",
     customRender,
@@ -39,6 +39,10 @@ export const FormBuilder = (props: IPropsForms) => {
   } = props;
 
   const { actions } = useWizard();
+
+
+  // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
+  const enableFormRegisterToParent = myParent === "record" ? false : _enableFormRegisterToParent;
 
   const eventEmitter = useEventEmitter();
   const toast = useToast();
@@ -71,7 +75,7 @@ export const FormBuilder = (props: IPropsForms) => {
       status: "dirty",
       form_key: formKey,
     });
-  }, [eventEmitter, form?.formState?.isDirty, formKey]);
+  }, [form?.formState?.isDirty]);
 
   //* Effect to listen to form errors
   useEffect(() => {
@@ -97,7 +101,7 @@ export const FormBuilder = (props: IPropsForms) => {
 
     // Clean up the subscription on unmount
     return () => subscription.unsubscribe();
-  }, [form, form.watch, onDataChange]);
+  }, [form.watch, onDataChange]);
 
   //* Effect to listen to filter grid config changes
   useEffect(() => {
@@ -148,7 +152,7 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, []);
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
 
   //* HANDLERS
 
@@ -168,9 +172,7 @@ export const FormBuilder = (props: IPropsForms) => {
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((
-    //  data
-    ) => {
+    ).then(() => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
@@ -339,11 +341,9 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSelectFieldFilterGrid = async (
-    data: z.infer<typeof formSchema>,
-  ) => {
+  const onSelectFieldFilterGrid = async (data: z.infer<typeof formSchema>) => {
     try {
-      if(data?.code && create_mode) {
+      if (data?.code && create_mode) {
         UpdateCurrentSubTab({ tab_name: data.code });
       }
       setFormGridSelected([data]);

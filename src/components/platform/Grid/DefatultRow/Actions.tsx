@@ -5,7 +5,7 @@ import { Delete } from "../Action/Delete";
 import { Archive } from "../Action/Archived";
 import { Restore } from "../Action/Restore";
 import { Button } from "@headlessui/react";
-import { ArchiveX, PencilIcon, RotateCcw, TrashIcon } from "lucide-react";
+import { ArchiveIcon, ArchiveX, ArchiveXIcon, PencilIcon, RotateCcw, TrashIcon } from "lucide-react";
 
 /**
  *
@@ -72,7 +72,7 @@ export function DeleteComponent({ row, config }: DefaultRowActions) {
         handleDelete({ row, config });
       }}
     >
-      <TrashIcon className="h-3 w-3 text-red-500" />
+      <TrashIcon className="h-3 w-3 text-destructive" />
     </Button>
   );
 }
@@ -108,7 +108,7 @@ export function ArchiveComponent({
         setOpen?.(true);
       }}
     >
-      <ArchiveX className="h-3 w-3 text-red-500" />
+      <ArchiveXIcon className="h-3 w-3 text-destructive" />
     </Button>
   );
 }
