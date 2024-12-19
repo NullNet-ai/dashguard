@@ -24,7 +24,7 @@ import { Separator } from "~/components/ui/separator";
 import * as _ICON from "@heroicons/react/24/outline";
 import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { StarIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { testIDFormatter } from "~/utils/formatter";
 
 
@@ -36,6 +36,9 @@ interface IProps {
 export default function GroupMenu({ groups }: IProps) {
   // State to track favorites for each submenu item
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
+  const refs = useRef<any[]>([]);
+
+
 
   // Toggle favorite for a specific submenu item
   const toggleFavorite = (e: React.MouseEvent, itemTitle: string) => {
@@ -48,6 +51,26 @@ export default function GroupMenu({ groups }: IProps) {
 
   const {open} = useSidebar();
 
+   // Scroll to the active item on load
+   useEffect(() => {
+    const activeIndex = groups?.reduce((acc, items,) => { 
+      if(items?.items?.length) {
+        const activeItem = items.items.findIndex((subItem) => 
+          subItem.isActive);
+       acc = activeItem 
+      }
+
+      return acc;
+
+    }, -1);
+
+
+    if (activeIndex !== -1 && refs.current[activeIndex]) {
+      refs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [groups]);
+
+  
   return (
     <SidebarGroup 
       className={`${!open ? 'px-0' : ''}`}
@@ -85,7 +108,7 @@ export default function GroupMenu({ groups }: IProps) {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {item.items?.map((subItem) => {
+                    {item.items?.map((subItem, index) => {
                       const SUB_ICON =
                         // @ts-expect-error - TS doesn't know about dynamic imports
                         _ICON?.[subItem?.icon] ?? ChevronUpDownIcon;
@@ -104,7 +127,10 @@ export default function GroupMenu({ groups }: IProps) {
                         favorites[subItem.title ?? ""] || false;
 
                       return (
-                        <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubItem key={subItem.title}
+                          
+                        ref={(el: any) => (refs.current[index] = el!)}
+                        >
                           <SidebarMenuSubButton
                             asChild
                             className={`${subItem?.isActive && "bg-muted text-primary"}`}

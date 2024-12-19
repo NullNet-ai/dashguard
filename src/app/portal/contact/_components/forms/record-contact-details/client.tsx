@@ -57,7 +57,7 @@ export default function RecordContactDetails({
       defaultValues={defaultValues}
       multiSelectOptions={multiSelectOptions}
       selectOptions={selectOptions}
-      enableFormRegisterToParent={true}
+      enableFormRegisterToParent={false}
       fields={[
         {
           id: "phone",
