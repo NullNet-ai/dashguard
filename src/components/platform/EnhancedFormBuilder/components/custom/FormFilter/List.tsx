@@ -111,8 +111,8 @@ export default function FormFilterGrid({
               main_entity_id: main_entity_id || "",
               filter_entity: config?.entity,
             }),
-          )?.then((data) => {
-            handleSelectedGridRecords([data?.rows] || []);
+          )?.then((data ) => {
+            handleSelectedGridRecords(Object.keys(data?.rows).length ? [data?.rows] : []);
             handleCloseGrid();
           });
         },
