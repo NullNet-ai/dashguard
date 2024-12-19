@@ -18,6 +18,7 @@ import {
 import { StarIcon } from "@heroicons/react/24/outline";
 import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { testIDFormatter } from "~/utils/formatter";
+import useScreenType from "~/hooks/use-screen-type";
 interface IProps {
   item: ISidebarMenu;
 }
@@ -25,6 +26,7 @@ interface IProps {
 export default function Menu({ item }: IProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const {open} = useSidebar();
+  const stype = useScreenType();
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the star
@@ -96,7 +98,8 @@ export default function Menu({ item }: IProps) {
                   data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}-btn`)}
                 >
                   <ICON className="mr-2 h-5 w-5" />
-                  {open ?     <span className="font-semibold">{item.title}</span> : null}
+                  {open || (stype ==='sm' ||   stype ==='md' ||stype ==='xs')
+                  ?     <span className="font-semibold">{item.title}</span> : null}
                   <> {!open ? (
                       isFavorite ? (
                         <SolidStarIcon
