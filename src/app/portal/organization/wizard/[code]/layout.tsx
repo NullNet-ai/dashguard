@@ -25,7 +25,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
           totalSteps: 2,
-          enableAutoCreate: false,
+          enableAutoCreate: true,
           entityName: mainEntity,
         }}
         summary={wizard_summary}

@@ -26,6 +26,8 @@ import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { StarIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import { testIDFormatter } from "~/utils/formatter";
+import useScreenType from "~/hooks/use-screen-type";
+import { cn } from "~/lib/utils";
 
 
 interface IProps {
@@ -38,7 +40,7 @@ export default function GroupMenu({ groups }: IProps) {
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
   const refs = useRef<any[]>([]);
 
-
+  const stype = useScreenType();
 
   // Toggle favorite for a specific submenu item
   const toggleFavorite = (e: React.MouseEvent, itemTitle: string) => {
@@ -49,7 +51,7 @@ export default function GroupMenu({ groups }: IProps) {
     }));
   };
 
-  const {open} = useSidebar();
+  const {open, openMobile} = useSidebar();
 
    // Scroll to the active item on load
    useEffect(() => {
@@ -94,19 +96,26 @@ export default function GroupMenu({ groups }: IProps) {
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="relative flex justify-center  flex-1 overflow-visible"
+                    className={
+                      cn(`relative flex justify-start  lg:justify-center  flex-1 overflow-visible ${openMobile ?  '' : ''}`)
+                    }
                     data-test-id={
                       testIDFormatter(`sidebar-grp-menu-${  item.title?.charAt(0).toUpperCase()}${item.title?.slice(1).toLowerCase()}`)
                     }
                   >
                     {item.icon && <ICON className={`h-5 w-5 ${open ? 'mr-2' : ''}`} />}
-                    {open ? <span className="font-semibold">{item.title}</span> : null}
+                    {(open && (stype ==='sm' ||   stype ==='md' ||stype ==='xs')) || openMobile || (open && !openMobile)
+                  ?     <span className="font-semibold ">{item.title}</span> : null}
                     {!!item?.items?.length && (
-                      <ChevronRightIcon className={`ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 ${!open ? 'absolute -right-4 z-[50]' : ''}`} />
+                      <ChevronRightIcon className={cn(`
+                          ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 
+                      `,
+                    `  ${!open && !openMobile ? 'absolute -right-4 z-[50]' : ''}`
+                    )} />
                     )}
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="w-full">
                   <SidebarMenuSub>
                     {item.items?.map((subItem, index) => {
                       const SUB_ICON =
@@ -128,7 +137,7 @@ export default function GroupMenu({ groups }: IProps) {
 
                       return (
                         <SidebarMenuSubItem key={subItem.title}
-                          
+                          className=""
                         ref={(el: any) => (refs.current[index] = el!)}
                         >
                           <SidebarMenuSubButton
@@ -144,7 +153,7 @@ export default function GroupMenu({ groups }: IProps) {
                               {subItem.icon && (
                                 <SUB_ICON className={`h-5 w-5 ${open ? 'mr-2' : ''}`} />
                               )}
-                              {open && <span className="grow text-nowrap font-semibold">
+                               {((open && (stype ==='sm' ||   stype ==='md' ||stype ==='xs')) || (openMobile) || (open && !openMobile) ) && <span className="grow text-nowrap font-semibold">
                                 {subItem.title}
                               </span>}
                              <>

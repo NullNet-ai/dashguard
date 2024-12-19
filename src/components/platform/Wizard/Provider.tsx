@@ -233,6 +233,11 @@ export default function WizardProvider({
   const handleSaveAndNew = async () => {
     try {
       setSaveNewLoading(true);
+      if (config?.enableAutoCreate === false) {
+        router.push(`/portal/${mainEntity}/wizard/new/1`);
+        setSaveNewLoading(false);
+        return;
+      }
       await SaveAndNew({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
