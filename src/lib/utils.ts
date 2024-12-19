@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatAndCapitalize(entityName: string): string {
   if (!entityName) return "";
   return entityName
-    .split("_")
+    .split(/[_-]/) // Split by both underscore and hyphen
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
