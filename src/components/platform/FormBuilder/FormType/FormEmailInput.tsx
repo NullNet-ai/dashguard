@@ -108,15 +108,15 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${fieldConfig.readonly ? "border-transparent read-only:opacity-50 disabled:opacity-100" : "border"} ${error?.[index] ? "border-destructive" : ""}`}
+                  className={`flex items-center focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring border ${error?.[index] ? "border-destructive" : ""}`}
                 >
                   <Input
                     {...register(`${fieldConfig.name}.${index}.email`)}
-                     readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+                    readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
-                    value={`${values?.[index]?.email || ""}`}
+                    defaultValue={`${values?.[index]?.email || ""}`}
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
                     className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
@@ -145,7 +145,7 @@ export default function FormEmailInput({
                   {!data.is_primary && isMultiple && (
                     <Button
                       name={`${name}.${index}.setPrimaryButton`}
-                      disabled={formRenderProps?.field?.disabled}
+                      disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                       data-test-id={`${formKey}-set-prim-btn-${index + 1}-${fieldConfig.name}`}
                       type="button"
                       variant={"ghost"}
@@ -168,7 +168,7 @@ export default function FormEmailInput({
                   {isMultiple && (
                     <Button
                       name={`${name}.${index}.RemoveEmailInputButton`}
-                      disabled={formRenderProps?.field?.disabled}
+                      disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
@@ -204,7 +204,7 @@ export default function FormEmailInput({
         <Button
           name={`${name}.AddEmailButton`}
           data-test-id={`${formKey}-add-email-btn-${fieldConfig.name}`}
-          disabled={formRenderProps?.field?.disabled}
+          disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           type="button"
           Icon={PlusIcon}
           variant={"link"}
