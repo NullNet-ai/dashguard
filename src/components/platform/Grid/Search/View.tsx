@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
 import { GridContext } from "../Provider";
 import SearchResult from "./SearchResult";
-import { formatAndCapitalize } from "~/lib/utils";
+import { cn, formatAndCapitalize } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { X } from "lucide-react";
@@ -140,8 +140,8 @@ export default function Search() {
           )}
         </div>
       </Combobox>
-      <div>
-        <span className="text-xs text-black">Filtered By: </span>
+      <div className={cn(`${!gridState?.sorting?.length ? 'mt-[20px]' : 'absolute -bottom-[40px]'}`)}>
+      <span className="text-xs text-black">Filtered By: </span>
         {defaultSearchItems?.map((item) => (
           <Badge key={item.id} variant="primary">
             {item.type === "criteria"
