@@ -9,7 +9,7 @@ import { EventEmitterProvider } from "~/context/EventEmitterProvider";
 import { TooltipProvider } from "~/components/ui/tooltip";
 
 export const metadata: Metadata = {
-  title: "Recruitment Platform",
+  title: "Platform",
   description: "All in one platform for recruitment",
 };
 
