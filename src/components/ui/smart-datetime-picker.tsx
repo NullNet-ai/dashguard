@@ -475,6 +475,7 @@ const NaturalLanguageInput = React.forwardRef<
       onDateChange,
       onTimeChange,
       readOnly=false,
+      disabled,
       ...props
     },
     ref,
@@ -666,12 +667,13 @@ const NaturalLanguageInput = React.forwardRef<
         ref={ref}
         type="text"
         readOnly={readOnly}
+        disabled={disabled}
         placeholder={_placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.currentTarget.value)}
         onKeyDown={handleKeydown}
-        onBlur={handleParse}
-        className={cn("mr-0.5 h-8 flex-1 rounded border-none px-2 read-only:focus-visible:border-transparent focus-visible:ring-transparent focus-visible:ring-0", inputBase)}
+        onBlur={(readOnly || disabled) ? undefined : handleParse}
+        className={cn(`mr-0.5 h-8 flex-1 rounded border-none px-2 read-only:focus-visible:border-transparent focus-visible:ring-transparent focus-visible:ring-0`, inputBase)}
         {...props}
       />
     );
@@ -743,7 +745,7 @@ const DateTimeLocalInput = ({
           <span className="sr-only">calender</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" sideOffset={8}>
+      <PopoverContent className="w-auto p-0 z-[10000]" sideOffset={10}  >
         <div className="flex gap-1">
           <Calendar
             {...props}
