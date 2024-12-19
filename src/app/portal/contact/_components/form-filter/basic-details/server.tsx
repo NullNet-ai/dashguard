@@ -2,7 +2,6 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
-
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";

@@ -116,7 +116,7 @@ export default function FormEmailInput({
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
-                    value={`${values[index]?.email || ""}`}
+                    value={`${values?.[index]?.email || ""}`}
                     iconPlacement="left"
                     // hasError={!!formRenderProps.fieldState.error}
                     className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
