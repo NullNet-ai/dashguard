@@ -86,6 +86,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
         return (
           <FormItem>
             <FormLabel
+              required={fieldConfig?.required}
               data-test-id={formKey + "-" + "lbl-" + formRenderProps.field.name}
             >
               Address
