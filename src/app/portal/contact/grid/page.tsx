@@ -34,6 +34,8 @@ export default async function Page({
     "updated_date",
     "created_time",
     "updated_time",
+    "created_by",
+    "updated_by",
   ];
 
   const sorting = await api.grid.getReportSorting();
@@ -69,6 +71,14 @@ export default async function Page({
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchableFields: searchableFields,
+        searchConfig: {
+          router: "contact",
+          resolver: "mainGrid",
+          query_params: {
+            entity: "contact",
+            pluck: _pluck,
+          },
+        }
       }}
     />
   );

@@ -10,7 +10,7 @@ export interface IState {
 export interface IAction {
   handleQuery: (data: React.SetStateAction<string>) => void;
   handleOpen: (open: boolean) => void;
-  defaultHandleFilterQuery: (
+  handleSearchQuery: (
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => ISearchResult | undefined;

@@ -9,6 +9,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import { ISearchItem, ISearchParams } from "./Search/types";
+import { appRouter } from '../../../server/api/root';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -33,6 +34,8 @@ export type TActionType =
   | "custom";
 
 export type TLayerType = "main" | "sub";
+
+export type AppRouterKeys = keyof typeof appRouter;
 
 export interface IConfigGrid {
   entity: string;
@@ -60,14 +63,11 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
-  searchCustomQuery?: (search_params: ISearchParams) =>
-    | Promise<{
-        totalCount: number;
-        items: any[];
-        currentPage: number;
-        totalPages: number;
-      }>
-    | undefined;
+  searchConfig?: {
+    router: AppRouterKeys;
+    resolver: string;
+    query_params?: ISearchParams;
+  }
 }
 
 export interface IState {

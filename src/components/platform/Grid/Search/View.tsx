@@ -20,20 +20,18 @@ export default function Search() {
   const { state: gridState } = useContext(GridContext);
   const {
     searchableFields = [],
-    searchCustomQuery,
     entity = "",
+    searchConfig,
   } = gridState?.config ?? {};
   const { advanceFilterItems = [] } = state ?? {};
 
   const { query = "", searchItems = [] } = state ?? {};
 
-  const { defaultHandleFilterQuery } = actions ?? {};
+  const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
 
-  const onFieldFilterFn = defaultHandleFilterQuery!;
-
-  const data = onFieldFilterFn!(
+  const data = handleSearchQuery!(
     {
       entity,
       current: 0,
@@ -55,6 +53,7 @@ export default function Search() {
         "updated_time",
       ],
       advance_filters: advanceFilterItems,
+      ...(searchConfig?.query_params ?? {}),
     },
     {
       refetchOnWindowFocus: false,
@@ -66,7 +65,6 @@ export default function Search() {
 
   const defaultSearchItems = searchItems?.filter((item) => item?.default);
   const selectedSearchItems = searchItems?.filter((item) => !item?.default);
-
 
   return (
     <>

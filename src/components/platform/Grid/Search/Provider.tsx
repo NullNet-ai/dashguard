@@ -33,7 +33,7 @@ export default function GridSearchProvider({ children }: IProps) {
     columns = [],
     entity,
     searchableFields = [],
-    searchCustomQuery,
+    searchConfig,
   } = gridState?.config ?? {};
 
   const pathName = usePathname();
@@ -89,11 +89,14 @@ export default function GridSearchProvider({ children }: IProps) {
     setOpen(open);
   };
 
-  const defaultHandleFilterQuery = (
+  const handleSearchQuery = (
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-    const { data } = api.contact.mainGrid.useQuery(search_params, options);
+
+    const {router = "grid", resolver = "items" } = searchConfig ?? {}
+    // @ts-ignore
+    const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
     return data;
   };
 
@@ -132,7 +135,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const actions = {
     handleQuery,
     handleOpen,
-    defaultHandleFilterQuery,
+    handleSearchQuery,
     handleAddSearchItem,
     handleRemoveSearchItem,
   } as IAction;
