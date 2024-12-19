@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
+import { DevTool } from "@hookform/devtools";
 
 interface IProps {
   fieldConfig: IField;
@@ -48,6 +49,7 @@ export default function FormCurrencyInput({
 }: IProps) {
   // const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
+  const defaultValues = form.watch(fieldConfig.name);
 
   const options =
     currencyInputOptions && currencyInputOptions[fieldConfig.name]
@@ -153,7 +155,8 @@ export default function FormCurrencyInput({
             onChange={(e) =>
               handleOnValueChange(e.target.value, fieldConfig.name, values)
             }
-            value={values.value}
+            defaultValue={values.value}
+            // value={values.value}
           />
 
           <CurrencyInput
@@ -171,7 +174,7 @@ export default function FormCurrencyInput({
               }
             }}
             // onFocus={() => normalInputRef.current?.focus()}
-            value={formRenderProps.field.value ? values.value : "0.00"}
+            value={defaultValues?.amount}
             step={1}
             prefix={selectedCurrency.value}
             decimalSeparator="."
