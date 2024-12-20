@@ -72,6 +72,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     gcTime: 0,
     enabled: debouncedSearchInput !== "",
   });
+
   return (
     <FormField
       control={form.control}
@@ -101,25 +102,26 @@ export function AddressAutoCompleteInput(props: CommonProps) {
 
                   <ComboboxInput
                     {...formRenderProps?.field}
+                    ref={inputRef}
                     disabled={is_disabled}
                     readOnly={is_readonly}
-                    data-test-id={formKey + "-" + formRenderProps.field.name}
+                    data-test-id={formKey + "-" + formRenderProps?.field.name}
                     autoComplete="off"
-                    ref={inputRef}
                     className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
                     placeholder="Search..."
+               
+                    onFocus={open}
                     onChange={(event) => {
                       handleSearch(event.target.value);
                     }}
                     value={searchedAddress}
                     onBlur={close}
-                    onFocus={open}
                   />
                   <Button
                     className="gap-1"
                     variant={"outline"}
                     onClick={() => {
-                      form.setValue("details", {});
+                      form.resetField("details");
                       handleSearch("");
                     }}
                     disabled={is_disabled_or_readonly}

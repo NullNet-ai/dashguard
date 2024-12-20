@@ -34,6 +34,8 @@ export default function FormFilterGrid({
     grid_data,
     selectedRecords: _form_filter_selected_record,
   } = config;
+  const {state} = useContext(WizardContext)
+  const {open} = useSidebar()
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
     .filter(Boolean) as string[];
@@ -56,9 +58,23 @@ export default function FormFilterGrid({
     grid_items = items || [];
     grid_total_count = totalCount || 0;
   }
+
+  const calcWidth = useMemo(() => {
+    if (open && state?.isSummaryOpen) {
+      return 'w-[calc(100vw-530px)]'
+    }
+    else if (!open && state?.isSummaryOpen) {
+      return 'w-auto'
+    }
+    else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]'
+    }
+    else
+      return ''
+  }, [open, state?.isSummaryOpen])
+
   handleListLoading(isLoading);
-  const {state} = useContext(WizardContext)
-  const {open} = useSidebar()
+
 
   
 
@@ -83,19 +99,6 @@ export default function FormFilterGrid({
   );
 
 
-  const calcWidth = useMemo(() => {
-    if (open && state?.isSummaryOpen) {
-      return 'w-[calc(100vw-530px)]'
-    }
-    else if (!open && state?.isSummaryOpen) {
-      return 'w-auto'
-    }
-    else if (open && !state?.isSummaryOpen) {
-      return 'w-[calc(100vw-320px)]'
-    }
-    else
-      return ''
-  }, [open, state?.isSummaryOpen])
 
 
   return (

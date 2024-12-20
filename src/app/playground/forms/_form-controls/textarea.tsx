@@ -1,7 +1,7 @@
 
 "use client";
 
-import { UserIcon } from "lucide-react";
+import { FileTextIcon, UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
@@ -50,7 +50,7 @@ export default function TextAreaDetails() {
             required: true,
             placeholder: "Textarea",
             textAreaLineWrapping: true,
-            textAreaIcon: UserIcon,
+            textAreaIcon: FileTextIcon,
             textAreaShowCharCount: true,
             textAreaMaxHeight: 658,
             textAreaMaxCharCount: 100,

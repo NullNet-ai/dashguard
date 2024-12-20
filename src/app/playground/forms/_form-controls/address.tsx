@@ -69,6 +69,7 @@ export default function AddressDetails({}) {
             label: "Address",
             required: true,
             placeholder: "Address",
+            disabled:true
           },
         ]}
       />
