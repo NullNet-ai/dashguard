@@ -41,7 +41,7 @@ const TabMenu  = ({ current, href, tabs, name } : {
                         });
                     }}>
                     <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-                   <span>Close current tab</span>
+                   <span>Close Tab</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                     className="flex gap-2"
@@ -54,7 +54,7 @@ const TabMenu  = ({ current, href, tabs, name } : {
                     }}
                 >
                     <FileX2 className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-                   <span>Close other tabs</span>
+                   <span>Close Other Tabs</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                     className="flex gap-2"
@@ -67,7 +67,7 @@ const TabMenu  = ({ current, href, tabs, name } : {
                     }}
                 >
                     <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-                   <span>Close all tabs</span>
+                   <span>Close All Tabs</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                     <DropdownMenuItem className="flex gap-2">
