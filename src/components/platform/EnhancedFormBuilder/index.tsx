@@ -259,14 +259,14 @@ export const FormBuilder = (props: IPropsForms) => {
       }
       // Handle form validation and other checks
       //what's the use of this function???
-      // if (!form.formState.isDirty) {
-      //   eventEmitter.emit(`formStatus:${formKey}`, {
-      //     status: "done",
-      //     form_key: formKey,
-      //   });
-      //   setIsSaveLoading(false);
-      //   return;
-      // }
+      if (!form.formState.isDirty) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "done",
+          form_key: formKey,
+        });
+        setIsSaveLoading(false);
+        return;
+      }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
@@ -320,9 +320,12 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>, options?:{
-    action_type?: string;
-  }) => {
+  const onSubmitFormGrid = async (
+    data: z.infer<typeof formSchema>,
+    options?: {
+      action_type?: string;
+    },
+  ) => {
     if (!handleSubmitFormGrid) return;
     try {
       setIsSaveLoading(true);
@@ -331,7 +334,9 @@ export const FormBuilder = (props: IPropsForms) => {
         data,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: options?.action_type || (formGridSelected.length ? "Update" : "Create"),
+        action_type:
+          options?.action_type ||
+          (formGridSelected.length ? "Update" : "Create"),
         form,
       });
 
