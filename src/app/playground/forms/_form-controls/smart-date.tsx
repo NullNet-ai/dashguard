@@ -58,7 +58,6 @@ export default function SmartDateDetails({}) {
             required: true,
             placeholder: "Smart Date",
             dateTimePickerProps:{
-              // includeTime:true
             }
             // readonly:true,
           },

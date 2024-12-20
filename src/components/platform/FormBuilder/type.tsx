@@ -1,6 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import {
-  ElementType,
+  type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
@@ -12,6 +12,7 @@ import { type Option } from "~/components/ui/multi-select";
 import { type TActionType } from "../Grid/types";
 import { type DropzoneOptions } from "react-dropzone";
 import {
+  type DateGranularity,
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
@@ -63,6 +64,7 @@ export interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   dateTimePickerProps?: DateTimeLocalInputProps & {
+    granularity?: DateGranularity;
     minDate?: Date;
     maxDate?: Date;
     disablePastDates?: boolean;
