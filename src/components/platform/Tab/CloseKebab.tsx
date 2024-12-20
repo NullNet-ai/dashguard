@@ -39,7 +39,7 @@ export default function CloseTab({ current, href, name }: IProps) {
           className="flex gap-2"
         >
           <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-          <span>Close tab</span>
+          <span>Close Tab</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="flex gap-2"
@@ -51,14 +51,14 @@ export default function CloseTab({ current, href, name }: IProps) {
           }}
         >
           <FileX2 className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-          <span>Close all other tab</span>
+          <span>Close Other Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="flex gap-2"
           onClick={() => closeAllClassTabs()}
         >
           <FileX className={`h-4 w-4 text-default/60`} aria-hidden="true" />
-          <span>Close all tab</span>
+          <span>Close All Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex gap-2">

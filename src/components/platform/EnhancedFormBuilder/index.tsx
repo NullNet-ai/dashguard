@@ -131,7 +131,7 @@ export const FormBuilder = (props: IPropsForms) => {
       reject: (reason: any) => any,
     ) => {
       try {
-        //
+        // console.log("SUBMITTING FORM");
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -251,27 +251,6 @@ export const FormBuilder = (props: IPropsForms) => {
     await onSubmit(data);
   };
 
-  const handleEmitFormStatus = (status: string) => {
-    eventEmitter.emit(`formStatus:${formKey}`, {
-      status,
-      form_key: formKey,
-    });
-  };
-
-  const handleSetResError = (
-    form_errors: { field: string; message: string }[],
-  ) => {
-    form_errors.forEach(
-      ({ field, message }: { field: string; message: string }) => {
-        form.setError(field, {
-          type: "manual",
-          message: message,
-        });
-      },
-    );
-    handleEmitFormStatus("failed");
-  };
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSaveLoading(true);
     try {
@@ -279,15 +258,14 @@ export const FormBuilder = (props: IPropsForms) => {
         return toast.error("Form is Unchanged");
       }
       // Handle form validation and other checks
-      // whats the use of this function? irish
-      // if (!form.formState.isDirty) {
-      // eventEmitter.emit(`formStatus:${formKey}`, {
-      //   status: "done",
-      //   form_key: formKey,
-      // });
-      //   setIsSaveLoading(false);
-      //   return;
-      // }
+      if (!form.formState.isDirty) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "done",
+          form_key: formKey,
+        });
+        setIsSaveLoading(false);
+        return;
+      }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
@@ -298,18 +276,40 @@ export const FormBuilder = (props: IPropsForms) => {
         setIsSaveLoading(false);
 
         if (form_errors.length || existing) {
-          handleSetResError(form_errors);
+          form_errors.map(
+            ({ field, message }: { field: string; message: string }) => {
+              form.setError(field, {
+                type: "manual",
+                message: message,
+              });
+            },
+          );
           setIsSaveLoading(false);
+
           return;
         }
 
+        if (!!Object.keys(form.formState.errors).length || form_errors.length) {
+          eventEmitter.emit(`formStatus:${formKey}`, {
+            status: "failed",
+            form_key: formKey,
+          });
+          setIsSaveLoading(false);
+
+          return;
+        }
         form.reset(data, {
           keepDirty: false,
           keepTouched: true,
         });
 
-        handleEmitFormStatus("done");
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "done",
+          form_key: formKey,
+        });
+
         form.control._disableForm(true);
+
         setIsSaveLoading(false);
       }
       setIsSaveLoading(false);
@@ -332,12 +332,17 @@ export const FormBuilder = (props: IPropsForms) => {
       });
       //TODO: Please cater setting error message in field and don't proceed to view mode.
       if (!response?.length) {
-        handleEmitFormStatus("failed");
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "failed",
+          form_key: formKey,
+        });
         throw new Error("Failed to submit form grid");
       }
-
+      eventEmitter.emit(`formStatus:${formKey}`, {
+        status: "done",
+        form_key: formKey,
+      });
       setFormGridSelected(response);
-      handleEmitFormStatus("done");
       setDisplayType("selected");
       setIsSaveLoading(false);
     } catch (error) {
