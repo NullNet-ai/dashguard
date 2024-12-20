@@ -8,7 +8,10 @@ import {
   XIcon,
 } from "lucide-react";
 import React, { useContext } from "react";
-import { type ICustomActions, type IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import {
+  type ICustomActions,
+  type IFeatures,
+} from "~/components/platform/EnhancedFormBuilder/types";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
 import {
   DropdownMenu,
@@ -23,7 +26,7 @@ export default function FormFilterOpenedActions({
   features,
   handleRemovedSelectedRecords,
   customFormFilterViewFormActions = [],
-  selectedRecords
+  selectedRecords,
 }: {
   form: any;
   selectedRecords: any;
@@ -53,25 +56,30 @@ export default function FormFilterOpenedActions({
     {
       icon: <ClipboardIcon className="h-4 w-4 text-slate-500" />,
       label: "Paste",
-      onClick: async() => {
+      onClick: async () => {
         if (navigator.clipboard && navigator.clipboard.readText) {
           const clipboardText = await navigator.clipboard.readText();
           // clipboardText must be an json to continue else return warn
           try {
             JSON.parse(clipboardText);
           } catch (error) {
-            console.warn("Clipboard content is not a valid JSON",error);
+            console.warn("Clipboard content is not a valid JSON", error);
             return;
           }
           const parsed_clipboard = JSON.parse(clipboardText);
+          // Omit specific keys if they exist
+          ["id", "code", "status"].forEach(
+            (key) => delete parsed_clipboard[key],
+          );
           form.reset(parsed_clipboard, {
             keepDefaultValues: true,
           });
 
-          if(parsed_clipboard?.id) {
-            form.handleSubmit(onSubmitFormGrid)()
-          }
-
+          // if (parsed_clipboard?.id) {
+          //   form.handleSubmit((data: any) =>
+          //     onSubmitFormGrid(data, { action_type: "Paste" }),
+          //   )();
+          // }
         } else {
           console.warn("Clipboard API not supported in this browser.");
         }
@@ -121,31 +129,36 @@ export default function FormFilterOpenedActions({
         const currentValues = form.formState.defaultValues;
         handleRemovedSelectedRecords([currentValues]);
       },
-      hidden : !selectedRecords?.length 
+      hidden: !selectedRecords?.length,
     },
-    ...customFormFilterViewFormActions
+    ...customFormFilterViewFormActions,
   ];
 
-  const {state} = useContext(WizardContext);
-  const {entityName} = state ?? {};
+  const { state } = useContext(WizardContext);
+  const { entityName } = state ?? {};
   if (!enableViewFormEllipsis) return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <EllipsisVertical className="h-4 w-4 text-muted-foreground" data-test-id={entityName + "-wzrd-form-filter-ddn-trg"}/>
+        <EllipsisVertical
+          className="h-4 w-4 text-muted-foreground"
+          data-test-id={entityName + "-wzrd-form-filter-ddn-trg"}
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {actions.map((action, index) => {
           if (action.label === "Copy" && !enableViewFormCopy) return null;
           if (action.label === "Paste" && !enableViewFormPaste) return null;
           if (action.label === "Clear" && !enableViewFormClear) return null;
-          if(action.hidden) return null;
+          if (action.hidden) return null;
           return (
             <DropdownMenuItem
               key={index}
               onClick={() => action.onClick()}
               className="flex gap-2"
-              data-tes-id={entityName + "-wzrd-form-filter-ddn-itm-" + action.label }
+              data-tes-id={
+                entityName + "-wzrd-form-filter-ddn-itm-" + action.label
+              }
             >
               {action.icon}
               <span>{action.label}</span>
