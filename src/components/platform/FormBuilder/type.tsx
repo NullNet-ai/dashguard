@@ -1,5 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import {
+  ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
@@ -80,6 +81,7 @@ export interface IField {
   sliderLabel?: (value: number | undefined) => React.ReactNode;
   sliderLabelPosition?: "top" | "bottom";
   fileDropzoneOptions?: DropzoneOptions;
+  selectIcon?: ElementType;
   multiSelectMaxSelected?: number;
   multiSelectDelay?: number;
   multiSelectHidePlaceholderWhenSelected?: boolean;

@@ -46,6 +46,7 @@ export default function PhoneInputDetails({}) {
             label: "Phone Input",
             required: true,
             placeholder: "Phone Input",
+            readonly:true,
             options: {
               phoneNumberType: "multiple",
             },
@@ -57,6 +58,7 @@ export default function PhoneInputDetails({}) {
             label: "Single Phone Input",
             required: true,
             placeholder: "Single Phone Input",
+            disabled:true,
             options: {
               phoneNumberType: "single",
             },
