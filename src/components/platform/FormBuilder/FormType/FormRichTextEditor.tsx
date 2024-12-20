@@ -39,7 +39,7 @@ export default function FormRichTextEditor({
     : formRenderProps.field.value;
   const isToFormat = true; // Set to true if to include like how the tipTapEditor is formatted
   if (isToFormat) {
-    defaultValue = `<p class="text-node">${defaultValue ?? ""}</p>`;
+    defaultValue = `<p class="text-node">${defaultValue}</p>`;
   } else {
     defaultValue;
   }
@@ -53,6 +53,7 @@ export default function FormRichTextEditor({
     setContent(newValue);
   }
 
+  form.watch()
   return (
     <FormItem>
       <FormLabel

@@ -16,7 +16,10 @@ import {
   type TFormType,
   type TSelectionType,
 } from "./types";
-import { type DateGranularity, type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
+import {
+  type DateGranularity,
+  type DateTimeLocalInputProps,
+} from "~/components/ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;

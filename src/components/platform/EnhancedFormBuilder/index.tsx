@@ -131,7 +131,7 @@ export const FormBuilder = (props: IPropsForms) => {
       reject: (reason: any) => any,
     ) => {
       try {
-        // console.log("SUBMITTING FORM");
+        //
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -258,6 +258,7 @@ export const FormBuilder = (props: IPropsForms) => {
         return toast.error("Form is Unchanged");
       }
       // Handle form validation and other checks
+      //what's the use of this function???
       if (!form.formState.isDirty) {
         eventEmitter.emit(`formStatus:${formKey}`, {
           status: "done",
@@ -319,9 +320,12 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>, options?:{
-    action_type?: string;
-  }) => {
+  const onSubmitFormGrid = async (
+    data: z.infer<typeof formSchema>,
+    options?: {
+      action_type?: string;
+    },
+  ) => {
     if (!handleSubmitFormGrid) return;
     try {
       setIsSaveLoading(true);
@@ -330,7 +334,9 @@ export const FormBuilder = (props: IPropsForms) => {
         data,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: options?.action_type || (formGridSelected.length ? "Update" : "Create"),
+        action_type:
+          options?.action_type ||
+          (formGridSelected.length ? "Update" : "Create"),
         form,
       });
 
@@ -342,6 +348,7 @@ export const FormBuilder = (props: IPropsForms) => {
         });
         throw new Error("Failed to submit form grid");
       }
+
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: "done",
         form_key: formKey,

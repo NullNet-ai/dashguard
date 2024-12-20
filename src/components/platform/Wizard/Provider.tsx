@@ -23,6 +23,7 @@ import useTraverseStepped from "./Hooks/useTraverseStepped";
 import useTraverseSteppedSaved from "./Hooks/useTraverseStepSave";
 import usePrefetchWizardTraverse from "./Hooks/usePrefetchWizardTraverse";
 import { NextPage } from "./Action/NextPage";
+import { Create } from "../Grid/Action/Create";
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -234,7 +235,10 @@ export default function WizardProvider({
     try {
       setSaveNewLoading(true);
       if (config?.enableAutoCreate === false) {
-        router.push(`/portal/${mainEntity}/wizard/new/1`);
+        Create({
+          entity: mainEntity!,
+          enableAutoCreate: false,
+        });
         setSaveNewLoading(false);
         return;
       }
