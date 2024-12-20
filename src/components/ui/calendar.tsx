@@ -2,117 +2,24 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, CaptionProps } from "react-day-picker";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { DayPicker } from "react-day-picker";
+
 
 import { cn } from "~/lib/utils";
 import { buttonVariants } from "~/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-const months = [
-  "January", "February", "March", "April", "May", "June", 
-  "July", "August", "September", "October", "November", "December"
-];
-
-function CustomCaption({ 
-  id, 
-  displayMonth, 
-  displayIndex 
-}: CaptionProps) {
-  const [selectedMonth, setSelectedMonth] = React.useState(
-    months[displayMonth.getMonth()]
-  );
-  const [selectedYear, setSelectedYear] = React.useState(displayMonth.getFullYear());
-
-  // Generate years array (10 years before and after current year)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from(
-    { length: 21 }, 
-    (_, i) => currentYear - 10 + i
-  );
-
-  const handleMonthChange = (newMonth: string) => {
-    const monthIndex = months.indexOf(newMonth);
-    const newDate = new Date(displayMonth);
-    newDate.setMonth(monthIndex);
-    // Note: This relies on DayPicker's onMonthChange prop being passed down
-    // You might need to handle this in the parent component
-    setSelectedMonth(newMonth);
-  };
-
-  const handleYearChange = (newYear: number) => {
-    const newDate = new Date(displayMonth);
-    newDate.setFullYear(newYear);
-    // Note: This relies on DayPicker's onMonthChange prop being passed down
-    // You might need to handle this in the parent component
-    setSelectedYear(newYear);
-  };
-
-  return (
-    <div 
-      id={id} 
-      className="flex justify-center items-center gap-2 mb-2"
-    >
-      <Select 
-        value={selectedMonth}
-        onValueChange={handleMonthChange}
-      >
-        <SelectTrigger className="w-[120px] focus:ring-0">
-          <SelectValue placeholder="Month" />
-        </SelectTrigger>
-        <SelectContent>
-          {months.map((month) => (
-            <SelectItem key={month} value={month}>
-              {month}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      
-      <Select 
-        value={selectedYear.toString()}
-        onValueChange={(value) => handleYearChange(Number(value))}
-      >
-        <SelectTrigger className="w-[100px] focus:ring-0">
-          <SelectValue placeholder="Year" />
-        </SelectTrigger>
-        <SelectContent>
-          {years.map((year) => (
-            <SelectItem key={year} value={year.toString()}>
-              {year}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  onMonthChange,
   ...props
 }: CalendarProps) {
-  const [month, setMonth] = React.useState<Date | undefined>(props.month);
-
-  const handleMonthChange = (newMonth: Date) => {
-    setMonth(newMonth);
-    onMonthChange?.(newMonth);
-  };
 
   return (
     <DayPicker
-      month={month}
-      onMonthChange={handleMonthChange}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       classNames={{
@@ -156,7 +63,6 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
-        // Caption: CustomCaption,
 
       }}
       {...props}
