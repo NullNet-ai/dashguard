@@ -39,7 +39,7 @@ export const menuRouter = createTRPCRouter({
         icon: "StarIcon",
         isActive: pathName.includes("/favorite"),
         items: [],
-        url: "/portal/favorites",
+        url: "/portal/favorite",
       },
       {
         title: "Activity Log",
