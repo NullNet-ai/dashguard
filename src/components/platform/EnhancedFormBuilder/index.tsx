@@ -319,17 +319,21 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>) => {
+  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>, options?:{
+    action_type?: string;
+  }) => {
     if (!handleSubmitFormGrid) return;
     try {
       setIsSaveLoading(true);
+
       const response = await handleSubmitFormGrid({
         data,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: formGridSelected.length ? "Update" : "Create",
+        action_type: options?.action_type || (formGridSelected.length ? "Update" : "Create"),
         form,
       });
+
       //TODO: Please cater setting error message in field and don't proceed to view mode.
       if (!response?.length) {
         handleEmitFormStatus("failed");
