@@ -121,7 +121,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     className="gap-1"
                     variant={"outline"}
                     onClick={() => {
-                      form.setValue("details", {});
+                      form.resetField("details");
                       handleSearch("");
                     }}
                     disabled={is_disabled_or_readonly}
