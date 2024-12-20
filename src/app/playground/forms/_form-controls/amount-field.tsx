@@ -3,7 +3,6 @@
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
-
 const FormSchema = z.object({
   amount: z.object({
     amount: z.number({ message: "Amount is required" }),
@@ -37,6 +36,12 @@ export default function AmountDetails({}) {
     <>
       {/* FormBuilder 18: Amount */}
       <FormBuilder
+      defaultValues={{
+        amount: {
+          amount: 1000,
+          currency: "USD",
+        },
+      }}
         enableFormRegisterToParent
         formLabel="Amount Form Builder"
         formKey="FormBuilderCurrency"

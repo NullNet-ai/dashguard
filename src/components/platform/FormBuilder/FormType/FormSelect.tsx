@@ -47,6 +47,11 @@ export default function FormSelect({
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+
+  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
+  const isReadOnly = fieldConfig.readonly;
+
+  const SelectIcon = fieldConfig.selectIcon;
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
@@ -73,16 +78,10 @@ export default function FormSelect({
   }, [formRenderProps?.field.value]);
 
   const inputReadOnly = useMemo(() => {
-    return (
-      !fieldConfig?.selectSearchable ||
-      fieldConfig?.readonly ||
-      formRenderProps?.field.disabled
-    );
-  }, [
-    fieldConfig?.selectSearchable,
-    fieldConfig?.readonly,
-    formRenderProps?.field.disabled,
-  ]);
+    return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
+  }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
+
+
 
   return (
     <FormItem>
@@ -120,21 +119,34 @@ export default function FormSelect({
           setQuery("");
           formRenderProps?.field.onChange(value?.value || "");
         }}
-        disabled={fieldConfig.disabled}
+        disabled={isDisabled}
       >
         <div className="relative mt-2">
+          {SelectIcon && (
+            <SelectIcon
+              className={cn(
+                "absolute left-2 top-2.5 size-5 text-muted-foreground",
+                {
+                  "opacity-50": isDisabled,
+                }
+              )}
+              aria-hidden="true"
+            />
+          )}
           <ComboboxInput
             placeholder={fieldConfig.placeholder}
             readOnly={inputReadOnly}
+            disabled={isDisabled}
             className={cn(
-              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
+              "block w-full rounded-md py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground  sm:text-sm/6 border-border ",
               {
                 "outline-destructive": error,
+                "cursor-not-allowed ": isDisabled,
+                "cursor-text ": isReadOnly,
               },
             )}
             onClick={() => {
-              if (formRenderProps.field.disabled || fieldConfig?.readonly)
-                return;
+              if (isDisabled || isReadOnly) return;
               setOpen(true);
             }}
             onChange={(event) => setQuery(event.target.value)}
@@ -147,16 +159,24 @@ export default function FormSelect({
             displayValue={(value) => value?.label}
           />
           <ComboboxButton
-            disabled={formRenderProps?.field?.disabled}
-            className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
+            disabled={isDisabled}
+            className={cn(
+              "inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none",
+              {
+                "cursor-not-allowed": isDisabled,
+                "cursor-default": isReadOnly,
+              }
+            )}
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ChevronUpDownIcon
-              className="absolute right-2 top-2.5 size-5 text-gray-400"
+              className={cn("absolute right-2 top-2.5 size-5 text-gray-400", {
+                "opacity-50": isDisabled || isReadOnly,
+              })}
               aria-hidden="true"
             />
           </ComboboxButton>
-          {!(formRenderProps.field.disabled || fieldConfig?.readonly) &&
+          {!(isDisabled || isReadOnly) &&
             (filteredOptions?.length ? (
               <ComboboxOptions
                 static={open}
@@ -167,11 +187,14 @@ export default function FormSelect({
                   <ComboboxOption
                     key={opt?.value}
                     value={opt}
-                    disabled={
-                      (formRenderProps.field.disabled || fieldConfig?.readonly) ??
-                      false
-                    }
-                    className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
+                    disabled={isDisabled || isReadOnly}
+                    className={cn(
+                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none",
+                      {
+                        "cursor-not-allowed": isDisabled,
+                        "cursor-default": isReadOnly,
+                      }
+                    )}
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                   >
                     <span

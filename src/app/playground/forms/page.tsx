@@ -1,5 +1,7 @@
 "use client";
 
+import { Toaster } from "~/components/ui/sonner";
+import SmartDateDetails from "./_form-controls/smart-date";
 import InputDetails from "./_form-controls/textfield";
 import MultiSelectDetails from "./_form-controls/multi-select";
 import CheckboxDetails from "./_form-controls/checkbox";
@@ -10,8 +12,6 @@ import PasswordDetails from "./_form-controls/password";
 import TextAreaDetails from "./_form-controls/textarea";
 import EmailInputDetails from "./_form-controls/email-input";
 import PhoneInputDetails from "./_form-controls/phone-input";
-import { Toaster } from "~/components/ui/sonner";
-import SmartDateDetails from "./_form-controls/smart-date";
 import AmountDetails from "./_form-controls/amount-field";
 import ButtonPlayGround from "./_form-controls/button-playground";
 import { Separator } from "~/components/ui/separator";
@@ -49,6 +49,7 @@ export default function PlatformPlayGround() {
 
         <Separator />
 
+
         <section>
           <h2 className="mb-4 text-xl font-bold">Choices and Selections</h2>
           <div className="grid gap-4">
@@ -79,7 +80,7 @@ export default function PlatformPlayGround() {
           </div>
         </section>
 
-        {/* <Separator />
+        <Separator />
 
         <section>
           <h2 className="text-xl font-bold mb-4">Other Inputs</h2>
@@ -88,7 +89,7 @@ export default function PlatformPlayGround() {
         <InputsGrid />
         <MultiSelectDetails />
           </div>
-        </section> */}
+        </section>
 
         <Toaster />
       </div>

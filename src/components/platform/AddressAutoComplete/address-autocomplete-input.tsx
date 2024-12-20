@@ -45,7 +45,7 @@ interface CommonProps {
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
-  const { handleSelectAddress, form, formKey } = props;
+  const { handleSelectAddress, form, formKey, fieldConfig } = props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -72,21 +72,29 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     gcTime: 0,
     enabled: debouncedSearchInput !== "",
   });
+
   return (
     <FormField
       control={form.control}
       name="inp-addr"
       render={(formRenderProps) => {
+        const is_readonly =
+          //@ts-expect-error - should add readonly to IField
+          (formRenderProps.field.readonly || fieldConfig?.readonly) ?? false;
+        const is_disabled =
+          formRenderProps.field.disabled || fieldConfig?.disabled;
+        const is_disabled_or_readonly = is_disabled || is_readonly;
         return (
           <FormItem>
             <FormLabel
+              required={fieldConfig?.required}
               data-test-id={formKey + "-" + "lbl-" + formRenderProps.field.name}
             >
               Address
             </FormLabel>
             <FormControl>
               <Combobox>
-                <div className="relative flex gap-2 ">
+                <div className="relative flex gap-2">
                   <MagnifyingGlassIcon
                     className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-muted-foreground"
                     aria-hidden="true"
@@ -94,33 +102,34 @@ export function AddressAutoCompleteInput(props: CommonProps) {
 
                   <ComboboxInput
                     {...formRenderProps?.field}
-                    disabled={undefined}
-                    data-test-id={formKey + "-" + formRenderProps.field.name}
-                    readOnly={formRenderProps.field.disabled}
-                    autoComplete="off"
                     ref={inputRef}
-                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm "
+                    disabled={is_disabled}
+                    readOnly={is_readonly}
+                    data-test-id={formKey + "-" + formRenderProps?.field.name}
+                    autoComplete="off"
+                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
                     placeholder="Search..."
+               
+                    onFocus={open}
                     onChange={(event) => {
                       handleSearch(event.target.value);
                     }}
                     value={searchedAddress}
                     onBlur={close}
-                    onFocus={open}
                   />
                   <Button
                     className="gap-1"
                     variant={"outline"}
                     onClick={() => {
-                      form.setValue("details", {});
+                      form.resetField("details");
                       handleSearch("");
                     }}
-                    disabled={formRenderProps.field.disabled}
+                    disabled={is_disabled_or_readonly}
                   >
                     <RotateCcw className="h-4 w-4" strokeWidth={3} />
                     Reset
                   </Button>
-                  {isOpen  && !formRenderProps.field.disabled &&(
+                  {isOpen && !is_disabled_or_readonly && (
                     <ComboboxOptions
                       static
                       as="ul"
