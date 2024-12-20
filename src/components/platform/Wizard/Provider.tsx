@@ -274,6 +274,8 @@ export default function WizardProvider({
 
   const registerSaveHandler = (eventName: string) => {
     const formHandler = "submitForm:" + eventName;
+
+    if (formSave?.[formHandler]) return;
     setFormSave((prev) => ({
       ...prev,
       [formHandler]: "dirty",

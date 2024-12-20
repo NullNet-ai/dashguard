@@ -335,7 +335,17 @@ export const FormBuilder = (props: IPropsForms) => {
       });
 
       //TODO: Please cater setting error message in field and don't proceed to view mode.
-      if (!response?.length) throw new Error("Failed to submit form grid");
+      if (!response?.length) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "failed",
+          form_key: formKey,
+        });
+        throw new Error("Failed to submit form grid");
+      }
+      eventEmitter.emit(`formStatus:${formKey}`, {
+        status: "done",
+        form_key: formKey,
+      });
       setFormGridSelected(response);
       setDisplayType("selected");
       setIsSaveLoading(false);
