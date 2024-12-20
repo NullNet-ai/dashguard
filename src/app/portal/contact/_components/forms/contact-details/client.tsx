@@ -43,7 +43,7 @@ export default function ContactDetails({
       formProps={params}
       formLabel="Contact Details"
       handleSubmit={handleSave}
-      formKey="ContactDetails"
+      formKey="contact_details"
       formSchema={contactDetailsSchema}
       defaultValues={defaultValues}
       multiSelectOptions={multiSelectOptions}
