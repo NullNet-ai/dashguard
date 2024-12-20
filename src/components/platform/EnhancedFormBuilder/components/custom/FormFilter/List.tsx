@@ -5,6 +5,10 @@ import Grid from "../../../../Grid/Client";
 
 import Skeleton from "../../../../Grid/Skeleton";
 import { IFilterGridConfig } from "../../../types/global/interfaces";
+import { useSidebar } from "~/components/ui/sidebar";
+import { cn } from "~/lib/utils";
+import { WizardContext } from "~/components/platform/Wizard/Provider";
+import { useContext, useMemo } from "react";
 
 export default function FormFilterGrid({
   config,
@@ -30,6 +34,8 @@ export default function FormFilterGrid({
     grid_data,
     selectedRecords: _form_filter_selected_record,
   } = config;
+  const {state} = useContext(WizardContext)
+  const {open} = useSidebar()
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
     .filter(Boolean) as string[];
@@ -52,7 +58,28 @@ export default function FormFilterGrid({
     grid_items = items || [];
     grid_total_count = totalCount || 0;
   }
+
+  const calcWidth = useMemo(() => {
+    if (open && state?.isSummaryOpen) {
+      return 'w-[calc(100vw-530px)]'
+    }
+    else if (!open && state?.isSummaryOpen) {
+      return 'w-auto'
+    }
+    else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]'
+    }
+    else
+      return ''
+  }, [open, state?.isSummaryOpen])
+
   handleListLoading(isLoading);
+
+
+  
+
+
+  
   if (isLoading) {
     return (
       <div
@@ -70,8 +97,15 @@ export default function FormFilterGrid({
     (acc, id) => ({ ...acc, [id]: true }),
     {},
   );
+
+
+
+
   return (
-    <Grid
+   <div className={
+    cn(`${calcWidth}`)
+   }>
+     <Grid
       height="300px"
       onSelectRecords={(rows) => {
         if (!onSelectRecords) return;
@@ -119,5 +153,6 @@ export default function FormFilterGrid({
       }}
       initialSelectedRecords={initialSelectedRecords}
     />
+   </div>
   );
 }

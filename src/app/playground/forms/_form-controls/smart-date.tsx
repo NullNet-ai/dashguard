@@ -7,7 +7,13 @@ import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
 const FormSchema = z.object({
   "smart-date": z
     .string({ message: "Date is required" })
-    .min(1, { message: "Date is required" }),
+    .min(1, { message: "Date is required" })
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of the day
+      return selectedDate >= today;
+    }, { message: "Date cannot be in the past" }),
 });
 const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
   return new Promise<void>((resolve, reject) => {
@@ -35,6 +41,9 @@ export default function SmartDateDetails({}) {
     <>
       {/* FormBuilder 6: Date */}
       <FormBuilder
+      // defaultValues={{
+      //   "smart-date":"11/20/2024"
+      // }}
         enableFormRegisterToParent
         formLabel="Date Form Builder"
         formKey="FormBuilderDate"
@@ -48,7 +57,9 @@ export default function SmartDateDetails({}) {
             label: "Smart Date",
             required: true,
             placeholder: "Smart Date",
-            
+            dateTimePickerProps:{
+            }
+            // readonly:true,
           },
         ]}
       />

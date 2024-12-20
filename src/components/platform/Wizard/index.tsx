@@ -86,7 +86,7 @@ export default function Wizard(props: Wizard) {
             <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
               <Header />
             </div>
-            <div className="h-[calc(100vh-10rem)] overflow-y-auto">
+            <div className="h-[calc(100vh-10rem)] overflow-auto">
               {children}
             </div>
           </div>

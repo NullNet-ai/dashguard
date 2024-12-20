@@ -1,12 +1,13 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import {
+  type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
   type ReactNode,
 } from "react";
 import { type DropzoneOptions } from "react-dropzone";
-import { Field, type UseFormReturn } from "react-hook-form";
+import { type Field, type UseFormReturn } from "react-hook-form";
 
 import { type TActionType } from "~/components/platform/Grid/types";
 import {
@@ -15,7 +16,7 @@ import {
   type TFormType,
   type TSelectionType,
 } from "./types";
-import { type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
+import { type DateGranularity, type DateTimeLocalInputProps } from "~/components/ui/smart-datetime-picker";
 
 interface OptionType {
   label: string;
@@ -37,6 +38,7 @@ interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   dateTimePickerProps?: DateTimeLocalInputProps & {
+    granularity?: DateGranularity;
     minDate?: Date;
     maxDate?: Date;
     disablePastDates?: boolean;
@@ -54,6 +56,7 @@ interface IField {
   sliderLabel?: (value: number | undefined) => ReactNode;
   sliderLabelPosition?: "top" | "bottom";
   fileDropzoneOptions?: DropzoneOptions;
+  selectIcon?: ElementType;
   multiSelectMaxSelected?: number;
   multiSelectDelay?: number;
   multiSelectHidePlaceholderWhenSelected?: boolean;
