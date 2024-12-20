@@ -75,7 +75,7 @@ export const menuRouter = createTRPCRouter({
             isActive: pathName.includes("/setting"),
             items: [
               {
-                title: "Roles",
+                title: "Role",
                 url: getGridLink({
                   mainEntity: "user_role",
                 }),

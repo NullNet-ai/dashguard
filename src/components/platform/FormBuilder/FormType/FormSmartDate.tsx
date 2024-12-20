@@ -61,6 +61,7 @@ export default function FormSmartDate({
       form.setValue(name, "");
     }
   };
+
   return (
     <FormItem className="flex w-full flex-col">
       <FormLabel
@@ -74,7 +75,10 @@ export default function FormSmartDate({
           datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
           inputTestID={`${formKey}-inp-${fieldConfig.name}`}
           value={formRenderProps.field.value}
-          onValueChange={handleChange}
+          onValueChange={
+            formRenderProps.field.onChange
+          }
+          onChange={formRenderProps.field.onChange}
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
