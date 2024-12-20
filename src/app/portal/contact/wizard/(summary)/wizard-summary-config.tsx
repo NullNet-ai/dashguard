@@ -20,7 +20,7 @@ const contactWizardSummary = ({
           label: "Basic Details",
           component: (
             <BasicDetailsSummary
-              form_key={"ContactsOne"}
+              form_key={"basicDetails"}
               identifier={identifier!}
             />
           ),
