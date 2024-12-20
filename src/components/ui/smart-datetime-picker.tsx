@@ -43,6 +43,8 @@ export const parseDateTime = (str: Date | string) => {
   return parsed_date ? parsed_date : str;
 };
 
+export type DateGranularity = "time" | "year" | "month" | "date";
+
 /**
  * Converts a given timestamp or the current date and time to a string representation in the local time zone.
  * format: `HH:mm`, adjusted for the local time zone.
