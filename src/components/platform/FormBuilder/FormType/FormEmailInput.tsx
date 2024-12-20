@@ -150,7 +150,7 @@ export default function FormEmailInput({
                       type="button"
                       variant={"ghost"}
                       size={"icon"}
-                      className={`rounded-none ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                      className={`disabled:opacity-100 rounded-none ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
                       const updatedFields = values.map(
                         (field: IEmailData, i: number) => ({
@@ -173,7 +173,7 @@ export default function FormEmailInput({
                       variant={"ghost"}
                       size={"icon"}
                       data-test-id={`${formKey}-rmv-btn-${index + 1}-${fieldConfig.name}`}
-                      className={`rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                      className={` disabled:opacity-100 rounded-none hover:bg-transparent hover:text-primary-foreground ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
                       onClick={() => {
                         const _values = form.getValues(fieldConfig.name);
                         handleRemoveEmail(index, _values);
@@ -210,7 +210,7 @@ export default function FormEmailInput({
           variant={"link"}
           iconPlacement="left"
           onClick={handleAddEmail}
-          className="mt-2"
+          className="mt-2 disabled:opacity-100"
         >
           Add Email
         </Button>
