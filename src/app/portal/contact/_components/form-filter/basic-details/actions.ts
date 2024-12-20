@@ -9,17 +9,6 @@ export const saveContactDetails = async (data: any, action_type?: string) => {
   if (response?.existing) {
     return response;
   }
-
-  if (action_type === "Create") {
-    const headerList = headers();
-    const pathname = headerList.get("x-pathname") || "";
-    const [, portal, mainEntity] = pathname.split("/");
-    const currentContext = "/" + portal + "/" + mainEntity;
-    await api.tab.closeCurrentInnerClassTab({
-      href: pathname,
-      current_context: currentContext,
-    });
-  }
   return response;
 };
 
