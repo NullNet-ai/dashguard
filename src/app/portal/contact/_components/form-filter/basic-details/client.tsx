@@ -115,6 +115,15 @@ export default function ContactDetails({
         current: 1,
         limit: 1000,
         label: "Contacts",
+        // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data
+        //   form.reset(data, {
+        //     keepDefaultValues: true,
+        //   });
+
+        //   form.handleSubmit((data: any) =>
+        //     onSubmitFormGrid(data, { action_type: "Paste" }),
+        //   )();
+        // },
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,

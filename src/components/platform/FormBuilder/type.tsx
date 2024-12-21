@@ -110,6 +110,7 @@ export interface IField {
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
   selectSearchable?: boolean;
+  accuracy?: number;
 }
 
 export interface ISelectOptions {
