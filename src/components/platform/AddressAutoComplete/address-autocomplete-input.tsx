@@ -42,6 +42,7 @@ interface CommonProps {
     id: string;
     provider: string;
   }) => void;
+  accuracy?: number;
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
@@ -61,6 +62,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
+      accuracy: props.accuracy || 0
     });
     return response?.data;
   };
