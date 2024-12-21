@@ -131,11 +131,13 @@ export const googleRouter = createTRPCRouter({
     .input(
       z.object({
         query: z.string(),
+        accuracy: z.number().optional(),
       }),
     )
     .mutation(async ({ input }) => {
+      const accuracy = input?.accuracy || 0;
       const response = await fetch(
-        `${PLACES_API}/autocomplete?search=${input?.query}`,
+        `${PLACES_API}/autocomplete?search=${input?.query}&accuracy=${accuracy}`,
         {
           method: "GET",
           headers: {
