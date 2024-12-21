@@ -462,7 +462,7 @@ const TimePicker = () => {
 export interface NaturalLanguageInputProps {
   placeholder?: string;
   disabled?: boolean;
-  readOnly?:boolean;
+  readOnly?: boolean;
   includeTime?: boolean;
   onDateChange?: (date: Date) => void;
   onTimeChange?: (time: string) => void;
@@ -478,7 +478,7 @@ const NaturalLanguageInput = React.forwardRef<
       includeTime = false,
       onDateChange,
       onTimeChange,
-      readOnly=false,
+      readOnly = false,
       disabled,
       ...props
     },
@@ -526,7 +526,7 @@ const NaturalLanguageInput = React.forwardRef<
       }
     }, [value, includeTime]);
 
-    const handleParse = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleParse = (e: React.FocusEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement>) => {
       const currentValue = e.currentTarget.value.trim();
       
       if (!currentValue) {
@@ -565,101 +565,17 @@ const NaturalLanguageInput = React.forwardRef<
           }
         }
       } else {
-        const formatted = new Date(currentValue);
-        onValueChange(formatted);
-        setInputValue(formatDateTime(formatted, includeTime));
+        onValueChange(null);
+        setInputValue(currentValue);
       }
     };
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        const currentValue = e.currentTarget.value.trim();
-        
-        if (!currentValue) {
-          onValueChange(null);
-          setInputValue("");
-          return;
-        }
-
-        const parsedDateTime = parseDateTime(currentValue);
-        if (parsedDateTime) {
-          const formatted = formatDateTime(parsedDateTime, includeTime);
-          const formatted_date = formatted?.includes("Invalid Date")
-            ? parsedDateTime
-            : formatted;
-          onValueChange(formatted_date);
-          setInputValue(formatted_date as string);
-
-          if (includeTime) {
-            const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
-            const PM_AM_hour = (parsedDateTime as Date).getHours();
-
-            const hour =
-              PM_AM_hour > 12
-                ? PM_AM_hour % 12
-                : PM_AM_hour === 0 || PM_AM_hour === 12
-                  ? 12
-                  : PM_AM_hour;
-
-            const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
-
-            if (onTimeChange) {
-              onTimeChange(formattedTime);
-            } else {
-              contextOnTimeChange(formattedTime);
-            }
-          }
-        } else {
-          onValueChange(null);
-          setInputValue("");
-        }
+        handleParse(e);
       }
     };
-
-    const debouncedValue = useDebounce(inputValue, 1500);
-    const memoizedOnValueChange = useCallback(onValueChange, []);
-
-    useEffect(() => {
-      if (!debouncedValue) {
-        memoizedOnValueChange(null);
-        setInputValue("");
-        return;
-      }
-
-      const parsedDateTime = parseDateTime(debouncedValue as Date | string);
-      if (parsedDateTime) {
-        const formatted = formatDateTime(parsedDateTime, includeTime);
-        const formatted_date = formatted?.includes("Invalid Date")
-          ? parsedDateTime
-          : formatted;
-        memoizedOnValueChange(formatted_date);
-        setInputValue(formatted_date as string);
-
-        if (includeTime) {
-          const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
-          const PM_AM_hour = (parsedDateTime as Date).getHours();
-
-          const hour =
-            PM_AM_hour > 12
-              ? PM_AM_hour % 12
-              : PM_AM_hour === 0 || PM_AM_hour === 12
-                ? 12
-                : PM_AM_hour;
-
-          const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
-
-          if (onTimeChange) {
-            onTimeChange(formattedTime);
-          } else {
-            contextOnTimeChange(formattedTime);
-          }
-        }
-      } else {
-        memoizedOnValueChange(null);
-        setInputValue("");
-      }
-    }, [debouncedValue, includeTime, memoizedOnValueChange]);
 
     return (
       <Input
