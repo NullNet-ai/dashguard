@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
 import { Badge } from "~/components/ui/badge";
 import { ISearchItemResult } from "./types";
+import { Separator } from "~/components/ui/separator";
 
 export default function SearchResult({
   results,
@@ -21,22 +22,25 @@ export default function SearchResult({
       {results?.length > 0 ? (
         <ul className="text-sm text-gray-700">
           {results?.map((result) => (
-            <ComboboxOption
-              as="li"
-              key={result.id}
-              value={result}
-            >
-              <div className="mb-2 ml-3">{result.values?.[0]}</div>
-              <Badge
-                key={result.id}
-                variant="primary"
+            <>
+              <ComboboxOption as="li" key={result.id} value={result} className={"hover:bg-muted/70"}>
+              <div
+                className="mb-2 ml-3 "
                 onClick={() => {
-                  actions?.handleAddSearchItem(result);
+                actions?.handleAddSearchItem(result);
                 }}
               >
+                <span className="text-sm font-semibold text-muted-foreground">
+                {result.values?.[0]}{" "}
+                </span>
+              </div>
+              <Badge key={result.id} variant="primary" className="hover:bg-primary/20 ">
                 {result?.label}
               </Badge>
-            </ComboboxOption>
+              </ComboboxOption>
+              {results.length > 1 && <Separator dashed className="m-2" />}
+            </>
+
           ))}
         </ul>
       ) : (

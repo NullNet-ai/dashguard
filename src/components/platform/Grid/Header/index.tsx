@@ -18,7 +18,7 @@ export default function Header() {
           </div>
         </div>
         <div className="ml-0 mt-4 flex w-full flex-row justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:w-1/2 relative">
-          <div className="my-2 w-full md:my-0 lg:w-1/2"> 
+          <div className="my-2 w-full md:my-0 lg:w-[472px]"> 
             <Search />
           </div>
           <div className="flex flex-row items-center flex-shrink-0 h-[40px]">

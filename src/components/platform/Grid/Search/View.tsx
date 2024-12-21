@@ -24,9 +24,7 @@ export default function Search() {
     searchConfig,
   } = gridState?.config ?? {};
   const { advanceFilterItems = [] } = state ?? {};
-
   const { query = "", searchItems = [] } = state ?? {};
-
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
@@ -61,64 +59,71 @@ export default function Search() {
       enabled: debouncedSearchInput?.length > 3,
     },
   );
+
   const { items } = data ?? {};
 
-  const defaultSearchItems = searchItems?.filter((item) => item?.default);
+  // Filter and log search items to debug any unintended data
   const selectedSearchItems = searchItems?.filter((item) => !item?.default);
+  const defaultSearchItems = searchItems?.filter((item) => item?.default);
 
   return (
     <>
       <Combobox>
-        {selectedSearchItems.length > 0 && (
-          <>
-            {selectedSearchItems?.map((item, index) => {
-              if (item.type === "operator" && index === 0) {
-                return <></>;
-              }
-              return (
-                <Badge key={item.id} variant="primary">
-                  {item.type === "criteria"
-                    ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
-                    : item?.operator}
-                  {item.type === "criteria" && !item.default && (
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      name="removeSortingButton"
-                      key={`${item.id}-remove`}
-                      className="h-auto w-auto p-0 focus:outline-none"
-                      onClick={() => {
-                        actions?.handleRemoveSearchItem(item);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </Badge>
-              );
-            })}
-          </>
-        )}
         <div className="relative">
-          <MagnifyingGlassIcon
-            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-400"
-            aria-hidden="true"
-          />
-
-          <ComboboxInput
-            className="h-10 w-full rounded-md border bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:border sm:text-sm"
-            placeholder="Search..."
-            value={query}
-            onChange={(event) => {
-              actions?.handleQuery(event.target.value);
-            }}
-            onBlur={() => {
-              actions?.handleOpen(false);
-            }}
-            onFocus={() => {
-              actions?.handleOpen(true);
-            }}
-          />
+          <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
+            <MagnifyingGlassIcon
+              className="h-5 w-5 text-muted-foreground"
+              aria-hidden="true"
+            />
+            {selectedSearchItems.length > 0 && (
+              <div className="flex flex-wrap gap-1 py-1 ">
+                {selectedSearchItems?.map((item, index) => {
+                  if (item.type === "operator" && index === 0) {
+                    return null;
+                  }
+                  return (
+                    <Badge
+                      key={item.id}
+                      variant="primary"
+                      className="flex items-center gap-1 m-1 "
+                    >
+                      {item.type === "criteria"
+                        ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
+                        : item?.operator}
+                      {item.type === "criteria" && !item.default && (
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          name="removeSortingButton"
+                          key={`${item.id}-remove`}
+                          className="h-auto w-auto p-0 text-primary hover:bg-transparent focus:outline-none"
+                          onClick={() => {
+                            actions?.handleRemoveSearchItem(item);
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+            <ComboboxInput
+              className="flex-grow border-none bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
+              placeholder="Search..."
+              value={query}
+              onChange={(event) => {
+                actions?.handleQuery(event.target.value);
+              }}
+              onBlur={() => {
+                actions?.handleOpen(false);
+              }}
+              onFocus={() => {
+                actions?.handleOpen(true);
+              }}
+            />
+          </div>
           {state?.open && debouncedSearchInput.length > 3 && (
             <ComboboxOptions
               static
@@ -140,10 +145,14 @@ export default function Search() {
           )}
         </div>
       </Combobox>
-      <div className={cn(`${!gridState?.sorting?.length ? 'mt-[20px]' : 'absolute -bottom-[40px]'}`)}>
-      <span className="text-xs text-black">Filtered By: </span>
+      <div
+        className={cn(
+          `${!gridState?.sorting?.length ? "mt-[20px]" : "absolute -bottom-[40px]"}`,
+        )}
+      >
+        <span className="text-xs text-black">Filtered By: </span>
         {defaultSearchItems?.map((item) => (
-          <Badge key={item.id} variant="primary">
+          <Badge key={item.id} variant="primary" className="m-2">
             {item.type === "criteria"
               ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
               : item?.operator}
