@@ -179,6 +179,7 @@ interface IFilterGridConfig {
   label?: string;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
+  onClipboardPaste?: (data: Record<string, any>, form: any, onSubmitFormGrid?: any) => any;
   renderComponentSelected?: (record: any) => JSX.Element;
   onSelectRecords?: ({
     rows,
