@@ -463,9 +463,9 @@ export interface NaturalLanguageInputProps {
   placeholder?: string;
   disabled?: boolean;
   readOnly?:boolean;
-  includeTime?: boolean; // New prop to control time handling
-  onDateChange?: (date: Date) => void; // Optional callback for date change
-  onTimeChange?: (time: string) => void; // Optional callback for time change
+  includeTime?: boolean;
+  onDateChange?: (date: Date) => void;
+  onTimeChange?: (time: string) => void;
 }
 
 const NaturalLanguageInput = React.forwardRef<
@@ -475,7 +475,7 @@ const NaturalLanguageInput = React.forwardRef<
   (
     {
       placeholder,
-      includeTime = false, // Default to including time
+      includeTime = false,
       onDateChange,
       onTimeChange,
       readOnly=false,
@@ -497,51 +497,45 @@ const NaturalLanguageInput = React.forwardRef<
     const [inputValue, setInputValue] = React.useState<string>("");
 
     React.useEffect(() => {
-      if (value) {
-        const formatted_date_time = formatDateTime(value, includeTime);
-        const formatted_date = formatted_date_time?.includes("Invalid Date")
-          ? value
-          : formatted_date_time;
-        setInputValue(formatted_date as string);
-
-        if (includeTime) {
-          const hour = value.getHours();
-          const timeVal = `${
-            hour >= 12 ? hour % 12 : hour
-          }:${value.getMinutes().toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
-
-          // Prioritize prop-based onTimeChange, then context-based
-          if (onTimeChange) {
-            onTimeChange(timeVal);
-          } else {
-            contextOnTimeChange(timeVal);
-          }
-        }
-
-        // Call additional date change callback if provided
-        if (onDateChange) {
-          onDateChange(value);
-        }
-      } else {
+      if (!value) {
         setInputValue("");
-        if (includeTime) {
-          const now = new Date();
-          const hour = now.getHours();
-          const timeVal = `${
-            hour >= 12 ? hour % 12 : hour
-          }:${now.getMinutes().toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
+        return;
+      }
 
-          if (onTimeChange) {
-            onTimeChange(timeVal);
-          } else {
-            contextOnTimeChange(timeVal);
-          }
+      const formatted_date_time = formatDateTime(value, includeTime);
+      const formatted_date = formatted_date_time?.includes("Invalid Date")
+        ? value
+        : formatted_date_time;
+      setInputValue(formatted_date as string);
+
+      if (includeTime) {
+        const hour = value.getHours();
+        const timeVal = `${
+          hour >= 12 ? hour % 12 : hour
+        }:${value.getMinutes().toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
+
+        if (onTimeChange) {
+          onTimeChange(timeVal);
+        } else {
+          contextOnTimeChange(timeVal);
         }
+      }
+
+      if (onDateChange) {
+        onDateChange(value);
       }
     }, [value, includeTime]);
 
     const handleParse = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const parsedDateTime = parseDateTime(e.currentTarget.value);
+      const currentValue = e.currentTarget.value.trim();
+      
+      if (!currentValue) {
+        onValueChange(null);
+        setInputValue("");
+        return;
+      }
+
+      const parsedDateTime = parseDateTime(currentValue);
       if (parsedDateTime) {
         const formatted = formatDateTime(parsedDateTime, includeTime);
         const formatted_date = formatted?.includes("Invalid Date")
@@ -549,9 +543,6 @@ const NaturalLanguageInput = React.forwardRef<
           : formatted;
 
         onValueChange(formatted_date);
-        // onValueChange(parsedDateTime as Date);
-
-        // Format with or without time based on includeTime
         setInputValue(formatted_date as string);
 
         if (includeTime) {
@@ -574,7 +565,7 @@ const NaturalLanguageInput = React.forwardRef<
           }
         }
       } else {
-        const formatted = new Date(e.currentTarget.value);
+        const formatted = new Date(currentValue);
         onValueChange(formatted);
         setInputValue(formatDateTime(formatted, includeTime));
       }
@@ -582,23 +573,26 @@ const NaturalLanguageInput = React.forwardRef<
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
-        e.preventDefault()
-        const parsedDateTime = parseDateTime(e.currentTarget.value);
+        e.preventDefault();
+        const currentValue = e.currentTarget.value.trim();
+        
+        if (!currentValue) {
+          onValueChange(null);
+          setInputValue("");
+          return;
+        }
 
+        const parsedDateTime = parseDateTime(currentValue);
         if (parsedDateTime) {
           const formatted = formatDateTime(parsedDateTime, includeTime);
           const formatted_date = formatted?.includes("Invalid Date")
             ? parsedDateTime
             : formatted;
           onValueChange(formatted_date);
-          // onValueChange(parsedDateTime as Date);
-
-          // Format with or without time based on includeTime
           setInputValue(formatted_date as string);
 
           if (includeTime) {
-            const PM_AM =
-              (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
+            const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
             const PM_AM_hour = (parsedDateTime as Date).getHours();
 
             const hour =
@@ -618,52 +612,52 @@ const NaturalLanguageInput = React.forwardRef<
           }
         } else {
           onValueChange(null);
-          setInputValue(formatDateTime("", includeTime));
+          setInputValue("");
         }
       }
     };
 
-    const debouncedValue = useDebounce(inputValue, 500); // 500ms debounce delay
+    const debouncedValue = useDebounce(inputValue, 1500);
     const memoizedOnValueChange = useCallback(onValueChange, []);
 
     useEffect(() => {
-      if (debouncedValue) {
-        const parsedDateTime = parseDateTime(debouncedValue as Date | string);
-        if (parsedDateTime) {
-          const formatted = formatDateTime(parsedDateTime, includeTime);
-          const formatted_date = formatted?.includes("Invalid Date")
-            ? parsedDateTime
-            : formatted;
-          memoizedOnValueChange(formatted_date);
-          // onValueChange(parsedDateTime as Date);
+      if (!debouncedValue) {
+        memoizedOnValueChange(null);
+        setInputValue("");
+        return;
+      }
 
-          // Format with or without time based on includeTime
-          setInputValue(formatted_date as string);
+      const parsedDateTime = parseDateTime(debouncedValue as Date | string);
+      if (parsedDateTime) {
+        const formatted = formatDateTime(parsedDateTime, includeTime);
+        const formatted_date = formatted?.includes("Invalid Date")
+          ? parsedDateTime
+          : formatted;
+        memoizedOnValueChange(formatted_date);
+        setInputValue(formatted_date as string);
 
-          if (includeTime) {
-            const PM_AM =
-              (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
-            const PM_AM_hour = (parsedDateTime as Date).getHours();
+        if (includeTime) {
+          const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? "PM" : "AM";
+          const PM_AM_hour = (parsedDateTime as Date).getHours();
 
-            const hour =
-              PM_AM_hour > 12
-                ? PM_AM_hour % 12
-                : PM_AM_hour === 0 || PM_AM_hour === 12
-                  ? 12
-                  : PM_AM_hour;
+          const hour =
+            PM_AM_hour > 12
+              ? PM_AM_hour % 12
+              : PM_AM_hour === 0 || PM_AM_hour === 12
+                ? 12
+                : PM_AM_hour;
 
-            const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
+          const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString().padStart(2, "0")} ${PM_AM}`;
 
-            if (onTimeChange) {
-              onTimeChange(formattedTime);
-            } else {
-              contextOnTimeChange(formattedTime);
-            }
+          if (onTimeChange) {
+            onTimeChange(formattedTime);
+          } else {
+            contextOnTimeChange(formattedTime);
           }
-        } else {
-          memoizedOnValueChange(null);
-          setInputValue(formatDateTime("", includeTime));
         }
+      } else {
+        memoizedOnValueChange(null);
+        setInputValue("");
       }
     }, [debouncedValue, includeTime, memoizedOnValueChange]);
 
@@ -714,50 +708,52 @@ const DateTimeLocalInput = ({
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-   // Adjust or validate the initial date
-   const getValidDate = React.useCallback(
-    (date: Date | undefined): Date => {
+    // Modified getValidDate to handle invalid dates more gracefully
+  const getValidDate = React.useCallback(
+    (date: Date | undefined): Date | undefined => {
+      if (!date || isNaN(date.getTime())) {
+        setErrorMessage(null);
+        return undefined;
+      }
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      if (date) {
-        if (disablePastDates && date < today) {
-          setErrorMessage("Selected date is in the past and not allowed.");
-          return today;
-        }
-        if (disableFutureDates && date > today) {
-          setErrorMessage("Selected date is in the future and not allowed.");
-          return today;
-        }
-        if (minDate && date < minDate) {
-          setErrorMessage("Selected date is earlier than the minimum allowed date.");
-          return minDate;
-        }
-        if (maxDate && date > maxDate) {
-          setErrorMessage("Selected date is later than the maximum allowed date.");
-          return maxDate;
-        }
-        setErrorMessage(null); // Clear error if date is valid
-        return date;
+      // Only apply restrictions if we have a valid date
+      if (disablePastDates && date < today) {
+        setErrorMessage("Selected date is in the past and not allowed.");
+        return today;
+      }
+      if (disableFutureDates && date > today) {
+        setErrorMessage("Selected date is in the future and not allowed.");
+        return today;
+      }
+      if (minDate && date < minDate) {
+        setErrorMessage("Selected date is earlier than the minimum allowed date.");
+        return minDate;
+      }
+      if (maxDate && date > maxDate) {
+        setErrorMessage("Selected date is later than the maximum allowed date.");
+        return maxDate;
       }
 
-      setErrorMessage(null); // Default to no error if no date is provided
-      return today;
+      setErrorMessage(null);
+      return date;
     },
     [disablePastDates, disableFutureDates, minDate, maxDate]
   );
 
 
   const initialDate = React.useMemo(() => getValidDate(value), [value, getValidDate]);
-    // Initialize with either the selected value, min date, or current date
-    const getInitialDate = React.useCallback(() => {
-      const today = new Date();
-      if (value) return value;
-      if (minDate && minDate > today) return minDate;
-      if (disablePastDates) return today;
-      return today;
-    }, [value, minDate, disablePastDates]);
-  
+     // Modified getInitialDate to handle invalid dates
+  const getInitialDate = React.useCallback(() => {
+    const today = new Date();
+    if (value && !isNaN(value.getTime())) return value;
+    if (minDate && minDate > today) return minDate;
+    if (disablePastDates) return today;
+    return today;
+  }, [value, minDate, disablePastDates]);
+
     // Set initial month and year based on the calculated initial date
     const [month, setMonth] = React.useState<number>(() => getInitialDate().getMonth());
     const [year, setYear] = React.useState<number>(() => getInitialDate().getFullYear());
@@ -770,18 +766,27 @@ const DateTimeLocalInput = ({
     }, [value, disablePastDates, getInitialDate]);
     
     React.useEffect(() => {
-      const validDate = getValidDate(value);
+      const validDate = getValidDate(value) ?? new Date();
       setMonth(validDate.getMonth());
       setYear(validDate.getFullYear());
     }, [value, getValidDate]);
   
-    const handleDateSelection = React.useCallback(
-      (selectedDate: Date) => {
-        const validDate = getValidDate(selectedDate);
+    // Modified handleDateSelection to handle invalid dates
+  const handleDateSelection = React.useCallback(
+    (selectedDate: Date) => {
+      if (!selectedDate || isNaN(selectedDate.getTime())) {
+        setErrorMessage("Invalid date selected");
+        return;
+      }
+      
+      const validDate = getValidDate(selectedDate);
+      if (validDate) {
         onValueChange(validDate);
-      },
-      [onValueChange, getValidDate]
-    );
+      }
+    },
+    [onValueChange, getValidDate]
+  );
+
   
   const formatSelectedDate = React.useCallback(
     (
@@ -790,14 +795,20 @@ const DateTimeLocalInput = ({
       m: ActiveModifiers,
       e: React.MouseEvent,
     ) => {
-      const parsedDateTime = parseDateTime(selectedDate);
+      if (!selectedDate || isNaN(selectedDate.getTime())) {
+        setErrorMessage("Invalid date selected");
+        return;
+      }
 
+      const parsedDateTime = parseDateTime(selectedDate);
       if (parsedDateTime) {
-        (parsedDateTime as Date).setHours(
-          parseInt(Time?.split(":")[0] || "0"),
-          parseInt(Time?.split(":")[1] || "0"),
-        );
-        onValueChange(parsedDateTime as Date);
+        const hours = parseInt(Time?.split(":")[0] || "0");
+        const minutes = parseInt(Time?.split(":")[1] || "0");
+        
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          (parsedDateTime as Date).setHours(hours, minutes);
+          onValueChange(parsedDateTime as Date);
+        }
       }
     },
     [Time, onValueChange]
