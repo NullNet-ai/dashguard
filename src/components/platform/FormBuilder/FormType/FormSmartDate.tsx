@@ -69,29 +69,17 @@ export default function FormSmartDate({
     }
   };
 
-  // const handleChange = (date: Date | null | string) => {
-  //   if (date) {
-  //     const formattedDate =
-  //       dateGranularity === "year"
-  //         ? moment(date).format("YYYY")
-  //         : dateGranularity === "month"
-  //           ? moment(date).format("YYYY-MM")
-  //           : moment(date).format("MM/DD/YYYY");
+  const getValue = () => {
+    const dateValue = form.getValues(`${name}_date`);
+    if (dateValue) return dateValue;
 
-  //     const formatted_date = formattedDate?.includes("Invalid date")
-  //       ? date
-  //       : formattedDate;
+    const stringValue = form.getValues(name);
+    if (!stringValue) return null;
 
-  //     form.setValue(name, formatted_date, {
-  //       shouldValidate: true,
-  //       shouldDirty: true,
-  //       shouldTouch: true,
-  //     });
-  //   } else {
-  //     form.setValue(name, "");
-  //   }
-  // };
-
+    const parsedDate = moment(stringValue);
+    return parsedDate.isValid() ? parsedDate.toDate() : undefined;
+  };
+  
   return (
     <FormItem className="flex w-full flex-col">
       <FormLabel
@@ -104,17 +92,14 @@ export default function FormSmartDate({
         <SmartDatetimeInput
           datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
           inputTestID={`${formKey}-inp-${fieldConfig.name}`}
-          value={
-        form.getValues(`${fieldConfig.name}_date`) ||
-        moment(form.getValues(fieldConfig.name)).toDate()
-          }
+          value={getValue()}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
           disabled={fieldConfig.disabled}
           readOnly={
-        (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
           }
         />
       </FormControl>
