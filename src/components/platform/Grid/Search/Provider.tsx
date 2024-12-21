@@ -6,9 +6,9 @@ import React, {
   useState,
 } from "react";
 import {
-  ISearchItem,
-  ISearchItemResult,
-  ISearchParams,
+  type ISearchItem,
+  type ISearchItemResult,
+  type ISearchParams,
   type IAction,
   type ICreateContext,
   type IState,
