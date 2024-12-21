@@ -65,6 +65,7 @@ export default function GridCardView() {
                       <div className="text-slate-500 mr-2">
                         {flexRender(
                           cell.column.columnDef.header,
+                          // @ts-expect-error - TS doesn't know about getContext
                           cell.getContext()
                         )} 
                       </div>
