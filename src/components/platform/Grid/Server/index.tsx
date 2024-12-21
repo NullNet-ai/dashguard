@@ -4,7 +4,16 @@ import GridProvider from "../Provider";
 import { GridDesktop, GridMobile } from "./views";
 import { GridScrollView } from "../common/GridScrollview";
 
-function MainServer({ config, data, totalCount, sorting, defaultSorting }: IPropsGrid) {
+function MainServer({
+  config,
+  data,
+  totalCount,
+  sorting,
+  defaultSorting,
+  searchableFields,
+  defaultAdvanceFilter,
+  advanceFilter,
+}: IPropsGrid) {
   return (
     <GridProvider
       totalCount={totalCount}
@@ -12,6 +21,9 @@ function MainServer({ config, data, totalCount, sorting, defaultSorting }: IProp
       sorting={sorting}
       config={config}
       defaultSorting={defaultSorting}
+      searchableFields={searchableFields}
+      defaultAdvanceFilter={defaultAdvanceFilter}
+      advanceFilter={advanceFilter}
     >
       <GridScrollView className="hidden lg:block">
         <GridDesktop />

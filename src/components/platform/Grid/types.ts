@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
-import { OnChangeFn, RowSelectionState, SortingState, type ColumnDef, type Row, type Table } from "@tanstack/react-table";
+import {
+  OnChangeFn,
+  RowSelectionState,
+  SortingState,
+  type ColumnDef,
+  type Row,
+  type Table,
+} from "@tanstack/react-table";
+import { ISearchItem, ISearchParams } from "./Search/types";
+import { appRouter } from '../../../server/api/root';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -26,6 +35,8 @@ export type TActionType =
 
 export type TLayerType = "main" | "sub";
 
+export type AppRouterKeys = keyof typeof appRouter;
+
 export interface IConfigGrid {
   entity: string;
   title?: string;
@@ -41,14 +52,22 @@ export interface IConfigGrid {
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
-  archiveCustomAction?: (args: Record<string, any>) => void | Promise<void | string | Record<string, any>>;
+  archiveCustomAction?: (
+    args: Record<string, any>,
+  ) => void | Promise<void | string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
-  layer?: TLayerType
+  layer?: TLayerType;
   enableAutoCreate?: boolean;
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
+  searchableFields?: any[];
+  searchConfig?: {
+    router: AppRouterKeys;
+    resolver: string;
+    query_params?: ISearchParams;
+  }
 }
 
 export interface IState {
@@ -59,25 +78,26 @@ export interface IState {
   selectTableRow: React.MutableRefObject<ColumnDef<any>>;
   createLoading?: boolean;
   totalCountSelected?: number;
-  archiveBulkLoading?: boolean; 
+  archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
   rowToArchive: Row<any>;
-  viewMode?: 'table' | 'card';
-  sorting?: SortingState
+  viewMode?: "table" | "card";
+  sorting?: SortingState;
   rowSelection: RowSelectionState;
+  advanceFilter?: ISearchItem[];
 }
 
 export interface IAction {
   handleCreate: () => void;
   handleMultiSelect: () => void;
   handleArchiveBulkRecord: () => void;
-  handleSwitchViewMode: (mode: 'table' | 'card') => void;
-  handleResetSorting: () => void
-  handleRemoveSorting: (id: string) => void
-  handleAddSorting: OnChangeFn<SortingState>
+  handleSwitchViewMode: (mode: "table" | "card") => void;
+  handleResetSorting: () => void;
+  handleRemoveSorting: (id: string) => void;
+  handleAddSorting: OnChangeFn<SortingState>;
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
-  setRowToArchive: React.Dispatch<any>
+  setRowToArchive: React.Dispatch<any>;
 }
 
 export interface ICreateContext {
@@ -93,4 +113,7 @@ export interface IPropsGrid {
   onSelectRecords?: (rows: any[]) => void;
   initialSelectedRecords?: RowSelectionState;
   defaultSorting?: SortingState;
+  searchableFields?: any[];
+  defaultAdvanceFilter?: ISearchItem[];
+  advanceFilter?: ISearchItem[];
 }

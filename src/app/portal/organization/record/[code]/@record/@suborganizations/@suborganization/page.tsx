@@ -33,6 +33,12 @@ export default async function RecordTabContainer({
     "updated_by",
   ];
 
+  const response = await api.organization.getByCode({
+    code: identifier!,
+    pluck_fields: ["id"],
+  });
+  const record_id = response?.data?.id;
+
   const { items = [], totalCount } = await api.grid
     .items({
       current: +(searchParams.page ?? "0"),
@@ -44,23 +50,23 @@ export default async function RecordTabContainer({
           type: "criteria",
           field: "parent_organization_id",
           operator: EOperator.EQUAL,
-          values: [identifier!],
+          values: [record_id!],
         },
       ],
     })
     .then(async (res) => {
       const final_items = await Bluebird.map(res.items, async (item) => {
         const final_item = await api.organization
-          .getById({
-            id: item.parent_organization_id ?? "",
-            pluck_fields: ["name"],
-          })
-          .then((res) => {
-            return {
-              ...item,
-              parent_organization_name: res?.data?.name,
-            };
-          });
+        .getById({
+          id: item.parent_organization_id ?? "",
+          pluck_fields: ["name"],
+        })
+        .then((res) => {
+          return {
+            ...item,
+            parent_organization_name: res?.data?.name,
+          };
+        });
         return final_item;
       });
       return {
