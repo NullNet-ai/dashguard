@@ -95,7 +95,7 @@ export default function GridSearchProvider({ children }: IProps) {
   ) => {
 
     const {router = "grid", resolver = "items" } = searchConfig ?? {}
-    // @ts-ignore
+    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
     return data;
   };
