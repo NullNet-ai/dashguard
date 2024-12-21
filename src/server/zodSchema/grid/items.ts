@@ -18,10 +18,10 @@ const ZodItems = z.object({
     .array(
       z.object({
         type: z.string(),
-        field: z.string(),
+        field: z.string().optional(),
         entity: z.string().optional(),
         operator: z.string(),
-        values: z.array(z.string()),
+        values: z.array(z.string()).optional(),
       }),
     )
     .optional(), // Optional advance filters

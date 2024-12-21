@@ -13,6 +13,7 @@ import { SetTab } from "~/lib/grid-default-tab";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
+import { ISearchItem } from "~/components/platform/Grid/Search/types";
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -527,5 +528,84 @@ export const gridRouter = createTRPCRouter({
       sortingReportTabId,
     )) as SortingState;
     return Array.isArray(sorting) ? sorting : [];
+  }),
+  updateReportFilter: privateProcedure
+    .input(
+      z.object({
+        filters: z.array(
+          z.object({
+            type: z.string(),
+            field: z.string().optional(),
+            entity: z.string().optional(),
+            operator: z.string(),
+            values: z.array(z.string()).optional(),
+            id: z.string().optional(),
+            label: z.string().optional(),
+            default: z.boolean().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { filters } = input;
+      const headerList = headers();
+
+      const pathName = headerList.get("x-pathname") || "";
+      const gridTabId = headerList.get("x-grid-tab-id") || "";
+      const [, , mainEntity, application] = pathName.split("/");
+      if (application !== "grid" || !mainEntity) return [];
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || "",
+        _application: application || "",
+        _id: ctx.session.account.contact.id,
+      });
+      let filterReportTabId = `${_tabMenuId}:${gridTabId}:filter`;
+      if (!gridTabId) {
+        const gridTabFilterList = (await ctx.redisClient.getCachedData(
+          _tabMenuId,
+        )) as ITabGrid[];
+        const activeTab = gridTabFilterList?.find((tab) => tab.current);
+        filterReportTabId = `${_tabMenuId}:${activeTab?.id}:filter`;
+      }
+
+      return await ctx.redisClient.cacheData(filterReportTabId, filters);
+    }),
+  getReportFilter: privateProcedure.query(async ({ ctx }) => {
+    const headerList = headers();
+    const gridTabId = headerList.get("x-grid-tab-id") || "";
+    const pathName = headerList.get("x-pathname") || "";
+    const [, , mainEntity, application] = pathName.split("/");
+    if (application !== "grid" || !mainEntity) return [];
+    const _tabMenuId = tabMenuId({
+      _mainEntity: mainEntity || "",
+      _application: application || "",
+      _id: ctx.session.account.contact.id,
+    });
+    let filterReportTabId = `${_tabMenuId}:${gridTabId}:filter`;
+    if (!gridTabId) {
+      const gridTabFilterList = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+      const activeTab = gridTabFilterList?.find((tab) => tab.current);
+      filterReportTabId = `${_tabMenuId}:${activeTab?.id}:filter`;
+    }
+    const filters = (await ctx.redisClient.getCachedData(
+      filterReportTabId,
+    )) as ISearchItem[];
+    const reportFilters = Array.isArray(filters) ? filters : [];
+    const advanceFilter = reportFilters.map(
+      ({ entity, operator, type, field, values }) => ({
+        entity,
+        operator,
+        type,
+        field,
+        values,
+      }),
+    ) as ISearchItem[];
+
+    return {
+      advanceFilter: advanceFilter,
+      reportFilters,
+    };
   }),
 });

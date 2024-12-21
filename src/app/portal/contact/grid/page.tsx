@@ -2,6 +2,14 @@ import { api } from "~/trpc/server";
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "./_config/columns";
 import Grid from "~/components/platform/Grid/Server";
 import { defaultSorting } from "./_config/sorting";
+import { searchableFields } from "./_config/searchableFields";
+import { defaultAdvanceFilter } from "./_config/advanceFilter";
+import { ISearchItem } from "~/components/platform/Grid/Search/types";
+
+interface IReportFilter {
+  advanceFilter: ISearchItem[];
+  reportFilters: ISearchItem[];
+}
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page({
   searchParams = {},
@@ -26,9 +34,13 @@ export default async function Page({
     "updated_date",
     "created_time",
     "updated_time",
+    "created_by",
+    "updated_by",
   ];
 
   const sorting = await api.grid.getReportSorting();
+  const filters = (await api.grid.getReportFilter()) as IReportFilter
+
   // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: +(searchParams.page ?? "0"),
@@ -36,6 +48,9 @@ export default async function Page({
     entity: "contact",
     pluck: _pluck,
     sorting: sorting?.length ? sorting : defaultSorting,
+    advance_filters: filters?.advanceFilter?.length
+      ? filters?.advanceFilter
+      : defaultAdvanceFilter,
   });
 
   return (
@@ -43,6 +58,8 @@ export default async function Page({
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
+      defaultAdvanceFilter={defaultAdvanceFilter}
+      advanceFilter={filters.reportFilters || []}
       sorting={sorting || []}
       config={{
         entity: "contact",
@@ -53,7 +70,15 @@ export default async function Page({
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
-        // editCustomComponent: EditComponent,
+        searchableFields: searchableFields,
+        searchConfig: {
+          router: "contact",
+          resolver: "mainGrid",
+          query_params: {
+            entity: "contact",
+            pluck: _pluck,
+          },
+        }
       }}
     />
   );
