@@ -147,6 +147,7 @@ const FormBodyMainActions = ({
             onSubmitFormGrid={onSubmitFormGrid}
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             form={form}
+            filterGridConfig={filterGridConfig}
           />
         )}
     </div>

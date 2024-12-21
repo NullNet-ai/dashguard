@@ -953,7 +953,7 @@ const DateTimeLocalInput = ({
           <span className="sr-only">calendar</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" sideOffset={10}>
+      <PopoverContent className="w-auto p-0" sideOffset={10} align="start" >
         <div className="p-3">
           <div className="flex gap-1 items-center justify-center">
             {!(disablePastDates && new Date(year, month) < new Date()) && (

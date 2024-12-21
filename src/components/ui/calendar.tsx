@@ -30,10 +30,18 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "h-7 w-7 disabled:bg-muted disabled:opacity-50 bg-transparent p-0 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        nav_button_previous: cn(
+          "absolute left-1", 
+          "disabled:opacity-50", 
+          "disabled:bg-muted"
+        ),
+        nav_button_next: cn(
+          "absolute right-1", 
+          "disabled:opacity-50", 
+          "disabled:bg-muted"
+        ),
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:
@@ -59,17 +67,17 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4 ", className)} {...props} />
+          <ChevronLeft className={cn("h-4 w-4 text-foreground", className)} {...props} />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4 ", className)} {...props} />
+          <ChevronRight className={cn("h-4 w-4  text-foreground", className)} {...props} />
         ),
-
       }}
       {...props}
     />
   );
 }
+
 
 Calendar.displayName = "Calendar";
 
