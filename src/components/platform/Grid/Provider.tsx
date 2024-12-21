@@ -250,13 +250,18 @@ export default function GridProvider({
     enableHiding: true,
   });
 
-  const actionTypeColumnCondition = (actionsType: TActionType) => {
+  const actionTypeColumnCondition = (actionsType: TActionType, viewMode: string) => {
+    // Exclude selectTableRow and actionRow if view mode is 'card'
+    if (viewMode === "card") {
+      return [...config?.columns];
+    }
+  
     switch (actionsType) {
       case "single-select":
         if (config?.disableDefaultAction) {
           return [...config?.columns];
         }
-
+  
         return [...config?.columns, actionRow?.current];
       case "default":
         if (config?.disableDefaultAction) {
@@ -267,12 +272,12 @@ export default function GridProvider({
           ...config?.columns,
           actionRow?.current,
         ];
-
+  
       default:
         if (config?.disableDefaultAction) {
           return [selectTableRow?.current, ...config?.columns];
         }
-
+  
         return [
           selectTableRow?.current,
           ...config?.columns,
@@ -280,12 +285,12 @@ export default function GridProvider({
         ];
     }
   };
-
+  
   /** @HOOKS */
   const table = useReactTable({
     data,
     getRowId: (row) => row.id,
-    columns: actionTypeColumnCondition(config?.actionType || "default"),
+    columns: actionTypeColumnCondition(config?.actionType || "default", viewMode),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
