@@ -322,6 +322,7 @@ export default function GridProvider({
         entity: config?.entity,
         defaultValues: config?.defaultValues,
         enableAutoCreate: config?.enableAutoCreate,
+        is_from_grid: true,
       });
     } catch (error) {
       console.error("An error occurred while creating a record", error);
