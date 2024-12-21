@@ -238,6 +238,9 @@ export default function WizardProvider({
         Create({
           entity: mainEntity!,
           enableAutoCreate: false,
+          identifier: config?.entityIdentifier,
+          currentContext: currentContext,
+          is_from_grid: false
         });
         setSaveNewLoading(false);
         return;
@@ -245,6 +248,7 @@ export default function WizardProvider({
       await SaveAndNew({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
+        currentContext: currentContext,
       });
       setSaveNewLoading(false);
     } catch (error) {
