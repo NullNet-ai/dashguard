@@ -27,6 +27,7 @@ export default function FormFilterOpenedActions({
   handleRemovedSelectedRecords,
   customFormFilterViewFormActions = [],
   selectedRecords,
+  filterGridConfig,
 }: {
   form: any;
   selectedRecords: any;
@@ -34,6 +35,7 @@ export default function FormFilterOpenedActions({
   onSubmitFormGrid: any;
   handleRemovedSelectedRecords: (records: any[]) => void;
   customFormFilterViewFormActions: ICustomActions[] | undefined;
+  filterGridConfig: any;
 }) {
   const {
     enableViewFormClear = true,
@@ -41,6 +43,8 @@ export default function FormFilterOpenedActions({
     enableViewFormEllipsis = true,
     enableViewFormPaste = true,
   } = features ?? {};
+
+  const { onClipboardPaste } = filterGridConfig ?? {};
   const actions = [
     {
       icon: <Copy className="h-4 w-4 text-slate-500" />,
@@ -67,18 +71,28 @@ export default function FormFilterOpenedActions({
             return;
           }
           const parsed_clipboard = JSON.parse(clipboardText);
-          // Omit specific keys if they exist
-          ["id", "code", "status"].forEach(
-            (key) => delete parsed_clipboard[key],
-          );
-          form.reset(parsed_clipboard, {
-            keepDefaultValues: true,
-          });
+          if (onClipboardPaste) {
+            return await onClipboardPaste(
+              parsed_clipboard as Record<string, any>,
+              form,
+              onSubmitFormGrid,
+            );
+          } else {
+            ["id", "code", "status"].forEach((key: any) => {
+              if (parsed_clipboard && typeof parsed_clipboard === "object") {
+                delete parsed_clipboard[key];
+              }
+            });
+
+            form.reset(parsed_clipboard, {
+              keepDefaultValues: true,
+            });
+          }
 
           // if (parsed_clipboard?.id) {
-          //   form.handleSubmit((data: any) =>
-          //     onSubmitFormGrid(data, { action_type: "Paste" }),
-          //   )();
+          // form.handleSubmit((data: any) =>
+          //   onSubmitFormGrid(data, { action_type: "Paste" }),
+          // )();
           // }
         } else {
           console.warn("Clipboard API not supported in this browser.");
