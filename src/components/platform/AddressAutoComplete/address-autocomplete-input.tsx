@@ -27,11 +27,15 @@ import { MapPinIcon } from "@heroicons/react/24/outline";
 import { type IField } from "../FormBuilder/type";
 import { formatFormTestID } from "~/lib/utils";
 
+interface ExtendedControllerRenderProps
+  extends ControllerRenderProps<Record<string, any>, string> {
+  accuracy?: number;
+}
 interface CommonProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   fieldConfig: IField;
   formRenderProps: {
-    field: ControllerRenderProps<Record<string, any>, string>;
+    field: ExtendedControllerRenderProps;
     fieldState: ControllerFieldState;
   };
   formKey: string;
@@ -42,11 +46,11 @@ interface CommonProps {
     id: string;
     provider: string;
   }) => void;
-  accuracy?: number;
 }
 
 export function AddressAutoCompleteInput(props: CommonProps) {
-  const { handleSelectAddress, form, formKey, fieldConfig } = props;
+  const { handleSelectAddress, form, formKey, fieldConfig, formRenderProps } =
+    props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
   const [isOpen, setIsOpen] = useState(false);
   const open = useCallback(() => setIsOpen(true), []);
@@ -62,7 +66,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
-      accuracy: props.accuracy || 0
+      accuracy: formRenderProps?.field?.accuracy || 0,
     });
     return response?.data;
   };
@@ -111,7 +115,6 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     autoComplete="off"
                     className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
                     placeholder="Search..."
-               
                     onFocus={open}
                     onChange={(event) => {
                       handleSearch(event.target.value);
