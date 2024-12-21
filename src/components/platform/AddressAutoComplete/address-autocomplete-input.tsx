@@ -121,7 +121,12 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     className="gap-1"
                     variant={"outline"}
                     onClick={() => {
-                      form.resetField("details");
+                      const values = form.getValues();
+                      form.reset({
+                        ...values,
+                        searchedAddress: "",
+                        details: {},
+                      });
                       handleSearch("");
                     }}
                     disabled={is_disabled_or_readonly}
