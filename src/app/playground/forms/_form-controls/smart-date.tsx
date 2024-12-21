@@ -58,8 +58,8 @@ export default function SmartDateDetails({}) {
             required: true,
             placeholder: "Smart Date",
             dateTimePickerProps:{
+              disablePastDates: true,
             }
-            // readonly:true,
           },
         ]}
       />

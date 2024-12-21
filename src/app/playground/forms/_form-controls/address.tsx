@@ -40,27 +40,43 @@ export default function AddressDetails({}) {
         formKey="address-details"
         handleSubmit={handleSave}
         formSchema={FormSchema}
-        // defaultValues={{
-        //   searchedAddress: "",
-        //   details: {
-        //     address_line_two: "URBAN DECA HOME BANILAD TOWER 3",
-        //     address:
-        //       "Irvine, North Ayrshire, Alba / Scotland, KA12 0AX, United Kingdom",
-        //     latitude: 55.6143121,
-        //     longitude: -4.6655591,
-        //     place_id: "253523596",
-        //     street_number: "",
-        //     street: "",
-        //     region_code: "",
-        //     country_code: "gb",
-        //     address_line_one: "Test",
-        //     city: "Smethwick",
-        //     state: "Ards",
-        //     region: "Alba / Scotland",
-        //     country: "United Kingdom",
-        //     postal_code: "KA12 0AX",
-        //   },
-        // }}
+        selectOptions={{
+          select:[
+            {
+              label:"Option 1",
+              value:"option1"
+            },
+            {
+              label:"Option 2",
+              value:"option2"
+            }
+          ]
+        }}
+        defaultValues={{
+          searchedAddress: "",
+          details: {
+            address_line_two: "URBAN DECA HOME BANILAD TOWER 3",
+            address:
+              "Irvine, North Ayrshire, Alba / Scotland, KA12 0AX, United Kingdom",
+            latitude: 55.6143121,
+            longitude: -4.6655591,
+            place_id: "253523596",
+            street_number: "",
+            street: "",
+            region_code: "",
+            country_code: "gb",
+            address_line_one: "Test",
+            city: "Smethwick",
+            state: "Ards",
+            region: "Alba / Scotland",
+            country: "United Kingdom",
+            postal_code: "KA12 0AX",
+          },
+          text:"hehe",
+          select:"option1",
+          smartDate:"2022-12-14",
+          // smartDate_date:new Date("2022-12-12"),
+        }}
         fields={[
           {
             id: "address",
@@ -69,8 +85,32 @@ export default function AddressDetails({}) {
             label: "Address",
             required: true,
             placeholder: "Address",
-            disabled:true
           },
+          {
+            id:"text",
+            formType:"input",
+            name:"text",
+            label:"Text",
+            required:true,
+            placeholder:"Text",
+          },
+          {
+            id:"select",
+            formType:"select",
+            name:"select",
+            label:"Select",
+            required:true,
+            placeholder:"Select",
+          },
+          {
+            id:"smartDate",
+            formType:"smart-date",
+            name:"smartDate",
+            label:"Smart Date",
+            dateTimePickerProps:{
+              disablePastDates: true
+            }
+          }
         ]}
       />
     </>
