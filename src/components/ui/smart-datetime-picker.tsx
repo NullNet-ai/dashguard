@@ -15,6 +15,7 @@ import { cn } from "~/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { isValidDate } from "~/server/zodSchema/contact/contactDetails";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 /* -------------------------------------------------------------------------- */
 /*                               Inspired By:                                 */
@@ -196,6 +197,7 @@ export const SmartDatetimeInput = React.forwardRef<
             datePickerTestID={datePickerTestID}
             disabled={disabled as boolean}
             readOnly={readOnly}
+
             {...dateTimePickerProps}
           />
           <NaturalLanguageInput
@@ -580,6 +582,7 @@ const NaturalLanguageInput = React.forwardRef<
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
+        e.preventDefault()
         const parsedDateTime = parseDateTime(e.currentTarget.value);
 
         if (parsedDateTime) {
@@ -683,10 +686,9 @@ const NaturalLanguageInput = React.forwardRef<
 );
 
 NaturalLanguageInput.displayName = "NaturalLanguageInput";
-
 export type DateTimeLocalInputProps = {
   disabled?: boolean;
-  readOnly?:boolean;
+  readOnly?: boolean;
 } & CalendarProps;
 
 const DateTimeLocalInput = ({
@@ -709,7 +711,78 @@ const DateTimeLocalInput = ({
   datePickerTestID?: string;
 }) => {
   const { value, onValueChange, Time } = useSmartDateInput();
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+   // Adjust or validate the initial date
+   const getValidDate = React.useCallback(
+    (date: Date | undefined): Date => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
+      if (date) {
+        if (disablePastDates && date < today) {
+          setErrorMessage("Selected date is in the past and not allowed.");
+          return today;
+        }
+        if (disableFutureDates && date > today) {
+          setErrorMessage("Selected date is in the future and not allowed.");
+          return today;
+        }
+        if (minDate && date < minDate) {
+          setErrorMessage("Selected date is earlier than the minimum allowed date.");
+          return minDate;
+        }
+        if (maxDate && date > maxDate) {
+          setErrorMessage("Selected date is later than the maximum allowed date.");
+          return maxDate;
+        }
+        setErrorMessage(null); // Clear error if date is valid
+        return date;
+      }
+
+      setErrorMessage(null); // Default to no error if no date is provided
+      return today;
+    },
+    [disablePastDates, disableFutureDates, minDate, maxDate]
+  );
+
+
+  const initialDate = React.useMemo(() => getValidDate(value), [value, getValidDate]);
+    // Initialize with either the selected value, min date, or current date
+    const getInitialDate = React.useCallback(() => {
+      const today = new Date();
+      if (value) return value;
+      if (minDate && minDate > today) return minDate;
+      if (disablePastDates) return today;
+      return today;
+    }, [value, minDate, disablePastDates]);
+  
+    // Set initial month and year based on the calculated initial date
+    const [month, setMonth] = React.useState<number>(() => getInitialDate().getMonth());
+    const [year, setYear] = React.useState<number>(() => getInitialDate().getFullYear());
+  
+    // Update view when value changes or when disablePastDates changes
+    React.useEffect(() => {
+      const newDate = getInitialDate();
+      setMonth(newDate.getMonth());
+      setYear(newDate.getFullYear());
+    }, [value, disablePastDates, getInitialDate]);
+    
+    React.useEffect(() => {
+      const validDate = getValidDate(value);
+      setMonth(validDate.getMonth());
+      setYear(validDate.getFullYear());
+    }, [value, getValidDate]);
+  
+    const handleDateSelection = React.useCallback(
+      (selectedDate: Date) => {
+        const validDate = getValidDate(selectedDate);
+        onValueChange(validDate);
+      },
+      [onValueChange, getValidDate]
+    );
+  
   const formatSelectedDate = React.useCallback(
     (
       date: Date | undefined,
@@ -727,13 +800,146 @@ const DateTimeLocalInput = ({
         onValueChange(parsedDateTime as Date);
       }
     },
-    [value, Time],
+    [Time, onValueChange]
   );
 
+  // Enhanced navigation handler with date boundary checks
+  const handleMonthNavigation = (newMonth: Date) => {
+    // Check if the new month is within bounds
+    if (minDate) {
+      const startOfNewMonth = new Date(newMonth.getFullYear(), newMonth.getMonth(), 1);
+      if (startOfNewMonth < new Date(minDate.getFullYear(), minDate.getMonth(), 1)) {
+        return;
+      }
+    }
+
+    if (maxDate) {
+      const endOfNewMonth = new Date(newMonth.getFullYear(), newMonth.getMonth() + 1, 0);
+      if (endOfNewMonth > new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0)) {
+        return;
+      }
+    }
+
+    if (disablePastDates) {
+      const today = new Date();
+      const startOfNewMonth = new Date(newMonth.getFullYear(), newMonth.getMonth(), 1);
+      if (startOfNewMonth < new Date(today.getFullYear(), today.getMonth(), 1)) {
+        return;
+      }
+    }
+
+    if (disableFutureDates) {
+      const today = new Date();
+      const endOfNewMonth = new Date(newMonth.getFullYear(), newMonth.getMonth() + 1, 0);
+      if (endOfNewMonth > new Date(today.getFullYear(), today.getMonth() + 1, 0)) {
+        return;
+      }
+    }
+
+    setMonth(newMonth.getMonth());
+    setYear(newMonth.getFullYear());
+  };
+
+  // Enhanced month/year dropdown handlers
+  const handleMonthChange = (newMonth: string) => {
+    const newMonthNum = parseInt(newMonth);
+    const newDate = new Date(year, newMonthNum, 1);
+    handleMonthNavigation(newDate);
+  };
+
+  const handleYearChange = (newYear: string) => {
+    const newYearNum = parseInt(newYear);
+    const newDate = new Date(newYearNum, month, 1);
+    handleMonthNavigation(newDate);
+  };
+
+  // Generate valid years array based on constraints
+  const years = React.useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    let startYear = currentYear - 100;
+    let endYear = currentYear + 100;
+
+    if (minDate) {
+      startYear = Math.max(startYear, minDate.getFullYear());
+    }
+    if (maxDate) {
+      endYear = Math.min(endYear, maxDate.getFullYear());
+    }
+    if (disablePastDates) {
+      startYear = Math.max(startYear, currentYear);
+    }
+    if (disableFutureDates) {
+      endYear = Math.min(endYear, currentYear);
+    }
+
+    return Array.from(
+      { length: endYear - startYear + 1 },
+      (_, i) => startYear + i
+    );
+  }, [minDate, maxDate, disablePastDates, disableFutureDates]);
+
+  // Generate valid months array based on constraints
+  const getValidMonths = React.useCallback(() => {
+    const allMonths = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+  
+    const currentYear = year;
+    const currentDate = new Date();
+  
+    return allMonths.filter((_, index) => {
+      const monthStart = new Date(currentYear, index, 1);
+      const monthEnd = new Date(currentYear, index + 1, 0);
+  
+      if (minDate && monthEnd < new Date(minDate.getFullYear(), minDate.getMonth(), 1)) {
+        return false;
+      }
+      if (maxDate && monthStart > new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0)) {
+        return false;
+      }
+      if (disablePastDates) {
+        // Compare year and month, including the current month
+        const currentYearMonth = currentDate.getFullYear() * 12 + currentDate.getMonth();
+        const monthStartYearMonth = monthStart.getFullYear() * 12 + monthStart.getMonth();
+        if (monthStartYearMonth < currentYearMonth) {
+          return false;
+        }
+      }
+      if (disableFutureDates) {
+        // Compare year and month, including the current month
+        const currentYearMonth = currentDate.getFullYear() * 12 + currentDate.getMonth();
+        const monthStartYearMonth = monthStart.getFullYear() * 12 + monthStart.getMonth();
+        if (monthStartYearMonth > currentYearMonth) {
+          return false;
+        }
+      }
+  
+      return true;
+    });
+  }, [year, minDate, maxDate, disablePastDates, disableFutureDates]);
+  
+  
+
+  const validMonths = React.useMemo(() => getValidMonths(), [getValidMonths]);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !isOpen) {
+        e.preventDefault();
+        buttonRef.current?.click();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={buttonRef}
           variant={"outline"}
           size={"icon"}
           disabled={readOnly}
@@ -744,45 +950,78 @@ const DateTimeLocalInput = ({
           data-test-id={datePickerTestID}
         >
           <CalendarIcon className="size-4" />
-          <span className="sr-only">calender</span>
+          <span className="sr-only">calendar</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 z-[10000]" sideOffset={10}  >
-        <div className="flex gap-1">
-          <Calendar
-            {...props}
-            id={"calendar"}
-            className={cn("peer flex justify-end", inputBase, className)}
-            mode="single"
-            selected={value}
-            onSelect={formatSelectedDate}
-            initialFocus
-            disabled={(date) => {
-              // If specific min/max dates are provided, use those first
-              if (minDate || maxDate) {
-                return (
-                  (minDate ? date < minDate : false) ||
-                  (maxDate ? date > maxDate : false)
-                );
-              }
+      <PopoverContent className="w-auto p-0" sideOffset={10}>
+        <div className="p-3">
+          <div className="flex gap-1 items-center justify-center">
+            {!(disablePastDates && new Date(year, month) < new Date()) && (
+              <Select value={month.toString()} onValueChange={handleMonthChange}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {validMonths.map((monthName, index) => (
+                    <SelectItem key={monthName} value={index.toString()}>
+                      {monthName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={year.toString()} onValueChange={handleYearChange}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-1">
 
-              // If disable flags are set, use those
-              if (disablePastDates || disableFutureDates) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+            <Calendar
+              {...props}
+              id={"calendar"}
+              className={cn("peer flex justify-end", inputBase, className)}
+              mode="single"
+              month={new Date(year, month)}
+              selected={value}
+              onSelect={formatSelectedDate}
+              onMonthChange={handleMonthNavigation}
+              initialFocus
+              disabled={(date) => {
+                if (minDate || maxDate) {
+                  return (
+                    (minDate ? date < minDate : false) ||
+                    (maxDate ? date > maxDate : false)
+                  );
+                }
 
-                if (disablePastDates && date < today) return true;
-                if (disableFutureDates && date > today) return true;
-              }
+                if (disablePastDates || disableFutureDates) {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
 
-              return false;
-            }}
-          />
-          {includeTime && <TimePicker />}
+                  if (disablePastDates && date < today) return true;
+                  if (disableFutureDates && date > today) return true;
+                }
+
+                return false;
+              }}
+            />
+
+            {includeTime && <TimePicker />}
+
+          </div>
+            {errorMessage && <p className="text-destructive mb-2 text-sm text-center">{errorMessage}</p>}
         </div>
       </PopoverContent>
+         
     </Popover>
   );
 };
-
-DateTimeLocalInput.displayName = "DateTimeLocalInput";

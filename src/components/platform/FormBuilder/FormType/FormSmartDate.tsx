@@ -39,36 +39,6 @@ export default function FormSmartDate({
   const { disabled } = formRenderProps.field;
   const isDisable = isFieldDisable || disabled;
 
-  // const handleChange = (date: Date | null | string) => {
-  //   if (date) {
-  //     const formattedDate =
-  //       dateGranularity === "year"
-  //         ? moment(date).format("YYYY")
-  //         : dateGranularity === "month"
-  //           ? moment(date).format("YYYY-MM")
-  //           : moment(date).format("MM/DD/YYYY");
-
-  //     const formatted_date = formattedDate?.includes("Invalid date")
-  //       ? date
-  //       : formattedDate;
-
-  //     form.setValue(`${name}_string`, formatted_date, {
-  //       shouldValidate: true,
-  //       shouldDirty: true,
-  //       shouldTouch: true,
-  //     });
-
-  //     form.setValue(`${name}_date`, moment(date).toDate(), {
-  //       shouldValidate: true,
-  //       shouldDirty: true,
-  //       shouldTouch: true,
-  //     });
-  //   } else {
-  //     form.setValue(`${name}_string`, "");
-  //     form.setValue(`${name}_date`, null);
-  //   }
-  // };
-
   const handleChange = (date: Date | null | string) => {
     if (date) {
       const formattedDate =
@@ -82,15 +52,45 @@ export default function FormSmartDate({
         ? date
         : formattedDate;
 
-      form.setValue(name, formatted_date, {
+      form.setValue(`${name}`, formatted_date, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+
+      form.setValue(`${name}_date`, moment(date).toDate(), {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
       });
     } else {
-      form.setValue(name, "");
+      form.setValue(`${name}`, "");
+      form.setValue(`${name}_date`, null);
     }
   };
+
+  // const handleChange = (date: Date | null | string) => {
+  //   if (date) {
+  //     const formattedDate =
+  //       dateGranularity === "year"
+  //         ? moment(date).format("YYYY")
+  //         : dateGranularity === "month"
+  //           ? moment(date).format("YYYY-MM")
+  //           : moment(date).format("MM/DD/YYYY");
+
+  //     const formatted_date = formattedDate?.includes("Invalid date")
+  //       ? date
+  //       : formattedDate;
+
+  //     form.setValue(name, formatted_date, {
+  //       shouldValidate: true,
+  //       shouldDirty: true,
+  //       shouldTouch: true,
+  //     });
+  //   } else {
+  //     form.setValue(name, "");
+  //   }
+  // };
 
   return (
     <FormItem className="flex w-full flex-col">
@@ -104,14 +104,17 @@ export default function FormSmartDate({
         <SmartDatetimeInput
           datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
           inputTestID={`${formKey}-inp-${fieldConfig.name}`}
-          value={form.getValues(`${fieldConfig.name}_date`)}
+          value={
+        form.getValues(`${fieldConfig.name}_date`) ||
+        moment(form.getValues(fieldConfig.name)).toDate()
+          }
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
           disabled={fieldConfig.disabled}
           readOnly={
-            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+        (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
           }
         />
       </FormControl>
