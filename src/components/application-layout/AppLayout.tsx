@@ -13,7 +13,7 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
         <Header />
         <InnerTabs />
       </HeaderContainer>
-      <div className="mt-24 lg:mb-0 mb-12  lg:mt-0">
+      <div className="mt-[140px] md:mt-24 lg:mb-0 mb-12  lg:mt-0">
         {children}
       </div>
       <SmartComponent />
