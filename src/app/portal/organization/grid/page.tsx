@@ -59,8 +59,24 @@ export default async function OrganizationGridPage({
           });
         return final_item;
       });
+
+      // disable archiving of parent organizations with children
+      const updated_final_items = final_items.reduce((acc: Record<string, any>[], item: Record<string, any>) => {
+        const parent = final_items.find(
+          (parent: Record<string, any>) => parent.parent_organization_id === item.id,
+        );
+        const isItemDisabled = !!parent;
+
+        return [
+          ...acc,
+          {
+            ...item,
+            disabled: isItemDisabled,
+          },
+        ];
+      }, [] as Record<string, any>[]);
       return {
-        items: final_items,
+        items: updated_final_items,
         totalCount: res.totalCount,
       };
     });
