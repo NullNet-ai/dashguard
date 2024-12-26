@@ -45,6 +45,7 @@ export interface IConfigGrid {
   actionType?: TActionType;
   statusesIncluded?: string[];
   disableDefaultAction?: boolean;
+  disableArchiveButton?: boolean;
   editCustomComponent?: React.FC<any>;
   deleteCustomComponent?: React.FC<any>;
   archiveCustomComponent?: React.FC<any>;

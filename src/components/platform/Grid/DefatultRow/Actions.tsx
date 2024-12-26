@@ -103,12 +103,15 @@ export function ArchiveComponent({
 
   return (
     <Button
+      {...(config?.disableArchiveButton && { disabled: true })}
       onClick={() => {
         setRecord?.(record);
         setOpen?.(true);
       }}
     >
-      <ArchiveXIcon className="h-3 w-3 text-destructive" />
+      <ArchiveXIcon
+        className={`h-3 w-3 ${config?.disableArchiveButton ? "bg-gray:300 opacity-50" : "text-destructive"}`}
+      />
     </Button>
   );
 }

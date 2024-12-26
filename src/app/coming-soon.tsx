@@ -26,7 +26,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
                 Thank you for your patient!
                 </p>
             </div>
-            <div className="hidden   lg:block relative -top-0 -right-10">
+            <div className="hidden   lg:block relative  -top-[40px] -right-10">
                 <Image
                     alt=""
                     width={"1080"}
