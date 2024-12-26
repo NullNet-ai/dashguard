@@ -5,6 +5,8 @@ import Header from "./Header";
 import SmartComponent, { SmartMobileComponent } from "./SmartComponent";
 import InnerTabs from "../platform/Tab/InnerTabList";
 import HeaderContainer from "./common/HeaderContainer";
+import App from "next/app";
+import AppContent from "./common/AppContent";
 const AppLayout = async ({ children }: PropsWithChildren) => {
   
   return (
@@ -13,9 +15,7 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
         <Header />
         <InnerTabs />
       </HeaderContainer>
-      <div className="mt-[140px] md:mt-24 lg:mb-0 mb-12  lg:mt-0">
-        {children}
-      </div>
+      <AppContent>{children}</AppContent>
       <SmartComponent />
       <SmartMobileComponent />
     </SidebarInset>
