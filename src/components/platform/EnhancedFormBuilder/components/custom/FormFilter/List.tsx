@@ -61,7 +61,7 @@ export default function FormFilterGrid({
 
   const calcWidth = useMemo(() => {
     if (open && state?.isSummaryOpen) {
-      return 'w-[calc(100vw-530px)]'
+      return 'w-[calc(100vw)]'
     }
     else if (!open && state?.isSummaryOpen) {
       return 'w-auto'

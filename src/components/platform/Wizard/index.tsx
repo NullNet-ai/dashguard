@@ -36,8 +36,8 @@ export default function Wizard(props: Wizard) {
       config={config}
       stepsNavigation={stepsNavigation}
     >
-     <section className="overflow-hidden wizard-section relative sm:mt-[2.2rem] lg:mt-0">
-        <div className="lg:hidden block  p-4 pt-10 border-b ">
+     <section className="overflow-hidden wizard-section relative  lg:mt-0">
+        <div className="hidden lg:block  p-4 pt-10 border-b ">
             <WizardNavigator />
         </div>
         <div className="flex  lg:0">

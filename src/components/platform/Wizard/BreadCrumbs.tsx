@@ -44,7 +44,8 @@ export default function WizardNavigator() {
               Step {currentStep} -{" "}
               {currentStep !== undefined
                 ? (stepLabels?.[currentStep] ?? "")
-                : ""}
+                : ""} 
+
             </span>
           </li>
         </ol>
