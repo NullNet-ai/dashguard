@@ -1,11 +1,12 @@
 import { api } from "~/trpc/server";
-import Grid from "~/components/platform/Grid/Server";
+// import Grid from "~/components/platform/Grid/Server";
 
 import { headers } from "next/headers";
 import { EOperator } from "@dna-platform/common-orm";
-import gridColumns, {
-  TO_HIDE_COLUMNS_WHEN_MOBILE,
-} from "~/app/portal/contact/grid/_config/columns";
+// import gridColumns, {
+//   TO_HIDE_COLUMNS_WHEN_MOBILE,
+// } from "~/app/portal/contact/grid/_config/columns";
+import ComingSoon from "~/app/portal/coming-soon/_components/coming_soon";
 
 export default async function Page() {
   const headerList = headers();
@@ -28,32 +29,33 @@ export default async function Page() {
   ];
 
   // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
-  const { items = [], totalCount } = await api.contact.mainGrid({
-    current: 0,
-    limit: 100,
-    entity: "contact",
-    pluck: _pluck,
-    advance_filters: [
-      {
-        field: "organization_id",
-        operator: EOperator.EQUAL,
-        values: [identifier!],
-        type: "criteria",
-      },
-    ],
-  });
+  // const { items = [], totalCount } = await api.contact.mainGrid({
+  //   current: 0,
+  //   limit: 100,
+  //   entity: "contact",
+  //   pluck: _pluck,
+  //   advance_filters: [
+  //     {
+  //       field: "organization_id",
+  //       operator: EOperator.EQUAL,
+  //       values: [identifier!],
+  //       type: "criteria",
+  //     },
+  //   ],
+  // });
 
   return (
-    <Grid
-      totalCount={totalCount || 0}
-      data={items}
-      config={{
-        entity: "contact",
-        title: "Contacts",
-        columns: gridColumns,
-        hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
-        // disableDefaultAction: true,
-      }}
-    />
+    // <Grid
+    //   totalCount={totalCount || 0}
+    //   data={items}
+    //   config={{
+    //     entity: "contact",
+    //     title: "Contacts",
+    //     columns: gridColumns,
+    //     hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
+    //     // disableDefaultAction: true,
+    //   }}
+    // />
+    <ComingSoon />
   );
 }
