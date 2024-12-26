@@ -24,6 +24,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useMediaQuery } from "react-responsive";
 import { Create } from "./Action/Create";
 import { Button } from "~/components/ui/button";
+import { Button as Button2 } from "@headlessui/react";
 import { FileIcon } from "lucide-react";
 
 import {
@@ -200,15 +201,14 @@ export default function GridProvider({
 
       if (config?.actionType === "single-select") {
         return (
-          <Button
+          <Button2
             disabled={disableActions}
-            className="mx-auto flex"
-            variant={"ghost"}
+            className="mx-auto flex cursor-pointer"
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
             <PlusCircleIcon className="h-5 w-5 text-sky-500" />
-          </Button>
+          </Button2>
         );
       }
 
