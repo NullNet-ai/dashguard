@@ -10,9 +10,14 @@ export default async function LoginSubmit({
   email: string;
   password: string;
 }) {
-  await api.auth.login({
+  const response = await api.auth.login({
     email,
     password,
   });
+
+  if ("statusCode" in response && response.statusCode !== 200) {
+    return JSON.parse(JSON.stringify(response));
+  }
+
   redirect("/portal/dashboard");
 }

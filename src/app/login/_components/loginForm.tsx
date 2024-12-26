@@ -12,7 +12,7 @@ import LoginSubmit from "../actions/loginSubmit";
 
 const formSchema = z.object({
   email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
-  password: z.string({required_error:"Please enter your password"}).min(5, "Password must be at least 5 characters long"),
+  password: z.string({required_error:"Please enter your password."}).min(5, "Password must contain at least 5 characters."),
 });
 
 export default function LoginForm() {
@@ -22,7 +22,10 @@ export default function LoginForm() {
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      await LoginSubmit(data);
+      const response = await LoginSubmit(data);
+      if (response && response.statusCode !== 200) {
+        throw response;
+      }
     } catch (error: any) {
       console.error("Error Details:", error.message);
       setIsSubmitting(false);
