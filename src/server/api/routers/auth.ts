@@ -49,7 +49,7 @@ export const authRouter = createTRPCRouter({
         });
 
       if (error) {
-        throw error;
+        return error;
       }
       
       ctx.storeCookies.set("token", token);
