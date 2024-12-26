@@ -2,7 +2,8 @@
 
 import { Button } from "~/components/ui/button";
 import { XCircleIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import React, { startTransition } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ErrorPage({ 
   error, 
@@ -11,8 +12,13 @@ export default function ErrorPage({
   error: Error & { digest?: string; statusCode?: number }; 
   reset: () => void;
 }) {
+  const router = useRouter();
+  
   function clearError() {
-    reset();
+    startTransition(() => {
+      router.refresh();
+      reset();
+    });
   }
 
   return (
