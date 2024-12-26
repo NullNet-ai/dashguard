@@ -23,7 +23,7 @@ export default function LoginForm() {
     setIsSubmitting(true);
     try {
       const response = await LoginSubmit(data);
-      if (response?.statusCode !== 200) {
+      if (response && response.statusCode !== 200) {
         throw response;
       }
     } catch (error: any) {
