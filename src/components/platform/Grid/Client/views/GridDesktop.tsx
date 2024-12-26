@@ -57,7 +57,7 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
               }
         }
       
-        className="overflow-auto sm:w-[350px] md:w-[460px] m-auto lg:w-auto rounded-md border bg-card text-card-foreground"
+        className="overflow-auto w-[350px] md:w-[460px] m-auto lg:w-auto rounded-md border bg-card text-card-foreground"
       >
         <Table>
           <TableHeader>
