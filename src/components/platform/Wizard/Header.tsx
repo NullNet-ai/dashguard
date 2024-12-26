@@ -74,7 +74,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex w-full flex-row items-center justify-between rounded h-12 py-1 px-2 text-foreground sm:items-center">
+      <div className="flex h-12 w-full flex-row items-center justify-between rounded px-2 py-1 text-foreground sm:items-center">
         <div className="flex flex-row items-center justify-start">
           <Collapsible
             onOpenChange={setIsOpen}
@@ -101,14 +101,31 @@ export default function Header() {
               <MyVerticalStepper />
             </CollapsibleContent>
           </Collapsible>
-          <div className="mr-auto hidden items-center lg:flex">
-            <WizardNavigator />
-          </div>
+
           <div className="p-4 px-2 lg:hidden">
-            <span className="text-sm font-bold text-foreground">Title </span>
+            <span className="text-sm font-bold text-foreground">
+              <WizardNavigator />
+            </span>
           </div>
         </div>
-        <div className="flex items-center space-x-2 ">
+        <div className="flex items-center space-x-2">
+          {currentStep > 1 && (
+            <Button
+              data-test-id={testIDFormatter(`${entityName}-wzrd-prev-btn`)}
+              disabled={!enabled_prev || currentStep === 1 || prevLoading}
+              variant={"outline"}
+              loading={prevLoading}
+              onClick={handlePrev}
+              size={"sm"}
+              className="gap-1"
+            >
+              <ChevronLeftIcon
+                className="h-3 w-3 text-slate-400"
+                strokeWidth={4}
+              />
+              <span className="text-foreground">Prev</span>
+            </Button>
+          )}
           <Button
             name="wizardDebugButton"
             data-test-id={testIDFormatter(`${entityName}-wzrd-debug-btn`)}
@@ -119,28 +136,14 @@ export default function Header() {
           >
             <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-red-500" />
           </Button>
-          <Button
-            data-test-id={testIDFormatter(`${entityName}-wzrd-prev-btn`)}
-            disabled={!enabled_prev || currentStep === 1 || prevLoading}
-            variant={"outline"}
-            loading={prevLoading}
-            onClick={handlePrev}
-            size={"sm"}
-            className="gap-1"
-          >
-            <ChevronLeftIcon
-              className="h-3 w-3 text-slate-400"
-              strokeWidth={4}
-            />
-            <span className="text-foreground">Prev</span>
-          </Button>
+
           {currentStep === totalSteps ? (
-            <div className="flex flex-row  items-center">
+            <div className="flex flex-row items-center">
               <Button
                 data-test-id={testIDFormatter(
                   `${entityName}-wzrd-save-continue-btn`,
                 )}
-                className="rounded-r-none gap-1"
+                className="gap-1 rounded-r-none"
                 loading={saveContinueLoading}
                 size={"sm"}
                 onClick={handleSaveAndContinue}
@@ -148,7 +151,7 @@ export default function Header() {
                   saveContinueLoading || saveCloseLoading || saveNewLoading
                 }
               >
-                <SaveIcon className="h-4 w-4"/>
+                <SaveIcon className="h-4 w-4" />
                 <span>Save & Continue</span>
               </Button>
               <ButtonWithDropdown
@@ -175,22 +178,25 @@ export default function Header() {
             </div>
           ) : (
             <>
-              <Button
-                data-test-id={testIDFormatter(`${entityName}-wzrd-skip-btn`)}
-                variant={"outline"}
-                loading={skipLoading}
-                size={"sm"}
-                disabled={
-                  !enabled_skip || currentStep === totalSteps || skipLoading
-                }
-                onClick={handleSkip}
-              >
-                <span className="text-foreground">Skip</span>
-                <ChevronRightIcon
-                  className="h-3 w-3 text-slate-400"
-                  strokeWidth={4}
-                />
-              </Button>
+              {currentStep > 1 && (
+                <Button
+                  data-test-id={testIDFormatter(`${entityName}-wzrd-skip-btn`)}
+                  variant={"outline"}
+                  loading={skipLoading}
+                  size={"sm"}
+                  disabled={
+                    !enabled_skip || currentStep === totalSteps || skipLoading
+                  }
+                  onClick={handleSkip}
+                >
+                  <span className="text-foreground">Skip</span>
+                  <ChevronRightIcon
+                    className="h-3 w-3 text-slate-400"
+                    strokeWidth={4}
+                  />
+                </Button>
+              )}
+
               <Button
                 data-test-id={testIDFormatter(`${entityName}-wzrd-next-btn`)}
                 loading={nextLoading}

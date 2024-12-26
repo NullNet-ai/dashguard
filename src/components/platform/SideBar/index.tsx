@@ -40,6 +40,7 @@ export default function AppSideBar(config: ISideBarProps) {
     footerComponent,
     footerMenuConfig,
     headerMenuConfig,
+    className,
     mainMenuConfig,
   } = config;
   const { ChevronUpDownIcon } = _ICON;
@@ -58,7 +59,7 @@ export default function AppSideBar(config: ISideBarProps) {
   const { width } = useWindowSize();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className={className}>
       {headerComponent && (
         <SidebarHeader className="group relative">
           {!isMobile && (

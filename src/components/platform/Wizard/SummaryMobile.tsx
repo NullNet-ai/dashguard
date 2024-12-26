@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  MicrophoneIcon,
-  PaperClipIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Button } from "@headlessui/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   CheckIcon,
   ChevronDown,
@@ -14,9 +11,16 @@ import {
   PlusIcon,
 } from "lucide-react";
 import Image from "next/image";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { Badge } from "~/components/ui/badge";
-import { Card, CardFooter } from "~/components/ui/card";
+import { Card } from "~/components/ui/card";
 import {
   Drawer,
   DrawerClose,
@@ -25,33 +29,23 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "~/components/ui/drawer";
-import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { useSidebar } from "~/components/ui/sidebar";
-import { WizardContext } from "./Provider";
+import { SmartContext } from "~/components/ui/smart-component";
 import useScreenType from "~/hooks/use-screen-type";
 import { cn } from "~/lib/utils";
-import { Button } from "@headlessui/react";
-import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
-import numberToWords from "./Utils/steptoWords";
-import { use } from "chai";
-import { SmartContext } from "~/components/ui/smart-component";
 import { testIDFormatter } from "~/utils/formatter";
+import { WizardContext } from "./Provider";
+import numberToWords from "./Utils/steptoWords";
+import Link from "next/link";
+import { TSummaryComponents } from "./type";
 
 const SummaryMobile = () => {
-  
   const { open } = useSidebar();
   const { state } = useContext(WizardContext);
   const size = useScreenType();
   const [selected, setSelected] = useState<null | "summary" | "smart">(null);
-  const smart  = useContext(SmartContext);
+  const smart = useContext(SmartContext);
 
   const traverseSteps = useMemo(() => {
     return state?.traverseSteps;
@@ -60,48 +54,66 @@ const SummaryMobile = () => {
     return Array.from({ length: state?.totalSteps || 0 }, (_, i) => i + 1);
   }, [state?.totalSteps]);
   const pathName = usePathname();
+  const pathArray = pathName.split("/");
   const searchParams = useSearchParams();
   const fullSearchQueryParams = searchParams.toString();
-  const pathArray = pathName.split("/");
-
-  const entity = state?.entityName
+  const currentStep = Number(pathArray[pathArray.length - 1]);
+  const entity = state?.entityName;
 
   useEffect(() => {
-     if(size === "xs" || size === "sm") {
+    if (size === "xs" || size === "sm") {
       smart?.action("wizard-summary");
-     }
+    }
 
     return () => {
       smart?.action("smart");
     };
-  }, [size])
-  
+  }, [size]);
 
   const footerContent = useCallback(() => {
-
     const activeClass = "border-b-4 border-primary bg-muted p-4 text-primary";
     return (
       <>
         <Separator />
         <DrawerFooter>
-          <div className="fixed bottom-0 z-20 left-0 flex w-full justify-between bg-muted text-default/60 lg:hidden">
+          <div className="fixed bottom-0 left-0 z-20 flex w-full justify-between bg-muted text-default/60 lg:hidden">
             <Button
-              data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-toggle-btn`)}
+              data-test-id={testIDFormatter(
+                `${entity}-wzrdsum-mobile-toggle-btn`,
+              )}
               onClick={() => {
                 setSelected("summary");
               }}
-              className={cn('flex w-1/2 justify-center gap-2  bg-muted p-4 lg:hidden', {[activeClass] : selected === "summary"})}
+              className={cn(
+                "flex w-1/2 justify-center gap-2 bg-muted p-4 lg:hidden",
+                { [activeClass]: selected === "summary" },
+              )}
             >
-              <ListCheckIcon className={cn('h-5 w-5', {'text-primary': selected === "summary"})} /> Summary 
+              <ListCheckIcon
+                className={cn("h-5 w-5", {
+                  "text-primary": selected === "summary",
+                })}
+              />{" "}
+              Summary
             </Button>
             <Button
-              data-test-id={testIDFormatter(`${entity}-wzrdsum-smart-mobile-toggle-btn`)}
+              data-test-id={testIDFormatter(
+                `${entity}-wzrdsum-smart-mobile-toggle-btn`,
+              )}
               onClick={() => {
                 setSelected("smart");
               }}
-              className={cn('flex w-1/2 justify-center gap-2  bg-muted p-4 lg:hidden', {[activeClass] : selected === "smart"})}
+              className={cn(
+                "flex w-1/2 justify-center gap-2 bg-muted p-4 lg:hidden",
+                { [activeClass]: selected === "smart" },
+              )}
             >
-              <FolderSearchIcon className={cn('h-5 w-5', {'text-primary': selected === "smart"})} /> Smart
+              <FolderSearchIcon
+                className={cn("h-5 w-5", {
+                  "text-primary": selected === "smart",
+                })}
+              />{" "}
+              Smart
             </Button>
           </div>
         </DrawerFooter>
@@ -116,196 +128,21 @@ const SummaryMobile = () => {
       return (
         <>
           <DrawerHeader className="flex items-center gap-4 p-3">
-            <h1 className="text-md flex-grow text-start font-bold">Summary</h1>
+            <h1 className="flex-grow text-start text-md font-bold">Summary</h1>
             <Button
               onClick={() => {
                 setSelected(null);
               }}
-              data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-drawer-toggle-btn`)}
+              data-test-id={testIDFormatter(
+                `${entity}-wzrdsum-mobile-drawer-toggle-btn`,
+              )}
               className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200"
             >
               <ChevronDown className="h-6 w-6 text-primary" />
             </Button>
           </DrawerHeader>
           <Separator />
-          <div className="p-2 px-4">
-            <div className="max-h-[40dvh] overflow-y-auto">
-              <Accordion
-                // onValueChange={(value) => {
-                // }}
-                // defaultValue={["1", "2", "3", "4"]}
-                type="multiple"
-              >
-                <div
-                  className={cn(
-                    "relative w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-3 lg:p-4",
-                  )}
-                >
-                  <ol role="list" className="overflow-hidden">
-                    {stepsArray?.map((step, stepIdx) => {
-                      const stepIndex = stepIdx + 1;
-                      const isStepped =
-                        traverseSteps?.[numberToWords(stepIndex)] === "Stepped";
-                      const isCurrent = state?.currentStep === stepIndex;
-                      pathArray.pop();
-                      pathArray.push(`${step}`);
-                      const _completeLink = pathArray.join("/");
-                      const completeLink = fullSearchQueryParams
-                        ? `${_completeLink}?${fullSearchQueryParams}`
-                        : _completeLink;
-
-                      const summaryTitle =
-                        // @ts-expect-error - SummaryComponent is not defined
-                        state?.summary?.[numberToWords(stepIndex)]?.label;
-                      // @ts-expect-error - SummaryComponent is not defined
-                      const summaryComponent = state?.summary?.[
-                        numberToWords(stepIndex)
-                      ]?.component
-                        ? // @ts-expect-error - SummaryComponent is not defined
-                          state?.summary?.[numberToWords(stepIndex)]?.component
-                        : null;
-
-                      return (
-                        <AccordionItem
-                          key={stepIdx}
-                          value={stepIndex.toString()}
-                          data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}`)}
-                        >
-                          <li
-                            className={cn(
-                              stepIdx !== stepsArray.length ? "pb-10" : "",
-                              "relative",
-                            )}
-                          >
-                            {isStepped ? (
-                              <div className={cn("flex", {})}>
-                                {isCurrent ? (
-                                  stepIdx !== stepsArray.length - 1 ? (
-                                    <div
-                                      aria-hidden="true"
-                                      className={cn(
-                                        "absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-indigo-600",
-                                      )}
-                                    />
-                                  ) : (
-                                    <div
-                                      aria-hidden="true"
-                                      className={cn(
-                                        "absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300",
-                                      )}
-                                    />
-                                  )
-                                ) : (
-                                  <div
-                                    aria-hidden="true"
-                                    className={cn(
-                                      "absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-indigo-600",
-                                    )}
-                                  />
-                                )}
-                                <Link
-                                  href={completeLink}
-                                  className="group relative flex items-start"
-                                  data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-completed-link`)}
-                                >
-                                  <span className="flex h-9 items-center">
-                                    {isCurrent ? (
-                                      <span
-                                        aria-hidden="true"
-                                        className="flex h-9 items-center"
-                                      >
-                                        <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-primary bg-white text-xs">
-                                          {stepIndex}
-                                        </span>
-                                      </span>
-                                    ) : (
-                                      <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 group-hover:bg-indigo-800">
-                                        <CheckIcon
-                                          aria-hidden="true"
-                                          className="h-5 w-5 text-white"
-                                        />
-                                      </span>
-                                    )}
-                                  </span>
-                                </Link>
-                                <span
-                                  className={cn("ml-3 flex min-w-0 flex-col")}
-                                >
-                                  {/* Hidden on mobile, visible from small screens (sm) and up */}
-                                  <span
-                                    className={cn("text-gray text-xs sm:block")}
-                                  >
-                                    {summaryTitle
-                                      ? summaryTitle
-                                      : "Description of Step " + stepIndex}
-                                  </span>
-                                  {/* This will be hidden on mobile screens */}
-                                  <AccordionTrigger
-                                    data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-accordion-trigger`)}
-                                  >
-                                    <span className="text-left text-sm font-medium sm:block">
-                                      {summaryTitle
-                                        ? summaryTitle
-                                        : "Description of Step " + stepIndex}
-                                    </span>
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="text-sm font-medium sm:block">
-                                      {summaryComponent}
-                                    </div>
-                                  </AccordionContent>
-                                </span>
-                              </div>
-                            ) : (
-                              <>
-                                {
-                                  // Last  step should not have a line
-                                  stepIdx !== stepsArray.length - 1 && (
-                                    <div
-                                      aria-hidden="true"
-                                      className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
-                                    />
-                                  )
-                                }
-                                <a
-                                  href={completeLink}
-                                  data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-link`)}
-                                  className="group relative flex items-start"
-                                >
-                                  <span
-                                    aria-hidden="true"
-                                    className="flex h-9 items-center"
-                                  >
-                                    <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white text-xs group-hover:border-gray-400">
-                                      {stepIndex}
-                                    </span>
-                                  </span>
-                                  <span
-                                    className={cn("ml-3 flex min-w-0 flex-col")}
-                                  >
-                                    {/* Hidden on mobile, visible from small screens (sm) and up */}
-                                    <span className="text-xs font-medium text-default/50 sm:block">
-                                      {"Step  " + stepIndex}
-                                    </span>
-                                    {/* This will be hidden on mobile screens */}
-                                    <span className="text-sm text-gray-500 sm:block">
-                                      {summaryTitle
-                                        ? summaryTitle
-                                        : "Description of Step " + stepIndex}
-                                    </span>
-                                  </span>
-                                </a>
-                              </>
-                            )}
-                          </li>
-                        </AccordionItem>
-                      );
-                    })}
-                  </ol>
-                </div>
-              </Accordion>
-            </div>
-          </div>
+          <SummaryContent/>
           {footerContent()}
         </>
       );
@@ -313,7 +150,7 @@ const SummaryMobile = () => {
     return (
       <>
         <DrawerHeader className="flex items-center gap-4 p-3">
-          <h1 className="text-md flex-grow text-start">Smart</h1>
+          <h1 className="flex-grow text-start text-md">Smart</h1>
           <PlusIcon className="h-6 w-6 text-primary" />
           <HistoryIcon className="h-5 w-5 text-muted-foreground" />
           <XMarkIcon className="h-6 w-6 text-muted-foreground" />
@@ -330,8 +167,10 @@ const SummaryMobile = () => {
                         as Marlyn Cooper's phone number that is used in this current draft
                         record`}
             </Card>
-            <img
+            <Image
               alt=""
+              width={35}
+              height={35}
               src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
               className="inline-block h-8 w-8 rounded-full"
             />
@@ -408,7 +247,7 @@ const SummaryMobile = () => {
             </span>
           </section>
         </main>
-       {footerContent()}
+        {footerContent()}
       </>
     );
   }, [selected]);
@@ -434,7 +273,9 @@ const SummaryMobile = () => {
             "flex w-1/2 items-center justify-center gap-2 p-4",
             widthClass,
           )}
-          data-test-id={testIDFormatter(`${entity}-wzrdsum-mobile-ftr-toggle-btn`)}
+          data-test-id={testIDFormatter(
+            `${entity}-wzrdsum-mobile-ftr-toggle-btn`,
+          )}
           onClick={() => {
             setSelected("summary");
           }}
@@ -447,7 +288,9 @@ const SummaryMobile = () => {
             "flex w-1/2 items-center justify-center gap-2 p-4",
             widthClass,
           )}
-          data-test-id={testIDFormatter(`${entity}-wzrdsum-smart-mobile-ftr-toggle-btn`)}
+          data-test-id={testIDFormatter(
+            `${entity}-wzrdsum-smart-mobile-ftr-toggle-btn`,
+          )}
           onClick={() => {
             setSelected("smart");
           }}
@@ -461,3 +304,186 @@ const SummaryMobile = () => {
 };
 
 export default SummaryMobile;
+
+
+
+
+const SummaryContent = () => {
+  const { state } = useContext(WizardContext);
+  const [defaultValueAccordionItems, setDefaultValueAccordionItems] = useState<string[]>([]);
+  
+  const traverseSteps = useMemo(() => {
+    return state?.traverseSteps;
+  }, [state?.traverseSteps]);
+
+  const stepsArray = useMemo(() => {
+    return Array.from({ length: state?.totalSteps || 0 }, (_, i) => i + 1);
+  }, [state?.totalSteps]);
+
+  const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const fullSearchQueryParams = searchParams.toString();
+  const pathArray = pathName.split("/");
+  const entity = state?.entityName;
+  
+  // Get default values for accordion items from summary components
+  useEffect(() => {
+    const defaultValues = Object.values(state?.summary || {}).reduce(
+      (acc: string[], { components }) => {
+        const labels = components?.map(
+          (
+            {
+              label,
+            }: {
+              label: string;
+            },
+            idx: number,
+          ) => idx + label,
+        ) || [];
+        return [...acc, ...labels];
+      },
+      [],
+    );
+    setDefaultValueAccordionItems(defaultValues);
+  }, [state?.summary]);
+
+  return (
+    <div className="p-2 px-4">
+      <div className="max-h-[40dvh] overflow-y-auto">
+        <Accordion
+          type="multiple"
+          defaultValue={defaultValueAccordionItems}
+        >
+          <div className="relative w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-3">
+            <ol role="list" className="overflow-hidden">
+              {stepsArray?.map((step, stepIdx) => {
+                const stepIndex = stepIdx + 1;
+                const index = numberToWords(stepIndex);
+                const isStepped = traverseSteps?.[index] === "Stepped";
+                const isCurrent = state?.currentStep === stepIndex;
+
+                pathArray.pop();
+                pathArray.push(`${step}`);
+                const _completeLink = pathArray.join("/");
+                const completeLink = fullSearchQueryParams
+                  ? `${_completeLink}?${fullSearchQueryParams}`
+                  : _completeLink;
+
+                // Get summary details for current step
+              // @ts-expect-error - SummaryComponent is not defined
+                const summaryTitle = state?.summary?.[index]?.label;
+              // @ts-expect-error - SummaryComponent is not defined
+                const summaryComponents = state?.summary?.[index]?.components;
+
+                return (
+                  <AccordionItem
+                    key={stepIndex}
+                    value={stepIndex.toString()}
+                    data-test-id={testIDFormatter(
+                      `${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}`,
+                    )}
+                  >
+                    <li className={cn(
+                      stepIdx !== stepsArray.length - 1 ? "pb-10" : "",
+                      "relative"
+                    )}>
+                      {isStepped || isCurrent ? (
+                        <div className="flex flex-1">
+                          {/* Vertical line styling */}
+                          {stepIdx !== stepsArray.length - 1 && (
+                            <div
+                              aria-hidden="true"
+                              className={cn(
+                                "absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5",
+                                isCurrent ? "bg-primary" : "bg-primary"
+                              )}
+                            />
+                          )}
+                          
+                          {/* Step indicator */}
+                          <Link
+                            href={completeLink}
+                            className="group relative flex items-start"
+                            data-test-id={testIDFormatter(
+                              `${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-completed-link`,
+                            )}
+                          >
+                            <span className="flex h-9 items-center">
+                              {isCurrent ? (
+                                <span className="flex h-9 items-center">
+                                  <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-primary bg-white" />
+                                </span>
+                              ) : (
+                                <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary group-hover:bg-primary">
+                                  <CheckIcon className="h-4 w-4 text-white" />
+                                </span>
+                              )}
+                            </span>
+                          </Link>
+
+                          {/* Step content */}
+                          <div className="ml-3 flex min-w-0 flex-col">
+                            <span className="text-gray text-xs">
+                              {summaryTitle || `Step ${stepIndex}`}
+                            </span>
+                            
+                            {summaryComponents?.map(
+                              ({ component, label }: TSummaryComponents, idx: number) => (
+                                <div key={idx + label} className="mt-2">
+                                  <AccordionTrigger
+                                    data-test-id={testIDFormatter(
+                                      `${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-trigger-${label}`,
+                                    )}
+                                  >
+                                    <span className="text-sm font-medium">
+                                      {label || `Component ${idx + 1}`}
+                                    </span>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="text-sm font-medium">
+                                      {component}
+                                    </div>
+                                  </AccordionContent>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        // Incomplete step styling
+                        <div className="flex items-start">
+                          {stepIdx !== stepsArray.length - 1 && (
+                            <div
+                              aria-hidden="true"
+                              className="absolute left-3 top-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-300"
+                            />
+                          )}
+                          <Link
+                            href={completeLink}
+                            className="group relative flex items-start"
+                            data-test-id={testIDFormatter(
+                              `${entity}-wzrdsum-mobile-stepper-itm-${stepIndex}-link`,
+                            )}
+                          >
+                            <span className="flex h-9 items-center">
+                              <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400" />
+                            </span>
+                            <span className="ml-3 flex min-w-0 flex-col">
+                              <span className="text-xs text-gray-500">
+                                {summaryTitle || `Step ${stepIndex}`}
+                              </span>
+                            </span>
+                          </Link>
+                        </div>
+                      )}
+                    </li>
+                  </AccordionItem>
+                );
+              })}
+            </ol>
+          </div>
+        </Accordion>
+      </div>
+    </div>
+  );
+};
