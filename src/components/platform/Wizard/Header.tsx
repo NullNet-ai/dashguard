@@ -105,7 +105,7 @@ export default function Header() {
             <WizardNavigator />
           </div>
           <div className="p-4 px-2 lg:hidden">
-            <span className="text-sm font-bold text-foreground">Title </span>
+            <span className="text-sm font-bold text-foreground"> </span>
           </div>
         </div>
         <div className="flex items-center space-x-2 ">
