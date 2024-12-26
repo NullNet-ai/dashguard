@@ -19,10 +19,10 @@ export async function Edit({
     identifier: code!,
   });
 
-  const { identifier } = response ?? {};
+  const { identifier, step } = response ?? {};
 
   if (status === "Draft") {
-    redirect(`/portal/${entity}/wizard/${identifier}/`);
+    redirect(`/portal/${entity}/wizard/${identifier}/${step}`);
   }
 
   redirect(`/portal/${entity}/record/${code}?current_tab=dashboard`);

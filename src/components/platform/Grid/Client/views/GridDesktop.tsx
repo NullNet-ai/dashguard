@@ -20,7 +20,7 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
   return (
-    <Card className="col-span-full border-0 shadow-none">
+    <Card className="col-span-full border-0 shadow-none m-4">
       {parentType !== "field" && (
         <CardHeader>
           <div className="flex flex-row space-x-2">
@@ -53,11 +53,11 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
             ? { height: "calc(100vh - 16rem)" }
             : {
                 // width: "calc(100vw - 40rem)",
-                width: "auto",
                 height: height || "auto",
               }
         }
-        className="overflox-y-auto rounded-md border bg-card text-card-foreground"
+      
+        className="overflow-auto w-[350px] md:w-[460px] m-auto lg:w-auto rounded-md border bg-card text-card-foreground"
       >
         <Table>
           <TableHeader>

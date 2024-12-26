@@ -30,7 +30,7 @@ function MainClient({
       config={config}
       initialSelectedRecords={initialSelectedRecords}
     >
-      <div className="hidden lg:block">
+      <div className="">
         <GridDesktop parentType={parentType} hideSearch height={height}/>
       </div>
       <div className="h-full lg:hidden">{/* <GridMobile /> */}</div>

@@ -6,13 +6,14 @@ import SmartComponent, { SmartMobileComponent } from "./SmartComponent";
 import InnerTabs from "../platform/Tab/InnerTabList";
 import HeaderContainer from "./common/HeaderContainer";
 const AppLayout = async ({ children }: PropsWithChildren) => {
+  
   return (
     <SidebarInset>
       <HeaderContainer>
         <Header />
         <InnerTabs />
       </HeaderContainer>
-      <div className="mt-28 lg:mb-0 mb-12 md:mt-16 lg:mt-0">
+      <div className="mt-[140px] md:mt-24 lg:mb-0 mb-12  lg:mt-0">
         {children}
       </div>
       <SmartComponent />

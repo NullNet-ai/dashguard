@@ -55,8 +55,11 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       className={cn("scrollbar-hide flex justify-between gap-x-2 border-b")}
     >
       <div className="flex items-center">
-        {newItems.map((tab) => (
-          <div
+        {newItems.map((tab) => {
+
+          const isGrid = tab.name === "Grid";
+
+          return <div
             key={tab.name}
             className="group relative flex items-center px-2 py-2 pr-1"
           >
@@ -65,10 +68,11 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               href={tab.href}
               aria-current={tab.current ? "page" : undefined}
               className={cn(
-              tab.current ? "text-primary" : "text-default-foreground/60",
-              "whitespace-nowrap px-2 pr-0 text-sm font-medium",
-              "flex items-center space-x-2",
-              "hover:border-t-primary hover:text-primary",
+                tab.current ? "text-primary" : "text-default-foreground/60",
+                "whitespace-nowrap px-2 text-sm font-medium",
+                "flex items-center space-x-2",
+                "hover:border-t-primary hover:text-primary",
+                `${isGrid ? 'pr-2': 'pr-0'}`
               )}
             >
               {formatTabName(tab.name)}
@@ -81,7 +85,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               name={tab.name}
             />
           </div>
-        ))}
+        })}
       </div>
       {dropdownItems.length > 0 && (
         <DropdownMenu>
