@@ -11,7 +11,7 @@ export default async function Page() {
     <div>
       <RecordSummary />
       <RecordShellSummary
-        form_key={"OrganizationOne"}
+        form_key={"organization_basic_details"}
         identifier={identifier!}
         main_entity={main_entity!}
       />

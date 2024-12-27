@@ -72,7 +72,7 @@ export function DeleteComponent({ row, config }: DefaultRowActions) {
         handleDelete({ row, config });
       }}
     >
-      <TrashIcon className="h-3 w-3 text-destructive" />
+      <ArchiveIcon className="h-3 w-3 text-destructive" />
     </Button>
   );
 }
@@ -109,7 +109,7 @@ export function ArchiveComponent({
         setOpen?.(true);
       }}
     >
-      <ArchiveXIcon
+      <ArchiveIcon
         className={`h-3 w-3 ${row.original.disabled ? "bg-gray:300 opacity-50" : "text-destructive"}`}
       />
     </Button>

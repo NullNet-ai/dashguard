@@ -13,7 +13,9 @@ const StepOneOrganizationForm = async () => {
   });
   const record_id = fetched_orgs?.data?.id;
 
-  const parent_orgs_options = await api.organization.parentOrganizations();
+  const parent_orgs_options = await api.organization.parentOrganizations({
+    id: record_id!,
+  });
   const defaultValues = fetched_orgs?.data;
 
   return (

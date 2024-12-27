@@ -96,7 +96,8 @@ export const createDefineRoutes = (entity: Entity) => ({
       if (!input?.code) return null;
 
       // Note: Temporary fix. Real code commented
-      const record = await ctx.dnaClient
+      try {
+        const record = await ctx.dnaClient
         .findByCode(input.code, {
           entity,
           token: ctx.token.value,
@@ -110,6 +111,15 @@ export const createDefineRoutes = (entity: Entity) => ({
         ...record,
         data: record?.data?.[0],
       };
+      } catch (error) {
+        return {
+          data: undefined,
+          status_code: 404,
+          message: "Record not found",
+          success: false,
+          error,
+        } as Record<string, any>;
+      }
     }),
   archivedRecord: privateProcedure
     .input(
