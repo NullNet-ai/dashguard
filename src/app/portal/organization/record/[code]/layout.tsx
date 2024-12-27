@@ -35,6 +35,13 @@ const Layout = async ({ children, record, record_summary }: IPlatformRecordLayou
     ],
   });
 
+  if (organization_details?.errors?.length) {
+    throw new Error(organization_details.message as string);
+  }
+  if (!organization_details?.data) {
+    throw new Error("Record not found");
+  }
+
   const { name, status } = organization_details?.data || {};
 
   //Record Shell Guard for Draft Records

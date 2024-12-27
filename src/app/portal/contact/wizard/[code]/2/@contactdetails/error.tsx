@@ -2,7 +2,8 @@
 
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 
 const ErrorContainer = ({
@@ -12,13 +13,17 @@ const ErrorContainer = ({
   error: Error & { digest?: string; statusCode?: number };
   reset: () => void;
 }) => {
+  const router = useRouter();
   
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   const clearError = () => {
-    reset();
+    startTransition(() => {
+      router.refresh();
+      reset();
+    });
   }
 
   return (
