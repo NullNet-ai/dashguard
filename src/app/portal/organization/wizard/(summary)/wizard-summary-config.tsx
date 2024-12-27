@@ -17,7 +17,7 @@ const organizationWizardSummary = ({
           label: "Organization Details",
           component: (
             <OrganizationSummary
-              form_key={"ContactsOne"}
+              form_key={"organization_basic_details"}
               identifier={identifier!}
               main_entity={mainEntity!}
             />
