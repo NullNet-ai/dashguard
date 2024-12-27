@@ -43,17 +43,13 @@ export default function GridMobileRow() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         className="flex gap-2 relative items-center text-primary"
-                        onClick={() => {
-
-                        }}>
+                     >
                         <PencilIcon className={`h-4 w-4`} aria-hidden="true" />
                         <span>Edit</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="flex gap-2 relative items-center text-danger-foreground"
-                        onClick={() => {
-
-                        }}>
+                        >
                         <ArchiveIcon className={`h-4 w-4 `} aria-hidden="true" />
                         <span>Delete</span>
                       </DropdownMenuItem>
