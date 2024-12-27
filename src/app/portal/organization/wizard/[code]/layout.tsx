@@ -27,6 +27,10 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           totalSteps: 2,
           enableAutoCreate: true,
           entityName: mainEntity,
+          stepLabels: {
+            1: "Organization",
+            2: "Confirmation",
+          },
         }}
         summary={wizard_summary}
       >
