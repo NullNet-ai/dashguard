@@ -138,7 +138,7 @@ export default function Pagination() {
               1
             </a>
 
-            <span className="relative mt-1 inline-flex items-center px-4 text-sm font-semibold text-gray-700 focus:outline-offset-0">
+            {totalPages > 1 ? (<span className="relative mt-1 inline-flex items-center px-4 text-sm font-semibold text-gray-700 focus:outline-offset-0">
               <Menu as="div" className="relative inline-block text-left"   data-test-id={camelCase(`${state?.config.entity}PaginationPageMenu`)}>
                 <MenuItems
                   transition
@@ -160,6 +160,7 @@ export default function Pagination() {
                     ))}
                   </div>
                 </MenuItems>
+                
                 {totalPages > 1 && (
                   <div>
                     <MenuButton 
@@ -170,8 +171,8 @@ export default function Pagination() {
                   </div>
                 )}
               </Menu>
-            </span>
-            {totalPages > 1 && (
+            </span> ) : null}
+            {totalPages > 1 ? (
               <a
                 href={`?page=${totalPages}&perPage=${rows}`}
                 data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-last-page-btn`)}
@@ -179,7 +180,7 @@ export default function Pagination() {
               >
                 {totalPages}
               </a>
-            )}
+            ): null}
 
             <a
               href={`?page=${Math.min(Number(currentPage) + 1, totalPages)}&perPage=${rows}`}

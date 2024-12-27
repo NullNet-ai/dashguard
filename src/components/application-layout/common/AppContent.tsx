@@ -10,7 +10,7 @@ const AppContent = ({ children }: any) => {
 
     return (
         <div className={cn(` md:mt-24 lg:mb-0 mb-12  lg:mt-0`, 
-            `${application === 'grid' ? 'mt-[80px] pt-2' : 'mt-[140px]'}`
+            `${application === 'grid' ? 'mt-[80px] pt-2 lg:pt-6' : 'mt-[140px]'}`
         )}>
             {children}
         </div>
