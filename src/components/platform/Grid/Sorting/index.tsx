@@ -41,6 +41,7 @@ const Sorting = () => {
         name="resetSortButton"
         data-test-id={testIDFormatter(`${entity}-grd-sorting-reset`)}
         variant={"link"}
+        className="text-default/60 underline hover:no-underline"
         onClick={() => {
           actions?.handleResetSorting();
         }}
