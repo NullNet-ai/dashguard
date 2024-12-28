@@ -81,8 +81,6 @@ export default function FormSelect({
     return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
   }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
 
-
-
   return (
     <FormItem>
       <div>
@@ -128,7 +126,7 @@ export default function FormSelect({
                 "absolute left-2 top-2.5 size-5 text-muted-foreground",
                 {
                   "opacity-50": isDisabled,
-                }
+                },
               )}
               aria-hidden="true"
             />
@@ -138,11 +136,12 @@ export default function FormSelect({
             readOnly={inputReadOnly}
             disabled={isDisabled}
             className={cn(
-              "block w-full rounded-md py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground  sm:text-sm/6 border-border ",
+              "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
               {
                 "outline-destructive": error,
-                "cursor-not-allowed ": isDisabled,
-                "cursor-text ": isReadOnly,
+                "border-red-500": error,
+                "cursor-not-allowed": isDisabled,
+                "cursor-text": isReadOnly,
               },
             )}
             onClick={() => {
@@ -165,7 +164,7 @@ export default function FormSelect({
               {
                 "cursor-not-allowed": isDisabled,
                 "cursor-default": isReadOnly,
-              }
+              },
             )}
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
@@ -193,7 +192,7 @@ export default function FormSelect({
                       {
                         "cursor-not-allowed": isDisabled,
                         "cursor-default": isReadOnly,
-                      }
+                      },
                     )}
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                   >
