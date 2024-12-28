@@ -1,5 +1,6 @@
 "use client"
 
+import { capitalize } from "lodash";
 import { Pie, PieChart } from "recharts";
 
 import {
@@ -54,9 +55,9 @@ const FormPieChart = (props: IFormPieChartProps) => {
     })
     
     return (
-        <div>
+        <div className="shadow-md p-4">
           <CardHeader className="items-center pb-0">
-            <CardTitle>{entity}</CardTitle>
+            <CardTitle>{capitalize(entity)}</CardTitle>
             <CardDescription>{`Total Records: ${items.reduce((acc, curr) => {
                 return acc + curr.value
             }, 0)}`}</CardDescription>
@@ -64,7 +65,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
           <CardContent className="flex-1 pb-0">
             <ChartContainer
               config={chartConfig}
-              className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+              className="mx-auto aspect-square max-h-[300px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
             >
               <PieChart>
                 <Pie data={chartData} dataKey="value" label nameKey="key" />
