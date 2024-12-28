@@ -12,7 +12,7 @@ import { type IPropsTabList } from "./type";
 import { formatAndCapitalize } from "~/lib/utils";
 import useScreenType from "~/hooks/use-screen-type";
 
-let SEARCH_BAR_WIDTH = 528;
+let SEARCH_BAR_WIDTH = 0;
 
 type TabItemsProps = { 
     items : IPropsTabList[];
