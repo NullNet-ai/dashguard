@@ -75,7 +75,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
   return (
     <CardContent
       className={cn(
-        "grid grid-cols-1 gap-4 pt-8 ",
+        "grid grid-cols-1 gap-4 pt-8 lg:grid-cols-2",
         colStyle,
         "shadow-none",
         customDesign?.formClassName,

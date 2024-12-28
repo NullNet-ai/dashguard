@@ -10,7 +10,7 @@ const MainContent = ({ children, className, ...props }: MainContentProps) => {
   const {open} = useSidebar();
 
 
-  const width = !open ? "md:w-[calc(100vw-300px-3rem)] w-full" : "md:w-[calc(100vw-300px-16rem)] w-full";
+  const width = !open ? "md:w-[calc(100vw-300px-2rem)] lg:w-[calc(100vw-300px-5rem)] w-full" : "md:w-[calc(100vw-300px-16rem)] w-full";
   const height  = "h-[calc(100vh-200px)]";
 
   return (
