@@ -15,6 +15,7 @@ import { countryRouter } from "./routers/country";
 import { googleRouter } from "./routers/google";
 import { contactRouter } from "./routers/contact";
 import { organizationRouter } from "./routers/organization";
+import { dashboardRouter } from "./routers/dashboard";
 
 /**
  * This is the primary router for your server.
@@ -23,6 +24,7 @@ import { organizationRouter } from "./routers/organization";
  */
 export const appRouter = createTRPCRouter({
   auth: authRouter,
+  dashboard: dashboardRouter,
   grid: gridRouter,
   wizard: wizardRouter,
   user_role: userRolesRouter,
