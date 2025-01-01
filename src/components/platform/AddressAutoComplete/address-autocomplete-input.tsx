@@ -66,7 +66,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
-      accuracy: formRenderProps?.field?.accuracy || 0,
+      accuracy: formRenderProps?.field?.accuracy || 100,
     });
     return response?.data;
   };
