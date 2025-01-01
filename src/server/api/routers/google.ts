@@ -193,9 +193,6 @@ export const googleRouter = createTRPCRouter({
         body: JSON.stringify(input?.address),
       });
       const data = await response.json();
-      console.log({
-        data,
-      });
       return {
         address_line_one: "",
         address_line_two: "",
