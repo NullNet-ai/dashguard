@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder }  from "~/components/platform/FormBuilder";
 
 const FormSchema = z.object({
   date: z

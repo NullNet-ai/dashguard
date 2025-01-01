@@ -11,7 +11,7 @@ import React, { useContext } from "react";
 import {
   type ICustomActions,
   type IFeatures,
-} from "~/components/platform/EnhancedFormBuilder/types";
+} from "~/components/platform/FormBuilder/types";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
 import {
   DropdownMenu,

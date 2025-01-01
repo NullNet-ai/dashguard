@@ -5,7 +5,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IFieldFilterActions, type IField } from "../type";
+import { type IFieldFilterActions, type IField } from "../types";
 import {
   FormControl,
   FormItem,
@@ -22,7 +22,7 @@ import { Badge } from "~/components/ui/badge";
 import { ulid } from "ulid";
 import { toast } from "sonner";
 // import { DevTool } from "@hookform/devtools";
-import { isPhoneValid } from "../Utils/phoneValidator";
+import { isPhoneValid } from "../utils/phoneValidator"
 
 interface IPhoneData {
   id?: string;

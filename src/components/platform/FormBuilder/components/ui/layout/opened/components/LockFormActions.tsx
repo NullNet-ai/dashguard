@@ -15,7 +15,7 @@ import React from "react";
 import SubmitForm from "../../../Buttons/Submit";
 import CancelFormButton from "../../../Buttons/Cancel";
 import { camelCase } from "lodash";
-import { ICustomActions, IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import { ICustomActions, IFeatures } from "~/components/platform/FormBuilder/types";
 import { testIDFormatter } from "~/utils/formatter";
 
 const LockFormActions = ({

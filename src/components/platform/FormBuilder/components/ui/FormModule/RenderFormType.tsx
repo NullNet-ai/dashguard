@@ -10,34 +10,35 @@ import {
 
 import { Input } from "~/components/ui/input";
 
-import FormAddress from "./FormType/FormAddress";
-import FormCheckbox from "./FormType/FormCheckbox";
-import FormDatePicker from "./FormType/FormDate";
-import FormDateRange from "./FormType/FormDateRange";
-import FormEmailInput from "./FormType/FormEmailInput";
-import FormInput from "./FormType/FormInput";
-import FormTextInputs from "./FormType/FormInputs";
-import FormLabelValueInput from "./FormType/FormLabelValueInput";
-import FormMultiSelect from "./FormType/FormMultiSelect";
-import FormPhoneInput from "./FormType/FormPhoneInput";
-import FormRadio from "./FormType/FormRadio";
-import FormSelect from "./FormType/FormSelect";
-import FormTextArea from "./FormType/FormTextArea";
+import FormAddress from "../../../FormType/FormAddress";
+import FormCheckbox from "../../../FormType/FormCheckbox";
+import FormDatePicker from "../../../FormType/FormDate";
+import FormDateRange from "../../../FormType/FormDateRange";
+import FormEmailInput from "../../../FormType/FormEmailInput";
+import FormInput from "../../../FormType/FormInput";
+import FormTextInputs from "../../../FormType/FormInputs";
+import FormLabelValueInput from "../../../FormType/FormLabelValueInput";
+import FormMultiSelect from "../../../FormType/FormMultiSelect";
+import FormPhoneInput from "../../../FormType/FormPhoneInput";
+import FormRadio from "../../../FormType/FormRadio";
+import FormSelect from "../../../FormType/FormSelect";
+import FormTextArea from "../../../FormType/FormTextArea";
 import {
   type ICheckboxOptions,
   type IRadioOptions,
   type ISelectOptions,
   type IField,
-} from "./type";
-import FormFileUpload from "./FormType/FormFileUpload";
-import FormSlider from "./FormType/FormSlider";
-import { type Option } from "~/components/ui/multi-select";
-import FormRichTextEditor from "./FormType/FormRichTextEditor";
-import FormNumberInput from "./FormType/FormNumberInput";
-import FormPassword from "./FormType/FormPassword";
-import FormCurrencyInput from "./FormType/FormCurrencyInput";
-import FormSmartDate from "./FormType/FormSmartDate";
-import FormInputGrid from "./FormType/FormInputGrid";
+} from "../../../types";
+import FormFileUpload from "../../../FormType/FormFileUpload";
+import FormSlider from "../../../FormType/FormSlider";
+import { Option } from "~/components/ui/multi-select";
+import FormRichTextEditor from "../../../FormType/FormRichTextEditor";
+import FormNumberInput from "../../../FormType/FormNumberInput";
+import FormPassword from "../../../FormType/FormPassword";
+import FormCurrencyInput from "../../../FormType/FormCurrencyInput";
+import FormSmartDate from "../../../FormType/FormSmartDate";
+import FormInputGrid from "../../../FormType/FormInputGrid";
+import React from "react";
 
 export default function RenderFormType(
   fieldConfig: IField,

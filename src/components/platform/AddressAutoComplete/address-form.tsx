@@ -12,7 +12,7 @@ import StateName from "./FieldComponent/State";
 import PostalName from "./FieldComponent/PostalCode";
 import AddressLineOne from "./FieldComponent/AddressLineOne";
 import AddressLineTwo from "./FieldComponent/AddressLineTwo";
-import { type IField } from "../FormBuilder/type";
+import { type IField } from "../FormBuilder/types";
 import { formatAddress } from "../../../server/utils/addresses";
 
 interface AddressFormProps {

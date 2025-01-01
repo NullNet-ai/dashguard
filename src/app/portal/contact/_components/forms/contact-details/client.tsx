@@ -1,8 +1,8 @@
 "use client";
 
 import { type z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { FormBuilder } from "~/components/platform/FormBuilder";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";

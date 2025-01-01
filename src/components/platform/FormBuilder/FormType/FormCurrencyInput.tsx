@@ -7,7 +7,7 @@ import CurrencyInput, {
   type CurrencyInputOnChangeValues,
   type CurrencyInputProps,
 } from "~/components/ui/currency-input";
-import { type OptionType, type IField } from "../type";
+import { type OptionType, type IField } from "../types";
 import {
   FormControl,
   FormItem,

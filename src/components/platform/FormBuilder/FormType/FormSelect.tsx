@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField, type ISelectOptions } from "../type";
+import { type IField, type ISelectOptions } from "../types";
 import {
   FormItem,
   FormLabel,
