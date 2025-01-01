@@ -23,6 +23,7 @@ import useTraverseStepped from "./Hooks/useTraverseStepped";
 import useTraverseSteppedSaved from "./Hooks/useTraverseStepSave";
 import usePrefetchWizardTraverse from "./Hooks/usePrefetchWizardTraverse";
 import { NextPage } from "./Action/NextPage";
+import { Create } from "../Grid/Action/Create";
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -151,17 +152,20 @@ export default function WizardProvider({
 
   const handleIncrementStep = async (setLoading: (loading: any) => void) => {
     setLoading(true);
-
-    const steps = currentStep + 1;
-    nextStep.mutateAsync({
-      entity: mainEntity!,
-      identifier: identifier!,
-      step: steps.toString(),
-    });
+    // const steps = currentStep + 1;
+    // nextStep.mutateAsync({
+    //   entity: mainEntity!,
+    //   identifier: identifier!,
+    //   step: steps.toString(),
+    // }).then(() => {
+    //   setLoading(false)
+    //   router.push()
+    // });
 
     NextPage()
       .then(() => {
         setLoading(false);
+        setFormSave({});
       })
       .catch(() => {
         setLoading(false);
@@ -230,9 +234,21 @@ export default function WizardProvider({
   const handleSaveAndNew = async () => {
     try {
       setSaveNewLoading(true);
+      if (config?.enableAutoCreate === false) {
+        Create({
+          entity: mainEntity!,
+          enableAutoCreate: false,
+          identifier: config?.entityIdentifier,
+          currentContext: currentContext,
+          is_from_grid: false
+        });
+        setSaveNewLoading(false);
+        return;
+      }
       await SaveAndNew({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
+        currentContext: currentContext,
       });
       setSaveNewLoading(false);
     } catch (error) {
@@ -266,6 +282,8 @@ export default function WizardProvider({
 
   const registerSaveHandler = (eventName: string) => {
     const formHandler = "submitForm:" + eventName;
+
+    if (formSave?.[formHandler]) return;
     setFormSave((prev) => ({
       ...prev,
       [formHandler]: "dirty",

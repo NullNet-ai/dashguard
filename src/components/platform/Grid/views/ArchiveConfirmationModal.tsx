@@ -3,12 +3,11 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
   DialogFooter,
 } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { handleArchive } from "../DefatultRow/Actions";
-import { Trash2 } from "lucide-react";
+import { ArchiveIcon, ArchiveX } from "lucide-react";
 
 const ArchiveConfirmationModal = ({
   open,
@@ -23,9 +22,9 @@ const ArchiveConfirmationModal = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="h-[30%] w-[30%] bg-white">
+      <DialogContent className="w-5/6 md:w-3/6 bg-white">
         <div className="mb-2 text-sm">
-          <Trash2
+          <ArchiveX
             size={35}
             className={
               "rounded-full border border-red-300 bg-red-100 p-2 text-destructive"

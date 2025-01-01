@@ -40,7 +40,7 @@ const LockFormActions = ({
 
   const { enableFormHostLockActions = true } = features ?? {};
 
-  if(!enableFormHostLockActions) return null
+  if(!enableFormHostLockActions || !customFormHostLockFormActions.length) return null
   return (
     <div className="flex flex-row gap-2">
       <DropdownMenu>

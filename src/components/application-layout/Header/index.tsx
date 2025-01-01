@@ -10,7 +10,7 @@ const Header: React.FC = () => {
   return (
     <div>
       <header
-        className={`col-span-full flex h-14 items-center justify-center gap-4 bg-background`}
+        className={`col-span-full flex md:h-14 h-[3rem] items-center justify-center gap-4 bg-background`}
       >
         {/* <SidebarTrigger Icon={TriggerComponent} className="hidden lg:block" /> */}
 

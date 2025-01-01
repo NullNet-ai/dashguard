@@ -11,8 +11,8 @@ import { Button } from "~/components/ui/button";
 import LoginSubmit from "../actions/loginSubmit";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(5, "Password must be at least 5 characters long"),
+  email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
+  password: z.string({required_error:"Please enter your password."}).min(5, "Password must contain at least 5 characters."),
 });
 
 export default function LoginForm() {
@@ -22,7 +22,10 @@ export default function LoginForm() {
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      await LoginSubmit(data);
+      const response = await LoginSubmit(data);
+      if (response && response.statusCode !== 200) {
+        throw response;
+      }
     } catch (error: any) {
       console.error("Error Details:", error.message);
       setIsSubmitting(false);
@@ -45,9 +48,9 @@ export default function LoginForm() {
                 fieldConfig={{
                   id: "email",
                   name: "email",
-                  label: "Email address",
+                  label: "Email Address",
                   required: true,
-                  placeholder: "Enter Valid Email Address",
+                  placeholder: "Enter valid email address",
                   type: "email",
                 }}
                 form={form}
@@ -68,7 +71,7 @@ export default function LoginForm() {
                   name: "password",
                   label: "Password",
                   required: true,
-                  placeholder: "Password",
+                  placeholder: "Enter at least 8 characters",
                 }}
                 form={form}
                 formKey={"Login"}
@@ -95,7 +98,7 @@ export default function LoginForm() {
           </div>
           <div className="text-md">
             <a href="#" className="font-semibold text-primary">
-              Forgot password?
+              Forgot Password?
             </a>
           </div>
         </div>

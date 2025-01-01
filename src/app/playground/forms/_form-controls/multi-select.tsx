@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
 
 const FormSchema = z.object({
   multi_select_with_options: z
@@ -21,6 +21,10 @@ const FormSchema = z.object({
       }),
     )
     .min(1, { message: "Multi Select Single is required" }),
+  single_select_options: z.object({
+    label: z.string({ message: "Label is required" }),
+    value: z.string({ message: "Value is required" }),
+  }),
 });
 function handleSubmit(values: {
   data: z.infer<typeof FormSchema>;
@@ -72,15 +76,18 @@ export default function MultiSelectDetails({}) {
           multi_select_with_options: sampleMultiSelectOptionsAlphabetical,
           multi_select_single: sampleMultiSelectOptions,
         }}
+        selectOptions={{
+          single_select_options: sampleMultiSelectOptions,
+        }}
         fields={[
-          // {
-          //   id: "multi-select-creatable",
-          //   formType: "multi-select",
-          //   name: "multi-select-creatable",
-          //   label: "Multi Select Creatable",
-          //   required: true,
-          //   placeholder: "Multi Select",
-          // },
+          {
+            id: "single_select_options",
+            formType: "select",
+            name: "single_select_options",
+            label: "Single Select_options",
+            required: true,
+            placeholder: "Single Select",
+          },
           {
             id: "multi_select_with_options",
             formType: "multi-select",

@@ -43,7 +43,7 @@ export default function MyTableBody() {
                               : "",
                           )}
                         >
-                          <div className="flex h-8 items-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
+                          <div className="flex h-8 items-center justify-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),

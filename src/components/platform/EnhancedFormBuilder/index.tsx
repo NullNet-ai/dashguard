@@ -27,7 +27,7 @@ export const FormBuilder = (props: IPropsForms) => {
     handleSubmit,
     enableAppendForm,
     //* other
-    enableFormRegisterToParent,
+    enableFormRegisterToParent: _enableFormRegisterToParent,
     filterGridConfig,
     defaultDisplay = "expanded",
     customRender,
@@ -39,6 +39,10 @@ export const FormBuilder = (props: IPropsForms) => {
   } = props;
 
   const { actions } = useWizard();
+
+  // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
+  const enableFormRegisterToParent =
+    myParent === "record" ? false : _enableFormRegisterToParent;
 
   const eventEmitter = useEventEmitter();
   const toast = useToast();
@@ -127,7 +131,7 @@ export const FormBuilder = (props: IPropsForms) => {
       reject: (reason: any) => any,
     ) => {
       try {
-        // console.log("SUBMITTING FORM");
+        //
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -254,6 +258,7 @@ export const FormBuilder = (props: IPropsForms) => {
         return toast.error("Form is Unchanged");
       }
       // Handle form validation and other checks
+      //what's the use of this function???
       if (!form.formState.isDirty) {
         eventEmitter.emit(`formStatus:${formKey}`, {
           status: "done",
@@ -315,19 +320,39 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
 
-  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>) => {
+  const onSubmitFormGrid = async (
+    data: z.infer<typeof formSchema>,
+    options?: {
+      action_type?: string;
+    },
+  ) => {
     if (!handleSubmitFormGrid) return;
     try {
       setIsSaveLoading(true);
+
       const response = await handleSubmitFormGrid({
         data,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: formGridSelected.length ? "Update" : "Create",
+        action_type:
+          options?.action_type ||
+          (formGridSelected.length ? "Update" : "Create"),
         form,
       });
+
       //TODO: Please cater setting error message in field and don't proceed to view mode.
-      if (!response?.length) throw new Error("Failed to submit form grid");
+      if (!response?.length) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "failed",
+          form_key: formKey,
+        });
+        throw new Error("Failed to submit form grid");
+      }
+
+      eventEmitter.emit(`formStatus:${formKey}`, {
+        status: "done",
+        form_key: formKey,
+      });
       setFormGridSelected(response);
       setDisplayType("selected");
       setIsSaveLoading(false);

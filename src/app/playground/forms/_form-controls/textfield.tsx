@@ -37,6 +37,9 @@ export default function UserProfileForm() {
         formKey="user-profile"
         handleSubmit={handleSave}
         formSchema={FormSchema}
+        defaultValues={{
+          "full-name": "John Doe",
+        }}
         fields={[
           {
             id: "fullName",
@@ -45,6 +48,7 @@ export default function UserProfileForm() {
             label: "Full Name",
             required: true,
             placeholder: "Enter your full name...",
+            readonly:true
           },
         ]}
       />

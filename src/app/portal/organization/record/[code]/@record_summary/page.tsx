@@ -1,4 +1,4 @@
-import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
+import RecordSummary from "~/components/platform/Record/Summary/RecordSummary";
 import { headers } from "next/headers";
 import RecordShellSummary from "./_1";
 
@@ -11,7 +11,7 @@ export default async function Page() {
     <div>
       <RecordSummary />
       <RecordShellSummary
-        form_key={"OrganizationOne"}
+        form_key={"organization_basic_details"}
         identifier={identifier!}
         main_entity={main_entity!}
       />

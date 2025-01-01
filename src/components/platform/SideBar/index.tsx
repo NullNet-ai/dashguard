@@ -32,6 +32,7 @@ import * as _ICON from "@heroicons/react/24/outline";
 import { Separator } from "~/components/ui/separator";
 import useWindowSize from "~/hooks/use-resize";
 import { testIDFormatter } from "~/utils/formatter";
+import { cn } from "~/lib/utils";
 
 export default function AppSideBar(config: ISideBarProps) {
   const {
@@ -39,6 +40,7 @@ export default function AppSideBar(config: ISideBarProps) {
     footerComponent,
     footerMenuConfig,
     headerMenuConfig,
+    className,
     mainMenuConfig,
   } = config;
   const { ChevronUpDownIcon } = _ICON;
@@ -54,15 +56,16 @@ export default function AppSideBar(config: ISideBarProps) {
     });
   };
 
-  const {width} = useWindowSize();
+  const { width } = useWindowSize();
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className={className}>
       {headerComponent && (
         <SidebarHeader className="group relative">
           {!isMobile && (
             <SidebarTrigger
               Icon={TriggerOpenCloseSidebarComponent}
-              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? 'lg:hidden': "lg:flex"}`}
+              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? 'lg:hidden' : "lg:flex"}`}
               data-test-id="sdnavmenu-trigger-btn"
             />
           )}
@@ -137,15 +140,28 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
-                    data-test-id={"sdnavmenu-ftr-btn"}
-                    size={"lg"}
-                    className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  >
-                    {footerComponent}
-                    <ChevronUpDownIcon className="ml-auto size-4" />
-                  </SidebarMenuButton>
+
+                    {open ? (
+                       <div className={cn(`${open ? 'w-full opacity-100' : 'w-0 opacity-0 h-0'} `)}>
+
+                       <SidebarMenuButton
+                         data-test-id={"sdnavmenu-ftr-btn"}
+                         size={"lg"}
+                         className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                       >
+                         {footerComponent}
+                         <ChevronUpDownIcon className="ml-auto size-4" />
+                       </SidebarMenuButton>
+                     </div>
+                    ) : (
+                      <div className={cn(`cursor-pointer ${!open ? 'w-full opacity-100' : 'opacity-0 w-0 h-0'}`)}>
+                    
+                      {footerComponent}
+                    </div>
+                    )}
+                 
                 </DropdownMenuTrigger>
+
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
                   {open ? (
                     <span>
@@ -158,7 +174,7 @@ export default function AppSideBar(config: ISideBarProps) {
                 </footer>
                 <DropdownMenuContent
                   className="z-[100] w-[--radix-dropdown-menu-trigger-width] mx-auto max-w-[90%] md:max-w-full  md:min-w-56 rounded-lg"
-                  side={width <= 640 ?"top":"right"}
+                  side={width <= 640 ? "top" : "right"}
                   align="end"
                   sideOffset={4}
                 >
@@ -169,7 +185,7 @@ export default function AppSideBar(config: ISideBarProps) {
                     // @ts-expect-error - TS doesn't know about dynamic imports
                     const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
                     return (
-                      <DropdownMenuItem key={index} data-test-id={testIDFormatter("sdnavmenu-ftr-"+item.title?.split("").join(""))}>
+                      <DropdownMenuItem key={index} data-test-id={testIDFormatter("sdnavmenu-ftr-" + item.title?.split("").join(""))}>
                         <ICON className="mr-2 h-5 w-5" />
                         {item.title}
                       </DropdownMenuItem>

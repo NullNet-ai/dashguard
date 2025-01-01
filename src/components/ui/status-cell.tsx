@@ -12,7 +12,7 @@ const StatusCell: React.FC<StatusCellProps> = ({ value }) => {
   };
 
   return (
-    <div className="flex items-start gap-x-3">
+    <div className="flex items-start m-1">
       <div
         className={cn(
           // @ts-expect-error - TS doesn't know about statuses

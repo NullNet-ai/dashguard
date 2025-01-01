@@ -24,6 +24,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useMediaQuery } from "react-responsive";
 import { Create } from "./Action/Create";
 import { Button } from "~/components/ui/button";
+import { Button as Button2 } from "@headlessui/react";
 import { FileIcon } from "lucide-react";
 
 import {
@@ -53,6 +54,8 @@ export default function GridProvider({
   initialSelectedRecords = {},
   sorting: initialSorting = [],
   defaultSorting,
+  advanceFilter = [],
+  defaultAdvanceFilter = [],
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -120,7 +123,7 @@ export default function GridProvider({
   };
 
   const handleResetSorting = () => {
-    setSorting(_defaultSorting); 
+    setSorting(_defaultSorting);
     handleUpdateReportSorting(_defaultSorting);
   };
 
@@ -198,15 +201,14 @@ export default function GridProvider({
 
       if (config?.actionType === "single-select") {
         return (
-          <Button
+          <Button2
             disabled={disableActions}
-            className="mx-auto flex"
-            variant={"ghost"}
+            className="mx-auto flex cursor-pointer"
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
             <PlusCircleIcon className="h-5 w-5 text-sky-500" />
-          </Button>
+          </Button2>
         );
       }
 
@@ -250,13 +252,18 @@ export default function GridProvider({
     enableHiding: true,
   });
 
-  const actionTypeColumnCondition = (actionsType: TActionType) => {
+  const actionTypeColumnCondition = (actionsType: TActionType, viewMode: string) => {
+    // Exclude selectTableRow and actionRow if view mode is 'card'
+    if (viewMode === "card") {
+      return [...config?.columns];
+    }
+  
     switch (actionsType) {
       case "single-select":
         if (config?.disableDefaultAction) {
           return [...config?.columns];
         }
-
+  
         return [...config?.columns, actionRow?.current];
       case "default":
         if (config?.disableDefaultAction) {
@@ -267,12 +274,12 @@ export default function GridProvider({
           ...config?.columns,
           actionRow?.current,
         ];
-
+  
       default:
         if (config?.disableDefaultAction) {
           return [selectTableRow?.current, ...config?.columns];
         }
-
+  
         return [
           selectTableRow?.current,
           ...config?.columns,
@@ -280,12 +287,12 @@ export default function GridProvider({
         ];
     }
   };
-
+  
   /** @HOOKS */
   const table = useReactTable({
     data,
     getRowId: (row) => row.id,
-    columns: actionTypeColumnCondition(config?.actionType || "default"),
+    columns: actionTypeColumnCondition(config?.actionType || "default", viewMode),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
@@ -322,6 +329,7 @@ export default function GridProvider({
         entity: config?.entity,
         defaultValues: config?.defaultValues,
         enableAutoCreate: config?.enableAutoCreate,
+        is_from_grid: true,
       });
     } catch (error) {
       console.error("An error occurred while creating a record", error);
@@ -375,6 +383,7 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
+    advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
     rowSelection,
   } as IState;
   const actions = {

@@ -65,7 +65,7 @@ export default function FormCheckbox({
                   />
                 </FormControl>
                 <FormLabel
-                  className="font-normal"
+                  className="font-normal disabled:opacity-100"
                   data-test-id={`${formKey}-chk-lbl-${fieldConfig.name}-${index + 1}`}
                 >
                   {item.label}

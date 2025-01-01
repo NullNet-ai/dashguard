@@ -1,5 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import {
+  type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
@@ -11,6 +12,7 @@ import { type Option } from "~/components/ui/multi-select";
 import { type TActionType } from "../Grid/types";
 import { type DropzoneOptions } from "react-dropzone";
 import {
+  type DateGranularity,
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
@@ -37,8 +39,7 @@ export type TFormType =
   | "slider"
   | "password"
   | "rich-text-editor"
-  | "currency-input"
-  
+  | "currency-input";
 
 // Single |  Multiple
 export type TType = "single" | "multiple";
@@ -63,6 +64,7 @@ export interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   dateTimePickerProps?: DateTimeLocalInputProps & {
+    granularity?: DateGranularity;
     minDate?: Date;
     maxDate?: Date;
     disablePastDates?: boolean;
@@ -81,6 +83,7 @@ export interface IField {
   sliderLabel?: (value: number | undefined) => React.ReactNode;
   sliderLabelPosition?: "top" | "bottom";
   fileDropzoneOptions?: DropzoneOptions;
+  selectIcon?: ElementType;
   multiSelectMaxSelected?: number;
   multiSelectDelay?: number;
   multiSelectHidePlaceholderWhenSelected?: boolean;
@@ -107,6 +110,7 @@ export interface IField {
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
   selectSearchable?: boolean;
+  accuracy?: number;
 }
 
 export interface ISelectOptions {
@@ -203,7 +207,7 @@ export interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
-  fieldConfig?:Field
+  fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;
   enableFormRegisterToParent?: boolean;
@@ -250,5 +254,5 @@ export interface IFieldFilterActions {
   onBlur?: () => void;
   onFocus?: () => void;
   handleSearch?: (search: string) => void;
-  ref?: any
+  ref?: any;
 }

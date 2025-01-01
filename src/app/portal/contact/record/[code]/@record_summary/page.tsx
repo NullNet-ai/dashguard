@@ -1,4 +1,4 @@
-import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
+import RecordSummary from "~/components/platform/Record/Summary/RecordSummary";
 import { headers } from "next/headers";
 import RecordShellSummary from "./_1";
 

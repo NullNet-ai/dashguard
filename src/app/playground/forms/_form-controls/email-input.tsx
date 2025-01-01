@@ -34,6 +34,13 @@ export default function EmailInputDetails({}) {
     <>
       {/* FormBuilder: Email Input */}
       <FormBuilder
+      defaultValues={{
+      "secondary-emails": [
+        {
+          email: "asdfasdfasdfasdf@gmail.com",
+        },
+      ]
+      }}
       enableFormRegisterToParent
       handleSubmit={handleSave}
       formLabel="Email Input Form"

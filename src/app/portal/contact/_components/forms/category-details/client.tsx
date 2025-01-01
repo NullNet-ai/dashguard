@@ -7,7 +7,7 @@ import { useToast } from "~/context/ToastProvider";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import UpdateCategory from "./actions/updateCategory";
+import { UpdateCategory } from "./actions/updateCategory";
 import CustomCategoryDetails from "../_custom/CategoryDetails";
 import { IFormProps } from "../types";
 import { XIcon } from "lucide-react";
@@ -19,7 +19,6 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
 
   const { shell_type } = params;
   const { categories } = defaultValues || {};
-
 
   useEffect(() => {
     if (shell_type === "wizard" && categories !== "Contact")

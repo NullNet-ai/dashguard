@@ -1,5 +1,6 @@
 "use client";
 
+import { UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
@@ -66,6 +67,9 @@ export default function SelectDetails({}) {
                         name: "select_with_options",
                         label: "Select with Options",
                         required: true,
+                        selectSearchable: true,
+                        selectIcon: UserIcon,
+                        // readonly:true,
                     },
                     {
                         id: "select_single",
@@ -73,6 +77,9 @@ export default function SelectDetails({}) {
                         name: "select_single",
                         label: "Select Single",
                         required: true,
+                        selectIcon: UserIcon,
+                        selectSearchable: true,
+                        // disabled:true
                     },
                 ]}
             />

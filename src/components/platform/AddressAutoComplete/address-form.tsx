@@ -28,9 +28,10 @@ interface AddressFormProps {
 interface IAddressDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   formKey: string;
+  fieldConfig: IField;
 }
 
-const AddressDetails = ({ form, formKey }: IAddressDetails) => {
+const AddressDetails = ({ form, formKey,fieldConfig }: IAddressDetails) => {
   const address_details = form.getValues("details");
   const address = formatAddress(address_details);
 
@@ -40,13 +41,13 @@ const AddressDetails = ({ form, formKey }: IAddressDetails) => {
 
   return (
     <div className="space-y-4 py-7 pt-4">
-      <CountryName form={form} formKey={formKey} />
-      <AddressLineOne form={form} formKey={formKey} />
-      <AddressLineTwo form={form} formKey={formKey} />
+      <CountryName form={form} formKey={formKey} fieldConfig={fieldConfig} />
+      <AddressLineOne form={form} formKey={formKey} fieldConfig={fieldConfig} />
+      <AddressLineTwo form={form} formKey={formKey} fieldConfig={fieldConfig}/>
       <div className="flex w-full flex-grow flex-row gap-2">
-        <CityName form={form} formKey={formKey} />
-        <StateName form={form} formKey={formKey} />
-        <PostalName form={form} formKey={formKey} />
+        <CityName form={form} formKey={formKey} fieldConfig={fieldConfig} />
+        <StateName form={form} formKey={formKey} fieldConfig={fieldConfig}/>
+        <PostalName form={form} formKey={formKey} fieldConfig={fieldConfig}/>
       </div>
     </div>
   );
@@ -55,7 +56,7 @@ const AddressDetails = ({ form, formKey }: IAddressDetails) => {
 export default function AddressForm(
   props: React.PropsWithChildren<AddressFormProps>,
 ) {
-  const { isLoading, form, formKey } = props;
+  const { isLoading, form, formKey,fieldConfig } = props;
 
   if (isLoading) {
     return (
@@ -67,5 +68,5 @@ export default function AddressForm(
     );
   }
 
-  return <AddressDetails form={form} formKey={formKey} />;
+  return <AddressDetails form={form} formKey={formKey} fieldConfig={fieldConfig} />;
 }

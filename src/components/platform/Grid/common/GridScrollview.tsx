@@ -14,7 +14,7 @@ export const GridScrollView = ({ children, className }: any) => {
   return (
     <div
       className={cn("grid-scroll-view", className)}
-      style={{ width: _width }}
+      style={{ width: _width + 15 }}
     >
       {children}
     </div>

@@ -62,8 +62,8 @@ export default function FormNumber({
         <Input
           {...formRenderProps.field}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
-          disabled={undefined}
+           readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          disabled={fieldConfig.disabled}
           type="number"
           inputMode="decimal"
           className={`no-spinner`}
@@ -72,6 +72,8 @@ export default function FormNumber({
           Icon={icon}
           hasError={!!formRenderProps.fieldState.error}
           onChange={handleChange}
+          leftAddon={fieldConfig.inputLeftAddOns}
+          rightAddon={fieldConfig.inputRightAddOns}
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>

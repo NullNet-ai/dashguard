@@ -52,15 +52,34 @@ export default function FormSmartDate({
         ? date
         : formattedDate;
 
-      form.setValue(name, formatted_date, {
+      form.setValue(`${name}`, formatted_date, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+
+      form.setValue(`${name}_date`, moment(date).toDate(), {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
       });
     } else {
-      form.setValue(name, "");
+      form.setValue(`${name}`, "");
+      form.setValue(`${name}_date`, null);
     }
   };
+
+  const getValue = () => {
+    const dateValue = form.getValues(`${name}_date`);
+    if (dateValue) return dateValue;
+
+    const stringValue = form.getValues(name);
+    if (!stringValue) return null;
+
+    const parsedDate = moment(stringValue);
+    return parsedDate.isValid() ? parsedDate.toDate() : undefined;
+  };
+  
   return (
     <FormItem className="flex w-full flex-col">
       <FormLabel
@@ -73,18 +92,18 @@ export default function FormSmartDate({
         <SmartDatetimeInput
           datePickerTestID={`${formKey}-dte-picker-${fieldConfig.name}`}
           inputTestID={`${formKey}-inp-${fieldConfig.name}`}
-          value={formRenderProps.field.value}
+          value={getValue()}
           onValueChange={handleChange}
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
-          disabled={undefined}
-          readOnly={formRenderProps.field.disabled}
+          disabled={fieldConfig.disabled}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
         />
       </FormControl>
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

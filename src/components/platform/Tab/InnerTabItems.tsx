@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TabMenu from "~/components/application-layout/common/TabMenu";
 import {
   DropdownMenu,
@@ -20,17 +20,35 @@ type InnerTabItemsProps = {
   pathname?: string;
 };
 
-let SEARCH_BAR_WIDTH = 528;
+let SEARCH_BAR_WIDTH = 0;
 
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
+  const [isWindowLoaded, setIsWindowLoaded] = useState(false);
   let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   if (size === "xs" || size === "sm" || size === "md") {
     SEARCH_BAR_WIDTH = 0;
     sidebar_width = 0;
   }
+
+  useEffect(() => {
+    const handleLoad = () => setIsWindowLoaded(true);
+
+    if (typeof window !== "undefined") {
+      if (document.readyState === "complete") {
+        setIsWindowLoaded(true);
+      } else {
+        window.addEventListener("load", handleLoad);
+      }
+    }
+
+    return () => {
+      window.removeEventListener("load", handleLoad);
+    };
+  }, []);
+
 
   const newItems = useMemo(() => {
     if (!winWidth) return tabs;
@@ -55,8 +73,11 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       className={cn("scrollbar-hide flex justify-between gap-x-2 border-b")}
     >
       <div className="flex items-center">
-        {newItems.map((tab) => (
-          <div
+        {newItems.map((tab) => {
+
+          const isGrid = tab.name === "Grid";
+
+          return <div
             key={tab.name}
             className="group relative flex items-center px-2 py-2 pr-1"
           >
@@ -65,10 +86,11 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               href={tab.href}
               aria-current={tab.current ? "page" : undefined}
               className={cn(
-              tab.current ? "text-primary" : "text-default-foreground/60",
-              "whitespace-nowrap px-2 pr-0 text-sm font-medium",
-              "flex items-center space-x-2",
-              "hover:border-t-primary hover:text-primary",
+                tab.current ? "text-primary" : "text-default-foreground/60",
+                "whitespace-nowrap px-2 text-sm font-medium",
+                "flex items-center space-x-2",
+                "hover:border-t-primary hover:text-primary",
+                `${isGrid ? 'pr-2': 'pr-0'}`
               )}
             >
               {formatTabName(tab.name)}
@@ -81,9 +103,9 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               name={tab.name}
             />
           </div>
-        ))}
+        })}
       </div>
-      {dropdownItems.length > 0 && (
+      {dropdownItems.length > 0 && isWindowLoaded && (
         <DropdownMenu>
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"

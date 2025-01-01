@@ -12,9 +12,8 @@ import { Fragment, useContext } from "react";
 import RenderFormType from "./RenderFormType";
 import { FormField } from "~/components/ui/form";
 import FormAddress from "./FormType/FormAddress";
-import { ColumnDef } from "@tanstack/react-table";
-import { z } from "zod";
-import { IField, TFormSchema } from "../EnhancedFormBuilder/types";
+import { type z } from "zod";
+import { type IField, type TFormSchema } from "../EnhancedFormBuilder/types";
 import FormInputGridWrapper from "../EnhancedFormBuilder/components/custom/FormFilter/FormInputGridWrapper";
 import { WizardContext } from "../Wizard/Provider";
 import { formatFormTestID } from "~/lib/utils";
@@ -39,7 +38,7 @@ export default function FormModule({
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
     currencyInputOptions?: Record<string, OptionType[]>;
   };
-  fieldConfig?:Field,
+  fieldConfig?: Field;
   formKey: string;
   gridConfig?: IFilterGridConfig;
   formSchema: TFormSchema;
@@ -49,7 +48,11 @@ export default function FormModule({
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   const formattedFormKey = formatFormTestID(
-    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+    (entityName ?? "no-entity") +
+      " " +
+      (myParent ?? "no-parent") +
+      " " +
+      formKey,
   );
   return (
     <Fragment>
@@ -63,7 +66,7 @@ export default function FormModule({
                 key={_field.id + index}
                 form={form}
                 formKey={formattedFormKey}
-                fieldConfig={fieldConfig}
+                fieldConfig={fieldConfig || _field}
               />
             );
           default:

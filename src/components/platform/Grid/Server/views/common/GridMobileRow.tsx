@@ -4,6 +4,8 @@ import { GridContext } from "../../../Provider";
 import { Badge } from "~/components/ui/badge";
 import { capitalize } from "lodash";
 import StatusCell from "~/components/ui/status-cell";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { ArchiveIcon, EllipsisVertical, PencilIcon } from "lucide-react";
 
 export default function GridMobileRow() {
   const { state } = useContext(GridContext);
@@ -15,7 +17,7 @@ export default function GridMobileRow() {
           const orig = row.original;
           return (
             <div
-              className="mb-4 flex flex-col justify-start rounded-md border border-b border-l-2 border-l-primary p-4 hover:bg-border/50"
+              className="mb-4 flex flex-col justify-start rounded-md border border-b border-l-2 border-l-primary p-4 hover:bg-border/50 relative"
               key={row.id}
               data-state={row.getIsSelected() && "selected"}
             >
@@ -25,6 +27,36 @@ export default function GridMobileRow() {
                   <StatusCell value={row.getValue("status")} />
                 ) : null}
               </div>
+              <div className="absolute right-2 top-2">
+                  <DropdownMenu
+                               
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer">
+                        <EllipsisVertical
+                          className={`h-4 w-4 text-foreground font-semibold`}
+                          aria-hidden="true"
+
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="flex gap-2 relative items-center text-primary"
+                     >
+                        <PencilIcon className={`h-4 w-4`} aria-hidden="true" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="flex gap-2 relative items-center text-danger-foreground"
+                        >
+                        <ArchiveIcon className={`h-4 w-4 `} aria-hidden="true" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               <div className="flex flex-wrap gap-4 text-sm">
                 {Object.entries(orig).map(([key, value]: any[]) => {
                   if (key === "id" || key === "status" || key === "tombstone")

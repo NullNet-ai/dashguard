@@ -48,7 +48,7 @@ export default function BasicDetails({
       formProps={params}
       formLabel="Organization"
       handleSubmit={handleSave}
-      formKey="OrganizationOne"
+      formKey="organization_basic_details"
       formSchema={FormSchema}
       defaultValues={defaultValues}
       selectOptions={selectOptions}

@@ -164,7 +164,7 @@ export default function FormPhoneInput({
           <FormControl>
             <>
               <div
-                className={`flex items-center border ${error?.[index] && "border-destructive"} focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring`}
+                className={`flex items-center border ${error?.[index] && "border-destructive"} focus-within:border-primary  focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 ring-offset-background`}
               >
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
@@ -187,7 +187,7 @@ export default function FormPhoneInput({
                     buttonClassName: "!focus-visible:border-r-primary ",
                   }}
                   defaultCountry="us"
-                  disabled={undefined}
+                  disabled={fieldConfig.disabled}
                   value={values && values[index] ? `+${values[index].raw_phone_number || ""}` : ""}
                   onChange={(phone, meta) => {
                     handlePhoneNumberChange(index, phone, meta);
@@ -224,11 +224,11 @@ export default function FormPhoneInput({
                 {!field.is_primary && isMultiple && (
                   <Button
                     name={`${name}.${index}.isPrimaryButton`}
-                    disabled={isDisabled}
+                    disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     data-test-id={`${formKey}-prim-btn-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                     variant={"ghost"}
                     size={"icon"}
-                    className="rounded-none"
+                    className="rounded-none disabled:opacity-100"
                     onClick={() => {
                       const updatedFields = values.map(
                         (f: IPhoneData, i: number) => ({
@@ -246,12 +246,12 @@ export default function FormPhoneInput({
                 {isMultiple && (
                   <Button
                     name={`${name}.${index}.RemovePhoneNumberButton`}
-                    disabled={isDisabled}
+                    disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                     type="button"
                     variant={"ghost"}
                     size={"icon"}
                     data-test-id={`${formKey}-rmv-btn-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
-                    className="rounded-none"
+                    className="rounded-none disabled:opacity-100"
                     onClick={() => {
                       const _values = form.getValues(fieldConfig.name);
                       handleRemovePhoneNumber(index, _values);
@@ -284,8 +284,8 @@ export default function FormPhoneInput({
           variant={"link"}
           iconPlacement="left"
           onClick={handleAddPhoneNumber}
-          className="mt-2"
-          disabled={isDisabled}
+          className="mt-2 disabled:opacity-100"
+          disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
         >
           Add Phone Number
         </Button>

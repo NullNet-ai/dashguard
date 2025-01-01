@@ -8,11 +8,11 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { saveContactDetails, selectRecord } from "./actions";
+import { removeRecord, saveContactDetails, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
-import UpdateCategory from "../../forms/category-details/actions/updateCategory";
+import { StepOneUpdateCategory } from "../../forms/category-details/actions/updateCategory";
 
 export default function ContactDetails({
   params,
@@ -47,13 +47,12 @@ export default function ContactDetails({
       }
 
       if (action_type === "Create") {
-        await UpdateCategory({
+        await StepOneUpdateCategory({
           id: response.id!,
           categories: "Employee",
+          code: response.code!,
         });
 
-        const code = response?.code;
-        router.push(`/portal/contact/wizard/${code}/1`);
       }
       return [response];
     } catch (error) {
@@ -70,6 +69,7 @@ export default function ContactDetails({
     filter_entity: string;
   }) => {
     try {
+      await removeRecord();
       return {
         rows: [],
         filter_entity,
@@ -115,6 +115,15 @@ export default function ContactDetails({
         current: 1,
         limit: 1000,
         label: "Contacts",
+        // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data
+        //   form.reset(data, {
+        //     keepDefaultValues: true,
+        //   });
+
+        //   form.handleSubmit((data: any) =>
+        //     onSubmitFormGrid(data, { action_type: "Paste" }),
+        //   )();
+        // },
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,

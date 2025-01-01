@@ -21,6 +21,7 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
 import { cn, formatFormTestID } from "~/lib/utils";
+
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -45,27 +46,40 @@ export default function FormSelect({
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  form.watch();
+  const [open, setOpen] = useState(false);
 
+  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
+  const isReadOnly = fieldConfig.readonly;
+
+  const SelectIcon = fieldConfig.selectIcon;
   const filteredOptions = useMemo(() => {
     return query === ""
       ? selectOptions?.[fieldConfig?.name]
-          // Sort by label
           ?.sort((a, b) => a.label.localeCompare(b.label))
           ?.slice(0, 250)
+          ?.filter((opt) => {
+            return !!opt?.label;
+          })
       : selectOptions?.[fieldConfig?.name]
           ?.filter((opt) => {
             return opt.value.toLowerCase().includes(query.toLowerCase());
           })
           ?.sort((a, b) => a.label.localeCompare(b.label))
-          .slice(0, 5);
+          .slice(0, 5)
+          ?.filter((opt) => {
+            return !!opt?.label;
+          });
   }, [fieldConfig?.name, query, selectOptions]);
 
   const label = useMemo(() => {
     return selectOptions?.[fieldConfig?.name]?.find(
       (opt) => opt.value === formRenderProps?.field.value,
     );
-  }, [fieldConfig?.name, formRenderProps?.field.value, selectOptions]);
+  }, [formRenderProps?.field.value]);
+
+  const inputReadOnly = useMemo(() => {
+    return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
+  }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
 
   return (
     <FormItem>
@@ -92,80 +106,121 @@ export default function FormSelect({
       </div>
       <Combobox
         as="div"
-        value={label}
+        value={
+          label || {
+            label: "",
+            value: "",
+          }
+        }
         onChange={(value) => {
+          setTimeout(() => setOpen(false), 100);
           setQuery("");
-          formRenderProps?.field.onChange(value?.value);
+          formRenderProps?.field.onChange(value?.value || "");
         }}
-        disabled={fieldConfig?.disabled}
+        disabled={isDisabled}
       >
         <div className="relative mt-2">
-            <ComboboxButton
-            disabled={formRenderProps?.field?.disabled}
-            className="inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none"
-            data-test-id={`${formKey}-btn-${fieldConfig.name}`}
-            >
-            <ComboboxInput
-              placeholder={fieldConfig.placeholder}
-              readOnly={
-              (formRenderProps.field.disabled || fieldConfig?.readonly) ?? 
-              (fieldConfig?.selectSearchable ? !fieldConfig?.selectSearchable : true)
-              }
+          {SelectIcon && (
+            <SelectIcon
               className={cn(
-              "block w-full rounded-md bg-white py-1.5 pl-3 pr-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6",
-              {
-                "outline-destructive": error,
-              },
+                "absolute left-2 top-2.5 size-5 text-muted-foreground",
+                {
+                  "opacity-50": isDisabled,
+                },
               )}
-              onChange={(event) => setQuery(event.target.value)}
-              onBlur={() => setQuery("")}
-              data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-              // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
-              displayValue={(value) => value?.label}
-            />
-            <ChevronUpDownIcon
-              className="absolute right-2 size-5 text-gray-400"
               aria-hidden="true"
             />
-            </ComboboxButton>
+          )}
+          <ComboboxInput
+            placeholder={fieldConfig.placeholder}
+            readOnly={inputReadOnly}
+            disabled={isDisabled}
+            className={cn(
+              "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
+              {
+                "outline-destructive": error,
+                "border-red-500": error,
+                "cursor-not-allowed": isDisabled,
+                "cursor-text": isReadOnly,
+              },
+            )}
+            onClick={() => {
+              if (isDisabled || isReadOnly) return;
+              setOpen(true);
+            }}
+            onChange={(event) => setQuery(event.target.value)}
+            onBlur={() => {
+              setTimeout(() => setOpen(false), 100);
+              setQuery("");
+            }}
+            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+            // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
+            displayValue={(value) => value?.label}
+          />
+          <ComboboxButton
+            disabled={isDisabled}
+            className={cn(
+              "inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none",
+              {
+                "cursor-not-allowed": isDisabled,
+                "cursor-default": isReadOnly,
+              },
+            )}
+            data-test-id={`${formKey}-btn-${fieldConfig.name}`}
+          >
+            <ChevronUpDownIcon
+              className={cn("absolute right-2 top-2.5 size-5 text-gray-400", {
+                "opacity-50": isDisabled || isReadOnly,
+              })}
+              aria-hidden="true"
+            />
+          </ComboboxButton>
+          {!(isDisabled || isReadOnly) &&
+            (filteredOptions?.length ? (
+              <ComboboxOptions
+                static={open}
+                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+              >
+                {filteredOptions?.slice(0, 700).map((opt) => (
+                  <ComboboxOption
+                    key={opt?.value}
+                    value={opt}
+                    disabled={isDisabled || isReadOnly}
+                    className={cn(
+                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none",
+                      {
+                        "cursor-not-allowed": isDisabled,
+                        "cursor-default": isReadOnly,
+                      },
+                    )}
+                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+                  >
+                    <span
+                      className="block truncate group-data-[selected]:font-semibold"
+                      data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                    >
+                      {opt.label}
+                    </span>
 
-          {filteredOptions?.length ? (
-            <ComboboxOptions
-              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-              data-test-id={`${formKey}-opts-${fieldConfig.name}`}
-            >
-              {filteredOptions?.slice(0, 700).map((opt) => (
-                <ComboboxOption
-                  key={opt?.value}
-                  value={opt}
-                  className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none"
-                  data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
-                >
+                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
+                      <CheckIcon className="size-5" aria-hidden="true" />
+                    </span>
+                  </ComboboxOption>
+                ))}
+              </ComboboxOptions>
+            ) : (
+              <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
+                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
                   <span
                     className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
                   >
-                    {opt.label}
+                    No {fieldConfig?.label} found.
                   </span>
-
-                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
-                    <CheckIcon className="size-5" aria-hidden="true" />
-                  </span>
-                </ComboboxOption>
-              ))}
-            </ComboboxOptions>
-          ) : (
-            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-              <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
-                <span
-                  className="block truncate group-data-[selected]:font-semibold"
-                  data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                >
-                  No {fieldConfig?.label} found.
-                </span>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
         </div>
       </Combobox>
 

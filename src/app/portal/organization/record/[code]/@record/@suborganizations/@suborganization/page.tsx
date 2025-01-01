@@ -4,9 +4,7 @@ import { api } from "~/trpc/server";
 import Grid from "~/components/platform/Grid/Server";
 import Bluebird from "bluebird";
 import React from "react"; // Import React if needed
-import gridColumns, {
-  TO_HIDE_COLUMNS_WHEN_MOBILE,
-} from "~/app/portal/contact/grid/_config/columns";
+import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "../_config/columns";
 
 export default async function RecordTabContainer({
   searchParams = {},
@@ -23,7 +21,6 @@ export default async function RecordTabContainer({
     "id",
     "code",
     "name",
-    "parent_organization_id",
     "status",
     "created_date",
     "created_time",
@@ -32,6 +29,12 @@ export default async function RecordTabContainer({
     "updated_time",
     "updated_by",
   ];
+
+  const response = await api.organization.getByCode({
+    code: identifier!,
+    pluck_fields: ["id"],
+  });
+  const record_id = response?.data?.id;
 
   const { items = [], totalCount } = await api.grid
     .items({
@@ -44,7 +47,7 @@ export default async function RecordTabContainer({
           type: "criteria",
           field: "parent_organization_id",
           operator: EOperator.EQUAL,
-          values: [identifier!],
+          values: [record_id!],
         },
       ],
     })

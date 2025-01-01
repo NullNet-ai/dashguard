@@ -1,5 +1,7 @@
 "use client";
 
+import { Toaster } from "~/components/ui/sonner";
+import SmartDateDetails from "./_form-controls/smart-date";
 import InputDetails from "./_form-controls/textfield";
 import MultiSelectDetails from "./_form-controls/multi-select";
 import CheckboxDetails from "./_form-controls/checkbox";
@@ -10,8 +12,6 @@ import PasswordDetails from "./_form-controls/password";
 import TextAreaDetails from "./_form-controls/textarea";
 import EmailInputDetails from "./_form-controls/email-input";
 import PhoneInputDetails from "./_form-controls/phone-input";
-import { Toaster } from "~/components/ui/sonner";
-import SmartDateDetails from "./_form-controls/smart-date";
 import AmountDetails from "./_form-controls/amount-field";
 import ButtonPlayGround from "./_form-controls/button-playground";
 import { Separator } from "~/components/ui/separator";
@@ -28,57 +28,59 @@ export default function PlatformPlayGround() {
       <Separator className="my-6" />
       <div className="space-y-20 p-5">
         <section>
-          <h2 className="text-xl font-bold mb-4">Basic Inputs</h2>
+          <h2 className="mb-4 text-xl font-bold">Basic Inputs</h2>
           <div className="grid gap-4">
-        <TextAreaDetails />
-        <NumberInputDetails />
-        <PasswordDetails />
-        <PhoneInputDetails />
+            <InputDetails />
+            <TextAreaDetails />
+            <NumberInputDetails />
+            <PasswordDetails />
+            <PhoneInputDetails />
           </div>
         </section>
 
         <Separator />
 
         <section>
-          <h2 className="text-xl font-bold mb-4">Date and Time</h2>
+          <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
           <div className="grid gap-4">
-        <SmartDateDetails />
+            <SmartDateDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Choices and Selections</h2>
+          <div className="grid gap-4">
+            <RadioDetails />
+            <CheckboxDetails />
+            <SelectDetails />
           </div>
         </section>
 
         <Separator />
 
         <section>
-          <h2 className="text-xl font-bold mb-4">Choices and Selections</h2>
+          <h2 className="mb-4 text-xl font-bold">Specialized Inputs</h2>
           <div className="grid gap-4">
-        <RadioDetails />
-        <CheckboxDetails />
-        <SelectDetails />
+            <EmailInputDetails />
+            <AmountDetails />
           </div>
         </section>
 
         <Separator />
 
         <section>
-          <h2 className="text-xl font-bold mb-4">Specialized Inputs</h2>
+          <h2 className="mb-4 text-xl font-bold">Complex Inputs</h2>
           <div className="grid gap-4">
-        <EmailInputDetails />
-        <AmountDetails />
+            <AddressDetails />
+            <RichTextEditorDetails />
+            <FileDetails />
           </div>
         </section>
 
         <Separator />
-
-        <section>
-          <h2 className="text-xl font-bold mb-4">Complex Inputs</h2>
-          <div className="grid gap-4">
-        <AddressDetails />
-        <RichTextEditorDetails />
-        <FileDetails />
-          </div>
-        </section>
-
-        {/* <Separator />
 
         <section>
           <h2 className="text-xl font-bold mb-4">Other Inputs</h2>
@@ -87,11 +89,10 @@ export default function PlatformPlayGround() {
         <InputsGrid />
         <MultiSelectDetails />
           </div>
-        </section> */}
+        </section>
 
         <Toaster />
       </div>
     </>
-
   );
 }

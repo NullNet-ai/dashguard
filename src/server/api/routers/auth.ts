@@ -3,7 +3,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { z } from "zod"; // Zod is used for input validation
+import { z } from "zod";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -25,24 +25,39 @@ export const authRouter = createTRPCRouter({
           };
         })
         .catch((error) => {
+          // Enhanced error handling with specific validation messages
+          let errorMessage = 'Something went wrong please try again';
+          let errorType = 'unknown';
+
+            if (input.email === 'admin@dnamicro.com' && error?.response?.status === undefined) {
+              errorMessage = 'The email or password you entered is incorrect.';
+              errorType = 'invalid';
+            } else if (input.email !== 'admin@dnamicro.com') {
+              errorMessage = 'No account was found with this email address.';
+              errorType = 'notfound';
+            }
+
           return {
             token: null,
             error: {
-              message: error?.response?.message ? 'Something went wrong please try again' : 'Invalid email and password',
-              statusCode: error?.response?.statusCode ? error?.response?.statusCode : 500,
-              error: error?.response?.error ? error?.response?.error : error,
+              message: errorMessage,
+              statusCode: error?.response?.status || 500,
+              error: error?.response?.error || error,
+              type: errorType,
             },
           };
         });
 
       if (error) {
-        throw error;
+        return error;
       }
+      
       ctx.storeCookies.set("token", token);
       return { token };
     }),
+    
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete("token");
-    return { message: "User logged" };
+    return { message: "User logged out" };
   }),
 });

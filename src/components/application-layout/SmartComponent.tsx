@@ -42,11 +42,12 @@ export default function SmartComponent() {
   
   return (
     <Card
-      className={`${openSmart ? "right-0" : `-right-[25dvw]`} transition-right fixed top-0 hidden h-screen w-[25dvw] duration-500 lg:block`}
+      className={`${openSmart ? "right-0" : `-right-[25dvw]`} transition-right fixed top-0 hidden z-50 h-screen w-[25dvw] duration-500 lg:block`}
     >
       <Button
         className="absolute left-[-3.5rem] top-3/4 -rotate-90 rounded-lg bg-primary/15 text-primary  hover:bg-primary/40 active:translate-x-0"
         onClick={handleClick}
+        data-test-id="smart-btn"
       >
         Smart
       </Button>
@@ -60,7 +61,9 @@ export default function SmartComponent() {
         <h1 className="text-md flex-grow font-bold">Smart</h1>
         <PlusIcon className="h-6 w-6 text-primary" />
         <HistoryIcon className="h-5 w-5 text-muted-foreground" />
-        <button onClick={handleClick}>
+        <button onClick={handleClick}
+          data-test-id="smart-btn-close"
+        >
           <XMarkIcon className="h-6 w-6 text-muted-foreground" />
         </button>
       </CardHeader>
@@ -86,6 +89,7 @@ export default function SmartComponent() {
         <Input
           placeholder="Smart Search..."
           Icon={MicrophoneIcon}
+          data-test-id="smart-search-bar"
           iconClassName="text-primary"
           className="w-full rounded-full bg-muted text-foreground placeholder:text-muted-foreground/80"
         />
@@ -213,6 +217,7 @@ export function SmartMobileComponent() {
               placeholder="Smart Search..."
               Icon={MicrophoneIcon}
               iconClassName="text-primary"
+              data-test-id="smart-search-bar-mobile"
               className="w-full rounded-full bg-muted text-foreground placeholder:text-muted-foreground/80"
             />
           </CardFooter>
