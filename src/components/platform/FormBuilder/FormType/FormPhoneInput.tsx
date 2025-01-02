@@ -23,6 +23,7 @@ import { ulid } from "ulid";
 import { toast } from "sonner";
 // import { DevTool } from "@hookform/devtools";
 import { isPhoneValid } from "../Utils/phoneValidator"
+import useInputPosition from "~/hooks/use-position";
 
 interface IPhoneData {
   id?: string;
@@ -56,6 +57,7 @@ export default function FormPhoneInput({
     remove: (index: number) => void;
     replace: (data: IPhoneData[]) => void;
   }
+  const inputRef = React.useRef<any>(null);
   const { error }: any = useFormField();
   const { name } = formRenderProps.field;
   const { fields, append, remove, replace } = useFieldArray({
@@ -63,6 +65,7 @@ export default function FormPhoneInput({
     name: name,
   }) as IUseFieldArrayPhone;
 
+  const positionClass = useInputPosition(inputRef);
   const handleAddPhoneNumber = () => {
     append({
       id: ulid(),
@@ -143,6 +146,8 @@ export default function FormPhoneInput({
     }
   });
 
+  
+
   const isDisabled = formRenderProps?.field?.disabled;
   const isMultiple = fieldConfig?.options?.phoneNumberType === "multiple";
   const values = form.watch(name);
@@ -166,13 +171,15 @@ export default function FormPhoneInput({
               <div
                 className={`flex items-center border ${error?.[index] && "border-destructive"} focus-within:border-primary  focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 ring-offset-background`}
               >
+                
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
                   data-test-id={`${formKey}-inp-${index > 0 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
                     "data-test-id": `${formKey}-inp-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
-                    readOnly:(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+                    readOnly:(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false,
+                    ref:inputRef
                   }}
                   countrySelectorStyleProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
@@ -183,6 +190,11 @@ export default function FormPhoneInput({
                       backgroundColor: "inherit",
                       borderColor: "transparent",
                       colorScheme: "normal",
+                    },
+                    dropdownStyleProps:{
+                      style:{
+                        ...(positionClass === "top" ? {top: "-205px"} : {})
+                      }
                     },
                     buttonClassName: "!focus-visible:border-r-primary ",
                   }}

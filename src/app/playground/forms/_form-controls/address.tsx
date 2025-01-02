@@ -41,16 +41,16 @@ export default function AddressDetails({}) {
         handleSubmit={handleSave}
         formSchema={FormSchema}
         selectOptions={{
-          select:[
+          select: [
             {
-              label:"Option 1",
-              value:"option1"
+              label: "Option 1",
+              value: "option1",
             },
             {
-              label:"Option 2",
-              value:"option2"
-            }
-          ]
+              label: "Option 2",
+              value: "option2",
+            },
+          ],
         }}
         defaultValues={{
           searchedAddress: "",
@@ -72,9 +72,9 @@ export default function AddressDetails({}) {
             country: "United Kingdom",
             postal_code: "KA12 0AX",
           },
-          text:"hehe",
-          select:"option1",
-          smartDate:"2022-12-14",
+          text: "hehe",
+          select: "option1",
+          smartDate: "2022-12-14",
           // smartDate_date:new Date("2022-12-12"),
         }}
         fields={[
@@ -85,32 +85,33 @@ export default function AddressDetails({}) {
             label: "Address",
             required: true,
             placeholder: "Address",
+            accuracy: 100,
           },
           {
-            id:"text",
-            formType:"input",
-            name:"text",
-            label:"Text",
-            required:true,
-            placeholder:"Text",
+            id: "text",
+            formType: "input",
+            name: "text",
+            label: "Text",
+            required: true,
+            placeholder: "Text",
           },
           {
-            id:"select",
-            formType:"select",
-            name:"select",
-            label:"Select",
-            required:true,
-            placeholder:"Select",
+            id: "select",
+            formType: "select",
+            name: "select",
+            label: "Select",
+            required: true,
+            placeholder: "Select",
           },
           {
-            id:"smartDate",
-            formType:"smart-date",
-            name:"smartDate",
-            label:"Smart Date",
-            dateTimePickerProps:{
-              disablePastDates: true
-            }
-          }
+            id: "smartDate",
+            formType: "smart-date",
+            name: "smartDate",
+            label: "Smart Date",
+            dateTimePickerProps: {
+              disablePastDates: true,
+            },
+          },
         ]}
       />
     </>
