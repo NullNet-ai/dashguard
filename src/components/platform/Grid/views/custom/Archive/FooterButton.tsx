@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Button } from "~/components/ui/button";
 
 interface IFooterButtonProps {
@@ -10,7 +10,7 @@ interface IFooterButtonProps {
 const FooterButton: React.FC<IFooterButtonProps> = (props) => {
   const { onClick, color, title } = props;
   return (
-    <Button onClick={onClick} className="mr-2" color={color}>
+    <Button autoFocus onClick={onClick} className="mr-2" color={color}>
       {title}
     </Button>
   );
