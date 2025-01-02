@@ -33,6 +33,10 @@ const HeaderMenu = ({ header }: HeaderMenuProps) => {
   const enableSorting = header.column.getCanSort();
   const [open, setOpen] = useState(false);
 
+  if (!enableSorting) {
+    return <></>;
+  }
+
   return (
     <DropdownMenu
       open={open}
