@@ -1,6 +1,7 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 import { EOperator, IResponse } from "@dna-platform/common-orm";
+import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
 
 export const recordRouter = createTRPCRouter({
   getById: privateProcedure
@@ -166,7 +167,23 @@ export const recordRouter = createTRPCRouter({
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
-    return response;
+    const advance_filters = createAdvancedFilter({
+      contact_id: response.contact.id,
+    });
+    const { data } = await ctx.dnaClient
+      .findAll({
+        entity: "contact_email",
+        token: ctx.token.value,
+        query: {
+          advance_filters,
+          pluck: ["id", "email"],
+        },
+      })
+      .execute();
+    return {
+      contact: { ...response?.contact, email: data?.[0]?.email },
+      organization: { ...response.organization },
+    };
   }),
   archiveRecord: privateProcedure
     .input(

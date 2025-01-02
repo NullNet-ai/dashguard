@@ -37,6 +37,8 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
+export type TArchiveType = 'warning' | 'archive';
+
 export interface IConfigGrid {
   entity: string;
   title?: string;
@@ -50,6 +52,7 @@ export interface IConfigGrid {
   deleteCustomComponent?: React.FC<any>;
   archiveCustomComponent?: React.FC<any>;
   restoreCustomComponent?: React.FC<any>;
+  archiveDialogCustomComponent?: React.FC<any>;
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
@@ -64,6 +67,7 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
+  is_warning_archive?: boolean;
   searchConfig?: {
     router: AppRouterKeys;
     resolver: string;
@@ -86,6 +90,8 @@ export interface IState {
   sorting?: SortingState;
   rowSelection: RowSelectionState;
   advanceFilter?: ISearchItem[];
+  bulkActionType: "archive" | null;
+  showBulkActionConfirmationModal: boolean;
 }
 
 export interface IAction {
@@ -99,6 +105,8 @@ export interface IAction {
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
+  setBulkActionType: (type: string | null) => void;
+  setShowBulkActionConfirmationModal: (show: boolean) => void;
 }
 
 export interface ICreateContext {

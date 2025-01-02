@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField, type ISelectOptions } from "../type";
+import { type IField, type ISelectOptions } from "../types";
 import {
   FormItem,
   FormLabel,
@@ -17,6 +17,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { usePopper } from "react-popper";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
@@ -50,6 +51,26 @@ export default function FormSelect({
 
   const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
   const isReadOnly = fieldConfig.readonly;
+
+  const [referenceElement, setReferenceElement] = useState<any>(null);
+  const [popperElement, setPopperElement] = useState<any>(null);
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement: "bottom-start", // Default placement
+    modifiers: [
+      {
+        name: "preventOverflow",
+        options: {
+          rootBoundary: "viewport",
+        },
+      },
+      {
+        name: "flip",
+        options: {
+          fallbackPlacements: ["top-start"],
+        },
+      },
+    ],
+  });
 
   const SelectIcon = fieldConfig.selectIcon;
   const filteredOptions = useMemo(() => {
@@ -135,6 +156,7 @@ export default function FormSelect({
             placeholder={fieldConfig.placeholder}
             readOnly={inputReadOnly}
             disabled={isDisabled}
+            ref={setReferenceElement}
             className={cn(
               "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
               {
@@ -179,6 +201,9 @@ export default function FormSelect({
             (filteredOptions?.length ? (
               <ComboboxOptions
                 static={open}
+                ref={setPopperElement}
+                style={styles.popper}
+                {...attributes.popper}
                 className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                 data-test-id={`${formKey}-opts-${fieldConfig.name}`}
               >

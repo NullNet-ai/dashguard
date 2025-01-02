@@ -1,15 +1,19 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import PlatformRecord from "~/components/platform/RecordV2";
-import { RecordSummaryViewContent } from "~/components/platform/RecordV2/Summary/SummaryViewContent";
+import PlatformRecord from "~/components/platform/Record";
+import { RecordSummaryViewContent } from "~/components/platform/Record/Summary/SummaryViewContent";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import RecordShellSummary from "../_components/RecordShellSummary";
 import Options from "../_components/IdentifierOption";
-import { IPlatformRecordLayoutProps } from "~/components/platform/RecordV2/types";
-import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
+import { IPlatformRecordLayoutProps } from "~/components/platform/Record/types";
+import RecordWrapper from "~/components/platform/Record/RecordWrapper";
 
-const Layout = async ({ children, record, record_summary }: IPlatformRecordLayoutProps) => {
+const Layout = async ({
+  children,
+  record,
+  record_summary,
+}: IPlatformRecordLayoutProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");

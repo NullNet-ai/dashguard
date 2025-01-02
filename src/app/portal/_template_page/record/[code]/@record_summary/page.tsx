@@ -1,7 +1,5 @@
-import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
+import RecordSummary from "~/components/platform/Record/Summary/RecordSummary";
 
 export default function Page() {
-    return (
-        <RecordSummary />
-    );
+  return <RecordSummary />;
 }

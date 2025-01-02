@@ -12,6 +12,7 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   getCoreRowModel,
+  Row,
   type RowSelectionState,
   SortingState,
   Updater,
@@ -81,7 +82,7 @@ export default function GridProvider({
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
-  const [rowToArchive, setRowToArchive] = useState<any>(null);
+  const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {};
@@ -89,6 +90,9 @@ export default function GridProvider({
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
+  const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
+    useState<boolean | null>(false);
+  const [bulkActionType, setBulkActionType] = useState<string | null>(null);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -252,18 +256,21 @@ export default function GridProvider({
     enableHiding: true,
   });
 
-  const actionTypeColumnCondition = (actionsType: TActionType, viewMode: string) => {
+  const actionTypeColumnCondition = (
+    actionsType: TActionType,
+    viewMode: string,
+  ) => {
     // Exclude selectTableRow and actionRow if view mode is 'card'
     if (viewMode === "card") {
       return [...config?.columns];
     }
-  
+
     switch (actionsType) {
       case "single-select":
         if (config?.disableDefaultAction) {
           return [...config?.columns];
         }
-  
+
         return [...config?.columns, actionRow?.current];
       case "default":
         if (config?.disableDefaultAction) {
@@ -274,12 +281,12 @@ export default function GridProvider({
           ...config?.columns,
           actionRow?.current,
         ];
-  
+
       default:
         if (config?.disableDefaultAction) {
           return [selectTableRow?.current, ...config?.columns];
         }
-  
+
         return [
           selectTableRow?.current,
           ...config?.columns,
@@ -287,12 +294,15 @@ export default function GridProvider({
         ];
     }
   };
-  
+
   /** @HOOKS */
   const table = useReactTable({
     data,
     getRowId: (row) => row.id,
-    columns: actionTypeColumnCondition(config?.actionType || "default", viewMode),
+    columns: actionTypeColumnCondition(
+      config?.actionType || "default",
+      viewMode,
+    ),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
@@ -351,6 +361,9 @@ export default function GridProvider({
       const record_ids = selectedRows.map((row) => row?.id);
       await BulkArchive({ entity: config?.entity, record_ids });
       setArchiveBulkLoading(false);
+      table?.resetRowSelection();
+      setShowBulkActionConfirmationModal(false)
+      setBulkActionType(null)
     } catch (error) {
       console.error("An error occurred while creating a record", error);
       setArchiveBulkLoading(false);
@@ -385,6 +398,8 @@ export default function GridProvider({
     sorting,
     advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
     rowSelection,
+    showBulkActionConfirmationModal,
+    bulkActionType
   } as IState;
   const actions = {
     handleCreate,
@@ -397,6 +412,8 @@ export default function GridProvider({
     handleSingleSelect,
     setShowArchiveConfirmationModal,
     setRowToArchive,
+    setShowBulkActionConfirmationModal,
+    setBulkActionType
   } as IAction;
 
   return (

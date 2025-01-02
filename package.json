@@ -14,7 +14,7 @@
     "test-local": "cypress open"
   },
   "dependencies": {
-    "@dna-platform/common-orm": "1.0.0-rc43",
+    "@dna-platform/common-orm": "1.0.0-rc49",
     "@faker-js/faker": "^9.2.0",
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
@@ -100,6 +100,7 @@
     "react-hook-form-persist": "^3.0.0",
     "react-international-phone": "4.3.0",
     "react-medium-image-zoom": "^5.2.11",
+    "react-popper": "^2.3.0",
     "react-resizable-panels": "^2.1.4",
     "react-responsive": "^10.0.0",
     "recharts": "^2.13.0",

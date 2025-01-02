@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import gridColumns from "~/app/portal/contact/grid/_config/columns";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 const FormSchema = z.object({
   first_name: z
     .string({ message: "Input is required" })

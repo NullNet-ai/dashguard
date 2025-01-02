@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { api } from "~/trpc/server";
 import Clock from "./Clock";
 import { MainMenuConfig } from "./config";
-import FooterMenuConfig from "./footerMenuConfig copy";
 import SideUserInfo from "./UserInfo";
 
 const getInitials = (name: string) => {
@@ -17,13 +16,14 @@ export default async function SideBarMenu() {
   const mainConfig = await MainMenuConfig();
 
   const { contact } = await api.record.getSessionInfo();
-  const initials = getInitials(contact?.first_name + " " + contact?.last_name);
-  const user_name = contact?.first_name + " " + contact?.last_name;
+  const { first_name, last_name, email } = contact;
+  const initials = getInitials(first_name + " " + last_name);
+  const user_name = first_name + " " + last_name;
   return (
     <AppSideBar
       mainMenuConfig={mainConfig}
       headerComponent={
-        <div className="flex items-center justify-start lg:justify-center  py-1.5 text-sm">
+        <div className="flex items-center justify-start py-1.5 text-sm lg:justify-center">
           <Image
             width={50}
             height={50}
@@ -35,9 +35,9 @@ export default async function SideBarMenu() {
         </div>
       }
       footerComponent={
-        <SideUserInfo user_name={user_name} initials={initials} />
+        <SideUserInfo user_name={user_name} initials={initials} email={email} />
       }
-      footerMenuConfig={FooterMenuConfig}
+      // footerMenuConfig={FooterMenuConfig}
     />
   );
 }

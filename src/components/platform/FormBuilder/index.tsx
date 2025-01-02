@@ -1,82 +1,74 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Fragment, SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { Card, CardContent } from "~/components/ui/card";
-import { Collapsible, CollapsibleContent } from "~/components/ui/collapsible";
-import { Form } from "~/components/ui/form";
+import { Card } from "~/components/ui/card";
+import { Collapsible } from "~/components/ui/collapsible";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
-import { useWizard } from "../Wizard/Provider";
-import DebuggerComponent from "./Debugger";
-import { type TDisplayType, type IPropsForms } from "./type";
-import { cn } from "~/lib/utils";
-import FormHeader from "./Header/Main";
-import FormModule from "./FormModule";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-} from "~/components/ui/accordion";
-import FormFilterGrid from "./FilterGrid/List";
-import SelectedView from "./FilterGrid/SelectedView";
 import { useToast } from "~/context/ToastProvider";
-import { EllipsisVertical } from "lucide-react";
+import { cn } from "~/lib/utils";
+import { useWizard } from "../Wizard/Provider";
+import { FormBuilderLayout } from "./components/ui";
+import { type IPropsForms, type TDisplayType } from "./types";
+import { testIDFormatter } from "~/utils/formatter";
+import { UpdateCurrentSubTab } from "./Actions/UpdateCurrentSubTab";
 
-export function FormBuilder({
-  fields,
-  fieldConfig,
-  selectOptions,
-  currencyInputOptions,
-  defaultValues,
-  checkboxOptions,
-  multiSelectOptions,
-  multiSelectOnSearch,
-  formSchema,
-  radioOptions,
-  formKey,
-  formLabel = "Basic Form",
-  formProps,
-  myParent,
-  enableFormRegisterToParent = true,
-  customDesign,
-  buttonConfig,
-  buttonHeaderRender,
-  filterGridConfig,
-  enableAppendForm,
-  appendFormKey,
-  defaultDisplay = "expanded",
-  handleSubmitFormGrid,
-  handleSubmit,
-  onFormChange,
-  customRender,
-  onDataChange,
-}: IPropsForms) {
+export const FormBuilder = (props: IPropsForms) => {
+  const {
+    //* data
+    formSchema,
+    defaultValues,
+    formKey,
+    appendFormKey,
+    //* actions
+    onFormChange,
+    onDataChange,
+    handleSubmitFormGrid,
+    handleSubmit,
+    enableAppendForm,
+    //* other
+    enableFormRegisterToParent: _enableFormRegisterToParent,
+    filterGridConfig,
+    defaultDisplay = "expanded",
+    customRender,
+    formProps,
+    features,
+    create_mode = true,
+    myParent,
+    fieldConfig,
+  } = props;
+
   const { actions } = useWizard();
+
+  // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
+  const enableFormRegisterToParent =
+    myParent === "record" ? false : _enableFormRegisterToParent;
+
   const eventEmitter = useEventEmitter();
-
-  const [debugOn, setDebugOn] = useState(false);
-  //@Button Loading
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [listLoading, setListLoading] = useState(false);
-  //@Button
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenGrid, setOpenGrid] = useState("");
-  const [displayType, setDisplayType] = useState<TDisplayType>("form");
-  const [formGridSelected, setFormGridSelected] = useState<any[]>([]);
-  const [open, setOpen] = useState(
-    defaultDisplay === "expanded" ? true : false,
-  );
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema), // is this where the validation relies?
     defaultValues,
-    shouldFocusError: true,
+    shouldFocusError: false,
   });
 
+  //* LOCAL STATES
+  const [isOpenGrid, setOpenGrid] = useState("");
+  const [formGridSelected, setFormGridSelected] = useState<any[]>([]);
+  const [displayType, setDisplayType] = useState<TDisplayType>("form");
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+  const [isSaveLoading, setIsSaveLoading] = useState(false);
+  const [isListLoading, setIsListLoading] = useState(false);
+  const [debugOn, setDebugOn] = useState(false);
+  const [isFormOpened, setIsFormOpened] = useState(
+    defaultDisplay === "expanded",
+  );
+  const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
+
+  //* EFFECTS
+
+  //* Effect to listen to form submission
   useEffect(() => {
     if (!form?.formState?.isDirty) return;
     eventEmitter.emit(`formStatus:${formKey}`, {
@@ -84,17 +76,21 @@ export function FormBuilder({
       form_key: formKey,
     });
   }, [form?.formState?.isDirty]);
+
+  //* Effect to listen to form errors
   useEffect(() => {
     if (form?.formState?.errors) {
       console.debug(" 🇦🇨 [Form-Props ERRORS]", form?.formState?.errors);
     }
   }, [form?.formState?.errors]);
 
+  //* Effect to listen to form changes
   useEffect(() => {
     if (!onFormChange) return;
     onFormChange(form);
   }, [form, onFormChange]);
 
+  //* Effect to listen to data changes
   useEffect(() => {
     if (!onDataChange) return;
 
@@ -107,6 +103,7 @@ export function FormBuilder({
     return () => subscription.unsubscribe();
   }, [form.watch, onDataChange]);
 
+  //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
       setDisplayType("form");
@@ -116,6 +113,7 @@ export function FormBuilder({
     setDisplayType("selected");
   }, [filterGridConfig?.selectedRecords]);
 
+  //* Effect to listen to event emitter
   useEffect(() => {
     if (!eventEmitter) return;
     if (!enableFormRegisterToParent) return;
@@ -133,6 +131,7 @@ export function FormBuilder({
       reject: (reason: any) => any,
     ) => {
       try {
+        //
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -153,50 +152,13 @@ export function FormBuilder({
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, [
-    enableFormRegisterToParent,
-    eventEmitter,
-    // form, //!causing re-render
-    formKey,
-    myParent,
-  ]);
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
 
-  const handleListLoading = (loading: boolean) => {
-    setListLoading(loading);
-  };
+  //* HANDLERS
 
-  function disableForm() {
-    form.clearErrors();
-    form.control._disableForm(!form.formState.disabled);
-  }
-
-  const handleDebug = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    setDebugOn(!debugOn);
-  };
-
-  const handleLock = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    disableForm();
-  };
-
-  const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setOpen(!open);
-  };
-
+  //* handler to disable form
   const handleCloseGrid = () => {
     setOpenGrid("");
-  };
-
-  const handleSelectedGridRecords = (records: any[]) => {
-    setFormGridSelected(records);
-    setDisplayType("selected");
-  };
-
-  const handleNewRecordFormFilterGrid = () => {
-    setDisplayType("form");
   };
 
   const handleRemovedSelectedRecords = (records: any[]) => {
@@ -210,7 +172,7 @@ export function FormBuilder({
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
       }),
-    ).then((data) => {
+    ).then(() => {
       const newRecords = formGridSelected?.filter((item) => {
         return !records.some((record) => record.id === item.id);
       });
@@ -224,52 +186,95 @@ export function FormBuilder({
     });
   };
 
+  const handleSearchOpen = () => {
+    setIsOpenSearch(!isOpenSearch);
+  };
+
+  const handleAccordionChange = (value: string) => {
+    setIsAccordionExpanded(value === "item-1");
+    setOpenGrid(value);
+  };
+
+  const handleOpenForm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsFormOpened(!isFormOpened);
+  };
+
+  const handleListLoading = (loading: boolean) => {
+    setIsListLoading(loading);
+  };
+
+  const handleDebug = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    setDebugOn(!debugOn);
+  };
+
+  const handleLock = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    disableForm();
+  };
+
+  const handleAccordionExpand = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsAccordionExpanded(!isAccordionExpanded);
+  };
+
+  const handleNewRecordFormFilterGrid = () => {
+    setDisplayType("form");
+  };
+
+  const handleAppendForm = () => {
+    if (!enableAppendForm) return;
+    eventEmitter.emit(`${formKey}:${appendFormKey}`);
+  };
+
   const handleUpdateDisplayType = (type: SetStateAction<TDisplayType>) => {
     setDisplayType(type);
   };
 
-  async function onSubmitFormGrid(data: z.infer<typeof formSchema>) {
-    if (!handleSubmitFormGrid) return;
-    try {
-      setSaveLoading(true);
-      const response = await handleSubmitFormGrid({
-        data,
-        main_id: filterGridConfig?.main_entity_id,
-        filter_entity: filterGridConfig?.filter_entity,
-        action_type: formGridSelected.length ? "Update" : "Create",
-      });
-      setFormGridSelected(response);
-      setDisplayType("selected");
-      setSaveLoading(false);
-    } catch (error) {
-      setSaveLoading(false);
-      toast.error("[Form-Filter] Failed to create new record");
-    }
-  }
+  //* ACTIONS
+  const disableForm = () => {
+    form.clearErrors();
+    form.control._disableForm(!form.formState.disabled);
+  };
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    setSaveLoading(true);
+  const saveForm = async (data: z.infer<typeof formSchema>) => {
+    if (!customRender) {
+      eventEmitter.emit(`formStatus:${formKey}`, {
+        status: "form_save",
+        form_key: "action",
+      });
+      await onSubmit(data);
+      return;
+    }
+    await onSubmit(data);
+  };
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsSaveLoading(true);
     try {
       if (!form.formState.isDirty && !form.formState.defaultValues) {
         return toast.error("Form is Unchanged");
       }
-      // Handle form validation and other checksF
-      // if (!form.formState.isDirty) {
-      //   eventEmitter.emit(`formStatus:${formKey}`, {
-      //     status: "done",
-      //     form_key: formKey,
-      //   });
-      //   setSaveLoading(false);
-      //   return;
-      // }
+      // Handle form validation and other checks
+      //what's the use of this function???
+      if (!form.formState.isDirty) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "done",
+          form_key: formKey,
+        });
+        setIsSaveLoading(false);
+        return;
+      }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
         const res = (await handleSubmit({ data, form })) as any;
-        const { errors = {}, existing_record, existing = false } = res || {};
+        const { errors = {}, existing = false } = res || {};
 
         const form_errors = errors?.form || [];
-        setSaveLoading(false);
+        setIsSaveLoading(false);
 
         if (form_errors.length || existing) {
           form_errors.map(
@@ -280,19 +285,7 @@ export function FormBuilder({
               });
             },
           );
-
-          // if (existing) {
-          //   const { id: existing_id, status } = existing_record || {};
-          //   const { entity, navigate } = formProps || {};
-          //   const { wizard_step = "1", record_tab = "dashboard" } =
-          //     navigate || {};
-          //   const last =
-          //     status == "Draft"
-          //       ? `wizard/${existing_id}/${wizard_step}`
-          //       : `record/${existing_id}/${record_tab}`;
-          //   router.push(`/portal/${entity}/${last}`);
-          // }
-          setSaveLoading(false);
+          setIsSaveLoading(false);
 
           return;
         }
@@ -302,7 +295,7 @@ export function FormBuilder({
             status: "failed",
             form_key: formKey,
           });
-          setSaveLoading(false);
+          setIsSaveLoading(false);
 
           return;
         }
@@ -318,172 +311,114 @@ export function FormBuilder({
 
         form.control._disableForm(true);
 
-        setSaveLoading(false);
+        setIsSaveLoading(false);
       }
-      setSaveLoading(false);
+      setIsSaveLoading(false);
     } catch (error) {
-      setSaveLoading(false);
+      setIsSaveLoading(false);
+      console.error("[Form-Filter] Failed to create new record", error);
     }
-  }
+  };
 
-  function handleAppendForm() {
-    if (!enableAppendForm) return;
-    eventEmitter.emit(`${formKey}:${appendFormKey}`);
-  }
+  const onSubmitFormGrid = async (
+    data: z.infer<typeof formSchema>,
+    options?: {
+      action_type?: string;
+    },
+  ) => {
+    if (!handleSubmitFormGrid) return;
+    try {
+      setIsSaveLoading(true);
 
-  async function saveForm(data: z.infer<typeof formSchema>) {
-    if (!customRender) {
-      eventEmitter.emit(`formStatus:${formKey}`, {
-        status: "form_save",
-        form_key: "action",
+      const response = await handleSubmitFormGrid({
+        data,
+        main_id: filterGridConfig?.main_entity_id,
+        filter_entity: filterGridConfig?.filter_entity,
+        action_type:
+          options?.action_type ||
+          (formGridSelected.length ? "Update" : "Create"),
+        form,
       });
-      await onSubmit(data);
-      return;
+
+      //TODO: Please cater setting error message in field and don't proceed to view mode.
+      if (!response?.length) {
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: "failed",
+          form_key: formKey,
+        });
+        throw new Error("Failed to submit form grid");
+      }
+
+      eventEmitter.emit(`formStatus:${formKey}`, {
+        status: "done",
+        form_key: formKey,
+      });
+      setFormGridSelected(response);
+      setDisplayType("selected");
+      setIsSaveLoading(false);
+    } catch (error) {
+      setIsSaveLoading(false);
+      console.error("[Form-Filter] Failed to create new record", error);
     }
-    await onSubmit(data);
-  }
+  };
 
+  const onSelectFieldFilterGrid = async (data: z.infer<typeof formSchema>) => {
+    try {
+      if (data?.code && create_mode) {
+        UpdateCurrentSubTab({ tab_name: data.code });
+      }
+      setFormGridSelected([data]);
+      setDisplayType("selected");
+    } catch (error) {
+      console.error("[Form-Filter] Failed onSelectFieldFilterGrid", error);
+    }
+  };
+
+  //* RENDER
   return (
-    <form data-test-id={formKey + "Form"}>
-      <Collapsible open={open} className="space-y-2">
-        <Card
-          className={cn(
-            "border-none shadow-none",
-            // form?.formState?.isDirty
-            //   ? "border border-t-4 border-destructive/70"
-            //   : "border border-t-4 border-primary/70",
-            `p-0 sm:p-2`,
-          )}
-        >
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full"
-            value={isOpenGrid}
-            onValueChange={(value) => {
-              setIsOpen(value === "item-1");
-              setOpenGrid(value);
-            }}
-          >
-            <AccordionItem value="item-1">
-              <FormHeader
-                formKey={formKey}
-                enableAppendForm={enableAppendForm}
-                displayType={displayType}
-                buttonHeaderRender={buttonHeaderRender}
-                headerClassName={customDesign?.headerClassName}
-                buttonConfig={buttonConfig}
-                formLabel={formLabel}
-                form={form}
-                formSchema={formSchema}
-                isButtonLoading={saveLoading}
-                open={open}
-                filterGridConfig={filterGridConfig}
-                isListLoading={listLoading}
-                saveForm={saveForm}
-                handleDebug={handleDebug}
-                handleLock={handleLock}
-                handleOpen={handleOpen}
-                onSubmitFormGrid={onSubmitFormGrid}
-                handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
-                handleAppendForm={handleAppendForm}
-                selectedRecords={formGridSelected}
-                handleUpdateDisplayType={handleUpdateDisplayType}
-              />
-              {filterGridConfig && (
-                <AccordionContent
-                  className={cn(
-                    "fixed z-50 max-w-full",
-                    isOpen
-                      ? "accordion-content-enter accordion-content-enter-active"
-                      : "accordion-content-exit accordion-content-exit-active",
-                  )}
-                >
-                  <FormFilterGrid
-                    handleListLoading={handleListLoading}
-                    handleSelectedGridRecords={handleSelectedGridRecords}
-                    handleCloseGrid={handleCloseGrid}
-                    config={{
-                      ...filterGridConfig,
-                    }}
-                  />
-                </AccordionContent>
-              )}
-
-              <CollapsibleContent>
-                {displayType === "form" && (
-                  <CardContent
-                    className={cn(
-                      customDesign?.formClassName
-                        ? customDesign?.formClassName
-                        : "grid grid-cols-1 gap-4 sm:grid-cols-2",
-                      !customRender
-                        ? (customDesign?.formClassName ??
-                            "grid grid-cols-1 gap-4 sm:grid-cols-2")
-                        : "",
-                      "shadow-none",
-                    )}
-                  >
-                    <Form {...form}>
-                      <Fragment>
-                        {!customRender ? (
-                          <FormModule
-                            fieldConfig={fieldConfig}
-                            formKey={formKey}
-                            fields={fields}
-                            form={form}
-                            formSchema={formSchema}
-                            subConfig={{
-                              checkboxOptions,
-                              multiSelectOptions,
-                              multiSelectOnSearch,
-                              radioOptions,
-                              selectOptions,
-                              currencyInputOptions,
-                            }}
-                            gridConfig={filterGridConfig!}
-                          />
-                        ) : (
-                          customRender(form, {
-                            appendButtonKey: `${formKey}:${appendFormKey || "not-found"}`,
-                          })
-                        )}
-                      </Fragment>
-                      {
-                        // Debugger
-                        debugOn && (
-                          <DebuggerComponent
-                            formKey={formKey}
-                            formProps={formProps}
-                            form={form}
-                          />
-                        )
-                      }
-                    </Form>
-                  </CardContent>
-                )}
-                {
-                  // Selected View
-                  displayType === "selected" && (
-                    <CardContent className="w-full">
-                      <SelectedView
-                        renderComponentSelected={
-                          filterGridConfig?.renderComponentSelected
-                        }
-                        handleRemovedSelectedRecords={
-                          handleRemovedSelectedRecords
-                        }
-                        handleUpdateDisplayType={handleUpdateDisplayType}
-                        records={formGridSelected}
-                      />
-                    </CardContent>
-                  )
-                }
-              </CollapsibleContent>
-            </AccordionItem>
-          </Accordion>
+    <form
+      data-test-id={testIDFormatter(
+        `${formProps?.entity}-${formProps?.shell_type}-${formKey}-form`,
+      )}
+    >
+      <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
+        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+          <FormBuilderLayout
+            {...props}
+            fieldConfig={fieldConfig}
+            form={form}
+            debugOn={debugOn}
+            showFormActions={showFormActions}
+            formGridSelected={formGridSelected}
+            isListLoading={isListLoading}
+            isSaveLoading={isSaveLoading}
+            isFormOpened={isFormOpened}
+            isOpenGrid={isOpenGrid}
+            isAccordionExpanded={isAccordionExpanded}
+            displayType={displayType}
+            saveForm={saveForm}
+            onSubmitFormGrid={onSubmitFormGrid}
+            setIsSaveLoading={setIsSaveLoading}
+            setShowFormActions={setShowFormActions}
+            handleCloseGrid={handleCloseGrid}
+            handleAccordionChange={handleAccordionChange}
+            handleListLoading={handleListLoading}
+            handleDebug={handleDebug}
+            handleLock={handleLock}
+            handleAccordionExpand={handleAccordionExpand}
+            handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleAppendForm={handleAppendForm}
+            handleUpdateDisplayType={handleUpdateDisplayType}
+            handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+            handleOpenForm={handleOpenForm}
+            features={features}
+            onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+            myParent={myParent}
+            handleSearchOpen={handleSearchOpen}
+            isOpenSearch={isOpenSearch}
+          />
         </Card>
       </Collapsible>
     </form>
   );
-}
+};

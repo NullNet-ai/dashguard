@@ -24,7 +24,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon } from "@heroicons/react/24/outline";
-import { type IField } from "../FormBuilder/type";
+import { type IField } from "../FormBuilder/types";
 import { formatFormTestID } from "~/lib/utils";
 
 interface ExtendedControllerRenderProps
@@ -61,12 +61,12 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     form.setValue("searchedAddress", search);
   };
 
-  const debouncedSearchInput = useDebounce(searchedAddress, 500);
+  const debouncedSearchInput = useDebounce(searchedAddress, 200);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
-      accuracy: formRenderProps?.field?.accuracy || 0,
+      accuracy: fieldConfig?.accuracy,
     });
     return response?.data;
   };
@@ -78,7 +78,6 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     gcTime: 0,
     enabled: debouncedSearchInput !== "",
   });
-
   return (
     <FormField
       control={form.control}
