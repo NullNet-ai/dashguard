@@ -23,21 +23,8 @@ const ArchiveConfirmationModal = ({
   record: any;
   config: any;
 }) => {
-
-  return (record.original.archive_type as TArchiveType) === "warning" ? (
-    <ArchiveDialog
-      buttonConfig={{
-        color: 'primary',
-        title: 'Close',
-        onClickButton: () => {
-          setOpen(false);
-        },
-      }}
-      modalContent={record.original.archive_prompt_message || DEFAULT_ARCHIVE_PROMPT_MESSAGE}
-      modalHeaderTitle={record.original.archive_title || DEFAULT_ARCHIVE_TITLE}
-      open={open}
-      setOpen={setOpen}
-     />
+  return config.archiveDialogCustomComponent ? (
+    <>{config.archiveDialogCustomComponent({ row: record.original, config, open, setOpen})}</>
   ) : (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-5/6 bg-white md:w-3/6">
@@ -49,7 +36,9 @@ const ArchiveConfirmationModal = ({
             }
           />
         </div>
-        <div className="flex flex-1 gap-2 py-4 font-bold">{DEFAULT_ARCHIVE_TITLE}</div>
+        <div className="flex flex-1 gap-2 py-4 font-bold">
+          {DEFAULT_ARCHIVE_TITLE}
+        </div>
         <div className="flex flex-1 gap-2">
           {DEFAULT_ARCHIVE_PROMPT_MESSAGE}
         </div>
