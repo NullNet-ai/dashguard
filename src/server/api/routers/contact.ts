@@ -182,6 +182,9 @@ export const contactRouter = createTRPCRouter({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
+          pluck_group_object: {
+            contact_phone_numbers: ["raw_phone_number"]
+          },
           pluck_object: {
             contact_emails: ["email", "is_primary"],
             contact_phone_numbers: [
@@ -245,7 +248,7 @@ export const contactRouter = createTRPCRouter({
         },
       })
       .execute();
-
+  
     //TODO: Transform the data - temporary
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item) => {
@@ -274,7 +277,7 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
-            primary_phone_number,
+            raw_phone_number: primary_phone_number,
           },
         ];
       },

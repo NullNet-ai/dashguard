@@ -7,6 +7,7 @@ import { cn } from "~/lib/utils";
 import ArchiveConfirmationModal from "./views/ArchiveConfirmationModal";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
 import { testIDFormatter } from "~/utils/formatter";
+import BulkActionConfirmationModal from "./views/common/BulkActionConfirmationModal";
 
 export default function MyTableBody() {
   const { state, actions } = useContext(GridContext);
@@ -105,6 +106,13 @@ export default function MyTableBody() {
           setOpen={actions?.setShowArchiveConfirmationModal!}
           record={state?.rowToArchive}
           config={state?.config}
+        />
+      )}
+      {state?.showBulkActionConfirmationModal && (
+        <BulkActionConfirmationModal
+          open={state?.showBulkActionConfirmationModal}
+          onOpenChange={actions?.setShowBulkActionConfirmationModal!}
+          action_type={state?.bulkActionType}
         />
       )}
     </>

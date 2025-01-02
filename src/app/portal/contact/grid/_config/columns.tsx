@@ -45,7 +45,7 @@ const gridColumns = [
 
   {
     header: "Primary Phone Number",
-    accessorKey: "primary_phone_number",
+    accessorKey: "raw_phone_number",
   },
   {
     header: "Primary Email",
