@@ -52,6 +52,7 @@ export interface IConfigGrid {
   deleteCustomComponent?: React.FC<any>;
   archiveCustomComponent?: React.FC<any>;
   restoreCustomComponent?: React.FC<any>;
+  archiveDialogCustomComponent?: React.FC<any>;
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
@@ -66,8 +67,6 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
-  archive_prompt_message?: string;
-  archive_title?: string;
   is_warning_archive?: boolean;
   searchConfig?: {
     router: AppRouterKeys;

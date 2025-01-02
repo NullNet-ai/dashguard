@@ -7,6 +7,7 @@ import React from "react"; // Import React if needed
 import DeleteComponent from "./customDefaultActions/Delete";
 import { defaultSorting } from "./_config/sorting";
 import { customArchive } from "./customArchiveAction";
+import ArchiveDialog from "../_components/controls/ArchiveDialog";
 export default async function OrganizationGridPage({
   searchParams = {},
   params,
@@ -124,6 +125,7 @@ export default async function OrganizationGridPage({
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
         archiveCustomAction: customArchive,
+        archiveDialogCustomComponent: ArchiveDialog,
       }}
     />
   );
