@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isPhoneValid } from "~/components/platform/FormBuilder/Utils/phoneValidator";
+import { isPhoneValid } from "~/components/platform/FormBuilder/utils/phoneValidator";
 
 // Utility function to check for duplicates in an array
 const checkForDuplicates = (

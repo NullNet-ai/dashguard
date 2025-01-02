@@ -1,8 +1,8 @@
 "use client";
 
 import { type z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { FormBuilder } from "~/components/platform/FormBuilder";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
 import { usePathname, useRouter } from "next/navigation";

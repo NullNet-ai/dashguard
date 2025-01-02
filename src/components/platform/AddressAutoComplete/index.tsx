@@ -10,7 +10,7 @@ import type {
 import { AddressAutoCompleteInput } from "./address-autocomplete-input";
 import AddressForm from "./address-form";
 import { api } from "~/trpc/react";
-import type { IField } from "../FormBuilder/type";
+import type { IField } from "../FormBuilder/types";
 import CountryToCities from "./countriesToCities.json";
 import States from "./states.json";
 import { deburr } from "lodash";

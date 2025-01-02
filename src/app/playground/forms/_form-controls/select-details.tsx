@@ -3,7 +3,7 @@
 import { UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 const FormSchema = z.object({
     select_with_options: z.string({ message: "Select with Options is required" }),
     select_single: z.string({ message: "Select Single is required" }),

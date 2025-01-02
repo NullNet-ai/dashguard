@@ -1,9 +1,9 @@
 "use client";
 
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { type IFormProps } from "../types";
 
 const FormSchema = z.object({

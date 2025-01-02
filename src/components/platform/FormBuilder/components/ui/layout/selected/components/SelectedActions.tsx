@@ -1,7 +1,7 @@
 import { Copy, EllipsisVertical, Eye, MinusCircleIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
-import { ICustomActions, IFeatures } from "~/components/platform/EnhancedFormBuilder/types";
+import { ICustomActions, IFeatures } from "~/components/platform/FormBuilder/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 
 

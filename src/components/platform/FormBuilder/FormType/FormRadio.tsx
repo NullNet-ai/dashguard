@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { type IRadioOptions, type IField } from "../type";
+import { type IRadioOptions, type IField } from "../types";
 
 
 interface IProps {
