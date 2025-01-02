@@ -12,6 +12,7 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   getCoreRowModel,
+  Row,
   type RowSelectionState,
   SortingState,
   Updater,
@@ -81,7 +82,7 @@ export default function GridProvider({
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
-  const [rowToArchive, setRowToArchive] = useState<any>(null);
+  const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {};
