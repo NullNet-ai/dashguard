@@ -12,7 +12,7 @@ import { camelCase } from "lodash";
 import {
   type ICustomActions,
   type IFeatures,
-} from "~/components/platform/EnhancedFormBuilder/types";
+} from "~/components/platform/FormBuilder/types";
 import { testIDFormatter } from "~/utils/formatter";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
 

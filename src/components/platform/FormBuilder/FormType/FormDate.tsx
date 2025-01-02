@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { type IField } from "../type";
+import { type IField } from "../types";
 import moment from "moment";
 import kebabCase from "lodash/kebabCase";
 

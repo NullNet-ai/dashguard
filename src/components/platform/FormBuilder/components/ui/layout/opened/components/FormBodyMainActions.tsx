@@ -11,7 +11,7 @@ import { PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {
   type ICustomActions,
   type IFeatures,
-} from "~/components/platform/EnhancedFormBuilder/types";
+} from "~/components/platform/FormBuilder/types";
 import { Separator } from "~/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { WizardContext } from "~/components/platform/Wizard/Provider";

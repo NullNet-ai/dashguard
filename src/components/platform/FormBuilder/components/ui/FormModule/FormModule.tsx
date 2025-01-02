@@ -7,16 +7,17 @@ import type {
   ISelectOptions,
   OptionType,
   IFilterGridConfig,
-} from "./type";
+} from "../../../types";
 import { Fragment, useContext } from "react";
 import RenderFormType from "./RenderFormType";
 import { FormField } from "~/components/ui/form";
-import FormAddress from "./FormType/FormAddress";
+import FormAddress from "../../../FormType/FormAddress";
 import { type z } from "zod";
-import { type IField, type TFormSchema } from "../EnhancedFormBuilder/types";
-import FormInputGridWrapper from "../EnhancedFormBuilder/components/custom/FormFilter/FormInputGridWrapper";
-import { WizardContext } from "../Wizard/Provider";
+import { type IField, type TFormSchema } from "../../../types";
+import FormInputGridWrapper from "../../custom/FormFilter/FormInputGridWrapper";
+import { WizardContext } from "../../../../Wizard/Provider";
 import { formatFormTestID } from "~/lib/utils";
+
 export default function FormModule({
   fields,
   form,
@@ -36,7 +37,7 @@ export default function FormModule({
     radioOptions?: Record<string, IRadioOptions[]>;
     checkboxOptions?: Record<string, ICheckboxOptions[]>;
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
-    currencyInputOptions?: Record<string, OptionType[]>;
+    currencyInputOptions?: Record<string, Option[]>;
   };
   fieldConfig?: Field;
   formKey: string;

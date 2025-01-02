@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { FormBuilder } from "~/components/platform/FormBuilder";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";

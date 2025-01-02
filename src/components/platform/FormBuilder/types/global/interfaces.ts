@@ -4,55 +4,33 @@ import {
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
+  type ReactNode,
 } from "react";
-import { type Field, type UseFormReturn } from "react-hook-form";
-import { type z } from "zod";
-import { type FormField } from "~/components/ui/form";
-import { type Option } from "~/components/ui/multi-select";
-import { type TActionType } from "../Grid/types";
 import { type DropzoneOptions } from "react-dropzone";
+import { type Field, type UseFormReturn } from "react-hook-form";
+
+import { type TActionType } from "~/components/platform/Grid/types";
+import {
+  type DateTimeGranularity,
+  type TFormSchema,
+  type TFormType,
+  type TSelectionType,
+} from "./types";
 import {
   type DateGranularity,
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
 
-export type TDisplayType = "form" | "selected";
-export type TFormType =
-  | "input"
-  | "input-grid"
-  | "number-input"
-  | "textarea"
-  | "select"
-  | "radio"
-  | "checkbox"
-  | "date"
-  | "smart-date"
-  | "file"
-  | "multi-select"
-  | "inputs"
-  | "input-label-value"
-  | "phone-input"
-  | "email-input"
-  | "date-range"
-  | "address-input"
-  | "slider"
-  | "password"
-  | "rich-text-editor"
-  | "currency-input";
-
-// Single |  Multiple
-export type TType = "single" | "multiple";
-type Granularity = "year" | "month" | "day" | "hour" | "minute" | "second";
-export type OptionType = {
+interface OptionType {
   label: string;
   value: string;
-};
-export interface IField {
+}
+
+interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
   formType?: TFormType;
-  withGridFilter?: boolean;
   creatable?: boolean;
   name: string;
   label?: string;
@@ -60,7 +38,7 @@ export interface IField {
   disabled?: boolean;
   hidden?: boolean;
   readonly?: boolean;
-  dateGranularity?: Granularity;
+  dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
   dateTimePickerProps?: DateTimeLocalInputProps & {
@@ -75,12 +53,12 @@ export interface IField {
   description?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
-  customRender?: React.JSX.Element;
+  customRender?: JSX.Element;
   min?: number;
   max?: number;
   step?: number;
   radioOrientation?: "horizontal" | "vertical";
-  sliderLabel?: (value: number | undefined) => React.ReactNode;
+  sliderLabel?: (value: number | undefined) => ReactNode;
   sliderLabelPosition?: "top" | "bottom";
   fileDropzoneOptions?: DropzoneOptions;
   selectIcon?: ElementType;
@@ -89,18 +67,17 @@ export interface IField {
   multiSelectHidePlaceholderWhenSelected?: boolean;
   multiSelectTriggerSearchOnFocus?: boolean;
   multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined;
-  multiSelectLoadingIndicator?: React.ReactNode;
-  multiSelectEmptyIndicator?: React.ReactNode;
+  multiSelectLoadingIndicator?: ReactNode;
+  multiSelectEmptyIndicator?: ReactNode;
   multiSelectHideClearAllButton?: boolean;
-
   richTextOutput?: "html" | "json" | "text";
-  inputRightAddOns?: React.ReactNode | string;
-  inputLeftAddOns?: React.ReactNode | string;
+  inputRightAddOns?: ReactNode | string;
+  inputLeftAddOns?: ReactNode | string;
   isMultiSelectAlphabetical?: boolean;
   options?: {
-    phoneNumberType?: TType;
-    phoneEmailType?: TType;
-    inputsType?: TType;
+    phoneNumberType?: TSelectionType;
+    phoneEmailType?: TSelectionType;
+    inputsType?: TSelectionType;
   };
   textAreaMaxHeight?: number;
   textAreaMinHeight?: number;
@@ -109,25 +86,36 @@ export interface IField {
   textAreaLineWrapping?: boolean;
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
+  withGridFilter?: boolean;
+  gridPosition?: "left" | "right";
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the field filter grid.
+   */
+  filterFieldConfig?: {
+    // for field filter grid
+    entity?: string;
+    field?: string;
+  };
   selectSearchable?: boolean;
-  accuracy?: number;
 }
 
-export interface ISelectOptions {
+interface ISelectOptions {
   value: string;
   label: string;
 }
 
-export interface IRadioOptions {
+interface IRadioOptions {
   value: string;
   label: string;
 }
 
-export interface ICheckboxOptions {
+interface ICheckboxOptions {
   value: string;
   label: string;
 }
-export interface IHandleSubmit<T = Record<string, any>> {
+
+interface IHandleSubmit<T = Record<string, any>> {
   data: T;
   form?: UseFormReturn<Record<string, any>, any, undefined>;
   main_entity_id?: string;
@@ -135,12 +123,12 @@ export interface IHandleSubmit<T = Record<string, any>> {
   action_type?: string;
 }
 
-export interface IOnFormListen
+interface IOnFormListen
   extends UseFormReturn<Record<string, any>, any, undefined> {
   test?: any;
 }
 
-export interface IButtonConfig {
+interface IButtonConfig {
   hideAccordions?: boolean;
   hideLockButton?: boolean;
   hideSaveButton?: boolean;
@@ -153,11 +141,35 @@ interface IReturnOnSelectRecords {
   filter_entity: string;
 }
 
-interface IReturnOnFieldFilterRecords {
-  items: any[];
+interface IUserFormField {
+  error?: {
+    label: { message: string };
+    value: { message: string };
+  }[];
 }
 
-export interface IFilterGridConfig {
+export interface IFeatures {
+  enableLockFormView?: boolean;
+  enableLockFormCopy?: boolean;
+  enableLockFormEllipsis?: boolean;
+  enableViewFormEllipsis?: boolean;
+  enableViewFormCopy?: boolean;
+  enableViewFormPaste?: boolean;
+  enableViewFormClear?: boolean;
+  enableUnlockFormFilter?: boolean;
+  enableFormHostViewActions?: boolean;
+  enableFormHostLockActions?: boolean;
+}
+
+export interface ICustomActions {
+  label: string;
+  icon?: ReactElement;
+  onClick: () => void;
+  disabled?: boolean;
+  hidden?: boolean;
+}
+
+interface IFilterGridConfig {
   selectedRecords?: any[];
   pluck?: string[];
   pluck_object?: Record<string, string[]>;
@@ -169,6 +181,7 @@ export interface IFilterGridConfig {
   label?: string;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
+  onClipboardPaste?: (data: Record<string, any>, form: any, onSubmitFormGrid?: any) => any;
   renderComponentSelected?: (record: any) => JSX.Element;
   onSelectRecords?: ({
     rows,
@@ -191,18 +204,43 @@ export interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
-  onFieldFilterRecords?: ({
-    filter_value,
-  }: {
-    filter_value: string | number;
-  }) => Promise<IReturnOnFieldFilterRecords>;
-  onSelectFieldFilterRecords?: ({
-    filter_value,
-  }: {
-    filter_value: string | number;
-  }) => Promise<IReturnOnFieldFilterRecords>;
+  grid_data?: {
+    items: Record<string, any>[];
+    totalCount: number;
+  };
+  onFilterFieldChange?: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) =>
+    | {
+        totalCount: number;
+        items: any[];
+        currentPage: number;
+        totalPages: number;
+      }
+    | undefined;
+  handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
+  fieldFilterGridColumns?: string[];
 }
-export interface IPropsForms {
+
+export interface ISearchParams {
+  entity: string;
+  pluck?: any;
+  pluck_object?: any;
+  current?: number;
+  limit?: number;
+  advance_filters?: {
+    type: string;
+    values: string[];
+    field: string;
+    operator: string;
+    entity?: string;
+  }[];
+
+  sorting?: any[];
+}
+
+interface IPropsForms {
   customDesign?: {
     formClassName?: string;
     headerClassName?: string;
@@ -217,11 +255,13 @@ export interface IPropsForms {
   fields: IField[];
   buttonHeaderRender?: JSX.Element;
   defaultValues?: Record<string, any>;
-  formSchema: z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
+  formSchema: TFormSchema;
   currencyInputOptions?: Record<string, OptionType[]>;
   selectOptions?: Record<string, ISelectOptions[]>;
-  multiSelectOptions?: Record<string, Option[]>;
-  multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
+  // multiSelectOptions?: Record<string, Option[]>;
+  multiSelectOptions?: Record<string, any[]>; // TODO: remove
+  // multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
+  multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>; // TODO: remove
   radioOptions?: Record<string, IRadioOptions[]>;
   checkboxOptions?: Record<string, ICheckboxOptions[]>;
   fetching?: boolean;
@@ -240,19 +280,42 @@ export interface IPropsForms {
     options?: {
       appendButtonKey?: string;
     },
-  ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
+    // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
+  ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
+  features?: IFeatures;
+  customFormHostViewFormActions?: ICustomActions[];
+  customFormHostLockFormActions?: ICustomActions[];
+  customFormFilterViewFormActions?: ICustomActions[];
+  customFormFilterLockFormActions?: ICustomActions[];
+  /**
+   * @description
+   * This prop is used to determine if the form filter will override the current wizard record.
+   * If true, the form filter will override the current wizard record which includes the tab name and the url identifier.
+   * Else, the form filter will not override the current wizard record.
+   */
+  create_mode?: boolean;
 }
 
-export interface IUserFormField {
-  error?: {
-    label: { message: string };
-    value: { message: string };
-  }[];
-}
-
-export interface IFieldFilterActions {
+interface IFieldFilterActions {
   onBlur?: () => void;
   onFocus?: () => void;
   handleSearch?: (search: string) => void;
   ref?: any;
 }
+
+
+export type {
+  IButtonConfig,
+  ICheckboxOptions,
+  IField,
+  IFilterGridConfig,
+  IHandleSubmit,
+  IOnFormListen,
+  IPropsForms,
+  IRadioOptions,
+  IReturnOnSelectRecords,
+  ISelectOptions,
+  IUserFormField,
+  OptionType,
+  IFieldFilterActions
+};

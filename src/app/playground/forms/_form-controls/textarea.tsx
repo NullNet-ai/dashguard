@@ -4,7 +4,7 @@
 import { FileTextIcon, UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 
 const FormSchema = z.object({
   textarea: z

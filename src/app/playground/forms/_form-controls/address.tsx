@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { type z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 import { AddressSchema } from "~/components/platform/AddressAutoComplete/autocomplete-validator";
 
 const FormSchema = AddressSchema;

@@ -11,7 +11,7 @@ import {
   IFilterGridConfig,
   ISearchParams,
   TFormSchema,
-} from "../../../../EnhancedFormBuilder/types";
+} from "../../../../FormBuilder/types";
 import { z } from "zod";
 import { Combobox, ComboboxOptions } from "@headlessui/react";
 import { kebabCase } from "lodash";

@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/form";
 import { useDebounce } from "~/components/ui/multi-select";
 import { api } from "~/trpc/react";
-import { type IField } from "../type";
+import { type IField } from "../types";
 
 interface IProps {
   fieldConfig: IField;

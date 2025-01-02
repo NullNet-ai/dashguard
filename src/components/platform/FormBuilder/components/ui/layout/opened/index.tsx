@@ -4,10 +4,10 @@ import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { cn, formatFormTestID } from "~/lib/utils";
 import DebuggerComponent from "../../../custom/Debugger";
-import { IFilterGridConfig } from "~/components/platform/FormBuilder/type";
+import { IFilterGridConfig } from "~/components/platform/FormBuilder/types";
 import { z } from "zod";
-import { TFormSchema } from "~/components/platform/EnhancedFormBuilder/types";
-import FormModule from "~/components/platform/FormBuilder/FormModule";
+import { TFormSchema } from "~/components/platform/FormBuilder/types";
+import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
 
 // TODO: replace any with the correct type
