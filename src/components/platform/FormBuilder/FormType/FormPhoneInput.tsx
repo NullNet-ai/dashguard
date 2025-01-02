@@ -22,7 +22,7 @@ import { Badge } from "~/components/ui/badge";
 import { ulid } from "ulid";
 import { toast } from "sonner";
 // import { DevTool } from "@hookform/devtools";
-import { isPhoneValid } from "../utils/phoneValidator"
+import { isPhoneValid } from "../Utils/phoneValidator"
 
 interface IPhoneData {
   id?: string;
