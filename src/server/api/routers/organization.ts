@@ -458,4 +458,48 @@ export const organizationRouter = createTRPCRouter({
         data: { ...record?.data?.[0], parent_organization: data?.[0]?.name },
       };
     }),
+  getOrgWithContact: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        pluck_fields: z.array(z.string()),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (!input?.id) return null;
+      const advance_filters = createAdvancedFilter({
+        id: input.id,
+      });
+      const record = await ctx.dnaClient
+        .findAll({
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            advance_filters,
+            // pluck: input.pluck_fields,
+            pluck_object: {
+              organizations: ["id"],
+              contacts: ["organization_id"],
+            },
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "contact",
+              field: "organization_id",
+            },
+            from: {
+              entity: ENTITY,
+              field: "id",
+            },
+          },
+        })
+        .execute();
+
+      return {
+        ...record?.data?.[0]?.contacts,
+      };
+    }),
 });

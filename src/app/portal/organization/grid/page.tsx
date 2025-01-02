@@ -57,24 +57,54 @@ export default async function OrganizationGridPage({
               parent_organization_name: res?.data?.name,
             };
           });
-        return final_item;
+
+        const _final_item = await api.organization
+          .getOrgWithContact({
+            id: item.id ?? "",
+            pluck_fields: ["id"],
+          })
+          .then((res) => {
+            return {
+              ...item,
+              contact_organization_id: res?.organization_id,
+            };
+          });
+        return { ...final_item, ..._final_item };
       });
 
       // disable archiving of parent organizations with children
-      const updated_final_items = final_items.reduce((acc: Record<string, any>[], item: Record<string, any>) => {
-        const parent = final_items.find(
-          (parent: Record<string, any>) => parent.parent_organization_id === item.id,
-        );
-        const isItemDisabled = !!parent;
+      const updated_final_items = final_items.reduce(
+        (acc: Record<string, any>[], item: Record<string, any>) => {
+          const parent = final_items.find(
+            (parent: Record<string, any>) =>
+              parent.parent_organization_id === item.id,
+          );
+          const isItemDisabled = !!parent;
 
-        return [
-          ...acc,
-          {
-            ...item,
-            disabled: isItemDisabled,
-          },
-        ];
-      }, [] as Record<string, any>[]);
+          const hasContact = final_items.find(
+            (contact: Record<string, any>) =>
+              contact.contact_organization_id === item.id,
+          );
+          const messages = !!hasContact
+            ? {
+                archive_prompt_message:
+                  "This organization has assigned contacts. Please remove all contact assignments before archiving.",
+                archive_title: "Cannot Archive Organization",
+                archive_type: "warning",
+              }
+            : {};
+
+          return [
+            ...acc,
+            {
+              ...item,
+              ...messages,
+              disabled: isItemDisabled,
+            },
+          ];
+        },
+        [] as Record<string, any>[],
+      );
       return {
         items: updated_final_items,
         totalCount: res.totalCount,
