@@ -55,6 +55,7 @@ export interface ISearchItem {
   field?: string;
   label?: string;
   default?: boolean;
+  display_value?: string;
 }
 
 export interface ISearchItemResult extends ISearchItem {

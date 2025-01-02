@@ -63,7 +63,10 @@ export default function GridSearchProvider({ children }: IProps) {
           {
             type: "criteria",
             operator: "equal",
-            values: [_query],
+            values:
+              item?.field === "raw_phone_number"
+                ? [_query?.replace(/[^\d]/g, "")]
+                : [_query],
             entity, // if entity is not provided, the default entity will be the entity of the grid
             ...item,
           },
@@ -75,7 +78,7 @@ export default function GridSearchProvider({ children }: IProps) {
       [
         ...advanceFilter,
         ...(advanceFilter?.length
-          ? [{ type: "operator", operator: "or" }]
+          ? [{ type: "operator", operator: "and" }]
           : []),
       ],
     );
@@ -93,9 +96,8 @@ export default function GridSearchProvider({ children }: IProps) {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-
-    const {router = "grid", resolver = "items" } = searchConfig ?? {}
-    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+    const { router = "grid", resolver = "items" } = searchConfig ?? {};
+    // @ts-ignore
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
     return data;
   };
@@ -108,7 +110,15 @@ export default function GridSearchProvider({ children }: IProps) {
       ...(searchItems.length
         ? [{ id: ulid(), type: "operator", operator: "and" }]
         : []),
-      { ...rest, id: ulid() },
+      {
+        ...rest,
+        id: ulid(),
+        values:
+          rest?.field === "raw_phone_number"
+            ? [rest?.values?.[0]?.replace(/[^\d]/g, "")]
+            : [rest?.values?.[0]],
+        display_value: rest?.values?.[0]
+      },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
     await UpdateReportFilter({

@@ -23,24 +23,30 @@ export default function SearchResult({
         <ul className="text-sm text-gray-700">
           {results?.map((result) => (
             <>
-              <ComboboxOption as="li" key={result.id} value={result} className={"hover:bg-muted/70"}>
-              <div
-                className="mb-2 ml-3 "
+              <ComboboxOption
+                as="li"
+                key={result.id}
+                value={result}
+                className={"cursor-pointer hover:bg-muted/70"}
                 onClick={() => {
-                actions?.handleAddSearchItem(result);
+                  actions?.handleAddSearchItem(result);
                 }}
               >
-                <span className="text-sm font-semibold text-muted-foreground">
-                {result.values?.[0]}{" "}
-                </span>
-              </div>
-              <Badge key={result.id} variant="primary" className="hover:bg-primary/20 ">
-                {result?.label}
-              </Badge>
+                <div className="mb-2 ml-3">
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    {result.values?.[0]}
+                  </span>
+                </div>
+                <Badge
+                  key={result.id}
+                  variant="primary"
+                  className="hover:bg-primary/20"
+                >
+                  {result?.label}
+                </Badge>
               </ComboboxOption>
               {results.length > 1 && <Separator dashed className="m-2" />}
             </>
-
           ))}
         </ul>
       ) : (

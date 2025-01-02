@@ -86,6 +86,8 @@ export interface IState {
   sorting?: SortingState;
   rowSelection: RowSelectionState;
   advanceFilter?: ISearchItem[];
+  bulkActionType: "archive" | null;
+  showBulkActionConfirmationModal: boolean;
 }
 
 export interface IAction {
@@ -99,6 +101,8 @@ export interface IAction {
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
+  setBulkActionType: (type: string | null) => void;
+  setShowBulkActionConfirmationModal: (show: boolean) => void;
 }
 
 export interface ICreateContext {
