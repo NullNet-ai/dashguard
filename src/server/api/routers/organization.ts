@@ -154,55 +154,71 @@ export const organizationRouter = createTRPCRouter({
 
       return res;
     }),
-  parentOrganizations: privateProcedure.query(async ({ ctx }) => {
-    // const user_id = ctx.session?.account?.contact?.id;
-    const filter = async ({
-      entity,
-      pluck,
-      advance_filters,
-      limit,
-    }: {
-      entity: string;
-      pluck: string[];
-      advance_filters: IAdvanceFilters<string | number>[];
-      limit?: number;
-    }) => {
-      return await ctx.dnaClient
-        .findAll({
-          entity,
-          token: ctx.token.value,
-          query: {
-            pluck,
-            advance_filters,
-            order: {
-              limit: limit || 100,
-              by_field: "created_date",
-              by_direction: EOrderDirection.DESC,
+  parentOrganizations: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // const user_id = ctx.session?.account?.contact?.id;
+      const filter = async ({
+        entity,
+        pluck,
+        advance_filters,
+        limit,
+      }: {
+        entity: string;
+        pluck: string[];
+        advance_filters: IAdvanceFilters<string | number>[];
+        limit?: number;
+      }) => {
+        return await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck,
+              advance_filters,
+              order: {
+                limit: limit || 100,
+                by_field: "created_date",
+                by_direction: EOrderDirection.DESC,
+              },
             },
-          },
-        })
-        .execute();
-    };
-    const orgs = await filter({
-      entity: ENTITY,
-      pluck: ["id", "name"],
-      advance_filters: [
-        {
-          type: "criteria",
-          field: "status",
-          operator: EOperator.EQUAL,
-          values: ["Active"],
-        },
-      ],
-    });
-    return orgs.data?.map((item) => {
-      const { id, name } = item;
-      return {
-        value: id,
-        label: name,
+          })
+          .execute();
       };
-    });
-  }),
+      const orgs = await filter({
+        entity: ENTITY,
+        pluck: ["id", "name"],
+        advance_filters: [
+          {
+            type: "criteria",
+            field: "status",
+            operator: EOperator.EQUAL,
+            values: ["Active"],
+          },
+          {
+            type: "operator",
+            operator: EOperator.AND,
+          },
+          {
+            type: "criteria",
+            field: "id",
+            operator: EOperator.NOT_EQUAL,
+            values: [input.id],
+          },
+        ],
+      });
+      return orgs.data?.map((item) => {
+        const { id, name } = item;
+        return {
+          value: id,
+          label: name,
+        };
+      });
+    }),
   deleteById: privateProcedure
     ?.input(
       z.object({

@@ -23,6 +23,7 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "80px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "d";
 import Cookies from 'js-cookie';
+import { useRouter } from "next/router";
 
 
 type SidebarContext = {
@@ -34,6 +35,10 @@ type SidebarContext = {
   isMobile: boolean;
   toggleSidebar: () => void;
 };
+
+interface SidebarInsetProps extends React.ComponentProps<"main"> {
+  application_name?: string; 
+}
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
 
@@ -393,15 +398,18 @@ const SidebarRail = React.forwardRef<
 });
 SidebarRail.displayName = "SidebarRail";
 
-const SidebarInset = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"main">
->(({ className, ...props }, ref) => {
+
+
+const SidebarInset = React.forwardRef<HTMLDivElement, SidebarInsetProps>(({ className, application_name, ...props }, ref) => {
+
+  const mt = application_name === 'record' ? 'lg:mt-[5.8rem]' : 'lg:mt-[4.9rem]';
+
   return (
     <div
       ref={ref}
       className={cn(
-        "sidebar-inset relative mt-0 flex flex-1 flex-col bg-background lg:mt-[5.8rem]",
+        "sidebar-inset relative mt-0 flex flex-1 flex-col bg-background",
+        mt,
         "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
         className,
       )}

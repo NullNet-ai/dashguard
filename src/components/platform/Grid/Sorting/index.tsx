@@ -18,9 +18,9 @@ const Sorting = () => {
 
   return (
     <div className="flex flex-1 items-center gap-2">
-      <span className="text-xs text-black">Sort By</span>
+      <span className="text-xs text-foreground">Sort By</span>
       {state?.sorting?.map((item: ColumnSort) => (
-        <Badge  key={item.id} variant="secondary" >
+        <Badge  key={item.id} variant="default" >
           {formatAndCapitalize(item.id)} ({item.desc ? "Desc" : "Asce"})
           <Button
             variant="ghost"
@@ -41,6 +41,7 @@ const Sorting = () => {
         name="resetSortButton"
         data-test-id={testIDFormatter(`${entity}-grd-sorting-reset`)}
         variant={"link"}
+        className="text-default/60 underline hover:no-underline"
         onClick={() => {
           actions?.handleResetSorting();
         }}

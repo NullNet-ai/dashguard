@@ -147,12 +147,12 @@ export default function Search() {
       </Combobox>
       <div
         className={cn(
-          `${!gridState?.sorting?.length ? "mt-[20px]" : "absolute -bottom-[40px]"}`,
+          `${!gridState?.sorting?.length ? "mt-[20px]" : "absolute -bottom-[50px]"}`,
         )}
       >
         <span className="text-xs text-black">Filtered By: </span>
         {defaultSearchItems?.map((item) => (
-          <Badge key={item.id} variant="primary" className="m-2">
+          <Badge key={item.id} variant="primary" className="m-2 mx-1">
             {item.type === "criteria"
               ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
               : item?.operator}

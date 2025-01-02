@@ -1,4 +1,4 @@
-import RecordSummary from "~/components/platform/RecordV2/Summary/RecordSummary";
+import RecordSummary from "~/components/platform/Record/Summary/RecordSummary";
 import RecordShellSummary from "../../_components/record-shell-summary";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";

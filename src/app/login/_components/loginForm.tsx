@@ -12,7 +12,7 @@ import LoginSubmit from "../actions/loginSubmit";
 
 const formSchema = z.object({
   email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
-  password: z.string({required_error:"Please enter your password."}).min(5, "Password must contain at least 5 characters."),
+  password: z.string().min(1, { message: "Please enter your password." }).min(5, "Password must contain at least 5 characters."),
 });
 
 export default function LoginForm() {

@@ -69,10 +69,14 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
   const formattedFormKey = formatFormTestID(
     (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
   );
+
+   const colStyle = myParent === 'record' ? 'sm:grid-cols-1' : 'sm:grid-cols-2'
+
   return (
     <CardContent
       className={cn(
-        "grid grid-cols-1 gap-4 pt-8 sm:grid-cols-2",
+        "grid grid-cols-1 gap-4 pt-8 lg:grid-cols-2",
+        colStyle,
         "shadow-none",
         customDesign?.formClassName,
       )}

@@ -17,6 +17,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { usePopper } from "react-popper";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
@@ -51,6 +52,26 @@ export default function FormSelect({
   const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
   const isReadOnly = fieldConfig.readonly;
 
+  const [referenceElement, setReferenceElement] = useState<any>(null);
+  const [popperElement, setPopperElement] = useState<any>(null);
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement: "bottom-start", // Default placement
+    modifiers: [
+      {
+        name: "preventOverflow",
+        options: {
+          rootBoundary: "viewport",
+        },
+      },
+      {
+        name: "flip",
+        options: {
+          fallbackPlacements: ["top-start"],
+        },
+      },
+    ],
+  });
+
   const SelectIcon = fieldConfig.selectIcon;
   const filteredOptions = useMemo(() => {
     return query === ""
@@ -80,8 +101,6 @@ export default function FormSelect({
   const inputReadOnly = useMemo(() => {
     return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
   }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
-
-
 
   return (
     <FormItem>
@@ -128,7 +147,7 @@ export default function FormSelect({
                 "absolute left-2 top-2.5 size-5 text-muted-foreground",
                 {
                   "opacity-50": isDisabled,
-                }
+                },
               )}
               aria-hidden="true"
             />
@@ -137,12 +156,14 @@ export default function FormSelect({
             placeholder={fieldConfig.placeholder}
             readOnly={inputReadOnly}
             disabled={isDisabled}
+            ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground  sm:text-sm/6 border-border ",
+              "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
               {
                 "outline-destructive": error,
-                "cursor-not-allowed ": isDisabled,
-                "cursor-text ": isReadOnly,
+                "border-red-500": error,
+                "cursor-not-allowed": isDisabled,
+                "cursor-text": isReadOnly,
               },
             )}
             onClick={() => {
@@ -165,7 +186,7 @@ export default function FormSelect({
               {
                 "cursor-not-allowed": isDisabled,
                 "cursor-default": isReadOnly,
-              }
+              },
             )}
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
@@ -180,6 +201,9 @@ export default function FormSelect({
             (filteredOptions?.length ? (
               <ComboboxOptions
                 static={open}
+                ref={setPopperElement}
+                style={styles.popper}
+                {...attributes.popper}
                 className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                 data-test-id={`${formKey}-opts-${fieldConfig.name}`}
               >
@@ -193,7 +217,7 @@ export default function FormSelect({
                       {
                         "cursor-not-allowed": isDisabled,
                         "cursor-default": isReadOnly,
-                      }
+                      },
                     )}
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                   >

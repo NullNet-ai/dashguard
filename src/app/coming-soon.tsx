@@ -1,41 +1,69 @@
 import Image from "next/image";
 
 type TComingProps = {
-  type: "page" | "component";
+  type: "page" | "component" | 'inner-component';
 };
 
 export default function NewComingSoon({ type = "page" }: TComingProps) {
+
+  if (type === 'inner-component') {
+    return (
+      <div className="w-full p-4  px-8 h-[calc(100vh-320px)]  relative">
+        <div className="w-full flex h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-center">
+          <div>
+          
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
+              Coming Soon
+            </h1>
+            <p className="mt-2 text-xl leading-7 text-gray-400">
+              Thank you for your patient!
+            </p>
+          </div>
+          <div className="hidden   lg:block relative  -top-[40px] -right-10">
+            <Image
+              alt=""
+              width={"1080"}
+              height={"720"}
+              src="/coming-soon.png"
+              className="w-[100%] relative object-cover md:inset-0"
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (type === "component") {
     return (
       <div className="w-full p-4  px-8 h-[calc(100vh-150px)]  relative">
         <div className="w-full flex h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-center">
-            <div>
+          <div>
             <a href="#" className="text-center justify-center lg:justify-start flex ">
-                <Image
-                    width={60}
-                    height={60}
-                    alt=""
-                    src="/tailwindLogo.svg"
-                    className="h-8 w-auto relative lg:-top-40"
-                />
-                </a>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
-                Coming Soon
-                </h1>
-                <p className="mt-2 text-xl leading-7 text-gray-400">
-                Thank you for your patient!
-                </p>
-            </div>
-            <div className="hidden   lg:block relative -top-0 -right-10">
-                <Image
-                    alt=""
-                    width={"1080"}
-                    height={"720"}
-                    src="/coming-soon.png"
-                    className="w-[100%] relative object-cover md:inset-0"
-                />
-                </div>
+              <Image
+                width={60}
+                height={60}
+                alt=""
+                src="/tailwindLogo.svg"
+                className="h-8 w-auto relative lg:-top-40"
+              />
+            </a>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
+              Coming Soon
+            </h1>
+            <p className="mt-2 text-xl leading-7 text-gray-400">
+              Thank you for your patient!
+            </p>
           </div>
+          <div className="hidden   lg:block relative  -top-[40px] -right-10">
+            <Image
+              alt=""
+              width={"1080"}
+              height={"720"}
+              src="/coming-soon.png"
+              className="w-[100%] relative object-cover md:inset-0"
+            />
+          </div>
+        </div>
       </div>
     );
   }
