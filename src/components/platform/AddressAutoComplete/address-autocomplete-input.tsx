@@ -61,12 +61,12 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     form.setValue("searchedAddress", search);
   };
 
-  const debouncedSearchInput = useDebounce(searchedAddress, 500);
+  const debouncedSearchInput = useDebounce(searchedAddress, 200);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
-      accuracy: formRenderProps?.field?.accuracy || 100,
+      accuracy: fieldConfig?.accuracy,
     });
     return response?.data;
   };
@@ -78,7 +78,6 @@ export function AddressAutoCompleteInput(props: CommonProps) {
     gcTime: 0,
     enabled: debouncedSearchInput !== "",
   });
-
   return (
     <FormField
       control={form.control}

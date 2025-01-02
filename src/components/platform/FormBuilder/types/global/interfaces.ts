@@ -98,6 +98,7 @@ interface IField {
     field?: string;
   };
   selectSearchable?: boolean;
+  accuracy?: number;
 }
 
 interface ISelectOptions {
@@ -159,6 +160,7 @@ export interface IFeatures {
   enableUnlockFormFilter?: boolean;
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
+  enableAutoSelect?: boolean;
 }
 
 export interface ICustomActions {
@@ -181,7 +183,11 @@ interface IFilterGridConfig {
   label?: string;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
-  onClipboardPaste?: (data: Record<string, any>, form: any, onSubmitFormGrid?: any) => any;
+  onClipboardPaste?: (
+    data: Record<string, any>,
+    form: any,
+    onSubmitFormGrid?: any,
+  ) => any;
   renderComponentSelected?: (record: any) => JSX.Element;
   onSelectRecords?: ({
     rows,
@@ -303,7 +309,6 @@ interface IFieldFilterActions {
   ref?: any;
 }
 
-
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -317,5 +322,5 @@ export type {
   ISelectOptions,
   IUserFormField,
   OptionType,
-  IFieldFilterActions
+  IFieldFilterActions,
 };
