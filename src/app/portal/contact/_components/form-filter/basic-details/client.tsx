@@ -52,7 +52,6 @@ export default function ContactDetails({
           categories: "Employee",
           code: response.code!,
         });
-
       }
       return [response];
     } catch (error) {
@@ -229,7 +228,7 @@ export default function ContactDetails({
         },
       ]}
       // customFormFilterViewFormActions={[
-      //   {
+      //   
       //     label: "Custom Action",
       //     onClick: () => {
       //       console.log("Custom Action Clicked");
@@ -251,7 +250,7 @@ export default function ContactDetails({
       //   },
       // ]}
       // features={{
-
+      //   enableAutoSelect : true
       // }}
     />
   );

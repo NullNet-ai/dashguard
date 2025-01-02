@@ -159,6 +159,7 @@ export interface IFeatures {
   enableUnlockFormFilter?: boolean;
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
+  enableAutoSelect?: boolean;
 }
 
 export interface ICustomActions {
