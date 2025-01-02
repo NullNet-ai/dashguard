@@ -2,7 +2,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../type";
+import { type IField } from "../types";
 import {
   FormControl,
   FormItem,

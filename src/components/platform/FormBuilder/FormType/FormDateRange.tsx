@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { type IField } from "../type";
+import { type IField } from "../types";
 import kebabCase from "lodash/kebabCase";
 
 

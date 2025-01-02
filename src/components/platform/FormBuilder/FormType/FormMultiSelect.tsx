@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import MultipleSelector, { type Option } from "~/components/ui/multi-select";
-import { type IField } from "../type";
+import { type IField } from "../types";
 
 interface IProps {
   fieldConfig: IField;

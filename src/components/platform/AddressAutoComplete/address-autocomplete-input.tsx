@@ -24,7 +24,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { MapPinIcon } from "@heroicons/react/24/outline";
-import { type IField } from "../FormBuilder/type";
+import { type IField } from "../FormBuilder/types";
 import { formatFormTestID } from "~/lib/utils";
 
 interface ExtendedControllerRenderProps
@@ -66,7 +66,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
   const fetchData = async () => {
     const response = await googleAutoComplete.mutateAsync({
       query: searchedAddress,
-      accuracy: formRenderProps?.field?.accuracy || 0,
+      accuracy: formRenderProps?.field?.accuracy || 100,
     });
     return response?.data;
   };

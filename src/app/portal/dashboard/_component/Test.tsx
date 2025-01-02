@@ -1,7 +1,7 @@
 // "use client";
 // import { z } from "zod";
 // import FileUploadTest from "./fileUploadTest";
-// import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+// import { FormBuilder }  from "~/components/platform/FormBuilder";
 
 // import ArrayTest from "./ArrayTest";
 // import FormDatePicker from "~/components/platform/FormBuilder/FormType/FormDate";

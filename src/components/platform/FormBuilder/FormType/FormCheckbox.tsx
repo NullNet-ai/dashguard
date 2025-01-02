@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { type ICheckboxOptions, type IField } from "../type";
+import { type ICheckboxOptions, type IField } from "../types";
 
 interface IProps {
   fieldConfig: IField;

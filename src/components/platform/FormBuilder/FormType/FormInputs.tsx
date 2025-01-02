@@ -5,7 +5,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IUserFormField, type IField, type IFieldFilterActions } from "../type";
+import { type IUserFormField, type IField, type IFieldFilterActions } from "../types";
 import {
   FormControl,
   FormItem,
