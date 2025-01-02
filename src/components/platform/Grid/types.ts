@@ -37,6 +37,8 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
+export type TArchiveType = 'warning' | 'archive';
+
 export interface IConfigGrid {
   entity: string;
   title?: string;
@@ -64,6 +66,9 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
+  archive_prompt_message?: string;
+  archive_title?: string;
+  is_warning_archive?: boolean;
   searchConfig?: {
     router: AppRouterKeys;
     resolver: string;
