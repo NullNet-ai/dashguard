@@ -98,7 +98,7 @@ export function ArchiveComponent({
   setRecord,
 }: DefaultRowActions) {
   if (config?.archiveCustomComponent) {
-    return <>{config?.archiveCustomComponent({ row, config })}</>;
+    return <>{config?.archiveCustomComponent({ row, config, setOpen, open })}</>;
   }
 
   return (
