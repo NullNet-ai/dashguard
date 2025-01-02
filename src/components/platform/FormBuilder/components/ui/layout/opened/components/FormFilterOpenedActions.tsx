@@ -42,6 +42,7 @@ export default function FormFilterOpenedActions({
     enableViewFormCopy = true,
     enableViewFormEllipsis = true,
     enableViewFormPaste = true,
+    enableAutoSelect = false,
   } = features ?? {};
 
   const { onClipboardPaste } = filterGridConfig ?? {};
@@ -66,34 +67,42 @@ export default function FormFilterOpenedActions({
           // clipboardText must be an json to continue else return warn
           try {
             JSON.parse(clipboardText);
+
+            const parsed_clipboard = JSON.parse(clipboardText);
+            if (onClipboardPaste) {
+              return await onClipboardPaste(
+                parsed_clipboard as Record<string, any>,
+                form,
+                onSubmitFormGrid,
+              );
+            } else if (enableAutoSelect && parsed_clipboard?.id) {
+              // if enableAutoSelect is true, then we will prefill the form
+              //  with the clipboard data and submit the form
+
+              form.reset(parsed_clipboard, {
+                keepDefaultValues: true,
+              });
+
+              form.handleSubmit((data: any) =>
+                onSubmitFormGrid(data, { action_type: "Paste" }),
+              )();
+            } else {
+              // defaults to removing id, code, status from the clipboard data
+              //  and prefilling the form with the rest of the data
+              ["id", "code", "status"].forEach((key: any) => {
+                if (parsed_clipboard && typeof parsed_clipboard === "object") {
+                  delete parsed_clipboard[key];
+                }
+              });
+
+              form.reset(parsed_clipboard, {
+                keepDefaultValues: true,
+              });
+            }
           } catch (error) {
             console.warn("Clipboard content is not a valid JSON", error);
             return;
           }
-          const parsed_clipboard = JSON.parse(clipboardText);
-          if (onClipboardPaste) {
-            return await onClipboardPaste(
-              parsed_clipboard as Record<string, any>,
-              form,
-              onSubmitFormGrid,
-            );
-          } else {
-            ["id", "code", "status"].forEach((key: any) => {
-              if (parsed_clipboard && typeof parsed_clipboard === "object") {
-                delete parsed_clipboard[key];
-              }
-            });
-
-            form.reset(parsed_clipboard, {
-              keepDefaultValues: true,
-            });
-          }
-
-          // if (parsed_clipboard?.id) {
-          // form.handleSubmit((data: any) =>
-          //   onSubmitFormGrid(data, { action_type: "Paste" }),
-          // )();
-          // }
         } else {
           console.warn("Clipboard API not supported in this browser.");
         }

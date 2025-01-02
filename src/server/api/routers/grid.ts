@@ -542,6 +542,7 @@ export const gridRouter = createTRPCRouter({
             id: z.string().optional(),
             label: z.string().optional(),
             default: z.boolean().optional(),
+            display_value: z.string().optional(),
           }),
         ),
       }),
