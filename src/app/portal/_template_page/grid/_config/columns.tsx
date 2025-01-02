@@ -9,6 +9,10 @@ const gridColumns = [
     accessorKey: "code",
   },
   {
+    header: "Name",
+    accessorKey: "name",
+  },
+  {
     header: "Status",
     accessorKey: "status",
     enableResizing: false,

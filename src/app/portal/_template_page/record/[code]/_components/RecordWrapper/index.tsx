@@ -7,6 +7,7 @@ import type { IProps } from "./types"
 import RecordProvider from "~/components/platform/RecordV2/Provider"
 import Options from "../../../_components/IdentifierOption"
 import { handleChangeStatus } from "../../../_actions"
+import { upperFirst } from "lodash"
 
 const Wrapper = (props: IProps) => {
     
@@ -19,15 +20,10 @@ const Wrapper = (props: IProps) => {
         tabName: "dashboard?categories="
       },
       {
-        id: "contact",
-        name: "Contact",
+        id: entity_name,
+        name: upperFirst(entity_name),
         tabName: "contact?categories="
-      },
-      {
-        id: "organization",
-        name: "Organization",
-        tabName: "organization?categories="
-      },
+      }
     ];
 
     return (

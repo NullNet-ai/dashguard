@@ -18,7 +18,7 @@ export default async function UserRoleGridPage({
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
-  const _pluck = ["id", "code", "status"];
+  const _pluck = ["id", "code", "name","created_date", "updated_date"];
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
