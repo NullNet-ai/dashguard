@@ -12,9 +12,11 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
 };
 
 export const SetIdTab = (mainEntity: string) => {
+  const modified_entity = mainEntity === "user_role" ? "role" : mainEntity;
+
   return [
     {
-      name: `All ${mainEntity}`,
+      name: `All ${modified_entity}`,
       current: true,
       href: `/portal/${mainEntity}/grid?filter_id=`,
       default: true,
