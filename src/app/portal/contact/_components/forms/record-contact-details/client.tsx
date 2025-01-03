@@ -48,7 +48,7 @@ export default function RecordContactDetails({
           type: "manual",
           message: "Email already exists.",
         });
-        throw new Error("Primary phone and email already exists.");
+        return toast.error("Primary phone and email already exists.");
       }
 
       await utils.contact.invalidate();
