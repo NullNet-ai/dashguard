@@ -9,7 +9,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import { ISearchItem, ISearchParams } from "./Search/types";
-import { appRouter } from '../../../server/api/root';
+import { appRouter } from "../../../server/api/root";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -37,7 +37,7 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
-export type TArchiveType = 'warning' | 'archive';
+export type TArchiveType = "warning" | "archive";
 
 export interface IConfigGrid {
   entity: string;
@@ -72,7 +72,7 @@ export interface IConfigGrid {
     router: AppRouterKeys;
     resolver: string;
     query_params?: ISearchParams;
-  }
+  };
 }
 
 interface IRowToArchive extends Row<any> {
