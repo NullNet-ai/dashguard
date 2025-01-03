@@ -8,7 +8,7 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { removeRecord, saveContactDetails, selectRecord } from "./actions";
+import { closeCurrentInnerClassTab, removeRecord, saveContactDetails, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
@@ -47,11 +47,9 @@ export default function ContactDetails({
       }
 
       if (action_type === "Create") {
-        await StepOneUpdateCategory({
-          id: response.id!,
-          categories: "Employee",
+        await closeCurrentInnerClassTab({
           code: response.code!,
-        });
+        })
       }
       return [response];
     } catch (error) {

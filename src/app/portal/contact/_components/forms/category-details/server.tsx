@@ -24,7 +24,10 @@ const FormServerFetch = async () => {
     ?.filter(Boolean);
   const default_values = filtered_categories?.[0]?.value
     ? { categories: filtered_categories?.[0]?.value }
-    : { categories: "Employee" };
+
+    // Default values for the form fields must be empty and set it on the
+    // custom component.
+    : { categories: "" };
 
   return (
     <div className="space-y-2">
