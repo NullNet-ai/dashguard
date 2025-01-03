@@ -39,6 +39,7 @@ import FormCurrencyInput from "../../../FormType/FormCurrencyInput";
 import FormSmartDate from "../../../FormType/FormSmartDate";
 import FormInputGrid from "../../../FormType/FormInputGrid";
 import React from "react";
+import FormTimePicker from "../../../FormType/FormTimePicker";
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -252,6 +253,14 @@ export default function RenderFormType(
           currencyInputOptions={subConfig?.currencyInputOptions}
         />
       );
+      case "time-picker":
+        return (
+          <FormTimePicker 
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
+          form={form}
+          formKey={formKey}
+          />)
     default:
       return <Input />;
   }
