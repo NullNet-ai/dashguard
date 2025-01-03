@@ -11,9 +11,16 @@ const ArchiveDialog = ({ row, config, open, setOpen }: DefaultRowActions) => {
   const handleCloseButton = () => {
     setOpen && setOpen(false);
   };
-  // add condition to check if an organization has an assigned contact
+
+  if (!row?.original?.shouldDisplayArchiveWarningPrompt) return null;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen && setOpen(open);
+      }}
+    >
       <DialogContent className="w-5/6 bg-white md:w-3/6">
         <div className="mb-2 text-sm">
           <TriangleAlertIcon

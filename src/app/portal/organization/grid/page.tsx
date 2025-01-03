@@ -8,9 +8,9 @@ import DeleteComponent from "./customDefaultActions/Delete";
 import { defaultSorting } from "./_config/sorting";
 import { customArchive } from "./customArchiveAction";
 import ArchiveDialog from "../_components/controls/ArchiveDialog";
+import ArchiveComponent from "./customDefaultActions/Archive";
 export default async function OrganizationGridPage({
   searchParams = {},
-  params,
 }: {
   searchParams?: {
     page?: string;
@@ -59,18 +59,7 @@ export default async function OrganizationGridPage({
             };
           });
 
-        const _final_item = await api.organization
-          .getOrgWithContact({
-            id: item.id ?? "",
-            pluck_fields: ["id"],
-          })
-          .then((res) => {
-            return {
-              ...item,
-              contact_organization_id: res?.organization_id,
-            };
-          });
-        return { ...final_item, ..._final_item };
+        return final_item;
       });
 
       // disable archiving of parent organizations with children
@@ -82,24 +71,10 @@ export default async function OrganizationGridPage({
           );
           const isItemDisabled = !!parent;
 
-          const hasContact = final_items.find(
-            (contact: Record<string, any>) =>
-              contact.contact_organization_id === item.id,
-          );
-          const messages = !!hasContact
-            ? {
-                archive_prompt_message:
-                  "This organization has assigned contacts. Please remove all contact assignments before archiving.",
-                archive_title: "Cannot Archive Organization",
-                archive_type: "warning",
-              }
-            : {};
-
           return [
             ...acc,
             {
               ...item,
-              ...messages,
               disabled: isItemDisabled,
             },
           ];
@@ -125,6 +100,7 @@ export default async function OrganizationGridPage({
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
         archiveCustomAction: customArchive,
+        archiveCustomComponent: ArchiveComponent,
         archiveDialogCustomComponent: ArchiveDialog,
       }}
     />

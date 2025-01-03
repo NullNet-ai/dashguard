@@ -177,7 +177,7 @@ export const contactRouter = createTRPCRouter({
         ]
       : [...(input?.advance_filters ?? [])];
 
-    const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+    const { total_count: totalCount = 1, data: items} = await ctx.dnaClient
       .findAll({
         entity: input?.entity,
         token: ctx.token.value,
@@ -195,6 +195,7 @@ export const contactRouter = createTRPCRouter({
             ],
             contacts: input.pluck,
           },
+          track_total_records: true,
           advance_filters: [
             // {
             //   type: "criteria",
@@ -247,12 +248,40 @@ export const contactRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: 'self',
+        field_relation: {
+          to: {
+            entity: 'contact',
+            field: 'created_by',
+          },
+          from: {
+            alias: 'created_by',
+            entity: 'contact',
+            field: 'id',
+          },
+        },
+      })
+      .join({
+        type: 'self',
+        field_relation: {
+          to: {
+            entity: 'contact',
+            field: 'updated_by',
+          },
+          from: {
+            alias: 'updated_by',
+            entity: 'contact',
+            field: 'id',
+          },
+        },
+      })
       .execute();
 
     //TODO: Transform the data - temporary
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item) => {
-        const { contacts, contact_emails, contact_phone_numbers } = item;
+        const { contacts, contact_emails, contact_phone_numbers, created_by, updated_by } = item;
         const emails = pick(contact_emails, ["email"]);
         const phones = pick(contact_phone_numbers, [
           "raw_phone_number",
@@ -277,14 +306,15 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
+            created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
+            updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
             raw_phone_number: primary_phone_number,
           },
         ];
       },
       [],
     );
-    // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
-    const totalPages = Math.ceil(totalCount / 100);
+    const totalPages = Math.ceil(totalCount / (input.limit || 100));
 
     return {
       totalCount, // Total number of users
