@@ -79,7 +79,7 @@ export const userRolesRouter = createTRPCRouter({
                 status: "Draft",
                 role,
               },
-              pluck: ["id", "code"],
+              pluck: ["id", "code", "role"],
             },
           })
           .execute();
