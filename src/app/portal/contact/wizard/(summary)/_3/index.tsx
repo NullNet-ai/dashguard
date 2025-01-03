@@ -38,7 +38,7 @@ const CategoryDetailsSummary = ({
 
   return (
     <div>
-      <p className="mb-[15px]">
+      <p className="mb-[8px]">
         <strong> Category: </strong>
         &nbsp;{" "}
         {filtered_categories?.length ? filtered_categories.join(", ") : "None"}

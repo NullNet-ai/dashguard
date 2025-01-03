@@ -234,7 +234,7 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block mt-[15px]">
+                                  <div className="text-sm font-medium sm:block mt-[16px]">
                                     {component}
                                   </div>
                                 </AccordionContent>
