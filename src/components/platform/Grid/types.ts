@@ -39,10 +39,14 @@ export type AppRouterKeys = keyof typeof appRouter;
 
 export type TArchiveType = "warning" | "archive";
 
+type CustomColumnDef<TData> = ColumnDef<TData> & {
+  sortKey?: string;
+};
+
 export interface IConfigGrid {
   entity: string;
   title?: string;
-  columns: ColumnDef<any>[];
+  columns: CustomColumnDef<any>[];
   hideColumnsOnMobile?: string[];
   actionType?: TActionType;
   statusesIncluded?: string[];

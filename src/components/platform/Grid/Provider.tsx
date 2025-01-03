@@ -141,7 +141,14 @@ export default function GridProvider({
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
     const _sorting = typeof updater === "function" ? updater(sorting) : updater;
-    UpdateReportSorting({ entity: config?.entity, sorting: _sorting });
+    const resolvedSorting = _sorting?.map(sort => {
+      const sort_key =  config?.columns?.find((column: any) => column?.accessorKey === sort.id)?.sortKey || sort.id
+      return {
+        ...sort,
+        sort_key
+      }
+    })
+    UpdateReportSorting({ entity: config?.entity, sorting: resolvedSorting });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
