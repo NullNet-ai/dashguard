@@ -25,5 +25,5 @@ export async function Edit({
     redirect(`/portal/${entity}/wizard/${identifier}/${step}`);
   }
 
-  redirect(`/portal/${entity}/record/${code}?current_tab=${entity}`);
+  redirect(`/portal/${entity}/record/${code}?current_tab=organization`);
 }
