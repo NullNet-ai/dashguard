@@ -42,8 +42,8 @@ export default function PlatformPlayGround() {
         <section>
           <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
           <div className="grid gap-4">
-            <SmartDateDetails />
             <TimePickerDetails />
+            <SmartDateDetails />
           </div>
         </section>
 
