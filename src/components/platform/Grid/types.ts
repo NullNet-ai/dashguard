@@ -9,7 +9,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import { ISearchItem, ISearchParams } from "./Search/types";
-import { appRouter } from '../../../server/api/root';
+import { appRouter } from "../../../server/api/root";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -37,7 +37,7 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
-export type TArchiveType = 'warning' | 'archive';
+export type TArchiveType = "warning" | "archive";
 
 type CustomColumnDef<TData> = ColumnDef<TData> & {
   sortKey?: string;
@@ -76,7 +76,11 @@ export interface IConfigGrid {
     router: AppRouterKeys;
     resolver: string;
     query_params?: ISearchParams;
-  }
+  };
+}
+
+interface IRowToArchive extends Row<any> {
+  shouldDisplayArchiveWarningPrompt?: boolean;
 }
 
 export interface IState {
@@ -89,7 +93,7 @@ export interface IState {
   totalCountSelected?: number;
   archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
-  rowToArchive: Row<any>;
+  rowToArchive: IRowToArchive;
   viewMode?: "table" | "card";
   sorting?: SortingState;
   rowSelection: RowSelectionState;

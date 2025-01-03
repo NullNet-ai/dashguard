@@ -49,13 +49,16 @@ const TabItems = ({ items } : TabItemsProps) => {
         return items.slice(Math.floor(showItem))
     } , [newItems])
 
+    const checkIfUserRole = (entity: string) =>
+    entity === "user_role" ? true : false;
+
     return (
         <>
             <div className="w-full flex flex-1">
             {newItems.map((tab) => (
                 <Item 
                     tab={tab} 
-                    key={tab.name} 
+                    key={checkIfUserRole(tab.name) ? "role" : tab.name} 
                 />
             ))}
         </div>
@@ -70,11 +73,11 @@ const TabItems = ({ items } : TabItemsProps) => {
               <DropdownMenuContent>
                 {dropdownItems.map((tab) => (
                   <DropdownMenuItem
-                    key={tab.name}
+                    key={checkIfUserRole(tab.name) ? "role" : tab.name}
                     className="group relative flex items-center p-2 py-3"
                   >
                     <a
-                      data-test-id={"mntab-" + tab.name.split(" ").join("")}
+                      data-test-id={"mntab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("")}
                       href={tab.href}
                       aria-current={tab.current ? "page" : undefined}
                       className={cn(
@@ -86,7 +89,7 @@ const TabItems = ({ items } : TabItemsProps) => {
                         "hover:border-t-primary hover:text-primary",
                       )}
                     >
-                      {formatAndCapitalize(tab.name)}
+                      {formatAndCapitalize(checkIfUserRole(tab.name) ? "role" : tab.name)}
                     </a>
                   </DropdownMenuItem>
                 ))}
