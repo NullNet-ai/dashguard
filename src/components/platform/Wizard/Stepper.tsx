@@ -145,7 +145,7 @@ export default function MyVerticalStepper() {
                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}`,
                   )}
                   className={cn(
-                    stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
+                    stepIdx !== stepsArray.length - 1 ? "relative pb-[16px]" : "",
                   )}
                 >
                   {isStepped || isCurrent ? (
@@ -200,13 +200,13 @@ export default function MyVerticalStepper() {
                         </span>
                       </button>
                       <span
-                        className={cn("ml-3 flex min-w-0 flex-col", {
+                        className={cn("ml-[10px] flex min-w-0 flex-col pt-2.5", {
                           "hidden h-0 w-0": !isSummOpen,
                         })}
                       >
                         {/* Hidden on mobile, visible from small screens (sm) and up */}
                         {/* this is the title */}
-                        <span className="text-gray text-xs sm:block">
+                        <span className="text-xs sm:block text-primary">
                           {summaryTitle
                             ? summaryTitle
                             : "Description of Step " + stepIndex}
@@ -234,7 +234,7 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block">
+                                  <div className="text-sm font-medium sm:block mt-[15px]">
                                     {component}
                                   </div>
                                 </AccordionContent>
@@ -268,12 +268,12 @@ export default function MyVerticalStepper() {
                         >
                           <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400"></span>
                         </span>
-                        <span className="ml-3 flex min-w-0 flex-col">
+                        <span className="ml-[10px] flex min-w-0 flex-col pt-2.5">
                           {/* This will be hidden on mobile screens */}
                           <span className="text-sm text-gray-500 sm:block">
                             {summaryTitle
                               ? summaryTitle
-                              : "Description of Step " + stepIndex}
+                              : "Description of Step " + stepIndex}xx
                           </span>
                         </span>
                       </div>

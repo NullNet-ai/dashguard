@@ -21,15 +21,16 @@ export default function RecordContactDetails({
 
   const handleSave = async ({
     data,
+    form,
   }: IHandleSubmit<z.infer<typeof recordContactDetailsSchema>>) => {
     try {
-      const { phone, email } = data || {};
+      const { phones, emails } = data || {};
       const contact_id = params.id;
 
-      await Promise.all([
+      const [email_phone_result] = await Promise.all([
         updatePhoneEmail.mutateAsync({
-          phone: phone?.map((item) => ({ ...item, contact_id })),
-          email: email?.map((item) => ({ ...item, contact_id })),
+          phones: phones?.map((item) => ({ ...item, contact_id })),
+          emails: emails?.map((item) => ({ ...item, contact_id })),
           id: contact_id,
         }),
         updateContactDetails.mutateAsync({
@@ -37,6 +38,18 @@ export default function RecordContactDetails({
           id: contact_id,
         }),
       ]);
+
+      if (email_phone_result?.existing) {
+        form?.setError("phones", {
+          type: "manual",
+          message: "Phone Number already exists.",
+        });
+        form?.setError("emails", {
+          type: "manual",
+          message: "Email already exists.",
+        });
+        return toast.error("Primary phone and email already exists.");
+      }
 
       await utils.contact.invalidate();
 
@@ -60,20 +73,26 @@ export default function RecordContactDetails({
       enableFormRegisterToParent={false}
       fields={[
         {
-          id: "phone",
+          id: "phones",
           formType: "phone-input",
           placeholder: "Phone Number",
-          name: "phone",
+          name: "phones",
           label: "Phone Number",
           required: true,
+          options: {
+            phoneNumberType: "multiple",
+          },
         },
         {
-          id: "email",
+          id: "emails",
           formType: "email-input",
           placeholder: "email address",
-          name: "email",
+          name: "emails",
           label: "Email Address",
           required: true,
+          options: {
+            phoneEmailType: "multiple",
+          },
         },
         {
           id: "first_name",

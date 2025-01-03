@@ -10,7 +10,11 @@ export async function UpdateReportSorting({
   sorting,
 }: {
   entity: string;
-  sorting: SortingState;
+  sorting: {
+    id: string;
+    desc: boolean;
+    sort_key?: string;
+  }[];
 }) {
   const headerList = headers();
   const gridTabId = headerList.get("x-grid-tab-id") || "";

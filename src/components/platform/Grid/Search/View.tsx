@@ -76,7 +76,7 @@ export default function Search() {
               aria-hidden="true"
             />
             {selectedSearchItems.length > 0 && (
-              <div className="flex flex-wrap gap-1 py-1 ">
+              <div className="flex flex-wrap gap-1 py-1">
                 {selectedSearchItems?.map((item, index) => {
                   if (item.type === "operator" && index === 0) {
                     return null;
@@ -85,10 +85,10 @@ export default function Search() {
                     <Badge
                       key={item.id}
                       variant="primary"
-                      className="flex items-center gap-1 m-1 "
+                      className="m-1 flex items-center gap-1"
                     >
                       {item.type === "criteria"
-                        ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
+                        ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value ? item?.display_value : item?.values?.[0]}`
                         : item?.operator}
                       {item.type === "criteria" && !item.default && (
                         <Button

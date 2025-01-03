@@ -21,6 +21,7 @@ import {
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
+import { TimePickerProps } from "~/components/ui/time-picker";
 
 interface OptionType {
   label: string;
@@ -41,6 +42,7 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
+  timePickerProps?:TimePickerProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
     granularity?: DateGranularity;
     minDate?: Date;
@@ -160,6 +162,7 @@ export interface IFeatures {
   enableUnlockFormFilter?: boolean;
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
+  enableAutoSelect?: boolean;
 }
 
 export interface ICustomActions {

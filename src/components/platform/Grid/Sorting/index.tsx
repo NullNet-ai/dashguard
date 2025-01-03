@@ -8,20 +8,25 @@ import { X } from "lucide-react";
 import { ColumnSort } from "@tanstack/react-table";
 import { testIDFormatter } from "~/utils/formatter";
 
-
 const Sorting = () => {
   const { state, actions } = useContext(GridContext);
   if (!state?.sorting?.length) return null;
 
-
   const entity = state?.config?.entity;
+
+  const getLabel = (id: string) => {
+    const column = state?.config?.columns.find(
+      (col: any) => col.accessorKey === id,
+    );
+    return column?.header || formatAndCapitalize(id);
+  };
 
   return (
     <div className="flex flex-1 items-center gap-2">
       <span className="text-xs text-foreground">Sort By</span>
       {state?.sorting?.map((item: ColumnSort) => (
-        <Badge  key={item.id} variant="default" >
-          {formatAndCapitalize(item.id)} ({item.desc ? "Desc" : "Asce"})
+        <Badge key={item.id} variant="default">
+          {getLabel(item.id) as string} ({item.desc ? "Desc" : "Asce"})
           <Button
             variant="ghost"
             size="xs"

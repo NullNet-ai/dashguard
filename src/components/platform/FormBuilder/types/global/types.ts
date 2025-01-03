@@ -5,6 +5,7 @@ type TDisplayType = "form" | "selected";
 type TFormType =
   | "input"
   | "input-grid"
+  | "time-picker"
   | "number-input"
   | "textarea"
   | "select"

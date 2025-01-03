@@ -478,7 +478,7 @@ export const gridRouter = createTRPCRouter({
   updateReportSorting: privateProcedure
     .input(
       z.object({
-        sorting: z.array(z.object({ id: z.string(), desc: z.boolean() })),
+        sorting: z.array(z.object({ id: z.string(), desc: z.boolean(), sort_key: z.string().optional() })),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -542,6 +542,7 @@ export const gridRouter = createTRPCRouter({
             id: z.string().optional(),
             label: z.string().optional(),
             default: z.boolean().optional(),
+            display_value: z.string().optional(),
           }),
         ),
       }),

@@ -19,7 +19,10 @@ const BasicDetailsSummary = ({
     code: identifier!,
     pluck_fields: [],
   });
-  const { email: _email, phone: _phone } = record;
+  const { emails: _email, phones: _phone } = record as unknown as Record<
+    string,
+    any
+  >;
 
   const email = useMemo(() => {
     const primary_email = _email?.find(
@@ -51,7 +54,7 @@ const BasicDetailsSummary = ({
 
   return (
     <div>
-      <p>
+      <p className="mb-[15px]">
         <strong> Phone Number: </strong>
         &nbsp; {phone}
       </p>

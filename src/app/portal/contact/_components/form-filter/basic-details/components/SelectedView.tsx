@@ -5,9 +5,9 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 
 const SelectedView = ({ record }: Record<string, any>) => {
-  const { phone, email } = record || {};
-  const [phone_data] = phone || [];
-  const [email_data] = email || [];
+  const { phones, emails } = record || {};
+  const [phone_data] = phones || [];
+  const [email_data] = emails || [];
   return (
     <div className="flex">
       <div className="w-1/2">

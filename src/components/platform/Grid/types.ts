@@ -9,7 +9,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import { ISearchItem, ISearchParams } from "./Search/types";
-import { appRouter } from '../../../server/api/root';
+import { appRouter } from "../../../server/api/root";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -37,12 +37,16 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
-export type TArchiveType = 'warning' | 'archive';
+export type TArchiveType = "warning" | "archive";
+
+type CustomColumnDef<TData> = ColumnDef<TData> & {
+  sortKey?: string;
+};
 
 export interface IConfigGrid {
   entity: string;
   title?: string;
-  columns: ColumnDef<any>[];
+  columns: CustomColumnDef<any>[];
   hideColumnsOnMobile?: string[];
   actionType?: TActionType;
   statusesIncluded?: string[];
@@ -52,6 +56,7 @@ export interface IConfigGrid {
   deleteCustomComponent?: React.FC<any>;
   archiveCustomComponent?: React.FC<any>;
   restoreCustomComponent?: React.FC<any>;
+  archiveDialogCustomComponent?: React.FC<any>;
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
@@ -66,14 +71,16 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
-  archive_prompt_message?: string;
-  archive_title?: string;
   is_warning_archive?: boolean;
   searchConfig?: {
     router: AppRouterKeys;
     resolver: string;
     query_params?: ISearchParams;
-  }
+  };
+}
+
+interface IRowToArchive extends Row<any> {
+  shouldDisplayArchiveWarningPrompt?: boolean;
 }
 
 export interface IState {
@@ -86,11 +93,13 @@ export interface IState {
   totalCountSelected?: number;
   archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
-  rowToArchive: Row<any>;
+  rowToArchive: IRowToArchive;
   viewMode?: "table" | "card";
   sorting?: SortingState;
   rowSelection: RowSelectionState;
   advanceFilter?: ISearchItem[];
+  bulkActionType: "archive" | null;
+  showBulkActionConfirmationModal: boolean;
 }
 
 export interface IAction {
@@ -104,6 +113,8 @@ export interface IAction {
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
+  setBulkActionType: (type: string | null) => void;
+  setShowBulkActionConfirmationModal: (show: boolean) => void;
 }
 
 export interface ICreateContext {

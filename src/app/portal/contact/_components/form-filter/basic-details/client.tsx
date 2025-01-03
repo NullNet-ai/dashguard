@@ -8,7 +8,7 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { removeRecord, saveContactDetails, selectRecord } from "./actions";
+import { closeCurrentInnerClassTab, removeRecord, saveContactDetails, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
@@ -31,15 +31,13 @@ export default function ContactDetails({
     any[]
   > => {
     try {
-      const response = await saveContactDetails(data, action_type);
+      const response = await saveContactDetails(data);
       if (response?.existing) {
-        // const { data } = response;
-        // const { phones, emails } = data || {};
-        form?.setError("phone", {
+        form?.setError("phones", {
           type: "manual",
           message: "Phone Number already exists.",
         });
-        form?.setError("email", {
+        form?.setError("emails", {
           type: "manual",
           message: "Email already exists.",
         });
@@ -47,12 +45,9 @@ export default function ContactDetails({
       }
 
       if (action_type === "Create") {
-        await StepOneUpdateCategory({
-          id: response.id!,
-          categories: "Employee",
+        await closeCurrentInnerClassTab({
           code: response.code!,
-        });
-
+        })
       }
       return [response];
     } catch (error) {
@@ -200,10 +195,10 @@ export default function ContactDetails({
       defaultValues={defaultValues}
       fields={[
         {
-          id: "phone",
+          id: "phones",
           formType: "phone-input",
           placeholder: "Phone Number",
-          name: "phone",
+          name: "phones",
           label: "Phone Number",
           required: true,
           gridPosition: "left",
@@ -214,10 +209,10 @@ export default function ContactDetails({
           },
         },
         {
-          id: "email",
+          id: "emails",
           formType: "email-input",
           placeholder: "Email",
-          name: "email",
+          name: "emails",
           label: "Email",
           required: true,
           withGridFilter: true,
@@ -229,7 +224,7 @@ export default function ContactDetails({
         },
       ]}
       // customFormFilterViewFormActions={[
-      //   {
+      //
       //     label: "Custom Action",
       //     onClick: () => {
       //       console.log("Custom Action Clicked");
@@ -251,7 +246,7 @@ export default function ContactDetails({
       //   },
       // ]}
       // features={{
-
+      //   enableAutoSelect : true
       // }}
     />
   );
