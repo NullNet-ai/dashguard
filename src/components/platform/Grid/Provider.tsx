@@ -99,6 +99,7 @@ export default function GridProvider({
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
+    hideCreateButton: false,
     ..._propsConfig,
   };
 

@@ -8,14 +8,13 @@ import { recordRouter } from "./routers/record";
 import { userRolesRouter } from "./routers/user_role";
 import { notificationsRouter } from "./routers/notification";
 import { validatorRouter } from "./routers/validator";
-import { contactOrganizationsRouter } from "./routers/contact_organizations";
-import { contactSubOrganizationRouter } from "./routers/contact_sub_organizations";
 import { degreeLevelRouter } from "./routers/degree_level";
 import { countryRouter } from "./routers/country";
 import { googleRouter } from "./routers/google";
 import { contactRouter } from "./routers/contact";
 import { organizationRouter } from "./routers/organization";
 import { dashboardRouter } from "./routers/dashboard";
+import { organizationContactsRouter } from "./routers/organization_contact";
 
 /**
  * This is the primary router for your server.
@@ -34,12 +33,11 @@ export const appRouter = createTRPCRouter({
   notification: notificationsRouter,
   contact: contactRouter,
   validator: validatorRouter,
-  contactOrganization: contactOrganizationsRouter,
-  contactSubOrganization: contactSubOrganizationRouter,
   degreeLevel: degreeLevelRouter,
   country: countryRouter,
   google: googleRouter,
   organization: organizationRouter,
+  organizationContact: organizationContactsRouter,
 });
 
 // export type definition of API

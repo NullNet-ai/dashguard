@@ -4,19 +4,22 @@ import { Button } from "~/components/ui/button";
 import { GridContext } from "../Provider";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/lib/utils";
-import { camelCase } from "lodash";
 import { testIDFormatter } from "~/utils/formatter";
 
-type CreateButtonProps = { 
-  className?: string 
-  title?: string
-}
+type CreateButtonProps = {
+  className?: string;
+  title?: string;
+};
 
-export default function CreateButton({ className, title="" }: CreateButtonProps) {
+export default function CreateButton({
+  className,
+  title = "",
+}: CreateButtonProps) {
   const { state, actions } = React.useContext(GridContext);
 
+  if (state?.config?.hideCreateButton) return <></>;
 
-  const entity = state?.config.entity
+  const entity = state?.config.entity;
   return (
     <Button
       data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
@@ -24,8 +27,8 @@ export default function CreateButton({ className, title="" }: CreateButtonProps)
       loading={state?.createLoading}
       onClick={() => actions?.handleCreate()}
     >
-      {title ?  <span className="mr-1">{title}</span> : null}
-     {!state?.createLoading &&  <PlusIcon className="h-5 w-5" />}
+      {title ? <span className="mr-1">{title}</span> : null}
+      {!state?.createLoading && <PlusIcon className="h-5 w-5" />}
     </Button>
   );
 }

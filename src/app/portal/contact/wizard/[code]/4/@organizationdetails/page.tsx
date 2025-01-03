@@ -1,4 +1,4 @@
-import ComingSoon from "~/app/portal/coming-soon/_components/coming_soon";
+import OrganizationDetails from "../../../../_components/forms/organization-details/server";
 
-const FormContainer = async () => <ComingSoon />;
+const FormContainer = async () => <OrganizationDetails />;
 export default FormContainer;

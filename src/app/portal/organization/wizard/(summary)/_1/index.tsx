@@ -38,7 +38,7 @@ const OrganizationSummary = ({
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key}>
+        <p key={key} className="mb-[15px]">
           <strong> {key}: </strong>
           &nbsp; {(data as { [key: string]: any })?.[value] || "None"}
         </p>
