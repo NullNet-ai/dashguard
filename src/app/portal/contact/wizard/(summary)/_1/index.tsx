@@ -54,7 +54,7 @@ const BasicDetailsSummary = ({
 
   return (
     <div>
-      <p>
+      <p className="mb-[15px]">
         <strong> Phone Number: </strong>
         &nbsp; {phone}
       </p>

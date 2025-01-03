@@ -39,7 +39,7 @@ const StepOneBasicDetails = ({
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key}>
+        <p key={key} className="mb-[15px]">
           <strong> {key}: </strong>
           &nbsp; {data?.[value] || "None"}
         </p>
