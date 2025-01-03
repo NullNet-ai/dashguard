@@ -5,8 +5,8 @@ import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
 
 const fields = {
-  "Phone Number": "phone",
-  Email: "email",
+  "Primary Phone Number": "phone",
+  "Primary Email": "email",
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
   Address: "address",
@@ -26,10 +26,12 @@ const RecordShellSummary = ({
     error: _error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: [],
+    pluck_fields: ["id"],
   });
-  const { email: _email, phone: _phone } = record;
-
+  const { emails: _email, phones: _phone } = record as unknown as Record<
+    string,
+    any
+  >;
   const email = useMemo(() => {
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,

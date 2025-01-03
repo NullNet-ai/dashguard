@@ -31,15 +31,13 @@ export default function ContactDetails({
     any[]
   > => {
     try {
-      const response = await saveContactDetails(data, action_type);
+      const response = await saveContactDetails(data);
       if (response?.existing) {
-        // const { data } = response;
-        // const { phones, emails } = data || {};
-        form?.setError("phone", {
+        form?.setError("phones", {
           type: "manual",
           message: "Phone Number already exists.",
         });
-        form?.setError("email", {
+        form?.setError("emails", {
           type: "manual",
           message: "Email already exists.",
         });
@@ -197,10 +195,10 @@ export default function ContactDetails({
       defaultValues={defaultValues}
       fields={[
         {
-          id: "phone",
+          id: "phones",
           formType: "phone-input",
           placeholder: "Phone Number",
-          name: "phone",
+          name: "phones",
           label: "Phone Number",
           required: true,
           gridPosition: "left",
@@ -211,10 +209,10 @@ export default function ContactDetails({
           },
         },
         {
-          id: "email",
+          id: "emails",
           formType: "email-input",
           placeholder: "Email",
-          name: "email",
+          name: "emails",
           label: "Email",
           required: true,
           withGridFilter: true,
@@ -226,7 +224,7 @@ export default function ContactDetails({
         },
       ]}
       // customFormFilterViewFormActions={[
-      //   
+      //
       //     label: "Custom Action",
       //     onClick: () => {
       //       console.log("Custom Action Clicked");

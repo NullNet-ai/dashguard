@@ -23,13 +23,13 @@ export default function RecordContactDetails({
     data,
   }: IHandleSubmit<z.infer<typeof recordContactDetailsSchema>>) => {
     try {
-      const { phone, email } = data || {};
+      const { phones, emails } = data || {};
       const contact_id = params.id;
 
       await Promise.all([
         updatePhoneEmail.mutateAsync({
-          phone: phone?.map((item) => ({ ...item, contact_id })),
-          email: email?.map((item) => ({ ...item, contact_id })),
+          phones: phones?.map((item) => ({ ...item, contact_id })),
+          emails: emails?.map((item) => ({ ...item, contact_id })),
           id: contact_id,
         }),
         updateContactDetails.mutateAsync({
@@ -60,20 +60,26 @@ export default function RecordContactDetails({
       enableFormRegisterToParent={false}
       fields={[
         {
-          id: "phone",
+          id: "phones",
           formType: "phone-input",
           placeholder: "Phone Number",
-          name: "phone",
+          name: "phones",
           label: "Phone Number",
           required: true,
+          options: {
+            phoneNumberType: "multiple",
+          },
         },
         {
-          id: "email",
+          id: "emails",
           formType: "email-input",
           placeholder: "email address",
-          name: "email",
+          name: "emails",
           label: "Email Address",
           required: true,
+          options: {
+            phoneEmailType: "multiple",
+          },
         },
         {
           id: "first_name",
