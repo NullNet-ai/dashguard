@@ -23,9 +23,15 @@ const ArchiveConfirmationModal = ({
   record: any;
   config: any;
 }) => {
-  return config.archiveDialogCustomComponent ? (
-    <>{config.archiveDialogCustomComponent({ row: record, config, open, setOpen})}</>
-  ) : (
+
+  if (config.archiveDialogCustomComponent) {
+    const result = config.archiveDialogCustomComponent({ row: record, config, open, setOpen });
+    if (result) {
+      return <>{result}</>;
+    }
+  }
+
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-5/6 bg-white md:w-3/6">
         <div className="mb-2 text-sm">
