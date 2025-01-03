@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useSidebar } from "~/components/ui/sidebar";
 const Clock = () => {
-  const [date, setDate] = useState<Date | null>(null);
+  const [date, setDate] = useState<Date>(new Date());
 
   let interval: any = null;
 

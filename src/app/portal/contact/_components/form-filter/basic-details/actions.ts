@@ -39,3 +39,21 @@ export const removeRecord = async () => {
   });
   redirect(`/portal/${mainEntity}/wizard/new/1`);
 };
+
+export const closeCurrentInnerClassTab = async ({
+  code
+} : {
+  code: string;
+}) => {
+  const headerList = headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const [, portal, mainEntity] = pathname.split("/");
+  const currentContext = "/" + portal + "/" + mainEntity;
+
+  await api.tab.closeCurrentInnerClassTab({
+    href: pathname,
+    current_context: currentContext,
+  });
+
+  redirect(`/portal/contact/wizard/${code}/1`);
+}
