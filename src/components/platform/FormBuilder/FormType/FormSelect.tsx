@@ -18,10 +18,11 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 import { usePopper } from "react-popper";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { CheckIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
 import { cn, formatFormTestID } from "~/lib/utils";
+import { ChevronDownIcon } from "lucide-react";
 
 interface IProps {
   fieldConfig: IField;
@@ -190,7 +191,7 @@ export default function FormSelect({
             )}
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
-            <ChevronUpDownIcon
+            <ChevronDownIcon
               className={cn("absolute right-2 top-2.5 size-5 text-gray-400", {
                 "opacity-50": isDisabled || isReadOnly,
               })}
