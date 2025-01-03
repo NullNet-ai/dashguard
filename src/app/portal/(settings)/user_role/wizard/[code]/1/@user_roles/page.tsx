@@ -1,3 +1,4 @@
-import { RoleBasicDetails } from "../../../../_components/forms";
-const FormContainer = async () => <RoleBasicDetails />;
+import { UserRoleDetails } from "../../../../_components/form-filter";
+
+const FormContainer = async () => <UserRoleDetails />;
 export default FormContainer;
