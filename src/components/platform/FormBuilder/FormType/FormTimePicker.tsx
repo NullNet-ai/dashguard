@@ -80,7 +80,7 @@ export default function FormTimePicker({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="w-full border border-input px-3 py-1">
+        <div className="w-full border border-input !m-0">
           <TimePicker
             data-test-id={`${formKey}-timepicker-${fieldConfig.name}`}
             is24Hour={timePickerProps?.is24Hour}
