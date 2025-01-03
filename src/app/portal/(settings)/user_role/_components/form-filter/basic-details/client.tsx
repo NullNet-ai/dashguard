@@ -6,7 +6,7 @@ import { FormBuilder } from "~/components/platform/FormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { removeRecord, selectRecord } from "./actions";
+import { removeRecord, savedRecord, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
@@ -24,7 +24,7 @@ export default function RoleDetails({
 
   const handleSave = async ({
     data,
-    // action_type,
+    action_type,
     form,
   }: IHandleSubmit<z.infer<typeof UserRoleFormSchema>>): Promise<any[]> => {
     try {
@@ -42,8 +42,12 @@ export default function RoleDetails({
           message,
         });
       }
-      if (res.status_code == 200) {
+      if (res?.status_code == 200) {
+        const [user_role_data] = res?.data;
         toast.success("Basic Details submit sucessfully");
+        if (action_type === "Create") {
+          savedRecord({ code: user_role_data?.code });
+        }
         return res.data;
       }
 
