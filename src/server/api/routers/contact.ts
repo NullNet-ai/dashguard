@@ -718,7 +718,12 @@ export const contactRouter = createTRPCRouter({
       };
 
       const [contact] = items || [];
-      const { id: contact_id = "", code = "", ...rest } = contact || {};
+      const {
+        id: contact_id = "",
+        code = "",
+        address_id,
+        ...rest
+      } = contact || {};
 
       const phones = await getRecordByContactId(
         "contact_phone_number",
@@ -738,6 +743,7 @@ export const contactRouter = createTRPCRouter({
         code: code,
         emails,
         phones,
+        address_id: address_id,
       };
     }),
   getBasicDetails: privateProcedure
