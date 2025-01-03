@@ -1,9 +1,13 @@
 "use server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { api } from "~/trpc/server";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
-export const saveContactDetails = async (data: any, action_type?: string) => {
+export const saveContactDetails = async (
+  data: z.infer<typeof ContactPhoneEmailSchema>,
+) => {
   const response = await api.contact.saveContactPhoneEmail(data);
 
   if (response?.existing) {
