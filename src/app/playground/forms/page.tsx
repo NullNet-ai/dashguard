@@ -1,5 +1,4 @@
-"use client";
-
+import TimePickerDetails from "./_form-controls/time-picker.-details";
 import { Toaster } from "~/components/ui/sonner";
 import SmartDateDetails from "./_form-controls/smart-date";
 import InputDetails from "./_form-controls/textfield";
@@ -44,11 +43,11 @@ export default function PlatformPlayGround() {
           <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
           <div className="grid gap-4">
             <SmartDateDetails />
+            <TimePickerDetails />
           </div>
         </section>
 
         <Separator />
-
 
         <section>
           <h2 className="mb-4 text-xl font-bold">Choices and Selections</h2>
@@ -83,11 +82,11 @@ export default function PlatformPlayGround() {
         <Separator />
 
         <section>
-          <h2 className="text-xl font-bold mb-4">Other Inputs</h2>
+          <h2 className="mb-4 text-xl font-bold">Other Inputs</h2>
           <div className="grid gap-4">
-        <SliderDetails />
-        <InputsGrid />
-        <MultiSelectDetails />
+            <SliderDetails />
+            <InputsGrid />
+            <MultiSelectDetails />
           </div>
         </section>
 
