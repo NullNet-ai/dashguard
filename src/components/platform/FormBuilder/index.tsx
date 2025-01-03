@@ -265,6 +265,7 @@ export const FormBuilder = (props: IPropsForms) => {
           form_key: formKey,
         });
         setIsSaveLoading(false);
+        form.control._disableForm(true);
         return;
       }
 

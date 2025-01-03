@@ -1,55 +1,57 @@
 "use client";
 
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 
 import { FormBuilder } from "~/components/platform/FormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { closeCurrentInnerClassTab, removeRecord, saveContactDetails, selectRecord } from "./actions";
+import { removeRecord, savedRecord, selectRecord } from "./actions";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
-import { StepOneUpdateCategory } from "../../forms/category-details/actions/updateCategory";
+import { UserRoleFormSchema } from "~/server/zodSchema/user_role/basicDetails";
 
-export default function ContactDetails({
+export default function RoleDetails({
   params,
   defaultValues,
   selectedRecords,
   grid_data,
 }: IFormProps) {
-  const router = useRouter();
   const toast = useToast();
+
+  const saveUserRole = api.user_role.saveUserRole.useMutation();
 
   const handleSave = async ({
     data,
     action_type,
     form,
-  }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
-    any[]
-  > => {
+  }: IHandleSubmit<z.infer<typeof UserRoleFormSchema>>): Promise<any[]> => {
     try {
-      const response = await saveContactDetails(data);
-      if (response?.existing) {
-        form?.setError("phones", {
+      const res = await saveUserRole.mutateAsync({
+        id: params.id,
+        ...data,
+      });
+
+      //@ts-expect-error - Need to fix type for this
+      const { existing = false, message } = res;
+
+      if (existing) {
+        form?.setError("role", {
           type: "manual",
-          message: "Phone Number already exists.",
+          message,
         });
-        form?.setError("emails", {
-          type: "manual",
-          message: "Email already exists.",
-        });
-        return [];
+      }
+      if (res?.status_code == 200) {
+        const [user_role_data] = res?.data;
+        toast.success("Basic Details submit sucessfully");
+        if (action_type === "Create") {
+          savedRecord({ code: user_role_data?.code });
+        }
+        return res.data;
       }
 
-      if (action_type === "Create") {
-        await closeCurrentInnerClassTab({
-          code: response.code!,
-        })
-      }
-      return [response];
+      return [];
     } catch (error) {
       toast.error("Failed to submit Basic Details");
       return [];
@@ -103,22 +105,13 @@ export default function ContactDetails({
         statusesIncluded: ["Draft"], // Enable Selectable Record Status
         actionType: "single-select",
         pluck: params?.pluck_fields,
-        filter_entity: "contact",
+        filter_entity: "user_role",
         main_entity_id: params.id,
         gridColumns: gridColumns,
         fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
-        label: "Contacts",
-        // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data
-        //   form.reset(data, {
-        //     keepDefaultValues: true,
-        //   });
-
-        //   form.handleSubmit((data: any) =>
-        //     onSubmitFormGrid(data, { action_type: "Paste" }),
-        //   )();
-        // },
+        label: "Roles",
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,
@@ -160,24 +153,7 @@ export default function ContactDetails({
           return data;
         },
         handleSelectFieldFilterGrid: (data) => {
-          const { raw_phone_number, iso_code, country_code, email, ...rest } =
-            data ?? {};
-          const resolvedData = {
-            ...rest,
-            phone: [
-              {
-                raw_phone_number,
-                iso_code,
-                country_code,
-              },
-            ],
-            email: [
-              {
-                email,
-              },
-            ],
-          };
-          return resolvedData;
+          return data;
         },
         renderComponentSelected: (record) => {
           // Selected View Component
@@ -191,63 +167,18 @@ export default function ContactDetails({
       formLabel="Basic Details"
       handleSubmitFormGrid={handleSave}
       formKey="basicDetails"
-      formSchema={ContactPhoneEmailSchema}
+      formSchema={UserRoleFormSchema}
       defaultValues={defaultValues}
       fields={[
         {
-          id: "phones",
-          formType: "phone-input",
-          placeholder: "Phone Number",
-          name: "phones",
-          label: "Phone Number",
+          id: "role",
+          formType: "input",
+          name: "role",
+          label: "Role",
           required: true,
-          gridPosition: "left",
-          withGridFilter: true,
-          filterFieldConfig: {
-            entity: "contact_phone_numbers",
-            field: "raw_phone_number",
-          },
-        },
-        {
-          id: "emails",
-          formType: "email-input",
-          placeholder: "Email",
-          name: "emails",
-          label: "Email",
-          required: true,
-          withGridFilter: true,
-          gridPosition: "right",
-          filterFieldConfig: {
-            entity: "contact_emails",
-            field: "email",
-          },
+          placeholder: "Role",
         },
       ]}
-      // customFormFilterViewFormActions={[
-      //
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // customFormFilterLockFormActions={[
-      //   {
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // features={{
-      //   enableAutoSelect : true
-      // }}
     />
   );
 }

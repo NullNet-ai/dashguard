@@ -13,7 +13,7 @@ const checkForDuplicates = (
     if (seen.has(value)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Duplicate ${key.replace("_", " ")} found.`,
+        message: `Duplicate ${key.replaceAll("_", " ")} found.`,
         path: [index, key],
       });
     } else {
@@ -95,6 +95,6 @@ export const EmailArraySchema = z
 export const ContactPhoneEmailSchema = z.object({
   id: z.string().optional(),
   code: z.string().optional(),
-  phone: PhoneArraySchema,
-  email: EmailArraySchema,
+  phones: PhoneArraySchema,
+  emails: EmailArraySchema,
 });

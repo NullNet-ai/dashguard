@@ -75,6 +75,10 @@ export interface IConfigGrid {
   }
 }
 
+interface IRowToArchive extends Row<any> {
+  shouldDisplayArchiveWarningPrompt?: boolean;
+}
+
 export interface IState {
   config: IConfigGrid;
   data: any;
@@ -85,7 +89,7 @@ export interface IState {
   totalCountSelected?: number;
   archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
-  rowToArchive: Row<any>;
+  rowToArchive: IRowToArchive;
   viewMode?: "table" | "card";
   sorting?: SortingState;
   rowSelection: RowSelectionState;

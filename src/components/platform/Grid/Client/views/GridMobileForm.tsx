@@ -4,7 +4,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import GridMobileRow from "./common/GridMobileRow";
 import Pagination from "../../Pagination";
 
-function GridMobile({shownPagination } : {
+function GridMobileForm({shownPagination } : {
   shownPagination?: boolean;
 }) {
   return (
@@ -13,7 +13,7 @@ function GridMobile({shownPagination } : {
         <Header />
       </CardHeader> */}
       <ScrollArea
-        style={{ height: "calc(100vh - 16rem)" }}
+        style={{ height: "auto" }}
         className="mx-2 rounded-md text-card-foreground"
       >
         <section>
@@ -40,4 +40,4 @@ function GridMobile({shownPagination } : {
   );
 }
 
-export default GridMobile;
+export default GridMobileForm;

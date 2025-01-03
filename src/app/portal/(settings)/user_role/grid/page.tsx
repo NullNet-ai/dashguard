@@ -48,6 +48,7 @@ export default async function UserRoleGridPage({
         entity: main_entity!,
         title: "User Roles",
         columns: gridColumns,
+        enableAutoCreate: false,
       }}
     />
   );

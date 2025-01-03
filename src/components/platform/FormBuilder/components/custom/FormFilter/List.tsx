@@ -73,13 +73,22 @@ export default function FormFilterGrid({
       return ''
   }, [open, state?.isSummaryOpen])
 
+  const containerWidth = useMemo(() => {
+    if (open && state?.isSummaryOpen) {
+      return 'lg:w-[calc(100vw-550px)]'
+    }
+    else if (!open && state?.isSummaryOpen) {
+      return 'w-auto'
+    }
+    else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]'
+    }
+    else
+      return ''
+  }, [open, state?.isSummaryOpen])
+
   handleListLoading(isLoading);
 
-
-  
-
-
-  
   if (isLoading) {
     return (
       <div
@@ -98,15 +107,14 @@ export default function FormFilterGrid({
     {},
   );
 
-
-
-
   return (
-   <div className={
+   <div className={cn('w-full overflow-x-auto', containerWidth)}>
+     <div className={
     cn(`${calcWidth}`)
    }>
      <Grid
       height="300px"
+      showPagination={false}
       onSelectRecords={(rows) => {
         if (!onSelectRecords) return;
         Promise.resolve(
@@ -153,6 +161,7 @@ export default function FormFilterGrid({
       }}
       initialSelectedRecords={initialSelectedRecords}
     />
+   </div>
    </div>
   );
 }
