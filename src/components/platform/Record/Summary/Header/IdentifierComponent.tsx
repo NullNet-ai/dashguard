@@ -63,11 +63,11 @@ export default function IdentifierComponent({
   return (
     <div className="flex flex-row items-center justify-between p-2 px-4 text-sm">
       <div className="flex flex-row items-center gap-x-1">
-        <StatusPoint variant={"success"} />
+        <StatusPoint variant={status === "Archived" ? "secondary" : "success"} />
         <span data-test-id={entityName + "-rcrd-code"}>
           {ellipsis(JSON.stringify(code), 8)}
         </span>{" "}
-        <Badge variant={"success"}>{capitalize(status)}</Badge>
+        <Badge variant={status === "Archived" ? "secondary" : "success"}>{capitalize(status)}</Badge>
       </div>
       <div className="flex flex-row items-center gap-x-1">
         {/* <Button2>

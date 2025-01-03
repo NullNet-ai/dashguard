@@ -13,7 +13,7 @@ const pointColor = cva(
             primary:
             "bg-primary",
           secondary:
-            "bg-secondary",
+            "bg-muted",
           success:
             "bg-success",
           destructive:
