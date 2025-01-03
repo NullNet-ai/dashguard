@@ -28,7 +28,10 @@ const RecordShellSummary = ({
     code: identifier!,
     pluck_fields: ["id"],
   });
-  const { emails: _email, phones: _phone } = record;
+  const { emails: _email, phones: _phone } = record as unknown as Record<
+    string,
+    any
+  >;
   const email = useMemo(() => {
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,
