@@ -9,7 +9,8 @@ import { testIDFormatter } from "~/utils/formatter";
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
   const { entityName, stepLabels } = state ?? {};
-  const formatEntitiyName = entityName
+  const modified_entity = entityName === "user_role" ? "role" : entityName;
+  const formatEntitiyName = modified_entity
     ?.split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");

@@ -58,9 +58,9 @@ const Layout = async ({
       tabName: "dashboard",
     },
     {
-      id: "user_role",
-      name: "User Role",
-      tabName: "user_role",
+      id: "role",
+      name: "Role",
+      tabName: "role",
     },
   ];
 
