@@ -273,7 +273,7 @@ export default function MyVerticalStepper() {
                           <span className="text-sm text-gray-500 sm:block">
                             {summaryTitle
                               ? summaryTitle
-                              : "Description of Step " + stepIndex}xx
+                              : "Description of Step " + stepIndex}
                           </span>
                         </span>
                       </div>
