@@ -62,13 +62,17 @@ export default function Pagination() {
       <div className="flex w-full flex-1 justify-between sm:hidden">
         <a
           href={`?page=${Math.max(Number(currentPage) - 1 || 1)}&perPage=${rows}`}
-          data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-page-prev-btn`)}
+          data-test-id={testIDFormatter(
+            `${state?.config.entity}-grd-pagination-page-prev-btn`,
+          )}
           className="relative inline-flex items-center rounded-md border border-gray-300 bg-background px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Previous
         </a>
         <a
-          data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-page-next-btn`)}
+          data-test-id={testIDFormatter(
+            `${state?.config.entity}-grd-pagination-page-next-btn`,
+          )}
           href={`?page=${Math.min(Number(currentPage) + 1, totalPages)}&perPage=${rows}`}
           className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-background px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
@@ -89,14 +93,20 @@ export default function Pagination() {
               defaultValue={`${perPageValue}` || "10"}
             >
               <SelectTrigger
-                data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-row-per-page-sel-trigger`)}
+                data-test-id={testIDFormatter(
+                  `${state?.config.entity}-grd-pagination-row-per-page-sel-trigger`,
+                )}
               >
                 <SelectValue placeholder={`${rows} rows`} />
               </SelectTrigger>
               <SelectContent>
                 {rowsPerPage.map((row) => (
-                  <SelectItem value={row.toString()} key={row}
-                    data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-row-per-page-sel-itm-${row}`)}
+                  <SelectItem
+                    value={row.toString()}
+                    key={row}
+                    data-test-id={testIDFormatter(
+                      `${state?.config.entity}-grd-pagination-row-per-page-sel-itm-${row}`,
+                    )}
                   >
                     {row} rows
                   </SelectItem>
@@ -115,7 +125,9 @@ export default function Pagination() {
             className="isolate inline-flex -space-x-px rounded-md"
           >
             <a
-              data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-first-page-btn`)}
+              data-test-id={testIDFormatter(
+                `${state?.config.entity}-grd-pagination-first-page-btn`,
+              )}
               href={`?page=${Math.min(Number(currentPage) * -5, 1)}&perPage=${rows}`}
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
@@ -123,68 +135,102 @@ export default function Pagination() {
               <ChevronDoubleLeftIcon aria-hidden="true" className="h-5 w-5" />
             </a>
             <a
-              data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-prev-page-btn`)}
+              data-test-id={testIDFormatter(
+                `${state?.config.entity}-grd-pagination-prev-page-btn`,
+              )}
               href={`?page=${Math.max(Number(currentPage) - 1, 1)}&perPage=${rows}`}
               className="relative inline-flex items-center px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span className="sr-only">Previous</span>
               <ChevronLeftIcon aria-hidden="true" className="h-5 w-5" />
             </a>
+
             <a
               href={`?page=1&perPage=${rows}`}
-              data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-page1-btn`)}
-              className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              data-test-id={testIDFormatter(
+                `${state?.config.entity}-grd-pagination-page1-btn`,
+              )}
+              className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == 1 ? "bg-violet-400": ""}`}
             >
               1
             </a>
-
-            {totalPages > 1 ? (<span className="relative mt-1 inline-flex items-center px-4 text-sm font-semibold text-gray-700 focus:outline-offset-0">
-              <Menu as="div" className="relative inline-block text-left"   data-test-id={camelCase(`${state?.config.entity}PaginationPageMenu`)}>
-                <MenuItems
-                  transition
-                  className="absolute bottom-full left-0 z-10 mb-2 w-20 origin-bottom-left rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                >
-                  <div className="flex max-h-72 flex-col overflow-auto py-1">
-                    {Array.from({ length: totalPages }, (_, index) => (
-                      <MenuItem key={index + 1}>
-                        <a
-                          href={`?page=${index + 1}&perPage=${rows}`}
-                          className={cn(
-                            "block px-4 py-2 text-sm data-[focus]:bg-gray-100",
-                          )}
-                          data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-page-menu-${index+1}`)}
-                        >
-                          {index + 1}
-                        </a>
-                      </MenuItem>
-                    ))}
-                  </div>
-                </MenuItems>
-                
-                {totalPages > 1 && (
-                  <div>
-                    <MenuButton 
-                      data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-page-menu-trigger-horizontal`)}
-                    className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
-                      <EllipsisHorizontalIcon className="h-5 w-5 rounded-full border" />
-                    </MenuButton>
-                  </div>
+            {totalPages > 1 && (
+              <a
+                href={`?page=2&perPage=${rows}`}
+                data-test-id={testIDFormatter(
+                  `${state?.config.entity}-grd-pagination-page1-btn`,
                 )}
-              </Menu>
-            </span> ) : null}
-            {totalPages > 1 ? (
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == 2 ? "bg-violet-400": ""}`}
+              >
+                2
+              </a>
+            )}
+
+            {totalPages > 3 ? (
+              <span className="relative mt-1 inline-flex items-center px-4 text-sm font-semibold text-gray-700 focus:outline-offset-0">
+                <Menu
+                  as="div"
+                  className="relative inline-block text-left"
+                  data-test-id={camelCase(
+                    `${state?.config.entity}PaginationPageMenu`,
+                  )}
+                >
+                  <MenuItems
+                    transition
+                    className="absolute bottom-full left-0 z-10 mb-2 w-20 origin-bottom-left rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                  >
+                    <div className="flex max-h-72 flex-col overflow-auto py-1">
+                      {Array.from({ length: totalPages }, (_, index) => (
+                        <MenuItem key={index + 1}>
+                          <a
+                            href={`?page=${index + 1}&perPage=${rows}`}
+                            className={cn(
+                              "block px-4 py-2 text-sm data-[focus]:bg-gray-100",
+                              currentPage == index + 1 ? "bg-violet-400": ""
+                            )}
+                            data-test-id={testIDFormatter(
+                              `${state?.config.entity}-grd-pagination-page-menu-${index + 1}`,
+                            )}
+                          >
+                            {index + 1}
+                          </a>
+                        </MenuItem>
+                      ))}
+                    </div>
+                  </MenuItems>
+
+                  {totalPages > 1 && (
+                    <div>
+                      <MenuButton
+                        data-test-id={testIDFormatter(
+                          `${state?.config.entity}-grd-pagination-page-menu-trigger-horizontal`,
+                        )}
+                        className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900"
+                      >
+                        <EllipsisHorizontalIcon className="h-5 w-5 rounded-full border" />
+                      </MenuButton>
+                    </div>
+                  )}
+                </Menu>
+              </span>
+            ) : null}
+            {totalPages > 2 ? (
               <a
                 href={`?page=${totalPages}&perPage=${rows}`}
-                data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-last-page-btn`)}
-                className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                data-test-id={testIDFormatter(
+                  `${state?.config.entity}-grd-pagination-last-page-btn`,
+                )}
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == totalPages ? "bg-violet-400": ""}`}
               >
                 {totalPages}
               </a>
-            ): null}
+            ) : null}
 
             <a
               href={`?page=${Math.min(Number(currentPage) + 1, totalPages)}&perPage=${rows}`}
-              data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-next-btn`)}
+              data-test-id={testIDFormatter(
+                `${state?.config.entity}-grd-pagination-next-btn`,
+              )}
               className="relative inline-flex items-center px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span className="sr-only">Next</span>
@@ -193,7 +239,9 @@ export default function Pagination() {
             </a>
             <a
               href={`?page=${Math.max(Number(currentPage) * 5, totalPages)}&perPage=${rows}`}
-              data-test-id={testIDFormatter(`${state?.config.entity}-grd-pagination-last-btn`)}
+              data-test-id={testIDFormatter(
+                `${state?.config.entity}-grd-pagination-last-btn`,
+              )}
               className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
             >
               <span className="sr-only">Next</span>
