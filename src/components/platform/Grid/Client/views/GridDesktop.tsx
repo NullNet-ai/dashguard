@@ -9,6 +9,7 @@ import Pagination from "../../Pagination";
 import { Button } from "~/components/ui/button";
 import { GridContext } from "../../Provider";
 import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
 
 interface IGridDesktopProps {
   parentType: "grid" | "form" | "field";
@@ -57,7 +58,9 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
               }
         }
       
-        className="overflow-auto w-[350px] md:w-[460px] m-auto lg:w-auto rounded-md border bg-card text-card-foreground"
+        className={cn(`overflow-auto  m-auto lg:w-auto rounded-md border bg-card text-card-foreground`, 
+          parentType === "grid" ? "w-[350px] md:w-[460px]" : "w-[350px] md:w-[100%]"
+        )}
       >
         <Table>
           <TableHeader>
