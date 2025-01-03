@@ -69,7 +69,7 @@ const contactWizardSummary = ({
           label: "Organization",
           component: (
             <ContactOrganizationSummary
-              form_key={""}
+              form_key={"organization_details"}
               identifier={identifier!}
               main_entity={mainEntity!}
             />
