@@ -10,6 +10,8 @@ const fields = {
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
   Address: "address",
+  Organization: "organization",
+  Role: "role",
 };
 
 const RecordShellSummary = ({
@@ -65,6 +67,20 @@ const RecordShellSummary = ({
     ],
   });
 
+  const {
+    data: org_record = {
+      data: {
+        organizations: [],
+        user_roles: [],
+      },
+    },
+    refetch: refetchOrg,
+  } = api.organizationContact.fetchOrganizations.useQuery({
+    code: identifier!,
+  });
+
+  const { organizations, user_roles } = org_record?.data || {};
+
   const record_details = {
     ...data,
     full_name:
@@ -72,11 +88,33 @@ const RecordShellSummary = ({
       "None",
     phone,
     email,
+    organization: organizations?.length
+      ? organizations
+          .sort(
+            (
+              a: {
+                label: string;
+              },
+              b: {
+                label: string;
+              },
+            ) => a.label.localeCompare(b.label),
+          )
+          .map(({ label }: { label: string }) => label)
+          .join(", ")
+      : "None",
+    role: user_roles?.length
+      ? user_roles
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .map(({ label }: { label: string }) => label)
+          .join(", ")
+      : "None",
   };
 
   const refetchAll = async () => {
     await refetchPhoneAndEmail();
     await refetchContactDetails();
+    await refetchOrg();
   };
 
   useRefetchRecord({
