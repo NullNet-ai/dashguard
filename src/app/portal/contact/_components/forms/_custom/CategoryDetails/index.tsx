@@ -1,4 +1,5 @@
 import { usePathname, useRouter } from "next/navigation";
+import React, {useEffect} from "react";
 import { Fragment } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import FormRadio from "~/components/platform/FormBuilder/FormType/FormRadio";
@@ -12,6 +13,17 @@ interface ICategoryDetails {
 export default function CustomCategoryDetails({ form }: ICategoryDetails) {
   const router = useRouter();
   const pathname = usePathname();
+
+  // this is needed to trigger the setting of the default value
+  useEffect(() => {
+
+    form.setValue("categories", "Employee", {
+      shouldValidate: true,
+      shouldDirty: true,
+    }
+    )
+  }, []);
+
   return (
     <Fragment>
       <FormField
