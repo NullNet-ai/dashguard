@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@headlessui/react";
-import { Header } from "@tanstack/react-table";
+import { type Header } from "@tanstack/react-table";
 import {
   ArrowDown,
   ArrowUp,
@@ -67,7 +67,7 @@ const HeaderMenu = ({ header }: HeaderMenuProps) => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="center" side="bottom" >
         {/* <DropdownMenuItem className="flex gap-2">
           <Pencil className={`h-4 w-4`} aria-hidden="true" />
           <span>Edit</span>
