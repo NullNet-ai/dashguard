@@ -181,6 +181,7 @@ interface IFilterGridConfig {
   limit?: number;
   filter_entity: string;
   main_entity_id: string;
+  is_same_entity_id?: boolean;
   statusesIncluded?: string[];
   label?: string;
   gridColumns: ColumnDef<any>[];

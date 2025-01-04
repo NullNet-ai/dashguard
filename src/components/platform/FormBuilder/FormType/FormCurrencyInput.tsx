@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -23,8 +23,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
-import { Input } from "~/components/ui/input";
-import { DevTool } from "@hookform/devtools";
 
 interface IProps {
   fieldConfig: IField;
@@ -33,7 +31,6 @@ interface IProps {
     fieldState: ControllerFieldState;
   };
   currencyInputOptions?: Record<string, OptionType[]>;
-
   form: UseFormReturn<Record<string, any>, any, undefined>;
   icon?: React.ElementType;
   value?: string;
@@ -47,7 +44,6 @@ export default function FormCurrencyInput({
   form,
   formKey,
 }: IProps) {
-  // const isDisabled = formRenderProps.field.disabled && fieldConfig.disabled;
   const inputRef = useRef<HTMLInputElement>(null);
   const defaultValues = form.watch(fieldConfig.name);
 
@@ -79,43 +75,128 @@ export default function FormCurrencyInput({
   }>((options && options?.[0]) ?? { label: "USD", value: "$" });
 
   const [values, setValues] = useState<CurrencyInputOnChangeValues>({
-    value: "0.00",
-    float: 0.0,
-    formatted: "0.00",
+    value: defaultValues?.amount || "0.00",
+    float: defaultValues?.amount || 0.0,
+    formatted: defaultValues?.amount?.toFixed(2) || "0.00",
   });
 
-  const handleOnValueChange: CurrencyInputProps["onValueChange"] = (
-    input,
-    _name,
-    _values,
-  ) => {
-    // Remove any non-numeric characters to sanitize input
-    const numericInput = input?.replace(/\D/g, "") || "";
+  const [isDeleted, setIsDeleted] = useState(false);
+  const lastCursorPosition = useRef<number | null>(null);
 
-    // Default to "0" if there's no input
-    const sanitizedInput = numericInput || "0";
+  useEffect(() => {
+    if (defaultValues?.amount !== undefined) {
+      const newValue = defaultValues.amount.toFixed(2);
+      setValues({
+        value: newValue,
+        float: defaultValues.amount,
+        formatted: newValue,
+      });
+    }
+  }, [defaultValues]);
 
-    // Shift decimal place two spaces for "ATM-like" behavior
-    const paddedInput = sanitizedInput.padStart(3, "0"); // Ensure at least 3 characters
-    const integerPart = paddedInput.slice(0, -2); // All but last two digits
-    const decimalPart = paddedInput.slice(-2); // Last two digits
+  const formatValue = (numericValue: string) => {
+    if (!numericValue) return "0.00";
 
-    const formattedValue = `${integerPart}.${decimalPart}`;
-    const floatValue = parseFloat(formattedValue);
+    // Remove any non-numeric characters
+    const cleanValue = numericValue.replace(/[^\d]/g, "");
 
-    const updatedValues = {
-      value: formattedValue,
-      float: floatValue,
-      formatted: floatValue.toFixed(2),
-    };
+    // Ensure we have at least 3 digits (including 2 decimal places)
+    const paddedValue = cleanValue.padStart(3, "0");
 
-    setValues(updatedValues);
+    // Split into integer and decimal parts
+    const integerPart = paddedValue.slice(0, -2) || "0";
+    const decimalPart = paddedValue.slice(-2);
 
-    // Update the form field value
-    form.setValue(fieldConfig.name, {
-      amount: floatValue,
-      currency: selectedCurrency.label,
-    });
+    return `${integerPart}.${decimalPart}`;
+  };
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const cursorStart = input.selectionStart ?? 0;
+
+    // Store the cursor position for later use
+    lastCursorPosition.current = cursorStart;
+
+    const newInput = e.target.value.replace(selectedCurrency.value, "");
+
+    // If backspace was used to clear the input
+    if (newInput === "") {
+      setIsDeleted(true);
+      const updatedValues = {
+        value: "0.00",
+        float: 0,
+        formatted: "0.00",
+      };
+      setValues(updatedValues);
+      form.setValue(fieldConfig.name, {
+        amount: 0,
+        currency: selectedCurrency.label,
+      });
+      return;
+    }
+
+    // Only process if not in deleted state or if new input is detected
+    if (!isDeleted || newInput !== values.value) {
+      setIsDeleted(false);
+
+      const formattedValue = formatValue(newInput);
+      const floatValue = parseFloat(formattedValue);
+
+      const updatedValues = {
+        value: formattedValue,
+        float: floatValue,
+        formatted: floatValue.toFixed(2),
+      };
+
+      setValues(updatedValues);
+      form.setValue(fieldConfig.name, {
+        amount: floatValue,
+        currency: selectedCurrency.label,
+      });
+
+      // Restore cursor position after React updates the DOM
+      setTimeout(() => {
+        if (inputRef.current && lastCursorPosition.current !== null) {
+          const newPosition = Math.min(
+            lastCursorPosition.current,
+            formattedValue.length + selectedCurrency.value.length,
+          );
+          inputRef.current.selectionStart = newPosition;
+          inputRef.current.selectionEnd = newPosition;
+        }
+      }, 0);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.target instanceof HTMLInputElement) {
+      const hasSelection = e.target.selectionStart !== e.target.selectionEnd;
+      const cursorPosition = e.target.selectionStart ?? 0;
+
+      // Handle backspace with text selection
+      if (e.key === "Backspace" && hasSelection) {
+        e.preventDefault();
+        setIsDeleted(true);
+        const updatedValues = {
+          value: "0.00",
+          float: 0,
+          formatted: "0.00",
+        };
+        setValues(updatedValues);
+        form.setValue(fieldConfig.name, {
+          amount: 0,
+          currency: selectedCurrency.label,
+        });
+      }
+      // Handle regular backspace
+      else if (e.key === "Backspace") {
+        lastCursorPosition.current = cursorPosition - 1;
+      }
+      // For any other key press
+      else {
+        lastCursorPosition.current = cursorPosition;
+      }
+    }
   };
 
   const handleCurrencySelect = (value: string) => {
@@ -123,20 +204,19 @@ export default function FormCurrencyInput({
     if (selectedOption) {
       setSelectedCurrency(selectedOption);
 
-      // Get the current amount from the existing form value
       const currentValue = form.getValues(fieldConfig.name);
       const currentAmount = currentValue?.amount;
 
-      // Update the form value with the current amount and new currency
       form.setValue(fieldConfig.name, {
         amount: currentAmount,
         currency: selectedOption.label,
       });
     }
   };
-  const normalInputRef = useRef<HTMLInputElement>(null);
+
   const { register } = form;
   const error = form.formState.errors[fieldConfig.name];
+
   return (
     <FormItem>
       <FormLabel
@@ -146,72 +226,61 @@ export default function FormCurrencyInput({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0">
-          <Input
-            disabled={fieldConfig.disabled}
-             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
-            containerClassName="opacity-0 pointer-events-none absolute right-0"
-            ref={normalInputRef}
-            onChange={(e) =>
-              handleOnValueChange(e.target.value, fieldConfig.name, values)
-            }
-            defaultValue={values.value}
-            // value={values.value}
-          />
-
+        <div
+          className={cn(
+            "flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
+            error ? "border-destructive" : "",
+          )}
+        >
           <CurrencyInput
             {...register(fieldConfig.name)}
             disabled={fieldConfig.disabled}
-             readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+            readOnly={
+              (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+            }
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
             className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
-            onValueChange={(value) => {
-              handleOnValueChange(value, fieldConfig.name, values);
-              if (normalInputRef.current) {
-                normalInputRef.current.focus(); // Focus on normal input when currency input is clicked
-              }
-            }}
-            // onFocus={() => normalInputRef.current?.focus()}
-            value={defaultValues?.amount}
-            step={1}
+            onChange={handleValueChange}
+            onKeyDown={handleKeyDown}
+            value={values.value}
             prefix={selectedCurrency.value}
             decimalSeparator="."
             groupSeparator=","
             decimalsLimit={2}
           />
-            <Select
+          <Select
             value={options
               ?.findIndex((option) => option.label === selectedCurrency.label)
               .toString()}
-            onValueChange={(value) => handleCurrencySelect(value)}
+            onValueChange={handleCurrencySelect}
             data-test-id={`${formKey}-sel-${fieldConfig.name}`}
             disabled={formRenderProps.field.disabled}
-            >
+          >
             <SelectTrigger
               className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
               data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue
-              placeholder="Unit"
-              data-test-id={`${formKey}-sel-val-${fieldConfig.name}`}
+                placeholder="Unit"
+                data-test-id={`${formKey}-sel-val-${fieldConfig.name}`}
               >
-              {selectedCurrency.label}
+                {selectedCurrency.label}
               </SelectValue>
             </SelectTrigger>
             <SelectContent data-test-id={`${formKey}-cnt-${fieldConfig.name}`}>
               {options?.map((option, i) => (
-              <SelectItem
-                key={option.label}
-                value={i.toString()}
-                data-test-id={`${formKey}-sel-opt-${option.label}-${fieldConfig.name}`}
-              >
-                {option.label}
-              </SelectItem>
+                <SelectItem
+                  key={option.label}
+                  value={i.toString()}
+                  data-test-id={`${formKey}-sel-opt-${option.label}-${fieldConfig.name}`}
+                >
+                  {option.label}
+                </SelectItem>
               ))}
             </SelectContent>
-            </Select>
+          </Select>
         </div>
       </FormControl>
 
