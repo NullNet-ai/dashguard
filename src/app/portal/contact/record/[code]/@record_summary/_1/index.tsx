@@ -116,7 +116,6 @@ const RecordShellSummary = ({
   const refetchAll = async () => {
     await refetchPhoneAndEmail();
     await refetchContactDetails();
-    await refetchOrg();
   };
 
   useRefetchRecord({
@@ -124,6 +123,10 @@ const RecordShellSummary = ({
     form_key,
   });
 
+  useRefetchRecord({
+    refetch: refetchOrg,
+    form_key: "organization_details",
+  });
   if (_error) {
     return <div>Error: {_error.message}</div>;
   }
