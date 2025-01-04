@@ -77,6 +77,7 @@ export interface IConfigGrid {
     resolver: string;
     query_params?: ISearchParams;
   };
+  hideCreateButton?: boolean;
 }
 
 interface IRowToArchive extends Row<any> {
