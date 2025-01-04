@@ -79,7 +79,7 @@ export default function FormInputGrid({
                 data-test-id={
                   formKey + "-inp-grd-input-" + fieldConfig.name
                 }
-                className="h-10 rounded-md border border-gray-200 bg-transparent text-gray-900 placeholder:text-gray-400 focus:border sm:text-xs"
+                className="h-10 focus:border-primary focus:ring-primary rounded-md border border-border bg-transparent text-foreground placeholder:text-muted-foreground focus:border sm:text-xs"
                 placeholder={fieldConfig?.placeholder || fieldConfig?.label}
                 onChange={(event) => {
                   handleSearch(event.target.value);
