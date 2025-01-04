@@ -515,6 +515,7 @@ const MultipleSelector = React.forwardRef<
               ref={inputRef}
               value={inputValue}
               disabled={disabled}
+              readOnly={readOnly}
               onValueChange={(value) => {
                 setInputValue(value);
                 inputProps?.onValueChange?.(value);
