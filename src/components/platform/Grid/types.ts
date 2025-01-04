@@ -77,6 +77,7 @@ export interface IConfigGrid {
     resolver: string;
     query_params?: ISearchParams;
   };
+  hideCreateButton?: boolean;
 }
 
 interface IRowToArchive extends Row<any> {
@@ -100,6 +101,7 @@ export interface IState {
   advanceFilter?: ISearchItem[];
   bulkActionType: "archive" | null;
   showBulkActionConfirmationModal: boolean;
+  pagination?: IPagination;
 }
 
 export interface IAction {
@@ -122,11 +124,17 @@ export interface ICreateContext {
   actions?: IAction;
 }
 
+export interface IPagination {
+ current_page: number;
+ limit_per_page: number;
+}
+
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
   sorting?: SortingState;
+  pagination?: IPagination;
   onSelectRecords?: (rows: any[]) => void;
   initialSelectedRecords?: RowSelectionState;
   defaultSorting?: SortingState;
