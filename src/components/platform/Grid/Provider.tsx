@@ -240,7 +240,7 @@ export default function GridProvider({
           </Button>
         );
       }
-
+  
       return (
         <>
           <EditComponent row={row} config={config!} />
