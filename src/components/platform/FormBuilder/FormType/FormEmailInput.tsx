@@ -117,6 +117,7 @@ export default function FormEmailInput({
                         fieldConfig?.readonly) ??
                       false
                     }
+                    containerClassName="!mt-0"
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}

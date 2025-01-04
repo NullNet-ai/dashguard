@@ -48,7 +48,7 @@ interface CommonProps {
   }) => void;
 }
 
-export function AddressAutoCompleteInput(props: CommonProps) {
+export function  AddressAutoCompleteInput(props: CommonProps) {
   const { handleSelectAddress, form, formKey, fieldConfig, formRenderProps } =
     props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
@@ -112,7 +112,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     readOnly={is_readonly}
                     data-test-id={formKey + "-" + formRenderProps?.field.name}
                     autoComplete="off"
-                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
+                    className="relative h-10 w-full focus:border-primary focus:ring-primary flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
                     placeholder="Search..."
                     onFocus={open}
                     onChange={(event) => {
