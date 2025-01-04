@@ -4,7 +4,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { type z } from "zod";
 import { useWizard } from "~/components/platform/Wizard/Provider";
 import { Accordion, AccordionItem } from "~/components/ui/accordion";
-import { Card } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Button as Button2 } from "@headlessui/react";
 import { Collapsible } from "~/components/ui/collapsible";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
@@ -19,10 +20,15 @@ import FormBodyMainActions from "../../ui/layout/opened/components/FormBodyMainA
 import SelectedViewLayout from "../../ui/layout/selected";
 import { ulid } from "ulid";
 import { Separator } from "~/components/ui/separator";
+import { Button } from "~/components/ui/button";
+import { XMarkIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { Loader2 } from "lucide-react";
+import SelectedActions from "../../ui/layout/selected/components/SelectedActions";
+import FormFilterOpenedActions from "../../ui/layout/opened/components/FormFilterOpenedActions";
 
-interface IMultipleFormBuilderProps extends IPropsForms {}
 
-export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
+export const MultipleFormBuilder: React.FC<IPropsForms> = (
   props,
 ) => {
   const {
@@ -62,7 +68,9 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
     customFormFilterLockFormActions,
   } = props;
 
-  const { actions } = useWizard();
+
+  const { actions, state } = useWizard();
+  const { entityName } = state ?? {};
 
   // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
   const enableFormRegisterToParent =
@@ -71,20 +79,18 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
+    mode: 'onChange',
     resolver: zodResolver(formSchema), // is this where the validation relies?
-    defaultValues: {
-      form_builder_fields: Array.isArray(defaultValues)
-        ? defaultValues
-        : [defaultValues],
-    },
+    defaultValues,
     shouldFocusError: false,
   });
 
   const fieldArray = useFieldArray({
     control: form.control,
     name: "form_builder_fields",
+    keyName: "_id",
   });
-
+  
   form.watch("form_builder_fields");
 
   //* LOCAL STATES
@@ -207,7 +213,6 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
     }
 
     const mergedRecord = index > -1 ? currentFieldRecord : records;
-    console.log("%c Line:209 🌽 mergedRecord", "color:#6ec1c2", mergedRecord);
 
     Promise.resolve(
       filterGridConfig?.onRemoveSelectedRecords?.({
@@ -216,13 +221,13 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
         filter_entity: filterGridConfig?.filter_entity,
       }),
     ).then(() => {
-      const newRecords = formGridSelected?.filter((item) => {
-        return !mergedRecord.some((record) => record.id === item.id);
-      });
-      setFormGridSelected(newRecords);
+      const fields = form.getValues().form_builder_fields;
+      fields.splice(index, 1);
+
+      setFormGridSelected(fields);
       handleCloseGrid();
-      // fieldArray.remove(index);
-      if (!newRecords.length) {
+      fieldArray.remove(index);
+      if (!fields.length) {
         setDisplayType("form");
         return;
       }
@@ -273,8 +278,8 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
       };
     }, {});
     fieldArray.append({
-      id: ulid(),
       ...mappedFields,
+      id: filterGridConfig?.main_entity_id
     });
   };
 
@@ -373,20 +378,26 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
     }
   };
 
-  const onSubmitFormGrid = async (data: z.infer<typeof formSchema>) => {
+  const onSubmitFormGrid = async (
+    index: number,
+    data: z.infer<typeof formSchema>,
+  ) => {
     if (!handleSubmitFormGrid) return;
+    const fields = form.getValues().form_builder_fields;
+    const selected_item = fields[index];
     try {
       setIsSaveLoading(true);
       const response = await handleSubmitFormGrid({
-        data,
+        data: selected_item,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: formGridSelected.length ? "Update" : "Create",
+        action_type: selected_item.id ? "Update" : "Create",
         form,
       });
       //TODO: Please cater setting error message in field and don't proceed to view mode.
       if (!response?.length) throw new Error("Failed to submit form grid");
-      setFormGridSelected(response);
+      fields.splice(index, 1, response[0]);
+      setFormGridSelected(fields);
       setDisplayType("selected");
       setIsSaveLoading(false);
     } catch (error) {
@@ -408,8 +419,6 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
   };
 
   const searchActive = isOpenSearch || false;
-
-  console.log("@@@@ formGridSelected", form.getValues('form_builder_fields'));
 
   return (
     <form
@@ -447,7 +456,6 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
                   handleLock={handleLock}
                   handleOpen={handleOpenForm}
                   features={features}
-                  onSubmitFormGrid={onSubmitFormGrid}
                   handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
                   handleAppendForm={handleAppendForm}
                   selectedRecords={formGridSelected}
@@ -460,9 +468,9 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
                     (field: Record<string, any>, index: number) => {
                       const prefix = `form_builder_fields.${index}`;
                       return (
-                        <Fragment key={field.id}>
+                        <Fragment key={prefix}>
                           <>
-                            <FormBodyMainActions
+                            {/* <FormBodyMainActions
                               formProps={{
                                 ...formProps,
                                 handleSearchOpen,
@@ -492,7 +500,136 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
                               customFormFilterLockFormActions={
                                 customFormFilterLockFormActions
                               }
-                            />
+                            /> */}
+                            <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
+                              {displayType !== "selected" &&
+                                filterGridConfig &&
+                                !!Object.keys(filterGridConfig).length && (
+                                  <>
+                                    {!!field.code && !formProps?.isOpenSearch && (
+                                      <Button
+                                        variant={"outline"}
+                                        data-test-id={
+                                          entityName + "-wzrd" + "-cancel-btn"
+                                        }
+                                        onClick={() => {
+                                          form.reset(
+                                            form.formState.defaultValues,
+                                          );
+                                          handleUpdateDisplayType("selected");
+                                        }}
+                                        type="button"
+                                        loading={isSaveLoading}
+                                        size={"xs"}
+                                      >
+                                        <XMarkIcon className="h-4 w-4" />
+                                        Cancel
+                                      </Button>
+                                    )}
+                                    {formLabel && !formProps?.isOpenSearch && (
+                                      <>
+                                        <Button
+                                          variant={"default"}
+                                          name={
+                                            formLabel.split(" ").join("") +
+                                            `${field.code ? "FormUpdateButton" : "FormCreateButton"}`
+                                          }
+                                          data-test-id={
+                                            field.code
+                                              ? entityName +
+                                                "-wzrd" +
+                                                "-update-btn"
+                                              : entityName +
+                                                "-wzrd" +
+                                                "-create-btn"
+                                          }
+                                          onClick={form.handleSubmit(
+                                            onSubmitFormGrid.bind(null, index),
+                                          )}
+                                          type="button"
+                                          loading={isSaveLoading}
+                                          size={"xs"}
+                                          className="items-center gap-1 text-sm"
+                                        >
+                                          <PlusIcon className="h-4 w-4" />
+                                          {field.code ? "Update" : "Create"}
+                                        </Button>
+                                        <Separator
+                                          orientation="vertical"
+                                          className="mr-1 py-3"
+                                        />
+                                      </>
+                                    )}
+
+                                    <div>
+                                      {isListLoading ? (
+                                        <Loader2
+                                          className={cn(
+                                            "h-5 w-5 animate-spin text-gray-400",
+                                          )}
+                                        />
+                                      ) : (
+                                        <>
+                                          <Button2
+                                            onClick={() => {
+                                              formProps?.handleSearchOpen();
+                                            }}
+                                            data-test-id={
+                                              !formProps?.isOpenSearch
+                                                ? entityName +
+                                                  "-wzrd" +
+                                                  "-show-grd-btn"
+                                                : entityName +
+                                                  "-wzrd" +
+                                                  "-hide-grd-btn"
+                                            }
+                                            className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
+                                          >
+                                            <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                                            <span className="text-primary">
+                                              {!formProps?.isOpenSearch
+                                                ? "Show Grid"
+                                                : "Hide Grid"}
+                                            </span>
+                                          </Button2>
+                                        </>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              {displayType === "selected" && (
+                                <SelectedActions
+                                  form={form}
+                                  features={features}
+                                  filterGridConfig={filterGridConfig}
+                                  customFormFilterLockFormActions={
+                                    customFormFilterLockFormActions
+                                  }
+                                />
+                              )}
+
+                              {!form?.formState?.disabled &&
+                                filterGridConfig &&
+                                displayType !== "selected" &&
+                                !formProps?.isOpenSearch && (
+                                  <FormFilterOpenedActions
+                                    features={features}
+                                     /**TODO: MODIFY */
+                                    selectedRecords={field.code ? [field] : []}
+                                    customFormFilterViewFormActions={
+                                      customFormFilterViewFormActions
+                                    }
+                                    onSubmitFormGrid={onSubmitFormGrid}
+                                    /**TODO: MODIFY */
+                                    handleRemovedSelectedRecords={
+                                      handleRemovedSelectedRecords.bind(null, [field], index)
+                                    }
+                                    form={form}
+                                    filterGridConfig={filterGridConfig}
+                                  />
+                                )}
+                            </div>
+
                             {searchActive && (
                               <FormFilterGridLayout
                                 isFormOpen={isFormOpened}
@@ -501,8 +638,7 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
                                   handleNewRecordFormFilterGrid
                                 }
                                 handleCloseGrid={handleCloseGrid}
-                                //@ts-ignore
-                                filterGridConfig={filterGridConfig}
+                                filterGridConfig={filterGridConfig!}
                               />
                             )}
                           </>
@@ -541,16 +677,33 @@ export const MultipleFormBuilder: React.FC<IMultipleFormBuilderProps> = (
                             />
                           )}
                           {displayType === "selected" && (
-                            <SelectedViewLayout
-                              formGridSelected={formGridSelected}
-                              handleUpdateDisplayType={handleUpdateDisplayType}
-                              filterGridConfig={filterGridConfig}
-                              handleRemovedSelectedRecords={handleRemovedSelectedRecords.bind(
-                                null,
-                                [field],
-                                index,
-                              )}
-                            />
+                            <CardContent>
+                              <Fragment key={prefix}>
+                                <Card className="border-none shadow-none">
+                                  <CardHeader
+                                    className={
+                                      "flex flex-row items-center justify-between"
+                                    }
+                                  >
+                                    <CardTitle className="text-sm">
+                                      {field.code}
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    {filterGridConfig?.renderComponentSelected ? (
+                                      filterGridConfig.renderComponentSelected(
+                                        field,
+                                      )
+                                    ) : (
+                                      <pre>
+                                        {JSON.stringify(field, null, 2)}
+                                      </pre>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                                {/* {index !== records.length - 1 && <Separator />} */}
+                              </Fragment>
+                            </CardContent>
                           )}
                           <Separator dashed />
                         </Fragment>

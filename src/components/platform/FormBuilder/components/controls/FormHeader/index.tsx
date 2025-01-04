@@ -28,7 +28,6 @@ const FormHeader = (props: IFormHeaderProps) => {
     handleLock,
     handleOpen,
     saveForm,
-    onSubmitFormGrid,
     handleAppendForm,
     selectedRecords,
     handleUpdateDisplayType,
