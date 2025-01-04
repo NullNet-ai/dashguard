@@ -7,7 +7,7 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { removeRecord, savedRecord, selectRecord } from "./actions";
-import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
+import gridColumns from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
 import { UserRoleFormSchema } from "~/server/zodSchema/user_role/basicDetails";
@@ -108,7 +108,7 @@ export default function RoleDetails({
         filter_entity: "user_role",
         main_entity_id: params.id,
         gridColumns: gridColumns,
-        fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
+        // fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
         label: "Roles",
@@ -145,13 +145,6 @@ export default function RoleDetails({
             main_entity_id: response.main_entity_id,
           };
         },
-        onFilterFieldChange: (search_params, options) => {
-          const { data } = api.contact.mainGrid.useQuery(
-            search_params,
-            options,
-          );
-          return data;
-        },
         handleSelectFieldFilterGrid: (data) => {
           return data;
         },
@@ -177,6 +170,11 @@ export default function RoleDetails({
           label: "Role",
           required: true,
           placeholder: "Role",
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: "user_roles",
+            field: "role",
+          },
         },
       ]}
     />
