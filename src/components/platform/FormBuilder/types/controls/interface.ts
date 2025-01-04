@@ -22,7 +22,6 @@ interface IFormHeaderProps {
   handleLock: (e: React.MouseEvent<HTMLButtonElement>) => void;
   handleOpen: (e: React.MouseEvent<HTMLButtonElement>) => void;
   saveForm(data: z.infer<TFormSchema>): Promise<void>;
-  onSubmitFormGrid(data: z.infer<TFormSchema>): Promise<void>;
   selectedRecords: any[];
   handleUpdateDisplayType: (type: TDisplayType) => void;
   formKey: string,
