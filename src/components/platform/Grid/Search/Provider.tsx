@@ -15,7 +15,7 @@ import {
 } from "./types";
 import { api } from "~/trpc/react";
 import { GridContext } from "../Provider";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UpdateReportFilter } from "../Action/UpdateReportFilter";
 import { ulid } from "ulid";
 import { formatAndCapitalize } from "~/lib/utils";
@@ -37,6 +37,8 @@ export default function GridSearchProvider({ children }: IProps) {
   } = gridState?.config ?? {};
 
   const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("current_tab");
   const router = useRouter();
 
   /** @STATES */
@@ -117,14 +119,21 @@ export default function GridSearchProvider({ children }: IProps) {
           rest?.field === "raw_phone_number"
             ? [rest?.values?.[0]?.replace(/[^\d]/g, "")]
             : [rest?.values?.[0]],
-        display_value: rest?.values?.[0]
+        display_value: rest?.values?.[0],
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
     await UpdateReportFilter({
       filters: updateSearchItems,
     });
-    router.push(`${pathName}?advanceFilterItem=${filterItem.id}`);
+
+    if (!!currentTab) {
+      router.push(
+        `${pathName}?current_tab=${currentTab}&advanceFilterItem=${filterItem.id}`,
+      );
+    } else {
+      router.push(`${pathName}?advanceFilterItem=${filterItem.id}`);
+    }
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery("");
