@@ -15,18 +15,20 @@ const RecordSummaryContent = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier] = pathname.split("/");
 
-  const recordDetails = await api.record.getByCode({
+  const recordDetails = await api.record.getByCodeWithJoin({
     id: identifier!,
     pluck_fields: [
       "id",
       "code",
-      "name",
+      "first_name",
+      "last_name",
       "status",
       "created_date",
       "created_time",
       "updated_date",
       "updated_time",
       "categories",
+      "updated_by"
     ],
     main_entity: mainEntity!,
   });
