@@ -1,7 +1,7 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod";
-import { EOperator, IResponse } from "@dna-platform/common-orm";
 import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
+import { IAdvanceFilters } from "@dna-platform/common-orm";
 
 export const recordRouter = createTRPCRouter({
   getById: privateProcedure
@@ -53,7 +53,7 @@ export const recordRouter = createTRPCRouter({
         const { data, ...rest } = recordByCode ?? {};
         return {
           ...rest,
-          data: recordByCode?.data?.[0],
+          data: data?.[0],
         };
       } catch (error) {
         return {
@@ -75,90 +75,124 @@ export const recordRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { id, pluck_fields, main_entity: entity } = input;
-      const response = await ctx.dnaClient
-        .findAll({
-          entity,
-          token: ctx.token.value,
-          query: {
-            advance_filters: [
-              {
-                type: "criteria",
-                field: "code",
-                operator: EOperator.EQUAL,
-                values: [id],
+      const join_type = entity === "contact" ? "self" : "left" as "self" | "left" | "right" | "inner";
+      const base_query = {
+        entity,
+        token: ctx.token.value,
+        query: {
+          advance_filters: [
+            {
+              type: "criteria",
+              field: "code",
+              operator: "equal",
+              values: [id],
+            },
+          ] as IAdvanceFilters<string | number>[],
+          pluck_object: {
+            [`${entity}s`]: pluck_fields,
+            ...(join_type === "self"
+              ? {}
+              : { contacts: ["first_name", "last_name"] }),
+          },
+        },
+      };
+      const base_join = {
+        type: join_type,
+        field_relation:
+          join_type === "self"
+            ? {
+                to: {
+                  entity,
+                  field: "created_by",
+                },
+                from: {
+                  ...(join_type === "self" ? { alias: "created_by" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              }
+            : {
+                from: {
+                  entity,
+                  field: "created_by",
+                },
+                to: {
+                  entity: "contact",
+                  field: "id",
+                },
               },
-            ],
-            pluck: pluck_fields,
+      };
+      const self_join = {
+        type: join_type,
+        field_relation: {
+          to: {
+            entity,
+            field: "updated_by",
           },
-        })
-        .join({
-          type: "left",
-          field_relation: {
-            to: {
-              entity: "contact",
-              field: "id",
-            },
-            from: {
-              entity,
-              field: "created_by",
-            },
+          from: {
+            ...(join_type === "self" ? { alias: "updated_by" } : {}),
+            entity: "contact",
+            field: "id",
           },
-        })
-        /*
-        Note: If same entity already exist w/ previous join's entity, it will throw an error.
-        For now, will create another TRPC request to sastisfy it.
-        */
-        // .join({
-        //   type: "left",
-        //   field_relation: {
-        //     to: {
-        //       entity: "contact",
-        //       field: "id",
-        //     },
-        //     from: {
-        //       entity,
-        //       field: "updated_by",
-        //     },
-        //   },
-        // })
-        .execute();
+        },
+      };
+      const query = ctx.dnaClient.findAll(base_query).join(base_join);
+
+      if (join_type === "self") {
+        query.join(self_join);
+      }
+
+      const response = await query.execute();
+
       const { data } = response;
+
       if (data) {
         const [item] = data;
         if (item) {
-          const { organizations, contacts } = item;
-          const { updated_by } = organizations;
-          const { first_name, last_name } = contacts;
-          let formatted_data = {
-            ...response,
-            data: {
-              ...organizations,
-              created_by_data: {
-                first_name,
-                last_name,
+          let formatted_data;
+          if (entity === "contact") {
+            const { contacts, created_by, updated_by } = item;
+            formatted_data = {
+              ...response,
+              data: {
+                ...contacts,
+                created_by_data: {
+                  first_name: created_by.first_name,
+                  last_name: created_by.last_name,
+                },
+                updated_by_data: {
+                  first_name: updated_by.first_name,
+                  last_name: updated_by.last_name,
+                },
               },
-            },
-          };
-          if (updated_by) {
-            const response = await ctx.dnaClient
-              .findOne(updated_by, {
+            };
+          } else {
+            //THIS IS TEMPORARY SINCE THE DOUBLE JOIN OF THE SAME ENTITY IS STILL AN ISSUE IN TH DB SIDE
+            const { contacts, [entity + "s"]: entity_data } = item;
+            const updated_by_response = await ctx.dnaClient
+              .findOne(entity_data.updated_by, {
                 entity: "contact",
                 token: ctx.token.value,
                 query: {
-                  pluck: ["id", "first_name", "last_name"],
+                  pluck: ["first_name", "last_name"],
                 },
               })
               .execute();
-            const {
-              data: [item],
-            } = response;
             formatted_data = {
-              ...formatted_data,
+              ...response,
               data: {
-                ...formatted_data.data,
-                updated_by_data: item,
+                ...entity_data,
+                created_by_data: {
+                  first_name: contacts.first_name,
+                  last_name: contacts.last_name,
+                },
+                updated_by_data: {
+                  first_name: updated_by_response?.data?.[0]?.first_name,
+                  last_name: updated_by_response?.data?.[0]?.last_name,
+                },
               },
             };
+            return formatted_data;
           }
           return formatted_data;
         }
