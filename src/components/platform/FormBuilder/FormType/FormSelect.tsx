@@ -118,7 +118,7 @@ export default function FormSelect({
               <Badge
                 data-test-id={`${formKey}-opt-${option}-${fieldConfig.name}`}
                 key={index}
-                className="mx-2 border border-green-800 bg-green-50 text-green-800"
+                className="mx-2 border border-success bg-success/10 text-success"
               >
                 {option}
               </Badge>
@@ -159,10 +159,10 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
+              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
               {
                 "outline-destructive": error,
-                "border-red-500": error,
+                "border-destructive": error,
                 "cursor-not-allowed": isDisabled,
                 "cursor-text": isReadOnly,
               },
@@ -192,7 +192,7 @@ export default function FormSelect({
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ChevronDownIcon
-              className={cn("absolute right-2 top-2.5 size-5 text-gray-400", {
+              className={cn("absolute right-2 top-2.5 size-5 text-muted-foreground", {
                 "opacity-50": isDisabled || isReadOnly,
               })}
               aria-hidden="true"
@@ -205,7 +205,7 @@ export default function FormSelect({
                 ref={setPopperElement}
                 style={styles.popper}
                 {...attributes.popper}
-                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                 data-test-id={`${formKey}-opts-${fieldConfig.name}`}
               >
                 {filteredOptions?.slice(0, 700).map((opt) => (
@@ -214,7 +214,7 @@ export default function FormSelect({
                     value={opt}
                     disabled={isDisabled || isReadOnly}
                     className={cn(
-                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none",
+                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
                       {
                         "cursor-not-allowed": isDisabled,
                         "cursor-default": isReadOnly,
@@ -229,7 +229,7 @@ export default function FormSelect({
                       {opt.label}
                     </span>
 
-                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-indigo-600 group-data-[selected]:flex group-data-[focus]:text-white">
+                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
                       <CheckIcon className="size-5" aria-hidden="true" />
                     </span>
                   </ComboboxOption>
@@ -237,7 +237,7 @@ export default function FormSelect({
               </ComboboxOptions>
             ) : (
               <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white data-[focus]:outline-none">
+                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none">
                   <span
                     className="block truncate group-data-[selected]:font-semibold"
                     data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
