@@ -74,6 +74,7 @@ export default function FormNumber({
           onChange={handleChange}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
+          autoComplete="off"
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
