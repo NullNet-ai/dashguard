@@ -1,6 +1,6 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod"; // Zod is used for input validation
-const PLACES_API = process.env.PLACES_API!;
+const PLACES_API = process.env.PLACES_API ?? "https://api.places.platform.dnadev.net";
 const authtoken = Buffer.from(
   `places-api:4lc0UxobR=DuyL4r?=uS`,
   "utf8",
