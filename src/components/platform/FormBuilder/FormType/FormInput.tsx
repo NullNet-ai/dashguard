@@ -62,6 +62,7 @@ export default function FormInput({
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
+          autoComplete="off"
           hasError={!!formRenderProps.fieldState.error}
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}

@@ -22,7 +22,7 @@ import { Badge } from "~/components/ui/badge";
 import { ulid } from "ulid";
 import { toast } from "sonner";
 // import { DevTool } from "@hookform/devtools";
-import { isPhoneValid } from "../Utils/phoneValidator"
+import { isPhoneValid } from "../Utils/phoneValidator";
 import useInputPosition from "~/hooks/use-position";
 
 interface IPhoneData {
@@ -146,8 +146,6 @@ export default function FormPhoneInput({
     }
   });
 
-  
-
   const isDisabled = formRenderProps?.field?.disabled;
   const isMultiple = fieldConfig?.options?.phoneNumberType === "multiple";
   const values = form.watch(name);
@@ -169,17 +167,19 @@ export default function FormPhoneInput({
           <FormControl>
             <>
               <div
-                className={`flex items-center border ${error?.[index] && "border-destructive"} focus-within:border-primary  focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 ring-offset-background`}
+                className={`flex items-center border ${error?.[index] && "border-destructive"} ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0`}
               >
-                
                 <PhoneInput
                   // {...register(`${name}.${index}.raw_phone_number`)}
                   data-test-id={`${formKey}-inp-${index > 0 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
                     "data-test-id": `${formKey}-inp-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
-                    readOnly:(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false,
-                    ref:inputRef
+                    readOnly:
+                      (formRenderProps.field.disabled ||
+                        fieldConfig?.readonly) ??
+                      false,
+                    ref: inputRef,
                   }}
                   countrySelectorStyleProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
@@ -191,16 +191,21 @@ export default function FormPhoneInput({
                       borderColor: "transparent",
                       colorScheme: "normal",
                     },
-                    dropdownStyleProps:{
-                      style:{
-                        ...(positionClass === "top" ? {top: "-205px"} : {})
-                      }
+                    dropdownStyleProps: {
+                      style: {
+                        ...(positionClass === "top" ? { top: "-205px" } : {}),
+                      },
                     },
                     buttonClassName: "!focus-visible:border-r-primary ",
                   }}
                   defaultCountry="us"
                   disabled={fieldConfig.disabled}
-                  value={values && values[index] ? `+${values[index].raw_phone_number || ""}` : ""}
+                  forceDialCode={true}
+                  value={
+                    values && values[index]
+                      ? `+${values[index].raw_phone_number || ""}`
+                      : ""
+                  }
                   onChange={(phone, meta) => {
                     handlePhoneNumberChange(index, phone, meta);
                     if (handleSearch) {
@@ -208,7 +213,7 @@ export default function FormPhoneInput({
                     }
                   }}
                   className={cn(
-                    "focus-visible:ring-offset-[-4] disabled:cursor-not-allowed mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:border-transparent disabled:opacity-100",
+                    "mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
                     `${isDisabled && "pointer-events-none border-transparent opacity-100"}`,
                   )}
                   inputStyle={{
@@ -236,7 +241,11 @@ export default function FormPhoneInput({
                 {!field.is_primary && isMultiple && (
                   <Button
                     name={`${name}.${index}.isPrimaryButton`}
-                    disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+                    disabled={
+                      (formRenderProps.field.disabled ||
+                        fieldConfig?.readonly) ??
+                      false
+                    }
                     data-test-id={`${formKey}-prim-btn-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                     variant={"ghost"}
                     size={"icon"}
@@ -258,7 +267,11 @@ export default function FormPhoneInput({
                 {isMultiple && (
                   <Button
                     name={`${name}.${index}.RemovePhoneNumberButton`}
-                    disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+                    disabled={
+                      (formRenderProps.field.disabled ||
+                        fieldConfig?.readonly) ??
+                      false
+                    }
                     type="button"
                     variant={"ghost"}
                     size={"icon"}
@@ -287,7 +300,7 @@ export default function FormPhoneInput({
         </div>
       ))}
 
-      {!isDisabled && isMultiple && (
+      {!isDisabled && isMultiple && !fieldConfig?.readonly && (
         <Button
           name={`${name}.AddPhoneNumberButton`}
           data-test-id={`${formKey}-add-btn-${fieldConfig.name}`}
@@ -297,7 +310,9 @@ export default function FormPhoneInput({
           iconPlacement="left"
           onClick={handleAddPhoneNumber}
           className="mt-2 disabled:opacity-100"
-          disabled={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          disabled={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
         >
           Add Phone Number
         </Button>

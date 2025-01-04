@@ -48,7 +48,7 @@ export default function FormFilterOpenedActions({
   const { onClipboardPaste } = filterGridConfig ?? {};
   const actions = [
     {
-      icon: <Copy className="h-4 w-4 text-slate-500" />,
+      icon: <Copy className="h-4 w-4 text-muted-foreground" />,
       label: "Copy",
       onClick: async () => {
         await navigator.clipboard.writeText(
@@ -59,7 +59,7 @@ export default function FormFilterOpenedActions({
       },
     },
     {
-      icon: <ClipboardIcon className="h-4 w-4 text-slate-500" />,
+      icon: <ClipboardIcon className="h-4 w-4 text-muted-foreground" />,
       label: "Paste",
       onClick: async () => {
         if (navigator.clipboard && navigator.clipboard.readText) {
@@ -109,7 +109,7 @@ export default function FormFilterOpenedActions({
       },
     },
     {
-      icon: <XIcon className="h-4 w-4 text-slate-500" strokeWidth={3} />,
+      icon: <XIcon className="h-4 w-4 text-muted-foreground" strokeWidth={3} />,
       label: "Clear",
       onClick: () => {
         console.info("I am clearing the form");
@@ -146,7 +146,7 @@ export default function FormFilterOpenedActions({
       },
     },
     {
-      icon: <Eraser className="h-4 w-4 text-slate-500" />,
+      icon: <Eraser className="h-4 w-4 text-muted-foreground" />,
       label: "Remove Selection",
       onClick: () => {
         const currentValues = form.formState.defaultValues;

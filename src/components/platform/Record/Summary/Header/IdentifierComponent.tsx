@@ -46,9 +46,8 @@ export default function IdentifierComponent({
 
   const memoizedRecordData = useMemo(() => {
     return {
-      recordId: code,
       status: status,
-      identifier: state?.entityCode,
+      recordId: state?.entityCode ?? "",
       entityName: state?.entityName,
     };
   }, [state?.entityCode, state?.entityName, code, status]);

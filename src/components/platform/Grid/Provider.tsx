@@ -12,10 +12,10 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   getCoreRowModel,
-  Row,
+  type Row,
   type RowSelectionState,
-  SortingState,
-  Updater,
+  type SortingState,
+  type Updater,
   useReactTable,
 } from "@tanstack/react-table";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -222,7 +222,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <PlusCircleIcon className="h-5 w-5 text-sky-500" />
+            <PlusCircleIcon className="h-5 w-5 text-primary" />
           </Button2>
         );
       }
@@ -236,7 +236,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <FileIcon className="h-5 w-5 text-sky-500" />
+            <FileIcon className="h-5 w-5 text-primary" />
           </Button>
         );
       }
