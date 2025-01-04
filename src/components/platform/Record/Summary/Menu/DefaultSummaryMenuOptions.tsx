@@ -14,7 +14,6 @@ import { ReactNode, useMemo } from "react";
 
 interface IMemoizedRecordData {
   entityName?: string;
-  identifier?: string;
   status: string;
   recordId: string;
 }
