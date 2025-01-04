@@ -20,6 +20,7 @@ export interface DefaultRowActions {
   setOpen?: (open: boolean) => void;
   setRecord?: (record: any) => void;
   record?: any;
+  viewMode?: "table" | "card";
 }
 
 export interface DefaultBulkActions {
