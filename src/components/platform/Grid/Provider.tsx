@@ -218,7 +218,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <PlusCircleIcon className="h-5 w-5 text-sky-500" />
+            <PlusCircleIcon className="h-5 w-5 text-primary" />
           </Button2>
         );
       }
@@ -232,7 +232,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <FileIcon className="h-5 w-5 text-sky-500" />
+            <FileIcon className="h-5 w-5 text-primary" />
           </Button>
         );
       }
