@@ -108,7 +108,6 @@ const FormBuilderLayout = ({
           handleLock={handleLock}
           handleOpen={handleOpenForm}
           features={features}
-          onSubmitFormGrid={onSubmitFormGrid}
           handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
           handleAppendForm={handleAppendForm}
           selectedRecords={formGridSelected}

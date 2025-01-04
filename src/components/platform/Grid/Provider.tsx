@@ -12,10 +12,10 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   getCoreRowModel,
-  Row,
+  type Row,
   type RowSelectionState,
-  SortingState,
-  Updater,
+  type SortingState,
+  type Updater,
   useReactTable,
 } from "@tanstack/react-table";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -57,6 +57,7 @@ export default function GridProvider({
   defaultSorting,
   advanceFilter = [],
   defaultAdvanceFilter = [],
+  pagination,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -99,6 +100,7 @@ export default function GridProvider({
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
+    hideCreateButton: false,
     ..._propsConfig,
   };
 
@@ -141,14 +143,16 @@ export default function GridProvider({
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
     const _sorting = typeof updater === "function" ? updater(sorting) : updater;
-    const resolvedSorting = _sorting?.map(sort => {
-      const sort_key =  config?.columns?.find((column: any) => column?.accessorKey === sort.id)?.sortKey || sort.id
+    const resolvedSorting = _sorting?.map((sort) => {
+      const sort_key =
+        config?.columns?.find((column: any) => column?.accessorKey === sort.id)
+          ?.sortKey || sort.id;
       return {
         ...sort,
-        sort_key
-      }
-    })
-    UpdateReportSorting({ entity: config?.entity, sorting: resolvedSorting });
+        sort_key,
+      };
+    });
+    UpdateReportSorting({ sorting: resolvedSorting });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
@@ -218,7 +222,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <PlusCircleIcon className="h-5 w-5 text-sky-500" />
+            <PlusCircleIcon className="h-5 w-5 text-primary" />
           </Button2>
         );
       }
@@ -232,7 +236,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <FileIcon className="h-5 w-5 text-sky-500" />
+            <FileIcon className="h-5 w-5 text-primary" />
           </Button>
         );
       }
@@ -369,8 +373,8 @@ export default function GridProvider({
       await BulkArchive({ entity: config?.entity, record_ids });
       setArchiveBulkLoading(false);
       table?.resetRowSelection();
-      setShowBulkActionConfirmationModal(false)
-      setBulkActionType(null)
+      setShowBulkActionConfirmationModal(false);
+      setBulkActionType(null);
     } catch (error) {
       console.error("An error occurred while creating a record", error);
       setArchiveBulkLoading(false);
@@ -406,7 +410,8 @@ export default function GridProvider({
     advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,
-    bulkActionType
+    bulkActionType,
+    pagination
   } as IState;
   const actions = {
     handleCreate,
@@ -420,7 +425,7 @@ export default function GridProvider({
     setShowArchiveConfirmationModal,
     setRowToArchive,
     setShowBulkActionConfirmationModal,
-    setBulkActionType
+    setBulkActionType,
   } as IAction;
 
   return (

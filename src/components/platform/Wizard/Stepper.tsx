@@ -98,7 +98,7 @@ export default function MyVerticalStepper() {
       >
         <div
           className={cn(
-            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-3",
+            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[10px]",
             { "text-center sm:p-0": !isSummOpen },
           )}
         >
@@ -170,7 +170,7 @@ export default function MyVerticalStepper() {
                           </>
                         )
                       ) : (
-                        <>
+                        <>  
                           {stepsArray.length > stepIdx + 1 ? (
                             <div
                               aria-hidden="true"
@@ -234,7 +234,7 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block mt-[15px]">
+                                  <div className="text-sm font-medium sm:block mt-[16px]">
                                     {component}
                                   </div>
                                 </AccordionContent>

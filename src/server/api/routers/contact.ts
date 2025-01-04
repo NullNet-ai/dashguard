@@ -177,13 +177,14 @@ export const contactRouter = createTRPCRouter({
         ]
       : [...(input?.advance_filters ?? [])];
 
-    const { total_count: totalCount = 1, data: items} = await ctx.dnaClient
+    const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
       .findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           pluck_group_object: {
-            contact_phone_numbers: ["raw_phone_number"],
+            contact_phone_numbers: ["raw_phone_number", "is_primary"],
+            contact_emails: ["email", "is_primary"],
           },
           pluck_object: {
             contact_emails: ["email", "is_primary"],
@@ -249,30 +250,30 @@ export const contactRouter = createTRPCRouter({
         },
       })
       .join({
-        type: 'self',
+        type: "self",
         field_relation: {
           to: {
-            entity: 'contact',
-            field: 'created_by',
+            entity: "contact",
+            field: "created_by",
           },
           from: {
-            alias: 'created_by',
-            entity: 'contact',
-            field: 'id',
+            alias: "created_by",
+            entity: "contact",
+            field: "id",
           },
         },
       })
       .join({
-        type: 'self',
+        type: "self",
         field_relation: {
           to: {
-            entity: 'contact',
-            field: 'updated_by',
+            entity: "contact",
+            field: "updated_by",
           },
           from: {
-            alias: 'updated_by',
-            entity: 'contact',
-            field: 'id',
+            alias: "updated_by",
+            entity: "contact",
+            field: "id",
           },
         },
       })
@@ -280,13 +281,21 @@ export const contactRouter = createTRPCRouter({
 
     //TODO: Transform the data - temporary
     const formatted_items = items.reduce(
-      (acc: Record<string, string>[], item) => {
-        const { contacts, contact_emails, contact_phone_numbers, created_by, updated_by } = item;
-        const emails = pick(contact_emails, ["email"]);
+      (acc: Record<string, string>[], item: Record<string, any>) => {
+        const {
+          contacts,
+          contact_emails,
+          contact_phone_numbers,
+          created_by,
+          updated_by,
+        } = item;
+
+        const emails = pick(contact_emails, ["emails", "is_primaries"]);
         const phones = pick(contact_phone_numbers, [
-          "raw_phone_number",
+          "raw_phone_numbers",
           "iso_code",
           "country_code",
+          "is_primaries",
         ]);
         const existing_contact = acc?.find(
           (acc_item: any) => acc_item?.id === contacts?.id,
@@ -294,9 +303,27 @@ export const contactRouter = createTRPCRouter({
 
         if (existing_contact) return acc;
 
-        const { raw_phone_number, iso_code } = phones;
+        const {
+          raw_phone_numbers,
+          iso_code,
+          is_primaries: p_is_primaries,
+        } = phones;
+        const { emails: _emails, is_primaries: e_is_primaries } = emails;
+        const filterPrimary = (li: string[], is_primaries: number[]) => {
+          if (!li || !is_primaries) return null;
+          const index = is_primaries?.findIndex(
+            (is_primary) => is_primary === 1,
+          );
+          return index !== -1 ? li[index] : null;
+        };
+        const _primary_phone_number = filterPrimary(
+          raw_phone_numbers,
+          p_is_primaries,
+        );
+        const primary_email = filterPrimary(_emails, e_is_primaries);
+
         const primary_phone_number = formatPhoneNumber({
-          raw_phone_number,
+          raw_phone_number: _primary_phone_number as string,
           iso_code,
         });
 
@@ -306,9 +333,10 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
-            created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
-            updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
+            created_by: `${created_by?.first_name ?? ""} ${created_by?.last_name ?? ""}`,
+            updated_by: `${updated_by?.first_name ?? ""} ${updated_by?.last_name ?? ""}`,
             raw_phone_number: primary_phone_number,
+            email: primary_email,
           },
         ];
       },

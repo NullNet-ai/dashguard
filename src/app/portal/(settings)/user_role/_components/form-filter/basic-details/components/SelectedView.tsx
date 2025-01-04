@@ -10,7 +10,6 @@ const SelectedView = ({ record }: Record<string, any>) => {
         <Input
           readOnly={true}
           className={`${true && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={true}
           placeholder={"Role"}
           value={record?.role}
           required={true}

@@ -6,7 +6,6 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 import { ContactOrganizationDetailsSchema } from "~/server/zodSchema/contact/organizationDetails";
 
 export default function OrganizationDetails({
@@ -41,7 +40,7 @@ export default function OrganizationDetails({
   return (
     <FormBuilder
       myParent={params.shell_type}
-      // enableFormRegisterToParent
+      enableFormRegisterToParent={false}
       formProps={params}
       formLabel="Organization"
       handleSubmit={handleSave}
