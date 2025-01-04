@@ -55,7 +55,6 @@ export default function OrganizationDetails({
           formType: "multi-select",
           name: "organizations",
           label: "Organization",
-          placeholder: "Organization",
           required: true,
         },
         {
@@ -63,7 +62,6 @@ export default function OrganizationDetails({
           formType: "multi-select",
           name: "user_roles",
           label: "Role",
-          placeholder: "Role",
           required: true,
         },
       ]}
