@@ -12,10 +12,10 @@ import {
   type ColumnDef,
   type ColumnSizingState,
   getCoreRowModel,
-  Row,
+  type Row,
   type RowSelectionState,
-  SortingState,
-  Updater,
+  type SortingState,
+  type Updater,
   useReactTable,
 } from "@tanstack/react-table";
 import { Checkbox } from "~/components/ui/checkbox";
