@@ -18,37 +18,41 @@ import { Label } from "~/components/ui/label";
 import { useSidebar } from "~/components/ui/sidebar";
 import { camelCase } from "lodash";
 import { testIDFormatter } from "~/utils/formatter";
+import { Button } from "~/components/ui/button";
+import { UpdateReportPagination } from "./Action/UpdateReportPagination";
 export default function Pagination() {
   const { state } = useContext(GridContext);
 
   const { open } = useSidebar();
 
-  const router = useRouter();
-  const pathName = usePathname();
-  const searchParams = useSearchParams();
-
   const { currentPage, totalPages, rows, totalRows } = useMemo(() => {
-    const getCurrentPage = searchParams.get("page") ?? 1;
+    const { current_page = 1, limit_per_page = 100 } = state?.pagination ?? {};
     const getTotalRows = state?.totalCount || 0;
-    const getRows = searchParams.get("perPage") ?? 100;
-    const getTotalPages = Math.ceil(getTotalRows / Number(getRows));
+    const getTotalPages = Math.ceil(getTotalRows / Number(limit_per_page));
     return {
-      currentPage: getCurrentPage,
+      currentPage: current_page,
       totalPages: getTotalPages,
-      rows: getRows,
+      rows: limit_per_page,
       totalRows: getTotalRows,
     };
-  }, [searchParams, state]);
+  }, [state?.pagination, state?.totalCount]);
 
   const rowsPerPage = [10, 20, 30, 40, 50, 100];
-  const [perPageValue, setPerPageValue] = useState(
-    searchParams.get("perPage") || "100",
-  );
 
   const handlePerPageValueChange = (value: string) => {
-    setPerPageValue(value);
-    router.push(`${pathName}?page=1&perPage=${value}`);
+    UpdateReportPagination({
+      current_page: Number(currentPage),
+      limit_per_page: Number(value),
+    });
   };
+
+  const handlePaginationChange = (page: number) => {
+    UpdateReportPagination({
+      current_page: Number(page),
+      limit_per_page: Number(rows),
+    });
+  };
+
   const width = open
     ? " md:w-[calc(100%-265px)] md:left-[258px]"
     : "md:w-[calc(100%-70px)] md:left-[80px]";
@@ -90,7 +94,7 @@ export default function Pagination() {
             <Label className="whitespace-nowrap">Rows Per Page</Label>
             <Select
               onValueChange={handlePerPageValueChange}
-              defaultValue={`${perPageValue}` || "10"}
+              defaultValue={`${rows}` || "10"}
             >
               <SelectTrigger
                 data-test-id={testIDFormatter(
@@ -124,46 +128,51 @@ export default function Pagination() {
             aria-label="Pagination"
             className="isolate inline-flex -space-x-px rounded-md"
           >
-            <a
+            <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-first-page-btn`,
               )}
-              href={`?page=${Math.min(Number(currentPage) * -5, 1)}&perPage=${rows}`}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              variant="ghost"
+              size="icon"
+              onClick={() => handlePaginationChange(1)}
+              disabled={currentPage == 1}
             >
-              <span className="sr-only">Previous</span>
               <ChevronDoubleLeftIcon aria-hidden="true" className="h-5 w-5" />
-            </a>
-            <a
+            </Button>
+            <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-prev-page-btn`,
               )}
-              href={`?page=${Math.max(Number(currentPage) - 1, 1)}&perPage=${rows}`}
-              className="relative inline-flex items-center px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                handlePaginationChange(Math.max(Number(currentPage) - 1, 1))
+              }
+              disabled={currentPage == 1}
             >
-              <span className="sr-only">Previous</span>
               <ChevronLeftIcon aria-hidden="true" className="h-5 w-5" />
-            </a>
-
-            <a
-              href={`?page=1&perPage=${rows}`}
+            </Button>
+            <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-page1-btn`,
               )}
-              className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == 1 ? "bg-violet-400": ""}`}
+              variant={currentPage == 1 ? "softPrimary" : "ghost"}
+              size="icon"
+              onClick={() => handlePaginationChange(1)}
             >
               1
-            </a>
+            </Button>
             {totalPages > 1 && (
-              <a
-                href={`?page=2&perPage=${rows}`}
+              <Button
                 data-test-id={testIDFormatter(
-                  `${state?.config.entity}-grd-pagination-page1-btn`,
+                  `${state?.config.entity}-grd-pagination-page2-btn`,
                 )}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == 2 ? "bg-violet-400": ""}`}
+                variant={currentPage == 2 ? "softPrimary" : "ghost"}
+                size="icon"
+                onClick={() => handlePaginationChange(2)}
               >
                 2
-              </a>
+              </Button>
             )}
 
             {totalPages > 3 ? (
@@ -177,23 +186,23 @@ export default function Pagination() {
                 >
                   <MenuItems
                     transition
-                    className="absolute bottom-full left-0 z-10 mb-2 w-20 origin-bottom-left rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                    className="absolute bottom-full left-0 z-10 mb-2 origin-bottom-left rounded-md bg-white p-2 shadow-2xl ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                   >
                     <div className="flex max-h-72 flex-col overflow-auto py-1">
                       {Array.from({ length: totalPages }, (_, index) => (
                         <MenuItem key={index + 1}>
-                          <a
-                            href={`?page=${index + 1}&perPage=${rows}`}
-                            className={cn(
-                              "block px-4 py-2 text-sm data-[focus]:bg-gray-100",
-                              currentPage == index + 1 ? "bg-violet-400": ""
-                            )}
+                          <Button
                             data-test-id={testIDFormatter(
                               `${state?.config.entity}-grd-pagination-page-menu-${index + 1}`,
                             )}
+                            variant={
+                              currentPage == index + 1 ? "softPrimary" : "ghost"
+                            }
+                            size="icon"
+                            onClick={() => handlePaginationChange(index + 1)}
                           >
                             {index + 1}
-                          </a>
+                          </Button>
                         </MenuItem>
                       ))}
                     </div>
@@ -214,39 +223,50 @@ export default function Pagination() {
                 </Menu>
               </span>
             ) : null}
-            {totalPages > 2 ? (
-              <a
-                href={`?page=${totalPages}&perPage=${rows}`}
+            {totalPages > 2 && (
+              <Button
                 data-test-id={testIDFormatter(
                   `${state?.config.entity}-grd-pagination-last-page-btn`,
                 )}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${currentPage == totalPages ? "bg-violet-400": ""}`}
+                variant={currentPage == totalPages ? "softPrimary" : "ghost"}
+                size="icon"
+                onClick={() => handlePaginationChange(totalPages)}
               >
                 {totalPages}
-              </a>
-            ) : null}
+              </Button>
+            )}
 
-            <a
-              href={`?page=${Math.min(Number(currentPage) + 1, totalPages)}&perPage=${rows}`}
+            <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-next-btn`,
               )}
-              className="relative inline-flex items-center px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              variant={"ghost"}
+              size="icon"
+              onClick={() =>
+                handlePaginationChange(
+                  Math.min(Number(currentPage) + 1, totalPages),
+                )
+              }
+              disabled={currentPage == totalPages}
             >
-              <span className="sr-only">Next</span>
-
               <ChevronRightIcon aria-hidden="true" className="h-5 w-5" />
-            </a>
-            <a
-              href={`?page=${Math.max(Number(currentPage) * 5, totalPages)}&perPage=${rows}`}
+            </Button>
+
+            <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-last-btn`,
               )}
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              variant={"ghost"}
+              size="icon"
+              onClick={() =>
+                handlePaginationChange(
+                  Math.max(Number(currentPage) * 5, totalPages),
+                )
+              }
+              disabled={currentPage == totalPages}
             >
-              <span className="sr-only">Next</span>
               <ChevronDoubleRightIcon aria-hidden="true" className="h-5 w-5" />
-            </a>
+            </Button>
           </nav>
         </div>
       </div>

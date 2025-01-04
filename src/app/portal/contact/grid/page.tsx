@@ -5,6 +5,7 @@ import { defaultSorting } from "./_config/sorting";
 import { searchableFields } from "./_config/searchableFields";
 import { defaultAdvanceFilter } from "./_config/advanceFilter";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 interface IReportFilter {
   advanceFilter: ISearchItem[];
@@ -38,13 +39,12 @@ export default async function Page({
     "updated_by",
   ];
 
-  const sorting = await api.grid.getReportSorting();
-  const filters = (await api.grid.getReportFilter()) as IReportFilter
+  const { sorting, pagination, filters } = await getGridCacheData();
 
   // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
   const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(searchParams.page ?? "0"),
-    limit: +(searchParams.perPage ?? "100"),
+    current: +(pagination.current_page ?? "0"),
+    limit: +(pagination.limit_per_page ?? "100"),
     entity: "contact",
     pluck: _pluck,
     sorting: sorting?.length ? sorting : defaultSorting,
@@ -61,6 +61,7 @@ export default async function Page({
       defaultAdvanceFilter={defaultAdvanceFilter}
       advanceFilter={filters.reportFilters || []}
       sorting={sorting || []}
+      pagination={pagination}
       config={{
         entity: "contact",
         title: "Contacts",
@@ -78,7 +79,7 @@ export default async function Page({
             entity: "contact",
             pluck: _pluck,
           },
-        }
+        },
       }}
     />
   );
