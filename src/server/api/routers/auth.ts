@@ -18,7 +18,6 @@ export const authRouter = createTRPCRouter({
         const response = await ctx.dnaClient
           .login(input.email, input.password)
           .execute();
-
         if (!response.success) {
           throw response;
         }
@@ -31,21 +30,21 @@ export const authRouter = createTRPCRouter({
         let errorMessage = "Something went wrong please try again";
         let errorType = "unknown";
 
-        if (
-          input.email === "admin@dnamicro.com" &&
-          error?.response?.status === undefined
-        ) {
-          errorMessage = "The email or password you entered is incorrect.";
-          errorType = "invalid";
-        } else if (input.email !== "admin@dnamicro.com") {
-          errorMessage = "No account was found with this email address.";
-          errorType = "notfound";
+        switch (error?.message) {
+          case "Invalid Credentials":
+            errorMessage = "The email or password you entered is incorrect.";
+            errorType = "invalid";
+            break;
+          case "Account not found":
+            errorMessage = "No account was found with this email address.";
+            errorType = " notfound";
+            break;
         }
 
         return {
           message: errorMessage,
-          statusCode: error?.response?.status || 500,
-          error: error?.response?.error || error,
+          statusCode: error?.status_code || 500,
+          error: error?.errors || error,
           type: errorType,
         };
       }
