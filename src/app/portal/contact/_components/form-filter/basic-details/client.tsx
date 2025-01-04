@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { FormBuilder } from "~/components/platform/FormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+import { ContactPhoneEmailSchema, MultipleContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { closeCurrentInnerClassTab, removeRecord, saveContactDetails, selectRecord } from "./actions";
@@ -13,6 +13,7 @@ import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
 import { StepOneUpdateCategory } from "../../forms/category-details/actions/updateCategory";
+import MultipleFormBuilder from "~/components/platform/FormBuilder/components/custom/FormFilter/MultipleFormBuilder";
 
 export default function ContactDetails({
   params,
@@ -64,7 +65,7 @@ export default function ContactDetails({
     filter_entity: string;
   }) => {
     try {
-      await removeRecord();
+      // await removeRecord();
       return {
         rows: [],
         filter_entity,
@@ -97,13 +98,16 @@ export default function ContactDetails({
   };
 
   return (
+    // <MultipleFormBuilder
     <FormBuilder
       filterGridConfig={{
         selectedRecords,
         statusesIncluded: ["Draft"], // Enable Selectable Record Status
         actionType: "single-select",
+        // actionType: "multi-select",
         pluck: params?.pluck_fields,
         filter_entity: "contact",
+        is_same_entity_id: true,
         main_entity_id: params.id,
         gridColumns: gridColumns,
         fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
@@ -191,7 +195,8 @@ export default function ContactDetails({
       formLabel="Basic Details"
       handleSubmitFormGrid={handleSave}
       formKey="basicDetails"
-      formSchema={ContactPhoneEmailSchema}
+      formSchema={MultipleContactPhoneEmailSchema}
+      // formSchema={ContactPhoneEmailSchema}
       defaultValues={defaultValues}
       fields={[
         {

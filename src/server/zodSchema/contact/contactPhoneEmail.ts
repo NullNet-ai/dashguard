@@ -98,3 +98,14 @@ export const ContactPhoneEmailSchema = z.object({
   phones: PhoneArraySchema,
   emails: EmailArraySchema,
 });
+
+export const MultipleContactPhoneEmailSchema = z.object({
+  id: z.string().optional(),
+  code: z.string().optional(),
+  form_builder_fields: z.array(
+    z.object({
+      phones: PhoneArraySchema,
+      emails: EmailArraySchema,
+    }),
+  ),
+});

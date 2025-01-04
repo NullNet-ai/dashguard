@@ -6,13 +6,13 @@ import { defaultSorting } from "../../../grid/_config/sorting";
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const pluck_fields = ["id", "code", "status"];
+  const pluck_fields = ["id", "code", "role", "status"];
   const [, , main_entity, application, identifier] = pathname.split("/");
 
   const record_data = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "code", "role"],
+    pluck_fields,
   });
 
   const _pluck = [
@@ -52,7 +52,7 @@ const FormServerFetch = async () => {
           id: user_role_id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
-          pluck_fields,
+          pluck_fields: _pluck,
         }}
         selectedRecords={user_role_id ? [default_values] : []}
         grid_data={{ items, totalCount }}
