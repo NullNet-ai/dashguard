@@ -13,6 +13,7 @@ function MainServer({
   searchableFields,
   defaultAdvanceFilter,
   advanceFilter,
+  pagination
 }: IPropsGrid) {
   return (
     <GridProvider
@@ -24,6 +25,7 @@ function MainServer({
       searchableFields={searchableFields}
       defaultAdvanceFilter={defaultAdvanceFilter}
       advanceFilter={advanceFilter}
+      pagination={pagination}
     >
       <GridScrollView className="hidden lg:block">
         <GridDesktop />
