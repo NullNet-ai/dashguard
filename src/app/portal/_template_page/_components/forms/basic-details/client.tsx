@@ -16,7 +16,8 @@ const FormSchema = z.object({
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
   const toast = useToast();
 
-  const updateOrg = api.templateRouter.updateName.useMutation();
+  // @ts-expect-error - Fix type later
+  const updateOrg = api[params.entity].updateName.useMutation();
 
   const handleSave = async ({
     data,
