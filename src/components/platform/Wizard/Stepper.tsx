@@ -95,11 +95,13 @@ export default function MyVerticalStepper() {
         data-test-id={testIDFormatter(
           `${entityName}-wzrdsum-stepper-accordion`,
         )}
+        className="flex flex-col items-center"
       >
         <div
           className={cn(
-            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[10px]",
+            "relative hidden  after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
             { "text-center sm:p-0": !isSummOpen },
+            `${isSummOpen ? "w-full" : "w-[30px]"}`,
           )}
         >
           <ol role="list" className="overflow-hidden">
@@ -145,7 +147,7 @@ export default function MyVerticalStepper() {
                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}`,
                   )}
                   className={cn(
-                    stepIdx !== stepsArray.length - 1 ? "relative pb-[16px]" : "",
+                    stepIdx !== stepsArray.length - 1 ? "relative pb-[24px]" : "",
                   )}
                 >
                   {isStepped || isCurrent ? (
@@ -234,7 +236,7 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block mt-[16px]">
+                                  <div className="text-sm font-medium sm:block mt-[8px]">
                                     {component}
                                   </div>
                                 </AccordionContent>
