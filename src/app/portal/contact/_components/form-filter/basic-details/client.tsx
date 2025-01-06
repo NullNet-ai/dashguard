@@ -195,8 +195,8 @@ export default function ContactDetails({
       formLabel="Basic Details"
       handleSubmitFormGrid={handleSave}
       formKey="basicDetails"
-      formSchema={MultipleContactPhoneEmailSchema}
-      // formSchema={ContactPhoneEmailSchema}
+      // formSchema={MultipleContactPhoneEmailSchema}
+      formSchema={ContactPhoneEmailSchema}
       defaultValues={defaultValues}
       fields={[
         {
