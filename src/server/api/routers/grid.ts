@@ -14,6 +14,7 @@ import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
+import { gridCacheId } from "~/lib/grid-cache_id";
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -69,88 +70,120 @@ export const gridRouter = createTRPCRouter({
         limit = 50,
         current = 1,
         advance_filters: _advance_filters = [],
+        entity,
+        pluck_object,
       } = input; // Default limit = 10 items per page, default current page = 1
       // Calculate the number of items to skip based on the current page
       // Fetch the total count of users
 
-      let advance_filters = _advance_filters;
-
-      /**
-       *
-       * @Logic to get filters from the grid tab
-       *
-       */
-      const headerList = headers();
-      const gridTabId = headerList.get("x-grid-tab-id") || "";
-      const pathName = headerList.get("x-pathname") || "";
-      const [, , mainEntity] = pathName.split("/");
-      const _tabMenuHref = `/portal/${mainEntity}/grid`;
-      const tabList = (await ctx.redisClient
-        .getCachedData(_tabMenuHref)
-        .then((data) => {
-          if (data) {
-            return data;
-          }
-          return [];
-        })
-        .catch((err) => {
-          console.error("@Error Grid", err);
-          return [];
-        })) as ITabGrid[];
-      const tabFound = tabList?.find((tab) => {
-        return tab.id === gridTabId || tab.current;
-      })?.id;
-
-      if (tabFound || gridTabId) {
-        const filter_by = await ctx.redisClient
-          .getCachedData(`${gridTabId || tabFound || ""}:filters`)
-          .then((data) => {
-            if (data) {
-              return data;
-            }
-            return [];
-          })
-          .catch((error) => {
-            console.error("@Error Grid", error);
-            return [];
-          });
-        advance_filters = [...advance_filters, ...filter_by]; //TBC
-      }
       /**
        *
        * @Logic to get filters from the grid tab
        *
        */
 
-      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
-        .findAll({
-          entity: input?.entity,
-          token: ctx.token.value,
-          query: {
-            pluck: input.pluck,
-            advance_filters: advance_filters as IAdvanceFilters[],
-            order: {
-              starts_at:
-                // current 5 *  input.limit 50 = 250
-                (input.current || 0) === 0
-                  ? 0
-                  : (input.current || 1) * (input.limit || 100) -
-                    (input.limit || 100),
-              limit: input.limit || 1,
-              by_field: "code",
-              by_direction: EOrderDirection.DESC,
-            },
-            multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
-              : [],
+      const join_type =
+        input?.entity === "contact"
+          ? "self"
+          : ("left" as "self" | "left" | "right" | "inner");
+
+      const created_by_join = {
+        type: join_type,
+        field_relation:
+          join_type === "self"
+            ? {
+                to: {
+                  entity,
+                  field: "created_by",
+                },
+                from: {
+                  ...(join_type === "self" ? { alias: "created_by" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              }
+            : {
+                from: {
+                  entity,
+                  field: "created_by",
+                },
+                to: {
+                  ...(join_type === "left" ? { alias: "created_by" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              },
+      };
+      const updated_by_join = {
+        type: join_type,
+        field_relation:
+          join_type === "self"
+            ? {
+                to: {
+                  entity,
+                  field: "updated_by",
+                },
+                from: {
+                  ...(join_type === "self" ? { alias: "updated_by" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              }
+            : {
+                from: {
+                  entity,
+                  field: "updated_by",
+                },
+                to: {
+                  ...(join_type === "left" ? { alias: "updated_by" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              },
+      };
+
+      const query = ctx.dnaClient.findAll({
+        entity: input?.entity,
+        token: ctx.token.value,
+        query: {
+          pluck: input.pluck,
+          advance_filters: [
+            ..._advance_filters as IAdvanceFilters[]],
+          order: {
+            starts_at:
+              // current 5 *  input.limit 50 = 250
+              (input.current || 0) === 0
+                ? 0
+                : (input.current || 1) * (input.limit || 100) -
+                  (input.limit || 100),
+            limit: input.limit || 1,
+            by_field: "code",
+            by_direction: EOrderDirection.DESC,
           },
-        })
-        .execute();
+          multiple_sort: input.sorting?.length
+            ? formatSorting(input.sorting)
+            : [],
+        },
+      });
+      if (pluck_object) {
+        query.join(created_by_join).join(updated_by_join);
+      }
+      const { total_count: totalCount = 1, data: items } =
+      await query.execute();
+
+      const formatted_items = items?.map((item) => {
+        const { [entity + "s"]: entity_data, ...rest } = item;
+        return {
+          ...entity_data,
+          ...rest,
+        };
+      });
+
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
       return {
         totalCount, // Total number of users
-        items, // Paginated users
+        items: formatted_items, // Paginated users
         currentPage: current, // The current page
         totalPages, // Total number of pages
       };
@@ -490,48 +523,24 @@ export const gridRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { sorting } = input;
       const headerList = headers();
-
       const pathName = headerList.get("x-pathname") || "";
-      const gridTabId = headerList.get("x-grid-tab-id") || "";
       const [, , mainEntity, application] = pathName.split("/");
-      if (application !== "grid" || !mainEntity) return [];
-      const _tabMenuId = tabMenuId({
-        _mainEntity: mainEntity || "",
-        _application: application || "",
-        _id: ctx.session.account.contact.id,
-      });
-      let sortingReportTabId = `${_tabMenuId}:${gridTabId}:sorting`;
-      if (!gridTabId) {
-        const gridTabFilterList = (await ctx.redisClient.getCachedData(
-          _tabMenuId,
-        )) as ITabGrid[];
-        const activeTab = gridTabFilterList?.find((tab) => tab.current);
-        sortingReportTabId = `${_tabMenuId}:${activeTab?.id}:sorting`;
-      }
-
-      return await ctx.redisClient.cacheData(sortingReportTabId, sorting);
+      if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+        return [];
+      const cached_id =
+        (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
+      return await ctx.redisClient.cacheData(cached_id, sorting);
     }),
   getReportSorting: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
-    const gridTabId = headerList.get("x-grid-tab-id") || "";
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
-    if (application !== "grid" || !mainEntity) return [];
-    const _tabMenuId = tabMenuId({
-      _mainEntity: mainEntity || "",
-      _application: application || "",
-      _id: ctx.session.account.contact.id,
-    });
-    let sortingReportTabId = `${_tabMenuId}:${gridTabId}:sorting`;
-    if (!gridTabId) {
-      const gridTabFilterList = (await ctx.redisClient.getCachedData(
-        _tabMenuId,
-      )) as ITabGrid[];
-      const activeTab = gridTabFilterList?.find((tab) => tab.current);
-      sortingReportTabId = `${_tabMenuId}:${activeTab?.id}:sorting`;
-    }
+    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+      return [];
+    const cached_id =
+      (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
     const sorting = (await ctx.redisClient.getCachedData(
-      sortingReportTabId,
+      cached_id,
     )) as SortingState;
     return Array.isArray(sorting) ? sorting : [];
   }),
@@ -558,46 +567,23 @@ export const gridRouter = createTRPCRouter({
       const headerList = headers();
 
       const pathName = headerList.get("x-pathname") || "";
-      const gridTabId = headerList.get("x-grid-tab-id") || "";
       const [, , mainEntity, application] = pathName.split("/");
-      if (application !== "grid" || !mainEntity) return [];
-      const _tabMenuId = tabMenuId({
-        _mainEntity: mainEntity || "",
-        _application: application || "",
-        _id: ctx.session.account.contact.id,
-      });
-      let filterReportTabId = `${_tabMenuId}:${gridTabId}:filter`;
-      if (!gridTabId) {
-        const gridTabFilterList = (await ctx.redisClient.getCachedData(
-          _tabMenuId,
-        )) as ITabGrid[];
-        const activeTab = gridTabFilterList?.find((tab) => tab.current);
-        filterReportTabId = `${_tabMenuId}:${activeTab?.id}:filter`;
-      }
-
-      return await ctx.redisClient.cacheData(filterReportTabId, filters);
+      if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+        return [];
+      const cached_id =
+        (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
+      return await ctx.redisClient.cacheData(cached_id, filters);
     }),
   getReportFilter: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
-    const gridTabId = headerList.get("x-grid-tab-id") || "";
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
-    if (application !== "grid" || !mainEntity) return [];
-    const _tabMenuId = tabMenuId({
-      _mainEntity: mainEntity || "",
-      _application: application || "",
-      _id: ctx.session.account.contact.id,
-    });
-    let filterReportTabId = `${_tabMenuId}:${gridTabId}:filter`;
-    if (!gridTabId) {
-      const gridTabFilterList = (await ctx.redisClient.getCachedData(
-        _tabMenuId,
-      )) as ITabGrid[];
-      const activeTab = gridTabFilterList?.find((tab) => tab.current);
-      filterReportTabId = `${_tabMenuId}:${activeTab?.id}:filter`;
-    }
+    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+      return [];
+    const cached_id =
+      (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
     const filters = (await ctx.redisClient.getCachedData(
-      filterReportTabId,
+      cached_id,
     )) as ISearchItem[];
     const reportFilters = Array.isArray(filters) ? filters : [];
     const advanceFilter = reportFilters.map(
@@ -625,52 +611,26 @@ export const gridRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { current_page, limit_per_page } = input;
       const headerList = headers();
-
       const pathName = headerList.get("x-pathname") || "";
-      const gridTabId = headerList.get("x-grid-tab-id") || "";
       const [, , mainEntity, application] = pathName.split("/");
-      if (application !== "grid" || !mainEntity) return [];
-      const _tabMenuId = tabMenuId({
-        _mainEntity: mainEntity || "",
-        _application: application || "",
-        _id: ctx.session.account.contact.id,
-      });
-      let paginationReportTabId = `${_tabMenuId}:${gridTabId}:pagination`;
-      if (!gridTabId) {
-        const gridTabFilterList = (await ctx.redisClient.getCachedData(
-          _tabMenuId,
-        )) as ITabGrid[];
-        const activeTab = gridTabFilterList?.find((tab) => tab.current);
-        paginationReportTabId = `${_tabMenuId}:${activeTab?.id}:pagination`;
-      }
-
-      return await ctx.redisClient.cacheData(paginationReportTabId, {
+      if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+        return [];
+      const cached_id =
+        (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+      return await ctx.redisClient.cacheData(cached_id, {
         current_page,
         limit_per_page,
       });
     }),
   getReportPagination: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
-    const gridTabId = headerList.get("x-grid-tab-id") || "";
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
-    if (application !== "grid" || !mainEntity) return [];
-    const _tabMenuId = tabMenuId({
-      _mainEntity: mainEntity || "",
-      _application: application || "",
-      _id: ctx.session.account.contact.id,
-    });
-    let paginationReportTabId = `${_tabMenuId}:${gridTabId}:pagination`;
-    if (!gridTabId) {
-      const gridTabFilterList = (await ctx.redisClient.getCachedData(
-        _tabMenuId,
-      )) as ITabGrid[];
-      const activeTab = gridTabFilterList?.find((tab) => tab.current);
-      paginationReportTabId = `${_tabMenuId}:${activeTab?.id}:pagination`;
-    }
-    const pagination = (await ctx.redisClient.getCachedData(
-      paginationReportTabId,
-    ));
+    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
+      return [];
+    const cached_id =
+      (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+    const pagination = await ctx.redisClient.getCachedData(cached_id);
     return pagination;
   }),
 });

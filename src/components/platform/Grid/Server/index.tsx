@@ -10,7 +10,6 @@ function MainServer({
   totalCount,
   sorting,
   defaultSorting,
-  searchableFields,
   defaultAdvanceFilter,
   advanceFilter,
   pagination
@@ -22,7 +21,6 @@ function MainServer({
       sorting={sorting}
       config={config}
       defaultSorting={defaultSorting}
-      searchableFields={searchableFields}
       defaultAdvanceFilter={defaultAdvanceFilter}
       advanceFilter={advanceFilter}
       pagination={pagination}

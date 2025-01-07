@@ -13,13 +13,13 @@ export async function UpdateReportPagination({
 }) {
   const headerList = headers();
   const pathName = headerList.get("x-pathname") || "";
+  const searchParams = headerList.get("x-full-search-query-params") || "";
+  const urlSearchParams = new URLSearchParams(searchParams);
 
   api.grid.updateReportPagination({
     current_page,
     limit_per_page,
   });
-
-  redirect(
-    `${pathName}?page=${current_page}&perPage=${limit_per_page}`,
-  );
+  urlSearchParams.set("pagination", `page=${current_page}&perPage=${limit_per_page}`);
+  redirect(`${pathName}?${urlSearchParams}`);
 }

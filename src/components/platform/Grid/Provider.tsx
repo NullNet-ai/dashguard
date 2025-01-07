@@ -36,6 +36,7 @@ import {
 } from "./DefatultRow/Actions";
 import { BulkArchive } from "./Action/BulkArchive";
 import { UpdateReportSorting } from "./Action/UpdateReportSorting";
+import { constructSearchableFields } from "./utils/constructSearchableFields";
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -101,6 +102,11 @@ export default function GridProvider({
     enableAutoCreate: true,
     enableRowClick: true,
     hideCreateButton: false,
+    searchableFields:
+      constructSearchableFields({
+        columns: _propsConfig?.columns ?? [],
+        entity: _propsConfig?.entity ?? "",
+      }) ?? [],
     ..._propsConfig,
   };
 
@@ -240,7 +246,7 @@ export default function GridProvider({
           </Button>
         );
       }
-  
+
       return (
         <>
           <EditComponent row={row} config={config!} />
@@ -411,7 +417,7 @@ export default function GridProvider({
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
-    pagination
+    pagination,
   } as IState;
   const actions = {
     handleCreate,
