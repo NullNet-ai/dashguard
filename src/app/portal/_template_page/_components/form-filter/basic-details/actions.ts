@@ -6,6 +6,7 @@ import { api } from "~/trpc/server";
 const entity = "";
 
 export const saveContactDetails = async (data: any, action_type?: string) => {
+  // @ts-expect-error - Fix type later
   const response = await api[entity].saveContactPhoneEmail(data);
 
   if (response?.existing) {

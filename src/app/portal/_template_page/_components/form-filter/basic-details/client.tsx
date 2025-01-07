@@ -37,6 +37,7 @@ export default function ContactDetails({
       const response = await saveContactDetails({
         id, 
         ...data,
+        // @ts-expect-error - Fix type later
         [form_filter_entity]: data[form_filter_entity].map(e => {
           return {
             ...e,

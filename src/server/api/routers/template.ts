@@ -258,13 +258,14 @@ export const templateRouter = createTRPCRouter({
     })))
     .mutation(async ({ input, ctx }) => {
       const { id, form_filter_entity } = input;
+      // @ts-expect-error - Fix type later
       const { [form_filter_entity]: email } = input
 
       const email_pluck = ["email", "id", `${entity}_id`, "is_primary"];
       const email_data = email?.[0];
 
-      let contact_id = id;
-      let contact_code = "";
+      const contact_id = id;
+      const contact_code = "";
 
       // Validate phone and email exists
       const fetchRecordData = async (
