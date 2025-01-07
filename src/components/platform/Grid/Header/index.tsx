@@ -27,7 +27,7 @@ export default function Header() {
             <div className="mx-2 h-full w-[1px] bg-tertiary" />
             <FilterButton />
           </div>
-          <CreateButton className="hidden lg:inline-flex" title="Create" />
+          <CreateButton className="hidden lg:inline-flex" title="New" />
         </div>
       </div>
       <BulkActionButton />
