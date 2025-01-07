@@ -1,34 +1,30 @@
-import RecordWrapperProvider from "~/components/platform/Record/providers/RecordWrapperProvider";
-import HeaderTabs from "~/components/platform/Record/Tabs/HeaderTabs";
-import MainContent from "~/components/platform/Record/MainContent";
-import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSummaryMobile";
-import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
-import type { IProps } from "./types";
-import RecordProvider from "~/components/platform/Record/Provider";
-import Options from "../../../_components/IdentifierOption";
-import { handleChangeStatus } from "../../../_actions";
+import RecordWrapperProvider from "~/components/platform/Record/providers/RecordWrapperProvider"
+import HeaderTabs from "~/components/platform/Record/Tabs/HeaderTabs"
+import MainContent from "~/components/platform/Record/MainContent"
+import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSummaryMobile"
+import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable"
+import type { IProps } from "./types"
+import RecordProvider from "~/components/platform/Record/Provider"
+import Options from "../../../_components/IdentifierOption"
+import { handleChangeStatus } from "../../../_actions"
+import { upperFirst } from "lodash"
 
 const Wrapper = (props: IProps) => {
-  const { record, record_summary, entity_code, entity_name, is_applicant } =
-    props;
-
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard?categories=",
-    },
-    {
-      id: "contact",
-      name: "Contact",
-      tabName: "contact?categories=",
-    },
-    {
-      id: "organization",
-      name: "Organization",
-      tabName: "organization?categories=",
-    },
-  ];
+    
+  const { record, record_summary, entity_code, entity_name, is_applicant } = props
+    
+    const tabs = [
+      {
+        id: "dashboard",
+        name: "Dashboard",
+        tabName: "dashboard?categories="
+      },
+      {
+        id: entity_name,
+        name: upperFirst(entity_name),
+        tabName: "contact?categories="
+      }
+    ];
 
   return (
     <RecordProvider

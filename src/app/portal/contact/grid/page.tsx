@@ -2,15 +2,9 @@ import { api } from "~/trpc/server";
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "./_config/columns";
 import Grid from "~/components/platform/Grid/Server";
 import { defaultSorting } from "./_config/sorting";
-import { searchableFields } from "./_config/searchableFields";
 import { defaultAdvanceFilter } from "./_config/advanceFilter";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
 import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
-interface IReportFilter {
-  advanceFilter: ISearchItem[];
-  reportFilters: ISearchItem[];
-}
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page({
   searchParams = {},
@@ -71,7 +65,6 @@ export default async function Page({
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
-        searchableFields: searchableFields,
         searchConfig: {
           router: "contact",
           resolver: "mainGrid",

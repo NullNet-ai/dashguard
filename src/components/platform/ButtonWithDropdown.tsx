@@ -13,6 +13,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { testIDFormatter } from "~/utils/formatter";
+import { PlusIcon } from "lucide-react";
 
 interface DropdownOption {
   label: string;
@@ -30,6 +31,7 @@ interface ButtonWithDropdownProps {
   buttonVariant?: ButtonProps["variant"]; // Optional button variant (from Button component)
   disabled?: boolean; // Optional disabled state for the main button
   entity?: string; // Optional entity name for test IDs
+  leftIcon?: React.ElementType; // Optional left icon component
 }
 
 export function ButtonWithDropdown({
@@ -40,7 +42,8 @@ export function ButtonWithDropdown({
   buttonClassName,
   buttonVariant = "outline", // Default to 'outline' variant
   disabled = false,
-  entity
+  entity,
+  leftIcon: Lefticon,
 }: ButtonWithDropdownProps) {
   return (
     <DropdownMenu>
@@ -52,6 +55,8 @@ export function ButtonWithDropdown({
           disabled={disabled}
           size={'sm'}
         >
+          {Lefticon && <Lefticon className="mr-2 h-4 w-4" />}
+          {/* Render left icon if provided */}
           {buttonLabel || ""}
           {ButtonIcon && <ButtonIcon className="mr-2 h-5 w-5" />}{" "}
           {/* Render icon if provided */}
