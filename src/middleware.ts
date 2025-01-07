@@ -23,6 +23,11 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.searchParams.toString(),
   );
 
+  requestHeaders.set(
+    "x-record-current-tab",
+    request.nextUrl.searchParams.get("current_tab") || "",
+  );
+
   const token = request.cookies.get("token");
   if (
     !token &&

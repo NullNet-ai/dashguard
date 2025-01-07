@@ -74,8 +74,8 @@ export interface IConfigGrid {
   searchableFields?: any[];
   is_warning_archive?: boolean;
   searchConfig?: {
-    router: AppRouterKeys;
-    resolver: string;
+    router?: AppRouterKeys;
+    resolver?: string;
     query_params?: ISearchParams;
   };
   hideCreateButton?: boolean;
@@ -139,7 +139,6 @@ export interface IPropsGrid {
   onSelectRecords?: (rows: any[]) => void;
   initialSelectedRecords?: RowSelectionState;
   defaultSorting?: SortingState;
-  searchableFields?: any[];
   defaultAdvanceFilter?: ISearchItem[];
   advanceFilter?: ISearchItem[];
 }

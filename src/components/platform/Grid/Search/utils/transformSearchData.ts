@@ -23,7 +23,7 @@ export const transformSearchData = (
           id: ulid(),
           field: key,
           values: Array.isArray(value) ? value : [value],
-          operator: "equal",
+          operator: searchableField?.operator || "equal",
           type: "criteria",
           label: searchableField?.label || formatAndCapitalize(key),
           ...searchableField,
