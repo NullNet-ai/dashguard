@@ -468,38 +468,36 @@ export const organizationRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       if (!input?.id) return null;
       const advance_filters = createAdvancedFilter({
-        id: input.id,
+        contact_organization_id: input.id,
       });
       const record = await ctx.dnaClient
         .findAll({
-          entity: ENTITY,
+          entity: "organization_contact",
           token: ctx.token.value,
           query: {
             advance_filters,
-            // pluck: input.pluck_fields,
-            pluck_object: {
-              organizations: ["id"],
-              contacts: ["organization_id"],
-            },
+            pluck: input.pluck_fields,
+            // pluck_object: {
+            //   organizations: ["id"],
+            //   contacts: ["organization_id"],
+            // },
           },
         })
-        .join({
-          type: "left",
-          field_relation: {
-            to: {
-              entity: "contact",
-              field: "organization_id",
-            },
-            from: {
-              entity: ENTITY,
-              field: "id",
-            },
-          },
-        })
+        // .join({
+        //   type: "left",
+        //   field_relation: {
+        //     to: {
+        //       entity: "contact",
+        //       field: "organization_id",
+        //     },
+        //     from: {
+        //       entity: ENTITY,
+        //       field: "id",
+        //     },
+        //   },
+        // })
         .execute();
 
-      return {
-        ...record?.data?.[0]?.contacts,
-      };
+      return record?.data?.[0];
     }),
 });
