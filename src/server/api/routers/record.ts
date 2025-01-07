@@ -75,7 +75,10 @@ export const recordRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { id, pluck_fields, main_entity: entity } = input;
-      const join_type = entity === "contact" ? "self" : "left" as "self" | "left" | "right" | "inner";
+      const join_type =
+        entity === "contact"
+          ? "self"
+          : ("left" as "self" | "left" | "right" | "inner");
       const base_query = {
         entity,
         token: ctx.token.value,
@@ -96,7 +99,7 @@ export const recordRouter = createTRPCRouter({
           },
         },
       };
-      const base_join = {
+      const created_by_join = {
         type: join_type,
         field_relation:
           join_type === "self"
@@ -106,7 +109,7 @@ export const recordRouter = createTRPCRouter({
                   field: "created_by",
                 },
                 from: {
-                  ...(join_type === "self" ? { alias: "created_by" } : {}),
+                  ...(join_type === "self" ? { alias: "created_by_data" } : {}),
                   entity: "contact",
                   field: "id",
                 },
@@ -117,87 +120,62 @@ export const recordRouter = createTRPCRouter({
                   field: "created_by",
                 },
                 to: {
+                  ...(join_type === "left" ? { alias: "created_by_data" } : {}),
                   entity: "contact",
                   field: "id",
                 },
               },
       };
-      const self_join = {
+      const updated_by_join = {
         type: join_type,
-        field_relation: {
-          to: {
-            entity,
-            field: "updated_by",
-          },
-          from: {
-            ...(join_type === "self" ? { alias: "updated_by" } : {}),
-            entity: "contact",
-            field: "id",
-          },
-        },
+        field_relation:
+          join_type === "self"
+            ? {
+                to: {
+                  entity,
+                  field: "updated_by",
+                },
+                from: {
+                  ...(join_type === "self" ? { alias: "updated_by_data" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              }
+            : {
+                from: {
+                  entity,
+                  field: "updated_by",
+                },
+                to: {
+                  ...(join_type === "left" ? { alias: "updated_by_data" } : {}),
+                  entity: "contact",
+                  field: "id",
+                },
+              },
       };
-      const query = ctx.dnaClient.findAll(base_query).join(base_join);
-
-      if (join_type === "self") {
-        query.join(self_join);
-      }
+      const query = ctx.dnaClient
+        .findAll(base_query)
+        .join(created_by_join)
+        .join(updated_by_join);
 
       const response = await query.execute();
 
       const { data } = response;
 
-      if (data) {
-        const [item] = data;
-        if (item) {
-          let formatted_data;
-          if (entity === "contact") {
-            const { contacts, created_by, updated_by } = item;
-            formatted_data = {
-              ...response,
-              data: {
-                ...contacts,
-                created_by_data: {
-                  first_name: created_by.first_name,
-                  last_name: created_by.last_name,
-                },
-                updated_by_data: {
-                  first_name: updated_by.first_name,
-                  last_name: updated_by.last_name,
-                },
-              },
-            };
-          } else {
-            //THIS IS TEMPORARY SINCE THE DOUBLE JOIN OF THE SAME ENTITY IS STILL AN ISSUE IN TH DB SIDE
-            const { contacts, [entity + "s"]: entity_data } = item;
-            const updated_by_response = await ctx.dnaClient
-              .findOne(entity_data.updated_by, {
-                entity: "contact",
-                token: ctx.token.value,
-                query: {
-                  pluck: ["first_name", "last_name"],
-                },
-              })
-              .execute();
-            formatted_data = {
-              ...response,
-              data: {
-                ...entity_data,
-                created_by_data: {
-                  first_name: contacts.first_name,
-                  last_name: contacts.last_name,
-                },
-                updated_by_data: {
-                  first_name: updated_by_response?.data?.[0]?.first_name,
-                  last_name: updated_by_response?.data?.[0]?.last_name,
-                },
-              },
-            };
-            return formatted_data;
-          }
-          return formatted_data;
-        }
-      }
-      return response;
+      const {
+        created_by_data,
+        updated_by_data,
+        [entity + "s"]: entity_data,
+      } = data?.[0] ?? {};
+      const formatted_data = {
+        ...response,
+        data: {
+          ...entity_data,
+          created_by_data,
+          updated_by_data,
+        },
+      };
+      return formatted_data
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
