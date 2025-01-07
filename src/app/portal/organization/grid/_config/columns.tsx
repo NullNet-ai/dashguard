@@ -50,7 +50,7 @@ const gridColumns = [
   },
   {
     header: "Created By",
-    accessorKey: "",
+    accessorKey: "created_by",
   },
   {
     header: "Updated Date",
@@ -68,7 +68,7 @@ const gridColumns = [
   },
   {
     header: "Updated By",
-    accessorKey: "",
+    accessorKey: "updated_by",
   },
   // {
   //   id: "action",

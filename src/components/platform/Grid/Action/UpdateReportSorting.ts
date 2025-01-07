@@ -16,7 +16,9 @@ export async function UpdateReportSorting({
 }) {
   const headerList = headers();
   const pathName = headerList.get("x-pathname") || "";
- 
+  const searchParams = headerList.get("x-full-search-query-params") || "";
+  const urlSearchParams = new URLSearchParams(searchParams);
+
   api.grid.updateReportSorting({
     sorting,
   });
@@ -24,7 +26,8 @@ export async function UpdateReportSorting({
   const sortingParams = sorting
     .map((item) => `${item.id}:${item.desc ? "desc" : "asc"}`) // Map each object to the desired string format
     .join("=");
-  
 
-  redirect(`${pathName}?sorting=${sortingParams}`);
+  urlSearchParams.set("sorting", sortingParams);
+
+  redirect(`${pathName}?${urlSearchParams}`);
 }
