@@ -1,10 +1,10 @@
-import RecordWrapperProvider from "~/components/platform/RecordV2/providers/RecordWrapperProvider"
-import HeaderTabs from "~/components/platform/RecordV2/Tabs/HeaderTabs"
-import MainContent from "~/components/platform/RecordV2/MainContent"
-import RecordSummaryMobile from "~/components/platform/RecordV2/Summary/RecordSummaryMobile"
+import RecordWrapperProvider from "~/components/platform/Record/providers/RecordWrapperProvider"
+import HeaderTabs from "~/components/platform/Record/Tabs/HeaderTabs"
+import MainContent from "~/components/platform/Record/MainContent"
+import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSummaryMobile"
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable"
 import type { IProps } from "./types"
-import RecordProvider from "~/components/platform/RecordV2/Provider"
+import RecordProvider from "~/components/platform/Record/Provider"
 import Options from "../../../_components/IdentifierOption"
 import { handleChangeStatus } from "../../../_actions"
 import { upperFirst } from "lodash"
@@ -25,24 +25,6 @@ const Wrapper = (props: IProps) => {
         tabName: "contact?categories="
       }
     ];
-
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard?categories=",
-    },
-    {
-      id: "contact",
-      name: "Contact",
-      tabName: "contact?categories=",
-    },
-    {
-      id: "organization",
-      name: "Organization",
-      tabName: "organization?categories=",
-    },
-  ];
 
   return (
     <RecordProvider
