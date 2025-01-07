@@ -224,6 +224,12 @@ export const FormBuilder = (props: IPropsForms) => {
     setDisplayType("form");
   };
 
+  const handleSelectedGridRecords = () => {
+    handleSearchOpen()
+    setDisplayType("selected");
+    setIsFormOpened(false)
+  };
+
   const handleAppendForm = () => {
     if (!enableAppendForm) return;
     eventEmitter.emit(`${formKey}:${appendFormKey}`);
@@ -408,6 +414,7 @@ export const FormBuilder = (props: IPropsForms) => {
             handleLock={handleLock}
             handleAccordionExpand={handleAccordionExpand}
             handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleSelectedGridRecords={handleSelectedGridRecords}
             handleAppendForm={handleAppendForm}
             handleUpdateDisplayType={handleUpdateDisplayType}
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}

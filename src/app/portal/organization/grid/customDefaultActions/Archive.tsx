@@ -15,25 +15,32 @@ export default function ArchiveComponent({
   if (!row.id) return null;
   const { data } = api.organization.getOrgWithContact.useQuery({
     id: row.id ?? "",
-    pluck_fields: ["id"],
+    pluck_fields: ["contact_organization_id"],
   });
-  const shouldDisplayArchiveWarningPrompt = data?.organization_id === row.id;
-  if (data?.organization_id !== row?.id || row?.original?.disabled) return null;
+  const shouldDisplayArchiveWarningPrompt =
+    data?.contact_organization_id === row.id;
+
+  if (data?.contact_organization_id !== row?.id || row?.original?.disabled)
+    return null;
   // ang component ang e null
   const handleOpenButton = () => {
     setOpen && setOpen(true);
 
-    // if (data?.organization_id === row?.id) {
-    //   setOpen && setOpen(true);
-    setRecord &&
-      setRecord({
-        ...record,
-        original: { ...row.original, shouldDisplayArchiveWarningPrompt },
-      });
-    //   // if (data) {
-    //   //   setOpen && setOpen(true);
-    //   // }
-    //   // setOpen && setOpen(false);
+    if (data?.contact_organization_id === row?.id) {
+      setOpen && setOpen(true);
+      setRecord &&
+        setRecord({
+          ...record,
+          original: {
+            ...row.original,
+            shouldDisplayArchiveWarningPrompt,
+          },
+        });
+      //   // if (data) {
+      //   //   setOpen && setOpen(true);
+      //   // }
+      //   // setOpen && setOpen(false);
+    }
   };
   return (
     <Button

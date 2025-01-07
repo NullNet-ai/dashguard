@@ -5,12 +5,12 @@ import StatusCell from "~/components/ui/status-cell";
 
 const gridColumns = [
   {
-    header: "ID",
+    header: "Code",
     accessorKey: "code",
   },
   {
-    header: "Name",
-    accessorKey: "name",
+    header: "Email",
+    accessorKey: "email",
   },
   {
     header: "Status",
@@ -22,7 +22,25 @@ const gridColumns = [
     },
   },
   {
-    header: "Created Date Time",
+    header: "Updated Date",
+    accessorKey: "updated_date",
+    cell: ({ row }) => {
+      const date = row?.original?.updated_date;
+      const time = row?.original?.updated_time;
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      );
+    },
+  },
+  {
+    header: "Updated By",
+    accessorKey: "updated_by",
+  },
+  {
+    header: "Created Date",
     accessorKey: "created_date",
     cell: ({ row }) => {
       const date = row?.original?.created_date;
@@ -36,18 +54,8 @@ const gridColumns = [
     },
   },
   {
-    header: "Updated Date Time",
-    accessorKey: "updated_date",
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    header: "Created By",
+    accessorKey: "created_by",
   },
 ] as ColumnDef<any>[];
 
@@ -55,3 +63,8 @@ export default gridColumns;
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
 export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];
+export const FIELD_FILTER_GRID_COLUMNS = [
+  "code",
+  "email",
+  "status",
+];

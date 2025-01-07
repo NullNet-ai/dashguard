@@ -54,6 +54,7 @@ const FormBuilderLayout = ({
   handleRemovedSelectedRecords,
   onSubmitFormGrid,
   handleNewRecordFormFilterGrid,
+  handleSelectedGridRecords,
   handleAppendForm,
   handleUpdateDisplayType,
   handleOpenForm,
@@ -143,7 +144,7 @@ const FormBuilderLayout = ({
             <FormFilterGridLayout
               isFormOpen={isFormOpened}
               handleListLoading={handleListLoading}
-              handleSelectedGridRecords={handleNewRecordFormFilterGrid}
+              handleSelectedGridRecords={handleSelectedGridRecords}
               handleCloseGrid={handleCloseGrid}
               filterGridConfig={filterGridConfig}
             />
