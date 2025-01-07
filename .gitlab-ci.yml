@@ -83,7 +83,7 @@ update_stack_qa:
     PORTAINER_USERNAME: 'ci'
     PORTAINER_PASSWORD: 'LmqfEfr5nDurvatgw8rv'
     PORTAINER_HOST: https://portainer.platform.dnadev.net
-    PORTAINER_YML_FILE: recruitment.yml
+    PORTAINER_YML_FILE: platform.yml
     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
     REGISTRY_USERNAME: 'dna'
     REGISTRY_PASSWORD: '3QFh6zZ2u2fnHbnt3pwy'
