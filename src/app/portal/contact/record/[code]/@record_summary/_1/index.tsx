@@ -5,11 +5,13 @@ import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
 
 const fields = {
-  "Phone Number": "phone",
-  Email: "email",
+  "Primary Phone Number": "phone",
+  "Primary Email": "email",
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
   Address: "address",
+  Organization: "organization",
+  Role: "role",
 };
 
 const RecordShellSummary = ({
@@ -26,10 +28,12 @@ const RecordShellSummary = ({
     error: _error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: [],
+    pluck_fields: ["id"],
   });
-  const { email: _email, phone: _phone } = record;
-
+  const { emails: _email, phones: _phone } = record as unknown as Record<
+    string,
+    any
+  >;
   const email = useMemo(() => {
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,
@@ -65,6 +69,20 @@ const RecordShellSummary = ({
     ],
   });
 
+  const {
+    data: org_record = {
+      data: {
+        organizations: [],
+        user_roles: [],
+      },
+    },
+    refetch: refetchOrg,
+  } = api.organizationContact.fetchOrganizations.useQuery({
+    code: identifier!,
+  });
+
+  const { organizations, user_roles } = org_record?.data || {};
+
   const record_details = {
     ...data,
     full_name:
@@ -72,6 +90,27 @@ const RecordShellSummary = ({
       "None",
     phone,
     email,
+    organization: organizations?.length
+      ? organizations
+          .sort(
+            (
+              a: {
+                label: string;
+              },
+              b: {
+                label: string;
+              },
+            ) => a.label.localeCompare(b.label),
+          )
+          .map(({ label }: { label: string }) => label)
+          .join(", ")
+      : "None",
+    role: user_roles?.length
+      ? user_roles
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .map(({ label }: { label: string }) => label)
+          .join(", ")
+      : "None",
   };
 
   const refetchAll = async () => {
@@ -84,6 +123,10 @@ const RecordShellSummary = ({
     form_key,
   });
 
+  useRefetchRecord({
+    refetch: refetchOrg,
+    form_key: "organization_details",
+  });
   if (_error) {
     return <div>Error: {_error.message}</div>;
   }

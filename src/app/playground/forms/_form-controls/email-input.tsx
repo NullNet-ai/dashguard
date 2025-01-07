@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 import { EmailArraySchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
 const FormSchema = z.object({

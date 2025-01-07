@@ -17,7 +17,7 @@ export const transformSearchData = (
       const isTextFound =
         searchableField?.operator === "contains"
           ? (value as any)?.includes(searchText)
-          : value === searchText;
+          : value === searchText
       if (isTextFound) {
         acc.push({
           id: ulid(),

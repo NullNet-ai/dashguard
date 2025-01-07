@@ -3,11 +3,13 @@
 import React from "react";
 import { type IPropsGrid } from "../types";
 import GridProvider from "../Provider";
-import { GridDesktop } from "./views";
+import { GridDesktop, GridMobile } from "./views";
+import GridMobileForm from "./views/GridMobileForm";
 
 interface IClientProps extends IPropsGrid {
   parentType?: "grid" | "form" | "field";
   height?: string;
+  showPagination?: boolean;
 }
 
 function MainClient({
@@ -18,10 +20,8 @@ function MainClient({
   onSelectRecords,
   initialSelectedRecords = {},
   height,
+  showPagination = true,
 }: IClientProps) {
-
-
-
   return (
     <GridProvider
       totalCount={totalCount}
@@ -30,10 +30,16 @@ function MainClient({
       config={config}
       initialSelectedRecords={initialSelectedRecords}
     >
-      <div className="">
-        <GridDesktop parentType={parentType} hideSearch height={height}/>
+      <div className="hidden lg:flex">
+        <GridDesktop parentType={parentType} hideSearch height={height} />
       </div>
-      <div className="h-full lg:hidden">{/* <GridMobile /> */}</div>
+      <div className="flex h-[500px] lg:hidden">
+        {parentType === "grid" ? (
+          <GridMobile shownPagination={showPagination} />
+        ) : (
+          <GridMobileForm shownPagination={showPagination} />
+        )}
+      </div>
     </GridProvider>
   );
 }

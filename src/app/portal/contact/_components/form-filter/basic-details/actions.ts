@@ -1,9 +1,13 @@
 "use server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { api } from "~/trpc/server";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 
-export const saveContactDetails = async (data: any, action_type?: string) => {
+export const saveContactDetails = async (
+  data: z.infer<typeof ContactPhoneEmailSchema>,
+) => {
   const response = await api.contact.saveContactPhoneEmail(data);
 
   if (response?.existing) {
@@ -35,3 +39,21 @@ export const removeRecord = async () => {
   });
   redirect(`/portal/${mainEntity}/wizard/new/1`);
 };
+
+export const closeCurrentInnerClassTab = async ({
+  code
+} : {
+  code: string;
+}) => {
+  const headerList = headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const [, portal, mainEntity] = pathname.split("/");
+  const currentContext = "/" + portal + "/" + mainEntity;
+
+  await api.tab.closeCurrentInnerClassTab({
+    href: pathname,
+    current_context: currentContext,
+  });
+
+  redirect(`/portal/contact/wizard/${code}/1`);
+}

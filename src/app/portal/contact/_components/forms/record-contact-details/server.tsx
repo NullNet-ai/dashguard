@@ -17,6 +17,7 @@ const FormServerFetch = async () => {
       "date_of_birth",
       "address_id",
     ],
+    is_multiple: true,
   });
 
   const address_id = response?.address_id;

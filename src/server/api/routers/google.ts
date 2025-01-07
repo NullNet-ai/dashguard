@@ -1,12 +1,6 @@
-import {
-  createTRPCRouter,
-  privateProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod"; // Zod is used for input validation
-import { getGeolocation } from "~/utils/get-geolocation";
-import { type AddressType } from "~/components/platform/AddressAutoComplete";
-const PLACES_API = "https://places-api.dnaqa.net";
+const PLACES_API = process.env.PLACES_API ?? "https://api.places.platform.dnadev.net";
 const authtoken = Buffer.from(
   `places-api:4lc0UxobR=DuyL4r?=uS`,
   "utf8",
@@ -16,6 +10,9 @@ const options = {
     Authorization: `Basic ${authtoken}`,
   },
 };
+
+// api.places.platform.dnadev.net
+
 export const googleRouter = createTRPCRouter({
   // autoComplete: publicProcedure
   //   .input(

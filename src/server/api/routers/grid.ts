@@ -478,7 +478,13 @@ export const gridRouter = createTRPCRouter({
   updateReportSorting: privateProcedure
     .input(
       z.object({
-        sorting: z.array(z.object({ id: z.string(), desc: z.boolean() })),
+        sorting: z.array(
+          z.object({
+            id: z.string(),
+            desc: z.boolean(),
+            sort_key: z.string().optional(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -542,6 +548,7 @@ export const gridRouter = createTRPCRouter({
             id: z.string().optional(),
             label: z.string().optional(),
             default: z.boolean().optional(),
+            display_value: z.string().optional(),
           }),
         ),
       }),
@@ -607,5 +614,63 @@ export const gridRouter = createTRPCRouter({
       advanceFilter: advanceFilter,
       reportFilters,
     };
+  }),
+  updateReportPagination: privateProcedure
+    .input(
+      z.object({
+        current_page: z.number(),
+        limit_per_page: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { current_page, limit_per_page } = input;
+      const headerList = headers();
+
+      const pathName = headerList.get("x-pathname") || "";
+      const gridTabId = headerList.get("x-grid-tab-id") || "";
+      const [, , mainEntity, application] = pathName.split("/");
+      if (application !== "grid" || !mainEntity) return [];
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || "",
+        _application: application || "",
+        _id: ctx.session.account.contact.id,
+      });
+      let paginationReportTabId = `${_tabMenuId}:${gridTabId}:pagination`;
+      if (!gridTabId) {
+        const gridTabFilterList = (await ctx.redisClient.getCachedData(
+          _tabMenuId,
+        )) as ITabGrid[];
+        const activeTab = gridTabFilterList?.find((tab) => tab.current);
+        paginationReportTabId = `${_tabMenuId}:${activeTab?.id}:pagination`;
+      }
+
+      return await ctx.redisClient.cacheData(paginationReportTabId, {
+        current_page,
+        limit_per_page,
+      });
+    }),
+  getReportPagination: privateProcedure.query(async ({ ctx }) => {
+    const headerList = headers();
+    const gridTabId = headerList.get("x-grid-tab-id") || "";
+    const pathName = headerList.get("x-pathname") || "";
+    const [, , mainEntity, application] = pathName.split("/");
+    if (application !== "grid" || !mainEntity) return [];
+    const _tabMenuId = tabMenuId({
+      _mainEntity: mainEntity || "",
+      _application: application || "",
+      _id: ctx.session.account.contact.id,
+    });
+    let paginationReportTabId = `${_tabMenuId}:${gridTabId}:pagination`;
+    if (!gridTabId) {
+      const gridTabFilterList = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+      const activeTab = gridTabFilterList?.find((tab) => tab.current);
+      paginationReportTabId = `${_tabMenuId}:${activeTab?.id}:pagination`;
+    }
+    const pagination = (await ctx.redisClient.getCachedData(
+      paginationReportTabId,
+    ));
+    return pagination;
   }),
 });

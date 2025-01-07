@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@headlessui/react";
-import { Header } from "@tanstack/react-table";
+import { type Header } from "@tanstack/react-table";
 import {
   ArrowDown,
   ArrowUp,
@@ -29,9 +29,17 @@ interface HeaderMenuProps {
 
 const HeaderMenu = ({ header }: HeaderMenuProps) => {
   const { state } = useContext(GridContext);
-  const sortingState = state?.sorting?.find((item) => item.id === header?.id);
+  const sortingState = state?.sorting?.find(
+    (item) =>
+      item.id === header?.id ||
+      item.id === (header?.column?.columnDef as any)?.sortKey,
+  );
   const enableSorting = header.column.getCanSort();
   const [open, setOpen] = useState(false);
+
+  if (!enableSorting) {
+    return <></>;
+  }
 
   return (
     <DropdownMenu
@@ -40,18 +48,26 @@ const HeaderMenu = ({ header }: HeaderMenuProps) => {
         setOpen(isOpen);
       }}
     >
-      <DropdownMenuTrigger asChild onClick={() => {
-        setOpen(!open);
-      }}>
-        <Button className={cn(` group-hover:block group-hover:opacity-100`,
-          `${open ? "opacity-100" : "opacity-0"}`
-        )}>
-          {
-            !open ?   <ChevronDown className="h-4 w-4" />  : <ChevronUp className="h-4 w-4" />
-          }
+      <DropdownMenuTrigger
+        asChild
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <Button
+          className={cn(
+            `group-hover:block group-hover:opacity-100`,
+            `${open ? "opacity-100" : "opacity-0"}`,
+          )}
+        >
+          {!open ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronUp className="h-4 w-4" />
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="center" side="bottom" >
         {/* <DropdownMenuItem className="flex gap-2">
           <Pencil className={`h-4 w-4`} aria-hidden="true" />
           <span>Edit</span>

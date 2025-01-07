@@ -1,8 +1,8 @@
-import { SortingState } from "@tanstack/react-table";
 
 export const defaultSorting = [
   {
-    id: "code",
+    id: "created_date",
     desc: true,
+    sort_key: "created_date",
   },
-] as SortingState;
+];

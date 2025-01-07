@@ -57,7 +57,7 @@ interface MultipleSelectorProps {
   onMaxSelected?: (maxLimit: number) => void;
   /** Hide the placeholder when there are options selected. */
   hidePlaceholderWhenSelected?: boolean;
-  readOnly?:boolean;
+  readOnly?: boolean;
   disabled?: boolean;
   /** Group the options base on provided key. */
   groupBy?: string;
@@ -464,7 +464,7 @@ const MultipleSelector = React.forwardRef<
           className={cn(
             "min-h-10 rounded-md border border-gray-300 text-sm",
             {
-              "px-3 py-2": selected.length !== 0,
+              "px-3 py-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
             },
             className,
@@ -474,14 +474,14 @@ const MultipleSelector = React.forwardRef<
             inputRef.current?.focus();
           }}
         >
-          <div className="relative flex flex-wrap gap-1">
+          <div className="relative flex flex-wrap items-center gap-1">
             {selected.map((option) => {
               return (
                 <Badge
                   key={option.value}
                   className={cn(
                     "data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground",
-                    "data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
+                    "max-h-8 min-h-8 data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
                     badgeClassName,
                   )}
                   data-fixed={option.fixed}
@@ -515,6 +515,7 @@ const MultipleSelector = React.forwardRef<
               ref={inputRef}
               value={inputValue}
               disabled={disabled}
+              readOnly={readOnly}
               onValueChange={(value) => {
                 setInputValue(value);
                 inputProps?.onValueChange?.(value);

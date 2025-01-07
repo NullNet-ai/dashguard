@@ -26,53 +26,71 @@ const Wrapper = (props: IProps) => {
       }
     ];
 
-    return (
-        <RecordProvider
-        config={{
-          entityCode: entity_code,
-          entityName: entity_name!,
-          identifierOption: is_applicant ? [
-            {
-              label: "Screening",
-              onClick: handleChangeStatus.bind(null, "Screening")
-            },
-            {
-              label: "Assessment Test",
-              onClick: handleChangeStatus.bind(null, "Assessment Test")
-            },
-            {
-              label: "Interview",
-              onClick: handleChangeStatus.bind(null, "Interview")
-            },
-            {
-              label: "Pending",
-              onClick: handleChangeStatus.bind(null, "Pending")
-            },
-            {
-              label: "Hired",
-              onClick: handleChangeStatus.bind(null, "Hired")
-            },
-            {
-              label: "Failed",
-              onClick: handleChangeStatus.bind(null, "Failed")
-            },
-            {
-              label: "On Hold",
-              onClick: handleChangeStatus.bind(null, "On Hold")
-            },
-            {
-              label: "Job",
-              onClick: handleChangeStatus.bind(null, "Job Offered")
-            },
-          ] : undefined
-        }}
-        >
-        <section className="min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem] mt-8">
+  const tabs = [
+    {
+      id: "dashboard",
+      name: "Dashboard",
+      tabName: "dashboard?categories=",
+    },
+    {
+      id: "contact",
+      name: "Contact",
+      tabName: "contact?categories=",
+    },
+    {
+      id: "organization",
+      name: "Organization",
+      tabName: "organization?categories=",
+    },
+  ];
+
+  return (
+    <RecordProvider
+      config={{
+        entityCode: entity_code,
+        entityName: entity_name!,
+        identifierOption: is_applicant
+          ? [
+              {
+                label: "Screening",
+                onClick: handleChangeStatus.bind(null, "Screening"),
+              },
+              {
+                label: "Assessment Test",
+                onClick: handleChangeStatus.bind(null, "Assessment Test"),
+              },
+              {
+                label: "Interview",
+                onClick: handleChangeStatus.bind(null, "Interview"),
+              },
+              {
+                label: "Pending",
+                onClick: handleChangeStatus.bind(null, "Pending"),
+              },
+              {
+                label: "Hired",
+                onClick: handleChangeStatus.bind(null, "Hired"),
+              },
+              {
+                label: "Failed",
+                onClick: handleChangeStatus.bind(null, "Failed"),
+              },
+              {
+                label: "On Hold",
+                onClick: handleChangeStatus.bind(null, "On Hold"),
+              },
+              {
+                label: "Job",
+                onClick: handleChangeStatus.bind(null, "Job Offered"),
+              },
+            ]
+          : undefined,
+      }}
+    >
+      <section className="mt-8 min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem]">
         <ResizablePanelGroup direction="horizontal" className="flex">
-          <div className="h-full hidden md:block w-full md:w-[240px] lg:w-[300px] border-r border-slate-100 min-h-[calc(100vh-105px)]">
-              <RecordWrapperProvider>
-                {record_summary}
-              </RecordWrapperProvider>
+          <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
+            <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
           </div>
           <ResizablePanel
             defaultSize={95}
@@ -86,11 +104,9 @@ const Wrapper = (props: IProps) => {
       </section>
       {/* <Tabs>{tabs} </Tabs>
       <MainContent>{children}</MainContent> */}
-      <RecordSummaryMobile>
-        {record_summary}
-      </RecordSummaryMobile>
-      </RecordProvider>
-    )
-}
+      <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+    </RecordProvider>
+  );
+};
 
-export default Wrapper
+export default Wrapper;

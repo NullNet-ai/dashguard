@@ -95,11 +95,13 @@ export default function MyVerticalStepper() {
         data-test-id={testIDFormatter(
           `${entityName}-wzrdsum-stepper-accordion`,
         )}
+        className="flex flex-col items-center"
       >
         <div
           className={cn(
-            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-3",
+            "relative hidden  after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
             { "text-center sm:p-0": !isSummOpen },
+            `${isSummOpen ? "w-full" : "w-[30px]"}`,
           )}
         >
           <ol role="list" className="overflow-hidden">
@@ -145,7 +147,7 @@ export default function MyVerticalStepper() {
                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}`,
                   )}
                   className={cn(
-                    stepIdx !== stepsArray.length - 1 ? "relative pb-10" : "",
+                    stepIdx !== stepsArray.length - 1 ? "relative pb-[24px]" : "",
                   )}
                 >
                   {isStepped || isCurrent ? (
@@ -170,7 +172,7 @@ export default function MyVerticalStepper() {
                           </>
                         )
                       ) : (
-                        <>
+                        <>  
                           {stepsArray.length > stepIdx + 1 ? (
                             <div
                               aria-hidden="true"
@@ -200,13 +202,13 @@ export default function MyVerticalStepper() {
                         </span>
                       </button>
                       <span
-                        className={cn("ml-3 flex min-w-0 flex-col", {
+                        className={cn("ml-[10px] flex min-w-0 flex-col pt-2.5", {
                           "hidden h-0 w-0": !isSummOpen,
                         })}
                       >
                         {/* Hidden on mobile, visible from small screens (sm) and up */}
                         {/* this is the title */}
-                        <span className="text-gray text-xs sm:block">
+                        <span className="text-xs sm:block text-primary">
                           {summaryTitle
                             ? summaryTitle
                             : "Description of Step " + stepIndex}
@@ -234,7 +236,7 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block">
+                                  <div className="text-sm font-medium sm:block mt-[8px]">
                                     {component}
                                   </div>
                                 </AccordionContent>
@@ -268,7 +270,7 @@ export default function MyVerticalStepper() {
                         >
                           <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-4 border-gray-300 bg-white group-hover:border-gray-400"></span>
                         </span>
-                        <span className="ml-3 flex min-w-0 flex-col">
+                        <span className="ml-[10px] flex min-w-0 flex-col pt-2.5">
                           {/* This will be hidden on mobile screens */}
                           <span className="text-sm text-gray-500 sm:block">
                             {summaryTitle

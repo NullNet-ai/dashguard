@@ -30,6 +30,7 @@ const ZodItems = z.object({
       z.object({
         id: z.string(),
         desc: z.boolean(),
+        sort_key: z.string().optional(),
       }),
     )
     .optional(), // Optional sorting

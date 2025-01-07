@@ -1,30 +1,25 @@
 "use client";
 
-import { XCircleIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
-import { startTransition, useEffect } from "react";
 import { Button } from "~/components/ui/button";
+import React, { startTransition } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const ErrorContainer = ({
+export default function ErrorPage({
   error,
   reset,
 }: {
   error: Error & { digest?: string; statusCode?: number };
   reset: () => void;
-}) => {
+}) {
   const router = useRouter();
 
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
-  const clearError = () => {
+  function clearError() {
     startTransition(() => {
       router.refresh();
       reset();
     });
-  };
+  }
 
   return (
     <div className="flex justify-center p-4 py-6">
@@ -49,6 +44,4 @@ const ErrorContainer = ({
       </div>
     </div>
   );
-};
-
-export default ErrorContainer;
+}

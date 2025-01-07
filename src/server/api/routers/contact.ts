@@ -182,6 +182,10 @@ export const contactRouter = createTRPCRouter({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
+          pluck_group_object: {
+            contact_phone_numbers: ["raw_phone_number", "is_primary"],
+            contact_emails: ["email", "is_primary"],
+          },
           pluck_object: {
             contact_emails: ["email", "is_primary"],
             contact_phone_numbers: [
@@ -192,6 +196,7 @@ export const contactRouter = createTRPCRouter({
             ],
             contacts: input.pluck,
           },
+          track_total_records: true,
           advance_filters: [
             // {
             //   type: "criteria",
@@ -244,17 +249,53 @@ export const contactRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: "self",
+        field_relation: {
+          to: {
+            entity: "contact",
+            field: "created_by",
+          },
+          from: {
+            alias: "created_by",
+            entity: "contact",
+            field: "id",
+          },
+        },
+      })
+      .join({
+        type: "self",
+        field_relation: {
+          to: {
+            entity: "contact",
+            field: "updated_by",
+          },
+          from: {
+            alias: "updated_by",
+            entity: "contact",
+            field: "id",
+          },
+        },
+      })
       .execute();
 
     //TODO: Transform the data - temporary
     const formatted_items = items.reduce(
-      (acc: Record<string, string>[], item) => {
-        const { contacts, contact_emails, contact_phone_numbers } = item;
-        const emails = pick(contact_emails, ["email"]);
+      (acc: Record<string, string>[], item: Record<string, any>) => {
+        const {
+          contacts,
+          contact_emails,
+          contact_phone_numbers,
+          created_by,
+          updated_by,
+        } = item;
+
+        const emails = pick(contact_emails, ["emails", "is_primaries"]);
         const phones = pick(contact_phone_numbers, [
-          "raw_phone_number",
+          "raw_phone_numbers",
           "iso_code",
           "country_code",
+          "is_primaries",
         ]);
         const existing_contact = acc?.find(
           (acc_item: any) => acc_item?.id === contacts?.id,
@@ -262,9 +303,27 @@ export const contactRouter = createTRPCRouter({
 
         if (existing_contact) return acc;
 
-        const { raw_phone_number, iso_code } = phones;
+        const {
+          raw_phone_numbers,
+          iso_code,
+          is_primaries: p_is_primaries,
+        } = phones;
+        const { emails: _emails, is_primaries: e_is_primaries } = emails;
+        const filterPrimary = (li: string[], is_primaries: number[]) => {
+          if (!li || !is_primaries) return null;
+          const index = is_primaries?.findIndex(
+            (is_primary) => is_primary === 1,
+          );
+          return index !== -1 ? li[index] : null;
+        };
+        const _primary_phone_number = filterPrimary(
+          raw_phone_numbers,
+          p_is_primaries,
+        );
+        const primary_email = filterPrimary(_emails, e_is_primaries);
+
         const primary_phone_number = formatPhoneNumber({
-          raw_phone_number,
+          raw_phone_number: _primary_phone_number as string,
           iso_code,
         });
 
@@ -274,14 +333,16 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
-            primary_phone_number,
+            created_by: `${created_by?.first_name ?? ""} ${created_by?.last_name ?? ""}`,
+            updated_by: `${updated_by?.first_name ?? ""} ${updated_by?.last_name ?? ""}`,
+            raw_phone_number: primary_phone_number,
+            email: primary_email,
           },
         ];
       },
       [],
     );
-    // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
-    const totalPages = Math.ceil(totalCount / 100);
+    const totalPages = Math.ceil(totalCount / (input.limit || 100));
 
     return {
       totalCount, // Total number of users
@@ -432,7 +493,7 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, email, phone } = input;
+      const { id, emails, phones } = input;
 
       const email_pluck = ["email", "id", "contact_id", "is_primary"];
       const phone_pluck = [
@@ -443,9 +504,9 @@ export const contactRouter = createTRPCRouter({
         "iso_code",
         "country_code",
       ];
-      const email_data = email?.[0];
+      const email_data = emails?.find((email) => email.is_primary);
 
-      const phone_data = phone?.[0];
+      const phone_data = phones?.find((phone) => phone.is_primary);
 
       let contact_id = id;
       let contact_code = "";
@@ -579,7 +640,6 @@ export const contactRouter = createTRPCRouter({
                 ...data,
                 contact_id,
                 status: "Active",
-                is_primary: true,
               },
               pluck,
             },
@@ -623,33 +683,45 @@ export const contactRouter = createTRPCRouter({
         return record?.data?.[0];
       };
 
-      const [contact_email, contact_phone] = await Promise.all([
-        getRecordByContactId("contact_email", contact_id!, email_data?.id!),
-        getRecordByContactId(
-          "contact_phone_number",
-          contact_id!,
-          phone_data?.id!,
-        ),
-      ]);
+      if (!contact_id)
+        return {
+          status_code: 500,
+          message: "Contact ID is required.",
+        };
 
-      // Since not multiple
-      const email_id = contact_email?.id;
-      const phone_id = contact_phone?.id;
+      const email_records = await Promise.all(
+        emails.map(async (email) => {
+          const existing_email = await getRecordByContactId(
+            "contact_email",
+            contact_id!,
+            email.id!,
+          );
+          if (existing_email) {
+            return update("contact_email", email, email_pluck);
+          } else {
+            return insert("contact_email", email, email_pluck);
+          }
+        }),
+      );
 
-      const [email_record, phone_record] = await Promise.all([
-        email_id
-          ? update("contact_email", email_data, email_pluck)
-          : insert("contact_email", email_data, email_pluck),
-        phone_id
-          ? update("contact_phone_number", phone_data, phone_pluck)
-          : insert("contact_phone_number", phone_data, phone_pluck),
-      ]);
+      const phone_records = await Promise.all(
+        phones.map(async (phone) => {
+          const existing_phone = await getRecordByContactId(
+            "contact_phone_number",
+            contact_id!,
+            phone.id!,
+          );
+          return existing_phone
+            ? update("contact_phone_number", phone, phone_pluck)
+            : insert("contact_phone_number", phone, phone_pluck);
+        }),
+      );
 
       return {
         id: contact_id,
         code: contact_code,
-        email: [email_record],
-        phone: [phone_record],
+        emails: email_records,
+        phones: phone_records,
       };
     }),
   fetchContactPhoneEmail: privateProcedure
@@ -659,26 +731,17 @@ export const contactRouter = createTRPCRouter({
           .string({ message: "Contact Code is required." })
           .min(1, { message: "Contact Code is required." }),
         pluck_fields: z.array(z.string()),
+        is_multiple: z.boolean().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { code: contact_code, pluck_fields } = input;
+      const { code: contact_code, pluck_fields, is_multiple } = input;
       const { data: items } = await ctx.dnaClient
         .findAll({
           entity: "contact",
           token: ctx.token.value,
           query: {
-            pluck_object: {
-              contact_emails: ["id", "email", "is_primary"],
-              contact_phone_numbers: [
-                "id",
-                "raw_phone_number",
-                "iso_code",
-                "country_code",
-                "is_primary",
-              ],
-              contacts: pluck_fields,
-            },
+            pluck: pluck_fields,
             advance_filters: [
               {
                 field: "code",
@@ -686,52 +749,59 @@ export const contactRouter = createTRPCRouter({
                 values: [contact_code],
               },
             ] as IAdvanceFilters[],
-            order: {
-              starts_at: 0,
-              limit: 1,
-              by_field: "created_date",
-              by_direction: EOrderDirection.DESC,
-            },
-          },
-        })
-        .join({
-          type: "left",
-          field_relation: {
-            to: {
-              entity: "contact_emails",
-              field: "contact_id",
-            },
-            from: {
-              entity: "contacts",
-              field: "id",
-            },
-          },
-        })
-        .join({
-          type: "left",
-          field_relation: {
-            to: {
-              entity: "contact_phone_numbers",
-              field: "contact_id",
-            },
-            from: {
-              entity: "contacts",
-              field: "id",
-            },
           },
         })
         .execute();
 
+      const getRecordByContactId = async (
+        entity: string,
+        contact_id: string,
+        pluck_fields: string[],
+      ) => {
+        const advance_filters = createAdvancedFilter({
+          contact_id,
+          ...(is_multiple ? {} : { is_primary: true }),
+        });
+        const record = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              advance_filters,
+              pluck: pluck_fields,
+            },
+          })
+          .execute();
+        return record?.data;
+      };
+
       const [contact] = items || [];
-      const { contact_emails, contact_phone_numbers, contacts } = contact || {};
-      const { id: contact_id = "", code = "", ...rest } = contacts || {};
+      const {
+        id: contact_id = "",
+        code = "",
+        address_id,
+        ...rest
+      } = contact || {};
+
+      const phones = await getRecordByContactId(
+        "contact_phone_number",
+        contact_id!,
+        ["id", "raw_phone_number", "iso_code", "country_code", "is_primary"],
+      );
+
+      const emails = await getRecordByContactId("contact_email", contact_id!, [
+        "id",
+        "email",
+        "is_primary",
+      ]);
 
       return {
+        ...rest,
         id: contact_id,
         code: code,
-        email: contact_emails ? [contact_emails] : [],
-        phone: contact_phone_numbers ? [contact_phone_numbers] : [],
-        ...rest,
+        emails,
+        phones,
+        address_id: address_id,
       };
     }),
   getBasicDetails: privateProcedure

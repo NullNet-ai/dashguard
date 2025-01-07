@@ -2,7 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
-import RecordWrapper from "~/components/platform/RecordV2/RecordWrapper";
+import RecordWrapper from "~/components/platform/Record/RecordWrapper";
 
 const Layout = async ({
   record,
@@ -46,7 +46,6 @@ const Layout = async ({
     return notFound();
   }
 
-
   //Record Shell Guard for Draft Records
   if (["Draft", "draft", "Pending"].includes(status)) {
     return notFound();
@@ -59,9 +58,9 @@ const Layout = async ({
       tabName: "dashboard",
     },
     {
-      id: "user_role",
-      name: "User Role",
-      tabName: "user_role",
+      id: "role",
+      name: "Role",
+      tabName: "role",
     },
   ];
 

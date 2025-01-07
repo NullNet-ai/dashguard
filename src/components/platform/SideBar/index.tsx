@@ -173,7 +173,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   )}
                 </footer>
                 <DropdownMenuContent
-                  className="z-[100] w-[--radix-dropdown-menu-trigger-width] mx-auto max-w-[90%] md:max-w-full  md:min-w-56 rounded-lg"
+                  className="z-[100] w-[50px]  mx-auto max-w-[90%] md:max-w-[500px]  rounded-lg"
                   side={width <= 640 ? "top" : "right"}
                   align="end"
                   sideOffset={4}

@@ -4,7 +4,7 @@ import React from "react";
 import { FormBuilder } from "~/components/platform/FormBuilder";
 import { z } from "zod";
 import { api } from "~/trpc/react";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types/global/interfaces";
 import { IFormProps } from "../types";
 
 const FormSchema = z.object({

@@ -42,14 +42,15 @@ const gridColumns = [
     header: "Middle Name",
     accessorKey: "middle_name",
   },
-
   {
     header: "Primary Phone Number",
-    accessorKey: "primary_phone_number",
+    accessorKey: "raw_phone_number",
+    sortKey: "contact_phone_number.raw_phone_number",
   },
   {
     header: "Primary Email",
     accessorKey: "email",
+    sortKey: "contact_email.email",
   },
   {
     header: "Organization",

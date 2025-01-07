@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { api } from "~/trpc/react";

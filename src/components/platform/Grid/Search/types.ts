@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
+import { EOrderDirection } from "@dna-platform/common-orm";
+
 export interface IState {
   open: boolean;
   searchItems: ISearchItem[];
@@ -55,6 +57,12 @@ export interface ISearchItem {
   field?: string;
   label?: string;
   default?: boolean;
+  display_value?: string;
+}
+
+export interface  ISortItem {
+  by_field: string;
+  by_direction: EOrderDirection;
 }
 
 export interface ISearchItemResult extends ISearchItem {

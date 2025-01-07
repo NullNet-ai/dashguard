@@ -11,6 +11,7 @@ const FormServerFetch = async () => {
   const record_data = await api.contact.fetchContactPhoneEmail({
     code: identifier!,
     pluck_fields,
+    is_multiple: true,
   });
   const _pluck = [
     "id",
@@ -42,13 +43,31 @@ const FormServerFetch = async () => {
 
   const contact_id = default_values?.id;
 
+  // TODO: create query that joins related contact phone and email
+  // !TEMPORARY: join contact phone and email
+  // let joinedContactDetails = (record_data.emails.length && record_data.emails.reduce(
+  //   (acc: Array<Record<string, any>>, curr, index) => {
+  //     return [
+  //       ...acc,
+  //       {
+  //         ...record_data,
+  //         // refactor: do not enclose in array
+  //         emails: [curr],
+  //         // refactor: do not enclose in array
+  //         phones: [record_data.phones[index]],
+  //       },
+  //     ];
+  //   },
+  //   [],
+  // )) || [{ emails: [], phones: [] }];
 
-  
   return (
     <div className="space-y-2">
       <BasicDetails
         defaultValues={{
           ...default_values,
+          // for multi-select form filter
+          // form_builder_fields: joinedContactDetails,
         }}
         params={{
           id: contact_id!,

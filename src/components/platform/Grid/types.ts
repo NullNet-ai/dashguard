@@ -9,7 +9,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import { ISearchItem, ISearchParams } from "./Search/types";
-import { appRouter } from '../../../server/api/root';
+import { appRouter } from "../../../server/api/root";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -20,6 +20,7 @@ export interface DefaultRowActions {
   setOpen?: (open: boolean) => void;
   setRecord?: (record: any) => void;
   record?: any;
+  viewMode?: "table" | "card";
 }
 
 export interface DefaultBulkActions {
@@ -37,10 +38,16 @@ export type TLayerType = "main" | "sub";
 
 export type AppRouterKeys = keyof typeof appRouter;
 
+export type TArchiveType = "warning" | "archive";
+
+type CustomColumnDef<TData> = ColumnDef<TData> & {
+  sortKey?: string;
+};
+
 export interface IConfigGrid {
   entity: string;
   title?: string;
-  columns: ColumnDef<any>[];
+  columns: CustomColumnDef<any>[];
   hideColumnsOnMobile?: string[];
   actionType?: TActionType;
   statusesIncluded?: string[];
@@ -50,6 +57,7 @@ export interface IConfigGrid {
   deleteCustomComponent?: React.FC<any>;
   archiveCustomComponent?: React.FC<any>;
   restoreCustomComponent?: React.FC<any>;
+  archiveDialogCustomComponent?: React.FC<any>;
   defaultValues?: Record<string, any>;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
@@ -64,11 +72,17 @@ export interface IConfigGrid {
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   searchableFields?: any[];
+  is_warning_archive?: boolean;
   searchConfig?: {
     router: AppRouterKeys;
     resolver: string;
     query_params?: ISearchParams;
-  }
+  };
+  hideCreateButton?: boolean;
+}
+
+interface IRowToArchive extends Row<any> {
+  shouldDisplayArchiveWarningPrompt?: boolean;
 }
 
 export interface IState {
@@ -81,11 +95,14 @@ export interface IState {
   totalCountSelected?: number;
   archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
-  rowToArchive: Row<any>;
+  rowToArchive: IRowToArchive;
   viewMode?: "table" | "card";
   sorting?: SortingState;
   rowSelection: RowSelectionState;
   advanceFilter?: ISearchItem[];
+  bulkActionType: "archive" | null;
+  showBulkActionConfirmationModal: boolean;
+  pagination?: IPagination;
 }
 
 export interface IAction {
@@ -99,6 +116,8 @@ export interface IAction {
   handleSingleSelect: (row: any) => void;
   setShowArchiveConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
+  setBulkActionType: (type: string | null) => void;
+  setShowBulkActionConfirmationModal: (show: boolean) => void;
 }
 
 export interface ICreateContext {
@@ -106,11 +125,17 @@ export interface ICreateContext {
   actions?: IAction;
 }
 
+export interface IPagination {
+ current_page: number;
+ limit_per_page: number;
+}
+
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
   sorting?: SortingState;
+  pagination?: IPagination;
   onSelectRecords?: (rows: any[]) => void;
   initialSelectedRecords?: RowSelectionState;
   defaultSorting?: SortingState;

@@ -14,48 +14,42 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { token, error } = await ctx.dnaClient
-        .login(input.email, input.password)
-        .execute()
-        .then((response) => {
-          return {
-            // @ts-expect-error - TS doesn't know about the ctx type
-            token: response.data?.[0].token,
-            error: null,
-          };
-        })
-        .catch((error) => {
-          // Enhanced error handling with specific validation messages
-          let errorMessage = 'Something went wrong please try again';
-          let errorType = 'unknown';
+      try {
+        const response = await ctx.dnaClient
+          .login(input.email, input.password)
+          .execute();
+        if (!response.success) {
+          throw response;
+        }
 
-            if (input.email === 'admin@dnamicro.com' && error?.response?.status === undefined) {
-              errorMessage = 'The email or password you entered is incorrect.';
-              errorType = 'invalid';
-            } else if (input.email !== 'admin@dnamicro.com') {
-              errorMessage = 'No account was found with this email address.';
-              errorType = 'notfound';
-            }
+        const token = response?.data?.[0]?.token;
 
-          return {
-            token: null,
-            error: {
-              message: errorMessage,
-              statusCode: error?.response?.status || 500,
-              error: error?.response?.error || error,
-              type: errorType,
-            },
-          };
-        });
+        ctx.storeCookies.set("token", token);
+        return { token };
+      } catch (error: any) {
+        let errorMessage = "Something went wrong please try again";
+        let errorType = "unknown";
 
-      if (error) {
-        return error;
+        switch (error?.message) {
+          case "Invalid Credentials":
+            errorMessage = "The email or password you entered is incorrect.";
+            errorType = "invalid";
+            break;
+          case "Account not found":
+            errorMessage = "No account was found with this email address.";
+            errorType = " notfound";
+            break;
+        }
+
+        return {
+          message: errorMessage,
+          statusCode: error?.status_code || 500,
+          error: error?.errors || error,
+          type: errorType,
+        };
       }
-      
-      ctx.storeCookies.set("token", token);
-      return { token };
     }),
-    
+
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete("token");
     return { message: "User logged out" };

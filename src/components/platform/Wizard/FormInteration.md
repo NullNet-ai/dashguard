@@ -63,9 +63,9 @@ Incorporate both resolve and reject within your save flow structure when using t
 "use client";
 
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/EnhancedFormBuilder";
+import { FormBuilder }  from "~/components/platform/FormBuilder";
 
-import { IHandleSubmit } from "~/components/platform/FormBuilder/type";
+import { IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { Contact } from "~/auto-generated";
 import { useState } from "react";
 import { INewProps } from "../(wizard)/wizard/types";

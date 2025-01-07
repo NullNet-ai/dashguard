@@ -5,7 +5,15 @@ import { Delete } from "../Action/Delete";
 import { Archive } from "../Action/Archived";
 import { Restore } from "../Action/Restore";
 import { Button } from "@headlessui/react";
-import { ArchiveIcon, ArchiveX, ArchiveXIcon, PencilIcon, RotateCcw, TrashIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  ArchiveX,
+  ArchiveXIcon,
+  PencilIcon,
+  RotateCcw,
+  TrashIcon,
+} from "lucide-react";
+import { DropdownMenuItem } from "~/components/ui/dropdown-menu";
 
 /**
  *
@@ -25,9 +33,26 @@ export const handleEdit = async ({ row, config }: DefaultRowActions) => {
   });
 };
 
-export function EditComponent({ row, config }: DefaultRowActions) {
+export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.editCustomComponent) {
     return <>{config?.editCustomComponent?.({ row, config })}</>;
+  }
+  if (viewMode === "card") {
+    return (
+      <DropdownMenuItem
+        className="relative flex cursor-pointer items-center gap-2 text-primary"
+        onClick={() => {
+          if (config?.editCustomAction) {
+            config?.editCustomAction({ row, config });
+            return;
+          }
+          handleEdit({ row, config });
+        }}
+      >
+        <PencilIcon className="h-3 w-3 text-primary" />
+        <span>Edit</span>
+      </DropdownMenuItem>
+    );
   }
 
   return (
@@ -57,9 +82,27 @@ const handleDelete = async ({ row, config }: DefaultRowActions) => {
   await Delete({ entity: config?.entity, id: row.original?.id });
 };
 
-export function DeleteComponent({ row, config }: DefaultRowActions) {
+export function DeleteComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.deleteCustomComponent) {
     return <>{config?.deleteCustomComponent({ row, config })}</>;
+  }
+
+  if (viewMode === "card") {
+    return (
+      <DropdownMenuItem
+        className="relative flex cursor-pointer items-center gap-2 text-red-500"
+        onClick={() => {
+          if (config?.deleteCustomAction) {
+            config?.deleteCustomAction({ row, config });
+            return;
+          }
+          handleDelete({ row, config });
+        }}
+      >
+        <ArchiveIcon className="h-3 w-3 text-destructive" />
+        <span>Delete</span>
+      </DropdownMenuItem>
+    );
   }
 
   return (
@@ -96,9 +139,36 @@ export function ArchiveComponent({
   setOpen,
   record,
   setRecord,
+  viewMode,
 }: DefaultRowActions) {
   if (config?.archiveCustomComponent) {
-    return <>{config?.archiveCustomComponent({ row, config })}</>;
+    const result = config?.archiveCustomComponent({
+      row,
+      config,
+      setOpen,
+      open,
+      setRecord,
+      record,
+    });
+    if (result) {
+      return <>{result}</>;
+    }
+  }
+  if (viewMode === "card") {
+    return (
+      <DropdownMenuItem
+        className="relative flex cursor-pointer items-center gap-2 text-red-500"
+        onClick={() => {
+          setRecord?.(record);
+          setOpen?.(true);
+        }}
+      >
+        <ArchiveIcon
+          className={`h-3 w-3 ${row.original.disabled ? "bg-gray:300 opacity-50" : "text-destructive"}`}
+        />
+        <span>Archive</span>
+      </DropdownMenuItem>
+    );
   }
 
   return (
@@ -127,11 +197,27 @@ const handleRestore = async ({ row, config }: DefaultRowActions) => {
   await Restore({ entity: config?.entity, id: row.original?.id });
 };
 
-export function RestoreComponent({ row, config }: DefaultRowActions) {
+export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.restoreCustomComponent) {
     return <>{config?.restoreCustomComponent({ row, config })}</>;
   }
-
+  if (viewMode === "card") {
+    return (
+      <DropdownMenuItem
+        className="relative flex cursor-pointer items-center gap-2 text-primary"
+        onClick={() => {
+          if (config?.restoreCustomAction) {
+            config?.restoreCustomAction({ row, config });
+            return;
+          }
+          handleRestore({ row, config });
+        }}
+      >
+        <RotateCcw className="h-3 w-3 text-primary" />
+        <span>Restore</span>
+      </DropdownMenuItem>
+    );
+  }
   return (
     <Button
       onClick={() => {

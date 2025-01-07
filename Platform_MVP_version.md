@@ -1,17 +1,5 @@
-- Platform MVP version
-    0.1.0 - recruitment portal
-        - 0.1.x - fixes
-    0.2.0 - mini project
-        - 0.2.x - development
-
-
-- Process flow ( partial documented )
-    Start to finish
-    ( Create entity > Menu > End to End )
-
-----------
-- Platform portal and data-store requirements
-    - node version 20 +
+Platform 1.0
+    - node version 20+
     - pnpm
     - redis ( redis-server )
         - use for:
@@ -24,40 +12,88 @@
                 - Steps
                 - Traverse Steps
                 - Pathname
-    - sqlite vs-code extension
-----------
-- Platform Data-Store Schema
-    - Contacts
-    - Organizations
-    - Roles
-    - Reports
-----------
-- Platform Application Template Goal
-    - Login-w/.cy
-    - Default Menu
-        - Contacts-w/.cy
-        - Organization-w/.cy
-        - Settings-w/.cy
-            - Roles-w/.cy
-            - Reports-w/.cy
-    - Main Application
+    - platform trpc server api
+        - auth
+        - contact
+        - country
+        - dashboard
+        - google
+        - grid
+        - menu
+        - notification
+        - organization_contact
+        - organization
+        - record
+        - tab
+        - user_role
+        - validator
+        - wizard
+    - platform application
+        - Login
+        - FormBuilder ( Dna Form )
+            - Filter
+                - Grid
+                    - single select
+                    - multi select
+                - Selected View
+            - Host ( Form Control ) and
+                - Address
+                - Checkbox
+                - CurrencyInput
+                - Date
+                - DateRange
+                - EmailInput
+                - FileUpload
+                - Inputs
+                - InputGrid
+                - Input
+                - LabelValueInput
+                - MultiSelect
+                - NumberInput
+                - Password
+                - PhoneInput
+                - Radio
+                - PieChart
+                - Select
+                - SmartDate
+                - TextArea
+                - TimePicker
+        - Wizard
+            - Navigation ( steps )
+            - Summary
+            - Next , previous , skip and save and continue
+            - Content
+                - FormBuilder
+        - Record
+            - Tab
+            - Summary
+            - Content
+                - FormBuilder
+            - Status Update
         - Grid
+            - Table
+            - Filter
+            - Search
+            - Pagination
+            - Card View
+            - Grid View
+            - Sorting
+            - Grid Tab
+        - Portal
+            - Main Tab ( Application Tab )
+            - Sub Tab ( Entity Tab )
+            - Dashboard
+            - Menu
+            - Notification
+            - Profile
+            - Settings
+            - Logout
+        - Notification
+    - Cypress
+        - Login
+        - FormBuilder
         - Wizard
         - Record
-        - Dna-Form
-            - Form Module
-            - Form Filter Grid
-        - Login
-        - Menu Sidebar
-        - Tabs
-        - Notifications
-
-- Naming convention
-   -  Function -
-   -  Variable -
-   -  Class -
-   -  Interface -
-   -  Enum -
-   -  Type -
-   -  Folder -
-   -  File -
+        - Grid
+        - Portal
+        - Notification
