@@ -163,6 +163,7 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
+  setFormHostInitialView?: 'lock' | 'unlock';
 }
 
 export interface ICustomActions {
