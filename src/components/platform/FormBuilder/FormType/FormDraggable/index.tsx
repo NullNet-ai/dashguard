@@ -60,10 +60,8 @@ const FormDraggable = ({
   });
   const { register } = form;
 
-
   const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
-  const values = form.watch(formRenderProps.field.name);
   const defValue = fieldConfig.draggableConfig?.reduce(
     (acc: Record<string, any>, config) => {
       if (config) {
@@ -86,9 +84,9 @@ const FormDraggable = ({
 
   const renderFormControl = (
     field: IField & {
-      selectOptions?: ISelectOptions;
-      radioOptions?: IRadioOptions;
-      checkboxOptions?: ICheckboxOptions;
+      selectOptions?: ISelectOptions[];
+      radioOptions?: IRadioOptions[];
+      checkboxOptions?: ICheckboxOptions[];
     },
     index: number,
   ) => {
@@ -110,14 +108,21 @@ const FormDraggable = ({
           </FormItem>
         );
       case "select":
-        const handleChange = (e) => {
-          formRenderProps.field.onChange(e);
+        const handleChange = (e: string) => {
+          form.setValue(`${fieldConfig.name}.${index}.${field.name}`, e, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          });
         }
         return (
           <FormItem>
             {index === 0 && <FormLabel>{field.label}</FormLabel>}
             <FormControl>
-              <Select {...register(`${fieldConfig.name}.${index}.${field.name}`)} onValueChange={formRenderProps.field.onChange} defaultValue={form.getValues(`${fieldConfig.name}.${index}.${field.name}`)} >
+              <Select {...register(`${fieldConfig.name}.${index}.${field.name}`)}
+              defaultValue={form.getValues(`${fieldConfig.name}.${index}.${field.name}`)}
+              onValueChange={handleChange}
+              >
                 <SelectTrigger {...commonProps}>
                   <SelectValue placeholder={field.placeholder}   />
                 </SelectTrigger>
