@@ -27,7 +27,7 @@ export default function Login() {
             </div>
           </div>
           <footer className="absolute bottom-0 text-[10px] w-full text-center py-4 text-muted-foreground">
-            &copy; All Rights Reserved. 2024 DNA Micro<sup>TM</sup>. 
+            &copy; All Rights Reserved. {new Date().getFullYear()} DNA Micro<sup>TM</sup>. 
           </footer>
         </div>
         <div className="relative hidden lg:block">

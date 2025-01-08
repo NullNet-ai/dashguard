@@ -13,7 +13,6 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { type IRadioOptions, type IField } from "../../types";
 
-
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -51,7 +50,7 @@ export default function FormRadio({
               data-test-id={`${formKey}-rdio-${fieldConfig.name}`}
               disabled={formRenderProps.field.disabled}
               onValueChange={(value) => {
-                field.onChange(value);
+                field.onChange(value === 'true' ? true : value === 'false' ? false : value);
               }}
               value={field.value}
               className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
