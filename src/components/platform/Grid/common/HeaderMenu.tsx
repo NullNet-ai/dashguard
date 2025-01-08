@@ -78,10 +78,14 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
         {!!defaultFilter?.length && (
           <>
             <DropdownMenuItem className="flex gap-2">
-              <span className="text-xs text-black">Filter </span>
-              <Badge variant="primary" className="m-2 mx-1">
+              <div className="flex flex-col gap-y-2">
+                <span className="text-xs font-semibold">
+                  Filter
+                </span>
+                <Badge variant="primary" className="mx-1">
                 {formattedFilter}
               </Badge>
+              </div>
             </DropdownMenuItem>
             <Separator />
           </>

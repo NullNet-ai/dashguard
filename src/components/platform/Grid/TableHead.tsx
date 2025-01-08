@@ -10,8 +10,8 @@ import { getCommonPinningStyles } from "./ColumnPining";
 import HeaderMenu from "./common/HeaderMenu";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
 import { testIDFormatter } from "~/utils/formatter";
-import { FilterIcon, ChevronUp, ChevronDown } from "lucide-react";
-
+import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown } from "lucide-react";
+import { PlayIcon } from "@heroicons/react/24/solid";
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
   return (
@@ -76,13 +76,14 @@ export default function MyTableHead() {
                         </Button>
                       )} */}
                     {sortingState && !sortingState.desc && (
-                      <ChevronUp className="h-4 w-4 text-primary" />
+                      <PlayIcon className="h-3 w-3 -rotate-90" />
                     )}
                     {sortingState && sortingState.desc && (
-                      <ChevronDown className="h-4 w-4 text-primary" />
+                      
+                      <PlayIcon className="h-3 w-3  rotate-90"  />
                     )}
                     {!!defaultFilter?.length && (
-                      <FilterIcon className="h-3 w-3 text-primary" />
+                      <FilterIcon className="h-3 w-3  text-primary" />
                     )}
                   </div>
                   <HeaderMenu header={header} defaultFilter={defaultFilter}/>
