@@ -22,12 +22,16 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { GridContext } from "../Provider";
 import { cn } from "~/lib/utils";
+import { ISearchItem } from "../Search/types";
+import { Badge } from "~/components/ui/badge";
+import { Separator } from "~/components/ui/separator";
 
 interface HeaderMenuProps {
   header: Header<any, unknown>;
+  defaultFilter?: ISearchItem[];
 }
 
-const HeaderMenu = ({ header }: HeaderMenuProps) => {
+const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
   const { state } = useContext(GridContext);
   const sortingState = state?.sorting?.find(
     (item) =>
@@ -40,6 +44,9 @@ const HeaderMenu = ({ header }: HeaderMenuProps) => {
   if (!enableSorting) {
     return <></>;
   }
+  const formattedFilter = defaultFilter?.reduce((acc, filter, index) => {
+    return `${acc} ${filter?.display_value || filter?.values?.[0]} ${index < defaultFilter.length - 1 ? "or" : ""}`;
+  }, `${header?.column?.columnDef.header} is`);
 
   return (
     <DropdownMenu
@@ -67,20 +74,18 @@ const HeaderMenu = ({ header }: HeaderMenuProps) => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" side="bottom" >
-        {/* <DropdownMenuItem className="flex gap-2">
-          <Pencil className={`h-4 w-4`} aria-hidden="true" />
-          <span>Edit</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="flex gap-2">
-          <Files className={`h-4 w-4`} aria-hidden="true" />
-          <span>Duplicate</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-2">
-          <Pin className="h-4 w-4" />
-          <span>Pin Column</span>
-        </DropdownMenuItem> */}
+      <DropdownMenuContent align="center" side="bottom">
+        {!!defaultFilter?.length && (
+          <>
+            <DropdownMenuItem className="flex gap-2">
+              <span className="text-xs text-black">Filter </span>
+              <Badge variant="primary" className="m-2 mx-1">
+                {formattedFilter}
+              </Badge>
+            </DropdownMenuItem>
+            <Separator />
+          </>
+        )}
         {(!sortingState || sortingState.desc) && (
           <DropdownMenuItem
             className="flex gap-2"

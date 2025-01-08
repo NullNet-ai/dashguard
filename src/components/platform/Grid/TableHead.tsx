@@ -30,7 +30,7 @@ export default function MyTableHead() {
                 item.id === header?.id ||
                 item.id === (header?.column?.columnDef as any)?.sortKey,
             );
-            const defaultFilter = state?.defaultAdvanceFilter?.find(filter => filter.field === header.id);
+            const defaultFilter = state?.defaultAdvanceFilter?.filter(filter => filter.field === header.id);
 
             const cellValue = header.isPlaceholder
               ? null
@@ -81,11 +81,11 @@ export default function MyTableHead() {
                     {sortingState && sortingState.desc && (
                       <ChevronDown className="h-4 w-4 text-primary" />
                     )}
-                    {defaultFilter && (
+                    {!!defaultFilter?.length && (
                       <FilterIcon className="h-3 w-3 text-primary" />
                     )}
                   </div>
-                  <HeaderMenu header={header} />
+                  <HeaderMenu header={header} defaultFilter={defaultFilter}/>
                 </div>
 
                 {/* {!header.isPlaceholder && header.column.getCanPin() && (
