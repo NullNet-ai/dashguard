@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { DevTool } from "@hookform/devtools";
 import {
-  ControllerFieldState,
-  ControllerRenderProps,
+  type ControllerFieldState,
+  type ControllerRenderProps,
   useFieldArray,
-  UseFormReturn,
+  type UseFormReturn,
 } from "react-hook-form";
 import {
   Form,
@@ -34,6 +35,7 @@ import {
   type ISelectOptions,
   type IField,
 } from "../../types/global/interfaces";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -56,26 +58,26 @@ const FormDraggable = ({
     control: form.control,
     name: formRenderProps.field.name,
   });
+  const { register } = form;
+
 
   const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
   const values = form.watch(formRenderProps.field.name);
+  const defValue = fieldConfig.draggableConfig?.reduce(
+    (acc: Record<string, any>, config) => {
+      if (config) {
+        acc[`${config.fields.name}`] = "";
+      }
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
+
+
   useEffect(() => {
     if (!fields?.length) {
-
-      const defaultValues = fieldConfig.draggableConfig?.reduce(
-        (acc: Record<string, any>, config) => {
-          if (config) {
-            acc[config.fields.name] = "123123";
-          }
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-
-      console.log("defaultValues", defaultValues)
-
-      append(defaultValues);
+      append(defValue);
     }
   }, []);
   if (isHidden) {
@@ -101,7 +103,9 @@ const FormDraggable = ({
           <FormItem>
             {index === 0 && <FormLabel>{field.label}</FormLabel>}
             <FormControl>
-              <Input {...commonProps} placeholder={field.placeholder} />
+              <Input
+                {...register(`${fieldConfig.name}.${index}.${field.name}`)}
+              {...commonProps} placeholder={field.placeholder} />
             </FormControl>
           </FormItem>
         );
@@ -132,18 +136,6 @@ const FormDraggable = ({
   };
 
   const fieldLength = fieldConfig?.draggableConfig?.length || 1;
-  const gridCols = `grid-cols-[auto,${"1fr,".repeat(fieldLength)}auto]`;
-  const defaultValues = fieldConfig.draggableConfig?.reduce(
-    (acc: Record<string, any>, config) => {
-      if (config) {
-        acc[config.fields.name] = "";
-      }
-      return acc;
-    },
-    {} as Record<string, any>,
-  );
-  console.log("form", form);
-
   return (
     <FormItem>
       <FormLabel required={fieldConfig?.required}>
@@ -157,7 +149,7 @@ const FormDraggable = ({
           <div className="flex w-full flex-col gap-2">
             {fields.map((field, index) => (
               <SortableItem key={field.id} value={field.id} asChild>
-                <div className={`grid ${gridCols} items-end gap-2`}>
+                <div className={cn(`grid  items-end gap-2`,fieldLength === 1 ? "grid-cols-[auto_1fr_auto]":fieldLength === 2 ? "grid-cols-[auto_1fr_1fr_auto]":"grid-cols-[auto_1fr_1fr_1fr_auto]")}>
                   <SortableDragHandle
                     variant="ghost"
                     size="icon"
@@ -201,7 +193,7 @@ const FormDraggable = ({
               className="mr-auto ms-7 gap-1 text-md text-primary hover:bg-transparent hover:opacity-70"
               variant="ghost"
               onClick={() => {
-                append(defaultValues);
+                append(defValue);
               }}
             >
               <PlusIcon className="size-5" aria-hidden="true" />
@@ -210,6 +202,7 @@ const FormDraggable = ({
           </div>
         </Sortable>
       </FormControl>
+      <DevTool control={form.control} />
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
