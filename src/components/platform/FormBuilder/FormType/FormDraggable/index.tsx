@@ -110,17 +110,20 @@ const FormDraggable = ({
           </FormItem>
         );
       case "select":
+        const handleChange = (e) => {
+          formRenderProps.field.onChange(e);
+        }
         return (
           <FormItem>
             {index === 0 && <FormLabel>{field.label}</FormLabel>}
             <FormControl>
-              <Select>
+              <Select {...register(`${fieldConfig.name}.${index}.${field.name}`)} onValueChange={formRenderProps.field.onChange} defaultValue={form.getValues(`${fieldConfig.name}.${index}.${field.name}`)} >
                 <SelectTrigger {...commonProps}>
-                  <SelectValue placeholder={field.placeholder} />
+                  <SelectValue placeholder={field.placeholder}   />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(field.options) &&
-                    field.options.map((option) => (
+                  {Array.isArray(field.selectOptions) &&
+                    field.selectOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
