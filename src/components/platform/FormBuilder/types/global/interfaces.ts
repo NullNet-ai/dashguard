@@ -21,13 +21,21 @@ import {
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
-import { TimePickerProps } from "~/components/ui/time-picker";
+import { type TimePickerProps } from "~/components/ui/time-picker";
 
 interface OptionType {
   label: string;
   value: string;
 }
 
+type DraggableConfig ={
+  fields: IField & {
+    selectOptions?: ISelectOptions[];
+    radioOptions?:IRadioOptions[];
+    checkboxOptions?: ICheckboxOptions[];
+  };
+ 
+}
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
@@ -53,6 +61,7 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
+  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
   customRender?: JSX.Element;
