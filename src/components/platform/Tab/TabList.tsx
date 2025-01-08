@@ -34,7 +34,7 @@ const getSessionTabs = async (): Promise<{
   }
 
   if (!newTabs.find((item) => item.current === true)) {
-    newTabs.push({
+    newTabs.splice(1, 0, { 
       name: mainEntity!,
       href: pathname,
       current: true,

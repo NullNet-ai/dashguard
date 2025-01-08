@@ -36,6 +36,7 @@ import {
 } from "./DefatultRow/Actions";
 import { BulkArchive } from "./Action/BulkArchive";
 import { UpdateReportSorting } from "./Action/UpdateReportSorting";
+import { constructSearchableFields } from "./utils/constructSearchableFields";
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -95,13 +96,22 @@ export default function GridProvider({
     useState<boolean | null>(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
 
+  const playgroundGridIsShowCreateButton = localStorage.getItem("playground_grid_is_show_create_button");
+  const playgroundGridIsShowIsShowRowAction = localStorage.getItem("playground_grid_is_show_row_action");
+
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
-    hideCreateButton: false,
+    searchableFields:
+      constructSearchableFields({
+        columns: _propsConfig?.columns ?? [],
+        entity: _propsConfig?.entity ?? "",
+      }) ?? [],
     ..._propsConfig,
+    hideCreateButton: playgroundGridIsShowCreateButton != null ? !(playgroundGridIsShowCreateButton == "true") : false,
+    disableDefaultAction: playgroundGridIsShowIsShowRowAction != null ? !(playgroundGridIsShowIsShowRowAction == "true") : false,
   };
 
   const handleSwitchViewMode = (mode: "table" | "card") => {
@@ -240,7 +250,7 @@ export default function GridProvider({
           </Button>
         );
       }
-  
+
       return (
         <>
           <EditComponent row={row} config={config!} />
@@ -408,10 +418,11 @@ export default function GridProvider({
     viewMode,
     sorting,
     advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
+    defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
-    pagination
+    pagination,
   } as IState;
   const actions = {
     handleCreate,
