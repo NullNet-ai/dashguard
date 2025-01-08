@@ -3,13 +3,13 @@ import { ISearchableField } from "../types";
 import { ulid } from "ulid";
 
 export const transformSearchData = (
-  array: Record<string, any>[] | undefined,
+  items: Record<string, any>[] | undefined,
   searchText: string,
   searchableFields: ISearchableField[],
 ) => {
-  if (!array) return null;
+  if (!items) return null;
 
-  const transformedData = array.reduce((acc: any, obj: any) => {
+  const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
         (field) => field.field === key,
@@ -22,7 +22,7 @@ export const transformSearchData = (
         acc.push({
           id: ulid(),
           field: key,
-          values: Array.isArray(value) ? value : [value],
+          values: [searchText],
           operator: searchableField?.operator || "equal",
           type: "criteria",
           label: searchableField?.label || formatAndCapitalize(key),

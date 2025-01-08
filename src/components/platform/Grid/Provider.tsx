@@ -414,6 +414,7 @@ export default function GridProvider({
     viewMode,
     sorting,
     advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
+    defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
