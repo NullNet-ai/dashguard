@@ -1,164 +1,97 @@
-"use client"
+// import TimePickerDetails from "./_form-controls/time-picker";
+import { Toaster } from "~/components/ui/sonner";
+import SmartDateDetails from "./_form-controls/smart-date";
+import InputDetails from "./_form-controls/textfield";
+import MultiSelectDetails from "./_form-controls/multi-select";
+import CheckboxDetails from "./_form-controls/checkbox";
+import RadioDetails from "./_form-controls/radio";
+import RichTextEditorDetails from "./_form-controls/rich-text-editor";
+import NumberInputDetails from "./_form-controls/number-input";
+import PasswordDetails from "./_form-controls/password";
+import TextAreaDetails from "./_form-controls/textarea";
+import EmailInputDetails from "./_form-controls/email-input";
+import PhoneInputDetails from "./_form-controls/phone-input";
+import AmountDetails from "./_form-controls/amount-field";
+import ButtonPlayGround from "./_form-controls/button-playground";
+import { Separator } from "~/components/ui/separator";
+import AddressDetails from "./_form-controls/address";
+import InputsGrid from "./_form-controls/inputs-grid";
+import SelectDetails from "./_form-controls/select-details";
+import FileDetails from "./_form-controls/file";
+import SliderDetails from "./_form-controls/slider";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { GripVerticalIcon, TrashIcon } from "lucide-react"
-import { useFieldArray, useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { Button } from "~/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card"
-import { Form, FormControl, FormField, FormItem } from "~/components/ui/form"
-import { Input } from "~/components/ui/input"
-import {
-  Sortable,
-  SortableDragHandle,
-  SortableItem,
-} from "~/components/ui/sortable"
-
-const schema = z.object({
-  flipTricks: z.array(
-    z.object({
-      name: z.string(),
-      spin: z.string(),
-    })
-  ),
-})
-
-type Schema = z.infer<typeof schema>
-
-export default function VerticalSortingDemo() {
-  const form = useForm<Schema>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      flipTricks: [
-        {
-          spin: "360",
-          name: "Kickflip",
-        },
-        {
-          spin: "180",
-          name: "Heelflip",
-        },
-      ],
-    },
-  })
-
-  function onSubmit(input: Schema) {
-    console.log({ input })
-  }
-
-  const { fields, append, move, remove } = useFieldArray({
-    control: form.control,
-    name: "flipTricks",
-  })
-
+export default function PlatformPlayGround() {
   return (
-    <Card className="p-4">
-      <div className="flex flex-col items-center gap-4 sm:flex-row">
-        <CardHeader className="w-full flex-col gap-4 space-y-0 sm:flex-row">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <CardTitle>Vertical sorting</CardTitle>
-            <CardDescription>
-              Sort items in the vertical direction.
-            </CardDescription>
+    <>
+      <ButtonPlayGround />
+      <Separator className="my-6" />
+      <div className="space-y-20 p-5">
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Basic Inputs</h2>
+          <div className="grid gap-4">
+            <InputDetails />
+            <TextAreaDetails />
+            <NumberInputDetails />
+            <PasswordDetails />
+            <PhoneInputDetails />
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-fit"
-            onClick={() => append({ name: "", spin: "" })}
-          >
-            Add trick
-          </Button>
-        </CardHeader>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
+          <div className="grid gap-4">
+            {/* <TimePickerDetails /> */}
+            <SmartDateDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Choices and Selections</h2>
+          <div className="grid gap-4">
+            <RadioDetails />
+            <CheckboxDetails />
+            <SelectDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Specialized Inputs</h2>
+          <div className="grid gap-4">
+            <EmailInputDetails />
+            <AmountDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Complex Inputs</h2>
+          <div className="grid gap-4">
+            <AddressDetails />
+            <RichTextEditorDetails />
+            <FileDetails />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section>
+          <h2 className="mb-4 text-xl font-bold">Other Inputs</h2>
+          <div className="grid gap-4">
+            <SliderDetails />
+            <InputsGrid />
+            <MultiSelectDetails />
+          </div>
+        </section>
+
+        <Toaster />
       </div>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex w-full flex-col gap-4"
-          >
-            <Sortable
-              value={fields}
-              onMove={({ activeIndex, overIndex }) =>
-                move(activeIndex, overIndex)
-              }
-              overlay={
-                <div className="grid grid-cols-[0.5fr,1fr,auto,auto] items-center gap-2">
-                  <div className="h-8 w-full rounded-sm bg-primary/10" />
-                  <div className="h-8 w-full rounded-sm bg-primary/10" />
-                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-                </div>
-              }
-            >
-              <div className="flex w-full flex-col gap-2">
-                {fields.map((field, index) => (
-                  <SortableItem key={field.id} value={field.id} asChild>
-                    <div className="grid grid-cols-[0.5fr,1fr,auto,auto] items-center gap-2">
-                      <FormField
-                        control={form.control}
-                        name={`flipTricks.${index}.spin`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input className="h-8 " containerClassName="!mt-0" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`flipTricks.${index}.name`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input className="h-8 " containerClassName="!mt-0"  {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <SortableDragHandle
-                        variant="outline"
-                        size="icon"
-                        className="size-8 shrink-0"
-                      >
-                        <GripVerticalIcon
-                          className="size-4"
-                          aria-hidden="true"
-                        />
-                      </SortableDragHandle>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="size-8 shrink-0"
-                        onClick={() => remove(index)}
-                      >
-                        <TrashIcon
-                          className="size-4 text-destructive"
-                          aria-hidden="true"
-                        />
-                        <span className="sr-only">Remove</span>
-                      </Button>
-                    </div>
-                  </SortableItem>
-                ))}
-              </div>
-            </Sortable>
-            <Button size="sm" className="w-fit">
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  )
+    </>
+  );
 }
