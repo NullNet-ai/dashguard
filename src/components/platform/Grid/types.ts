@@ -103,6 +103,7 @@ export interface IState {
   bulkActionType: "archive" | null;
   showBulkActionConfirmationModal: boolean;
   pagination?: IPagination;
+  defaultAdvanceFilter?: ISearchItem[];
 }
 
 export interface IAction {
