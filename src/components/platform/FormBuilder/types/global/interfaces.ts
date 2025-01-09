@@ -33,6 +33,7 @@ type DraggableConfig ={
     selectOptions?: ISelectOptions[];
     radioOptions?:IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
+    formType?: "input" | "select" | "radio" | "checkbox" | "textarea" | 'number-input'|"smart-date" | 'time-picker';
   };
 }
 
@@ -79,6 +80,7 @@ interface IField {
   min?: number;
   max?: number;
   step?: number;
+  checkboxOrientation?: "horizontal" | "vertical";
   radioOrientation?: "horizontal" | "vertical";
   sliderLabel?: (value: number | undefined) => ReactNode;
   sliderLabelPosition?: "top" | "bottom";
@@ -129,12 +131,12 @@ interface ISelectOptions {
 }
 
 interface IRadioOptions {
-  value: string;
+  value: string | boolean;
   label: string;
 }
 
 interface ICheckboxOptions {
-  value: string;
+  value: string | boolean;
   label: string;
 }
 
