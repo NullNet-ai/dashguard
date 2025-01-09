@@ -12,12 +12,13 @@ export const transformSearchData = (
   const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
-        (field) => field.field === key,
+        (field) => field.accessorKey === key,
       );
-      const isTextFound =
-        searchableField?.operator === "contains"
-          ? (value as any)?.includes(searchText)
-          : value === searchText
+      const isTextFound = ["contains", "like"].includes(
+        searchableField?.operator || "",
+      )
+        ? (value as any)?.includes(searchText)
+        : value === searchText;
       if (isTextFound) {
         acc.push({
           id: ulid(),
@@ -34,7 +35,7 @@ export const transformSearchData = (
   }, []);
   const consolidated: Record<string, any> = {};
   transformedData.forEach((result: any) => {
-    const key = `${result.field}_${JSON.stringify(result.values)}`;
+    const key = `${result.field}_${JSON.stringify(result.values)}_${result.entity}`;
     if (!consolidated[key]) {
       consolidated[key] = { ...result, count: 1 };
     } else {

@@ -10,8 +10,8 @@ import { getCommonPinningStyles } from "./ColumnPining";
 import HeaderMenu from "./common/HeaderMenu";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
 import { testIDFormatter } from "~/utils/formatter";
-import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown } from "lucide-react";
-import { PlayIcon } from "@heroicons/react/24/solid";
+import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown, ArrowBigUp } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
   return (
@@ -30,7 +30,9 @@ export default function MyTableHead() {
                 item.id === header?.id ||
                 item.id === (header?.column?.columnDef as any)?.sortKey,
             );
-            const defaultFilter = state?.defaultAdvanceFilter?.filter(filter => filter.field === header.id);
+            const defaultFilter = state?.defaultAdvanceFilter?.filter(
+              (filter) => filter.field === header.id,
+            );
 
             const cellValue = header.isPlaceholder
               ? null
@@ -76,17 +78,16 @@ export default function MyTableHead() {
                         </Button>
                       )} */}
                     {sortingState && !sortingState.desc && (
-                      <PlayIcon className="h-3 w-3 -rotate-90" />
+                      <ArrowUpIcon className="h-4 w-4" />
                     )}
                     {sortingState && sortingState.desc && (
-                      
-                      <PlayIcon className="h-3 w-3  rotate-90"  />
+                      <ArrowDownIcon className="h-4 w-4" />
                     )}
                     {!!defaultFilter?.length && (
-                      <FilterIcon className="h-3 w-3  text-primary" />
+                      <FilterIcon className="h-3 w-3 text-primary" />
                     )}
                   </div>
-                  <HeaderMenu header={header} defaultFilter={defaultFilter}/>
+                  <HeaderMenu header={header} defaultFilter={defaultFilter} />
                 </div>
 
                 {/* {!header.isPlaceholder && header.column.getCanPin() && (

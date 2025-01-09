@@ -31,7 +31,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const { state: gridState } = useContext(GridContext);
   const {
     columns = [],
-    entity,
+    entity: defaultEntity,
     searchableFields = [],
     searchConfig,
   } = gridState?.config ?? {};
@@ -45,8 +45,8 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
-      ({ entity: _entity, operator, type, field, values }) => ({
-        entity: _entity || entity,
+      ({ entity, operator, type, field, values }) => ({
+        entity: entity || defaultEntity,
         operator,
         type,
         field,
@@ -54,7 +54,7 @@ export default function GridSearchProvider({ children }: IProps) {
       }),
     ) as ISearchItem[];
     return searchableFields.reduce(
-      (acc: any, item: any, index) => {
+      (acc: any, { accessorKey, ...item }: any, index) => {
         return [
           ...acc,
           {
@@ -64,7 +64,7 @@ export default function GridSearchProvider({ children }: IProps) {
               item?.field === "raw_phone_number"
                 ? [_query?.replace(/[^\d]/g, "")]
                 : [_query],
-            entity, // if entity is not provided, the default entity will be the entity of the grid
+            entity: defaultEntity, // if entity is not provided, the default entity will be the entity of the grid
             ...item,
           },
           ...(searchableFields.length - 1 === index
@@ -101,12 +101,10 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     const { count, ...rest } = filterItem ?? {};
-    const advanceFilter = searchItems.map(
-      ({ entity: _entity, ...rest }) => ({
-        entity: _entity || entity,
-        ...rest
-      }),
-    ) as ISearchItem[];
+    const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
+      entity: entity || defaultEntity,
+      ...rest,
+    })) as ISearchItem[];
     setQuery("");
     const updateSearchItems = [
       ...advanceFilter,

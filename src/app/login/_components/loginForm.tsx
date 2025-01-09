@@ -71,7 +71,7 @@ export default function LoginForm() {
                   name: "password",
                   label: "Password",
                   required: true,
-                  placeholder: "Enter at least 8 characters",
+                  placeholder: "Enter at least 5 characters",
                 }}
                 form={form}
                 formKey={"Login"}
