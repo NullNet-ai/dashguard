@@ -54,7 +54,7 @@ const BasicDetailsSummary = ({
 
   return (
     <div>
-      <p className="mb-[8px]">
+      <p className="mb-[8px] no-underline">
         <strong> Phone Number: </strong>
         &nbsp; {phone}
       </p>

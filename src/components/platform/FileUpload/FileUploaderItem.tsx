@@ -28,7 +28,7 @@ export const FileUploaderItem = forwardRef<
   HTMLDivElement,
   {
     index: number;
-    file: File;
+    file: any;
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
   } & React.HTMLAttributes<HTMLDivElement>
@@ -37,11 +37,24 @@ export const FileUploaderItem = forwardRef<
     { className, index, file, onRemove, children, progressState, ...props },
     ref,
   ) => {
+    const {
+      removeFileFromSet,
+      activeIndex,
+      direction,
+      formRenderProps,
+      fieldConfig,
+      state,
+      defaultImageSrc,
+    } = useFileUpload();
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [imageSrc, setImageSrc] = useState<string | null>(
+      defaultImageSrc || null,
+    );
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [croppedFile, setCroppedFile] = useState<File>(file);
-    const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+    const [previewSrc, setPreviewSrc] = useState<string | null>(
+      defaultImageSrc || null,
+    );
     const isImageFile = FILE_TYPES.IMAGE.includes(file.type);
     const isPdfFile = FILE_TYPES.PDF.includes(file.type);
     const isGifImageFIle = FILE_TYPES.GIF.includes(file.type);
@@ -54,14 +67,6 @@ export const FileUploaderItem = forwardRef<
       `${fileSizeInMB >= 1 ? fileSizeInMB.toFixed(2) + " MB" : fileSizeInMB.toFixed(2) + " KB"}`,
     );
 
-    const {
-      removeFileFromSet,
-      activeIndex,
-      direction,
-      formRenderProps,
-      state,
-    } = useFileUpload();
-
     const isSelected = index === activeIndex;
 
     const [cropState, setCropState] = useState<CropState>({
@@ -71,7 +76,8 @@ export const FileUploaderItem = forwardRef<
       croppedAreaPixels: null,
     });
 
-    const isDisabled = formRenderProps?.field?.disabled;
+    const isDisabled =
+      formRenderProps?.field?.disabled || fieldConfig?.readonly;
 
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -92,13 +98,18 @@ export const FileUploaderItem = forwardRef<
       reader.readAsDataURL(file);
     };
 
-    // Load initial image
+    // // Load initial image
     useEffect(() => {
-      readFile(file);
+      if (!file?.download_path) {
+        readFile(file);
+      }
+      return;
     }, [file]);
 
     const handleOpenCropModal = () => {
-      readFile(croppedFile);
+      if (!file?.download_path) {
+        readFile(croppedFile);
+      }
       setIsCropModalOpen(true);
       setCropState({
         crop: { x: 0, y: 0 },
@@ -203,7 +214,7 @@ export const FileUploaderItem = forwardRef<
     };
 
     useEffect(() => {
-      if (isImageFile || isPdfFile) {
+      if ((isImageFile && !file?.download_path) || isPdfFile) {
         readFile(file);
       }
     }, [file, isImageFile, isPdfFile]);
@@ -224,8 +235,9 @@ export const FileUploaderItem = forwardRef<
       }, 1000);
     };
 
-    const currentProgressState =
-      progressState && progressState[index] !== undefined
+    const currentProgressState = file.download_path
+      ? 100
+      : progressState && progressState[index] !== undefined
         ? progressState[index]
         : 0;
 

@@ -2,7 +2,7 @@ import { type z } from "zod";
 
 type TDisplayType = "form" | "selected";
 
-type TFormType =
+ type TFormType =
   | "input"
   | "draggable"
   | "multi-field"

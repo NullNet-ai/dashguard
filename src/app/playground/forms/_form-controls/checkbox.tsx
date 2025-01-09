@@ -36,12 +36,16 @@ export default function FavoriteFruitsForm() {
         handleSubmit={handleSave}
         checkboxOptions={{
           favoriteFruits: [
-            { label: "Apple", value: "apple" },
+            { label: "Apple", value: true},
             { label: "Banana", value: "banana" },
             { label: "Cherry", value: "cherry" },
             { label: "Date", value: "date" },
             { label: "Elderberry", value: "elderberry" },
           ],
+          isActive:[
+            {label: "Yes", value: true},
+            {label: "No", value: false}
+          ]
         }}
         fields={[
           {
@@ -52,6 +56,12 @@ export default function FavoriteFruitsForm() {
             required: true,
             placeholder: "Select at least one fruit",
           },
+          {
+            id:"isActive",
+            formType: "checkbox",
+            name: "isActive",
+            label: "Is Active",
+            required: true,}
         ]}
       />
     </>

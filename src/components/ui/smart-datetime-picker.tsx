@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
 import { parseDate } from "chrono-node";
+import { Calendar as CalendarIcon } from "lucide-react";
+import React, { useEffect } from "react";
+import { type ActiveModifiers } from "react-day-picker";
+import { Button, buttonVariants } from "~/components/ui/button";
+import { Calendar, type CalendarProps } from "~/components/ui/calendar";
+import { Input } from "~/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { type ActiveModifiers } from "react-day-picker";
-import { Calendar, type CalendarProps } from "~/components/ui/calendar";
-import { Input } from "~/components/ui/input";
-import { Button, buttonVariants } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { cn } from "~/lib/utils";
 import { isValidDate } from "~/server/zodSchema/contact/contactDetails";
 import {
   Select,
@@ -193,7 +193,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className="flex items-center justify-center">
         <div
           className={cn(
-            "flex w-full items-center justify-between gap-1 rounded-md border p-1 ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0",
+            "flex w-full items-center justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0",
             "focus-within:outline-0 focus:outline-0 focus:ring-0",
             "placeholder:text-muted-foreground focus-visible:outline-0",
             className,
@@ -954,16 +954,16 @@ const DateTimeLocalInput = ({
       <PopoverTrigger asChild>
         <Button
           ref={buttonRef}
-          variant={"outline"}
+          variant={"ghost"}
           size={"icon"}
           disabled={readOnly}
           className={cn(
-            "flex size-9 items-center justify-center font-normal disabled:opacity-100",
+            "flex items-center justify-center font-normal disabled:opacity-100 active:!translate-y-0",
             !value && "text-muted-foreground",
           )}
           data-test-id={datePickerTestID}
         >
-          <CalendarIcon className="size-4" />
+          <CalendarIcon className="size-5" />
           <span className="sr-only">calendar</span>
         </Button>
       </PopoverTrigger>

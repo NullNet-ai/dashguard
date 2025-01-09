@@ -34,12 +34,12 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
         {...timescape.getRootProps()}
         ref={ref}
         className={cn(
-          `flex ${!options.hour12 ? "w-44" : "w-44"} items-center justify-around p-1`,
+          `flex ${!options.hour12 ? "w-44" : "w-44"} items-center justify-around p-1  `,
           "rounded-md",
           className,
         )}
       >
-        <ClockIcon className="mr-2 w-20 text-muted-foreground" />
+        <ClockIcon className=" w-8 text-muted-foreground mr-auto" />
         <Input
           containerClassName="w-10 !mt-0"
           className={cn(timePickerInputBase, "!w-[15px] opacity-100")}
