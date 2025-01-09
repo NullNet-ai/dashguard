@@ -58,8 +58,17 @@ export default function WizardProvider({
   const toast = useToast();
   const searchParams = useSearchParams();
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
-  const [, portal, mainEntity, application = "wizard", identifier, step] =
-    usePathname().split("/");
+  const path =
+  usePathname().split("/");
+  let [, portal, mainEntity, application = "wizard", identifier, step] = path;
+  if (process.env.IS_PLAYGROUND) {
+    const [, , playgroundPortal, playgroundApplication, , playgroundIdentifier, playgroundStep] = path
+    portal = playgroundPortal
+    application = playgroundApplication || "wizard"
+    identifier = playgroundIdentifier
+    step = playgroundStep
+    mainEntity = "contact";
+  } 
   const currentContext = "/" + portal + "/" + mainEntity;
 
   // Now:
