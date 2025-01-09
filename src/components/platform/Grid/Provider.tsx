@@ -95,23 +95,35 @@ export default function GridProvider({
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
+  const [playgroundGridIsShowCreateButton, setPlaygroundGridIsShowCreateButton] = useState<string | null>(null);
+  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] = useState<string | null>(null);
 
-  const playgroundGridIsShowCreateButton = localStorage.getItem("playground_grid_is_show_create_button");
-  const playgroundGridIsShowIsShowRowAction = localStorage.getItem("playground_grid_is_show_row_action");
+
+  // use effects
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const createButton = localStorage.getItem("playground_grid_is_show_create_button");
+      const rowAction = localStorage.getItem("playground_grid_is_show_row_action");
+      
+      setPlaygroundGridIsShowCreateButton(createButton);
+      setPlaygroundGridIsShowRowAction(rowAction);
+    }
+  }, []);
+
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
+    hideCreateButton: playgroundGridIsShowCreateButton != null ? !(playgroundGridIsShowCreateButton == "true") : false,
+    disableDefaultAction: playgroundGridIsShowRowAction != null ? !(playgroundGridIsShowRowAction == "true") : false,
     searchableFields:
       constructSearchableFields({
         columns: _propsConfig?.columns ?? [],
         entity: _propsConfig?.entity ?? "",
       }) ?? [],
     ..._propsConfig,
-    hideCreateButton: playgroundGridIsShowCreateButton != null ? !(playgroundGridIsShowCreateButton == "true") : false,
-    disableDefaultAction: playgroundGridIsShowIsShowRowAction != null ? !(playgroundGridIsShowIsShowRowAction == "true") : false,
   };
 
   const handleSwitchViewMode = (mode: "table" | "card") => {
