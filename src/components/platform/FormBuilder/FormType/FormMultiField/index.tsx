@@ -163,6 +163,7 @@ const FormMultiField = ({
 
   return (
     <FormItem>
+      <div className="py-2 h-[49px]">
       <ButtonWithDropdown
         entity={"test"}
         buttonClassName=""
@@ -175,7 +176,8 @@ const FormMultiField = ({
         }
         // loading={saveContinueLoading} // Pass the loading state for the main button
       />
-      <div className="border-t-default-100 mt-2 border-b border-t border-b-primary p-2">
+      </div>
+      <div className="border-t-default-100 border-b border-t border-b-primary !m-0 h-[49px] flex items-center">
         <FormLabel className="">{fieldConfig.label}</FormLabel>
       </div>
       <FormControl>
@@ -190,9 +192,9 @@ const FormMultiField = ({
                   <SortableDragHandle
                     variant="link"
                     size="icon"
-                    className="size-8 shrink-0 text-default/60"
+                    className="size-8 shrink-0 text-default/40"
                   >
-                    <GripVerticalIcon className="size-4" aria-hidden="true" />
+                    <GripVerticalIcon className="size-5" aria-hidden="true" />
                   </SortableDragHandle>
                   <div className="min-w-[150px]">
                     <FormLabel className="font-normal">

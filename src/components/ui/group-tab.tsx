@@ -28,7 +28,7 @@ export interface GroupTabProps extends React.HTMLAttributes<HTMLDivElement> {
 const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
   ({ selected, tabs, onValueChange, onTabSelect, onClickAddTab,...props }, ref) => {
     return (
-      <div className="flex p-4 text-sm" ref={ref}>
+      <div className="flex p-4 text-md gap-x-2" ref={ref}>
         <Sortable
           value={tabs}
           collisionDetection={closestCorners}
@@ -52,9 +52,9 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
                     <SortableDragHandle
                       variant="link"
                       size="icon"
-                      className="size-8 shrink-0 text-default/60"
+                      className="size-8 shrink-0 text-default/40"
                     >
-                      <GripVerticalIcon className="size-4" aria-hidden="true" />
+                      <GripVerticalIcon className="size-5" aria-hidden="true" />
                     </SortableDragHandle>
                     <div className="min-w-[150px]">
                       <span
@@ -71,7 +71,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             ))}
             <div className="mt-2 flex justify-center">
               <Button
-                className="w-[80%] border-2 border-dashed border-primary text-sm text-primary"
+                className="w-[80%] border-2 border-dashed border-primary text-primary text-md"
                 variant={"ghost"}
                 onClick={() => {
                     onClickAddTab?.();
@@ -82,7 +82,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             </div>
           </div>
         </Sortable>
-        <div className="">
+        <div className="flex-1">
                 {selected?.content}
         </div>
       </div>
