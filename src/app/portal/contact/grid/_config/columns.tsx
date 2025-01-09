@@ -91,7 +91,8 @@ const gridColumns = [
     sortKey: "updated_by.first_name",
     search_config: {
       entity: "updated_by",
-      field: "first_name"
+      field: "first_name",
+      operator: 'like'
     }
   },
   {
@@ -114,7 +115,8 @@ const gridColumns = [
     sortKey: "created_by.first_name",
     search_config: {
       entity: "created_by",
-      field: "first_name"
+      field: "first_name",
+      operator: 'like'
     }
   },
 ] as ColumnDef<any>[];

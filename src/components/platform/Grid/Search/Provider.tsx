@@ -54,7 +54,7 @@ export default function GridSearchProvider({ children }: IProps) {
       }),
     ) as ISearchItem[];
     return searchableFields.reduce(
-      (acc: any, item: any, index) => {
+      (acc: any, { accessorKey, ...item }: any, index) => {
         return [
           ...acc,
           {
@@ -101,12 +101,10 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     const { count, ...rest } = filterItem ?? {};
-    const advanceFilter = searchItems.map(
-      ({ entity: _entity, ...rest }) => ({
-        entity: _entity || entity,
-        ...rest
-      }),
-    ) as ISearchItem[];
+    const advanceFilter = searchItems.map(({ entity: _entity, ...rest }) => ({
+      entity: _entity || entity,
+      ...rest,
+    })) as ISearchItem[];
     setQuery("");
     const updateSearchItems = [
       ...advanceFilter,
