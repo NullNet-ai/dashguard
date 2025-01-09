@@ -3,7 +3,6 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../../types";
 import {
   FormControl,
   FormItem,
@@ -13,6 +12,7 @@ import {
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
 import { useState } from "react";
 import { type Content } from "@tiptap/react";
+import { IField } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
@@ -53,7 +53,7 @@ export default function FormRichTextEditor({
     setContent(newValue);
   }
 
-  form.watch()
+  form.watch();
   return (
     <FormItem>
       <FormLabel

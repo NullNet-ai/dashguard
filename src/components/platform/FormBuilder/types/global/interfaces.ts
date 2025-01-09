@@ -35,8 +35,18 @@ type DraggableConfig ={
     checkboxOptions?: ICheckboxOptions[];
     formType?: "input" | "select" | "radio" | "checkbox" | "textarea" | 'number-input'|"smart-date" | 'time-picker';
   };
- 
 }
+
+type MultiFieldConfig =  DraggableConfig & {
+  fieldOptions: MultiFieldOption[];
+}
+
+type MultiFieldOption = {
+  label : string;
+  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
+  options?: OptionType[];
+} 
+
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
@@ -63,6 +73,7 @@ interface IField {
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
+  multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
   customRender?: JSX.Element;
@@ -174,6 +185,8 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
+  setFormHostInitialView?: 'lock' | 'unlock';
+  enableFormFilterCreate?: boolean;
 }
 
 export interface ICustomActions {

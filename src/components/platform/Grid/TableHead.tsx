@@ -10,7 +10,8 @@ import { getCommonPinningStyles } from "./ColumnPining";
 import HeaderMenu from "./common/HeaderMenu";
 import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
 import { testIDFormatter } from "~/utils/formatter";
-
+import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown, ArrowBigUp } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
   return (
@@ -19,16 +20,29 @@ export default function MyTableHead() {
         <TableRow
           className="backdrop-blur-lg"
           key={headerGroup.id + "group" + index}
-          data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row`)}
+          data-test-id={testIDFormatter(
+            `${state.config.entity}-grd-tbl-thead-row`,
+          )}
         >
           {headerGroup.headers.map((header, index) => {
+            const sortingState = state?.sorting?.find(
+              (item) =>
+                item.id === header?.id ||
+                item.id === (header?.column?.columnDef as any)?.sortKey,
+            );
+            const defaultFilter = state?.defaultAdvanceFilter?.filter(
+              (filter) => filter.field === header.id,
+            );
+
             const cellValue = header.isPlaceholder
               ? null
               : flexRender(header.column.columnDef.header, header.getContext());
             return (
               <TableHead
                 key={header.id + index}
-                data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row-${header.column.id}`)}
+                data-test-id={testIDFormatter(
+                  `${state.config.entity}-grd-tbl-thead-row-${header.column.id}`,
+                )}
                 className={cn(
                   "group relative font-medium text-muted-foreground", // originally bg-grid-header
                   getCommonPinningStyles(header?.column).className,
@@ -63,8 +77,17 @@ export default function MyTableHead() {
                           <ChevronsUpDown className="h-3 w-3" />
                         </Button>
                       )} */}
+                    {sortingState && !sortingState.desc && (
+                      <ArrowUpIcon className="h-4 w-4" />
+                    )}
+                    {sortingState && sortingState.desc && (
+                      <ArrowDownIcon className="h-4 w-4" />
+                    )}
+                    {!!defaultFilter?.length && (
+                      <FilterIcon className="h-3 w-3 text-primary" />
+                    )}
                   </div>
-                  <HeaderMenu header={header} />
+                  <HeaderMenu header={header} defaultFilter={defaultFilter} />
                 </div>
 
                 {/* {!header.isPlaceholder && header.column.getCanPin() && (

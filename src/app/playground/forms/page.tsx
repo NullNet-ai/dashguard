@@ -19,6 +19,9 @@ import InputsGrid from "./_form-controls/inputs-grid";
 import SelectDetails from "./_form-controls/select-details";
 import FileDetails from "./_form-controls/file";
 import SliderDetails from "./_form-controls/slider";
+import MultiFieldForm from "./_form-controls/multifield";
+import GroupTabView from "./_dummy-controls/multifield-view";
+import GroupTabWithMultiField from "./_dummy-controls/page";
 
 export default function PlatformPlayGround() {
   return (
@@ -26,6 +29,7 @@ export default function PlatformPlayGround() {
       <ButtonPlayGround />
       <Separator className="my-6" />
       <div className="space-y-20 p-5">
+
         <section>
           <h2 className="mb-4 text-xl font-bold">Basic Inputs</h2>
           <div className="grid gap-4">
@@ -36,6 +40,26 @@ export default function PlatformPlayGround() {
             <PhoneInputDetails />
           </div>
         </section>
+
+
+      <section>
+          <h2 className="mb-4 text-xl font-bold">Multi Field</h2>
+          <div className="grid gap-4">
+          <MultiFieldForm />
+
+          
+           
+          </div>
+          <Separator />
+         <div className="mt-4">
+         <h2 className="mb-4 text-xl font-bold">Group Tabs</h2>
+          <div>
+            <GroupTabWithMultiField />
+          </div>
+         </div>
+        </section>
+
+
 
         <Separator />
 

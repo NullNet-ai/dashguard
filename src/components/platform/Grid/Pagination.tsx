@@ -9,9 +9,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { cn } from "~/lib/utils";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { GridContext } from "./Provider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectItem } from "~/components/ui/select";
 import { SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
@@ -53,6 +52,17 @@ export default function Pagination() {
     });
   };
 
+  const generatePaginationText = (
+    limit: number,
+    pageNumber: number,
+    totalCount: number,
+  ): string => {
+    const start = (pageNumber - 1) * limit + 1;
+    const end = Math.min(pageNumber * limit, totalCount);
+
+    return `Showing ${start} to ${end} of ${totalCount} results`;
+  };
+
   const width = open
     ? " md:w-[calc(100%-265px)] md:left-[258px]"
     : "md:w-[calc(100%-70px)] md:left-[80px]";
@@ -87,11 +97,12 @@ export default function Pagination() {
       <div className="hidden flex-col gap-x-2 sm:flex sm:flex-1 sm:items-center sm:justify-between lg:flex-row">
         <div className="flex w-full flex-1 items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            <span>Showing {Math.min(Number(rows), totalRows)}</span> of{" "}
-            <span className="font-medium">{totalRows}</span> results
+            <span className="font-medium">
+              {generatePaginationText(rows, currentPage, totalRows)}
+            </span>
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Label className="whitespace-nowrap">Rows Per Page</Label>
+            <Label className="whitespace-nowrap">Rows per page</Label>
             <Select
               onValueChange={handlePerPageValueChange}
               defaultValue={`${rows}` || "10"}
@@ -112,7 +123,7 @@ export default function Pagination() {
                       `${state?.config.entity}-grd-pagination-row-per-page-sel-itm-${row}`,
                     )}
                   >
-                    {row} rows
+                    {row}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -121,9 +132,6 @@ export default function Pagination() {
         </div>
 
         <div className="flex w-full items-center justify-between gap-10 lg:w-auto">
-          <Label>
-            Page {currentPage} of {totalPages}
-          </Label>
           <nav
             aria-label="Pagination"
             className="isolate inline-flex -space-x-px rounded-md"
@@ -258,11 +266,7 @@ export default function Pagination() {
               )}
               variant={"ghost"}
               size="icon"
-              onClick={() =>
-                handlePaginationChange(
-                  Math.max(Number(currentPage) * 5, totalPages),
-                )
-              }
+              onClick={() => handlePaginationChange(totalPages)}
               disabled={currentPage == totalPages}
             >
               <ChevronDoubleRightIcon aria-hidden="true" className="h-5 w-5" />

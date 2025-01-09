@@ -154,7 +154,7 @@ export default function Search() {
         {defaultSearchItems?.map((item) => (
           <Badge key={item.id} variant="primary" className="m-2 mx-1">
             {item.type === "criteria"
-              ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.values?.[0]}`
+              ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value || item?.values?.[0]}`
               : item?.operator}
           </Badge>
         ))}

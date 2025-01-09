@@ -23,6 +23,8 @@ import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
 import axios from "axios";
 import Bluebird from "bluebird";
 import { UploadState } from "./FileUploaderItem";
+import { api } from "~/trpc/react";
+import { IField } from "../FormBuilder/types";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -42,8 +44,10 @@ type FileUploaderContextType = {
     field: ControllerRenderProps<Record<string, string[]>>;
     fieldState: ControllerFieldState;
   };
+  fieldConfig?: IField;
   progressState?: number[];
   state?: any;
+  defaultImageSrc?: string | null;
 };
 
 const FileUploaderContext = createContext<FileUploaderContextType | null>(null);
@@ -66,6 +70,8 @@ export type FileUploaderProps = {
     field: ControllerRenderProps<Record<string, string[]>>;
     fieldState: ControllerFieldState;
   };
+  fieldConfig: IField;
+  form?: any;
 };
 
 export const FileUploader = forwardRef<
@@ -82,6 +88,8 @@ export const FileUploader = forwardRef<
       dir,
       onUploadFile,
       formRenderProps,
+      value: _file,
+      fieldConfig,
       ...props
     },
     ref,
@@ -93,6 +101,7 @@ export const FileUploader = forwardRef<
     const [activeIndex, setActiveIndex] = useState(-1);
     const [state, setState] = useState<UploadState>(UploadState.IDLE);
     const [progressState, setProgressState] = useState<number[]>([]);
+    const [defaultImageSrc, setDefaultImageSrc] = useState<string | null>(null);
 
     const {
       accept = {
@@ -103,13 +112,61 @@ export const FileUploader = forwardRef<
       multiple = true,
     } = dropzoneOptions;
 
+    const { data }: any = api?.files?.getFileById.useQuery({
+      id: (_file as unknown as string[])?.[0] ?? "",
+      pluck_fields: [
+        "filename",
+        "filepath",
+        "mimetype",
+        "download_path",
+        "size",
+        "originalname",
+      ],
+    });
+
+    useEffect(() => {
+      const new_value = data?.map((file: any) => {
+        return {
+          ...file,
+          type: file.mimetype,
+          name: file.originalname,
+        } as File;
+      });
+
+      setValue((prevValue: File[] | null) => {
+        if (prevValue === null) {
+          return new_value ? [...new_value] : [];
+        }
+        const combinedValues = new_value
+          ? [...prevValue, ...new_value]
+          : [...prevValue];
+        const uniqueValues = Array.from(
+          new Set(combinedValues.map((file) => file.name)),
+        ).map((name) => combinedValues.find((file) => file.name === name));
+        return uniqueValues;
+      });
+
+      setDefaultImageSrc(data?.[0]?.download_path);
+    }, [data]);
+
     const reSelectAll = maxFiles === 1 ? true : reSelect;
     const direction: DirectionOptions = dir === "rtl" ? "rtl" : "ltr";
 
     const onValueChange = (value: File[] | null) => {
-      setValue(value);
+      //@ts-expect-error - TS is not able to infer the type of value
+      setValue((prevValue: File[] | null) => {
+        if (prevValue === null) {
+          return value ? [...value] : [];
+        }
+        const combinedValues = value
+          ? [...prevValue, ...value]
+          : [...prevValue];
+        const uniqueValues = Array.from(
+          new Set(combinedValues.map((file) => file.name)),
+        ).map((name) => combinedValues.find((file) => file.name === name));
+        return uniqueValues;
+      });
     };
-
     const handleSetFilesUploaded = (file_id: string) => {
       setFilesUploaded((prev) => [...prev, file_id]);
     };
@@ -200,7 +257,6 @@ export const FileUploader = forwardRef<
           setActiveIndex(-1);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [value, activeIndex, removeFileFromSet],
     );
 
@@ -317,7 +373,9 @@ export const FileUploader = forwardRef<
           direction,
           value,
           formRenderProps,
+          fieldConfig,
           progressState,
+          defaultImageSrc,
           state,
         }}
       >

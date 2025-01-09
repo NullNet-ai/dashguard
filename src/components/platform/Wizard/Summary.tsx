@@ -40,14 +40,16 @@ const SummaryComponent = () => {
             state?.isSummaryOpen ? 'flex-row px-[12px] border-b' : 'flex-col-reverse justify-end gap-6 border-b mb-2'
   
           )}
-          style={{ height:  (state?.isSummaryOpen ) ? FORM_HEADER_HEIGHT : 110 }}
+          style={{ height:  (state?.isSummaryOpen ) ? FORM_HEADER_HEIGHT : 124 }}
         >
           <span className={cn('text-sm font-bold', !state?.isSummaryOpen ? '-rotate-90 w-[80px] ml-[-3px]' : '')}>Summary</span>
           <Button2 
             onClick={() => {
               handleToggle()
             }} 
-            className="font-bold flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-primary"
+            className={cn(`${!state?.isSummaryOpen ? 'mt-2' : ''}`,
+            'font-bold flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-primary')
+          }
             data-test-id={testIDFormatter(`${entityName}-wzrdsum-toggle-btn`)}
           >
             <ChevronLeftIcon className="h-3 w-3" />
