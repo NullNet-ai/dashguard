@@ -11,10 +11,12 @@ export const gridCacheId = async  ({ context, type }: { context: any, type: 'fil
   if(application === "grid") {
     const tabMenuId = `${_id}:${mainEntity}:${application}`;
     if(!gridTabId) {
-      const gridTabFilterList = (await context.redisClient.getCachedData(
+      const cachedGridTabFilterData = (await context.redisClient.getCachedData(
         tabMenuId,
       )) as ITabGrid[];
-      const activeTab = gridTabFilterList?.find((tab) => tab.current);
+      const gridTableFilterList = Array.isArray(cachedGridTabFilterData) ? cachedGridTabFilterData : []
+      const activeTab = gridTableFilterList?.find((tab) => tab.current);
+      if(!activeTab) return null;
       return `${tabMenuId}:${activeTab?.id}:${type}`;
     }
     return `${tabMenuId}:${gridTabId}:${type}`;

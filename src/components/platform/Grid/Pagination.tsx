@@ -9,9 +9,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { cn } from "~/lib/utils";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { GridContext } from "./Provider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectItem } from "~/components/ui/select";
 import { SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
@@ -103,7 +102,7 @@ export default function Pagination() {
             </span>
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Label className="whitespace-nowrap">Rows Per Page</Label>
+            <Label className="whitespace-nowrap">Rows per page</Label>
             <Select
               onValueChange={handlePerPageValueChange}
               defaultValue={`${rows}` || "10"}

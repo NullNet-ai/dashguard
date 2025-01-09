@@ -74,5 +74,6 @@ export interface ISearchableField {
   label: string;
   operator?: string;
   entity?: string;
+  accessorKey?: string;
 }
 

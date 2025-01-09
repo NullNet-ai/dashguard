@@ -14,7 +14,7 @@ import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
-import { gridCacheId } from "~/lib/grid-cache_id";
+import { gridCacheId } from "~/lib/grid-cache-id";
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -147,8 +147,7 @@ export const gridRouter = createTRPCRouter({
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
-          advance_filters: [
-            ..._advance_filters as IAdvanceFilters[]],
+          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -169,7 +168,7 @@ export const gridRouter = createTRPCRouter({
         query.join(created_by_join).join(updated_by_join);
       }
       const { total_count: totalCount = 1, data: items } =
-      await query.execute();
+        await query.execute();
 
       const formatted_items = items?.map((item) => {
         const { [entity + "s"]: entity_data, ...rest } = item;
@@ -529,6 +528,7 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, sorting);
     }),
   getReportSorting: privateProcedure.query(async ({ ctx }) => {
@@ -539,6 +539,7 @@ export const gridRouter = createTRPCRouter({
       return [];
     const cached_id =
       (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
+    if (!cached_id) return;
     const sorting = (await ctx.redisClient.getCachedData(
       cached_id,
     )) as SortingState;
@@ -572,6 +573,7 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, filters);
     }),
   getReportFilter: privateProcedure.query(async ({ ctx }) => {
@@ -582,6 +584,7 @@ export const gridRouter = createTRPCRouter({
       return [];
     const cached_id =
       (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
+    if (!cached_id) return;
     const filters = (await ctx.redisClient.getCachedData(
       cached_id,
     )) as ISearchItem[];
@@ -617,6 +620,7 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, {
         current_page,
         limit_per_page,
@@ -630,6 +634,7 @@ export const gridRouter = createTRPCRouter({
       return [];
     const cached_id =
       (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+    if (!cached_id) return;
     const pagination = await ctx.redisClient.getCachedData(cached_id);
     return pagination;
   }),
