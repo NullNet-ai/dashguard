@@ -2,7 +2,11 @@
 
 import { TStatus } from "./types";
 
-const handleChangeStatus = (status: TStatus, recordId: string, entityName: string) => {
+const handleChangeStatus = (
+  status: TStatus,
+  recordId: string,
+  entityName: string,
+) => {
   try {
     // const response = await changeContactStatus.mutateAsync({
     //   id: contact_id!,
@@ -13,8 +17,6 @@ const handleChangeStatus = (status: TStatus, recordId: string, entityName: strin
   } catch (error) {
     // toast.error("Failed to change status.");
   }
-}
+};
 
-export {
-  handleChangeStatus
-}
+export { handleChangeStatus };
