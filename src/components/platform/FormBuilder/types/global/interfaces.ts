@@ -34,8 +34,18 @@ type DraggableConfig ={
     radioOptions?:IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
   };
- 
 }
+
+type MultiFieldConfig =  DraggableConfig & {
+  fieldOptions: MultiFieldOption[];
+}
+
+type MultiFieldOption = {
+  label : string;
+  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
+  options?: OptionType[];
+} 
+
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>["className"];
@@ -62,6 +72,7 @@ interface IField {
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
+  multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
   customRender?: JSX.Element;
