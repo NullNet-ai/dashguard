@@ -119,7 +119,6 @@ const FormMultiField = ({
         };
         return (
           <FormItem>
-            {index === 0 && <FormLabel>{field.label}</FormLabel>}
             <FormControl>
               <Select
                 {...register(`${fieldConfig.name}.${index}.${field.name}`)}
