@@ -3,27 +3,28 @@ import { ISearchableField } from "../types";
 import { ulid } from "ulid";
 
 export const transformSearchData = (
-  array: Record<string, any>[] | undefined,
+  items: Record<string, any>[] | undefined,
   searchText: string,
   searchableFields: ISearchableField[],
 ) => {
-  if (!array) return null;
+  if (!items) return null;
 
-  const transformedData = array.reduce((acc: any, obj: any) => {
+  const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
-        (field) => field.field === key,
+        (field) => field.accessorKey === key,
       );
-      const isTextFound =
-        searchableField?.operator === "contains"
-          ? (value as any)?.includes(searchText)
-          : value === searchText
+      const isTextFound = ["contains", "like"].includes(
+        searchableField?.operator || "",
+      )
+        ? (value as any)?.includes(searchText)
+        : value === searchText;
       if (isTextFound) {
         acc.push({
           id: ulid(),
           field: key,
-          values: Array.isArray(value) ? value : [value],
-          operator: "equal",
+          values: [searchText],
+          operator: searchableField?.operator || "equal",
           type: "criteria",
           label: searchableField?.label || formatAndCapitalize(key),
           ...searchableField,
@@ -34,7 +35,7 @@ export const transformSearchData = (
   }, []);
   const consolidated: Record<string, any> = {};
   transformedData.forEach((result: any) => {
-    const key = `${result.field}_${JSON.stringify(result.values)}`;
+    const key = `${result.field}_${JSON.stringify(result.values)}_${result.entity}`;
     if (!consolidated[key]) {
       consolidated[key] = { ...result, count: 1 };
     } else {

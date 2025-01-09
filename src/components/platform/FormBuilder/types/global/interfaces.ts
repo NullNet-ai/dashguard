@@ -21,12 +21,30 @@ import {
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
-import { TimePickerProps } from "~/components/ui/time-picker";
+import { type TimePickerProps } from "~/components/ui/time-picker";
 
 interface OptionType {
   label: string;
   value: string;
 }
+
+type DraggableConfig ={
+  fields: IField & {
+    selectOptions?: ISelectOptions[];
+    radioOptions?:IRadioOptions[];
+    checkboxOptions?: ICheckboxOptions[];
+  };
+}
+
+type MultiFieldConfig =  DraggableConfig & {
+  fieldOptions: MultiFieldOption[];
+}
+
+type MultiFieldOption = {
+  label : string;
+  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
+  options?: OptionType[];
+} 
 
 interface IField {
   id: string;
@@ -53,6 +71,8 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
+  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
+  multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
   customRender?: JSX.Element;
@@ -163,6 +183,8 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
+  setFormHostInitialView?: 'lock' | 'unlock';
+  enableFormFilterCreate?: boolean;
 }
 
 export interface ICustomActions {

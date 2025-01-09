@@ -55,6 +55,7 @@ const FormBodyMainActions = ({
 }) => {
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
+  const { enableFormFilterCreate = true } = features ?? {}
 
   return (
     <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
@@ -76,7 +77,7 @@ const FormBodyMainActions = ({
               Cancel
             </Button>
           )}
-          {!formProps?.isOpenSearch && (
+          {!formProps?.isOpenSearch && enableFormFilterCreate && (
             <>
               <Button
                 variant={"default"}

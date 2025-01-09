@@ -66,6 +66,8 @@ export const FormBuilder = (props: IPropsForms) => {
   const [showFormActions, setShowFormActions] = useState(false);
   const [isOpenSearch, setIsOpenSearch] = useState(false);
 
+
+  const { setFormHostInitialView } = features ?? {}
   //* EFFECTS
 
   //* Effect to listen to form submission
@@ -152,8 +154,14 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
-
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]); 
+  
+  useEffect(() => {
+    if(setFormHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
+      disableForm();
+    }
+  }, [setFormHostInitialView, myParent, enableFormRegisterToParent]);
+  
   //* HANDLERS
 
   //* handler to disable form
@@ -222,6 +230,12 @@ export const FormBuilder = (props: IPropsForms) => {
 
   const handleNewRecordFormFilterGrid = () => {
     setDisplayType("form");
+  };
+
+  const handleSelectedGridRecords = () => {
+    handleSearchOpen()
+    setDisplayType("selected");
+    setIsFormOpened(false)
   };
 
   const handleAppendForm = () => {
@@ -408,6 +422,7 @@ export const FormBuilder = (props: IPropsForms) => {
             handleLock={handleLock}
             handleAccordionExpand={handleAccordionExpand}
             handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleSelectedGridRecords={handleSelectedGridRecords}
             handleAppendForm={handleAppendForm}
             handleUpdateDisplayType={handleUpdateDisplayType}
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}

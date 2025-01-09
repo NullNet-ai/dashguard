@@ -31,15 +31,10 @@ export default function GridSearchProvider({ children }: IProps) {
   const { state: gridState } = useContext(GridContext);
   const {
     columns = [],
-    entity,
+    entity: defaultEntity,
     searchableFields = [],
     searchConfig,
   } = gridState?.config ?? {};
-
-  const pathName = usePathname();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("current_tab");
-  const router = useRouter();
 
   /** @STATES */
   const [_query, setQuery] = useState<string>("");
@@ -51,7 +46,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
       ({ entity, operator, type, field, values }) => ({
-        entity,
+        entity: entity || defaultEntity,
         operator,
         type,
         field,
@@ -59,7 +54,7 @@ export default function GridSearchProvider({ children }: IProps) {
       }),
     ) as ISearchItem[];
     return searchableFields.reduce(
-      (acc: any, item: any, index) => {
+      (acc: any, { accessorKey, ...item }: any, index) => {
         return [
           ...acc,
           {
@@ -69,7 +64,7 @@ export default function GridSearchProvider({ children }: IProps) {
               item?.field === "raw_phone_number"
                 ? [_query?.replace(/[^\d]/g, "")]
                 : [_query],
-            entity, // if entity is not provided, the default entity will be the entity of the grid
+            entity: defaultEntity, // if entity is not provided, the default entity will be the entity of the grid
             ...item,
           },
           ...(searchableFields.length - 1 === index
@@ -80,7 +75,7 @@ export default function GridSearchProvider({ children }: IProps) {
       [
         ...advanceFilter,
         ...(advanceFilter?.length
-          ? [{ type: "operator", operator: "and" }]
+          ? [{ type: "operator", operator: "or" }]
           : []),
       ],
     );
@@ -106,10 +101,14 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     const { count, ...rest } = filterItem ?? {};
+    const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
+      entity: entity || defaultEntity,
+      ...rest,
+    })) as ISearchItem[];
     setQuery("");
     const updateSearchItems = [
-      ...searchItems,
-      ...(searchItems.length
+      ...advanceFilter,
+      ...(advanceFilter.length
         ? [{ id: ulid(), type: "operator", operator: "and" }]
         : []),
       {
@@ -125,15 +124,8 @@ export default function GridSearchProvider({ children }: IProps) {
     setSearchItems(updateSearchItems);
     await UpdateReportFilter({
       filters: updateSearchItems,
+      filterItemId: filterItem.id,
     });
-
-    if (!!currentTab) {
-      router.push(
-        `${pathName}?current_tab=${currentTab}&advanceFilterItem=${filterItem.id}`,
-      );
-    } else {
-      router.push(`${pathName}?advanceFilterItem=${filterItem.id}`);
-    }
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery("");
@@ -141,8 +133,8 @@ export default function GridSearchProvider({ children }: IProps) {
     setSearchItems(updatedSearchItems);
     await UpdateReportFilter({
       filters: updatedSearchItems,
+      filterItemId: filterItem.id,
     });
-    router.push(`${pathName}?advanceFilterItem=${filterItem.id}`);
   };
 
   const state_context = {

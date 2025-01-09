@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type UseFormReturn } from "react-hook-form";
+import { ControllerFieldState, ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   FormControl,
@@ -15,6 +15,10 @@ import { type ICheckboxOptions, type IField } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
+  formRenderProps: {
+    field: ControllerRenderProps<Record<string, any[]>>;
+    fieldState: ControllerFieldState;
+  };
   checkboxOptions: Record<string, ICheckboxOptions[]> | undefined;
   form: UseFormReturn<Record<string, any>, any, undefined>;
   formKey: string;

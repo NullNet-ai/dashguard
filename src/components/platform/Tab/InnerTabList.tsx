@@ -13,7 +13,7 @@ const getSessionTabs = async () => {
     .getSubTabs({
       current_context: currentContext,
     })
-    .then((res) => {
+    .then((res : any) => {
       return res?.tabs ?? [];
     })
     .catch(() => {
@@ -51,7 +51,7 @@ const getSessionTabs = async () => {
   });
 
   if (application === "grid" && !grid) {
-    newTabs.push({
+    newTabs.unshift({
       name: "Grid",
       href: pathname,
       current: true,
@@ -59,7 +59,7 @@ const getSessionTabs = async () => {
   }
 
   if (application === "wizard" && !hasIdentifier && identifier) {
-    newTabs.push({
+    newTabs.splice(1, 0, {
       name: identifier,
       href: pathname,
       current: true,
@@ -67,7 +67,7 @@ const getSessionTabs = async () => {
   }
 
   if (application === "record" && !hasIdentifier && identifier) {
-    newTabs.push({
+    newTabs.splice(1, 0, {
       name: identifier,
       href: `${pathname}?current_tab=dashboard`,
       current: true,

@@ -4,6 +4,8 @@ type TDisplayType = "form" | "selected";
 
 type TFormType =
   | "input"
+  | "draggable"
+  | "multi-field"
   | "input-grid"
   | "time-picker"
   | "number-input"

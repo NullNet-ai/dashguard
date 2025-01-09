@@ -29,6 +29,9 @@ const gridColumns = [
         return <StatusCell key={index} value={category} />;
       });
     },
+    search_config: {
+      operator: "contains"
+    }
   },
   {
     header: "First Name",
@@ -46,19 +49,27 @@ const gridColumns = [
     header: "Primary Phone Number",
     accessorKey: "raw_phone_number",
     sortKey: "contact_phone_number.raw_phone_number",
+    search_config: {
+      entity: "contact_phone_numbers"
+    }
   },
   {
     header: "Primary Email",
     accessorKey: "email",
     sortKey: "contact_email.email",
+    search_config: {
+      entity: "contact_emails"
+    }
   },
   {
     header: "Organization",
     accessorKey: "organization",
+    isSearchable: false,
   },
   {
     header: "Role",
     accessorKey: "role",
+    isSearchable: false,
   },
   {
     header: "Updated Date",
@@ -77,8 +88,13 @@ const gridColumns = [
   {
     header: "Updated By",
     accessorKey: "updated_by",
+    sortKey: "updated_by.first_name",
+    search_config: {
+      entity: "updated_by",
+      field: "first_name",
+      operator: 'like'
+    }
   },
-
   {
     header: "Created Date",
     accessorKey: "created_date",
@@ -96,6 +112,12 @@ const gridColumns = [
   {
     header: "Created By",
     accessorKey: "created_by",
+    sortKey: "created_by.first_name",
+    search_config: {
+      entity: "created_by",
+      field: "first_name",
+      operator: 'like'
+    }
   },
 ] as ColumnDef<any>[];
 

@@ -3,6 +3,7 @@
 
 import { type ReactElement } from "react";
 import {
+  Form,
   type ControllerFieldState,
   type ControllerRenderProps,
   type UseFormReturn,
@@ -40,6 +41,8 @@ import FormSmartDate from "../../../FormType/FormSmartDate";
 import FormInputGrid from "../../../FormType/FormInputGrid";
 import React from "react";
 import FormTimePicker from "../../../FormType/FormTimePicker";
+import FormDraggable from "../../../FormType/FormDraggable";
+import FormMultiField from "../../../FormType/FormMultiField";
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -121,6 +124,7 @@ export default function RenderFormType(
       return (
         <FormCheckbox
           form={form}
+          formRenderProps={formRenderProps}
           checkboxOptions={subConfig?.checkboxOptions}
           fieldConfig={fieldConfig}
           formKey={formKey}
@@ -261,6 +265,24 @@ export default function RenderFormType(
           form={form}
           formKey={formKey}
           />)
+      case "draggable":
+        return (
+          <FormDraggable
+            fieldConfig={fieldConfig}
+            formRenderProps={formRenderProps}
+            form={form}
+            formKey={formKey}
+          />
+        );
+        case "multi-field":
+          return (
+            <FormMultiField
+              fieldConfig={fieldConfig}
+              formRenderProps={formRenderProps}
+              form={form}
+              formKey={formKey}
+            />
+          );
     default:
       return <Input />;
   }
