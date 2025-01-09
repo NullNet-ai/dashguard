@@ -3,6 +3,7 @@
 
 import { type ReactElement } from "react";
 import {
+  Form,
   type ControllerFieldState,
   type ControllerRenderProps,
   type UseFormReturn,
@@ -41,6 +42,7 @@ import FormInputGrid from "../../../FormType/FormInputGrid";
 import React from "react";
 import FormTimePicker from "../../../FormType/FormTimePicker";
 import FormDraggable from "../../../FormType/FormDraggable";
+import FormMultiField from "../../../FormType/FormMultiField";
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -272,6 +274,15 @@ export default function RenderFormType(
             formKey={formKey}
           />
         );
+        case "multi-field":
+          return (
+            <FormMultiField
+              fieldConfig={fieldConfig}
+              formRenderProps={formRenderProps}
+              form={form}
+              formKey={formKey}
+            />
+          );
     default:
       return <Input />;
   }

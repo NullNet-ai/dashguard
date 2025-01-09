@@ -9,6 +9,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
@@ -80,7 +81,7 @@ export function ButtonWithDropdown({
         collisionPadding={10} // Avoid the content colliding with the edge of the screen
       >
         {dropdownOptions.map((option, index) => (
-          <button
+          <DropdownMenuItem
             data-test-id={testIDFormatter(`${entity}-wzrd-drd-opt-${option?.label?.replace(/\s/g, "")}`)}
             key={index}
             onClick={() => {
@@ -96,7 +97,7 @@ export function ButtonWithDropdown({
           >
             {option.loading ? "Loading..." : option.label}
             {/* Display loading text for the option */}
-          </button>
+          </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
