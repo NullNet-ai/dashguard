@@ -36,8 +36,6 @@ export default function FormSmartDate({
     name,
     required,
   } = fieldConfig;
-  const { disabled } = formRenderProps.field;
-  const isDisable = isFieldDisable || disabled;
 
   const handleChange = (date: Date | null | string) => {
     if (date) {
@@ -97,7 +95,7 @@ export default function FormSmartDate({
           placeholder={fieldConfig.placeholder}
           dateTimePickerProps={fieldConfig.dateTimePickerProps}
           inputProps={fieldConfig.dateInputProps}
-          disabled={fieldConfig.disabled}
+          disabled={isFieldDisable}
           readOnly={
             (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
           }

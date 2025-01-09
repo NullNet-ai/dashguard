@@ -62,7 +62,7 @@ export default function FormRadio({
                 >
                   <FormControl>
                     <RadioGroupItem
-                      value={option.value}
+                      value={String(option.value)}
                       data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
                     />
                   </FormControl>
