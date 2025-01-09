@@ -20,6 +20,7 @@ const FileUpload = ({
   formRenderProps,
   fileUploaderProps,
   fileInputProps,
+  fieldConfig,
   fileUploaderContentProps,
   ...props
 }: FileProps) => {
@@ -30,12 +31,13 @@ const FileUpload = ({
       orientation={orientation}
       onUploadFile={onUploadFile}
       formRenderProps={formRenderProps}
+      fieldConfig={fieldConfig}
       {...fileUploaderProps}
     >
       <FileInput
         id="fileInput"
         className="h-full content-center border border-dashed border-border/75"
-        disabled={formRenderProps?.field.disabled}
+        disabled={formRenderProps?.field.disabled || fieldConfig?.readonly}
         {...fileInputProps}
       >
         <div className="flex w-full flex-col items-center justify-center p-8">

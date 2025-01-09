@@ -24,6 +24,8 @@ import Underline from "@tiptap/extension-underline";
 import { Link } from "./extensions/link/link";
 import ExtendedTextStyle from "./components/extended-text-style";
 import { Image } from "./extensions/image/image";
+import { CodeBlockLowlight, FileHandler } from "./extensions";
+import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
 import { useEffect, useRef } from "react";
 
 export interface MinimalTiptapProps
@@ -76,7 +78,7 @@ const Toolbar = ({
             "code",
             "clearFormatting",
           ]}
-          mainActionCount={disabled ?0 : 3}
+          mainActionCount={disabled ? 0 : 3}
           disabled={disabled}
         />
         <Separator orientation="vertical" className="mx-2 h-7" />
@@ -123,7 +125,7 @@ export const MinimalTiptapEditor = React.forwardRef<
       className,
       readOnly = false,
       editorContentClassName,
-      enableCoreExtensions = false,
+      editable = false,
       ...props
     },
     ref,
@@ -141,15 +143,19 @@ export const MinimalTiptapEditor = React.forwardRef<
         FontSize,
         Image,
         Link,
+        FileHandler,
+        CodeBlockLowlight,
+        HorizontalRule,
       ],
       ...props,
     });
+    //!!TO BE RECHECKED
 
-    useEffect(() => {
-      if (editor) {
-        editor.setEditable(!readOnly);
-      }
-    }, [readOnly, editor]);
+    // useEffect(() => {
+    //   if (editor) {
+    //     editor.setEditable(!readOnly);
+    //   }
+    // }, [readOnly, editor]);
 
     if (!editor) {
       return null;
@@ -161,11 +167,11 @@ export const MinimalTiptapEditor = React.forwardRef<
         name="editor"
         ref={ref}
         className={cn(
-          "flex h-auto min-h-72 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary focus-within:ring-primary focus-within:ring-1",
+          "flex h-auto min-h-72 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary",
           className,
         )}
       >
-        <Toolbar editor={editor} disabled={readOnly} readOnly={readOnly} />
+        <Toolbar editor={editor} disabled={editable} readOnly={readOnly} />
         <EditorContent
           editor={editor}
           readOnly={readOnly}

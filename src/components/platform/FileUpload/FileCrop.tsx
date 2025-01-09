@@ -12,7 +12,7 @@ import { Slider } from "~/components/ui/slider";
 type FileCropProps = {
   isCropModalOpen: boolean;
   setIsCropModalOpen: (isOpen: boolean) => void;
-  imageSrc: string | null;
+  imageSrc?: string | null;
   cropState: any;
   onCropChange: any;
   onZoomChange: any;

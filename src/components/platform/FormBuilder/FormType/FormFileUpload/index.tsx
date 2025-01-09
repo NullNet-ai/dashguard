@@ -4,15 +4,14 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../../types";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-
-import FileUpload from "../../../FileUpload";
+import { IField } from "../../types";
+import FileUpload from "~/components/platform/FileUpload";
 
 // import { DevTool } from "@hookform/devtools";
 
@@ -35,6 +34,7 @@ export default function FormFile({
   formKey,
 }: IProps) {
   const { field } = formRenderProps;
+  const { value } = field;
   const { register } = form;
   const handleChangeUpload = (file_ids: string[]) => {
     form?.setValue(field.name, file_ids, {
@@ -75,12 +75,13 @@ export default function FormFile({
           dropzoneOptions={
             fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
           }
+          value={value as any[]}
           formRenderProps={formRenderProps}
+          fieldConfig={fieldConfig}
+          form={form}
         />
       </FormControl>
-      <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-      />
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }
