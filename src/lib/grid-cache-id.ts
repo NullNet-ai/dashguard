@@ -14,7 +14,9 @@ export const gridCacheId = async  ({ context, type }: { context: any, type: 'fil
       const gridTabFilterList = (await context.redisClient.getCachedData(
         tabMenuId,
       )) as ITabGrid[];
-      const activeTab = gridTabFilterList?.find((tab) => tab.current);
+      const _gridTableFilterList = Array.isArray(gridTabFilterList) ? gridTabFilterList : []
+      const activeTab = _gridTableFilterList?.find((tab) => tab.current);
+      if(!activeTab) return null;
       return `${tabMenuId}:${activeTab?.id}:${type}`;
     }
     return `${tabMenuId}:${gridTabId}:${type}`;

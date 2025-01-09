@@ -103,7 +103,7 @@ export default function Pagination() {
             </span>
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Label className="whitespace-nowrap">Rows Per Page</Label>
+            <Label className="whitespace-nowrap">Rows per page</Label>
             <Select
               onValueChange={handlePerPageValueChange}
               defaultValue={`${rows}` || "10"}
