@@ -90,7 +90,6 @@ const FormMultiField = ({
     fieldType: string,
     selectOptions?: any,
   ) => {
-    console.log("selectOptions", selectOptions);
 
     const commonProps = {
       disabled: isDisabled,
@@ -172,9 +171,9 @@ const FormMultiField = ({
         leftIcon={PlusIcon}
         buttonLabel={"Add"}
         dropdownOptions={dropOptions}
-        // disabled={
-        //   saveContinueLoading || saveCloseLoading || saveNewLoading
-        // }
+        disabled={
+          isDisabled
+        }
         // loading={saveContinueLoading} // Pass the loading state for the main button
       />
       <div className="border-t-default-100 mt-2 border-b border-t border-b-primary p-2">
@@ -210,6 +209,7 @@ const FormMultiField = ({
                   >
                     <FormField
                       control={form.control}
+                      disabled={isDisabled}
                       name={`${fieldConfig.multiFieldConfig?.fields.name}-${index}-${fieldConfig?.name ?? ""}`}
                       render={() =>
                         fieldConfig.multiFieldConfig ? (
@@ -232,6 +232,7 @@ const FormMultiField = ({
                     />
                   </div>
                   <Button
+                    disabled={isDisabled}
                     type="button"
                     variant="softDestructive"
                     size="icon"
