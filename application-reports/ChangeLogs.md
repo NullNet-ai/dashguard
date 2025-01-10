@@ -396,6 +396,14 @@ chore: major update
 
 # FormBuilder
 
+#### tag: 1.2.2, cli/b_1_2_2
+
+> 2025-01-09
+
+```js
+[Franklin]:Initial test
+```
+
 #### tag: 1.2.1, cli/b_1_2_1
 
 > 2025-01-08
@@ -468,6 +476,14 @@ chore: major update
 
 # Wizard
 
+#### tag: 1.1.0, cli/b_1_1_0
+
+> 2025-01-10
+
+```js
+[Shem Alexis Chavez]:Add custom implementation when use in Playground
+```
+
 #### tag: 1.0.0, cli/b_1_0_0
 
 > 2025-01-08
@@ -539,6 +555,22 @@ chore: major update
 ---
 
 # Grid
+
+#### tag: 1.2.2, cli/b_1_2_2
+
+> 2025-01-10
+
+```js
+[Mary Grace Tiburillo-Tan]:Add adjustment for sorting and searching self joined entity
+```
+
+#### tag: 1.2.1, cli/b_1_2_1
+
+> 2025-01-09
+
+```js
+[Mary Grace Tiburillo-Tan]:Add grid identifier for sorting and default filter
+```
 
 #### tag: 1.2.0, cli/b_1_2_0
 
