@@ -3,6 +3,7 @@ import { SetIdTab } from "~/lib/grid-default-tab";
 import { getGridLink } from "~/lib/grid-get-link";
 import { tabMenuId } from "~/lib/tab-menu-id";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import MENU from "../../../menu";
 
 export const menuRouter = createTRPCRouter({
   getMenuConfig: privateProcedure.query(async ({ ctx }) => {
@@ -26,21 +27,7 @@ export const menuRouter = createTRPCRouter({
       ctx.redisClient.cacheData(_tabMenuId, setIdTab);
     }
     const menuItems = [
-      {
-        title: "Dashboard",
-        icon: "AcademicCapIcon",
-        isActive: pathName.endsWith("/dashboard"),
-        url: "/portal/dashboard",
-        items: [],
-      },
-
-      {
-        title: "Favorite",
-        icon: "StarIcon",
-        isActive: pathName.includes("/favorite"),
-        items: [],
-        url: "/portal/favorite",
-      },
+      // ...MENU,
       {
         title: "Activity Log",
         icon: "DocumentTextIcon",
@@ -86,7 +73,24 @@ export const menuRouter = createTRPCRouter({
           },
         ],
       },
-    ];
+    ] as {
+      title?: string;
+      icon?: string;
+      isActive?: boolean;
+      url?: string;
+      groupTitle?: string;
+      groups?: {
+        title: string;
+        icon?: string;
+        isActive?: boolean;
+        items: {
+          title: string;
+          url: string;
+          icon?: string;
+          isActive?: boolean;
+        }[];
+      }[];
+    }[];
 
     // Update isActive for groups based on their items
     menuItems.forEach((item) => {
