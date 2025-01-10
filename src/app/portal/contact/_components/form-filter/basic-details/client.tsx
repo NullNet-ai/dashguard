@@ -1,19 +1,17 @@
 "use client";
 
-import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 
 import { FormBuilder } from "~/components/platform/FormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { ContactPhoneEmailSchema, MultipleContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { closeCurrentInnerClassTab, fetchRecords, removeRecord, saveContactDetails, selectRecord } from "./actions";
-import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
-import SelectedView from "./components/SelectedView";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { api } from "~/trpc/react";
-import { StepOneUpdateCategory } from "../../forms/category-details/actions/updateCategory";
-import MultipleFormBuilder from "~/components/platform/FormBuilder/components/custom/FormFilter/MultipleFormBuilder";
+import { type IFormProps } from "../types";
+import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
+import { closeCurrentInnerClassTab, fetchRecords, saveContactDetails, selectRecord } from "./actions";
+import SelectedView from "./components/SelectedView";
 
 export default function ContactDetails({
   params,
@@ -273,31 +271,6 @@ export default function ContactDetails({
           },
         },
       ]}
-      // customFormFilterViewFormActions={[
-      //
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // customFormFilterLockFormActions={[
-      //   {
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // features={{
-      //   enableAutoSelect : true
-      // }}
     />
   );
 }

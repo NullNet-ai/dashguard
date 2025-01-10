@@ -340,6 +340,12 @@ interface IFieldFilterActions {
   ref?: any;
 }
 
+interface IGridData {
+  items: any[];
+  totalCount: number;
+  advance_filters?: any[];
+}
+
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -354,4 +360,5 @@ export type {
   IUserFormField,
   OptionType,
   IFieldFilterActions,
+  IGridData,
 };

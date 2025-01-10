@@ -3,17 +3,13 @@
 import { api } from "~/trpc/react";
 import Grid from "../../../../Grid/Client";
 
-import Skeleton from "../../../../Grid/Skeleton";
-import { IFilterGridConfig } from "../../../types/global/interfaces";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { WizardContext } from "~/components/platform/Wizard/Provider";
 import { useSidebar } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
-import { WizardContext } from "~/components/platform/Wizard/Provider";
-import { useContext, useMemo, useState, useEffect, useCallback } from "react";
-interface GridData {
-  items: any[];
-  totalCount: number;
-  advance_filters?: any[];
-}
+import Skeleton from "../../../../Grid/Skeleton";
+import { IFilterGridConfig, IGridData } from "../../../types/global/interfaces";
+
 export default function FormFilterGrid({
   config,
   handleCloseGrid,
@@ -43,7 +39,7 @@ export default function FormFilterGrid({
   const { state } = useContext(WizardContext);
   const { open } = useSidebar();
 
-  const [gridData, setGridData] = useState<GridData | null>(null);
+  const [gridData, setGridData] = useState<IGridData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async ({

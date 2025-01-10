@@ -1,13 +1,12 @@
 "use server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { z } from "zod";
-import { api } from "~/trpc/server";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
-import { defaultSorting } from "../../../grid/_config/sorting";
-import { EOperator } from "@dna-platform/common-orm";
 import { ulid } from "ulid";
+import { z } from "zod";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
+import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+import { api } from "~/trpc/server";
+import { defaultSorting } from "../../../grid/_config/sorting";
 
 const defaultAdvanceFilter = [
   {

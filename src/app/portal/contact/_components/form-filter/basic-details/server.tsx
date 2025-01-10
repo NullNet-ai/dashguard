@@ -1,7 +1,7 @@
-import { api } from "~/trpc/server";
 import { headers } from "next/headers";
+import { api } from "~/trpc/server";
 import BasicDetails from "./client";
-import { defaultSorting } from "../../../grid/_config/sorting";
+
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
@@ -41,8 +41,6 @@ const FormServerFetch = async () => {
       <BasicDetails
         defaultValues={{
           ...default_values,
-          // for multi-select form filter
-          // form_builder_fields: joinedContactDetails,
         }}
         params={{
           id: contact_id!,
