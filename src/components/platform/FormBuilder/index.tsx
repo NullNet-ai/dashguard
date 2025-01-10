@@ -67,7 +67,7 @@ export const FormBuilder = (props: IPropsForms) => {
   const [isOpenSearch, setIsOpenSearch] = useState(false);
 
 
-  const { setFormHostInitialView } = features ?? {}
+  const { formHostInitialView } = features ?? {}
   //* EFFECTS
 
   //* Effect to listen to form submission
@@ -157,10 +157,10 @@ export const FormBuilder = (props: IPropsForms) => {
   }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]); 
   
   useEffect(() => {
-    if(setFormHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
+    if(formHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
       disableForm();
     }
-  }, [setFormHostInitialView, myParent, enableFormRegisterToParent]);
+  }, [formHostInitialView, myParent, enableFormRegisterToParent]);
   
   //* HANDLERS
 
