@@ -16,7 +16,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               Coming Soon
             </h1>
             <p className="mt-2 text-xl leading-7 text-gray-400">
-              Thank you for your patient!
+              Thank you for your patience!
             </p>
           </div>
           <div className="hidden   lg:block relative  -top-[40px] -right-10">
@@ -51,7 +51,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               Coming Soon
             </h1>
             <p className="mt-2 text-xl leading-7 text-gray-400">
-              Thank you for your patient!
+              Thank you for your patience!
             </p>
           </div>
           <div className="hidden   lg:block relative  -top-[40px] -right-10">
@@ -88,7 +88,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               Coming Soon
             </h1>
             <p className="mt-2 text-xl leading-7 text-gray-400">
-              Thank you for your patient!
+              Thank you for your patience!
             </p>
           </div>
         </main>

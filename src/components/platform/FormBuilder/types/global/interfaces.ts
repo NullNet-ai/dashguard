@@ -185,7 +185,7 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
-  setFormHostInitialView?: 'lock' | 'unlock';
+  formHostInitialView?: 'lock' | 'unlock';
   enableFormFilterCreate?: boolean;
 }
 

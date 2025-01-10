@@ -9,7 +9,7 @@ const FormServerFetch = async () => {
   const fetched_user_role = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "code", "name"],
+    pluck_fields: ["id", "code"],
   });
   const defaultValues = fetched_user_role?.data;
   return (

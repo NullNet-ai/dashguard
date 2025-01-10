@@ -15,7 +15,6 @@ const FormSchema = z.object({
 
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
   const toast = useToast();
-
   // @ts-expect-error - Fix type later
   const updateOrg = api[params.entity].updateName.useMutation();
 

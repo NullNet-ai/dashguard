@@ -4,8 +4,7 @@ import Grid from "~/components/platform/Grid/Server";
 import { headers } from "next/headers";
 import { defaultSorting } from "./_config/sorting";
 
-
-export default async function UserRoleGridPage({
+export default async function Page({
   searchParams = {},
 }: {
   searchParams?: {
@@ -14,11 +13,10 @@ export default async function UserRoleGridPage({
   };
 }) {
   const sorting = await api.grid.getReportSorting();
-
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const [, , main_entity, application, identifier] = pathname.split("/");
-  const _pluck = ["id", "code", "name","created_date", "updated_date"];
+  const [, , main_entity] = pathname.split("/");
+  const _pluck = ["id", "code", "created_date", "updated_date"];
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
