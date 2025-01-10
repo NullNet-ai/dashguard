@@ -58,7 +58,7 @@ const FormBodyMainActions = ({
   const { enableFormFilterCreate = true } = features ?? {}
 
   return (
-    <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
+    <div className="me-4 ms-auto mt-4 flex justify-end gap-2 md:mb-3 lg:mb-0">
       {displayType !== "selected" && !!Object.keys(filterGridConfig).length && (
         <>
           {!!selectedRecords?.length && !formProps?.isOpenSearch && (
