@@ -9,8 +9,18 @@ export async function NextPage() {
   const pathname = headerList.get("x-pathname") || "";
   const fullSearchQueryParams =
     headerList.get("x-full-search-query-params") || "";
-  const [, , mainEntity, application = "wizard", identifier, currentStep] =
+    const path =
     pathname.split("/");
+  let [, , mainEntity, application = "wizard", identifier, currentStep] = path
+  let version = "1"
+  if (process.env.IS_PLAYGROUND) {
+    const [, , playgroundApplication, , playgroundVersion, playgroundIdentifier, playgroundCurrentStep] = path
+    application = playgroundApplication || "wizard";
+    version = playgroundVersion || "1";
+    identifier = playgroundIdentifier
+    currentStep = playgroundCurrentStep
+    mainEntity = "contact";
+  }
   if (application !== "wizard" || !identifier) return;
 
   const step = Number(currentStep) + 1;
@@ -21,9 +31,19 @@ export async function NextPage() {
   });
 
   if (fullSearchQueryParams) {
-    redirect(
-      `/portal/${mainEntity}/wizard/${identifier}/${step}?${fullSearchQueryParams}`,
-    );
+    if (process.env.IS_PLAYGROUND) {
+      redirect(
+        `/portal/wizard/version/${version}/${identifier}/${step}?${fullSearchQueryParams}`,
+      );
+    } else {
+      redirect(
+        `/portal/${mainEntity}/wizard/${identifier}/${step}?${fullSearchQueryParams}`,
+      );
+    }
   }
-  redirect(`/portal/${mainEntity}/wizard/${identifier}/${step}`);
+  if (process.env.IS_PLAYGROUND) {
+    redirect(`/portal/wizard/version/${version}/${identifier}/${step}`);
+  } else {
+    redirect(`/portal/${mainEntity}/wizard/${identifier}/${step}`);
+  }
 }

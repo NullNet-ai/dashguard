@@ -28,6 +28,9 @@ export async function SaveAndContinue({
     href: updatedPath,
     current_context: currentContext,
   })
-
-  redirect(`/portal/${entity}/record/${identifier}/?current_tab=dashboard`);
+  if (process.env.IS_PLAYGROUND) {
+    redirect(`/portal/record/version/1/${identifier}/?current_tab=dashboard`);
+  } else {
+    redirect(`/portal/${entity}/record/${identifier}/?current_tab=dashboard`);
+  }
 }
