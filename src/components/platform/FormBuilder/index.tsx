@@ -108,11 +108,17 @@ export const FormBuilder = (props: IPropsForms) => {
   //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
-      setDisplayType("form");
-      return;
+      const parsingResult = formSchema.safeParseAsync(defaultValues);
+      parsingResult.then((result) => {
+        if (result.success) {
+          form.control._disableForm(result.success);
+          setDisplayType("form");
+        }
+      });
+    } else {
+      setFormGridSelected(filterGridConfig?.selectedRecords);
+      setDisplayType("selected");
     }
-    setFormGridSelected(filterGridConfig?.selectedRecords);
-    setDisplayType("selected");
   }, [filterGridConfig?.selectedRecords]);
 
   //* Effect to listen to event emitter
