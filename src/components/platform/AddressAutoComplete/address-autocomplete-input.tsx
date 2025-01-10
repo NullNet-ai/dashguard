@@ -84,7 +84,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
       name="inp-addr"
       render={(formRenderProps) => {
         const is_readonly =
-          (formRenderProps.field.readonly || fieldConfig?.readonly) ?? false;
+          (fieldConfig?.readonly) ?? false;
         const is_disabled =
           formRenderProps.field.disabled || fieldConfig?.disabled;
         const is_disabled_or_readonly = is_disabled || is_readonly;
