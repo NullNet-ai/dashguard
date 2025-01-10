@@ -7,6 +7,15 @@ export const DEFAULT_MENU_OPTION_CONFIG: IMenuOptionConfig[] = [
   {
     label: CHANGE_RECORD_STATE,
     onClick: () => ({}),
-    children: [],
+    children: [
+      {
+        label: "Archive",
+        onClick: () => ({}),
+      },
+      {
+        label: "Delete",
+        onClick: () => ({}),
+      },
+    ],
   },
 ];
