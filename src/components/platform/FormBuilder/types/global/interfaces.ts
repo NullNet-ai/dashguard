@@ -208,8 +208,10 @@ interface IFilterGridConfig {
   is_same_entity_id?: boolean;
   statusesIncluded?: string[];
   label?: string;
+  hideSearch?: boolean;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
+  searchConfig? : any;
   onClipboardPaste?: (
     data: Record<string, any>,
     form: any,
@@ -223,6 +225,8 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+
+  fetchGridRecords?: (args: any) => Promise<any>;
   onRemoveSelectedRecords?: ({
     rows,
     main_entity_id,

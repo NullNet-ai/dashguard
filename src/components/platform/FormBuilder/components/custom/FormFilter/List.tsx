@@ -8,8 +8,12 @@ import { IFilterGridConfig } from "../../../types/global/interfaces";
 import { useSidebar } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
 import { WizardContext } from "~/components/platform/Wizard/Provider";
-import { useContext, useMemo } from "react";
-
+import { useContext, useMemo, useState, useEffect, useCallback } from "react";
+interface GridData {
+  items: any[];
+  totalCount: number;
+  advance_filters?: any[];
+}
 export default function FormFilterGrid({
   config,
   handleCloseGrid,
@@ -31,33 +35,67 @@ export default function FormFilterGrid({
     main_entity_id,
     onSelectRecords,
     filter_entity,
-    grid_data,
+    hideSearch,
     selectedRecords: _form_filter_selected_record,
+    searchConfig,
+    fetchGridRecords,
   } = config;
   const { state } = useContext(WizardContext);
   const { open } = useSidebar();
+
+  const [gridData, setGridData] = useState<GridData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async ({
+    current,
+    limit,
+    pluck,
+    advance_filters = [],
+  }: {
+    current: number;
+    limit: number;
+    pluck: string[];
+    advance_filters: any[];
+  }) => {
+    setIsLoading(true);
+    try {
+      if (fetchGridRecords) {
+        const result = await fetchGridRecords({ current, limit, pluck, advance_filters });
+        setGridData({
+          ...result,
+          advance_filters
+        }); 
+      } else {
+        const [_, list] = api.grid.items.useSuspenseQuery({
+          entity: filter_entity!,
+          current,
+          limit: limit || 100,
+          pluck,
+        });
+        const { isLoading: list_is_loading, data } = list ?? {};
+        setIsLoading(list_is_loading);
+        const { items, totalCount } = data ?? {};
+        setGridData({ items: items || [], totalCount: totalCount || 0 });
+      }
+    } catch (error) {
+      console.error('Error fetching grid data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  },[fetchGridRecords]);
+
+  useEffect(() => {
+    fetchData({
+      current: current || 1,
+      limit: limit || 100,
+      pluck: pluck || [],
+      advance_filters: [],
+    });
+  }, [fetchGridRecords]);
+    
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
     .filter(Boolean) as string[];
-  let grid_items: any[] = [];
-  let grid_total_count = 0;
-  let isLoading = false;
-  if (grid_data) {
-    grid_items = grid_data.items;
-    grid_total_count = grid_data.totalCount;
-  } else {
-    const [_, list] = api.grid.items.useSuspenseQuery({
-      entity: filter_entity!,
-      current,
-      limit: limit || 100,
-      pluck,
-    });
-    const { isLoading: list_is_loading, data } = list ?? {};
-    isLoading = list_is_loading;
-    const { items, totalCount } = data ?? {};
-    grid_items = items || [];
-    grid_total_count = totalCount || 0;
-  }
 
   const calcWidth = useMemo(() => {
     if (open && state?.isSummaryOpen) {
@@ -118,9 +156,11 @@ export default function FormFilterGrid({
               handleCloseGrid();
             });
           }}
+          hideSearch={hideSearch}
           parentType="form"
-          totalCount={grid_total_count || 0}
-          data={grid_items}
+          totalCount={gridData?.totalCount || 0}
+          data={gridData?.items || []}
+          advanceFilter={gridData?.advance_filters || []}
           config={{
             statusesIncluded: config?.statusesIncluded ?? [
               "draft",
@@ -132,6 +172,8 @@ export default function FormFilterGrid({
             title: label,
             columns: gridColumns!,
             actionType,
+            searchConfig,
+            onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (row.original.id === _form_filter_selected_record?.[0]?.id)
                 return;

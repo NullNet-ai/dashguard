@@ -10,6 +10,7 @@ interface IClientProps extends IPropsGrid {
   parentType?: "grid" | "form" | "field";
   height?: string;
   showPagination?: boolean;
+  hideSearch?: boolean;
 }
 
 function MainClient({
@@ -20,18 +21,22 @@ function MainClient({
   onSelectRecords,
   initialSelectedRecords = {},
   height,
+  hideSearch = true,
   showPagination = true,
+  advanceFilter,
 }: IClientProps) {
   return (
     <GridProvider
       totalCount={totalCount}
       onSelectRecords={onSelectRecords}
+      advanceFilter={advanceFilter}
       data={data}
       config={config}
       initialSelectedRecords={initialSelectedRecords}
+      parentType={parentType}
     >
       <div className="hidden lg:flex">
-        <GridDesktop parentType={parentType} hideSearch height={height} />
+        <GridDesktop parentType={parentType} hideSearch={hideSearch} height={height} />
       </div>
       <div className="flex h-[500px] lg:hidden">
         {parentType === "grid" ? (

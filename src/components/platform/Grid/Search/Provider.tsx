@@ -34,8 +34,11 @@ export default function GridSearchProvider({ children }: IProps) {
     entity: defaultEntity,
     searchableFields = [],
     searchConfig,
+    onFetchRecords
   } = gridState?.config ?? {};
 
+
+  const { parentType } = gridState ?? {}
   /** @STATES */
   const [_query, setQuery] = useState<string>("");
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
@@ -122,6 +125,12 @@ export default function GridSearchProvider({ children }: IProps) {
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
+    if(parentType === "form") {
+      onFetchRecords?.({
+        advance_filters: updateSearchItems,
+      })
+      return;
+    }
     await UpdateReportFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
@@ -131,6 +140,13 @@ export default function GridSearchProvider({ children }: IProps) {
     setQuery("");
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
+    if(parentType === "form") {
+      onFetchRecords?.({
+        advance_filters: updatedSearchItems,
+      })
+      return;
+    }
+
     await UpdateReportFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
