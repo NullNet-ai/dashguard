@@ -50,8 +50,8 @@ export default function FormSelect({
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
-  const isReadOnly = fieldConfig.readonly;
+  const isDisabled = fieldConfig.disabled ?? false
+  const isReadOnly = formRenderProps.field.disabled || fieldConfig.readonly;
 
   const [referenceElement, setReferenceElement] = useState<any>(null);
   const [popperElement, setPopperElement] = useState<any>(null);
@@ -141,7 +141,7 @@ export default function FormSelect({
         }}
         disabled={isDisabled}
       >
-        <div className="relative mt-2">
+        <div className="relative mt-2 ">
           {SelectIcon && (
             <SelectIcon
               className={cn(
@@ -163,7 +163,6 @@ export default function FormSelect({
               {
                 "outline-destructive": error,
                 "border-destructive": error,
-                "cursor-not-allowed": isDisabled,
                 "cursor-text": isReadOnly,
               },
             )}
@@ -185,7 +184,6 @@ export default function FormSelect({
             className={cn(
               "inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none",
               {
-                "cursor-not-allowed": isDisabled,
                 "cursor-default": isReadOnly,
               },
             )}
