@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
@@ -29,7 +30,7 @@ const FormServerFetch = async () => {
     "created_time",
     "updated_time",
   ];
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.contact.formFilterGrid({
     entity: "contact",

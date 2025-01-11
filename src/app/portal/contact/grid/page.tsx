@@ -51,7 +51,7 @@ export default async function Page({
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
+      defaultAdvanceFilter={defaultAdvanceFilter || []}
       advanceFilter={filters?.reportFilters || []}
       sorting={sorting || []}
       pagination={pagination}

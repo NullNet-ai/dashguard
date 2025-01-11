@@ -20,7 +20,7 @@ export async function UpdateReportFilter({
     filters,
   });
 
-  urlSearchParams.set("advanceFilterItem", `${filterItemId}`);
+  urlSearchParams.set("advanceFilterItem", filterItemId || "");
 
   redirect(`${pathName}?${urlSearchParams}`);
 }
