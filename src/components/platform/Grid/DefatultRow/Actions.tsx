@@ -35,7 +35,13 @@ export const handleEdit = async ({ row, config }: DefaultRowActions) => {
 
 export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.editCustomComponent) {
-    return <>{config?.editCustomComponent?.({ row, config })}</>;
+    const result = config?.editCustomComponent({
+      row,
+      config,
+    });
+    if (result) {
+      return <>{result}</>;
+    }
   }
   if (viewMode === "card") {
     return (
@@ -84,7 +90,13 @@ const handleDelete = async ({ row, config }: DefaultRowActions) => {
 
 export function DeleteComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.deleteCustomComponent) {
-    return <>{config?.deleteCustomComponent({ row, config })}</>;
+    const result = config?.deleteCustomComponent({
+      row,
+      config,
+    });
+    if (result) {
+      return <>{result}</>;
+    }
   }
 
   if (viewMode === "card") {
@@ -199,7 +211,13 @@ const handleRestore = async ({ row, config }: DefaultRowActions) => {
 
 export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
   if (config?.restoreCustomComponent) {
-    return <>{config?.restoreCustomComponent({ row, config })}</>;
+    const result = config?.restoreCustomComponent({
+      row,
+      config,
+    });
+    if (result) {
+      return <>{result}</>;
+    }
   }
   if (viewMode === "card") {
     return (
