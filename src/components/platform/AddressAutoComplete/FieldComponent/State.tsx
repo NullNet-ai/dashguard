@@ -4,7 +4,7 @@ import States from "../states.json";
 import { useMemo } from "react";
 import { FormField } from "~/components/ui/form";
 
-export default function StateName({ form, formKey }: IFieldComponentProps) {
+export default function StateName({ form,fieldConfig, formKey }: IFieldComponentProps) {
   const address_values_country = form.getValues("details.country");
   const state_list = useMemo(() => {
     return (
@@ -28,7 +28,8 @@ export default function StateName({ form, formKey }: IFieldComponentProps) {
               formKey={formKey}
               fieldConfig={{
                 selectSearchable: true,
-                ...formRenderProps?.field,
+                ...fieldConfig,
+              name: formRenderProps.field.name,
                 // required: true,
                 placeholder: "Select State",
                 label: "State",
