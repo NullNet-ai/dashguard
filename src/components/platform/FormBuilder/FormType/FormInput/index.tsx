@@ -49,7 +49,6 @@ export default function FormInput({
   if (isHidden) {
     return null;
   }
-
   return (
     <FormItem>
       <FormLabel required={fieldConfig?.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
@@ -67,9 +66,9 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           {...formRenderProps.field}
-          disabled={fieldConfig.disabled}
+          disabled={fieldConfig.disabled ?? false}
+          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
           onChange={(e) => {
             formRenderProps.field.onChange(e.target.value);
             if(handleSearch){
