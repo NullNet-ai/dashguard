@@ -170,10 +170,10 @@ export default function AppSideBar(config: ISideBarProps) {
                   variant={"ghost"}
                   onClick={handleLogout}
                   data-test-id={"sdnavmenu-ftr-logout-btn"}
-                  className="w-full text-destructive hover:text-destructive hover:bg-secondary"
+                  className={`w-full text-destructive hover:bg-secondary hover:text-destructive ${open ? "justify-start" : "justify-center"}`}
                 >
-                  <ArrowLeftStartOnRectangleIcon className="mr-2 h-5 w-5 " />
-                  <b>Log out</b>
+                  <ArrowLeftStartOnRectangleIcon className={`mr-2 ms-1 h-5 w-5 `}/>
+                  {open && <p>Logout</p>}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
                   {open ? (
