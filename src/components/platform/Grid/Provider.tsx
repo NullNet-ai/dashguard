@@ -45,6 +45,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
+  parentType?: "grid" | "form" | "field";
 }
 
 export default function GridProvider({
@@ -59,6 +60,7 @@ export default function GridProvider({
   advanceFilter = [],
   defaultAdvanceFilter = [],
   pagination,
+  parentType
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -418,6 +420,7 @@ export default function GridProvider({
         actionRow?.current,
       ],
     },
+    parentType,
     data,
     table,
     selectTableRow,

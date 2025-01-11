@@ -71,6 +71,7 @@ export interface IConfigGrid {
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
+  onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
   is_warning_archive?: boolean;
   searchConfig?: {
@@ -104,6 +105,7 @@ export interface IState {
   showBulkActionConfirmationModal: boolean;
   pagination?: IPagination;
   defaultAdvanceFilter?: ISearchItem[];
+  parentType?: "grid" | "form" | "field";
 }
 
 export interface IAction {
