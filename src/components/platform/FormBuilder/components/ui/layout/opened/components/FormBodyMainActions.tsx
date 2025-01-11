@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { EyeSlashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Loader2 } from "lucide-react";
 import React, { useContext } from "react";
 import { Button as Button2 } from "@headlessui/react";
@@ -119,7 +119,7 @@ const FormBodyMainActions = ({
                   }
                   className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
                 >
-                  <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                  {!formProps?.isOpenSearch  ?  <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" /> : <EyeSlashIcon className="h-4 w-4 text-primary transition-none" />}
                   <span className="text-primary">
                     {!formProps?.isOpenSearch ? "Show Grid" : "Hide Grid"}
                   </span>
