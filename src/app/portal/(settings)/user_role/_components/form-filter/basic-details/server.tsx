@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import RoleDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -28,7 +29,7 @@ const FormServerFetch = async () => {
     "updated_by",
   ];
 
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,

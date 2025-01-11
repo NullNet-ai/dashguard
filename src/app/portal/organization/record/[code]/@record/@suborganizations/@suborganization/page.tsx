@@ -32,7 +32,7 @@ export default async function RecordTabContainer({
     "updated_by",
   ];
 
-  const { sorting, pagination, filters } = await getGridCacheData();
+  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
   const response = await api.organization.getByCode({
     code: identifier!,
     pluck_fields: ["id", "name"],
@@ -66,7 +66,7 @@ export default async function RecordTabContainer({
       data={items}
       defaultSorting={defaultSorting}
       defaultAdvanceFilter={defaultAdvanceFilter}
-      advanceFilter={filters.reportFilters || []}
+      advanceFilter={filters?.reportFilters || []}
       sorting={sorting || []}
       pagination={pagination}
       config={{

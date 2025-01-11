@@ -1,30 +1,17 @@
 "use client";
 
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  StarIcon,
+  ChevronLeftIcon
 } from "@heroicons/react/24/outline";
-import { Badge } from "~/components/ui/badge";
-import { Button as Button2 } from "@headlessui/react";
-import { StatusPoint } from "~/components/ui/StatusPoint";
-import MenuButton from "../MenuButton";
 import { capitalize } from "lodash";
+import { ChevronDownIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
-import { RecordContext } from "../../Provider";
-import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
-import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
+import { Badge } from "~/components/ui/badge";
+import { StatusPoint } from "~/components/ui/StatusPoint";
 import useScreenType from "~/hooks/use-screen-type";
-import { SmartContext } from "~/components/ui/smart-component";
-import { ChevronDownIcon, EllipsisVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import RecursiveMenuItem from "../Menu/RecursiveMenuItem";
-import { DEFAULT_MENU_OPTION_CONFIG } from "../../constants";
+import { RecordContext } from "../../Provider";
+import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
+import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
 const ellipsis = (str: string, length: number) => {
   const sanitizedStr = str?.replace(/["']/g, ""); // Remove both single and double quotes
   return sanitizedStr?.length > length

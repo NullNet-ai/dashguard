@@ -1,13 +1,4 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  type IConfigGrid,
-  type IAction,
-  type ICreateContext,
-  type IState,
-  type IPropsGrid,
-  type TActionType,
-} from "./types";
 import {
   type ColumnDef,
   type ColumnSizingState,
@@ -18,24 +9,34 @@ import {
   type Updater,
   useReactTable,
 } from "@tanstack/react-table";
+import React, { useEffect, useRef, useState } from "react";
 import { Checkbox } from "~/components/ui/checkbox";
 import { useToast } from "~/context/ToastProvider";
-
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { useMediaQuery } from "react-responsive";
-import { Create } from "./Action/Create";
-import { Button } from "~/components/ui/button";
-import { Button as Button2 } from "@headlessui/react";
-import { FileIcon } from "lucide-react";
-
 import {
-  EditComponent,
-  ArchiveComponent,
-  DeleteComponent,
-  RestoreComponent,
-} from "./DefatultRow/Actions";
+  type IAction,
+  type IConfigGrid,
+  type ICreateContext,
+  type IPropsGrid,
+  type IState,
+  type TActionType,
+} from "./types";
+
+import { Button as Button2 } from "@headlessui/react";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import { FileIcon } from "lucide-react";
+import { useMediaQuery } from "react-responsive";
+import { Button } from "~/components/ui/button";
+import { Create } from "./Action/Create";
+import StatusCell from "~/components/ui/status-cell";
 import { BulkArchive } from "./Action/BulkArchive";
 import { UpdateReportSorting } from "./Action/UpdateReportSorting";
+import {
+  ArchiveComponent,
+  DeleteComponent,
+  EditComponent,
+  RestoreComponent,
+} from "./DefatultRow/Actions";
+import { ISearchItem } from "./Search/types";
 import { constructSearchableFields } from "./utils/constructSearchableFields";
 
 export const GridContext = React.createContext<ICreateContext>({});
@@ -97,29 +98,41 @@ export default function GridProvider({
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
-  const [playgroundGridIsShowCreateButton, setPlaygroundGridIsShowCreateButton] = useState<string | null>(null);
-  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] = useState<string | null>(null);
-
+  const [
+    playgroundGridIsShowCreateButton,
+    setPlaygroundGridIsShowCreateButton,
+  ] = useState<string | null>(null);
+  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
+    useState<string | null>(null);
 
   // use effects
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const createButton = localStorage.getItem("playground_grid_is_show_create_button");
-      const rowAction = localStorage.getItem("playground_grid_is_show_row_action");
-      
+      const createButton = localStorage.getItem(
+        "playground_grid_is_show_create_button",
+      );
+      const rowAction = localStorage.getItem(
+        "playground_grid_is_show_row_action",
+      );
+
       setPlaygroundGridIsShowCreateButton(createButton);
       setPlaygroundGridIsShowRowAction(rowAction);
     }
   }, []);
-
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
-    hideCreateButton: playgroundGridIsShowCreateButton != null ? !(playgroundGridIsShowCreateButton == "true") : false,
-    disableDefaultAction: playgroundGridIsShowRowAction != null ? !(playgroundGridIsShowRowAction == "true") : false,
+    hideCreateButton:
+      playgroundGridIsShowCreateButton != null
+        ? !(playgroundGridIsShowCreateButton == "true")
+        : false,
+    disableDefaultAction:
+      playgroundGridIsShowRowAction != null
+        ? !(playgroundGridIsShowRowAction == "true")
+        : false,
     searchableFields:
       constructSearchableFields({
         columns: _propsConfig?.columns ?? [],
@@ -294,39 +307,62 @@ export default function GridProvider({
   const actionTypeColumnCondition = (
     actionsType: TActionType,
     viewMode: string,
+    defaultAdvanceFilter: ISearchItem[],
   ) => {
+    const isDefaultFilterArchived = defaultAdvanceFilter?.find(
+      (filter) =>
+        filter?.field === "status" && filter?.values?.[0] === "Archived",
+    );
+    const stateIndex = config?.columns?.findIndex(
+      (column) => column.header === "State",
+    );
+    let columns = config?.columns || [];
+
+    if (isDefaultFilterArchived) {
+      const newColumn = {
+        header: "Previous State",
+        accessorKey: "previous_status",
+        cell: ({ row }) => {
+          const value = row?.original?.previous_status;
+          return <StatusCell value={value} />;
+        },
+      } as ColumnDef<any>;
+
+      if (stateIndex !== -1) {
+        columns = [
+          ...columns.slice(0, stateIndex + 1),
+          newColumn,
+          ...columns.slice(stateIndex + 1),
+        ];
+      } else {
+        columns = [...columns, newColumn];
+      }
+    }
+
     // Exclude selectTableRow and actionRow if view mode is 'card'
     if (viewMode === "card") {
-      return [...config?.columns];
+      return [...columns];
     }
 
     switch (actionsType) {
       case "single-select":
         if (config?.disableDefaultAction) {
-          return [...config?.columns];
+          return [...columns];
         }
 
-        return [...config?.columns, actionRow?.current];
+        return [...columns, actionRow?.current];
       case "default":
         if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...config?.columns];
+          return [selectTableRow?.current, ...columns];
         }
-        return [
-          selectTableRow?.current,
-          ...config?.columns,
-          actionRow?.current,
-        ];
+        return [selectTableRow?.current, ...columns, actionRow?.current];
 
       default:
         if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...config?.columns];
+          return [selectTableRow?.current, ...columns];
         }
 
-        return [
-          selectTableRow?.current,
-          ...config?.columns,
-          actionRow?.current,
-        ];
+        return [selectTableRow?.current, ...columns, actionRow?.current];
     }
   };
 
@@ -337,6 +373,7 @@ export default function GridProvider({
     columns: actionTypeColumnCondition(
       config?.actionType || "default",
       viewMode,
+      defaultAdvanceFilter,
     ),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
