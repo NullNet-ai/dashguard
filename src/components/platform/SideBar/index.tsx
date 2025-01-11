@@ -33,6 +33,7 @@ import { Separator } from "~/components/ui/separator";
 import useWindowSize from "~/hooks/use-resize";
 import { testIDFormatter } from "~/utils/formatter";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
 
 export default function AppSideBar(config: ISideBarProps) {
   const {
@@ -65,7 +66,7 @@ export default function AppSideBar(config: ISideBarProps) {
           {!isMobile && (
             <SidebarTrigger
               Icon={TriggerOpenCloseSidebarComponent}
-              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? 'lg:hidden' : "lg:flex"}`}
+              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? "lg:hidden" : "lg:flex"}`}
               data-test-id="sdnavmenu-trigger-btn"
             />
           )}
@@ -140,28 +141,40 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-
-                    {open ? (
-                       <div className={cn(`${open ? 'w-full opacity-100' : 'w-0 opacity-0 h-0'} `)}>
-
-                       <SidebarMenuButton
-                         data-test-id={"sdnavmenu-ftr-btn"}
-                         size={"lg"}
-                         className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                       >
-                         {footerComponent}
-                         <ChevronUpDownIcon className="ml-auto size-4" />
-                       </SidebarMenuButton>
-                     </div>
-                    ) : (
-                      <div className={cn(`cursor-pointer ${!open ? 'w-full opacity-100' : 'opacity-0 w-0 h-0'}`)}>
-                    
+                  {open ? (
+                    <div
+                      className={cn(
+                        `${open ? "w-full opacity-100" : "h-0 w-0 opacity-0"} `,
+                      )}
+                    >
+                      <SidebarMenuButton
+                        data-test-id={"sdnavmenu-ftr-btn"}
+                        size={"lg"}
+                        className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                      >
+                        {footerComponent}
+                        <ChevronUpDownIcon className="ml-auto size-4" />
+                      </SidebarMenuButton>
+                    </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        `cursor-pointer ${!open ? "w-full opacity-100" : "h-0 w-0 opacity-0"}`,
+                      )}
+                    >
                       {footerComponent}
                     </div>
-                    )}
-                 
+                  )}
                 </DropdownMenuTrigger>
-
+                <Button
+                  variant={"ghost"}
+                  onClick={handleLogout}
+                  data-test-id={"sdnavmenu-ftr-logout-btn"}
+                  className="w-full text-destructive hover:text-destructive hover:bg-secondary"
+                >
+                  <ArrowLeftStartOnRectangleIcon className="mr-2 h-5 w-5 " />
+                  <b>Log out</b>
+                </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
                   {open ? (
                     <span>
@@ -172,34 +185,33 @@ export default function AppSideBar(config: ISideBarProps) {
                     <span>&copy;{currentYear}</span>
                   )}
                 </footer>
-                <DropdownMenuContent
-                  className="z-[100] w-[50px]  mx-auto max-w-[90%] md:max-w-[500px]  rounded-lg"
-                  side={width <= 640 ? "top" : "right"}
-                  align="end"
-                  sideOffset={4}
-                >
-                  {footerMenuConfig?.map((item, index) => {
-                    if (item?.separator) {
-                      return <DropdownMenuSeparator key={index} />;
-                    }
-                    // @ts-expect-error - TS doesn't know about dynamic imports
-                    const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
-                    return (
-                      <DropdownMenuItem key={index} data-test-id={testIDFormatter("sdnavmenu-ftr-" + item.title?.split("").join(""))}>
-                        <ICON className="mr-2 h-5 w-5" />
-                        {item.title}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    data-test-id={"sdnavmenu-ftr-logout-btn"}
-                    className="text-destructive"
+                {footerMenuConfig && (
+                  <DropdownMenuContent
+                    className="z-[100] mx-auto w-[50px] max-w-[90%] rounded-lg md:max-w-[500px]"
+                    side={width <= 640 ? "top" : "right"}
+                    align="end"
+                    sideOffset={4}
                   >
-                    <ArrowLeftStartOnRectangleIcon className="mr-2 h-5 w-5 text-destructive" />
-                    <b>Log out</b>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                    {footerMenuConfig?.map((item, index) => {
+                      if (item?.separator) {
+                        return <DropdownMenuSeparator key={index} />;
+                      }
+                      // @ts-expect-error - TS doesn't know about dynamic imports
+                      const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
+                      return (
+                        <DropdownMenuItem
+                          key={index}
+                          data-test-id={testIDFormatter(
+                            "sdnavmenu-ftr-" + item.title?.split("").join(""),
+                          )}
+                        >
+                          <ICON className="mr-2 h-5 w-5" />
+                          {item.title}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
