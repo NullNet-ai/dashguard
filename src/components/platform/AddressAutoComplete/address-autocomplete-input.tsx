@@ -84,9 +84,8 @@ export function AddressAutoCompleteInput(props: CommonProps) {
       name="inp-addr"
       render={(formRenderProps) => {
         const is_readonly =
-          (fieldConfig?.readonly) ?? false;
-        const is_disabled =
-          formRenderProps.field.disabled || fieldConfig?.disabled;
+          (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false;
+        const is_disabled = fieldConfig?.disabled;
         const is_disabled_or_readonly = is_disabled || is_readonly;
         return (
           <FormItem>
@@ -105,7 +104,8 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                   />
 
                   <ComboboxInput
-                    {...formRenderProps?.field}
+                    {...formRenderProps.field}
+                    {...fieldConfig}
                     ref={inputRef}
                     disabled={is_disabled}
                     readOnly={is_readonly}
