@@ -2,7 +2,7 @@ import FormInput from "../../FormBuilder/FormType/FormInput";
 import { type IFieldComponentProps } from "./type";
 import { FormField, FormMessage } from "~/components/ui/form";
 
-export default function PostalName({ form,formKey }: IFieldComponentProps) {
+export default function PostalName({ form,fieldConfig,formKey }: IFieldComponentProps) {
   const address_values = form.getValues("details.postal_code");
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   form.setValue(`details.postal_code`, e.target.value);
@@ -19,7 +19,7 @@ export default function PostalName({ form,formKey }: IFieldComponentProps) {
             data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name }
               formKey={formKey}
               fieldConfig={{
-                ...formRenderProps?.field,
+                ...fieldConfig,
                 required: true,
                 placeholder: "Enter ZIP Code",
                 label: "ZIP Code",
