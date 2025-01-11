@@ -67,7 +67,7 @@ export const FormBuilder = (props: IPropsForms) => {
   const [isOpenSearch, setIsOpenSearch] = useState(false);
 
 
-  const { setFormHostInitialView } = features ?? {}
+  const { formHostInitialView } = features ?? {}
   //* EFFECTS
 
   //* Effect to listen to form submission
@@ -108,11 +108,17 @@ export const FormBuilder = (props: IPropsForms) => {
   //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
-      setDisplayType("form");
-      return;
+      const parsingResult = formSchema.safeParseAsync(defaultValues);
+      parsingResult.then((result) => {
+        if (result.success) {
+          form.control._disableForm(result.success);
+          setDisplayType("form");
+        }
+      });
+    } else {
+      setFormGridSelected(filterGridConfig?.selectedRecords);
+      setDisplayType("selected");
     }
-    setFormGridSelected(filterGridConfig?.selectedRecords);
-    setDisplayType("selected");
   }, [filterGridConfig?.selectedRecords]);
 
   //* Effect to listen to event emitter
@@ -157,10 +163,10 @@ export const FormBuilder = (props: IPropsForms) => {
   }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]); 
   
   useEffect(() => {
-    if(setFormHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
+    if(formHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
       disableForm();
     }
-  }, [setFormHostInitialView, myParent, enableFormRegisterToParent]);
+  }, [formHostInitialView, myParent, enableFormRegisterToParent]);
   
   //* HANDLERS
 
