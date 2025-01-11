@@ -9,6 +9,8 @@ import { useSidebar } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
 import Skeleton from "../../../../Grid/Skeleton";
 import { IFilterGridConfig, IGridData } from "../../../types/global/interfaces";
+import { fetchRecords } from "./actions";
+import { ulid } from "ulid";
 
 export default function FormFilterGrid({
   config,
@@ -34,7 +36,6 @@ export default function FormFilterGrid({
     hideSearch,
     selectedRecords: _form_filter_selected_record,
     searchConfig,
-    fetchGridRecords,
   } = config;
   const { state } = useContext(WizardContext);
   const { open } = useSidebar();
@@ -42,43 +43,67 @@ export default function FormFilterGrid({
   const [gridData, setGridData] = useState<IGridData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = useCallback(async ({
-    current,
-    limit,
-    pluck,
-    advance_filters = [],
-  }: {
-    current: number;
-    limit: number;
-    pluck: string[];
-    advance_filters: any[];
-  }) => {
-    setIsLoading(true);
-    try {
-      if (fetchGridRecords) {
-        const result = await fetchGridRecords({ current, limit, pluck, advance_filters });
-        setGridData({
-          ...result,
-          advance_filters
-        }); 
-      } else {
-        const [_, list] = api.grid.items.useSuspenseQuery({
-          entity: filter_entity!,
-          current,
-          limit: limit || 100,
-          pluck,
-        });
-        const { isLoading: list_is_loading, data } = list ?? {};
-        setIsLoading(list_is_loading);
-        const { items, totalCount } = data ?? {};
-        setGridData({ items: items || [], totalCount: totalCount || 0 });
+  const fetchData = useCallback(
+    async ({
+      current,
+      limit,
+      pluck,
+      advance_filters = [],
+    }: {
+      current: number;
+      limit: number;
+      pluck: string[];
+      advance_filters: any[];
+    }) => {
+      setIsLoading(true);
+      try {
+        if (!!Object.keys(searchConfig ?? {}).length) {
+          const {
+            router = "grid",
+            resolver = "items",
+            query_params,
+          } = searchConfig ?? {};
+
+          const updateSearchItems = query_params?.default_advance_filters.length
+            ? [
+                ...query_params?.default_advance_filters,
+                ...(query_params?.default_advance_filters.length
+                  ? [{ id: ulid(), type: "operator", operator: "and" }]
+                  : []),
+                ...advance_filters,
+              ]
+            : advance_filters;
+
+          const result = await fetchRecords({
+            advance_filters: updateSearchItems,
+            pluck_fields: query_params?.pluck || [],
+            router,
+            resolver,
+          });
+          setGridData({
+            ...result,
+            advance_filters,
+          });
+        } else {
+          const [_, list] = api.grid.items.useSuspenseQuery({
+            entity: filter_entity!,
+            current,
+            limit: limit || 100,
+            pluck,
+          });
+          const { isLoading: list_is_loading, data } = list ?? {};
+          setIsLoading(list_is_loading);
+          const { items, totalCount } = data ?? {};
+          setGridData({ items: items || [], totalCount: totalCount || 0 });
+        }
+      } catch (error) {
+        console.error("Error fetching grid data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching grid data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  },[fetchGridRecords]);
+    },
+    [filter_entity, searchConfig],
+  );
 
   useEffect(() => {
     fetchData({
@@ -87,8 +112,8 @@ export default function FormFilterGrid({
       pluck: pluck || [],
       advance_filters: [],
     });
-  }, [fetchGridRecords]);
-    
+  }, []);
+
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
     .filter(Boolean) as string[];

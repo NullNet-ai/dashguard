@@ -226,7 +226,6 @@ interface IFilterGridConfig {
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
 
-  fetchGridRecords?: (args: any) => Promise<any>;
   onRemoveSelectedRecords?: ({
     rows,
     main_entity_id,

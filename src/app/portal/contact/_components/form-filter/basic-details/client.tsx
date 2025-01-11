@@ -12,6 +12,35 @@ import { type IFormProps } from "../types";
 import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
 import { closeCurrentInnerClassTab, fetchRecords, saveContactDetails, selectRecord } from "./actions";
 import SelectedView from "./components/SelectedView";
+import { ulid } from "ulid";
+
+const defaultAdvanceFilter = [
+  {
+    entity: "contacts",
+    operator: "equal",
+    type: "criteria",
+    field: "status",
+    id: ulid(),
+    label: "Status",
+    values: ["Active"],
+    default: true,
+  },
+  {
+    operator: "or",
+    type: "operator",
+    default: true,
+  },
+  {
+    entity: "contacts",
+    operator: "equal",
+    type: "criteria",
+    field: "status",
+    id: ulid(),
+    label: "Status",
+    values: ["Draft"],
+    default: true,
+  }
+];
 
 export default function ContactDetails({
   params,
@@ -95,32 +124,6 @@ export default function ContactDetails({
     }
   };
 
-  const handleFetchGridRecords = async({
-    advance_filters,
-  }: {
-    advance_filters: {
-      type: string;
-      operator: string;
-      values?: string[] | undefined;
-      entity?: string | undefined;
-      field?: string | undefined;
-    }[];
-  }) => {
-    try{
-      const {items, totalCount} = await fetchRecords({
-        advance_filters,
-        pluck_fields : params.pluck_fields!,
-      });
-
-      return {
-        items,
-        totalCount,
-      }
-    } catch (error) {
-      toast.error("Failed to fetch grid records");
-    }
-  }
-
   return (
     // <MultipleFormBuilder
     <FormBuilder
@@ -145,6 +148,7 @@ export default function ContactDetails({
           query_params: {
             entity: "contact",
             pluck: params?.pluck_fields,
+            default_advance_filters : defaultAdvanceFilter
           },
         },
         // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data
@@ -156,15 +160,6 @@ export default function ContactDetails({
         //     onSubmitFormGrid(data, { action_type: "Paste" }),
         //   )();
         // },
-        fetchGridRecords: async ({ current, limit, pluck, advance_filters }) => {
-          const { items, totalCount } = await handleFetchGridRecords({
-            advance_filters,
-          }) as { items: Record<string, string>[]; totalCount: number; };
-          return {
-            items,
-            totalCount,
-          };
-        },
 
         onSelectRecords : async ({ filter_entity, main_entity_id, rows }) => {
           const response = (await handleSelectRecord({
