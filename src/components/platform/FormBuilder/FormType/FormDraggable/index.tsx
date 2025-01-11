@@ -1,14 +1,20 @@
-// import { DevTool } from "@hookform/devtools";
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  useEffect,
+  useRef,
+} from "react";
 import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
-import { useEffect } from "react";
+// import { DevTool } from "@hookform/devtools";
 import {
-  useFieldArray,
+  Controller,
   type ControllerFieldState,
   type ControllerRenderProps,
+  useFieldArray,
   type UseFormReturn,
 } from "react-hook-form";
-import { Button } from "~/components/ui/button";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
@@ -16,18 +22,33 @@ import {
   FormMessage,
   useFormField,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Button } from "~/components/ui/button";
 import {
   Sortable,
   SortableDragHandle,
   SortableItem,
 } from "~/components/ui/sortable";
-import { cn } from "~/lib/utils";
 import {
   type ICheckboxOptions,
   type IRadioOptions,
   type ISelectOptions,
   type IField,
 } from "../../types/global/interfaces";
+import { cn } from "~/lib/utils";
+import AutosizeTextarea from "~/components/ui/autosize-textarea";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { Checkbox } from "~/components/ui/checkbox";
+import moment from "moment";
+import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
+import TimePicker from "~/components/ui/time-picker";
 
 interface IProps {
   fieldConfig: IField;
@@ -39,23 +60,6 @@ interface IProps {
   value?: string;
   formKey: string;
 }
-
-import moment from "moment";
-import { useRef, type ChangeEvent, type ChangeEventHandler } from "react";
-import { Controller, type UseFormRegister } from "react-hook-form";
-import AutosizeTextarea from "~/components/ui/autosize-textarea";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Input } from "~/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
-import TimePicker from "~/components/ui/time-picker";
 
 const FormDraggable = ({
   fieldConfig,
@@ -69,10 +73,10 @@ const FormDraggable = ({
   });
   const { register } = form;
   const { error }: any = useFormField();
-
   const timePickerRef = useRef(null);
 
   const isDisabled = formRenderProps.field.disabled || fieldConfig.disabled;
+
   const isHidden = fieldConfig.hidden;
   const defValue = fieldConfig.draggableConfig?.reduce(
     (acc: Record<string, any>, config) => {
@@ -93,8 +97,6 @@ const FormDraggable = ({
     return null;
   }
 
-  const fieldLength = fieldConfig?.draggableConfig?.length || 1;
-
   const renderFormControl = (
     field: IField & {
       selectOptions?: ISelectOptions[];
@@ -104,6 +106,7 @@ const FormDraggable = ({
     index: number,
   ) => {
     const ISDisabled = isDisabled || field.disabled;
+
     const commonProps = {
       disabled: ISDisabled,
       className: "h-10 px-3",
@@ -139,6 +142,7 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
+
       case "number-input":
         const handleNumberInputChange: ChangeEventHandler<HTMLInputElement> = (
           e,
@@ -664,6 +668,7 @@ const FormDraggable = ({
     }
   };
 
+  const fieldLength = fieldConfig?.draggableConfig?.length || 1;
   return (
     <FormItem>
       <FormLabel required={fieldConfig?.required}>
@@ -677,58 +682,55 @@ const FormDraggable = ({
           <div className="flex w-full flex-col gap-2">
             {fields.map((field, index) => (
               <SortableItem key={field.id} value={field.id} asChild>
-                <>
-                  <div
-                    className={cn(
-                      `grid items-end gap-2`,
-                      fieldLength === 1
-                        ? "grid-cols-[auto_1fr_auto]"
-                        : fieldLength === 2
-                          ? "grid-cols-[auto_1fr_1fr_auto]"
-                          : "grid-cols-[auto_1fr_1fr_1fr_auto]",
-                    )}
+                <div
+                  className={cn(
+                    `grid items-end gap-2`,
+                    fieldLength === 1
+                      ? "grid-cols-[auto_1fr_auto]"
+                      : fieldLength === 2
+                        ? "grid-cols-[auto_1fr_1fr_auto]"
+                        : "grid-cols-[auto_1fr_1fr_1fr_auto]",
+                  )}
+                >
+                  <SortableDragHandle
+                    variant="ghost"
+                    size="icon"
+                    className="mb-1 size-8 shrink-0 text-muted-foreground"
                   >
-                    <SortableDragHandle
-                      variant="ghost"
+                    <GripVerticalIcon className="size-6" aria-hidden="true" />
+                  </SortableDragHandle>
+                  {fieldConfig.draggableConfig?.map((config) => (
+                    <FormField
+                      key={config?.fields?.id ?? index}
+                      control={form.control}
+                      name={`${formRenderProps.field.name}-${index}-${config?.fields?.name ?? ""}`}
+                      render={() =>
+                        config ? (
+                          (renderFormControl(config.fields, index) ?? <div />)
+                        ) : (
+                          <div />
+                        )
+                      }
+                    />
+                  ))}
+                  {!isDisabled && (
+                    <Button
+                      type="button"
+                      variant="softDestructive"
                       size="icon"
-                      className="mb-1 size-8 shrink-0 text-muted-foreground"
+                      className="mb-1 size-6 shrink-0 rounded-full"
+                      onClick={() => {
+                        if (isDisabled) return;
+                        remove(index);
+                      }}
                     >
-                      <GripVerticalIcon className="size-6" aria-hidden="true" />
-                    </SortableDragHandle>
-                    {fieldConfig.draggableConfig?.map((config) => (
-                      <FormField
-                        key={config?.fields?.id ?? index}
-                        control={form.control}
-                        name={`${formRenderProps.field.name}-${index}-${config?.fields?.name ?? ""}`}
-                        render={() =>
-                          config ? (
-                            (renderFormControl(config.fields, index) ?? <div />)
-                          ) : (
-                            <div />
-                          )
-                        }
+                      <MinusIcon
+                        className="size-4 text-destructive"
+                        aria-hidden="true"
                       />
-                    ))}
-                    {!isDisabled && (
-                      <Button
-                        type="button"
-                        variant="softDestructive"
-                        size="icon"
-                        className="mb-1 size-6 shrink-0 rounded-full"
-                        onClick={() => {
-                          if (isDisabled) return;
-                          remove(index);
-                        }}
-                      >
-                        <MinusIcon
-                          className="size-4 text-destructive"
-                          aria-hidden="true"
-                        />
-                        <span className="sr-only">Remove</span>
-                      </Button>
-                    )}
-                  </div>
-
+                      <span className="sr-only">Remove</span>
+                    </Button>
+                  )}
                   {error?.[index] && (
                     <p
                       id={field?.id}
@@ -746,7 +748,7 @@ const FormDraggable = ({
                       data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
                     />
                   )}
-                </>
+                </div>
               </SortableItem>
             ))}
             {!isDisabled && (
