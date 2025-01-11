@@ -1,4 +1,9 @@
-import React, { ChangeEventHandler, useEffect, useRef } from "react";
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  useEffect,
+  useRef,
+} from "react";
 import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
 // import { DevTool } from "@hookform/devtools";
 import {
@@ -694,7 +699,6 @@ const FormDraggable = ({
                   >
                     <GripVerticalIcon className="size-6" aria-hidden="true" />
                   </SortableDragHandle>
-
                   {fieldConfig.draggableConfig?.map((config) => (
                     <FormField
                       key={config?.fields?.id ?? index}
@@ -709,33 +713,57 @@ const FormDraggable = ({
                       }
                     />
                   ))}
+                  {!isDisabled && (
+                    <Button
+                      type="button"
+                      variant="softDestructive"
+                      size="icon"
+                      className="mb-1 size-6 shrink-0 rounded-full"
+                      onClick={() => {
+                        if (isDisabled) return;
+                        remove(index);
+                      }}
+                    >
+                      <MinusIcon
+                        className="size-4 text-destructive"
+                        aria-hidden="true"
+                      />
+                      <span className="sr-only">Remove</span>
+                    </Button>
+                  )}
+                  {error?.[index] && (
+                    <p
+                      id={field?.id}
+                      className={cn(
+                        "py-1 text-md font-medium text-destructive",
+                      )}
+                      data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}`}
+                    >
+                      {error?.[index]?.[fieldConfig.name]?.message}
+                    </p>
+                  )}
 
-                  <Button
-                    type="button"
-                    variant="softDestructive"
-                    size="icon"
-                    className="mb-1 size-6 shrink-0 rounded-full"
-                    onClick={() => remove(index)}
-                  >
-                    <MinusIcon
-                      className="size-4 text-destructive"
-                      aria-hidden="true"
+                  {(error?.root?.message || error?.message) && (
+                    <FormMessage
+                      data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
                     />
-                    <span className="sr-only">Remove</span>
-                  </Button>
+                  )}
                 </div>
               </SortableItem>
             ))}
-            <Button
-              className="mr-auto ms-7 gap-1 text-md text-primary hover:bg-transparent hover:opacity-70"
-              variant="ghost"
-              onClick={() => {
-                append(defValue);
-              }}
-            >
-              <PlusIcon className="size-5" aria-hidden="true" />
-              Add {fieldConfig.label}
-            </Button>
+            {!isDisabled && (
+              <Button
+                className="mr-auto ms-7 gap-1 text-md text-primary hover:bg-transparent hover:opacity-70"
+                variant="ghost"
+                onClick={() => {
+                  if (isDisabled) return;
+                  append(defValue);
+                }}
+              >
+                <PlusIcon className="size-5" aria-hidden="true" />
+                Add {fieldConfig.label}
+              </Button>
+            )}
           </div>
         </Sortable>
       </FormControl>
