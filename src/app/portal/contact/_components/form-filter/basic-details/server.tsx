@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import BasicDetails from "./client";
-
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";

@@ -7,6 +7,7 @@ import { ISearchItem } from "~/components/platform/Grid/Search/types";
 import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
 import { api } from "~/trpc/server";
 import { defaultSorting } from "../../../grid/_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 const defaultAdvanceFilter = [
   {
@@ -33,9 +34,8 @@ const defaultAdvanceFilter = [
     label: "Status",
     values: ["Draft"],
     default: true,
-  }
+  },
 ] as ISearchItem[];
-
 
 export const saveContactDetails = async (
   data: z.infer<typeof ContactPhoneEmailSchema>,
@@ -90,7 +90,7 @@ export const fetchRecords = async ({
   advance_filters = [],
   pluck_fields,
 }: {
-  pluck_fields: string[],
+  pluck_fields: string[];
   advance_filters: {
     type: string;
     operator: string;
@@ -99,14 +99,16 @@ export const fetchRecords = async ({
     field?: string | undefined;
   }[];
 }) => {
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: 0,
     limit: 100,
     entity: "contact",
     pluck: pluck_fields,
     sorting: sorting?.length ? sorting : defaultSorting,
-    advance_filters: advance_filters?.length ? advance_filters : defaultAdvanceFilter,
+    advance_filters: advance_filters?.length
+      ? advance_filters
+      : defaultAdvanceFilter,
   });
   return {
     items,

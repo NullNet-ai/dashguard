@@ -3,6 +3,7 @@ import gridColumns from "./_config/columns";
 import Grid from "~/components/platform/Grid/Server";
 import { headers } from "next/headers";
 import { defaultSorting } from "./_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 export default async function UserRoleGridPage({
   searchParams = {},
@@ -28,7 +29,7 @@ export default async function UserRoleGridPage({
     "updated_by",
   ];
 
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,

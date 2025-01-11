@@ -29,7 +29,10 @@ export const handleEdit = async ({ row, config }: DefaultRowActions) => {
     entity: config?.entity,
     // id: row.original?.id,
     code: row.original?.code,
-    status: row.original?.status,
+    status:
+      row.original?.status === "Archived"
+        ? (row.original?.previous_status ?? "")
+        : row.original?.status,
   });
 };
 

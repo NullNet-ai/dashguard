@@ -194,7 +194,7 @@ export const contactRouter = createTRPCRouter({
               "country_code",
               "is_primary",
             ],
-            contacts: input.pluck,
+            contacts: [...input.pluck, "previous_status"],
           },
           track_total_records: true,
           advance_filters: [

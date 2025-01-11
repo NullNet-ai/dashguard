@@ -9,6 +9,7 @@ import { defaultSorting } from "./_config/sorting";
 import { customArchive } from "./customArchiveAction";
 import ArchiveDialog from "../_components/controls/ArchiveDialog";
 import ArchiveComponent from "./customDefaultActions/Archive";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 export default async function OrganizationGridPage({
   searchParams = {},
 }: {
@@ -34,7 +35,7 @@ export default async function OrganizationGridPage({
     "updated_by",
   ];
 
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid
     .items({

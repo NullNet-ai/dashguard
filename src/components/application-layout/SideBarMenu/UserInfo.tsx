@@ -19,9 +19,7 @@ const SideUserInfo = ({ user_name, email, initials }: SideInfoProps) => {
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage
-                        src={
-                            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80"
-                        }
+                    // insert image src here for the user
                         alt={user_name}
                     />
                     <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
