@@ -13,8 +13,12 @@ import { SetTab } from "~/lib/grid-default-tab";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
-import { gridCacheId } from "~/lib/grid-cache-id";
+import {
+  IAdvanceFilter,
+  IPagination,
+  ISearchItem,
+} from "~/components/platform/Grid/Search/types";
+import { gridCacheId, TReportDataType } from "~/lib/grid-cache-id";
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -531,20 +535,6 @@ export const gridRouter = createTRPCRouter({
       if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, sorting);
     }),
-  getReportSorting: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
-    if (!cached_id) return;
-    const sorting = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as SortingState;
-    return Array.isArray(sorting) ? sorting : [];
-  }),
   updateReportFilter: privateProcedure
     .input(
       z.object({
@@ -576,34 +566,6 @@ export const gridRouter = createTRPCRouter({
       if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, filters);
     }),
-  getReportFilter: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
-    if (!cached_id) return;
-    const filters = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as ISearchItem[];
-    const reportFilters = Array.isArray(filters) ? filters : [];
-    const advanceFilter = reportFilters.map(
-      ({ entity, operator, type, field, values }) => ({
-        entity,
-        operator,
-        type,
-        field,
-        values,
-      }),
-    ) as ISearchItem[];
-
-    return {
-      advanceFilter: advanceFilter,
-      reportFilters,
-    };
-  }),
   updateReportPagination: privateProcedure
     .input(
       z.object({
@@ -626,16 +588,54 @@ export const gridRouter = createTRPCRouter({
         limit_per_page,
       });
     }),
-  getReportPagination: privateProcedure.query(async ({ ctx }) => {
+  getReportCachedData: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
     if (!["grid", "record"].includes(application ?? "") || !mainEntity)
       return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
-    if (!cached_id) return;
-    const pagination = await ctx.redisClient.getCachedData(cached_id);
-    return pagination;
+    const cacheTypes: TReportDataType[] = [
+      "filter",
+      "sorting",
+      "pagination",
+      "grid_tabs",
+    ];
+    const cacheIds = await Promise.all(
+      cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
+    );
+
+    const [filters, sorting, pagination, gridTabs] = await Promise.all(
+      cacheIds
+        .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
+        .filter(Boolean),
+    );
+  
+    const gridReports = Array.isArray(gridTabs) ? gridTabs : [];
+    const cachedFilters: ISearchItem[] = Array.isArray(filters) ? filters : [];
+    const reportSorting: SortingState = Array.isArray(sorting) ? sorting : [];
+    const reportPagination: IPagination =
+      typeof pagination === "object" ? pagination : {};
+    const defaultFilters = gridReports?.find((report) => report.current)?.default_filter ?? []
+    const reportFilters = cachedFilters?.length ? cachedFilters : defaultFilters as ISearchItem[];
+    const advanceFilter = reportFilters?.map(
+      ({ entity, operator, type, field, values }) => ({
+        entity,
+        operator,
+        type,
+        field,
+        values,
+      }),
+    ) as IAdvanceFilter[];
+
+
+    return {
+      filters: {
+        advanceFilter,
+        reportFilters,
+        defaultFilters  
+      },
+      sorting: reportSorting,
+      pagination: reportPagination,
+    };
   }),
 });

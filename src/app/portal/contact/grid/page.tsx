@@ -33,18 +33,17 @@ export default async function Page({
     "updated_by",
   ];
 
-  const { sorting, pagination, filters } = await getGridCacheData();
+  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
 
-  // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
   const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(pagination.current_page ?? "0"),
-    limit: +(pagination.limit_per_page ?? "100"),
+    current: +(pagination?.current_page ?? "0"),
+    limit: +(pagination?.limit_per_page ?? "100"),
     entity: "contact",
     pluck: _pluck,
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
-      : defaultAdvanceFilter,
+      : [],
   });
 
   return (
@@ -52,8 +51,8 @@ export default async function Page({
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter}
-      advanceFilter={filters.reportFilters || []}
+      defaultAdvanceFilter={filters?.defaultFilters || []}
+      advanceFilter={filters?.reportFilters || []}
       sorting={sorting || []}
       pagination={pagination}
       config={{
