@@ -1,18 +1,17 @@
 "use client";
 
 import { EllipsisVertical } from "lucide-react";
+import { useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { getDefaultMenuOptionConfig } from "../../constants";
 import RecursiveMenuItem from "./RecursiveMenuItem";
-import { DEFAULT_MENU_OPTION_CONFIG } from "../../constants";
-import { ReactNode, useMemo } from "react";
 
-
-interface IMemoizedRecordData {
+export interface IMemoizedRecordData {
   entityName?: string;
   status: string;
   recordId: string;
@@ -29,24 +28,22 @@ interface IDefaultSummaryMenuOptionsProps {
   menuOptionConfig?: IMenuOptionConfig[];
 }
 
-
 export default function DefaultSummaryMenuOptions({
   title,
   memoizedRecordData,
   menuOptionConfig,
 }: IDefaultSummaryMenuOptionsProps) {
-
   const { recordId, entityName } = memoizedRecordData;
 
   const memoizedMenuOptionConfig = useMemo(() => {
     return [
-      ...DEFAULT_MENU_OPTION_CONFIG,
-      ...(menuOptionConfig || [])
-    ]
+      ...getDefaultMenuOptionConfig(memoizedRecordData),
+      ...(menuOptionConfig || []),
+    ];
   }, [menuOptionConfig]);
-  
+
   return (
-    <DropdownMenu> 
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <EllipsisVertical className={`h-4 w-4`} aria-hidden="true" />
@@ -54,10 +51,10 @@ export default function DefaultSummaryMenuOptions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {title && <DropdownMenuLabel>{title}</DropdownMenuLabel>}
-        <RecursiveMenuItem 
-          recordId={recordId} 
-          entityName={entityName!} 
-          menuOptionConfig={memoizedMenuOptionConfig} 
+        <RecursiveMenuItem
+          recordId={recordId}
+          entityName={entityName!}
+          menuOptionConfig={memoizedMenuOptionConfig}
         />
       </DropdownMenuContent>
     </DropdownMenu>
