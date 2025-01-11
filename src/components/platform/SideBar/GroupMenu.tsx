@@ -39,6 +39,8 @@ export default function GroupMenu({ groups }: IProps) {
   // State to track favorites for each submenu item
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
   const refs = useRef<any[]>([]);
+  const hasSelected = groups?.some((group) => group?.items?.some((item) => item.isActive));
+  const [openMenu, setOpenMenu] = useState(hasSelected);
 
   const stype = useScreenType();
 
@@ -66,13 +68,15 @@ export default function GroupMenu({ groups }: IProps) {
 
     }, -1);
 
-
     if (activeIndex !== -1 && refs.current[activeIndex]) {
-      refs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => {
+        refs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 1000);
+   
     }
-  }, [groups]);
 
-  
+  }, [groups ]);
+
   return (
     <SidebarGroup 
       className={`${!open ? 'px-0' : ''}`}
@@ -85,15 +89,23 @@ export default function GroupMenu({ groups }: IProps) {
         return (
           <SidebarMenu key={index}>
             <Collapsible
+              open={openMenu}
               key={item.title}
               asChild
               defaultOpen={item.isActive}
               className="group/collapsible"
+
             >
               <SidebarMenuItem
                 className={`${!open ? 'w-full flex items-center justify-center flex-col' : ''}`}
+           
               >
-                <CollapsibleTrigger asChild>
+                <CollapsibleTrigger 
+                       onClick={() => {
+                        setOpenMenu(!openMenu);
+                      }}
+                      asChild
+                >
                   <SidebarMenuButton
                     tooltip={item.title}
                     className={
