@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, useEffect, useRef } from "react";
 import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
-import { DevTool } from "@hookform/devtools";
+// import { DevTool } from "@hookform/devtools";
 import {
   Controller,
   type ControllerFieldState,
@@ -739,7 +739,7 @@ const FormDraggable = ({
           </div>
         </Sortable>
       </FormControl>
-      <DevTool control={form.control} />
+      {/* <DevTool control={form.control} /> */}
     </FormItem>
   );
 };
