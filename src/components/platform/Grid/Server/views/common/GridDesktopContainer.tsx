@@ -40,7 +40,9 @@ const GridDesktopContainer = () => {
   }
 
   return (
-    <Table>
+    <Table
+      style={{width: state?.table?.getCenterTotalSize()}}
+    >
       <TableHeader>
         <MyTableHead />
       </TableHeader>
