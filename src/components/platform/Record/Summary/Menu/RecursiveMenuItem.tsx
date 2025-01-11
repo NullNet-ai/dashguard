@@ -8,6 +8,7 @@ import { Fragment } from "react";
 import { DEFAULT_MENU_OPTION_CONFIG } from "../../constants";
 import MenuItem from "./MenuItem";
 import { formatFormTestID } from "~/lib/utils";
+import { ChevronRight } from "lucide-react";
 
 interface IRecursiveMenuItemProps {
   recordId: string;
@@ -20,6 +21,7 @@ export default function RecursiveMenuItem({
   recordId,
   entityName,
 }: IRecursiveMenuItemProps) {
+
   // ! All iterations should wrap the MenuItem component with a Fragment
   return menuOptionConfig.map((option) => (
     <Fragment key={recordId}>
@@ -35,11 +37,11 @@ export default function RecursiveMenuItem({
                   formatFormTestID(option.label)
                 }
               >
-                {option.label}
+               <ChevronRight  className="size-5 text-default/40"/> {option.label}
               </MenuItem>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
+          <DropdownMenuContent align="start" side="right"  >
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}

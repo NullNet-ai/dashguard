@@ -1,7 +1,7 @@
-import { api } from "~/trpc/server";
 import { headers } from "next/headers";
+import { api } from "~/trpc/server";
 import BasicDetails from "./client";
-import { defaultSorting } from "../../../grid/_config/sorting";
+
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
@@ -28,55 +28,27 @@ const FormServerFetch = async () => {
     "updated_date",
     "created_time",
     "updated_time",
+    "created_by",
+    "updated_by",
   ];
-  const sorting = await api.grid.getReportSorting();
-
-  const { items = [], totalCount } = await api.contact.formFilterGrid({
-    entity: "contact",
-    pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
-    current: 0,
-    limit: 100,
-  });
 
   const default_values = record_data;
 
   const contact_id = default_values?.id;
-
-  // TODO: create query that joins related contact phone and email
-  // !TEMPORARY: join contact phone and email
-  // let joinedContactDetails = (record_data.emails.length && record_data.emails.reduce(
-  //   (acc: Array<Record<string, any>>, curr, index) => {
-  //     return [
-  //       ...acc,
-  //       {
-  //         ...record_data,
-  //         // refactor: do not enclose in array
-  //         emails: [curr],
-  //         // refactor: do not enclose in array
-  //         phones: [record_data.phones[index]],
-  //       },
-  //     ];
-  //   },
-  //   [],
-  // )) || [{ emails: [], phones: [] }];
 
   return (
     <div className="space-y-2">
       <BasicDetails
         defaultValues={{
           ...default_values,
-          // for multi-select form filter
-          // form_builder_fields: joinedContactDetails,
         }}
         params={{
           id: contact_id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
-          pluck_fields,
+          pluck_fields : _pluck,
         }}
         selectedRecords={contact_id ? [default_values] : []}
-        grid_data={{ items, totalCount }}
       />
     </div>
   );
