@@ -1,36 +1,37 @@
 "use client";
 
 import { id } from "date-fns/locale";
-import { uniqueId } from "lodash";
+import { set, uniqueId } from "lodash";
 import React, { useEffect, useState } from "react";
+import { cn } from "~/lib/utils";
 
 const custom_data = [
   {
-    id: "1",
+    id: "11111",
     name: "John Doe",
     age: 20,
     hidden: false,
   },
   {
-    id: "2",
+    id: "22222",
     name: "Doe John",
     age: 30,
     hidden: false,
   },
   {
-    id: "3",
+    id: "333333",
     name: "Jane Curz",
     age: 25,
     hidden: false,
   },
   {
-    id: "4",
+    id: "444444",
     name: "Curzssd Jane",
     age: 35,
     hidden: false,
   },
   {
-    id: "6",
+    id: "666666",
     name: "sdsds2323d Jane",
     age: 35,
     hidden: false,
@@ -39,8 +40,7 @@ const custom_data = [
 
 const DynamicList = () => {
   const [data, setData] = useState<typeof custom_data>(custom_data);
-  const [visible, setVisible] = useState<typeof custom_data>([]);
-  const [hidden, setHidden] = useState<typeof custom_data>([]);
+
 
   const conref = React.useRef<HTMLDivElement>(null);
   const inner = React.useRef<HTMLDivElement>(null);
@@ -61,17 +61,6 @@ const DynamicList = () => {
                       }
                       return item;
                   });
-  
-                  setHidden((prev) => {
-                      const hiddenItems = newData.filter((item) => item.hidden);
-                      return hiddenItems
-                  });
-  
-                  setVisible((prev) => {
-                      const visibleItems = newData.filter((item) => !item.hidden);
-                      return visibleItems;
-                  });
-  
                   return newData;
               });
         }else {
@@ -80,25 +69,37 @@ const DynamicList = () => {
       }
   }
 
+
+
   useEffect(() => {
     calc();
-  }, [data]);
+  }, []);
 
 
 
   const randomNumbers = () => {
-    return Math.floor(Math.random() * 101230).toString();
+    return Math.floor(Math.random() * 1023231230).toString();
   }
 
   const handleAdd = () => {
     setData([...data, { id:  randomNumbers(), name: "New Item", age: 40, hidden: false }]);
-    // if(hidden.length > 0) {
-    //     setHidden([...hidden, { id: uniqueId(), name: "New Item", age: 40 }]);
-    // }
-    // else {
-    //     setVisible([...visible, { id: uniqueId(), name: "New Item", age: 40 }]);
-    // }
+    setTimeout(() => {
+        calc();
+    }, 100);
   };
+
+  const removeData = (item: typeof custom_data[0]) => {
+    const filtered = data.filter((i) => i.id !== item.id).map((i) => {
+        return {
+            ...i,
+            hidden: false
+        }
+    });
+    setData(filtered);    
+    setTimeout(() => {
+        calc();
+    }, 100);
+  }
 
   return (
     <div className="flex justify-between p-4">
@@ -109,25 +110,22 @@ const DynamicList = () => {
           className="flex h-[100px] w-[400px] overflow-hidden border border-red-200 p-2"
           ref={conref}
         >
-          <div className="flex flex-row gap-2 self-start text-sm" ref={inner}>
+          <div className="flex flex-row gap-2 self-start text-sm bg-red-200" ref={inner}>
             {data?.map((item, index) => {
-                if(item.hidden) {
-                    return null;
-                }
+          
               return (
                 <div
                   key={item.id}
-                  className="whitespace-nowrap rounded-md border border-gray-200 p-1"
+                  className={cn(`whitespace-nowrap rounded-md border border-gray-200 p-1`,
+                    { 'opacity-0': item.hidden }
+                  )}
+
                 >
-                  {item.name}
+                  {item.name} {item.id}
                   <button
                     className="ml-2"
                     onClick={() => {
-                        setData((prev) =>
-                            prev.filter((i) => i.id !== item.id),
-                        );
-                        calc();
-                 
+                        removeData(item);
                     }}
                   >
                     X
@@ -146,7 +144,10 @@ const DynamicList = () => {
           Add Item
         </button>
         <div className="flex flex-col gap-2 self-start text-sm">
-          {hidden?.map((item, index) => {
+          {data?.map((item, index) => {
+            if (!item.hidden) {
+              return null;
+            }
             return (
               <div
                 key={item.id}
@@ -156,10 +157,9 @@ const DynamicList = () => {
                 <button
                   className="ml-2"
                   onClick={() => {
-                    setHidden((prev) =>
-                      prev.filter((i) => i.id !== item.id),
+                    setData((prev) =>
+                      prev.filter((i) => i.id !== item.id)
                     );
-                    setVisible((prev) => [...prev, item]);
                   }}
                 >
                   X
@@ -177,18 +177,7 @@ const DynamicList = () => {
               Data ({data.length})
               <pre>{JSON.stringify(data, null, 2)}</pre>
             </div>
-          </div>
-          <div>
-            <div>
-              visible ({visible.length})
-              <pre>{JSON.stringify(visible, null, 2)}</pre>
-            </div>
-          </div>
-          <div>
-            <div>
-              hidden ({hidden.length})
-              <pre>{JSON.stringify(hidden, null, 2)}</pre>
-            </div>
+        
           </div>
         </div>
       </div>
