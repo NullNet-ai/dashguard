@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import { X } from "lucide-react";
 import { ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
+import { IAdvanceFilters } from "@dna-platform/common-orm";
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
@@ -50,7 +51,7 @@ export default function Search() {
         "created_time",
         "updated_time",
       ],
-      advance_filters: advanceFilterItems,
+      advance_filters: advanceFilterItems as IAdvanceFilters[],
       ...(searchConfig?.query_params ?? {}),
     },
     {

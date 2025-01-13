@@ -2,6 +2,8 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
 import { IAdvanceFilters } from "@dna-platform/common-orm";
+import { TRPCError } from "@trpc/server";
+import Entities from "~/auto-generated/entities";
 
 export const recordRouter = createTRPCRouter({
   getById: privateProcedure
@@ -213,6 +215,53 @@ export const recordRouter = createTRPCRouter({
             params: {
               status: "Archived",
             },
+          },
+        })
+        .execute();
+    }),
+  updateRecordState: privateProcedure
+    .input(
+      z.object({
+        identifier: z.string().min(1),
+        entity: z.string().refine(
+          (value) => {
+            return Entities.includes(value);
+          },
+          {
+            message:
+              "Invalid entity name. It must be one of the DnaOrm models.",
+          },
+        ),
+        status: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const record = await ctx.dnaClient
+        .findByCode(input.identifier, {
+          entity: input.entity,
+          token: ctx.token.value,
+          query: {
+            pluck: ["id"],
+          },
+        })
+        .execute();
+      const record_id = record?.data?.[0]?.id;
+      if (!record_id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Record not found",
+        });
+      }
+
+      await ctx.dnaClient
+        .update(record_id, {
+          entity: input.entity,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              status: input.status,
+            },
+            pluck: ["id", "code"],
           },
         })
         .execute();
