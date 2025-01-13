@@ -5,10 +5,7 @@ import { SearchGridContext } from "./Provider";
 import { cn, formatAndCapitalize } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
-import { testIDFormatter } from "~/utils/formatter";
-import { v } from "node_modules/@faker-js/faker/dist/airline-BnpeTvY9";
-// import DropResult from "./DropResult";
+import { X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -189,10 +186,6 @@ const SortingList = () => {
                                 className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
                                 onClick={() => {
                                   actions?.handleRemoveSearchItem(item);
-                                  // setTimeout(() => {
-                                  //   const items = calc();
-                                  //   setData(items);
-                                  // }, 100);
                                 }}
                               >
                                 <X className="h-3 w-3" />
@@ -217,7 +210,7 @@ const SortingList = () => {
                 `${data?.length && data.some(item=> item.hidden ) ? "absolute mt-[2px]" : ""}`
               )}
               onClick={() => {
-                //
+                // platform dev will add this
               }}
             >
               Clear All
