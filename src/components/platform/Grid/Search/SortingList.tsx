@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { testIDFormatter } from "~/utils/formatter";
 import { v } from "node_modules/@faker-js/faker/dist/airline-BnpeTvY9";
-import DropResult from "./DropResult";
+// import DropResult from "./DropResult";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,71 +17,76 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 const SortingList = () => {
-  const containerRef = useRef<any>(null);
-  const innerRef = useRef<any>(null);
+  const conref = useRef<any>(null);
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(SearchGridContext);
 
-  const { searchItems = [] } = state ?? {};
+  const { searchItems = []  } = state ?? {};
   const selectedSearchItems = searchItems?.filter((item) => !item?.default);
+  const defaultSearchItems = selectedSearchItems?.map((item) => ({ ...item, hidden: false })).filter(itm => itm.type !== "operator");
 
-  const [visibleItems, setVisibleItems] = useState<any[]>(selectedSearchItems);
+  const [data, setData] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+
   useEffect(() => {
-    const calculateWidths = () => {
-      const containerWidth = containerRef.current?.offsetWidth || 0;
-      const inner  = innerRef.current?.offsetWidth || 0;
-      let totalWidth = 130;
-      const visible: string[] = [];
-
-      visibleItems.forEach((item, index) => {
-        const itemWidth = itemsRef.current[index]?.offsetWidth || 0;
-        if (totalWidth + itemWidth <= containerWidth) {
-          visible.push(item);
+    const calc = (items?: any[]) => {
+      const itemss: any[] = [];
+      const newData = items || defaultSearchItems?.filter((item) => item.type !== "operator");
+  
+      const clearWidth = 65 + 63 + 61; // clear width, more width, and search by
+      let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth;
+      const containerWidth = conref.current?.offsetWidth || 0;
+  
+      for (let index = 0; index < newData.length; index++) {
+        if (itemsRef.current[index]?.offsetWidth) {
+          totalWidth += itemsRef.current[index].offsetWidth || 0;
+          if (totalWidth > containerWidth) {
+            itemss?.push({
+              ...newData[index],
+              hidden: true,
+            });
+          } else {
+            itemss?.push({
+              ...newData[index],
+              hidden: false,
+            });
+          }
         }
-        totalWidth += itemWidth;
-      });
-
-      setVisibleItems(visible);
-    };
-    const timeout = setTimeout(() => {
-      calculateWidths();
-    }, 1000);
-
-    const handleResize = () => {
-      calculateWidths();
+      }
+      return itemss;
     };
 
-    if (
-      innerRef.current?.offsetWidth > containerRef.current?.offsetWidth
-    ) {
-        console.log("first", innerRef.current?.offsetWidth , containerRef.current?.offsetWidth)
-      calculateWidths();
+    const onResize = () => { 
+        const items = calc();
+        if (JSON.stringify(items) !== JSON.stringify(data) && !open) {
+          setData(items);
+      } 
     }
+    onResize()
+    window.addEventListener("resize", onResize);
 
-    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(timeout);
-    };
-  }, [searchItems, itemsRef?.current, innerRef.current]);
+      window.removeEventListener("resize", onResize);
+    }
+ 
 
-  const hiddenItems = useMemo(() => {
-    const items = searchItems?.filter(
-      (item) => !visibleItems.some((sel) => sel.id === item.id),
-    );
-
-    return items.filter((item) => item.type !== "operator");
-  }, [visibleItems]);
-
-  console.log("hiddenItems", hiddenItems);
+  }, [defaultSearchItems, open])
+  
+  const lastHiddenIndexLeftPos = useMemo(() => {
+    const lastIndex = data?.findIndex((item) => item.hidden);
+    if (lastIndex === -1) {
+      return null;
+    }
+    return itemsRef.current[lastIndex - 1]?.offsetLeft + itemsRef.current[lastIndex - 1]?.offsetWidth + 5;
+  }  , [data, defaultSearchItems, itemsRef.current]); 
 
   return (
-    <div
-      className="flex flex-col items-center gap-2 md:flex-row"
-      ref={containerRef}
+    <>
+      <div
+      className="container-ref flex flex-col items-center gap-2 md:flex-row overflow-hidden relative"
+      ref={conref}
     >
-      <div className="flex flex-row items-center gap-1" ref={innerRef}>
+      <div className="flex flex-row items-center">
         <span
           className={cn(
             `whitespace-nowrap text-xs text-black`,
@@ -90,18 +95,20 @@ const SortingList = () => {
         >
           Search By:{" "}
         </span>
-        {selectedSearchItems.length > 0 && (
-          <div className="flex flex-nowrap py-1">
-            {searchItems?.map((item, index) => {
-              if (item.type === "operator" || index === 0) {
-                return null;
-              }
+        {defaultSearchItems.length ? (
+          <div className="flex flex-nowrap py-1 ">
+            {defaultSearchItems?.map((item, index) => {
+              const isHidden = data?.[index]?.hidden;
               return (
                 <Badge
                   key={item.id}
                   variant="secondary"
-                  className="m-1 flex items-center gap-1 whitespace-nowrap"
-                  ref={(el: any) => (itemsRef.current[index] = el)}
+                  className={cn(`item-ref m-1 flex items-center gap-1 whitespace-nowrap`,   { "opacity-0": isHidden },)}
+                  ref={(el) => {
+                    if (el) {
+                      itemsRef.current[index] = el;
+                    }
+                  }}
                 >
                   {item.type === "criteria"
                     ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
@@ -114,6 +121,7 @@ const SortingList = () => {
                       key={`${item.id}-remove`}
                       className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
                       onClick={() => {
+                        if(isHidden) return
                         actions?.handleRemoveSearchItem(item);
                       }}
                     >
@@ -123,8 +131,12 @@ const SortingList = () => {
                 </Badge>
               );
             })}
-            {hiddenItems?.length ? (
-              <div className="py-1">
+            {data?.length && data.some(item=> item.hidden ) &&  (
+              <div className="py-1 absolute max-w-[63px]"
+                style={{
+                  left: lastHiddenIndexLeftPos,
+                }}
+              >
                 <DropdownMenu
                   open={open}
                   onOpenChange={(isOpen) => {
@@ -146,12 +158,18 @@ const SortingList = () => {
                         //
                       }}
                     >
-                      More ({hiddenItems?.length})
+                      More ({data.filter(d=> d.hidden)?.length})
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" side="bottom">
-                    <div className="flex flex-col gap-1">
-                    {hiddenItems?.map((item, index) => {
+                    <div className="flex flex-col gap-1 gap-y-2 py-1">
+                    {data?.map((item, index) => {
+                      if (!item.hidden) {
+                        return null;
+                      }
+                      if (item.type === "operator" || index === 0) {
+                        return null;
+                      }
                       return (
                           <Badge
                             key={item.id}
@@ -171,6 +189,10 @@ const SortingList = () => {
                                 className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
                                 onClick={() => {
                                   actions?.handleRemoveSearchItem(item);
+                                  // setTimeout(() => {
+                                  //   const items = calc();
+                                  //   setData(items);
+                                  // }, 100);
                                 }}
                               >
                                 <X className="h-3 w-3" />
@@ -183,12 +205,17 @@ const SortingList = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            ) : null}
+            ) }
 
             <Button
               name="resetSortButton"
               variant={"link"}
-              className="h-[30px] text-default/60 underline hover:no-underline"
+              style={{
+                left:lastHiddenIndexLeftPos ? lastHiddenIndexLeftPos + 63 : 0,
+              }}
+              className={cn(`h-[30px] text-default/60 underline hover:no-underline`,
+                `${data?.length && data.some(item=> item.hidden ) ? "absolute mt-[2px]" : ""}`
+              )}
               onClick={() => {
                 //
               }}
@@ -196,16 +223,10 @@ const SortingList = () => {
               Clear All
             </Button>
           </div>
-        )}
-        {/* {defaultSearchItems?.map((item) => (
-        <Badge key={item.id} variant="primary" className="m-2 mx-1">
-          {item.type === "criteria"
-            ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value || item?.values?.[0]}`
-            : item?.operator}
-        </Badge>
-      ))} */}
+        ) : null}
       </div>
     </div>
+    </>
   );
 };
 
