@@ -111,7 +111,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     readOnly={is_readonly}
                     data-test-id={formKey + "-" + formRenderProps?.field.name}
                     autoComplete="off"
-                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border focus:border-primary focus:ring-primary sm:text-sm"
+                    className="relative h-10 w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border focus:border-primary focus:ring-primary sm:text-sm disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300"
                     placeholder="Search..."
                     onFocus={open}
                     onChange={(event) => {
