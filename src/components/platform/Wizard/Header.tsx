@@ -72,6 +72,8 @@ export default function Header() {
     );
   }, [currentStep, stepsNavigation]);
 
+  const customizedButton = state?.callbackHandlers?.customizeWizardButtonSave;
+
   return (
     <>
       <div className="flex h-12 w-full flex-row items-center justify-between rounded px-2 py-1 text-foreground sm:items-center">
@@ -151,30 +153,42 @@ export default function Header() {
                   saveContinueLoading || saveCloseLoading || saveNewLoading
                 }
               >
-                <SaveIcon className="h-4 w-4" />
-                <span>Save & Continue</span>
+                {customizedButton?.icon ? (
+                  customizedButton?.icon
+                ) : (
+                  <SaveIcon className="h-4 w-4" />
+                )}
+                <span>{customizedButton?.label || "Save & Continue"}</span>
               </Button>
-              <ButtonWithDropdown
-                entity={entityName}
-                buttonClassName="rounded-l-none"
-                buttonVariant={"default"}
-                dropdownOptions={[
-                  {
-                    label: "Save & Close",
-                    onClick: handleSaveAndClose!,
-                    loading: saveCloseLoading,
-                  },
-                  {
-                    label: "Save & New",
-                    onClick: handleSaveAndNew!,
-                    loading: saveNewLoading,
-                  },
-                ]}
-                disabled={
-                  saveContinueLoading || saveCloseLoading || saveNewLoading
-                }
-                loading={saveContinueLoading} // Pass the loading state for the main button
-              />
+              {!!customizedButton?.disableDropdown ? (
+                <></>
+              ) : (
+                <ButtonWithDropdown
+                  entity={entityName}
+                  buttonClassName="rounded-l-none"
+                  buttonVariant={"default"}
+                  dropdownOptions={[
+                    {
+                      label:
+                        customizedButton?.dropdownOptions?.[0]?.label ||
+                        "Save & Close",
+                      onClick: handleSaveAndClose!,
+                      loading: saveCloseLoading,
+                    },
+                    {
+                      label:
+                        customizedButton?.dropdownOptions?.[1]?.label ||
+                        "Save & New",
+                      onClick: handleSaveAndNew!,
+                      loading: saveNewLoading,
+                    },
+                  ]}
+                  disabled={
+                    saveContinueLoading || saveCloseLoading || saveNewLoading
+                  }
+                  loading={saveContinueLoading} // Pass the loading state for the main button
+                />
+              )}
             </div>
           ) : (
             <>

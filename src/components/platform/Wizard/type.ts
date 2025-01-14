@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 export type IValidationType = "required" | "date" | "unique";
 export interface IConfigValidationWizard {
   key: string;
@@ -22,6 +24,26 @@ export interface IConfigWizard {
   saveCloseLoading?: boolean;
   formSave?: Record<string, string>;
   stepValidation?: Record<string, IConfigValidationWizard[]>;
+}
+export interface ICallbackHandler {
+  onClickWizardSave?: (args: {
+    /** 
+     * action_type is just an identifier to determine which action is being performed
+     */
+    action_type: "save_new" | "save_continue" | "save_close";
+    /**
+     * next() will continue to the default next step
+     */
+    next: () => Promise<void>;
+  }) => Promise<void>;
+  customizeWizardButtonSave?: {
+    label?: string;
+    icon?: ReactElement;
+    disableDropdown?: boolean;
+    dropdownOptions?: Array<{
+      label: string;
+    }>;
+  };
 }
 
 export type NumberWords =
@@ -82,6 +104,7 @@ export interface IState extends IConfigWizard {
   traverseSteps?: Record<string, "Stepped">;
   isSummaryOpen?: boolean;
   stepsNavigation?: TStepsNavigationButtons;
+  callbackHandlers?: ICallbackHandler;
 }
 
 export interface IAction {
@@ -99,6 +122,7 @@ export interface IAction {
   handleSkip: () => Promise<void> | void;
   setFormSave: (formSave: Record<string, string>) => void;
   setSavedStep: (step: number) => void;
+  setCallback: (callbackHandler: ICallbackHandler) => void;
 }
 
 export interface ICreateContext {
