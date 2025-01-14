@@ -402,7 +402,7 @@ SidebarRail.displayName = "SidebarRail";
 
 const SidebarInset = React.forwardRef<HTMLDivElement, SidebarInsetProps>(({ className, application_name, ...props }, ref) => {
 
-  const mt = application_name === 'record' ? 'lg:mt-[5.8rem]' : 'lg:mt-[4.9rem]';
+  const mt = application_name === 'record' ? 'lg:mt-[4.4rem]' : 'lg:mt-[4.9rem]';
 
   return (
     <div
