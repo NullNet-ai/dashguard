@@ -464,7 +464,7 @@ const MultipleSelector = React.forwardRef<
           className={cn(
             "min-h-10 rounded-md border border-gray-300 text-sm",
             {
-              "px-3 py-1": selected.length !== 0,
+              "px-2 py-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
             },
             className,
@@ -481,7 +481,7 @@ const MultipleSelector = React.forwardRef<
                   key={option.value}
                   className={cn(
                     "data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground",
-                    "max-h-8 min-h-8 data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
+                    "max-h-6 min-h-6 data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
                     badgeClassName,
                   )}
                   data-fixed={option.fixed}
@@ -540,7 +540,7 @@ const MultipleSelector = React.forwardRef<
                 "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
                 {
                   "w-full": hidePlaceholderWhenSelected,
-                  "px-3 py-2": selected.length === 0,
+                  "px-2 py-2": selected.length === 0,
                   "ml-1": selected.length !== 0,
                 },
                 inputProps?.className,
@@ -553,7 +553,7 @@ const MultipleSelector = React.forwardRef<
                 onChange?.(selected.filter((s) => s.fixed));
               }}
               className={cn(
-                "absolute right-0 top-[25%] h-6 w-6 p-0",
+                "absolute right-0  h-5 w-5 p-0",
                 (hideClearAllButton ||
                   disabled ||
                   selected.length < 1 ||

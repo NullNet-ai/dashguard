@@ -125,7 +125,7 @@ export default function GridCardView() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-4 gap-y-2 text-sm">
                 {visibleCells.map((cell, cellIndex) => {
                   // Skip id and status as they're already shown above
                   if (cell.column.id === "id" || cell.column.id === "status")

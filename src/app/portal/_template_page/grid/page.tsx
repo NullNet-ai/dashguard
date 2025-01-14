@@ -3,6 +3,7 @@ import gridColumns from "./_config/columns";
 import Grid from "~/components/platform/Grid/Server";
 import { headers } from "next/headers";
 import { defaultSorting } from "./_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 export default async function Page({
   searchParams = {},
@@ -12,7 +13,7 @@ export default async function Page({
     perPage?: string;
   };
 }) {
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity] = pathname.split("/");

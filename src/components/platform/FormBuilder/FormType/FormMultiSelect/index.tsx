@@ -58,13 +58,13 @@ export default function FormMultiSelect({
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"
-              : "border border-input outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
+              : "border border-input outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring py-0 flex items-center"
           }
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
             "data-test-id": `${formKey}-inp-${fieldConfig.name}`,
             "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`,
-            className: `flex w-full rounded-md border bg-background px-4 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
+            className: `flex w-full rounded-md border bg-background px-2 py-0 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
           }}
           onSearch={multiSelectOnSearch?.[fieldConfig.name]}
           loadingIndicator={

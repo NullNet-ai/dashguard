@@ -22,7 +22,7 @@ import { ulid } from "ulid";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { EyeSlashIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { Loader2 } from "lucide-react";
 import SelectedActions from "../../ui/layout/selected/components/SelectedActions";
 import FormFilterOpenedActions from "../../ui/layout/opened/components/FormFilterOpenedActions";
@@ -585,7 +585,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
                                             }
                                             className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
                                           >
-                                            <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                                           
+                                            {!formProps?.isOpenSearch  ?  <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" /> : <EyeSlashIcon className="h-4 w-4 text-primary transition-none" />}
                                             <span className="text-primary">
                                               {!formProps?.isOpenSearch
                                                 ? "Show Grid"

@@ -13,8 +13,13 @@ import { SetTab } from "~/lib/grid-default-tab";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
-import { gridCacheId } from "~/lib/grid-cache-id";
+import { pluralize } from '../../utils/pluralize';
+import {
+  IAdvanceFilter,
+  IPagination,
+  ISearchItem,
+} from "~/components/platform/Grid/Search/types";
+import { gridCacheId, TReportDataType } from "~/lib/grid-cache-id";
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -71,7 +76,7 @@ export const gridRouter = createTRPCRouter({
         current = 1,
         advance_filters: _advance_filters = [],
         entity,
-        pluck_object,
+        pluck_object : _pluck_object,
       } = input; // Default limit = 10 items per page, default current page = 1
       // Calculate the number of items to skip based on the current page
       // Fetch the total count of users
@@ -142,11 +147,17 @@ export const gridRouter = createTRPCRouter({
               },
       };
 
+      const pluck_object = {
+        contacts: ["first_name", "last_name"],
+        [pluralize(input?.entity)]: input.pluck,
+      };
+      
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
+          pluck_object: pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:
@@ -170,13 +181,24 @@ export const gridRouter = createTRPCRouter({
       const { total_count: totalCount = 1, data: items } =
         await query.execute();
 
-      const formatted_items = items?.map((item) => {
-        const { [entity + "s"]: entity_data, ...rest } = item;
-        return {
-          ...entity_data,
-          ...rest,
-        };
-      });
+        const formatted_items = items?.map((item: Record<string, any>) => {
+          const {
+            [pluralize(input?.entity)]: entity_data,
+            created_by,
+            updated_by,
+            ...rest
+          } = item;
+          return {
+            ...entity_data,
+            ...rest,
+            created_by: created_by
+              ? `${created_by.first_name} ${created_by.last_name}`
+              : null,
+            updated_by: updated_by
+              ? `${updated_by.first_name} ${updated_by.last_name}`
+              : null,
+          };
+        });
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
@@ -531,20 +553,6 @@ export const gridRouter = createTRPCRouter({
       if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, sorting);
     }),
-  getReportSorting: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
-    if (!cached_id) return;
-    const sorting = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as SortingState;
-    return Array.isArray(sorting) ? sorting : [];
-  }),
   updateReportFilter: privateProcedure
     .input(
       z.object({
@@ -576,34 +584,6 @@ export const gridRouter = createTRPCRouter({
       if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, filters);
     }),
-  getReportFilter: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
-    if (!cached_id) return;
-    const filters = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as ISearchItem[];
-    const reportFilters = Array.isArray(filters) ? filters : [];
-    const advanceFilter = reportFilters.map(
-      ({ entity, operator, type, field, values }) => ({
-        entity,
-        operator,
-        type,
-        field,
-        values,
-      }),
-    ) as ISearchItem[];
-
-    return {
-      advanceFilter: advanceFilter,
-      reportFilters,
-    };
-  }),
   updateReportPagination: privateProcedure
     .input(
       z.object({
@@ -626,16 +606,95 @@ export const gridRouter = createTRPCRouter({
         limit_per_page,
       });
     }),
-  getReportPagination: privateProcedure.query(async ({ ctx }) => {
+  getReportCachedData: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
     if (!["grid", "record"].includes(application ?? "") || !mainEntity)
       return [];
+    const cacheTypes: TReportDataType[] = [
+      "filter",
+      "sorting",
+      "pagination",
+      "grid_tabs",
+    ];
+    const cacheIds = await Promise.all(
+      cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
+    );
+
+    const [filters, sorting, pagination, gridTabs] = await Promise.all(
+      cacheIds
+        .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
+        .filter(Boolean),
+    );
+
+    const gridReports = Array.isArray(gridTabs) ? gridTabs : [];
+    const cachedFilters: ISearchItem[] = Array.isArray(filters) ? filters : [];
+    const reportSorting: SortingState = Array.isArray(sorting) ? sorting : [];
+    const reportPagination: IPagination =
+      typeof pagination === "object" ? pagination : {};
+    const defaultFilters =
+      gridReports?.find((report) => report.current)?.default_filter ?? [];
+    const reportFilters = cachedFilters?.length
+      ? cachedFilters
+      : (defaultFilters as ISearchItem[]);
+    const advanceFilter = reportFilters?.map(
+      ({ entity, operator, type, field, values }) => ({
+        entity,
+        operator,
+        type,
+        field,
+        values,
+      }),
+    ) as IAdvanceFilter[];
+
+    return {
+      filters: {
+        advanceFilter,
+        reportFilters,
+        defaultFilters,
+      },
+      sorting: reportSorting,
+      pagination: reportPagination,
+    };
+  }),
+  updateGridTabs: privateProcedure
+  .input(
+    z.object({
+      href: z.string(),
+    }),
+  )
+  .mutation(async ({ ctx, input }) => {
+    const headerList = headers();
+    const pathName = headerList.get("x-pathname") || "";
+    const [, , mainEntity, application] = pathName.split("/");
+    if (application !== "grid" || !mainEntity) return [];
     const cached_id =
-      (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+      (await gridCacheId({ context: ctx, type: "grid_tabs" })) ?? "";
     if (!cached_id) return;
-    const pagination = await ctx.redisClient.getCachedData(cached_id);
-    return pagination;
+    const cachedReportTabs = await ctx.redisClient.getCachedData(cached_id);
+    const reportTabs = Array.isArray(cachedReportTabs)
+      ? cachedReportTabs
+      : [];
+    const updatedTabs = reportTabs?.map((tab) => ({
+      ...tab,
+      current: tab.href === input.href,
+    }));
+    await ctx.redisClient.cacheData(cached_id, updatedTabs);
+    return updatedTabs
+  }),
+  getGridTabs: privateProcedure.query(async ({ ctx }) => {
+    const headerList = headers();
+    const pathName = headerList.get("x-pathname") || "";
+    const [, , mainEntity, application] = pathName.split("/");
+    if (application !== "grid" || !mainEntity) return [];
+    const cached_id =
+    (await gridCacheId({ context: ctx, type: "grid_tabs" })) ?? "";
+    if (!cached_id) return;
+    const cachedReportTabs = await ctx.redisClient.getCachedData(cached_id);
+    const reportTabs = Array.isArray(cachedReportTabs)
+      ? cachedReportTabs
+      : [];
+    return reportTabs;
   }),
 });

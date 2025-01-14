@@ -118,7 +118,7 @@ const gridColumns = [
       field: "first_name",
       operator: 'like'
     }
-  },
+  }
 ] as ColumnDef<any>[];
 
 export default gridColumns;

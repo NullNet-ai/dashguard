@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
+import { getGridCacheData } from "~/lib/grid-get-cache-data";
 
 const form_filter_entity = "";
 
@@ -28,7 +29,7 @@ const FormServerFetch = async () => {
     "updated_date",
     "updated_time",
   ];
-  const sorting = await api.grid.getReportSorting();
+  const { sorting } = (await getGridCacheData()) ?? {};
 
   // @ts-expect-error - Fix type later
   const { items = [], totalCount } = await api[main_entity].formFilterGrid({

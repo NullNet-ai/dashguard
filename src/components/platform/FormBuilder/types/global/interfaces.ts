@@ -185,7 +185,7 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
-  setFormHostInitialView?: 'lock' | 'unlock';
+  formHostInitialView?: 'lock' | 'unlock';
   enableFormFilterCreate?: boolean;
 }
 
@@ -208,8 +208,10 @@ interface IFilterGridConfig {
   is_same_entity_id?: boolean;
   statusesIncluded?: string[];
   label?: string;
+  hideSearch?: boolean;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
+  searchConfig? : any;
   onClipboardPaste?: (
     data: Record<string, any>,
     form: any,
@@ -223,6 +225,7 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+
   onRemoveSelectedRecords?: ({
     rows,
     main_entity_id,
@@ -336,6 +339,12 @@ interface IFieldFilterActions {
   ref?: any;
 }
 
+interface IGridData {
+  items: any[];
+  totalCount: number;
+  advance_filters?: any[];
+}
+
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -350,4 +359,5 @@ export type {
   IUserFormField,
   OptionType,
   IFieldFilterActions,
+  IGridData,
 };
