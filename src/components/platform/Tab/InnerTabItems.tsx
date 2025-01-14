@@ -53,7 +53,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const newItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - 57;
-    const showItem = max_width / 106;
+    const showItem = max_width / 88;
 
     return tabs.slice(0, Math.floor(showItem));
   }, [winWidth, tabs, sidebar_width]);
@@ -61,7 +61,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const dropdownItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57;
-    const showItem = max_width / 106;
+    const showItem = max_width / 88;
 
     return tabs.slice(Math.floor(showItem));
   }, [sidebar_width, tabs, winWidth]);
@@ -72,7 +72,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b min-h-[2.3rem] mt-[-4px]")}
+      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px] md:pl-[30px] pl-0 lg:pl-0")}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
@@ -81,7 +81,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
 
           return <div
             key={checkIfUserRole(tab.name) ? "role" : tab.name}
-            className={cn(`group relative flex items-center  h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
+            className={cn(`group relative flex items-center  md:h-[32px] h-[36px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
           >
             <a
               data-test-id={entity + "-apptab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("-").toLowerCase()}

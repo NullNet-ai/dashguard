@@ -9,7 +9,7 @@ type ItemProps = {
 };
 
 const Item = ({ tab }: ItemProps) => {
-  const padding = tab.name === "dashboard" ? "pr-4" : "pr-0";
+  const padding = tab.name === "dashboard" ? "pr-[8px]" : "pr-0";
   const checkIfUserRole = (entity: string) =>
     entity === "user_role" ? true : false;
 
@@ -28,15 +28,15 @@ const Item = ({ tab }: ItemProps) => {
           aria-current={tab.current ? "page" : undefined}
           className={cn(
             tab.current
-              ? "text-primary md:rounded-t-lg md:border-b-0 md:border-l md:border-r md:border-t-2 md:border-t-primary"
+              ? "text-primary rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary"
               : "text-gray-500",
-            "whitespace-nowrap px-4 py-1 text-sm font-medium  max-h-[32px]",
+            "whitespace-nowrap px-[8px] py-1 text-sm font-medium  max-h-[32px]",
             "flex items-center pl-[8px] space-x-2",
             "hover:border-t-primary hover:text-primary relative",
             padding,
           )}
         >
-          {tab.current ? <span className="w-full absolute left-0 bottom-[-1px] bg-white dark:bg-black  h-[1px] z-10"/> : null}
+          {tab.current ? <span className="w-full absolute left-0 bottom-[-4px] md:bottom-[-7px] lg:bottom-[-3px]  bg-white dark:bg-black  h-[3px] md:h-[3px] z-10"/> : null}
           {formatAndCapitalize(checkIfUserRole(tab.name) ? "role" : tab.name)}
           <CloseTab {...tab} />
         </a>
