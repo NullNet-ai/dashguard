@@ -144,13 +144,13 @@ export default function AppSideBar(config: ISideBarProps) {
                   {open ? (
                     <div
                       className={cn(
-                        `${open ? "w-full opacity-100" : "h-0 w-0 opacity-0"} `,
+                        `${open ? "w-full opacity-100 border-b" : "h-0 w-0 opacity-0"} `,
                       )}
                     >
                       <SidebarMenuButton
                         data-test-id={"sdnavmenu-ftr-btn"}
                         size={"lg"}
-                        className="h-20 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        className="p-1 h-12 w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                       >
                         {footerComponent}
                         <ChevronUpDownIcon className="ml-auto size-4" />
@@ -170,7 +170,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   variant={"ghost"}
                   onClick={handleLogout}
                   data-test-id={"sdnavmenu-ftr-logout-btn"}
-                  className={`w-full text-destructive hover:bg-secondary hover:text-destructive ${open ? "justify-start" : "justify-center"}`}
+                  className={`w-full text-destructive hover:bg-secondary hover:text-destructive h-8 ${open ? "justify-start" : "justify-center"}`}
                 >
                   <ArrowLeftStartOnRectangleIcon className={`mr-2 ms-1 h-5 w-5 `}/>
                   {open && <p>Logout</p>}
