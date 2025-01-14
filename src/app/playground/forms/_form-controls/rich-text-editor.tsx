@@ -40,11 +40,6 @@ export default function RichTextEditorDetails({}) {
           formClassName: "w-full",
           headerClassName: "text-lg",
         }}
-        defaultValues={
-          {
-            rich_text_editor:"hehe"
-          }
-        }
         handleSubmit={handleSubmit}
         enableFormRegisterToParent
         formLabel="Rich Text Editor Form Builder"

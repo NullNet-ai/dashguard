@@ -13,6 +13,7 @@ import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-ti
 import { useState } from "react";
 import { type Content } from "@tiptap/react";
 import { IField } from "../../types";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -53,7 +54,9 @@ export default function FormRichTextEditor({
     setContent(newValue);
   }
 
-  form.watch();
+  console.log("FORM", form);
+
+  const {errors:hasError} = form.formState;
   return (
     <FormItem>
       <FormLabel
@@ -63,6 +66,9 @@ export default function FormRichTextEditor({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
+        <div>
+          
+        </div>
         <MinimalTiptapEditor
           {...form.register(fieldConfig?.name)}
           editorProps={{
@@ -75,7 +81,7 @@ export default function FormRichTextEditor({
           throttleDelay={0}
           value={content}
           onChange={handleChange} // Use handleChange to synchronize both states
-          className="w-full"
+          className={cn(`w-full, ${hasError ? 'border-danger' : ''}`)}
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
           placeholder={
