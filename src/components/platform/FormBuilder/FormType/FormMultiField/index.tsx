@@ -155,7 +155,7 @@ const FormMultiField = ({
           append({
             name: option.label,
             fieldType: option.fieldType,
-            index: index
+            optionId: index
           });
         },
       };
@@ -171,10 +171,10 @@ const FormMultiField = ({
         leftIcon={PlusIcon}
         buttonLabel={"Add"}
         dropdownOptions={dropOptions}
+        side="start"
         disabled={
           isDisabled
         }
-        // loading={saveContinueLoading} // Pass the loading state for the main button
       />
       </div>
       <div className="border-t-default-100 border-b border-t border-b-primary !m-0 h-[49px] flex items-center">
@@ -221,7 +221,7 @@ const FormMultiField = ({
                               `${fieldConfig.name}.${index}.fieldType`,
                             ),
                             fieldConfig.multiFieldConfig?.fieldOptions[form.getValues(
-                              `${fieldConfig.name}.${index}.index`,
+                              `${fieldConfig.name}.${index}.optionId`,
                             )]?.options ?? []
                        
                            ,
