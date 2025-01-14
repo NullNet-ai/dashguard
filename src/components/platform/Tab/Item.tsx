@@ -32,17 +32,18 @@ const Item = ({ tab }: ItemProps) => {
               : "text-gray-500",
             "whitespace-nowrap px-4 py-1 text-sm font-medium  max-h-[32px]",
             "flex items-center pl-[8px] space-x-2",
-            "hover:border-t-primary hover:text-primary",
+            "hover:border-t-primary hover:text-primary relative",
             padding,
           )}
         >
+          {tab.current ? <span className="w-full absolute left-0 bottom-[-1px] bg-white dark:bg-black  h-[1px] z-10"/> : null}
           {formatAndCapitalize(checkIfUserRole(tab.name) ? "role" : tab.name)}
           <CloseTab {...tab} />
         </a>
-
+{/* 
         {tab.current && (
           <div className="absolute bottom-[-10px] z-10 h-1 w-full bg-white"></div>
-        )}
+        )} */}
       </div>
     </Fragment>
   );
