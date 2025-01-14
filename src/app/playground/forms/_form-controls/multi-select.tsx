@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/FormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 
 const FormSchema = z.object({
   multi_select_with_options: z
@@ -81,6 +81,25 @@ export default function MultiSelectDetails({}) {
         }}
         fields={[
           {
+            id: "multi_select_single",
+            formType: "multi-select",
+            name: "multi_select_single",
+            label: "Multi Select Single",
+            required: true,
+            isMultiSelectAlphabetical: false,
+            multiSelectMaxSelected: 1,
+            multiSelectOnMaxSelected: () => {
+              toast.error("Only one value can be selected");
+            },
+          },
+          {
+            id: "text",
+            formType: "input",
+            name: "text",
+            label: "Text",
+          },
+
+          {
             id: "single_select_options",
             formType: "select",
             name: "single_select_options",
@@ -94,18 +113,6 @@ export default function MultiSelectDetails({}) {
             name: "multi_select_with_options",
             label: "Multi Select with Options",
             required: true,
-          },
-          {
-            id: "multi_select_single",
-            formType: "multi-select",
-            name: "multi_select_single",
-            label: "Multi Select Single",
-            required: true,
-            isMultiSelectAlphabetical: false,
-            multiSelectMaxSelected: 1,
-            multiSelectOnMaxSelected: () => {
-              toast.error("Only one value can be selected");
-            },
           },
         ]}
       />
