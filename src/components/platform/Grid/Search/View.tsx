@@ -1,21 +1,17 @@
 "use client";
 
+import { useContext } from "react";
 import { Combobox, ComboboxInput, ComboboxOptions } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { useDebounce } from "~/components/ui/multi-select";
-// import RecentSearch from "./RecentSearch";
-import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
 import { GridContext } from "../Provider";
 import SearchResult from "./SearchResult";
-import { cn, formatAndCapitalize } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { X } from "lucide-react";
-import { ISearchItemResult } from "./types";
+import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
-import { IAdvanceFilters } from "@dna-platform/common-orm";
-import Sorting from "../Sorting";
+import { type IAdvanceFilters } from "@dna-platform/common-orm";
+
+
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
@@ -63,11 +59,6 @@ export default function Search() {
   );
 
   const { items } = data ?? {};
-
-  // Filter and log search items to debug any unintended data
-  // const selectedSearchItems = searchItems?.filter((item) => !item?.default);
-  // const defaultSearchItems = searchItems?.filter((item) => item?.default);
-
 
   return (
     <>

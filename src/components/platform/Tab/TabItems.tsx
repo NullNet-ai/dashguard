@@ -33,7 +33,7 @@ const TabItems = ({ items } : TabItemsProps) => {
 
         if (!winWidth) return items;
         const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57;
-        const showItem = max_width / 140
+        const showItem = max_width / 85
 
 
         return items.slice(0,  Math.floor(showItem))
