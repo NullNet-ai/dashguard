@@ -21,7 +21,7 @@ export default function ModeToggle() {
         <TooltipTrigger asChild>
           <Button
             data-test-id="themeSwitcher"
-            className="rounded-full w-8 h-8 bg-background mr-2"
+            className="rounded-full w-6 h-6 bg-background mr-2"
             variant="outline"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
