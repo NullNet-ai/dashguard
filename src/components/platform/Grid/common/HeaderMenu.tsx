@@ -45,7 +45,7 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
     return <></>;
   }
   const formattedFilter = defaultFilter?.reduce((acc, filter, index) => {
-    return `${acc} ${filter?.display_value || filter?.values?.[0]} ${index < defaultFilter.length - 1 ? "or" : ""}`;
+    return `${acc} "${filter?.display_value || filter?.values?.[0]}" ${index < defaultFilter.length - 1 ? "or" : ""}`;
   }, `${header?.column?.columnDef.header} is`);
 
   return (
