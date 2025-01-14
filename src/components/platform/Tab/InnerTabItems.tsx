@@ -53,7 +53,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const newItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - 57;
-    const showItem = max_width / 106;
+    const showItem = max_width / 88;
 
     return tabs.slice(0, Math.floor(showItem));
   }, [winWidth, tabs, sidebar_width]);
@@ -61,7 +61,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const dropdownItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57;
-    const showItem = max_width / 106;
+    const showItem = max_width / 88;
 
     return tabs.slice(Math.floor(showItem));
   }, [sidebar_width, tabs, winWidth]);
@@ -72,7 +72,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b")}
+      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px] md:pl-[30px] pl-0 lg:pl-0")}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
@@ -81,7 +81,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
 
           return <div
             key={checkIfUserRole(tab.name) ? "role" : tab.name}
-            className="group relative flex items-center px-2 py-2 pr-1"
+            className={cn(`group relative flex items-center  md:h-[32px] h-[36px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
           >
             <a
               data-test-id={entity + "-apptab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("-").toLowerCase()}
@@ -89,10 +89,10 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               aria-current={tab.current ? "page" : undefined}
               className={cn(
                 tab.current ? "text-primary" : "text-default-foreground/60",
-                "whitespace-nowrap px-2 text-sm font-medium",
+                "whitespace-nowrap  text-sm font-medium",
                 "flex items-center space-x-2",
                 "hover:border-t-primary hover:text-primary",
-                `${isGrid ? 'pr-2': 'pr-0'}`
+                `${isGrid ? 'px-[8px]': 'pr-0'}`
               )}
             >
               {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}

@@ -8,7 +8,7 @@ const AppContent = ({ children }: any) => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , , application, identifier] = pathname.split("/");
 
-    const mtop = application === 'record' ? 'mt-[116px]' : 'mt-[140px]'
+    const mtop = application === 'record' ? 'mt-[116px]' : 'mt-[120px]'
 
     return (
         <div className={cn(` md:mt-24 lg:mb-0 mb-12  lg:mt-0`, 
