@@ -32,7 +32,7 @@ export default async function Notifications() {
         <div>
           <MenuButton className="flex items-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
             <span className="sr-only">Open Notifcations</span>
-            <BellIcon className="h-7 w-7 text-muted-foreground" />
+            <BellIcon className="h-6 w-6 text-muted-foreground" />
           </MenuButton>
         </div>
 

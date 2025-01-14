@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
+import { cn } from "~/lib/utils";
 
 const fields = {
   "Primary Phone Number": "phone",
@@ -137,7 +138,7 @@ const RecordShellSummary = ({
   return (
     <div>
       {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
+        <div className={cn(`${index !== 0 ? 'pt-[4px]' : 'pt-2'}`)} key={index}>
           <div className="px-5">
             <div className="p-1 text-sm">
               <div>

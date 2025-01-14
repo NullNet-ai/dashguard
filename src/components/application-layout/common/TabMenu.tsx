@@ -22,13 +22,12 @@ const TabMenu  = ({ current, href, tabs, name } : {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm group-hover:opacity-100 opacity-0">
-                    <EllipsisVertical 
-                        className={`h-4 w-4 text-default/60 font-semibold`}
-                        aria-hidden="true"
-                        
-                    />
-                </div>
+            <div className="flex items-center gap-2 w-[18px] px-1 py-1.5 pl-[2px] text-left pr-[2px] text-sm opacity-0 group-hover:opacity-100">
+                <EllipsisVertical
+                    className={`h-4 w-4 font-semibold text-default/60`}
+                    aria-hidden="true"
+                />
+            </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
                 <DropdownMenuItem 
