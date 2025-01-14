@@ -160,9 +160,7 @@ export default function Header() {
                 )}
                 <span>{customizedButton?.label || "Save & Continue"}</span>
               </Button>
-              {!!customizedButton?.disableDropdown ? (
-                <></>
-              ) : (
+              {!!customizedButton?.disableDropdown ? null : (
                 <ButtonWithDropdown
                   entity={entityName}
                   buttonClassName="rounded-l-none"
