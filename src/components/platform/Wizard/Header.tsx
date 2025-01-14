@@ -104,7 +104,7 @@ export default function Header() {
             </CollapsibleContent>
           </Collapsible>
 
-          <div className="p-4 px-2 lg:hidden">
+          <div className="p-4 px-2">
             <span className="text-sm font-bold text-foreground">
               <WizardNavigator />
             </span>
@@ -118,8 +118,9 @@ export default function Header() {
               variant={"outline"}
               loading={prevLoading}
               onClick={handlePrev}
-              size={"sm"}
+              size={"xs"}
               className="gap-1"
+              
             >
               <ChevronLeftIcon
                 className="h-3 w-3 text-slate-400"
