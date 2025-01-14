@@ -1,17 +1,16 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { SearchGridContext } from "./Provider";
-import { cn, formatAndCapitalize } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { X } from "lucide-react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { cn, formatAndCapitalize } from "~/lib/utils"; 
+import { SearchGridContext } from "./Provider";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 
 const SortingList = () => {
   const conref = useRef<any>(null);
