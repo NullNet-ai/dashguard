@@ -30,8 +30,8 @@ const Item = ({ tab }: ItemProps) => {
             tab.current
               ? "text-primary md:rounded-t-lg md:border-b-0 md:border-l md:border-r md:border-t-2 md:border-t-primary"
               : "text-gray-500",
-            "whitespace-nowrap px-4 py-1.5 text-sm font-medium md:pt-2",
-            "flex items-center space-x-2",
+            "whitespace-nowrap px-4 py-1 text-sm font-medium  max-h-[32px]",
+            "flex items-center pl-[8px] space-x-2",
             "hover:border-t-primary hover:text-primary",
             padding,
           )}

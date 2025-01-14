@@ -72,7 +72,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b")}
+      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b min-h-[2.3rem] mt-[-4px]")}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
@@ -81,7 +81,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
 
           return <div
             key={checkIfUserRole(tab.name) ? "role" : tab.name}
-            className="group relative flex items-center px-2 py-2 pr-1"
+            className={cn(`group relative flex items-center  h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
           >
             <a
               data-test-id={entity + "-apptab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("-").toLowerCase()}
@@ -89,10 +89,10 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
               aria-current={tab.current ? "page" : undefined}
               className={cn(
                 tab.current ? "text-primary" : "text-default-foreground/60",
-                "whitespace-nowrap px-2 text-sm font-medium",
+                "whitespace-nowrap  text-sm font-medium",
                 "flex items-center space-x-2",
                 "hover:border-t-primary hover:text-primary",
-                `${isGrid ? 'pr-2': 'pr-0'}`
+                `${isGrid ? 'px-[8px]': 'pr-0'}`
               )}
             >
               {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}
