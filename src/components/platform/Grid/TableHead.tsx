@@ -62,7 +62,7 @@ export default function MyTableHead() {
                       : "justify-between",
                   )}
                 >
-                  <div className="flex flex-row items-center gap-1">
+                  <div className="flex flex-row items-center gap-1 whitespace-nowrap">
                     {cellValue}
                     {/* {!!cellValue &&
                       header.column.id !== "action" &&
