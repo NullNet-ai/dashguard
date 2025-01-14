@@ -14,7 +14,7 @@ const gridColumns = [
     },
   },
   {
-    header: "Code",
+    header: "ID",
     accessorKey: "code",
   },
   {
