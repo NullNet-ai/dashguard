@@ -159,7 +159,7 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6 disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300 min-h-10" ,
+              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6 disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300" ,
               {
                 "outline-destructive": error,
                 "border-destructive": error,

@@ -30,6 +30,7 @@ export default function FormCheckbox({
   form,
   formKey,
 }: IProps) {
+
   // Helper function to handle the checkbox change
   const handleCheckboxChange = (field: ControllerRenderProps<Record<string, any>>, item?: ICheckboxOptions) => {
     // If no item is provided, treat it as a boolean checkbox
@@ -86,7 +87,7 @@ export default function FormCheckbox({
             <FormItem className="flex flex-row items-center space-x-3 space-y-0">
               <FormControl>
                 <Checkbox
-                  disabled={field.disabled}
+                  disabled={fieldConfig.readonly||fieldConfig.disabled||field.disabled}
                   data-test-id={`${formKey}-chk-${fieldConfig?.name}`}
                   checked={isChecked(field)}
                   onCheckedChange={handleCheckboxChange(field)}
@@ -108,15 +109,21 @@ export default function FormCheckbox({
               key={String(item.value)}
               className="flex flex-row items-center space-x-3 space-y-0"
             >
-              <FormControl>
+                <FormControl>
                 <Checkbox
-                  disabled={field.disabled}
+                  disabled={fieldConfig.readonly || fieldConfig.disabled || field.disabled}
                   data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
                   checked={isChecked(field, item)}
                   onCheckedChange={handleCheckboxChange(field, item)}
+                  className={`focus:ring-1 focus:ring-primary focus:ring-offset-1 ${
+                  (fieldConfig.disabled || field.disabled) &&
+                  (!field.value || !isChecked(field, item))
+                    ? 'bg-muted'
+                    : ''
+                  }`}
                   {...form.register(fieldConfig?.name)}
                 />
-              </FormControl>
+                </FormControl>
               <FormLabel
                 className="font-normal disabled:opacity-100"
                 data-test-id={`${formKey}-chk-lbl-${fieldConfig.name}-${index + 1}`}
