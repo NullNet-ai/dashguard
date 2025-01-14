@@ -165,6 +165,7 @@ export default function FormSelect({
                 "border-destructive": error,
                 "cursor-text": isReadOnly,
               },
+              SelectIcon ? "pl-8" : "pl-2",
             )}
             onClick={() => {
               if (isDisabled || isReadOnly) return;
