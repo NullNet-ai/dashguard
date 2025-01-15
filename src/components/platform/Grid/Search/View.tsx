@@ -11,8 +11,6 @@ import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
 import { type IAdvanceFilters } from "@dna-platform/common-orm";
 
-
-
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);

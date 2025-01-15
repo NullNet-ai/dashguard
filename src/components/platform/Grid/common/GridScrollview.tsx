@@ -9,8 +9,9 @@ import { remToPx } from "~/utils/fetcher";
 export const GridScrollView = ({ children, className }: any) => {
   const { open } = useSidebar();
   const { width } = useWindowSize();
-  const _width = open ? width - remToPx(17) : width - remToPx(5.5);
- 
+  const newWidth = width <= 0 ? 1920 : width;
+  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(5.5);
+
   return (
     <div
       className={cn("grid-scroll-view", className)}
