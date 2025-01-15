@@ -1,8 +1,8 @@
 import React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "~/lib/utils";
 import { LoaderCircleIcon } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 const loaderVariants = cva("relative block opacity-[0.65]", {
   variants: {
