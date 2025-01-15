@@ -22,6 +22,7 @@ import {
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
 import { type TimePickerProps } from "~/components/ui/time-picker";
+import { type RawSwitchProps } from "~/components/ui/switch";
 
 interface OptionType {
   label: string;
@@ -72,6 +73,7 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
+  switchConfig?:RawSwitchProps
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
