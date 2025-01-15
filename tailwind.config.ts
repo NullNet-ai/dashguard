@@ -1,14 +1,13 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
-import color from 'tailwindcss/colors'
 import tailwindCssAnimate from "tailwindcss-animate";
 import tailwindContainerQueries from "@tailwindcss/container-queries";
+import tailwindForms from "@tailwindcss/forms";
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.tsx"],
   theme: {
   	container: {
-  		center: 'true',
   		padding: '2rem',
   		screens: {
   			'2xl': '1400px'
@@ -176,6 +175,6 @@ export default {
   plugins: [
     tailwindCssAnimate,
     tailwindContainerQueries,
-    require("@tailwindcss/forms"),
+    tailwindForms,
   ],
 } satisfies Config;
