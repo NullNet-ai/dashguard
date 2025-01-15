@@ -146,7 +146,7 @@ export default function GridMobileRow() {
                           cell.getContext(),
                         )}
                       </div>
-                      <div>
+                      <div className="break-all">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

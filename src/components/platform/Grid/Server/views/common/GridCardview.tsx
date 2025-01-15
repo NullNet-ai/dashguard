@@ -38,7 +38,7 @@ export default function GridCardView() {
         return "grid-cols-2";
       case "xl":
       case "2xl":
-        return "grid-cols-3";
+        return "grid-cols-2";
       default:
         return "grid-cols-1";
     }
@@ -146,7 +146,7 @@ export default function GridCardView() {
                           cell.getContext(),
                         )}
                       </div>
-                      <div>
+                      <div className="break-all">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

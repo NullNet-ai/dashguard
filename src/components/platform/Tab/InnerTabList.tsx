@@ -6,9 +6,11 @@ import InnerTabItems from "./InnerTabItems";
 const getSessionTabs = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
+  const fullSearchQueryParams = headerList.get("x-full-search-query-params") || "";
   const [, portal, mainEntity, application, identifier] =
     pathname.split("/") || "New Tab";
   const currentContext = "/" + portal + "/" + mainEntity;
+
   const stateTabs = (await api.tab
     .getSubTabs({
       current_context: currentContext,
@@ -35,9 +37,8 @@ const getSessionTabs = async () => {
       _application === "record" &&
       !_current?.includes("current_tab")
     ) {
-      const curr_tab = "?current_tab=dashboard";
-      path = `${main}/${curr_tab}`;
-      href = `${tab.href}/${curr_tab}`;
+      path = `${main}/${fullSearchQueryParams}`;
+      href = `${tab.href}/${fullSearchQueryParams}`;
     } else {
       path = `${main}`;
       href = tab.href;
@@ -69,7 +70,7 @@ const getSessionTabs = async () => {
   if (application === "record" && !hasIdentifier && identifier) {
     newTabs.splice(1, 0, {
       name: identifier,
-      href: `${pathname}?current_tab=dashboard`,
+      href: `${pathname}?${fullSearchQueryParams}`,
       current: true,
     });
   }
