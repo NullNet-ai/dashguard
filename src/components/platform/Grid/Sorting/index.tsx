@@ -22,10 +22,13 @@ const Sorting = () => {
   };
 
   return (
-    <div className="flex flex-1 items-center gap-2">
+    <div className="flex flex-1 items-center">
       <span className="text-xs text-foreground">Sort By</span>
       {state?.sorting?.map((item: ColumnSort) => (
-        <Badge key={item.id} variant="default">
+        <Badge key={item.id}                   
+          variant="secondary"
+          className="m-1 flex items-center gap-1 whitespace-nowrap"
+        >
           {getLabel(item.id) as string} ({item.desc ? "Desc" : "Asce"})
           <Button
             variant="ghost"
@@ -33,15 +36,26 @@ const Sorting = () => {
             name="removeSortingButton"
             data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
             key={`${item.id}-remove`}
-            className="h-auto w-auto p-0 focus:outline-none"
+                className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
             onClick={() => {
               actions?.handleRemoveSorting(item.id);
             }}
           >
-            <X className="h-4 w-4" />
+          <X className="h-3 w-3" />
           </Button>
         </Badge>
       ))}
+          <Button
+              variant="outline"
+              size="xs"
+              name="removeSortingButton"
+              className="h-[24px] w-auto text-nowrap bg-muted px-2 text-default/70 hover:bg-transparent focus:outline-none"
+              onClick={() => {
+                //
+              }}
+            >
+              More (2)
+            </Button>
       <Button
         name="resetSortButton"
         data-test-id={testIDFormatter(`${entity}-grd-sorting-reset`)}
