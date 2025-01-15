@@ -204,6 +204,10 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
+a {
+  touch-action: manipulation;
+}
+
 /* Remove number input spinner for Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
@@ -222,3 +226,4 @@ input[type="number"] {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, and Opera */
 }
+

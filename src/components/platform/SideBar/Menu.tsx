@@ -91,7 +91,7 @@ export default function Menu({ item }: IProps) {
             ) : (
               <a
                 href={item.url || "#"}
-                className={`flex items-center  gap-2 group/item ${isActive && "bg-muted text-primary"} ${open ? '' : 'justify-center bg-transparent'} `}
+                className={`flex items-center z-0  gap-2 lg:group/item ${isActive && "bg-muted text-primary"} ${open ? '' : 'justify-center lg:bg-transparent'} `}
                 data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
                 >
                 <SidebarMenuButton tooltip={item.title}
