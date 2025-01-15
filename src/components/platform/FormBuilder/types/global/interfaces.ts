@@ -11,6 +11,7 @@ import { type Field, type UseFormReturn } from "react-hook-form";
 
 import { type TActionType } from "~/components/platform/Grid/types";
 import {
+  TDisplayType,
   type DateTimeGranularity,
   type TFormSchema,
   type TFormType,
@@ -313,9 +314,11 @@ interface IPropsForms {
   onDataChange?: (data: Record<string, any>) => void;
   customRender?: (
     form: UseFormReturn<Record<string, any>, any, undefined>,
-    options?: {
+    options: {
       appendButtonKey?: string;
     },
+    displayType: TDisplayType,
+    handleUpdateDisplayType: (type: TDisplayType) => void,
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
   features?: IFeatures;

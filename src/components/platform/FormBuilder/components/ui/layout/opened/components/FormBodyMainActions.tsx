@@ -55,7 +55,7 @@ const FormBodyMainActions = ({
 }) => {
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
-  const { enableFormFilterCreate = true } = features ?? {}
+  const { enableFormFilterCreate = true } = features ?? {};
 
   return (
     <div className="me-4 ms-auto mt-4 flex justify-end gap-2 md:mb-3 lg:mb-0">
@@ -64,7 +64,7 @@ const FormBodyMainActions = ({
           {!!selectedRecords?.length && !formProps?.isOpenSearch && (
             <Button
               variant={"outline"}
-              data-test-id={entityName + "-wzrd" +"-cancel-btn"}
+              data-test-id={entityName + "-wzrd" + "-cancel-btn"}
               onClick={() => {
                 form.reset(form.formState.defaultValues);
                 handleUpdateDisplayType("selected");
@@ -129,28 +129,34 @@ const FormBodyMainActions = ({
           </div>
         </>
       )}
-      {displayType === "selected" && (
-        <SelectedActions
-          form={form}
-          features={features}
-          filterGridConfig={filterGridConfig}
-          customFormFilterLockFormActions={customFormFilterLockFormActions}
-        />
+      {enableFormFilterCreate && (
+        <>
+          {displayType === "selected" && (
+            <SelectedActions
+              form={form}
+              features={features}
+              filterGridConfig={filterGridConfig}
+              customFormFilterLockFormActions={customFormFilterLockFormActions}
+            />
+          )}
+          {!form?.formState?.disabled &&
+            filterGridConfig &&
+            displayType !== "selected" &&
+            !formProps?.isOpenSearch && (
+              <FormFilterOpenedActions
+                features={features}
+                selectedRecords={selectedRecords}
+                customFormFilterViewFormActions={
+                  customFormFilterViewFormActions
+                }
+                onSubmitFormGrid={onSubmitFormGrid}
+                handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+                form={form}
+                filterGridConfig={filterGridConfig}
+              />
+            )}
+        </>
       )}
-
-      {!form?.formState?.disabled &&
-        filterGridConfig &&
-        displayType !== "selected" && !formProps?.isOpenSearch && (
-          <FormFilterOpenedActions
-            features={features}
-            selectedRecords={selectedRecords}
-            customFormFilterViewFormActions={customFormFilterViewFormActions}
-            onSubmitFormGrid={onSubmitFormGrid}
-            handleRemovedSelectedRecords={handleRemovedSelectedRecords}
-            form={form}
-            filterGridConfig={filterGridConfig}
-          />
-        )}
     </div>
   );
 };
