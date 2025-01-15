@@ -259,7 +259,7 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <PlusCircleIcon className="h-5 w-5 text-primary" />
+            <PlusCircleIcon className={`h-5 w-5 ${disableActions ? 'text-gray-400' : 'text-primary'}`} />
           </Button2>
         );
       }
