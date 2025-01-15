@@ -14,7 +14,7 @@ export default function TableViewButton() {
   return (
     <Button
       variant={active ? 'default' : 'outline'}
-      size="lg"
+      size='lg'
       className="rounded-r-none"
       loading={state?.createLoading}
       onClick={() => actions?.handleSwitchViewMode("table")}
