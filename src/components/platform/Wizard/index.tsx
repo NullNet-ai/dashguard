@@ -17,7 +17,7 @@ import WizardNavigator from "./BreadCrumbs";
 import SummaryComponent from "./Summary";
 import SummaryMobile from "./SummaryMobile";
 
-const FORM_HEADER_HEIGHT = "3.5rem";
+const FORM_HEADER_HEIGHT = "44px";
 
 interface Wizard {
   children: React.ReactNode;
@@ -43,8 +43,8 @@ export default function Wizard(props: Wizard) {
             <SummaryComponent />
             </div>
 
-          <div className="flex-grow bg-transparent">
-            <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
+          <div className="flex-grow bg-transparent" >
+            <div className="border-b flex items-center"  style={{ height: FORM_HEADER_HEIGHT }}>
               <Header />
             </div>
             <div className="h-[calc(100vh-10rem)] overflow-auto">

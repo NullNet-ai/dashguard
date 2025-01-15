@@ -9,8 +9,8 @@ const SelectedView = ({ record }: Record<string, any>) => {
   const [phone_data] = phones || [];
   const [email_data] = emails || [];
   return (
-    <div className="flex">
-      <div className="w-1/2">
+    <div className="flex flex-col gap-y-4 md:gap-y-0 md:flex-row">
+      <div className="w-full md:w-1/2">
         <Label className={cn("text-md font-semibold")}>
           Primary Phone Number: *
         </Label>
@@ -45,7 +45,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
         />
       </div>
 
-      <div className="w-1/2">
+      <div className="w-full md:w-1/2">
         <Label className={cn("text-md font-semibold")}>Primary Email: *</Label>
         <Input
           readOnly={true}
