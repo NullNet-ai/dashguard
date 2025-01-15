@@ -25,6 +25,7 @@ type TDisplayType = "form" | "selected";
   | "address-input"
   | "slider"
   | "password"
+  | "switch"
   | "rich-text-editor"
   | "currency-input";
 

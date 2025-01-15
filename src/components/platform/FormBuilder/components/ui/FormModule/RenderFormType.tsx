@@ -32,7 +32,7 @@ import {
 } from "../../../types";
 import FormFileUpload from "../../../FormType/FormFileUpload";
 import FormSlider from "../../../FormType/FormSlider";
-import { Option } from "~/components/ui/multi-select";
+import { type Option } from "~/components/ui/multi-select";
 import FormRichTextEditor from "../../../FormType/FormRichTextEditor";
 import FormNumberInput from "../../../FormType/FormNumberInput";
 import FormPassword from "../../../FormType/FormPassword";
@@ -43,6 +43,7 @@ import React from "react";
 import FormTimePicker from "../../../FormType/FormTimePicker";
 import FormDraggable from "../../../FormType/FormDraggable";
 import FormMultiField from "../../../FormType/FormMultiField";
+import FormSwitch from "../../../FormType/FormSwitch";
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -257,32 +258,42 @@ export default function RenderFormType(
           currencyInputOptions={subConfig?.currencyInputOptions}
         />
       );
-      case "time-picker":
-        return (
-          <FormTimePicker 
+    case "time-picker":
+      return (
+        <FormTimePicker
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
-          />)
-      case "draggable":
-        return (
-          <FormDraggable
-            fieldConfig={fieldConfig}
-            formRenderProps={formRenderProps}
-            form={form}
-            formKey={formKey}
-          />
-        );
-        case "multi-field":
-          return (
-            <FormMultiField
-              fieldConfig={fieldConfig}
-              formRenderProps={formRenderProps}
-              form={form}
-              formKey={formKey}
-            />
-          );
+        />
+      );
+    case "draggable":
+      return (
+        <FormDraggable
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
+          form={form}
+          formKey={formKey}
+        />
+      );
+    case "multi-field":
+      return (
+        <FormMultiField
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
+          form={form}
+          formKey={formKey}
+        />
+      );
+    case "switch":
+      return (
+        <FormSwitch
+          fieldConfig={fieldConfig}
+          formRenderProps={formRenderProps}
+          form={form}
+          formKey={formKey}
+        />
+      );
     default:
       return <Input />;
   }
