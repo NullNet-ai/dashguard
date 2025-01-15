@@ -26,9 +26,8 @@ const ButtonPlayground = () => {
   ];
 
   const sizes = [
-    { size: "xs", label: "Extra Small Button Size" },
     { size: "sm", label: "Small Button Size" },
-    { size: "default", label: "Default Button Size" },
+    { size: "md", label: "Medium Button Size" },
     { size: "lg", label: "Large Button Size" },
   ];
 
