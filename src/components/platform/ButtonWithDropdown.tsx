@@ -33,6 +33,7 @@ interface ButtonWithDropdownProps {
   disabled?: boolean; // Optional disabled state for the main button
   entity?: string; // Optional entity name for test IDs
   leftIcon?: React.ElementType; // Optional left icon component
+  side?: 'start' | 'end'; // Optional side for the dropdown
 }
 
 export function ButtonWithDropdown({
@@ -45,6 +46,7 @@ export function ButtonWithDropdown({
   disabled = false,
   entity,
   leftIcon: Lefticon,
+  side = 'end',
 }: ButtonWithDropdownProps) {
   return (
     <DropdownMenu>
@@ -74,7 +76,7 @@ export function ButtonWithDropdown({
 
       {/* Dropdown menu content with responsive handling */}
       <DropdownMenuContent
-        align="end" // Align to the end (right), but Radix UI handles edge cases
+        align={side} // Align to the end (right), but Radix UI handles edge cases
         className="w-56 max-w-full overflow-hidden rounded-md border border-gray-300 bg-white shadow-md ring-1 ring-black ring-opacity-5 focus:outline-none"
         sideOffset={5} // Offset for the dropdown from the trigger button
         side="bottom" // Default side where the dropdown will open

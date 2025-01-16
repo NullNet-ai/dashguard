@@ -34,6 +34,8 @@ import useWindowSize from "~/hooks/use-resize";
 import { testIDFormatter } from "~/utils/formatter";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import Cookies from "js-cookie";
+import useScreenType from "~/hooks/use-screen-type";
 
 export default function AppSideBar(config: ISideBarProps) {
   const {
@@ -43,14 +45,16 @@ export default function AppSideBar(config: ISideBarProps) {
     headerMenuConfig,
     className,
     mainMenuConfig,
+    screenType
   } = config;
   const { ChevronUpDownIcon } = _ICON;
 
+  const mobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
+
   const apiAuth = api.auth.logout.useMutation();
   const navigate = useRouter();
-  const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
-  const { open } = useSidebar();
+  const { open, openMobile } = useSidebar();
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
       navigate.push("/login");
@@ -58,18 +62,21 @@ export default function AppSideBar(config: ISideBarProps) {
   };
 
   const { width } = useWindowSize();
-
+  const screen = useScreenType();
+  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
+ 
+  if((screenType !== screen) && screen) { 
+    Cookies.set('screen-type', `${screen}` , { expires: 7 }); // Expires in 7 days
+  }
   return (
-    <Sidebar collapsible="icon" className={className}>
+    <Sidebar collapsible="icon" className={className} screenType={screenType}>
       {headerComponent && (
         <SidebarHeader className="group relative">
-          {!isMobile && (
-            <SidebarTrigger
+           <SidebarTrigger
               Icon={TriggerOpenCloseSidebarComponent}
-              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open ? "lg:hidden" : "lg:flex"}`}
+              className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${(open || openMobile) ? "hidden" : "lg:flex"}`}
               data-test-id="sdnavmenu-trigger-btn"
             />
-          )}
           <SidebarMenu>
             <SidebarMenuItem>
               {/* <DropdownMenu> */}
@@ -120,17 +127,18 @@ export default function AppSideBar(config: ISideBarProps) {
           return (
             <Fragment key={index}>
               {!item?.groups?.length ? (
-                <Menu item={item} />
+                <Menu item={item}  screenType={screenType}/>
               ) : (
                 <>
                   <GroupMenu
                     title={item?.groupTitle || ""}
                     groups={item.groups}
+                    screenType={screenType || ""}
                   />
                 </>
               )}
 
-              {item.title === "Activity Log" && <Separator />}
+              {item.title === "Activity Log" && <Separator className="my-2"/>}
             </Fragment>
           );
         })}
@@ -170,13 +178,18 @@ export default function AppSideBar(config: ISideBarProps) {
                   variant={"ghost"}
                   onClick={handleLogout}
                   data-test-id={"sdnavmenu-ftr-logout-btn"}
-                  className={`w-full text-destructive hover:bg-secondary hover:text-destructive h-8 ${open ? "justify-start" : "justify-center"}`}
+                  className={cn(
+                    `w-full text-destructive hover:bg-secondary hover:text-destructive h-8 `,
+                    `${(open && !mobile)  ? "justify-start" : "justify-center"}`,
+                    `${openMobile ? "justify-start px-2" : ""}`,
+                    
+                  )}
                 >
                   <ArrowLeftStartOnRectangleIcon className={`mr-2 ms-1 h-5 w-5 `}/>
-                  {open && <p>Logout</p>}
+                  { ((open && !isMobile) || (openMobile && isMobile)  || (open && !openMobile && !isMobile) ) ?  <p>Logout</p> : null}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
-                  {open ? (
+                  {(open && !mobile)  ? (
                     <span>
                       &copy; All Rights Reserved. {currentYear} DNA Micro
                       <sup className="text-[8px]">TM</sup>

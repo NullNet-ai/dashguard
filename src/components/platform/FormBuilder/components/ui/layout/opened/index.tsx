@@ -4,7 +4,10 @@ import { CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { cn, formatFormTestID } from "~/lib/utils";
 import DebuggerComponent from "../../../custom/Debugger";
-import { IFilterGridConfig } from "~/components/platform/FormBuilder/types";
+import {
+  IFilterGridConfig,
+  TDisplayType,
+} from "~/components/platform/FormBuilder/types";
 import { z } from "zod";
 import { TFormSchema } from "~/components/platform/FormBuilder/types";
 import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
@@ -12,6 +15,7 @@ import { WizardContext } from "~/components/platform/Wizard/Provider";
 
 // TODO: replace any with the correct type
 interface IOpenedFormLayoutProps {
+  displayType?: TDisplayType;
   myParent?: "wizard" | "record";
   customDesign?: any;
   customRender?: any;
@@ -34,11 +38,15 @@ interface IOpenedFormLayoutProps {
   handleLock: any;
   filterGridConfig?: IFilterGridConfig;
   onSelectFieldFilterGrid: (data: z.infer<TFormSchema>) => Promise<void>;
+  handleUpdateDisplayType?: (type: TDisplayType) => void;
+  handleNewRecordFormFilterGrid?: () => void;
   formSchema: TFormSchema;
 }
 
 const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
   const {
+
+    displayType,
     customDesign,
     customRender,
     fields,
@@ -60,17 +68,23 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     handleLock,
     filterGridConfig,
     onSelectFieldFilterGrid,
+    handleUpdateDisplayType,
+    handleNewRecordFormFilterGrid,
     formSchema,
-    myParent
+    myParent,
   } = props;
 
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   const formattedFormKey = formatFormTestID(
-    (entityName ?? "no-entity") + " " + (myParent ?? "no-parent")+ " " + formKey,
+    (entityName ?? "no-entity") +
+      " " +
+      (myParent ?? "no-parent") +
+      " " +
+      formKey,
   );
 
-   const colStyle = myParent === 'record' ? 'sm:grid-cols-1' : 'sm:grid-cols-2'
+  const colStyle = myParent === "record" ? "sm:grid-cols-1" : "sm:grid-cols-2";
 
   return (
     <CardContent
@@ -81,7 +95,10 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
         customDesign?.formClassName,
       )}
     >
-      <Form {...form} data-test-id={entityName + "-" + myParent + "-" + formKey}>
+      <Form
+        {...form}
+        data-test-id={entityName + "-" + myParent + "-" + formKey}
+      >
         <Fragment>
           {!customRender ? (
             <FormModule
@@ -103,9 +120,15 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
               formSchema={formSchema}
             />
           ) : (
-            customRender(form, {
-              appendButtonKey: `${formKey}:${appendFormKey || "not-found"}`,
-            })
+            customRender(
+              form,
+              {
+                appendButtonKey: `${formKey}:${appendFormKey || "not-found"}`,
+              },
+              displayType,
+              handleUpdateDisplayType,
+              handleNewRecordFormFilterGrid,
+            )
           )}
         </Fragment>
         {

@@ -11,8 +11,8 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import TimePicker from "~/components/ui/time-picker";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -35,14 +35,13 @@ export default function FormTimePicker({
   formKey,
   form,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
   const timePickerRef = useRef(null);
 
   if (isHidden) {
     return null;
   }
-
+  const {register} = form
   const timePickerProps = fieldConfig.timePickerProps;
 
   
@@ -80,8 +79,9 @@ export default function FormTimePicker({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="w-full border border-input !m-0 focus-within:border-primary focus-within:ring-primary">
+        <div className={cn("w-full border border-input !m-0 focus-within:border-primary focus-within:ring-primary",!!form.formState.errors[formKey] && "border-destructive",fieldConfig.disabled && "bg-secondary")}>
           <TimePicker
+          {...register(fieldConfig.name)}
             data-test-id={`${formKey}-timepicker-${fieldConfig.name}`}
             is24Hour={timePickerProps?.is24Hour}
             className={timePickerProps?.className}
@@ -94,6 +94,7 @@ export default function FormTimePicker({
                 ? new Date(`1970-01-01T${formRenderProps.field.value}Z`)
                 : undefined
             }
+      
           />
         </div>
       </FormControl>
