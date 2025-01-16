@@ -38,7 +38,7 @@ export default function GridCardView() {
         return "grid-cols-2";
       case "xl":
       case "2xl":
-        return "grid-cols-3";
+        return "grid-cols-2";
       default:
         return "grid-cols-1";
     }
@@ -125,7 +125,7 @@ export default function GridCardView() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-4 gap-y-2 text-sm">
                 {visibleCells.map((cell, cellIndex) => {
                   // Skip id and status as they're already shown above
                   if (cell.column.id === "id" || cell.column.id === "status")
@@ -146,7 +146,7 @@ export default function GridCardView() {
                           cell.getContext(),
                         )}
                       </div>
-                      <div>
+                      <div className="break-all">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

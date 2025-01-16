@@ -24,7 +24,7 @@ export default function RecordShellSummary(props: TProps) {
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");
   return (
-    <div className="pt-2">
+    <div className="pt-[4px]">
       {Object.entries(fields || {}).map(([key, value], idx) => (
         <div
           className="px-5"

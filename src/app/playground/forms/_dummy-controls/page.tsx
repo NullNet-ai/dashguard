@@ -10,12 +10,12 @@ export default function GroupTabWithMultiField() {
     {
       id: crypto.randomUUID(),
       name: "Group 1",
-      content: <MultiFieldView />
+      content: 'asdfasdf'
     },
     {
       id: crypto.randomUUID(),
       name: "Group 2",
-      content: <GroupTabView />
+      content: 'asdf'
     },
   ]);
 

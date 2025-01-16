@@ -13,6 +13,7 @@ import { SetTab } from "~/lib/grid-default-tab";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
+import { pluralize } from '../../utils/pluralize';
 import {
   IAdvanceFilter,
   IPagination,
@@ -75,7 +76,7 @@ export const gridRouter = createTRPCRouter({
         current = 1,
         advance_filters: _advance_filters = [],
         entity,
-        pluck_object,
+        pluck_object : _pluck_object,
       } = input; // Default limit = 10 items per page, default current page = 1
       // Calculate the number of items to skip based on the current page
       // Fetch the total count of users
@@ -146,11 +147,17 @@ export const gridRouter = createTRPCRouter({
               },
       };
 
+      const pluck_object = {
+        contacts: ["first_name", "last_name"],
+        [pluralize(input?.entity)]: input.pluck,
+      };
+      
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
+          pluck_object: pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:
@@ -174,13 +181,24 @@ export const gridRouter = createTRPCRouter({
       const { total_count: totalCount = 1, data: items } =
         await query.execute();
 
-      const formatted_items = items?.map((item) => {
-        const { [entity + "s"]: entity_data, ...rest } = item;
-        return {
-          ...entity_data,
-          ...rest,
-        };
-      });
+        const formatted_items = items?.map((item: Record<string, any>) => {
+          const {
+            [pluralize(input?.entity)]: entity_data,
+            created_by,
+            updated_by,
+            ...rest
+          } = item;
+          return {
+            ...entity_data,
+            ...rest,
+            created_by: created_by
+              ? `${created_by.first_name} ${created_by.last_name}`
+              : null,
+            updated_by: updated_by
+              ? `${updated_by.first_name} ${updated_by.last_name}`
+              : null,
+          };
+        });
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);

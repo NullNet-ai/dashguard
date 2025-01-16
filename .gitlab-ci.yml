@@ -23,31 +23,31 @@ master_build:
   only:
     - 'development'
 
-pusher_dev:
-  stage: pusher-dev
-  variables:
-    REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
-    REGISTRY_USERNAME: 'dna'
-    REGISTRY_PASSWORD: '3QFh6zZ2u2fnHbnt3pwy'
-    SUDO_PASSWORD: "DNAG0ds!!"
-    STACK_ID: 6
-    PORTAINER_DATA: '/mnt/sdb1/docker/volumes/portainer-data/_data/compose'
-    #'/var/lib/docker/volumes/portainer_data/_data/compose/'
-  script:
-    - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
-    - 'docker pull $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
-    - 'docker pull $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
-    # - 'ls $PORTAINER_DATA/$STACK_ID'
-    # - 'cat $PORTAINER_DATA/$STACK_ID/docker-compose.yml'
-    # - 'docker restart recruitment-recruitment-portal-1'
-    # - 'docker restart recruitment-recruitment-portal-2'
-    # - 'docker restart recruitment-recruitment-portal-3'
-    # - 'docker restart recruitment-recruitment-portal-4'
-  only:
-    - 'development'
-  tags:
-     #- 'recruitment'
-    - 'runner-60-1-13'
+# pusher_dev:
+#   stage: pusher-dev
+#   variables:
+#     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
+#     REGISTRY_USERNAME: 'dna'
+#     REGISTRY_PASSWORD: '3QFh6zZ2u2fnHbnt3pwy'
+#     SUDO_PASSWORD: "DNAG0ds!!"
+#     STACK_ID: 6
+#     PORTAINER_DATA: '/mnt/sdb1/docker/volumes/portainer-data/_data/compose'
+#     #'/var/lib/docker/volumes/portainer_data/_data/compose/'
+#   script:
+#     - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
+#     - 'docker pull $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
+#     - 'docker pull $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+#     # - 'ls $PORTAINER_DATA/$STACK_ID'
+#     # - 'cat $PORTAINER_DATA/$STACK_ID/docker-compose.yml'
+#     # - 'docker restart recruitment-recruitment-portal-1'
+#     # - 'docker restart recruitment-recruitment-portal-2'
+#     # - 'docker restart recruitment-recruitment-portal-3'
+#     # - 'docker restart recruitment-recruitment-portal-4'
+#   only:
+#     - 'development'
+#   tags:
+#      #- 'recruitment'
+#     - 'runner-60-1-13'
 
 update_stack:
   stage: update_portainer-development
