@@ -1,12 +1,12 @@
 "use client";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { ColumnSort } from "@tanstack/react-table";
+import { Trash2, X } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { GridContext } from "../Provider";
 import { cn, formatAndCapitalize } from "~/lib/utils";
-import { ColumnSort } from "@tanstack/react-table";
 import { testIDFormatter } from "~/utils/formatter";
-import { X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -211,7 +211,8 @@ const Sorting = () => {
           // platform dev will add this
         }}
       >
-        Clear All
+        <Trash2 className="size-4 block lg:hidden"/>
+        <span className="hidden md:block">Clear All</span>
       </Button>
     </div>
   );

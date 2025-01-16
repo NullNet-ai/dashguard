@@ -1,16 +1,17 @@
-import { Card, CardFooter } from "~/components/ui/card";
 import React from "react";
+import { Card, CardFooter, CardHeader } from "~/components/ui/card";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import GridMobileRow from "./common/GridMobileRow";
 import Pagination from "../../Pagination";
 import CreateButton from "../../Header/ButtonHeader";
+import MobileHeader from "../../Header/MobileHeader";
 
 function GridMobile() {
   return (
     <Card className="col-span-full border-0 shadow-none py-4">
-      {/* <CardHeader>
-        <Header />
-      </CardHeader> */}
+      <CardHeader>
+        <MobileHeader />
+      </CardHeader>
       <ScrollArea
         style={{ height: "calc(100vh - 16rem)" }}
         className="mx-2 rounded-md text-card-foreground"

@@ -10,10 +10,18 @@ import SearchResult from "./SearchResult";
 import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
 import { type IAdvanceFilters } from "@dna-platform/common-orm";
+import useWindowSize from "~/hooks/use-resize";
+import { cn } from "~/lib/utils";
+import useScreenType from "~/hooks/use-screen-type";
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+
+  const {width} = useWindowSize();
+  const screenSize = useScreenType();
+  const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg';
+
   const {
     searchableFields = [],
     entity = "",
@@ -61,7 +69,9 @@ export default function Search() {
   return (
     <>
       <Combobox>
-        <div className="relative">
+        <div className={cn(`relative`, isMobile ? "overflow-x-hidden" : "")}
+          style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : "auto" }}
+        >
           <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
             <MagnifyingGlassIcon
               className="h-5 w-5 text-muted-foreground"
