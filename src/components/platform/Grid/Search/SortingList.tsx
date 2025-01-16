@@ -127,7 +127,7 @@ const SortingList = () => {
                 </Badge>
               );
             })}
-            {data?.length && data.some(item=> item.hidden ) &&  (
+            {!!data?.length && data.some(item=> item.hidden ) &&  (
               <div className="py-1 absolute max-w-[63px]"
                 style={{
                   left: lastHiddenIndexLeftPos,
