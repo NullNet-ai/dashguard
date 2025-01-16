@@ -8,7 +8,7 @@ const loaderVariants = cva("relative block opacity-[0.65]", {
   variants: {
     variant: {
       spinner: "", // Original spinner
-      circular: "rounded-full animate-spin",
+      circular: "",
       circularShadow: "",
       custom: "object-contain", // New variant for custom images
     },
@@ -79,15 +79,17 @@ const Loader = React.forwardRef<HTMLSpanElement, LoaderProps>(
 
       switch (effectiveVariant) {
         case "circular":
-          return <LoaderCircleIcon />;
+          return (
+            <div className="relative h-full w-full animate-spin rounded-full border-4 border-transparent border-t-foreground"></div>
+          );
         case "circularShadow":
           return (
-            <div className="relative h-full w-full animate-spin rounded-full border-2 border-gray-300 border-t-blue-500"></div>
+            <div className="relative h-full w-full animate-spin rounded-full border-4 border-border border-t-foreground"></div>
           );
         default: // Original spinner
           return (
             <>
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
                 <span
                   key={i}
                   className="animate-spinner-leaf-fade absolute left-1/2 top-0 h-full w-[15%] rounded-full"
