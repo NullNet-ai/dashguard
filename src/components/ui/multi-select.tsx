@@ -81,6 +81,7 @@ interface MultipleSelectorProps {
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
+  onCreateRecord?: (value: string) => Promise<Option>;
 }
 
 export interface MultipleSelectorRef {
@@ -145,7 +146,7 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
 function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   for (const [, value] of Object.entries(groupOption)) {
     if (
-      value.some((option) => targetOption.find((p) => p.value === option.value))
+      value.some((option) => targetOption.find((p) => p.value === option.label))
     ) {
       return true;
     }
@@ -210,6 +211,7 @@ const MultipleSelector = React.forwardRef<
       commandProps,
       inputProps,
       hideClearAllButton = false,
+      onCreateRecord,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -224,6 +226,8 @@ const MultipleSelector = React.forwardRef<
       transToGroupOption(arrayDefaultOptions, groupBy),
     );
     const [inputValue, setInputValue] = React.useState("");
+    const [isCreateLoading, setIsCreateLoading] = React.useState(false);
+
     const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
 
     React.useImperativeHandle(
@@ -364,7 +368,7 @@ const MultipleSelector = React.forwardRef<
       if (!creatable) return undefined;
       if (
         isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
-        selected.find((s) => s.value === inputValue)
+        selected.find((s) => s.label === inputValue)
       ) {
         return undefined;
       }
@@ -372,24 +376,30 @@ const MultipleSelector = React.forwardRef<
       const Item = (
         <CommandItem
           value={inputValue}
-          // add hidden because of design to not show the item when there is no option matched.
-          className="hidden cursor-pointer"
+          className="cursor-pointer"
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
-          onSelect={(value: string) => {
+          onSelect={async (value: string) => {
             if (selected.length >= maxSelected) {
               onMaxSelected?.(selected.length);
               return;
             }
+            let newRecord = { value, label: value };
+            if (onCreateRecord) {
+              setIsCreateLoading(true);
+              newRecord = await onCreateRecord?.(value);
+            }
+
             setInputValue("");
-            const newOptions = [...selected, { value, label: value }];
+            const newOptions = [...selected, newRecord];
             setSelected(newOptions);
             onChange?.(newOptions);
+            setIsCreateLoading(false);
           }}
         >
-          {`Create "${inputValue}"`}
+          {isCreateLoading ? "Creating..." : `Create "${inputValue}"`}
         </CommandItem>
       );
 
@@ -432,11 +442,6 @@ const MultipleSelector = React.forwardRef<
         return commandProps.filter;
       }
 
-      if (creatable) {
-        return (value: string, search: string) => {
-          return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1;
-        };
-      }
       // Using default filter in `cmdk`. We don't have to provide it.
       return undefined;
     }, [creatable, commandProps?.filter]);
@@ -553,7 +558,7 @@ const MultipleSelector = React.forwardRef<
                 onChange?.(selected.filter((s) => s.fixed));
               }}
               className={cn(
-                "absolute right-0  h-5 w-5 p-0",
+                "absolute right-0 h-5 w-5 p-0",
                 (hideClearAllButton ||
                   disabled ||
                   selected.length < 1 ||
@@ -600,7 +605,7 @@ const MultipleSelector = React.forwardRef<
                           return (
                             <CommandItem
                               key={option.value}
-                              value={option.value}
+                              value={option.label}
                               disabled={option.disable}
                               onMouseDown={(e) => {
                                 e.preventDefault();

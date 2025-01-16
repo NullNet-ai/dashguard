@@ -16,6 +16,7 @@ import { organizationRouter } from "./routers/organization";
 import { dashboardRouter } from "./routers/dashboard";
 import { organizationContactsRouter } from "./routers/organization_contact";
 import { filesRouter } from "./routers/files";
+import { formRouter } from "./routers/form";
 
 /**
  * This is the primary router for your server.
@@ -40,6 +41,7 @@ export const appRouter = createTRPCRouter({
   organization: organizationRouter,
   organizationContact: organizationContactsRouter,
   files: filesRouter,
+  form: formRouter,
 });
 
 // export type definition of API

@@ -11,7 +11,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import MultipleSelector, { type Option } from "~/components/ui/multi-select";
-import { type IField } from "../../types";
+import { ISelectOptions, type IField } from "../../types";
+import { useState } from "react";
+import { CreateRecord } from "../../Actions/CreateRecord";
 
 interface IProps {
   fieldConfig: IField;
@@ -43,22 +45,50 @@ export default function FormMultiSelect({
 
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
+
+  const createRecord = async (query: string) => {
+    if (!fieldConfig?.onCreateRecord) {
+      throw new Error("onCreateRecord is not defined in fieldConfig");
+    }
+    let createdData = null;
+    if (typeof fieldConfig?.onCreateRecord === "function") {
+      createdData = await fieldConfig?.onCreateRecord(query);
+    } else {
+      const { entity, fieldIdentifier, customParams } =
+        fieldConfig?.onCreateRecord ?? {};
+      createdData = await CreateRecord({
+        entity,
+        fieldIdentifier,
+        data: {
+          ...(customParams ?? {}),
+          [fieldIdentifier]: query,
+        },
+      });
+    }
+    return createdData as Option;
+  };
+
   return (
     <FormItem className="overflow-visible">
-      <FormLabel required={fieldConfig.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
+      <FormLabel
+        required={fieldConfig.required}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+      >
         {fieldConfig.label}
       </FormLabel>
       <FormControl>
         <MultipleSelector
           {...register(fieldConfig.name)}
           {...formRenderProps.field}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={fieldConfig.disabled || isDisabled}
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"
-              : "border border-input outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring py-0 flex items-center"
+              : "flex items-center border border-input py-0 outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
           }
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
@@ -81,7 +111,7 @@ export default function FormMultiSelect({
           hidePlaceholderWhenSelected={
             fieldConfig.multiSelectHidePlaceholderWhenSelected ?? false
           }
-          creatable={!multiSelectOnSearch && !multiselectOptions && true}
+          creatable={fieldConfig.selectEnableCreate ?? false}
           triggerSearchOnFocus={
             fieldConfig.multiSelectTriggerSearchOnFocus ?? false
           }
@@ -104,6 +134,7 @@ export default function FormMultiSelect({
             fieldConfig.multiSelectHideClearAllButton ??
             fieldConfig.multiSelectMaxSelected === 1
           }
+          onCreateRecord={createRecord}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

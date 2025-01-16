@@ -52,10 +52,30 @@ export default function OrganizationDetails({
       fields={[
         {
           id: "organizations",
-          formType: "multi-select",
+          formType: "select",
           name: "organizations",
           label: "Organization",
           required: true,
+          selectEnableCreate: true,
+          // onCreateRecord: async (data) => {
+          //   console.log(
+          //     "%c 🔣: data ",
+          //     "font-size:16px;background-color:#146755;color:white;",
+          //     data,
+          //   );
+          //   return {
+          //     value: "testing123334",
+          //     label: "testing",
+          //   };
+          // },
+          onCreateRecord: {
+            entity: "organization",
+            fieldIdentifier: "name",
+            customParams: {
+              parent_organization_id: "01JBHKXHYSKPP247HZZWHA3JCT",
+              organization_id: "01JBHKXHYSKPP247HZZWHA3JCT",
+            },
+          },
         },
         {
           id: "user_roles",
@@ -63,6 +83,17 @@ export default function OrganizationDetails({
           name: "user_roles",
           label: "Role",
           required: true,
+          selectEnableCreate: true,
+          onCreateRecord: {
+            entity: "user_role",
+            fieldIdentifier: "role",
+          },
+          // onCreateRecord: async (data) => {
+          //   return {
+          //     value: "testing123334",
+          //     label: data,
+          //   };
+          // },
         },
       ]}
     />
