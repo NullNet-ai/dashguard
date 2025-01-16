@@ -19,14 +19,17 @@ import { StarIcon } from "@heroicons/react/24/outline";
 import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
 import { testIDFormatter } from "~/utils/formatter";
 import useScreenType from "~/hooks/use-screen-type";
+import { cn } from "~/lib/utils";
 interface IProps {
   item: ISidebarMenu;
+  screenType?: string
 }
 
-export default function Menu({ item }: IProps) {
+export default function Menu({ item, screenType }: IProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const {open} = useSidebar();
   const stype = useScreenType();
+  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the star
@@ -50,7 +53,7 @@ export default function Menu({ item }: IProps) {
             {item?.items?.length ? (
               <>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}>
                     <ICON className="mr-2 h-5 w-5" />
                     <span>{item.title}</span>
                     <a
@@ -91,14 +94,17 @@ export default function Menu({ item }: IProps) {
             ) : (
               <a
                 href={item.url || "#"}
-                className={`flex items-center z-0  gap-2 lg:group/item ${isActive && "bg-muted text-primary"} ${open ? '' : 'justify-center lg:bg-transparent'} `}
+                className={cn(`flex items-center z-0  gap-2 lg:group/item`,
+                 ` ${isActive && "bg-muted text-primary"}`,
+                  `${!open || screenType ==='md' ? 'justify-center lg:bg-transparent' : '' }`
+                )}
                 data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
                 >
-                <SidebarMenuButton tooltip={item.title}
+                <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}
                   data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}-btn`)}
                 >
                   <ICON className="mr-2 h-5 w-5" />
-                  {open || (stype ==='sm' ||   stype ==='md' ||stype ==='xs')
+                  {( open || (stype ==='sm' ||   stype ==='md' ||stype ==='xs'))
                   ?     <span className="font-semibold">{item.title}</span> : null}
                   <> {!open ? (
                       isFavorite ? (
