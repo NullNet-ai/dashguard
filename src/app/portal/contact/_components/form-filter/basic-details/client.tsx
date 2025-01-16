@@ -148,7 +148,14 @@ export default function ContactDetails({
           query_params: {
             entity: "contact",
             pluck: params?.pluck_fields,
-            default_advance_filters : defaultAdvanceFilter
+            default_advance_filters : defaultAdvanceFilter,
+            default_sorting : [
+              {
+                id: "created_date",
+                desc: true,
+                sort_key: "created_date",
+              },
+            ]
           },
         },
         // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data

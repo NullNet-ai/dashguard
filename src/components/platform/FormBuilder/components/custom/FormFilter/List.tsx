@@ -49,11 +49,13 @@ export default function FormFilterGrid({
       limit,
       pluck,
       advance_filters = [],
+      sort = [],
     }: {
       current: number;
       limit: number;
       pluck: string[];
       advance_filters: any[];
+      sort: any[];
     }) => {
       setIsLoading(true);
       try {
@@ -79,10 +81,12 @@ export default function FormFilterGrid({
             pluck_fields: query_params?.pluck || [],
             router,
             resolver,
+            sort,
           });
           setGridData({
             ...result,
             advance_filters,
+            sorting : sort,
           });
         } else {
           const [_, list] = api.grid.items.useSuspenseQuery({
@@ -111,6 +115,7 @@ export default function FormFilterGrid({
       limit: limit || 100,
       pluck: pluck || [],
       advance_filters: [],
+      sort: [],
     });
   }, []);
 
@@ -181,6 +186,8 @@ export default function FormFilterGrid({
           parentType="form"
           totalCount={gridData?.totalCount || 0}
           data={gridData?.items || []}
+          defaultSorting={config?.searchConfig?.query_params?.default_sorting || []}
+          sorting={gridData?.sorting}
           advanceFilter={gridData?.advance_filters || []}
           config={{
             statusesIncluded: config?.statusesIncluded ?? [

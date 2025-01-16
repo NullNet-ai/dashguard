@@ -15,10 +15,12 @@ import { X } from "lucide-react";
 import { ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
 import { IAdvanceFilters } from "@dna-platform/common-orm";
+import Sorting from "../Sorting";
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+  const { parentType } = gridState ?? {};
   const {
     searchableFields = [],
     entity = "",
@@ -160,6 +162,7 @@ export default function Search() {
           </Badge>
         ))}
       </div>
+      {parentType === 'form' && <Sorting />}
     </>
   );
 }

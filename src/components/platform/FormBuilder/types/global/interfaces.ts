@@ -343,6 +343,7 @@ interface IGridData {
   items: any[];
   totalCount: number;
   advance_filters?: any[];
+  sorting?: any[];
 }
 
 export type {
