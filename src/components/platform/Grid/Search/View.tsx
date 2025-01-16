@@ -69,7 +69,7 @@ export default function Search() {
   return (
     <>
       <Combobox>
-        <div className={cn(`relative`, isMobile ? "overflow-x-hidden" : "")}
+        <div className={cn(`relative`)}
           style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : "auto" }}
         >
           <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
