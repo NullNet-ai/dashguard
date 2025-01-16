@@ -134,7 +134,7 @@ export default function GridMobileRow() {
                   return (
                     <div
                       key={cell.id}
-                      className="flex flex-row text-xs text-foreground"
+                      className="flex flex-row text-xs text-foreground "
                       data-test-id={testIDFormatter(
                         `${state?.config.entity}-grd-crd-item-cell-${cell.column.id}-${cellIndex + 1}`,
                       )}
@@ -146,7 +146,7 @@ export default function GridMobileRow() {
                           cell.getContext(),
                         )}
                       </div>
-                      <div>
+                      <div className="break-all">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

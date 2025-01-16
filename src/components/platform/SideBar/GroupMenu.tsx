@@ -29,18 +29,21 @@ import { testIDFormatter } from "~/utils/formatter";
 import useScreenType from "~/hooks/use-screen-type";
 import { cn } from "~/lib/utils";
 
-
 interface IProps {
   groups: ISidebarMenu[];
   title?: string;
+  screenType: string
 }
 
-export default function GroupMenu({ groups }: IProps) {
+export default function GroupMenu({ groups, screenType }: IProps) {
   // State to track favorites for each submenu item
+
+  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
+
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
   const refs = useRef<any[]>([]);
   const hasSelected = groups?.some((group) => group?.items?.some((item) => item.isActive));
-  const [openMenu, setOpenMenu] = useState(hasSelected);
+  const [openMenu, setOpenMenu] = useState(isMobile ? false : hasSelected);
 
   const stype = useScreenType();
 
@@ -82,12 +85,14 @@ export default function GroupMenu({ groups }: IProps) {
       className={`${!open ? 'px-0' : ''}`}
 
     >
-      <Separator className="mb-3" />
+      <Separator className="my-2" />
       {groups?.map((item, index) => {
         // @ts-expect-error - TS doesn't know about dynamic imports
         const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
         return (
-          <SidebarMenu key={index}>
+          <SidebarMenu key={index}
+            className={isMobile ? 'px-2' : ''}
+          >
             <Collapsible
               open={openMenu}
               key={item.title}
@@ -115,20 +120,22 @@ export default function GroupMenu({ groups }: IProps) {
                       testIDFormatter(`sidebar-grp-menu-${  item.title?.charAt(0).toUpperCase()}${item.title?.slice(1).toLowerCase()}`)
                     }
                   >
-                    {item.icon && <ICON className={`h-5 w-5 ${open ? 'mr-2' : ''}`} />}
-                    {(open && (stype ==='sm' ||   stype ==='md' ||stype ==='xs')) || openMobile || (open && !openMobile)
+                    { item.icon && <ICON className={`h-5 w-5 ${open || openMobile ? 'mr-2' : ''}`} />}
+                    { ((open && !isMobile) || (openMobile && isMobile)  || (open && !openMobile && !isMobile) )
                   ?     <span className="font-semibold ">{item.title}</span> : null}
                     {!!item?.items?.length && (
                       <ChevronRightIcon className={cn(`
                           ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 
                       `,
-                    `  ${!open && !openMobile ? 'absolute -right-4 z-[50]' : ''}`
+                    `  ${!open && !openMobile && !isMobile ? 'absolute -right-4 z-[50]' : ''}`
                     )} />
                     )}
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="w-full">
-                  <SidebarMenuSub>
+                  <SidebarMenuSub 
+                       className="px-2.5 p-1"
+                  >
                     {item.items?.map((subItem, index) => {
                       const SUB_ICON =
                         // @ts-expect-error - TS doesn't know about dynamic imports
@@ -149,7 +156,7 @@ export default function GroupMenu({ groups }: IProps) {
 
                       return (
                         <SidebarMenuSubItem key={subItem.title}
-                          className=""
+                       
                         ref={(el: any) => (refs.current[index] = el!)}
                         >
                           <SidebarMenuSubButton
@@ -157,7 +164,7 @@ export default function GroupMenu({ groups }: IProps) {
                             className={`${subItem?.isActive && "bg-muted text-primary"}`}
                           >
                             <a
-                              className={`group/item flex items-center gap-2`}
+                              className={`group/item flex items-center lg:h-[2.4rem] gap-2`}
                               href={subItem.url || "#"}
                               data-test-id={testIDFormatter(`sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`)}
                               

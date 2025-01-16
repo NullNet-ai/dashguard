@@ -11,6 +11,7 @@ export default function FilterButton() {
     <Button
       loading={state?.createLoading}
       disabled
+      size='lg'
       variant={"outline"}
       className=""
       data-test-id={testIDFormatter(`${state?.config.entity}-grd-filter-btn`)}

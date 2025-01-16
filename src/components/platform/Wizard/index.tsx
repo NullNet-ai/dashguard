@@ -17,7 +17,7 @@ import WizardNavigator from "./BreadCrumbs";
 import SummaryComponent from "./Summary";
 import SummaryMobile from "./SummaryMobile";
 
-const FORM_HEADER_HEIGHT = "3.5rem";
+const FORM_HEADER_HEIGHT = "44px";
 
 interface Wizard {
   children: React.ReactNode;
@@ -37,17 +37,14 @@ export default function Wizard(props: Wizard) {
       stepsNavigation={stepsNavigation}
     >
      <section className="overflow-hidden wizard-section relative  lg:mt-0">
-        <div className="hidden lg:block  p-4 pt-4 border-b ">
-            <WizardNavigator />
-        </div>
         <div className="flex  lg:0">
           {/* Left side: Stepper */}
             <div className="hidden sm:block">
             <SummaryComponent />
             </div>
 
-          <div className="flex-grow bg-transparent">
-            <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
+          <div className="flex-grow bg-transparent" >
+            <div className="border-b flex items-center"  style={{ height: FORM_HEADER_HEIGHT }}>
               <Header />
             </div>
             <div className="h-[calc(100vh-10rem)] overflow-auto">
