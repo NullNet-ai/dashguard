@@ -14,7 +14,7 @@ export default function Main() {
           <div className="my-2 w-full md:my-0  h-[40px] lg:w-[472px]">
             <Search />
           </div>
-          <div className="flex h-[40px] flex-shrink-0 flex-row items-center">
+          <div className="flex h-[36px] flex-shrink-0 flex-row items-center">
             <TableViewButton />
             <CardViewButton />
             <div className="mx-2 h-full w-[1px] bg-tertiary" />
