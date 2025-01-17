@@ -67,7 +67,7 @@ const gridColumns = [
     isSearchable: false,
   },
   {
-    header: "Role",
+    header: "Roles",
     accessorKey: "roles",
     enableResizing: false,
     isSearchable: false,
