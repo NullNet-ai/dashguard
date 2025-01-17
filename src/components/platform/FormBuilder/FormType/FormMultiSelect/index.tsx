@@ -14,6 +14,7 @@ import MultipleSelector, { type Option } from "~/components/ui/multi-select";
 import { ISelectOptions, type IField } from "../../types";
 import { useState } from "react";
 import { CreateRecord } from "../../Actions/CreateRecord";
+import { useToast } from "~/context/ToastProvider";
 
 interface IProps {
   fieldConfig: IField;
@@ -42,20 +43,28 @@ export default function FormMultiSelect({
   formKey,
 }: IProps) {
   const { register } = form;
-
+  const toast = useToast();
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
 
   const createRecord = async (query: string) => {
-    if (!fieldConfig?.onCreateRecord) {
-      throw new Error("onCreateRecord is not defined in fieldConfig");
+    if (!fieldConfig?.selectOnCreateRecord) {
+      toast.error("selectOnCreateRecord is not defined in fieldConfig");
+      return
+    }
+    if (fieldConfig?.selectOnCreateValidate) {
+      const validation = await fieldConfig?.selectOnCreateValidate(query);
+      if (!validation?.valid) {
+        toast.error(validation?.message || "Invalid Input");
+        return;
+      }
     }
     let createdData = null;
-    if (typeof fieldConfig?.onCreateRecord === "function") {
-      createdData = await fieldConfig?.onCreateRecord(query);
+    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+      createdData = await fieldConfig?.selectOnCreateRecord(query);
     } else {
       const { entity, fieldIdentifier, customParams } =
-        fieldConfig?.onCreateRecord ?? {};
+        fieldConfig?.selectOnCreateRecord ?? {};
       createdData = await CreateRecord({
         entity,
         fieldIdentifier,
@@ -118,14 +127,14 @@ export default function FormMultiSelect({
           defaultOptions={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label.localeCompare(b.label),
+                  a.label?.localeCompare(b.label),
                 )
               : multiselectOptions?.[fieldConfig.name]
           }
           options={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label.localeCompare(b.label),
+                  a.label?.localeCompare(b.label),
                 )
               : multiselectOptions?.[fieldConfig.name]
           }

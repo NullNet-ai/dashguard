@@ -58,7 +58,6 @@ const FormServerFetch = async () => {
       <OrganizationDetails
         defaultValues={default_values}
         multiSelectOptions={{ organizations, user_roles }}
-        selectOptions={{ organizations, user_roles }}
         params={{
           id: default_values?.id!,
           shell_type: application! as "record" | "wizard",

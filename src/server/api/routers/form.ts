@@ -12,7 +12,6 @@ export const formRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-    // process.exit(1)
       const record = await ctx.dnaClient
         .create({
           entity: input.entity,
@@ -28,7 +27,6 @@ export const formRouter = createTRPCRouter({
         .execute()
         .catch((error) => {
           throw new Error(error);
-          // console.error("@Error Select > Create Record", error);
         });
 
       const result = record?.data?.[0];

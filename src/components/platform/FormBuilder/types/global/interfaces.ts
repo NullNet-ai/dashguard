@@ -82,7 +82,7 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
-  switchConfig?:RawSwitchProps
+  switchConfig?: RawSwitchProps;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
@@ -135,13 +135,16 @@ interface IField {
   selectSearchable?: boolean;
   accuracy?: number;
   selectEnableCreate?: boolean;
-  onCreateRecord?:
+  selectOnCreateRecord?:
     | {
         fieldIdentifier: string;
         entity: string;
         customParams?: Record<string, any>;
       }
-    | ((textQuery: string) => Promise<ISelectOptions>);
+    | ((text: string) => Promise<ISelectOptions>);
+  selectOnCreateValidate?: (
+    text: string,
+  ) => Promise<{ valid: boolean; message?: string }>;
 }
 
 interface ISelectOptions {

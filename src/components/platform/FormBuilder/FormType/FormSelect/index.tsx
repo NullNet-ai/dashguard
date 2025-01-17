@@ -24,6 +24,7 @@ import React, { useMemo, useState } from "react";
 import { cn, formatFormTestID } from "~/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import { CreateRecord } from "../../Actions/CreateRecord";
+import { useToast } from "~/context/ToastProvider";
 
 interface IProps {
   fieldConfig: IField;
@@ -46,6 +47,7 @@ export default function FormSelect({
   form,
 }: IProps) {
   form.watch(fieldConfig?.name);
+  const toast = useToast();
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
@@ -83,7 +85,7 @@ export default function FormSelect({
   const filteredOptions = useMemo(() => {
     return query === ""
       ? options
-          ?.sort((a, b) => a.label.localeCompare(b.label))
+          ?.sort((a, b) => a.label?.localeCompare(b.label))
           ?.slice(0, 250)
           ?.filter((opt) => {
             return !!opt?.label;
@@ -92,7 +94,7 @@ export default function FormSelect({
           ?.filter((opt) => {
             return opt.label.toLowerCase().includes(query.toLowerCase());
           })
-          ?.sort((a, b) => a.label.localeCompare(b.label))
+          ?.sort((a, b) => a.label?.localeCompare(b.label))
           .slice(0, 5)
           ?.filter((opt) => {
             return !!opt?.label;
@@ -117,16 +119,24 @@ export default function FormSelect({
   ]);
 
   const createRecord = async () => {
-    if (!fieldConfig?.onCreateRecord) {
-      throw new Error("onCreateRecord is not defined in fieldConfig");
+    if (!fieldConfig?.selectOnCreateRecord) {
+      toast.error("selectOnCreateRecord is not defined in fieldConfig");
+      return
+    }
+    if (fieldConfig?.selectOnCreateValidate) {
+      const validation = await fieldConfig?.selectOnCreateValidate(query);
+      if (!validation?.valid) {
+        toast.error(validation?.message || "Invalid Input");
+        return;
+      }
     }
     setIsCreateLoading(true);
     let createdData = null;
-    if (typeof fieldConfig?.onCreateRecord === "function") {
-      createdData = await fieldConfig?.onCreateRecord(query);
+    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+      createdData = await fieldConfig?.selectOnCreateRecord(query);
     } else {
       const { entity, fieldIdentifier, customParams } =
-        fieldConfig?.onCreateRecord ?? {};
+        fieldConfig?.selectOnCreateRecord ?? {};
       createdData = (await CreateRecord({
         entity,
         fieldIdentifier,
@@ -136,10 +146,10 @@ export default function FormSelect({
         },
       })) as ISelectOptions;
     }
-    setTimeout(() => setOpen(false), 100);
     setOptions([...(options ?? []), createdData]);
     formRenderProps?.field.onChange(createdData?.value || "");
     setIsCreateLoading(false);
+    setTimeout(() => setOpen(false), 100);
   };
 
   const isOptionsExist = options?.find((p) => p.label === query);
@@ -215,7 +225,7 @@ export default function FormSelect({
             onChange={(event) => setQuery(event.target.value)}
             onBlur={() => {
               setTimeout(() => setOpen(false), 100);
-              setQuery("");
+              // setQuery("");
             }}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
@@ -256,7 +266,7 @@ export default function FormSelect({
                   value={opt}
                   disabled={isDisabled || isReadOnly}
                   className={cn(
-                    "group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                    "group relative cursor-default select-none py-2 text-md pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
                     {
                       "cursor-not-allowed": isDisabled,
                       "cursor-default": isReadOnly,
@@ -265,7 +275,7 @@ export default function FormSelect({
                   data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                 >
                   <span
-                    className="block truncate group-data-[selected]:font-semibold"
+                    className="block truncate"
                     data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
                   >
                     {opt.label}
@@ -280,7 +290,7 @@ export default function FormSelect({
                 !isOptionsExist &&
                 query && (
                   <span
-                    className="block cursor-pointer truncate group-data-[selected]:font-semibold"
+                    className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
                     data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
                     onClick={createRecord}
                   >

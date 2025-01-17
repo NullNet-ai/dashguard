@@ -81,7 +81,7 @@ interface MultipleSelectorProps {
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
-  onCreateRecord?: (value: string) => Promise<Option>;
+  onCreateRecord?: (value: string) => Promise<Option | undefined>;
 }
 
 export interface MultipleSelectorRef {
@@ -146,7 +146,7 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
 function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   for (const [, value] of Object.entries(groupOption)) {
     if (
-      value.some((option) => targetOption.find((p) => p.label === option.label))
+      value.some((option) => targetOption.find((p) => p?.label === option?.label))
     ) {
       return true;
     }
@@ -376,7 +376,7 @@ const MultipleSelector = React.forwardRef<
       const Item = (
         <CommandItem
           value={inputValue}
-          className="cursor-pointer"
+          className="cursor-pointer mt-1 px-3 py-2 text-secondary-foreground !hover:bg-primary !hover:text-primary-foreground  !bg-primary/10 font-bold text-md"
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -389,7 +389,12 @@ const MultipleSelector = React.forwardRef<
             let newRecord = { value, label: value };
             if (onCreateRecord) {
               setIsCreateLoading(true);
-              newRecord = await onCreateRecord?.(value);
+              const result = await onCreateRecord?.(value);
+              if (!result) {
+                setIsCreateLoading(false);
+                return;
+              }
+              newRecord = result;
             }
 
             setInputValue("");
@@ -467,7 +472,7 @@ const MultipleSelector = React.forwardRef<
       >
         <div
           className={cn(
-            "min-h-10 rounded-md border border-gray-300 text-sm",
+            "min-h-10 rounded-md border border-gray-300 text-sm relative",
             {
               "px-2 py-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
@@ -479,7 +484,7 @@ const MultipleSelector = React.forwardRef<
             inputRef.current?.focus();
           }}
         >
-          <div className="relative flex flex-wrap items-center gap-1">
+          <div className=" flex flex-wrap items-center gap-1">
             {selected.map((option) => {
               return (
                 <Badge
@@ -542,7 +547,7 @@ const MultipleSelector = React.forwardRef<
                   : placeholder
               }
               className={cn(
-                "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
+                "flex-1 bg-transparent outline-none placeholder:text-muted-foreground static",
                 {
                   "w-full": hidePlaceholderWhenSelected,
                   "px-2 py-2": selected.length === 0,
@@ -558,7 +563,7 @@ const MultipleSelector = React.forwardRef<
                 onChange?.(selected.filter((s) => s.fixed));
               }}
               className={cn(
-                "absolute right-0 h-5 w-5 p-0",
+                "absolute right-2 h-5 w-5 p-0",
                 (hideClearAllButton ||
                   disabled ||
                   selected.length < 1 ||
@@ -574,7 +579,7 @@ const MultipleSelector = React.forwardRef<
           {open && (
             <CommandList
               // add top-0 instead of top-1 to avoid the border of the input field. Remove also border and shadow-md to not show the border when empty.
-              className="absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in"
+              className="absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in pt-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none "
               onMouseLeave={() => {
                 setOnScrollbar(false);
               }}
@@ -598,7 +603,7 @@ const MultipleSelector = React.forwardRef<
                     <CommandGroup
                       key={key}
                       heading={key}
-                      className="h-full overflow-auto"
+                      className="m-1 max-h-60 w-full h-full overflow-auto "
                     >
                       <>
                         {dropdowns.map((option) => {
@@ -622,9 +627,9 @@ const MultipleSelector = React.forwardRef<
                                 onChange?.(newOptions);
                               }}
                               className={cn(
-                                "cursor-pointer",
+                                "cursor-pointer !text-md",
                                 option.disable &&
-                                  "cursor-default text-sidebar-foreground",
+                                  "cursor-default text-sidebar-foreground ",
                               )}
                             >
                               {option.label}
