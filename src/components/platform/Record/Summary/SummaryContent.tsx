@@ -65,31 +65,6 @@ const RecordSummaryContent = async () => {
         }
       />
       <Separator />
-      <div className="p-2 px-4 text-sm">
-        <div className="mb-2 px-2">
-          <span className="text-slate-400">Category</span>
-          <div>
-            {recordDetails &&
-              recordDetails.data?.categories?.map((e: string) => {
-                return (
-                  <Badge
-                    key={e}
-                    className="m-1"
-                    variant="primary"
-                    data-test-id={
-                      mainEntity +
-                      "-rcrd-category-" +
-                      e.split(" ").join("-").toLowerCase()
-                    }
-                  >
-                    {e}
-                  </Badge>
-                );
-              })}
-          </div>
-        </div>
-      </div>
-      <Separator />
     </div>
   );
 };

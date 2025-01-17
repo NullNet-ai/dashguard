@@ -40,7 +40,7 @@ export default function Pagination() {
 
   const handlePerPageValueChange = (value: string) => {
     UpdateReportPagination({
-      current_page: Number(currentPage),
+      current_page: 1,
       limit_per_page: Number(value),
     });
   };
