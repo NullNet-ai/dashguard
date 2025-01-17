@@ -21,12 +21,11 @@ const Clock = () => {
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const { open } = useSidebar();
+  const { open, openMobile } = useSidebar();
 
-  if(!open) return null
   return (
     <div
-      className={`grid flex-1 px-2 text-right text-sm leading-tight ${!open && "hidden"}`}
+      className={`grid flex-1 px-2 text-right text-sm leading-tight ${(!openMobile && !open) && "hidden"}`}
     >
       {date ? (
         <span className="mr-4 ms-auto truncate px-2 py-[2px] font-semibold">

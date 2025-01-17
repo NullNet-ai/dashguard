@@ -76,7 +76,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex h-12 w-full flex-row items-center justify-between rounded px-2 py-1 text-foreground sm:items-center">
+      <div className="flex h-[44px] w-full flex-row items-center justify-between rounded px-2 py-1 text-foreground sm:items-center">
         <div className="flex flex-row items-center justify-start">
           <Collapsible
             onOpenChange={setIsOpen}
@@ -104,7 +104,7 @@ export default function Header() {
             </CollapsibleContent>
           </Collapsible>
 
-          <div className="p-4 px-2 lg:hidden">
+          <div className="md:p-4 md:px-2">
             <span className="text-sm font-bold text-foreground">
               <WizardNavigator />
             </span>
@@ -118,8 +118,9 @@ export default function Header() {
               variant={"outline"}
               loading={prevLoading}
               onClick={handlePrev}
-              size={"sm"}
+              size={"xs"}
               className="gap-1"
+              
             >
               <ChevronLeftIcon
                 className="h-3 w-3 text-slate-400"

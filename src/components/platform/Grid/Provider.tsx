@@ -61,7 +61,7 @@ export default function GridProvider({
   advanceFilter = [],
   defaultAdvanceFilter = [],
   pagination,
-  parentType
+  parentType,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -104,6 +104,14 @@ export default function GridProvider({
   ] = useState<string | null>(null);
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
+
+  const resolvedAdvanceFilter = advanceFilter?.reduce(
+    (acc, curr) => {
+      if (curr?.default) return acc;
+      return [...acc, curr];
+    },
+    [...defaultAdvanceFilter],
+  );
 
   // use effects
   useEffect(() => {
@@ -270,7 +278,9 @@ export default function GridProvider({
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
-            <PlusCircleIcon className="h-5 w-5 text-primary" />
+            <PlusCircleIcon
+              className={`h-5 w-5 ${disableActions ? "text-gray-400" : "text-primary"}`}
+            />
           </Button2>
         );
       }
@@ -480,7 +490,7 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
-    advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
+    advanceFilter: resolvedAdvanceFilter,
     defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,

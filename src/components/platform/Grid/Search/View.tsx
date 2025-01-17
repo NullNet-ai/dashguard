@@ -1,18 +1,13 @@
 "use client";
 
+import { useContext } from "react";
 import { Combobox, ComboboxInput, ComboboxOptions } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { useDebounce } from "~/components/ui/multi-select";
-// import RecentSearch from "./RecentSearch";
-import { useContext } from "react";
 import { SearchGridContext } from "./Provider";
 import { GridContext } from "../Provider";
 import SearchResult from "./SearchResult";
-import { cn, formatAndCapitalize } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { X } from "lucide-react";
-import { ISearchItemResult } from "./types";
+import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
 import { IAdvanceFilters } from "@dna-platform/common-orm";
 import Sorting from "../Sorting";
@@ -59,15 +54,11 @@ export default function Search() {
     {
       refetchOnWindowFocus: false,
       gcTime: 0,
-      enabled: debouncedSearchInput?.length > 3,
+      enabled: !!debouncedSearchInput?.length,
     },
   );
 
   const { items } = data ?? {};
-
-  // Filter and log search items to debug any unintended data
-  const selectedSearchItems = searchItems?.filter((item) => !item?.default);
-  const defaultSearchItems = searchItems?.filter((item) => item?.default);
 
   return (
     <>
@@ -78,40 +69,6 @@ export default function Search() {
               className="h-5 w-5 text-muted-foreground"
               aria-hidden="true"
             />
-            {selectedSearchItems.length > 0 && (
-              <div className="flex flex-wrap gap-1 py-1">
-                {selectedSearchItems?.map((item, index) => {
-                  if (item.type === "operator" && index === 0) {
-                    return null;
-                  }
-                  return (
-                    <Badge
-                      key={item.id}
-                      variant="primary"
-                      className="m-1 flex items-center gap-1"
-                    >
-                      {item.type === "criteria"
-                        ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value ? item?.display_value : item?.values?.[0]}`
-                        : item?.operator}
-                      {item.type === "criteria" && !item.default && (
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          name="removeSortingButton"
-                          key={`${item.id}-remove`}
-                          className="h-auto w-auto p-0 text-primary hover:bg-transparent focus:outline-none"
-                          onClick={() => {
-                            actions?.handleRemoveSearchItem(item);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </Badge>
-                  );
-                })}
-              </div>
-            )}
             <ComboboxInput
               className="flex-grow border-none bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
               placeholder="Search..."
