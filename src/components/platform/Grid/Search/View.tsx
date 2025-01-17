@@ -60,7 +60,7 @@ export default function Search() {
     {
       refetchOnWindowFocus: false,
       gcTime: 0,
-      enabled: debouncedSearchInput?.length > 3,
+      enabled: !!debouncedSearchInput?.length,
     },
   );
 

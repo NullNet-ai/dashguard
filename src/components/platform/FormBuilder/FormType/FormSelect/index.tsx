@@ -50,7 +50,7 @@ export default function FormSelect({
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const isDisabled = fieldConfig.disabled ?? false
+  const isDisabled = fieldConfig.disabled ?? false;
   const isReadOnly = formRenderProps.field.disabled || fieldConfig.readonly;
 
   const [referenceElement, setReferenceElement] = useState<any>(null);
@@ -141,7 +141,7 @@ export default function FormSelect({
         }}
         disabled={isDisabled}
       >
-        <div className="relative mt-2 ">
+        <div className="relative mt-2">
           {SelectIcon && (
             <SelectIcon
               className={cn(
@@ -159,7 +159,7 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6 disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300" ,
+              "block w-full rounded-md border-border py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
               {
                 "outline-destructive": error,
                 "border-destructive": error,
@@ -191,9 +191,12 @@ export default function FormSelect({
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ChevronDownIcon
-              className={cn("absolute right-2 top-2.5 size-5 text-muted-foreground", {
-                "opacity-50": isDisabled || isReadOnly,
-              })}
+              className={cn(
+                "absolute right-2 top-2.5 size-5 text-muted-foreground",
+                {
+                  "opacity-50": isDisabled || isReadOnly,
+                },
+              )}
               aria-hidden="true"
             />
           </ComboboxButton>
@@ -235,16 +238,28 @@ export default function FormSelect({
                 ))}
               </ComboboxOptions>
             ) : (
-              <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none">
+              <ComboboxOptions
+                static={open}
+                ref={setPopperElement}
+                style={styles.popper}
+                {...attributes.popper}
+                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+              >
+                <ComboboxOption
+                  value={null}
+                  disabled={true}
+                  className="group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none"
+                  data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                >
                   <span
                     className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                    data-test-id={`${formKey}-opt-not-found-lbl-${fieldConfig.name}`}
                   >
                     No {fieldConfig?.label} found.
                   </span>
-                </div>
-              </div>
+                </ComboboxOption>
+              </ComboboxOptions>
             ))}
         </div>
       </Combobox>

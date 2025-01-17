@@ -63,23 +63,6 @@ export const SetIdTab = (mainEntity: string) => {
         },
       ],
     },
-    {
-      name: "Archived",
-      current: false,
-      href: `/portal/${mainEntity}/grid?filter_id=`,
-      default: true,
-      default_filter: [
-        {
-          operator: "equal",
-          type: "criteria",
-          field: "status",
-          id: ulid(),
-          label: "Status",
-          values: ["Archived"],
-          default: true,
-        },
-      ],
-    },
   ].map((tab) => {
     const _id = ulid();
 
