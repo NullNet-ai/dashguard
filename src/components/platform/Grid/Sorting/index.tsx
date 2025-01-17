@@ -33,7 +33,7 @@ const Sorting = () => {
 
   useEffect(() => {
     const calc = (items?: any[]) => {
-      const itemss: any[] = [];
+      const allItems: any[] = [];
       const newData = items || state?.sorting || [];
 
       const clearWidth = 65 + 63 + 42; // clear width, more width, and sort by
@@ -44,19 +44,19 @@ const Sorting = () => {
         if (itemsRef.current[index]?.offsetWidth) {
           totalWidth += itemsRef.current[index].offsetWidth || 0;
           if (totalWidth > containerWidth) {
-            itemss?.push({
+            allItems?.push({
               ...newData[index],
               hidden: true,
             });
           } else {
-            itemss?.push({
+            allItems?.push({
               ...newData[index],
               hidden: false,
             });
           }
         }
       }
-      return itemss;
+      return allItems;
     };
 
     const onResize = () => {
