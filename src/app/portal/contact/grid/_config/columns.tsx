@@ -62,14 +62,21 @@ const gridColumns = [
     }
   },
   {
-    header: "Organization",
+    header: "Primary Organization",
     accessorKey: "organization",
     isSearchable: false,
   },
   {
     header: "Role",
-    accessorKey: "role",
+    accessorKey: "roles",
+    enableResizing: false,
     isSearchable: false,
+    cell: ({ row }) => {
+      const roles = row?.original?.roles || [];
+      return roles?.map((role: string, index: number) => {
+        return <StatusCell key={index} value={role} />;
+      });
+    },
   },
   {
     header: "Updated Date",
