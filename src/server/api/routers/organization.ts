@@ -477,27 +477,31 @@ export const organizationRouter = createTRPCRouter({
           query: {
             advance_filters,
             pluck: input.pluck_fields,
-            // pluck_object: {
-            //   organizations: ["id"],
-            //   contacts: ["organization_id"],
-            // },
+            pluck_object: {
+              organization_contacts: ["id", "contact_organization_id"],
+              contacts: ["organization_id", "status"],
+            },
           },
         })
-        // .join({
-        //   type: "left",
-        //   field_relation: {
-        //     to: {
-        //       entity: "contact",
-        //       field: "organization_id",
-        //     },
-        //     from: {
-        //       entity: ENTITY,
-        //       field: "id",
-        //     },
-        //   },
-        // })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "contact",
+              field: "id",
+            },
+            from: {
+              entity: "organization_contact",
+              field: "contact_id",
+            },
+          },
+        })
         .execute();
 
-      return record?.data?.[0];
+      if (record.data?.[0]?.contacts?.status === 'Active') {
+        return record.data[0].organization_contacts;
+      }
+      return null;
+
     }),
 });
