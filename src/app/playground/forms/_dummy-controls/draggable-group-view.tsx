@@ -1,4 +1,7 @@
 "use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
 import { Form } from "~/components/ui/form";
@@ -16,7 +19,19 @@ const FormSchema = z.object({
   ),
 });
 
-export default function GroupTabView({form, handleSave}: any) {
+export default function GroupTabView() {
+  const form = useForm<z.infer<any>>({
+    resolver: zodResolver(FormSchema), // is this where the validation relies?
+    defaultValues: {
+      draggable: [
+        {
+          "full-name": "John Doe",
+          email: "",
+        },
+      ],
+    },
+    shouldFocusError: false,
+  });
 
   return (
     <div>
