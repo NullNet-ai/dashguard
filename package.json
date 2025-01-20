@@ -102,6 +102,7 @@
     "react-easy-crop": "^5.2.0",
     "react-hook-form": "^7.53.1",
     "react-hook-form-persist": "^3.0.0",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-international-phone": "4.3.0",
     "react-medium-image-zoom": "^5.2.11",
     "react-popper": "^2.3.0",
