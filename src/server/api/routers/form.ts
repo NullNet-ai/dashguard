@@ -26,7 +26,7 @@ export const formRouter = createTRPCRouter({
         })
         .execute()
         .catch((error) => {
-          throw new Error(error);
+          throw error;
         });
 
       const result = record?.data?.[0];

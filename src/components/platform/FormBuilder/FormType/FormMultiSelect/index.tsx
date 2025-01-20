@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
+  type UseFormReturn,
 } from "react-hook-form";
 import {
   FormControl,
@@ -11,10 +11,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import MultipleSelector, { type Option } from "~/components/ui/multi-select";
-import { ISelectOptions, type IField } from "../../types";
-import { useState } from "react";
-import { CreateRecord } from "../../Actions/CreateRecord";
 import { useToast } from "~/context/ToastProvider";
+import { createRecord } from "../../Actions/CreateRecord";
+import { type IField } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
@@ -47,7 +46,7 @@ export default function FormMultiSelect({
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
 
-  const createRecord = async (query: string) => {
+  const createNewRecord = async (query: string) => {
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
       return
@@ -65,7 +64,7 @@ export default function FormMultiSelect({
     } else {
       const { entity, fieldIdentifier, customParams } =
         fieldConfig?.selectOnCreateRecord ?? {};
-      createdData = await CreateRecord({
+      createdData = await createRecord({
         entity,
         fieldIdentifier,
         data: {
@@ -143,7 +142,7 @@ export default function FormMultiSelect({
             fieldConfig.multiSelectHideClearAllButton ??
             fieldConfig.multiSelectMaxSelected === 1
           }
-          onCreateRecord={createRecord}
+          onCreateRecord={createNewRecord}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

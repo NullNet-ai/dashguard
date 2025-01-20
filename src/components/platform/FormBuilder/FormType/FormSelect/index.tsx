@@ -23,7 +23,7 @@ import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
 import { cn, formatFormTestID } from "~/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
-import { CreateRecord } from "../../Actions/CreateRecord";
+import { createRecord } from "../../Actions/CreateRecord";
 import { useToast } from "~/context/ToastProvider";
 
 interface IProps {
@@ -118,7 +118,7 @@ export default function FormSelect({
     fieldConfig?.selectEnableCreate,
   ]);
 
-  const createRecord = async () => {
+  const createNewRecord = async () => {
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
       return
@@ -137,7 +137,7 @@ export default function FormSelect({
     } else {
       const { entity, fieldIdentifier, customParams } =
         fieldConfig?.selectOnCreateRecord ?? {};
-      createdData = (await CreateRecord({
+      createdData = (await createRecord({
         entity,
         fieldIdentifier,
         data: {
@@ -292,7 +292,7 @@ export default function FormSelect({
                   <span
                     className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
                     data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                    onClick={createRecord}
+                    onClick={createNewRecord}
                   >
                     {isCreateLoading ? "Creating..." : `Create "${query}"`}
                   </span>
