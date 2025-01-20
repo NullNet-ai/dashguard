@@ -30,24 +30,32 @@ interface OptionType {
   value: string;
 }
 
-type DraggableConfig ={
+type DraggableConfig = {
   fields: IField & {
     selectOptions?: ISelectOptions[];
-    radioOptions?:IRadioOptions[];
+    radioOptions?: IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
-    formType?: "input" | "select" | "radio" | "checkbox" | "textarea" | 'number-input'|"smart-date" | 'time-picker';
+    formType?:
+      | "input"
+      | "select"
+      | "radio"
+      | "checkbox"
+      | "textarea"
+      | "number-input"
+      | "smart-date"
+      | "time-picker";
   };
-}
+};
 
-type MultiFieldConfig =  DraggableConfig & {
+type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
-}
+};
 
 type MultiFieldOption = {
-  label : string;
-  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
+  label: string;
+  fieldType: "input" | "select" | "radio" | "checkbox";
   options?: OptionType[];
-} 
+};
 
 interface IField {
   id: string;
@@ -63,7 +71,7 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
-  timePickerProps?:TimePickerProps;
+  timePickerProps?: TimePickerProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
     granularity?: DateGranularity;
     minDate?: Date;
@@ -74,7 +82,7 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
-  switchConfig?:RawSwitchProps
+  switchConfig?: RawSwitchProps;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
@@ -126,6 +134,17 @@ interface IField {
   };
   selectSearchable?: boolean;
   accuracy?: number;
+  selectEnableCreate?: boolean;
+  selectOnCreateRecord?:
+    | {
+        fieldIdentifier: string;
+        entity: string;
+        customParams?: Record<string, any>;
+      }
+    | ((text: string) => Promise<ISelectOptions>);
+  selectOnCreateValidate?: (
+    text: string,
+  ) => Promise<{ valid: boolean; message?: string }>;
 }
 
 interface ISelectOptions {
@@ -188,7 +207,7 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
-  formHostInitialView?: 'lock' | 'unlock';
+  formHostInitialView?: "lock" | "unlock";
   enableFormFilterCreate?: boolean;
 }
 
@@ -214,7 +233,7 @@ interface IFilterGridConfig {
   hideSearch?: boolean;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
-  searchConfig? : any;
+  searchConfig?: any;
   onClipboardPaste?: (
     data: Record<string, any>,
     form: any,
