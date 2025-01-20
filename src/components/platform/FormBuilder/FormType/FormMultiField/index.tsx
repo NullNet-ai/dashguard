@@ -187,17 +187,23 @@ const FormMultiField = ({
         >
           <div className="!m-0 flex w-full flex-col">
             {fields.map((field, index) => (
-              <SortableItem key={field.id} value={field.id} asChild>
+              <SortableItem key={field.id} value={field.id} asChild
+                draggable={isDisabled ? false : true}
+              >
                 <div className="border-default-100 flex flex-row items-center gap-2 border-b py-2">
-                  <SortableDragHandle
-                    variant="link"
-                    size="icon"
-                    className="size-8 shrink-0 text-default/40"
-                  >
-                    <GripVerticalIcon className="size-5" aria-hidden="true" />
-                  </SortableDragHandle>
+                  {!isDisabled ? (
+                     <SortableDragHandle
+                      variant="link"
+                      size="icon"
+                      className="size-8 shrink-0 text-default/40"
+                      disabled={isDisabled}
+                    > 
+                      <GripVerticalIcon /> 
+                    </SortableDragHandle>
+                  ) : null}
                   <div className="min-w-[150px]">
-                    <FormLabel className="font-normal">
+                    <FormLabel className="font-normal"
+                    >
                       {form.getValues(`${fieldConfig.name}.${index}.name`) ??
                         fieldConfig.multiFieldConfig?.fields?.label}
                     </FormLabel>
@@ -232,7 +238,8 @@ const FormMultiField = ({
                       }
                     />
                   </div>
-                  <Button
+                  {!isDisabled ? (
+                    <Button
                     disabled={isDisabled}
                     type="button"
                     variant="softDestructive"
@@ -246,6 +253,7 @@ const FormMultiField = ({
                     />
                     <span className="sr-only">Remove</span>
                   </Button>
+                  ) : null}
                 </div>
               </SortableItem>
             ))}

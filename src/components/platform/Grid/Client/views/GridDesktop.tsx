@@ -15,9 +15,10 @@ interface IGridDesktopProps {
   parentType: "grid" | "form" | "field";
   hideSearch?: boolean;
   height?: string;
+  showAction?: boolean;
 }
 
-function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
+function GridDesktop({ parentType, hideSearch, height, showAction }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
   return (
@@ -66,7 +67,9 @@ function GridDesktop({ parentType, hideSearch, height }: IGridDesktopProps) {
           <TableHeader>
             <MyTableHead />
           </TableHeader>
-          <MyTableBody />
+          <MyTableBody 
+            showAction={showAction}
+          />
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
