@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardFooter, CardHeader } from "~/components/ui/card";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import CreateButton from "../../Header/ButtonHeader";
 import MobileHeader from "../../Header/MobileHeader";
 import InfiniteScrollContainer from "./InfiniteScroll";
@@ -19,8 +19,9 @@ function GridMobile() {
           <InfiniteScrollContainer />
           <CreateButton className="fixed right-4 bottom-[8rem] md:bottom-[9rem]  z-10 w-14 h-14 rounded-full" />
         </section>
+      </ScrollArea>
     </Card>
-  );
+  )
 }
 
 export default GridMobile;
