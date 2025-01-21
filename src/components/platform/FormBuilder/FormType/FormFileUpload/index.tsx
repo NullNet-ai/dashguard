@@ -35,7 +35,7 @@ export default function FormFile({
   formKey,
 }: IProps) {
   const { formState, field } = formRenderProps;
-  const value = formState?.defaultValues?.[field.name];
+  const value = formState?.defaultValues?.[field.name] ?? [];
 
   const { register } = form;
   const handleChangeUpload = (file_ids: string[]) => {

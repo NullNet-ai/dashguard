@@ -39,12 +39,13 @@ const FileUpload = ({
       <FileInput
         id="fileInput"
         className={
-          !!form?.formState?.errors &&
-          !!Object?.keys(form?.formState?.errors)?.length
-            ? `h-full content-center border border-dashed border-destructive`
-            : "h-full content-center border border-dashed border-border/75"
+          !(
+            form?.formState?.errors && Object.keys(form.formState.errors).length
+          )
+            ? `h-full content-center border border-dashed border-border/75`
+            : "h-full content-center border border-dashed border-destructive"
         }
-        disabled={formRenderProps?.field.disabled || fieldConfig?.readonly}
+        disabled={formRenderProps?.field?.disabled || fieldConfig?.readonly}
         {...fileInputProps}
       >
         <div className="flex w-full flex-col items-center justify-center p-8">
