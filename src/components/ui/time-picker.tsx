@@ -19,7 +19,10 @@ export interface TimePickerProps {
 }
 
 const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
-  ({ value, onChange, is24Hour = false, className }, ref) => {
+  (
+    { value, onChange, is24Hour = false, className, disabled, readonly },
+    ref,
+  ) => {
     const timescape = useTimescape({
       date: value || undefined,
       hour12: !is24Hour,
@@ -34,22 +37,34 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
         {...timescape.getRootProps()}
         ref={ref}
         className={cn(
-          `flex ${!options.hour12 ? "w-44" : "w-44"} items-center justify-around p-1  `,
+          `flex ${!options.hour12 ? "w-44" : "w-44"} items-center justify-around p-1`,
           "rounded-md",
           className,
         )}
       >
-        <ClockIcon className=" w-8 text-muted-foreground mr-auto" />
+        <ClockIcon className="mr-auto w-8 text-muted-foreground" />
         <Input
           containerClassName="w-10 !mt-0"
-          className={cn(timePickerInputBase, "!w-[15px] opacity-100")}
+          className={cn(
+            timePickerInputBase,
+            "!w-[15px] opacity-100",
+            readonly && "pointer-events-none",
+          )}
+          disabled={disabled}
+          readOnly={readonly}
           {...timescape.getInputProps("hours")}
           placeholder="HH"
         />
         <span className={cn(timePickerSeparatorBase, "opacity-100")}>:</span>
         <Input
           containerClassName="w-10 !mt-0"
-          className={cn(timePickerInputBase, "!w-[15px] opacity-100")}
+          className={cn(
+            timePickerInputBase,
+            "!w-[15px] opacity-100",
+            readonly && "pointer-events-none",
+          )}
+          disabled={disabled}
+          readOnly={readonly}
           {...timescape.getInputProps("minutes")}
           placeholder="MM"
         />
@@ -57,7 +72,13 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
         {options.hour12 && (
           <Input
             containerClassName="w-10 !mt-0"
-            className={cn(timePickerInputBase, "!w-[60px] opacity-100")}
+            className={cn(
+              timePickerInputBase,
+              "!w-[60px] opacity-100",
+              readonly && "pointer-events-none",
+            )}
+            disabled={disabled}
+            readOnly={readonly}
             {...timescape.getInputProps("am/pm")}
             placeholder="AM/PM"
           />
