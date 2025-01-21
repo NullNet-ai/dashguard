@@ -64,6 +64,7 @@ interface IField {
   creatable?: boolean;
   name: string;
   label?: string;
+  detail?: string;
   placeholder?: string;
   disabled?: boolean;
   hidden?: boolean;
