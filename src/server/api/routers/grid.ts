@@ -83,11 +83,7 @@ export const gridRouter = createTRPCRouter({
       });
 
       const hasTabMenu = await ctx.redisClient.getCachedData(_tabMenuId);
-      console.log({
-        input,
-        _tabMenuId,
-        hasTabMenu,
-      });
+
       if (hasTabMenu) return hasTabMenu;
       if (input?.application === "grid") {
         const setIdTab = SetIdTab(input.entity);

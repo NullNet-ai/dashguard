@@ -78,7 +78,6 @@ const TabItems = ({ items }: TabItemsProps) => {
         current: true,
       },
     ]?.map((item) => {
-      console.log(item, pathname);
       return {
         ...item,
         current: item.href === pathname,

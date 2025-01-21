@@ -55,9 +55,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
       customFormHostViewFormActions={[
         {
           label: "Custom Action",
-          onClick: () => {
-            // console.log("Custom Action Clicked");
-          },
+          onClick: () => {},
           icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
           disabled: false,
           hidden: false,
@@ -66,9 +64,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
       customFormHostLockFormActions={[
         {
           label: "Custom Action",
-          onClick: () => {
-            // console.log("Custom Action Clicked");
-          },
+          onClick: () => {},
           icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
           disabled: false,
           hidden: false,
