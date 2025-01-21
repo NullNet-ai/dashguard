@@ -10,8 +10,8 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { IField } from "../../types";
 import FileUpload from "~/components/platform/FileUpload";
+import { IField } from "../../types";
 
 // import { DevTool } from "@hookform/devtools";
 
@@ -20,6 +20,7 @@ interface IProps {
   formRenderProps: {
     field: ControllerRenderProps<Record<string, string[]>>;
     fieldState: ControllerFieldState;
+    formState?: any;
   };
   form: UseFormReturn<Record<string, string[]>, string, undefined>;
   accept?: string; // Optional accept prop for file types
@@ -33,8 +34,9 @@ export default function FormFile({
   fieldConfig,
   formKey,
 }: IProps) {
-  const { field } = formRenderProps;
-  const { value } = field;
+  const { formState, field } = formRenderProps;
+  const value = formState?.defaultValues?.[field.name];
+
   const { register } = form;
   const handleChangeUpload = (file_ids: string[]) => {
     form?.setValue(field.name, file_ids, {
@@ -78,7 +80,6 @@ export default function FormFile({
           value={value as any[]}
           formRenderProps={formRenderProps}
           fieldConfig={fieldConfig}
-          form={form}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

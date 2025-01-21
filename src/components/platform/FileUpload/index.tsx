@@ -22,7 +22,6 @@ const FileUpload = ({
   fileInputProps,
   fieldConfig,
   fileUploaderContentProps,
-  form,
   ...props
 }: FileProps) => {
   return (
@@ -37,9 +36,7 @@ const FileUpload = ({
     >
       <FileInput
         id="fileInput"
-        className={`h-full content-center border border-dashed ${
-          form?.formState?.errors ? "border-red-500" : "border-border/75"
-        }`}
+        className="h-full content-center border border-dashed border-border/75"
         disabled={formRenderProps?.field.disabled || fieldConfig?.readonly}
         {...fileInputProps}
       >

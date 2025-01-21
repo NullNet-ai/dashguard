@@ -71,7 +71,6 @@ export type FileUploaderProps = {
     fieldState: ControllerFieldState;
   };
   fieldConfig: IField;
-  form?: any;
 };
 
 export const FileUploader = forwardRef<
@@ -112,7 +111,7 @@ export const FileUploader = forwardRef<
       multiple = true,
     } = dropzoneOptions;
 
-    const { data }: any = api?.files?.getFileById.useQuery({
+    const { data }: any = api.files.getFileById.useQuery({
       id: (_file as unknown as string[])?.[0] ?? "",
       pluck_fields: [
         "filename",
@@ -274,12 +273,7 @@ export const FileUploader = forwardRef<
         const files = acceptedFiles;
 
         if (!files) {
-          toast.error("file error, probably too big");
-          return;
-        }
-
-        if (!multiple && files.length > 1) {
-          toast.error("Only one file can be uploaded at a time");
+          toast.error("file error , probably too big");
           return;
         }
 
@@ -315,11 +309,6 @@ export const FileUploader = forwardRef<
           }
         });
 
-        if (!multiple && newValues.length > 1) {
-          newValues.splice(1); // Keep only the first file
-          toast.error("Only one file can be uploaded at a time");
-        }
-
         onValueChange(newValues);
 
         if (rejectedFiles.length) {
@@ -341,8 +330,9 @@ export const FileUploader = forwardRef<
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [reSelectAll, value, multiple],
+      [reSelectAll, value],
     );
+
     useEffect(() => {
       if (!value) return;
       if (value.length === maxFiles) {
