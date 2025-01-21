@@ -7,13 +7,8 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import { useFileUpload } from "./Provider";
 import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
 import { FileCrop } from "./FileCrop";
-import {
-  CropState,
-  PixelCrop,
-  blobToFile,
-  canvasPreview,
-  createImage,
-} from "./canvasUtils";
+import type { CropState, PixelCrop } from "./canvasUtils";
+import { blobToFile, canvasPreview, createImage } from "./canvasUtils";
 import { toast } from "sonner";
 import { Progress } from "~/components/ui/progress";
 
@@ -28,13 +23,21 @@ export const FileUploaderItem = forwardRef<
   HTMLDivElement,
   {
     index: number;
-    file: any;
+    file: File & { download_path?: string };
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
   } & React.HTMLAttributes<HTMLDivElement>
 >(
   (
-    { className, index, file, onRemove, children, progressState, ...props },
+    {
+      className,
+      index,
+      file,
+      onRemove: _onRemove,
+      children: _children,
+      progressState,
+      ...props
+    },
     ref,
   ) => {
     const {
@@ -81,7 +84,7 @@ export const FileUploaderItem = forwardRef<
 
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const readFile = (file: File | any) => {
+    const readFile = (file: File & { download_path?: string }) => {
       if (file?.download_path) return;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
