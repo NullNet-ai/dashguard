@@ -11,6 +11,7 @@ interface FileProps extends FileUploaderProps {
   fileUploaderProps?: Record<string, string>;
   fileInputProps?: Record<string, string>;
   fileUploaderContentProps?: Record<string, string>;
+  form?: any;
 }
 const FileUpload = ({
   value,
@@ -37,10 +38,14 @@ const FileUpload = ({
     >
       <FileInput
         id="fileInput"
-        className={`h-full content-center border border-dashed ${
-          form?.formState?.errors ? "border-red-500" : "border-border/75"
-        }`}
-        disabled={formRenderProps?.field.disabled || fieldConfig?.readonly}
+        className={
+          !(
+            form?.formState?.errors && Object.keys(form.formState.errors).length
+          )
+            ? `h-full content-center border border-dashed border-border/75`
+            : "h-full content-center border border-dashed border-destructive"
+        }
+        disabled={formRenderProps?.field?.disabled || fieldConfig?.readonly}
         {...fileInputProps}
       >
         <div className="flex w-full flex-col items-center justify-center p-8">

@@ -5,19 +5,13 @@ export default function Tab() {
   return (
     <Fragment>
       <div className="">
-        {/* <label htmlFor="tabs" className="sr-only">
-          Select a tab
-          </label> */}
-        {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-        {/* <SelectedTab tabs={tabs} /> */}
-
         <img
           alt="Your Company"
           src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-          className="ml-4 h-10 hidden"
+          className="ml-4 hidden h-10"
         />
       </div>
-      <div className=" lg:block">
+      <div className="lg:block">
         <div>
           <TabList />
         </div>
