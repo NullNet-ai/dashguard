@@ -274,7 +274,12 @@ export const FileUploader = forwardRef<
         const files = acceptedFiles;
 
         if (!files) {
-          toast.error("file error , probably too big");
+          toast.error("file error, probably too big");
+          return;
+        }
+
+        if (!multiple && files.length > 1) {
+          toast.error("Only one file can be uploaded at a time");
           return;
         }
 
@@ -310,6 +315,11 @@ export const FileUploader = forwardRef<
           }
         });
 
+        if (!multiple && newValues.length > 1) {
+          newValues.splice(1); // Keep only the first file
+          toast.error("Only one file can be uploaded at a time");
+        }
+
         onValueChange(newValues);
 
         if (rejectedFiles.length) {
@@ -331,9 +341,8 @@ export const FileUploader = forwardRef<
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [reSelectAll, value],
+      [reSelectAll, value, multiple],
     );
-
     useEffect(() => {
       if (!value) return;
       if (value.length === maxFiles) {

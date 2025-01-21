@@ -52,6 +52,11 @@ export default function FileDetails({}) {
             label: "Resume",
             required: true,
             placeholder: "Upload your resume",
+            fileDropzoneOptions: {
+              multiple: false,
+              maxSize: 1024 * 1024 * 10,
+              maxFiles: 5,
+            },
           },
         ]}
       />
