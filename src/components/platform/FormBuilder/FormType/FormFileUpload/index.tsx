@@ -34,7 +34,7 @@ export default function FormFile({
   formKey,
 }: IProps) {
   const { field } = formRenderProps;
-  const { value } = field;
+  const {value } = field;
   const { register } = form;
   const handleChangeUpload = (file_ids: string[]) => {
     form?.setValue(field.name, file_ids, {
@@ -43,10 +43,10 @@ export default function FormFile({
     });
   };
 
-  const defaultDropzoneOptions = {
-    maxFiles: 5,
-    maxSize: 1024 * 1024 * 10,
-    multiple: true,
+  const fileDropZoneOptions = {
+    maxFiles: fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5,
+    maxSize:fieldConfig?.fileDropzoneOptions?.maxSize ?? 1024 * 1024 * 10,
+    multiple:fieldConfig?.fileDropzoneOptions?.multiple ?? true,
   };
   return (
     <FormItem>
@@ -73,7 +73,7 @@ export default function FormFile({
           }}
           onUploadFile={handleChangeUpload}
           dropzoneOptions={
-            fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
+            fileDropZoneOptions
           }
           value={value as any[]}
           formRenderProps={formRenderProps}
