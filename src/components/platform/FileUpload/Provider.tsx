@@ -112,7 +112,7 @@ export const FileUploader = forwardRef<
     } = dropzoneOptions;
 
     const { data }: any = api.files.getFileById.useQuery({
-      id: (_file as unknown as string[])?.[0] ?? "",
+      ids: (_file as unknown as string[]) ?? "",
       pluck_fields: [
         "filename",
         "filepath",
@@ -127,8 +127,9 @@ export const FileUploader = forwardRef<
       const new_value = data?.map((file: any) => {
         return {
           ...file,
-          type: file.mimetype,
-          name: file.originalname,
+          type: file?.mimetype,
+          name: file?.originalname,
+          download_path: file?.download_path,
         } as File;
       });
 

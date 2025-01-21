@@ -27,7 +27,7 @@ export async function GET(
   }
 
   const data: any = await api.files.getFileById({
-    id: params.file_id,
+    ids: [params.file_id],
     pluck_fields: ["filename", "filepath", "mimetype", "download_path", "size"],
   });
 
@@ -51,7 +51,6 @@ export async function GET(
 
     return response;
   } catch (error) {
-    // console.error("Error fetching file:", error);
     if (axios.isAxiosError(error)) {
       return NextResponse.json(
         { message: error.message },

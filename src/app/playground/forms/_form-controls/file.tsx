@@ -44,9 +44,12 @@ export default function FileDetails({}) {
           formClassName: "sm:grid-cols-1",
         }}
         defaultValues={{
-          resume: ["01JJ3VEEBDPVTZF2ZS4STZ9QNR", "01JJ3ZZ58E7C735440ZDHFE5HD"],
-          file: ["01JJ3VEEBDPVTZF2ZS4STZ9QNR"],
-          new_file: ["01JJ3ZZ58E7C735440ZDHFE5HD"],
+          resume: ["01JJ5FGJ4FVJHHDS0JZDKF8J5T", "01JJ5FGM8MG3PQW0Z7KJC74EVS"],
+          file: ["01JJ5FGV0RHJMFZCW6514QHHV9", "01JJ5FGWX5W2101K1GXQXSJ43V"],
+          new_file: [
+            "01JJ5FGPVEHTNWWQT3G2R16AD2",
+            "01JJ5FGS38ZNSHXFS0TMYFFVC1",
+          ],
         }}
         fields={[
           {
