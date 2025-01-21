@@ -10,8 +10,8 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { IField } from "../../types";
 import FileUpload from "~/components/platform/FileUpload";
+import { IField } from "../../types";
 
 // import { DevTool } from "@hookform/devtools";
 
@@ -20,6 +20,7 @@ interface IProps {
   formRenderProps: {
     field: ControllerRenderProps<Record<string, string[]>>;
     fieldState: ControllerFieldState;
+    formState?: any;
   };
   form: UseFormReturn<Record<string, string[]>, string, undefined>;
   accept?: string; // Optional accept prop for file types
@@ -33,8 +34,9 @@ export default function FormFile({
   fieldConfig,
   formKey,
 }: IProps) {
-  const { field } = formRenderProps;
-  const { value } = field;
+  const { formState, field } = formRenderProps;
+  const value = formState?.defaultValues?.[field.name] ?? [];
+
   const { register } = form;
   const handleChangeUpload = (file_ids: string[]) => {
     form?.setValue(field.name, file_ids, {
@@ -43,10 +45,10 @@ export default function FormFile({
     });
   };
 
-  const defaultDropzoneOptions = {
-    maxFiles: 5,
-    maxSize: 1024 * 1024 * 10,
-    multiple: true,
+  const fileDropZoneOptions = {
+    maxFiles: fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5,
+    maxSize: fieldConfig?.fileDropzoneOptions?.maxSize ?? 1024 * 1024 * 10,
+    multiple: fieldConfig?.fileDropzoneOptions?.multiple ?? true,
   };
   return (
     <FormItem>
@@ -72,13 +74,10 @@ export default function FormFile({
             "data-test-id": `${formKey}-file-cnt-${fieldConfig.name}`,
           }}
           onUploadFile={handleChangeUpload}
-          dropzoneOptions={
-            fieldConfig.fileDropzoneOptions ?? defaultDropzoneOptions
-          }
+          dropzoneOptions={fileDropZoneOptions}
           value={value as any[]}
           formRenderProps={formRenderProps}
           fieldConfig={fieldConfig}
-          form={form}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

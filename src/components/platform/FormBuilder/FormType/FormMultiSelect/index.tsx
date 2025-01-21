@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
+  type UseFormReturn,
 } from "react-hook-form";
 import {
   FormControl,
@@ -11,6 +11,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import MultipleSelector, { type Option } from "~/components/ui/multi-select";
+import { useToast } from "~/context/ToastProvider";
+import { createRecord } from "../../Actions/CreateRecord";
 import { type IField } from "../../types";
 
 interface IProps {
@@ -40,25 +42,61 @@ export default function FormMultiSelect({
   formKey,
 }: IProps) {
   const { register } = form;
-
+  const toast = useToast();
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
+
+  const createNewRecord = async (query: string) => {
+    if (!fieldConfig?.selectOnCreateRecord) {
+      toast.error("selectOnCreateRecord is not defined in fieldConfig");
+      return
+    }
+    if (fieldConfig?.selectOnCreateValidate) {
+      const validation = await fieldConfig?.selectOnCreateValidate(query);
+      if (!validation?.valid) {
+        toast.error(validation?.message || "Invalid Input");
+        return;
+      }
+    }
+    let createdData = null;
+    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+      createdData = await fieldConfig?.selectOnCreateRecord(query);
+    } else {
+      const { entity, fieldIdentifier, customParams } =
+        fieldConfig?.selectOnCreateRecord ?? {};
+      createdData = await createRecord({
+        entity,
+        fieldIdentifier,
+        data: {
+          ...(customParams ?? {}),
+          [fieldIdentifier]: query,
+        },
+      });
+    }
+    return createdData as Option;
+  };
+
   return (
     <FormItem className="overflow-visible">
-      <FormLabel required={fieldConfig.required} data-test-id={`${formKey}-lbl-${fieldConfig.name}`}>
+      <FormLabel
+        required={fieldConfig.required}
+        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+      >
         {fieldConfig.label}
       </FormLabel>
       <FormControl>
         <MultipleSelector
           {...register(fieldConfig.name)}
           {...formRenderProps.field}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          readOnly={
+            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+          }
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={fieldConfig.disabled || isDisabled}
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"
-              : "border border-input outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring py-0 flex items-center"
+              : "flex items-center border border-input py-0 outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
           }
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
@@ -81,21 +119,21 @@ export default function FormMultiSelect({
           hidePlaceholderWhenSelected={
             fieldConfig.multiSelectHidePlaceholderWhenSelected ?? false
           }
-          creatable={!multiSelectOnSearch && !multiselectOptions && true}
+          creatable={fieldConfig.selectEnableCreate ?? false}
           triggerSearchOnFocus={
             fieldConfig.multiSelectTriggerSearchOnFocus ?? false
           }
           defaultOptions={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label.localeCompare(b.label),
+                  a.label?.localeCompare(b.label),
                 )
               : multiselectOptions?.[fieldConfig.name]
           }
           options={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label.localeCompare(b.label),
+                  a.label?.localeCompare(b.label),
                 )
               : multiselectOptions?.[fieldConfig.name]
           }
@@ -104,6 +142,7 @@ export default function FormMultiSelect({
             fieldConfig.multiSelectHideClearAllButton ??
             fieldConfig.multiSelectMaxSelected === 1
           }
+          onCreateRecord={createNewRecord}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

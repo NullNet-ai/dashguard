@@ -17,10 +17,12 @@ export default function FormFilterGrid({
   handleCloseGrid,
   handleSelectedGridRecords,
   handleListLoading,
+  className
 }: {
   handleSelectedGridRecords: (records: any[]) => void;
   handleCloseGrid: () => void;
   handleListLoading: (loading: boolean) => void;
+  className?: string;
   config: IFilterGridConfig;
 }) {
   const {
@@ -124,16 +126,22 @@ export default function FormFilterGrid({
     .filter(Boolean) as string[];
 
   const calcWidth = useMemo(() => {
+    if (className) {
+      return className
+    } 
     if (open && state?.isSummaryOpen) {
-      return "w-[calc(100vw)]";
+      return "w-full";
     } else if (!open && state?.isSummaryOpen) {
       return "w-auto";
     } else if (open && !state?.isSummaryOpen) {
       return "w-[calc(100vw-320px)]";
     } else return "";
-  }, [open, state?.isSummaryOpen]);
+  }, [open, state?.isSummaryOpen, className]);
 
   const containerWidth = useMemo(() => {
+    if (className) {
+      return className
+    }
     if (open && state?.isSummaryOpen) {
       return "lg:w-[calc(100vw-550px)]";
     } else if (!open && state?.isSummaryOpen) {
@@ -141,7 +149,7 @@ export default function FormFilterGrid({
     } else if (open && !state?.isSummaryOpen) {
       return "w-[calc(100vw-320px)]";
     } else return "";
-  }, [open, state?.isSummaryOpen]);
+  }, [open, state?.isSummaryOpen, className]);
 
   handleListLoading(isLoading);
 

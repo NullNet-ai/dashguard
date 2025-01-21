@@ -71,7 +71,6 @@ export type FileUploaderProps = {
     fieldState: ControllerFieldState;
   };
   fieldConfig: IField;
-  form?: any;
 };
 
 export const FileUploader = forwardRef<
@@ -112,7 +111,7 @@ export const FileUploader = forwardRef<
       multiple = true,
     } = dropzoneOptions;
 
-    const { data }: any = api?.files?.getFileById.useQuery({
+    const { data }: any = api.files.getFileById.useQuery({
       id: (_file as unknown as string[])?.[0] ?? "",
       pluck_fields: [
         "filename",

@@ -25,7 +25,6 @@ export default function FileDetails({}) {
         );
         resolve();
       } catch (error) {
-        console.error("Form submission error", error);
         toast.error("Failed to submit the form. Please try again.");
         reject(new Error("Form submission error"));
       }
@@ -44,6 +43,11 @@ export default function FileDetails({}) {
         customDesign={{
           formClassName: "sm:grid-cols-1",
         }}
+        defaultValues={{
+          resume: ["01JJ3VEEBDPVTZF2ZS4STZ9QNR", "01JJ3ZZ58E7C735440ZDHFE5HD"],
+          file: ["01JJ3VEEBDPVTZF2ZS4STZ9QNR"],
+          new_file: ["01JJ3ZZ58E7C735440ZDHFE5HD"],
+        }}
         fields={[
           {
             id: "resume",
@@ -52,6 +56,37 @@ export default function FileDetails({}) {
             label: "Resume",
             required: true,
             placeholder: "Upload your resume",
+            fileDropzoneOptions: {
+              multiple: false,
+              maxSize: 1024 * 1024 * 10,
+              maxFiles: 5,
+            },
+          },
+          {
+            id: "new_file",
+            formType: "file",
+            name: "new_file",
+            label: "New File",
+            required: true,
+            placeholder: "Upload your new file",
+            fileDropzoneOptions: {
+              multiple: false,
+              maxSize: 1024 * 1024 * 10,
+              maxFiles: 5,
+            },
+          },
+          {
+            id: "file",
+            formType: "file",
+            name: "file",
+            label: "File",
+            required: true,
+            placeholder: "Upload your resume",
+            fileDropzoneOptions: {
+              multiple: false,
+              maxSize: 1024 * 1024 * 10,
+              maxFiles: 5,
+            },
           },
         ]}
       />

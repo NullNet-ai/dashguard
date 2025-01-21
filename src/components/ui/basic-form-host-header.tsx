@@ -53,7 +53,7 @@ export default function BasicFormHostHeader({
           <LockClosedIcon className="h-4 w-4 cursor-pointer rounded-full border" />
         </Button>
       ) : (
-        <>
+        <div className="flex gap-2">
           <Button
             variant={"default"}
             onClick={handleSave}
@@ -97,7 +97,7 @@ export default function BasicFormHostHeader({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </>
+        </div>
       )}
     </div>
   );

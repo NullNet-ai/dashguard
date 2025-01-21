@@ -11,6 +11,7 @@ interface IClientProps extends IPropsGrid {
   height?: string;
   showPagination?: boolean;
   hideSearch?: boolean;
+  showAction?: boolean;
 }
 
 function MainClient({
@@ -24,7 +25,8 @@ function MainClient({
   hideSearch = true,
   showPagination = true,
   advanceFilter,
-  sorting
+  sorting,
+  showAction
 }: IClientProps) {
   return (
     <GridProvider
@@ -38,7 +40,7 @@ function MainClient({
       sorting={sorting}
     >
       <div className="hidden lg:flex">
-        <GridDesktop parentType={parentType} hideSearch={hideSearch} height={height} />
+        <GridDesktop parentType={parentType} hideSearch={hideSearch} height={height} showAction={showAction}/>
       </div>
       <div className="flex h-[500px] lg:hidden">
         {parentType === "grid" ? (
