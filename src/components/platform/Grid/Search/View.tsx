@@ -78,7 +78,7 @@ export default function Search() {
               aria-hidden="true"
             />
             <ComboboxInput
-              className="flex-grow border-none bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
+              className="flex-grow border-none h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
               placeholder="Search..."
               value={query}
               onChange={(event) => {

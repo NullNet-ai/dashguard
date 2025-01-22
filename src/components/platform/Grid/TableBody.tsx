@@ -14,6 +14,8 @@ export default function MyTableBody({showAction} : {showAction?: boolean}) {
 
   const context = useContext(ScrollContainerContext);
   const { isEndReached = false } = context ?? {};
+
+  console.log("showAction", showAction)
   return (
     <>
       <TableBody
@@ -39,7 +41,7 @@ export default function MyTableBody({showAction} : {showAction?: boolean}) {
                         <div
                           className={cn(
                             "items-center",
-                            `${showAction} ? 'opacity-100' : 'opacity-0'`,
+                            `${showAction ? 'opacity-100' : 'opacity-0'}`,
                             !isEndReached
                               ? " group-hover:opacity-100"
                               : "",
