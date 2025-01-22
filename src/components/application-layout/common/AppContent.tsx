@@ -8,16 +8,13 @@ const AppContent = ({ children }: any) => {
 
   const mtop = application === "record" ? "mt-[116px]" : "mt-[140px]";
 
-  return (
-    <div
-      className={cn(
-        `mb-12 md:mt-24 lg:mb-0 lg:mt-0`,
-        `${application === "grid" ? "mt-[80px] pt-2 lg:pt-0" : mtop}`,
-      )}
-    >
-      {children}
-    </div>
-  );
-};
+    return (
+        <div className={cn(`  lg:mb-0 mb-12  lg:mt-0`, 
+            `${application === 'grid' ? 'md:mt-[20px] lg:mt-[0px] pt-2 lg:pt-2 mt-[80px]' : mtop}`
+        )}>
+            {children}
+        </div>
+    )
+}
 
 export default AppContent;

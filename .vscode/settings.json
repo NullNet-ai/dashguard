@@ -1,5 +1,10 @@
 {
     "prettier.singleQuote": false,
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#145201",
+      "activityBar.foreground": "#06deff",
+      "activityBar.inactiveForeground": "#f4f4f4",
+    },
     "files.exclude": {
       "node_modules": false,
       "package-lock.json": true,
