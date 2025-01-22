@@ -4,14 +4,16 @@ import FilterButton from "../Header/FilterButton";
 import TableViewButton from "../Header/TableViewButton";
 import GridSearchProvider from "./Provider";
 import SortingList from "./SortingList";
+import SortingListMobile from "./SortingListMobile";
 import Search from "./View";
 
 export default function Main() {
+
   return (
     <GridSearchProvider>
-      <div className="ml-0 mt-4 flex w-full flex-col justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:w-[40%] lg:max-w-[40%]">
+      <div className="ml-0 mt-4 flex w-full flex-col justify-end max-w-[100%] gap-x-2 sm:mt-0 lg:ml-2 lg:w-[40%] lg:max-w-[40%]">
         <div className="relative flex flex-1 flex-row gap-x-2">
-          <div className="my-2 w-full md:my-0  h-[40px] lg:w-[472px]">
+          <div className="my-2 w-full md:my-0  h-[40px]">
             <Search />
           </div>
           <div className="flex h-[36px] flex-shrink-0 flex-row items-center">
@@ -22,9 +24,13 @@ export default function Main() {
           </div>
           <CreateButton className="hidden lg:inline-flex" title="New" />
         </div>
-        <div className="min-h-[40px]">
+        <div className="min-h-[40px] hidden lg:block">
           <SortingList />
         </div>
+        <div className="min-h-[40px] lg:hidden">
+        <SortingListMobile />
+        </div>
+        
       </div>
     </GridSearchProvider>
   );

@@ -79,7 +79,7 @@ export default function FormInput({
           {...(restFieldFilterActions ?? {})}
         />
       </FormControl>
-      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}/>
+      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} detail={fieldConfig.detail} />
       {/* <DevTool  control={form.control} /> */}
     </FormItem>
   );

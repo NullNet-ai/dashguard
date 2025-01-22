@@ -1,6 +1,8 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import TabMenu from "~/components/application-layout/common/TabMenu";
 import {
@@ -25,6 +27,8 @@ let SEARCH_BAR_WIDTH = 0;
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
+  const newPathname = usePathname();
+  const [application, code] = (newPathname || "").split("/").slice(3);
   const [isWindowLoaded, setIsWindowLoaded] = useState(false);
   let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
@@ -49,11 +53,10 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     };
   }, []);
 
-
   const newItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - 57;
-    const showItem = max_width / 88;
+    const showItem = max_width / 106;
 
     return tabs.slice(0, Math.floor(showItem));
   }, [winWidth, tabs, sidebar_width]);
@@ -61,7 +64,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const dropdownItems = useMemo(() => {
     if (!winWidth) return tabs;
     const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57;
-    const showItem = max_width / 88;
+    const showItem = max_width / 106;
 
     return tabs.slice(Math.floor(showItem));
   }, [sidebar_width, tabs, winWidth]);
@@ -69,42 +72,49 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const entity = pathname?.split("/").at(2);
   const checkIfUserRole = (entity: string) =>
     entity === "user_role" ? true : false;
+
   return (
     <nav
       aria-label="Tabs"
-      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px] md:pl-[30px] pl-0 lg:pl-0")}
+      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b")}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
-
-          const isGrid = tab.name === "Grid";
-
-          return <div
-            key={checkIfUserRole(tab.name) ? "role" : tab.name}
-            className={cn(`group relative flex items-center  md:h-[32px] h-[36px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
-          >
-            <a
-              data-test-id={entity + "-apptab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("-").toLowerCase()}
-              href={tab.href}
-              aria-current={tab.current ? "page" : undefined}
-              className={cn(
-                tab.current ? "text-primary" : "text-default-foreground/60",
-                "whitespace-nowrap  text-sm font-medium",
-                "flex items-center space-x-2",
-                "hover:border-t-primary hover:text-primary",
-                `${isGrid ? 'px-[8px]': 'pr-0'}`
-              )}
+          const isGrid = tab.name === "Grid" || tab.name === "grid";
+          const isGridActive = application === "Grid" || application === "grid";
+          const isActive = isGridActive ? !!isGrid : code === tab?.name;
+          return (
+            <div
+              key={checkIfUserRole(tab.name) ? "role" : tab.name}
+              className="group relative flex items-center px-2 py-2 pr-1"
             >
-              {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}
-              <span className="absolute right-0 h-[50%] w-[1px] bg-default/20"></span>
-            </a>
-            <TabMenu
-              current={tab.href.match(pathname) ? true : false}
-              href={tab.href}
-              tabs={newItems}
-              name={checkIfUserRole(tab.name) ? "role" : tab.name}
-            />
-          </div>
+              <Link
+                data-test-id={
+                  entity + "-apptab-" + checkIfUserRole(tab.name)
+                    ? "role"
+                    : tab.name.split(" ").join("-").toLowerCase()
+                }
+                href={tab.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  isActive ? "text-primary" : "text-default-foreground/60",
+                  "whitespace-nowrap px-2 text-sm font-medium",
+                  "flex items-center space-x-2",
+                  "hover:border-t-primary hover:text-primary",
+                  `${isGrid ? "pr-2" : "pr-0"}`,
+                )}
+              >
+                {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}
+                <span className="absolute right-0 h-[50%] w-[1px] bg-default/20"></span>
+              </Link>
+              <TabMenu
+                current={tab.href.match(pathname) ? true : false}
+                href={tab.href}
+                tabs={newItems}
+                name={checkIfUserRole(tab.name) ? "role" : tab.name}
+              />
+            </div>
+          );
         })}
       </div>
       {dropdownItems.length > 0 && isWindowLoaded && (
@@ -119,33 +129,45 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="">
-            {dropdownItems.map((tab) => (
-              <DropdownMenuItem
-                key={checkIfUserRole(tab.name) ? "role" : tab.name}
-                className="group relative flex items-center p-2 py-3"
-              >
-                <a
-                  data-test-id={"apptab-" + checkIfUserRole(tab.name) ? "role" : tab.name.split(" ").join("-").toLowerCase()}
-                  href={tab.href}
-                  aria-current={tab.current ? "page" : undefined}
-                  className={cn(
-                    tab.current ? "text-primary" : "text-gray-500",
-                    "whitespace-nowrap px-4 pr-1 text-sm font-medium",
-                    "flex items-center space-x-2",
-                    "hover:border-t-primary hover:text-primary",
-                  )}
+            {dropdownItems.map((tab) => {
+              const isGrid = tab.name === "Grid" || tab.name === "grid";
+              const isGridActive =
+                application === "Grid" || application === "grid";
+              const isActive = isGridActive ? !!isGrid : code === tab?.name;
+              return (
+                <DropdownMenuItem
+                  key={checkIfUserRole(tab.name) ? "role" : tab.name}
+                  className="group relative flex items-center p-2 py-3"
                 >
-                  {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}
-                </a>
-                <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
-                <TabMenu
-                  current={tab.href.match(pathname) ? true : false}
-                  href={tab.href}
-                  tabs={dropdownItems}
-                  name={checkIfUserRole(tab.name) ? "role" : tab.name}
-                />
-              </DropdownMenuItem>
-            ))}
+                  <Link
+                    data-test-id={
+                      "apptab-" + checkIfUserRole(tab.name)
+                        ? "role"
+                        : tab.name.split(" ").join("-").toLowerCase()
+                    }
+                    href={tab.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      isActive ? "text-primary" : "text-gray-500",
+                      "whitespace-nowrap px-4 pr-1 text-sm font-medium",
+                      "flex items-center space-x-2",
+                      "hover:border-t-primary hover:text-primary",
+                    )}
+                  >
+                    {formatTabName(
+                      checkIfUserRole(tab.name) ? "role" : tab.name,
+                    )}
+                  </Link>
+                  <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
+                  <TabMenu
+                    current={tab.href.match(pathname) ? true : false}
+                    href={tab.href}
+                    tabs={dropdownItems}
+                    name={checkIfUserRole(tab.name) ? "role" : tab.name}
+                  />
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       )}

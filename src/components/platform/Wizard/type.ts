@@ -27,6 +27,7 @@ export interface IConfigWizard {
 }
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {
+    data: Record<string, any>;
     /** 
      * action_type is just an identifier to determine which action is being performed
      */

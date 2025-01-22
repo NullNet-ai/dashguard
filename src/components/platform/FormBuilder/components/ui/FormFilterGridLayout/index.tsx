@@ -9,6 +9,7 @@ interface IFormFilterGridLayoutProps {
   handleSelectedGridRecords: (records: any[]) => void;
   handleCloseGrid: () => void;
   filterGridConfig: IFilterGridConfig;
+  className?: string;
 }
 
 const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
@@ -18,6 +19,7 @@ const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
     handleSelectedGridRecords,
     handleCloseGrid,
     filterGridConfig,
+    className
   } = props;
   return (
     <AccordionContent
@@ -35,6 +37,7 @@ const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
           config={{
             ...filterGridConfig,
           }}
+          className={className}
         />
       </AccordionContent>
   )

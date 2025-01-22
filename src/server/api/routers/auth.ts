@@ -10,7 +10,7 @@ export const authRouter = createTRPCRouter({
     .input(
       z.object({
         email: z.string().email(),
-        password: z.string().min(5),
+        password: z.string().min(8),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -53,5 +53,8 @@ export const authRouter = createTRPCRouter({
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete("token");
     return { message: "User logged out" };
+  }),
+  verify: privateProcedure.mutation(async ({ ctx }) => {
+    return {};
   }),
 });

@@ -15,6 +15,8 @@ export default async function LoginSubmit({
     password,
   });
 
+  await api.auth.verify();
+
   if ("statusCode" in response && response.statusCode !== 200) {
     return JSON.parse(JSON.stringify(response));
   }
