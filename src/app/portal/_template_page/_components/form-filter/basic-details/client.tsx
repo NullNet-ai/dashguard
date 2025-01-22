@@ -14,7 +14,7 @@ import SelectedView from "./components/SelectedView";
 import { api } from "~/trpc/react";
 import { param } from "node_modules/cypress/types/jquery";
 
-const form_filter_entity = ''
+const form_filter_entity = "";
 
 export default function ContactDetails({
   params,
@@ -33,19 +33,22 @@ export default function ContactDetails({
     any[]
   > => {
     try {
-      const { id, entity } = params
-      const response = await saveContactDetails({
-        id, 
-        ...data,
-        // @ts-expect-error - Fix type later
-        [form_filter_entity]: data[form_filter_entity].map(e => {
-          return {
-            ...e,
-            [`${entity}_id`]: id,
-          }
-        }), 
-        form_filter_entity
-      }, action_type);
+      const { id, entity } = params;
+      const response = await saveContactDetails(
+        {
+          id,
+          ...data,
+          // @ts-expect-error - Fix type later
+          [form_filter_entity]: data[form_filter_entity].map((e) => {
+            return {
+              ...e,
+              [`${entity}_id`]: id,
+            };
+          }),
+          form_filter_entity,
+        },
+        action_type,
+      );
       if (response?.existing) {
         // const { data } = response;
         // const { phones, emails } = data || {};
@@ -57,7 +60,6 @@ export default function ContactDetails({
       }
 
       if (action_type === "Create") {
-
       }
       return [response];
     } catch (error) {
@@ -95,13 +97,13 @@ export default function ContactDetails({
     filter_entity: string;
   }) => {
     try {
-      const updated_main_entity_id = main_entity_id || params.id
-      const [selectedRecord] = selectedRecords
-      let item
+      const updated_main_entity_id = main_entity_id || params.id;
+      const [selectedRecord] = selectedRecords;
+      let item;
       if (selectedRecord) {
-        item = selectedRecord[filter_entity][0]
+        item = selectedRecord[filter_entity][0];
       }
-      await selectRecord(rows, updated_main_entity_id, filter_entity, item)
+      await selectRecord(rows, updated_main_entity_id, filter_entity, item);
       return {
         rows,
         filter_entity,
@@ -168,7 +170,7 @@ export default function ContactDetails({
             main_entity_id: response.main_entity_id,
           };
         },
-        
+
         onFilterFieldChange: (search_params, options) => {
           // @ts-expect-error - Fix type later
           const { data } = api[params.entity].mainGrid.useQuery(
@@ -179,8 +181,7 @@ export default function ContactDetails({
           return data;
         },
         handleSelectFieldFilterGrid: (data) => {
-          const { [form_filter_entity]: email, ...rest } =
-            data ?? {};
+          const { [form_filter_entity]: email, ...rest } = data ?? {};
           const resolvedData = {
             ...rest,
             [form_filter_entity]: [
@@ -221,31 +222,6 @@ export default function ContactDetails({
           },
         },
       ]}
-      // customFormFilterViewFormActions={[
-      //   {
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // customFormFilterLockFormActions={[
-      //   {
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // features={{
-
-      // }}
     />
   );
 }

@@ -72,10 +72,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const entity = pathname?.split("/").at(2);
   const checkIfUserRole = (entity: string) =>
     entity === "user_role" ? true : false;
-  console.log("entity", {
-    code,
-    application,
-  });
+
   return (
     <nav
       aria-label="Tabs"

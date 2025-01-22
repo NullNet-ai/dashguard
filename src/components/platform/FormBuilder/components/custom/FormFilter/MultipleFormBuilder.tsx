@@ -22,15 +22,16 @@ import { ulid } from "ulid";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { EyeSlashIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  EyeSlashIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import { Loader2 } from "lucide-react";
 import SelectedActions from "../../ui/layout/selected/components/SelectedActions";
 import FormFilterOpenedActions from "../../ui/layout/opened/components/FormFilterOpenedActions";
 
-
-export const MultipleFormBuilder: React.FC<IPropsForms> = (
-  props,
-) => {
+export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   const {
     //* data
     fields,
@@ -68,7 +69,6 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
     customFormFilterLockFormActions,
   } = props;
 
-
   const { actions, state } = useWizard();
   const { entityName } = state ?? {};
 
@@ -79,7 +79,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
-    mode: 'onChange',
+    mode: "onChange",
     resolver: zodResolver(formSchema), // is this where the validation relies?
     defaultValues,
     shouldFocusError: false,
@@ -90,7 +90,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
     name: "form_builder_fields",
     keyName: "_id",
   });
-  
+
   form.watch("form_builder_fields");
 
   //* LOCAL STATES
@@ -172,7 +172,6 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
       reject: (reason: any) => any,
     ) => {
       try {
-        // console.log("SUBMITTING FORM");
         await form.handleSubmit(onSubmit)(); // Trigger form submit and validation
 
         if (Object.keys(form?.formState?.errors).length > 0) {
@@ -279,7 +278,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
     }, {});
     fieldArray.append({
       ...mappedFields,
-      id: filterGridConfig?.main_entity_id
+      id: filterGridConfig?.main_entity_id,
     });
   };
 
@@ -506,26 +505,27 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
                                 filterGridConfig &&
                                 !!Object.keys(filterGridConfig).length && (
                                   <>
-                                    {!!field.code && !formProps?.isOpenSearch && (
-                                      <Button
-                                        variant={"outline"}
-                                        data-test-id={
-                                          entityName + "-wzrd" + "-cancel-btn"
-                                        }
-                                        onClick={() => {
-                                          form.reset(
-                                            form.formState.defaultValues,
-                                          );
-                                          handleUpdateDisplayType("selected");
-                                        }}
-                                        type="button"
-                                        loading={isSaveLoading}
-                                        size={"xs"}
-                                      >
-                                        <XMarkIcon className="h-4 w-4" />
-                                        Cancel
-                                      </Button>
-                                    )}
+                                    {!!field.code &&
+                                      !formProps?.isOpenSearch && (
+                                        <Button
+                                          variant={"outline"}
+                                          data-test-id={
+                                            entityName + "-wzrd" + "-cancel-btn"
+                                          }
+                                          onClick={() => {
+                                            form.reset(
+                                              form.formState.defaultValues,
+                                            );
+                                            handleUpdateDisplayType("selected");
+                                          }}
+                                          type="button"
+                                          loading={isSaveLoading}
+                                          size={"xs"}
+                                        >
+                                          <XMarkIcon className="h-4 w-4" />
+                                          Cancel
+                                        </Button>
+                                      )}
                                     {formLabel && !formProps?.isOpenSearch && (
                                       <>
                                         <Button
@@ -585,8 +585,11 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
                                             }
                                             className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
                                           >
-                                           
-                                            {!formProps?.isOpenSearch  ?  <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" /> : <EyeSlashIcon className="h-4 w-4 text-primary transition-none" />}
+                                            {!formProps?.isOpenSearch ? (
+                                              <MagnifyingGlassIcon className="h-4 w-4 text-primary transition-none" />
+                                            ) : (
+                                              <EyeSlashIcon className="h-4 w-4 text-primary transition-none" />
+                                            )}
                                             <span className="text-primary">
                                               {!formProps?.isOpenSearch
                                                 ? "Show Grid"
@@ -615,16 +618,18 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (
                                 !formProps?.isOpenSearch && (
                                   <FormFilterOpenedActions
                                     features={features}
-                                     /**TODO: MODIFY */
+                                    /**TODO: MODIFY */
                                     selectedRecords={field.code ? [field] : []}
                                     customFormFilterViewFormActions={
                                       customFormFilterViewFormActions
                                     }
                                     onSubmitFormGrid={onSubmitFormGrid}
                                     /**TODO: MODIFY */
-                                    handleRemovedSelectedRecords={
-                                      handleRemovedSelectedRecords.bind(null, [field], index)
-                                    }
+                                    handleRemovedSelectedRecords={handleRemovedSelectedRecords.bind(
+                                      null,
+                                      [field],
+                                      index,
+                                    )}
                                     form={form}
                                     filterGridConfig={filterGridConfig}
                                   />
