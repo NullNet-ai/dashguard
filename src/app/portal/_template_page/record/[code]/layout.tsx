@@ -16,6 +16,14 @@ const Layout = async ({
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
 
+  if (!main_entity || !identifier) {
+    return notFound();
+  }
+
+  if (identifier === "new") {
+    return notFound();
+  }
+
   const record_details = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
@@ -41,15 +49,9 @@ const Layout = async ({
 
   const { status, categories } = record_details?.data || {};
 
-  //Record Shell Guard for Draft Records
-  if (status === "draft") {
-    return notFound();
-  }
-
-  const is_applicant = categories?.includes("Applicant");
-
-  //Record Shell Guard for Draft Records
-  if (["Draft", "draft", "Pending"].includes(status)) {
+  if (
+    ["Draft", "draft", "Pending"].includes((status as string)?.toLowerCase())
+  ) {
     return notFound();
   }
 
@@ -59,7 +61,6 @@ const Layout = async ({
       record_summary={record_summary}
       entity_code={identifier!}
       entity_name={main_entity!}
-      is_applicant={is_applicant}
     />
   );
 };

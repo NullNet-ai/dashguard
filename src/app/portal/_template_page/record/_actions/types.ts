@@ -1,11 +1,3 @@
-type TStatus =
-  | "Screening"
-  | "Assessment Test"
-  | "Interview"
-  | "Pending"
-  | "Hired"
-  | "Failed"
-  | "On Hold"
-  | "Job Offered";
+type TStatus = "Test" | "Failed" | "Passed";
 
 export type { TStatus };

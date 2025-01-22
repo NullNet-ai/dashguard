@@ -9,8 +9,7 @@ import { handleChangeStatus } from "../../../_actions";
 import { upperFirst } from "lodash";
 
 const Wrapper = (props: IProps) => {
-  const { record, record_summary, entity_code, entity_name, is_applicant } =
-    props;
+  const { record, record_summary, entity_code, entity_name } = props;
 
   const tabs = [
     {
@@ -30,42 +29,16 @@ const Wrapper = (props: IProps) => {
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: is_applicant
-          ? [
-              {
-                label: "Screening",
-                onClick: handleChangeStatus.bind(null, "Screening"),
-              },
-              {
-                label: "Assessment Test",
-                onClick: handleChangeStatus.bind(null, "Assessment Test"),
-              },
-              {
-                label: "Interview",
-                onClick: handleChangeStatus.bind(null, "Interview"),
-              },
-              {
-                label: "Pending",
-                onClick: handleChangeStatus.bind(null, "Pending"),
-              },
-              {
-                label: "Hired",
-                onClick: handleChangeStatus.bind(null, "Hired"),
-              },
-              {
-                label: "Failed",
-                onClick: handleChangeStatus.bind(null, "Failed"),
-              },
-              {
-                label: "On Hold",
-                onClick: handleChangeStatus.bind(null, "On Hold"),
-              },
-              {
-                label: "Job",
-                onClick: handleChangeStatus.bind(null, "Job Offered"),
-              },
-            ]
-          : undefined,
+        identifierOption: [
+          {
+            label: "Identifier Option One",
+            onClick: handleChangeStatus.bind(null, "Passed"),
+          },
+          {
+            label: "Identifier Option Two",
+            onClick: handleChangeStatus.bind(null, "Test"),
+          },
+        ],
       }}
     >
       <section className="mt-8 min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem]">
