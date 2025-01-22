@@ -102,7 +102,7 @@ export default function WizardProvider({
   const [nextLoading, setNextLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
   const [savedStep, setSavedStep] = useState<null | number>(null);
-  const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>();
+  const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>(config?.callbackHandlers || {});
 
   /** @STATES */
   const nextStep = api.wizard.wizardCreateStep.useMutation();
@@ -229,16 +229,18 @@ export default function WizardProvider({
 
   const handleSaveAndClose = async () => {
     try {
+      const data = {
+        entity: mainEntity!,
+        identifier: config?.entityIdentifier,
+        currentContext: currentContext,
+      }
       const next = async () => {
-        await SaveAndClose({
-          entity: mainEntity!,
-          identifier: config?.entityIdentifier,
-          currentContext: currentContext,
-        });
+        await SaveAndClose(data);
       };
       setSaveCloseLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
+          data,
           action_type: "save_close",
           next,
         });
@@ -255,27 +257,25 @@ export default function WizardProvider({
 
   const handleSaveAndNew = async () => {
     try {
+      const data = {
+        entity: mainEntity!,
+        enableAutoCreate: false,
+        identifier: config?.entityIdentifier,
+        currentContext: currentContext,
+        is_from_grid: false,
+      };
       const next = async () => {
         if (config?.enableAutoCreate === false) {
-          Create({
-            entity: mainEntity!,
-            enableAutoCreate: false,
-            identifier: config?.entityIdentifier,
-            currentContext: currentContext,
-            is_from_grid: false,
-          });
+          Create(data);
           setSaveNewLoading(false);
           return;
         }
-        await SaveAndNew({
-          entity: mainEntity!,
-          identifier: config?.entityIdentifier,
-          currentContext: currentContext,
-        });
+        await SaveAndNew(data);
       };
       setSaveNewLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
+          data,
           action_type: "save_new",
           next,
         });
@@ -292,16 +292,18 @@ export default function WizardProvider({
 
   const handleSaveAndContinue = async () => {
     try {
+      const data = {
+        entity: mainEntity!,
+        identifier: config?.entityIdentifier,
+        currentContext: currentContext,
+      }
       const next = async () => {
-        await SaveAndContinue({
-          entity: mainEntity!,
-          identifier: config?.entityIdentifier,
-          currentContext: currentContext,
-        });
+        await SaveAndContinue(data);
       };
       setSaveContinueLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
+          data,
           action_type: "save_continue",
           next,
         });
