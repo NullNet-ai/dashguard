@@ -1,6 +1,7 @@
 "use client"
 
 import { capitalize } from "lodash";
+import React from "react";
 import { Pie, PieChart } from "recharts";
 
 import {
@@ -17,6 +18,7 @@ import {
 } from "~/components/ui/chart";
 
 interface IFormPieChartProps {
+  renderCustomPieChartLabel: React.FC<any>;
   entity: string;
   items: {
     key: string
@@ -28,7 +30,7 @@ interface IFormPieChartProps {
 
 const FormPieChart = (props: IFormPieChartProps) => {
 
-    const { entity, items } = props
+    const { entity, items, renderCustomPieChartLabel } = props
 
     const chartConfig: ChartConfig = items.reduce((acc, curr) => {
         const {
@@ -68,7 +70,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
               className="mx-auto aspect-square max-h-[300px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
             >
               <PieChart>
-                <Pie data={chartData} dataKey="value" label nameKey="key" />
+                <Pie data={chartData} dataKey="value" label={renderCustomPieChartLabel ?? true} nameKey="key" />
                 <ChartLegend
                   content={<ChartLegendContent nameKey="key" />}
                   className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
