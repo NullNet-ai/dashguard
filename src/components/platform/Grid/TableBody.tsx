@@ -9,11 +9,12 @@ import { ScrollContainerContext } from "./Server/views/common/GridScrollContaine
 import { testIDFormatter } from "~/utils/formatter";
 import BulkActionConfirmationModal from "./views/common/BulkActionConfirmationModal";
 
-export default function MyTableBody() {
+export default function MyTableBody({showAction} : {showAction?: boolean}) {
   const { state, actions } = useContext(GridContext);
 
   const context = useContext(ScrollContainerContext);
   const { isEndReached = false } = context ?? {};
+
   return (
     <>
       <TableBody
@@ -39,8 +40,9 @@ export default function MyTableBody() {
                         <div
                           className={cn(
                             "items-center",
+                            `${showAction ? 'opacity-100' : 'opacity-0'}`,
                             !isEndReached
-                              ? "opacity-0 group-hover:opacity-100"
+                              ? " group-hover:opacity-100"
                               : "",
                           )}
                         >

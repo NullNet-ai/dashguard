@@ -1,10 +1,5 @@
 "use client";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
 import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
 import { Form } from "~/components/ui/form";
 
@@ -21,38 +16,7 @@ const FormSchema = z.object({
   ),
 });
 
-export default function GroupTabView() {
-  const form = useForm<z.infer<any>>({
-    resolver: zodResolver(FormSchema), // is this where the validation relies?
-    defaultValues: {
-      draggable: [
-        {
-          "full-name": "John Doe",
-          email: "",
-        },
-      ],
-    },
-    shouldFocusError: false,
-  });
-
-  const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        toast(
-          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            <code className="text-white">
-              {JSON.stringify(values.data, null, 2)}
-            </code>
-          </pre>,
-        );
-        resolve();
-      } catch (error) {
-        console.error("Profile update error", error);
-        toast.error("Failed to update profile. Please try again.");
-        reject(new Error("Profile update error"));
-      }
-    });
-  };
+export default function GroupTabView({form, handleSave}: any) {
 
   return (
     <div>

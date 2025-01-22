@@ -1,3 +1,4 @@
+import Bluebird from "bluebird";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 
@@ -5,22 +6,26 @@ export const filesRouter = createTRPCRouter({
   getFileById: privateProcedure
     .input(
       z.object({
-        id: z.string(),
+        ids: z.array(z.string()),
         pluck_fields: z.array(z.string()),
       }),
     )
     .query(async ({ input, ctx }) => {
-      if (!input?.id) return null;
-      const record = await ctx.dnaClient
-        .findOne(input.id, {
-          entity: "file",
-          token: ctx.token.value,
-          query: {
-            pluck: input.pluck_fields,
-          },
-        })
-        .execute();
+      const { ids, pluck_fields } = input;
+      if (!ids?.length) return null;
+      const response = await Bluebird.map(ids, async (id) => {
+        const record = await ctx.dnaClient
+          .findOne(id, {
+            entity: "file",
+            token: ctx.token.value,
+            query: {
+              pluck: pluck_fields,
+            },
+          })
+          .execute();
 
-      return record?.data;
+        return record?.data?.[0];
+      }).filter(Boolean);
+      return response;
     }),
 });

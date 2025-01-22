@@ -12,7 +12,7 @@ export default function CardViewButton() {
     <Button
     variant={active ? 'default' : 'outline'}
       loading={state?.createLoading}
-      size='lg'
+      size='md'
       className="rounded-l-none"
       onClick={() => actions?.handleSwitchViewMode("card")}
       data-test-id={testIDFormatter(`${state?.config.entity}-grd-card-view-btn`)}

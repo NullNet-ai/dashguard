@@ -26,7 +26,7 @@ const SortingList = () => {
 
   useEffect(() => {
     const calc = (items?: any[]) => {
-      const itemss: any[] = [];
+      const allItems: any[] = [];
       const newData = items || defaultSearchItems?.filter((item) => item.type !== "operator");
   
       const clearWidth = 65 + 63 + 61; // clear width, more width, and search by
@@ -37,32 +37,32 @@ const SortingList = () => {
         if (itemsRef.current[index]?.offsetWidth) {
           totalWidth += itemsRef.current[index].offsetWidth || 0;
           if (totalWidth > containerWidth) {
-            itemss?.push({
+            allItems?.push({
               ...newData[index],
               hidden: true,
             });
           } else {
-            itemss?.push({
+            allItems?.push({
               ...newData[index],
               hidden: false,
             });
           }
         }
       }
-      return itemss;
+      return allItems;
     };
 
-    const onResize = () => { 
+    const handleResize = () => { 
         const items = calc();
         if (JSON.stringify(items) !== JSON.stringify(data) && !open) {
           setData(items);
       } 
     }
-    onResize()
-    window.addEventListener("resize", onResize);
+    handleResize()
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", handleResize);
     }
  
 
@@ -127,7 +127,7 @@ const SortingList = () => {
                 </Badge>
               );
             })}
-            {data?.length && data.some(item=> item.hidden ) &&  (
+            {!!data?.length && data.some(item=> item.hidden ) &&  (
               <div className="py-1 absolute max-w-[63px]"
                 style={{
                   left: lastHiddenIndexLeftPos,
@@ -160,12 +160,9 @@ const SortingList = () => {
                   <DropdownMenuContent align="end" side="bottom">
                     <div className="flex flex-col gap-1 gap-y-2 py-1">
                     {data?.map((item, index) => {
-                      if (!item.hidden) {
-                        return null;
-                      }
-                      if (item.type === "operator" || index === 0) {
-                        return null;
-                      }
+                    if (!item.hidden || item.type === "operator" || index === 0) { 
+                      return null; 
+                    }
                       return (
                           <Badge
                             key={item.id}

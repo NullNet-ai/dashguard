@@ -1,31 +1,13 @@
 import { headers } from "next/headers";
-import { SetIdTab } from "~/lib/grid-default-tab";
 import { getGridLink } from "~/lib/grid-get-link";
 import { tabMenuId } from "~/lib/tab-menu-id";
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import MENU from "../../../menu";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const menuRouter = createTRPCRouter({
-  getMenuConfig: privateProcedure.query(async ({ ctx }) => {
+  getMenuConfig: publicProcedure.query(async () => {
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    const _tabMenuId = tabMenuId({
-      _mainEntity: mainEntity || "",
-      _application: application || "",
-      _id: ctx.session.account.contact.id,
-    });
-    const hasTabMenu = await ctx.redisClient.getCachedData(_tabMenuId);
-    if (application === "grid" && mainEntity && !hasTabMenu) {
-      const setIdTab = SetIdTab(mainEntity);
-      ctx.redisClient.cacheData(
-        getGridLink({
-          mainEntity,
-        }),
-        setIdTab,
-      );
-      ctx.redisClient.cacheData(_tabMenuId, setIdTab);
-    }
     const menuItems = [
       // ...MENU,
       {

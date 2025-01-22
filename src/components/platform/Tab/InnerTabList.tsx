@@ -6,16 +6,14 @@ import InnerTabItems from "./InnerTabItems";
 const getSessionTabs = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const fullSearchQueryParams = headerList.get("x-full-search-query-params") || "";
   const [, portal, mainEntity, application, identifier] =
     pathname.split("/") || "New Tab";
   const currentContext = "/" + portal + "/" + mainEntity;
-
   const stateTabs = (await api.tab
     .getSubTabs({
       current_context: currentContext,
     })
-    .then((res : any) => {
+    .then((res) => {
       return res?.tabs ?? [];
     })
     .catch(() => {
@@ -37,8 +35,9 @@ const getSessionTabs = async () => {
       _application === "record" &&
       !_current?.includes("current_tab")
     ) {
-      path = `${main}/${fullSearchQueryParams}`;
-      href = `${tab.href}/${fullSearchQueryParams}`;
+      const curr_tab = "?current_tab=dashboard";
+      path = `${main}/${curr_tab}`;
+      href = `${tab.href}/${curr_tab}`;
     } else {
       path = `${main}`;
       href = tab.href;
@@ -52,7 +51,7 @@ const getSessionTabs = async () => {
   });
 
   if (application === "grid" && !grid) {
-    newTabs.unshift({
+    newTabs.push({
       name: "Grid",
       href: pathname,
       current: true,
@@ -60,7 +59,7 @@ const getSessionTabs = async () => {
   }
 
   if (application === "wizard" && !hasIdentifier && identifier) {
-    newTabs.splice(1, 0, {
+    newTabs.push({
       name: identifier,
       href: pathname,
       current: true,
@@ -68,9 +67,9 @@ const getSessionTabs = async () => {
   }
 
   if (application === "record" && !hasIdentifier && identifier) {
-    newTabs.splice(1, 0, {
+    newTabs.push({
       name: identifier,
-      href: `${pathname}?${fullSearchQueryParams}`,
+      href: `${pathname}?current_tab=dashboard`,
       current: true,
     });
   }
@@ -80,6 +79,11 @@ const getSessionTabs = async () => {
     tabs: newTabs,
   });
 
+  await api.grid.defaultGridTab({
+    application: application || "",
+    entity: mainEntity || "",
+  });
+
   return newTabs;
 };
 
@@ -87,11 +91,6 @@ const InnerTabs = async () => {
   const newTabs = await getSessionTabs();
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  if (!newTabs?.length) return null;
-
-  // const mainTabs = newTabs.slice(0, 6);
-  // const dropdownTabs = newTabs.slice(6);
-
   return <InnerTabItems tabs={newTabs} pathname={pathname} />;
 };
 

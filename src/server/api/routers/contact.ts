@@ -19,6 +19,7 @@ import { EStatus } from "../types";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 import { getContactsWithPhoneAndEmail } from "../../../utils/phone-email-validation";
 import { formatPhoneNumber } from "~/utils/formatter";
+import Bluebird from "bluebird";
 
 const ENTITY = "contact";
 
@@ -279,8 +280,94 @@ export const contactRouter = createTRPCRouter({
       })
       .execute();
 
+    const fetchOrganizations = async (contact_id: string) => {
+      const org_contacts: any = await ctx.dnaClient
+        .findAll({
+          entity: "organization_contacts",
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              organizations: ["id", "name"],
+              organization_contacts: [
+                "id",
+                "contact_organization_id",
+                "is_primary",
+              ],
+            },
+            advance_filters: createAdvancedFilter({
+              contact_id,
+            }),
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "organizations",
+              field: "id",
+            },
+            from: {
+              entity: "organization_contacts",
+              field: "contact_organization_id",
+            },
+          },
+        })
+        .execute();
+
+      const primary_org = org_contacts.data.find(
+        (org: Record<string, any>) => !!org.organization_contacts.is_primary,
+      );
+
+      const org_contact_user_roles = await ctx.dnaClient
+        .findAll({
+          entity: "organization_contact_user_roles",
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              user_roles: ["id", "role"],
+              organization_contact_user_roles: ["id"],
+            },
+            advance_filters: createAdvancedFilter({
+              organization_contact_id: primary_org?.organization_contacts?.id,
+            }),
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "user_roles",
+              field: "id",
+            },
+            from: {
+              entity: "organization_contact_user_roles",
+              field: "user_role_id",
+            },
+          },
+        })
+        .execute();
+
+      return {
+        organization: primary_org?.organizations?.name ?? "",
+        roles: org_contact_user_roles?.data
+          ? org_contact_user_roles.data.map((item) => item?.user_roles?.role)
+          : [],
+      };
+    };
+
+    let formatted_items = await Bluebird.map(items, async (item: any) => {
+      const { organization, roles } = await fetchOrganizations(
+        item?.contacts?.id,
+      );
+      return {
+        organization,
+        roles,
+        ...item,
+      };
+    });
+
     //TODO: Transform the data - temporary
-    const formatted_items = items.reduce(
+    formatted_items = formatted_items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
         const {
           contacts,
@@ -288,6 +375,8 @@ export const contactRouter = createTRPCRouter({
           contact_phone_numbers,
           created_by,
           updated_by,
+          roles,
+          organization,
         } = item;
 
         const emails = pick(contact_emails, ["emails", "is_primaries"]);
@@ -330,6 +419,8 @@ export const contactRouter = createTRPCRouter({
         return [
           ...acc,
           {
+            roles,
+            organization,
             ...contacts,
             ...emails,
             ...phones,

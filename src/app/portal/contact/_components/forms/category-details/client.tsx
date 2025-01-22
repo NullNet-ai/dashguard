@@ -56,7 +56,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
         {
           label: "Custom Action",
           onClick: () => {
-            // console.log("Custom Action Clicked");
+             // todo
           },
           icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
           disabled: false,
@@ -67,7 +67,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
         {
           label: "Custom Action",
           onClick: () => {
-            // console.log("Custom Action Clicked");
+            // todo
           },
           icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
           disabled: false,
