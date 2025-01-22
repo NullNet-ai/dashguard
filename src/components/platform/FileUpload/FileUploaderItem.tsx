@@ -7,13 +7,8 @@ import { Button, buttonVariants } from "~/components/ui/button";
 import { useFileUpload } from "./Provider";
 import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
 import { FileCrop } from "./FileCrop";
-import {
-  CropState,
-  PixelCrop,
-  blobToFile,
-  canvasPreview,
-  createImage,
-} from "./canvasUtils";
+import type { CropState, PixelCrop } from "./canvasUtils";
+import { blobToFile, canvasPreview, createImage } from "./canvasUtils";
 import { toast } from "sonner";
 import { Progress } from "~/components/ui/progress";
 
@@ -28,13 +23,21 @@ export const FileUploaderItem = forwardRef<
   HTMLDivElement,
   {
     index: number;
-    file: any;
+    file: File & { download_path?: string };
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
   } & React.HTMLAttributes<HTMLDivElement>
 >(
   (
-    { className, index, file, onRemove, children, progressState, ...props },
+    {
+      className,
+      index,
+      file,
+      onRemove: _onRemove,
+      children: _children,
+      progressState,
+      ...props
+    },
     ref,
   ) => {
     const {
@@ -44,16 +47,16 @@ export const FileUploaderItem = forwardRef<
       formRenderProps,
       fieldConfig,
       state,
-      defaultImageSrc,
     } = useFileUpload();
+
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [imageSrc, setImageSrc] = useState<string | null>(
-      defaultImageSrc || null,
+      file?.download_path || null,
     );
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [croppedFile, setCroppedFile] = useState<File>(file);
     const [previewSrc, setPreviewSrc] = useState<string | null>(
-      defaultImageSrc || null,
+      file?.download_path || null,
     );
     const isImageFile = FILE_TYPES.IMAGE.includes(file.type);
     const isPdfFile = FILE_TYPES.PDF.includes(file.type);
@@ -81,7 +84,8 @@ export const FileUploaderItem = forwardRef<
 
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const readFile = (file: File) => {
+    const readFile = (file: File & { download_path?: string }) => {
+      if (file?.download_path) return;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         // const result = reader.result?.toString() || null;
@@ -220,7 +224,9 @@ export const FileUploaderItem = forwardRef<
     }, [file, isImageFile, isPdfFile]);
 
     const handleOpenInNewTab = () => {
-      const url = URL.createObjectURL(file);
+      const url = file?.download_path
+        ? file?.download_path
+        : URL.createObjectURL(file);
       const a = document.createElement("a");
       a.href = url;
       a.target = "_blank";

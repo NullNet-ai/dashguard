@@ -47,7 +47,6 @@ type FileUploaderContextType = {
   fieldConfig?: IField;
   progressState?: number[];
   state?: any;
-  defaultImageSrc?: string | null;
 };
 
 const FileUploaderContext = createContext<FileUploaderContextType | null>(null);
@@ -100,7 +99,6 @@ export const FileUploader = forwardRef<
     const [activeIndex, setActiveIndex] = useState(-1);
     const [state, setState] = useState<UploadState>(UploadState.IDLE);
     const [progressState, setProgressState] = useState<number[]>([]);
-    const [defaultImageSrc, setDefaultImageSrc] = useState<string | null>(null);
 
     const {
       accept = {
@@ -112,7 +110,7 @@ export const FileUploader = forwardRef<
     } = dropzoneOptions;
 
     const { data }: any = api.files.getFileById.useQuery({
-      id: (_file as unknown as string[])?.[0] ?? "",
+      ids: (_file as unknown as string[]) ?? "",
       pluck_fields: [
         "filename",
         "filepath",
@@ -127,8 +125,9 @@ export const FileUploader = forwardRef<
       const new_value = data?.map((file: any) => {
         return {
           ...file,
-          type: file.mimetype,
-          name: file.originalname,
+          type: file?.mimetype,
+          name: file?.originalname,
+          download_path: file?.download_path,
         } as File;
       });
 
@@ -144,8 +143,6 @@ export const FileUploader = forwardRef<
         ).map((name) => combinedValues.find((file) => file.name === name));
         return uniqueValues;
       });
-
-      setDefaultImageSrc(data?.[0]?.download_path);
     }, [data]);
 
     const reSelectAll = maxFiles === 1 ? true : reSelect;
@@ -374,7 +371,6 @@ export const FileUploader = forwardRef<
           formRenderProps,
           fieldConfig,
           progressState,
-          defaultImageSrc,
           state,
         }}
       >

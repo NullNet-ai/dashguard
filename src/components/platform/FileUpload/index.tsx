@@ -39,9 +39,11 @@ const FileUpload = ({
       <FileInput
         id="fileInput"
         className={
-          !(form?.formState?.errors && Object.keys(form.formState.errors).length)
-        ? `h-full content-center border border-dashed border-border/75`
-        : "h-full content-center border border-dashed border-destructive"
+          !(
+            form?.formState?.errors && Object.keys(form.formState.errors).length
+          )
+            ? `h-full content-center border border-dashed border-border/75`
+            : "h-full content-center border border-dashed border-destructive"
         }
         disabled={formRenderProps?.field?.disabled || fieldConfig?.readonly}
         {...fileInputProps}
@@ -49,10 +51,10 @@ const FileUpload = ({
         <div className="flex w-full flex-col items-center justify-center p-8">
           <CloudUpload className="h-10 w-10 text-primary" />
           <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-        <span className="font-semibold text-primary">Upload Document</span>
+            <span className="font-semibold text-primary">Upload Document</span>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-        PDF, Doc, JPG or GIF up to 10MB
+            PDF, Doc, JPG or GIF up to 10MB
           </p>
         </div>
       </FileInput>

@@ -9,20 +9,28 @@ import { GridContext } from "../Provider";
 import SearchResult from "./SearchResult";
 import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
-import { IAdvanceFilters } from "@dna-platform/common-orm";
 import Sorting from "../Sorting";
+import { type IAdvanceFilters } from "@dna-platform/common-orm";
+import useWindowSize from "~/hooks/use-resize";
+import { cn } from "~/lib/utils";
+import useScreenType from "~/hooks/use-screen-type";
 
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
   const { parentType } = gridState ?? {};
+
+  const {width} = useWindowSize();
+  const screenSize = useScreenType();
+  const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg';
+
   const {
     searchableFields = [],
     entity = "",
     searchConfig,
   } = gridState?.config ?? {};
   const { advanceFilterItems = [] } = state ?? {};
-  const { query = "", searchItems = [] } = state ?? {};
+  const { query = "", } = state ?? {};
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
@@ -54,7 +62,7 @@ export default function Search() {
     {
       refetchOnWindowFocus: false,
       gcTime: 0,
-      enabled: !!debouncedSearchInput?.length,
+      enabled: !!debouncedSearchInput,
     },
   );
 
@@ -63,14 +71,16 @@ export default function Search() {
   return (
     <>
       <Combobox>
-        <div className="relative">
+        <div className={cn(`relative`)}
+          style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : "auto" }}
+        >
           <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
             <MagnifyingGlassIcon
               className="h-5 w-5 text-muted-foreground"
               aria-hidden="true"
             />
             <ComboboxInput
-              className="flex-grow border-none bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
+              className="flex-grow border-none h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
               placeholder="Search..."
               value={query}
               onChange={(event) => {
@@ -84,7 +94,7 @@ export default function Search() {
               }}
             />
           </div>
-          {state?.open && debouncedSearchInput.length > 3 && (
+          {state?.open && !!debouncedSearchInput && (
             <ComboboxOptions
               static
               as="ul"
@@ -105,20 +115,6 @@ export default function Search() {
           )}
         </div>
       </Combobox>
-      <div
-        className={cn(
-          `${!gridState?.sorting?.length ? "mt-[20px]" : "absolute -bottom-[50px]"}`,
-        )}
-      >
-        <span className="text-xs text-black">Filtered By: </span>
-        {defaultSearchItems?.map((item) => (
-          <Badge key={item.id} variant="primary" className="m-2 mx-1">
-            {item.type === "criteria"
-              ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value || item?.values?.[0]}`
-              : item?.operator}
-          </Badge>
-        ))}
-      </div>
       {parentType === 'form' && <Sorting />}
     </>
   );
