@@ -86,8 +86,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   />
                 </>
               )}
-
-              {item.title === "Activity Log" && <Separator />}
+              {item?.separator && <Separator />}
             </Fragment>
           );
         })}
