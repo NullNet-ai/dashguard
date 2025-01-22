@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import { getGridLink } from "~/lib/grid-get-link";
-import { tabMenuId } from "~/lib/tab-menu-id";
 import MENU from "../../../menu";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -9,7 +8,7 @@ export const menuRouter = createTRPCRouter({
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
     const menuItems = [
-      // ...MENU,
+      ...MENU,
       {
         title: "Activity Log",
         icon: "DocumentTextIcon",
