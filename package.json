@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "dev": "next dev",
     "local": "NODE_ENV=local NODE_OPTIONS='--max-old-space-size=8192' UV_THREADPOOL_SIZE=16 next dev",
     "lint": "next lint",
