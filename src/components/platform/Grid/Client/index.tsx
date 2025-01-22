@@ -25,6 +25,7 @@ function MainClient({
   hideSearch = true,
   showPagination = true,
   advanceFilter,
+  sorting,
   showAction
 }: IClientProps) {
   return (
@@ -36,6 +37,7 @@ function MainClient({
       config={config}
       initialSelectedRecords={initialSelectedRecords}
       parentType={parentType}
+      sorting={sorting}
     >
       <div className="hidden lg:flex">
         <GridDesktop parentType={parentType} hideSearch={hideSearch} height={height} showAction={showAction}/>

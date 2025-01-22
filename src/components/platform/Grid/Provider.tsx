@@ -183,6 +183,11 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
+    if(parentType === 'form') {
+      return config?.onFetchRecords?.({
+        sort: updatedSorting,
+      })
+    }
     handleUpdateReportSorting(updatedSorting);
   };
 
@@ -197,6 +202,12 @@ export default function GridProvider({
         sort_key,
       };
     });
+
+    if(parentType === 'form') {
+      return config?.onFetchRecords?.({
+        sort: resolvedSorting,
+      })
+    }
     UpdateReportSorting({ sorting: resolvedSorting });
   };
 

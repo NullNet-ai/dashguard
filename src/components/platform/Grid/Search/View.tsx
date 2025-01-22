@@ -9,6 +9,7 @@ import { GridContext } from "../Provider";
 import SearchResult from "./SearchResult";
 import { type ISearchItemResult } from "./types";
 import { transformSearchData } from "./utils/transformSearchData";
+import Sorting from "../Sorting";
 import { type IAdvanceFilters } from "@dna-platform/common-orm";
 import useWindowSize from "~/hooks/use-resize";
 import { cn } from "~/lib/utils";
@@ -17,6 +18,7 @@ import useScreenType from "~/hooks/use-screen-type";
 export default function Search() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+  const { parentType } = gridState ?? {};
 
   const {width} = useWindowSize();
   const screenSize = useScreenType();
@@ -113,6 +115,7 @@ export default function Search() {
           )}
         </div>
       </Combobox>
+      {parentType === 'form' && <Sorting />}
     </>
   );
 }
