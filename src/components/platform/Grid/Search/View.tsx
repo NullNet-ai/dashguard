@@ -20,7 +20,7 @@ export default function Search() {
     searchConfig,
   } = gridState?.config ?? {};
   const { advanceFilterItems = [] } = state ?? {};
-  const { query = "", searchItems = [] } = state ?? {};
+  const { query = "", } = state ?? {};
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
@@ -52,7 +52,7 @@ export default function Search() {
     {
       refetchOnWindowFocus: false,
       gcTime: 0,
-      enabled: !!debouncedSearchInput?.length,
+      enabled: !!debouncedSearchInput,
     },
   );
 
@@ -82,7 +82,7 @@ export default function Search() {
               }}
             />
           </div>
-          {state?.open && debouncedSearchInput.length > 3 && (
+          {state?.open && !!debouncedSearchInput && (
             <ComboboxOptions
               static
               as="ul"
@@ -103,7 +103,6 @@ export default function Search() {
           )}
         </div>
       </Combobox>
-
     </>
   );
 }
