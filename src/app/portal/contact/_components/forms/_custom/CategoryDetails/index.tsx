@@ -16,8 +16,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
 
   // this is needed to trigger the setting of the default value
   useEffect(() => {
-
-    form.setValue("categories", "Employee", {
+    form.setValue("categories", "User", {
       shouldValidate: true,
       shouldDirty: true,
     }
@@ -54,7 +53,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
               }}
               form={form}
               radioOptions={{
-                categories: [{ label: "Employee", value: "Employee" }],
+                categories: [{ label: "User", value: "User" }],
               }}
             />
           );
