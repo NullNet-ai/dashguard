@@ -4,7 +4,6 @@ import { api } from "~/trpc/server";
 import TabItems from "./TabItems";
 import type { IPropsTabList } from "./type";
 
-
 const getSessionTabs = async (): Promise<{
   pathname: string;
   newTabs: IPropsTabList[];
@@ -13,7 +12,7 @@ const getSessionTabs = async (): Promise<{
   const pathname = headerList.get("x-pathname") || "";
   const [, portal, mainEntity, , ,] = pathname.split("/") || "New Tab";
   const stateTabs = (await api.tab.getMainTabs()) as IPropsTabList[];
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const currentContext = `/${portal}/${mainEntity}`;
 
   let newTabs = stateTabs.map((tab) => {
     return {
@@ -34,7 +33,7 @@ const getSessionTabs = async (): Promise<{
   }
 
   if (!newTabs.find((item) => item.current === true)) {
-    newTabs.splice(1, 0, { 
+    newTabs.push({
       name: mainEntity!,
       href: pathname,
       current: true,
@@ -47,12 +46,10 @@ const getSessionTabs = async (): Promise<{
 
 export default async function TabList({ className }: { className?: string }) {
   const { newTabs } = await getSessionTabs();
-
   if (!newTabs?.length) return null;
-
   return (
-    <nav aria-label="Tabs" className={cn("flex flex-1 pt-[5px] md:pt-0", className)}>
-      <TabItems items={newTabs}/>      
+    <nav aria-label="Tabs" className={cn("flex flex-1", className)}>
+      <TabItems items={newTabs} />
     </nav>
   );
 }

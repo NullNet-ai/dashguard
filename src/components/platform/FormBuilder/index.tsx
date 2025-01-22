@@ -238,7 +238,8 @@ export const FormBuilder = (props: IPropsForms) => {
     setDisplayType("form");
   };
 
-  const handleSelectedGridRecords = () => {
+  const handleSelectedGridRecords = (data : Record<string,any>[]) => {
+    setFormGridSelected(data);
     handleSearchOpen()
     setDisplayType("selected");
     setIsFormOpened(false)
