@@ -14,14 +14,14 @@ console.table({
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // rewrites: async () => {
-  //   return [
-  //     {
-  //       source: "/api/file/:path*",
-  //       destination: "http://localhost:5001/api/file/:path*",
-  //     },
-  //   ];
-  // },
+  experimental:
+    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "local"
+      ? {
+          workerThreads: true,
+          cpus: 6,
+          webpackBuildWorker: true,
+        }
+      : undefined,
   env: {
     NEXT_NODE_ENV: process.env.NODE_ENV,
   },
