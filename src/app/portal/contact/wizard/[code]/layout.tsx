@@ -9,17 +9,8 @@ const WizardLayout = (props: IWizardLayoutProps) => {
   const { children } = props;
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const category = headerList.get("x-categories") || "";
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
 
-  let totalSteps = 5;
-  switch (category) {
-    case "Employee":
-      totalSteps = 5;
-      break;
-    default:
-      break;
-  }
   const _params = {
     identifier: identifier!,
     mainEntity: mainEntity!,
@@ -31,7 +22,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
         config={{
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
-          totalSteps: totalSteps,
+          totalSteps: 6,
           enableAutoCreate: false,
           entityName: mainEntity,
           stepLabels: {
@@ -39,7 +30,8 @@ const WizardLayout = (props: IWizardLayoutProps) => {
             2: "Contact Details",
             3: "Category Details",
             4: "Organization",
-            5: "Confirmation",
+            5: "Account Details",
+            6: "Confirmation",
           },
         }}
         summary={wizard_summary}

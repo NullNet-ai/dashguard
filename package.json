@@ -6,7 +6,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "local": "NODE_ENV=local next dev",
+    "local": "NODE_ENV=local NODE_OPTIONS='--max-old-space-size=8192' UV_THREADPOOL_SIZE=16 next dev",
     "lint": "next lint",
     "start": "next start",
     "test": "dotenvx run --env-file=.orm.env -- ts-node ./test.ts",
