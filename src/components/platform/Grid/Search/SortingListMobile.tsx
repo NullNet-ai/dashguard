@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   DropdownMenu,
@@ -11,11 +11,17 @@ import { cn, formatAndCapitalize } from "~/lib/utils";
 import { SearchGridContext } from "./Provider";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import useWindowSize from "~/hooks/use-resize";
+import useScreenType from "~/hooks/use-screen-type";
 
-const SortingList = () => {
+const SortingListMobile = () => {
   const conref = useRef<any>(null);
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(SearchGridContext);
+
+  const {width} = useWindowSize();
+  const screenSize = useScreenType();
+  const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg';
 
   const { searchItems = []  } = state ?? {};
   const selectedSearchItems = searchItems?.filter((item) => !item?.default);
@@ -28,8 +34,9 @@ const SortingList = () => {
     const calc = (items?: any[]) => {
       const allItems: any[] = [];
       const newData = items || defaultSearchItems?.filter((item) => item.type !== "operator");
+
   
-      const clearWidth = 65 + 63 + 61; // clear width, more width, and search by
+      const clearWidth =  63 + 61; // clear width, more width, and search by
       let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth;
       const containerWidth = conref.current?.offsetWidth || 0;
   
@@ -79,9 +86,11 @@ const SortingList = () => {
   return (
     <>
       <div
-      className="container-ref flex flex-col items-center gap-2 md:flex-row overflow-hidden relative"
+      className="mobile-container-ref flex  flex-col  gap-2 md:flex-row overflow-hidden relative"
       ref={conref}
+      style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : "auto" }}
     >
+      
       <div className="flex flex-row items-center">
         <span
           className={cn(
@@ -127,7 +136,7 @@ const SortingList = () => {
                 </Badge>
               );
             })}
-            {!!data?.length && data.some(item=> item.hidden ) &&  (
+            {data?.length && data.some(item=> item.hidden ) &&  (
               <div className="py-1 absolute max-w-[63px]"
                 style={{
                   left: lastHiddenIndexLeftPos,
@@ -160,9 +169,9 @@ const SortingList = () => {
                   <DropdownMenuContent align="end" side="bottom">
                     <div className="flex flex-col gap-1 gap-y-2 py-1">
                     {data?.map((item, index) => {
-                    if (!item.hidden || item.type === "operator" || index === 0) { 
-                      return null; 
-                    }
+                      if (!item.hidden || item.type === "operator" || index === 0) { 
+                        return null; 
+                      }
                       return (
                           <Badge
                             key={item.id}
@@ -209,7 +218,8 @@ const SortingList = () => {
                 // platform dev will add this
               }}
             >
-              Clear All
+                <Trash2 className="size-4 block lg:hidden"/>
+                <span className="hidden md:block">Clear All</span>
             </Button>
           </div>
         ) : null}
@@ -219,4 +229,4 @@ const SortingList = () => {
   );
 };
 
-export default SortingList;
+export default SortingListMobile;

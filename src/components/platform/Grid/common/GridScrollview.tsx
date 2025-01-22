@@ -10,7 +10,7 @@ export const GridScrollView = ({ children, className }: any) => {
   const { open } = useSidebar();
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
-  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(5.5);
+  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6);
 
   return (
     <div
