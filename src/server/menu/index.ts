@@ -5,7 +5,6 @@ const menu = Object.values({
   Contact: require("./contact").default,
   Organization: require("./organization").default,
   Settings: require("./settings").default,
-  DnaTestMenu: require("./dna_test_menu").default,
 });
 
 export default menu;

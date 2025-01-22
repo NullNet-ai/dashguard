@@ -1,8 +1,5 @@
-import { headers } from "next/headers";
+import { ISidebarMenu } from "~/components/platform/SideBar/type";
 import { getGridLink } from "~/lib/grid-get-link";
-
-const headerList = headers();
-const pathName = headerList.get("x-pathname") || "";
 
 const menu = {
   title: "Organization",
@@ -10,7 +7,6 @@ const menu = {
     mainEntity: "organization",
   }),
   icon: "UserGroupIcon",
-  isActive: pathName.includes("/organization"),
-};
+} as ISidebarMenu;
 
 export default menu;
