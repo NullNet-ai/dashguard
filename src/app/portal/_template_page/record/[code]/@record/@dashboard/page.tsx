@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import NewComingSoon from "~/app/coming-soon";
+
 const RecordTabContainer = async () => {
-  return (
-    <div className="space-y-2">
-      Coming Soon
-    </div>
-  );
+  return <NewComingSoon type="inner-component" />;
 };
 
 export default RecordTabContainer;

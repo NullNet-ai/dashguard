@@ -56,8 +56,6 @@ const Wrapper = (props: IProps) => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </section>
-      {/* <Tabs>{tabs} </Tabs>
-      <MainContent>{children}</MainContent> */}
       <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
     </RecordProvider>
   );

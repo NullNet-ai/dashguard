@@ -1,5 +1,3 @@
-const FormContainer = async () => {
-  return <div className="space-y-2">Confimation.</div>;
-};
-
+import Confirmation from "../../../../_components/forms/confirmation-details/server";
+const FormContainer = async () => <Confirmation />;
 export default FormContainer;
