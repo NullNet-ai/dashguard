@@ -20,7 +20,7 @@ export interface TimePickerProps {
 
 const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
   (
-    { value, onChange, is24Hour = false, className, disabled, readonly },
+    { value, onChange, is24Hour = true, className, disabled, readonly },
     ref,
   ) => {
     const timescape = useTimescape({

@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.7.0",
-  "branch": "released/feat/Platform-859/1.7.0",
-  "message": "Grid > Editing an archive record",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.8.0",
+  "branch": "released/fix/1.8.0",
+  "message": "Update grid",
+  "publish_name": "Juphet Vitualla"
 }

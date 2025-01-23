@@ -24,14 +24,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 interface IProps {
   item: ISidebarMenu;
+  screenType?: string
 }
 
-export default function Menu({ item }: IProps) {
+export default function Menu({ item, screenType }: IProps) {
   const pathname = usePathname();
   const [, , entity, application] = pathname?.split("/");
   const [isFavorite, setIsFavorite] = useState(false);
   const { open } = useSidebar();
   const stype = useScreenType();
+  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the star
