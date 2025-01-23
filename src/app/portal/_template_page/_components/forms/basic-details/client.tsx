@@ -15,13 +15,13 @@ const FormSchema = z.object({
 
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
   const toast = useToast();
-  const updateOrg = api.record.updateDynamicRecord.useMutation();
+  const update = api.record.updateDynamicRecord.useMutation();
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
       // alert(JSON.stringify(data, null, 2));
-      return updateOrg.mutateAsync({
+      return update.mutateAsync({
         id: params.id,
         data,
         entity: params.entity!,

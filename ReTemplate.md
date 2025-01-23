@@ -5,4 +5,3 @@ Wizard
       - totalSteps
       - wizardSummaryConfig
     - (summary) redesign
-      - codebase

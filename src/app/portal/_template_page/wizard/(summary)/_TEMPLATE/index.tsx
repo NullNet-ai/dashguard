@@ -1,16 +1,11 @@
 "use client";
+import { usePathname } from "next/navigation";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
-const Summary = ({
-  form_key,
-  identifier,
-  entity,
-}: {
-  form_key: string;
-  identifier: string;
-  entity: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , entity, _, identifier] = pathName.split("/");
   const {
     data: record = { data: { id: null } },
     refetch,
@@ -18,7 +13,7 @@ const Summary = ({
   } = api.record.getByCode.useQuery({
     id: identifier!,
     pluck_fields: ["id", "code", "status"],
-    main_entity: entity,
+    main_entity: entity!,
   });
 
   useRefetchRecord({
@@ -33,4 +28,15 @@ const Summary = ({
   return <pre>{JSON.stringify(record, null, 2)}</pre>;
 };
 
-export default Summary;
+const SummaryConfig = {
+  label: "Step X",
+  required: true,
+  components: [
+    {
+      label: "Record Details",
+      component: <Summary form_key={"BasicDetails"} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

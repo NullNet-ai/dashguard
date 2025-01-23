@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import PlatformWizard from "~/components/platform/Wizard";
-import WizardSummaryComponent from "../(summary)/wizard-summary-config";
 import { type IWizardLayoutProps } from "../types";
 //** Wizard Configuration */
+import WizardSummaryComponent from "../_config/wizardSummaryConfig";
 import stepsNavigation from "../_config/stepsNavigation";
 import totalSteps from "../_config/totalSteps";
 import stepLabels from "../_config/stepLabels";
