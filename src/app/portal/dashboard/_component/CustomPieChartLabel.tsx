@@ -1,56 +1,21 @@
 "use client";
 import { startCase } from "lodash";
 import React from "react";
-
-interface IPayload {
-  key: string;
-  value: number;
-  fill: string;
-  [key: string]: any;
-}
-
-interface IToolTipPayload {
-  name: string;
-  value: number;
-  payload: IPayload;
-  [key: string]: any;
-}
-
-interface IToolTipPosition {
-  x: number;
-  y: number;
-}
-
-interface ICustomPieChartLabelProps {
-  stroke: string;
-  fill: string;
-  cx: number;
-  cy: number;
-  percent: number;
-  name: string;
-  tooltipPayload: IToolTipPayload[];
-  midAngle: number;
-  middleRadius: number;
-  tooltipPosition: IToolTipPosition;
-  payload: IPayload;
-  key: string;
-  value: number;
-  innerRadius: number;
-  outerRadius: number;
-  maxRadius: number;
-  startAngle: number;
-  endAngle: number;
-  paddingAngle: number;
-  index: number;
-  textAnchor: string;
-  x: number;
-  y: number;
-}
+import { ICustomPieChartLabelProps } from "../types";
 
 const CustomPieChartLabel: React.FC<ICustomPieChartLabelProps> = (props) => {
   const RADIAN = Math.PI / 180;
-  const { cx, cy, midAngle, innerRadius, outerRadius, value, name, fill } =
-    props;
+  const {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    value,
+    name,
+    fill,
+    percent,
+  } = props;
   const radius = 25 + innerRadius + (outerRadius - innerRadius);
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -64,6 +29,9 @@ const CustomPieChartLabel: React.FC<ICustomPieChartLabelProps> = (props) => {
       dominantBaseline="central"
     >
       {`${startCase(name)} (${value})`}
+      <tspan x={x} y={y + 20} textAnchor="middle" className="">
+        {`${(percent * 100).toFixed(0)}`}%
+      </tspan>
     </text>
   );
 };
