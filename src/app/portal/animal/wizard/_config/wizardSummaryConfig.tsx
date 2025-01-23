@@ -1,7 +1,7 @@
 const WizardSummaryComponent = () => {
   return {
-    one: require("./_1").default,
-    two: require("./_2").default,
+    one: require("../(summary)/_1").default,
+    two: require("../(summary)/_2").default,
   };
 };
 
