@@ -185,7 +185,6 @@ export default function Header() {
                   disabled={
                     saveContinueLoading || saveCloseLoading || saveNewLoading
                   }
-                  loading={saveContinueLoading} // Pass the loading state for the main button
                 />
               )}
             </div>
