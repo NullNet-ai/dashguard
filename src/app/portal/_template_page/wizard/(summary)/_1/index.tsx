@@ -30,7 +30,7 @@ const Summary = ({
     return <div>Error: {error.message}</div>;
   }
   // TODO: Implement Summary component UI manually
-  return <div>{JSON.stringify(record, null, 2)}</div>;
+  return <pre>{JSON.stringify(record, null, 2)}</pre>;
 };
 
 export default Summary;

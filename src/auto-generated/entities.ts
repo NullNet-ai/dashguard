@@ -4,4 +4,6 @@ export default [
   "contact",
   "organization",
   "user_role",
+  "animal",
+  "animal",
 ];

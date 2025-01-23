@@ -5,7 +5,7 @@ import { FormBuilder } from "~/components/platform/FormBuilder";
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
-// import { api } from "~/trpc/react";
+import { api } from "~/trpc/react";
 
 const FormSchema = z.object({
   name: z
@@ -15,13 +15,17 @@ const FormSchema = z.object({
 
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
   const toast = useToast();
-  // const updateOrg = api[params.entity].updateName.useMutation();
+  const updateOrg = api.record.updateDynamicRecord.useMutation();
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      alert(JSON.stringify(data, null, 2));
-      return Promise.resolve({});
+      // alert(JSON.stringify(data, null, 2));
+      return updateOrg.mutateAsync({
+        id: params.id,
+        data,
+        entity: params.entity!,
+      });
     } catch (error) {
       toast.error("Failed to submit Basic Details");
     }
