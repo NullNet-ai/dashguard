@@ -1,4 +1,4 @@
-export const steps_navigation = {
+const stepsNavigation = {
   one: {
     next: true,
     prev: false,
@@ -10,3 +10,4 @@ export const steps_navigation = {
     skip: false,
   },
 };
+export default stepsNavigation;
