@@ -24,14 +24,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 interface IProps {
   item: ISidebarMenu;
+  screenType?: string
 }
 
-export default function Menu({ item }: IProps) {
+export default function Menu({ item, screenType }: IProps) {
   const pathname = usePathname();
   const [, , entity, application] = pathname?.split("/");
   const [isFavorite, setIsFavorite] = useState(false);
   const { open } = useSidebar();
   const stype = useScreenType();
+  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the star
@@ -60,7 +62,7 @@ export default function Menu({ item }: IProps) {
             {item?.items?.length ? (
               <>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}>
                     <ICON className="mr-2 h-5 w-5" />
                     <span>{item.title}</span>
                     <Link
@@ -110,7 +112,7 @@ export default function Menu({ item }: IProps) {
                 data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
               >
                 <SidebarMenuButton
-                  tooltip={item.title}
+                tooltip={!isMobile ? item.title : undefined}
                   data-test-id={testIDFormatter(
                     `sdnavmenu-itm-${item.title}-btn`,
                   )}

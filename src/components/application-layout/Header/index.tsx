@@ -24,7 +24,7 @@ const Header: React.FC = () => {
           </div>
           <SidebarTrigger
             Icon={MobileTriggerComponent}
-            className="mr-6 sm:mb-0 sm:hidden"
+            className="mr-4 sm:mb-0 sm:hidden"
           />
         </div>
       </header>
