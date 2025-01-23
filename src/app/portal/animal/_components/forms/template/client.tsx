@@ -29,7 +29,7 @@ export default function BasicDetails({ params, defaultValues }: IFormProps) {
   return (
     <FormBuilder
       myParent={params.shell_type}
-      enableFormRegisterToParent
+      // enableFormRegisterToParent // Default value is false can proceed next without required fields
       formProps={params}
       formLabel="Basic Details"
       handleSubmit={handleSave}
