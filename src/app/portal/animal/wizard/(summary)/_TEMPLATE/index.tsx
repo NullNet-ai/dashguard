@@ -29,7 +29,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
 };
 
 const SummaryConfig = {
-  label: "Step 1",
+  label: "Step X",
   required: true,
   components: [
     {

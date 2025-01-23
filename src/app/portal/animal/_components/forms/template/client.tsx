@@ -20,12 +20,7 @@ export default function BasicDetails({ params, defaultValues }: IFormProps) {
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      // alert(JSON.stringify(data, null, 2));
-      return update.mutateAsync({
-        id: params.id,
-        data,
-        entity: params.entity!,
-      });
+      alert(JSON.stringify(data, null, 2));
     } catch (error) {
       toast.error("Failed to submit Basic Details");
     }
