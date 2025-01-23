@@ -37,6 +37,7 @@ const config = {
     "@typescript-eslint/restrict-template-expressions": "off",
     "react/no-unescaped-entities": "off",
     "@typescript-eslint/prefer-optional-chain": "off",
+    "@typescript-eslint/no-require-imports": "off",
     "@typescript-eslint/consistent-type-imports": [
       "warn",
       {
