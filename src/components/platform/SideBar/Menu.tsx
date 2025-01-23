@@ -62,7 +62,7 @@ export default function Menu({ item, screenType }: IProps) {
             {item?.items?.length ? (
               <>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}>
                     <ICON className="mr-2 h-5 w-5" />
                     <span>{item.title}</span>
                     <Link
@@ -112,7 +112,7 @@ export default function Menu({ item, screenType }: IProps) {
                 data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
               >
                 <SidebarMenuButton
-                  tooltip={item.title}
+                tooltip={!isMobile ? item.title : undefined}
                   data-test-id={testIDFormatter(
                     `sdnavmenu-itm-${item.title}-btn`,
                   )}

@@ -4,14 +4,14 @@ import { cn } from "~/lib/utils";
 const AppContent = ({ children }: any) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const [, , , application, identifier] = pathname.split("/");
+  const [, ,firstSegment ,, application, identifier] = pathname.split("/");
 
   const mtop =
     application === "record"
-      ? "lg:mt-[0px]"
+      ? "lg:mt-[0px] md:mt-[53px] mt-[80px]"
       : application === "wizard"
         ? "lg:mt-[0] mt-[80px] md:mt-[53px]"
-        : "mt-[140px]";
+        : firstSegment === 'dashboard' ? "lg:mt-[50px] md:mt-[80px] mt-[100px]" : "mt-[140px]";
 
   return (
     <div
