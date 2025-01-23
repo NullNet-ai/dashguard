@@ -76,7 +76,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex h-[44px] w-full flex-row items-center justify-between rounded px-2 py-1 text-foreground sm:items-center">
+      <div className="flex md:h-[44px] gap-y-2 md:gap-0 w-full md:flex-row flex-col items-start md:items-center justify-start md:justify-between rounded px-2 pb-2 md:pb-1 py-2 md:py-1 text-foreground sm:items-center">
         <div className="flex flex-row items-center justify-start">
           <Collapsible
             onOpenChange={setIsOpen}

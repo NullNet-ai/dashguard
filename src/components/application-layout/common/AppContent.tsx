@@ -8,16 +8,16 @@ const AppContent = ({ children }: any) => {
 
   const mtop =
     application === "record"
-      ? "mt-[116px]"
+      ? "lg:mt-[0px]"
       : application === "wizard"
-        ? "mt-[88px] md:mt-0"
+        ? "lg:mt-[0] mt-[80px] md:mt-[53px]"
         : "mt-[140px]";
 
   return (
     <div
       className={cn(
         `mb-12 lg:mb-0 lg:mt-0`,
-        `${application === "grid" ? "mt-[80px] pt-2 md:mt-[20px] lg:mt-[0px] lg:pt-2" : mtop}`,
+        `${application === "grid" ? "mt-[80px] pt-2 md:mt-[20px] lg:mt-[0px] lg:pt-0" : mtop}`,
       )}
     >
       {children}

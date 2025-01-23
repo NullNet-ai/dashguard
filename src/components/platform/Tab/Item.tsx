@@ -11,7 +11,7 @@ type ItemProps = {
 };
 
 const Item = ({ tab }: ItemProps) => {
-  const padding = tab.name === "dashboard" ? "pr-4" : "pr-0";
+  const padding = tab.name === "dashboard" ? "pr-2" : "pr-0";
   const checkIfUserRole = (entity: string) =>
     entity === "user_role" ? true : false;
 
@@ -37,21 +37,22 @@ const Item = ({ tab }: ItemProps) => {
           href={tab.href}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            isActive
-              ? "text-primary md:rounded-t-lg md:border-b-0 md:border-l md:border-r md:border-t-2 md:border-t-primary"
+            tab.current
+              ? "text-primary rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary"
               : "text-gray-500",
-            "whitespace-nowrap px-4 py-1.5 text-sm font-medium md:pt-2",
-            "flex items-center space-x-2",
-            "hover:border-t-primary hover:text-primary",
+            "whitespace-nowrap px-[8px] py-1 text-sm font-medium  max-h-[32px]",
+            "flex items-center pl-[8px] space-x-2",
+            "hover:border-t-primary hover:text-primary relative",
             padding,
           )}
         >
           {formatAndCapitalize(checkIfUserRole(tab.name) ? "role" : tab.name)}
+          {}
           <CloseTab {...tab} />
         </Link>
 
-        {isActive && (
-          <div className="absolute bottom-[-10px] z-10 h-1 w-full bg-white"></div>
+        {isActive || tab.current && (
+          <div className="absolute bottom-[-4px] z-10 h-1 w-full bg-white"></div>
         )}
       </div>
     </Fragment>

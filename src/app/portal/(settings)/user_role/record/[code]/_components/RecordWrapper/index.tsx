@@ -29,7 +29,7 @@ const Wrapper = (props: IProps) => {
         entityName: entity_name!,
       }}
     >
-      <section className="mt-8 min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem]">
+      <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
         <ResizablePanelGroup direction="horizontal" className="flex">
           <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
             <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
