@@ -4,7 +4,7 @@ import { cn } from "~/lib/utils";
 const AppContent = ({ children }: any) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const [, ,firstSegment ,, application, identifier] = pathname.split("/");
+  const [, ,firstSegment ,application, , identifier] = pathname.split("/");
 
   const mtop =
     application === "record"
