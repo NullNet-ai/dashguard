@@ -1,7 +1,7 @@
 {
   "app_name": "platform__SideBar",
-  "tag": "1.7.0",
-  "branch": "released/feat/1.7.0",
-  "message": "Replace a tag to Link",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.7.0-rc.1<unreleased>",
+  "branch": "unreleased/test/1.7.0-rc.1<unreleased>",
+  "message": "Test to playground",
+  "publish_name": "Juphet Vitualla"
 }
