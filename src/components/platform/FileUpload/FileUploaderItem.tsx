@@ -270,7 +270,7 @@ export const FileUploaderItem = React.forwardRef<
           )}
           onClick={() => {
             if (!stillInProgress && !hasUploadError) {
-              setIsPreviewModalOpen(true);
+              !isImageFile ? handleOpenInNewTab() : setIsPreviewModalOpen(true);
             }
           }}
           {...props}
