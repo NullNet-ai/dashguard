@@ -17,7 +17,7 @@ const AppContent = ({ children }: any) => {
     <div
       className={cn(
         `mb-12 lg:mb-0 lg:mt-0`,
-        `${application === "grid" ? "mt-[80px] pt-2 md:mt-[20px] lg:mt-[0px] lg:pt-0" : mtop}`,
+        `${application === "grid" ? "mt-[80px] pt-2 md:mt-[45px] lg:mt-[0px] lg:pt-0" : mtop}`,
       )}
     >
       {children}

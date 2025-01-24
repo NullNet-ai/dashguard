@@ -7,7 +7,7 @@ import InfiniteScrollContainer from "./InfiniteScroll";
 
 function GridMobile() {
   return (
-    <Card className="col-span-full border-0 shadow-none py-4">
+    <Card className="col-span-full border-0 shadow-none py-2">
       <CardHeader>
         <MobileHeader />
       </CardHeader>
