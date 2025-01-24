@@ -3,14 +3,10 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import StatusCell from "~/components/ui/status-cell";
 
-const gridColumns = [
+const GRID_COLUMNS = [
   {
-    header: "Code",
+    header: "ID",
     accessorKey: "code",
-  },
-  {
-    header: "Email",
-    accessorKey: "email",
   },
   {
     header: "Status",
@@ -36,10 +32,6 @@ const gridColumns = [
     },
   },
   {
-    header: "Updated By",
-    accessorKey: "updated_by",
-  },
-  {
     header: "Created Date",
     accessorKey: "created_date",
     cell: ({ row }) => {
@@ -53,13 +45,9 @@ const gridColumns = [
       );
     },
   },
-  {
-    header: "Created By",
-    accessorKey: "created_by",
-  },
 ] as ColumnDef<any>[];
 
-export default gridColumns;
+export default GRID_COLUMNS;
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
 export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];

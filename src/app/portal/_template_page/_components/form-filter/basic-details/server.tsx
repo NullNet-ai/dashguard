@@ -18,28 +18,6 @@ const FormServerFetch = async () => {
     pluck_fields,
     form_filter_entity,
   });
-  const _pluck = [
-    "id",
-    "code",
-    "email",
-    `${main_entity}_id`,
-    "status",
-    "created_date",
-    "created_time",
-    "updated_date",
-    "updated_time",
-  ];
-  const { sorting } = (await getGridCacheData()) ?? {};
-
-  // @ts-expect-error - Fix type later
-  const { items = [], totalCount } = await api[main_entity].formFilterGrid({
-    entity: main_entity,
-    pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
-    current: 0,
-    limit: 100,
-    form_filter_entity,
-  });
 
   const default_values = record_data;
 
@@ -64,7 +42,6 @@ const FormServerFetch = async () => {
           pluck_fields,
         }}
         selectedRecords={selectedRecords.length ? [default_values] : []}
-        grid_data={{ items, totalCount }}
       />
     </div>
   );
