@@ -23,8 +23,6 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "80px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "d";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-
 type SidebarContext = {
   state: "expanded" | "collapsed";
   open: boolean;
@@ -193,6 +191,10 @@ const Sidebar = React.forwardRef<
     React.useEffect(() => {
       if (size === "md" || size === "sm" || size === "xs") {
         setOpen(false);
+      }
+      else{
+        setOpen(true);
+        setOpenMobile(false);
       }
     }, [size]);
 

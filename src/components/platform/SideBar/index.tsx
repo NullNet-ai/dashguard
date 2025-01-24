@@ -59,8 +59,8 @@ export default function AppSideBar(config: ISideBarProps) {
   };
 
   const { width } = useWindowSize();
-  const screen = useScreenType();
-  const isMobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
+  const screen =  useScreenType() || screenType
+  const isMobile = screen !== 'lg' && screen !== 'xl' && screen !== '2xl';
 
   if((screenType !== screen) && screen) { 
     Cookies.set('screen-type', `${screen}` , { expires: 7 }); // Expires in 7 days
@@ -125,13 +125,13 @@ export default function AppSideBar(config: ISideBarProps) {
           return (
             <Fragment key={index}>
               {!item?.groups?.length ? (
-                <Menu item={item}  screenType={screenType}/>
+                <Menu item={item}  screenType={screen || screenType}/>
               ) : (
                 <>
                   <GroupMenu
                     title={item?.groupTitle || ""}
                     groups={item.groups}
-                    screenType={screenType || ""}
+                    screenType={screen || screenType || ""}
                   />
                 </>
               )}

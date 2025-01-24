@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.8.0-rc.1<unreleased>",
-  "branch": "unreleased/test/1.8.0-rc.1<unreleased>",
-  "message": "test the sidebar component in playground",
+  "tag": "1.9.0<unreleased>",
+  "branch": "unreleased/fix/1.9.0<unreleased>",
+  "message": "Fixed UI issue and revert changes in sidebar and tabs",
   "publish_name": "Juphet Vitualla"
 }

@@ -59,22 +59,22 @@ const Sorting = () => {
       return allItems;
     };
 
-    const onResize = () => {
+    const handleResize = () => {
       const items = calc();
       if (JSON.stringify(items) !== JSON.stringify(data) && !open) {
         setData(items);
       }
     };
     if (document.readyState === "complete") {
-      onResize()
+      handleResize()
     } else {
-      window.addEventListener("load", onResize);
+      window.addEventListener("load", handleResize);
     }
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("load", onResize);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("load", handleResize);
     };
   }, [state?.sorting, open]);
 
