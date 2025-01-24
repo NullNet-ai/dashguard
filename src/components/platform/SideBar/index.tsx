@@ -16,18 +16,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import GroupMenu from "./GroupMenu";
-import { Fragment, useEffect } from "react";
+import { Fragment } from "react";
 import Menu from "./Menu";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import { TriggerOpenCloseSidebarComponent } from "~/components/application-layout/Header/TriggerComponent";
-import { useIsMobile } from "~/hooks/use-mobile";
 import * as _ICON from "@heroicons/react/24/outline";
 import { Separator } from "~/components/ui/separator";
 import useWindowSize from "~/hooks/use-resize";
@@ -42,7 +40,6 @@ export default function AppSideBar(config: ISideBarProps) {
     headerComponent,
     footerComponent,
     footerMenuConfig,
-    headerMenuConfig,
     className,
     mainMenuConfig,
     screenType,
