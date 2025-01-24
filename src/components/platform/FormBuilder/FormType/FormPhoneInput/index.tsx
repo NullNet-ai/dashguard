@@ -167,10 +167,9 @@ export default function FormPhoneInput({
           <FormControl>
             <>
               <div
-                className={`flex items-center border ${error?.[index] && "border-destructive"} ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0`}
+                className={`flex items-center rounded-md border ${error?.[index] && "border-destructive"} ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 h-[36px] ${fieldConfig.disabled ? "bg-secondary" : ""}`}
               >
                 <PhoneInput
-                  // {...register(`${name}.${index}.raw_phone_number`)}
                   data-test-id={`${formKey}-inp-${index > 0 ? `${index + 1}-` : ""}${fieldConfig.name}`}
                   inputProps={{
                     // @ts-expect-error - Not able to pass data-test-id on types
@@ -185,7 +184,6 @@ export default function FormPhoneInput({
                     // @ts-expect-error - Not able to pass data-test-id on types
                     "data-test-id": `${formKey}-country-sel-${index > 1 ? `${index + 1}-` : ""}${fieldConfig.name}`,
                     buttonStyle: {
-                      padding: "1.2rem",
                       paddingInline: "0.5rem",
                       backgroundColor: "inherit",
                       borderColor: "transparent",
@@ -214,7 +212,7 @@ export default function FormPhoneInput({
                   }}
                   className={cn(
                     "mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
-                    `${isDisabled && "pointer-events-none border-transparent opacity-100"}`,
+                    `${isDisabled && " border-transparent opacity-100"}`,
                   )}
                   inputStyle={{
                     width: "100%",
@@ -222,10 +220,11 @@ export default function FormPhoneInput({
                     color: "inherit",
                     borderColor: `transparent`,
                     padding: "1.2rem",
+                    paddingLeft:"0",
                     opacity: "inherit",
                   }}
-                  inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-l-primary
-                  focus-visible:ring-l-1  disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
+                  inputClassName="ring-offset-background border-0 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-l-primary
+                  focus-visible:ring-l-1  disabled:cursor-not-allowed disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100 !py-0"
                   {...(restFieldFilterActions ?? {})}
                 />
                 {field.is_primary && isMultiple && (
