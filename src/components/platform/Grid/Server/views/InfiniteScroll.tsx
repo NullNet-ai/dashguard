@@ -9,7 +9,7 @@ const InfiniteScrollContainer = () => {
   const { state } = useContext(GridContext);
   return (
     <InfiniteScroll
-      className="mx-2 rounded-md text-card-foreground"
+      className="rounded-md text-card-foreground md:w-[92%] lg:w-full w-[86%]"
       dataLength={state?.data?.length}
       hasMore={true} // This will be true when more data is available
       next={() => {

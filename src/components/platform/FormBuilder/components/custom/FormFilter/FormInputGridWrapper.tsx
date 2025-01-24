@@ -120,7 +120,7 @@ export default function FormInputGridWrapper({
         static
         as="ul"
         data-test-id={kebabCase('cbx-'+fieldConfig.name)}
-        className={cn('absolute z-[100] w-full right-0 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg mt-8', 
+        className={cn('absolute z-[100] w-full right-0 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg mt-4 lg:mt-8 ', 
           fieldConfig?.gridPosition ? `${fieldConfig?.gridPosition}-0` : "left-0" )}
         >
 

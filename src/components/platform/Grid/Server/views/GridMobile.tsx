@@ -13,9 +13,9 @@ function GridMobile() {
       </CardHeader>
       <ScrollArea
         style={{ height: "calc(100vh - 16rem)" }}
-        className="mx-2 rounded-md text-card-foreground"
+        className="rounded-md text-card-foreground"
       >
-        <section>
+        <section className="px-2 lg:px-0">
           <InfiniteScrollContainer />
           <CreateButton className="fixed right-4 bottom-[8rem] md:bottom-[9rem]  z-10 w-14 h-14 rounded-full" />
         </section>
