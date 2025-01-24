@@ -15,11 +15,6 @@ const Wrapper = ({
   entity_code,
   entity_name,
 }: IProps) => {
-  tabs.splice(1, 0, {
-    id: entity_name,
-    name: upperFirst(entity_name),
-    tabName: `${entity_name}?categories=`,
-  });
   return (
     <RecordProvider
       config={{
@@ -38,7 +33,18 @@ const Wrapper = ({
             minSize={25}
             className="min-h-60 flex-grow-[6] bg-transparent"
           >
-            <HeaderTabs tabs={tabs} />
+            <HeaderTabs
+              tabs={[
+                tabs[0]!,
+                {
+                  id: entity_name,
+                  name: upperFirst(entity_name),
+                  tabName: `${entity_name}?categories=`,
+                },
+                // Omit tab[0], so that i can spread the rest of the tabs
+                ...tabs.slice(1),
+              ]}
+            />
             <MainContent className="p-4">{record}</MainContent>
           </ResizablePanel>
         </ResizablePanelGroup>

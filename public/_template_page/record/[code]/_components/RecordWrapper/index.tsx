@@ -5,40 +5,22 @@ import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSumm
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
-import { handleChangeStatus } from "../../../_actions";
 import { upperFirst } from "lodash";
+import statusOptions from "../../../_actions/statusOptions";
+import tabs from "../../../_config/tabs";
 
-const Wrapper = (props: IProps) => {
-  const { record, record_summary, entity_code, entity_name } = props;
-
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard?categories=",
-    },
-    {
-      id: entity_name,
-      name: upperFirst(entity_name),
-      tabName: "contact?categories=",
-    },
-  ];
-
+const Wrapper = ({
+  record,
+  record_summary,
+  entity_code,
+  entity_name,
+}: IProps) => {
   return (
     <RecordProvider
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: [
-          {
-            label: "Identifier Option One",
-            onClick: handleChangeStatus.bind(null, "Passed"),
-          },
-          {
-            label: "Identifier Option Two",
-            onClick: handleChangeStatus.bind(null, "Test"),
-          },
-        ],
+        identifierOption: statusOptions,
       }}
     >
       <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
@@ -51,7 +33,18 @@ const Wrapper = (props: IProps) => {
             minSize={25}
             className="min-h-60 flex-grow-[6] bg-transparent"
           >
-            <HeaderTabs tabs={tabs} />
+            <HeaderTabs
+              tabs={[
+                tabs[0]!,
+                {
+                  id: entity_name,
+                  name: upperFirst(entity_name),
+                  tabName: `${entity_name}?categories=`,
+                },
+                // Omit tab[0], so that i can spread the rest of the tabs
+                ...tabs.slice(1),
+              ]}
+            />
             <MainContent className="p-4">{record}</MainContent>
           </ResizablePanel>
         </ResizablePanelGroup>

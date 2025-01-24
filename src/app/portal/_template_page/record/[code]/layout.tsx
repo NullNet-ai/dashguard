@@ -47,7 +47,7 @@ const Layout = async ({
     throw new Error("Record not found");
   }
 
-  const { status, categories } = record_details?.data || {};
+  const { status } = record_details?.data || {};
 
   if (
     ["Draft", "draft", "Pending"].includes((status as string)?.toLowerCase())
