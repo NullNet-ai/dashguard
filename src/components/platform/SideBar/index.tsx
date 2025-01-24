@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import GroupMenu from "./GroupMenu";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import Menu from "./Menu";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
@@ -48,10 +48,6 @@ export default function AppSideBar(config: ISideBarProps) {
     screenType,
   } = config;
   const { ChevronUpDownIcon } = _ICON;
-
-  const mobile =
-    screenType !== "lg" && screenType !== "xl" && screenType !== "2xl";
-
   const apiAuth = api.auth.logout.useMutation();
   const navigate = useRouter();
   const currentYear = new Date().getFullYear();
@@ -63,15 +59,19 @@ export default function AppSideBar(config: ISideBarProps) {
   };
 
   const { width } = useWindowSize();
-  const screen = useScreenType();
-  const isMobile =
-    screenType !== "lg" && screenType !== "xl" && screenType !== "2xl";
+  const screen = useScreenType() || screenType;
+  const isMobile = screen !== "lg" && screen !== "xl" && screen !== "2xl";
 
   if (screenType !== screen && screen) {
     Cookies.set("screen-type", `${screen}`, { expires: 7 }); // Expires in 7 days
   }
+
   return (
-    <Sidebar collapsible="icon" className={className} screenType={screenType}>
+    <Sidebar
+      collapsible="icon"
+      className={className}
+      screenType={screen || screenType}
+    >
       {headerComponent && (
         <SidebarHeader className="group relative">
           <SidebarTrigger
@@ -89,13 +89,13 @@ export default function AppSideBar(config: ISideBarProps) {
           return (
             <Fragment key={index}>
               {!item?.groups?.length ? (
-                <Menu item={item} screenType={screenType} />
+                <Menu item={item} screenType={screen || screenType} />
               ) : (
                 <>
                   <GroupMenu
                     title={item?.groupTitle || ""}
                     groups={item.groups}
-                    screenType={screenType || ""}
+                    screenType={screen || screenType || ""}
                   />
                 </>
               )}
@@ -141,7 +141,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   data-test-id={"sdnavmenu-ftr-logout-btn"}
                   className={cn(
                     `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`,
-                    `${open && !mobile ? "justify-start" : "justify-center"}`,
+                    `${open && !isMobile ? "justify-start" : "justify-center"}`,
                     `${openMobile ? "justify-start px-2" : ""}`,
                   )}
                 >
@@ -155,7 +155,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   ) : null}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
-                  {open && !mobile ? (
+                  {open && !isMobile ? (
                     <span>
                       &copy; All Rights Reserved. {currentYear} DNA Micro
                       <sup className="text-[8px]">TM</sup>

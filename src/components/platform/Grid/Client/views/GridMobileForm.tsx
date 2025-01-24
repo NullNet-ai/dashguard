@@ -8,17 +8,17 @@ function GridMobileForm({shownPagination } : {
   shownPagination?: boolean;
 }) {
   return (
-    <Card className="col-span-full border-0 shadow-none">
+    <Card className="col-span-full border-0 shadow-none flex-1">
       {/* <CardHeader>
         <Header />
       </CardHeader> */}
       <ScrollArea
         style={{ height: "auto" }}
-        className="mx-2 rounded-md text-card-foreground"
+        className="rounded-md text-card-foreground"
       >
         <section>
           <div>
-            <GridMobileRow />
+            <GridMobileRow parent="wizard" />
           </div>
         </section>
         {/* <Table>

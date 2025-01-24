@@ -23,8 +23,6 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "80px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "d";
 import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-
 type SidebarContext = {
   state: "expanded" | "collapsed";
   open: boolean;
@@ -191,8 +189,12 @@ const Sidebar = React.forwardRef<
 
     const size = useScreenType();
     React.useEffect(() => {
-      if (size === "md") {
+      if (size === "md" || size === "sm" || size === "xs") {
         setOpen(false);
+      }
+      else{
+        setOpen(true);
+        setOpenMobile(false);
       }
     }, [size]);
 
@@ -264,7 +266,7 @@ const Sidebar = React.forwardRef<
               className,
             )}
             {...props}
-          >
+          >            
             <div
               data-sidebar="sidebar"
               className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
@@ -356,7 +358,7 @@ const SidebarTrigger = React.forwardRef<
       )}
       onClick={(event) => {
         onClick?.(event);
-        if (size === "md") {
+        if (size === "md" || size === "sm" || size === "xs") {
           setOpenMobile(!openMobile);
           return;
         }

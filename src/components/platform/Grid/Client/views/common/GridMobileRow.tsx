@@ -22,11 +22,12 @@ import {
 } from "../../../DefatultRow/Actions";
 import ArchiveConfirmationModal from "../../../views/ArchiveConfirmationModal";
 
-export default function GridMobileRow() {
+export default function GridMobileRow({parent} : {parent?: string}) {
   const { state, actions } = useContext(GridContext);
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
+
 
   const getCols = useMemo(() => {
     switch (size) {
@@ -77,52 +78,52 @@ export default function GridMobileRow() {
                     ...statusCell.getContext(),
                     view_mode: "card",
                   })}
-                <div>
+                {parent === 'grid' ? ( <div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div className="flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm">
-                        <EllipsisVertical
-                          className={`h-4 w-4 font-semibold text-foreground`}
-                          aria-hidden="true"
-                        />
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <EditComponent
-                        row={row}
-                        config={config!}
-                        viewMode="card"
-                      />
-                      {!["Archived", "Delete"].includes(
-                        row.original?.status,
-                      ) && (
-                        <ArchiveComponent
+                      <DropdownMenuTrigger asChild>
+                        <div className="flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm">
+                          <EllipsisVertical
+                            className={`h-4 w-4 font-semibold text-foreground`}
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" side="right" className="z-[100]">
+                        <EditComponent
                           row={row}
                           config={config!}
-                          open={showArchiveConfirmationModal}
-                          setOpen={setShowArchiveConfirmationModal}
-                          record={row}
-                          setRecord={setRowToArchive}
                           viewMode="card"
                         />
-                      )}
-                      {row.original?.status === "Archived" && (
-                        <>
-                          <RestoreComponent
+                        {!["Archived", "Delete"].includes(
+                          row.original?.status,
+                        ) && (
+                          <ArchiveComponent
                             row={row}
                             config={config!}
+                            open={showArchiveConfirmationModal}
+                            setOpen={setShowArchiveConfirmationModal}
+                            record={row}
+                            setRecord={setRowToArchive}
                             viewMode="card"
                           />
-                          <DeleteComponent
-                            row={row}
-                            config={config!}
-                            viewMode="card"
-                          />
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                        )}
+                        {row.original?.status === "Archived" && (
+                          <>
+                            <RestoreComponent
+                              row={row}
+                              config={config!}
+                              viewMode="card"
+                            />
+                            <DeleteComponent
+                              row={row}
+                              config={config!}
+                              viewMode="card"
+                            />
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>) : null}
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -160,7 +161,7 @@ export default function GridMobileRow() {
           );
         })
       ) : (
-        <div>
+        <div className="p-4 lg:p-0">
           <div className="h-24 text-center text-foreground">No results.</div>
         </div>
       )}

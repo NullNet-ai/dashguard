@@ -11,7 +11,7 @@ export default function Main() {
 
   return (
     <GridSearchProvider>
-      <div className="ml-0 mt-4 flex w-full flex-col justify-end max-w-[100%] gap-x-2 sm:mt-0 lg:ml-2 lg:w-[40%] lg:max-w-[40%]">
+      <div className="ml-0 mt-0 lg:mt-4 flex w-full flex-col justify-end max-w-[100%] gap-x-2 sm:mt-0 lg:ml-2 lg:w-[40%] lg:max-w-[40%]">
         <div className="relative flex flex-1 flex-row gap-x-2">
           <div className="my-2 w-full md:my-0  h-[40px]">
             <Search />

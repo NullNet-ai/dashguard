@@ -15,7 +15,7 @@ export default function TableViewButton() {
     <Button
       variant={active ? 'default' : 'outline'}
       size='md'
-      className="rounded-r-none"
+      className="rounded-r-none hidden lg:block"
       loading={state?.createLoading}
       onClick={() => actions?.handleSwitchViewMode("table")}
       data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-view-btn`)}
