@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useSidebar } from "~/components/ui/sidebar";
+import useScreenType from "~/hooks/use-screen-type";
 import { cn } from "~/lib/utils";
 
 type SideInfoProps = {
@@ -14,8 +15,9 @@ type SideInfoProps = {
 const SideUserInfo = ({ user_name, email, initials, screenType }: SideInfoProps) => {
 
     const { open, openMobile } = useSidebar();
-
-    const mobile = screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
+    const screen = useScreenType() || screenType;
+    const mobile = (screen !== 'lg' && screen !== 'xl' && screen !== '2xl');
+    
 
     return (
         <div className="grid place-items-center px-2">

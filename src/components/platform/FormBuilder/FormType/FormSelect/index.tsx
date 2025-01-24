@@ -64,7 +64,7 @@ export default function FormSelect({
   const [isCreateLoading, setIsCreateLoading] = useState(false);
 
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: "bottom-start", // Default placement
+    placement: "bottom-start",
     modifiers: [
       {
         name: "preventOverflow",
@@ -82,23 +82,36 @@ export default function FormSelect({
   });
 
   const SelectIcon = fieldConfig.selectIcon;
+
+  // Helper function to check if a string is numeric
+  const isNumeric = (str: string) => {
+    if (typeof str !== 'string') return false;
+    return !isNaN(parseFloat(str)) && isFinite(Number(str));
+  };
+
+  // Helper function to sort options
+  const sortOptions = (opts: ISelectOptions[]) => {
+    return [...opts].sort((a, b) => {
+      // Check if both values are numeric strings
+      if (isNumeric(a.value) && isNumeric(b.value)) {
+        return Number(a.value) - Number(b.value);
+      }
+      // Fall back to alphabetical sorting if not numeric
+      return a.label?.localeCompare(b.label) ?? 0;
+    });
+  };
+
   const filteredOptions = useMemo(() => {
-    return query === ""
-      ? options
-          ?.sort((a, b) => a.label?.localeCompare(b.label))
-          ?.slice(0, 250)
-          ?.filter((opt) => {
-            return !!opt?.label;
-          })
+    const filtered = query === ""
+      ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
       : options
           ?.filter((opt) => {
             return opt.label.toLowerCase().includes(query.toLowerCase());
           })
-          ?.sort((a, b) => a.label?.localeCompare(b.label))
-          .slice(0, 5)
-          ?.filter((opt) => {
-            return !!opt?.label;
-          });
+          ?.slice(0, 5)
+          ?.filter((opt) => !!opt?.label);
+
+    return sortOptions(filtered ?? []);
   }, [fieldConfig?.name, query, selectOptions, options?.length]);
 
   const label = useMemo(() => {
@@ -146,7 +159,7 @@ export default function FormSelect({
         },
       })) as ISelectOptions;
     }
-    setOptions([...(options ?? []), createdData]);
+    setOptions(sortOptions([...(options ?? []), createdData]));
     formRenderProps?.field.onChange(createdData?.value || "");
     setIsCreateLoading(false);
     setTimeout(() => setOpen(false), 100);
@@ -225,7 +238,6 @@ export default function FormSelect({
             onChange={(event) => setQuery(event.target.value)}
             onBlur={() => {
               setTimeout(() => setOpen(false), 100);
-              // setQuery("");
             }}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
@@ -261,50 +273,53 @@ export default function FormSelect({
               data-test-id={`${formKey}-opts-${fieldConfig.name}`}
             >
               {filteredOptions?.slice(0, 700).map((opt) => (
-                <ComboboxOption
-                  key={opt?.value}
-                  value={opt}
-                  disabled={isDisabled || isReadOnly}
-                  className={cn(
-                    "group relative cursor-default select-none py-2 pl-3 pr-9 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
-                    {
-                      "cursor-not-allowed": isDisabled,
-                      "cursor-default": isReadOnly,
-                    },
-                  )}
-                  data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+              <ComboboxOption
+                key={opt?.value}
+                value={opt}
+                disabled={isDisabled || isReadOnly}
+                className={cn(
+                "group relative cursor-default select-none py-2 text-md  pr-12 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                SelectIcon ? "pl-8" : "pl-2",
+                {
+                  "cursor-not-allowed": isDisabled,
+                  "cursor-default": isReadOnly,
+                },
+                )}
+                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+              >
+                <span
+                className="block truncate"
+                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
                 >
-                  <span
-                    className="block truncate"
-                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
-                  >
-                    {opt.label}
-                  </span>
+                {opt.label}
+                </span>
 
-                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
-                    <CheckIcon className="size-5" aria-hidden="true" />
-                  </span>
-                </ComboboxOption>
+                <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
+                <CheckIcon className="size-5" aria-hidden="true" />
+                </span>
+              </ComboboxOption>
               ))}
-              {fieldConfig?.selectEnableCreate
-                ? !isOptionsExist &&
-                  query && (
-                    <span
-                      className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
-                      data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                      onClick={createNewRecord}
-                    >
-                      {isCreateLoading ? "Creating..." : `Create "${query}"`}
-                    </span>
-                  )
-                : !filteredOptions?.length && (
-                    <span
-                      className="block truncate px-3 py-2 font-bold"
-                      data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                    >
-                      No {fieldConfig?.label} found.
-                    </span>
-                  )}
+              {fieldConfig?.selectEnableCreate ? (
+              !isOptionsExist &&
+              query && (
+                <span
+                className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
+                data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+                onClick={createNewRecord}
+                >
+                {isCreateLoading ? "Creating..." : `Create "${query}"`}
+                </span>
+              )
+              ) : (
+              !filteredOptions.length && (
+                <span
+                className="block truncate group-data-[selected]:font-semibold ms-3"
+                data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                >
+                No {fieldConfig?.label} found.
+                </span>
+              )
+              )}
             </ComboboxOptions>
           )}
         </div>

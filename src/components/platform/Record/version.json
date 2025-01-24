@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Record",
-  "tag": "1.7.0",
-  "branch": "released/feat/Platform-859/1.7.0",
-  "message": "Add action Change record state in Record summary",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.8.0<unreleased>",
+  "branch": "unreleased/fix/1.8.0<unreleased>",
+  "message": "Fixed UI issue and revert changes in sidebar and tabs",
+  "publish_name": "Juphet Vitualla"
 }

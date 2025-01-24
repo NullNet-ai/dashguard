@@ -156,9 +156,6 @@ export default function FormFilterGrid({
   if (isLoading) {
     return (
       <div
-        style={{
-          width: "calc(100vw - 28rem)",
-        }}
         className="bg-white"
       >
         <Skeleton />
@@ -172,11 +169,16 @@ export default function FormFilterGrid({
   );
 
   return (
-    <div className={cn("w-full overflow-x-auto", containerWidth)}>
+    <div className={cn("w-full ", containerWidth)}>
       <div className={cn(`${calcWidth}`)}>
         <Grid
           height="300px"
           showPagination={false}
+          parentProps={{
+            width: containerWidth,
+            open: open,
+            summary: state?.isSummaryOpen
+          }}
           onSelectRecords={(rows) => {
             if (!onSelectRecords) return;
             Promise.resolve(
