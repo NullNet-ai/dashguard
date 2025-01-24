@@ -4,8 +4,9 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import GridMobileRow from "./common/GridMobileRow";
 import Pagination from "../../Pagination";
 
-function GridMobileForm({shownPagination } : {
+function GridMobileForm({shownPagination, parentType } : {
   shownPagination?: boolean;
+  parentType?: string
 }) {
   return (
     <Card className="col-span-full border-0 shadow-none flex-1">
@@ -18,7 +19,7 @@ function GridMobileForm({shownPagination } : {
       >
         <section>
           <div>
-            <GridMobileRow parent="wizard" />
+            <GridMobileRow parent={parentType} />
           </div>
         </section>
         {/* <Table>
@@ -30,7 +31,7 @@ function GridMobileForm({shownPagination } : {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       {
-        shownPagination && (
+        shownPagination && parentType ==='grid' && (
           <CardFooter>
             <Pagination />
           </CardFooter>
