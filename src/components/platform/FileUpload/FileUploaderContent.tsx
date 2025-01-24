@@ -10,13 +10,14 @@ import FilePPTIcon from "../../../../public/fileIcons/Outline/file-ppt-outline.s
 import FileXLSIcon from "../../../../public/fileIcons/Outline/file-xls-outline.svg";
 import Image from "next/image";
 import { cn } from "~/lib/utils";
-import { forwardRef, useRef } from "react";
+import {  useRef } from "react";
 
 import { Paperclip } from "lucide-react";
 import { useFileUpload } from "./Provider";
 import { FileUploaderItem } from "./FileUploaderItem";
+import React from "react";
 
-export const FileUploaderContent = forwardRef<
+export const FileUploaderContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ children, className, ...props }, ref) => {
