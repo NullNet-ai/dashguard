@@ -54,7 +54,7 @@ export default function FormSelect({
   const [open, setOpen] = useState(false);
 
   const isDisabled = fieldConfig.disabled ?? false;
-  const isReadOnly = formRenderProps.field.disabled || fieldConfig.readonly;
+  const isReadOnly = fieldConfig.readonly ?? false;
 
   const [referenceElement, setReferenceElement] = useState<any>(null);
   const [popperElement, setPopperElement] = useState<any>(null);
@@ -104,6 +104,7 @@ export default function FormSelect({
   const label = useMemo(() => {
     return options?.find((opt) => opt.value === formRenderProps?.field.value);
   }, [formRenderProps?.field.value]);
+    console.log("%c 🥤: label -> label ", "font-size:16px;background-color:#c9d80c;color:black;", label)
 
   const inputReadOnly = useMemo(() => {
     return (
@@ -121,7 +122,7 @@ export default function FormSelect({
   const createNewRecord = async () => {
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
-      return
+      return;
     }
     if (fieldConfig?.selectOnCreateValidate) {
       const validation = await fieldConfig?.selectOnCreateValidate(query);
@@ -266,7 +267,7 @@ export default function FormSelect({
                   value={opt}
                   disabled={isDisabled || isReadOnly}
                   className={cn(
-                    "group relative cursor-default select-none py-2 text-md pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                    "group relative cursor-default select-none py-2 pl-3 pr-9 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
                     {
                       "cursor-not-allowed": isDisabled,
                       "cursor-default": isReadOnly,
@@ -286,25 +287,25 @@ export default function FormSelect({
                   </span>
                 </ComboboxOption>
               ))}
-              {fieldConfig?.selectEnableCreate ? (
-                !isOptionsExist &&
-                query && (
-                  <span
-                    className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
-                    data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                    onClick={createNewRecord}
-                  >
-                    {isCreateLoading ? "Creating..." : `Create "${query}"`}
-                  </span>
-                )
-              ) : (
-                <span
-                  className="block truncate group-data-[selected]:font-semibold"
-                  data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                >
-                  No {fieldConfig?.label} found.
-                </span>
-              )}
+              {fieldConfig?.selectEnableCreate
+                ? !isOptionsExist &&
+                  query && (
+                    <span
+                      className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
+                      data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+                      onClick={createNewRecord}
+                    >
+                      {isCreateLoading ? "Creating..." : `Create "${query}"`}
+                    </span>
+                  )
+                : !filteredOptions?.length && (
+                    <span
+                      className="block truncate font-bold px-3 py-2"
+                      data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                    >
+                      No {fieldConfig?.label} found.
+                    </span>
+                  )}
             </ComboboxOptions>
           )}
         </div>

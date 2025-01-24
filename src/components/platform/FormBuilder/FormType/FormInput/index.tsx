@@ -35,7 +35,9 @@ export default function FormInput({
   formKey
 }: IProps) {
   const isDisabled =  formRenderProps.field.disabled
+  console.log("%c 🚸: formRenderProps ", "font-size:16px;background-color:#1ae5e9;color:black;", formRenderProps)
   const isHidden = fieldConfig.hidden;
+  console.log("%c 🤹‍♀️: fieldConfig ", "font-size:16px;background-color:#e09184;color:white;", fieldConfig)
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
@@ -67,7 +69,7 @@ export default function FormInput({
           defaultValue={value}
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
-          readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
+          readOnly={(fieldConfig?.readonly) ?? false}
           {...formRenderProps.field}
           disabled={fieldConfig.disabled}
           onChange={(e) => {

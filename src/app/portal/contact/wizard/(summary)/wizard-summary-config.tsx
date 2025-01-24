@@ -2,7 +2,8 @@ import BasicDetailsSummary from "./_1";
 import ContactDetailsSummary from "./_2";
 import CategoryDetailsSummary from "./_3";
 import ContactOrganizationSummary from "./_4";
-import ConfirmationSummary from "./_5";
+import AccountDetailsSummary from "./_5";
+import ConfirmationSummary from "./_6";
 
 const contactWizardSummary = ({
   identifier,
@@ -79,6 +80,23 @@ const contactWizardSummary = ({
     },
     five: {
       label: "Step 5",
+      required: false,
+      show_summary: true,
+      components: [
+        {
+          label: "Account Details",
+          component: (
+            <AccountDetailsSummary
+              form_key={"account_details"}
+              identifier={identifier!}
+              main_entity={mainEntity!}
+            />
+          ),
+        },
+      ],
+    },
+    six: {
+      label: "Step 6",
       required: false,
       show_summary: true,
       components: [

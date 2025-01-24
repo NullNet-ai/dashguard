@@ -54,7 +54,7 @@ export const authRouter = createTRPCRouter({
     ctx.storeCookies.delete("token");
     return { message: "User logged out" };
   }),
-  verify: privateProcedure.mutation(async ({ ctx }) => {
+  verify: privateProcedure.mutation(async () => {
     return {};
   }),
 });

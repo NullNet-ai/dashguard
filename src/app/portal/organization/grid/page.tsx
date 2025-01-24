@@ -46,47 +46,47 @@ export default async function OrganizationGridPage({
       advance_filters: [],
       sorting: sorting?.length ? sorting : defaultSorting,
     })
-    .then(async (res) => {
-      const final_items = await Bluebird.map(res.items, async (item) => {
-        const final_item = await api.organization
-          .getById({
-            id: item.parent_organization_id ?? "",
-            pluck_fields: ["name"],
-          })
-          .then((res) => {
-            return {
-              ...item,
-              parent_organization_name: res?.data?.name,
-            };
-          });
+    // .then(async (res) => {
+    //   const final_items = await Bluebird.map(res.items, async (item) => {
+    //     const final_item = await api.organization
+    //       .getById({
+    //         id: item.parent_organization_id ?? "",
+    //         pluck_fields: ["name"],
+    //       })
+    //       .then((res) => {
+    //         return {
+    //           ...item,
+    //           parent_organization_name: res?.data?.name,
+    //         };
+    //       });
 
-        return final_item;
-      });
+    //     return final_item;
+    //   });
 
-      // disable archiving of parent organizations with children
-      const updated_final_items = final_items.reduce(
-        (acc: Record<string, any>[], item: Record<string, any>) => {
-          const parent = final_items.find(
-            (parent: Record<string, any>) =>
-              parent.parent_organization_id === item.id,
-          );
-          const isItemDisabled = !!parent;
+    //   // disable archiving of parent organizations with children
+    //   const updated_final_items = final_items.reduce(
+    //     (acc: Record<string, any>[], item: Record<string, any>) => {
+    //       const parent = final_items.find(
+    //         (parent: Record<string, any>) =>
+    //           parent.parent_organization_id === item.id,
+    //       );
+    //       const isItemDisabled = !!parent;
 
-          return [
-            ...acc,
-            {
-              ...item,
-              disabled: isItemDisabled,
-            },
-          ];
-        },
-        [] as Record<string, any>[],
-      );
-      return {
-        items: updated_final_items,
-        totalCount: res.totalCount,
-      };
-    });
+    //       return [
+    //         ...acc,
+    //         {
+    //           ...item,
+    //           disabled: isItemDisabled,
+    //         },
+    //       ];
+    //     },
+    //     [] as Record<string, any>[],
+    //   );
+    //   return {
+    //     items: updated_final_items,
+    //     totalCount: res.totalCount,
+    //   };
+    // });
 
   return (
     <Grid
