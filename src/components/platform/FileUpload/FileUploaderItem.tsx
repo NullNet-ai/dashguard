@@ -268,6 +268,11 @@ export const FileUploaderItem = React.forwardRef<
             stillInProgress ? "cursor-not-allowed" : "cursor-pointer",
             hasUploadError ? "bg-destructive/10" : "",
           )}
+          onClick={() => {
+            if (!stillInProgress && !hasUploadError) {
+              setIsPreviewModalOpen(true);
+            }
+          }}
           {...props}
         >
           <div className="mr-4">
@@ -280,11 +285,6 @@ export const FileUploaderItem = React.forwardRef<
                 src={imageSrc}
                 alt="Preview"
                 className={`h-16 w-16 rounded object-cover ${hasUploadError ? "opacity-50" : ""}`}
-                onClick={() => {
-                  if (!isDisabled && !stillInProgress && !hasUploadError) {
-                    setIsPreviewModalOpen(true);
-                  }
-                }}
               />
             ) : (
               <button
@@ -326,7 +326,10 @@ export const FileUploaderItem = React.forwardRef<
                 size={"xs"}
                 variant={"softPrimary"}
                 type="button"
-                onClick={handleOpenCropModal}
+                onClick={(e) => {
+                  handleOpenCropModal();
+                  e.stopPropagation();
+                }}
                 disabled={stillInProgress || isDisabled || hasUploadError}
                 className="rounded-full"
               >
@@ -340,7 +343,10 @@ export const FileUploaderItem = React.forwardRef<
                 type="button"
                 size={"xs"}
                 variant={"softDestructive"}
-                onClick={() => removeFileFromSet(index)}
+                onClick={(e) => {
+                  removeFileFromSet(index);
+                  e.stopPropagation();
+                }}
                 className={cn(
                   direction === "rtl" ? "left-1 top-1" : "right-1 top-1",
                   "rounded-full",
