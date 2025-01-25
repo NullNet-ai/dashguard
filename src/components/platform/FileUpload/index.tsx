@@ -25,6 +25,22 @@ const FileUpload = ({
   form,
   ...props
 }: FileProps) => {
+  const getAcceptedFileTypesText = (dropzoneOptions: any) => {
+    const acceptedTypes = dropzoneOptions?.accept
+      ? `${Object.keys(dropzoneOptions.accept)
+          .map(type => {
+            if (type.includes('/*')) {
+              return dropzoneOptions?.accept?.[type]?.map((subType: string) => subType.toUpperCase()).join(', ').replace('.', '') ?? '';
+            }
+            return type.split('/')[1]?.toUpperCase().replace('.', '') ?? '';
+          })
+          .join(', ')}`
+      : 'PDF, Doc, JPG or GIF';
+
+    const maxSize = dropzoneOptions?.maxSize ? ` up to ${dropzoneOptions.maxSize / (1024 * 1024)}MB` : ' up to 10MB';
+
+    return `${acceptedTypes}${maxSize}`;
+  };
   return (
     <FileUploader
       dropzoneOptions={dropzoneOptions}
@@ -49,17 +65,7 @@ const FileUpload = ({
             <span className="font-semibold text-primary">Upload Document</span>
           </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {dropzoneOptions?.accept
-                ? `${Object.keys(dropzoneOptions.accept)
-                  .map(type => {
-                  if (type.includes('/*')) {
-                  return dropzoneOptions?.accept?.[type]?.map(subType => subType.toUpperCase()).join(', ').replace('.', '') ?? '';
-                  }
-                  return type.split('/')[1]?.toUpperCase().replace('.', '') ?? '';
-                  })
-                  .join(', ')}`
-                : 'PDF, Doc, JPG or GIF'}
-                {dropzoneOptions?.maxSize ? ` up to ${dropzoneOptions.maxSize / (1024 * 1024)}MB` : ' up to 10MB'}
+              {getAcceptedFileTypesText(dropzoneOptions)}
               </p>
         </div>
       </FileInput>
