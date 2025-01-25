@@ -4,7 +4,7 @@ import RecordSummaryContent from "./SummaryContent";
 const RecordSummary = async () => {
 
   return (
-    <div className="hidden md:block">
+    <div>
         <RecordSummaryContent />
     </div>
 
