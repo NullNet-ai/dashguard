@@ -40,6 +40,7 @@ const Layout = async ({
       "updated_time",
     ],
   });
+
   if (record_details?.errors?.length) {
     throw new Error(record_details.message as string);
   }
@@ -49,6 +50,11 @@ const Layout = async ({
 
   const { status } = record_details?.data || {};
 
+  console.log({
+    main_entity,
+    identifier,
+    status,
+  });
   if (
     ["Draft", "draft", "Pending"].includes((status as string)?.toLowerCase())
   ) {

@@ -1,13 +1,23 @@
 const stepsNavigation = {
   one: {
     next: true,
-    prev: false,
-    skip: false,
+    prev: true,
+    skip: true
   },
   two: {
     next: true,
     prev: true,
-    skip: false,
+    skip: true
+  },
+  three: {
+    next: true,
+    prev: true,
+    skip: true
+  },
+  four: {
+    next: true,
+    prev: true,
+    skip: true
   },
 };
 export default stepsNavigation;

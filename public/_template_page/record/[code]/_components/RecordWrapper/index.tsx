@@ -5,7 +5,6 @@ import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSumm
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
-import { upperFirst } from "lodash";
 import statusOptions from "../../../_actions/statusOptions";
 import tabs from "../../../_config/tabs";
 
@@ -33,18 +32,7 @@ const Wrapper = ({
             minSize={25}
             className="min-h-60 flex-grow-[6] bg-transparent"
           >
-            <HeaderTabs
-              tabs={[
-                tabs[0]!,
-                {
-                  id: entity_name,
-                  name: upperFirst(entity_name),
-                  tabName: `${entity_name}?categories=`,
-                },
-                // Omit tab[0], so that i can spread the rest of the tabs
-                ...tabs.slice(1),
-              ]}
-            />
+            <HeaderTabs tabs={tabs} />
             <MainContent className="p-4">{record}</MainContent>
           </ResizablePanel>
         </ResizablePanelGroup>
