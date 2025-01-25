@@ -78,7 +78,7 @@ export default function GridMobileRow({parent} : {parent?: string}) {
                     ...statusCell.getContext(),
                     view_mode: "card",
                   })}
-                {parent === 'grid' ? ( <div>
+                {(parent === 'grid' || parent === 'form') ? ( <div>
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <div className="flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm">
