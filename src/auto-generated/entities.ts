@@ -1,8 +1,1 @@
-export default [
-  "sample",
-  "guest",
-  "contact",
-  "organization",
-  "user_role",
-  "animal",
-];
+export default ["sample", "guest", "contact", "organization", "user_role"];

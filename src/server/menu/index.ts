@@ -5,7 +5,6 @@ const menu = Object.values({
   Contact: require("./contact").default,
   Organization: require("./organization").default,
   Settings: require("./settings").default,
-  Animal: require("./animal").default,
 });
 
 export default menu;
