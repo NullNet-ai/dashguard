@@ -11,7 +11,7 @@
 - **[jsx-a11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)**: Accessibility rules for JSX
 - **[import](https://github.com/import-js/eslint-plugin-import)**: ES6+ import/export syntax rules
 
-## Extended Configurations
+## Default Recommended Rules
 1. [`next/core-web-vitals`](https://nextjs.org/docs/app/building-your-application/configuring/eslint#core-web-vitals)
 2. [`@typescript-eslint/recommended-type-checked`](https://typescript-eslint.io/linting/configs#recommended-type-checked)
 3. [`@typescript-eslint/stylistic-type-checked`](https://typescript-eslint.io/linting/configs#stylistic-type-checked)
@@ -24,52 +24,261 @@
 10. [`eslint:recommended`](https://eslint.org/docs/latest/rules/)
 11. [`prettier`](https://github.com/prettier/eslint-config-prettier)
 
-## Rules Configuration
+## Additional Rules
 
-### Stylistic Rules
+### Stylistic
 - [`@stylistic/array-bracket-newline`](https://eslint.style/rules/default/array-bracket-newline): Consistent array bracket newlines
+  - Value: `["error", { "multiline": true }]`
+  - ❌ Incorrect:
+    ```javascript
+    const arr = [1,
+      2, 3];
+    ```
+  - ✅ Correct:
+    ```javascript
+    const arr = [
+      1,
+      2,
+      3
+    ];
+    ```
+
 - [`@stylistic/arrow-spacing`](https://eslint.style/rules/default/arrow-spacing): Spacing around arrow function arrows
+  - Value: `["error", { "before": true, "after": true }]`
+  - ❌ Incorrect:
+    ```javascript
+    const fn =()=>42;
+    ```
+  - ✅ Correct:
+    ```javascript
+    const fn = () => 42;
+    ```
+
 - [`@stylistic/curly-newline`](https://eslint.style/rules/default/curly-newline): Newlines in curly braces
-- [`@stylistic/function-call-argument-newline`](https://eslint.style/rules/default/function-call-argument-newline): Function call argument newlines
+  - Value: `["error", { "multiline": true }]`
+  - ❌ Incorrect:
+    ```javascript
+    const obj = { foo: 1,
+      bar: 2 };
+    ```
+  - ✅ Correct:
+    ```javascript
+    const obj = {
+      foo: 1,
+      bar: 2
+    };
+    ```
+
 - [`@stylistic/function-call-spacing`](https://eslint.style/rules/default/function-call-spacing): Function call spacing
+  - Value: `["error", "never"]`
+  - ❌ Incorrect:
+    ```javascript
+    fn (x);
+    ```
+  - ✅ Correct:
+    ```javascript
+    fn(x);
+    ```
+
 - [`@stylistic/implicit-arrow-linebreak`](https://eslint.style/rules/default/implicit-arrow-linebreak): Arrow function linebreaks
-- [`@stylistic/line-comment-position`](https://eslint.style/rules/default/line-comment-position): Line comment positioning
+  - Value: `["error", "beside"]`
+  - ❌ Incorrect:
+    ```javascript
+    const fn = () =>
+      42;
+    ```
+  - ✅ Correct:
+    ```javascript
+    const fn = () => 42;
+    ```
+
 - [`@stylistic/max-len`](https://eslint.style/rules/default/max-len): Maximum line length
-- [`@stylistic/newline-per-chained-call`](https://eslint.style/rules/default/newline-per-chained-call): Newlines in method chains
+  - Value: `["error", { "code": 100 }]`
+  - ❌ Incorrect:
+    ```javascript
+    const veryLongVariableName = "This is a very long string that exceeds the maximum line length limit of 100 characters";
+    ```
+  - ✅ Correct:
+    ```javascript
+    const veryLongVariableName = 
+      "This is a very long string that has been properly" +
+      "split across multiple lines";
+    ```
+
 - [`@stylistic/no-extra-semi`](https://eslint.style/rules/default/no-extra-semi): No extra semicolons
-- [`@stylistic/nonblock-statement-body-position`](https://eslint.style/rules/default/nonblock-statement-body-position): Non-block statement positioning
-- [`@stylistic/rest-spread-spacing`](https://eslint.style/rules/default/rest-spread-spacing): Rest/spread operator spacing
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```javascript
+    const x = 5;;
+    ```
+  - ✅ Correct:
+    ```javascript
+    const x = 5;
+    ```
+
 - [`@stylistic/semi`](https://eslint.style/rules/default/semi): Semicolon usage
-- [`@stylistic/switch-colon-spacing`](https://eslint.style/rules/default/switch-colon-spacing): Switch case colon spacing
-- [`@stylistic/template-curly-spacing`](https://eslint.style/rules/default/template-curly-spacing): Template literal curly spacing
+  - Value: `["error", "always"]`
+  - ❌ Incorrect:
+    ```javascript
+    const x = 5
+    ```
+  - ✅ Correct:
+    ```javascript
+    const x = 5;
+    ```
 
-### TypeScript Rules
+### TypeScript
 - [`@typescript-eslint/consistent-type-definitions`](https://typescript-eslint.io/rules/consistent-type-definitions): Type definition style
+  - Value: `["error", "interface"]`
+  - ❌ Incorrect:
+    ```typescript
+    type User = { name: string; age: number; };
+    ```
+  - ✅ Correct:
+    ```typescript
+    interface User { name: string; age: number; }
+    ```
+
 - [`@typescript-eslint/consistent-type-imports`](https://typescript-eslint.io/rules/consistent-type-imports): Type import style
+  - Value: `["error", { "prefer": "type-imports" }]`
+  - ❌ Incorrect:
+    ```typescript
+    import { User } from './types';
+    ```
+  - ✅ Correct:
+    ```typescript
+    import type { User } from './types';
+    ```
+
 - [`@typescript-eslint/no-floating-promises`](https://typescript-eslint.io/rules/no-floating-promises): Unhandled promises
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```typescript
+    promise.then(callback);
+    ```
+  - ✅ Correct:
+    ```typescript
+    await promise.then(callback);
+    // or
+    void promise.then(callback);
+    ```
+
 - [`@typescript-eslint/no-misused-promises`](https://typescript-eslint.io/rules/no-misused-promises): Promise misuse
-- [`@typescript-eslint/no-unsafe-assignment`](https://typescript-eslint.io/rules/no-unsafe-assignment): Unsafe assignments
-- [`@typescript-eslint/no-unsafe-call`](https://typescript-eslint.io/rules/no-unsafe-call): Unsafe function calls
-- [`@typescript-eslint/no-unsafe-return`](https://typescript-eslint.io/rules/no-unsafe-return): Unsafe returns
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```typescript
+    if (promise) { /* ... */ }
+    ```
+  - ✅ Correct:
+    ```typescript
+    if (await promise) { /* ... */ }
+    ```
+
 - [`@typescript-eslint/prefer-optional-chain`](https://typescript-eslint.io/rules/prefer-optional-chain): Optional chaining
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```typescript
+    obj && obj.prop && obj.prop.value
+    ```
+  - ✅ Correct:
+    ```typescript
+    obj?.prop?.value
+    ```
 
-### Import Rules
+### Import
 - [`import/order`](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md): Import order
-- [`no-duplicate-imports`](https://eslint.org/docs/latest/rules/no-duplicate-imports): No duplicate imports
+  - Value: `["error", { "groups": ["builtin", "external", "internal", "parent", "sibling", "index"] }]`
+  - ❌ Incorrect:
+    ```javascript
+    import './styles.css';
+    import React from 'react';
+    import { something } from '../parent';
+    ```
+  - ✅ Correct:
+    ```javascript
+    import React from 'react';
+    import { something } from '../parent';
+    import './styles.css';
+    ```
 
-### React Rules
+- [`no-duplicate-imports`](https://eslint.org/docs/latest/rules/no-duplicate-imports): No duplicate imports
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```javascript
+    import { foo } from 'module';
+    import { bar } from 'module';
+    ```
+  - ✅ Correct:
+    ```javascript
+    import { foo, bar } from 'module';
+    ```
+
+### React
 - [`react/boolean-prop-naming`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/boolean-prop-naming.md): Boolean prop naming
+  - Value: `["error", { "rule": "^(is|has)[A-Z]([A-Za-z0-9]?)+" }]`
+  - ❌ Incorrect:
+    ```jsx
+    <Component disabled={true} />
+    ```
+  - ✅ Correct:
+    ```jsx
+    <Component isDisabled={true} />
+    ```
+
 - [`react/destructuring-assignment`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/destructuring-assignment.md): Destructuring assignments
+  - Value: `["error", "always"]`
+  - ❌ Incorrect:
+    ```javascript
+    const name = props.name;
+    ```
+  - ✅ Correct:
+    ```javascript
+    const { name } = props;
+    ```
+
 - [`react/hook-use-state`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/hook-use-state.md): useState hook usage
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```javascript
+    const [enabled, setEnabled] = useState(false);
+    ```
+  - ✅ Correct:
+    ```javascript
+    const [isEnabled, setIsEnabled] = useState(false);
+    ```
+
 - [`react/jsx-boolean-value`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-boolean-value.md): Boolean attributes
-- [`react/jsx-closing-bracket-location`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-closing-bracket-location.md): Closing bracket location
-- [`react/jsx-curly-brace-presence`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-curly-brace-presence.md): JSX curly braces
+  - Value: `["error", "never"]`
+  - ❌ Incorrect:
+    ```jsx
+    <Component isEnabled={true} />
+    ```
+  - ✅ Correct:
+    ```jsx
+    <Component isEnabled />
+    ```
+
 - [`react/jsx-fragments`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-fragments.md): React fragments
-- [`react/jsx-handler-names`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-handler-names.md): Event handler naming
-- [`react/jsx-no-constructed-context-values`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-constructed-context-values.md): Context value construction
-- [`react/jsx-sort-props`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-sort-props.md): Props sorting
+  - Value: `["error", "syntax"]`
+  - ❌ Incorrect:
+    ```jsx
+    <React.Fragment><div /><div /></React.Fragment>
+    ```
+  - ✅ Correct:
+    ```jsx
+    <><div /><div /></>
+    ```
+
 - [`react/no-array-index-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-array-index-key.md): Array index keys
-- [`react/no-unstable-nested-components`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-unstable-nested-components.md): Nested components
+  - Value: `"error"`
+  - ❌ Incorrect:
+    ```jsx
+    array.map((item, index) => <div key={index} />)
+    ```
+  - ✅ Correct:
+    ```jsx
+    array.map((item) => <div key={item.id} />)
+    ```
 
 ## Scripts
 - **pnpm lint:normal**: Runs ESLint with normal configuration where most rules are set to warn level and some critical rules to error level
