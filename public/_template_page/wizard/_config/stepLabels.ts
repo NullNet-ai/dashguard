@@ -1,6 +1,5 @@
-import { ulid } from "ulid";
 const stepLabels = {
-  1: "Basic Details" + ulid(),
-  2: "Basic Details" + ulid(),
+  1: "Basic Details",
+  2: "Basic Details",
 };
 export default stepLabels;
