@@ -1,10 +1,16 @@
+import one from "../(summary)/_1";
+import two from "../(summary)/_2";
+import three from "../(summary)/_2";
+import four from "../(summary)/_2";
+import five from "../(summary)/_2";
+
 const WizardSummaryComponent = () => {
   return {
-    one: require("../(summary)/_1").default,
-    two: require("../(summary)/_2").default,
-    three: require("../(summary)/_3").default,
-    four: require("../(summary)/_4").default,
-    five: require("../(summary)/_5").default,
+    one,
+    two,
+    three,
+    four,
+    five,
   };
 };
 

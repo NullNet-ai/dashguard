@@ -1,10 +1,17 @@
-const menu = Object.values({
-  Dashboard: require("./dashboard").default,
-  Favorite: require("./favorite").default,
-  ActivityLog: require("./activity_log").default,
-  Contact: require("./contact").default,
-  Organization: require("./organization").default,
-  Settings: require("./settings").default,
-});
+import activity_log from "./activity_log";
+import contact from "./contact";
+import dashboard from "./dashboard";
+import favorite from "./favorite";
+import organization from "./organization";
+import settings from "./settings";
+
+const menu = [
+  activity_log,
+  contact,
+  dashboard,
+  favorite,
+  organization,
+  settings,
+];
 
 export default menu;

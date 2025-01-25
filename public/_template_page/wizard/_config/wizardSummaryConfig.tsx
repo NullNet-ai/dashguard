@@ -1,7 +1,10 @@
+import one from "../(summary)/_1";
+import two from "../(summary)/_2";
+
 const WizardSummaryComponent = () => {
   return {
-    one: require("../(summary)/_1").default,
-    two: require("../(summary)/_2").default,
+    one,
+    two,
   };
 };
 
