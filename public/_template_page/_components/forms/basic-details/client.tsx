@@ -7,50 +7,13 @@ import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { api } from "~/trpc/react";
 
-const FormSchema = z.object({
-  name: z
-    .string({ message: "Name is required" })
-    .min(1, { message: "Name is required" }),
-});
-
+const FormSchema = z.object({});
+// Paste the code snippet here
+// Double check the code snippet to ensure that it is correct
+// 1. FormSchema is defined as a z.object
+// 2. FormBuilder is imported from "~/components/platform/FormBuilder"
+// 3. IHandleSubmit is imported from "~/components/platform/FormBuilder/types"
+// 4. Fields are defined in the FormBuilder component
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
-  const toast = useToast();
-  const update = api.record.updateDynamicRecord.useMutation();
-  const handleSave = async ({
-    data,
-  }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
-    try {
-      // alert(JSON.stringify(data, null, 2));
-      return update.mutateAsync({
-        id: params.id,
-        data,
-        entity: params.entity!,
-      });
-    } catch (error) {
-      toast.error("Failed to submit Basic Details");
-    }
-  };
-
-  return (
-    <FormBuilder
-      myParent={params.shell_type}
-      // enableFormRegisterToParent // Default value is false can proceed next without required fields
-      formProps={params}
-      formLabel="Basic Details"
-      handleSubmit={handleSave}
-      formKey="basicDetails"
-      formSchema={FormSchema}
-      defaultValues={defaultValues}
-      fields={[
-        {
-          id: "name",
-          formType: "input",
-          name: "name",
-          label: "Name",
-          required: true,
-          placeholder: "Name",
-        },
-      ]}
-    />
-  );
+  return null;
 }

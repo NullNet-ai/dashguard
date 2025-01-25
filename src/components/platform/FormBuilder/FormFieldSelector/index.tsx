@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "~/components/ui/button";
-import { Select } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -40,13 +39,12 @@ const FIELD_TYPES = [
   { value: "switch", label: "Switch" },
 ] as const;
 
-// Add this utility function at the top of the file after imports
 const toSnakeCase = (str: string) => {
   return str
-    .replace(/([A-Z])/g, " $1") // Add space before capital letters
+    .replace(/([A-Z])/g, " $1")
     .trim()
     .toLowerCase()
-    .replace(/[^a-zA-Z0-9]+/g, "_"); // Replace spaces and special chars with underscore
+    .replace(/[^a-zA-Z0-9]+/g, "_");
 };
 
 export function FormFieldSelector() {
@@ -308,8 +306,10 @@ export default function BasicDetails({ params, defaultValues }: IFormProps) {
                     Copy Code
                   </Button>
                 </div>
-                <pre className="overflow-x-auto rounded-md bg-slate-50 p-4">
-                  <code>{generateCode()}</code>
+                <pre className="overflow-x-auto rounded-md bg-slate-900 p-4">
+                  <code className="block text-sm text-slate-50">
+                    {generateCode()}
+                  </code>
                 </pre>
               </Card>
             </>
