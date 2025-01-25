@@ -86,11 +86,10 @@ export default function FormEmailInput({
     if (!fields?.length) {
       append({ id: ulid(), email: "", is_primary: true });
     }
-  });
+  },[]);
   const { name } = formRenderProps.field;
   const isDisabled = formRenderProps?.field?.disabled;
   const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
-  const { register } = form;
   const values = form.watch(name);
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
