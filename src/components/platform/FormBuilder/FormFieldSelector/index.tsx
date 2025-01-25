@@ -10,6 +10,7 @@ import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { FormBuilder } from "~/components/platform/FormBuilder";
 import { z } from "zod";
 import { useToast } from "~/context/ToastProvider";
+import { ulid } from "ulid";
 
 const FIELD_TYPES = [
   { value: "input", label: "Text Input" },
@@ -66,13 +67,13 @@ export function FormFieldSelector() {
   }, [fields]);
 
   const handleFieldTypeSelect = (type: string) => {
-    const id = crypto.randomUUID();
+    const id = ulid();
     setFields((prev) => [
       ...prev,
       {
         id,
         formType: type,
-        name: "",
+        name: `${type}_${id}`,
         label: "",
         required: false,
         placeholder: "",
