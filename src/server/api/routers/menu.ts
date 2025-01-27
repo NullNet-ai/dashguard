@@ -40,6 +40,16 @@ export const menuRouter = createTRPCRouter({
       (key) => menuMap[key],
     ) as ISidebarMenu[];
 
+    // Get the remaining items that are not in the newMenuItems array
+    const remainingItems = menuItems.filter(
+      (item) => !newMenuItems.includes(item),
+    );
+
+    if (remainingItems.length > 0) {
+      // Add the remaining items to the end of the newMenuItems array
+      newMenuItems.unshift(...remainingItems);
+    }
+
     return newMenuItems;
   }),
 });
