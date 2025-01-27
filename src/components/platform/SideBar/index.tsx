@@ -96,7 +96,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   />
                 </>
               )}
-              {item?.separator && <Separator />}
+              {item?.separator && <Separator className="my-2" />}
             </Fragment>
           );
         })}

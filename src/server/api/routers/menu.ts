@@ -2,14 +2,13 @@ import MENU from "../../menu";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { ISidebarMenu } from "~/components/platform/SideBar/type";
 import { headers } from "next/headers";
-
+import arrangement from "../../menu/arrangement.json";
 export const menuRouter = createTRPCRouter({
   getMenuConfig: publicProcedure.query(async () => {
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
 
     const menuItems = MENU as ISidebarMenu[];
-
     // Update isActive for groups based on their items
     menuItems.forEach((item) => {
       item.isActive = item?.items?.some((subItem) =>
@@ -24,6 +23,23 @@ export const menuRouter = createTRPCRouter({
       }
     });
 
-    return menuItems;
+    const menuMap = menuItems.reduce(
+      (acc, item) => {
+        const itemTitle = item?.title
+          ?.toLowerCase()
+          .replace(/\s+/g, "_") as string;
+        return {
+          ...acc,
+          [itemTitle]: item,
+        };
+      },
+      {} as Record<string, ISidebarMenu>,
+    );
+
+    const newMenuItems = arrangement.order.map(
+      (key) => menuMap[key],
+    ) as ISidebarMenu[];
+
+    return newMenuItems;
   }),
 });

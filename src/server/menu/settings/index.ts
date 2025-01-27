@@ -2,6 +2,7 @@ import role from "./role";
 
 // Manual add menu to items
 const menu = {
+  title: "Settings",
   groupTitle: "Platform",
   groups: [
     {
