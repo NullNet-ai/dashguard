@@ -15,6 +15,7 @@ import redisClient from "~/server/redis/cache";
 import { cookies } from "next/headers";
 import { TokenData } from "./types";
 import { ulid } from "ulid";
+import { colors } from "../utils/choychoy";
 
 /**
  * 1. CONTEXT
@@ -41,6 +42,21 @@ export const createTRPCContext = async (opts: {
     ...opts,
   };
 };
+
+/**
+ *
+ * @param timing
+ * @returns
+ */
+function legend(timing: number): string {
+  if (timing >= 10000) {
+    return `${colors.red}${timing}ms${colors.reset}`;
+  } else if (timing >= 3000) {
+    return `${colors.yellow}${timing}ms${colors.reset}`;
+  } else {
+    return `${colors.green}${timing}ms${colors.reset}`;
+  }
+}
 
 /**
  * 2. INITIALIZATION
@@ -101,8 +117,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
+  const timing = end - start;
   console.info(
-    `[${new Date().toISOString()}]-[TRPC] ${path} took ${end - start}ms to execute`,
+    `[${new Date().toISOString()}]-[TRPC] ${path} took ${legend(timing)} to execute`,
   );
 
   return result;
@@ -153,16 +170,19 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const cachedSessionClient = ctx.redisClient;
 
   const cachedSession = await cachedSessionClient.getCachedData(token.value);
+  const endTimeInit = Date.now();
+  const timingInit = endTimeInit - startTime;
   console.info(
     `[${new Date().toISOString()}]-` + "[CacheSession Get]: ",
-    Date.now() - startTime + "ms ",
+    legend(timingInit),
     "path: " + path,
   );
   if (cachedSession) {
     const endTime = Date.now();
+    const timing = endTime - startTime;
     console.info(
       `[${new Date().toISOString()}]-` + "[TOKEN-CACHE-HIT]: ",
-      endTime - startTime + "ms",
+      legend(timing),
       "path: " + path,
     );
     return next({
@@ -182,9 +202,10 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
     })
     .catch(() => null);
   const endTime = Date.now();
+  const timing = endTime - startTime;
   console.info(
     `[${new Date().toISOString()}]-` + "[TOKEN-CACHE-MISS]: ",
-    endTime - startTime + "ms",
+    legend(timing),
   );
   if (!session) {
     throw new TRPCError({

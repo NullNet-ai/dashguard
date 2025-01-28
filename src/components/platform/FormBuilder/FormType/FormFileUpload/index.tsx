@@ -11,10 +11,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import FileUpload from "~/components/platform/FileUpload";
-import { type IField } from "../../types";
-import { type DropzoneOptions } from "react-dropzone";
+import { IField } from "../../types";
 
-// import { DevTool } from "@hookform/devtools";
 
 interface IProps {
   fieldConfig: IField;
@@ -47,12 +45,11 @@ export default function FormFile({
   };
 
   const fileDropZoneOptions = {
-    maxFiles: fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5,
+    maxFiles: fieldConfig?.fileDropzoneOptions?.multiple === false ? 1 : (fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5),
     maxSize: fieldConfig?.fileDropzoneOptions?.maxSize ?? 1024 * 1024 * 10,
     multiple: fieldConfig?.fileDropzoneOptions?.multiple ?? true,
     ...fieldConfig?.fileDropzoneOptions,
-  } as DropzoneOptions;
-  
+  };
   return (
     <FormItem>
       {fieldConfig?.label && (

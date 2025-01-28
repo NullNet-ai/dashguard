@@ -1,7 +1,18 @@
 "use client";
 
-const ConfirmationSummary = () => {
+const Summary = () => {
   return <></>;
 };
 
-export default ConfirmationSummary;
+const SummaryConfig = {
+  label: "Step 2",
+  required: false,
+  components: [
+    {
+      label: "Confirmation",
+      component: <Summary />,
+    },
+  ],
+};
+
+export default SummaryConfig;

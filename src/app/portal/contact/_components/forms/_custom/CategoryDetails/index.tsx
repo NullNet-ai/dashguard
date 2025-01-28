@@ -48,6 +48,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
                       shouldDirty: true,
                     });
                     router.replace(`${pathname}?categories=${value}`);
+                    router.refresh();
                   },
                 },
               }}

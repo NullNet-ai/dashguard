@@ -1,15 +1,11 @@
 "use client";
 import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
+import { usePathname } from "next/navigation";
 
-const ContactOrganizationSummary = ({
-  form_key,
-  identifier,
-}: {
-  form_key: string;
-  identifier: string;
-  main_entity: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , entity, _, identifier] = pathName.split("/");
   const {
     data: record = {
       data: {
@@ -55,4 +51,16 @@ const ContactOrganizationSummary = ({
   );
 };
 
-export default ContactOrganizationSummary;
+const SummaryConfig = {
+  label: "Step 4",
+  required: false,
+  show_summary: true,
+  components: [
+    {
+      label: "Organization",
+      component: <Summary form_key={"organization_details"} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

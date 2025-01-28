@@ -22,6 +22,12 @@ export const EventEmitterProvider: React.FC<{ children: React.ReactNode }> = ({
   //   const events = emitterRef.current.eventNames(); // Get all event names
   // }, [emitterRef.current]);
 
+  // Set Limit of Listeners
+  emitterRef.current.setMaxListeners(20);
+
+  // log debug list of listeners
+  console.debug(emitterRef.current.eventNames());
+
   return (
     <EventEmitterContext.Provider value={value}>
       {children}

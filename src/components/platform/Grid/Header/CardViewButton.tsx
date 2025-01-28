@@ -11,7 +11,6 @@ export default function CardViewButton() {
   return (
     <Button
     variant={active ? 'default' : 'outline'}
-      loading={state?.createLoading}
       size='md'
       className="rounded-l-none hidden lg:block"
       onClick={() => actions?.handleSwitchViewMode("card")}
