@@ -10,7 +10,7 @@ const Header: React.FC = () => {
   return (
     <div>
       <header
-        className={`col-span-full flex md:h-14 h-[3rem] items-center justify-center gap-4 bg-background`}
+        className={`col-span-full flex h-[3rem] items-center justify-center gap-4 bg-background md:h-14`}
       >
         {/* <SidebarTrigger Icon={TriggerComponent} className="hidden lg:block" /> */}
 
@@ -24,12 +24,12 @@ const Header: React.FC = () => {
           </div>
           <SidebarTrigger
             Icon={MobileTriggerComponent}
-            className="mr-6 sm:mb-0 sm:hidden"
+            className="mr-4 sm:mb-0 sm:hidden"
           />
         </div>
       </header>
-      <div className="flex sm:hidden border-b sm:border-none">
-        <MainTab className=" w-full" />
+      <div className="flex border-b sm:hidden sm:border-none">
+        <MainTab className="w-full" />
       </div>
     </div>
   );

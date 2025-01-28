@@ -43,10 +43,11 @@ const buttonVariants = cva(
           "relative after:absolute after:bg-primary after:bottom-2 after:h-[1px] after:w-2/3 after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300",
       },
       size: {
-        default: "h-10 px-2 py-1",
+        default: "h-[34px]  px-2",
         xs: "h-7  px-2",
-        sm: "h-9  px-2",
-        lg: "h-11  px-3",
+        sm: "h-7  px-2",
+        md: "h-[34px]  px-2",
+        lg: "h-[40px]  px-3",
         icon: "h-10 w-10",
       },
       
@@ -114,7 +115,7 @@ const Button = React.forwardRef<
             iconPlacement === "left" &&
             variant !== "expandIcon" &&
             !loading && (
-              <div className="w-5 -translate-x-[50%]">
+              <div className="w-5 lg:-translate-x-[50%]">
                 <Icon className={cn("h-5 w-5", iconClassName)} />
               </div>
             )}
@@ -148,7 +149,7 @@ const Button = React.forwardRef<
             iconPlacement === "right" &&
             variant !== "expandIcon" &&
             !loading && (
-              <div className="w-5 translate-x-[50%]">
+              <div className="w-5 lg:translate-x-[50%]">
                 <Icon className={cn("h-5 w-5", iconClassName)} />
               </div>
             )}

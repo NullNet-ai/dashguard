@@ -14,14 +14,15 @@ console.table({
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // rewrites: async () => {
-  //   return [
-  //     {
-  //       source: "/api/file/:path*",
-  //       destination: "http://localhost:5001/api/file/:path*",
-  //     },
-  //   ];
-  // },
+  experimental:
+    // @ts-expect-error - This is not in the types yet
+    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "local"
+      ? {
+          workerThreads: true,
+          cpus: 6,
+          webpackBuildWorker: true,
+        }
+      : undefined,
   env: {
     NEXT_NODE_ENV: process.env.NODE_ENV,
   },

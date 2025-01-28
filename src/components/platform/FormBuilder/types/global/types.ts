@@ -2,8 +2,10 @@ import { type z } from "zod";
 
 type TDisplayType = "form" | "selected";
 
-type TFormType =
+ type TFormType =
   | "input"
+  | "draggable"
+  | "multi-field"
   | "input-grid"
   | "time-picker"
   | "number-input"
@@ -23,6 +25,7 @@ type TFormType =
   | "address-input"
   | "slider"
   | "password"
+  | "switch"
   | "rich-text-editor"
   | "currency-input";
 

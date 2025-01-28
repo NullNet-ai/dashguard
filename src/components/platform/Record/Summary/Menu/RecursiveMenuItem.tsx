@@ -4,10 +4,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { IMenuOptionConfig } from "../../types";
-import { Fragment } from "react";
-import { DEFAULT_MENU_OPTION_CONFIG } from "../../constants";
+import { Fragment, useState } from "react";
 import MenuItem from "./MenuItem";
 import { formatFormTestID } from "~/lib/utils";
+import { ChevronRight } from "lucide-react";
 
 interface IRecursiveMenuItemProps {
   recordId: string;
@@ -16,10 +16,20 @@ interface IRecursiveMenuItemProps {
 }
 
 export default function RecursiveMenuItem({
-  menuOptionConfig = DEFAULT_MENU_OPTION_CONFIG,
+  menuOptionConfig = [],
   recordId,
   entityName,
 }: IRecursiveMenuItemProps) {
+  const [menuItemLoadingState, setMenuItemLoadingState] = useState<
+    Record<string, boolean>
+  >({});
+
+  const handleLoadingStateChange = (itemName: string, isLoading: boolean) => {
+    setMenuItemLoadingState((prev) => ({
+      ...prev,
+      [itemName]: isLoading,
+    }));
+  };
   // ! All iterations should wrap the MenuItem component with a Fragment
   return menuOptionConfig.map((option) => (
     <Fragment key={recordId}>
@@ -28,18 +38,24 @@ export default function RecursiveMenuItem({
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <MenuItem
-                onClick={option.onClick.bind(null, recordId, entityName)}
+                onClick={option.onClick.bind(
+                  null,
+                  recordId,
+                  entityName,
+                  handleLoadingStateChange,
+                )}
                 data-test-id={
                   entityName +
                   "-rcrd-ddn-menu-" +
                   formatFormTestID(option.label)
                 }
               >
+                <ChevronRight className="size-5 text-default/40" />{" "}
                 {option.label}
               </MenuItem>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
+          <DropdownMenuContent align="start" side="right">
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}
@@ -50,7 +66,12 @@ export default function RecursiveMenuItem({
       )) || (
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <MenuItem
-            onClick={option.onClick.bind(null, recordId, entityName)}
+            onClick={option.onClick.bind(
+              null,
+              recordId,
+              entityName,
+              handleLoadingStateChange,
+            )}
             data-test-id={
               entityName + "-rcrd-menu-" + formatFormTestID(option.label)
             }

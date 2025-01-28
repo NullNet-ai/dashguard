@@ -79,6 +79,11 @@ const getSessionTabs = async () => {
     tabs: newTabs,
   });
 
+  await api.grid.defaultGridTab({
+    application: application || "",
+    entity: mainEntity || "",
+  });
+
   return newTabs;
 };
 
@@ -86,11 +91,6 @@ const InnerTabs = async () => {
   const newTabs = await getSessionTabs();
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  if (!newTabs?.length) return null;
-
-  // const mainTabs = newTabs.slice(0, 6);
-  // const dropdownTabs = newTabs.slice(6);
-
   return <InnerTabItems tabs={newTabs} pathname={pathname} />;
 };
 

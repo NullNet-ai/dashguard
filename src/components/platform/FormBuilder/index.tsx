@@ -66,6 +66,8 @@ export const FormBuilder = (props: IPropsForms) => {
   const [showFormActions, setShowFormActions] = useState(false);
   const [isOpenSearch, setIsOpenSearch] = useState(false);
 
+
+  const { formHostInitialView } = features ?? {}
   //* EFFECTS
 
   //* Effect to listen to form submission
@@ -106,11 +108,17 @@ export const FormBuilder = (props: IPropsForms) => {
   //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
-      setDisplayType("form");
-      return;
+      const parsingResult = formSchema.safeParseAsync(defaultValues);
+      parsingResult.then((result) => {
+        if (result.success) {
+          form.control._disableForm(result.success);
+          setDisplayType("form");
+        }
+      });
+    } else {
+      setFormGridSelected(filterGridConfig?.selectedRecords);
+      setDisplayType("selected");
     }
-    setFormGridSelected(filterGridConfig?.selectedRecords);
-    setDisplayType("selected");
   }, [filterGridConfig?.selectedRecords]);
 
   //* Effect to listen to event emitter
@@ -152,8 +160,14 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
-
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]); 
+  
+  useEffect(() => {
+    if(formHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
+      disableForm();
+    }
+  }, [formHostInitialView, myParent, enableFormRegisterToParent]);
+  
   //* HANDLERS
 
   //* handler to disable form
@@ -222,6 +236,13 @@ export const FormBuilder = (props: IPropsForms) => {
 
   const handleNewRecordFormFilterGrid = () => {
     setDisplayType("form");
+  };
+
+  const handleSelectedGridRecords = (data : Record<string,any>[]) => {
+    setFormGridSelected(data);
+    handleSearchOpen()
+    setDisplayType("selected");
+    setIsFormOpened(false)
   };
 
   const handleAppendForm = () => {
@@ -408,6 +429,7 @@ export const FormBuilder = (props: IPropsForms) => {
             handleLock={handleLock}
             handleAccordionExpand={handleAccordionExpand}
             handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
+            handleSelectedGridRecords={handleSelectedGridRecords}
             handleAppendForm={handleAppendForm}
             handleUpdateDisplayType={handleUpdateDisplayType}
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}

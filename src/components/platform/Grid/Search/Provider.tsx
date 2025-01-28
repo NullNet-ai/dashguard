@@ -5,20 +5,18 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { ulid } from "ulid";
+import { api } from "~/trpc/react";
+import { UpdateReportFilter } from "../Action/UpdateReportFilter";
+import { GridContext } from "../Provider";
 import {
+  type IAction,
+  type ICreateContext,
   type ISearchItem,
   type ISearchItemResult,
   type ISearchParams,
-  type IAction,
-  type ICreateContext,
   type IState,
 } from "./types";
-import { api } from "~/trpc/react";
-import { GridContext } from "../Provider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { UpdateReportFilter } from "../Action/UpdateReportFilter";
-import { ulid } from "ulid";
-import { formatAndCapitalize } from "~/lib/utils";
 import { removeSearchItems } from "./utils/removeSearchItems";
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
@@ -31,11 +29,14 @@ export default function GridSearchProvider({ children }: IProps) {
   const { state: gridState } = useContext(GridContext);
   const {
     columns = [],
-    entity,
+    entity: defaultEntity,
     searchableFields = [],
     searchConfig,
+    onFetchRecords
   } = gridState?.config ?? {};
 
+
+  const { parentType } = gridState ?? {}
   /** @STATES */
   const [_query, setQuery] = useState<string>("");
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
@@ -45,8 +46,8 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
-      ({ entity: _entity, operator, type, field, values }) => ({
-        entity: _entity || entity,
+      ({ entity, operator, type, field, values }) => ({
+        entity: entity || defaultEntity,
         operator,
         type,
         field,
@@ -54,7 +55,7 @@ export default function GridSearchProvider({ children }: IProps) {
       }),
     ) as ISearchItem[];
     return searchableFields.reduce(
-      (acc: any, item: any, index) => {
+      (acc: any, { accessorKey, ...item }: any, index) => {
         return [
           ...acc,
           {
@@ -64,7 +65,7 @@ export default function GridSearchProvider({ children }: IProps) {
               item?.field === "raw_phone_number"
                 ? [_query?.replace(/[^\d]/g, "")]
                 : [_query],
-            entity, // if entity is not provided, the default entity will be the entity of the grid
+            entity: defaultEntity, // if entity is not provided, the default entity will be the entity of the grid
             ...item,
           },
           ...(searchableFields.length - 1 === index
@@ -101,12 +102,10 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     const { count, ...rest } = filterItem ?? {};
-    const advanceFilter = searchItems.map(
-      ({ entity: _entity, ...rest }) => ({
-        entity: _entity || entity,
-        ...rest
-      }),
-    ) as ISearchItem[];
+    const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
+      entity: entity || defaultEntity,
+      ...rest,
+    })) as ISearchItem[];
     setQuery("");
     const updateSearchItems = [
       ...advanceFilter,
@@ -124,6 +123,12 @@ export default function GridSearchProvider({ children }: IProps) {
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
+    if(parentType === "form") {
+      onFetchRecords?.({
+        advance_filters: updateSearchItems,
+      })
+      return;
+    }
     await UpdateReportFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
@@ -133,6 +138,13 @@ export default function GridSearchProvider({ children }: IProps) {
     setQuery("");
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
+    if(parentType === "form") {
+      onFetchRecords?.({
+        advance_filters: updatedSearchItems,
+      })
+      return;
+    }
+
     await UpdateReportFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,

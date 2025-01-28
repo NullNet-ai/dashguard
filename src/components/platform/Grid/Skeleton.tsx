@@ -6,7 +6,7 @@ export default function Skeleton() {
 
       {/* List skeleton items */}
       <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
             className="flex items-center justify-between rounded-md bg-slate-200 p-4"

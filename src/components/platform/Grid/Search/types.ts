@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
-import { EOrderDirection } from "@dna-platform/common-orm";
+import { EOrderDirection, IAdvanceFilters } from '@dna-platform/common-orm';
 
 export interface IState {
   open: boolean;
@@ -31,16 +31,9 @@ export interface ISearchParams {
   pluck_object?: any;
   current?: number;
   limit?: number;
-  advance_filters?: {
-    type: string;
-    values?: string[];
-    field?: string;
-    operator: string;
-    entity?: string;
-  }[];
+  advance_filters?: IAdvanceFilters[];
   sorting?: any[];
 }
-
 export interface ISearchResult {
   totalCount: number;
   items: Record<string, any>[];
@@ -74,5 +67,18 @@ export interface ISearchableField {
   label: string;
   operator?: string;
   entity?: string;
+  accessorKey?: string;
 }
 
+export interface IPagination {
+  current_page: number;
+  limit_per_page: number;
+}
+
+export interface IAdvanceFilter {
+  type: string;
+  operator: string;
+  field?: string;
+  entity?: string;
+  values?: string[];
+} 

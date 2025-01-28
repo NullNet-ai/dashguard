@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type UseFormReturn } from "react-hook-form";
+import { type ControllerFieldState, type ControllerRenderProps, type UseFormReturn } from "react-hook-form";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   FormControl,
@@ -16,6 +16,10 @@ import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
+  formRenderProps: {
+    field: ControllerRenderProps<Record<string, any[]>>;
+    fieldState: ControllerFieldState;
+  };
   checkboxOptions: Record<string, ICheckboxOptions[]> | undefined;
   form: UseFormReturn<Record<string, any>, any, undefined>;
   formKey: string;
@@ -28,6 +32,44 @@ export default function FormCheckbox({
   formKey,
 }: IProps) {
 
+  // Helper function to handle the checkbox change
+  const handleCheckboxChange = (field: ControllerRenderProps<Record<string, any>>, item?: ICheckboxOptions) => {
+    // If no item is provided, treat it as a boolean checkbox
+    if (!item) {
+      return (checked: boolean) => {
+        field.onChange(checked);
+      };
+    }
+
+    // Handle array of strings case
+    return (checked: boolean) => {
+      const currentValue = field.value || [];
+      if (Array.isArray(currentValue)) {
+        return checked
+          ? field.onChange([...currentValue, item.value])
+          : field.onChange(currentValue.filter((value: any) => value !== item.value));
+      } else {
+        // Initialize as array if it wasn't one before
+        return checked
+          ? field.onChange([item.value])
+          : field.onChange([]);
+      }
+    };
+  };
+
+  // Helper function to check if a value is checked
+  const isChecked = (field: ControllerRenderProps<Record<string, any>>, item?: ICheckboxOptions) => {
+    if (!item) {
+      return field.value || false;
+    }
+
+    const currentValue = field.value;
+    if (Array.isArray(currentValue)) {
+      return currentValue.includes(item.value);
+    }
+    return false;
+  };
+
   return (
     <FormItem>
       <FormLabel
@@ -37,17 +79,37 @@ export default function FormCheckbox({
       >
         {fieldConfig?.label}
       </FormLabel>
-      {checkboxOptions?.[fieldConfig?.name]?.map((item, index) => (
+      {/* Render single checkbox for boolean values when no options are provided */}
+      {(!checkboxOptions?.[fieldConfig?.name] || (checkboxOptions[fieldConfig.name]?.length ?? 0) === 0) && (
         <FormField
-          key={item.value}
           control={form.control}
           name={fieldConfig?.name}
-          render={({ field }) => {
-            return (
-              <FormItem
-                key={item.value}
-                className="flex flex-row items-center space-x-3 space-y-0"
-              >
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  disabled={fieldConfig.readonly||fieldConfig.disabled||field.disabled}
+                  data-test-id={`${formKey}-chk-${fieldConfig?.name}`}
+                  checked={isChecked(field)}
+                  onCheckedChange={handleCheckboxChange(field)}
+                  {...form.register(fieldConfig?.name)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
+      {/* Render multiple checkboxes for string array values */}
+      {checkboxOptions?.[fieldConfig?.name]?.map((item, index) => (
+        <FormField
+          key={String(item.value)}
+          control={form.control}
+          name={fieldConfig?.name}
+          render={({ field }) => (
+            <FormItem
+              key={String(item.value)}
+              className="flex flex-row items-center space-x-3 space-y-0"
+            >
                 <FormControl>
                   <Checkbox
                   className={cn(
@@ -67,15 +129,14 @@ export default function FormCheckbox({
                     {...form.register(fieldConfig?.name)}
                   />
                 </FormControl>
-                <FormLabel
-                  className="font-normal disabled:opacity-100"
-                  data-test-id={`${formKey}-chk-lbl-${fieldConfig.name}-${index + 1}`}
-                >
-                  {item.label}
-                </FormLabel>
-              </FormItem>
-            );
-          }}
+              <FormLabel
+                className="font-normal disabled:opacity-100"
+                data-test-id={`${formKey}-chk-lbl-${fieldConfig.name}-${index + 1}`}
+              >
+                {item.label}
+              </FormLabel>
+            </FormItem>
+          )}
         />
       ))}
       <FormMessage

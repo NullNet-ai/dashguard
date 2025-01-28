@@ -11,6 +11,7 @@ import { type Field, type UseFormReturn } from "react-hook-form";
 
 import { type TActionType } from "~/components/platform/Grid/types";
 import {
+  TDisplayType,
   type DateTimeGranularity,
   type TFormSchema,
   type TFormType,
@@ -21,12 +22,40 @@ import {
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
 } from "~/components/ui/smart-datetime-picker";
-import { TimePickerProps } from "~/components/ui/time-picker";
+import { type TimePickerProps } from "~/components/ui/time-picker";
+import { type RawSwitchProps } from "~/components/ui/switch";
 
 interface OptionType {
   label: string;
   value: string;
 }
+
+type DraggableConfig = {
+  fields: IField & {
+    selectOptions?: ISelectOptions[];
+    radioOptions?: IRadioOptions[];
+    checkboxOptions?: ICheckboxOptions[];
+    formType?:
+      | "input"
+      | "select"
+      | "radio"
+      | "checkbox"
+      | "textarea"
+      | "number-input"
+      | "smart-date"
+      | "time-picker";
+  };
+};
+
+type MultiFieldConfig = DraggableConfig & {
+  fieldOptions: MultiFieldOption[];
+};
+
+type MultiFieldOption = {
+  label: string;
+  fieldType: "input" | "select" | "radio" | "checkbox";
+  options?: OptionType[];
+};
 
 interface IField {
   id: string;
@@ -35,6 +64,7 @@ interface IField {
   creatable?: boolean;
   name: string;
   label?: string;
+  detail?: string;
   placeholder?: string;
   disabled?: boolean;
   hidden?: boolean;
@@ -42,7 +72,7 @@ interface IField {
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
-  timePickerProps?:TimePickerProps;
+  timePickerProps?: TimePickerProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
     granularity?: DateGranularity;
     minDate?: Date;
@@ -53,12 +83,16 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
+  switchConfig?: RawSwitchProps;
+  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
+  multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
   customRender?: JSX.Element;
   min?: number;
   max?: number;
   step?: number;
+  checkboxOrientation?: "horizontal" | "vertical";
   radioOrientation?: "horizontal" | "vertical";
   sliderLabel?: (value: number | undefined) => ReactNode;
   sliderLabelPosition?: "top" | "bottom";
@@ -101,6 +135,17 @@ interface IField {
   };
   selectSearchable?: boolean;
   accuracy?: number;
+  selectEnableCreate?: boolean;
+  selectOnCreateRecord?:
+    | {
+        fieldIdentifier: string;
+        entity: string;
+        customParams?: Record<string, any>;
+      }
+    | ((text: string) => Promise<ISelectOptions>);
+  selectOnCreateValidate?: (
+    text: string,
+  ) => Promise<{ valid: boolean; message?: string }>;
 }
 
 interface ISelectOptions {
@@ -109,12 +154,12 @@ interface ISelectOptions {
 }
 
 interface IRadioOptions {
-  value: string;
+  value: string | boolean;
   label: string;
 }
 
 interface ICheckboxOptions {
-  value: string;
+  value: string | boolean;
   label: string;
 }
 
@@ -163,6 +208,8 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
+  formHostInitialView?: "lock" | "unlock";
+  enableFormFilterCreate?: boolean;
 }
 
 export interface ICustomActions {
@@ -184,8 +231,10 @@ interface IFilterGridConfig {
   is_same_entity_id?: boolean;
   statusesIncluded?: string[];
   label?: string;
+  hideSearch?: boolean;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
+  searchConfig?: any;
   onClipboardPaste?: (
     data: Record<string, any>,
     form: any,
@@ -199,6 +248,7 @@ interface IFilterGridConfig {
   }: IReturnOnSelectRecords) =>
     | Promise<IReturnOnSelectRecords>
     | IReturnOnSelectRecords;
+
   onRemoveSelectedRecords?: ({
     rows,
     main_entity_id,
@@ -286,9 +336,11 @@ interface IPropsForms {
   onDataChange?: (data: Record<string, any>) => void;
   customRender?: (
     form: UseFormReturn<Record<string, any>, any, undefined>,
-    options?: {
+    options: {
       appendButtonKey?: string;
     },
+    displayType: TDisplayType,
+    handleUpdateDisplayType: (type: TDisplayType) => void,
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
   ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
   features?: IFeatures;
@@ -312,6 +364,13 @@ interface IFieldFilterActions {
   ref?: any;
 }
 
+interface IGridData {
+  items: any[];
+  totalCount: number;
+  advance_filters?: any[];
+  sorting?: any[];
+}
+
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -326,4 +385,5 @@ export type {
   IUserFormField,
   OptionType,
   IFieldFilterActions,
+  IGridData,
 };

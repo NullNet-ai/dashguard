@@ -31,8 +31,8 @@ export default async function RecordTabContainer({
     "updated_time",
     "updated_by",
   ];
- 
-  const { sorting, pagination, filters } = await getGridCacheData();
+
+  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
   const response = await api.organization.getByCode({
     code: identifier!,
     pluck_fields: ["id", "name"],
@@ -45,21 +45,20 @@ export default async function RecordTabContainer({
       operator: EOperator.EQUAL,
       values: [record_id!],
       display_value: response?.data?.name,
-      default:true,
+      default: true,
+      label: "Parent Organization",
     },
-  ]  as ISearchItem[];
-  const { items = [], totalCount } = await api.grid
-    .items({
-      current: +(searchParams.page ?? "0"),
-      limit: +(searchParams.perPage ?? "100"),
-      entity: "organization",
-      pluck: _pluck,
-      sorting: sorting?.length ? sorting : defaultSorting,
-      advance_filters: filters?.advanceFilter?.length
-        ? filters?.advanceFilter
-        : defaultAdvanceFilter,
-    })
-    
+  ] as ISearchItem[];
+  const { items = [], totalCount } = await api.grid.items({
+    current: +(searchParams.page ?? "0"),
+    limit: +(searchParams.perPage ?? "100"),
+    entity: "organization",
+    pluck: _pluck,
+    sorting: sorting?.length ? sorting : defaultSorting,
+    advance_filters: filters?.advanceFilter?.length
+      ? filters?.advanceFilter
+      : defaultAdvanceFilter,
+  });
 
   return (
     <Grid
@@ -67,7 +66,7 @@ export default async function RecordTabContainer({
       data={items}
       defaultSorting={defaultSorting}
       defaultAdvanceFilter={defaultAdvanceFilter}
-      advanceFilter={filters.reportFilters || []}
+      advanceFilter={filters?.reportFilters || []}
       sorting={sorting || []}
       pagination={pagination}
       config={{
@@ -81,7 +80,7 @@ export default async function RecordTabContainer({
             entity: "organization",
             pluck: _pluck,
           },
-        }
+        },
       }}
     />
   );

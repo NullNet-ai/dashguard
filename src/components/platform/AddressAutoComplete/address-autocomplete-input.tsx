@@ -48,7 +48,7 @@ interface CommonProps {
   }) => void;
 }
 
-export function  AddressAutoCompleteInput(props: CommonProps) {
+export function AddressAutoCompleteInput(props: CommonProps) {
   const { handleSelectAddress, form, formKey, fieldConfig, formRenderProps } =
     props;
   const googleAutoComplete = api.google.searchPlace.useMutation();
@@ -84,10 +84,8 @@ export function  AddressAutoCompleteInput(props: CommonProps) {
       name="inp-addr"
       render={(formRenderProps) => {
         const is_readonly =
-          //@ts-expect-error - should add readonly to IField
-          (formRenderProps.field.readonly || fieldConfig?.readonly) ?? false;
-        const is_disabled =
-          formRenderProps.field.disabled || fieldConfig?.disabled;
+        !!(formRenderProps.field.disabled || fieldConfig?.readonly)
+        const is_disabled = fieldConfig?.disabled;
         const is_disabled_or_readonly = is_disabled || is_readonly;
         return (
           <FormItem>
@@ -106,13 +104,14 @@ export function  AddressAutoCompleteInput(props: CommonProps) {
                   />
 
                   <ComboboxInput
-                    {...formRenderProps?.field}
+                    {...formRenderProps.field}
+                    {...fieldConfig}
                     ref={inputRef}
                     disabled={is_disabled}
                     readOnly={is_readonly}
                     data-test-id={formKey + "-" + formRenderProps?.field.name}
                     autoComplete="off"
-                    className="relative h-10 w-full focus:border-primary focus:ring-primary flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border sm:text-sm"
+                    className="relative h-[36px] w-full flex-grow rounded-md border border-border bg-transparent pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border focus:border-primary focus:ring-primary text-md disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300"
                     placeholder="Search..."
                     onFocus={open}
                     onChange={(event) => {
@@ -122,7 +121,7 @@ export function  AddressAutoCompleteInput(props: CommonProps) {
                     onBlur={close}
                   />
                   <Button
-                    className="gap-1"
+                    className="gap-1 h-[36px]"
                     variant={"outline"}
                     onClick={() => {
                       const values = form.getValues();
@@ -156,7 +155,7 @@ export function  AddressAutoCompleteInput(props: CommonProps) {
                       )}
                       <li className="p-2">
                         <Fragment>
-                          <ul className="text-sm text-muted-foreground">
+                          <ul className="text-md">
                             {predictions?.length ? (
                               <Fragment>
                                 {predictions?.map((place, index) => (
@@ -178,8 +177,8 @@ export function  AddressAutoCompleteInput(props: CommonProps) {
                                       className="group flex cursor-default select-none items-center rounded-md px-3 py-2 hover:bg-primary/90 hover:text-white"
                                     >
                                       <div className="flex flex-row">
-                                        <MapPinIcon className="h-5 w-5 text-sky-500" />
-                                        <span className="ml-3 flex-auto truncate">
+                                        <MapPinIcon className="h-5 w-5 hover:text-primary-foreground shrink-0" />
+                                        <span className="ml-3 flex-auto ">
                                           {place.name}
                                         </span>
                                       </div>

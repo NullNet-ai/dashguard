@@ -92,7 +92,6 @@ export const createTRPCRouter = t.router;
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
-
   // if (t._config.isDev) {
   //   // artificial delay in dev
   //   const waitMs = Math.floor(Math.random() * 400) + 100;
@@ -102,7 +101,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-  console.info(`[TRPC] ${path} took ${end - start}ms to execute`);
+  console.info(
+    `[${new Date().toISOString()}]-[TRPC] ${path} took ${end - start}ms to execute`,
+  );
 
   return result;
 });
@@ -153,14 +154,14 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
 
   const cachedSession = await cachedSessionClient.getCachedData(token.value);
   console.info(
-    "[CacheSession Get]: ",
+    `[${new Date().toISOString()}]-` + "[CacheSession Get]: ",
     Date.now() - startTime + "ms ",
     "path: " + path,
   );
   if (cachedSession) {
     const endTime = Date.now();
     console.info(
-      "[TOKEN-CACHE-HIT]: ",
+      `[${new Date().toISOString()}]-` + "[TOKEN-CACHE-HIT]: ",
       endTime - startTime + "ms",
       "path: " + path,
     );
@@ -181,7 +182,10 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
     })
     .catch(() => null);
   const endTime = Date.now();
-  console.info("[TOKEN-CACHE-MISS]: ", endTime - startTime + "ms");
+  console.info(
+    `[${new Date().toISOString()}]-` + "[TOKEN-CACHE-MISS]: ",
+    endTime - startTime + "ms",
+  );
   if (!session) {
     throw new TRPCError({
       code: "UNAUTHORIZED",

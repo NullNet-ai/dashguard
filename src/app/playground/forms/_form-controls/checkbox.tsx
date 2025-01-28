@@ -36,7 +36,7 @@ export default function FavoriteFruitsForm() {
         handleSubmit={handleSave}
         checkboxOptions={{
           favoriteFruits: [
-            { label: "Apple", value: "apple" },
+            { label: "Apple", value: true},
             { label: "Banana", value: "banana" },
             { label: "Cherry", value: "cherry" },
             { label: "Date", value: "date" },

@@ -3,7 +3,6 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../../types";
 import {
   FormControl,
   FormItem,
@@ -11,8 +10,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type Content } from "@tiptap/react";
+import { type IField } from "../../types";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -31,29 +32,57 @@ export default function FormRichTextEditor({
   formRenderProps,
   form,
   formKey,
-  // value,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled;
-  let defaultValue: string = Array.isArray(formRenderProps.field.value)
-    ? formRenderProps.field.value.join("")
-    : formRenderProps.field.value;
-  const isToFormat = true; // Set to true if to include like how the tipTapEditor is formatted
-  if (isToFormat) {
-    defaultValue = `<p class="text-node">${defaultValue}</p>`;
-  } else {
-    defaultValue;
-  }
-  const [content, setContent] = useState<Content>(defaultValue);
-  function handleChange(newValue: Content) {
-    form.setValue(`${fieldConfig?.name}`, newValue, {
+  // Initialize content state from form value
+  const [content, setContent] = useState<Content>(() => {
+    const fieldValue = formRenderProps.field.value;
+    if (!fieldValue) return "";
+    
+    const stringValue = Array.isArray(fieldValue) 
+      ? fieldValue.join("") 
+      : (fieldValue as string).toString();
+      
+    // Only wrap in p tag if it doesn't already contain HTML
+    return !stringValue.includes('<') 
+      ? `<p class="text-node">${stringValue}</p>`
+      : stringValue;
+  });
+
+  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
+  
+  // Track editor instance key to force re-render
+  const [editorKey, setEditorKey] = useState(0);
+
+  // Sync content state with form value changes
+  useEffect(() => {
+    const fieldValue = formRenderProps.field.value;
+    if (fieldValue !== content) {
+      setContent(fieldValue || "");
+    }
+  }, [formRenderProps.field.value]);
+
+  // Force re-render of editor when disabled state changes
+  useEffect(() => {
+    setEditorKey(prev => prev + 1);
+  }, [isDisabled]);
+
+  const handleChange = (newValue: Content) => {
+    if (
+      formRenderProps.field.disabled ||
+      fieldConfig?.readonly ||
+      fieldConfig?.disabled
+    ) {
+      return;
+    }
+
+    setContent(newValue);
+    form.setValue(fieldConfig?.name, newValue, {
       shouldDirty: true,
       shouldValidate: true,
       shouldTouch: true,
     });
-    setContent(newValue);
-  }
+  };
 
-  form.watch()
   return (
     <FormItem>
       <FormLabel
@@ -64,38 +93,31 @@ export default function FormRichTextEditor({
       </FormLabel>
       <FormControl>
         <MinimalTiptapEditor
-          {...form.register(fieldConfig?.name)}
+          key={editorKey} // Add key prop to force re-render
           editorProps={{
-            editable: () =>
-              !(formRenderProps.field.disabled || fieldConfig?.readonly),
+            editable: () => !isDisabled,
             attributes: {
               "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
             },
           }}
           throttleDelay={0}
+          immediatelyRender={false}
           value={content}
-          onChange={handleChange} // Use handleChange to synchronize both states
-          className="w-full"
+          onChange={handleChange}
+          className={cn(
+            "w-full",
+            form.formState.errors[fieldConfig?.name] && 
+            "ring-1 ring-destructive ring-offset-0",
+          )}
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
-          placeholder={
-            fieldConfig?.placeholder ?? "Type your description here..."
-          }
+          placeholder={fieldConfig?.placeholder ?? "Type your description here..."}
           autofocus={true}
-          editable={
-            formRenderProps.field.disabled ||
-            fieldConfig?.readonly ||
-            fieldConfig?.disabled
-          }
           editorClassName="focus:outline-none"
-          onBlur={() => {
-            formRenderProps.field.onBlur();
-          }}
+          onBlur={formRenderProps.field.onBlur}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-error-msg-${fieldConfig.name}`} />
-
-      {/* <span>{JSON.stringify(content, null, 2)}</span> */}
     </FormItem>
   );
 }

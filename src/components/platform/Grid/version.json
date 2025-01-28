@@ -1,0 +1,7 @@
+{
+  "app_name": "platform__Grid",
+  "tag": "1.8.2<unreleased>",
+  "branch": "unreleased/fix/1.8.2<unreleased>",
+  "message": "Refactor grid and form filter component",
+  "publish_name": "Juphet Vitualla"
+}

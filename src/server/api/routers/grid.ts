@@ -9,13 +9,18 @@ import ZodItems from "~/server/zodSchema/grid/items";
 import { EStatus, type IGridFilterBy, type ITabGrid } from "../types";
 import { tabMenuId } from "~/lib/tab-menu-id";
 import { z } from "zod";
-import { SetTab } from "~/lib/grid-default-tab";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
 import { SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
-import { gridCacheId } from "~/lib/grid-cache_id";
-
+import { pluralize } from "../../utils/pluralize";
+import {
+  IAdvanceFilter,
+  IPagination,
+  ISearchItem,
+} from "~/components/platform/Grid/Search/types";
+import { gridCacheId, TReportDataType } from "~/lib/grid-cache-id";
+import { getGridLink } from "~/lib/grid-get-link";
+import { SetIdTab, SetTab } from "~/lib/grid-default-tab";
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
     .input(ZodCreateEntity)
@@ -62,6 +67,35 @@ export const gridRouter = createTRPCRouter({
         });
       return record as IResponse<Record<string, any>>;
     }),
+  defaultGridTab: privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+        application: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (input?.application !== "grid") return;
+      const _tabMenuId = tabMenuId({
+        _mainEntity: input?.entity || "",
+        _application: input?.application || "",
+        _id: ctx.session.account.contact.id,
+      });
+
+      const hasTabMenu = await ctx.redisClient.getCachedData(_tabMenuId);
+
+      if (hasTabMenu) return hasTabMenu;
+      if (input?.application === "grid") {
+        const setIdTab = SetIdTab(input.entity);
+        ctx.redisClient.cacheData(
+          getGridLink({
+            mainEntity: input.entity,
+          }),
+          setIdTab,
+        );
+        ctx.redisClient.cacheData(_tabMenuId, setIdTab);
+      }
+    }),
   items: privateProcedure
     // Define input using zod for validation
     .input(ZodItems)
@@ -71,7 +105,7 @@ export const gridRouter = createTRPCRouter({
         current = 1,
         advance_filters: _advance_filters = [],
         entity,
-        pluck_object,
+        pluck_object: _pluck_object,
       } = input; // Default limit = 10 items per page, default current page = 1
       // Calculate the number of items to skip based on the current page
       // Fetch the total count of users
@@ -142,13 +176,18 @@ export const gridRouter = createTRPCRouter({
               },
       };
 
+      const pluck_object = {
+        contacts: ["first_name", "last_name"],
+        [pluralize(input?.entity)]: input.pluck,
+      };
+
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
-          advance_filters: [
-            ..._advance_filters as IAdvanceFilters[]],
+          pluck_object: pluck_object,
+          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -169,13 +208,24 @@ export const gridRouter = createTRPCRouter({
         query.join(created_by_join).join(updated_by_join);
       }
       const { total_count: totalCount = 1, data: items } =
-      await query.execute();
+        await query.execute();
 
-      const formatted_items = items?.map((item) => {
-        const { [entity + "s"]: entity_data, ...rest } = item;
+      const formatted_items = items?.map((item: Record<string, any>) => {
+        const {
+          [pluralize(input?.entity)]: entity_data,
+          created_by,
+          updated_by,
+          ...rest
+        } = item;
         return {
           ...entity_data,
           ...rest,
+          created_by: created_by
+            ? `${created_by.first_name} ${created_by.last_name}`
+            : null,
+          updated_by: updated_by
+            ? `${updated_by.first_name} ${updated_by.last_name}`
+            : null,
         };
       });
 
@@ -204,11 +254,12 @@ export const gridRouter = createTRPCRouter({
       _tabMenuId,
     )) as ITabGrid[];
     if (!gridTabId) {
-      return activeTab;
+      if (activeTab) return activeTab;
     }
     const gridTabFilterList = (await ctx.redisClient.getCachedData(
       _tabMenuId,
     )) as ITabGrid[];
+    if (!gridTabFilterList) return [];
     const setActiveTab = gridTabFilterList?.map((tab) => {
       const newCurrent =
         _tabMenuHref === gridTabId
@@ -529,21 +580,9 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, sorting);
     }),
-  getReportSorting: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "sorting" })) ?? "";
-    const sorting = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as SortingState;
-    return Array.isArray(sorting) ? sorting : [];
-  }),
   updateReportFilter: privateProcedure
     .input(
       z.object({
@@ -572,35 +611,9 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, filters);
     }),
-  getReportFilter: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get("x-pathname") || "";
-    const [, , mainEntity, application] = pathName.split("/");
-    if (!["grid", "record"].includes(application ?? "") || !mainEntity)
-      return [];
-    const cached_id =
-      (await gridCacheId({ context: ctx, type: "filter" })) ?? "";
-    const filters = (await ctx.redisClient.getCachedData(
-      cached_id,
-    )) as ISearchItem[];
-    const reportFilters = Array.isArray(filters) ? filters : [];
-    const advanceFilter = reportFilters.map(
-      ({ entity, operator, type, field, values }) => ({
-        entity,
-        operator,
-        type,
-        field,
-        values,
-      }),
-    ) as ISearchItem[];
-
-    return {
-      advanceFilter: advanceFilter,
-      reportFilters,
-    };
-  }),
   updateReportPagination: privateProcedure
     .input(
       z.object({
@@ -617,20 +630,99 @@ export const gridRouter = createTRPCRouter({
         return [];
       const cached_id =
         (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
+      if (!cached_id) return;
       return await ctx.redisClient.cacheData(cached_id, {
         current_page,
         limit_per_page,
       });
     }),
-  getReportPagination: privateProcedure.query(async ({ ctx }) => {
+  getReportCachedData: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers();
     const pathName = headerList.get("x-pathname") || "";
     const [, , mainEntity, application] = pathName.split("/");
     if (!["grid", "record"].includes(application ?? "") || !mainEntity)
       return [];
+    const cacheTypes: TReportDataType[] = [
+      "filter",
+      "sorting",
+      "pagination",
+      "grid_tabs",
+    ];
+    const cacheIds = await Promise.all(
+      cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
+    );
+
+    const [filters, sorting, pagination, gridTabs] = await Promise.all(
+      cacheIds
+        .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
+        .filter(Boolean),
+    );
+
+    const gridReports = Array.isArray(gridTabs) ? gridTabs : [];
+    const cachedFilters: ISearchItem[] = Array.isArray(filters) ? filters : [];
+    const reportSorting: SortingState = Array.isArray(sorting) ? sorting : [];
+    const reportPagination: IPagination =
+      typeof pagination === "object" ? pagination : {};
+    const defaultFilters =
+      gridReports?.find((report) => report.current)?.default_filter ?? [];
+    const reportFilters = cachedFilters?.length
+      ? cachedFilters
+      : (defaultFilters as ISearchItem[]);
+    const advanceFilter = reportFilters?.map(
+      ({ entity, operator, type, field, values }) => ({
+        entity,
+        operator,
+        type,
+        field,
+        values,
+      }),
+    ) as IAdvanceFilter[];
+
+    return {
+      filters: {
+        advanceFilter,
+        reportFilters,
+        defaultFilters,
+      },
+      sorting: reportSorting,
+      pagination: reportPagination,
+    };
+  }),
+  updateGridTabs: privateProcedure
+    .input(
+      z.object({
+        href: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const headerList = headers();
+      const pathName = headerList.get("x-pathname") || "";
+      const [, , mainEntity, application] = pathName.split("/");
+      if (application !== "grid" || !mainEntity) return [];
+      const cached_id =
+        (await gridCacheId({ context: ctx, type: "grid_tabs" })) ?? "";
+      if (!cached_id) return;
+      const cachedReportTabs = await ctx.redisClient.getCachedData(cached_id);
+      const reportTabs = Array.isArray(cachedReportTabs)
+        ? cachedReportTabs
+        : [];
+      const updatedTabs = reportTabs?.map((tab) => ({
+        ...tab,
+        current: tab.href === input.href,
+      }));
+      await ctx.redisClient.cacheData(cached_id, updatedTabs);
+      return updatedTabs;
+    }),
+  getGridTabs: privateProcedure.query(async ({ ctx }) => {
+    const headerList = headers();
+    const pathName = headerList.get("x-pathname") || "";
+    const [, , mainEntity, application] = pathName.split("/");
+    if (application !== "grid" || !mainEntity) return [];
     const cached_id =
-      (await gridCacheId({ context: ctx, type: "pagination" })) ?? "";
-    const pagination = await ctx.redisClient.getCachedData(cached_id);
-    return pagination;
+      (await gridCacheId({ context: ctx, type: "grid_tabs" })) ?? "";
+    if (!cached_id) return;
+    const cachedReportTabs = await ctx.redisClient.getCachedData(cached_id);
+    const reportTabs = Array.isArray(cachedReportTabs) ? cachedReportTabs : [];
+    return reportTabs;
   }),
 });

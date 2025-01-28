@@ -36,9 +36,7 @@ export default function EmailInputDetails({}) {
       <FormBuilder
       defaultValues={{
       "secondary-emails": [
-        {
-          email: "asdfasdfasdfasdf@gmail.com",
-        },
+      
       ]
       }}
       enableFormRegisterToParent
@@ -47,14 +45,14 @@ export default function EmailInputDetails({}) {
       formKey="email-input-form"
       formSchema={FormSchema}
       fields={[
-        {
-        id: "primary_email",
-        formType: "email-input",
-        name: "primary-email",
-        label: "Primary Email",
-        required: true,
-        placeholder: "Enter your primary email",
-        },
+        // {
+        // id: "primary_email",
+        // formType: "email-input",
+        // name: "primary-email",
+        // label: "Primary Email",
+        // required: true,
+        // placeholder: "Enter your primary email",
+        // },
         {
         id: "secondary_emails",
         formType: "email-input",

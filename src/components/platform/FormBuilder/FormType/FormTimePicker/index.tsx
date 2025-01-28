@@ -11,8 +11,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import TimePicker from "~/components/ui/time-picker";
+import { cn } from "~/lib/utils";
+import { parse, isValid, format, set } from "date-fns";
 
 interface IProps {
   fieldConfig: IField;
@@ -27,15 +28,12 @@ interface IProps {
   formKey: string;
 }
 
-const timeFormatRegex = /^([01]?\d|2[0-3]):[0-5]\d(?:\s?[APap][Mm])?$/;
-
 export default function FormTimePicker({
   fieldConfig,
   formRenderProps,
   formKey,
   form,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
   const timePickerRef = useRef(null);
 
@@ -43,30 +41,62 @@ export default function FormTimePicker({
     return null;
   }
 
+  const { register } = form;
   const timePickerProps = fieldConfig.timePickerProps;
+  const is24Hour = timePickerProps?.is24Hour;
+  const timeFormat = is24Hour ? "HH:mm" : "hh:mm a";
 
-  
-  const handleChange = (date: Date | undefined) => {
-      const formattedTime = date
-        ? date.toTimeString()?.split(" ")[0]?.slice(0, 5)
-        : "";
+  const parseTimeString = (timeStr: string): Date | null => {
+    // Try parsing as 24-hour format first
+    let date = parse(timeStr, "HH:mm", new Date());
+    
+    if (!isValid(date)) {
+      // Try parsing as hour:minute without period
+      date = parse(timeStr, "h:mm", new Date());
+      
+      if (isValid(date)) {
+        // If no AM/PM specified, assume AM for 12-hour format
+        if (!is24Hour) {
+          date = set(date, { hours: date.getHours() % 12 });
+        }
+      } else {
+        // Try parsing with AM/PM
+        date = parse(timeStr, "h:mm a", new Date());
+      }
+    } else if (!is24Hour) {
+      // Convert 24-hour time to 12-hour format
+      date = set(date, { hours: date.getHours() % 12 });
+    }
+    
+    return isValid(date) ? date : null;
+  };
 
-    if (!formattedTime) {
+  const handleChange = (input: Date | string | undefined) => {
+    if (!input) {
       form.setError(formKey, {
         type: "required",
-        message: "Time is required. Please use the correct format (e.g. HH:MM AM/PM).",
+        message: "Time is required. Please use the correct format.",
       });
       return;
     }
 
-    if (!timeFormatRegex.test(formattedTime)) {
+    let date: Date | null;
+
+    if (typeof input === "string") {
+      date = parseTimeString(input);
+    } else {
+      date = input;
+    }
+
+    if (!date || !isValid(date)) {
       form.setError(formKey, {
         type: "pattern",
-        message: "Invalid Time Format. Please use the correct format (e.g. HH:MM AM/PM).",
+        message: `Invalid Time Format. Please use the correct format (${timeFormat}).`,
       });
       return;
     }
 
+    const formattedTime = format(date, timeFormat);
     form.clearErrors(formKey);
     formRenderProps.field.onChange(formattedTime);
   };
@@ -80,10 +110,17 @@ export default function FormTimePicker({
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
-        <div className="w-full border border-input !m-0 focus-within:border-primary focus-within:ring-primary">
+        <div
+          className={cn(
+            "w-full border border-input !m-0 focus-within:border-primary focus-within:ring-primary",
+            !!form.formState.errors[formKey] && "border-destructive",
+            fieldConfig.disabled && "bg-secondary"
+          )}
+        >
           <TimePicker
+            {...register(fieldConfig.name)}
             data-test-id={`${formKey}-timepicker-${fieldConfig.name}`}
-            is24Hour={timePickerProps?.is24Hour}
+            is24Hour={is24Hour}
             className={timePickerProps?.className}
             ref={timePickerRef}
             disabled={fieldConfig.disabled}
@@ -91,7 +128,7 @@ export default function FormTimePicker({
             onChange={handleChange}
             value={
               formRenderProps.field.value
-                ? new Date(`1970-01-01T${formRenderProps.field.value}Z`)
+                ? parseTimeString(String(formRenderProps.field.value)) || undefined
                 : undefined
             }
           />

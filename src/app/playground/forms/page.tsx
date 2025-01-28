@@ -1,4 +1,4 @@
-// import TimePickerDetails from "./_form-controls/time-picker";
+import TimePickerDetails from "./_form-controls/time-picker";
 import { Toaster } from "~/components/ui/sonner";
 import SmartDateDetails from "./_form-controls/smart-date";
 import InputDetails from "./_form-controls/textfield";
@@ -19,6 +19,8 @@ import InputsGrid from "./_form-controls/inputs-grid";
 import SelectDetails from "./_form-controls/select-details";
 import FileDetails from "./_form-controls/file";
 import SliderDetails from "./_form-controls/slider";
+import MultiFieldForm from "./_form-controls/multifield";
+import GroupTabView2 from "./_dummy-controls/multifield-view-2";
 
 export default function PlatformPlayGround() {
   return (
@@ -26,6 +28,7 @@ export default function PlatformPlayGround() {
       <ButtonPlayGround />
       <Separator className="my-6" />
       <div className="space-y-20 p-5">
+
         <section>
           <h2 className="mb-4 text-xl font-bold">Basic Inputs</h2>
           <div className="grid gap-4">
@@ -37,12 +40,32 @@ export default function PlatformPlayGround() {
           </div>
         </section>
 
+
+      <section>
+          <h2 className="mb-4 text-xl font-bold">Multi Field</h2>
+          <div className="grid gap-4">
+          <MultiFieldForm />
+
+          
+           
+          </div>
+          <Separator />
+         <div className="mt-4">
+         <h2 className="mb-4 text-xl font-bold">Group Tabs</h2>
+          <div>
+            <GroupTabView2 />
+          </div>
+         </div>
+        </section>
+
+
+
         <Separator />
 
         <section>
           <h2 className="mb-4 text-xl font-bold">Date and Time</h2>
           <div className="grid gap-4">
-            {/* <TimePickerDetails /> */}
+            <TimePickerDetails />
             <SmartDateDetails />
           </div>
         </section>

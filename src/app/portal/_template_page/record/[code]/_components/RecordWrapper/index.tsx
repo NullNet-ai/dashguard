@@ -5,8 +5,8 @@ import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSumm
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
-import Options from "../../../_components/IdentifierOption";
 import { handleChangeStatus } from "../../../_actions";
+import { upperFirst } from "lodash";
 
 const Wrapper = (props: IProps) => {
   const { record, record_summary, entity_code, entity_name, is_applicant } =
@@ -19,14 +19,9 @@ const Wrapper = (props: IProps) => {
       tabName: "dashboard?categories=",
     },
     {
-      id: "contact",
-      name: "Contact",
+      id: entity_name,
+      name: upperFirst(entity_name),
       tabName: "contact?categories=",
-    },
-    {
-      id: "organization",
-      name: "Organization",
-      tabName: "organization?categories=",
     },
   ];
 
@@ -73,7 +68,7 @@ const Wrapper = (props: IProps) => {
           : undefined,
       }}
     >
-      <section className="mt-8 min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem]">
+      <section className="mt-0 min-h-[calc(100vh-110px)] lg:mt-[0rem]">
         <ResizablePanelGroup direction="horizontal" className="flex">
           <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
             <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>

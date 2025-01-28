@@ -26,7 +26,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
   };
   const wizard_summary = contactWizardSummary(_params);
   return (
-    <div className="p-1">
+    <div className="">
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),

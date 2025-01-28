@@ -9,6 +9,7 @@ import FormInput from "~/components/platform/FormBuilder/FormType/FormInput";
 import FormPassword from "~/components/platform/FormBuilder/FormType/FormPassword";
 import { Button } from "~/components/ui/button";
 import LoginSubmit from "../actions/loginSubmit";
+import { Checkbox } from "~/components/ui/checkbox";
 
 const formSchema = z.object({
   email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
@@ -71,7 +72,7 @@ export default function LoginForm() {
                   name: "password",
                   label: "Password",
                   required: true,
-                  placeholder: "Enter at least 8 characters",
+                  placeholder: "Enter at least 5 characters",
                 }}
                 form={form}
                 formKey={"Login"}
@@ -83,11 +84,9 @@ export default function LoginForm() {
         {error && <FormMessage>{error}</FormMessage>}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center">
-            <input
+            <Checkbox
               id="rememberMe"
               name="rememberMe"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600"
             />
             <label
               htmlFor="rememberMe"

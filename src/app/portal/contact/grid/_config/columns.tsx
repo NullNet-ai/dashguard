@@ -62,14 +62,21 @@ const gridColumns = [
     }
   },
   {
-    header: "Organization",
+    header: "Primary Organization",
     accessorKey: "organization",
     isSearchable: false,
   },
   {
-    header: "Role",
-    accessorKey: "role",
+    header: "Roles",
+    accessorKey: "roles",
+    enableResizing: false,
     isSearchable: false,
+    cell: ({ row }) => {
+      const roles = row?.original?.roles || [];
+      return roles?.map((role: string, index: number) => {
+        return <StatusCell key={index} value={role} />;
+      });
+    },
   },
   {
     header: "Updated Date",
@@ -88,9 +95,13 @@ const gridColumns = [
   {
     header: "Updated By",
     accessorKey: "updated_by",
-    isSearchable: false,
+    sortKey: "updated_by.first_name",
+    search_config: {
+      entity: "updated_by",
+      field: "first_name",
+      operator: 'like'
+    }
   },
-
   {
     header: "Created Date",
     accessorKey: "created_date",
@@ -108,8 +119,13 @@ const gridColumns = [
   {
     header: "Created By",
     accessorKey: "created_by",
-    isSearchable: false,
-  },
+    sortKey: "created_by.first_name",
+    search_config: {
+      entity: "created_by",
+      field: "first_name",
+      operator: 'like'
+    }
+  }
 ] as ColumnDef<any>[];
 
 export default gridColumns;

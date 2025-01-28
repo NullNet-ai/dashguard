@@ -56,7 +56,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
     (action: FormatAction) => (
       <ToolbarButton
         key={action.label}
-        className="disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground"
+        className="disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
         onClick={() => action.action(editor)}
         disabled={disabled}
         isActive={action.isActive(editor)}
@@ -77,9 +77,12 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
         key={action.label}
         onClick={() => action.action(editor)}
         disabled={!action.canExecute(editor) && disabled}
-        className={cn("flex flex-row items-center justify-between gap-4 disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground", {
-          "bg-accent": action.isActive(editor),
-        })}
+        className={cn(
+          "flex flex-row items-center justify-between gap-4 disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent",
+          {
+            "bg-accent": action.isActive(editor),
+          },
+        )}
         aria-label={action.label}
       >
         <span className="grow">{action.label}</span>
@@ -99,7 +102,10 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
       {mainActions.map(renderToolbarButton)}
       {dropdownActions.length > 0 && (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild className="disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground">
+          <DropdownMenuTrigger
+            asChild
+            className="disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
+          >
             <ToolbarButton
               isActive={isDropdownActive}
               tooltip={dropdownTooltip}
@@ -112,7 +118,10 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
               {dropdownIcon || <ChevronDownIcon className="size-5" />}
             </ToolbarButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-full disabled:opacity-100 disabled:cursor-auto hover:disabled:bg-transparent disabled:text-foreground">
+          <DropdownMenuContent
+            align="start"
+            className="w-full disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
+          >
             {dropdownActions.map(renderDropdownMenuItem)}
           </DropdownMenuContent>
         </DropdownMenu>

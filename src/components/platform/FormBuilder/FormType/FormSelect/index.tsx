@@ -23,6 +23,8 @@ import { Badge } from "~/components/ui/badge";
 import React, { useMemo, useState } from "react";
 import { cn, formatFormTestID } from "~/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
+import { createRecord } from "../../Actions/CreateRecord";
+import { useToast } from "~/context/ToastProvider";
 
 interface IProps {
   fieldConfig: IField;
@@ -45,18 +47,24 @@ export default function FormSelect({
   form,
 }: IProps) {
   form.watch(fieldConfig?.name);
+  const toast = useToast();
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
-  const isReadOnly = fieldConfig.readonly;
+  const isDisabled = fieldConfig.disabled ?? false;
+  const isReadOnly = formRenderProps.field.disabled || fieldConfig.readonly;
 
   const [referenceElement, setReferenceElement] = useState<any>(null);
   const [popperElement, setPopperElement] = useState<any>(null);
+  const [options, setOptions] = useState<ISelectOptions[]>(
+    selectOptions?.[fieldConfig?.name] ?? [],
+  );
+  const [isCreateLoading, setIsCreateLoading] = useState(false);
+
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: "bottom-start", // Default placement
+    placement: "bottom-start",
     modifiers: [
       {
         name: "preventOverflow",
@@ -74,34 +82,90 @@ export default function FormSelect({
   });
 
   const SelectIcon = fieldConfig.selectIcon;
+
+  // Helper function to check if a string is numeric
+  const isNumeric = (str: string) => {
+    if (typeof str !== 'string') return false;
+    return !isNaN(parseFloat(str)) && isFinite(Number(str));
+  };
+
+  // Helper function to sort options
+  const sortOptions = (opts: ISelectOptions[]) => {
+    return [...opts].sort((a, b) => {
+      // Check if both values are numeric strings
+      if (isNumeric(a.value) && isNumeric(b.value)) {
+        return Number(a.value) - Number(b.value);
+      }
+      // Fall back to alphabetical sorting if not numeric
+      return a.label?.localeCompare(b.label) ?? 0;
+    });
+  };
+
   const filteredOptions = useMemo(() => {
-    return query === ""
-      ? selectOptions?.[fieldConfig?.name]
-          ?.sort((a, b) => a.label.localeCompare(b.label))
-          ?.slice(0, 250)
+    const filtered = query === ""
+      ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
+      : options
           ?.filter((opt) => {
-            return !!opt?.label;
+            return opt.label.toLowerCase().includes(query.toLowerCase());
           })
-      : selectOptions?.[fieldConfig?.name]
-          ?.filter((opt) => {
-            return opt.value.toLowerCase().includes(query.toLowerCase());
-          })
-          ?.sort((a, b) => a.label.localeCompare(b.label))
-          .slice(0, 5)
-          ?.filter((opt) => {
-            return !!opt?.label;
-          });
-  }, [fieldConfig?.name, query, selectOptions]);
+          ?.slice(0, 5)
+          ?.filter((opt) => !!opt?.label);
+
+    return sortOptions(filtered ?? []);
+  }, [fieldConfig?.name, query, selectOptions, options?.length]);
 
   const label = useMemo(() => {
-    return selectOptions?.[fieldConfig?.name]?.find(
-      (opt) => opt.value === formRenderProps?.field.value,
-    );
+    return options?.find((opt) => opt.value === formRenderProps?.field.value);
   }, [formRenderProps?.field.value]);
 
   const inputReadOnly = useMemo(() => {
-    return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
-  }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
+    return (
+      (!fieldConfig?.selectSearchable && !fieldConfig?.selectEnableCreate) ||
+      isReadOnly ||
+      isDisabled
+    );
+  }, [
+    fieldConfig?.selectSearchable,
+    isReadOnly,
+    isDisabled,
+    fieldConfig?.selectEnableCreate,
+  ]);
+
+  const createNewRecord = async () => {
+    if (!fieldConfig?.selectOnCreateRecord) {
+      toast.error("selectOnCreateRecord is not defined in fieldConfig");
+      return
+    }
+    if (fieldConfig?.selectOnCreateValidate) {
+      const validation = await fieldConfig?.selectOnCreateValidate(query);
+      if (!validation?.valid) {
+        toast.error(validation?.message || "Invalid Input");
+        return;
+      }
+    }
+    setIsCreateLoading(true);
+    let createdData = null;
+    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+      createdData = await fieldConfig?.selectOnCreateRecord(query);
+    } else {
+      const { entity, fieldIdentifier, customParams } =
+        fieldConfig?.selectOnCreateRecord ?? {};
+      createdData = (await createRecord({
+        entity,
+        fieldIdentifier,
+        data: {
+          ...(customParams ?? {}),
+          [fieldIdentifier]: query,
+        },
+      })) as ISelectOptions;
+    }
+    setOptions(sortOptions([...(options ?? []), createdData]));
+    formRenderProps?.field.onChange(createdData?.value || "");
+    setIsCreateLoading(false);
+    setTimeout(() => setOpen(false), 100);
+  };
+
+  const isOptionsExist = options?.find((p) => p.label === query);
 
   return (
     <FormItem>
@@ -130,7 +194,7 @@ export default function FormSelect({
         as="div"
         value={
           label || {
-            label: "",
+            label: query,
             value: "",
           }
         }
@@ -159,13 +223,13 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
+              "block w-full rounded-md border-border py-[5px] pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
               {
                 "outline-destructive": error,
                 "border-destructive": error,
-                "cursor-not-allowed": isDisabled,
                 "cursor-text": isReadOnly,
               },
+              SelectIcon ? "pl-8" : "pl-2",
             )}
             onClick={() => {
               if (isDisabled || isReadOnly) return;
@@ -174,7 +238,6 @@ export default function FormSelect({
             onChange={(event) => setQuery(event.target.value)}
             onBlur={() => {
               setTimeout(() => setOpen(false), 100);
-              setQuery("");
             }}
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
@@ -185,68 +248,80 @@ export default function FormSelect({
             className={cn(
               "inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none",
               {
-                "cursor-not-allowed": isDisabled,
                 "cursor-default": isReadOnly,
               },
             )}
             data-test-id={`${formKey}-btn-${fieldConfig.name}`}
           >
             <ChevronDownIcon
-              className={cn("absolute right-2 top-2.5 size-5 text-muted-foreground", {
-                "opacity-50": isDisabled || isReadOnly,
-              })}
+              className={cn(
+                "absolute right-2 top-2.5 size-5 text-muted-foreground",
+                {
+                  "opacity-50": isDisabled || isReadOnly,
+                },
+              )}
               aria-hidden="true"
             />
           </ComboboxButton>
-          {!(isDisabled || isReadOnly) &&
-            (filteredOptions?.length ? (
-              <ComboboxOptions
-                static={open}
-                ref={setPopperElement}
-                style={styles.popper}
-                {...attributes.popper}
-                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-                data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+          {!(isDisabled || isReadOnly) && (
+            <ComboboxOptions
+              static={open}
+              ref={setPopperElement}
+              style={styles.popper}
+              {...attributes.popper}
+              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+              data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+            >
+              {filteredOptions?.slice(0, 700).map((opt) => (
+              <ComboboxOption
+                key={opt?.value}
+                value={opt}
+                disabled={isDisabled || isReadOnly}
+                className={cn(
+                "group relative cursor-default select-none py-2 text-md  pr-12 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                SelectIcon ? "pl-8" : "pl-2",
+                {
+                  "cursor-not-allowed": isDisabled,
+                  "cursor-default": isReadOnly,
+                },
+                )}
+                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
               >
-                {filteredOptions?.slice(0, 700).map((opt) => (
-                  <ComboboxOption
-                    key={opt?.value}
-                    value={opt}
-                    disabled={isDisabled || isReadOnly}
-                    className={cn(
-                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
-                      {
-                        "cursor-not-allowed": isDisabled,
-                        "cursor-default": isReadOnly,
-                      },
-                    )}
-                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
-                  >
-                    <span
-                      className="block truncate group-data-[selected]:font-semibold"
-                      data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
-                    >
-                      {opt.label}
-                    </span>
+                <span
+                className="block truncate"
+                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                >
+                {opt.label}
+                </span>
 
-                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
-                      <CheckIcon className="size-5" aria-hidden="true" />
-                    </span>
-                  </ComboboxOption>
-                ))}
-              </ComboboxOptions>
-            ) : (
-              <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none">
-                  <span
-                    className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                  >
-                    No {fieldConfig?.label} found.
-                  </span>
-                </div>
-              </div>
-            ))}
+                <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
+                <CheckIcon className="size-5" aria-hidden="true" />
+                </span>
+              </ComboboxOption>
+              ))}
+              {fieldConfig?.selectEnableCreate ? (
+              !isOptionsExist &&
+              query && (
+                <span
+                className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
+                data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+                onClick={createNewRecord}
+                >
+                {isCreateLoading ? "Creating..." : `Create "${query}"`}
+                </span>
+              )
+              ) : (
+              !filteredOptions.length && (
+                <span
+                className="block truncate group-data-[selected]:font-semibold ms-3"
+                data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                >
+                No {fieldConfig?.label} found.
+                </span>
+              )
+              )}
+            </ComboboxOptions>
+          )}
         </div>
       </Combobox>
 

@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import {
+  ICallbackHandler,
   Summary,
   TStepsNavigationButtons,
   type IAction,
@@ -58,8 +59,17 @@ export default function WizardProvider({
   const toast = useToast();
   const searchParams = useSearchParams();
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
-  const [, portal, mainEntity, application = "wizard", identifier, step] =
-    usePathname().split("/");
+  const path =
+  usePathname().split("/");
+  let [, portal, mainEntity, application = "wizard", identifier, step] = path;
+  if (process.env.IS_PLAYGROUND) {
+    const [, , playgroundPortal, playgroundApplication, , playgroundIdentifier, playgroundStep] = path
+    portal = playgroundPortal
+    application = playgroundApplication || "wizard"
+    identifier = playgroundIdentifier
+    step = playgroundStep
+    mainEntity = "contact";
+  }
   const currentContext = "/" + portal + "/" + mainEntity;
 
   // Now:
@@ -92,6 +102,7 @@ export default function WizardProvider({
   const [nextLoading, setNextLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
   const [savedStep, setSavedStep] = useState<null | number>(null);
+  const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>(config?.callbackHandlers || {});
 
   /** @STATES */
   const nextStep = api.wizard.wizardCreateStep.useMutation();
@@ -218,12 +229,25 @@ export default function WizardProvider({
 
   const handleSaveAndClose = async () => {
     try {
-      setSaveCloseLoading(true);
-      await SaveAndClose({
+      const data = {
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
-      });
+      }
+      const next = async () => {
+        await SaveAndClose(data);
+      };
+      setSaveCloseLoading(true);
+      if (callbackHandlers?.onClickWizardSave) {
+        await callbackHandlers?.onClickWizardSave({
+          data,
+          action_type: "save_close",
+          next,
+        });
+        setSaveCloseLoading(false);
+        return;
+      }
+      await next();
       setSaveCloseLoading(false);
     } catch (error) {
       console.error("An error occurred while saving and closing", error);
@@ -233,23 +257,32 @@ export default function WizardProvider({
 
   const handleSaveAndNew = async () => {
     try {
+      const data = {
+        entity: mainEntity!,
+        enableAutoCreate: false,
+        identifier: config?.entityIdentifier,
+        currentContext: currentContext,
+        is_from_grid: false,
+      };
+      const next = async () => {
+        if (config?.enableAutoCreate === false) {
+          Create(data);
+          setSaveNewLoading(false);
+          return;
+        }
+        await SaveAndNew(data);
+      };
       setSaveNewLoading(true);
-      if (config?.enableAutoCreate === false) {
-        Create({
-          entity: mainEntity!,
-          enableAutoCreate: false,
-          identifier: config?.entityIdentifier,
-          currentContext: currentContext,
-          is_from_grid: false
+      if (callbackHandlers?.onClickWizardSave) {
+        await callbackHandlers?.onClickWizardSave({
+          data,
+          action_type: "save_new",
+          next,
         });
         setSaveNewLoading(false);
         return;
       }
-      await SaveAndNew({
-        entity: mainEntity!,
-        identifier: config?.entityIdentifier,
-        currentContext: currentContext,
-      });
+      await next();
       setSaveNewLoading(false);
     } catch (error) {
       console.error("An error occurred while saving and new", error);
@@ -259,12 +292,25 @@ export default function WizardProvider({
 
   const handleSaveAndContinue = async () => {
     try {
-      setSaveContinueLoading(true);
-      await SaveAndContinue({
+      const data = {
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
-      });
+      }
+      const next = async () => {
+        await SaveAndContinue(data);
+      };
+      setSaveContinueLoading(true);
+      if (callbackHandlers?.onClickWizardSave) {
+        await callbackHandlers?.onClickWizardSave({
+          data,
+          action_type: "save_continue",
+          next,
+        });
+        setSaveContinueLoading(false);
+        return;
+      }
+      await next();
       setSaveContinueLoading(false);
     } catch (error) {
       console.error("An error occurred while saving and continuing", error);
@@ -299,6 +345,9 @@ export default function WizardProvider({
   const unregisterSaveHandler = (eventName: string) => {
     const formHandler = "submitForm:" + eventName;
     setFormSave((prev) => omit(prev, formHandler));
+  };
+  const setCallback = (callback: ICallbackHandler) => {
+    setCallbackHandlers((prev) => ({ ...prev, ...callback }));
   };
 
   useDeepCompareEffect(() => {
@@ -344,6 +393,7 @@ export default function WizardProvider({
     traverseSteps,
     isSummaryOpen,
     stepsNavigation,
+    callbackHandlers,
   } as IState;
 
   const actions = {
@@ -361,6 +411,7 @@ export default function WizardProvider({
     handleSkip,
     setFormSave,
     setSavedStep,
+    setCallback,
   } as IAction;
 
   return (

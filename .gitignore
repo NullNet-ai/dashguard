@@ -44,7 +44,6 @@ yarn-error.log*
 
 # idea files
 .idea
-src/styles/config/config.json
 
 
 pnpm-lock.yaml
@@ -54,4 +53,5 @@ dump
 dump.rdb
 
 
-/src/app/playground
+# /src/app/playground
+# /src/app/playground

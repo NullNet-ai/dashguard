@@ -27,6 +27,7 @@ interface IAccordionLayoutProps extends IPropsForms {
   handleAccordionExpand: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onSubmitFormGrid: (data: z.infer<TFormSchema>) => Promise<void>;
   handleNewRecordFormFilterGrid: () => void;
+  handleSelectedGridRecords: (data : Record<string,any>[]) => void;
   handleAppendForm: () => void;
   handleUpdateDisplayType: (type: TDisplayType) => void;
   handleRemovedSelectedRecords: (records: any[]) => void;

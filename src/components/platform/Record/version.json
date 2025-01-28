@@ -1,0 +1,7 @@
+{
+  "app_name": "platform__Record",
+  "tag": "1.8.0<unreleased>",
+  "branch": "unreleased/fix/1.8.0<unreleased>",
+  "message": "Fixed UI issue and revert changes in sidebar and tabs",
+  "publish_name": "Juphet Vitualla"
+}

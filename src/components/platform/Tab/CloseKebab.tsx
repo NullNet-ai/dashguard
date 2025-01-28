@@ -21,7 +21,7 @@ export default function CloseTab({ current, href, name }: IProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-1 py-1.5 text-left pr-[2px] text-sm opacity-0 group-hover:opacity-100">
+        <div className="flex items-center gap-2 w-[18px] !ml-0 px-1 py-1.5 pl-[2px] text-left pr-[2px] text-sm opacity-0 group-hover:opacity-100">
           <EllipsisVertical
             className={`h-4 w-4 font-semibold text-default/60`}
             aria-hidden="true"

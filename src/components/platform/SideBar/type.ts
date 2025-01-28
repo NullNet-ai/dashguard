@@ -4,7 +4,8 @@ export interface ISideBarProps {
   mainMenuConfig?: ISidebarMenu[];
   footerMenuConfig?: ISidebarMenu[];
   headerMenuConfig?: ISidebarMenu[];
-  className?:string;
+  className?: string;
+  screenType?: string;
 }
 
 export interface ISidebarMenu {
