@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <>
         {label && <Label htmlFor={name}>{label}</Label>}
 
-        <div className={cn("relative w-full !mt-[8px]",containerClassName)}>
+        <div className={cn("relative w-full",containerClassName)}>
           {leftAddon && (
             <div
               className={`pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 transform`}
