@@ -193,7 +193,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className="flex items-center justify-center">
         <div
           className={cn(
-            "flex w-full items-center justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0",
+            "flex w-full items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0",
             "focus-within:outline-0 focus:outline-0 focus:ring-0",
             "placeholder:text-muted-foreground focus-visible:outline-0",
             className,
@@ -958,7 +958,7 @@ const DateTimeLocalInput = ({
           size={"icon"}
           disabled={readOnly}
           className={cn(
-            "flex items-center justify-center font-normal disabled:opacity-100 active:!translate-y-0",
+            "flex items-center justify-center font-normal disabled:opacity-100 active:!translate-y-0 hover:bg-transparent",
             !value && "text-muted-foreground",
           )}
           data-test-id={datePickerTestID}
