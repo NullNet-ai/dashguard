@@ -1,11 +1,11 @@
 import { IReturnOnSelectRecords } from "~/components/platform/FormBuilder/types";
 
-const onSelectRecords = async ({
+const onRemoveSelectedRecords = async ({
   filter_entity,
   main_entity_id,
   rows,
-}: IReturnOnSelectRecords) => {
-  alert("Select Records");
+}: IReturnOnSelectRecords): Promise<IReturnOnSelectRecords> => {
+  alert("Remove Selected Records");
   return await Promise.resolve({
     filter_entity,
     main_entity_id,
@@ -13,4 +13,4 @@ const onSelectRecords = async ({
   });
 };
 
-export default onSelectRecords;
+export default onRemoveSelectedRecords;
