@@ -24,6 +24,10 @@ export default function RootLayout({
       className={`${GeistSans.className}`}
       suppressHydrationWarning
     >
+      <head>
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="format-detection" content="email=no" />
+      </head>
       <body>
         <TRPCReactProvider>
           <EventEmitterProvider>
