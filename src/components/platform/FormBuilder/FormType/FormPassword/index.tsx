@@ -51,9 +51,7 @@ export default function FormPassword({
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
-            readOnly={
-              (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
-            }
+            readOnly={fieldConfig?.readonly ?? false}
             disabled={fieldConfig.disabled}
             placeholder={fieldConfig?.placeholder}
             iconPlacement="left"
@@ -67,7 +65,7 @@ export default function FormPassword({
             type="button"
             variant="ghost"
             size="sm"
-            className={`absolute right-0 top-0 mr-4 hidden h-full py-2 hover:bg-transparent ${isDisabled ? "":"group-hover:block"}`}
+            className={`absolute right-0 top-0 mr-4 hidden h-full py-2 hover:bg-transparent ${isDisabled ? "" : "group-hover:block"}`}
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={formRenderProps?.field?.disabled}
           >

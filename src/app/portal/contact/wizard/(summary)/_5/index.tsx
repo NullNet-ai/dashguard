@@ -14,7 +14,7 @@ const fields = {
 interface IAccountDetails {
   id: string;
   organization_id: string;
-  user_role_id: string;
+  role_id: string;
   account_id: string;
   account_secret: string;
 }

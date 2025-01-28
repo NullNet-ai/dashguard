@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
 import { ulid } from "ulid";
 import { useToast } from "~/context/ToastProvider";
@@ -11,6 +11,10 @@ import BasicFormHostHeader from "~/components/ui/basic-form-host-header";
 import { api } from "~/trpc/react";
 import FormInput from "~/components/platform/FormBuilder/FormType/FormInput";
 import { ContactAccountDetailsSchema } from "~/server/zodSchema/contact/accountDetails";
+import { Badge } from "~/components/ui/badge";
+import DeactivateConfirmationDialog, {
+  IDialogContext,
+} from "./DeactivateConfirmationDialog";
 interface IAccountDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   selectOptions?: {
@@ -29,7 +33,7 @@ interface IAccountDetails {
 interface IAccounts {
   id?: string;
   organization_id: string;
-  user_role_id: string;
+  role_id: string;
   account_id: string;
   account_secret: string;
 }
@@ -43,18 +47,16 @@ export default function AccountDetailsForm({
   defaultValues,
 }: IAccountDetails) {
   const toast = useToast();
+  const [dialogContext, setDialogContext] = useState<IDialogContext>();
   const { organization, user_role } = selectOptions || {};
-  console.log(
-    "%c 🐃: selectOptions ",
-    "font-size:16px;background-color:#22b253;color:white;",
-    selectOptions,
-  );
+
   const updateAccountDetails = api.account.updateAccountDetails.useMutation();
+  const validateAccountDetails =
+    api.account.validateAccountDetails.useMutation();
+  const updateAccountStatus = api.account.updateAccountStatus.useMutation();
 
   const {
-    fields,
     append,
-    remove: handleRemove,
   } = useFieldArray({
     control: form?.control,
     name: "accounts",
@@ -64,7 +66,7 @@ export default function AccountDetailsForm({
   const addAccount = () => {
     append({
       organization_id: "",
-      user_role_id: "",
+      role_id: "",
       account_id: "",
       account_secret: "",
       disabled: false,
@@ -77,64 +79,62 @@ export default function AccountDetailsForm({
   });
 
   const handleClickSave = async (index: number, field_values: any) => {
-    // field_values contains the key:value pair of the form section
-    // must remove disabled before passing on a trpc request or any other request
-
     try {
       const { disabled, ...rest } = field_values;
-      console.log(
-        "%c 🥉: handleSave -> rest ",
-        "font-size:16px;background-color:#b5d7ca;color:black;",
-        rest,
-      );
       const isValid = await form.trigger(`accounts.${index}`);
-      console.log(
-        "%c 🙎‍♀️: handleClickSave -> isValid ",
-        "font-size:16px;background-color:#630847;color:white;",
-        isValid,
-      );
-
       if (!isValid) {
         return;
+      } else {
+        const { isValid, message } = await validateAccountDetails.mutateAsync({
+          ...rest,
+          contact_id: formProps?.id,
+        });
+        if (!isValid) {
+          Object.entries(message).forEach(([key, value]) => {
+            if (value) {
+              form.setError(`accounts.${index}.${key}`, {
+                type: "custom",
+                message: value,
+              });
+            }
+          });
+          return;
+        }
       }
+
       const response = await updateAccountDetails.mutateAsync({
         ...rest,
         contact_id: formProps?.id,
       });
       if (response) {
         toast.success("Account Details submit successfully");
-        form.setValue(`accounts.${index}.disabled`, true);
-
+        form.setValue(`accounts.${index}`, {...response, account_secret: "************", disabled: true});
         return response;
       }
       throw new Error("Failed to submit Account Details");
     } catch (error) {
-      console.log(
-        "%c 🇭🇰: handleClickSave -> error ",
-        "font-size:16px;background-color:#c968db;color:white;",
-        error,
-      );
       toast.error("Failed to submit Account Details");
     }
   };
 
   form.watch("accounts"); // Watch accounts array
 
-  const handleUnlock = () => {
-    form.setValue("accounts.0.disabled", false);
+  const handleUnlock = (index: string) => {
+    form.setValue(`accounts.${index}.disabled`, false);
   };
 
-  const handleCancel = (index: number, account_id: string) => {
+  const handleCancel = (index: number, id: string) => {
     const formData = form.getValues();
-    if (account_id) {
+    form.clearErrors(`accounts.${index}`);
+    if (id) {
       const account = defaultValues?.accounts.find(
-        (item: IAccounts) => item?.id === account_id,
+        (item: IAccounts) => item?.id === id,
       );
-      console.log("%c 🏼: handleCancel -> account ", "font-size:16px;background-color:#d5bcea;color:black;", account)
-      const updatedAccounts = [...formData.accounts];
-      updatedAccounts[index] = account;
-      console.log("%c 🍗: handleCancel -> updatedAccounts ", "font-size:16px;background-color:#55e6d4;color:black;", updatedAccounts)
-      form.setValue("accounts", updatedAccounts);
+     
+      form.setValue(`accounts.${index}`, {
+        ...account,
+        status: formData.accounts?.[index]?.status || account?.status,
+      });
       return;
     }
 
@@ -143,48 +143,92 @@ export default function AccountDetailsForm({
     form.setValue("accounts", updatedAccounts);
   };
 
+  const handleUpdateAccountStatus = async ({
+    index,
+    account_id,
+    status,
+  }: IDialogContext) => {
+    try {
+      const response = await updateAccountStatus.mutateAsync({
+        account_id,
+        status,
+      });
+      if (response) {
+        toast.success(
+          `Account successfully ${
+            status === "Active" ? "Activated" : "Deactivated"
+          }`,
+        );
+        form.setValue(`accounts.${index}.status`, status);
+
+        return response;
+      }
+      throw new Error("Failed to submit Account Details");
+    } catch (error) {
+      toast.error(
+        `Failed to ${
+          status === "Active" ? "Activate" : "Deactivate"
+        } the account`,
+      );
+    }
+  };
+
   return (
     <>
       {form.getValues().accounts.map((field: any, index: any) => {
         const prefix = `accounts.${index}`;
         return (
           <Fragment key={index}>
-            {!!form?.formState?.disabled && (
-              <BasicFormHostHeader
-                key={`account_${index + 1}`}
-                isLock={!!field?.disabled}
-                label={`Account ${index + 1}`}
-                form={form}
-                handleUnlock={handleUnlock}
-                handleCancel={() => handleCancel(index, field?.id)}
-                handleSave={() => handleClickSave(index, field)}
-                ellipseOptions={[
-                  {
-                    id: 1,
-                    name: "Deactivate",
-                    onClick: () => handleRemove(index),
+            <BasicFormHostHeader
+              key={`account_${index + 1}`}
+              isLock={!!field?.disabled}
+              label={
+                <span className="text-md font-semibold leading-none tracking-tight">
+                  {`Account ${index + 1}`}
+                  {field?.status && field?.status === "Archived" && (
+                    <Badge variant="destructive" className="ml-2">
+                      Inactive
+                    </Badge>
+                  )}
+                </span>
+              }
+              form={form}
+              handleUnlock={() => handleUnlock(index)}
+              handleCancel={() => handleCancel(index, field?.id)}
+              handleSave={() => handleClickSave(index, field)}
+              hideEllipseOptions={formProps?.shell_type !== "record"}
+              ellipseOptions={[
+                {
+                  id: 1,
+                  name:
+                    field?.status === "Active"
+                      ? "Deactivate Account"
+                      : "Activate Account",
+                  onClick: () => {
+                    if (field?.status === "Active") {
+                      setDialogContext({
+                        open: true,
+                        account_id: field?.id,
+                        status:
+                          field?.status === "Active" ? "Archived" : "Active",
+                        index,
+                      });
+                      return;
+                    }
+                    handleUpdateAccountStatus({
+                      index,
+                      account_id: field?.id,
+                      status:
+                        field?.status === "Active" ? "Archived" : "Active",
+                    });
                   },
-                ]}
-              />
-            )}
-            {/* <FormInput
-                  fieldConfig={{
-                    id: "account_id",
-                    name: `account_id`,
-                    formType: "input",
-                    label: "Username",
-                    required: true,
-                    disabled: !!field?.disabled,
-                  }}
-                  form={form}
-                  formKey="accounts"
-                  formRenderProps={formRender}
-
-                  /> */}
-
+                },
+              ]}
+            />
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <FormModule
-                formKey="accounts"
+                formKey={"accounts"}
+                form={form}
                 formSchema={formSchema}
                 fields={[
                   {
@@ -196,8 +240,8 @@ export default function AccountDetailsForm({
                     disabled: !!field?.disabled,
                   },
                   {
-                    id: `${prefix}.user_role_id`,
-                    name: `${prefix}.user_role_id`,
+                    id: `${prefix}.role_id`,
+                    name: `${prefix}.role_id`,
                     formType: "select",
                     label: "Role",
                     required: true,
@@ -218,13 +262,13 @@ export default function AccountDetailsForm({
                     label: "Password",
                     required: true,
                     disabled: !!field?.disabled,
+                    placeholder: field?.id ? "Change password": "",
                   },
                 ]}
-                form={form}
                 subConfig={{
                   selectOptions: {
                     [`${prefix}.organization_id`]: organization || [],
-                    [`${prefix}.user_role_id`]: user_role || [],
+                    [`${prefix}.role_id`]: user_role || [],
                   },
                 }}
               />
@@ -233,6 +277,13 @@ export default function AccountDetailsForm({
           </Fragment>
         );
       })}
+      <DeactivateConfirmationDialog
+        context={dialogContext!}
+        onChangeContext={(context: IDialogContext) => setDialogContext(context)}
+        onConfirm={async (context: IDialogContext) => {
+          await handleUpdateAccountStatus(context);
+        }}
+      />
     </>
     // <FormField
     //   name="accounts"
@@ -297,8 +348,8 @@ export default function AccountDetailsForm({
     //                       disabled: !!field?.disabled,
     //                     },
     //                     {
-    //                       id: `${prefix}.user_role_id`,
-    //                       name: `${prefix}.user_role_id`,
+    //                       id: `${prefix}.role_id`,
+    //                       name: `${prefix}.role_id`,
     //                       formType: "select",
     //                       label: "Role",
     //                       required: true,
@@ -325,7 +376,7 @@ export default function AccountDetailsForm({
     //                   subConfig={{
     //                     selectOptions: {
     //                       [`${prefix}.organization_id`]: organization || [],
-    //                       [`${prefix}.user_role_id`]: user_role || [],
+    //                       [`${prefix}.role_id`]: user_role || [],
     //                     },
     //                   }}
     //                 />

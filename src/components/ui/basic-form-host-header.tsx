@@ -16,7 +16,7 @@ interface IEllipsisOptions {
 }
 
 interface IProps {
-  label?: string;
+  label?: string | React.ReactElement;
   ellipseOptions: IEllipsisOptions[];
   isDisable?: boolean;
   isLock: boolean;
@@ -24,6 +24,7 @@ interface IProps {
   handleSave?: () => void;
   handleCancel?: () => void;
   handleUnlock: () => void;
+  hideEllipseOptions?: boolean;
 }
 
 export default function BasicFormHostHeader({
@@ -34,71 +35,81 @@ export default function BasicFormHostHeader({
   form,
   handleSave,
   handleCancel,
-  handleUnlock
+  handleUnlock,
+  hideEllipseOptions = false,
 }: IProps) {
-
-
-  return (
-    <div className={"flex flex-row items-center justify-between p-2"}>
+  const Label =
+    typeof label === "string" ? (
       <span className="text-sm font-semibold leading-none tracking-tight">
         {label}
       </span>
-      {isLock ? (
-        <Button
-          size={"icon"}
-          variant={"ghost"}
-          onClick={handleUnlock}
-          className="m-auto h-6 w-6 rounded-full"
-        >
-          <LockClosedIcon className="h-4 w-4 cursor-pointer rounded-full border" />
-        </Button>
-      ) : (
-        <div className="flex gap-2">
-          <Button
-            variant={"default"}
-            onClick={handleSave}
-            type="button"
-            // loading={}
-            size={"xs"}
-            className="items-center gap-1 text-sm"
-            // {...props}
-          >
-            <SaveIcon className="h-4 w-4" />
-            Save
-          </Button>
-          <Button
-            variant={"outline"}
-            onClick={handleCancel}
-            type="button"
-            size={"xs"}
-          >
-            {" "}
-            <XMarkIcon className="h-4 w-4" />
-            Cancel
-          </Button>
-          <DropdownMenu>
-            {!isDisable ? (
-              <DropdownMenuTrigger>
-                <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
-              </DropdownMenuTrigger>
-            ) : (
-              <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
-            )}
+    ) : (
+      label
+    );
 
-            <DropdownMenuContent align="start">
-              {ellipseOptions?.map((option) => (
-                <DropdownMenuItem
-                  key={option.id}
-                  onClick={option.onClick}
-                  className="flex gap-2"
-                >
-                  {option.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+  return (
+    <div className={"flex flex-row items-center justify-between p-2"}>
+      {Label}
+      <div className="flex gap-2">
+        {isLock ? (
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            onClick={handleUnlock}
+            className="m-auto h-6 w-6 rounded-full"
+          >
+            <LockClosedIcon className="h-5 w-5 cursor-pointer rounded-full border" />
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant={"default"}
+              onClick={handleSave}
+              type="button"
+              // loading={}
+              size={"xs"}
+              className="items-center gap-1 text-sm"
+              // {...props}
+            >
+              <SaveIcon className="h-4 w-4" />
+              Save
+            </Button>
+            <Button
+              variant={"outline"}
+              onClick={handleCancel}
+              type="button"
+              size={"xs"}
+            >
+              <XMarkIcon className="h-4 w-4" />
+              Cancel
+            </Button>
+
+            {!hideEllipseOptions && (
+              <DropdownMenu>
+                {!isDisable ? (
+                  <DropdownMenuTrigger>
+                    <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+                  </DropdownMenuTrigger>
+                ) : (
+                  <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+                )}
+
+                <DropdownMenuContent align="start">
+                  {ellipseOptions?.map((option) => (
+                    <DropdownMenuItem
+                      key={option.id}
+                      onClick={option.onClick}
+                      className="flex cursor-pointer gap-2"
+                    >
+                      {option.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
