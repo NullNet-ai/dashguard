@@ -1,7 +1,7 @@
 {
   "app_name": "application-layout__common",
-  "tag": "1.7.0<unreleased>",
-  "branch": "unreleased/fix/1.7.0<unreleased>",
-  "message": "Fixed UI issues and revert changes in main tab and sidebar",
+  "tag": "1.7.1<unreleased>",
+  "branch": "unreleased/fix/1.7.1<unreleased>",
+  "message": "Fixed UI issues",
   "publish_name": "Juphet Vitualla"
 }

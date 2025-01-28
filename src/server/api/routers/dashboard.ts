@@ -3,6 +3,8 @@ import { z } from "zod"; // Zod is used for input validation
 import { groupBy } from "lodash";
 import entities from "~/auto-generated/entities";
 
+const LIMIT = 20;
+
 export const dashboardRouter = createTRPCRouter({
   getEntityCountGroupByStatus: privateProcedure.input(z.object({
     entity: z.string().refine(
@@ -17,9 +19,9 @@ export const dashboardRouter = createTRPCRouter({
     const getAll = async (
       start: number, 
       total_count: number | null, 
-      previous_items: { id: string, status: string }[]) => {
-      if (total_count === null || start < total_count) {
-        const { total_count, data: items } = await ctx.dnaClient
+      previous_items: { id: string, status: string }[]): Promise<{ total_count: number | null, items: { id: string, status: string }[] }> => {
+      if (total_count === null || start <= total_count) {
+        const { total_count: newTotalCount, data: items } = await ctx.dnaClient
             .findAll({
               entity: input?.entity,
               token: ctx.token.value,
@@ -28,13 +30,14 @@ export const dashboardRouter = createTRPCRouter({
                 advance_filters: [],
                 order: {
                   starts_at: start,
-                  limit: 20,
+                  limit: LIMIT,
                 },
               },
             })
             .execute();
             // @ts-expect-error - Need to update type of total_count to number
-            return getAll(start + 20, total_count, [...previous_items, ...items]);
+            const response = await getAll(start + LIMIT, newTotalCount ?? total_count, [...previous_items, ...items])
+            return response;
       }
       return {
         total_count,

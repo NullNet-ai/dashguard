@@ -90,9 +90,9 @@ export default function FormEmailInput({
   const { name } = formRenderProps.field;
   const isDisabled = formRenderProps?.field?.disabled;
   const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
-  const { register } = form;
   const values = form.watch(name);
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
+
   return (
     <FormItem>
       <FormLabel
@@ -108,24 +108,24 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center border focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${error?.[index] ? "border-destructive" : ""}`}
+                  className={`flex items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 h-[36px] focus-within:ring-ring  ${error?.[index] ? "border-destructive" : ""} ${fieldConfig.disabled ? "bg-secondary" : ""}`}
                 >
                   <Input
-                    {...register(`${fieldConfig.name}.${index}.email`)}
+                    // {...register(`${fieldConfig.name}.${index}.email`)}
                     readOnly={
                       (formRenderProps.field.disabled ||
                         fieldConfig?.readonly) ??
                       false
                     }
+                    value={`${values?.[index]?.email || ""}`}
+                    disabled={fieldConfig.disabled}
                     containerClassName="!mt-0"
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
                     defaultValue={`${values?.[index]?.email || ""}`}
                     iconPlacement="left"
-                    // hasError={!!formRenderProps.fieldState.error}
-                    className={`rounded-none border-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4]`}
-                    disabled={fieldConfig.disabled}
+                    className={`rounded-none border-0 !py-0 focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:border-0 h-[30px] ps-8`}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
                     type={"email"}
