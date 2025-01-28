@@ -7,6 +7,9 @@ import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { api } from "~/trpc/react";
 
+// Remove this guideline
+import FormGuideLine from "../../form_guideline";
+
 const FormSchema = z.object({});
 // Paste the code snippet here
 // Double check the code snippet to ensure that it is correct
@@ -15,5 +18,5 @@ const FormSchema = z.object({});
 // 3. IHandleSubmit is imported from "~/components/platform/FormBuilder/types"
 // 4. Fields are defined in the FormBuilder component
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
-  return null;
+  return <FormGuideLine />;
 }
