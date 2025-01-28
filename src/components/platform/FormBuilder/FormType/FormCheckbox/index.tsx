@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type ICheckboxOptions, type IField } from "../../types";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -49,6 +50,8 @@ export default function FormCheckbox({
               >
                 <FormControl>
                   <Checkbox
+                  className={cn(
+                    form.formState.errors && "border-destructive",)}
                     disabled={field.disabled}
                     data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
                     checked={field?.value?.includes(item.value)}
