@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { type ICheckboxOptions, type IField } from "../../types";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -110,19 +111,23 @@ export default function FormCheckbox({
               className="flex flex-row items-center space-x-3 space-y-0"
             >
                 <FormControl>
-                <Checkbox
-                  disabled={fieldConfig.readonly || fieldConfig.disabled || field.disabled}
-                  data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
-                  checked={isChecked(field, item)}
-                  onCheckedChange={handleCheckboxChange(field, item)}
-                  className={`focus:ring-1 focus:ring-primary focus:ring-offset-1 ${
-                  (fieldConfig.disabled || field.disabled) &&
-                  (!field.value || !isChecked(field, item))
-                    ? 'bg-muted'
-                    : ''
-                  }`}
-                  {...form.register(fieldConfig?.name)}
-                />
+                  <Checkbox
+                  className={cn(
+                    form.formState.errors && "border-destructive",)}
+                    disabled={field.disabled}
+                    data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
+                    checked={field?.value?.includes(item.value)}
+                    onCheckedChange={(checked) => {
+                      return checked
+                        ? field?.onChange([...(field?.value || []), item.value])
+                        : field?.onChange(
+                            field?.value?.filter(
+                              (value: any) => value !== item.value,
+                            ),
+                          );
+                    }}
+                    {...form.register(fieldConfig?.name)}
+                  />
                 </FormControl>
               <FormLabel
                 className="font-normal disabled:opacity-100"
