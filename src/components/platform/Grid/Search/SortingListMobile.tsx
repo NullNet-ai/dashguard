@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import React,{ useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
