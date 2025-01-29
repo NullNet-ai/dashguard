@@ -73,7 +73,7 @@ export default function AppSideBar(config: ISideBarProps) {
         <SidebarHeader className="group relative">
           <SidebarTrigger
             Icon={TriggerOpenCloseSidebarComponent}
-            className={`absolute right-[-8px] top-10 z-50 flex group-hover:flex ${open || openMobile ? "hidden" : "lg:flex"}`}
+            className={`absolute right-2 top-10 z-50 flex group-hover:flex ${open || openMobile ? "hidden" : "lg:flex"}`}
             data-test-id="sdnavmenu-trigger-btn"
           />
           <SidebarMenu>
@@ -143,7 +143,7 @@ export default function AppSideBar(config: ISideBarProps) {
                   )}
                 >
                   <ArrowLeftStartOnRectangleIcon
-                    className={`mr-2 ms-1 h-5 w-5`}
+                    className={`mr-2 ms-3 h-5 w-5`}
                   />
                   {(open && !isMobile) ||
                   (openMobile && isMobile) ||
