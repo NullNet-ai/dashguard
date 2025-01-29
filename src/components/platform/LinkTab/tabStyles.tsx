@@ -49,5 +49,5 @@ export const getTabStyles = (
         // Default states
         'text-muted-foreground': !isActive,
       }
-    )
+    ),
 })
