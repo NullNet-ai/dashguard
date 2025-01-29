@@ -29,18 +29,18 @@ export default async function ConfigurationRuleGrid({
     "model",
   ];
 
-  const { items = [], totalCount } = await api.device.mainGrid({
-    entity: main_entity!,
-    pluck: _pluck,
-    current: +(searchParams.page ?? "0"),
-    limit: +(searchParams.perPage ?? "100"),
-    sorting: sorting?.length ? sorting : defaultSorting,
-  });
+  // const { items = [], totalCount } = await api.device.mainGrid({
+  //   entity: main_entity!,
+  //   pluck: _pluck,
+  //   current: +(searchParams.page ?? "0"),
+  //   limit: +(searchParams.perPage ?? "100"),
+  //   sorting: sorting?.length ? sorting : defaultSorting,
+  // });
 
   return (
     <Grid
-      totalCount={totalCount || 0}
-      data={items}
+      totalCount={0}
+      data={[]}
       defaultSorting={defaultSorting}
       sorting={sorting?.length ? sorting : []}
       config={{
