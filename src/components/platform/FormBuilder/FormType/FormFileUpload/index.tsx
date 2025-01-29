@@ -13,7 +13,6 @@ import {
 import FileUpload from "~/components/platform/FileUpload";
 import { IField } from "../../types";
 
-// import { DevTool } from "@hookform/devtools";
 
 interface IProps {
   fieldConfig: IField;
@@ -46,9 +45,10 @@ export default function FormFile({
   };
 
   const fileDropZoneOptions = {
-    maxFiles: fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5,
+    maxFiles: fieldConfig?.fileDropzoneOptions?.multiple === false ? 1 : (fieldConfig?.fileDropzoneOptions?.maxFiles ?? 5),
     maxSize: fieldConfig?.fileDropzoneOptions?.maxSize ?? 1024 * 1024 * 10,
     multiple: fieldConfig?.fileDropzoneOptions?.multiple ?? true,
+    ...fieldConfig?.fileDropzoneOptions,
   };
   return (
     <FormItem>

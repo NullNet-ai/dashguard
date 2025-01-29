@@ -1,18 +1,19 @@
 "use client";
 import React from "react";
 import { useSearchParams } from "next/navigation";
-
-import { ILayoutProps } from "./types";
-
+import type { ILayoutProps } from "./types";
+import ComingSoon from "../../_components/ComingSoon";
+import RecordImplementationGuide from "../../../_components/record_guideline";
 const Layout = (props: ILayoutProps) => {
   const searchParams = useSearchParams();
-
   const slot = props[searchParams.get("current_tab") ?? "dashboard"];
-
-  if (!slot) {
-    return <div>Coming Soon</div>;
-  }
+  if (!slot)
+    return (
+      <div>
+        <RecordImplementationGuide />
+        <ComingSoon />
+      </div>
+    );
   return <div>{slot}</div>;
 };
-
 export default Layout;

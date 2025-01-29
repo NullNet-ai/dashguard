@@ -14,15 +14,6 @@ console.table({
 
 /** @type {import("next").NextConfig} */
 const config = {
-  experimental:
-    // @ts-expect-error - This is not in the types yet
-    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "local"
-      ? {
-          workerThreads: true,
-          cpus: 6,
-          webpackBuildWorker: true,
-        }
-      : undefined,
   env: {
     NEXT_NODE_ENV: process.env.NODE_ENV,
   },

@@ -36,18 +36,15 @@ export default function Wizard(props: Wizard) {
       config={config}
       stepsNavigation={stepsNavigation}
     >
-     <section className="overflow-hidden wizard-section relative  lg:mt-0">
-        <div className="hidden lg:block  p-4 pt-10 border-b ">
-            <WizardNavigator />
-        </div>
-        <div className="flex  lg:0">
+     <section className="overflow-hidden wizard-section relative  lg:mt-[0px]">
+        <div className="flex ">
           {/* Left side: Stepper */}
             <div className="hidden sm:block">
             <SummaryComponent />
             </div>
 
           <div className="flex-grow bg-transparent">
-            <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
+            <div className="border-b flex items-center md:h-[2.72rem]">
               <Header />
             </div>
             <div className="h-[calc(100vh-10rem)] overflow-auto">

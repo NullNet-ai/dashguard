@@ -1,8 +1,7 @@
 "use client";
-
 import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { Key } from "react";
+import { usePathname } from "next/navigation";
 
 const fields = {
   organization: "Organization",
@@ -18,14 +17,13 @@ interface IAccountDetails {
   account_id: string;
   account_secret: string;
 }
-const AccountDetailsSummary = ({
+const Summary = ({
   form_key,
-  identifier,
 }: {
   form_key: string;
-  identifier: string;
-  main_entity: string;
 }) => {
+  const pathName = usePathname();
+  const [, , entity, _, identifier] = pathName.split("/");
   const { data, refetch, error } = api.account.fetchAccountDetails.useQuery({
     contact_code: identifier!,
   });
@@ -55,5 +53,16 @@ const AccountDetailsSummary = ({
     </div>
   );
 };
+const SummaryConfig = {
+  label: "Step 5",
+  required: false,
+  show_summary: true,
+  components: [
+    {
+      label: "Account Details",
+      component: <Summary form_key={"account_details"} />,
+    },
+  ],
+};
 
-export default AccountDetailsSummary;
+export default SummaryConfig;

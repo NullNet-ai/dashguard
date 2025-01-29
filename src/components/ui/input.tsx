@@ -68,7 +68,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             name={name}
             autoComplete={autoComplete}
             className={cn(
-              "flex  w-full read-only:cursor-text h-10 rounded-md border border-input bg-background px-[8px] py-1 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:border-primary  sm:text-md/6 disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300",
+              "flex  w-full read-only:cursor-text h-10 rounded-md border border-input bg-background px-[8px] py-1 md:text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:cursor-not-allowed focus-visible:border-primary  sm:text-md/6 disabled:bg-secondary text-[1rem]  disabled:text-gray-400 disabled:border-gray-300",
               (leftAddon || (Icon && iconPlacement === "left")) && "pl-7",
               (rightAddon || (Icon && iconPlacement === "right")) && "pr-7",
               className,

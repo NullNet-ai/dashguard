@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Wizard",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.7.0-rc.2<unreleased>",
+  "branch": "unreleased/test/1.7.0-rc.2<unreleased>",
+  "message": "remove pagination",
+  "publish_name": "Juphet Vitualla"
 }

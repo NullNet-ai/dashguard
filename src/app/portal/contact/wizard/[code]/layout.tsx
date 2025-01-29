@@ -2,40 +2,38 @@ import { headers } from "next/headers";
 
 import PlatformWizard from "~/components/platform/Wizard";
 import type { IWizardLayoutProps } from "../types";
-import { steps_navigation } from "./steps-navigation";
-import contactWizardSummary from "../(summary)/wizard-summary-config";
+import totalSteps from "../_config/totalSteps";
+import stepLabels from "../_config/stepLabels";
+import stepsNavigation from "../_config/stepsNavigation";
+import WizardSummaryComponent from "../_config/wizardSummaryConfig";
 
-const WizardLayout = (props: IWizardLayoutProps) => {
-  const { children } = props;
+const WizardLayout = ({ children }: IWizardLayoutProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
+  const category = headerList.get("x-categories") || "";
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
-
-  const _params = {
-    identifier: identifier!,
-    mainEntity: mainEntity!,
-  };
-  const wizard_summary = contactWizardSummary(_params);
+  let _totalSteps = totalSteps;
+  switch (category) {
+    case "Employee":
+      _totalSteps = 5;
+      break;
+    default:
+      break;
+  }
+  const wizard_summary = WizardSummaryComponent();
   return (
     <div className="">
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
-          totalSteps: 6,
+          totalSteps: _totalSteps,
           enableAutoCreate: false,
           entityName: mainEntity,
-          stepLabels: {
-            1: "Basic Details",
-            2: "Contact Details",
-            3: "Category Details",
-            4: "Organization",
-            5: "Account Details",
-            6: "Confirmation",
-          },
+          stepLabels: stepLabels,
         }}
         summary={wizard_summary}
-        stepsNavigation={steps_navigation}
+        stepsNavigation={stepsNavigation}
       >
         {children}
       </PlatformWizard>

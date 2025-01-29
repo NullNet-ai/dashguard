@@ -68,6 +68,7 @@ function GroupSubMenu(props: IProps) {
       ref={(el: any) => (refs.current[index] = el!)}
     >
       <SidebarMenuSubButton
+        open={open}
         asChild
         className={`${isActive && "bg-muted text-primary"}`}
       >

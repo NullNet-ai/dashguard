@@ -4,21 +4,22 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import GridMobileRow from "./common/GridMobileRow";
 import Pagination from "../../Pagination";
 
-function GridMobileForm({shownPagination } : {
+function GridMobileForm({shownPagination, parentType } : {
   shownPagination?: boolean;
+  parentType?: string
 }) {
   return (
-    <Card className="col-span-full border-0 shadow-none">
+    <Card className="col-span-full border-0 shadow-none flex-1">
       {/* <CardHeader>
         <Header />
       </CardHeader> */}
       <ScrollArea
         style={{ height: "auto" }}
-        className="mx-2 rounded-md text-card-foreground"
+        className="rounded-md text-card-foreground"
       >
         <section>
           <div>
-            <GridMobileRow />
+            <GridMobileRow parent={parentType} />
           </div>
         </section>
         {/* <Table>
@@ -30,7 +31,7 @@ function GridMobileForm({shownPagination } : {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       {
-        shownPagination && (
+        shownPagination && parentType ==='grid' && (
           <CardFooter>
             <Pagination />
           </CardFooter>

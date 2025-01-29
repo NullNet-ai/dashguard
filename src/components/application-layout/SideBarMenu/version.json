@@ -1,7 +1,7 @@
 {
   "app_name": "application-layout__SideBarMenu",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.7.1<unreleased>",
+  "branch": "unreleased/fix/FixedUIissues/1.7.1<unreleased>",
+  "message": "Fixed UI issues",
+  "publish_name": "Juphet Vitualla"
 }

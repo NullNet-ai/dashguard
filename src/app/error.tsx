@@ -1,34 +1,62 @@
 "use client";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { startTransition, useEffect } from "react";
+import { Button } from "~/components/ui/button";
+import Image from "next/image";
 
-export default function ErrorPage({ error }: { error: { message: string } }) {
+export default function ErrorPage(props: {
+  error: Error & { digest?: string; statusCode?: number; message: string };
+  reset: () => void;
+}) {
+  const { error } = props;
   switch (error.message?.toUpperCase()) {
     case "UNAUTHORIZED":
       return <UnAuthorized />;
     default:
-      return <DefaultError />;
+      return <DefaultError {...props} />;
   }
 }
 
-function DefaultError() {
+function DefaultError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string; statusCode?: number };
+  reset: () => void;
+}) {
+  const router = useRouter();
+
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
+  const clearError = () => {
+    startTransition(() => {
+      router.refresh();
+      reset();
+    });
+  };
+
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-md text-center">
-        <TriangleAlertIcon className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="mt-4 text-6xl font-bold tracking-tight text-foreground">
-          500
-        </h1>
-        <p className="mt-4 text-muted-foreground">
-          Something went wrong. Please try again later.
-        </p>
-        <div className="mt-6">
-          <a
-            href="/login"
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+    <div className="flex justify-center p-4 py-6">
+      <div className="flex flex-col items-center">
+        <Image
+          src="/something-wrong.svg"
+          alt="Error"
+          width={100}
+          height={120}
+        />
+        <h2 className="mt-2 text-sm font-bold">Something Went Wrong!</h2>
+        <div className="mt-3">
+          <Button
+            onClick={clearError}
+            className="border border-primary text-primary"
+            size={"xs"}
+            variant={"outline"}
           >
-            <ChevronLeftIcon className="mr-2 h-4 w-4" />
-            Login
-          </a>
+            Try again
+          </Button>
         </div>
       </div>
     </div>
