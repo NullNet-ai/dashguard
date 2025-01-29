@@ -1,7 +1,7 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
-import { IAdvanceFilters } from "@dna-platform/common-orm";
+import { EOperator, type IAdvanceFilters } from "@dna-platform/common-orm";
 import { TRPCError } from "@trpc/server";
 import Entities from "~/auto-generated/entities";
 
@@ -181,6 +181,71 @@ export const recordRouter = createTRPCRouter({
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
+    console.log(
+      "%c 🇹🇷: response ",
+      "font-size:16px;background-color:#9370dc;color:white;",
+      response,
+    );
+    const accounts = await ctx.dnaClient
+      .findAll({
+        entity: "organization_accounts",
+        token: ctx.token.value,
+        query: {
+          advance_filters: [
+            {
+              type: "criteria",
+              field: "account_id",
+              operator: EOperator.EQUAL,
+              values: [response.contact.id],
+            },
+          ],
+          pluck_object: {
+            organization_accounts: [
+              "id",
+              "organization_id",
+              "account_id",
+              "contact_id",
+              "status",
+            ],
+            contacts: ["id", "first_name", "last_name"],
+            organizations: ["name"],
+          },
+        },
+      })
+      .join({
+        type: "left",
+        field_relation: {
+          to: {
+            entity: "contacts",
+            field: "id",
+          },
+          from: {
+            entity: "organization_accounts",
+            field: "contact_id",
+          },
+        },
+      })
+      .join({
+        type: "left",
+        field_relation: {
+          to: {
+            entity: "organizations",
+            field: "id",
+          },
+          from: {
+            entity: "organization_accounts",
+            field: "organization_id",
+          },
+        },
+      })
+      .execute();
+    const { organization_accounts, contacts, organizations } = accounts.data?.[0] ?? {};
+    const accountDetails = {
+      account_name: `${contacts?.first_name || ""} ${contacts?.last_name || ""}`,
+      username: organization_accounts?.account_id || "",
+      organization: organizations?.name || "",
+    };
+    console.log("%c ⚔️: accountDetails ", "font-size:16px;background-color:#2e56e6;color:white;", accountDetails)
     const advance_filters = createAdvancedFilter({
       organization_contact_id: response.contact.id,
     });

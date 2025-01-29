@@ -151,7 +151,7 @@ export default function Header() {
                 size={"sm"}
                 onClick={handleSaveAndContinue}
                 disabled={
-                  saveContinueLoading || saveCloseLoading || saveNewLoading
+                  customizedButton?.disabled || saveContinueLoading || saveCloseLoading || saveNewLoading
                 }
               >
                 {customizedButton?.icon ? (

@@ -1,2 +1,2 @@
-const totalSteps = 5;
+const totalSteps = 6;
 export default totalSteps;

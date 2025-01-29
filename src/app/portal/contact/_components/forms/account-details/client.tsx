@@ -13,7 +13,7 @@ export default function AccountDetails({
   return (
     <FormBuilder
       myParent={params.shell_type}
-      enableFormRegisterToParent={true}
+      enableFormRegisterToParent={false}
       formProps={params}
       formLabel="Account Details"
       formKey="account_details"
@@ -42,36 +42,6 @@ export default function AccountDetails({
         hideLockButton: true,
       }}
       fields={[]}
-      // fields={[
-      //   {
-      //     id: "organization",
-      //     formType: "select",
-      //     name: "organization",
-      //     label: "Organization",
-      //     required: true,
-      //   },
-      //   {
-      //     id: "user_role",
-      //     formType: "select",
-      //     name: "user_role",
-      //     label: "Role",
-      //     required: true,
-      //   },
-      //   {
-      //     id: "account_id",
-      //     formType: "input",
-      //     name: "account_id",
-      //     label: "Username",
-      //     required: true,
-      //   },
-      //   {
-      //     id: "account_secret",
-      //     formType: "password",
-      //     name: "account_secret",
-      //     label: "Password",
-      //     required: true,
-      //   },
-      // ]}
     />
   );
 }

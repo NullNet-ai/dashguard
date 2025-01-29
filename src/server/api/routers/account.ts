@@ -348,24 +348,88 @@ export const accountRouter = createTRPCRouter({
         },
       };
     }),
-  getAccountProfile: privateProcedure.query(async ({ ctx }) => {
-    const response = ctx.session.account;
-    const advance_filters = createAdvancedFilter({
-      contact_id: response.contact.id,
-    });
-    const { data } = await ctx.dnaClient
-      .findAll({
-        entity: "organization_contact_account",
-        token: ctx.token.value,
-        query: {
-          advance_filters,
-          pluck: ["id", "email"],
-        },
+  fetchWizardSummary: privateProcedure
+    .input(z.object({ contact_code: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const accounts = await ctx.dnaClient
+        .findAll({
+          entity: "organization_accounts",
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: "criteria",
+                field: "code",
+                operator: EOperator.EQUAL,
+                entity: "contacts",
+                values: [input.contact_code],
+              },
+            ],
+            pluck_object: {
+              organization_accounts: [
+                "id",
+                "organization_id",
+                "role_id",
+                "account_id",
+                "contact_id",
+                "status",
+              ],
+              contacts: ["id"],
+              user_roles: ["role"],
+              organizations: ["name"],
+            },
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "contacts",
+              field: "id",
+            },
+            from: {
+              entity: "organization_accounts",
+              field: "contact_id",
+            },
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "user_roles",
+              field: "id",
+            },
+            from: {
+              entity: "organization_accounts",
+              field: "role_id",
+            },
+          },
+        })
+        .join({
+          type: "left",
+          field_relation: {
+            to: {
+              entity: "organizations",
+              field: "id",
+            },
+            from: {
+              entity: "organization_accounts",
+              field: "organization_id",
+            },
+          },
+        })
+        .execute();
+
+      const existingAccounts = accounts.data?.map(account => {
+        return {
+          id: account.organization_accounts.id,
+          organization: account.organizations.name,
+          role: account.user_roles.role,
+          account_id: account.organization_accounts.account_id,
+        };
       })
-      .execute();
-    return {
-      contact: { ...response?.contact, email: data?.[0]?.email },
-      organization: { ...response.organization },
-    };
-  }),
+
+      return existingAccounts ?? []
+    }),
 });

@@ -14,5 +14,10 @@ const tabs = [
     name: "Organization",
     tabName: "organization?categories=",
   },
+  {
+    id: "account",
+    name: "Account",
+    tabName: "account?categories=",
+  },
 ];
 export default tabs;

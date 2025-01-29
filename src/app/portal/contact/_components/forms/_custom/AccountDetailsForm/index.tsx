@@ -1,20 +1,18 @@
-import { Fragment, useEffect, useState } from "react";
-import { FieldError, useFieldArray, UseFormReturn } from "react-hook-form";
-import { ulid } from "ulid";
+import { Fragment, useState } from "react";
+import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
+import { type ISelectOptions } from "~/components/platform/FormBuilder/types";
+import { useWizard } from '~/components/platform/Wizard/Provider';
+import { Badge } from "~/components/ui/badge";
+import BasicFormHostHeader from "~/components/ui/basic-form-host-header";
+import { Separator } from "~/components/ui/separator";
 import { useToast } from "~/context/ToastProvider";
 import { useEventListener } from "~/hooks/useEventListener";
-import { FormField, FormItem } from "~/components/ui/form";
-import { Separator } from "~/components/ui/separator";
-import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
-import { ISelectOptions } from "~/components/platform/FormBuilder/types";
-import BasicFormHostHeader from "~/components/ui/basic-form-host-header";
 import { api } from "~/trpc/react";
-import FormInput from "~/components/platform/FormBuilder/FormType/FormInput";
-import { ContactAccountDetailsSchema } from "~/server/zodSchema/contact/accountDetails";
-import { Badge } from "~/components/ui/badge";
 import DeactivateConfirmationDialog, {
-  IDialogContext,
+  type IDialogContext,
 } from "./DeactivateConfirmationDialog";
+import { useEventEmitter } from "~/context/EventEmitterProvider";
 interface IAccountDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   selectOptions?: {
@@ -47,6 +45,8 @@ export default function AccountDetailsForm({
   defaultValues,
 }: IAccountDetails) {
   const toast = useToast();
+  const { actions } = useWizard();
+  const eventEmitter = useEventEmitter();
   const [dialogContext, setDialogContext] = useState<IDialogContext>();
   const { organization, user_role } = selectOptions || {};
 
@@ -106,9 +106,14 @@ export default function AccountDetailsForm({
         ...rest,
         contact_id: formProps?.id,
       });
+      actions?.setFormSave({})
       if (response) {
         toast.success("Account Details submit successfully");
         form.setValue(`accounts.${index}`, {...response, account_secret: "************", disabled: true});
+        eventEmitter.emit(`formStatus:account_details`, {
+          status: "done",
+          form_key: "action",
+        });
         return response;
       }
       throw new Error("Failed to submit Account Details");
@@ -285,109 +290,5 @@ export default function AccountDetailsForm({
         }}
       />
     </>
-    // <FormField
-    //   name="accounts"
-    //   control={form.control}
-    //   render={(data) => {
-    //     console.log(
-    //       "%c 🏊‍♂️: data ",
-    //       "font-size:16px;background-color:#e2a089;color:white;",
-    //       data,
-    //     );
-
-    //     return (
-    //       <FormItem>
-    //         {form.getValues().accounts.map((field: any, index: any) => {
-    //           const prefix = `accounts.${index}`;
-    //           return (
-    //             <Fragment key={index}>
-    //               {!form?.formState?.disabled && (
-    //                 <BasicFormHostHeader
-    //                   key={`account_${index + 1}`}
-    //                   isLock={!!field?.disabled}
-    //                   label={`Account ${index + 1}`}
-    //                   form={form}
-    //                   handleUnlock={handleUnlock}
-    //                   handleCancel={() => handleCancel(index)}
-    //                   handleSave={() => handleClickSave(index, field)}
-    //                   ellipseOptions={[
-    //                     {
-    //                       id: 1,
-    //                       name: "Deactivate",
-    //                       onClick: () => handleRemove(index),
-    //                     },
-    //                   ]}
-    //                 />
-    //               )}
-    //               {/* <FormInput
-    //               fieldConfig={{
-    //                 id: "account_id",
-    //                 name: `account_id`,
-    //                 formType: "input",
-    //                 label: "Username",
-    //                 required: true,
-    //                 disabled: !!field?.disabled,
-    //               }}
-    //               form={form}
-    //               formKey="accounts"
-    //               formRenderProps={formRender}
-
-    //               /> */}
-
-    //               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-    //                 <FormModule
-    //                   formKey="accounts"
-    //                   formSchema={formSchema}
-    //                   fields={[
-    //                     {
-    //                       id: `${prefix}.organization_id`,
-    //                       name: `${prefix}.organization_id`,
-    //                       formType: "select",
-    //                       label: "Organization",
-    //                       required: true,
-    //                       disabled: !!field?.disabled,
-    //                     },
-    //                     {
-    //                       id: `${prefix}.role_id`,
-    //                       name: `${prefix}.role_id`,
-    //                       formType: "select",
-    //                       label: "Role",
-    //                       required: true,
-    //                       disabled: !!field?.disabled,
-    //                     },
-    //                     {
-    //                       id: `${prefix}.account_id`,
-    //                       name: `${prefix}.account_id`,
-    //                       formType: "input",
-    //                       label: "Username",
-    //                       required: true,
-    //                       disabled: !!field?.disabled,
-    //                     },
-    //                     {
-    //                       id: `${prefix}.account_secret`,
-    //                       name: `${prefix}.account_secret`,
-    //                       formType: "password",
-    //                       label: "Password",
-    //                       required: true,
-    //                       disabled: !!field?.disabled,
-    //                     },
-    //                   ]}
-    //                   form={form}
-    //                   subConfig={{
-    //                     selectOptions: {
-    //                       [`${prefix}.organization_id`]: organization || [],
-    //                       [`${prefix}.role_id`]: user_role || [],
-    //                     },
-    //                   }}
-    //                 />
-    //               </div>
-    //               {<Separator className="!my-4" dashed />}
-    //             </Fragment>
-    //           );
-    //         })}
-    //       </FormItem>
-    //     );
-    //   }}
-    // />
   );
 }
