@@ -134,7 +134,7 @@ export default function FormSelect({
   const createNewRecord = async () => {
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
-      return
+      return;
     }
     if (fieldConfig?.selectOnCreateValidate) {
       const validation = await fieldConfig?.selectOnCreateValidate(query);

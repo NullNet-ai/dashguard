@@ -1,26 +1,29 @@
 "use client";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
+import { usePathname } from "next/navigation";
 
 const fields = {
   Role: "role",
 };
 
-const StepOneBasicDetails = ({
+const Summary = ({
   form_key,
-  identifier,
-  main_entity,
+
 }: {
   form_key: string;
-  identifier: string;
-  main_entity: string;
+
 }) => {
+  const pathName = usePathname();
+
+  const [, , entity, _, identifier] = pathName.split("/");
+
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.record.getByCode.useQuery({
-    main_entity: main_entity!,
+    main_entity: entity!,
     id: identifier!,
     pluck_fields: ["id", "role"],
   });
@@ -46,6 +49,17 @@ const StepOneBasicDetails = ({
       ))}
     </div>
   );
+};
+
+const StepOneBasicDetails = {
+  label: "Step 1",
+  required: true,
+  components: [
+    {
+      label: "Record Details",
+      component: <Summary form_key={"UserRolesBasicDetails"} />,
+    },
+  ],
 };
 
 export default StepOneBasicDetails;

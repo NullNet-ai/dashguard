@@ -5,22 +5,10 @@ import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSumm
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
+import tabs from "../../../_config/tabs";
 
 const Wrapper = (props: IProps) => {
   const { record, record_summary, entity_code, entity_name } = props;
-
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard",
-    },
-    {
-      id: "user_role",
-      name: "User Role",
-      tabName: "user_role",
-    },
-  ];
 
   return (
     <RecordProvider
