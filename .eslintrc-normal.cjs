@@ -1,6 +1,6 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
-  ignorePatterns: ['scripts/**/*', 'public/**/*', '.eslintrc*', 'prettier.config.js'],
+  ignorePatterns: ['scripts/**/*', 'public/**/*', '.eslintrc*', 'prettier.config.js', 'src/components/ui/**/*'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: true,
@@ -48,6 +48,7 @@ const config = {
             fixStyle: 'inline-type-imports',
           },
         ],
+        '@typescript-eslint/no-empty-function': 'warn',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-floating-promises': 'error',
         '@typescript-eslint/no-misused-promises': 'error',
@@ -110,16 +111,14 @@ const config = {
             enforceForRenamedProperties: true,
           },
         ],
-        'react/react-in-jsx-scope': 'off',
+        
         'react/boolean-prop-naming': 'error',
-        'react/destructuring-assignment': ['error', 'never'],
-        // 'react/hook-use-state': ['error', { allowDestructuredState: false }],
+        'react/destructuring-assignment': ['error', 'always'],
         'react/jsx-boolean-value': ['warn', 'always'],
    
         
-        // 'react/jsx-closing-bracket-location': ['warn', 'after-props'],
         'react/jsx-closing-tag-location': ['warn', 'line-aligned'],
-        // 'react/jsx-curly-brace-presence': ['warn', 'always'],
+        'react/jsx-curly-brace-presence': ['warn', 'always'],
         'react/jsx-curly-spacing': ['warn', 'always'],
         'react/jsx-equals-spacing': ['warn', 'always'],
         // "react/jsx-first-prop-new-line": ["warn", "multiprop"],
@@ -148,12 +147,6 @@ const config = {
             shorthandFirst: true,
             ignoreCase: true,
             noSortAlphabetically: false,
-          },
-        ],
-        'react/jsx-tag-spacing': [
-          'warn',
-          {
-            beforeSelfClosing: 'always',
           },
         ],
         'react/jsx-wrap-multilines': [
