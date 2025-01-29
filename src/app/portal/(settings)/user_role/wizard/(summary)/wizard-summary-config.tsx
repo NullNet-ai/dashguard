@@ -1,17 +1,13 @@
-import StepOneBasicDetails from "./_1";
-import ConfirmationSummary from "./_2";
+import StepOneBasicDetails from './_1'
+import StepTwoCategoryDetails from './_2'
+import ConfirmationSummary from './_3'
 
-const roleWizardSummary = ({
-  identifier,
-  mainEntity,
-}: {
-  identifier: string;
-  mainEntity: string;
-}) => {
+const roleWizardSummary = () => {
   return {
     one: StepOneBasicDetails,
-    two: ConfirmationSummary,
-  };
-};
+    two: StepTwoCategoryDetails,
+    three: ConfirmationSummary,
+  }
+}
 
-export default roleWizardSummary;
+export default roleWizardSummary
