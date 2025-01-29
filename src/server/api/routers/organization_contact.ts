@@ -240,7 +240,7 @@ export const organizationContactsRouter = createTRPCRouter({
       return {
         data: {
           organizations: org_contacts.data.map((org: Record<string, any>) => {
-            const { id, name } = org?.organizations;
+            const { id, name } = org?.organizations ?? {};
             return {
               value: id,
               label: name,
