@@ -66,8 +66,7 @@ export const FormBuilder = (props: IPropsForms) => {
   const [showFormActions, setShowFormActions] = useState(false);
   const [isOpenSearch, setIsOpenSearch] = useState(false);
 
-
-  const { formHostInitialView } = features ?? {}
+  const { formHostInitialView } = features ?? {};
   //* EFFECTS
 
   //* Effect to listen to form submission
@@ -160,14 +159,18 @@ export const FormBuilder = (props: IPropsForms) => {
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]); 
-  
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
+
   useEffect(() => {
-    if(formHostInitialView === "lock" && enableFormRegisterToParent === undefined && myParent === undefined ){ 
+    if (
+      formHostInitialView === "lock" &&
+      enableFormRegisterToParent === undefined &&
+      myParent === undefined
+    ) {
       disableForm();
     }
   }, [formHostInitialView, myParent, enableFormRegisterToParent]);
-  
+
   //* HANDLERS
 
   //* handler to disable form
@@ -238,11 +241,11 @@ export const FormBuilder = (props: IPropsForms) => {
     setDisplayType("form");
   };
 
-  const handleSelectedGridRecords = (data : Record<string,any>[]) => {
+  const handleSelectedGridRecords = (data: Record<string, any>[]) => {
     setFormGridSelected(data);
-    handleSearchOpen()
+    handleSearchOpen();
     setDisplayType("selected");
-    setIsFormOpened(false)
+    setIsFormOpened(false);
   };
 
   const handleAppendForm = () => {

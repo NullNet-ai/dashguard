@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "NODE_ENV=production next build",
+    "build": "next build",
     "dev": "next dev",
     "local": "NODE_ENV=local next dev",
     "lint": "next lint",
+    "lint:normal": "next lint --config .eslintrc-normal.cjs",
+    "lint:strict": "next lint --config .eslintrc-strict.cjs",
     "start": "next start",
     "test": "dotenvx run --env-file=.orm.env -- ts-node ./test.ts",
     "clean": "rm -rf .next && rm -rf node_modules && rm -rf pnpm-lock.yaml && pnpm i",
-    "test-local": "cypress open"
+    "test-local": "cypress open",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dna-platform/common-orm": "1.1.1",
@@ -123,6 +126,7 @@
   },
   "devDependencies": {
     "@hookform/devtools": "^4.3.1",
+    "@stylistic/eslint-plugin": "^2.13.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@types/eslint": "^8.56.12",
     "@types/js-cookie": "^3.0.6",
@@ -136,6 +140,13 @@
     "cypress": "^13.16.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.15",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.2",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.8",

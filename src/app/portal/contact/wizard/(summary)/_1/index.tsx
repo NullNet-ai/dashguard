@@ -1,16 +1,13 @@
 "use client";
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
 
-const BasicDetailsSummary = ({
-  form_key,
-  identifier,
-}: {
-  form_key: string;
-  identifier: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , _, identifier] = pathName.split("/");
   const {
     data: record = { data: { id: null } },
     refetch,
@@ -66,4 +63,15 @@ const BasicDetailsSummary = ({
   );
 };
 
-export default BasicDetailsSummary;
+const SummaryConfig = {
+  label: "Step 1",
+  required: true,
+  components: [
+    {
+      label: "Basic Details",
+      component: <Summary form_key={"basicDetails"} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

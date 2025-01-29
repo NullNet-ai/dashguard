@@ -64,7 +64,7 @@ function GroupSubMenu(props: IProps) {
   return (
     <SidebarMenuSubItem
       key={subItem?.title}
-      className=""
+      className="pl-4"
       ref={(el: any) => (refs.current[index] = el!)}
     >
       <SidebarMenuSubButton
