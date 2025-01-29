@@ -37,12 +37,12 @@ const Item = ({ tab }: ItemProps) => {
           href={tab.href}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            tab.current
-              ? "text-primary rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary"
+            isActive
+              ? "rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary text-primary"
               : "text-gray-500",
-            "whitespace-nowrap px-[8px] py-1 text-sm font-medium  max-h-[32px]",
-            "flex items-center pl-[8px] space-x-2",
-            "hover:border-t-primary hover:text-primary relative",
+            "max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium",
+            "flex items-center space-x-2 pl-[8px]",
+            "relative hover:border-t-primary hover:text-primary",
             padding,
           )}
         >
@@ -51,7 +51,7 @@ const Item = ({ tab }: ItemProps) => {
           <CloseTab {...tab} />
         </Link>
 
-        {isActive || tab.current && (
+        {isActive && (
           <div className="absolute bottom-[-4px] z-10 h-1 w-full bg-white"></div>
         )}
       </div>
