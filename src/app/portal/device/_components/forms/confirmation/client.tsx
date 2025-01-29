@@ -44,7 +44,7 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
         label: "Finish",
         icon: <CheckIcon className="h-6 w-4 text-secondary" />,
         disableDropdown: true,
-        // disabled: loading,
+        disabled: loading,
         dropdownOptions: [],
       },
     });
