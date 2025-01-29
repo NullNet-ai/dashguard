@@ -1,40 +1,27 @@
-"use client";
+'use client'
 
-import { createContext, useContext, ReactNode, useEffect } from "react";
-import { LinkTabContextType } from "./types";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { createContext, useContext, ReactNode } from 'react'
 
-const LinkTabContext = createContext<LinkTabContextType | undefined>(undefined);
+import { LinkTabContextType } from './types'
+
+const LinkTabContext = createContext<LinkTabContextType | undefined>(undefined)
 
 export function LinkTabProvider({
   children,
   value,
-  defaultHref,
 }: {
-  children: ReactNode;
-  value: LinkTabContextType;
-  defaultHref?: string;
+  children: ReactNode
+  value: LinkTabContextType
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (defaultHref) {
-      const defaultRoute = value?.tabs.find((tab) => tab.href === defaultHref);
-      if (defaultRoute) {
-        router.replace(defaultRoute.href);
-      }
-    }
-  }, [defaultHref, searchParams]);
   return (
     <LinkTabContext.Provider value={value}>{children}</LinkTabContext.Provider>
-  );
+  )
 }
 
 export function useLinkTab() {
-  const context = useContext(LinkTabContext);
+  const context = useContext(LinkTabContext)
   if (!context) {
-    throw new Error("useLinkTab must be used within LinkTabProvider");
+    throw new Error('useLinkTab must be used within LinkTabProvider')
   }
-  return context;
+  return context
 }
