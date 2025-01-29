@@ -29,6 +29,7 @@ import { testIDFormatter } from "~/utils/formatter";
 import useScreenType from "~/hooks/use-screen-type";
 import { cn } from "~/lib/utils";
 import Link from "next/link";
+import GroupSubMenu from "./GroupSubMenu";
 
 interface IProps {
   groups: ISidebarMenu[];
@@ -49,7 +50,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
   );
   const [openMenu, setOpenMenu] = useState(isMobile ? false : hasSelected);
 
-  const stype = useScreenType();
+  const sType = useScreenType();
 
   // Toggle favorite for a specific submenu item
   const toggleFavorite = (e: React.MouseEvent, itemTitle: string) => {
@@ -93,7 +94,6 @@ export default function GroupMenu({ groups, screenType }: IProps) {
         return (
           <SidebarMenu key={index} className={isMobile ? "px-2" : ""}>
             <Collapsible
-              open={openMenu}
               key={item.title}
               asChild
               defaultOpen={item.isActive}
@@ -102,12 +102,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
               <SidebarMenuItem
                 className={`${!open ? "flex w-full flex-col items-center justify-center" : ""}`}
               >
-                <CollapsibleTrigger
-                  onClick={() => {
-                    setOpenMenu(!openMenu);
-                  }}
-                  asChild
-                >
+                <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
                     className={cn(
@@ -118,104 +113,34 @@ export default function GroupMenu({ groups, screenType }: IProps) {
                     )}
                   >
                     {item.icon && (
-                      <ICON
-                        className={`h-5 w-5 ${open || openMobile ? "mr-2" : ""}`}
-                      />
+                      <ICON className={`h-5 w-5 ${open ? "mr-2" : ""}`} />
                     )}
-                    {(open && !isMobile) ||
-                    (openMobile && isMobile) ||
-                    (open && !openMobile && !isMobile) ? (
+                    {(open &&
+                      (sType === "sm" || sType === "md" || sType === "xs")) ||
+                    openMobile ||
+                    (open && !openMobile) ? (
                       <span className="font-semibold">{item.title}</span>
                     ) : null}
                     {!!item?.items?.length && (
                       <ChevronRightIcon
                         className={cn(
                           `ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90`,
-                          ` ${!open && !openMobile && !isMobile ? "absolute -right-4 z-[50]" : ""}`,
+                          ` ${!open && !openMobile ? "absolute -right-4 z-[50]" : ""}`,
                         )}
                       />
                     )}
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="w-full">
-                  <SidebarMenuSub className="p-1 px-2.5">
+                  <SidebarMenuSub>
                     {item.items?.map((subItem, index) => {
-                      const SUB_ICON =
-                        // @ts-expect-error - TS doesn't know about dynamic imports
-                        _ICON?.[subItem?.icon] ?? ChevronUpDownIcon;
-
-                      const formattedTitle = (subItem.title ?? "")
-                        .split(" ")
-                        .map(
-                          (word) =>
-                            word.charAt(0).toUpperCase() +
-                            word.slice(1).toLowerCase(),
-                        )
-                        .join("");
-
-                      // Determine if this submenu item is favorited
-                      const isFavorite =
-                        favorites[subItem.title ?? ""] || false;
-
                       return (
-                        <SidebarMenuSubItem
-                          key={subItem.title}
-                          ref={(el: any) => (refs.current[index] = el!)}
-                        >
-                          <SidebarMenuSubButton
-                            asChild
-                            className={`${subItem?.isActive && "bg-muted text-primary"}`}
-                            open={open}
-                          >
-                            <Link
-                              className={`group/item flex items-center gap-2 lg:h-[2.4rem]`}
-                              href={subItem?.url || "#"}
-                              data-test-id={testIDFormatter(
-                                `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`,
-                              )}
-                            >
-                              {subItem.icon && (
-                                <SUB_ICON
-                                  className={`h-5 w-5 ${open ? "mr-2" : ""}`}
-                                />
-                              )}
-                              {((open &&
-                                (stype === "sm" ||
-                                  stype === "md" ||
-                                  stype === "xs")) ||
-                                openMobile ||
-                                (open && !openMobile)) && (
-                                <span className="grow text-nowrap font-semibold">
-                                  {subItem.title}
-                                </span>
-                              )}
-                              <>
-                                {open ? (
-                                  <>
-                                    {isFavorite ? (
-                                      <SolidStarIcon
-                                        onClick={(e) =>
-                                          toggleFavorite(e, subItem.title ?? "")
-                                        }
-                                        data-test-id={testIDFormatter(
-                                          `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-fav-btn`,
-                                        )}
-                                        className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                                      />
-                                    ) : (
-                                      <StarIcon
-                                        onClick={(e) =>
-                                          toggleFavorite(e, subItem.title ?? "")
-                                        }
-                                        className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                                      />
-                                    )}
-                                  </>
-                                ) : null}
-                              </>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <GroupSubMenu
+                          key={index}
+                          index={index}
+                          subItem={subItem}
+                          item={item}
+                        />
                       );
                     })}
                   </SidebarMenuSub>
