@@ -76,7 +76,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex md:h-[44px] gap-y-2 md:gap-0 w-full md:flex-row flex-col items-start md:items-center justify-start md:justify-between rounded px-2 pb-2 md:pb-1 py-2 md:py-1 text-foreground sm:items-center">
+      <div className="flex w-full flex-col items-start justify-start gap-y-2 rounded px-2 py-2 pb-2 text-foreground sm:items-center md:h-[44px] md:flex-row md:items-center md:justify-between md:gap-0 md:py-1 md:pb-1">
         <div className="flex flex-row items-center justify-start">
           <Collapsible
             onOpenChange={setIsOpen}
@@ -120,7 +120,6 @@ export default function Header() {
               onClick={handlePrev}
               size={"xs"}
               className="gap-1"
-              
             >
               <ChevronLeftIcon
                 className="h-3 w-3 text-slate-400"
@@ -151,7 +150,10 @@ export default function Header() {
                 size={"sm"}
                 onClick={handleSaveAndContinue}
                 disabled={
-                  saveContinueLoading || saveCloseLoading || saveNewLoading
+                  customizedButton?.disabled ||
+                  saveContinueLoading ||
+                  saveCloseLoading ||
+                  saveNewLoading
                 }
               >
                 {customizedButton?.icon ? (
@@ -183,7 +185,10 @@ export default function Header() {
                     },
                   ]}
                   disabled={
-                    saveContinueLoading || saveCloseLoading || saveNewLoading
+                    customizedButton?.disabled ||
+                    saveContinueLoading ||
+                    saveCloseLoading ||
+                    saveNewLoading
                   }
                 />
               )}

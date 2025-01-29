@@ -28,7 +28,7 @@ export interface IConfigWizard {
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {
     data: Record<string, any>;
-    /** 
+    /**
      * action_type is just an identifier to determine which action is being performed
      */
     action_type: "save_new" | "save_continue" | "save_close";
@@ -41,6 +41,7 @@ export interface ICallbackHandler {
     label?: string;
     icon?: ReactElement;
     disableDropdown?: boolean;
+    disabled?: boolean;
     dropdownOptions?: Array<{
       label: string;
     }>;
