@@ -1,0 +1,99 @@
+Platform 1.0
+    - node version 20+
+    - pnpm
+    - redis ( redis-server )
+        - use for:
+            - token store
+            - tabs store
+                - Entity tabs ( Main Tabs )
+                - Application tabs ( Sub Tabs )
+                - Grid Report tabs ( Primary tabs for grid )
+            - wizard store
+                - Steps
+                - Traverse Steps
+                - Pathname
+    - platform trpc server api
+        - auth
+        - contact
+        - country
+        - dashboard
+        - google
+        - grid
+        - menu
+        - notification
+        - organization_contact
+        - organization
+        - record
+        - tab
+        - user_role
+        - validator
+        - wizard
+    - platform application
+        - Login
+        - FormBuilder ( Dna Form )
+            - Filter
+                - Grid
+                    - single select
+                    - multi select
+                - Selected View
+            - Host ( Form Control ) and
+                - Address
+                - Checkbox
+                - CurrencyInput
+                - Date
+                - DateRange
+                - EmailInput
+                - FileUpload
+                - Inputs
+                - InputGrid
+                - Input
+                - LabelValueInput
+                - MultiSelect
+                - NumberInput
+                - Password
+                - PhoneInput
+                - Radio
+                - PieChart
+                - Select
+                - SmartDate
+                - TextArea
+                - TimePicker
+        - Wizard
+            - Navigation ( steps )
+            - Summary
+            - Next , previous , skip and save and continue
+            - Content
+                - FormBuilder
+        - Record
+            - Tab
+            - Summary
+            - Content
+                - FormBuilder
+            - Status Update
+        - Grid
+            - Table
+            - Filter
+            - Search
+            - Pagination
+            - Card View
+            - Grid View
+            - Sorting
+            - Grid Tab
+        - Portal
+            - Main Tab ( Application Tab )
+            - Sub Tab ( Entity Tab )
+            - Dashboard
+            - Menu
+            - Notification
+            - Profile
+            - Settings
+            - Logout
+        - Notification
+    - Cypress
+        - Login
+        - FormBuilder
+        - Wizard
+        - Record
+        - Grid
+        - Portal
+        - Notification

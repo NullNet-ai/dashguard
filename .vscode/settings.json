@@ -1,0 +1,31 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#145201",
+      "activityBar.foreground": "#06deff",
+      "activityBar.inactiveForeground": "#f4f4f4",
+    },
+    "files.exclude": {
+      "node_modules": false,
+      "package-lock.json": true,
+      "build": true,
+      ".eslintrc.js": true,
+      ".npmrc": false,
+      ".gitignore": true,
+      ".npmignore": true,
+      ".prettierrc": true,
+      "tsconfig.json": false,
+      "nest-cli.json": true,
+      "yarn.lock": true,
+      ".orm.env": false,
+      "src/auto-generated": false,
+      "public/_template_page": false
+    },
+    "cSpell.words": [
+      "previeous",
+      "TRPC"
+    ],
+    "compile-hero.disable-compile-files-on-did-save-code": true
+  }

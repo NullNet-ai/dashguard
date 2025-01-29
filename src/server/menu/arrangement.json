@@ -1,0 +1,10 @@
+{
+  "order": [
+    "dashboard",
+    "favorite",
+    "activity_log",
+    "contact",
+    "device",
+    "settings"
+  ]
+}
