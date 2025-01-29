@@ -90,7 +90,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     onClick={() => {
-      if (!["select", "action"].includes(column_id) && config?.enableRowClick) {
+      if (!["select", "action", "expand"].includes(column_id) && config?.enableRowClick) {
         if (config?.rowClickCustomAction) {
           config.rowClickCustomAction({ row, config });
           return;

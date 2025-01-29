@@ -36,7 +36,7 @@ import {
   EditComponent,
   RestoreComponent,
 } from "./DefatultRow/Actions";
-import { ISearchItem } from "./Search/types";
+import { type ISearchItem } from "./Search/types";
 import { constructSearchableFields } from "./utils/constructSearchableFields";
 
 export const GridContext = React.createContext<ICreateContext>({});
@@ -246,6 +246,23 @@ export default function GridProvider({
     enableHiding: true,
   });
 
+  const expandTableRow = useRef<ColumnDef<any>>({
+    id: "expand",
+    size: 50,
+    enableResizing: false,
+    header: "",
+    cell: ({ row }: any) => (
+      <button
+        className="px-2 py-1 border rounded bg-gray-200 hover:bg-gray-300"
+        onClick={() => row.toggleExpanded()}
+      >
+        {row.getIsExpanded() ? "▼" : "▶"}
+      </button>
+    ),
+    enableSorting: false,
+    enableHiding: true,
+  });
+
   const actionRow = useRef<ColumnDef<any>>({
     id: "action",
     size: 1,
@@ -391,11 +408,11 @@ export default function GridProvider({
   const table = useReactTable({
     data,
     getRowId: (row) => row.id,
-    columns: actionTypeColumnCondition(
+    columns: [expandTableRow.current,...actionTypeColumnCondition(
       config?.actionType || "default",
       viewMode,
       defaultAdvanceFilter,
-    ),
+    )],
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),
