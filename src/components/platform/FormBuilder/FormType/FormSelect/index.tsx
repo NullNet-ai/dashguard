@@ -119,7 +119,6 @@ export default function FormSelect({
     return options?.find((opt) => opt.value === formRenderProps?.field.value);
   }, [formRenderProps?.field.value, selectOptions?.[fieldConfig?.name]]);
 
-  console.log("%c Line:120 🍊 options", "color:#465975", options, label);
   const inputReadOnly = useMemo(() => {
     return (
       (!fieldConfig?.selectSearchable && !fieldConfig?.selectEnableCreate) ||

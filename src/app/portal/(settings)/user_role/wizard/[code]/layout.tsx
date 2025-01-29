@@ -10,11 +10,8 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier, currentStep] = pathname.split("/");
-  const _params = {
-    identifier: identifier!,
-    mainEntity: main_entity!,
-  };
-  const wizard_summary = roleWizardSummary(_params);
+
+  const wizard_summary = roleWizardSummary();
 
   return (
     <div className="p-1">
