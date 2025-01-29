@@ -90,12 +90,7 @@ const TabItems = (props: TabItemsProps) => {
   }
 
   useEffect(() => {
-    insertMainTabs()
-      .then(() => {
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+    void insertMainTabs()
   }, [entity])
 
   return (
