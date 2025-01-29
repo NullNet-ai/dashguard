@@ -7,7 +7,6 @@ import SystemDates from "./Header/SystemDate";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
 
 const RecordSummaryContent = async () => {
   const headerList = headers();
@@ -28,7 +27,8 @@ const RecordSummaryContent = async () => {
       "updated_date",
       "updated_time",
       "categories",
-      "updated_by"
+      "updated_by",
+      "created_by",
     ],
     main_entity: mainEntity!,
   });

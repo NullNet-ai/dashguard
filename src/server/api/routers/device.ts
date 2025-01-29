@@ -327,7 +327,14 @@ export const deviceRouter = createTRPCRouter({
             token: ctx.token.value,
             query: {
               pluck_object: {
-                devices: ["id", "model", "instance_name", "address_id"],
+                devices: [
+                  "id",
+                  "model",
+                  "instance_name",
+                  "address_id",
+                  "created_date",
+                  "updated_date",
+                ],
                 addresses: ["id", "country", "city", "state"],
               },
               advance_filters: createAdvancedFilter({ id: id! }),

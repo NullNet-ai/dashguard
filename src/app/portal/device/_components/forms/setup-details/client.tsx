@@ -39,6 +39,8 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
     } catch (error) {}
   };
 
+  const is_from_record = params.shell_type === "record";
+
   return (
     <FormBuilder
       customDesign={{
@@ -54,7 +56,11 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
       defaultValues={defaultValues}
       fields={[]}
       customRender={(form) => (
-        <CustomSetupDetails form={form} orgAccount={orgAccount} />
+        <CustomSetupDetails
+          form={form}
+          orgAccount={orgAccount}
+          isFromRecord={is_from_record}
+        />
       )}
     />
   );

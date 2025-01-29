@@ -5,10 +5,12 @@ import { type UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel } from "~/components/ui/form";
 import Image from "next/image";
 import { InfoIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 interface ISetupDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   orgAccount?: Record<string, string> | null;
+  isFromRecord?: boolean;
 }
 
 const addTestIdName = ({
@@ -22,6 +24,7 @@ const addTestIdName = ({
 export default function CustomSetupDetails({
   form,
   orgAccount,
+  isFromRecord,
 }: ISetupDetails) {
   const { control } = form;
   const { account_id, account_secret } = orgAccount || {};
@@ -145,6 +148,17 @@ export default function CustomSetupDetails({
                             readOnly
                             className="mt-1 min-w-[80%] rounded-md border-gray-300 bg-gray-100 p-2 text-gray-800"
                           />
+                          {isFromRecord && (
+                            <Button
+                              onClick={() => {}}
+                              className="mt-2 border border-primary text-primary"
+                              size={"xs"}
+                              color="secondary"
+                              variant={"secondary"}
+                            >
+                              Generate new key
+                            </Button>
+                          )}
                         </div>
                       );
                     }}
