@@ -9,32 +9,8 @@ const roleWizardSummary = ({
   mainEntity: string;
 }) => {
   return {
-    one: {
-      label: "Step 1",
-      required: true,
-      components: [
-        {
-          label: "Basic Details",
-          component: (
-            <StepOneBasicDetails
-              main_entity={mainEntity!}
-              form_key={"UserRolesBasicDetails"}
-              identifier={identifier!}
-            />
-          ),
-        },
-      ],
-    },
-    two: {
-      label: "Step 2",
-      required: false,
-      components: [
-        {
-          label: "Confirmation",
-          component: <ConfirmationSummary />,
-        },
-      ],
-    },
+    one: StepOneBasicDetails,
+    two: ConfirmationSummary,
   };
 };
 
