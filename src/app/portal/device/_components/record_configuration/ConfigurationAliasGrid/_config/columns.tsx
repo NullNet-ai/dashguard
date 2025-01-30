@@ -20,7 +20,7 @@ const gridColumns = [
     accessorKey: '',
   },
   {
-    header: 'Tyoe',
+    header: 'Type',
     accessorKey: '',
   },
   {
