@@ -28,7 +28,7 @@ export const accountRouter = createTRPCRouter({
             token: ctx.token.value,
             mutation: {
               params: {
-                organization_id,
+                account_organization_id: organization_id,
                 role_id,
                 account_id,
                 contact_id,
@@ -38,7 +38,7 @@ export const accountRouter = createTRPCRouter({
               },
               pluck: [
                 "id",
-                "organization_id",
+                "account_organization_id",
                 "role_id",
                 "account_id",
                 "account_secret",
@@ -48,35 +48,67 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute();
-        return account?.data?.[0];
+        // return account?.data?.[0];
+        return {
+          ...account?.data?.[0],
+          organization_id: account?.data?.[0]?.account_organization_id
+        };
       }
 
-      const account = await ctx.dnaClient
-        .create({
-          entity: "organization_accounts",
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              contact_id,
-              organization_id,
-              role_id,
-              account_id,
-              account_secret: await argon2.hash(account_secret),
-              status: "Active",
+      const [organizationRecord, contactRecord] = await Promise.all([
+        ctx.dnaClient
+          .findAll({
+            entity: "organizations",
+            token: ctx.token.value,
+            query: {
+              advance_filters: createAdvancedFilter({
+                id: organization_id,
+              }),
+              pluck: ["id", "name"],
             },
-            pluck: [
-              "id",
-              "organization_id",
-              "role_id",
-              "account_id",
-              "account_secret",
-              "contact_id",
-              "status",
-            ],
-          },
-        })
+          })
+          .execute(),
+        ctx.dnaClient
+          .findAll({
+            entity: "contacts",
+            token: ctx.token.value,
+            query: {
+              advance_filters: createAdvancedFilter({
+                id: contact_id,
+              }),
+              pluck: ["id", "first_name", "last_name"],
+            },
+          })
+          .execute(),
+      ]);
+      const userOrganization = ctx.session.account?.organization ?? {};
+   
+      const organization = {
+        id: userOrganization?.id,
+        name: userOrganization?.name || "",
+      };
+   
+      const account = {
+        first_name: contactRecord?.data?.[0]?.first_name || "",
+        last_name: contactRecord?.data?.[0]?.last_name || "",
+        email: account_id,
+        password: account_secret,
+        account_id,
+        account_secret,
+        contact_id,
+        role_id,
+        account_organization_id: organization_id,
+        account_organization_name: organizationRecord?.data?.[0]?.name || "",
+      };
+
+      const result = await ctx.dnaClient
+        .register(organization, account)
         .execute();
-      return account?.data?.[0];
+   
+      if (!result?.success) {
+        return null;
+      }
+      return {};
     }),
   fetchAccountDetails: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -122,6 +154,7 @@ export const accountRouter = createTRPCRouter({
             pluck: [
               "id",
               "organization_id",
+              // "account_organization_id",
               "role_id",
               "account_id",
               "account_secret",
@@ -137,6 +170,7 @@ export const accountRouter = createTRPCRouter({
         (account: Record<string, any>) => ({
           ...account,
           account_secret: "************",
+          // organization_id: account?.account_organization_id,
           disabled: true,
         }),
       );
@@ -153,6 +187,7 @@ export const accountRouter = createTRPCRouter({
                 role_id: "",
                 account_id: defaultAccountId,
                 account_secret: "",
+                contact_id: contactData?.data?.[0]?.contacts?.id,
                 disabled: false,
               },
             ],
@@ -301,7 +336,7 @@ export const accountRouter = createTRPCRouter({
               advance_filters: [
                 ...createAdvancedFilter({
                   role_id,
-                  organization_id,
+                  account_organization_id: organization_id,
                 }),
                 {
                   type: "operator",
@@ -328,7 +363,7 @@ export const accountRouter = createTRPCRouter({
                     ]
                   : []),
               ],
-              pluck: ["id", "role_id", "organization_id"],
+              pluck: ["id", "role_id", "account_organization_id"],
             },
           })
           .execute(),
@@ -368,7 +403,7 @@ export const accountRouter = createTRPCRouter({
             pluck_object: {
               organization_accounts: [
                 "id",
-                "organization_id",
+                "account_organization_id",
                 "role_id",
                 "account_id",
                 "contact_id",
@@ -415,21 +450,21 @@ export const accountRouter = createTRPCRouter({
             },
             from: {
               entity: "organization_accounts",
-              field: "organization_id",
+              field: "account_organization_id",
             },
           },
         })
         .execute();
 
-      const existingAccounts = accounts.data?.map(account => {
+      const existingAccounts = accounts.data?.map((account) => {
         return {
           id: account.organization_accounts.id,
           organization: account.organizations.name,
           role: account.user_roles.role,
           account_id: account.organization_accounts.account_id,
         };
-      })
+      });
 
-      return existingAccounts ?? []
+      return existingAccounts ?? [];
     }),
 });

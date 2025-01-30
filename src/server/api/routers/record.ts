@@ -181,11 +181,6 @@ export const recordRouter = createTRPCRouter({
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
-    console.log(
-      "%c 🇹🇷: response ",
-      "font-size:16px;background-color:#9370dc;color:white;",
-      response,
-    );
     const accounts = await ctx.dnaClient
       .findAll({
         entity: "organization_accounts",
@@ -196,7 +191,7 @@ export const recordRouter = createTRPCRouter({
               type: "criteria",
               field: "account_id",
               operator: EOperator.EQUAL,
-              values: [response.contact.id],
+              values: [response.email],
             },
           ],
           pluck_object: {
@@ -245,7 +240,6 @@ export const recordRouter = createTRPCRouter({
       username: organization_accounts?.account_id || "",
       organization: organizations?.name || "",
     };
-    console.log("%c ⚔️: accountDetails ", "font-size:16px;background-color:#2e56e6;color:white;", accountDetails)
     const advance_filters = createAdvancedFilter({
       organization_contact_id: response.contact.id,
     });
@@ -259,10 +253,7 @@ export const recordRouter = createTRPCRouter({
         },
       })
       .execute();
-    return {
-      contact: { ...response?.contact, email: data?.[0]?.email },
-      organization: { ...response.organization },
-    };
+    return accountDetails;
   }),
   archiveRecord: privateProcedure
     .input(

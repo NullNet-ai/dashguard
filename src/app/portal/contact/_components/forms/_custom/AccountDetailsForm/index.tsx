@@ -69,6 +69,7 @@ export default function AccountDetailsForm({
       role_id: "",
       account_id: "",
       account_secret: "",
+      contact_id: formProps?.id,
       disabled: false,
     });
   };

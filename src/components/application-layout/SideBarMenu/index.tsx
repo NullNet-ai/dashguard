@@ -1,4 +1,3 @@
-
 import { cookies } from "next/headers";
 import Image from "next/image";
 import AppSideBar from "~/components/platform/SideBar";
@@ -15,12 +14,11 @@ const getInitials = (name: string) => {
 export default async function SideBarMenu() {
   const mainConfig = await MainMenuConfig();
 
-  const { contact } = await api.record.getSessionInfo();
-  const { first_name, last_name, email } = contact;
-  const initials = getInitials(first_name + " " + last_name);
-  const user_name = first_name + " " + last_name;
+  const { account_name, username, organization } =
+    await api.record.getSessionInfo();
+  const initials = getInitials(account_name);
   const cookieStore = cookies(); // Access cookies
-  const screenType = cookieStore.get('screen-type'); 
+  const screenType = cookieStore.get("screen-type");
 
   return (
     <AppSideBar
@@ -39,9 +37,14 @@ export default async function SideBarMenu() {
         </div>
       }
       footerComponent={
-        <SideUserInfo user_name={user_name} initials={initials} email={email}  screenType={screenType?.value}/>
+        <SideUserInfo
+          user_name={account_name}
+          initials={initials}
+          email={username}
+          screenType={screenType?.value}
+          organization={organization}
+        />
       }
-
     />
   );
 }

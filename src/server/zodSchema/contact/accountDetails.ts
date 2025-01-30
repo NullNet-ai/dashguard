@@ -36,7 +36,7 @@ const account_secret = z.string().superRefine((value, ctx) => {
 
 export const AccountDetailSchema = z.object({
   id: z.string().optional(),
-  contact_id: z.string().optional(),
+  contact_id: z.string(),
   organization_id: z.string().min(1, {
     message: "Organization is required",
   }),
