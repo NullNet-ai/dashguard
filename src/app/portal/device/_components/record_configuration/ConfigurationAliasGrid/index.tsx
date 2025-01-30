@@ -1,33 +1,28 @@
-import { api } from "~/trpc/server";
-import gridColumns from "./_config/columns";
-import Grid from "~/components/platform/Grid/Server";
-import { headers } from "next/headers";
-import { defaultSorting } from "./_config/sorting";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import { headers } from 'next/headers'
+import React from 'react'
 
-export default async function ConfigurationRuleGrid({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-}) {
-  const { sorting } = (await getGridCacheData()) ?? {};
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , main_entity] = pathname.split("/");
-  const _pluck = [
-    "id",
-    "code",
-    "created_date",
-    "updated_date",
-    "status",
-    "instance_name",
-    "created_by",
-    "updated_by",
-    "model",
-  ];
+import Grid from '~/components/platform/Grid/Server'
+import { getGridCacheData } from '~/lib/grid-get-cache-data'
+
+import gridColumns from './_config/columns'
+import { defaultSorting } from './_config/sorting'
+
+export default async function ConfigurationRuleGrid() {
+  const { sorting } = (await getGridCacheData()) ?? {}
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , main_entity] = pathname.split('/')
+  // const _pluck = [
+  //   'id',
+  //   'code',
+  //   'created_date',
+  //   'updated_date',
+  //   'status',
+  //   'instance_name',
+  //   'created_by',
+  //   'updated_by',
+  //   'model',
+  // ]
 
   // const { items = [], totalCount } = await api.device.mainGrid({
   //   entity: main_entity!,
@@ -39,18 +34,18 @@ export default async function ConfigurationRuleGrid({
 
   return (
     <Grid
-      totalCount={0}
+      config={{
+        entity: main_entity!,
+        title: 'Device',
+        columns: gridColumns,
+        defaultValues: {
+          entity_prefix: 'DV',
+        },
+      }}
       data={[]}
       defaultSorting={defaultSorting}
       sorting={sorting?.length ? sorting : []}
-      config={{
-        entity: main_entity!,
-        title: "Device",
-        columns: gridColumns,
-        defaultValues: {
-          entity_prefix: "DV",
-        },
-      }}
+      totalCount={0}
     />
-  );
+  )
 }
