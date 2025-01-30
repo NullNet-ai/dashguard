@@ -1,3 +1,6 @@
-import BasicDetails from "../../../../_components/forms/basic-details/server";
-const FormContainer = async () => <BasicDetails />;
-export default FormContainer;
+import React from 'react'
+
+import BasicDetails from '../../../../_components/forms/basic-details/server'
+const FormContainer = async () => <BasicDetails />
+
+export default FormContainer
