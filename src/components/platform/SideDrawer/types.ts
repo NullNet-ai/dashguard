@@ -20,4 +20,6 @@ export interface ISideDrawerConfig {
     componentProps?: Record<string, any>
   }
   onCloseSideDrawer?: () => void
+  overlayEnabled?: boolean
+  closeOnOutsideClick?: boolean
 }

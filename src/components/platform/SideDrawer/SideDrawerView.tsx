@@ -17,7 +17,13 @@ export const SideDrawerView: React.FC = () => {
   const { config, isOpen } = state
 
   if (!isOpen || !config) return null
-  const { title, body, sideDrawerWidth = '982px' } = config
+  const {
+    title,
+    body,
+    sideDrawerWidth = '982px',
+    overlayEnabled = false,
+    closeOnOutsideClick = false,
+  } = config
 
   const { component: BodyComponent, componentProps } = body
 
@@ -28,16 +34,17 @@ export const SideDrawerView: React.FC = () => {
       className='fixed inset-0 z-50 overflow-hidden'
       role='dialog'
     >
-      <div
-        className='absolute inset-0 bg-black bg-opacity-50 transition-opacity'
-        onClick={closeSideDrawer}
-      />
-
+      {overlayEnabled && (
+        <div
+          className={`absolute inset-0 transition-opacity ${overlayEnabled
+            ? 'bg-black bg-opacity-50'
+            : 'bg-transparent'}`}
+          onClick={closeOnOutsideClick ? closeSideDrawer : undefined}
+        />
+      )}
       <Card
-        className={`fixed top-0 h-screen z-50 transition-transform 
-          duration-500 ease-in-out ${
-    isOpen ? 'right-0' : `-right-[${sideDrawerWidth}]`
-    }`}
+        className={`fixed top-0 h-screen z-50 transition-transform duration-500 drop-shadow-lg
+          ease-in-out ${isOpen ? 'right-0' : `-right-[${sideDrawerWidth}]`}`}
         style={{ width: sideDrawerWidth }}
       >
         <CardHeader className="flex items-center gap-4 p-3">
