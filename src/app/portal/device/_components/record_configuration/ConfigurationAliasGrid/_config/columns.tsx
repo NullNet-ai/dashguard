@@ -15,7 +15,6 @@ const gridColumns = [
       return <StatusCell value={value} />
     },
   },
-
   {
     header: 'Name',
     accessorKey: '',
