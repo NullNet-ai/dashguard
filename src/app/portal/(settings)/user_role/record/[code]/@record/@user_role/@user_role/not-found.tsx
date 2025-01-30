@@ -1,9 +1,11 @@
+import React from 'react'
+
 const RecordContainerNotFound = () => {
   return (
     <div>
       <h1>Page Not Found</h1>
     </div>
-  );
-};
+  )
+}
 
-export default RecordContainerNotFound;
+export default RecordContainerNotFound
