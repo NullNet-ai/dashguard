@@ -1,56 +1,55 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from "next/navigation";
 
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect } from "react";
 
-import { LinkTabProvider, useLinkTab } from './Provider'
+import { LinkTabProvider, useLinkTab } from "./Provider";
 
-import { getTabStyles } from './tabStyles'
+import { getTabStyles } from "./tabStyles";
 
-import { LinkTabProps } from './types'
+import { type LinkTabProps } from "./types";
 
 export function LinkTabList({
   className,
   persistKey,
 }: {
-  className?: string
-  persistKey?: string
+  className?: string;
+  persistKey?: string;
 }) {
   const {
     tabs,
-    variant = 'default',
-    size = 'md',
-    orientation = 'horizontal',
-  } = useLinkTab()
+    variant = "default",
+    size = "md",
+    orientation = "horizontal",
+  } = useLinkTab();
 
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const fullPath = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`
-
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fullPath = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
   // Persist active tab
   useEffect(() => {
     if (persistKey && fullPath) {
-      localStorage.setItem(`tab-${persistKey}`, fullPath)
+      localStorage.setItem(`tab-${persistKey}`, fullPath);
     }
-  }, [fullPath, persistKey])
+  }, [fullPath, persistKey]);
 
   // Restore persisted tab on mount
   useEffect(() => {
     if (persistKey) {
-      const savedPath = localStorage.getItem(`tab-${persistKey}`)
+      const savedPath = localStorage.getItem(`tab-${persistKey}`);
       const _tabs = tabs.some((tab) => {
-        return tab.href === savedPath
-      })
+        return tab.href === savedPath;
+      });
       if (savedPath && _tabs) {
-        window.history.replaceState({}, '', savedPath)
+        window.history.replaceState({}, "", savedPath);
       }
     }
-  }, [])
+  }, []);
 
-  const tabStyles = getTabStyles(orientation, className)
+  const tabStyles = getTabStyles(orientation, className);
 
   return (
     <div className={tabStyles.container}>
@@ -60,25 +59,36 @@ export function LinkTabList({
         className={tabStyles.tabList}
       >
         {tabs.map((tab) => {
-          const isActive = fullPath === tab.href
-
+          const isActive = fullPath === tab.href;
+          const { iconPosition = "left", disabled } = tab ?? {};
           return (
             <Fragment key={tab.id}>
               <Link
-                href={tab.href}
+                href={disabled ? "#" : tab.href}
                 role="tab"
                 aria-selected={isActive}
-                className={tabStyles.tab(isActive, variant, size)}
+                aria-disabled={disabled}
+                onClick={(e) => {
+                  if (disabled) {
+                    e.preventDefault();
+                  }
+                }}
+                className={tabStyles.tab(isActive, variant, size, disabled)}
               >
-                {tab.icon && <span className="mr-2">{tab.icon}</span>}
+                {tab.icon && iconPosition === "left" && (
+                  <span className="mr-2">{tab.icon}</span>
+                )}
                 <span>{tab.label}</span>
+                {tab.icon && iconPosition === "right" && (
+                  <span className="ml-2">{tab.icon}</span>
+                )}
               </Link>
             </Fragment>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 const LinkTab = ({
@@ -88,12 +98,12 @@ const LinkTab = ({
   orientation,
   className,
   persistKey,
-}: LinkTabProps & { persistKey?: string }) => {
+}: LinkTabProps) => {
   return (
     <LinkTabProvider value={{ tabs, variant, size, orientation }}>
       <LinkTabList className={className} persistKey={persistKey} />
     </LinkTabProvider>
-  )
-}
+  );
+};
 
-export default LinkTab
+export default LinkTab;

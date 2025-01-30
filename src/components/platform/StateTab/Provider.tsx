@@ -1,9 +1,11 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode } from 'react'
 import { StateTabContextType } from './types'
 
-const StateTabContext = createContext<StateTabContextType | undefined>(undefined)
+const StateTabContext = createContext<StateTabContextType | undefined>(
+  undefined
+)
 
 export function StateTabProvider({
   children,
@@ -13,7 +15,9 @@ export function StateTabProvider({
   value: StateTabContextType
 }) {
   return (
-    <StateTabContext.Provider value={value}>{children}</StateTabContext.Provider>
+    <StateTabContext.Provider value={value}>
+      {children}
+    </StateTabContext.Provider>
   )
 }
 

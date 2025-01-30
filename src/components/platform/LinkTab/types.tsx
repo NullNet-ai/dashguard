@@ -3,6 +3,8 @@ export interface TabItem {
   label: string;
   href: string;
   icon?: React.ReactNode;
+  iconPosition?: "left" | "right";
+  disabled?: boolean; // Add disabled property
 }
 
 export interface LinkTabContextType {
@@ -10,6 +12,7 @@ export interface LinkTabContextType {
   variant?: "default" | "pills" | "underline";
   size?: "sm" | "md" | "lg";
   orientation?: "horizontal" | "vertical";
+  className?: string;
 }
 
 export interface LinkTabProps extends LinkTabContextType {

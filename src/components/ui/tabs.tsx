@@ -2,133 +2,84 @@
 
 import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { ChevronDown } from 'lucide-react'
+
 import { cn } from '~/lib/utils'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu'
 
 const Tabs = TabsPrimitive.Root
 
-interface TabsListProps
-  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
-  orientation?: 'horizontal' | 'vertical'
-  variant?: 'default' | 'pills' | 'underline'
-  size?: 'sm' | 'md' | 'lg'
-  responsive?: boolean
-}
-
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  TabsListProps
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    variant?: 'default' | 'pills' | 'underline'
+    orientation?: 'horizontal' | 'vertical'
+  }
 >(
   (
-    {
-      className,
-      orientation = 'horizontal',
-      variant = 'default',
-      size = 'md',
-      responsive = true,
-      ...props
-    },
+    { className, variant = 'default', orientation = 'horizontal', ...props },
     ref
-  ) => {
-    const [isDropdown, setIsDropdown] = React.useState(false)
-    const listRef = React.useRef<HTMLDivElement>(null)
-
-    React.useEffect(() => {
-      if (!responsive) return
-
-      const checkOverflow = () => {
-        if (listRef.current) {
-          const isOverflowing =
-            listRef.current.scrollWidth > listRef.current.clientWidth
-          setIsDropdown(isOverflowing)
-        }
-      }
-
-      checkOverflow()
-      window.addEventListener('resize', checkOverflow)
-      return () => window.removeEventListener('resize', checkOverflow)
-    }, [responsive])
-
-    const baseStyles = {
-      default: 'border-b border-border',
-      pills: 'bg-muted p-1 rounded-lg',
-      underline: 'border-b border-border',
-    }
-
-    const sizeStyles = {
-      sm: 'h-8 text-sm',
-      md: 'h-10 text-base',
-      lg: 'h-12 text-lg',
-    }
-
-    return (
-      <div className="relative w-full">
-        <TabsPrimitive.List
-          ref={ref}
-          className={cn(
-            'flex',
-            orientation === 'vertical' ? 'flex-col' : 'flex-row',
-            baseStyles[variant],
-            sizeStyles[size],
-            !isDropdown && 'scrollbar-hide overflow-x-auto',
-            className
-          )}
-          {...props}
-        />
-        {isDropdown && responsive && (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="absolute right-0 top-0">
-              <ChevronDown className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {React.Children.map(props.children, (child) => (
-                <DropdownMenuItem>{child}</DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-    )
-  }
+  ) => (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        'flex',
+        orientation === 'vertical' ? 'flex-col' : 'flex-row',
+        {
+          'border-b border-gray-200': variant !== 'pills',
+          'rounded-lg bg-gray-50 p-1': variant === 'pills',
+        },
+        className
+      )}
+      {...props}
+    />
+  )
 )
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    iconPosition?: 'left' | 'right'
+    size?: 'sm' | 'md' | 'lg'
     variant?: 'default' | 'pills' | 'underline'
   }
->(({ className, variant = 'default', ...props }, ref) => {
-  const variantStyles = {
-    default:
-      'border-b-2 border-transparent hover:border-primary/30 data-[state=active]:border-primary',
-    pills:
-      'rounded-md hover:bg-primary/10 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground',
-    underline:
-      'border-b-2 border-transparent hover:text-primary data-[state=active]:border-primary data-[state=active]:text-primary',
-  }
-
-  return (
+>(
+  (
+    {
+      className,
+      iconPosition = 'left',
+      size = 'md',
+      variant = 'default',
+      ...props
+    },
+    ref
+  ) => (
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5',
-        'text-sm font-medium transition-all',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        'disabled:pointer-events-none disabled:opacity-50',
-        variantStyles[variant],
+        'inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all',
+        {
+          // Size variants
+          'px-3 py-1 text-xs': size === 'sm',
+          'px-4 py-1.5 text-sm': size === 'md',
+          'px-6 py-2 text-base': size === 'lg',
+
+          // Style variants
+          'border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
+            variant === 'default',
+          'rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 data-[state=active]:bg-[#6366F1] data-[state=active]:text-white':
+            variant === 'pills',
+          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full data-[state=active]:after:bg-blue-500':
+            variant === 'underline',
+
+          // Icon positioning
+          'flex-row-reverse': iconPosition === 'right',
+        },
         className
       )}
       {...props}
     />
   )
-})
+)
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = React.forwardRef<
@@ -137,10 +88,7 @@ const TabsContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn(
-      'mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-      className
-    )}
+    className={cn('mt-4', className)}
     {...props}
   />
 ))

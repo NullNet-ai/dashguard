@@ -1,3 +1,4 @@
+import React from 'react'
 import NewComingSoon from '~/app/coming-soon'
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */

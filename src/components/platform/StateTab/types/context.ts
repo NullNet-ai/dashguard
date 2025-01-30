@@ -1,14 +1,4 @@
-import React from 'react'
-
-export interface TabItem {
-  id: string
-  label: string
-  content: React.ReactNode
-  icon?: React.ReactNode
-  iconPosition?: 'left' | 'right'
-  disabled?: boolean
-  forceMount?: boolean
-}
+import { TabItem } from './tab'
 
 export interface StateTabContextType {
   tabs: TabItem[]
