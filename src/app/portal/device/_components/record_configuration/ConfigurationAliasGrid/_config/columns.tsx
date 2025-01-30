@@ -15,13 +15,12 @@ const gridColumns = [
       return <StatusCell value={value} />
     },
   },
-
   {
     header: 'Name',
     accessorKey: '',
   },
   {
-    header: 'Tyoe',
+    header: 'Type',
     accessorKey: '',
   },
   {
