@@ -15,42 +15,17 @@ const gridColumns = [
       return <StatusCell value={value} />
     },
   },
-  {
-    header: 'Status',
-    accessorKey: 'configuration_rule_status',
-    enableResizing: false,
-    cell: ({ row }) => {
-      const value = row?.original?.device_status
-      return <StatusCell value={value} />
-    },
-  },
-  {
-    header: 'Type',
-    accessorKey: 'configuration_type',
-  },
-  {
-    header: 'Action',
-    accessorKey: '',
-  },
-  {
-    header: 'Protocol',
-    accessorKey: '',
-  },
-  {
-    header: 'Source',
-    accessorKey: '',
-  },
-  {
-    header: 'Src Port',
-    accessorKey: 'ip_address',
-  },
 
   {
-    header: 'Destination',
+    header: 'Name',
     accessorKey: '',
   },
   {
-    header: 'Dest Port',
+    header: 'Tyoe',
+    accessorKey: '',
+  },
+  {
+    header: 'Values',
     accessorKey: '',
   },
   {

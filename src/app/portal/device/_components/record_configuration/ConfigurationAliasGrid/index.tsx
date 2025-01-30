@@ -7,7 +7,7 @@ import { getGridCacheData } from '~/lib/grid-get-cache-data'
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
 
-export default async function ConfigurationRuleGrid() {
+export default async function ConfigurationAliasGrid() {
   const { sorting } = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
