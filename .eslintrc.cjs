@@ -1,12 +1,6 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
-  ignorePatterns: [
-    'scripts/**/*',
-    'public/**/*',
-    '.eslintrc*',
-    'prettier.config.js',
-    'src/components/ui/**/*',
-  ],
+  ignorePatterns: ['scripts/**/*', 'public/**/*', '.eslintrc*', 'prettier.config.js', 'src/components/ui/**/*'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: true,
@@ -30,7 +24,7 @@ const config = {
       files: ['src/**/*'],
       rules: {
         '@stylistic/array-bracket-newline': ['warn', 'consistent'],
-        '@stylistic/arrow-spacing': ['error', {before: true, after: true}],
+        '@stylistic/arrow-spacing': ['error', { before: true, after: true }],
         '@stylistic/curly-newline': ['warn', 'always'],
         '@stylistic/function-call-argument-newline': ['error', 'never'],
         '@stylistic/function-call-spacing': ['error', 'never'],
@@ -83,7 +77,7 @@ const config = {
         'import/order': [
           'error',
           {
-            groups: [
+            'groups': [
               'builtin',
               'external',
               'internal',
@@ -92,10 +86,10 @@ const config = {
               'index',
             ],
             'newlines-between': 'always',
-            alphabetize: {order: 'asc', caseInsensitive: true},
+            'alphabetize': { order: 'asc', caseInsensitive: true },
           },
         ],
-        'no-console': ['error', {allow: ['warn', 'error', 'info']}],
+        'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
         'no-duplicate-imports': 'error',
         'no-var': 'error',
         'object-shorthand': ['error', 'always'],
@@ -117,11 +111,9 @@ const config = {
             enforceForRenamedProperties: true,
           },
         ],
-
         'react/boolean-prop-naming': 'error',
         'react/destructuring-assignment': ['error', 'always'],
         'react/jsx-boolean-value': ['warn', 'always'],
-
         'react/jsx-closing-tag-location': ['warn', 'line-aligned'],
         'react/jsx-curly-brace-presence': ['warn', 'always'],
         'react/jsx-curly-spacing': ['warn', 'always'],
@@ -138,11 +130,11 @@ const config = {
             checkInlineFunction: true,
           },
         ],
-        'react/jsx-indent': ['warn', 2, {indentLogicalExpressions: true}],
+        'react/jsx-indent': ['warn', 2, { indentLogicalExpressions: true }],
         'react/jsx-indent-props': ['warn', 2],
         'react/jsx-no-constructed-context-values': 'warn',
         'react/jsx-no-useless-fragment': 'error',
-        'react/jsx-pascal-case': ['warn', {allowNamespace: true}],
+        'react/jsx-pascal-case': ['warn', { allowNamespace: true }],
         'react/jsx-props-no-multi-spaces': 'error',
         'react/jsx-props-no-spread-multi': 'error',
         'react/jsx-sort-props': [
@@ -168,6 +160,7 @@ const config = {
         ],
         'react/no-array-index-key': 'warn',
         'react/no-unstable-nested-components': 'warn',
+        'react/react-in-jsx-scope': 'off',
         'react/self-closing-comp': [
           'error',
           {
@@ -178,5 +171,5 @@ const config = {
       },
     },
   ],
-};
-module.exports = config;
+}
+module.exports = config

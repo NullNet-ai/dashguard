@@ -476,7 +476,7 @@ const MultipleSelector = React.forwardRef<
         >
           <div className="flex w-full flex-row">
             <MagnifyingGlassIcon
-              className={`pointer-events-none ${!!selected?.length ? "mr-2" : "ml-2"} h-4 w-4 self-center text-gray-400`}
+              className={`pointer-events-none ${selected?.length ? "mr-2" : "ml-2"} h-4 w-4 self-center text-gray-400`}
               aria-hidden="true"
             />
             <div className="relative flex w-full flex-wrap gap-1">

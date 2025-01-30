@@ -99,7 +99,7 @@ export default function FormInputGrid({
                 >
                   <li className="p-2">
                     <>
-                      {!!predictions?.length ? null : (
+                      {predictions?.length ? null : (
                         <div className="flex flex-row items-center">
                           {isLoading && (
                             <Loader2 className="size-5 animate-spin" />

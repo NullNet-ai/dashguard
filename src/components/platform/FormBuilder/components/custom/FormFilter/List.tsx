@@ -61,7 +61,7 @@ export default function FormFilterGrid({
     }) => {
       setIsLoading(true);
       try {
-        if (!!Object.keys(searchConfig ?? {}).length) {
+        if (Object.keys(searchConfig ?? {}).length) {
           const {
             router = "grid",
             resolver = "items",

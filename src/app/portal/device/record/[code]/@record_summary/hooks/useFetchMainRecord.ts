@@ -17,6 +17,7 @@ const useRefetchRecord = ({
     };
 
     eventEmitter.on(`formStatus:${form_key}`, fetchDetails);
+
     return () => {
       eventEmitter.off(`formStatus:${form_key}`, fetchDetails);
     };

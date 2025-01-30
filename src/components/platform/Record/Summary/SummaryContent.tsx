@@ -14,24 +14,44 @@ const RecordSummaryContent = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier] = pathname.split("/");
 
-  const recordDetails = await api.record.getByCodeWithJoin({
-    id: identifier!,
-    pluck_fields: [
-      "id",
-      "code",
-      "first_name",
-      "last_name",
-      "status",
-      "created_date",
-      "created_time",
-      "updated_date",
-      "updated_time",
-      "categories",
-      "updated_by",
-      "created_by",
-    ],
-    main_entity: mainEntity!,
-  });
+  const recordDetails =
+    mainEntity === "devices" || mainEntity === "device"
+      ? await api.device.getByCodeWithJoin({
+          id: identifier!,
+          pluck_fields: [
+            "id",
+            "code",
+            "first_name",
+            "last_name",
+            "status",
+            "created_date",
+            "created_time",
+            "updated_date",
+            "updated_time",
+            "categories",
+            "updated_by",
+            "created_by",
+          ],
+          main_entity: mainEntity!,
+        })
+      : await api.record.getByCodeWithJoin({
+          id: identifier!,
+          pluck_fields: [
+            "id",
+            "code",
+            "first_name",
+            "last_name",
+            "status",
+            "created_date",
+            "created_time",
+            "updated_date",
+            "updated_time",
+            "categories",
+            "updated_by",
+            "created_by",
+          ],
+          main_entity: mainEntity!,
+        });
 
   if (recordDetails?.status_code === 500) {
     throw recordDetails.message;

@@ -101,7 +101,7 @@ export default function FilterForm() {
       onDataChange={handleChange}
       handleSubmit={onSubmit}
       defaultValues={{
-        filters: !!category_state?.filter_state.filter_by?.raw.length
+        filters: category_state?.filter_state.filter_by?.raw.length
           ? category_state?.filter_state.filter_by?.raw?.map((item) => {
               return {
                 ...item,

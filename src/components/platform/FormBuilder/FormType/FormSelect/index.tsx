@@ -177,7 +177,7 @@ export default function FormSelect({
         >
           {fieldConfig?.label}
         </FormLabel>
-        {!!pillOptions?.length ? (
+        {pillOptions?.length ? (
           <>
             {pillOptions.map((option, index) => (
               <Badge

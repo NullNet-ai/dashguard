@@ -10,7 +10,7 @@ export default function Page() {
     <div>
       <RecordSummary />
       <RecordShellSummary
-        form_key={"setup_details"}
+        form_key={"device_basic_details"}
         identifier={identifier!}
         main_entity={main_entity!}
       />

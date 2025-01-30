@@ -7,8 +7,10 @@ import CustomSetupDetails from "../_custom/SetupDetails";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 
 export default function SetupDetails({ params, defaultValues }: IFormProps) {
+  const form = useForm();
   const toast = useToast();
   const createOrgAccount = api.device.createOrganizationAccount.useMutation();
   const [orgAccount, setOrgAccount] = useState<Record<string, string> | null>();
@@ -36,6 +38,11 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
 
   const handleSave = async ({}) => {
     try {
+      form.setValue("app_secret", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+        shouldTouch: true,
+      });
     } catch (error) {}
   };
 
@@ -60,6 +67,7 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
           form={form}
           orgAccount={orgAccount}
           isFromRecord={is_from_record}
+          params={params}
         />
       )}
     />

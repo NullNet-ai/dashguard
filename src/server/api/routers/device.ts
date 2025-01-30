@@ -42,7 +42,7 @@ export const deviceRouter = createTRPCRouter({
 
         let address_res;
 
-        if (!!address_id) {
+        if (address_id) {
           address_res = await ctx.dnaClient
             .update(address_id, {
               entity: "addresses",
@@ -97,7 +97,7 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute();
 
-        if (!!filter_device_group.data.length) {
+        if (filter_device_group.data.length) {
           const { id: existing_id } = filter_device_group?.data[0] || {};
           await ctx.dnaClient
             .update(existing_id, {
@@ -166,10 +166,23 @@ export const deviceRouter = createTRPCRouter({
 
       const pluck_object = {
         contacts: ["first_name", "last_name", "id"],
-        device_groups: ["device_id", "device_group_setting_id", "id"],
-        device_group_settings: ["name", "id"],
-        devices: input.pluck,
+        organization_accounts: ["contact_id", "id", "device_id"],
+        devices: [
+          "id",
+          "created_by",
+          "updated_by",
+          "created_date",
+          "updated_date",
+          "code",
+          "status",
+          "instance_name",
+          "model",
+        ],
         updated_by: ["first_name", "last_name", "id"],
+        device_groups: ["device_group_setting_id", "device_id", "id"],
+        device_group_settings: ["name", "id"],
+        device_created_by: ["id", "instance_name"],
+        device_updated_by: ["id", "instance_name"],
       };
 
       const query = ctx.dnaClient.findAll({
@@ -202,11 +215,11 @@ export const deviceRouter = createTRPCRouter({
             type: "left",
             field_relation: {
               to: {
-                entity: "contacts",
+                entity: "organization_accounts",
                 field: "id",
               },
               from: {
-                entity: input?.entity,
+                entity: "devices",
                 field: "created_by",
               },
             },
@@ -214,14 +227,97 @@ export const deviceRouter = createTRPCRouter({
           .join({
             type: "left",
             field_relation: {
+              to: {
+                entity: "contacts",
+                field: "id",
+              },
               from: {
-                entity: input?.entity,
+                entity: "organization_accounts",
+                field: "contact_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "organization_account_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
                 field: "updated_by",
               },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
               to: {
                 entity: "contacts",
                 alias: "updated_by",
                 field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "contact_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "device_organization_account_created_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "updated_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "devices",
+                alias: "device_created_by",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "device_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "device_organization_account_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "updated_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "devices",
+                alias: "device_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "device_id",
               },
             },
           })
@@ -259,7 +355,6 @@ export const deviceRouter = createTRPCRouter({
         const {
           [pluralize(input?.entity)]: entity_data,
           updated_by,
-          created_by,
           contacts,
           device_group_settings,
           ...rest
@@ -674,6 +769,232 @@ export const deviceRouter = createTRPCRouter({
 
       return {
         data: res.data[0],
+      };
+    }),
+
+  updateOrganizationAccount: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        account_secret: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, account_secret } = input;
+      const advance_filters = createAdvancedFilter({ device_id: id });
+      const find_res = await ctx.dnaClient
+        .findAll({
+          entity: "organization_account",
+          token: ctx.token.value,
+          query: {
+            pluck: ["id", "account_id", "device_id"],
+            advance_filters,
+            order: {
+              limit: 1,
+              by_field: "created_date",
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute();
+
+      const hashed_account_secret = await argon2.hash(account_secret);
+
+      const response = await ctx.dnaClient
+        .update(find_res?.data[0]?.id, {
+          entity: "organization_account",
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_secret: hashed_account_secret,
+              device_id: id,
+            },
+            pluck: ["id", "account_id"],
+          },
+        })
+        .execute();
+
+      return {
+        account_id: find_res?.data[0]?.account_id,
+        message: transformResMessage(response?.message),
+      };
+    }),
+
+  getByCodeWithJoin: privateProcedure
+    // Define input using zod for validation
+    .input(
+      z.object({
+        id: z.string().min(1),
+        pluck_fields: z.array(z.string()),
+        main_entity: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { id, pluck_fields, main_entity: entity } = input;
+
+      const pluck_object = {
+        created_by_data: ["first_name", "last_name", "id"],
+        updated_by_data: ["first_name", "last_name", "id"],
+        organization_accounts: ["contact_id", "id", "device_id"],
+        devices: [
+          "id",
+          "created_by",
+          "updated_by",
+          "created_date",
+          "updated_date",
+          "code",
+          "status",
+          "instance_name",
+          "model",
+        ],
+        device_groups: ["device_group_setting_id", "device_id", "id"],
+        device_group_settings: ["name", "id"],
+        device_created_by: ["id", "instance_name"],
+        device_updated_by: ["id", "instance_name"],
+      };
+      const _advance_filters = createAdvancedFilter({
+        code: id,
+      });
+
+      const query = ctx.dnaClient.findAll({
+        entity: entity,
+        token: ctx.token.value,
+        query: {
+          pluck: pluck_fields,
+          pluck_object,
+          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+        },
+      });
+
+      if (pluck_object) {
+        query
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "created_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "contacts",
+                alias: "created_by_data",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "contact_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "organization_account_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "updated_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "contacts",
+                alias: "updated_by_data",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "contact_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "device_organization_account_created_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "updated_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "devices",
+                alias: "device_created_by",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "device_id",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "organization_accounts",
+                alias: "device_organization_account_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "devices",
+                field: "updated_by",
+              },
+            },
+          })
+          .join({
+            type: "left",
+            field_relation: {
+              to: {
+                entity: "devices",
+                alias: "device_updated_by",
+                field: "id",
+              },
+              from: {
+                entity: "organization_accounts",
+                field: "device_id",
+              },
+            },
+          });
+      }
+      const response = await query.execute();
+
+      return {
+        ...response,
+        data: {
+          ...response.data[0],
+          code: response.data[0]?.code,
+          status: response.data[0]?.status,
+          created_date: response.data[0]?.created_date,
+          updated_date: response.data[0]?.updated_date,
+          created_time: response.data[0]?.created_time,
+          updated_time: response.data[0]?.updated_time,
+          updated_by_data: response.data[0]?.updated_by_data?.[0],
+          created_by_data: response.data[0]?.created_by_data?.[0],
+        },
       };
     }),
 });

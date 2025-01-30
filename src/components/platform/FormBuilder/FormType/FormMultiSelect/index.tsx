@@ -94,7 +94,7 @@ export default function FormMultiSelect({
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={fieldConfig.disabled || isDisabled}
           className={
-            !!formRenderProps?.fieldState.error
+            formRenderProps?.fieldState.error
               ? "border-destructive"
               : "flex items-center border border-input py-0 outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
           }

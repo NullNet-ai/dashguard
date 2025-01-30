@@ -10,7 +10,7 @@ export const customArchive = async (args: Record<string, any>) => {
   return await api.organization
     .getOrganizationByParentIds({ parent_organization_ids: [id] })
     .then(async (res) => {
-      if (!!res.length) {
+      if (res.length) {
         return { message: "Organization has sub organizations assigned" };
       }
       await api.grid.archiveRecord({
