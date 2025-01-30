@@ -35,7 +35,6 @@ const StepOneOrganizationForm = async () => {
           entity: main_entity,
         }}
         selectOptions={{
-          // TODO: Replace with actual values
           categories: [{ label: 'User', value: 'User' }],
           entity: [{ label: 'Contact', value: 'Contact' }],
         }}
