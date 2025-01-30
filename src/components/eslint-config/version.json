@@ -1,0 +1,7 @@
+{
+  "app_name": "components__eslint-config",
+  "tag": "1.1.0",
+  "branch": "released/fix/PLATFORM7-2305/1.1.0",
+  "message": "Turn off ESLint rule - react/react-in-jsx-scope",
+  "publish_name": "Shem Alexis Chavez"
+}

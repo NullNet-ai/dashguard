@@ -111,16 +111,13 @@ const config = {
             enforceForRenamedProperties: true,
           },
         ],
-        
         'react/boolean-prop-naming': 'error',
         'react/destructuring-assignment': ['error', 'always'],
         'react/jsx-boolean-value': ['warn', 'always'],
-   
-        
         'react/jsx-closing-tag-location': ['warn', 'line-aligned'],
         'react/jsx-curly-brace-presence': ['warn', 'always'],
         'react/jsx-curly-spacing': ['warn', 'always'],
-        'react/jsx-equals-spacing': ['warn', 'always'],
+        'react/jsx-equals-spacing': ['warn', 'never'],
         // "react/jsx-first-prop-new-line": ["warn", "multiprop"],
         'react/jsx-first-prop-new-line': 'warn',
         'react/jsx-fragments': ['warn', 'syntax'],
@@ -163,6 +160,7 @@ const config = {
         ],
         'react/no-array-index-key': 'warn',
         'react/no-unstable-nested-components': 'warn',
+        'react/react-in-jsx-scope': 'off',
         'react/self-closing-comp': [
           'error',
           {

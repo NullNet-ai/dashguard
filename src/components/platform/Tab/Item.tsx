@@ -2,56 +2,59 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Fragment, useMemo } from 'react'
+import React, { Fragment, useMemo } from 'react'
 
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import CloseTab from './CloseKebab'
-interface ItemProps {
+
+type ItemProps = {
   tab: any
 }
 
-const Item = (props: ItemProps) => {
-  const padding = props.tab.name === 'dashboard' ? 'pr-4' : 'pr-0'
+const Item = ({ tab }: ItemProps) => {
+  const padding = tab.name === 'dashboard' ? 'pr-2' : 'pr-0'
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
 
   const pathname = usePathname()
-  const [, , entity] = pathname ? pathname.split('/') : ['', '', '']
+  // eslint-disable-next-line no-unsafe-optional-chaining
+  const [, , entity] = pathname?.split('/')
 
   const isActive = useMemo(() => {
-    const [, , entityName] = (props.tab.href || '').split('/')
+    const [, , entityName] = (tab.href || '').split('/')
     return entityName === entity
   }, [entity])
 
   return (
-    <Fragment key={checkIfUserRole(props.tab.name) ? 'role' : props.tab.name}>
+    <Fragment key={checkIfUserRole(tab.name) ? 'role' : tab.name}>
       <div className="group relative flex items-center">
         <Link
+          data-test-id={
+            'mntab-'
+            + (checkIfUserRole(tab.name) ? 'role' : tab.name)
+              .split(' ')
+              .join('-')
+              .toLowerCase()
+          }
+          href={tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
             isActive
-              ? 'text-primary md:rounded-t-lg md:border-b-0 md:border-l md:border-r md:border-t-2 md:border-t-primary'
-              : 'text-gray-500', 'whitespace-nowrap px-4 py-1.5 text-sm font-medium md:pt-2', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', padding,
+              ? 'rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary text-primary'
+              : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding,
           )}
-          data-test-id={
-            `mntab-${
-              (checkIfUserRole(props.tab.name) ? 'role' : props.tab.name)
-                .split(' ')
-                .join('-')
-                .toLowerCase()}`
-          }
-          href={props.tab.href}
         >
-          {formatAndCapitalize(checkIfUserRole(props.tab.name) ? 'role' : props.tab.name)}
-          <CloseTab {...props.tab} />
+          {formatAndCapitalize(checkIfUserRole(tab.name) ? 'role' : tab.name)}
+          {}
+          <CloseTab {...tab} />
         </Link>
 
         {isActive && (
-          <div className="absolute bottom-[-10px] z-10 h-1 w-full bg-white" />
+          <div className="absolute bottom-[-4px] z-10 h-1 w-full bg-white" />
         )}
       </div>
     </Fragment>
   )
-}
+};
 
 export default Item

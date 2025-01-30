@@ -25,18 +25,18 @@ const SEARCH_BAR_WIDTH = 0
 const ITEM_WIDTH = 140
 const OFFSET_WIDTH = 57
 
-interface TabItemsProps {
+type TabItemsProps = {
   items: IPropsTabList[]
   children?: React.ReactNode
 }
 
-const TabItems = (props: TabItemsProps) => {
-  const { items } = props
+const TabItems = ({ items }: TabItemsProps) => {
   const winWidth = useWindowSize().width
   const { open } = useSidebar()
   const screenSize = useScreenType()
   const pathname = usePathname()
-  const [, , entity] = pathname.split('/')
+  // eslint-disable-next-line no-unsafe-optional-chaining
+  const [, , entity] = pathname?.split('/')
   const insertTabs = api.tab.insertMainTabs.useMutation()
   const [newTabList, setNewTabList] = useState<IPropsTabList[]>(items)
   // Adjust sidebar width based on whether it is open or closed.
@@ -64,7 +64,7 @@ const TabItems = (props: TabItemsProps) => {
   const isUserRole = (entity: string) => entity === 'user_role'
 
   // Insert new tabs into the tab list.
-  const insertMainTabs = async () => {
+  const insertMainTabs = () => {
     const found = newTabList.find((tab) => {
       const [, , entityName] = tab.href.split('/')
       return entityName === entity
@@ -87,35 +87,31 @@ const TabItems = (props: TabItemsProps) => {
       }
     }) as IPropsTabList[]
     setNewTabList(newTab)
-    await insertTabs.mutateAsync(newTab)
+    void insertTabs.mutateAsync(newTab)
     // Drop by into database
   }
 
   useEffect(() => {
-    insertMainTabs().catch((err) => {
-      console.error(err)
-    })
+    insertMainTabs()
   }, [entity])
 
   return (
     <Fragment>
       <div className="flex w-full flex-1">
-        {visibleItems.map((tab) => {
-          return (
-            <Item key={isUserRole(tab.name) ? 'role' : tab.name} tab={tab} />
-          )
-        })}
+        {visibleItems.map((tab) => (
+          <Item tab={tab} key={isUserRole(tab.name) ? 'role' : tab.name} />
+        ))}
       </div>
       {dropdownItems.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger
-            aria-label="More tabs"
             className="ml-auto flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
+            aria-label="More tabs"
             data-test-id="mainTabDropdownButton"
           >
             <ChevronDownIcon
-              aria-hidden="true"
               className="h-6 w-6 text-muted-foreground group-hover:text-primary"
+              aria-hidden="true"
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
