@@ -1,0 +1,7 @@
+{
+  "app_name": "components__eslint-config",
+  "tag": "1.0.0",
+  "branch": "released/feat/PLATFORM7-2305/1.0.0",
+  "message": "Add ESLint configs",
+  "publish_name": "Shem Alexis Chavez"
+}
