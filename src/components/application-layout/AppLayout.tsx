@@ -1,15 +1,17 @@
-import { type PropsWithChildren } from "react";
-import { SidebarInset } from "../ui/sidebar";
+import { headers } from 'next/headers'
+import { type PropsWithChildren } from 'react'
 
-import Header from "./Header";
-import SmartComponent, { SmartMobileComponent } from "./SmartComponent";
-import HeaderContainer from "./common/HeaderContainer";
-import AppContent from "./common/AppContent";
-import { headers } from "next/headers";
+import { SideDrawerView } from '../platform/SideDrawer'
+import { SidebarInset } from '../ui/sidebar'
+
+import AppContent from './common/AppContent'
+import HeaderContainer from './common/HeaderContainer'
+import Header from './Header'
+import SmartComponent, { SmartMobileComponent } from './SmartComponent'
 const AppLayout = async ({ children }: PropsWithChildren) => {
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , , app, ,] = pathname.split("/");
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , , app, ,] = pathname.split('/')
 
   return (
     <SidebarInset application_name={app}>
@@ -19,8 +21,9 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
       <AppContent>{children}</AppContent>
       <SmartComponent />
       <SmartMobileComponent />
+      <SideDrawerView />
     </SidebarInset>
-  );
-};
+  )
+}
 
-export default AppLayout;
+export default AppLayout
