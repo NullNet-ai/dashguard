@@ -16,7 +16,6 @@ export default function ArchiveComponent({
   const isContactOrganizationMatch = contact_organization_id === row.id
   const shouldDisplayArchiveWarningPrompt = isContactOrganizationMatch
 
-  // ang component ang e null
   if (!row.id || !isContactOrganizationMatch || row?.original?.disabled) return null
 
   const handleOpenButton = () => {
@@ -29,15 +28,11 @@ export default function ArchiveComponent({
         shouldDisplayArchiveWarningPrompt,
       },
     })
-    //   // if (data) {
-    //   //   setOpen && setOpen(true);
-    //   // }
-    //   // setOpen && setOpen(false);
   }
   return (
     <Button
-      className="hover:bg-transparent"
-      variant="ghost"
+      className='hover:bg-transparent'
+      variant='ghost'
       onClick={() => {
         handleOpenButton()
       }}
