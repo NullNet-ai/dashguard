@@ -17,7 +17,7 @@ export interface IProps {
   icon?: React.ElementType
   value?: string
   formKey: string
-  formSchema: TFormSchema
+  formSchema?: TFormSchema
 }
 
 export interface IPasswordStrength {
