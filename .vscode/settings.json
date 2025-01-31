@@ -1,6 +1,7 @@
 {
   "prettier.operatorLinebreak": "before",
   "javascript.format.insertSpaceBeforeAndAfterBinaryOperators": true,
+  "prettier.singleQuote": true,
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
   "editor.formatOnSave": true,
