@@ -1,6 +1,12 @@
 'use client'
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { ulid } from 'ulid'
 
 import { WizardContext } from '~/components/platform/Wizard/Provider'
@@ -167,9 +173,7 @@ export default function FormFilterGrid({
 
   if (isLoading) {
     return (
-      <div
-        className="bg-white"
-      >
+      <div className="bg-white">
         <Skeleton />
       </div>
     )
@@ -180,12 +184,11 @@ export default function FormFilterGrid({
   )
 
   return (
-    <div className={cn('w-full ', containerWidth)}>
+    <div className={cn('w-full', containerWidth)}>
       <div className={cn(`${calcWidth}`)}>
         <Grid
           height="300px"
           showPagination={false}
-          showAction={true}
           parentProps={{
             width: containerWidth,
             open,
@@ -208,7 +211,9 @@ export default function FormFilterGrid({
           parentType="form"
           totalCount={gridData?.totalCount || 0}
           data={gridData?.items || []}
-          defaultSorting={config?.searchConfig?.query_params?.default_sorting || []}
+          defaultSorting={
+            config?.searchConfig?.query_params?.default_sorting || []
+          }
           sorting={gridData?.sorting}
           advanceFilter={gridData?.advance_filters || []}
           config={{
