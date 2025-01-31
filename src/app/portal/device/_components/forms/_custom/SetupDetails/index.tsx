@@ -191,11 +191,11 @@ export default function CustomSetupDetails({
                             <button
                               data-test-id={addTestIdName({
                                 type: "cpy",
-                                name: "app_id",
+                                name: "app_secret",
                               })}
                               className="my-auto"
                               onClick={(event) =>
-                                handleCopyClick(event, `${account_id}`)
+                                handleCopyClick(event, `${app_secret}`)
                               }
                             >
                               <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
