@@ -1,5 +1,5 @@
-import { type IRouteParams } from "../../types";
+import { IRouteParams } from '../../../types';
 
 export interface RecordAtContainerProps {
-  params: IRouteParams;
+  params: IRouteParams
 }
