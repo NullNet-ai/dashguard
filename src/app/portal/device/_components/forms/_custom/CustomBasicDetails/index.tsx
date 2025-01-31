@@ -88,6 +88,7 @@ export default function CustomBasicDetails({
                         label: 'Model',
                         required: true,
                         disabled: disabledModel,
+                        selectSearchable: true,
                       }}
                       form={form}
                       formKey="device_model"
@@ -109,6 +110,7 @@ export default function CustomBasicDetails({
                         name: `instance_name`,
                         label: 'Instance Name',
                         required: true,
+                        
                       }}
                       form={form}
                       formKey="device_instance_name"
@@ -127,6 +129,7 @@ export default function CustomBasicDetails({
                         formType: 'select',
                         name: `grouping`,
                         label: 'Grouping',
+                        selectSearchable: true,
                       }}
                       form={form}
                       formKey="device_grouping"
@@ -156,6 +159,7 @@ export default function CustomBasicDetails({
                         formType: 'select',
                         name: `country`,
                         label: `Country`,
+                        selectSearchable: true,
                       }}
                       form={form}
                       formKey="device_country"
@@ -194,6 +198,7 @@ export default function CustomBasicDetails({
                         formType: 'select',
                         name: `state`,
                         label: `State/Province`,
+                        selectSearchable: true,
                       }}
                       form={form}
                       formKey="device_state"
@@ -214,6 +219,7 @@ export default function CustomBasicDetails({
                         formType: 'select',
                         name: `city`,
                         label: `City`,
+                        selectSearchable: true,
                       }}
                       form={form}
                       formKey="device_city"

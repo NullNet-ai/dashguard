@@ -1,6 +1,5 @@
 'use client'
 
-import 'highlight.js/styles/default.css'
 import hljs from 'highlight.js'
 import React, { useEffect, useRef } from 'react'
 
@@ -49,20 +48,33 @@ const CodeBlock = ({
       })
     }
 
+    // return code
+    //   .split('\n')
+    //   .map((line) => {
+    //     // Escape each line to handle XML symbols properly
+    //     const escapedLine = escapeXml(line)
+    //     if (escapedLine.includes('+')) {
+    //       return `<div class="added-line">${escapedLine}</div>`
+    //     }
+    //     else if (escapedLine.includes('-')) {
+    //       return `<div class="removed-line">${escapedLine}</div>`
+    //     }
+    //     return `<div>${escapedLine}</div>`
+    //   })
+    //   .join('\n')
     return code
-      .split('\n')
-      .map((line) => {
-        // Escape each line to handle XML symbols properly
-        const escapedLine = escapeXml(line)
-        if (escapedLine.includes('+')) {
-          return `<span class="added-line">${escapedLine}</span>`
-        }
-        else if (escapedLine.includes('-')) {
-          return `<span class="removed-line">${escapedLine}</span>`
-        }
-        return `<span>${escapedLine}</span>`
-      })
-      .join('\n')
+    .split('\n')
+    .map((line) => {
+      // Escape each line to handle XML symbols properly
+      const escapedLine = escapeXml(line.trim());
+      if (escapedLine.startsWith('+')) {
+        return `<div class="added-line">${escapedLine.slice(1)}</div>`;
+      } else if (escapedLine.startsWith('-')) {
+        return `<div class="removed-line">${escapedLine.slice(1)}</div>`;
+      }
+      return `<div class="neutral-line">${escapedLine}</div>`;
+    })
+    .join('\n');
   }
 
   return (
@@ -76,7 +88,7 @@ const CodeBlock = ({
       }}
     >
       <code
-        className={language}
+        // className={language}
         dangerouslySetInnerHTML={{ __html: formatCode(code) }}
         ref={codeRef}
       />
@@ -106,7 +118,6 @@ const RawData = () => {
 
   return (
     <div>
-      <span>Raw Data</span>
       {xmlCode.map((code, index) => (
         <Card className="border-none p-0 shadow-none" key={index}>
           <CardContent className="mt-2">
