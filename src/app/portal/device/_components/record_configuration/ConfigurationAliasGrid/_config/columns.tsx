@@ -17,19 +17,19 @@ const gridColumns = [
   },
   {
     header: 'Name',
-    accessorKey: '',
+    accessorKey: 'name',
   },
   {
     header: 'Type',
-    accessorKey: '',
+    accessorKey: 'type',
   },
   {
     header: 'Values',
-    accessorKey: '',
+    accessorKey: 'value',
   },
   {
     header: 'Description',
-    accessorKey: '',
+    accessorKey: 'description',
   },
   {
     header: 'Updated Date',

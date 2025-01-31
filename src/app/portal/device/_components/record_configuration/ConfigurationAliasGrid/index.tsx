@@ -3,34 +3,56 @@ import React from 'react'
 
 import Grid from '~/components/platform/Grid/Server'
 import { getGridCacheData } from '~/lib/grid-get-cache-data'
+import { api } from '~/trpc/server'
 
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 
-export default async function ConfigurationAliasGrid() {
+export default async function ConfigurationAliasGrid({
+  searchParams = {},
+}: {
+  searchParams?: {
+    page?: string
+    perPage?: string
+  }
+}) {
   const { sorting } = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity] = pathname.split('/')
-  // const _pluck = [
-  //   'id',
-  //   'code',
-  //   'created_date',
-  //   'updated_date',
-  //   'status',
-  //   'instance_name',
-  //   'created_by',
-  //   'updated_by',
-  //   'model',
-  // ]
+  const [, , main_entity,,code] = pathname.split('/')
+  const _pluck = [
+    'device_id',
+    'type',
+    'name',
+    'value',
+    'description',
+    'created_by',
+    'updated_by',
+    'created_date',
+    'updated_date',
+    'status'
+  ]
 
-  // const { items = [], totalCount } = await api.device.mainGrid({
-  //   entity: main_entity!,
-  //   pluck: _pluck,
-  //   current: +(searchParams.page ?? "0"),
-  //   limit: +(searchParams.perPage ?? "100"),
-  //   sorting: sorting?.length ? sorting : defaultSorting,
-  // });
+  const record = await api.record.getByCode({
+    main_entity: main_entity!,
+    id: code!,
+    pluck_fields: ['id'],
+  })
+
+  const record_id = record?.data?.id
+
+  const { items = [], totalCount } = await api.deviceAlias.mainGrid({
+    entity: 'device_aliases',
+    pluck: _pluck,
+    current: +(searchParams.page ?? '0'),
+    limit: +(searchParams.perPage ?? '100'),
+    sorting: sorting?.length ? sorting : defaultSorting,
+   advance_filters: createAdvancedFilter({
+      device_id: record_id,
+      status: 'Active',
+    }),
+  })
 
   return (
     <Grid
@@ -41,11 +63,13 @@ export default async function ConfigurationAliasGrid() {
         defaultValues: {
           entity_prefix: 'DV',
         },
+        disableDefaultAction: true,
+        hideCreateButton: true,
       }}
-      data={[]}
+      data={items}
       defaultSorting={defaultSorting}
       sorting={sorting?.length ? sorting : []}
-      totalCount={0}
+      totalCount={totalCount}
     />
   )
 }
