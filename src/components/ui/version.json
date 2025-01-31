@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.10.0<unreleased>",
-  "branch": "unreleased/fix/2093-2135-2136-2095/1.10.0<unreleased>",
-  "message": "add update to fix ui to be consistent with other inputs (2093) add update to multi-select UI to be consistent with other inputs (2135)  add refactor toggle component  to remove hover text-color (2136) add update to remove error message on calendar that is inside in the datepicker (2095)",
+  "tag": "1.10.2<unreleased>",
+  "branch": "unreleased/fix/1.10.2<unreleased>",
+  "message": "add update to input and smartdatetimepicker to set height to 36px for uniformity",
   "publish_name": "Rob Caldosa"
 }

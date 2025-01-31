@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
-import { formatFormTestID } from '~/lib/utils'
+import { cn, formatFormTestID } from '~/lib/utils'
 import { api } from '~/trpc/react'
 
 import { useDebounce } from '../../ui/multi-select'
@@ -102,7 +102,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                 <div className="relative flex gap-2">
                   <MagnifyingGlassIcon
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-2 top-2 h-5 w-5 text-muted-foreground"
+                    className="pointer-events-none absolute left-2 top-2 h-5 w-5 text-muted-foreground z-50"
                   />
 
                   <ComboboxInput
@@ -123,7 +123,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     onFocus={open}
                   />
                   <Button
-                    className="gap-1 h-[36px]"
+                    className={cn('gap-1 h-[36px]')}
                     disabled={is_disabled_or_readonly}
                     variant="outline"
                     onClick={() => {
