@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "1.10.0<unreleased>",
-  "branch": "unreleased/fix/2135/1.10.0<unreleased>",
-  "message": "fix close icon misalignment, select error placeholder misalignment and icon misaligntmnet UI ",
+  "tag": "1.11.0<unreleased>",
+  "branch": "unreleased/fix/1.11.0<unreleased>",
+  "message": "add fix to handle dynamic options when there is a change of state/data ",
   "publish_name": "Rob Caldosa"
 }
