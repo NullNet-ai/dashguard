@@ -1,5 +1,5 @@
-import TabList from "./TabList";
-import { Fragment } from "react";
+import TabList from './TabList'
+import { Fragment } from 'react'
 
 export default function Tab() {
   return (
@@ -17,5 +17,5 @@ export default function Tab() {
         </div>
       </div>
     </Fragment>
-  );
+  )
 }

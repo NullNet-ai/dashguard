@@ -2,20 +2,23 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { Fragment, useMemo } from 'react'
+import React, { Fragment, useEffect, useMemo } from 'react'
 
 import { cn, formatAndCapitalize } from '~/lib/utils'
+import { api } from '~/trpc/react'
 
 import CloseTab from './CloseKebab'
+import { type IActions } from './TabItems'
 
 type ItemProps = {
   tab: any
+  actions: IActions
 }
 
-const Item = ({ tab }: ItemProps) => {
+const Item = ({ tab, actions }: ItemProps) => {
   const padding = tab.name === 'dashboard' ? 'pr-2' : 'pr-0'
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
-
+  const updateTabs = api.tab.updateMainTabs.useMutation()
   const pathname = usePathname()
   // eslint-disable-next-line no-unsafe-optional-chaining
   const [, , entity] = pathname?.split('/')
@@ -24,6 +27,13 @@ const Item = ({ tab }: ItemProps) => {
     const [, , entityName] = (tab.href || '').split('/')
     return entityName === entity
   }, [entity])
+
+  useEffect(() => {
+    void updateTabs.mutateAsync({
+      tab_name: entity!,
+      is_active: isActive,
+    })
+  }, [isActive])
 
   return (
     <Fragment key={checkIfUserRole(tab.name) ? 'role' : tab.name}>
@@ -41,20 +51,20 @@ const Item = ({ tab }: ItemProps) => {
           className={cn(
             isActive
               ? 'rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary text-primary'
-              : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding,
+              : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding
           )}
         >
           {formatAndCapitalize(checkIfUserRole(tab.name) ? 'role' : tab.name)}
           {}
-          <CloseTab {...tab} />
+          <CloseTab actions={actions} {...tab} />
         </Link>
 
         {isActive && (
-          <div className="absolute bottom-[-4px] z-10 h-1 w-full bg-white" />
+          <div className="absolute bottom-[-6px] lg:bottom-[-4px] z-10 h-1 w-full bg-white" />
         )}
       </div>
     </Fragment>
   )
-};
+}
 
 export default Item
