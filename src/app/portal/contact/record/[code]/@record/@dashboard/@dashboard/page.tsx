@@ -1,9 +1,9 @@
-import React from 'react'
 import NewComingSoon from '~/app/coming-soon'
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const RecordTabContainer = async () => {
-  return <NewComingSoon type="inner-component" />
+  // eslint-disable-next-line react/jsx-curly-spacing
+  return <NewComingSoon type='inner-component' />
 }
 
 export default RecordTabContainer
