@@ -429,6 +429,7 @@ export const deviceRouter = createTRPCRouter({
                   "address_id",
                   "created_date",
                   "updated_date",
+                  "categories"
                 ],
                 addresses: ["id", "country", "city", "state"],
               },

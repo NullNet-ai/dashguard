@@ -49,6 +49,7 @@ export default async function Page({
         columns: gridColumns,
         defaultValues: {
           entity_prefix: "DV",
+          categories: ["Firewall"]
         },
       }}
     />

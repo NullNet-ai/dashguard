@@ -10,6 +10,7 @@ import {
 import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
 import FormSelect from '~/components/platform/FormBuilder/FormType/FormSelect'
 import { FormField, FormItem } from '~/components/ui/form'
+import Map from '../../../maps/Map'
 
 interface BasicDetails {
   defaultValues?: Partial<{
@@ -30,6 +31,7 @@ interface BasicDetails {
   }
   disabledModel: boolean
 }
+
 const transformDropdown = (data: string[]) => data?.map(item => ({ value: item, label: item }))
 
 export default function CustomBasicDetails({
@@ -41,7 +43,6 @@ export default function CustomBasicDetails({
   const { model, grouping } = selectOptions
 
   const [city_options, setCityOptions] = useState<IDropdown[]>([])
-
   const [state_options, setStateOptions] = useState<IDropdown[]>([])
 
   const country_options = useMemo(() => {
@@ -52,6 +53,8 @@ export default function CustomBasicDetails({
   }, [])
 
   const selected_country = watch('country') as 'China'
+  const selected_state = watch('state') as 'China'
+  const selected_city = watch('city') as 'China'
 
   useEffect(() => {
     if (!selected_country) return
@@ -75,162 +78,171 @@ export default function CustomBasicDetails({
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <FormField
                   control={control}
-                  name='model'
-                  render={(formProps) => {
-                    return (
-                      <FormSelect
-                        fieldConfig={{
-                          id: `model`,
-                          formType: 'select',
-                          name: `model`,
-                          label: 'Model',
-                          required: true,
-                          disabled: disabledModel,
-                        }}
-                        form={form}
-                        formKey="device_model"
-                        formRenderProps={formProps}
-                        selectOptions={{
-                          model,
-                        }}
-                      />
-                    )
-                  }}
+                  name="model"
+                  render={(formProps) => (
+                    <FormSelect
+                      fieldConfig={{
+                        id: `model`,
+                        formType: 'select',
+                        name: `model`,
+                        label: 'Model',
+                        required: true,
+                        disabled: disabledModel,
+                      }}
+                      form={form}
+                      formKey="device_model"
+                      formRenderProps={formProps}
+                      selectOptions={{
+                        model,
+                      }}
+                    />
+                  )}
                 />
                 <FormField
                   control={control}
-                  name='instance_name'
-                  render={(formProps) => {
-                    return (
-                      <FormInput
-                        fieldConfig={{
-                          id: `instance_name`,
-                          formType: 'input',
-                          name: `instance_name`,
-                          label: 'Instance Name',
-                          required: true,
-                        }}
-                        form={form}
-                        formKey="device_instance_name"
-                        formRenderProps={formProps}
-                      />
-                    )
-                  }}
+                  name="instance_name"
+                  render={(formProps) => (
+                    <FormInput
+                      fieldConfig={{
+                        id: `instance_name`,
+                        formType: 'input',
+                        name: `instance_name`,
+                        label: 'Instance Name',
+                        required: true,
+                      }}
+                      form={form}
+                      formKey="device_instance_name"
+                      formRenderProps={formProps}
+                    />
+                  )}
                 />
 
                 <FormField
                   control={control}
-                  name='grouping'
-                  render={(formProps) => {
-                    return (
-                      <FormSelect
-                        fieldConfig={{
-                          id: `grouping`,
-                          formType: 'select',
-                          name: `grouping`,
-                          label: 'Grouping',
-                        }}
-                        form={form}
-                        formKey="device_grouping"
-                        formRenderProps={formProps}
-                        selectOptions={{
-                          grouping,
-                        }}
-                      />
-                    )
-                  }}
+                  name="grouping"
+                  render={(formProps) => (
+                    <FormSelect
+                      fieldConfig={{
+                        id: `grouping`,
+                        formType: 'select',
+                        name: `grouping`,
+                        label: 'Grouping',
+                      }}
+                      form={form}
+                      formKey="device_grouping"
+                      formRenderProps={formProps}
+                      selectOptions={{
+                        grouping,
+                      }}
+                    />
+                  )}
                 />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2">
-                <FormField
-                  control={control}
-                  name='country'
-                  render={(formProps) => {
-                    return (
-                      <FormSelect
-                        fieldConfig={{
-                          id: `country`,
-                          formType: 'select',
-                          name: `country`,
-                          label: `Country`,
-                        }}
-                        form={form}
-                        formKey="device_country"
-                        formRenderProps={{
-                          ...formProps,
 
-                          field: {
-                            ...formProps.field,
-                            onChange: (value) => {
-                              form.setValue('country', value, {
-                                shouldValidate: true,
-                                shouldDirty: true,
-                              })
-                              form.setValue('city', '', {
-                                shouldDirty: true,
-                              })
-                              form.setValue('state', '', {
-                                shouldDirty: true,
-                              })
-                            },
+<div className='grid grid-cols-2 gap-4 border p-4 mt-4 rounded-md pb-12'>
+
+              
+             
+
+              <div className="flex flex-col">
+              <FormField
+                  control={control}
+                  name="country"
+                  render={(formProps) => (
+                    <FormSelect
+                      fieldConfig={{
+                        id: `country`,
+                        formType: 'select',
+                        name: `country`,
+                        label: `Country`,
+                      }}
+                      form={form}
+                      formKey="device_country"
+                      formRenderProps={{
+                        ...formProps,
+
+                        field: {
+                          ...formProps.field,
+                          onChange: (value) => {
+                            form.setValue('country', value, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                            form.setValue('city', '', {
+                              shouldDirty: true,
+                            })
+                            form.setValue('state', '', {
+                              shouldDirty: true,
+                            })
                           },
-                        }}
-                        selectOptions={{
-                          country: country_options,
-                        }}
-                      />
-                    )
-                  }}
+                        },
+                      }}
+                      selectOptions={{
+                        country: country_options,
+                      }}
+                    />
+                  )}
                 />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
                   control={control}
-                  name='state'
-                  render={(formProps) => {
-                    return (
-                      <FormSelect
-                        fieldConfig={{
-                          id: `state`,
-                          formType: 'select',
-                          name: `state`,
-                          label: `State/Province`,
-                        }}
-                        form={form}
-                        formKey="device_state"
-                        formRenderProps={formProps}
-                        selectOptions={{
-                          state: state_options,
-                        }}
-                      />
-                    )
-                  }}
+                  name="state"
+                  render={(formProps) => (
+                    <FormSelect
+                      fieldConfig={{
+                        id: `state`,
+                        formType: 'select',
+                        name: `state`,
+                        label: `State/Province`,
+                      }}
+                      form={form}
+                      formKey="device_state"
+                      formRenderProps={formProps}
+                      selectOptions={{
+                        state: state_options,
+                      }}
+                    />
+                  )}
+                />
+                 <FormField
+                  control={control}
+                  name="city"
+                  render={(formProps) => (
+                    <FormSelect
+                      fieldConfig={{
+                        id: `city`,
+                        formType: 'select',
+                        name: `city`,
+                        label: `City`,
+                      }}
+                      form={form}
+                      formKey="device_city"
+                      formRenderProps={formProps}
+                      selectOptions={{
+                        city: city_options,
+                      }}
+                    />
+                  )}
                 />
 
-                <FormField
-                  control={control}
-                  name='city'
-                  render={(formProps) => {
-                    return (
-                      <FormSelect
-                        fieldConfig={{
-                          id: `city`,
-                          formType: 'select',
-                          name: `city`,
-                          label: `City`,
-                        }}
-                        form={form}
-                        formKey="device_city"
-                        formRenderProps={formProps}
-                        selectOptions={{
-                          city: city_options,
-                        }}
-                      />
-                    )
-                  }}
-                />
+                
               </div>
+           
+
+              {/* Map component */}
+              <div className=" justify-center">
+                <div className=" w-[500px] h-[185px] rounded-md">
+                  <h1 className='m-0 text-md font-semibold'>Maps</h1>
+                  <Map
+                    country={selected_country}
+                    state={selected_state}
+                    city={selected_city}
+                  />
+                </div>
+              </div>
+</div>
+              
+              
             </>
           </FormItem>
         )
