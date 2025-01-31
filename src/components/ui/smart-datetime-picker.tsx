@@ -185,7 +185,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className='flex items-center justify-center'>
         <div
           className={cn(
-            'flex w-full items-center justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
+            'flex w-full items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
           )}
         >
           <DateTimeLocalInput

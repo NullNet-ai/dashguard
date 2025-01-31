@@ -99,7 +99,7 @@ const TableCell = React.forwardRef<
       }
     }}
     className={cn(
-      "whitespace-nowrap px-2 py-2 text-sm text-gray-500" +
+      "whitespace-nowrap px-2 py-1 text-sm text-gray-500" +
         (config?.enableRowClick ? " cursor-pointer" : ""),
       className,
     )}

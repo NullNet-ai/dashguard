@@ -41,16 +41,18 @@ const TabItems = ({ items }: TabItemsProps) => {
   const [newTabList, setNewTabList] = useState<IPropsTabList[]>(items)
   // Adjust sidebar width based on whether it is open or closed.
   const sidebarWidth = useMemo(
-    () => screenSize === 'xs' || screenSize === 'sm' || screenSize === 'md'
-      ? 0
-      : remToPx(open ? 16 : 5), [screenSize, open],
+    () =>
+      screenSize === 'xs' || screenSize === 'sm' || screenSize === 'md'
+        ? 0
+        : remToPx(open ? 16 : 5),
+    [screenSize, open]
   )
 
   const [visibleItems, dropdownItems] = useMemo(() => {
     if (!winWidth) return [newTabList, []]
 
-    const maxAvailableWidth
-      = winWidth - sidebarWidth - SEARCH_BAR_WIDTH - OFFSET_WIDTH
+    const maxAvailableWidth =
+      winWidth - sidebarWidth - SEARCH_BAR_WIDTH - OFFSET_WIDTH
     const maxVisibleItems = Math.floor(maxAvailableWidth / ITEM_WIDTH)
 
     return [
@@ -87,16 +89,16 @@ const TabItems = ({ items }: TabItemsProps) => {
     setNewTabList(newTab)
     void insertTabs.mutateAsync(newTab)
     // Drop by into database
-  };
+  }
 
   useEffect(() => {
     insertMainTabs()
   }, [entity])
 
   return (
-    <>
+    <Fragment>
       <div className="flex w-full flex-1">
-        {visibleItems.map(tab => (
+        {visibleItems.map((tab) => (
           <Item tab={tab} key={isUserRole(tab.name) ? 'role' : tab.name} />
         ))}
       </div>
@@ -113,37 +115,41 @@ const TabItems = ({ items }: TabItemsProps) => {
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {dropdownItems.map(tab => (
-              <DropdownMenuItem
-                key={isUserRole(tab.name) ? 'role' : tab.name}
-                className="group relative flex items-center p-2 py-3"
-              >
-                <Link
-                  data-test-id={
-                    'mntab-'
-                    + (isUserRole(tab.name)
-                      ? 'role'
-                      : tab.name.replace(/\s+/g, ''))
-                  }
-                  href={tab.href}
-                  aria-current={tab.current ? 'page' : undefined}
-                  className={cn(
-                    tab.current
-                      ? 'rounded-t-lg border-primary text-primary'
-                      : 'text-gray-500', 'whitespace-nowrap px-4 pt-2 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',
-                  )}
+            {dropdownItems.map((tab) => {
+              return (
+                <DropdownMenuItem
+                  className="group relative flex items-center p-2 py-3"
+                  key={isUserRole(tab.name) ? 'role' : tab.name}
                 >
-                  {formatAndCapitalize(
-                    isUserRole(tab.name) ? 'role' : tab.name,
-                  )}
-                </Link>
-              </DropdownMenuItem>
-            ))}
+                  <Link
+                    aria-current={tab.current ? 'page' : undefined}
+                    className={cn(
+                      tab.current
+                        ? 'rounded-t-lg border-primary text-primary'
+                        : 'text-gray-500',
+                      'whitespace-nowrap px-4 pt-2 text-sm font-medium',
+                      'flex items-center space-x-2',
+                      'hover:border-t-primary hover:text-primary'
+                    )}
+                    data-test-id={`mntab-${
+                      isUserRole(tab.name)
+                        ? 'role'
+                        : tab.name.replace(/\s+/g, '')
+                    }`}
+                    href={tab.href}
+                  >
+                    {formatAndCapitalize(
+                      isUserRole(tab.name) ? 'role' : tab.name
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+              )
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </>
+    </Fragment>
   )
-};
+}
 
 export default TabItems
