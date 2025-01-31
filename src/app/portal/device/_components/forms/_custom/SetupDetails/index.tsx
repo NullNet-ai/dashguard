@@ -34,7 +34,7 @@ export default function CustomSetupDetails({
   params,
 }: ISetupDetails) {
   const { control } = form
-  const { account_id } = orgAccount || {}
+  const { account_id, account_secret } = orgAccount || {}
 
   const toast = useToast()
   const [showInfo, setShowInfo] = React.useState<boolean>(false)
@@ -183,27 +183,26 @@ export default function CustomSetupDetails({
                             }) }
                             readOnly={true}
                             type = "text"
-                            value = { app_secret || '***************'}
+                            value = { account_secret || app_secret || '***************'}
                           />
-                          {!!app_secret && (
+                          {(!!app_secret || !!account_secret) && (
                             <button
                               className="my-auto"
                               data-test-id={addTestIdName({
                                 type: 'cpy',
                                 name: 'app_secret',
                               })}
-                              onClick={(event) => handleCopyClick(event, `${app_secret}`) }
+                              onClick={(event) => handleCopyClick(event, `${app_secret || account_secret}`) }
                             >
                               <DocumentDuplicateIcon className = "h-5 w-5 text-gray-400" />
                             </button>
                           )}
+                          <br />
                           {isFromRecord && (
                             <Button
-                              className="mt-2 border border-primary text-primary"
-                              color="secondary"
+                              className="mt-2"
                               disabled={field?.disabled}
                               size={"xs"}
-                              variant={"secondary"}
                               onClick={handleGenerateNewKey}
                             >
                               {"Generate new key"}
