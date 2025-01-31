@@ -46,7 +46,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: "grid" | "form" | "field";
+  parentType?: "grid" | "form" | "field" | "table";
 }
 
 export default function GridProvider({
@@ -133,6 +133,8 @@ export default function GridProvider({
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
+    enableRowExpansion: false,
+    enableRowSelection: true,
     hideCreateButton:
       playgroundGridIsShowCreateButton != null
         ? !(playgroundGridIsShowCreateButton == "true")
@@ -183,10 +185,10 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
-    if(parentType === 'form') {
+    if (parentType === "form") {
       return config?.onFetchRecords?.({
         sort: updatedSorting,
-      })
+      });
     }
     handleUpdateReportSorting(updatedSorting);
   };
@@ -203,10 +205,10 @@ export default function GridProvider({
       };
     });
 
-    if(parentType === 'form') {
+    if (parentType === "form") {
       return config?.onFetchRecords?.({
         sort: resolvedSorting,
-      })
+      });
     }
     UpdateReportSorting({ sorting: resolvedSorting });
   };
@@ -253,7 +255,7 @@ export default function GridProvider({
     header: "",
     cell: ({ row }: any) => (
       <button
-        className="px-2 py-1 border rounded bg-gray-200 hover:bg-gray-300"
+        className="rounded border bg-gray-200 px-2 py-1 hover:bg-gray-300"
         onClick={() => row.toggleExpanded()}
       >
         {row.getIsExpanded() ? "▼" : "▶"}
@@ -343,9 +345,9 @@ export default function GridProvider({
   });
 
   const actionTypeColumnCondition = (
-    actionsType: TActionType,
     viewMode: string,
     defaultAdvanceFilter: ISearchItem[],
+    actionsType?: TActionType,
   ) => {
     const isDefaultFilterArchived = defaultAdvanceFilter?.find(
       (filter) =>
@@ -389,18 +391,18 @@ export default function GridProvider({
         }
 
         return [...columns, actionRow?.current];
-      case "default":
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...columns];
-        }
-        return [selectTableRow?.current, ...columns, actionRow?.current];
-
       default:
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...columns];
+        if (config?.enableRowSelection) {
+          columns.unshift(selectTableRow?.current);
+        }
+        if (!config?.disableDefaultAction) {
+          columns.push(actionRow?.current);
+        }
+        if (config?.enableRowExpansion) {
+          columns.unshift(expandTableRow?.current);
         }
 
-        return [selectTableRow?.current, ...columns, actionRow?.current];
+        return columns;
     }
   };
 
@@ -408,11 +410,11 @@ export default function GridProvider({
   const table = useReactTable({
     data,
     getRowId: (row) => row.id,
-    columns: [expandTableRow.current,...actionTypeColumnCondition(
-      config?.actionType || "default",
+    columns: actionTypeColumnCondition(
       viewMode,
       defaultAdvanceFilter,
-    )],
+      config?.actionType,
+    ),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     getCoreRowModel: getCoreRowModel(),

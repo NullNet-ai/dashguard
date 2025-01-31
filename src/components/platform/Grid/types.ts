@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
 import {
-  OnChangeFn,
-  RowSelectionState,
-  SortingState,
+  type OnChangeFn,
+  type RowSelectionState,
+  type SortingState,
   type ColumnDef,
   type Row,
   type Table,
 } from "@tanstack/react-table";
-import { ISearchItem, ISearchParams } from "./Search/types";
-import { appRouter } from "../../../server/api/root";
+import { type ISearchItem, type ISearchParams } from "./Search/types";
+import { type appRouter } from "../../../server/api/root";
+import { type ReactElement } from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -68,7 +69,7 @@ export interface IConfigGrid {
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
   layer?: TLayerType;
   enableAutoCreate?: boolean;
-  enableMultiRowSelection?: boolean;
+  enableMultiRowSelection?: boolean; // toggle for single and multi select
   enableRowClick?: boolean;
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   onFetchRecords?: (args: any) => void;
@@ -80,6 +81,10 @@ export interface IConfigGrid {
     query_params?: ISearchParams;
   };
   hideCreateButton?: boolean;
+  enableRowExpansion?: boolean;
+  rowExpansionBuilder?: ReactElement | ((rowData: any) => JSX.Element) // for custom row expansion component
+  enableRowSelection?: boolean; // to hide/show checkbox
+  isChildGrid?: boolean; // to identify if grid is a child grid
 }
 
 interface IRowToArchive extends Row<any> {
@@ -129,8 +134,8 @@ export interface ICreateContext {
 }
 
 export interface IPagination {
- current_page: number;
- limit_per_page: number;
+  current_page: number;
+  limit_per_page: number;
 }
 
 export interface IPropsGrid {

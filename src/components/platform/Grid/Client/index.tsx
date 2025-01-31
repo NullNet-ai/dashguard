@@ -7,7 +7,7 @@ import { GridDesktop, GridMobile } from "./views";
 import GridMobileForm from "./views/GridMobileForm";
 
 interface IClientProps extends IPropsGrid {
-  parentType?: "grid" | "form" | "field";
+  parentType?: "grid" | "form" | "field" | "table";
   height?: string;
   showPagination?: boolean;
   hideSearch?: boolean;
@@ -32,12 +32,11 @@ function MainClient({
   advanceFilter,
   sorting,
   showAction,
-  parentProps
+  parentProps,
+  defaultSorting,
+  defaultAdvanceFilter,
+  pagination
 }: IClientProps) {
-
- 
-
-
   return (
     <GridProvider
       totalCount={totalCount}
@@ -48,6 +47,9 @@ function MainClient({
       initialSelectedRecords={initialSelectedRecords}
       parentType={parentType}
       sorting={sorting}
+      defaultSorting={defaultSorting}
+      defaultAdvanceFilter={defaultAdvanceFilter}
+      pagination={pagination}
     >
       <div className="hidden lg:grid">
         <GridDesktop parentType={parentType} hideSearch={hideSearch} height={height} showAction={showAction}

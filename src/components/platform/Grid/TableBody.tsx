@@ -1,36 +1,19 @@
-import { useContext } from "react";
-import { TableBody, TableCell, TableRow } from "~/components/ui/table";
-import { GridContext } from "./Provider";
 import { flexRender } from "@tanstack/react-table";
-import { getCommonPinningStyles } from "./ColumnPining";
+import React, { useContext } from "react";
+import { TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
-import ArchiveConfirmationModal from "./views/ArchiveConfirmationModal";
-import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
 import { testIDFormatter } from "~/utils/formatter";
+import { getCommonPinningStyles } from "./ColumnPining";
+import { GridContext } from "./Provider";
+import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
+import ArchiveConfirmationModal from "./views/ArchiveConfirmationModal";
 import BulkActionConfirmationModal from "./views/common/BulkActionConfirmationModal";
-import Grid from "~/components/platform/Grid/Client";
 
 export default function MyTableBody({ showAction }: { showAction?: boolean }) {
   const { state, actions } = useContext(GridContext);
 
   const context = useContext(ScrollContainerContext);
   const { isEndReached = false } = context ?? {};
-
-  const defaultData = [
-    {
-      id: 1,
-      name: "John Doe",
-      age: 28,
-      details: "Loves coding and coffee",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      age: 34,
-      details: "Enjoys hiking and photography",
-    },
-  ];
-
 
   return (
     <>
@@ -121,38 +104,20 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
                     className="bg-gray-50 p-2"
                   >
                     <div className="rounded-md border bg-white p-3 shadow">
-                      <strong>Details:</strong> {JSON.stringify(row.original)}
-                      <Grid
-                        totalCount={2}
-                        data={defaultData}
-                        defaultSorting={[{ id: "name", desc: false }]}
-                        defaultAdvanceFilter={[]}
-                        advanceFilter={[]}
-                        sorting={[]}
-                        pagination={{
-                          current_page: 1,
-                          limit_per_page: 10,
-                        }}
-                        config={{
-                          entity: "contact",
-                          title: "Contacts",
-                          columns: [
-                            {
-                              header: "Name",
-                              accessorKey: "name",
-                            },
-                            {
-                              header: "Age",
-                              accessorKey: "age",
-                            },
-                            {
-                              header: "Details",
-                              accessorKey: "details",
-                            },
-                          ],
-                          enableAutoCreate: false,
-                        }}
-                      />
+                      {state?.config?.rowExpansionBuilder ? (
+                        // state?.config?.rowExpansionBuilder
+                        typeof state?.config?.rowExpansionBuilder ===
+                        "function" ? (
+                          state?.config?.rowExpansionBuilder({ rowData: row.original })
+                        ) : (
+                          React.cloneElement(
+                            state?.config?.rowExpansionBuilder,
+                            { rowData: row.original },
+                          )
+                        )
+                      ) : (
+                        <span>Provide your expand component</span>
+                      )}
                     </div>
                   </td>
                 </TableRow>

@@ -13,7 +13,7 @@ import { cn } from "~/lib/utils";
 import Sorting from "../../Sorting";
 
 interface IGridDesktopProps {
-  parentType: "grid" | "form" | "field";
+  parentType: "grid" | "form" | "field" | "table";
   hideSearch?: boolean;
   height?: string;
   showAction?: boolean;
