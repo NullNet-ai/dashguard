@@ -143,12 +143,8 @@ export default function CustomBasicDetails({
               </div>
 
 
-<div className='grid grid-cols-2 gap-4 border p-4 mt-4 rounded-md pb-12'>
-
-              
-             
-
-              <div className="flex flex-col">
+          <div className='grid grid-cols-2 gap-4 border p-4 mt-4 rounded-md pb-12'>
+            <div className="flex flex-col">
               <FormField
                   control={control}
                   name="country"
@@ -236,7 +232,7 @@ export default function CustomBasicDetails({
            
 
               {/* Map component */}
-              <div className=" justify-center">
+              {/* <div className=" justify-center">
                 <div className=" w-[500px] h-[185px] rounded-md">
                   <h1 className='m-0 text-md font-semibold'>Maps</h1>
                   <Map
@@ -245,14 +241,14 @@ export default function CustomBasicDetails({
                     city={selected_city}
                   />
                 </div>
-              </div>
-</div>
+              </div> */}
+          </div>
               
               
             </>
-          </FormItem>
-        )
-      }}
+        </FormItem>
+      )
+    }}
     />
   )
 }
