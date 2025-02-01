@@ -15,8 +15,7 @@ const InfiniteScrollContainer = () => {
       className="rounded-md text-card-foreground w-full"
       dataLength={state?.data?.length}
       hasMore={true}
-      next={() => {
-      }}
+      next={() => null}
       loader={(
         <div className="flex justify-center p-4">
           <Loader size='md' variant='circularShadow' label="" />
