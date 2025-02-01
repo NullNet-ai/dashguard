@@ -10,7 +10,8 @@ import {
 import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
 import FormSelect from '~/components/platform/FormBuilder/FormType/FormSelect'
 import { FormField, FormItem } from '~/components/ui/form'
-import Map from '../../../maps/Map'
+import Map from '../../../maps'
+import { getCitiesByState } from '~/components/platform/AddressAutoComplete/statesToCities'
 
 interface BasicDetails {
   defaultValues?: Partial<{
@@ -58,14 +59,20 @@ export default function CustomBasicDetails({
 
   useEffect(() => {
     if (!selected_country) return
-    const cities = countriesToCities?.[selected_country] as string[]
-    const city_options = transformDropdown(cities)
-    setCityOptions(city_options)
+    
 
     const states = getStates(selected_country) as string[]
     const state_options = transformDropdown(states)
     setStateOptions(state_options)
   }, [selected_country])
+
+  useEffect(() => {
+    if(!selected_state) return
+    // const cities = countriesToCities?.[selected_country] as string[]
+    const cities = getCitiesByState(selected_state) as string[]
+    const city_options = transformDropdown(cities)
+    setCityOptions(city_options)
+  },[selected_state])
 
   return (
     <FormField
@@ -143,8 +150,12 @@ export default function CustomBasicDetails({
               </div>
 
 
-          <div className='grid grid-cols-2 gap-4 border p-4 mt-4 rounded-md pb-12'>
-            <div className="flex flex-col">
+<div className='grid grid-cols-2 gap-4 border p-4 mt-4 rounded-md pb-12'>
+
+              
+             
+
+              <div className="flex flex-col">
               <FormField
                   control={control}
                   name="country"
@@ -198,7 +209,22 @@ export default function CustomBasicDetails({
                       }}
                       form={form}
                       formKey="device_state"
-                      formRenderProps={formProps}
+                      formRenderProps={{
+                        ...formProps,
+
+                        field: {
+                          ...formProps.field,
+                          onChange: (value) => {
+                            form.setValue('state', value, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                            form.setValue('city', '', {
+                              shouldDirty: true,
+                            })
+                          },
+                        },
+                      }}
                       selectOptions={{
                         state: state_options,
                       }}
@@ -232,23 +258,23 @@ export default function CustomBasicDetails({
            
 
               {/* Map component */}
-              {/* <div className=" justify-center">
+              <div className=" justify-center">
                 <div className=" w-[500px] h-[185px] rounded-md">
-                  <h1 className='m-0 text-md font-semibold'>Maps</h1>
+                  <h1 className='m-1 text-md font-semibold'>Maps</h1>
                   <Map
                     country={selected_country}
                     state={selected_state}
                     city={selected_city}
                   />
                 </div>
-              </div> */}
-          </div>
+              </div>
+</div>
               
               
             </>
-        </FormItem>
-      )
-    }}
+          </FormItem>
+        )
+      }}
     />
   )
 }
