@@ -94,7 +94,7 @@ const AccountGridExpansion = (props: any) => {
           enableRowExpansion: true,
           rowExpansionBuilder: <OrganizationGridExpansion/>
         }}
-        parentType="table"
+        parentType="grid_expansion"
       />
     </>
   );

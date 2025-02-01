@@ -46,7 +46,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: "grid" | "form" | "field" | "table";
+  parentType?: "grid" | "form" | "field" | "grid_expansion";
 }
 
 export default function GridProvider({

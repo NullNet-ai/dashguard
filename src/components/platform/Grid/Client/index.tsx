@@ -7,7 +7,7 @@ import { GridDesktop, GridMobile } from "./views";
 import GridMobileForm from "./views/GridMobileForm";
 
 interface IClientProps extends IPropsGrid {
-  parentType?: "grid" | "form" | "field" | "table";
+  parentType?: "grid" | "form" | "field" | "grid_expansion";
   height?: string;
   showPagination?: boolean;
   hideSearch?: boolean;

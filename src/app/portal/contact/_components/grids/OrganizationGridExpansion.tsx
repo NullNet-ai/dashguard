@@ -87,7 +87,7 @@ const OrganizationGridExpansion = (props: any) => {
           enableRowSelection: false,
           enableRowExpansion: false,
         }}
-        parentType="table"
+        parentType="grid_expansion"
       />
     </>
   );
