@@ -11,12 +11,13 @@ import { ulid } from 'ulid'
 
 import { WizardContext } from '~/components/platform/Wizard/Provider'
 import { useSidebar } from '~/components/ui/sidebar'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/react'
 
 import Grid from '../../../../Grid/Client'
 import Skeleton from '../../../../Grid/Skeleton'
-import { IFilterGridConfig, IGridData } from '../../../types/global/interfaces'
+import { type IFilterGridConfig, type IGridData } from '../../../types/global/interfaces'
 
 import { fetchRecords } from './actions'
 
@@ -26,12 +27,14 @@ export default function FormFilterGrid({
   handleSelectedGridRecords,
   handleListLoading,
   className,
+  formKey,
 }: {
   handleSelectedGridRecords: (records: any[]) => void
   handleCloseGrid: () => void
   handleListLoading: (loading: boolean) => void
   className?: string
   config: IFilterGridConfig
+  formKey?: string
 }) {
   const {
     current,
@@ -47,6 +50,7 @@ export default function FormFilterGrid({
     selectedRecords: _form_filter_selected_record,
     searchConfig,
   } = config
+  const eventEmitter = useEventEmitter()
   const { state } = useContext(WizardContext)
   const { open } = useSidebar()
 
@@ -173,7 +177,7 @@ export default function FormFilterGrid({
 
   if (isLoading) {
     return (
-      <div className="bg-white">
+      <div className='bg-white'>
         <Skeleton />
       </div>
     )
@@ -187,34 +191,6 @@ export default function FormFilterGrid({
     <div className={cn('w-full', containerWidth)}>
       <div className={cn(`${calcWidth}`)}>
         <Grid
-          height="300px"
-          showPagination={false}
-          parentProps={{
-            width: containerWidth,
-            open,
-            summary: state?.isSummaryOpen,
-          }}
-          onSelectRecords={(rows) => {
-            if (!onSelectRecords) return
-            void Promise.resolve(
-              onSelectRecords({
-                rows,
-                main_entity_id,
-                filter_entity,
-              }),
-            )?.then((data) => {
-              handleSelectedGridRecords(data?.rows || [])
-              handleCloseGrid()
-            })
-          }}
-          hideSearch={hideSearch}
-          parentType="form"
-          totalCount={gridData?.totalCount || 0}
-          data={gridData?.items || []}
-          defaultSorting={
-            config?.searchConfig?.query_params?.default_sorting || []
-          }
-          sorting={gridData?.sorting}
           advanceFilter={gridData?.advance_filters || []}
           config={{
             statusesIncluded: config?.statusesIncluded ?? [
@@ -231,10 +207,8 @@ export default function FormFilterGrid({
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
-              if (row.original.id === _form_filter_selected_record?.[0]?.id)
-                return
-              if (!config?.statusesIncluded?.includes(row.original.status))
-                return
+              if (row.original.id === _form_filter_selected_record?.[0]?.id) return
+              if (!config?.statusesIncluded?.includes(row.original.status)) return
 
               if (!onSelectRecords) return
               void Promise.resolve(
@@ -244,6 +218,11 @@ export default function FormFilterGrid({
                   filter_entity: config?.entity,
                 }),
               )?.then((data) => {
+                eventEmitter.emit(`formStatus:${formKey}`, {
+                  status: 'done',
+                  form_key: formKey,
+                });
+
                 handleSelectedGridRecords(
                   Object.keys(data?.rows).length ? [data?.rows] : [],
                 )
@@ -251,7 +230,39 @@ export default function FormFilterGrid({
               })
             },
           }}
+          data={gridData?.items || []}
+          defaultSorting={
+            config?.searchConfig?.query_params?.default_sorting || []
+          }
+          height="300px"
+          hideSearch={hideSearch}
           initialSelectedRecords={initialSelectedRecords}
+          parentProps={{
+            width: containerWidth,
+            open,
+            summary: state?.isSummaryOpen,
+          }}
+          parentType="form"
+          showPagination={false}
+          sorting={gridData?.sorting}
+          totalCount={gridData?.totalCount || 0}
+          onSelectRecords={(rows) => {
+            if (!onSelectRecords) return
+            void Promise.resolve(
+              onSelectRecords({
+                rows,
+                main_entity_id,
+                filter_entity,
+              }),
+            )?.then((data) => {
+              eventEmitter.emit(`formStatus:${formKey}`, {
+                status: 'done',
+                form_key: formKey,
+              })
+              handleSelectedGridRecords(data?.rows || [])
+              handleCloseGrid()
+            })
+          }}
         />
       </div>
     </div>
