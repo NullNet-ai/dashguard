@@ -1,5 +1,6 @@
-import TabList from './TabList'
-import { Fragment } from 'react'
+import { Fragment } from 'react';
+
+import TabList from './TabList';
 
 export default function Tab() {
   return (
@@ -11,11 +12,11 @@ export default function Tab() {
           className="ml-4 hidden h-10"
         />
       </div>
-      <div className="lg:block">
-        <div>
+      <div className="flex flex-1">
+        <div className="flex flex-1">
           <TabList />
         </div>
       </div>
     </Fragment>
-  )
+  );
 }
