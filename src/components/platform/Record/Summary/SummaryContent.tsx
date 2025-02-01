@@ -31,6 +31,7 @@ const RecordSummaryContent = async () => {
             "categories",
             "updated_by",
             "created_by",
+            "categories"
           ],
           main_entity: mainEntity!,
         })

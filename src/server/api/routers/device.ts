@@ -428,12 +428,13 @@ export const deviceRouter = createTRPCRouter({
             query: {
               pluck_object: {
                 devices: [
-                  'id',
-                  'model',
-                  'instance_name',
-                  'address_id',
-                  'created_date',
-                  'updated_date',
+                  "id",
+                  "model",
+                  "instance_name",
+                  "address_id",
+                  "created_date",
+                  "updated_date",
+                  "categories"
                 ],
                 addresses: ['id', 'country', 'city', 'state'],
               },

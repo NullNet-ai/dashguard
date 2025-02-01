@@ -3,6 +3,8 @@
 import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { Badge } from "~/components/ui/badge";
+import { Separator } from "~/components/ui/separator";
+import StatusCell from "~/components/ui/status-cell";
 
 const fields = {
   Type: "type",
@@ -17,6 +19,7 @@ const fields = {
     LAN: "lan",
     OPT1: "opt1",
   },
+  Category: "categories",
 };
 
 const RecordShellSummary = ({
@@ -62,43 +65,73 @@ const RecordShellSummary = ({
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {key === "Status" ? (
-                    <Badge variant="success">
-                      {(mock_data as { [key: string]: any })?.[
-                        value as string
-                      ] || "None"}
-                    </Badge>
-                  ) : key === "Interfaces" ? (
-                    <div className="pl-4">
-                      {Object.entries(value).map(([subKey, subValue]) => (
-                        <div key={subKey}>
-                          <span className="text-slate-400">{subKey}: </span>
-                          <span>
-                            {(mock_data.interfaces as { [key: string]: any })?.[
-                              subValue
-                            ] || "None"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    (mock_data as { [key: string]: any })?.[value as string] ||
-                    "None"
-                  )}
-                </span>
+    <div>
+      {Object.entries(fields).map(([key, value], index) => {
+        if (key !== 'Category') return null; // Only process the 'Category' field
+  
+        const dataValue = (data as { [key: string]: any })?.[value as string];
+        return (
+          <div className="pt-2" key={index}>
+            <div className="px-5">
+              <div className="p-1 text-sm">
+                <div>
+                  <span className="text-slate-400">{key}: </span> {/* Display the key 'Category' */}
+                  {dataValue?.length
+                    ? dataValue.map((item: string) => {
+                        return <StatusCell key={item} value={item} />;
+                      })
+                    : 'None'}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
+    <Separator />
+    <div>
+      {Object.entries(fields).map(([key, value], index) => {
+        if (key === 'Category') return null; // Skip the 'Category' field as it is already processed
+  
+        return (
+          <div className="pt-2" key={index}>
+            <div className="px-5">
+              <div className="p-1 text-sm">
+                <div>
+                  <span className="text-slate-400">{key}: </span>
+                  <span>
+                    {key === "Status" ? (
+                      <Badge variant="success">
+                        {(mock_data as { [key: string]: any })?.[
+                          value as string
+                        ] || "None"}
+                      </Badge>
+                    ) : key === "Interfaces" ? (
+                      <div className="pl-4">
+                        {Object.entries(value).map(([subKey, subValue]) => (
+                          <div key={subKey}>
+                            <span className="text-slate-400">{subKey}: </span>
+                            <span>
+                              {(mock_data.interfaces as { [key: string]: any })?.[
+                                subValue
+                              ] || "None"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      (mock_data as { [key: string]: any })?.[value as string] ||
+                      "None"
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
   );
 };
 
