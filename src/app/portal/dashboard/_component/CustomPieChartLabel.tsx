@@ -29,8 +29,8 @@ const CustomPieChartLabel: React.FC<ICustomPieChartLabelProps> = (props) => {
       dominantBaseline="central"
     >
       {`${startCase(name)} (${value})`}
-      <tspan x={x} y={y + 20} textAnchor="middle" className="">
-        {`${(percent * 100).toFixed(0)}`}%
+      <tspan x={x-20} y={y + 15} textAnchor="middle" className="flex">
+      {`${(percent * 100).toFixed(0)}`}%
       </tspan>
     </text>
   );

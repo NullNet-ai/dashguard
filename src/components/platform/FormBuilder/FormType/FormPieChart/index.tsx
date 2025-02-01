@@ -7,6 +7,7 @@ import { Pie, PieChart, Tooltip } from "recharts";
 import {
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -15,6 +16,8 @@ import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "~/components/ui/chart";
 
 interface IFormPieChartProps {
@@ -72,25 +75,19 @@ const FormPieChart = (props: IFormPieChartProps) => {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[300px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+          className="mx-auto aspect-square max-h-[350px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
         >
           <PieChart>
-          <Tooltip
-              {...(renderCustomPieChartTooltip && {
-                content: (props) => {
-                  return renderCustomPieChartTooltip({...props, totalRecordsCount});
-                },
-              })}
-            />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />}/>
             <Pie
               data={chartData}
               dataKey="value"
               label={renderCustomPieChartLabel ?? true}
               nameKey="key"
             />
-            <ChartLegend
+           <ChartLegend
               content={<ChartLegendContent nameKey="key" />}
-              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center mt-8"
             />
           </PieChart>
         </ChartContainer>
