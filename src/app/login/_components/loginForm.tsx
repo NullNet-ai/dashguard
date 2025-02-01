@@ -12,7 +12,7 @@ import LoginSubmit from "../actions/loginSubmit";
 import { Checkbox } from "~/components/ui/checkbox";
 
 const formSchema = z.object({
-  email: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
+  username: z.string().min(1, { message: "Please enter your username." }),
   password: z.string().min(1, { message: "Please enter your password." }).min(5, "Password must contain at least 5 characters."),
 });
 
@@ -41,18 +41,18 @@ export default function LoginForm() {
     <Form {...form}>
       <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
-          name="email"
+          name="username"
           control={form.control}
           render={(formProps) => {
             return (
               <FormInput
                 fieldConfig={{
-                  id: "email",
-                  name: "email",
-                  label: "Email Address",
+                  id: "username",
+                  name: "username",
+                  label: "Username",
                   required: true,
-                  placeholder: "Enter valid email address",
-                  type: "email",
+                  placeholder: "Enter your username",
+                  type: "text",
                 }}
                 form={form}
                 formKey={"Login"}

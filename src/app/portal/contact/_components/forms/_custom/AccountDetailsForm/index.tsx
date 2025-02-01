@@ -244,6 +244,8 @@ export default function AccountDetailsForm({
                     label: "Organization",
                     required: true,
                     disabled: !!field?.disabled,
+                    readonly: field?.id && formProps?.shell_type === "record",
+                    isCustomFormField: true,
                   },
                   {
                     id: `${prefix}.role_id`,
@@ -252,6 +254,7 @@ export default function AccountDetailsForm({
                     label: "Role",
                     required: true,
                     disabled: !!field?.disabled,
+                    isCustomFormField: true,
                   },
                   {
                     id: `${prefix}.account_id`,
@@ -260,6 +263,7 @@ export default function AccountDetailsForm({
                     label: "Username",
                     required: true,
                     disabled: !!field?.disabled,
+                    isCustomFormField: true,
                   },
                   {
                     id: `${prefix}.account_secret`,
@@ -269,6 +273,7 @@ export default function AccountDetailsForm({
                     required: true,
                     disabled: !!field?.disabled,
                     placeholder: field?.id ? "Change password": "",
+                    isCustomFormField: true,
                   },
                 ]}
                 subConfig={{

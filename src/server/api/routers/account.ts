@@ -48,10 +48,10 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute();
-        // return account?.data?.[0];
+        const { account_organization_id, ...rest } = account?.data?.[0] ?? {};
         return {
-          ...account?.data?.[0],
-          organization_id: account?.data?.[0]?.account_organization_id
+          ...rest,
+          organization_id: account_organization_id,
         };
       }
 
@@ -82,12 +82,12 @@ export const accountRouter = createTRPCRouter({
           .execute(),
       ]);
       const userOrganization = ctx.session.account?.organization ?? {};
-   
+
       const organization = {
         id: userOrganization?.id,
         name: userOrganization?.name || "",
       };
-   
+
       const account = {
         first_name: contactRecord?.data?.[0]?.first_name || "",
         last_name: contactRecord?.data?.[0]?.last_name || "",
@@ -104,11 +104,29 @@ export const accountRouter = createTRPCRouter({
       const result = await ctx.dnaClient
         .register(organization, account)
         .execute();
-   
+
       if (!result?.success) {
         return null;
       }
-      return {};
+
+      const {
+        account_organization_id,
+        account_id: account_id_result,
+        role_id: role_id_result,
+        contact_id: contact_id_result,
+        organization_account_id: id,
+        status,
+      } = result?.data?.[0] ?? {};
+      return {
+        id,
+        organization_id: account_organization_id,
+        account_id: account_id_result,
+        role_id: role_id_result,
+        account_secret: "************",
+        contact_id: contact_id_result,
+        status: status || 'Active',
+        disabled: true,
+      };
     }),
   fetchAccountDetails: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -153,8 +171,7 @@ export const accountRouter = createTRPCRouter({
             }),
             pluck: [
               "id",
-              "organization_id",
-              // "account_organization_id",
+              "account_organization_id",
               "role_id",
               "account_id",
               "account_secret",
@@ -170,7 +187,7 @@ export const accountRouter = createTRPCRouter({
         (account: Record<string, any>) => ({
           ...account,
           account_secret: "************",
-          // organization_id: account?.account_organization_id,
+          organization_id: account?.account_organization_id,
           disabled: true,
         }),
       );

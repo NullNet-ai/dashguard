@@ -1,9 +1,15 @@
+/* eslint-disable @stylistic/multiline-ternary */
+"use client";
+
 import {
-  type UseFormReturn,
-  type ControllerFieldState,
-  type ControllerRenderProps,
-} from "react-hook-form";
-import { type IField } from "../../types";
+  CheckIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+
+import { Button } from "~/components/ui/button";
 import {
   FormControl,
   FormItem,
@@ -11,21 +17,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import { Button } from "~/components/ui/button";
 
-interface IProps {
-  fieldConfig: IField;
-  formRenderProps: {
-    field: ControllerRenderProps<Record<string, any[]>>;
-    fieldState: ControllerFieldState;
-  };
-  form: UseFormReturn<Record<string, any>, any, undefined>;
-  icon?: React.ElementType;
-  value?: string;
-  formKey: string;
-}
+import { type IPasswordStrength, type IProps } from "./types";
 
 export default function FormPassword({
   fieldConfig,
@@ -35,39 +28,114 @@ export default function FormPassword({
   value,
   formKey,
 }: IProps) {
+  // Destructure configurable properties with default values
+  const { showPasswordStrengthBar = true, hasComplexValidation = true } =
+    fieldConfig;
+
   const isDisabled = formRenderProps.field.disabled;
   const [showPassword, setShowPassword] = useState(false);
+
+  // State for password validation rules
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
+
+  // State for password strength
+  const [passwordStrength, setPasswordStrength] = useState<IPasswordStrength>({
+    level: 0,
+    text: "Too Short",
+  });
+
+  // Function to validate password against rules
+  const validatePassword = (password: string) => {
+    return {
+      minLength: password.length >= 12,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+  };
+
+  // Function to calculate password strength
+  const getPasswordStrength = (validation: {
+    minLength: boolean;
+    hasUppercase: boolean;
+    hasLowercase: boolean;
+    hasNumber: boolean;
+    hasSpecialChar: boolean;
+  }) => {
+    const rulesSatisfied = Object.values(validation).filter(Boolean).length;
+    if (rulesSatisfied === 0) return { level: 0, text: "Too Short" };
+    if (rulesSatisfied === 1) return { level: 1, text: "Weak" };
+    if (rulesSatisfied === 2) return { level: 2, text: "Okay" };
+    if (rulesSatisfied === 3) return { level: 3, text: "Good" };
+    return { level: 4, text: "Strong" };
+  };
+
+  // Effect to update validation and strength when password changes
+  useEffect(() => {
+    if (formRenderProps?.field?.value) {
+      const validation = validatePassword(String(formRenderProps.field.value));
+      setPasswordValidation(validation);
+      setPasswordStrength(getPasswordStrength(validation));
+      return;
+    }
+    // Reset validation and strength if password is empty
+    setPasswordValidation({
+      minLength: false,
+      hasUppercase: false,
+      hasLowercase: false,
+      hasNumber: false,
+      hasSpecialChar: false,
+    });
+    setPasswordStrength({ level: 0, text: "Too Short" });
+  }, [formRenderProps?.field?.value]);
+
   return (
     <FormItem>
+      {/* Password Input Label */}
       <FormLabel
-        required={fieldConfig?.required}
         data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+        required={fieldConfig?.required}
       >
         {fieldConfig?.label}
       </FormLabel>
+
+      {/* Password Input Field */}
       <FormControl>
         <div className="group relative">
           <Input
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? "text" : "password"}
             {...form.register(fieldConfig?.name)}
-            readOnly={fieldConfig?.readonly ?? false}
             disabled={fieldConfig.disabled}
-            placeholder={fieldConfig?.placeholder}
-            iconPlacement="left"
-            Icon={icon}
             hasError={!!formRenderProps.fieldState.error}
+            Icon={icon}
+            iconPlacement="left"
+            placeholder={fieldConfig?.placeholder}
+            readOnly={
+              (fieldConfig.isCustomFormField
+                ? fieldConfig?.readonly
+                : formRenderProps.field.disabled || fieldConfig?.readonly) ??
+              false
+            }
             value={value}
           />
+          {/* Show/Hide Password Button */}
           <Button
+            className={`absolute right-0 top-0 mr-4 hidden h-full py-2 hover:bg-transparent ${isDisabled ? "" : "group-hover:block"}`}
             data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
+            disabled={formRenderProps?.field?.disabled}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
+            size="sm"
             type="button"
             variant="ghost"
-            size="sm"
-            className={`absolute right-0 top-0 mr-4 hidden h-full py-2 hover:bg-transparent ${isDisabled ? "" : "group-hover:block"}`}
             onClick={() => setShowPassword((prev) => !prev)}
-            disabled={formRenderProps?.field?.disabled}
           >
             <span className="sr-only">
               {showPassword ? "Hide password" : "Show password"}
@@ -75,7 +143,63 @@ export default function FormPassword({
           </Button>
         </div>
       </FormControl>
-      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+
+      {/* Password Strength Bar (Conditional) */}
+      {showPasswordStrengthBar && (
+        <div className="mt-2">
+          <div className="flex gap-1">
+            {[1, 2, 3, 4].map((bar) => (
+              <div
+                className={`h-2 flex-1 rounded-full ${
+                  passwordStrength.level >= bar
+                    ? passwordStrength.level === 1
+                      ? "bg-red-500"
+                      : passwordStrength.level === 2
+                        ? "bg-yellow-500"
+                        : passwordStrength.level === 3
+                          ? "bg-blue-500"
+                          : "bg-green-500"
+                    : "bg-gray-200"
+                }`}
+                key={bar}
+              />
+            ))}
+          </div>
+          <div className="me-2 mt-1 flex justify-end text-sm text-gray-600">
+            {passwordStrength.text}
+          </div>
+        </div>
+      )}
+
+      {/* Complex Validation Rules (Conditional) */}
+      {hasComplexValidation ? (
+        <div className="mt-2 space-y-1">
+          {[
+            { key: "minLength", label: "At least 12 characters" },
+            { key: "hasUppercase", label: "At least one uppercase letter" },
+            { key: "hasLowercase", label: "At least one lowercase letter" },
+            { key: "hasNumber", label: "At least one number" },
+            { key: "hasSpecialChar", label: "At least one special character" },
+          ].map((rule) => (
+            <div className="flex items-center" key={rule.key}>
+              {passwordValidation[
+                rule.key as keyof typeof passwordValidation
+              ] ? (
+                <CheckIcon className="h-4 w-4 text-green-500" />
+              ) : (
+                <XMarkIcon className="h-4 w-4 text-red-500" />
+              )}
+              <span className="ml-2 text-sm">{rule.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Single FormMessage for simple validation
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+          isMultiple={true}
+        />
+      )}
     </FormItem>
   );
 }

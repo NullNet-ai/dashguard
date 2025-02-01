@@ -9,7 +9,6 @@ const gridColumns = [
   {
     header: "State",
     accessorKey: "status",
-    enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
@@ -22,7 +21,6 @@ const gridColumns = [
   {
     header: "Category",
     accessorKey: "categories",
-    enableResizing: false,
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
       return categories?.map((category: string, index: number) => {
@@ -69,7 +67,6 @@ const gridColumns = [
   {
     header: "Roles",
     accessorKey: "roles",
-    enableResizing: false,
     isSearchable: false,
     cell: ({ row }) => {
       const roles = row?.original?.roles || [];

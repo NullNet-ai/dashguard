@@ -11,7 +11,7 @@ if [ -n "$ALL_FILES" ]; then
   # Lint src files with normal config
   if [ -n "$SRC_FILES" ]; then
     echo "Linting src/*..."
-    pnpm lint:normal --config .eslintrc-normal.cjs --file $SRC_FILES
+    pnpm lint:normal --config ./src/components/eslint-config/.eslintrc-normal.cjs --file $SRC_FILES
   fi
 else
   echo "No staged files to lint"
