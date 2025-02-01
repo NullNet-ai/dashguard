@@ -23,8 +23,6 @@ type InnerTabItemsProps = {
   pathname?: string
 }
 
-let SEARCH_BAR_WIDTH = 0
-
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width
   const { open } = useSidebar()
@@ -34,7 +32,6 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   let sidebar_width = remToPx(open ? 16 : 5)
   const size = useScreenType()
   if (size === 'xs' || size === 'sm' || size === 'md') {
-    SEARCH_BAR_WIDTH = 0
     sidebar_width = 0
   }
 
@@ -75,15 +72,14 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     const showItem = max_width / 88
 
     return sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
-  }, [sortTabsActiveWillSecond, code])
+  }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
 
   const dropdownItems = useMemo(() => {
     if (!winWidth) return sortTabsActiveWillSecond
-    const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57
+    const max_width = winWidth - sidebar_width - 57
     const showItem = max_width / 88
-
     return sortTabsActiveWillSecond.slice(Math.floor(showItem))
-  }, [sortTabsActiveWillSecond, code])
+  }, [sortTabsActiveWillSecond, winWidth, sidebar_width])
 
   const entity = pathname?.split('/').at(2)
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
