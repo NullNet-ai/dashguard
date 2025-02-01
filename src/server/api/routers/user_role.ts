@@ -1,19 +1,19 @@
-import { EOperator, EOrderDirection } from '@dna-platform/common-orm'
-import { z } from 'zod'
+import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
+import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
-import RoleCategoryDetailsSchema from '~/server/zodSchema/user_role/categoryDetails'
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import RoleCategoryDetailsSchema from '~/server/zodSchema/user_role/categoryDetails';
 
-import { UserRoleFormSchema } from '../../zodSchema/user_role/basicDetails'
-import { createDefineRoutes } from '../baseCrud'
+import { UserRoleFormSchema } from '../../zodSchema/user_role/basicDetails';
+import { createDefineRoutes } from '../baseCrud';
 
 export const userRolesRouter = createTRPCRouter({
   ...createDefineRoutes('user_roles'),
   saveUserRole: privateProcedure
     .input(UserRoleFormSchema.extend({ id: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
-      const { role, id: user_role_id } = input
+      const { role, id: user_role_id } = input;
 
       const roles = await ctx.dnaClient
         .findAll({
@@ -45,11 +45,11 @@ export const userRolesRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       if (roles?.data?.length) {
-        const [role] = roles.data
-        const { id: existing_id, status } = role || {}
+        const [role] = roles.data;
+        const { id: existing_id, status } = role || {};
         return {
           message: 'Role already exists.',
           data: [],
@@ -69,7 +69,7 @@ export const userRolesRouter = createTRPCRouter({
               },
             ],
           },
-        }
+        };
       }
 
       if (!user_role_id) {
@@ -85,9 +85,9 @@ export const userRolesRouter = createTRPCRouter({
               pluck: ['id', 'code', 'role'],
             },
           })
-          .execute()
+          .execute();
 
-        return record
+        return record;
       }
 
       const res = await ctx.dnaClient
@@ -101,31 +101,14 @@ export const userRolesRouter = createTRPCRouter({
             pluck: ['id', 'code', 'role'],
           },
         })
-        .execute()
+        .execute();
 
-      return res
+      return res;
     }),
   saveCategoryDetails: privateProcedure
     .input(RoleCategoryDetailsSchema.extend({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id, categories, entity } = input
-
-      // fetch categories from user_role entity
-      const fetched_categories = await ctx.dnaClient
-        .findOne(id, {
-          entity: 'user_roles',
-          token: ctx.token.value,
-          query: {
-            pluck: ['categories'],
-          },
-        })
-        .execute()
-
-      const existing_categories
-        = fetched_categories?.data?.[0]?.categories || []
-
-      // merge existing categories with new categories
-      const merged_categories = [...existing_categories, categories]
+      const { id, categories, entity } = input;
 
       const updated_category_details_response = await ctx.dnaClient
         .update(id, {
@@ -133,14 +116,14 @@ export const userRolesRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              categories: merged_categories,
+              categories: [categories],
               entity,
             },
           },
         })
-        .execute()
+        .execute();
 
-      return updated_category_details_response
+      return updated_category_details_response;
     }),
   update: privateProcedure
     .input(
@@ -164,10 +147,10 @@ export const userRolesRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       if (role.data.length > 0 && role?.data[0]?.id !== input.id) {
-        const { id: existing_id, status } = role?.data[0] || {}
+        const { id: existing_id, status } = role?.data[0] || {};
         return {
           message: 'Role already exists',
           data: [],
@@ -187,7 +170,7 @@ export const userRolesRouter = createTRPCRouter({
               },
             ],
           },
-        }
+        };
       }
 
       const res = await ctx.dnaClient
@@ -200,8 +183,8 @@ export const userRolesRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
-      return res
+      return res;
     }),
-})
+});
