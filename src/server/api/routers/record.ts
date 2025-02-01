@@ -177,7 +177,7 @@ export const recordRouter = createTRPCRouter({
           updated_by_data,
         },
       };
-      return formatted_data
+      return formatted_data;
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
@@ -262,6 +262,25 @@ export const recordRouter = createTRPCRouter({
               status: input.status,
             },
             pluck: ["id", "code"],
+          },
+        })
+        .execute();
+    }),
+  updateDynamicRecord: privateProcedure
+    .input(
+      z.object({
+        entity: z.string().min(1),
+        id: z.string().min(1),
+        data: z.object({}),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: input.entity,
+          token: ctx.token.value,
+          mutation: {
+            params: input.data,
           },
         })
         .execute();

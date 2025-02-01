@@ -2,11 +2,10 @@ import { api } from "~/trpc/server";
 // import Grid from "~/components/platform/Grid/Server";
 
 import { headers } from "next/headers";
-import { EOperator } from "@dna-platform/common-orm";
 // import gridColumns, {
 //   TO_HIDE_COLUMNS_WHEN_MOBILE,
 // } from "~/app/portal/contact/grid/_config/columns";
-import ComingSoon from "~/app/portal/coming-soon/_components/coming_soon";
+import NewComingSoon from "~/app/coming-soon";
 
 export default async function Page() {
   const headerList = headers();
@@ -56,6 +55,6 @@ export default async function Page() {
     //     // disableDefaultAction: true,
     //   }}
     // />
-    <ComingSoon />
+    <NewComingSoon type="inner-component"/>
   );
 }

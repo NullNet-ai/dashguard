@@ -9,7 +9,6 @@ export default function FilterButton() {
   const { state } = React.useContext(GridContext);
   return (
     <Button
-      loading={state?.createLoading}
       disabled
       size='md'
       variant={"outline"}

@@ -1,30 +1,32 @@
 "use client";
 
-import { cn } from "~/lib/utils";
-import {
-  type Dispatch,
-  type SetStateAction,
+import axios from "axios";
+import Bluebird from "bluebird";
+import React, {
   createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
-  useState,
   useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
 import {
   useDropzone,
+  type DropzoneOptions,
   type DropzoneState,
   type FileRejection,
-  type DropzoneOptions,
 } from "react-dropzone";
+import {
+  type ControllerFieldState,
+  type ControllerRenderProps,
+} from "react-hook-form";
 import { toast } from "sonner";
-import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
-import axios from "axios";
-import Bluebird from "bluebird";
-import { UploadState } from "./FileUploaderItem";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import { IField } from "../FormBuilder/types";
+import { type IField } from "../FormBuilder/types";
+import { UploadState } from "./FileUploaderItem";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -47,6 +49,7 @@ type FileUploaderContextType = {
   fieldConfig?: IField;
   progressState?: number[];
   state?: any;
+  defaultImageSrc?: string | null;
 };
 
 const FileUploaderContext = createContext<FileUploaderContextType | null>(null);
@@ -70,9 +73,10 @@ export type FileUploaderProps = {
     fieldState: ControllerFieldState;
   };
   fieldConfig: IField;
+  form?: any;
 };
 
-export const FileUploader = forwardRef<
+export const FileUploader = React.forwardRef<
   HTMLDivElement,
   FileUploaderProps & React.HTMLAttributes<HTMLDivElement>
 >(
@@ -99,6 +103,7 @@ export const FileUploader = forwardRef<
     const [activeIndex, setActiveIndex] = useState(-1);
     const [state, setState] = useState<UploadState>(UploadState.IDLE);
     const [progressState, setProgressState] = useState<number[]>([]);
+    const [defaultImageSrc, setDefaultImageSrc] = useState<string | null>(null);
 
     const {
       accept = {
@@ -109,6 +114,7 @@ export const FileUploader = forwardRef<
       multiple = true,
     } = dropzoneOptions;
 
+    // In recruitment portal it is api.files.getFileById
     const { data }: any = api.files.getFileById.useQuery({
       ids: (_file as unknown as string[]) ?? "",
       pluck_fields: [
@@ -125,9 +131,8 @@ export const FileUploader = forwardRef<
       const new_value = data?.map((file: any) => {
         return {
           ...file,
-          type: file?.mimetype,
-          name: file?.originalname,
-          download_path: file?.download_path,
+          type: file.mimetype,
+          name: file.originalname,
         } as File;
       });
 
@@ -143,6 +148,8 @@ export const FileUploader = forwardRef<
         ).map((name) => combinedValues.find((file) => file.name === name));
         return uniqueValues;
       });
+
+      setDefaultImageSrc(data?.[0]?.download_path);
     }, [data]);
 
     const reSelectAll = maxFiles === 1 ? true : reSelect;
@@ -270,7 +277,12 @@ export const FileUploader = forwardRef<
         const files = acceptedFiles;
 
         if (!files) {
-          toast.error("file error , probably too big");
+          toast.error("file error, probably too big");
+          return;
+        }
+
+        if (!multiple && files.length > 1) {
+          toast.error("Only one file can be uploaded at a time");
           return;
         }
 
@@ -306,6 +318,11 @@ export const FileUploader = forwardRef<
           }
         });
 
+        if (!multiple && newValues.length > 1) {
+          newValues.splice(1); // Keep only the first file
+          toast.error("Only one file can be uploaded at a time");
+        }
+
         onValueChange(newValues);
 
         if (rejectedFiles.length) {
@@ -327,9 +344,8 @@ export const FileUploader = forwardRef<
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [reSelectAll, value],
+      [reSelectAll, value, multiple],
     );
-
     useEffect(() => {
       if (!value) return;
       if (value.length === maxFiles) {
@@ -371,6 +387,7 @@ export const FileUploader = forwardRef<
           formRenderProps,
           fieldConfig,
           progressState,
+          defaultImageSrc,
           state,
         }}
       >

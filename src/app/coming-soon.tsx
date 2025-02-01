@@ -8,10 +8,9 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
 
   if (type === 'inner-component') {
     return (
-      <div className="w-full p-4  px-8 h-[calc(100vh-320px)]  relative">
-        <div className="w-full flex h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-center">
+      <div className="w-full p-4  md:px-8 h-[calc(100vh-320px)]  relative">
+        <div className="w-full flex flex-col lg:flex-row h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-start">
           <div>
-          
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl ">
               Coming Soon
             </h1>
@@ -19,7 +18,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               Thank you for your patience!
             </p>
           </div>
-          <div className="hidden   lg:block relative  -top-[40px] -right-10">
+          <div className="lg:block relative  lg:-top-[40px] lg:-right-10">
             <Image
               alt=""
               width={"1080"}
@@ -36,7 +35,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
   if (type === "component") {
     return (
       <div className="w-full p-4  px-8 h-[calc(100vh-150px)]  relative">
-        <div className="w-full flex h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-center">
+        <div className="w-full flex flex-col lg:flex-row h-full text-center lg:text-left relative z-10  items-center lg:justify-between justify-start">
           <div>
             <a href="#" className="text-center justify-center lg:justify-start flex ">
               <Image
@@ -54,7 +53,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               Thank you for your patience!
             </p>
           </div>
-          <div className="hidden   lg:block relative  -top-[40px] -right-10">
+          <div className="lg:block relative  lg:-top-[40px] lg:-right-10">
             <Image
               alt=""
               width={"1080"}

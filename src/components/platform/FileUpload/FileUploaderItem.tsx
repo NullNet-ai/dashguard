@@ -1,16 +1,20 @@
 "use client";
 
-import { forwardRef, useRef, useState, useEffect } from "react";
-import { Trash2 as RemoveIcon, CropIcon } from "lucide-react";
-import { cn } from "~/lib/utils";
+import {
+  AlertTriangleIcon,
+  CropIcon,
+  Trash2 as RemoveIcon,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button, buttonVariants } from "~/components/ui/button";
-import { useFileUpload } from "./Provider";
-import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
+import { Progress } from "~/components/ui/progress";
+import { cn } from "~/lib/utils";
 import { FileCrop } from "./FileCrop";
+import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
+import { useFileUpload } from "./Provider";
 import type { CropState, PixelCrop } from "./canvasUtils";
 import { blobToFile, canvasPreview, createImage } from "./canvasUtils";
-import { toast } from "sonner";
-import { Progress } from "~/components/ui/progress";
 
 export enum UploadState {
   IDLE = "idle",
@@ -19,13 +23,14 @@ export enum UploadState {
   ERROR = "error",
 }
 
-export const FileUploaderItem = forwardRef<
+export const FileUploaderItem = React.forwardRef<
   HTMLDivElement,
   {
     index: number;
     file: File & { download_path?: string };
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
+    uploadError?: string;
   } & React.HTMLAttributes<HTMLDivElement>
 >(
   (
@@ -36,6 +41,7 @@ export const FileUploaderItem = forwardRef<
       onRemove: _onRemove,
       children: _children,
       progressState,
+      uploadError,
       ...props
     },
     ref,
@@ -88,7 +94,6 @@ export const FileUploaderItem = forwardRef<
       if (file?.download_path) return;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        // const result = reader.result?.toString() || null;
         let resultString: string;
 
         if (typeof reader.result === "object") {
@@ -102,7 +107,7 @@ export const FileUploaderItem = forwardRef<
       reader.readAsDataURL(file);
     };
 
-    // // Load initial image
+    // Load initial image
     useEffect(() => {
       if (!file?.download_path) {
         readFile(file);
@@ -130,10 +135,11 @@ export const FileUploaderItem = forwardRef<
         });
       }
     };
+
     const rotateImage = (newRotation: number[]) => {
       setCropState((prev) => ({
         ...prev,
-        rotation: newRotation, // (prev.rotation + 90) % 360,
+        rotation: newRotation,
       }));
     };
 
@@ -154,7 +160,6 @@ export const FileUploaderItem = forwardRef<
           previewCanvasRef.current,
           cropState.croppedAreaPixels,
           cropState.rotation[0],
-          // cropState.zoom,
         );
 
         // Create a new file from the Blob
@@ -172,7 +177,6 @@ export const FileUploaderItem = forwardRef<
 
         const reader = new FileReader();
         reader.onloadend = () => {
-          // const result = reader.result?.toString() || null;
           let resultString: string;
 
           if (typeof reader.result === "object") {
@@ -250,6 +254,8 @@ export const FileUploaderItem = forwardRef<
     const stillInProgress =
       currentProgressState !== undefined && currentProgressState !== 100;
 
+    const hasUploadError = state === "error";
+
     return (
       <>
         <div
@@ -260,34 +266,48 @@ export const FileUploaderItem = forwardRef<
             className,
             isSelected ? "bg-muted" : "",
             stillInProgress ? "cursor-not-allowed" : "cursor-pointer",
+            hasUploadError ? "bg-destructive/10" : "",
           )}
+          onClick={() => {
+            if (!stillInProgress && !hasUploadError) {
+              !isImageFile ? handleOpenInNewTab() : setIsPreviewModalOpen(true);
+            }
+          }}
           {...props}
         >
           <div className="mr-4">
-            {!!isImageFile && !!imageSrc ? (
+            {hasUploadError ? (
+              <div className="text-destructive">
+                <AlertTriangleIcon className="h-12 w-12" />
+              </div>
+            ) : !!isImageFile && !!imageSrc ? (
               <img
                 src={imageSrc}
                 alt="Preview"
-                className={`h-16 w-16 rounded object-cover`}
-                onClick={() => {
-                  if (!isDisabled && !stillInProgress) {
-                    setIsPreviewModalOpen(true);
-                  }
-                }}
+                className={`h-16 w-16 rounded object-cover ${hasUploadError ? "opacity-50" : ""}`}
               />
             ) : (
               <button
                 type="button"
-                disabled={isDisabled}
-                onClick={handleOpenInNewTab}
+                disabled={isDisabled || hasUploadError}
+                onClick={hasUploadError ? undefined : handleOpenInNewTab}
+                className={hasUploadError ? "opacity-50" : ""}
               >
                 {getFileTypeIcon(file)}
               </button>
             )}
           </div>
           <div className="flex-grow">
-            <div className="text-sm font-medium">{croppedFile.name}</div>
-            {stillInProgress ? (
+            <div
+              className={`text-sm font-medium ${hasUploadError ? "text-destructive" : ""}`}
+            >
+              {croppedFile.name}
+            </div>
+            {hasUploadError ? (
+              <div className="text-sm text-destructive">
+                Upload Failed: {uploadError}
+              </div>
+            ) : stillInProgress ? (
               <Progress className="mt-2" value={currentProgressState} />
             ) : (
               <div className="text-sm font-medium">
@@ -298,13 +318,19 @@ export const FileUploaderItem = forwardRef<
             )}
           </div>
           <div className="flex items-center space-x-2">
-            {!!isImageFile && !isGifImageFIle && !isDisabled ? (
+            {!!isImageFile &&
+            !isGifImageFIle &&
+            !isDisabled &&
+            !hasUploadError ? (
               <Button
                 size={"xs"}
                 variant={"softPrimary"}
                 type="button"
-                onClick={handleOpenCropModal}
-                disabled={stillInProgress || isDisabled}
+                onClick={(e) => {
+                  handleOpenCropModal();
+                  e.stopPropagation();
+                }}
+                disabled={stillInProgress || isDisabled || hasUploadError}
                 className="rounded-full"
               >
                 <CropIcon className="h-4 w-4 text-primary" strokeWidth={2} />
@@ -317,7 +343,10 @@ export const FileUploaderItem = forwardRef<
                 type="button"
                 size={"xs"}
                 variant={"softDestructive"}
-                onClick={() => removeFileFromSet(index)}
+                onClick={(e) => {
+                  removeFileFromSet(index);
+                  e.stopPropagation();
+                }}
                 className={cn(
                   direction === "rtl" ? "left-1 top-1" : "right-1 top-1",
                   "rounded-full",

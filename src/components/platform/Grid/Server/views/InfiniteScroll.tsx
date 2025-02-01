@@ -1,27 +1,31 @@
-"use client";
-import { useContext } from "react";
-import { GridContext } from "../../Provider";
-import GridMobileRow from "./common/GridMobileRow";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { Loader } from "~/components/ui/loader";
+'use client'
+import { useContext } from 'react'
+import InfiniteScroll from 'react-infinite-scroll-component'
+
+import { Loader } from '~/components/ui/loader'
+
+import { GridContext } from '../../Provider'
+
+import GridMobileRow from './common/GridMobileRow'
 
 const InfiniteScrollContainer = () => {
-  const { state } = useContext(GridContext);
+  const { state } = useContext(GridContext)
   return (
     <InfiniteScroll
-      className="mx-2 rounded-md text-card-foreground"
+      className="rounded-md text-card-foreground w-full"
       dataLength={state?.data?.length}
-      hasMore={true} // This will be true when more data is available
+      hasMore={true}
       next={() => {
-        //code will be place here for fetching
       }}
-      loader={<div className="flex justify-center p-4">
-        <Loader size='md' variant='circularShadow'  label=""/>
-      </div>}
+      loader={(
+        <div className="flex justify-center p-4">
+          <Loader size='md' variant='circularShadow' label="" />
+        </div>
+      )}
     >
       <GridMobileRow />
     </InfiniteScroll>
-  );
+  )
 };
 
-export default InfiniteScrollContainer;
+export default InfiniteScrollContainer

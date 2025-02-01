@@ -1,34 +1,29 @@
-"use server";
+'use server'
 
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { api } from '~/trpc/server'
 
 export const closeClassTab = async ({
   pathname,
   current,
 }: {
-  pathname: string;
-  current?: boolean;
+  pathname: string
+  current?: boolean
 }) => {
-  const headerList = headers();
-  const currentPathname = headerList.get("x-pathname") || "";
-
-  const tab = await api.tab.closeCurrentClassTab({
+  await api.tab.closeCurrentClassTab({
     href: pathname,
-  });
+  })
 
-  if (!current) {
-    redirect(currentPathname);
-  }
-
-  redirect(tab?.href || "/portal/dashboard");
-};
-
+  // if (!current) {
+  //   redirect(currentPathname)
+  // }
+  // redirect(tab?.href || '/portal/dashboard')
+}
 
 export const closeAllClassTabs = async () => {
-  await api.tab.closeAllClassTabs();
-  redirect("/portal/dashboard");
+  await api.tab.closeAllClassTabs()
+  redirect('/portal/dashboard')
 }
 
 export const closeOtherClassTabs = async ({
@@ -36,13 +31,12 @@ export const closeOtherClassTabs = async ({
   current,
   tabs,
 }: {
-  pathname: string;
-  current?: any;
-  tabs?: any;
+  pathname: string
+  current?: any
+  tabs?: any
 }) => {
-  
   await api.tab.closeOtherClassTabs({
     href: pathname,
-  });
-  redirect(pathname);
+  })
+  redirect(pathname)
 }

@@ -1,4 +1,5 @@
 "use client";
+
 import { type ISidebarMenu } from "./type";
 import {
   SidebarGroup,
@@ -6,6 +7,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "~/components/ui/sidebar";
 import {
@@ -19,49 +22,77 @@ import {
 } from "~/components/ui/collapsible";
 import { Separator } from "~/components/ui/separator";
 import * as _ICON from "@heroicons/react/24/outline";
-import { useEffect, useRef } from "react";
+import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
+import { StarIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
 import { testIDFormatter } from "~/utils/formatter";
 import useScreenType from "~/hooks/use-screen-type";
 import { cn } from "~/lib/utils";
+import Link from "next/link";
 import GroupSubMenu from "./GroupSubMenu";
 
 interface IProps {
   groups: ISidebarMenu[];
   title?: string;
+  screenType: string;
 }
 
-export default function GroupMenu({ groups }: IProps) {
+export default function GroupMenu({ groups, screenType }: IProps) {
+  // State to track favorites for each submenu item
+
+  const isMobile =
+    screenType !== "lg" && screenType !== "xl" && screenType !== "2xl";
+
+  const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
   const refs = useRef<any[]>([]);
+  const hasSelected = groups?.some((group) =>
+    group?.items?.some((item) => item.isActive),
+  );
+  const [openMenu, setOpenMenu] = useState(isMobile ? false : hasSelected);
+
   const sType = useScreenType();
+
+  // Toggle favorite for a specific submenu item
+  const toggleFavorite = (e: React.MouseEvent, itemTitle: string) => {
+    e.preventDefault(); // Prevent navigation when clicking the star
+    setFavorites((prev) => ({
+      ...prev,
+      [itemTitle]: !prev[itemTitle],
+    }));
+  };
+
   const { open, openMobile } = useSidebar();
 
   // Scroll to the active item on load
-  useEffect(() => {
-    const activeIndex = groups?.reduce((acc, items) => {
-      if (items?.items?.length) {
-        const activeItem = items.items.findIndex((subItem) => subItem.isActive);
-        acc = activeItem;
-      }
+  //  useEffect(() => {
+  //   const activeIndex = groups?.reduce((acc, items,) => {
+  //     if(items?.items?.length) {
+  //       const activeItem = items.items.findIndex((subItem) =>
+  //         subItem.isActive);
+  //      acc = activeItem
+  //     }
 
-      return acc;
-    }, -1);
+  //     return acc;
 
-    if (activeIndex !== -1 && refs.current[activeIndex]) {
-      refs.current[activeIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
-  }, [groups]);
+  //   }, -1);
+
+  //   if (activeIndex !== -1 && refs.current[activeIndex]) {
+  //     setTimeout(() => {
+  //       refs.current[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  //     }, 1000);
+
+  //   }
+
+  // }, [groups ]);
 
   return (
     <SidebarGroup className={`${!open ? "px-0" : ""}`}>
-      <Separator className="mb-3" />
+      <Separator className="my-2" />
       {groups?.map((item, index) => {
         // @ts-expect-error - TS doesn't know about dynamic imports
         const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
         return (
-          <SidebarMenu key={index}>
+          <SidebarMenu key={index} className={isMobile ? "px-2" : ""}>
             <Collapsible
               key={item.title}
               asChild

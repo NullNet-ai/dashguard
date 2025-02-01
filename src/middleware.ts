@@ -17,10 +17,15 @@ export async function middleware(request: NextRequest) {
     "x-categories",
     request.nextUrl.searchParams.get("categories") || "",
   );
-
   requestHeaders.set(
     "x-full-search-query-params",
     request.nextUrl.searchParams.toString(),
+  );
+
+  // x-full-pathname is the full pathname of the request with query params
+  requestHeaders.set(
+    "x-full-pathname",
+    request.nextUrl.pathname + request.nextUrl.search,
   );
 
   requestHeaders.set(

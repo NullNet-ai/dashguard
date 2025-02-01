@@ -1,16 +1,10 @@
-import React from "react";
-import { notFound } from "next/navigation";
-import PlatformRecord from "~/components/platform/Record";
-import { RecordSummaryViewContent } from "~/components/platform/Record/Summary/SummaryViewContent";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { type IPlatformRecordLayoutProps } from "~/components/platform/Record/types";
 import { api } from "~/trpc/server";
-import RecordShellSummary from "../_components/RecordShellSummary";
-import Options from "../_components/IdentifierOption";
-import { IPlatformRecordLayoutProps } from "~/components/platform/Record/types";
-import RecordWrapper from "~/components/platform/Record/RecordWrapper";
+import RecordWrapper from "./_components/RecordWrapper";
 
 const Layout = async ({
-  children,
   record,
   record_summary,
 }: IPlatformRecordLayoutProps) => {
@@ -46,47 +40,19 @@ const Layout = async ({
     throw new Error("Record not found");
   }
 
-  const { name, status } = organization_details?.data || {};
+  const { status } = organization_details?.data || {};
 
   //Record Shell Guard for Draft Records
   if (status === "draft") {
     return notFound();
   }
 
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard",
-    },
-    {
-      id: "organization",
-      name: "Organization",
-      tabName: "organization",
-    },
-    {
-      id: "suborganizations",
-      name: "Sub-Organizations",
-      tabName: "suborganizations",
-    },
-    {
-      id: "contact",
-      name: "Contact",
-      tabName: "contact",
-    },
-  ];
-
   return (
     <RecordWrapper
       record={record}
       record_summary={record_summary}
-      tabs={tabs}
-      customProps={{
-        config: {
-          entityCode: identifier!,
-          entityName: main_entity!,
-        },
-      }}
+      entity_code={identifier!}
+      entity_name={main_entity!}
     />
   );
 };

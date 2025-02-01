@@ -472,9 +472,9 @@ const MultipleSelector = React.forwardRef<
       >
         <div
           className={cn(
-            "min-h-10 rounded-md border border-gray-300 text-sm relative",
+            "min-h-[26px]  rounded-md border border-gray-300 text-sm relative flex items-center",
             {
-              "px-2 py-1": selected.length !== 0,
+              "px-2": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
             },
             className,
@@ -484,7 +484,7 @@ const MultipleSelector = React.forwardRef<
             inputRef.current?.focus();
           }}
         >
-          <div className=" flex flex-wrap items-center gap-1">
+          <div className={"flex flex-wrap items-center gap-1 py-[5px]"}>
             {selected.map((option) => {
               return (
                 <Badge
@@ -547,10 +547,10 @@ const MultipleSelector = React.forwardRef<
                   : placeholder
               }
               className={cn(
-                "flex-1 bg-transparent outline-none placeholder:text-muted-foreground static",
+                "flex-1 bg-transparent outline-none placeholder:text-muted-foreground static  !py-0",
                 {
                   "w-full": hidePlaceholderWhenSelected,
-                  "px-2 py-2": selected.length === 0,
+                  "px-2": selected.length === 0,
                   "ml-1": selected.length !== 0,
                 },
                 inputProps?.className,

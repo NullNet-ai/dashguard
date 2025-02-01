@@ -1,7 +1,10 @@
 "use client";
 
-import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,28 +14,36 @@ import {
 import { useSidebar } from "~/components/ui/sidebar";
 import useWindowSize from "~/hooks/use-resize";
 import useScreenType from "~/hooks/use-screen-type";
-import { remToPx } from "~/utils/fetcher";
 import { cn, formatAndCapitalize } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import { remToPx } from "~/utils/fetcher";
+
 import Item from "./Item";
 import { type IPropsTabList } from "./type";
-import { usePathname } from "next/navigation";
-import { api } from "~/trpc/react";
-import Link from "next/link";
 
-const SEARCH_BAR_WIDTH = 0; // Fixed search bar width for layout calculations.
-const ITEM_WIDTH = 140; // Approximate width of a tab item in pixels.
-const OFFSET_WIDTH = 57; // Fixed offset for other UI elements.
+const SEARCH_BAR_WIDTH = 0;
+const ITEM_WIDTH = 140;
+const OFFSET_WIDTH = 57;
 
 type TabItemsProps = {
   items: IPropsTabList[];
   children?: React.ReactNode;
 };
 
+export interface IActions {
+  closeTab: (tab: IPropsTabList) => void;
+  closeCurrentTab: (tab: IPropsTabList) => void;
+  closeAllTabs: () => void;
+  closeOtherTabs: (tab: IPropsTabList) => void;
+}
+
 const TabItems = ({ items }: TabItemsProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
   const screenSize = useScreenType();
   const pathname = usePathname();
+  const router = useRouter();
+  // eslint-disable-next-line no-unsafe-optional-chaining
   const [, , entity] = pathname?.split("/");
   const insertTabs = api.tab.insertMainTabs.useMutation();
   const [newTabList, setNewTabList] = useState<IPropsTabList[]>(items);
@@ -84,19 +95,115 @@ const TabItems = ({ items }: TabItemsProps) => {
       };
     }) as IPropsTabList[];
     setNewTabList(newTab);
-    insertTabs.mutateAsync(newTab);
+    void insertTabs.mutateAsync(newTab);
     // Drop by into database
   };
+
+  // Close Class Tab
+  // Not the current tab
+  const closeTab = (tab: IPropsTabList) => {
+    const newTab = newTabList.filter((item) => item.href !== tab.href);
+    // make it current tab
+    const activeTab = newTab[newTab.length - 1];
+    if (activeTab) {
+      activeTab.current = true;
+      router.push(activeTab?.href);
+    }
+    setNewTabList(newTab);
+  };
+  // Close Current Tab
+  // Current tab
+  const closeCurrentTab = (tab: IPropsTabList) => {
+    // 1. Find the current tab
+    // 2. remove the current tab
+    // 3. active tab will be the left tab if the current tab is the last tab
+    // 4. active tab will be the right tab if the current tab is the first tab
+    const currentTabIndex = newTabList.findIndex(
+      (item) => item.href === tab.href,
+    );
+    if (currentTabIndex === -1) {
+      return;
+    }
+    const newTab = [...newTabList];
+    newTab.splice(currentTabIndex, 1);
+    let activeTabIndex = currentTabIndex - 1;
+    if (activeTabIndex < 0) {
+      activeTabIndex = 0;
+    }
+    const activeTab = newTab[activeTabIndex];
+    if (activeTab) {
+      activeTab.current = true;
+      router.push(activeTab?.href);
+    }
+
+    setNewTabList(newTab);
+  };
+
+  // Close All tabs
+  // Except dashboard
+
+  const closeAllTabs = () => {
+    const newTab = newTabList.filter((item) => item.name === "dashboard");
+    setNewTabList(newTab);
+    const found = newTab.find((item) => item.name === "dashboard");
+    if (!found) {
+      router.push("/portal/dashboard");
+      return;
+    }
+    router.push(found?.href);
+  };
+
+  // Close Other tabs
+  const closeOtherTabs = (tab: IPropsTabList) => {
+    const newTab = newTabList.filter(
+      (item) => item.name === tab?.name || item.name === "dashboard",
+    );
+    console.debug(newTab, tab);
+    if (newTab.length > 0 && newTab[0]) {
+      newTab?.map((item) => {
+        return {
+          ...item,
+          current: item.name === tab.name,
+        };
+      });
+      const found = newTab.find((item) => item.name == tab.name);
+      if (!found) {
+        newTab[0].current = true;
+        router.push(newTab[0]?.href);
+        return;
+      }
+      router.push(found?.href);
+    }
+    setNewTabList(newTab);
+  };
+
+  const actions = {
+    closeTab,
+    closeCurrentTab,
+    closeAllTabs,
+    closeOtherTabs,
+  } as IActions;
 
   useEffect(() => {
     insertMainTabs();
   }, [entity]);
 
+  useEffect(() => {
+    if (newTabList.length !== 0) {
+      void insertTabs.mutateAsync(newTabList);
+      return;
+    }
+  }, [newTabList]);
+
   return (
     <Fragment>
       <div className="flex w-full flex-1">
         {visibleItems.map((tab) => (
-          <Item tab={tab} key={isUserRole(tab.name) ? "role" : tab.name} />
+          <Item
+            actions={actions}
+            tab={tab}
+            key={isUserRole(tab.name) ? "role" : tab.name}
+          />
         ))}
       </div>
       {dropdownItems.length > 0 && (
@@ -112,35 +219,36 @@ const TabItems = ({ items }: TabItemsProps) => {
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {dropdownItems.map((tab) => (
-              <DropdownMenuItem
-                key={isUserRole(tab.name) ? "role" : tab.name}
-                className="group relative flex items-center p-2 py-3"
-              >
-                <Link
-                  data-test-id={
-                    "mntab-" +
-                    (isUserRole(tab.name)
-                      ? "role"
-                      : tab.name.replace(/\s+/g, ""))
-                  }
-                  href={tab.href}
-                  aria-current={tab.current ? "page" : undefined}
-                  className={cn(
-                    tab.current
-                      ? "rounded-t-lg border-primary text-primary"
-                      : "text-gray-500",
-                    "whitespace-nowrap px-4 pt-2 text-sm font-medium",
-                    "flex items-center space-x-2",
-                    "hover:border-t-primary hover:text-primary",
-                  )}
+            {dropdownItems.map((tab) => {
+              return (
+                <DropdownMenuItem
+                  className="group relative flex items-center p-2 py-3"
+                  key={isUserRole(tab.name) ? "role" : tab.name}
                 >
-                  {formatAndCapitalize(
-                    isUserRole(tab.name) ? "role" : tab.name,
-                  )}
-                </Link>
-              </DropdownMenuItem>
-            ))}
+                  <Link
+                    aria-current={tab.current ? "page" : undefined}
+                    className={cn(
+                      tab.current
+                        ? "rounded-t-lg border-primary text-primary"
+                        : "text-gray-500",
+                      "whitespace-nowrap px-4 pt-2 text-sm font-medium",
+                      "flex items-center space-x-2",
+                      "hover:border-t-primary hover:text-primary",
+                    )}
+                    data-test-id={`mntab-${
+                      isUserRole(tab.name)
+                        ? "role"
+                        : tab.name.replace(/\s+/g, "")
+                    }`}
+                    href={tab.href}
+                  >
+                    {formatAndCapitalize(
+                      isUserRole(tab.name) ? "role" : tab.name,
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       )}

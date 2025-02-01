@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "1.8.0",
-  "branch": "released/feat/Platform-1888/1.8.0",
-  "message": "Add create feature in Single Select control",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.11.0<unreleased>",
+  "branch": "unreleased/fix/1.11.0<unreleased>",
+  "message": "add fix to handle dynamic options when there is a change of state/data ",
+  "publish_name": "Rob Caldosa"
 }

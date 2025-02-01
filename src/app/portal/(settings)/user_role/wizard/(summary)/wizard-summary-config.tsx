@@ -1,41 +1,13 @@
-import StepOneBasicDetails from "./_1";
-import ConfirmationSummary from "./_2";
+import StepOneBasicDetails from './_1'
+import StepTwoCategoryDetails from './_2'
+import ConfirmationSummary from './_3'
 
-const roleWizardSummary = ({
-  identifier,
-  mainEntity,
-}: {
-  identifier: string;
-  mainEntity: string;
-}) => {
+const roleWizardSummary = () => {
   return {
-    one: {
-      label: "Step 1",
-      required: true,
-      components: [
-        {
-          label: "Basic Details",
-          component: (
-            <StepOneBasicDetails
-              main_entity={mainEntity!}
-              form_key={"UserRolesBasicDetails"}
-              identifier={identifier!}
-            />
-          ),
-        },
-      ],
-    },
-    two: {
-      label: "Step 2",
-      required: false,
-      components: [
-        {
-          label: "Confirmation",
-          component: <ConfirmationSummary />,
-        },
-      ],
-    },
-  };
-};
+    one: StepOneBasicDetails,
+    two: StepTwoCategoryDetails,
+    three: ConfirmationSummary,
+  }
+}
 
-export default roleWizardSummary;
+export default roleWizardSummary

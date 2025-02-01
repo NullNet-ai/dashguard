@@ -1,20 +1,21 @@
-import React from "react";
+import Image from 'next/image'
+import React from 'react'
 
-import Search from "./Search";
-import RecordDetails from "./RecordDetails";
-import { SidebarTrigger } from "~/components/ui/sidebar";
-import MainTab from "~/components/platform/Tab/MainTab";
-import { MobileTriggerComponent } from "./TriggerComponent";
-import Image from "next/image";
+import MainTab from '~/components/platform/Tab/MainTab'
+import { SidebarTrigger } from '~/components/ui/sidebar'
+
+import RecordDetails from './RecordDetails'
+import { MobileTriggerComponent } from './TriggerComponent'
+
 const Header: React.FC = () => {
   return (
     <div>
       <header
-        className={`col-span-full flex h-[3rem] items-center justify-center gap-4 bg-background md:h-14`}
+        className="col-span-full flex lg:h-[3rem] items-center justify-center gap-4 bg-background"
       >
         {/* <SidebarTrigger Icon={TriggerComponent} className="hidden lg:block" /> */}
 
-        <div className="relative flex w-full items-center border-b pb-1 lg:pb-0">
+        <div className="relative flex w-full items-center pt-[11px] lg:pt-[7px] border-b pb-1 lg:pb-0">
           <MainTab className="hidden md:flex" />
           <Logo />
           <div className="flex w-full items-center justify-end gap-3 sm:justify-normal md:justify-end">
@@ -24,7 +25,7 @@ const Header: React.FC = () => {
           </div>
           <SidebarTrigger
             Icon={MobileTriggerComponent}
-            className="mr-6 sm:mb-0 sm:hidden"
+            className="mr-4 sm:mb-0 sm:hidden"
           />
         </div>
       </header>
@@ -32,10 +33,10 @@ const Header: React.FC = () => {
         <MainTab className="w-full" />
       </div>
     </div>
-  );
+  )
 };
 
-export default Header;
+export default Header
 
 export function Logo() {
   return (
@@ -46,5 +47,5 @@ export function Logo() {
       width={40}
       height={40}
     />
-  );
+  )
 }

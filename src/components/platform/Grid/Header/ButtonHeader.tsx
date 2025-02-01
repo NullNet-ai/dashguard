@@ -23,7 +23,7 @@ export default function CreateButton({
   return (
     <Button
       data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
-      className={cn("flex", className)}
+      className={cn("flex ", className)}
       loading={state?.createLoading}
       size='md'
       onClick={() => actions?.handleCreate()}
