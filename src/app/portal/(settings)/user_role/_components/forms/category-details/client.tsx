@@ -12,29 +12,28 @@ import { api } from '~/trpc/react'
 import { type IFormProps } from '../types'
 
 export default function CategoryDetails(props: IFormProps) {
-  const params = props.params
-  const defaultValues = props.defaultValues
-  const multiSelectOptions = props.multiSelectOptions
-  const selectOptions = props.selectOptions
+  const { params } = props
+  const { defaultValues } = props
+  const { multiSelectOptions } = props
+  const { selectOptions } = props
   const toast = useToast()
   const updateCategoryDetails = api.user_role.saveCategoryDetails.useMutation()
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof RoleCategoryDetailsSchema>>) => {
     try {
-      alert(JSON.stringify(data))
       const response = await updateCategoryDetails.mutateAsync({
         ...data,
         id: params.id,
       })
 
       if (response.status_code === 200) {
-        toast.success('Basic Details submit successfully')
+        toast.success('Category Details submitted successfully!')
       }
       return response
     }
     catch {
-      toast.error('Failed to submit Category Details')
+      toast.error('Failed to submit Category Details.')
     }
   }
 
@@ -44,29 +43,28 @@ export default function CategoryDetails(props: IFormProps) {
       enableFormRegisterToParent={false}
       fields={[
         {
-          id: 'categories',
-          formType: 'select',
-          name: 'categories',
-          label: 'Category',
-          required: true,
-        },
-        {
           id: 'entity',
           formType: 'select',
           name: 'entity',
           label: 'Entity',
           required: true,
         },
+        {
+          id: 'categories',
+          formType: 'select',
+          name: 'categories',
+          label: 'Category',
+          required: true,
+        },
       ]}
-      formKey="UserRoleCategoryDetails"
-      formLabel="Category Details"
+      formKey='UserRoleCategoryDetails'
+      formLabel='Category Details'
       formProps={params}
       formSchema={RoleCategoryDetailsSchema}
       handleSubmit={handleSave}
       multiSelectOptions={multiSelectOptions}
       myParent={params.shell_type}
       selectOptions={selectOptions}
-
     />
   )
 }
