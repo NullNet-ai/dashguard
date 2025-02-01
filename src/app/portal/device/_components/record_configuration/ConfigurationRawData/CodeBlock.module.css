@@ -1,0 +1,43 @@
+/* Added line styles */
+.addedLine {
+  background-color: #e6ffed; /* Light green */
+  color: #2b6a30; /* Dark green */
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  padding-left: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  font-family: monospace;
+}
+
+/* Removed line styles */
+.removedLine {
+  background-color: #ffe6e6; /* Light red */
+  color: #a33a3a; /* Dark red */
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  padding-left: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  font-family: monospace;
+}
+
+/* Neutral line styles */
+.neutralLine {
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  padding-left: 4rem;
+  display: flex;
+  font-family: monospace;
+}
+
+/* Highlight.js line marker */
+.lineMarker {
+  font-weight: bold;
+  margin-right: 0.5rem;
+  padding-left: 4rem;
+}
+
+.sign{
+  /* padding-left: 10rem; */
+}

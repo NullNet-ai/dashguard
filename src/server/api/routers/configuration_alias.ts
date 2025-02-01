@@ -9,7 +9,7 @@ import { pluralize } from '~/server/utils/pluralize'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
-const entity = ''
+const entity = 'device_aliases'
 export const deviceAliasRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   mainGrid: privateProcedure
@@ -24,19 +24,30 @@ export const deviceAliasRouter = createTRPCRouter({
       } = input
 
       const pluck_object = {
-        device_aliases: pluck,
+        device_aliases: pluck as string[],
+        device_configurations: [
+          'id',
+          'device_id',
+          'raw_content',
+        ],
         contacts: ['first_name', 'last_name', 'id'],
         organization_accounts: ['contact_id', 'id'],
-        
-      }
+        organization_account_updated_by: ['contact_id', 'id'],
+        device_organization_account_created_by: ['contact_id', 'id'],
+        updated_by: ['first_name', 'last_name', 'id'],
+        device_created_by: ['id', 'instance_name'],
+        device_updated_by: ['id', 'instance_name'],
+        devices: [
+          'id', 'instance_name',
+        ],
 
+      }
       const device_aliases = await ctx.dnaClient.findAll({
-        entity: input?.entity,
+        entity: 'device_aliases',
         token: ctx.token.value,
         query: {
-          pluck: input.pluck,
-          // pluck_object,
-          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+          pluck_object,
+          advance_filters: _advance_filters as IAdvanceFilters[],
           order: {
             starts_at:
             (input.current || 0) === 0
@@ -52,32 +63,129 @@ export const deviceAliasRouter = createTRPCRouter({
             : [],
         },
       })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'organization_accounts',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity,
-      //       field: 'created_by',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'contacts',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'organization_accounts',
-      //       field: 'contact_id',
-      //     },
-      //   },
-      // })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'device_configurations',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_aliases',
+              field: 'device_configuration_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_aliases',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              alias: 'organization_account_updated_by',
+              field: 'id',
+            },
+            from: {
+              entity,
+              field: 'updated_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              alias: 'updated_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       entity: 'organization_accounts',
+        //       alias: 'device_organization_account_created_by',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'device_aliases',
+        //       field: 'updated_by',
+        //     },
+        //   },
+        // })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       entity: 'devices',
+        //       alias: 'device_created_by',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'organization_accounts',
+        //       field: 'device_id',
+        //     },
+        //   },
+        // })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       entity: 'organization_accounts',
+        //       alias: 'device_organization_account_updated_by',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'devices',
+        //       field: 'updated_by',
+        //     },
+        //   },
+        // })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       entity: 'devices',
+        //       alias: 'device_updated_by',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'organization_accounts',
+        //       field: 'device_id',
+        //     },
+        //   },
+        // })
         .execute()
 
       const { total_count: totalCount = 1, data: items }

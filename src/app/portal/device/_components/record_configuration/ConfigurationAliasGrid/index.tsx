@@ -1,3 +1,4 @@
+import { EOperator } from '@dna-platform/common-orm'
 import { headers } from 'next/headers'
 import React from 'react'
 
@@ -7,7 +8,6 @@ import { api } from '~/trpc/server'
 
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 
 export default async function ConfigurationAliasGrid({
   searchParams = {},
@@ -22,7 +22,8 @@ export default async function ConfigurationAliasGrid({
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity,,code] = pathname.split('/')
   const _pluck = [
-    'device_id',
+    'id',
+    'device_configuration_id',
     'type',
     'name',
     'value',
@@ -31,7 +32,7 @@ export default async function ConfigurationAliasGrid({
     'updated_by',
     'created_date',
     'updated_date',
-    'status'
+    'status',
   ]
 
   const record = await api.record.getByCode({
@@ -48,17 +49,37 @@ export default async function ConfigurationAliasGrid({
     current: +(searchParams.page ?? '0'),
     limit: +(searchParams.perPage ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
-   advance_filters: createAdvancedFilter({
-      device_id: record_id,
-      status: 'Active',
-    }),
+    advance_filters: [
+      {
+        type: 'criteria',
+        field: 'device_id',
+        entity: 'device_configurations',
+        operator: EOperator.EQUAL,
+        values: [
+          record_id,
+        ],
+      },
+      {
+        type: 'operator',
+        operator: 'and',
+      },
+      {
+        type: 'criteria',
+        field: 'status',
+        entity: 'device_aliases',
+        operator: EOperator.EQUAL,
+        values: [
+          'Active',
+        ],
+      },
+    ],
   })
 
   return (
     <Grid
       config={{
-        entity: main_entity!,
-        title: 'Device',
+        entity: 'device_aliases',
+        title: 'Aliases',
         columns: gridColumns,
         defaultValues: {
           entity_prefix: 'DV',

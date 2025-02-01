@@ -1,42 +1,35 @@
+import { EOperator } from '@dna-platform/common-orm'
 import { headers } from 'next/headers'
 import React from 'react'
 
 import Grid from '~/components/platform/Grid/Server'
 import { getGridCacheData } from '~/lib/grid-get-cache-data'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import { api } from '~/trpc/server'
 
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
 
-export default async function ConfigurationRuleGrid({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string
-    perPage?: string
-  }
-}) {
-  const { sorting } = (await getGridCacheData()) ?? {}
+export default async function ConfigurationRuleGrid() {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity,,code] = pathname.split('/')
   const _pluck = [
-    'device_id',
+    'id',
+    'device_configuration_id',
+    'device_rule_status',
+    'status',
     'type',
-    'device_rule_action',
+    'policy',
     'protocol',
     'source_port',
     'source_addr',
     'destination_port',
     'destination_addr',
     'description',
-    'device_rule_status',
     'created_by',
     'updated_by',
     'created_date',
     'updated_date',
-    'status',
   ]
 
   const record = await api.record.getByCode({
@@ -45,23 +38,47 @@ export default async function ConfigurationRuleGrid({
     pluck_fields: ['id'],
   })
 
+  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {}
+
   const record_id = record?.data?.id
   const { items = [], totalCount } = await api.deviceRule.mainGrid({
     entity: 'device_rules',
     pluck: _pluck,
-    current: +(searchParams.page ?? '0'),
-    limit: +(searchParams.perPage ?? '100'),
+    current: +(pagination?.current_page ?? '0'),
+    limit: +(pagination?.limit_per_page ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
-    advance_filters: createAdvancedFilter({
-      device_id: record_id,
-      status: 'Active',
-    }),
+    advance_filters: filters?.advanceFilter?.length
+      ? filters?.advanceFilter
+      : [
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'device_configurations',
+            operator: EOperator.EQUAL,
+            values: [
+              record_id,
+            ],
+          },
+          {
+            type: 'operator',
+            operator: 'and',
+          },
+          {
+            type: 'criteria',
+            field: 'status',
+            entity: 'device_rules',
+            operator: EOperator.EQUAL,
+            values: [
+              'Active',
+            ],
+          },
+        ],
   })
 
   return (
     <Grid
       config={{
-        entity: main_entity!,
+        entity: 'device_rules',
         title: 'Rules',
         columns: gridColumns,
         defaultValues: {
@@ -69,7 +86,14 @@ export default async function ConfigurationRuleGrid({
         },
         disableDefaultAction: true,
         hideCreateButton: true,
-      
+        searchConfig: {
+          router: 'deviceRule',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: 'device_rules',
+            pluck: _pluck,
+          },
+        },
       }}
       data={items}
       defaultSorting={defaultSorting}
