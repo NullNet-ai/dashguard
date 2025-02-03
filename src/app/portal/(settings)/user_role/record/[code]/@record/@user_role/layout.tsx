@@ -3,21 +3,17 @@ import React, { type ReactNode } from 'react'
 interface LayoutProps {
   children?: ReactNode
   params?: any
+  user_role?: ReactNode
+  category_details?: ReactNode
   [key: string]: ReactNode
 }
 
 const RecordLayout: React.FC<LayoutProps> = async (props) => {
-  const slots = Object.entries(props)
-    .filter(([propName]) => !['children', 'params'].includes(propName))
-    .map(([componentName, componentValue]) => {
-      return (
-        <div className="space-y-2" key={componentName}>
-          {componentValue}
-        </div>
-      )
-    })
+  const { user_role, category_details } = props;
 
-  return slots
+  const slots = [user_role, category_details]
+
+  return <div className='space-y-2'>{slots}</div>
 }
 
 export default RecordLayout

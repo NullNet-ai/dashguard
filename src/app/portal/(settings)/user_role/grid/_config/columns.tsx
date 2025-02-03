@@ -1,8 +1,8 @@
-'use client'
-import { type ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+'use client';
+import { type ColumnDef } from '@tanstack/react-table';
+import React from 'react';
 
-import StatusCell from '~/components/ui/status-cell'
+import StatusCell from '~/components/ui/status-cell';
 
 const gridColumns = [
   {
@@ -10,8 +10,8 @@ const gridColumns = [
     accessorKey: 'status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.status
-      return <StatusCell value={value} />
+      const value = row?.original?.status;
+      return <StatusCell value={value} />;
     },
   },
   {
@@ -23,35 +23,35 @@ const gridColumns = [
     accessorKey: 'role',
   },
   {
+    header: 'Entity',
+    accessorKey: 'entity',
+  },
+  {
     header: 'Category',
     accessorKey: 'categories',
     enableResizing: false,
     cell: ({ row }) => {
-      const categories = row?.original?.categories || []
+      const categories = row?.original?.categories || [];
       return categories.map((category: string, index: number) => {
-        return <StatusCell key={index} value={category} />
-      })
+        return <StatusCell key={index} value={category} />;
+      });
     },
     search_config: {
       operator: 'contains',
     },
   },
   {
-    header: 'Entity',
-    accessorKey: 'entity',
-  },
-  {
     header: 'Updated Date',
     accessorKey: 'updated_date',
     cell: ({ row }) => {
-      const date = row?.original?.updated_date
-      const time = row?.original?.updated_time
+      const date = row?.original?.updated_date;
+      const time = row?.original?.updated_time;
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
           <div>{time}</div>
         </div>
-      )
+      );
     },
   },
   {
@@ -68,14 +68,14 @@ const gridColumns = [
     header: 'Created Date',
     accessorKey: 'created_date',
     cell: ({ row }) => {
-      const date = row?.original?.created_date
-      const time = row?.original?.created_time
+      const date = row?.original?.created_date;
+      const time = row?.original?.created_time;
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
           <div>{time}</div>
         </div>
-      )
+      );
     },
   },
   {
@@ -88,9 +88,9 @@ const gridColumns = [
       operator: 'like',
     },
   },
-] as ColumnDef<any>[]
+] as ColumnDef<any>[];
 
-export default gridColumns
+export default gridColumns;
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
-export const TO_HIDE_COLUMNS_WHEN_MOBILE = []
+export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];
