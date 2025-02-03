@@ -82,8 +82,7 @@ export default function FormFilterGrid({
 
           const updateSearchItems = query_params?.default_advance_filters.length
             ? [
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-                ...query_params?.default_advance_filters,
+                ...query_params?.default_advance_filters ?? [],
                 ...(query_params?.default_advance_filters.length
                   ? [{ id: ulid(), type: 'operator', operator: 'and' }]
                   : []),
@@ -105,8 +104,7 @@ export default function FormFilterGrid({
           })
         }
         else {
-          // eslint-disable-next-line no-unused-vars
-          const [_, list] = api.grid.items.useSuspenseQuery({
+          const [, list] = api.grid.items.useSuspenseQuery({
             entity: filter_entity!,
             current,
             limit: limit || 100,
@@ -204,13 +202,14 @@ export default function FormFilterGrid({
             columns: gridColumns!,
             actionType,
             searchConfig,
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onFetchRecords: fetchData,
+            onFetchRecords: void fetchData,
             rowClickCustomAction: ({ row, config }) => {
-              if (row.original.id === _form_filter_selected_record?.[0]?.id) return
-              if (!config?.statusesIncluded?.includes(row.original.status)) return
+              if (
+                row.original.id === _form_filter_selected_record?.[0]?.id
+                || !config?.statusesIncluded?.includes(row.original.status)
+                || !onSelectRecords
+              ) return
 
-              if (!onSelectRecords) return
               void Promise.resolve(
                 onSelectRecords({
                   rows: [row?.original],
