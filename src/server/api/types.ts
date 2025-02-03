@@ -27,6 +27,7 @@ interface Account {
   contact: Contact;
   organization: Organization;
   organization_id: string;
+  email: string
 }
 
 interface Contact {

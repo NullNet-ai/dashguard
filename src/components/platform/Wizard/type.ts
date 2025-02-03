@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { type ReactElement } from "react";
 
 export type IValidationType = "required" | "date" | "unique";
 export interface IConfigValidationWizard {
@@ -40,6 +40,7 @@ export interface ICallbackHandler {
   customizeWizardButtonSave?: {
     label?: string;
     icon?: ReactElement;
+    disabled?: boolean;
     disableDropdown?: boolean;
     dropdownOptions?: Array<{
       label: string;
