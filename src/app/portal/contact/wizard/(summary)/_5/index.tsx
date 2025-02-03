@@ -18,7 +18,7 @@ interface IAccountDetails {
 }
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , , _, identifier] = pathName.split("/");
+  const [, , , , identifier] = pathName.split("/");
   const {
     data = [],
     refetch,
@@ -41,7 +41,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
       {(data as IAccountDetails[])?.map(
         (account: IAccountDetails, index: number) =>
           account?.id && (
-            <div key={account?.id} className="mt-2">
+            <div key={account.id} className="mt-2">
               <p className="font-bold">{`Account ${index + 1}`}</p>
               {Object.entries(fields).map(([key, value]) => (
                 <p key={key} className="mb-[8px] no-underline">
@@ -63,7 +63,7 @@ const SummaryConfig = {
   components: [
     {
       label: "Account Details",
-      component: <Summary form_key={"account_details"} />,
+      component: <Summary form_key="account_details" />,
     },
   ],
 };

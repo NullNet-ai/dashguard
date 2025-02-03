@@ -25,7 +25,7 @@ const DeactivateConfirmationDialog = ({
     onChangeContext({ open, account_id: "", status: "", index: 0 });
   };
   return (
-    <Dialog open={context?.open || false}>
+    <Dialog open={context?.open ?? false}>
       <DialogContent className="w-5/6 bg-white sm:w-3/6">
         <div className="mb-2 text-sm">
           <ShieldMinus
@@ -36,7 +36,7 @@ const DeactivateConfirmationDialog = ({
           />
         </div>
         <div className="flex flex-1 gap-2 py-4 font-bold">
-          {"Deactivate Account"}
+          Deactivate Account
         </div>
         <div className="flex flex-1 gap-2">
           {
@@ -66,7 +66,7 @@ const DeactivateConfirmationDialog = ({
               setLoading(false);
             }}
           >
-            {"Deactive"}
+            Deactive
           </Button>
         </DialogFooter>
       </DialogContent>
