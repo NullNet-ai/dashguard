@@ -16,7 +16,6 @@ export default function ContactDetails({
 }: IFormProps) {
   const toast = useToast();
   const updateContact = api.contact.updateContactDetails.useMutation();
-
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
@@ -31,7 +30,7 @@ export default function ContactDetails({
         return data;
       }
       throw new Error("Failed to submit Contact Details");
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit Contact Details");
     }
   };
