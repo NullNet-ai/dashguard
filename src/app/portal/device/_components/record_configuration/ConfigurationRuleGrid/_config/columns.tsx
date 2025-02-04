@@ -1,111 +1,136 @@
-"use client";
+'use client'
 
-import { type ColumnDef } from "@tanstack/react-table";
-import StatusCell from "~/components/ui/status-cell";
+import { type ColumnDef } from '@tanstack/react-table'
+
+import StatusCell from '~/components/ui/status-cell'
 
 const gridColumns = [
   {
-    header: "State",
-    accessorKey: "status",
+    header: 'State',
+    accessorKey: 'status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.status;
-      return <StatusCell value={value} />;
+      const value = row?.original?.status
+      return <StatusCell value={value} />
     },
   },
   {
-    header: "Status",
-    accessorKey: "configuration_rule_status",
+    header: 'Status',
+    accessorKey: 'device_rule_status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.device_rule_status;
-      return <StatusCell value={value} />;
+      const value = row?.original?.device_rule_status
+      return <StatusCell value={value} />
     },
   },
   {
-    header: "Type",
-    accessorKey: "type",
+    header: 'Type',
+    accessorKey: 'type',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Action",
-    accessorKey: "device_rule_action",
+    header: 'Action',
+    accessorKey: 'policy',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Protocol",
-    accessorKey: "protocol",
+    header: 'Protocol',
+    accessorKey: 'protocol',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Source",
-    accessorKey: "source_addr",
+    header: 'Source',
+    accessorKey: 'source_addr',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Src Port",
-    accessorKey: "source_port",
+    header: 'Src Port',
+    accessorKey: 'source_port',
+    search_config: {
+      operator: 'like',
+    },
   },
 
   {
-    header: "Destination",
-    accessorKey: "destination_addr",
+    header: 'Destination',
+    accessorKey: 'destination_addr',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Dest Port",
-    accessorKey: "destination_port",
+    header: 'Dest Port',
+    accessorKey: 'destination_port',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Description",
-    accessorKey: "description",
+    header: 'Description',
+    accessorKey: 'description',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Updated Date",
-    accessorKey: "updated_date",
+    header: 'Updated Date',
+    accessorKey: 'updated_date',
     cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
+      const date = row?.original?.updated_date
+      const time = row?.original?.updated_time
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
           <div>{time}</div>
         </div>
-      );
+      )
     },
   },
   {
-    header: "Updated By",
-    accessorKey: "updated_by",
-    sortKey: "updated_by.first_name",
+    header: 'Updated By',
+    accessorKey: 'updated_by',
+    sortKey: 'updated_by.first_name',
     search_config: {
-      entity: "updated_by",
-      field: "first_name",
-      operator: "like",
+      entity: 'updated_by',
+      field: 'first_name',
+      operator: 'like',
     },
   },
   {
-    header: "Created Date",
-    accessorKey: "created_date",
+    header: 'Created Date',
+    accessorKey: 'created_date',
     cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
+      const date = row?.original?.created_date
+      const time = row?.original?.created_time
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
           <div>{time}</div>
         </div>
-      );
+      )
     },
   },
   {
-    header: "Created By",
-    accessorKey: "created_by",
-    sortKey: "created_by.first_name",
+    header: 'Created By',
+    accessorKey: 'created_by',
+    sortKey: 'created_by.first_name',
     search_config: {
-      entity: "created_by",
-      field: "first_name",
-      operator: "like",
+      entity: 'created_by',
+      field: 'first_name',
+      operator: 'like',
     },
   },
-] as ColumnDef<any>[];
+] as ColumnDef<any>[]
 
-export default gridColumns;
+export default gridColumns
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
-export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];
+export const TO_HIDE_COLUMNS_WHEN_MOBILE = []
