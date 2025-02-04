@@ -1,9 +1,8 @@
 import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
 import React from 'react'
 
 import PlatformWizard from '~/components/platform/Wizard'
-import { api } from '~/trpc/server'
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
 
 import roleWizardSummary from '../(summary)/wizard-summary-config'
 import { type IWizardLayoutProps } from '../types'
@@ -14,40 +13,14 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
   const wizard_summary = roleWizardSummary()
 
-  if (identifier !== 'new') {
-    const record_details = await api.record.getByCode({
-      main_entity: mainEntity!,
-      id: identifier!,
-      pluck_fields: ['id', 'code', 'status'],
-    })
-
-    if (!record_details?.data) {
-      return notFound()
-    }
-
-    const { status } = record_details?.data || {}
-
-    if (status.toLowerCase() === 'active') {
-      return notFound()
-    }
-
-    // const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
-    /* This is needed to be check to fix error upon redirect
-    from form filter newly created record as draft since it still
-    doesn't have stepDetails saved on redis */
-    // if (stepDetails?.traverse) {
-    //   const { traverse } = stepDetails || {}
-
-    //   const stepCount = Object.keys(traverse).length;
-
-    //   if (Number(currentStep) > stepCount + 1) {
-    //     return notFound()
-    //   }
-    // }
-  }
+  await stepValidator({
+    currentStep: currentStep!,
+    identifier: identifier!,
+    mainEntity: mainEntity!,
+  })
 
   return (
-    <div className='p-1'>
+    <div className="p-1">
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),
