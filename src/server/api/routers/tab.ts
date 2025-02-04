@@ -87,7 +87,7 @@ export const tabRouter = createTRPCRouter({
       if (input.is_active) {
         const update_sub_tabs = response?.tabs?.map((tab: Record<string, any>) => ({
           ...tab,
-          current: tab.name === input.tab_name,
+          current: tab?.name === input.tab_name,
         }))
 
         await ctx.redisClient.cacheData(key, {
@@ -240,7 +240,7 @@ export const tabRouter = createTRPCRouter({
         })
 
       const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) => tab.name === 'Grid'
+        (tab: Record<string, any>) => tab?.name === 'Grid'
       )
 
       response = {
@@ -266,7 +266,7 @@ export const tabRouter = createTRPCRouter({
         .then(res => res || [])
         .catch(() => [])
 
-      const update_tabs = response?.tabs?.filter((tab: any) => tab.name === 'Grid' || tab.href === input.href)
+      const update_tabs = response?.tabs?.filter((tab: any) => tab?.name === 'Grid' || tab?.href === input.href)
 
       response = {
         ...response,

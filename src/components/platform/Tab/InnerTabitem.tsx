@@ -74,7 +74,7 @@ const InnerTabitem = ({
         <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
       </Link>
       <TabMenu
-        current={tab.href.match(pathname) ? true : false}
+        current={!!tab.href.match(pathname)}
         href={tab.href}
         tabs={newItems}
         name={checkIfUserRole(tab.name) ? 'role' : tab.name}

@@ -1,38 +1,43 @@
-import Link from 'next/link'
-import { useEffect, useMemo } from 'react'
+import Link from 'next/link';
+import { useEffect, useMemo } from 'react';
 
-import TabMenu from '~/components/application-layout/common/TabMenu'
-import { cn, formatTabName } from '~/lib/utils'
-import { api } from '~/trpc/react'
+import TabMenu from '~/components/application-layout/common/TabMenu';
+import { cn, formatTabName } from '~/lib/utils';
+import { api } from '~/trpc/react';
 
 type InnerTabitemProps = {
   tab: any
   pathname?: string
   dropItems: any
   isActive: boolean
-}
+};
 
-const InnerDropTabItem = ({ tab, pathname, dropItems, isActive }: InnerTabitemProps) => {
-  const updateSubtabs = api.tab.updateSubTabs.useMutation()
-  const isGrid = tab.name === 'Grid' || tab.name === 'grid'
-  const [,, entityName, application, code] = (pathname || '').split('/')
+const InnerDropTabItem = ({
+  tab,
+  pathname,
+  dropItems,
+  isActive,
+}: InnerTabitemProps) => {
+  const updateSubtabs = api.tab.updateSubTabs.useMutation();
+  const isGrid = tab.name === 'Grid' || tab.name === 'grid';
+  const [, , entityName, application, code] = (pathname || '').split('/');
   const active = useMemo(() => {
     if (isGrid && application === 'grid') {
-      return true
+      return true;
     }
 
-    return code === tab?.name
-  }, [code, application])
+    return code === tab?.name;
+  }, [code, application]);
 
   useEffect(() => {
     void updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
       is_active: active,
       tab_name: tab.name,
-    })
-  }, [active])
+    });
+  }, [active]);
 
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
+  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false;
   return (
     <>
       <Link
@@ -51,13 +56,13 @@ const InnerDropTabItem = ({ tab, pathname, dropItems, isActive }: InnerTabitemPr
       </Link>
       <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
       <TabMenu
-        current={tab.href.match(pathname) ? true : false}
+        current={!!tab.href.match(pathname)}
         href={tab.href}
         tabs={dropItems}
         name={checkIfUserRole(tab.name) ? 'role' : tab.name}
       />
     </>
-  )
+  );
 };
 
-export default InnerDropTabItem
+export default InnerDropTabItem;
