@@ -18,18 +18,30 @@ const gridColumns = [
   {
     header: 'Name',
     accessorKey: 'name',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Type',
     accessorKey: 'type',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Values',
     accessorKey: 'value',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Description',
     accessorKey: 'description',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Updated Date',

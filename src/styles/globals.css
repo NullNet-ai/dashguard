@@ -227,19 +227,3 @@ input[type="number"] {
   display: none; /* Chrome, Safari, and Opera */
 }
 
-/* Styles for added lines */
-.added-line {
-  
-  @apply bg-[#e6ffed] text-[#2b6a30] block p-1 rounded-md;
-}
-
-/* Styles for removed lines */
-.removed-line {
-  background-color: #ffe6e6; /* Light red background for removed lines */
-  color: #a33a3a; /* Dark red text */
-  display: block; /* Ensures the entire line is styled */
-  padding: 0.2rem; /* Optional: Add some spacing */
-  border-radius: 4px; /* Optional: Rounded corners */
-}
-
-
