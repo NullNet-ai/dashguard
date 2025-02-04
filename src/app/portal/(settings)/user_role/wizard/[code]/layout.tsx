@@ -38,7 +38,9 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
     if (stepDetails?.traverse) {
       const { traverse } = stepDetails || {}
 
-      if (Number(currentStep) > Object.keys(traverse).length) {
+      const stepCount = Object.keys(traverse).length;
+
+      if (Number(currentStep) > stepCount + 1) {
         return notFound()
       }
     }
