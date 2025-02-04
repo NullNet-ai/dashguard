@@ -19,9 +19,7 @@ const Sorting = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(GridContext)
-
   const entity = state?.config?.entity
-
   const [data, setData] = useState<any[]>([])
   const [open, setOpen] = useState(false)
 

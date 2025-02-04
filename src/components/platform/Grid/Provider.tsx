@@ -1,17 +1,37 @@
-'use client';
+'use client'
+
+import { Button as Button2, Button as HeadlessBtn } from '@headlessui/react'
+import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import {
   type ColumnDef,
   type ColumnSizingState,
+  // eslint-disable-next-line import/named
   getCoreRowModel,
   type Row,
   type RowSelectionState,
   type SortingState,
   type Updater,
   useReactTable,
-} from '@tanstack/react-table';
-import React, { useEffect, useRef, useState } from 'react';
-import { Checkbox } from '~/components/ui/checkbox';
-import { useToast } from '~/context/ToastProvider';
+} from '@tanstack/react-table'
+import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useMediaQuery } from 'react-responsive'
+
+import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
+import StatusCell from '~/components/ui/status-cell'
+import { useToast } from '~/context/ToastProvider'
+
+import { BulkArchive } from './Action/BulkArchive'
+import { Create } from './Action/Create'
+import { UpdateReportSorting } from './Action/UpdateReportSorting'
+import {
+  ArchiveComponent,
+  DeleteComponent,
+  EditComponent,
+  RestoreComponent,
+} from './DefatultRow/Actions'
+import { type ISearchItem } from './Search/types'
 import {
   type IAction,
   type IConfigGrid,
@@ -19,35 +39,18 @@ import {
   type IPropsGrid,
   type IState,
   type TActionType,
-} from './types';
+} from './types'
+import { constructSearchableFields } from './utils/constructSearchableFields'
 
-import { Button as Button2 } from '@headlessui/react';
-import { PlusCircleIcon } from '@heroicons/react/24/outline';
-import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
-import { useMediaQuery } from 'react-responsive';
-import { Button } from '~/components/ui/button';
-import { Button as HeadlessBtn } from '@headlessui/react';
-import { Create } from './Action/Create';
-import StatusCell from '~/components/ui/status-cell';
-import { BulkArchive } from './Action/BulkArchive';
-import { UpdateReportSorting } from './Action/UpdateReportSorting';
-import {
-  ArchiveComponent,
-  DeleteComponent,
-  EditComponent,
-  RestoreComponent,
-} from './DefatultRow/Actions';
-import { type ISearchItem } from './Search/types';
-import { constructSearchableFields } from './utils/constructSearchableFields';
-
-export const GridContext = React.createContext<ICreateContext>({});
+export const GridContext = React.createContext<ICreateContext>({})
 
 interface IProps extends IPropsGrid {
-  children: React.ReactNode;
-  config: IConfigGrid;
-  data: any;
-  totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  children: React.ReactNode
+  config: IConfigGrid
+  data: any
+  totalCount: number
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
+  onRefetch?: (gridData: any) => void
 }
 
 export default function GridProvider({
@@ -63,6 +66,7 @@ export default function GridProvider({
   defaultAdvanceFilter = [],
   pagination,
   parentType,
+  onRefetch,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -71,63 +75,62 @@ export default function GridProvider({
           id: 'created_date',
           desc: true,
         },
-      ];
+      ]
 
-  const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
+  const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' })
 
   /** @HOOKS */
-  const toast = useToast();
+  const toast = useToast()
 
   /** @STATES */
-  const [createLoading, setCreateLoading] = useState<boolean>(false);
-  const [archiveBulkLoading, setArchiveBulkLoading] = useState<boolean>(false);
+  const [createLoading, setCreateLoading] = useState<boolean>(false)
+  const [archiveBulkLoading, setArchiveBulkLoading] = useState<boolean>(false)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
-  );
-  const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
-  const [colSizing, setColSizing] = useState<ColumnSizingState>({});
-  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
-    useState<boolean>(false);
-  const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  )
+  const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([])
+  const [colSizing, setColSizing] = useState<ColumnSizingState>({})
+  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal]
+    = useState<boolean>(false)
+  const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null)
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table')
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {};
-  });
+    return {}
+  })
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
-  );
-  const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
-    useState<boolean | null>(false);
-  const [bulkActionType, setBulkActionType] = useState<string | null>(null);
+  )
+  const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal]
+    = useState<boolean | null>(false)
+  const [bulkActionType, setBulkActionType] = useState<string | null>(null)
   const [
     playgroundGridIsShowCreateButton,
     setPlaygroundGridIsShowCreateButton,
-  ] = useState<string | null>(null);
-  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
-    useState<string | null>(null);
+  ] = useState<string | null>(null)
+  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction]
+    = useState<string | null>(null)
 
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
-      if (curr?.default) return acc;
-      return [...acc, curr];
-    },
-    [...defaultAdvanceFilter],
-  );
+      if (curr?.default) return acc
+      return [...acc, curr]
+    }, [...defaultAdvanceFilter],
+  )
 
   // use effects
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const createButton = localStorage.getItem(
         'playground_grid_is_show_create_button',
-      );
+      )
       const rowAction = localStorage.getItem(
         'playground_grid_is_show_row_action',
-      );
+      )
 
-      setPlaygroundGridIsShowCreateButton(createButton);
-      setPlaygroundGridIsShowRowAction(rowAction);
+      setPlaygroundGridIsShowCreateButton(createButton)
+      setPlaygroundGridIsShowRowAction(rowAction)
     }
-  }, []);
+  }, [])
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -150,74 +153,74 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
-  };
+  }
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
-    setViewMode(mode);
-  };
+    setViewMode(mode)
+  }
 
   const handleSingleSelect = async (row: any) => {
     if (!row) {
-      toast.error('Row is required');
-      return;
+      toast.error('Row is required')
+      return
     }
-    setRowSelectedRecord([row]);
-  };
+    setRowSelectedRecord([row])
+  }
   const handleMultiSelect = () => {
     if (!Object.keys(rowSelection).length) {
-      toast.error('Row Selected is required');
-      return;
+      toast.error('Row Selected is required')
+      return
     }
 
     const selectedData = (data as any[])?.filter((item) => {
-      return rowSelection[item.id];
-    });
+      return rowSelection[item.id]
+    })
 
-    setRowSelectedRecord(selectedData);
-  };
+    setRowSelectedRecord(selectedData)
+  }
 
   const handleResetSorting = () => {
-    setSorting(_defaultSorting);
-    handleUpdateReportSorting(_defaultSorting);
-  };
+    setSorting(_defaultSorting)
+    void handleUpdateReportSorting(_defaultSorting)
+  }
 
   const handleRemoveSorting = (columnId: string) => {
-    setSorting((prevSorting) =>
-      prevSorting.filter((sort) => sort.id !== columnId),
-    );
-    const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
+    setSorting(prevSorting => prevSorting.filter(sort => sort.id !== columnId),
+    )
+    const updatedSorting = sorting.filter(sort => sort.id !== columnId)
     if (parentType === 'form') {
       return config?.onFetchRecords?.({
         sort: updatedSorting,
-      });
+      })
     }
-    handleUpdateReportSorting(updatedSorting);
-  };
+    void handleUpdateReportSorting(updatedSorting)
+  }
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
-    const _sorting = typeof updater === 'function' ? updater(sorting) : updater;
+    const _sorting = typeof updater === 'function' ? updater(sorting) : updater
     const resolvedSorting = _sorting?.map((sort) => {
-      const sort_key =
-        config?.columns?.find((column: any) => column?.accessorKey === sort.id)
-          ?.sortKey || sort.id;
+      const sort_key
+        = config?.columns?.find((column: any) => column?.accessorKey === sort.id)
+          ?.sortKey || sort.id
       return {
         ...sort,
         sort_key,
-      };
-    });
-
+      }
+    })
+    onRefetch && onRefetch({ sorting: resolvedSorting })
+    if (parentType === 'grid_expansion') return
     if (parentType === 'form') {
       return config?.onFetchRecords?.({
         sort: resolvedSorting,
-      });
+      })
     }
-    UpdateReportSorting({ sorting: resolvedSorting });
-  };
+    void UpdateReportSorting({ sorting: resolvedSorting })
+  }
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
-    setSorting(updater);
-    handleUpdateReportSorting(updater);
-  };
+    setSorting(updater)
+    void handleUpdateReportSorting(updater)
+  }
 
   /** @REFS */
   const selectTableRow = useRef<ColumnDef<any>>({
@@ -226,28 +229,28 @@ export default function GridProvider({
     enableResizing: false,
     header: ({ table }) => (
       <Checkbox
+        aria-label='Select all'
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
+          table.getIsAllPageRowsSelected()
+          || (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        className="border-foreground"
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        className='border-foreground'
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
       />
     ),
     cell: ({ row }) => (
       <Checkbox
-        className="border-foreground"
+        aria-label='Select row'
         checked={row.getIsSelected()}
+        className='border-foreground'
         onCheckedChange={(value) => {
-          row.toggleSelected(!!value);
+          row.toggleSelected(!!value)
         }}
-        aria-label="Select row"
       />
     ),
     enableSorting: false,
     enableHiding: true,
-  });
+  })
 
   const expandTableRow = useRef<ColumnDef<any>>({
     id: 'expand',
@@ -255,17 +258,19 @@ export default function GridProvider({
     enableResizing: false,
     header: '',
     cell: ({ row }: any) => (
-      <HeadlessBtn className="" onClick={() => row.toggleExpanded()}>
-        {row.getIsExpanded() ? (
-          <ChevronUp className="h-6 w-6 text-primary" />
-        ) : (
-          <ChevronRight className="h-6 w-6 text-default/40" />
-        )}
+      <HeadlessBtn onClick={() => row.toggleExpanded()}>
+        {row.getIsExpanded()
+          ? (
+              <ChevronUp className="h-6 w-6 text-primary" />
+            )
+          : (
+              <ChevronRight className="h-6 w-6 text-default/40" />
+            )}
       </HeadlessBtn>
     ),
     enableSorting: false,
     enableHiding: true,
-  });
+  })
 
   const actionRow = useRef<ColumnDef<any>>({
     id: 'action',
@@ -281,70 +286,70 @@ export default function GridProvider({
         'Active',
         'Archived',
         'archived',
-      ].includes(row.original?.status);
+      ].includes(row.original?.status)
 
-      if (!showActions) return null;
+      if (!showActions) return null
 
-      const statusesIncluded = config?.statusesIncluded || [];
-      const selectedRecords = Object.keys(rowSelection);
-      const disableActions =
-        selectedRecords.includes(row.original.id) ||
-        !statusesIncluded?.includes(row.original?.status);
+      const statusesIncluded = config?.statusesIncluded || []
+      const selectedRecords = Object.keys(rowSelection)
+      const disableActions
+        = selectedRecords.includes(row.original.id)
+          || !statusesIncluded?.includes(row.original?.status)
 
       if (config?.actionType === 'single-select') {
         return (
           <Button2
+            className='mx-auto flex cursor-pointer'
             disabled={disableActions}
-            className="mx-auto flex cursor-pointer"
-            type="button"
-            onClick={() => handleSingleSelect(row.original)}
+            type='button'
+            onClick={() => void handleSingleSelect(row.original)}
           >
             <PlusCircleIcon
               className={`h-5 w-5 ${disableActions ? 'text-gray-400' : 'text-primary'}`}
             />
           </Button2>
-        );
+        )
       }
 
       if (config?.actionType === 'multi-select') {
         return (
           <Button
+            className='mx-auto flex'
             disabled={disableActions}
-            className="mx-auto flex"
-            variant={'ghost'}
-            type="button"
-            onClick={() => handleSingleSelect(row.original)}
+            type='button'
+            variant="ghost"
+            onClick={() => void handleSingleSelect(row.original)}
           >
             <FileIcon className="h-5 w-5 text-primary" />
           </Button>
-        );
+        )
       }
 
       return (
         <>
-          <EditComponent row={row} config={config!} />
+          <EditComponent config={config!} row={row} />
           {!['Archived', 'Delete'].includes(row.original?.status) && (
             <ArchiveComponent
-              row={row}
               config={config!}
               open={showArchiveConfirmationModal}
-              setOpen={setShowArchiveConfirmationModal}
               record={row}
+              row={row}
+              setOpen={setShowArchiveConfirmationModal}
               setRecord={setRowToArchive}
             />
           )}
           {row.original?.status === 'Archived' && (
             <>
-              <RestoreComponent row={row} config={config!} />
-              <DeleteComponent row={row} config={config!} />
+              <RestoreComponent config={config!} row={row} />
+              <DeleteComponent config={config!} row={row} />
             </>
           )}
         </>
-      );
+      )
     },
     enableSorting: false,
     enableHiding: true,
-  });
+  })
 
   const actionTypeColumnCondition = (
     viewMode: string,
@@ -352,70 +357,68 @@ export default function GridProvider({
     actionsType?: TActionType,
   ) => {
     const isDefaultFilterArchived = defaultAdvanceFilter?.find(
-      (filter) =>
-        filter?.field === 'status' && filter?.values?.[0] === 'Archived',
-    );
+      filter => filter?.field === 'status' && filter?.values?.[0] === 'Archived',
+    )
     const stateIndex = config?.columns?.findIndex(
-      (column) => column.header === 'State',
-    );
-    let columns = config?.columns || [];
+      column => column.header === 'State',
+    )
+    let columns = config?.columns || []
 
     if (isDefaultFilterArchived) {
       const newColumn = {
         header: 'Previous State',
         accessorKey: 'previous_status',
         cell: ({ row }) => {
-          const value = row?.original?.previous_status;
-          return <StatusCell value={value} />;
+          const value = row?.original?.previous_status
+          return <StatusCell value={value} />
         },
-      } as ColumnDef<any>;
+      } as ColumnDef<any>
 
       if (stateIndex !== -1) {
         columns = [
           ...columns.slice(0, stateIndex + 1),
           newColumn,
           ...columns.slice(stateIndex + 1),
-        ];
-      } else {
-        columns = [...columns, newColumn];
+        ]
+      }
+      else {
+        columns = [...columns, newColumn]
       }
     }
 
     // Exclude selectTableRow and actionRow if view mode is 'card'
     if (viewMode === 'card') {
-      return [...columns];
+      return [...columns]
     }
 
     switch (actionsType) {
       case 'single-select':
         if (config?.disableDefaultAction) {
-          return [...columns];
+          return [...columns]
         }
 
-        return [...columns, actionRow?.current];
+        return [...columns, actionRow?.current]
       default:
         if (config?.enableRowExpansion) {
-          columns.unshift(expandTableRow?.current);
+          columns.unshift(expandTableRow?.current)
         }
         if (config?.enableRowSelection) {
-          columns.unshift(selectTableRow?.current);
+          columns.unshift(selectTableRow?.current)
         }
         if (!config?.disableDefaultAction) {
-          columns.push(actionRow?.current);
+          columns.push(actionRow?.current)
         }
 
-        return columns;
+        return columns
     }
-  };
+  }
 
   /** @HOOKS */
   const table = useReactTable({
     data,
-    getRowId: (row) => row.id,
+    getRowId: row => row.id,
     columns: actionTypeColumnCondition(
-      viewMode,
-      defaultAdvanceFilter,
-      config?.actionType,
+      viewMode, defaultAdvanceFilter, config?.actionType,
     ),
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
@@ -431,79 +434,81 @@ export default function GridProvider({
       rowSelection,
       columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
         // @ts-expect-error - No need to check for acc
-        acc[curr] = !isMobileOrTablet;
-        return acc;
+        acc[curr] = !isMobileOrTablet
+        return acc
       }, columnVisibility),
     },
     enableMultiSort: true,
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
-  });
+  })
 
   /** @ACTIONS */
   const handleCreate = async () => {
     try {
-      setCreateLoading(true);
+      setCreateLoading(true)
       if (!config?.entity) {
-        toast.error('Entity is required');
-        setCreateLoading(false);
-        return;
+        toast.error('Entity is required')
+        setCreateLoading(false)
+        return
       }
       await Create({
         entity: config?.entity,
         defaultValues: config?.defaultValues,
         enableAutoCreate: config?.enableAutoCreate,
         is_from_grid: true,
-      });
-    } catch (error) {
-      console.error('An error occurred while creating a record', error);
-      setCreateLoading(false);
+      })
     }
-  };
+    catch (error) {
+      console.error('An error occurred while creating a record', error)
+      setCreateLoading(false)
+    }
+  }
   const handleArchiveBulkRecord = async () => {
     try {
-      setArchiveBulkLoading(true);
-      const selectedRows = table?.getSelectedRowModel().rows;
-      if (!selectedRows?.length) return;
+      setArchiveBulkLoading(true)
+      const selectedRows = table?.getSelectedRowModel().rows
+      if (!selectedRows?.length) return
       if (config?.archiveBulkRecordCustomAction) {
         config?.archiveBulkRecordCustomAction({
           config,
           selected_rows: selectedRows,
-        });
-        return;
+        })
+        return
       }
-      const record_ids = selectedRows.map((row) => row?.id);
-      await BulkArchive({ entity: config?.entity, record_ids });
-      setArchiveBulkLoading(false);
-      table?.resetRowSelection();
-      setShowBulkActionConfirmationModal(false);
-      setBulkActionType(null);
-    } catch (error) {
-      console.error('An error occurred while creating a record', error);
-      setArchiveBulkLoading(false);
+      const record_ids = selectedRows.map(row => row?.id)
+      await BulkArchive({ entity: config?.entity, record_ids })
+      setArchiveBulkLoading(false)
+      table?.resetRowSelection()
+      setShowBulkActionConfirmationModal(false)
+      setBulkActionType(null)
     }
-  };
+    catch (error) {
+      console.error('An error occurred while creating a record', error)
+      setArchiveBulkLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (!onSelectRecords) return;
-    if (rowSelectedRecord?.length === 0) return;
-    onSelectRecords(rowSelectedRecord);
-  }, [onSelectRecords, rowSelectedRecord]);
+    if (!onSelectRecords) return
+    if (rowSelectedRecord?.length === 0) return
+    onSelectRecords(rowSelectedRecord)
+  }, [onSelectRecords, rowSelectedRecord])
 
   const state_context = {
     config: {
       ...config,
       columns: [
         selectTableRow?.current,
-        ...config?.columns,
         actionRow?.current,
+        ...config?.columns ?? [],
       ],
     },
     parentType,
     data,
     table,
     selectTableRow,
-    totalCount: totalCount,
+    totalCount,
     createLoading,
     archiveBulkLoading,
     showArchiveConfirmationModal,
@@ -517,7 +522,7 @@ export default function GridProvider({
     showBulkActionConfirmationModal,
     bulkActionType,
     pagination,
-  } as IState;
+  } as IState
   const actions = {
     handleCreate,
     handleArchiveBulkRecord,
@@ -531,16 +536,16 @@ export default function GridProvider({
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
-  } as IAction;
+  } as IAction
 
   return (
     <GridContext.Provider
       value={{
         state: state_context,
-        actions: actions,
+        actions,
       }}
     >
       {children}
     </GridContext.Provider>
-  );
+  )
 }

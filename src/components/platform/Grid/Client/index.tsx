@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 
-import { Loader } from '~/components/ui/loader'
-import { useSidebar } from '~/components/ui/sidebar'
-import useWindowSize from '~/hooks/use-resize'
-import { remToPx } from '~/utils/fetcher'
+import { Loader } from '~/components/ui/loader';
+import { useSidebar } from '~/components/ui/sidebar';
+import useWindowSize from '~/hooks/use-resize';
+import { remToPx } from '~/utils/fetcher';
 
-import GridProvider from '../Provider'
-import { type IPropsGrid } from '../types'
+import GridProvider from '../Provider';
+import { type IPropsGrid } from '../types';
 
-import { GridDesktop, GridMobile } from './views'
-import GridMobileForm from './views/GridMobileForm'
+import { GridDesktop, GridMobile } from './views';
+import GridMobileForm from './views/GridMobileForm';
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
@@ -26,6 +26,7 @@ interface IClientProps extends IPropsGrid {
   }
   isLoading?: boolean
   gridLevel?: number
+  onRefetch?: (gridData: any) => void
 }
 
 function MainClient({
@@ -47,13 +48,14 @@ function MainClient({
   pagination,
   isLoading,
   gridLevel,
+  onRefetch,
 }: IClientProps) {
-  const { open } = useSidebar()
-  const { width } = useWindowSize()
-  const newWidth = width <= 0 ? 1920 : width
-  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6)
+  const { open } = useSidebar();
+  const { width } = useWindowSize();
+  const newWidth = width <= 0 ? 1920 : width;
+  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6);
 
-  if (isLoading) {
+  if (isLoading && !data?.length) {
     return (
       <div
         className="flex h-full items-center justify-center"
@@ -66,7 +68,7 @@ function MainClient({
           className="bg-primary text-primary"
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -82,6 +84,7 @@ function MainClient({
       defaultSorting={defaultSorting}
       defaultAdvanceFilter={defaultAdvanceFilter}
       pagination={pagination}
+      onRefetch={onRefetch}
     >
       <div className="hidden lg:grid">
         <GridDesktop
@@ -109,7 +112,7 @@ function MainClient({
             )}
       </div>
     </GridProvider>
-  )
+  );
 }
 
-export default MainClient
+export default MainClient;

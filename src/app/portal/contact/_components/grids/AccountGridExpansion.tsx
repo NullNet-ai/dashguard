@@ -1,10 +1,9 @@
 'use client'
-import React, { useEffect } from 'react'
-
 import Grid from '~/components/platform/Grid/Client'
 import StatusCell from '~/components/ui/status-cell'
-import { api } from '~/trpc/react'
 
+import ErrorPage from './ErrorPage'
+import useFetchData from './hooks/useFetchData'
 import OrganizationGridExpansion from './OrganizationGridExpansion'
 
 const AccountGridExpansion = (props: any) => {
@@ -63,7 +62,8 @@ const AccountGridExpansion = (props: any) => {
       values: [rowData.id],
     },
   ]
-  const { data, isLoading, refetch } = api.grid.items.useQuery({
+
+  const { fetchData, data, error, isLoading } = useFetchData({
     current: 0,
     limit: 100,
     entity: 'organization_account',
@@ -72,36 +72,40 @@ const AccountGridExpansion = (props: any) => {
     advance_filters: defaultFilter,
   })
 
-  useEffect(() => {
-    void refetch()
-  }, [])
-
   const { items = [], totalCount = 0 } = data ?? {}
 
+  if (error) return <ErrorPage refetch={fetchData} />
+
   return (
-    <Grid
-      isLoading={isLoading}
-      totalCount={totalCount || 0}
-      data={items}
-      defaultSorting={defaultSorting}
-      // defaultAdvanceFilter={defaultAdvanceFilter || []}
-      // advanceFilter={filters?.reportFilters || []}
-      sorting={defaultSorting || []}
-      pagination={pagination}
-      config={{
-        entity: 'organization_account',
-        title: 'Accounts',
-        columns: gridColumns,
-        disableDefaultAction: true,
-        enableRowClick: false,
-        enableAutoCreate: false,
-        enableRowSelection: false,
-        enableRowExpansion: true,
-        rowExpansionBuilder: <OrganizationGridExpansion />,
-      }}
-      parentType="grid_expansion"
-    />
+    <>
+      <p>Accounts</p>
+      <Grid
+        config={{
+          entity: 'organization_account',
+          title: 'Accounts',
+          columns: gridColumns,
+          disableDefaultAction: true,
+          enableRowClick: false,
+          enableAutoCreate: false,
+          enableRowSelection: false,
+          enableRowExpansion: true,
+          rowExpansionBuilder: <OrganizationGridExpansion />,
+        }}
+        data={items}
+        isLoading={isLoading}
+        defaultSorting={defaultSorting}
+        // defaultAdvanceFilter={defaultAdvanceFilter || []}
+        // advanceFilter={filters?.reportFilters || []}
+        pagination={pagination}
+        parentType='grid_expansion'
+        sorting={defaultSorting || []}
+        totalCount={totalCount || 0}
+        onRefetch={(args) => {
+          fetchData(args);
+        }}
+      />
+    </>
   )
-};
+}
 
 export default AccountGridExpansion
