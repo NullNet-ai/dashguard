@@ -67,7 +67,7 @@ const Switch = React.forwardRef<
         >
           {leftIcon && (
             <div className={cn(
-              "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-3 flex items-center justify-center transition-opacity duration-300",
               iconClassName,
               checked ? "opacity-0" : "opacity-100"
             )}>
@@ -76,7 +76,7 @@ const Switch = React.forwardRef<
           )}
           {rightIcon && (
             <div className={cn(
-              "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-3 flex items-center justify-center transition-opacity duration-300",
               iconClassName,
               checked ? "opacity-100" : "opacity-0"
             )}>
