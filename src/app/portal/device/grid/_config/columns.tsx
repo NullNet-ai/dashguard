@@ -2,7 +2,7 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import StatusCell from "~/components/ui/status-cell";
-import { GridBarGraph } from "../../_components/chart/GridBarGraph";
+import { GridBarGraph } from "../../_components/charts/GridBarGraph";
 
 const gridColumns = [
   {
