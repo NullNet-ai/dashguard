@@ -25,25 +25,25 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
       return notFound()
     }
 
-    const { status, code } = record_details?.data || {}
+    const { status } = record_details?.data || {}
 
     if (status.toLowerCase() === 'active') {
       return notFound()
     }
 
-    const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
+    // const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
     /* This is needed to be check to fix error upon redirect
     from form filter newly created record as draft since it still
     doesn't have stepDetails saved on redis */
-    if (stepDetails?.traverse) {
-      const { traverse } = stepDetails || {}
+    // if (stepDetails?.traverse) {
+    //   const { traverse } = stepDetails || {}
 
-      const stepCount = Object.keys(traverse).length;
+    //   const stepCount = Object.keys(traverse).length;
 
-      if (Number(currentStep) > stepCount + 1) {
-        return notFound()
-      }
-    }
+    //   if (Number(currentStep) > stepCount + 1) {
+    //     return notFound()
+    //   }
+    // }
   }
 
   return (
