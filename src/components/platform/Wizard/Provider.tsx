@@ -4,9 +4,9 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useEventEmitter } from "~/context/EventEmitterProvider";
 import { useToast } from "~/context/ToastProvider";
 import {
-  ICallbackHandler,
-  Summary,
-  TStepsNavigationButtons,
+  type ICallbackHandler,
+  type Summary,
+  type TStepsNavigationButtons,
   type IAction,
   type ICreateContext,
   type IState,
@@ -120,6 +120,7 @@ export default function WizardProvider({
       },
       [],
     );
+
     if (!filtered_handlers.length) {
       handleIncrementStep(setNextLoading);
     }

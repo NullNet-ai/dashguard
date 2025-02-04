@@ -3,6 +3,7 @@ const stepLabels = {
   2: "Contact Details",
   3: "Category Details",
   4: "Organization",
-  5: "Confirmation",
+  5: "Account Details",
+  6: "Confirmation",
 };
 export default stepLabels;
