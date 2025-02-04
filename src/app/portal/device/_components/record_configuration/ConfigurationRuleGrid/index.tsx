@@ -1,56 +1,80 @@
-import { api } from "~/trpc/server";
-import gridColumns from "./_config/columns";
-import Grid from "~/components/platform/Grid/Server";
-import { headers } from "next/headers";
-import { defaultSorting } from "./_config/sorting";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import { headers } from 'next/headers'
+import React from 'react'
+
+import Grid from '~/components/platform/Grid/Server'
+import { getGridCacheData } from '~/lib/grid-get-cache-data'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
+import { api } from '~/trpc/server'
+
+import gridColumns from './_config/columns'
+import { defaultSorting } from './_config/sorting'
 
 export default async function ConfigurationRuleGrid({
   searchParams = {},
 }: {
   searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
+    page?: string
+    perPage?: string
+  }
 }) {
-  const { sorting } = (await getGridCacheData()) ?? {};
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , main_entity] = pathname.split("/");
+  const { sorting } = (await getGridCacheData()) ?? {}
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , main_entity,,code] = pathname.split('/')
   const _pluck = [
-    "id",
-    "code",
-    "created_date",
-    "updated_date",
-    "status",
-    "instance_name",
-    "created_by",
-    "updated_by",
-    "model",
-  ];
+    'device_id',
+    'type',
+    'device_rule_action',
+    'protocol',
+    'source_port',
+    'source_addr',
+    'destination_port',
+    'destination_addr',
+    'description',
+    'device_rule_status',
+    'created_by',
+    'updated_by',
+    'created_date',
+    'updated_date',
+    'status',
+  ]
 
-  // const { items = [], totalCount } = await api.device.mainGrid({
-  //   entity: main_entity!,
-  //   pluck: _pluck,
-  //   current: +(searchParams.page ?? "0"),
-  //   limit: +(searchParams.perPage ?? "100"),
-  //   sorting: sorting?.length ? sorting : defaultSorting,
-  // });
+  const record = await api.record.getByCode({
+    main_entity: main_entity!,
+    id: code!,
+    pluck_fields: ['id'],
+  })
+
+  const record_id = record?.data?.id
+  const { items = [], totalCount } = await api.deviceRule.mainGrid({
+    entity: 'device_rules',
+    pluck: _pluck,
+    current: +(searchParams.page ?? '0'),
+    limit: +(searchParams.perPage ?? '100'),
+    sorting: sorting?.length ? sorting : defaultSorting,
+    advance_filters: createAdvancedFilter({
+      device_id: record_id,
+      status: 'Active',
+    }),
+  })
 
   return (
     <Grid
-      totalCount={0}
-      data={[]}
-      defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
       config={{
         entity: main_entity!,
-        title: "Device",
+        title: 'Rules',
         columns: gridColumns,
         defaultValues: {
-          entity_prefix: "DV",
+          entity_prefix: 'DR',
         },
+        disableDefaultAction: true,
+        hideCreateButton: true,
+      
       }}
+      data={items}
+      defaultSorting={defaultSorting}
+      sorting={sorting?.length ? sorting : []}
+      totalCount={totalCount}
     />
-  );
+  )
 }

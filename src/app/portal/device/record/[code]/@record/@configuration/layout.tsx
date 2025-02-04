@@ -1,8 +1,89 @@
-import React from "react";
+'use client'
 
-const RecordLayout: React.FC<any> = (props) => {
-  const { params, children, ...rest } = props;
-  return <div className="space-y-2">{Object.values(rest)}</div>;
-};
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import React, { Suspense } from 'react'
 
-export default RecordLayout;
+import LinkTab from '~/components/platform/LinkTab'
+import { useTabPersistence } from '~/components/platform/LinkTab/hooks/useTabPersistence'
+
+interface RecordLayoutProps {
+  params: { code: string }
+  searchParams: { current_tab?: string, tab?: string }
+  rules: React.ReactNode
+  aliases: React.ReactNode
+  raw_data: React.ReactNode
+}
+
+const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
+  const { params, rules, aliases, raw_data } = props || {}
+  const searchParams = useSearchParams()
+  const pathName = usePathname()
+  const currentTab = searchParams.get('sub_tab')
+  const router = useRouter()
+  const { currentPath } = useTabPersistence({
+    code: params.code,
+    prefix: 'dashboard-tab',
+  })
+
+  const baseUrl = `${pathName}?current_tab=configuration`
+  const tabs = [
+    {
+      id: 'rules',
+      label: 'Rules',
+      href: `${baseUrl}&sub_tab=rules`,
+    },
+    {
+      id: 'aliases',
+      label: 'Aliases',
+      href: `${baseUrl}&sub_tab=aliases`,
+    },
+    {
+      id: 'raw_data',
+      label: 'Raw Data',
+      href: `${baseUrl}&sub_tab=raw_data`,
+    },
+  ]
+
+  // Redirect to users tab if current tab is invalid
+  // useEffect(() => {
+  //   if (!currentTab || !['dashboard', 'users'].includes(currentTab)) {
+  //     router.replace(`${baseUrl}?current_tab=dashboard&tab=dashboard`);
+  //   }
+  // }, [currentTab]);
+
+  const Content = React.useMemo(() => {
+    const renderContent = () => {
+      switch (currentTab) {
+        case 'rules':
+          return <div style={{ display: 'block' }}>{rules}</div>
+        case 'aliases':
+          return <div style={{ display: 'block' }}>{aliases}</div>
+        case 'raw_data':
+          return <div style={{ display: 'block' }}>{raw_data}</div>
+        default:
+          router.push(`${baseUrl}&sub_tab=rules`)
+          return null
+      }
+    }
+
+    return (
+      <Suspense fallback={<div>Loading...</div>}>{renderContent()}</Suspense>
+    )
+  }, [searchParams, rules, aliases, baseUrl])
+
+  return (
+    <div className="space-y-4">
+      <LinkTab
+        defaultHref={`${baseUrl}?current_tab=dashboard&tab=users`}
+        orientation="horizontal"
+        persistKey={currentPath}
+        size="sm"
+        tabs={tabs}
+        variant="default"
+      />
+      {Content}
+    </div>
+  )
+}
+
+export default RecordLayout
