@@ -20,11 +20,17 @@ interface IData {
   totalPages: number
 }
 
-const useFetchData = (initialArgs: IFetchDataParams) => {
+interface IQueryOptions {
+  router: string
+  resolver: string
+}
+const useFetchData = (initialArgs: IFetchDataParams, query_options?: IQueryOptions) => {
   const [args, setArgs] = useState(initialArgs)
   const [currentData, setCurrentData] = useState<IData>()
-
-  const { data, isLoading, error, refetch } = api.grid.items.useQuery({
+  const { router = 'grid', resolver = 'items' } = query_options ?? {}
+  // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+  // eslint-disable-next-line @stylistic/max-len, @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
+  const { data, isLoading, error, refetch } = api?.[router]?.[resolver].useQuery({
     current: 0,
     limit: 100,
     pluck: args.pluck,

@@ -1,17 +1,18 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
-import { Loader } from '~/components/ui/loader';
-import { useSidebar } from '~/components/ui/sidebar';
-import useWindowSize from '~/hooks/use-resize';
-import { remToPx } from '~/utils/fetcher';
+import { Loader } from '~/components/ui/loader'
+import { useSidebar } from '~/components/ui/sidebar'
+import useWindowSize from '~/hooks/use-resize'
+import { remToPx } from '~/utils/fetcher'
 
-import GridProvider from '../Provider';
-import { type IPropsGrid } from '../types';
+import ErrorPage from '../common/ErrorPage'
+import GridProvider from '../Provider'
+import { type IPropsGrid } from '../types'
 
-import { GridDesktop, GridMobile } from './views';
-import GridMobileForm from './views/GridMobileForm';
+import { GridDesktop, GridMobile } from './views'
+import GridMobileForm from './views/GridMobileForm'
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
@@ -27,6 +28,7 @@ interface IClientProps extends IPropsGrid {
   isLoading?: boolean
   gridLevel?: number
   onRefetch?: (gridData: any) => void
+  isError?: boolean
 }
 
 function MainClient({
@@ -38,7 +40,7 @@ function MainClient({
   initialSelectedRecords = {},
   height,
   hideSearch = true,
-  showPagination = true,
+  showPagination,
   advanceFilter,
   sorting,
   showAction,
@@ -49,70 +51,82 @@ function MainClient({
   isLoading,
   gridLevel,
   onRefetch,
+  isError = false,
 }: IClientProps) {
-  const { open } = useSidebar();
-  const { width } = useWindowSize();
-  const newWidth = width <= 0 ? 1920 : width;
-  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6);
+  const { open } = useSidebar()
+  const { width } = useWindowSize()
+  const newWidth = width <= 0 ? 1920 : width
+  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6)
 
   if (isLoading && !data?.length) {
     return (
       <div
-        className="flex h-full items-center justify-center"
+        className='flex h-full items-center justify-center'
         style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <Loader
-          size="md"
-          label=""
-          variant="circularShadow"
           className="bg-primary text-primary"
+          label=""
+          size="md"
+          variant="circularShadow"
         />
       </div>
-    );
+    )
+  }
+  if (isError) {
+    return (
+      <div
+        className='flex h-full items-center justify-center'
+        style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
+      >
+        <ErrorPage refetch={() => onRefetch?.({})} />
+      </div>
+    )
   }
 
   return (
     <GridProvider
-      totalCount={totalCount}
-      onSelectRecords={onSelectRecords}
       advanceFilter={advanceFilter}
-      data={data}
       config={config}
+      data={data}
+      defaultAdvanceFilter={defaultAdvanceFilter}
+      defaultSorting={defaultSorting}
       initialSelectedRecords={initialSelectedRecords}
+      pagination={pagination}
       parentType={parentType}
       sorting={sorting}
-      defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter}
-      pagination={pagination}
+      totalCount={totalCount}
       onRefetch={onRefetch}
+      onSelectRecords={onSelectRecords}
     >
-      <div className="hidden lg:grid">
+      <div className='hidden lg:grid'>
         <GridDesktop
-          parentType={parentType}
-          hideSearch={hideSearch}
           height={height}
-          showAction={showAction}
+          hideSearch={hideSearch}
           parentProps={parentProps}
+          parentType={parentType}
+          showAction={showAction}
+          showPagination={showPagination ?? false}
         />
       </div>
 
-      <div className="flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]">
+      <div className='flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]'>
         {parentType === 'grid'
           ? (
               <GridMobile
-                shownPagination={showPagination}
                 parentType={parentType}
+                shownPagination={showPagination ?? true}
               />
             )
           : (
               <GridMobileForm
-                shownPagination={showPagination}
                 parentType={parentType}
+                shownPagination={showPagination ?? true}
               />
             )}
       </div>
     </GridProvider>
-  );
+  )
 }
 
-export default MainClient;
+export default MainClient

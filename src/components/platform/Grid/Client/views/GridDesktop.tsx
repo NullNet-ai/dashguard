@@ -24,6 +24,7 @@ interface IGridDesktopProps {
     open?: boolean
     summary?: boolean
   }
+  showPagination?: boolean
 }
 
 function GridDesktop({
@@ -32,6 +33,7 @@ function GridDesktop({
   height,
   showAction,
   parentProps,
+  showPagination = false,
 }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext)
 
@@ -132,7 +134,7 @@ function GridDesktop({
             <ScrollBar orientation='horizontal' />
           </ScrollArea>
         </div>
-        {parentType === 'grid'
+        {parentType === 'grid' || showPagination
           ? (
               <CardFooter>
                 <Pagination />
