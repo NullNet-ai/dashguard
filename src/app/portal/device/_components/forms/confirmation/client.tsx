@@ -51,7 +51,6 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
   }, [loading]);
 
   useEffect(() => {
-    if(loading) return 
     //This is a temporary solution to simulate the connection establishment
     const interval = setInterval(async () => {
       const { data } = await fetchConnectionStatus.refetch();
@@ -59,6 +58,7 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
 
       if (is_connection_established) {
         setLoading(false);
+        clearInterval(interval);
       }
     }, 2000);
 
