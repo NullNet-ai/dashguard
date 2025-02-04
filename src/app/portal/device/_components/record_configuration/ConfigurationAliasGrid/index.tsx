@@ -86,6 +86,14 @@ export default async function ConfigurationAliasGrid({
         },
         disableDefaultAction: true,
         hideCreateButton: true,
+        searchConfig: {
+          router: 'deviceAlias',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: 'device_aliases',
+            pluck: _pluck,
+          },
+        },
       }}
       data={items}
       defaultSorting={defaultSorting}

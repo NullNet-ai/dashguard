@@ -34,6 +34,11 @@ export const deviceRuleRouter = createTRPCRouter({
         organization_account_updated_by: ['contact_id', 'id'],
         device_organization_account_created_by: ['contact_id', 'id'],
         updated_by: ['first_name', 'last_name', 'id'],
+        created_by: [
+          'first_name',
+          'last_name',
+          'id',
+        ],
         device_created_by: ['id', 'instance_name'],
         device_updated_by: ['id', 'instance_name'],
         devices: [
@@ -94,6 +99,7 @@ export const deviceRuleRouter = createTRPCRouter({
             to: {
               entity: 'contacts',
               field: 'id',
+              alias: 'created_by',
             },
             from: {
               entity: 'organization_accounts',
@@ -193,16 +199,15 @@ export const deviceRuleRouter = createTRPCRouter({
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
-          updated_by,
-          contacts,
+          updated_by, created_by,
           ...rest
         } = item
 
         return {
           ...entity_data,
           ...rest,
-          created_by: contacts?.length
-            ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
+          created_by: created_by?.length
+            ? `${created_by?.[0].first_name} ${created_by?.[0].last_name}`
             : null,
           updated_by: updated_by?.length
             ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
