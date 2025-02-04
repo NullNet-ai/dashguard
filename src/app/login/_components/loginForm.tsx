@@ -14,11 +14,9 @@ import { Form, FormField, FormMessage } from '~/components/ui/form'
 import LoginSubmit from '../actions/loginSubmit'
 
 const formSchema = z.object({
-  email: z.string({ required_error: 'Please enter your email address.' })
-    .email('Please enter a valid email address.'),
-  password: z.string().min(1, { message: 'Please enter your password.' })
-    .min(5, 'Password must contain at least 5 characters.'),
-})
+  username: z.string().min(1, { message: 'Please enter your username.' }),
+  password: z.string().min(1, { message: 'Please enter your password.' }).min(5, 'Password must contain at least 5 characters.'),
+});
 
 export default function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -51,18 +49,18 @@ export default function LoginForm() {
         }}
       >
         <FormField
+          name="username"
           control={form.control}
-          name="email"
           render={(formProps) => {
             return (
               <FormInput
                 fieldConfig={{
-                  id: 'email',
-                  name: 'email',
-                  label: 'Email Address',
+                  id: 'username',
+                  name: 'username',
+                  label: 'Username',
                   required: true,
-                  placeholder: 'Enter valid email address',
-                  type: 'email',
+                  placeholder: 'Enter your username',
+                  type: 'text',
                 }}
                 form={form}
                 formKey='Login'
