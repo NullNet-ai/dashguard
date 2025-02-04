@@ -41,7 +41,7 @@ const InnerDropTabItem = ({ tab, pathname, dropItems, isActive }: InnerTabitemPr
             ? 'role'
             : tab.name.split(' ').join('-').toLowerCase()
         }
-        href={tab.href}
+        href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
         aria-current={isActive ? 'page' : undefined}
         className={cn(
           isActive ? 'text-primary' : 'text-gray-500', 'whitespace-nowrap px-4 pr-1 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',

@@ -2,7 +2,7 @@
 
 import Cookies from 'js-cookie'
 import { ChevronDownIcon } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import {
@@ -29,6 +29,9 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width
   const { open } = useSidebar()
   const newPathname = usePathname()
+  const searchParams = useSearchParams()
+  const isDropdown = searchParams.get('dropdown') === 'true'
+
   const [application, code] = (newPathname || '').split('/').slice(3)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
 
@@ -55,16 +58,23 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     };
   }, [])
 
+  // Add this state to handle client-side rendering
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const sortTabsActiveWillSecond = useMemo(() => {
+    if (!isClient) return tabs
     if (tabs.length) {
       const activeIndex = tabs.findIndex(a => a.name === code)
-      const prevCurrent = typeof window !== 'undefined' ? Cookies.get('prevCurrent') : null
+      const prevCurrent = Cookies.get('prevCurrent')
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
 
       if (activeIndex !== -1) {
         const result = [...tabs]
         const activeTab = result.splice(activeIndex, 1)[0]
-        // Handle previous active tab if exists in tabs
         if (prevActiveIndex !== -1 && prevCurrent !== code) {
           const prevActiveTab = result.splice(prevActiveIndex > activeIndex ? prevActiveIndex - 1 : prevActiveIndex, 1)[0]
           result.splice(1, 0, activeTab)
@@ -73,59 +83,44 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
         else {
           result.splice(1, 0, activeTab)
         }
+
+        if (isDropdown) {
+          const lastItem = Cookies.get('lastInnerTabItem')
+          const lastItemIndex = result.findIndex(a => a.name === lastItem)
+
+          if (lastItemIndex !== -1) {
+            const itemValue = result[lastItemIndex]
+            result.splice(lastItemIndex, 1)
+            result.push(itemValue)
+          }
+        }
+
         return result
       }
+
       return tabs
     }
     return tabs
-  }, [tabs, code])
+  }, [tabs, code, isClient])
 
   const newItems = useMemo(() => {
-    if (!winWidth) return sortTabsActiveWillSecond
+    if (!isClient || !winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
     const showItem = max_width / 88
-    const sliceCount = Math.floor(showItem)
+    const result = sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
+    const lastItem = result[result.length - 1]
+    Cookies.set('lastInnerTabItem', lastItem.name)
 
-    // If clicked item is from dropdown, handle reordering
-    const isFromDropdown = sortTabsActiveWillSecond.findIndex(tab => tab.name === code) >= sliceCount
-    if (isFromDropdown && code) {
-      // Create new array without modifying original
-      const reorderedTabs = [...sortTabsActiveWillSecond]
-      const clickedIndex = reorderedTabs.findIndex(tab => tab.name === code)
-
-      // Store items we need to move
-      const clickedItem = reorderedTabs[clickedIndex]
-      const lastVisibleItem = reorderedTabs[sliceCount - 1]
-
-      // Create new array with desired order
-      const newOrder = [
-        reorderedTabs[0],
-        clickedItem,
-        ...reorderedTabs.slice(1, sliceCount - 1),
-        lastVisibleItem,
-      ]
-
-      return [...newOrder.slice(0, sliceCount)]
-    }
-
-    return sortTabsActiveWillSecond.slice(0, sliceCount)
+    return result
   }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
 
   const dropdownItems = useMemo(() => {
     if (!winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
     const showItem = max_width / 88
-    const sliceCount = Math.floor(showItem)
 
-    const isFromDropdown = sortTabsActiveWillSecond.findIndex(tab => tab.name === code) >= sliceCount
-    if (isFromDropdown && code) {
-      const visibleItems = newItems
-      return sortTabsActiveWillSecond.filter(tab => !visibleItems.find(item => item.name === tab.name)
-      )
-    }
-
-    return sortTabsActiveWillSecond.slice(sliceCount)
-  }, [sortTabsActiveWillSecond, newItems, code, winWidth, sidebar_width])
+    return sortTabsActiveWillSecond.slice(Math.floor(showItem))
+  }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
 
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
 
