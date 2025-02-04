@@ -1,5 +1,5 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import {
+import React, {
   type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
@@ -11,26 +11,27 @@ import { type Field, type UseFormReturn } from "react-hook-form";
 
 import { type TActionType } from "~/components/platform/Grid/types";
 import {
-  TDisplayType,
+  type DateGranularity,
+  type DateTimeLocalInputProps,
+  type NaturalLanguageInputProps,
+} from "~/components/ui/smart-datetime-picker";
+import { type SwitchProps } from "~/components/ui/switch";
+import { type TimePickerProps } from "~/components/ui/time-picker";
+
+import {
+  type TDisplayType,
   type DateTimeGranularity,
   type TFormSchema,
   type TFormType,
   type TSelectionType,
 } from "./types";
-import {
-  type DateGranularity,
-  type DateTimeLocalInputProps,
-  type NaturalLanguageInputProps,
-} from "~/components/ui/smart-datetime-picker";
-import { type TimePickerProps } from "~/components/ui/time-picker";
-import { type RawSwitchProps } from "~/components/ui/switch";
 
 interface OptionType {
   label: string;
   value: string;
 }
 
-type DraggableConfig = {
+interface DraggableConfig {
   fields: IField & {
     selectOptions?: ISelectOptions[];
     radioOptions?: IRadioOptions[];
@@ -45,17 +46,17 @@ type DraggableConfig = {
       | "smart-date"
       | "time-picker";
   };
-};
+}
 
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
 };
 
-type MultiFieldOption = {
+interface MultiFieldOption {
   label: string;
   fieldType: "input" | "select" | "radio" | "checkbox";
   options?: OptionType[];
-};
+}
 
 interface IField {
   id: string;
@@ -83,12 +84,12 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
-  switchConfig?: RawSwitchProps;
+  switchConfig?: SwitchProps;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   multiFieldConfig?: MultiFieldConfig;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
-  customRender?: JSX.Element;
+  customRender?: React.JSX.Element;
   min?: number;
   max?: number;
   step?: number;
@@ -146,6 +147,9 @@ interface IField {
   selectOnCreateValidate?: (
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
+  showPasswordStrengthBar?: boolean;
+  hasComplexValidation?: boolean;
+  isCustomFormField?: boolean; // This prop is used to determine if the field is a custom form field.
 }
 
 interface ISelectOptions {
@@ -240,7 +244,7 @@ interface IFilterGridConfig {
     form: any,
     onSubmitFormGrid?: any,
   ) => any;
-  renderComponentSelected?: (record: any) => JSX.Element;
+  renderComponentSelected?: (record: any) => React.JSX.Element;
   onSelectRecords?: ({
     rows,
     main_entity_id,
@@ -312,15 +316,15 @@ interface IPropsForms {
   formKey: string;
   persistTimeout?: number;
   fields: IField[];
-  buttonHeaderRender?: JSX.Element;
+  buttonHeaderRender?: React.JSX.Element;
   defaultValues?: Record<string, any>;
   formSchema: TFormSchema;
   currencyInputOptions?: Record<string, OptionType[]>;
   selectOptions?: Record<string, ISelectOptions[]>;
   // multiSelectOptions?: Record<string, Option[]>;
-  multiSelectOptions?: Record<string, any[]>; // TODO: remove
+  multiSelectOptions?: Record<string, any[]>;
   // multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
-  multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>; // TODO: remove
+  multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>;
   radioOptions?: Record<string, IRadioOptions[]>;
   checkboxOptions?: Record<string, ICheckboxOptions[]>;
   fetching?: boolean;
@@ -342,7 +346,7 @@ interface IPropsForms {
     displayType: TDisplayType,
     handleUpdateDisplayType: (type: TDisplayType) => void,
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
-  ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
+  ) => ReactElement<any> | ReactElement<any>[];
   features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];

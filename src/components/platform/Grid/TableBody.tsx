@@ -1,13 +1,13 @@
-import { flexRender } from "@tanstack/react-table";
-import React, { useContext } from "react";
-import { TableBody, TableCell, TableRow } from "~/components/ui/table";
-import { cn } from "~/lib/utils";
-import { testIDFormatter } from "~/utils/formatter";
-import { getCommonPinningStyles } from "./ColumnPining";
-import { GridContext } from "./Provider";
-import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
-import ArchiveConfirmationModal from "./views/ArchiveConfirmationModal";
-import BulkActionConfirmationModal from "./views/common/BulkActionConfirmationModal";
+import { flexRender } from '@tanstack/react-table';
+import React, { useContext } from 'react';
+import { TableBody, TableCell, TableRow } from '~/components/ui/table';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
+import { getCommonPinningStyles } from './ColumnPining';
+import { GridContext } from './Provider';
+import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
+import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
+import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
 
 export default function MyTableBody({ showAction }: { showAction?: boolean }) {
   const { state, actions } = useContext(GridContext);
@@ -27,24 +27,26 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
               <TableRow
                 className="group relative border-b hover:bg-border/50"
                 key={row.id + index}
-                data-state={row.getIsSelected() && "selected"}
+                data-state={row.getIsSelected() && 'selected'}
                 data-test-id={testIDFormatter(
                   `${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`,
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-                  if (cell.column.id === "action") {
+                  if (cell.column.id === 'action') {
                     return (
                       <td
                         key={cell.id + index}
-                        className={cn("right-0", isEndReached ? "" : "sticky")}
+                        className={cn('right-0', isEndReached ? '' : 'sticky')}
                       >
                         <div className="px-3">
                           <div
                             className={cn(
-                              "items-center",
-                              `${showAction ? "opacity-100" : "opacity-0"}`,
-                              !isEndReached ? "group-hover:opacity-100" : "",
+                              'items-center',
+                              `${showAction ? 'opacity-100' : 'opacity-0'}`,
+                              !isEndReached
+                                ? 'group-hover:opacity-100'
+                                : 'opacity-100',
                             )}
                           >
                             <div className="flex h-8 items-center justify-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
@@ -62,7 +64,7 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
                   return (
                     <TableCell
                       className={cn(
-                        "relative text-sm text-foreground hover:bg-border",
+                        'relative text-sm text-foreground hover:bg-border',
                         getCommonPinningStyles(cell.column).className,
                       )}
                       key={cell.id + index}
@@ -70,7 +72,7 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
                       config={state?.config}
                       column_id={cell?.column?.id}
                       data-test-id={testIDFormatter(
-                        `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + "-" + (index + 1)}`,
+                        `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
                       )}
                       style={{
                         width: cell.column.getSize(),
@@ -78,37 +80,36 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
                         ...getCommonPinningStyles(cell.column).style,
                       }}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      <div className="flex flex-row flex-wrap">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </div>
                       <div
                         {...{
                           className: `absolute  border border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
-                          // className: `absolute top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full  border  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
-                          style: {
-                            // userSelect: "none",
-                            // touchAction: "none",
-                          },
+                          style: {},
                         }}
                       />
                     </TableCell>
                   );
                 })}
               </TableRow>
-              {/* Expanded Row */}
               {row.getIsExpanded() && (
                 <TableRow className="group relative border-b hover:bg-border/50">
                   <td
                     colSpan={state?.table.getVisibleLeafColumns().length}
-                    className="bg-gray-50 p-2"
+                    className="bg-gray-50 lg:p-8"
                   >
-                    <div className="rounded-md border bg-white p-3 shadow">
+                    <div>
                       {state?.config?.rowExpansionBuilder ? (
                         // state?.config?.rowExpansionBuilder
                         typeof state?.config?.rowExpansionBuilder ===
-                        "function" ? (
-                          state?.config?.rowExpansionBuilder({ rowData: row.original })
+                        'function' ? (
+                          state?.config?.rowExpansionBuilder({
+                            rowData: row.original,
+                          })
                         ) : (
                           React.cloneElement(
                             state?.config?.rowExpansionBuilder,
@@ -138,6 +139,7 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
       {state?.showArchiveConfirmationModal && (
         <ArchiveConfirmationModal
           open={state?.showArchiveConfirmationModal}
+          // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
           setOpen={actions?.setShowArchiveConfirmationModal!}
           record={state?.rowToArchive}
           config={state?.config}
@@ -146,6 +148,7 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
       {state?.showBulkActionConfirmationModal && (
         <BulkActionConfirmationModal
           open={state?.showBulkActionConfirmationModal}
+          // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
           onOpenChange={actions?.setShowBulkActionConfirmationModal!}
           action_type={state?.bulkActionType}
         />

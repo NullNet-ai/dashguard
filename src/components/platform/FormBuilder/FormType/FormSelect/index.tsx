@@ -1,30 +1,32 @@
 import {
-  type UseFormReturn,
-  type ControllerFieldState,
-  type ControllerRenderProps,
-} from "react-hook-form";
-import { type IField, type ISelectOptions } from "../../types";
-import {
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useFormField,
-} from "~/components/ui/form";
-import {
   Combobox,
   ComboboxButton,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { usePopper } from "react-popper";
 import { CheckIcon } from "@heroicons/react/20/solid";
-import { Badge } from "~/components/ui/badge";
-import React, { useMemo, useState } from "react";
-import { cn, formatFormTestID } from "~/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
-import { createRecord } from "../../Actions/CreateRecord";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  type UseFormReturn,
+  type ControllerFieldState,
+  type ControllerRenderProps,
+} from "react-hook-form";
+import { usePopper } from "react-popper";
+
+import { Badge } from "~/components/ui/badge";
+import {
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from "~/components/ui/form";
 import { useToast } from "~/context/ToastProvider";
+import { cn, formatFormTestID } from "~/lib/utils";
+
+import { createRecord } from "../../Actions/CreateRecord";
+import { type IField, type ISelectOptions } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
@@ -54,7 +56,9 @@ export default function FormSelect({
   const [open, setOpen] = useState(false);
 
   const isDisabled = fieldConfig.disabled ?? false;
-  const isReadOnly = formRenderProps.field.disabled || fieldConfig.readonly;
+  const isReadOnly = fieldConfig.isCustomFormField
+    ? fieldConfig.readonly
+    : formRenderProps.field.disabled || fieldConfig.readonly;
 
   const [referenceElement, setReferenceElement] = useState<any>(null);
   const [popperElement, setPopperElement] = useState<any>(null);
@@ -84,13 +88,13 @@ export default function FormSelect({
   const SelectIcon = fieldConfig.selectIcon;
 
   // Helper function to check if a string is numeric
-  const isNumeric = (str: string) => {
-    if (typeof str !== 'string') return false;
-    return !isNaN(parseFloat(str)) && isFinite(Number(str));
-  };
-
   // Helper function to sort options
-  const sortOptions = (opts: ISelectOptions[]) => {
+  const sortOptions = useCallback((opts: ISelectOptions[]) => {
+    const isNumeric = (str: string) => {
+      if (typeof str !== "string") return false;
+      return !isNaN(parseFloat(str)) && isFinite(Number(str));
+    };
+
     return [...opts].sort((a, b) => {
       // Check if both values are numeric strings
       if (isNumeric(a.value) && isNumeric(b.value)) {
@@ -99,24 +103,29 @@ export default function FormSelect({
       // Fall back to alphabetical sorting if not numeric
       return a.label?.localeCompare(b.label) ?? 0;
     });
-  };
+  }, []);
 
   const filteredOptions = useMemo(() => {
-    const filtered = query === ""
-      ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
-      : options
-          ?.filter((opt) => {
-            return opt.label.toLowerCase().includes(query.toLowerCase());
-          })
-          ?.slice(0, 5)
-          ?.filter((opt) => !!opt?.label);
+    const filtered =
+      query === ""
+        ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
+        : options
+            ?.filter((opt) => {
+              return opt.label.toLowerCase().includes(query.toLowerCase());
+            })
+            ?.slice(0, 5)
+            ?.filter((opt) => !!opt?.label);
 
     return sortOptions(filtered ?? []);
-  }, [fieldConfig?.name, query, selectOptions, options?.length]);
+  }, [query, options, sortOptions]);
+
+  React.useEffect(() => {
+    setOptions(selectOptions?.[fieldConfig?.name] ?? []);
+  }, [selectOptions, fieldConfig?.name]);
 
   const label = useMemo(() => {
     return options?.find((opt) => opt.value === formRenderProps?.field.value);
-  }, [formRenderProps?.field.value]);
+  }, [formRenderProps?.field.value, options]);
 
   const inputReadOnly = useMemo(() => {
     return (
@@ -176,7 +185,7 @@ export default function FormSelect({
         >
           {fieldConfig?.label}
         </FormLabel>
-        {!!pillOptions?.length ? (
+        {pillOptions?.length ? (
           <>
             {pillOptions.map((option, index) => (
               <Badge
@@ -273,53 +282,51 @@ export default function FormSelect({
               data-test-id={`${formKey}-opts-${fieldConfig.name}`}
             >
               {filteredOptions?.slice(0, 700).map((opt) => (
-              <ComboboxOption
-                key={opt?.value}
-                value={opt}
-                disabled={isDisabled || isReadOnly}
-                className={cn(
-                "group relative cursor-default select-none py-2 text-md  pr-12 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
-                SelectIcon ? "pl-8" : "pl-2",
-                {
-                  "cursor-not-allowed": isDisabled,
-                  "cursor-default": isReadOnly,
-                },
-                )}
-                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
-              >
-                <span
-                className="block truncate"
-                data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                <ComboboxOption
+                  key={opt?.value}
+                  value={opt}
+                  disabled={isDisabled || isReadOnly}
+                  className={cn(
+                    "group relative cursor-default select-none py-2 pr-12 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                    SelectIcon ? "pl-8" : "pl-2",
+                    {
+                      "cursor-not-allowed": isDisabled,
+                      "cursor-default": isReadOnly,
+                    },
+                  )}
+                  data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
                 >
-                {opt.label}
-                </span>
+                  <span
+                    className="block truncate"
+                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                  >
+                    {opt.label}
+                  </span>
 
-                <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
-                <CheckIcon className="size-5" aria-hidden="true" />
-                </span>
-              </ComboboxOption>
+                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
+                    <CheckIcon className="size-5" aria-hidden="true" />
+                  </span>
+                </ComboboxOption>
               ))}
-              {fieldConfig?.selectEnableCreate ? (
-              !isOptionsExist &&
-              query && (
-                <span
-                className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
-                data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                onClick={createNewRecord}
-                >
-                {isCreateLoading ? "Creating..." : `Create "${query}"`}
-                </span>
-              )
-              ) : (
-              !filteredOptions.length && (
-                <span
-                className="block truncate group-data-[selected]:font-semibold ms-3"
-                data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                >
-                No {fieldConfig?.label} found.
-                </span>
-              )
-              )}
+              {fieldConfig?.selectEnableCreate
+                ? !isOptionsExist &&
+                  query && (
+                    <button
+                      className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
+                      data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+                      onClick={void createNewRecord}
+                    >
+                      {isCreateLoading ? "Creating..." : `Create "${query}"`}
+                    </button>
+                  )
+                : !filteredOptions.length && (
+                    <span
+                      className="ms-3 block truncate group-data-[selected]:font-semibold"
+                      data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                    >
+                      {"No "} {fieldConfig?.label} found.
+                    </span>
+                  )}
             </ComboboxOptions>
           )}
         </div>

@@ -1,15 +1,17 @@
-import { AccordionContent } from '~/components/ui/accordion';
-import { cn } from '~/lib/utils';
-import { IFilterGridConfig } from '../../../types';
-import FormFilterGrid from '../../custom/FormFilter/List';
+import { AccordionContent } from '~/components/ui/accordion'
+import { cn } from '~/lib/utils'
+
+import { type IFilterGridConfig } from '../../../types'
+import FormFilterGrid from '../../custom/FormFilter/List'
 
 interface IFormFilterGridLayoutProps {
-  isFormOpen: boolean;
-  handleListLoading: (loading: boolean) => void;
-  handleSelectedGridRecords: (records: any[]) => void;
-  handleCloseGrid: () => void;
-  filterGridConfig: IFilterGridConfig;
-  className?: string;
+  isFormOpen: boolean
+  handleListLoading: (loading: boolean) => void
+  handleSelectedGridRecords: (records: any[]) => void
+  handleCloseGrid: () => void
+  filterGridConfig: IFilterGridConfig
+  className?: string
+  formKey?: string
 }
 
 const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
@@ -19,27 +21,28 @@ const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
     handleSelectedGridRecords,
     handleCloseGrid,
     filterGridConfig,
-    className
-  } = props;
+    className,
+    formKey,
+  } = props
   return (
     <AccordionContent
-        className={cn(
-          "relative w-full z-50",
-          isFormOpen
-            ? "accordion-content-enter accordion-content-enter-active"
-            : "accordion-content-exit accordion-content-exit-active",
-        )}
-      >
-        <FormFilterGrid
-          handleListLoading={handleListLoading}
-          handleSelectedGridRecords={handleSelectedGridRecords}
-          handleCloseGrid={handleCloseGrid}
-          config={{
-            ...filterGridConfig,
-          }}
-          className={className}
-        />
-      </AccordionContent>
+      className={cn(
+        'relative w-full z-50', isFormOpen
+          ? 'accordion-content-enter accordion-content-enter-active'
+          : 'accordion-content-exit accordion-content-exit-active',
+      )}
+    >
+      <FormFilterGrid
+        className={className}
+        config={{
+          ...filterGridConfig,
+        }}
+        formKey={formKey}
+        handleCloseGrid={handleCloseGrid}
+        handleListLoading={handleListLoading}
+        handleSelectedGridRecords={handleSelectedGridRecords}
+      />
+    </AccordionContent>
   )
 }
 

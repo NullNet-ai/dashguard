@@ -4,14 +4,14 @@ import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
 export default async function LoginSubmit({
-  email,
+  username,
   password,
 }: {
-  email: string;
+  username: string;
   password: string;
 }) {
   const response = await api.auth.login({
-    email,
+    username,
     password,
   });
 

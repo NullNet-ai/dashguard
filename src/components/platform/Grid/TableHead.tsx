@@ -12,13 +12,16 @@ import { ScrollContainerContext } from "./Server/views/common/GridScrollContaine
 import { testIDFormatter } from "~/utils/formatter";
 import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown, ArrowBigUp } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
-export default function MyTableHead() {
+
+type GridParentType =  "grid" | "form" | "field" | "grid_expansion"
+
+export default function MyTableHead({parentType}: {parentType?: GridParentType}) {
   const { state } = useContext(GridContext);
   return (
     <>
       {state?.table.getHeaderGroups().map((headerGroup, index) => (
         <TableRow
-          className="backdrop-blur-lg"
+          className={cn(` ${parentType ==='grid_expansion' ? 'bg-white' : 'backdrop-blur-lg'}`)}
           key={headerGroup.id + "group" + index}
           data-test-id={testIDFormatter(
             `${state.config.entity}-grd-tbl-thead-row`,

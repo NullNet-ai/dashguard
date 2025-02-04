@@ -21,7 +21,7 @@ export default function Main({ parentType = 'grid' }: any) {
                 <div className="my-2 h-[40px] w-full md:my-0">
                   <Search />
                 </div>
-                <div className="flex h-[36px] flex-shrink-0 flex-row items-center">
+                <div className="lg:flex h-[36px] flex-shrink-0 flex-row items-center hidden">
                   <TableViewButton />
                   <CardViewButton />
                   <div className="mx-2 h-full w-[1px] bg-tertiary" />

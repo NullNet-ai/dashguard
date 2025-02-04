@@ -1,5 +1,5 @@
 "use client";
-import { Moon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
@@ -31,7 +31,8 @@ export default function Page() {
             formType: "switch",
             label: "Switch",
             switchConfig: {
-              icon: <Moon />,
+              leftIcon: <Moon />,
+              rightIcon: <Sun />,
               leftLabel: "Off",
               rightLabel: "On",
             },

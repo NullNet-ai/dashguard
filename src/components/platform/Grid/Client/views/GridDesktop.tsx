@@ -1,19 +1,19 @@
-import { Table, TableHeader } from "~/components/ui/table";
-import { Card, CardFooter, CardHeader } from "~/components/ui/card";
-import React, { useContext, useMemo } from "react";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import MyTableHead from "../../TableHead";
-import MyTableBody from "../../TableBody";
-import Search from "../../Search";
-import Pagination from "../../Pagination";
-import { Button } from "~/components/ui/button";
-import { GridContext } from "../../Provider";
-import { Badge } from "~/components/ui/badge";
-import { cn } from "~/lib/utils";
-import Sorting from "../../Sorting";
+import { Table, TableHeader } from '~/components/ui/table';
+import { Card, CardFooter, CardHeader } from '~/components/ui/card';
+import React, { useContext, useMemo } from 'react';
+import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
+import MyTableHead from '../../TableHead';
+import MyTableBody from '../../TableBody';
+import Search from '../../Search';
+import Pagination from '../../Pagination';
+import { Button } from '~/components/ui/button';
+import { GridContext } from '../../Provider';
+import { Badge } from '~/components/ui/badge';
+import { cn } from '~/lib/utils';
+import Sorting from '../../Sorting';
 
 interface IGridDesktopProps {
-  parentType: "grid" | "form" | "field" | "grid_expansion";
+  parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
   hideSearch?: boolean;
   height?: string;
   showAction?: boolean;
@@ -33,34 +33,53 @@ function GridDesktop({
 }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
 
+  const rowsLen = state?.table?.getVisibleFlatColumns()?.length || 0;
+
   const { open, summary } = parentProps || {};
 
   const conWidth = useMemo(() => {
     if (open && summary) {
-      return "lg:w-[calc(100vw-578px)]";
+      return 'lg:w-[calc(100vw-578px)]';
     } else if (!open && summary) {
-      return "w-auto";
+      return 'w-auto';
     } else if (open && !summary) {
-      return "w-[calc(100vw-320px)]";
-    } else return "";
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
   }, [open, summary]);
+
+  const isExpandedTable = parentType === 'grid_expansion';
+
+  const expandedWidth = useMemo(() => {
+    if (isExpandedTable) {
+      return rowsLen > 4 ? 150 * rowsLen : 150 * 5;
+    } else {
+      return undefined;
+    }
+  }, [isExpandedTable]);
 
   return (
     <>
       {hideSearch ? null : (
         <div
-          style={{ width: "calc(100vw - 37rem)" }}
+          style={{ width: 'calc(100vw - 37rem)' }}
           className="flex flex-col justify-between px-4"
         >
           <Search parentType="form" />
-          {parentType === "form" && <Sorting />}
+          {parentType === 'form' && <Sorting />}
         </div>
       )}
-      <Card className="col-span-full border-0 shadow-none">
-        {parentType !== "field" && (
-          <CardHeader>
+      <Card
+        className={cn(
+          `col-span-full border-0 shadow-none`,
+          `${isExpandedTable ? 'bg-transparent' : ''}`,
+        )}
+      >
+        {parentType !== 'field' && (
+          <CardHeader
+            className={cn(`${parentType === 'grid_expansion' ? 'py-0' : ''}`)}
+          >
             <div className="flex flex-row space-x-2">
-              {state?.config?.actionType === "multi-select" && (
+              {state?.config?.actionType === 'multi-select' && (
                 <Button
                   onClick={() => {
                     actions?.handleMultiSelect();
@@ -76,34 +95,37 @@ function GridDesktop({
             </div>
           </CardHeader>
         )}
-        <div className={cn(`${parentType === 'form' ? 'px-4' : ''}`)}>
+        <div
+          className={cn(`${parentType === 'form' ? 'px-4' : ''}`)}
+          style={{ width: expandedWidth }}
+        >
           <ScrollArea
             style={
-              parentType === "grid"
-                ? { height: "calc(100vh - 16rem)" }
+              parentType === 'grid'
+                ? { height: 'calc(100vh - 16rem)' }
                 : {
                     // width: "calc(100vw - 40rem)",
-                    height: height || "auto",
+                    height: height || 'auto',
                   }
             }
             className={cn(
-              `m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
+              `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
               conWidth,
-              parentType === "grid"
-                ? "w-[350px] md:w-[460px]"
-                : "w-[350px] md:w-[100%]",
+              parentType === 'grid'
+                ? 'w-[350px] md:w-[460px]'
+                : 'w-[350px] md:w-[100%]',
             )}
           >
             <Table>
-              <TableHeader>
-                <MyTableHead />
+              <TableHeader parentType={parentType}>
+                <MyTableHead parentType={parentType} />
               </TableHeader>
               <MyTableBody showAction={showAction} />
             </Table>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        {parentType === "grid" ? (
+        {parentType === 'grid' ? (
           <CardFooter>
             <Pagination />
           </CardFooter>

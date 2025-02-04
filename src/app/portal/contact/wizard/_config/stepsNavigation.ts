@@ -24,5 +24,10 @@ const stepsNavigation = {
     prev: true,
     skip: true,
   },
+  six: {
+    next: true,
+    prev: true,
+    skip: true,
+  },
 };
 export default stepsNavigation;

@@ -10,15 +10,15 @@ import { EStatus, type IGridFilterBy, type ITabGrid } from "../types";
 import { tabMenuId } from "~/lib/tab-menu-id";
 import { z } from "zod";
 import { type ISortBy } from "~/components/platform/Grid/Category/type";
-import { SortingState } from "@tanstack/react-table";
+import { type SortingState } from "@tanstack/react-table";
 import { formatSorting } from "~/server/utils/formatSorting";
 import { pluralize } from "../../utils/pluralize";
 import {
-  IAdvanceFilter,
-  IPagination,
-  ISearchItem,
+  type IAdvanceFilter,
+  type IPagination,
+  type ISearchItem,
 } from "~/components/platform/Grid/Search/types";
-import { gridCacheId, TReportDataType } from "~/lib/grid-cache-id";
+import { gridCacheId, type TReportDataType } from "~/lib/grid-cache-id";
 import { getGridLink } from "~/lib/grid-get-link";
 import { SetIdTab, SetTab } from "~/lib/grid-default-tab";
 export const gridRouter = createTRPCRouter({
@@ -208,8 +208,8 @@ export const gridRouter = createTRPCRouter({
         query.join(created_by_join).join(updated_by_join);
       }
       const { total_count: totalCount = 1, data: items } =
-        await query.execute();
-
+      await query.execute();
+      
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,

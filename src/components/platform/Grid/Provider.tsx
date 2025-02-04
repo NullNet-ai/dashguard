@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   type ColumnDef,
   type ColumnSizingState,
@@ -8,10 +8,10 @@ import {
   type SortingState,
   type Updater,
   useReactTable,
-} from "@tanstack/react-table";
-import React, { useEffect, useRef, useState } from "react";
-import { Checkbox } from "~/components/ui/checkbox";
-import { useToast } from "~/context/ToastProvider";
+} from '@tanstack/react-table';
+import React, { useEffect, useRef, useState } from 'react';
+import { Checkbox } from '~/components/ui/checkbox';
+import { useToast } from '~/context/ToastProvider';
 import {
   type IAction,
   type IConfigGrid,
@@ -19,25 +19,26 @@ import {
   type IPropsGrid,
   type IState,
   type TActionType,
-} from "./types";
+} from './types';
 
-import { Button as Button2 } from "@headlessui/react";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { FileIcon } from "lucide-react";
-import { useMediaQuery } from "react-responsive";
-import { Button } from "~/components/ui/button";
-import { Create } from "./Action/Create";
-import StatusCell from "~/components/ui/status-cell";
-import { BulkArchive } from "./Action/BulkArchive";
-import { UpdateReportSorting } from "./Action/UpdateReportSorting";
+import { Button as Button2 } from '@headlessui/react';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { useMediaQuery } from 'react-responsive';
+import { Button } from '~/components/ui/button';
+import { Button as HeadlessBtn } from '@headlessui/react';
+import { Create } from './Action/Create';
+import StatusCell from '~/components/ui/status-cell';
+import { BulkArchive } from './Action/BulkArchive';
+import { UpdateReportSorting } from './Action/UpdateReportSorting';
 import {
   ArchiveComponent,
   DeleteComponent,
   EditComponent,
   RestoreComponent,
-} from "./DefatultRow/Actions";
-import { type ISearchItem } from "./Search/types";
-import { constructSearchableFields } from "./utils/constructSearchableFields";
+} from './DefatultRow/Actions';
+import { type ISearchItem } from './Search/types';
+import { constructSearchableFields } from './utils/constructSearchableFields';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -46,7 +47,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: "grid" | "form" | "field" | "grid_expansion";
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
 }
 
 export default function GridProvider({
@@ -67,12 +68,12 @@ export default function GridProvider({
     ? defaultSorting
     : [
         {
-          id: "created_date",
+          id: 'created_date',
           desc: true,
         },
       ];
 
-  const isMobileOrTablet = useMediaQuery({ query: "(max-width: 728px)" });
+  const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
   /** @HOOKS */
   const toast = useToast();
@@ -88,7 +89,7 @@ export default function GridProvider({
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "card">("table");
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {};
   });
@@ -115,12 +116,12 @@ export default function GridProvider({
 
   // use effects
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const createButton = localStorage.getItem(
-        "playground_grid_is_show_create_button",
+        'playground_grid_is_show_create_button',
       );
       const rowAction = localStorage.getItem(
-        "playground_grid_is_show_row_action",
+        'playground_grid_is_show_row_action',
       );
 
       setPlaygroundGridIsShowCreateButton(createButton);
@@ -137,34 +138,34 @@ export default function GridProvider({
     enableRowSelection: true,
     hideCreateButton:
       playgroundGridIsShowCreateButton != null
-        ? !(playgroundGridIsShowCreateButton == "true")
+        ? !(playgroundGridIsShowCreateButton == 'true')
         : false,
     disableDefaultAction:
       playgroundGridIsShowRowAction != null
-        ? !(playgroundGridIsShowRowAction == "true")
+        ? !(playgroundGridIsShowRowAction == 'true')
         : false,
     searchableFields:
       constructSearchableFields({
         columns: _propsConfig?.columns ?? [],
-        entity: _propsConfig?.entity ?? "",
+        entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
   };
 
-  const handleSwitchViewMode = (mode: "table" | "card") => {
+  const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
   };
 
   const handleSingleSelect = async (row: any) => {
     if (!row) {
-      toast.error("Row is required");
+      toast.error('Row is required');
       return;
     }
     setRowSelectedRecord([row]);
   };
   const handleMultiSelect = () => {
     if (!Object.keys(rowSelection).length) {
-      toast.error("Row Selected is required");
+      toast.error('Row Selected is required');
       return;
     }
 
@@ -185,7 +186,7 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
-    if (parentType === "form") {
+    if (parentType === 'form') {
       return config?.onFetchRecords?.({
         sort: updatedSorting,
       });
@@ -194,7 +195,7 @@ export default function GridProvider({
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
-    const _sorting = typeof updater === "function" ? updater(sorting) : updater;
+    const _sorting = typeof updater === 'function' ? updater(sorting) : updater;
     const resolvedSorting = _sorting?.map((sort) => {
       const sort_key =
         config?.columns?.find((column: any) => column?.accessorKey === sort.id)
@@ -205,7 +206,7 @@ export default function GridProvider({
       };
     });
 
-    if (parentType === "form") {
+    if (parentType === 'form') {
       return config?.onFetchRecords?.({
         sort: resolvedSorting,
       });
@@ -220,14 +221,14 @@ export default function GridProvider({
 
   /** @REFS */
   const selectTableRow = useRef<ColumnDef<any>>({
-    id: "select",
+    id: 'select',
     size: 50,
     enableResizing: false,
     header: ({ table }) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         className="border-foreground"
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
@@ -249,36 +250,37 @@ export default function GridProvider({
   });
 
   const expandTableRow = useRef<ColumnDef<any>>({
-    id: "expand",
+    id: 'expand',
     size: 50,
     enableResizing: false,
-    header: "",
+    header: '',
     cell: ({ row }: any) => (
-      <button
-        className="rounded border bg-gray-200 px-2 py-1 hover:bg-gray-300"
-        onClick={() => row.toggleExpanded()}
-      >
-        {row.getIsExpanded() ? "▼" : "▶"}
-      </button>
+      <HeadlessBtn className="" onClick={() => row.toggleExpanded()}>
+        {row.getIsExpanded() ? (
+          <ChevronUp className="h-6 w-6 text-primary" />
+        ) : (
+          <ChevronRight className="h-6 w-6 text-default/40" />
+        )}
+      </HeadlessBtn>
     ),
     enableSorting: false,
     enableHiding: true,
   });
 
   const actionRow = useRef<ColumnDef<any>>({
-    id: "action",
+    id: 'action',
     size: 1,
     enableResizing: false,
-    header: "Actions",
+    header: 'Actions',
     cell: ({ row }) => {
       // Check if the row has either 'draft' or desired accessor
       const showActions = [
-        "draft",
-        "active",
-        "Draft",
-        "Active",
-        "Archived",
-        "archived",
+        'draft',
+        'active',
+        'Draft',
+        'Active',
+        'Archived',
+        'archived',
       ].includes(row.original?.status);
 
       if (!showActions) return null;
@@ -289,7 +291,7 @@ export default function GridProvider({
         selectedRecords.includes(row.original.id) ||
         !statusesIncluded?.includes(row.original?.status);
 
-      if (config?.actionType === "single-select") {
+      if (config?.actionType === 'single-select') {
         return (
           <Button2
             disabled={disableActions}
@@ -298,18 +300,18 @@ export default function GridProvider({
             onClick={() => handleSingleSelect(row.original)}
           >
             <PlusCircleIcon
-              className={`h-5 w-5 ${disableActions ? "text-gray-400" : "text-primary"}`}
+              className={`h-5 w-5 ${disableActions ? 'text-gray-400' : 'text-primary'}`}
             />
           </Button2>
         );
       }
 
-      if (config?.actionType === "multi-select") {
+      if (config?.actionType === 'multi-select') {
         return (
           <Button
             disabled={disableActions}
             className="mx-auto flex"
-            variant={"ghost"}
+            variant={'ghost'}
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
@@ -321,7 +323,7 @@ export default function GridProvider({
       return (
         <>
           <EditComponent row={row} config={config!} />
-          {!["Archived", "Delete"].includes(row.original?.status) && (
+          {!['Archived', 'Delete'].includes(row.original?.status) && (
             <ArchiveComponent
               row={row}
               config={config!}
@@ -331,7 +333,7 @@ export default function GridProvider({
               setRecord={setRowToArchive}
             />
           )}
-          {row.original?.status === "Archived" && (
+          {row.original?.status === 'Archived' && (
             <>
               <RestoreComponent row={row} config={config!} />
               <DeleteComponent row={row} config={config!} />
@@ -351,17 +353,17 @@ export default function GridProvider({
   ) => {
     const isDefaultFilterArchived = defaultAdvanceFilter?.find(
       (filter) =>
-        filter?.field === "status" && filter?.values?.[0] === "Archived",
+        filter?.field === 'status' && filter?.values?.[0] === 'Archived',
     );
     const stateIndex = config?.columns?.findIndex(
-      (column) => column.header === "State",
+      (column) => column.header === 'State',
     );
     let columns = config?.columns || [];
 
     if (isDefaultFilterArchived) {
       const newColumn = {
-        header: "Previous State",
-        accessorKey: "previous_status",
+        header: 'Previous State',
+        accessorKey: 'previous_status',
         cell: ({ row }) => {
           const value = row?.original?.previous_status;
           return <StatusCell value={value} />;
@@ -380,26 +382,26 @@ export default function GridProvider({
     }
 
     // Exclude selectTableRow and actionRow if view mode is 'card'
-    if (viewMode === "card") {
+    if (viewMode === 'card') {
       return [...columns];
     }
 
     switch (actionsType) {
-      case "single-select":
+      case 'single-select':
         if (config?.disableDefaultAction) {
           return [...columns];
         }
 
         return [...columns, actionRow?.current];
       default:
+        if (config?.enableRowExpansion) {
+          columns.unshift(expandTableRow?.current);
+        }
         if (config?.enableRowSelection) {
           columns.unshift(selectTableRow?.current);
         }
         if (!config?.disableDefaultAction) {
           columns.push(actionRow?.current);
-        }
-        if (config?.enableRowExpansion) {
-          columns.unshift(expandTableRow?.current);
         }
 
         return columns;
@@ -416,7 +418,7 @@ export default function GridProvider({
       config?.actionType,
     ),
     enableColumnResizing: true,
-    columnResizeMode: "onChange",
+    columnResizeMode: 'onChange',
     getCoreRowModel: getCoreRowModel(),
     // getSortedRowModel: getSortedRowModel(),
     onColumnSizingChange: setColSizing,
@@ -443,7 +445,7 @@ export default function GridProvider({
     try {
       setCreateLoading(true);
       if (!config?.entity) {
-        toast.error("Entity is required");
+        toast.error('Entity is required');
         setCreateLoading(false);
         return;
       }
@@ -454,7 +456,7 @@ export default function GridProvider({
         is_from_grid: true,
       });
     } catch (error) {
-      console.error("An error occurred while creating a record", error);
+      console.error('An error occurred while creating a record', error);
       setCreateLoading(false);
     }
   };
@@ -477,7 +479,7 @@ export default function GridProvider({
       setShowBulkActionConfirmationModal(false);
       setBulkActionType(null);
     } catch (error) {
-      console.error("An error occurred while creating a record", error);
+      console.error('An error occurred while creating a record', error);
       setArchiveBulkLoading(false);
     }
   };
