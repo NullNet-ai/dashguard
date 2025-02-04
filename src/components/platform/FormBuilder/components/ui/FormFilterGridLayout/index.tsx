@@ -11,7 +11,7 @@ interface IFormFilterGridLayoutProps {
   handleCloseGrid: () => void
   filterGridConfig: IFilterGridConfig
   className?: string
-  formKey: string
+  formKey?: string
 }
 
 const FormFilterGridLayout = (props: IFormFilterGridLayoutProps) => {
