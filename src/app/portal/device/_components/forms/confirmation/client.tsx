@@ -61,11 +61,11 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
       }
     }, 2000);
 
-    setTimeout(() => {
-      updateConnectionStatus.mutate({
-        id: params.id,
-      });
-    }, 10000);
+    // setTimeout(() => {
+    //   updateConnectionStatus.mutate({
+    //     id: params.id,
+    //   });
+    // }, 10000);
 
     return () => clearInterval(interval);
   }, []);
