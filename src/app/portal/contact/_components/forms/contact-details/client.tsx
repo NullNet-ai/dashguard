@@ -7,6 +7,8 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
+import { XIcon } from 'lucide-react';
+import { useSideDrawer } from '~/components/platform/SideDrawer';
 
 export default function ContactDetails({
   params,
@@ -16,7 +18,8 @@ export default function ContactDetails({
 }: IFormProps) {
   const toast = useToast();
   const updateContact = api.contact.updateContactDetails.useMutation();
-
+  
+  
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof contactDetailsSchema>>) => {
@@ -35,6 +38,26 @@ export default function ContactDetails({
       toast.error("Failed to submit Contact Details");
     }
   };
+
+  // * Uncomment the following line to open a side drawer
+  // const { actions } = useSideDrawer();
+
+// * Uncomment the following function to open a side drawer
+// const handleOpenSideDrawer = () => {
+//   actions.openSideDrawer({
+//     title: "Assign > Permission",
+//     body: {
+//       component:SampleAlert ,
+//       componentProps: {
+//         userId: "123",
+//         onSave: (data) => console.log("Saved data:", data),
+//       },
+//     },
+//     overlayEnabled: false,
+//     closeOnOutsideClick:false,
+//     onCloseCallback: () => console.log("SideDrawer closed!"),
+//   });
+// };
 
   return (
     <FormBuilder
@@ -91,6 +114,27 @@ export default function ContactDetails({
           label: "Address",
         },
       ]}
+      //* Uncomment the following line to add custom actions to the form 
+      // customFormHostViewFormActions={[
+      //   {
+      //     label: "Custom Action",
+      //     onClick: handleOpenSideDrawer,
+      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+      //     disabled: false,
+      //     hidden: false,
+      //   },
+      // ]}
     />
   );
 }
+
+
+
+// * Uncomment the following function to open a side drawer
+// function SampleAlert(){
+//   return (
+//     <div>
+//       <p>Alert</p>
+//     </div>
+//   )
+// }
