@@ -26,22 +26,22 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
     if (!record_details?.data) {
       return notFound()
     }
-    const { status, code } = record_details?.data || {}
+    const { status } = record_details?.data || {}
 
     if (status.toLowerCase() === 'active') {
       return notFound()
     }
 
-    const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
-    if (stepDetails?.traverse) {
-      const { traverse } = stepDetails || {}
+    // const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
+    // if (stepDetails?.traverse) {
+    //   const { traverse } = stepDetails || {}
 
-      const stepCount = Object.keys(traverse).length;
+    //   const stepCount = Object.keys(traverse).length;
 
-      if (Number(currentStep) > stepCount + 1) {
-        return notFound()
-      }
-    }
+    //   if (Number(currentStep) > stepCount + 1) {
+    //     return notFound()
+    //   }
+    // }
   }
 
   let _totalSteps = totalSteps
