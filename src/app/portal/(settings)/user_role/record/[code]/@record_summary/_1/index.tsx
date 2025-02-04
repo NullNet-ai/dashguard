@@ -7,7 +7,7 @@ import { api } from '~/trpc/react'
 import useRefetchRecord from '../hooks/useFetchMainRecord'
 
 const fields = {
-  Name: 'role',
+  Role: 'role',
   Category: 'categories',
   Entity: 'entity',
 }
@@ -50,20 +50,22 @@ const RecordShellSummary = ({
       {Object.entries(fields).map(([key, value], index) => {
         const dataValue = (data as { [key: string]: any })?.[value]
         return (
-          <div className="pt-2" key={index}>
-            <div className="px-5">
-              <div className="p-1 text-sm">
+          <div className='pt-2' key={index}>
+            <div className='px-5'>
+              <div className='p-1 text-sm'>
                 <div>
-                  <span className="text-slate-400">
+                  <span className='text-slate-400'>
                     {key}
                     :
                     {' '}
                   </span>
                   <span>
                     {key === 'Category'
-                      ? (dataValue?.length && dataValue.map((item: string) => {
+                      ? (dataValue?.length
+                        && dataValue.map((item: string) => {
                           return <StatusCell key={item} value={item} />
-                        })) || 'None'
+                        }))
+                        || 'None'
                       : dataValue || 'None'}
                   </span>
                 </div>
