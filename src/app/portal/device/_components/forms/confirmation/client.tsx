@@ -58,14 +58,15 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
 
       if (is_connection_established) {
         setLoading(false);
+        clearInterval(interval);
       }
     }, 2000);
 
-    setTimeout(() => {
-      updateConnectionStatus.mutate({
-        id: params.id,
-      });
-    }, 10000);
+    // setTimeout(() => {
+    //   updateConnectionStatus.mutate({
+    //     id: params.id,
+    //   });
+    // }, 10000);
 
     return () => clearInterval(interval);
   }, []);
