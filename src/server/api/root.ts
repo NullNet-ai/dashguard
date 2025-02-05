@@ -10,6 +10,7 @@ import { degreeLevelRouter } from './routers/degree_level'
 import { deviceRouter } from './routers/device'
 import { deviceConfigurationRouter } from './routers/device_configuration'
 import { deviceGroupSettingsRouter } from './routers/device_group_settings'
+import { deviceHeartbeatsRouter } from './routers/device_heartbeats'
 import { filesRouter } from './routers/files'
 import { formRouter } from './routers/form'
 import { googleRouter } from './routers/google'
@@ -53,6 +54,7 @@ export const appRouter = createTRPCRouter({
   deviceRule: deviceRuleRouter,
   deviceAlias: deviceAliasRouter,
   deviceConfiguration: deviceConfigurationRouter,
+  deviceHeartbeats: deviceHeartbeatsRouter,
 })
 
 // export type definition of API
