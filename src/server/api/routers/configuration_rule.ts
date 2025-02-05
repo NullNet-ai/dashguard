@@ -29,21 +29,6 @@ export const deviceRuleRouter = createTRPCRouter({
           'device_id',
           'raw_content',
         ],
-        contacts: ['first_name', 'last_name', 'id'],
-        organization_accounts: ['contact_id', 'id'],
-        organization_account_updated_by: ['contact_id', 'id'],
-        device_organization_account_created_by: ['contact_id', 'id'],
-        updated_by: ['first_name', 'last_name', 'id'],
-        created_by: [
-          'first_name',
-          'last_name',
-          'id',
-        ],
-        device_created_by: ['id', 'instance_name'],
-        device_updated_by: ['id', 'instance_name'],
-        devices: [
-          'id', 'instance_name',
-        ],
       }
 
       const device_rules = await ctx.dnaClient.findAll({
@@ -80,117 +65,6 @@ export const deviceRuleRouter = createTRPCRouter({
             },
           },
         })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'organization_accounts',
-              field: 'id',
-            },
-            from: {
-              entity: 'device_rules',
-              field: 'created_by',
-            },
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'contacts',
-              field: 'id',
-              alias: 'created_by',
-            },
-            from: {
-              entity: 'organization_accounts',
-              field: 'contact_id',
-            },
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'organization_accounts',
-              alias: 'organization_account_updated_by',
-              field: 'id',
-            },
-            from: {
-              entity,
-              field: 'updated_by',
-            },
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'contacts',
-              alias: 'updated_by',
-              field: 'id',
-            },
-            from: {
-              entity: 'organization_accounts',
-              field: 'contact_id',
-            },
-          },
-        })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'organization_accounts',
-        //       alias: 'device_organization_account_created_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'device_rules',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'devices',
-        //       alias: 'device_created_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'organization_accounts',
-        //       field: 'device_id',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'organization_accounts',
-        //       alias: 'device_organization_account_updated_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'devices',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'devices',
-        //       alias: 'device_updated_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'organization_accounts',
-        //       field: 'device_id',
-        //     },
-        //   },
-        // })
         .execute()
 
       const { total_count: totalCount = 1, data: items }
@@ -199,19 +73,14 @@ export const deviceRuleRouter = createTRPCRouter({
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
-          updated_by, created_by,
           ...rest
         } = item
 
         return {
           ...entity_data,
           ...rest,
-          created_by: created_by?.length
-            ? `${created_by?.[0].first_name} ${created_by?.[0].last_name}`
-            : null,
-          updated_by: updated_by?.length
-            ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
-            : null,
+          created_by: 'Wallguard Client',
+          updated_by: 'Wallguard Client',
         }
       })
 

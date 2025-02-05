@@ -2,6 +2,7 @@
 
 import { type ColumnDef } from '@tanstack/react-table'
 
+import { Badge } from '~/components/ui/badge'
 import StatusCell from '~/components/ui/status-cell'
 
 const gridColumns = [
@@ -20,7 +21,16 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.device_rule_status
-      return <StatusCell value={value} />
+      return <Badge variant={value == 'Applied' ? 'success' : 'destructive'}>{value}</Badge>
+    },
+  },
+  {
+    header: 'Mode',
+    accessorKey: 'mode',
+    enableResizing: false,
+    cell: ({ row }) => {
+      const value = row?.original?.mode || 'Disabled'
+      return <Badge variant={value == 'Disabled' ? 'destructive' : 'success'}>{value}</Badge>
     },
   },
   {
