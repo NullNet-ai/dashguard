@@ -57,7 +57,7 @@ const Alert = React.forwardRef<
     Icon?: React.ElementType;
     IconClassName?: string;
     dismissible?: boolean;
-    toastId?: string | number; // Add toastId prop
+    toastId?: string | number;
   }
 >(({ className,
   variant = "default",
@@ -65,7 +65,6 @@ const Alert = React.forwardRef<
   Icon,
   IconClassName,
   dismissible = false,
-  toastId,
   ...props
 }, ref) => {
   const IconComponent = Icon || defaultIcons[variant as keyof typeof defaultIcons];
