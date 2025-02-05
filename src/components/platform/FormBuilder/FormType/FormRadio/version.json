@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormRadio",
-  "tag": "1.6.1<unreleased>",
-  "branch": "unreleased/fix/1.6.1<unreleased>",
-  "message": "Update form radio change handler",
-  "publish_name": "Franklin"
+  "tag": "1.6.2<unreleased>",
+  "branch": "unreleased/fix/1.6.2<unreleased>",
+  "message": "Handle front-end UI to indicate that is resetted or there is no value selected ",
+  "publish_name": "Rob Caldosa"
 }
