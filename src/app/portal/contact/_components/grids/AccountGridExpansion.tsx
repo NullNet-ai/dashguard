@@ -97,6 +97,7 @@ const AccountGridExpansion = (props: any) => {
         },
       }}
       data={items}
+      gridLevel={2}
       isError={error}
       isLoading={isLoading}
       defaultSorting={defaultSorting}

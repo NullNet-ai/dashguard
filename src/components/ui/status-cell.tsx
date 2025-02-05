@@ -14,13 +14,13 @@ const StatusCell: React.FC<StatusCellProps> = ({ value }) => {
   };
 
   return (
-    <div className="m-1 flex flex-row items-start">
+    <div className="m-1 my-0 flex flex-row items-start">
       <div
         className={cn(
           'bg-primary/10 text-primary',
           // @ts-expect-error - TS doesn't know about statuses
           statuses?.[value?.toLocaleLowerCase()],
-          'inline-flex items-center rounded-md px-2 py-1 text-sm font-normal',
+          'inline-flex items-center rounded-md px-2 py-1 text-xs font-normal',
         )}
       >
         {value}

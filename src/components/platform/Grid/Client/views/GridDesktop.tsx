@@ -1,11 +1,15 @@
 import React, { useContext, useMemo } from 'react'
 
+import SearchDialog from '~/components/application-layout/Header/Search'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardFooter, CardHeader } from '~/components/ui/card'
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
+import { useSidebar } from '~/components/ui/sidebar'
 import { Table, TableHeader } from '~/components/ui/table'
+import useWindowSize from '~/hooks/use-resize'
 import { cn } from '~/lib/utils'
+import { remToPx } from '~/utils/fetcher'
 
 import Pagination from '../../Pagination'
 import { GridContext } from '../../Provider'
@@ -25,6 +29,8 @@ interface IGridDesktopProps {
     summary?: boolean
   }
   showPagination?: boolean
+  gridLevel?: number
+  isLoading?: boolean
 }
 
 function GridDesktop({
@@ -34,10 +40,14 @@ function GridDesktop({
   showAction,
   parentProps,
   showPagination = false,
+  gridLevel = 1,
+  isLoading,
 }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext)
-
-  const rowsLen = state?.table?.getVisibleFlatColumns()?.length || 0
+  const { open: sidebarOpen } = useSidebar();
+  const { width } = useWindowSize();
+  const newWidth = width <= 0 ? 1920 : width;
+  const _width = sidebarOpen ? newWidth - remToPx(17) : newWidth - remToPx(6);
 
   const { open, summary } = parentProps || {}
 
@@ -58,10 +68,10 @@ function GridDesktop({
 
   const expandedWidth = useMemo(() => {
     if (isExpandedTable) {
-      return rowsLen > 4 ? 250 * rowsLen : 250 * 5
+      return _width - 90 - (gridLevel === 3 ? 100 : 0)
     }
     else {
-      return undefined
+      return undefined;
     }
   }, [isExpandedTable])
 
@@ -73,11 +83,12 @@ function GridDesktop({
     <Separator /> */}
       {/* {hideSearch ? null : ( */}
       <div
-        className="flex flex-col justify-between px-4"
-        style={{ width: 'calc(100vw - 37rem)' }}
+        className={cn(`flex justify-between `, `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`)}
+        style={{ width: isExpandedTable ? expandedWidth : 'calc(100vw - 37rem)' }}
       >
-        {!hideSearch && <Search parentType='form' />}
-        {['form', 'grid_expansion'].includes(parentType) && <Sorting />}
+        {!hideSearch && !isExpandedTable && <Search parentType='form' />}
+        <SearchDialog />
+        {['form', 'grid_expansion'].includes(parentType) && <Sorting className={cn(`${isExpandedTable ? 'self-end mb-[2px]' : ''}`)} />}
       </div>
 
       <Card
@@ -129,7 +140,7 @@ function GridDesktop({
               <TableHeader parentType={parentType}>
                 <MyTableHead parentType={parentType} />
               </TableHeader>
-              <MyTableBody showAction={showAction} />
+              <MyTableBody showAction={showAction} gridLevel={gridLevel} isLoading={isLoading} showPagination={showPagination} />
             </Table>
             <ScrollBar orientation='horizontal' />
           </ScrollArea>
@@ -137,7 +148,7 @@ function GridDesktop({
         {parentType === 'grid' || showPagination
           ? (
               <CardFooter>
-                <Pagination />
+                <Pagination width={expandedWidth} />
               </CardFooter>
             )
           : null}

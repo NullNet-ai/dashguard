@@ -27,7 +27,7 @@ import { testIDFormatter } from '~/utils/formatter';
 import { UpdateReportPagination } from './Action/UpdateReportPagination';
 import { GridContext } from './Provider';
 import { IPagination } from './types';
-export default function Pagination() {
+export default function Pagination({ width: customWidth }: { width?: string | number }) {
   const { state } = useContext(GridContext);
   const { open } = useSidebar();
   const [pagination, setPagination] = useState<IPagination | undefined>(state?.pagination);
@@ -101,6 +101,10 @@ export default function Pagination() {
       className={cn(
         'border-grid-header bg-grid-footer fixed bottom-14 flex w-full items-center justify-between bg-background px-4 py-2 transition-all duration-300 ease-in-out sm:px-4 sm:py-0 lg:static lg:w-full', width,
       )}
+      style={{
+        width: customWidth
+          ? customWidth
+          : undefined }}
     >
       <div className="flex w-full flex-1 justify-between sm:hidden">
         <a
@@ -140,8 +144,9 @@ export default function Pagination() {
                 data-test-id={testIDFormatter(
                   `${state?.config.entity}-grd-pagination-row-per-page-sel-trigger`,
                 )}
+                className='text-xs'
               >
-                <SelectValue placeholder={`${rows} rows`} />
+                <SelectValue placeholder={`${rows} rows`} className='text-xs' />
               </SelectTrigger>
               <SelectContent>
                 {rowsPerPage.map(row => (

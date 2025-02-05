@@ -6,7 +6,7 @@ import FilterButton from '../Header/FilterButton'
 import TableViewButton from '../Header/TableViewButton'
 
 import GridSearchProvider from './Provider'
-import SortingList from './SortingList'
+import SortingList from './SearchList'
 import SortingListMobile from './SortingListMobile'
 import Search from './View'
 

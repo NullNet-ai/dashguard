@@ -64,7 +64,7 @@ function MainClient({
       >
         <Loader
           className="bg-primary text-primary"
-          label=""
+          label="Fetching data..."
           size="md"
           variant="circularShadow"
         />
@@ -104,6 +104,8 @@ function MainClient({
           parentType={parentType}
           showAction={showAction}
           showPagination={showPagination ?? false}
+          isLoading
+          gridLevel={gridLevel}
         />
       </div>
 

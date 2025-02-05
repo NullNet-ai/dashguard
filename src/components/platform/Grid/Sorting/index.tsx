@@ -15,7 +15,7 @@ import { testIDFormatter } from '~/utils/formatter'
 
 import { GridContext } from '../Provider'
 
-const Sorting = () => {
+const Sorting = ({ className }: { className?: string }) => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(GridContext)
@@ -95,7 +95,7 @@ const Sorting = () => {
 
   return (
     <div
-      className="sort-ref flex w-full flex-1 items-center overflow-hidden"
+      className={cn(`sort-ref flex w-full flex-1 items-center overflow-hidden`, className)}
       ref={conref}
     >
       <span className="text-nowrap text-xs text-foreground">Sort By</span>

@@ -233,7 +233,7 @@ export default function GridProvider({
           table.getIsAllPageRowsSelected()
           || (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        className='border-foreground'
+        className='border-foreground ml-1'
         onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
       />
     ),
@@ -241,7 +241,7 @@ export default function GridProvider({
       <Checkbox
         aria-label='Select row'
         checked={row.getIsSelected()}
-        className='border-foreground'
+        className='border-foreground ml-1'
         onCheckedChange={(value) => {
           row.toggleSelected(!!value)
         }}
