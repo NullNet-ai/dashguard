@@ -59,11 +59,11 @@ const gridColumns = [
   },
   {
     header: 'UUID',
-    accessorKey: 'uuid',
+    accessorKey: 'system_id',
   },
   {
     header: 'Version',
-    accessorKey: 'version',
+    accessorKey: 'device_version',
   },
   {
     header: 'Last Heartbeat',

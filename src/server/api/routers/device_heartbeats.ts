@@ -40,6 +40,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     const hour_range = generateHourlyRange(new Date(start as string), new Date(end as string))
 
     const res = await ctx.dnaClient.aggregate({
+      //@ts-ignore
       query: {
         entity: 'device_heartbeats',
         aggregations: [

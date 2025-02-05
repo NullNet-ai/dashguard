@@ -164,24 +164,14 @@ export const deviceRouter = createTRPCRouter({
         limit = 50,
         current = 1,
         advance_filters: _advance_filters = [],
-
+        pluck,
         pluck_object: _pluck_object,
       } = input
 
       const pluck_object = {
         contacts: ['first_name', 'last_name', 'id'],
         organization_accounts: ['contact_id', 'id', 'device_id'],
-        devices: [
-          'id',
-          'created_by',
-          'updated_by',
-          'created_date',
-          'updated_date',
-          'code',
-          'status',
-          'instance_name',
-          'model',
-        ],
+        devices: pluck,
         updated_by: ['first_name', 'last_name', 'id'],
         device_groups: ['device_group_setting_id', 'device_id', 'id'],
         device_group_settings: ['name', 'id'],
