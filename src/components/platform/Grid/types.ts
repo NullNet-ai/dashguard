@@ -117,7 +117,7 @@ export interface IState {
   showBulkActionConfirmationModal: boolean
   pagination?: IPagination
   defaultAdvanceFilter?: ISearchItem[]
-  parentType?: 'grid' | 'form' | 'field'
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
 }
 
 export interface IAction {

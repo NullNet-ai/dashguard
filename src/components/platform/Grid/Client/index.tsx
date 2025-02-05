@@ -27,7 +27,6 @@ interface IClientProps extends IPropsGrid {
   }
   isLoading?: boolean
   gridLevel?: number
-  onRefetch?: (gridData: any) => void
   isError?: boolean
 }
 
@@ -50,7 +49,6 @@ function MainClient({
   pagination,
   isLoading,
   gridLevel,
-  onRefetch,
   isError = false,
 }: IClientProps) {
   const { open } = useSidebar()
@@ -79,7 +77,7 @@ function MainClient({
         className='flex h-full items-center justify-center'
         style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
-        <ErrorPage refetch={() => onRefetch?.({})} />
+        <ErrorPage refetch={() => config?.onFetchRecords?.({})} />
       </div>
     )
   }
@@ -96,7 +94,6 @@ function MainClient({
       parentType={parentType}
       sorting={sorting}
       totalCount={totalCount}
-      onRefetch={onRefetch}
       onSelectRecords={onSelectRecords}
     >
       <div className='hidden lg:grid'>

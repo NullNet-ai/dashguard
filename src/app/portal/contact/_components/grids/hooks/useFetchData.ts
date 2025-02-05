@@ -24,6 +24,29 @@ interface IQueryOptions {
   router: string
   resolver: string
 }
+
+const removeNullUndefined = (obj: any) => {
+  return Object.fromEntries(
+    // eslint-disable-next-line no-unused-vars
+    Object.entries(obj).filter(([_, v]) => v != null)
+  )
+}
+
+const advanceFilterResolver = (advance_filters: IAdvanceFilter[]) => {
+  const advanceFilter = advance_filters?.map(
+    ({ entity, operator, type, field, values }) => {
+      const filter = {
+        entity,
+        operator,
+        type,
+        field,
+        values,
+      };
+      return removeNullUndefined(filter);
+    },
+  )
+  return advanceFilter
+}
 const useFetchData = (initialArgs: IFetchDataParams, query_options?: IQueryOptions) => {
   const [args, setArgs] = useState(initialArgs)
   const [currentData, setCurrentData] = useState<IData>()
@@ -35,7 +58,7 @@ const useFetchData = (initialArgs: IFetchDataParams, query_options?: IQueryOptio
     limit: 100,
     pluck: args.pluck,
     sorting: args.sorting,
-    advance_filters: args.advance_filters,
+    advance_filters: advanceFilterResolver(args.advance_filters ?? []),
     ...args,
   })
 

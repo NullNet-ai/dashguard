@@ -185,6 +185,7 @@ export const gridRouter = createTRPCRouter({
         query: {
           pluck: input.pluck,
           pluck_object,
+          track_total_records: true,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:

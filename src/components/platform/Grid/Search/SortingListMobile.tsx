@@ -127,7 +127,7 @@ const SortingListMobile = () => {
                           variant="ghost"
                           onClick={() => {
                             if (isHidden) return
-                            actions?.handleRemoveSearchItem(item)
+                            void actions?.handleRemoveSearchItem(item)
                           }}
                         >
                           <X className="h-3 w-3" />
@@ -193,7 +193,7 @@ const SortingListMobile = () => {
                                     size="xs"
                                     variant="ghost"
                                     onClick={() => {
-                                      actions?.handleRemoveSearchItem(item)
+                                      void actions?.handleRemoveSearchItem(item)
                                     }}
                                   >
                                     <X className="h-3 w-3" />

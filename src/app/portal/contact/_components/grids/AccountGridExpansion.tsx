@@ -49,8 +49,8 @@ const AccountGridExpansion = (props: any) => {
   ];
 
   const pagination = {
-    current_page: 0,
-    limit_per_page: 100,
+    current_page: 1,
+    limit_per_page: 50,
   };
 
   const defaultFilter = [
@@ -58,13 +58,14 @@ const AccountGridExpansion = (props: any) => {
       type: 'criteria',
       field: 'contact_id',
       operator: 'equal',
+      entity: 'organization_account',
       values: [rowData.id],
     },
   ];
 
   const { fetchData, data, error, isLoading } = useFetchData({
-    current: 0,
-    limit: 100,
+    current: pagination?.current_page,
+    limit: pagination?.limit_per_page,
     entity: 'organization_account',
     pluck: _pluck,
     sorting: defaultSorting,
@@ -85,20 +86,25 @@ const AccountGridExpansion = (props: any) => {
         enableRowSelection: false,
         enableRowExpansion: true,
         rowExpansionBuilder: <OrganizationGridExpansion />,
+        onFetchRecords: fetchData,
+        searchConfig: {
+          router: 'grid',
+          resolver: 'items',
+          query_params: {
+            entity: 'organization_account',
+            pluck: _pluck,
+          },
+        },
       }}
       data={items}
       isError={error}
       isLoading={isLoading}
       defaultSorting={defaultSorting}
-      // defaultAdvanceFilter={defaultAdvanceFilter || []}
-      // advanceFilter={filters?.reportFilters || []}
+      defaultAdvanceFilter={defaultFilter || []}
       pagination={pagination}
       parentType="grid_expansion"
       sorting={defaultSorting || []}
       totalCount={totalCount || 0}
-      onRefetch={(args) => {
-        fetchData(args);
-      }}
       hideSearch={false}
       showPagination={true}
     />

@@ -66,7 +66,6 @@ export default function GridProvider({
   defaultAdvanceFilter = [],
   pagination,
   parentType,
-  onRefetch,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -110,11 +109,13 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction]
     = useState<string | null>(null)
 
+  const resolvedDefaultFilter = defaultAdvanceFilter?.map(filter => ({ ...filter, default: true })) as ISearchItem[]
+
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
       if (curr?.default) return acc
       return [...acc, curr]
-    }, [...defaultAdvanceFilter],
+    }, [...resolvedDefaultFilter],
   )
 
   // use effects
@@ -190,7 +191,7 @@ export default function GridProvider({
     const updatedSorting = sorting.filter(sort => sort.id !== columnId)
     if (parentType === 'form') {
       return config?.onFetchRecords?.({
-        sort: updatedSorting,
+        sorting: updatedSorting,
       })
     }
     void handleUpdateReportSorting(updatedSorting)
@@ -207,11 +208,9 @@ export default function GridProvider({
         sort_key,
       }
     })
-    onRefetch && onRefetch({ sorting: resolvedSorting })
-    if (parentType === 'grid_expansion') return
-    if (parentType === 'form') {
+    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       return config?.onFetchRecords?.({
-        sort: resolvedSorting,
+        sorting: resolvedSorting,
       })
     }
     void UpdateReportSorting({ sorting: resolvedSorting })
@@ -517,7 +516,7 @@ export default function GridProvider({
     viewMode,
     sorting,
     advanceFilter: resolvedAdvanceFilter,
-    defaultAdvanceFilter,
+    defaultAdvanceFilter: resolvedDefaultFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,

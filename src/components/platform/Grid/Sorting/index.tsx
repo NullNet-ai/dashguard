@@ -219,7 +219,7 @@ const Sorting = () => {
         }}
         variant="link"
         onClick={() => {
-          // platform dev will add this
+          actions?.handleResetSorting()
         }}
       >
         {/* <Trash2 className="size-4 block lg:hidden"/> */}
