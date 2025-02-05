@@ -36,7 +36,7 @@ export default function RecursiveMenuItem({
       {(option.children && option.children.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <div className="flex items-center gap-2  text-left text-sm">
               <MenuItem
                 onClick={option.onClick.bind(
                   null,
@@ -64,7 +64,7 @@ export default function RecursiveMenuItem({
           </DropdownMenuContent>
         </DropdownMenu>
       )) || (
-        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <div className="flex items-center gap-2 text-left text-sm">
           <MenuItem
             onClick={option.onClick.bind(
               null,
