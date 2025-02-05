@@ -702,55 +702,43 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
 
   const handleMonthNavigation = (newDate: Date) => {
     const startOfNewMonth = new Date(
-      newDate.getFullYear(), newDate.getMonth(), 1,
-    )
+      newDate.getFullYear(), newDate.getMonth(), 1
+    );
     const endOfNewMonth = new Date(
-      newDate.getFullYear(), newDate.getMonth() + 1, 0,
-    )
-
+      newDate.getFullYear(), newDate.getMonth() + 1, 0
+    );
+  
     if (
-      props.minDate
-      && startOfNewMonth < new Date(props.minDate.getFullYear(), props.minDate.getMonth(), 1)
+      props.minDate &&
+      startOfNewMonth < new Date(props.minDate.getFullYear(), props.minDate.getMonth(), 1)
     ) {
-      return
+      return;
     }
-
+  
     if (
-      props.maxDate
-      && endOfNewMonth > new Date(props.maxDate.getFullYear(), props.maxDate.getMonth() + 1, 0)
+      props.maxDate &&
+      endOfNewMonth > new Date(props.maxDate.getFullYear(), props.maxDate.getMonth() + 1, 0)
     ) {
-      return
+      return;
     }
-
+  
+    const today = new Date();
     if (props.disablePastDates) {
-      const today = new Date()
-      if (
-        startOfNewMonth < new Date(today.getFullYear(), today.getMonth(), 1)
-      ) {
-        return
+      const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (startOfNewMonth < startOfCurrentMonth) {
+        return;
       }
     }
-
+  
     if (props.disableFutureDates) {
-      const today = new Date()
-      if (
-        endOfNewMonth > new Date(today.getFullYear(), today.getMonth() + 1, 0)
-      ) {
-        return
+      const endOfCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      if (endOfNewMonth > endOfCurrentMonth) {
+        return;
       }
     }
-
-    setMonth(newDate.getMonth())
-    setYear(newDate.getFullYear())
-
-    if (value) {
-      const newSelectedDate = new Date(newDate)
-      newSelectedDate.setHours(
-        value.getHours(), value.getMinutes(), value.getSeconds(), value.getMilliseconds(),
-      )
-      onValueChange(newSelectedDate)
-    }
-  }
+    setMonth(newDate.getMonth());
+    setYear(newDate.getFullYear());
+  };
 
   const getLastValidDayOfMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate()
@@ -887,7 +875,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
       <PopoverTrigger asChild={true}>
         <Button
           className={cn(
-            'flex items-center justify-center font-normal disabled:opacity-100 active:!translate-y-0', !value && 'text-muted-foreground',
+            'flex items-center justify-center font-normal hover:bg-transparent  disabled:opacity-100 active:!translate-y-0', !value && 'text-muted-foreground',
           )}
           data-test-id={props.datePickerTestID}
           disabled={props.readOnly}
