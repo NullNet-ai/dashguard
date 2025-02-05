@@ -46,7 +46,6 @@ const FormHeader = (props: IFormHeaderProps) => {
       <div className='flex flex-row space-x-2'>
         <DebugButton
           handleDebug={handleDebug}
-          // dataTestID={`${formKey}${formLabel.split(" ").join("")}FormDebugButton`}
           dataTestID={testIDFormatter(
             `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-debug-btn`,
           )}
@@ -59,7 +58,6 @@ const FormHeader = (props: IFormHeaderProps) => {
             variant="ghost"
             onClick={() => handleUpdateDisplayType('form')}
             size="icon"
-            // data-test-id={`${formKey}${formLabel.split(" ").join("")}FormLockButton`}
             data-test-id={testIDFormatter(
               `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
             )}
@@ -75,7 +73,6 @@ const FormHeader = (props: IFormHeaderProps) => {
         && (buttonConfig?.hideLockButton
           ? null
           : (
-              // eslint-disable-next-line react/jsx-indent
               <UnlockButton
                 dataTestID={testIDFormatter(
                   `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-unlock-btn`,
