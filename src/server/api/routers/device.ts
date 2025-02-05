@@ -3,6 +3,7 @@ import {
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
 import argon2 from 'argon2'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
@@ -15,6 +16,7 @@ import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicD
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import { decrypt, encrypt } from '../encryptAndDecryptAccountSecret'
 
 const entity = 'device'
 
@@ -373,12 +375,15 @@ export const deviceRouter = createTRPCRouter({
             ?.map((setting: { name: string }) => setting.name)
             .join(', '),
           created_by: contacts?.length
-          ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
-          : device_created_by?.length ? `${device_created_by?.[0].instance_name}`
-          :  null,
+            ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
+            : device_created_by?.length
+              ? `${device_created_by?.[0].instance_name}`
+              : null,
           updated_by: updated_by?.length
             ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
-            : device_updated_by?.length ? `${device_updated_by?.[0].instance_name}`: null,
+            : device_updated_by?.length
+              ? `${device_updated_by?.[0].instance_name}`
+              : null,
         }
       })
 
@@ -399,7 +404,7 @@ export const deviceRouter = createTRPCRouter({
         code: z.string().optional(),
       }),
     )
-    
+
     .query(async ({ input, ctx }) => {
       const { id: device_id, code } = input
       let id = device_id
@@ -431,13 +436,13 @@ export const deviceRouter = createTRPCRouter({
             query: {
               pluck_object: {
                 devices: [
-                  "id",
-                  "model",
-                  "instance_name",
-                  "address_id",
-                  "created_date",
-                  "updated_date",
-                  "categories"
+                  'id',
+                  'model',
+                  'instance_name',
+                  'address_id',
+                  'created_date',
+                  'updated_date',
+                  'categories',
                 ],
                 addresses: ['id', 'country', 'city', 'state'],
               },
@@ -569,9 +574,15 @@ export const deviceRouter = createTRPCRouter({
           throw new Error(`Failed to create an account for device ${id}`)
         }
 
+        const encrypted_token = encrypt(account_secret || '')
+        const cookieStore = cookies()
+
+        cookieStore.set(`encrypted_token_${id}`, encrypted_token, { httpOnly: true, secure: true })
+
         return {
           account_id,
           account_secret,
+          encrypted_token,
           message: transformResMessage(reg_res?.message),
         }
       }
@@ -703,10 +714,16 @@ export const deviceRouter = createTRPCRouter({
           entity,
           token: ctx.token.value,
           query: {
-            pluck: ['is_connection_established'],
+            pluck: ['is_connection_established', 'status'],
           },
         })
         .execute()
+
+      const cookieStore = cookies()
+      const cookieName = `encrypted_token_${id}`
+      if (find_res?.data?.[0]?.status?.toLowerCase() === 'active') {
+        cookieStore.set(cookieName, '', { expires: new Date(0) })
+      }
 
       return {
         is_connection_established:
@@ -989,6 +1006,8 @@ export const deviceRouter = createTRPCRouter({
             },
           })
       }
+
+
       const response = await query.execute()
 
       return {
@@ -1004,6 +1023,44 @@ export const deviceRouter = createTRPCRouter({
           updated_by_data: response.data[0]?.updated_by_data?.[0],
           created_by_data: response.data[0]?.created_by_data?.[0],
         },
+      }
+    }),
+
+  getByCode: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        pluck_fields: z.array(z.string()),
+        main_entity: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (!input?.id) return null
+      try {
+        const recordByCode = await ctx.dnaClient
+          .findByCode(input.id, {
+            entity: input.main_entity,
+            token: ctx.token.value,
+            query: {
+              pluck: input.pluck_fields,
+            },
+          })
+          .execute()
+        const { data, ...rest } = recordByCode ?? {}
+
+        return {
+          ...rest,
+          data: data?.[0],
+        }
+      }
+      catch (error) {
+        return {
+          data: undefined,
+          status_code: 404,
+          message: 'Record not found',
+          success: false,
+          error,
+        } as Record<string, any>
       }
     }),
 })

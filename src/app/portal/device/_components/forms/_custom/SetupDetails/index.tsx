@@ -1,7 +1,8 @@
+'use client'
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
-import { InfoIcon } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, InfoIcon } from 'lucide-react'
 import Image from 'next/image'
-import React, { Fragment } from 'react'
+import React, { useState } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
 import { Button } from '~/components/ui/button'
@@ -33,16 +34,19 @@ export default function CustomSetupDetails({
   isFromRecord,
   params,
 }: ISetupDetails) {
-  const { control } = form
+  const { control, formState } = form || {}
+  const { defaultValues } = formState || {}
   const { account_id, account_secret } = orgAccount || {}
 
   const toast = useToast()
   const [showInfo, setShowInfo] = React.useState<boolean>(false)
-
+  const [showSecret, setShowSecret] = useState(false)
   const updateOrgAccount = api.device.updateOrganizationAccount.useMutation()
 
   const copyToClipboard = (value: string) => {
-    navigator.clipboard.writeText(value)
+    navigator.clipboard.writeText(value).catch((err) => {
+      console.error('Failed to copy text: ', err)
+    })
   }
   const handleCopyClick = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -76,36 +80,35 @@ export default function CustomSetupDetails({
     }
   }
 
-  const app_secret = form.watch('app_secret')
+  const acct_secret = form.watch('app_secret')
+
+  const app_secret = params?.shell_type === 'wizard' ? defaultValues?.account_secret : acct_secret
 
   return (
     <FormField
-      control = { form.control }
-      name = "Firewall"
-      render = { () => {
+      control={form.control}
+      name="Firewall"
+      render={() => {
         return (
-          <FormItem>
+          <FormItem className='contents'>
             <>
               {showInfo && !!app_secret && <AppSecretGenerationInfo />}
-              <div className="flex flex-col">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-1">
                   <div className="mt-2 space-x-2">
                     <label
-                      className="block text-md"
-                      data-test-id={addTestIdName({
-                        type: 'lbl',
-                        name: 'server_url',
-                      })}
+                      className='block text-md'
+                      data-test-id = { addTestIdName({ type: 'lbl', name: 'server_url' }) }
                     >
                       Server URL
                     </label>
                     <input
-                      className="mt-1 min-w-[80%] rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500"
+                      className="mt-1 min-w-[70%] rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500"
                       data-test-id={addTestIdName({
                         type: 'inp',
                         name: 'server_url',
                       })}
-                      readOnly = { true }
+                      readOnly={true}
                       type="text"
                       value="https://wallgaurd.ai/"
                     />
@@ -120,121 +123,146 @@ export default function CustomSetupDetails({
                       <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
-                  <FormField
-                    control = { control }
-                    name = { `app_id` }
-                    render = { () => {
-                      return (
-                        <div className = "mt-2 space-x-2">
-                          <label
-                            className = "block text-md"
-                            data-test-id = { addTestIdName({
-                              type: 'lbl',
-                              name: 'app_id',
-                            }) }
-                          >
-                            {"APP ID"}
-                          </label>
-                          <input
-                            className = "mt-1 min-w-[80%] rounded-md border-green-300 bg-green-100 p-2 text-green-600"
-                            data-test-id = { addTestIdName({
-                              type: 'inp',
-                              name: 'app_id',
-                            }) }
-                            readOnly={true}
-                            type = "text"
-                            value = { account_id }
-                          />
-                          <button
-                            className="my-auto"
-                            data-test-id={addTestIdName({
-                              type: 'cpy',
-                              name: 'app_id',
-                            })}
-                            onClick={(event) => handleCopyClick(event, `${account_id}`) }
-                          >
-                            <DocumentDuplicateIcon className = "h-5 w-5 text-gray-400" />
-                          </button>
-                        </div>
-                      )
-                    }}
-                  />
-                  <FormField
-                    control = { control }
-                    name = { `app_secret` }
-                    render = { (formRenderProps) => {
-                      const { field } = formRenderProps
-                      return (
-                        <div className = "mt-2 space-x-2">
-                          <label
-                            className = "block text-md"
-                            data-test-id = { addTestIdName({
-                              type: 'lbl',
-                              name: 'app_secret',
-                            }) }
-                          >
-                            {"APP Secret"}
-                          </label>
-                          <input
-                            className = "mt-1 min-w-[80%] rounded-md border-gray-300 bg-gray-100 p-2 text-gray-800"
-                            data-test-id = { addTestIdName({
-                              type: 'inp',
-                              name: 'app_secret',
-                            }) }
-                            readOnly={true}
-                            type = "text"
-                            value = { account_secret || app_secret || '***************'}
-                          />
-                          {(!!app_secret || !!account_secret) && (
-                            <button
-                              className="my-auto"
-                              data-test-id={addTestIdName({
-                                type: 'cpy',
-                                name: 'app_secret',
-                              })}
-                              onClick={(event) => handleCopyClick(event, `${app_secret || account_secret}`) }
-                            >
-                              <DocumentDuplicateIcon className = "h-5 w-5 text-gray-400" />
-                            </button>
-                          )}
-                          <br />
-                          {isFromRecord && (
-                            <Button
-                              className="mt-2"
-                              disabled={field?.disabled}
-                              size={"xs"}
-                              onClick={handleGenerateNewKey}
-                            >
-                              {"Generate new key"}
-                            </Button>
-                          )}
-                        </div>
-                      )
-                    }}
-                  />
                 </div>
                 <FormField
-                  control = { control }
-                  name = { `wallguard_configuration` }
-                  render = { () => {
+                  control={control}
+                  name={`app_id`}
+                  render={() => {
                     return (
-                      <div className = "mt-12">
-                        <div className = "mb-4">
+                <div className="col-span-1">
+
+                      <div className="mt-2 space-x-2">
+                        <label
+                          className="block text-md"
+                          data-test-id={addTestIdName({
+                            type: 'lbl',
+                            name: 'app_id',
+                          })}
+                        >
+                          {"APP ID"}
+                        </label>
+                        <input
+                          className="mt-1 min-w-[70%] rounded-md border-green-300 bg-green-100 p-2 text-green-600"
+                          data-test-id={addTestIdName({
+                            type: 'inp',
+                            name: 'app_id',
+                          })}
+                          readOnly={true}
+                          type="text"
+                          value={account_id}
+                        />
+                        <button
+                          className="my-auto"
+                          data-test-id={addTestIdName({
+                            type: 'cpy',
+                            name: 'app_id',
+                          })}
+                          onClick={(event) => handleCopyClick(event, `${account_id}`) }
+                        >
+                          <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
+                        </button>
+                      </div>
+                      </div>
+                    )
+                  } }
+                />
+                
+                <FormField
+                  control={control}
+                  name={`app_secret`}
+                  render={(formRenderProps) => {
+                    const { field } = formRenderProps
+                    return (
+                      <div className="mt-2 space-x-2">
+                        <label
+                          className="block text-md"
+                          data-test-id={addTestIdName({
+                            type: 'lbl',
+                            name: 'app_secret',
+                          })}
+                        >
+                          APP Secret
+                        </label>
+                        <div className="relative w-[70%]">
+                          <input
+                            className="mt-1 w-full rounded-md border-gray-300 bg-gray-100 p-2 pr-10 text-gray-800"
+                            data-test-id={addTestIdName({
+                              type: 'inp',
+                              name: 'app_secret',
+                            })}
+                            readOnly={true}
+                            type={showSecret ? 'text' : 'password'}
+                            value={account_secret || app_secret || '***************'}
+                          />
+                          {/* Eye Toggle Button Inside Input */}
+                          <button
+                            className="absolute inset-y-0 right-2 flex items-center"
+                            type="button"
+                            disabled={field?.disabled}
+                            onClick={() => setShowSecret(!showSecret)}
+                          >
+                            {showSecret
+                              ? (
+                                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                                )
+                              : (
+                                  <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                                )}
+                          </button>
+                          {/* Copy Button Below Input */}
+                        {(!!app_secret || !!account_secret) && (
+                        <button
+                            className="ml-2 absolute -right-6 top-3"
+                            data-test-id={addTestIdName({
+                              type: 'cpy',
+                              name: 'app_secret',
+                            })}
+                            onClick={(event) => handleCopyClick(event, `${app_secret || account_secret}`)}
+                          >
+                            <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
+                          </button>
+                        )} 
+                        </div>
+                        
+                        <br />
+                        {isFromRecord && (
+                          <Button
+                            className="mt-2"
+                            disabled={field?.disabled}
+                            size={"xs"}
+                            onClick={handleGenerateNewKey}
+                          >
+                            Generate new key
+                          </Button>
+                        )}
+                      </div>
+
+                    )
+                  } }
+                />
+                <br />
+                <FormField
+                  control={control}
+                  name={`wallguard_configuration`}
+                  render={() => {
+                    return (
+                      <div className="col-span-1 mt-12">
+                        <div className="mb-4">
                           <FormLabel
-                            data-test-id = { addTestIdName({
+                            data-test-id={addTestIdName({
                               type: 'lbl',
                               name: 'wallguard_configuration',
-                            }) }
+                            })}
                           >
                             {"Wallguard Configuration"}
                           </FormLabel>
-                          <div className = "item mt-2 flex gap-x-2 rounded-md bg-primary/10 p-3 text-primary lg:max-w-[70%]">
-                            <InfoIcon className = "size-4 shrink-0 text-primary" />
+                          <div className="item mt-2 flex gap-x-2 rounded-md bg-primary/10 p-3 text-primary lg:max-w-[70%]">
+                            <InfoIcon className="size-4 shrink-0 text-primary" />
                             <div>
-                              <h2 className = "text-sm font-bold">
+                              <h2 className="text-sm font-bold">
                                 {"Configure Firewall"}
                               </h2>
-                              <p className = "text-sm">
+                              <p className="text-sm">
                                 {"Lorem ipsum dolor sit amet, consectetur"}
                                 {"adipiscing elit, sed do eiusmod tempor"}
                                 {"incididunt ut labore et dolore magna aliqua. Ut"}
@@ -249,7 +277,7 @@ export default function CustomSetupDetails({
                             </div>
                           </div>
                         </div>
-                        <div className = "">
+                        <div className="">
                           <Image
                             alt=""
                             className="relative w-[100%] max-w-[70%] object-cover md:inset-0"
@@ -260,13 +288,13 @@ export default function CustomSetupDetails({
                         </div>
                       </div>
                     )
-                  }}
+                  } }
                 />
               </div>
             </>
           </FormItem>
         )
-      }}
+      } }
     />
   )
 }

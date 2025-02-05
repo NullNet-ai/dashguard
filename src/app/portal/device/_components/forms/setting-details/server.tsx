@@ -7,9 +7,10 @@ const WizardContainer = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , , application, identifier] = pathname.split("/");
 
-  const response = await api.device.getByCode({
-    code: identifier!,
+  const response = await api.record.getByCode({
+    id: identifier!,
     pluck_fields: ["id", "tags"],
+    main_entity: "device"
   });
 
   const record_id = response?.data?.id;

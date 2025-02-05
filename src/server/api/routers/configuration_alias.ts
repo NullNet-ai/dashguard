@@ -1,9 +1,9 @@
-import { EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
-
 import {
-  createTRPCRouter,
-  privateProcedure,
-} from '~/server/api/trpc'
+  EOrderDirection,
+  type IAdvanceFilters,
+} from '@dna-platform/common-orm'
+
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
 import { pluralize } from '~/server/utils/pluralize'
 import ZodItems from '~/server/zodSchema/grid/items'
@@ -13,7 +13,7 @@ const entity = 'device_aliases'
 export const deviceAliasRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   mainGrid: privateProcedure
-  // Define input using zod for validation
+    // Define input using zod for validation
     .input(ZodItems)
     .query(async ({ input, ctx }) => {
       const {
@@ -31,27 +31,28 @@ export const deviceAliasRouter = createTRPCRouter({
           'raw_content',
         ],
       }
-      const device_aliases = await ctx.dnaClient.findAll({
-        entity: 'device_aliases',
-        token: ctx.token.value,
-        query: {
-          pluck_object,
-          advance_filters: _advance_filters as IAdvanceFilters[],
-          order: {
-            starts_at:
-            (input.current || 0) === 0
-              ? 0
-              : (input.current || 1) * (input.limit || 100)
-                - (input.limit || 100),
-            limit: input.limit || 1,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
+      const device_aliases = await ctx.dnaClient
+        .findAll({
+          entity: 'device_aliases',
+          token: ctx.token.value,
+          query: {
+            pluck_object,
+            advance_filters: _advance_filters as IAdvanceFilters[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100)
+                    - (input.limit || 100),
+              limit: input.limit || 1,
+              by_field: 'code',
+              by_direction: EOrderDirection.DESC,
+            },
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
+              : [],
           },
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
-            : [],
-        },
-      })
+        })
         .join({
           type: 'left',
           field_relation: {
