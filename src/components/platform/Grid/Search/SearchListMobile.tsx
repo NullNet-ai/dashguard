@@ -16,7 +16,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGridContext } from './Provider'
 
-const SortingListMobile = () => {
+const SearchListMobile = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGridContext)
@@ -224,7 +224,7 @@ const SortingListMobile = () => {
                   }}
                   variant="link"
                   onClick={() => {
-                    // platform dev will add this
+                    void actions?.handleClearSearchItems()
                   }}
                 >
                   Clear All
@@ -237,4 +237,4 @@ const SortingListMobile = () => {
   )
 }
 
-export default SortingListMobile
+export default SearchListMobile

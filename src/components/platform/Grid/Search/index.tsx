@@ -6,8 +6,8 @@ import FilterButton from '../Header/FilterButton'
 import TableViewButton from '../Header/TableViewButton'
 
 import GridSearchProvider from './Provider'
-import SortingList from './SortingList'
-import SortingListMobile from './SortingListMobile'
+import SearchList from './SearchList'
+import SearchListMobile from './SearchListMobile'
 import Search from './View'
 
 // eslint-disable-next-line react/destructuring-assignment
@@ -30,10 +30,10 @@ export default function Main({ parentType = 'grid' }: any) {
                 <CreateButton className="hidden lg:inline-flex" title="New" />
               </div>
               <div className="hidden min-h-[40px] lg:block">
-                <SortingList />
+                <SearchList />
               </div>
               <div className="min-h-[40px] lg:hidden">
-                <SortingListMobile />
+                <SearchListMobile />
               </div>
             </div>
           )
@@ -45,10 +45,10 @@ export default function Main({ parentType = 'grid' }: any) {
                 </div>
               </div>
               <div className="hidden min-h-[40px] lg:block">
-                <SortingList />
+                <SearchList />
               </div>
               <div className="min-h-[40px] lg:hidden">
-                <SortingListMobile />
+                <SearchListMobile />
               </div>
             </div>
           )}

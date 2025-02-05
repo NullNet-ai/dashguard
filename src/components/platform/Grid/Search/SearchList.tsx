@@ -14,7 +14,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGridContext } from './Provider'
 
-const SortingList = () => {
+const SearchList = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGridContext)
@@ -185,6 +185,7 @@ const SortingList = () => {
                                     size="xs"
                                     variant="ghost"
                                     onClick={() => {
+                                      setData(prev => prev.filter(prevData => prevData.id !== item.id))
                                       void actions?.handleRemoveSearchItem(item)
                                     }}
                                   >
@@ -221,4 +222,4 @@ const SortingList = () => {
   )
 }
 
-export default SortingList
+export default SearchList
