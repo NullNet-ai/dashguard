@@ -74,13 +74,13 @@ export default function Search() {
         <div className={cn(`relative`)}
           style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : "auto" }}
         >
-          <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
+          <div className="flex flex-wrap items-center md:gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
             <MagnifyingGlassIcon
               className="h-5 w-5 text-muted-foreground"
               aria-hidden="true"
             />
             <ComboboxInput
-              className="flex-grow border-none h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
+              className="flex-grow border-none px-1.5 md:px-3 h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
               placeholder="Search..."
               value={query}
               onChange={(event) => {
