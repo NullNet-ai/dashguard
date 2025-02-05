@@ -1,44 +1,46 @@
+import { z } from 'zod'
+
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
-} from "~/server/api/trpc";
-import { z } from "zod";
+} from '~/server/api/trpc'
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
     .input(
       z.object({
         username: z.string().min(1),
-        password: z.string().min(8),
+        password: z.string().min(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       try {
         const response = await ctx.dnaClient
           .login(input.username, input.password)
-          .execute();
+          .execute()
         if (!response.success) {
-          throw response;
+          throw response
         }
 
-        const token = response?.data?.[0]?.token;
+        const token = response?.data?.[0]?.token
 
-        ctx.storeCookies.set("token", token);
-        return { token };
-      } catch (error: any) {
-        let errorMessage = "Something went wrong please try again";
-        let errorType = "unknown";
+        ctx.storeCookies.set('token', token)
+        return { token }
+      }
+      catch (error: any) {
+        let errorMessage = 'Something went wrong please try again'
+        let errorType = 'unknown'
 
         switch (error?.message) {
-          case "Invalid Credentials":
-            errorMessage = "The email or password you entered is incorrect.";
-            errorType = "invalid";
-            break;
-          case "Account not found":
-            errorMessage = "No account was found with this email address.";
-            errorType = " notfound";
-            break;
+          case 'Invalid Credentials':
+            errorMessage = 'The email or password you entered is incorrect.'
+            errorType = 'invalid'
+            break
+          case 'Account not found':
+            errorMessage = 'No account was found with this email address.'
+            errorType = ' notfound'
+            break
         }
 
         return {
@@ -46,15 +48,15 @@ export const authRouter = createTRPCRouter({
           statusCode: error?.status_code || 500,
           error: error?.errors || error,
           type: errorType,
-        };
+        }
       }
     }),
 
   logout: privateProcedure.mutation(async ({ ctx }) => {
-    ctx.storeCookies.delete("token");
-    return { message: "User logged out" };
+    ctx.storeCookies.delete('token')
+    return { message: 'User logged out' }
   }),
   verify: privateProcedure.mutation(async () => {
-    return {};
+    return true
   }),
-});
+})
