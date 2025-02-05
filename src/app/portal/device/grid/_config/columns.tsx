@@ -4,7 +4,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 
 import StatusCell from '~/components/ui/status-cell'
 
-import Connectivity from '../../_components/chart/GridConnectivity/client'
+import Connectivity from '../../_components/charts/GridConnectivity/client'
 import GridDeviceStatus from '../GridDeviceStatus'
 
 const gridColumns = [
@@ -52,8 +52,8 @@ const gridColumns = [
     accessorKey: 'device_status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.id
-      return <GridDeviceStatus device_id='value' />
+      const device_id = row?.original?.id
+      return <GridDeviceStatus device_id={device_id} />
     },
   },
   {

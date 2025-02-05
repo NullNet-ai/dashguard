@@ -3,7 +3,7 @@ import React from "react";
 import { Fragment } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { FormField } from "~/components/ui/form";
-import { FirewallChart } from "../../../chart/FirewallChart";
+import { FirewallChart } from "../../../charts/FirewallChart";
 import { Alert, AlertContent, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";

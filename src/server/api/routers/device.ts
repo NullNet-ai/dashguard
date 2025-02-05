@@ -279,7 +279,7 @@ export const deviceRouter = createTRPCRouter({
               },
               from: {
                 entity: 'devices',
-                field: 'updated_by',
+                field: 'created_by',
               },
             },
           })
@@ -361,6 +361,8 @@ export const deviceRouter = createTRPCRouter({
           updated_by,
           contacts,
           device_group_settings,
+          device_updated_by,
+          device_created_by,
           ...rest
         } = item
 
@@ -371,11 +373,12 @@ export const deviceRouter = createTRPCRouter({
             ?.map((setting: { name: string }) => setting.name)
             .join(', '),
           created_by: contacts?.length
-            ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
-            : null,
+          ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
+          : device_created_by?.length ? `${device_created_by?.[0].instance_name}`
+          :  null,
           updated_by: updated_by?.length
             ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
-            : null,
+            : device_updated_by?.length ? `${device_updated_by?.[0].instance_name}`: null,
         }
       })
 

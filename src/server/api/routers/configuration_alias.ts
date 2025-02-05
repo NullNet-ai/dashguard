@@ -31,9 +31,9 @@ export const deviceAliasRouter = createTRPCRouter({
           'raw_content',
         ],
         contacts: ['first_name', 'last_name', 'id'],
-        organization_accounts: ['contact_id', 'id'],
+        organization_accounts: ['contact_id','device_id', 'id'],
         organization_account_updated_by: ['contact_id', 'id'],
-        device_organization_account_created_by: ['contact_id', 'id'],
+        device_organization_account_created_by: ['contact_id','device_id', 'id'],
         updated_by: ['first_name', 'last_name', 'id'],
         created_by: ['first_name', 'last_name', 'id'],
         device_created_by: ['id', 'instance_name'],
@@ -41,6 +41,9 @@ export const deviceAliasRouter = createTRPCRouter({
         devices: [
           'id', 'instance_name',
         ],
+        device_aliases_created_by: ['id', 'created_by'],
+        device_aliases_updated_by: ['id', 'updated_by'],
+        device_configurations_created_by: ['id', 'created_by', 'device_configuration_id'],
 
       }
       const device_aliases = await ctx.dnaClient.findAll({
@@ -132,71 +135,73 @@ export const deviceAliasRouter = createTRPCRouter({
             },
           },
         })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'organization_accounts',
-        //       alias: 'device_organization_account_created_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'device_aliases',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'devices',
-        //       alias: 'device_created_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'organization_accounts',
-        //       field: 'device_id',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'organization_accounts',
-        //       alias: 'device_organization_account_updated_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'devices',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'devices',
-        //       alias: 'device_updated_by',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'organization_accounts',
-        //       field: 'device_id',
-        //     },
-        //   },
-        // })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              alias: 'device_organization_account_created_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_aliases',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'devices',
+              alias: 'device_created_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'device_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              alias: 'device_organization_account_updated_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_aliases',
+              alias: 'device_aliases_updated_by',
+              field: 'updated_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'devices',
+              alias: 'device_updated_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'device_id',
+            },
+          },
+        })
         .execute()
 
       const { total_count: totalCount = 1, data: items }
       = device_aliases
-
+      
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
           updated_by, created_by,
+          device_created_by, device_updated_by,
           ...rest
         } = item
 
@@ -205,10 +210,11 @@ export const deviceAliasRouter = createTRPCRouter({
           ...rest,
           created_by: created_by?.length
             ? `${created_by?.[0].first_name} ${created_by?.[0].last_name}`
-            : null,
+            : device_created_by?.length ? `${device_created_by?.[0].instance_name}`
+            :  null,
           updated_by: updated_by?.length
             ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
-            : null,
+            : device_updated_by?.length ? `${device_updated_by?.[0].instance_name}`: null,
         }
       })
 
