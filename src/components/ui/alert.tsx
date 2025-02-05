@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { Terminal } from "lucide-react";
 import { XMarkIcon } from "@heroicons/react/24/solid"; // Import the X icon
+import { toast } from "sonner";
 
 const alertVariants = cva(
   "relative w-full p-4 [&>svg~*]:pl-9 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-[13px] [&>svg]:text-foreground",
@@ -51,8 +52,21 @@ const defaultIcons = {
 const Alert = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> &
-    VariantProps<typeof alertVariants> & { withAccentBorder?: boolean; Icon?: React.ElementType; IconClassName?: string; dismissible?: boolean; onDismiss?: () => void }
->(({ className, variant = "default", withAccentBorder = false, Icon, IconClassName, dismissible = false, onDismiss, ...props }, ref) => {
+  VariantProps<typeof alertVariants> & {
+    withAccentBorder?: boolean;
+    Icon?: React.ElementType;
+    IconClassName?: string;
+    dismissible?: boolean;
+    toastId?: string | number;
+  }
+>(({ className,
+  variant = "default",
+  withAccentBorder = false,
+  Icon,
+  IconClassName,
+  dismissible = false,
+  ...props
+}, ref) => {
   const IconComponent = Icon || defaultIcons[variant as keyof typeof defaultIcons];
   return (
     <div
@@ -65,7 +79,7 @@ const Alert = React.forwardRef<
       {props.children}
       {dismissible && (
         <button
-          onClick={onDismiss}
+          onClick={() => toast.dismiss()}
           className="absolute top-1/2 -translate-y-1/2 right-3"
           aria-label="Dismiss"
         >
