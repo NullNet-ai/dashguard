@@ -110,11 +110,11 @@ export default function FormSelect({
       query === ""
         ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
         : options
-            ?.filter((opt) => {
-              return opt.label.toLowerCase().includes(query.toLowerCase());
-            })
-            ?.slice(0, 5)
-            ?.filter((opt) => !!opt?.label);
+          ?.filter((opt) => {
+            return opt.label.toLowerCase().includes(query.toLowerCase());
+          })
+          ?.slice(0, 5)
+          ?.filter((opt) => !!opt?.label);
 
     return sortOptions(filtered ?? []);
   }, [query, options, sortOptions]);
@@ -232,7 +232,7 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border py-[5px] pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
+              "block w-full rounded-md border-border py-[5px] text-md pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
               {
                 "outline-destructive": error,
                 "border-destructive": error,
@@ -310,23 +310,23 @@ export default function FormSelect({
               ))}
               {fieldConfig?.selectEnableCreate
                 ? !isOptionsExist &&
-                  query && (
-                    <button
-                      className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
-                      data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                      onClick={void createNewRecord}
-                    >
-                      {isCreateLoading ? "Creating..." : `Create "${query}"`}
-                    </button>
-                  )
+                query && (
+                  <button
+                    className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
+                    data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+                    onClick={void createNewRecord}
+                  >
+                    {isCreateLoading ? "Creating..." : `Create "${query}"`}
+                  </button>
+                )
                 : !filteredOptions.length && (
-                    <span
-                      className="ms-3 block truncate group-data-[selected]:font-semibold"
-                      data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                    >
-                      {"No "} {fieldConfig?.label} found.
-                    </span>
-                  )}
+                  <span
+                    className="ms-3 block truncate group-data-[selected]:font-semibold"
+                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+                  >
+                    {"No "} {fieldConfig?.label} found.
+                  </span>
+                )}
             </ComboboxOptions>
           )}
         </div>
