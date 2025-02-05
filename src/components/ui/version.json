@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.10.2<unreleased>",
-  "branch": "unreleased/fix/1.10.2<unreleased>",
-  "message": "add update to input and smartdatetimepicker to set height to 36px for uniformity",
+  "tag": "1.10.3<unreleased>",
+  "branch": "unreleased/fix/1.10.3<unreleased>",
+  "message": "Alert to add toast dismiss, Dialog to reduce opacity of overlay making it not so dark overlay, sonner to remove padding ",
   "publish_name": "Rob Caldosa"
 }

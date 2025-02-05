@@ -45,11 +45,11 @@ export default function DefaultSummaryMenuOptions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer">
           <EllipsisVertical className={`h-4 w-4`} aria-hidden="true" />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent side='bottom' align="center">
         {title && <DropdownMenuLabel>{title}</DropdownMenuLabel>}
         <RecursiveMenuItem
           recordId={recordId}

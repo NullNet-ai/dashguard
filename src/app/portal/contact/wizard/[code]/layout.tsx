@@ -1,8 +1,7 @@
 import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
 
 import PlatformWizard from '~/components/platform/Wizard'
-import { api } from '~/trpc/server'
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
 
 import stepLabels from '../_config/stepLabels'
 import stepsNavigation from '../_config/stepsNavigation'
@@ -16,33 +15,11 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
   const category = headerList.get('x-categories') || ''
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
 
-  if (identifier !== 'new') {
-    const record_details = await api.record.getByCode({
-      main_entity: mainEntity!,
-      id: identifier!,
-      pluck_fields: ['id', 'code', 'status'],
-    })
-
-    if (!record_details?.data) {
-      return notFound()
-    }
-    const { status } = record_details?.data || {}
-
-    if (status.toLowerCase() === 'active') {
-      return notFound()
-    }
-
-    // const stepDetails = await api.wizard.getTraverseStepped(`${mainEntity}:wizard:${code}`)
-    // if (stepDetails?.traverse) {
-    //   const { traverse } = stepDetails || {}
-
-    //   const stepCount = Object.keys(traverse).length;
-
-    //   if (Number(currentStep) > stepCount + 1) {
-    //     return notFound()
-    //   }
-    // }
-  }
+  await stepValidator({
+    currentStep: currentStep!,
+    identifier: identifier!,
+    mainEntity: mainEntity!,
+  })
 
   let _totalSteps = totalSteps
   switch (category) {

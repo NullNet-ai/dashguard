@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCheckbox",
-  "tag": "1.7.0<unreleased>",
-  "branch": "unreleased/fix/2133/1.7.0<unreleased>",
-  "message": "add border color to be red when there is an error",
+  "tag": "1.7.1<unreleased>",
+  "branch": "unreleased/fix/2133/1.7.1<unreleased>",
+  "message": "Add fix to change all border color to red even though it's valid",
   "publish_name": "Rob Caldosa"
 }
