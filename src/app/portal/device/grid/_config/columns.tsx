@@ -5,6 +5,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import StatusCell from '~/components/ui/status-cell'
 
 import Connectivity from '../../_components/charts/GridConnectivity/client'
+import GridDeviceLastHeartbeat from '../GridDeviceLastHeartbeat'
 import GridDeviceStatus from '../GridDeviceStatus'
 
 const gridColumns = [
@@ -67,6 +68,11 @@ const gridColumns = [
   {
     header: 'Last Heartbeat',
     accessorKey: 'last_heartbeat',
+    cell: ({ row }) => {
+      const device_id = row?.original?.id
+
+      return <GridDeviceLastHeartbeat device_id={device_id} />
+    },
   },
   {
     header: 'Updated Date',

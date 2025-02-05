@@ -1,10 +1,11 @@
-import { EOperator, EOrderDirection } from '@dna-platform/common-orm'
+import { EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
 import { z } from 'zod'
 
 import {
   createTRPCRouter,
   privateProcedure,
 } from '~/server/api/trpc'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 
 import { createDefineRoutes } from '../baseCrud'
 
@@ -98,5 +99,30 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     })
 
     return time_status
+  }),
+  getLastHeartbeat: privateProcedure.input(
+    z.object({
+      device_id: z.string(),
+    })
+  ).query(async ({ ctx, input }) => {
+    const { device_id } = input
+
+    const device_heartbeats = await ctx.dnaClient.findAll({
+      entity: 'device_heartbeats',
+      token: ctx.token.value,
+      query: {
+        pluck: ['id', 'timestamp'],
+        advance_filters: createAdvancedFilter({
+          status: 'Active',
+          device_id,
+        }) as IAdvanceFilters[],
+        order: {
+          by_field: 'timestamp',
+          limit: 1,
+          by_direction: EOrderDirection.DESC,
+        },
+      },
+    }).execute()
+    return device_heartbeats
   }),
 })
