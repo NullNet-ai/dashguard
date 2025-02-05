@@ -1,5 +1,4 @@
 import crypto from 'crypto'
-
 import dotenv from 'dotenv'
 
 import { generateSecretKey } from './utils'
@@ -40,7 +39,7 @@ export const decrypt = (encryptedText: string) => {
     }
     const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(secretKey, 'base64'), iv)
     decipher.setAuthTag(authTag)
-
+//@ts-ignore
     return decipher.update(encrypted, 'binary', 'utf8') + decipher.final('utf8')
   }
   catch (error) {

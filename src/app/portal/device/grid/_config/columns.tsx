@@ -40,7 +40,6 @@ const gridColumns = [
   },
   {
     header: 'Connectivity',
-    accessorKey: 'connectivity',
     cell: ({ row }) => {
       // return <GridBarGraph />;
       return (
@@ -50,11 +49,9 @@ const gridColumns = [
   },
   {
     header: 'Status',
-    accessorKey: 'device_status',
     enableResizing: false,
     cell: ({ row }) => {
-      const device_id = row?.original?.id
-      return <GridDeviceStatus device_id={device_id} />
+      return <GridDeviceStatus device_id={ row?.original?.id } />
     },
   },
   {

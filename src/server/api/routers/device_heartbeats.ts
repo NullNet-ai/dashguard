@@ -75,7 +75,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
         bucket_size: '1h',
         order: {
           order_by: 'bucket',
-          order_direction: EOrderDirection.ASC,
+          order_direction: EOrderDirection.DESC,
         },
       },
       token: ctx.token.value,
@@ -112,7 +112,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
       entity: 'device_heartbeats',
       token: ctx.token.value,
       query: {
-        pluck: ['id', 'timestamp'],
+        pluck: ['id', 'timestamp','device_id'],
         advance_filters: createAdvancedFilter({
           status: 'Active',
           device_id,

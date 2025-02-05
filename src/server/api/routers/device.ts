@@ -567,6 +567,7 @@ export const deviceRouter = createTRPCRouter({
         const encrypted_token = encrypt(account_secret || '')
         const cookieStore = cookies()
 
+        //@ts-ignore
         cookieStore.set(`encrypted_token_${id}`, encrypted_token, { httpOnly: true, secure: true })
 
         return {

@@ -36,5 +36,5 @@ export default function GridDeviceLastHeartbeat({ device_id }: { device_id: stri
     return moment(record?.data?.[0]?.timestamp).format('MM/DD/YYYY HH:mm')
   }, [record?.data?.[0]?.timestamp])
 
-  return <span>{timestamp }</span>
+  return <span>{timestamp}</span>
 }

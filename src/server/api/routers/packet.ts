@@ -134,5 +134,4 @@ export const countryRouter = createTRPCRouter({
     //     label: country,
     //   };
     // });
-  }),
-})
+  })
