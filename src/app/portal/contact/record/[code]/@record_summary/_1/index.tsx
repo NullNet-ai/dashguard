@@ -152,7 +152,7 @@ const RecordShellSummary = ({
           return null;
         }
         return (
-          <div className={cn(`${index !== 0 ? 'pt-[4px]' : ''}`)} key={index}>
+          <div className={cn(`${index !== 0 ? 'pt-[4px]' : ''}`)} key={key}>
             <div className="px-5">
               <div className="p-1 text-sm">
                 <div>

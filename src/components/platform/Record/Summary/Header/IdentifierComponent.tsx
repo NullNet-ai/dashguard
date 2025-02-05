@@ -9,7 +9,7 @@ import useScreenType from "~/hooks/use-screen-type";
 import { RecordContext } from "../../Provider";
 import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
 import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
-import  capitalize  from 'lodash/capitalize';
+import capitalize from 'lodash/capitalize';
 
 const ellipsis = (str: string, length: number) => {
   const sanitizedStr = str?.replace(/["']/g, "");
@@ -39,7 +39,7 @@ export default function IdentifierComponent({
   const handleClickCollapseButton = () => onClickCollapseButton?.();
 
   const entityName = state?.entityName;
-  
+
   return (
     <div className="flex flex-row items-center justify-between p-2 px-4 text-sm">
       <div className="flex flex-row items-center gap-x-1">
@@ -53,19 +53,17 @@ export default function IdentifierComponent({
       </div>
       <div className="flex flex-row items-center gap-x-1">
         <ChevronLeftIcon
-          className={`hidden h-4 w-4 text-slate-500 md:block cursor-pointer transition-transform ${
-            isCollapseRecordSummary ? "rotate-180" : ""
-          }`}
+          className={`hidden h-4 w-4 text-slate-500 md:block cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
+            }`}
           onClick={handleClickCollapseButton}
         />
         <ChevronDownIcon
-          className={`h-4 w-4 text-slate-500 md:hidden cursor-pointer transition-transform ${
-            isCollapseRecordSummary ? "rotate-180" : ""
-          }`}
+          className={`h-4 w-4 text-slate-500 md:hidden cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
+            }`}
           onClick={handleClickCollapseButton}
         />
         <DefaultSummaryMenuOptions
-          key={Math.random()}
+          key={state?.recordId}
           menuOptionConfig={state?.identifierOption}
           memoizedRecordData={memoizedRecordData}
         />
