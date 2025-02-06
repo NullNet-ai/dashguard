@@ -24,6 +24,7 @@ import { tabRouter } from './routers/tab'
 import { userRolesRouter } from './routers/user_role'
 import { validatorRouter } from './routers/validator'
 import { wizardRouter } from './routers/wizard'
+import { packetRouter } from './routers/packet';
 
 /**
  * This is the primary router for your server.
@@ -55,6 +56,7 @@ export const appRouter = createTRPCRouter({
   deviceAlias: deviceAliasRouter,
   deviceConfiguration: deviceConfigurationRouter,
   deviceHeartbeats: deviceHeartbeatsRouter,
+  packet:packetRouter
 })
 
 // export type definition of API

@@ -6,7 +6,7 @@ import { type ActiveShape } from 'recharts/types/util/types'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
-import { getBarPath } from './utils/getBarPath';
+import { getBarPath } from '../utils/getBarPath';
 
 
 interface ShapeProps {
