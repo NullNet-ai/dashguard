@@ -1,0 +1,7 @@
+{
+  "app_name": "FormControl__FormSwitch",
+  "tag": "1.0.0",
+  "branch": "released/feat/2165/1.0.0",
+  "message": "Add to repo and fix icon size, add transition from left icon to right icon which corresponds to swtich state as on and off",
+  "publish_name": "Rob Caldosa"
+}
