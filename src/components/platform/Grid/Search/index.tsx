@@ -1,14 +1,14 @@
-import React from 'react'
+import React from 'react';
 
-import CreateButton from '../Header/ButtonHeader'
-import CardViewButton from '../Header/CardViewButton'
-import FilterButton from '../Header/FilterButton'
-import TableViewButton from '../Header/TableViewButton'
+import CreateButton from '../Header/ButtonHeader';
+import CardViewButton from '../Header/CardViewButton';
+import FilterButton from '../Header/FilterButton';
+import TableViewButton from '../Header/TableViewButton';
 
-import GridSearchProvider from './Provider'
-import SearchList from './SearchList'
-import SearchListMobile from './SearchListMobile'
-import Search from './View'
+import GridSearchProvider from './Provider';
+import SearchList from './SearchList';
+import SearchListMobile from './SearchListMobile';
+import Search from './View';
 
 // eslint-disable-next-line react/destructuring-assignment
 export default function Main({ parentType = 'grid' }: any) {
@@ -21,7 +21,7 @@ export default function Main({ parentType = 'grid' }: any) {
                 <div className="my-2 h-[40px] w-full md:my-0">
                   <Search />
                 </div>
-                <div className="lg:flex h-[36px] flex-shrink-0 flex-row items-center hidden">
+                <div className="hidden h-[36px] flex-shrink-0 flex-row items-center lg:flex">
                   <TableViewButton />
                   <CardViewButton />
                   <div className="mx-2 h-full w-[1px] bg-tertiary" />
@@ -53,5 +53,5 @@ export default function Main({ parentType = 'grid' }: any) {
             </div>
           )}
     </GridSearchProvider>
-  )
+  );
 }

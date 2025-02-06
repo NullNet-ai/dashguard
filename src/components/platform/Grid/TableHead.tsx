@@ -1,73 +1,73 @@
-"use client";
+'use client'
 
-import { useContext } from "react";
-import { TableHead, TableRow } from "~/components/ui/table";
-import { GridContext } from "./Provider";
-import { cn } from "~/lib/utils";
-import { ColumnResizer } from "./column-resizer";
-import { flexRender } from "@tanstack/react-table";
-import { getCommonPinningStyles } from "./ColumnPining";
-import HeaderMenu from "./common/HeaderMenu";
-import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
-import { testIDFormatter } from "~/utils/formatter";
-import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown, ArrowBigUp } from "lucide-react";
-import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
+import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
+import { flexRender } from '@tanstack/react-table'
+import { FilterIcon } from 'lucide-react'
+import { useContext } from 'react'
 
-type GridParentType =  "grid" | "form" | "field" | "grid_expansion"
+import { TableHead, TableRow } from '~/components/ui/table'
+import { cn } from '~/lib/utils'
+import { testIDFormatter } from '~/utils/formatter'
 
-export default function MyTableHead({parentType}: {parentType?: GridParentType}) {
-  const { state } = useContext(GridContext);
+import { ColumnResizer } from './column-resizer'
+import { getCommonPinningStyles } from './ColumnPining'
+import HeaderMenu from './common/HeaderMenu'
+import { GridContext } from './Provider'
+
+type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion'
+
+type MyTableHeadProps = {
+  parentType: GridParentType
+}
+
+export default function MyTableHead({ parentType }: MyTableHeadProps) {
+  const { state } = useContext(GridContext)
   return (
-    <>
-      {state?.table.getHeaderGroups().map((headerGroup, index) => (
-        <TableRow
-          className={cn(` ${parentType ==='grid_expansion' ? 'bg-white' : 'backdrop-blur-lg'}`)}
-          key={headerGroup.id + "group" + index}
-          data-test-id={testIDFormatter(
-            `${state.config.entity}-grd-tbl-thead-row`,
-          )}
-        >
-          {headerGroup.headers.map((header, index) => {
-            const sortingState = state?.sorting?.find(
-              (item) =>
-                item.id === header?.id ||
-                item.id === (header?.column?.columnDef as any)?.sortKey,
-            );
-            const defaultFilter = state?.defaultAdvanceFilter?.filter(
-              (filter) => filter.field === header.id,
-            );
+    state?.table.getHeaderGroups().map((headerGroup, index) => (
+      <TableRow
+        className={cn(` ${parentType === 'grid_expansion' ? 'bg-white' : 'backdrop-blur-lg'}`)}
+        key={headerGroup.id + 'group' + index}
+        data-test-id={testIDFormatter(
+          `${state.config.entity}-grd-tbl-thead-row`,
+        )}
+      >
+        {headerGroup.headers.map((header, index) => {
+          const sortingState = state?.sorting?.find(
+            item => item.id === header?.id
+              || item.id === (header?.column?.columnDef as any)?.sortKey,
+          )
+          const defaultFilter = state?.defaultAdvanceFilter?.filter(
+            filter => filter.field === header.id,
+          )
 
-            const cellValue = header.isPlaceholder
-              ? null
-              : flexRender(header.column.columnDef.header, header.getContext());
-            return (
-              <TableHead
-                key={header.id + index}
-                data-test-id={testIDFormatter(
-                  `${state.config.entity}-grd-tbl-thead-row-${header.column.id}`,
-                )}
+          const cellValue = header.isPlaceholder
+            ? null
+            : flexRender(header.column.columnDef.header, header.getContext())
+          return (
+            <TableHead
+              key={header.id + index}
+              data-test-id={testIDFormatter(
+                `${state.config.entity}-grd-tbl-thead-row-${header.column.id}`,
+              )}
+              className={cn(
+                // @ts-expect-error error
+                'group relative font-medium text-muted-foreground', getCommonPinningStyles(header?.column).className, header.column.columnDef.meta?.className,
+              )}
+              style={{
+                width: header.getSize(),
+                ...getCommonPinningStyles(header?.column).style,
+              }}
+            >
+              <div
                 className={cn(
-                  "group relative font-medium text-muted-foreground", // originally bg-grid-header
-                  getCommonPinningStyles(header?.column).className,
-                  // @ts-expect-error - TS doesn't know about meta
-                  header.column.columnDef.meta?.className,
+                  'flex flex-row items-center', header.column.id === 'action'
+                    ? 'justify-center'
+                    : 'justify-between',
                 )}
-                style={{
-                  width: header.getSize(),
-                  ...getCommonPinningStyles(header?.column).style,
-                }}
               >
-                <div
-                  className={cn(
-                    "flex flex-row items-center",
-                    header.column.id === "action"
-                      ? "justify-center"
-                      : "justify-between",
-                  )}
-                >
-                  <div className="flex flex-row items-center gap-1 whitespace-nowrap">
-                    {cellValue}
-                    {/* {!!cellValue &&
+                <div className="flex flex-row items-center gap-1 whitespace-nowrap text-default">
+                  {cellValue}
+                  {/* {!!cellValue &&
                       header.column.id !== "action" &&
                       typeof cellValue === "string" &&
                       cellValue !== "Actions" && (
@@ -80,20 +80,20 @@ export default function MyTableHead({parentType}: {parentType?: GridParentType})
                           <ChevronsUpDown className="h-3 w-3" />
                         </Button>
                       )} */}
-                    {sortingState && !sortingState.desc && (
-                      <ArrowUpIcon className="h-4 w-4" />
-                    )}
-                    {sortingState && sortingState.desc && (
-                      <ArrowDownIcon className="h-4 w-4" />
-                    )}
-                    {!!defaultFilter?.length && (
-                      <FilterIcon className="h-3 w-3 text-primary" />
-                    )}
-                  </div>
-                  <HeaderMenu header={header} defaultFilter={defaultFilter} />
+                  {sortingState && !sortingState.desc && (
+                    <ArrowUpIcon className="h-4 w-4" />
+                  )}
+                  {sortingState && sortingState.desc && (
+                    <ArrowDownIcon className="h-4 w-4" />
+                  )}
+                  {!!defaultFilter?.length && (
+                    <FilterIcon className="h-3 w-3 text-primary" />
+                  )}
                 </div>
+                <HeaderMenu header={header} defaultFilter={defaultFilter} />
+              </div>
 
-                {/* {!header.isPlaceholder && header.column.getCanPin() && (
+              {/* {!header.isPlaceholder && header.column.getCanPin() && (
                   <div className="flex justify-center gap-1">
                     {header.column.getIsPinned() !== "left" ? (
                       <button
@@ -127,12 +127,11 @@ export default function MyTableHead({parentType}: {parentType?: GridParentType})
                     ) : null}
                   </div>
                 )} */}
-                <ColumnResizer header={header} />
-              </TableHead>
-            );
-          })}
-        </TableRow>
-      ))}
-    </>
-  );
+              <ColumnResizer header={header} />
+            </TableHead>
+          )
+        })}
+      </TableRow>
+    ))
+  )
 }

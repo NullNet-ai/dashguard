@@ -1,19 +1,28 @@
-import { flexRender } from '@tanstack/react-table';
-import React, { useContext } from 'react';
-import { TableBody, TableCell, TableRow } from '~/components/ui/table';
-import { cn } from '~/lib/utils';
-import { testIDFormatter } from '~/utils/formatter';
-import { getCommonPinningStyles } from './ColumnPining';
-import { GridContext } from './Provider';
-import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
-import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
-import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
+import { flexRender } from '@tanstack/react-table'
+import React, { useContext } from 'react'
 
-export default function MyTableBody({ showAction }: { showAction?: boolean }) {
-  const { state, actions } = useContext(GridContext);
+import { TableBody, TableCell, TableRow } from '~/components/ui/table'
+import { cn } from '~/lib/utils'
+import { testIDFormatter } from '~/utils/formatter'
 
-  const context = useContext(ScrollContainerContext);
-  const { isEndReached = false } = context ?? {};
+import { getCommonPinningStyles } from './ColumnPining'
+import { GridContext } from './Provider'
+import { ScrollContainerContext } from './Server/views/common/GridScrollContainer'
+import ArchiveConfirmationModal from './views/ArchiveConfirmationModal'
+import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal'
+
+type MyTableBodyProps = {
+  showAction?: boolean
+  gridLevel?: number
+  isLoading?: boolean
+  showPagination?: boolean
+}
+
+export default function MyTableBody({ showAction, gridLevel }: MyTableBodyProps) {
+  const { state, actions } = useContext(GridContext)
+
+  const context = useContext(ScrollContainerContext)
+  const { isEndReached = false } = context ?? {}
 
   return (
     <>
@@ -21,120 +30,128 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
         className="overflow-y-auto"
         data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody`)}
       >
-        {state?.table.getRowModel().rows?.length ? (
-          state?.table.getRowModel().rows.map((row, index) => (
-            <>
-              <TableRow
-                className="group relative border-b hover:bg-border/50"
-                key={row.id + index}
-                data-state={row.getIsSelected() && 'selected'}
-                data-test-id={testIDFormatter(
-                  `${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`,
-                )}
-              >
-                {row.getVisibleCells().map((cell, index) => {
-                  if (cell.column.id === 'action') {
-                    return (
-                      <td
-                        key={cell.id + index}
-                        className={cn('right-0', isEndReached ? '' : 'sticky')}
-                      >
-                        <div className="px-3">
-                          <div
-                            className={cn(
-                              'items-center',
-                              `${showAction ? 'opacity-100' : 'opacity-0'}`,
-                              !isEndReached
-                                ? 'group-hover:opacity-100'
-                                : 'opacity-100',
-                            )}
+        {state?.table.getRowModel().rows?.length
+          ? (
+              state?.table.getRowModel().rows.map((row, index) => (
+                <>
+                  <TableRow
+                    className={cn(`group relative border-b hover:bg-border/50`, `${row.getIsExpanded() ? 'border-l-2 border-l-primary' : ''}`)}
+                    key={row.id + index}
+                    data-state={row.getIsSelected() && 'selected'}
+                    data-test-id={testIDFormatter(
+                      `${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`,
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell, index) => {
+                      if (cell.column.id === 'action') {
+                        return (
+                          <td
+                            key={cell.id + index}
+                            className={cn('right-0', isEndReached ? '' : 'sticky')}
                           >
-                            <div className="flex h-8 items-center justify-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
+                            <div className="px-3">
+                              <div
+                                className={cn(
+                                  'items-center', `${showAction ? 'opacity-100' : 'opacity-0'}`, !isEndReached
+                                    ? 'group-hover:opacity-100'
+                                    : 'opacity-100',
+                                )}
+                              >
+                                <div className="flex h-8 items-center justify-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
+                                  {flexRender(
+                                    cell.column.columnDef.cell, cell.getContext(),
+                                  )}
+                                </div>
+                              </div>
                             </div>
+                          </td>
+                        )
+                      }
+                      return (
+                        <TableCell
+                          className={cn(
+                            'relative text-sm text-foreground hover:bg-border', getCommonPinningStyles(cell.column).className,
+                          )}
+                          key={cell.id + index}
+                          row={cell?.row}
+                          config={state?.config}
+                          column_id={cell?.column?.id}
+                          data-test-id={testIDFormatter(
+                            `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
+                          )}
+                          style={{
+                            width: cell.column.getSize(),
+                            minWidth: cell.column.columnDef.minSize,
+                            ...getCommonPinningStyles(cell.column).style,
+                          }}
+                        >
+                          <div className="flex flex-row flex-wrap gap-y-1">
+                            {flexRender(
+                              cell.column.columnDef.cell, cell.getContext(),
+                            )}
+                          </div>
+                          <div
+                            {...{
+                              className: `absolute  border border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
+                              style: {},
+                            }}
+                          />
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+                  {row.getIsExpanded() && (
+                    <TableRow className="group relative border-b hover:bg-border/50">
+                      <td
+                        colSpan={state?.table.getVisibleLeafColumns().length}
+                        className="bg-gray-50 lg:p-2 lg:pb-2 lg:px-4 lg:pl-12 relative"
+                      >
+                        <div
+                          style={{
+                            height: gridLevel === 2 ? 'calc(100% - 30px) ' : 'calc(100% - 85px)',
+                          }}
+                          className="absolute left-4 w-[1px] top-1 bg-primary"
+                        >
+                          <div className='absolute bottom-0 h-[1px] w-[20px] bg-primary'>
+                            <div className='w-2 absolute h-2 rounded-full right-[-2px] bg-primary bottom-[-3px]' />
                           </div>
                         </div>
-                      </td>
-                    );
-                  }
+                        <div>
 
-                  return (
-                    <TableCell
-                      className={cn(
-                        'relative text-sm text-foreground hover:bg-border',
-                        getCommonPinningStyles(cell.column).className,
-                      )}
-                      key={cell.id + index}
-                      row={cell?.row}
-                      config={state?.config}
-                      column_id={cell?.column?.id}
-                      data-test-id={testIDFormatter(
-                        `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
-                      )}
-                      style={{
-                        width: cell.column.getSize(),
-                        minWidth: cell.column.columnDef.minSize,
-                        ...getCommonPinningStyles(cell.column).style,
-                      }}
-                    >
-                      <div className="flex flex-row flex-wrap">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
-                      <div
-                        {...{
-                          className: `absolute  border border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
-                          style: {},
-                        }}
-                      />
-                    </TableCell>
-                  );
-                })}
+                          {state?.config?.rowExpansionBuilder
+                            ? (
+                                typeof state?.config?.rowExpansionBuilder === 'function'
+                                  ? (
+                                      state?.config?.rowExpansionBuilder({
+                                        rowData: row.original,
+                                      })
+                                    )
+                                  : (
+                                      React.cloneElement(
+                                        state?.config?.rowExpansionBuilder, { rowData: row.original },
+                                      )
+                                    )
+                              )
+                            : (
+                                <span>Provide your expand component</span>
+                              )}
+                        </div>
+                      </td>
+                    </TableRow>
+                  )}
+                </>
+              ))
+            )
+          : (
+              <TableRow>
+                <TableCell
+                  colSpan={state?.config?.columns.length}
+                  className="h-24 text-center text-foreground"
+                >
+                  No results.
+                </TableCell>
               </TableRow>
-              {row.getIsExpanded() && (
-                <TableRow className="group relative border-b hover:bg-border/50">
-                  <td
-                    colSpan={state?.table.getVisibleLeafColumns().length}
-                    className="bg-gray-50 lg:p-8"
-                  >
-                    <div>
-                      {state?.config?.rowExpansionBuilder ? (
-                        // state?.config?.rowExpansionBuilder
-                        typeof state?.config?.rowExpansionBuilder ===
-                        'function' ? (
-                          state?.config?.rowExpansionBuilder({
-                            rowData: row.original,
-                          })
-                        ) : (
-                          React.cloneElement(
-                            state?.config?.rowExpansionBuilder,
-                            { rowData: row.original },
-                          )
-                        )
-                      ) : (
-                        <span>Provide your expand component</span>
-                      )}
-                    </div>
-                  </td>
-                </TableRow>
-              )}
-            </>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell
-              colSpan={state?.config?.columns.length}
-              className="h-24 text-center text-foreground"
-            >
-              No results.
-            </TableCell>
-          </TableRow>
-        )}
+            )}
       </TableBody>
       {state?.showArchiveConfirmationModal && (
         <ArchiveConfirmationModal
@@ -154,5 +171,5 @@ export default function MyTableBody({ showAction }: { showAction?: boolean }) {
         />
       )}
     </>
-  );
+  )
 }
