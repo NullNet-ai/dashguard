@@ -13,13 +13,13 @@ export default function CustomInstallationDetails({
   form,
 }: IInstallationDetails) {
   const copyToClipboard = (value: string) => {
-    console.log("%c Line:16 🌮 value", "color:#42b983", value);
+    console.log('%c Line:16 🌮 value', 'color:#42b983', value);
     navigator.clipboard.writeText(value).then(
       () => {
-        console.log("Copied to clipboard successfully!");
+        console.log('Copied to clipboard successfully!');
       },
       (err) => {
-        console.error("Failed to copy to clipboard: ", err);
+        console.error('Failed to copy to clipboard: ', err);
       }
     );
   };
@@ -28,7 +28,9 @@ export default function CustomInstallationDetails({
     event: React.MouseEvent<HTMLButtonElement>,
     value: string,
   ) => {
+    console.log('%c Line:34 🥔 value', 'color:#f5ce50', value);
     event.preventDefault();
+    console.log('%c Line:32 🍏 event', 'color:#b03734', event);
     copyToClipboard(value);
   };
 
