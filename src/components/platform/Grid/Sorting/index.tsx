@@ -225,7 +225,7 @@ const Sorting = ({ className }: { className?: string }) => {
         }}
       >
         {/* <Trash2 className="size-4 block lg:hidden"/> */}
-        <span>Clear All</span>
+        <span>Reset Sort</span>
       </Button>
     </div>
   )
