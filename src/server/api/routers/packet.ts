@@ -144,7 +144,7 @@ export const packetRouter = createTRPCRouter({
         bucket_size,
         order: {
                "order_by": "bucket",
-        "order_direction": "desc"
+        "order_direction": EOrderDirection.DESC
         },
       },
       token: ctx.token.value,
