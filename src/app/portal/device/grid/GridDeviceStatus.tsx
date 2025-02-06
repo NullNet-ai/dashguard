@@ -23,17 +23,23 @@ export default function GridDeviceStatus({ device_id }: { device_id: string }) {
   const {
     data: record = [{
       hour: '',
-      heartbeats: 0,
+      heartbeats: null,
     }],
 
+    
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastThirtySecondsTimeStamp(),
   })
 
+
   const status = useMemo(() => record?.[0]?.heartbeats ? 'Online' : 'Offline', [
     record?.[0]?.heartbeats,
   ])
+
+  if(record?.[0]?.heartbeats == null){
+    return null
+  }
 
   return <Badge variant={status == 'Online' ? 'success' : 'destructive'}>{status}</Badge>
 }
