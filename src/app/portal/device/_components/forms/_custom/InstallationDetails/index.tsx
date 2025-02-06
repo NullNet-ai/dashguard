@@ -63,18 +63,20 @@ export default function CustomInstallationDetails({
         control={form.control}
         render={() => {
           return (
-            <div>
-              <p>
+            <div className="grid grid-cols-1 gap-2">
+              <p className="col-span-2">
                 Download the following package for your PfSense and install
                 using the following directions:
               </p>
-              <div className="mt-2 space-x-2">
+              <div className="col-span-2">
+
+              <div className="mt-2  space-x-4">
                 <p>1. Download the package</p>
                 <input
                   type="text"
                   value="curl-o https://wallmon.ai/wallmon.pkg"
                   readOnly
-                  className="mt-1 min-w-96 rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500"
+                  className="mt-1 md:w-96 rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500"
                 />
                 <button
                   className="my-auto"
@@ -91,13 +93,15 @@ export default function CustomInstallationDetails({
                   />
                 </button>
               </div>
-              <div className="mt-2 space-x-2">
+              </div>
+              <div className="col-span-2">
+              <div className="mt-2 space-x-4">
                 <p>2. Install package using the following command:</p>
                 <input
                   type="text"
                   value="pkg install Wallmon.pkg"
                   readOnly
-                  className="mt-1 min-w-96 rounded-md border-indigo-300 bg-indigo-50 p-2 text-indigo-700"
+                  className="mt-1  md:w-96 rounded-md border-indigo-300 bg-indigo-50 p-2 text-indigo-700"
                 />
                 <button
                   className="my-auto"
@@ -111,13 +115,15 @@ export default function CustomInstallationDetails({
                   />
                 </button>
               </div>
-              <div className="mt-2 space-x-2">
+              </div>
+              
+              <div className="mt-2 space-x-4">
                 <p>3. Confirm Installation using command</p>
                 <input
                   type="text"
                   value="Wallmon --version"
                   readOnly
-                  className="mt-1 min-w-96 rounded-md border-green-300 bg-green-100 p-2 text-green-600"
+                  className="mt-1  md:w-96 rounded-md border-green-300 bg-green-100 p-2 text-green-600"
                 />
                 <button
                   className="my-auto"

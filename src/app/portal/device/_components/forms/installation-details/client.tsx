@@ -29,6 +29,9 @@ export default function InstallationDetails({
   return (
     <FormBuilder
       defaultValues={defaultValues}
+      customDesign={{
+        formClassName: "!grid-cols-1",
+      }}
       formSchema={FormSchema}
       myParent={params.shell_type}
       formProps={params}
