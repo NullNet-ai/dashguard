@@ -154,14 +154,9 @@ export default function GridMobileRow({ parent }: { parent?: string }) {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {visibleCells.map((cell, cellIndex) => {
+                  const excludedColumns = ['id', 'status', 'select'];
                   // Skip id and status as they're already shown above
-                  if (
-                    cell.column.id === 'id' ||
-                    cell.column.id === 'status' ||
-                    cell.column.id === 'select'
-                  )
-                    return null;
-
+                  if (excludedColumns.includes(cell.column.id)) return null;
                   return (
                     <div
                       className="flex flex-row text-xs text-foreground"
