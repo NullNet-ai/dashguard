@@ -21,7 +21,7 @@ import {
 import { GridContext } from '../../../Provider'
 import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal'
 
-export default function GridMobileRow({ parent }: { parent?: string }) {
+export default function GridMobileRow({ parent = 'grid' }: { parent?: string }) {
   const { state, actions } = useContext(GridContext)
   const { config, showArchiveConfirmationModal } = state ?? {}
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {}
