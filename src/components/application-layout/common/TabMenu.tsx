@@ -28,7 +28,7 @@ const TabMenu = ({
 }) => {
   if (name === 'Grid') return null
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm opacity-0 group-hover:opacity-100">
           <EllipsisVertical
