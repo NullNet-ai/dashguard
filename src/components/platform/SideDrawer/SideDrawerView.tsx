@@ -21,6 +21,7 @@ export const SideDrawerView: React.FC = () => {
     sideDrawerWidth = '982px',
     overlayEnabled = false,
     closeOnOutsideClick = true,
+
   } = config || {}
 
   const { component: BodyComponent, componentProps } = body || {}
@@ -38,7 +39,6 @@ export const SideDrawerView: React.FC = () => {
       className={`fixed inset-0 z-[101] overflow-hidden transition-opacity duration-300 ${isOpen && config ? 'opacity-100' : 'opacity-0 pointer-events-none'
         } ${overlayEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
       role='dialog'
-      onClick={handleOutsideClick}
     >
       {/* Overlay */}
       <div
@@ -46,6 +46,9 @@ export const SideDrawerView: React.FC = () => {
           ? 'bg-black bg-opacity-50'
           : 'bg-transparent'
           } ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+        onClick={handleOutsideClick}
+
+
       />
 
       {/* Drawer Content */}

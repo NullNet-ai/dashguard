@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.10.3<unreleased>",
-  "branch": "unreleased/fix/1.10.3<unreleased>",
-  "message": "Alert to add toast dismiss, Dialog to reduce opacity of overlay making it not so dark overlay, sonner to remove padding ",
+  "tag": "1.10.5<unreleased>",
+  "branch": "unreleased/fix/2176/1.10.5<unreleased>",
+  "message": "Handle Smart DatePicker to not change the value when navigating throughout the months",
   "publish_name": "Rob Caldosa"
 }

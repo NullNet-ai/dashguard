@@ -1,31 +1,29 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from 'next/image';
+import React from 'react';
 
-import MainTab from '~/components/platform/Tab/MainTab'
-import { SidebarTrigger } from '~/components/ui/sidebar'
+import MainTab from '~/components/platform/Tab/MainTab';
+import { SidebarTrigger } from '~/components/ui/sidebar';
 
-import RecordDetails from './RecordDetails'
-import { MobileTriggerComponent } from './TriggerComponent'
+import RecordDetails from './RecordDetails';
+import { MobileTriggerComponent } from './TriggerComponent';
 
 const Header: React.FC = () => {
   return (
     <div>
-      <header
-        className="col-span-full flex lg:h-[3rem] items-center justify-center gap-4 bg-background"
-      >
+      <header className="col-span-full flex items-center justify-center gap-4 bg-background lg:h-[3rem]">
         {/* <SidebarTrigger Icon={TriggerComponent} className="hidden lg:block" /> */}
 
-        <div className="relative flex w-full items-center pt-[11px] lg:pt-[7px] border-b pb-1 lg:pb-0">
+        <div className="relative flex w-full items-center border-b pb-1 pt-[11px] lg:pb-0 lg:pt-[7px]">
           <MainTab className="hidden md:flex" />
           <Logo />
-          <div className="flex w-full items-center justify-end gap-3 sm:justify-normal md:justify-end">
+          <div className="flex items-center justify-end gap-3 sm:justify-normal md:justify-end">
             {/* // Hide search bar for now */}
             {/* <Search /> */}
             <RecordDetails />
           </div>
           <SidebarTrigger
             Icon={MobileTriggerComponent}
-            className="mr-4 sm:mb-0 sm:hidden"
+            className="ml-[7px] mr-4 sm:mb-0 sm:hidden md:ml-0"
           />
         </div>
       </header>
@@ -33,10 +31,10 @@ const Header: React.FC = () => {
         <MainTab className="w-full" />
       </div>
     </div>
-  )
+  );
 };
 
-export default Header
+export default Header;
 
 export function Logo() {
   return (
@@ -47,5 +45,5 @@ export function Logo() {
       width={40}
       height={40}
     />
-  )
+  );
 }
