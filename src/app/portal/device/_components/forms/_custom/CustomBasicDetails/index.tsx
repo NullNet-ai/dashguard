@@ -41,8 +41,7 @@ export default function CustomBasicDetails({
   selectOptions,
   disabledModel,
 }: BasicDetails) {
-  const { control, watch, formState } = form
-  const { defaultValues } = formState
+  const { control, watch } = form
   const { model, grouping } = selectOptions
 
   const [city_options, setCityOptions] = useState<IDropdown[]>([])
@@ -145,7 +144,7 @@ export default function CustomBasicDetails({
                     const response = await createDeviceGroupSettings.mutateAsync({
                       entity: 'device_group_settings',
                       fieldIdentifier: 'name',
-                      data: { name: text, device_id: defaultValues?.id },
+                      data: { name: text},
                     })
                     if (response) {
                       return response

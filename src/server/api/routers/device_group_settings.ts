@@ -21,7 +21,6 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { device_id } = input.data
       try {
         const record = await ctx.dnaClient
           .create({
@@ -31,22 +30,6 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
               params: {
                 ...input.data,
                 entity_prefix: 'DGS',
-                status: EStatus.ACTIVE,
-              },
-              pluck: ['id', input.fieldIdentifier],
-            },
-          })
-          .execute()
-
-        await ctx.dnaClient
-          .create({
-            entity: 'device_groups',
-            token: ctx.token.value,
-            mutation: {
-              params: {
-                device_group_setting_id: record?.data?.[0]?.id,
-                device_id,
-                entity_prefix: 'DG',
                 status: EStatus.ACTIVE,
               },
               pluck: ['id', input.fieldIdentifier],
