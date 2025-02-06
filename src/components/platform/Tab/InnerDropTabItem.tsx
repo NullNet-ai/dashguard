@@ -54,7 +54,7 @@ const InnerDropTabItem = ({
       >
         {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
       </Link>
-      <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
+      <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
       <TabMenu
         current={!!tab.href.match(pathname)}
         href={tab.href}
