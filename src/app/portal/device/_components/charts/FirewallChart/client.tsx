@@ -76,7 +76,9 @@ const renderLegend = (props: Record<string, any>) => {
   )
 }
 
-export function FirewallChart() {
+export function FirewallChart({ device_id }: { device_id: string }) {
+
+
   return (
     <Card>
       <CardHeader className='p-8'>

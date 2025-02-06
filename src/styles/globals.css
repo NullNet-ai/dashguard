@@ -227,3 +227,21 @@ input[type="number"] {
   display: none; /* Chrome, Safari, and Opera */
 }
 
+
+.leaflet-popup-content  {
+  margin: 10px!important;
+  margin-top: 14px!important;
+}
+
+
+
+.leaflet-left {
+  right: 10px!important;
+  left: auto!important;
+}
+
+
+.leaflet-top {
+  bottom: 20px!important;
+  top: auto!important;
+}

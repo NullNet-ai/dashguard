@@ -9,6 +9,7 @@ import { api } from '~/trpc/react'
 import { AreaChartSample } from '../../../charts/AreaChart'
 import { getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat';
 
+
 interface ISuccessfulConnectionDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>
   selectOptions?: Record<string, any>

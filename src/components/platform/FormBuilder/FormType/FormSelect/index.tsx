@@ -116,9 +116,9 @@ export default function FormSelect({
     return sortOptions(filtered ?? [])
   }, [query, options, sortOptions])
 
-  React.useEffect(() => {
-    setOptions(selectOptions?.[fieldConfig?.name] ?? [])
-  }, [selectOptions, fieldConfig?.name])
+  // React.useEffect(() => {
+  //   setOptions(selectOptions?.[fieldConfig?.name] ?? [])
+  // }, [selectOptions, fieldConfig?.name])
 
   const label = useMemo(() => {
     return options?.find(opt => opt.value === formRenderProps?.field.value)
@@ -137,7 +137,9 @@ export default function FormSelect({
     fieldConfig?.selectEnableCreate,
   ])
 
-  const createNewRecord = async () => {
+  const createNewRecord = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+  
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error('selectOnCreateRecord is not defined in fieldConfig')
       return
@@ -308,7 +310,7 @@ export default function FormSelect({
                       <button
                         className="block cursor-pointer truncate px-3 py-2 text-secondary-foreground hover:bg-primary hover:text-primary-foreground  bg-primary/10 font-bold"
                         data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                        onClick={void createNewRecord}
+                        onClick={createNewRecord}
                       >
                         {isCreateLoading ? 'Creating...' : `Create "${query}"`}
                       </button>

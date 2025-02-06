@@ -16,7 +16,6 @@ import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicD
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
-import { decrypt, encrypt } from '../encryptAndDecryptAccountSecret'
 
 const entity = 'device'
 
@@ -564,16 +563,14 @@ export const deviceRouter = createTRPCRouter({
           throw new Error(`Failed to create an account for device ${id}`)
         }
 
-        const encrypted_token = encrypt(account_secret || '')
-        const cookieStore = cookies()
+        // set by device_id:app_id to app_id
+        // set by app_id:app_secret to app_secret
 
-        //@ts-ignore
-        cookieStore.set(`encrypted_token_${id}`, encrypted_token, { httpOnly: true, secure: true })
+        await ctx.redisClient.cacheData(`${id}:${account_id}`, { account_secret, expiration: 60 * 60 * 24 * 7 })
 
         return {
           account_id,
           account_secret,
-          encrypted_token,
           message: transformResMessage(reg_res?.message),
         }
       }
@@ -998,7 +995,6 @@ export const deviceRouter = createTRPCRouter({
           })
       }
 
-
       const response = await query.execute()
 
       return {
@@ -1026,22 +1022,44 @@ export const deviceRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      if (!input?.id) return null
+      const { id, pluck_fields, main_entity: entity } = input
+      if (!id) return null
       try {
-        const recordByCode = await ctx.dnaClient
-          .findByCode(input.id, {
-            entity: input.main_entity,
-            token: ctx.token.value,
-            query: {
-              pluck: input.pluck_fields,
+        const recordByCode = await ctx.dnaClient.findAll({
+          entity,
+          token: ctx.token.value,
+          query: {
+            pluck: pluck_fields,
+            pluck_object: {
+              devices: pluck_fields,
+              organization_accounts: ['contact_id', 'id', 'device_id', 'account_id'],
             },
-          })
+            advance_filters: createAdvancedFilter({ code: id }),
+          },
+        }).join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_account',
+              field: 'device_id',
+            },
+            from: {
+              entity,
+              field: 'id',
+            },
+          },
+        })
           .execute()
         const { data, ...rest } = recordByCode ?? {}
+        const { id: device_id, organization_accounts } = data?.[0] ?? {}
+
+        const fetch_account_secret = await ctx.redisClient.getCachedData(`${device_id}:${organization_accounts?.[0]?.account_id}`)
+
+        const { account_secret } = fetch_account_secret ?? {}
 
         return {
           ...rest,
-          data: data?.[0],
+          data: { id: device_id, account_secret, ...data?.[0] },
         }
       }
       catch (error) {

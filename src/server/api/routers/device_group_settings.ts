@@ -1,15 +1,55 @@
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
-import { createDefineRoutes } from "../baseCrud";
-import { z } from "zod";
 import {
   EOperator,
   EOrderDirection,
   type IAdvanceFilters,
-} from "@dna-platform/common-orm";
+} from '@dna-platform/common-orm'
+import { z } from 'zod'
+
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
+
+import { createDefineRoutes } from '../baseCrud'
+import { EStatus } from '../types'
 
 export const deviceGroupSettingsRouter = createTRPCRouter({
-  ...createDefineRoutes("degree_levels"),
+  ...createDefineRoutes('device_group_settings'),
+  createDeviceGroupSettings: privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+        fieldIdentifier: z.string(),
+        data: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const record = await ctx.dnaClient
+          .create({
+            entity: 'device_group_settings',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                ...input.data,
+                entity_prefix: 'DGS',
+                status: EStatus.ACTIVE,
+              },
+              pluck: ['id', input.fieldIdentifier],
+            },
+          })
+          .execute()
 
+        const result = record?.data?.[0]
+
+        return result
+          ? {
+              value: result?.id,
+              label: result?.[input.fieldIdentifier],
+            }
+          : null
+      }
+      catch (error) {
+        console.error('%c Line:28 🍑 error', 'color:#e41a6a', error)
+      }
+    }),
   getDeviceGroupSettings: privateProcedure.query(async ({ ctx }) => {
     const filter = async ({
       entity,
@@ -17,10 +57,10 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
       advance_filters,
       limit,
     }: {
-      entity: string;
-      pluck: string[];
-      advance_filters: IAdvanceFilters<string | number>[];
-      limit?: number;
+      entity: string
+      pluck: string[]
+      advance_filters: IAdvanceFilters<string | number>[]
+      limit?: number
     }) => {
       return await ctx.dnaClient
         .findAll({
@@ -31,32 +71,32 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
             advance_filters,
             order: {
               limit: limit || 100,
-              by_field: "created_date",
+              by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
             },
           },
         })
-        .execute();
-    };
+        .execute()
+    }
     const device_group_settings = await filter({
-      entity: "device_group_settings",
-      pluck: ["id", "name"],
+      entity: 'device_group_settings',
+      pluck: ['id', 'name'],
       advance_filters: [
         {
-          type: "criteria",
-          field: "status",
+          type: 'criteria',
+          field: 'status',
           operator: EOperator.EQUAL,
-          values: ["Active"],
+          values: ['Active'],
         },
       ],
-    });
+    })
 
     return device_group_settings.data?.map((item) => {
-      const { id, name } = item;
+      const { id, name } = item
       return {
         value: id,
         label: name,
-      };
-    });
+      }
+    })
   }),
-});
+})

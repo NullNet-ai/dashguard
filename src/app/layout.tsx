@@ -1,32 +1,34 @@
-import "../styles/globals.css";
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { TRPCReactProvider } from "~/trpc/react";
-import { ThemeProvider } from "~/context/ThemeProvider";
-import { ToastProvider } from "../context/ToastProvider";
-import config from "~/styles/config/config.json";
-import { EventEmitterProvider } from "~/context/EventEmitterProvider";
-import { TooltipProvider } from "~/components/ui/tooltip";
+import '../styles/globals.css'
+import { GeistSans } from 'geist/font/sans'
+import type { Metadata } from 'next'
+
+import { TooltipProvider } from '~/components/ui/tooltip'
+import { EventEmitterProvider } from '~/context/EventEmitterProvider'
+import { ThemeProvider } from '~/context/ThemeProvider'
+import config from '~/styles/config/config.json'
+import { TRPCReactProvider } from '~/trpc/react'
+
+import { ToastProvider } from '../context/ToastProvider'
 
 export const metadata: Metadata = {
-  title: "Platform",
-  description: "All in one platform for recruitment",
-};
+  title: 'Nullnet',
+  description: 'All in one platform for recruitment',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
-      lang="en"
       className={`${GeistSans.className}`}
-      suppressHydrationWarning
+      lang="en"
+      suppressHydrationWarning = { true }
     >
       <head>
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="format-detection" content="email=no" />
+        <meta content = "telephone=no" name = "format-detection" />
+        <meta content = "email=no" name = "format-detection" />
       </head>
       <body>
         <TRPCReactProvider>
@@ -36,8 +38,8 @@ export default function RootLayout({
                 <ThemeProvider
                   attribute="class"
                   defaultTheme="light"
-                  enableSystem
-                  disableTransitionOnChange
+                  disableTransitionOnChange = { true }
+                  enableSystem = { true }
                   layout={config.ApplicationLayout}
                 >
                   {children}
@@ -48,5 +50,5 @@ export default function RootLayout({
         </TRPCReactProvider>
       </body>
     </html>
-  );
+  )
 }

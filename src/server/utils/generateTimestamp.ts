@@ -1,6 +1,6 @@
-export const generateTimestamps = () => {
+export const generateTimestamps = (date: Date) => {
   const timestamps = [];
-  const now = new Date();
+  const now = date;
 
   for (let i = 0; i < 6; i++) {
     const timestamp = new Date(now.getTime() + i * 20 * 1000).toISOString();

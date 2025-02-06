@@ -1,6 +1,8 @@
-import { z } from "zod";
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
-import { EStatus } from "../types";
+import { z } from 'zod'
+
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
+
+import { EStatus } from '../types'
 
 export const formRouter = createTRPCRouter({
   createRecord: privateProcedure
@@ -21,21 +23,21 @@ export const formRouter = createTRPCRouter({
               ...input.data,
               status: EStatus.ACTIVE,
             },
-            pluck: ["id", input.fieldIdentifier],
+            pluck: ['id', input.fieldIdentifier],
           },
         })
         .execute()
         .catch((error) => {
-          throw error;
-        });
+          throw error
+        })
 
-      const result = record?.data?.[0];
+      const result = record?.data?.[0]
 
       return result
         ? {
             value: result?.id,
             label: result?.[input.fieldIdentifier],
           }
-        : null;
+        : null
     }),
-});
+})
