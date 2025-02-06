@@ -47,7 +47,6 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
           : null
       }
       catch (error) {
-        console.error('%c Line:28 🍑 error', 'color:#e41a6a', error)
       }
     }),
   getDeviceGroupSettings: privateProcedure.query(async ({ ctx }) => {

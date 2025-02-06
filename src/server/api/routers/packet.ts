@@ -21,24 +21,87 @@ interface OutputData {
 }
 
 
+function getAllSecondsBetweenDates(startDate: Date, endDate: Date) {
+  // Convert the input date strings to Date objects by using the format 'YYYY-MM-DD HH:mm:ss+00'
+  const startMoment = new Date(startDate);
+  const endMoment = new Date(endDate);
 
-function transformData(data: InputData[]): OutputData[] {
-  const result: OutputData[] = [];
+  // Check if both dates are valid
+  if (isNaN(startMoment.getTime()) || isNaN(endMoment.getTime())) {
+    throw new Error("Invalid date(s) provided");
+  }
 
-  data.forEach((item, index) => {
-    // Extract the seconds part from the timestamp
-    const seconds = index * 5;
-    result.push({
-      second:  `${seconds}`,
-      bandwidth: parseInt(item.bandwidth, 10),
-    });
-  });
+  // Calculate the difference in seconds
+  const totalSeconds = (endMoment.getTime() - startMoment.getTime()) / 1000;
 
-  // Sort the result by seconds
-  // result.sort((a, b) => a.second.localeCompare(b.second));
+  // Array to hold all the seconds involved
+  const secondsArray = [];
 
-  return result;
+  // Loop through and generate each second
+  for (let i = 0; i <= totalSeconds; i++) {
+    const currentMoment = new Date(startMoment.getTime() + i * 1000);
+    
+    // Format each second as "YYYY-MM-DD HH:mm:ss+00"
+    const formattedDate = currentMoment.toISOString().replace("T", " ").split(".")[0] + "+00";
+    
+    secondsArray.push(formattedDate);
+  }
+
+  return secondsArray;
 }
+
+
+
+
+function transformData({start_date, end_date}:{start_date: string, end_date: string},data: InputData[]): OutputData[] {
+    // const result: OutputData[] = [];
+  const seconds = getAllSecondsBetweenDates(new Date(start_date), new Date(end_date))
+    // Iterate over 1 to 180 to ensure complete data
+    // for (let i = 180; i >= 1; i--) {
+    //   const item = data[i - 1]; // Account for 0-based indexing
+    //   // 
+     
+  
+    //   // Calculate minutes and seconds
+    //   const minutes = Math.floor(i / 60);
+    //   const seconds = i % 60;
+  
+    //   let timeString = '';
+  
+    //   if (minutes > 0) {
+    //     timeString += `${minutes}m`;
+    //   }
+  
+    //   if (seconds > 0) {
+    //     if (minutes > 0) {
+    //       timeString += ` ${seconds}s`; // Add seconds if there are minutes
+    //     } else {
+    //       timeString += `${seconds}s`; // Just seconds if no minutes
+    //     }
+    //   }
+
+    //   const _d ={
+    //     second: timeString || `${i}s`, // Handle case where there's no time
+    //     bandwidth: item ?item.bandwidth as any : 0, // Use 0 if no bandwidth exists
+    //   }
+    //   if(item && data?.[i +1] ==undefined){
+
+        
+    //   }
+    //   result.push(_d);
+    // }
+  const result = seconds.map((second) => {
+    const item = data.find((d) => d.bucket === second);
+    return {
+      second,
+      bandwidth: item ? Number(item.bandwidth) : 0,
+    };
+  })
+
+    return result;
+  }
+  
+
 
 
 
@@ -106,7 +169,7 @@ export const packetRouter = createTRPCRouter({
   // });
   getBandwithPerSecond: privateProcedure.input(z.object({ code: z.string(), bucket_size: z.string(), time_range: z.array(z.string()) })).query(async ({ input, ctx }) => {
     const { code, bucket_size, time_range } = input
-    console.log('%c Line:77 🍕 time_range', 'color:#4fff4B', time_range, bucket_size);
+    
 
     const res = await ctx.dnaClient.aggregate({
       // @ts-ignore
@@ -143,14 +206,14 @@ export const packetRouter = createTRPCRouter({
         ],
         bucket_size,
         order: {
-               "order_by": "bucket",
-        "order_direction": "desc"
+        'order_by': 'bucket',
+        'order_direction': EOrderDirection.DESC,
         },
       },
       token: ctx.token.value,
 
     }).execute()
-    console.log('%c Line:121 🍢 res', 'color:#33a5ff', res);
+    // 
 
 
     // [
@@ -169,9 +232,14 @@ export const packetRouter = createTRPCRouter({
     // ]
 
     // Function to transform the data
-    const transformedData: OutputData[] = transformData(res?.data as InputData[]);
-    console.log('%c Line:184 🥛 transformedData', 'color:#3f7cff', transformedData);
+    // console.log('%c Line:199 🍭 res?.data', 'color:#7f2b82', res?.data);
+    const transformedData: OutputData[] = transformData({
+      start_date:time_range[0] as string,
+      end_date:time_range[1] as string,
+    },res?.data as InputData[]);
+    // 
     
+    console.log('%c Line:241 🍇 transformedData', 'color:#2eafb0', transformedData);
     return transformedData
   }),
 
@@ -193,7 +261,7 @@ export const packetRouter = createTRPCRouter({
     };
     
     const timestamp = formatDate(new Date());
-    console.log(timestamp); // Example output: '2025-02-04 04:51:37.134+00'
+     // Example output: '2025-02-04 04:51:37.134+00'
     
     const sampleData = {
       // code: 'PK449666',
@@ -214,7 +282,7 @@ export const packetRouter = createTRPCRouter({
       destination_mac: '01:00:5e:00:00:fb',
       ether_type: 'unknown',
       ip_header_length: 20,
-      payload_length: Math.floor(Math.random() * 10),
+      payload_length: Math.floor(Math.random() * 500),
       protocol: 'udp',
       source_ip: '172.18.51.11',
       destination_ip: '224.0.0.251',
@@ -223,7 +291,7 @@ export const packetRouter = createTRPCRouter({
       entity_prefix: 'PK',
     }
 
-    console.log('%c Line:300 🎂', 'color:#6ec1c2');
+    
     const a =  await ctx.dnaClient
       .create({
         entity: input.entity,
