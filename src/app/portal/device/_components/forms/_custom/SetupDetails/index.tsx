@@ -43,18 +43,53 @@ export default function CustomSetupDetails({
   const [showSecret, setShowSecret] = useState(false)
   const updateOrgAccount = api.device.updateOrganizationAccount.useMutation()
 
-  const copyToClipboard = (value: string) => {
-    navigator.clipboard.writeText(value).catch((err) => {
-      console.error('Failed to copy text: ', err)
-    })
-  }
+  const copyToClipboard = async (value: string) => {
+    // Try using navigator.clipboard first (works in HTTPS)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(value);
+        toast.success('Copied to clipboard!');
+        return;
+      } catch (err) {
+        console.error('Clipboard API failed:', err);
+      }
+    }
+
+    // Fallback for HTTP or when Clipboard API fails
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = value;
+      
+      // Make the textarea invisible but still functional
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      textArea.remove();
+      
+      if (successful) {
+        toast.success('Copied to clipboard!');
+      } else {
+        toast.error('Failed to copy to clipboard');
+      }
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
   const handleCopyClick = (
     event: React.MouseEvent<HTMLButtonElement>,
     value: string,
   ) => {
-    event.preventDefault()
-    copyToClipboard(value)
-  }
+    event.preventDefault();
+    copyToClipboard(value);
+  };
 
   const handleGenerateNewKey = async () => {
     try {

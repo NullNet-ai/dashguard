@@ -1,5 +1,5 @@
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import React, { useState } from "react";
 import { Fragment } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { FormField } from "~/components/ui/form";
@@ -12,28 +12,50 @@ interface IInstallationDetails {
 export default function CustomInstallationDetails({
   form,
 }: IInstallationDetails) {
-  const copyToClipboard = (value: string) => {
-    console.log('%c Line:16 🌮 value', 'color:#42b983', value);
-    navigator.clipboard.writeText(value).then(
-      () => {
-        console.log('Copied to clipboard successfully!');
-      },
-      (err) => {
-        console.error('Failed to copy to clipboard: ', err);
+  const copyToClipboard = async (value: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return;
+      } catch (err) {
+        console.error('Clipboard API failed:', err);
       }
-    );
+    }
+
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = value;
+      
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      textArea.remove();
+      
+      if (successful) {
+      } else {
+        console.error('execCommand copy failed');
+      }
+    } catch (err) {
+      console.error('Fallback copy method failed:', err);
+    }
   };
 
   const handleCopyClick = (
     event: React.MouseEvent<HTMLButtonElement>,
     value: string,
   ) => {
-    console.log('%c Line:34 🥔 value', 'color:#f5ce50', value);
     event.preventDefault();
-    console.log('%c Line:32 🍏 event', 'color:#b03734', event);
     copyToClipboard(value);
   };
 
+  // Rest of your component remains the same
   return (
     <Fragment>
       <FormField
