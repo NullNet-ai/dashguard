@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { z } from 'zod'
+
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 export const tabRouter = createTRPCRouter({
@@ -70,6 +71,31 @@ export const tabRouter = createTRPCRouter({
 
       return response
     }),
+  updateSubTabs: privateProcedure
+    .input(
+      z.object({
+        current_context: z.string().min(1),
+        tab_name: z.string().min(1),
+        is_active: z.boolean(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const response = await ctx.redisClient.getCachedData(key)
+
+      // If we're setting a tab to active, ensure only one tab is active
+      if (input.is_active) {
+        const update_sub_tabs = response?.tabs?.map((tab: Record<string, any>) => ({
+          ...tab,
+          current: tab?.name === input.tab_name,
+        }))
+
+        await ctx.redisClient.cacheData(key, {
+          current_context: input.current_context,
+          tabs: update_sub_tabs,
+        }, 90000000)
+      }
+    }),
   getSubTabs: privateProcedure
     .input(
       z.object({
@@ -111,8 +137,8 @@ export const tabRouter = createTRPCRouter({
         href: string
       }[]
 
-      const tab = response?.find((tab) => tab.href === input.href)
-      const index = response?.findIndex((tab) => tab.href === input.href)
+      const tab = response?.find(tab => tab.href === input.href)
+      const index = response?.findIndex(tab => tab.href === input.href)
 
       if (tab) {
         response?.splice(index, 1)
@@ -123,7 +149,7 @@ export const tabRouter = createTRPCRouter({
       // return left tab
       return response?.[index - 1]
     }),
-  closeAllClassTabs: privateProcedure.mutation(async ({ input, ctx }) => {
+  closeAllClassTabs: privateProcedure.mutation(async ({ ctx }) => {
     const tabs = ctx.redisClient
     const key = `main-tabs:${ctx.session.account.contact?.id}`
     const response = await tabs
@@ -214,7 +240,7 @@ export const tabRouter = createTRPCRouter({
         })
 
       const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) => tab.name === 'Grid'
+        (tab: Record<string, any>) => tab?.name === 'Grid'
       )
 
       response = {
@@ -237,17 +263,10 @@ export const tabRouter = createTRPCRouter({
       const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
       let response = await tabs
         .getCachedData(key)
-        .then((res) => {
-          return res || []
-        })
-        .catch(() => {
-          return []
-        })
+        .then(res => res || [])
+        .catch(() => [])
 
-      const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) =>
-          tab.name === 'Grid' || tab.href === input.href
-      )
+      const update_tabs = response?.tabs?.filter((tab: any) => tab?.name === 'Grid' || tab?.href === input.href)
 
       response = {
         ...response,

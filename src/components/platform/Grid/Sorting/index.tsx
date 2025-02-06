@@ -119,19 +119,21 @@ const Sorting = ({ className }: { className?: string }) => {
             (
             {item.desc ? 'Desc' : 'Asce'}
             )
-            <Button
-              className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
-              data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
-              key={`${item.id}-remove`}
-              name="removeSortingButton"
-              size="xs"
-              variant="ghost"
-              onClick={() => {
-                actions?.handleRemoveSorting(item.id)
-              }}
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            {state?.sorting && state.sorting.length > 1 && (
+              <Button
+                className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
+                key={`${item.id}-remove`}
+                name="removeSortingButton"
+                size="xs"
+                variant="ghost"
+                onClick={() => {
+                  actions?.handleRemoveSorting(item.id);
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </Badge>
         )
       })}

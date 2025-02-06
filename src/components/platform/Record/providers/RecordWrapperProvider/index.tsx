@@ -21,7 +21,7 @@ const RecordWrapperProvider = (props: IRecordWrapperProviderProps) => {
     isCollapseRecordSummary,
     onClickCollapseButton: handleClickCollapseButton
   }}>
-    {isCollapseRecordSummary && <Button2 className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary hover:opacity-70 mt-3" onClick={handleClickCollapseButton}>
+    {isCollapseRecordSummary && <Button2 className="flex h-5 w-5 items-center justify-center rounded-full  hover:opacity-70 mt-3" onClick={handleClickCollapseButton}>
       <ChevronRightIcon className="h-4 w-4 text-slate-500" />
     </Button2>}
     <div className={`h-full border-r border-slate-100`}>

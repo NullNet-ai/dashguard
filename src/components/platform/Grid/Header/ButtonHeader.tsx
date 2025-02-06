@@ -30,8 +30,8 @@ export default function CreateButton({
       size='md'
       onClick={() => void actions?.handleCreate()}
     >
-      {!state?.createLoading && <PlusIcon className='h-5 w-5' />}
-      {title ? <span className='mr-1'>{title}</span> : null}
+      {!state?.createLoading && <PlusIcon className="lg:h-5 lg:w-5 w-7 h-7" />}
+      {title ? <span className="mr-1">{title}</span> : null}
     </Button>
   )
 }

@@ -38,7 +38,7 @@ const RecordSummaryContent = async () => {
   }
 
   return (
-    <div className="">
+    <div>
       {/* <Separator /> */}
       <IdentifierComponent
         code={recordDetails?.data?.code!}

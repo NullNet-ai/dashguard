@@ -118,9 +118,11 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     value={searchedAddress}
                     onBlur={close}
                     onChange={(event) => {
+                      if (!isOpen){
+                        open()
+                      }
                       handleSearch(event.target.value)
                     }}
-                    onFocus={open}
                   />
                   <Button
                     className={cn('gap-1 h-[36px]')}

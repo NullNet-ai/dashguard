@@ -2,15 +2,22 @@ import { headers } from 'next/headers'
 import React from 'react'
 
 import PlatformWizard from '~/components/platform/Wizard'
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
 
 import roleWizardSummary from '../(summary)/wizard-summary-config'
 import { type IWizardLayoutProps } from '../types'
 
-const WizardLayout = async (props: IWizardLayoutProps) => {
+const WizardLayout = async ({ children }: IWizardLayoutProps) => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity, , identifier, currentStep] = pathname.split('/')
+  const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
   const wizard_summary = roleWizardSummary()
+
+  await stepValidator({
+    currentStep: currentStep!,
+    identifier: identifier!,
+    mainEntity: mainEntity!,
+  })
 
   return (
     <div className="p-1">
@@ -20,7 +27,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
           entityIdentifier: identifier!,
           totalSteps: 3,
           enableAutoCreate: true,
-          entityName: main_entity,
+          entityName: mainEntity,
           stepLabels: {
             1: 'Basic Details',
             2: 'Category Details',
@@ -29,7 +36,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
         }}
         summary={wizard_summary}
       >
-        {props.children}
+        {children}
       </PlatformWizard>
     </div>
   )
