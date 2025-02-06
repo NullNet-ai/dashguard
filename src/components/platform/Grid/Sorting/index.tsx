@@ -121,7 +121,7 @@ const Sorting = () => {
             (
             {item.desc ? 'Desc' : 'Asce'}
             )
-            {state?.sorting && state?.sorting?.length > 1 && (
+            {state?.sorting && state.sorting.length > 1 && (
               <Button
                 className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
                 data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
