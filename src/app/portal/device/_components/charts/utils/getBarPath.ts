@@ -26,33 +26,33 @@ export const chartData = [
 ]
 
 export const getBarPath = (x: number, y: number, width: number, height: number, value: number, hour: string) => {
-  const CONTAINER_RADIUS = 8;
+  const CONTAINER_RADIUS = 8
 
   // Extract the number from the hour string
-  const hourNumber = parseInt(hour?.split(' ')[0] || '0', 10);
+  const hourNumber = parseInt(hour?.split(' ')[0] || '0', 10)
 
   // Find first and last active hours
-  const firstActiveHour = parseInt(chartData.find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10);
-  const lastActiveHour = parseInt([...chartData].reverse().find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10);
+  const firstActiveHour = parseInt(chartData.find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10)
+  const lastActiveHour = parseInt([...chartData].reverse().find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10)
 
-  if (value === 0) return '';
+  if (value === 0) return ''
 
-  let leftRadius = 0;
-  let rightRadius = 0;
+  let leftRadius = 0
+  let rightRadius = 0
 
   // Apply left radius only to first active bar
-  if (hourNumber === firstActiveHour) leftRadius = CONTAINER_RADIUS;
+  if (hourNumber === firstActiveHour) leftRadius = CONTAINER_RADIUS
 
   // Apply right radius only if it's the last hour in the container
-  if (hourNumber === lastActiveHour && lastActiveHour === 24) rightRadius = CONTAINER_RADIUS;
+  if (hourNumber === lastActiveHour && lastActiveHour === 24) rightRadius = CONTAINER_RADIUS
 
   // Even larger overlap to ensure absolutely no gaps
-  const adjustedWidth = width + 4;
-  const adjustedX = x - 2;
+  const adjustedWidth = width + 4
+  const adjustedX = x - 2
 
   // Ensure the height covers the full container
-  const adjustedY = y - 0.5;
-  const adjustedHeight = height + 1;
+  const adjustedY = y - 0.5
+  const adjustedHeight = height + 1
   return `
     M ${adjustedX + leftRadius},${adjustedY}
     H ${adjustedX + adjustedWidth - rightRadius}
@@ -64,5 +64,5 @@ export const getBarPath = (x: number, y: number, width: number, height: number, 
     V ${adjustedY + leftRadius}
     ${leftRadius ? `A ${leftRadius} ${leftRadius} 0 0 1 ${adjustedX + leftRadius} ${adjustedY}` : ''}
     Z
-  `;
+  `
 }

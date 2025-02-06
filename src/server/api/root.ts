@@ -55,6 +55,7 @@ export const appRouter = createTRPCRouter({
   deviceAlias: deviceAliasRouter,
   deviceConfiguration: deviceConfigurationRouter,
   deviceHeartbeats: deviceHeartbeatsRouter,
+
 })
 
 // export type definition of API

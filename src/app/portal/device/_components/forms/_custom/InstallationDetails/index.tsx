@@ -29,7 +29,7 @@ export default function CustomInstallationDetails({
       <FormField
         name="firewall"
         control={form.control}
-        render={(formProps) => {
+        render={() => {
           return (
             <div>
               <p>

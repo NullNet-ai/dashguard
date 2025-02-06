@@ -7,4 +7,6 @@ export default [
   'device',
   'device_rules',
   'device_aliases',
+  'device_group',
+  'device_group_settings',
 ]

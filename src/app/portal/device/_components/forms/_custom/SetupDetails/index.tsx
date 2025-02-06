@@ -82,7 +82,7 @@ export default function CustomSetupDetails({
 
   const acct_secret = form.watch('app_secret')
 
-  const app_secret = params?.shell_type === 'wizard' ? defaultValues?.account_secret : acct_secret
+  const app_secret = defaultValues?.account_secret || acct_secret
 
   return (
     <FormField
@@ -129,44 +129,44 @@ export default function CustomSetupDetails({
                   name={`app_id`}
                   render={() => {
                     return (
-                <div className="col-span-1">
+                      <div className="col-span-1">
 
-                      <div className="mt-2 space-x-2">
-                        <label
-                          className="block text-md"
-                          data-test-id={addTestIdName({
-                            type: 'lbl',
-                            name: 'app_id',
-                          })}
-                        >
-                          {"APP ID"}
-                        </label>
-                        <input
-                          className="mt-1 min-w-[70%] rounded-md border-green-300 bg-green-100 p-2 text-green-600"
-                          data-test-id={addTestIdName({
-                            type: 'inp',
-                            name: 'app_id',
-                          })}
-                          readOnly={true}
-                          type="text"
-                          value={account_id}
-                        />
-                        <button
-                          className="my-auto"
-                          data-test-id={addTestIdName({
-                            type: 'cpy',
-                            name: 'app_id',
-                          })}
-                          onClick={(event) => handleCopyClick(event, `${account_id}`) }
-                        >
-                          <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
-                        </button>
-                      </div>
+                        <div className="mt-2 space-x-2">
+                          <label
+                            className="block text-md"
+                            data-test-id={addTestIdName({
+                              type: 'lbl',
+                              name: 'app_id',
+                            })}
+                          >
+                            APP ID
+                          </label>
+                          <input
+                            className="mt-1 min-w-[70%] rounded-md border-green-300 bg-green-100 p-2 text-green-600"
+                            data-test-id={addTestIdName({
+                              type: 'inp',
+                              name: 'app_id',
+                            })}
+                            readOnly={true}
+                            type="text"
+                            value={account_id}
+                          />
+                          <button
+                            className="my-auto"
+                            data-test-id={addTestIdName({
+                              type: 'cpy',
+                              name: 'app_id',
+                            })}
+                            onClick={(event) => handleCopyClick(event, `${account_id}`) }
+                          >
+                            <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
+                          </button>
+                        </div>
                       </div>
                     )
                   } }
                 />
-                
+
                 <FormField
                   control={control}
                   name={`app_secret`}
@@ -196,10 +196,10 @@ export default function CustomSetupDetails({
                           />
                           {/* Eye Toggle Button Inside Input */}
                           <button
-                            className="absolute inset-y-0 right-2 flex items-center"
-                            type="button"
-                            disabled={field?.disabled}
-                            onClick={() => setShowSecret(!showSecret)}
+                            className = "absolute inset-y-0 right-2 flex items-center"
+                            disabled = { field?.disabled }
+                            type = "button"
+                            onClick = { () => setShowSecret(!showSecret) }
                           >
                             {showSecret
                               ? (
@@ -210,20 +210,20 @@ export default function CustomSetupDetails({
                                 )}
                           </button>
                           {/* Copy Button Below Input */}
-                        {(!!app_secret || !!account_secret) && (
-                        <button
-                            className="ml-2 absolute -right-6 top-3"
-                            data-test-id={addTestIdName({
-                              type: 'cpy',
-                              name: 'app_secret',
-                            })}
-                            onClick={(event) => handleCopyClick(event, `${app_secret || account_secret}`)}
-                          >
-                            <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
-                          </button>
-                        )} 
+                          {(!!app_secret || !!account_secret) && (
+                            <button
+                              className="ml-2 absolute -right-6 top-3"
+                              data-test-id={addTestIdName({
+                                type: 'cpy',
+                                name: 'app_secret',
+                              })}
+                              onClick={(event) => handleCopyClick(event, `${app_secret || account_secret}`)}
+                            >
+                              <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
+                            </button>
+                          )}
                         </div>
-                        
+
                         <br />
                         {isFromRecord && (
                           <Button
