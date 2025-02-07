@@ -1,4 +1,3 @@
-// https://typescript-eslint.io/rules/no-misused-promises
 import React, { useEffect } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
@@ -18,6 +17,7 @@ export default function CustomSuccessfulConnectionDetails({
   form,
 }: ISuccessfulConnectionDetails) {
   const [chartData, setChartData] = React.useState([])
+  // const createPackets = api.packet.createDynamicRecord.useMutation()
 
   const {
     refetch: fetchBandWidth,
@@ -30,11 +30,19 @@ export default function CustomSuccessfulConnectionDetails({
   })
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    // setInterval(async () => {
+    //   await createPackets.mutateAsync({ entity: 'packets',
+    //     data: {} })
+
+    //   return true
+    // }, 1000)
+    const fetchChartData = async () => {
       const { data } = await fetchBandWidth()
-      if (!data) return
-      setChartData(data as any)
-    }, 1000)
+      if (data) {
+        setChartData(data as any)
+      }
+    }
+    const interval = setInterval(fetchChartData, 1000)
 
     return () => clearInterval(interval)
   }, [])

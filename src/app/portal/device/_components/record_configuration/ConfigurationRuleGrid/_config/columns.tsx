@@ -26,11 +26,12 @@ const gridColumns = [
   },
   {
     header: 'Mode',
-    accessorKey: 'mode',
+    accessorKey: 'disabled',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.mode || 'Disabled'
-      return <Badge variant={value == 'Disabled' ? 'destructive' : 'success'}>{value}</Badge>
+      const value = row?.original?.disabled
+      if (![true, false]?.includes(value)) return null
+      return <Badge variant={value ? 'destructive' : 'success'}>{value ? 'Disabled' : 'Enabled'}</Badge>
     },
   },
   {
