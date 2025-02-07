@@ -101,6 +101,7 @@ export const accountRouter = createTRPCRouter({
           role_id,
           account_organization_id: organization_id,
           account_organization_name: organizationRecord?.data?.[0]?.name || '',
+          is_new_user: true,
         }
 
         const result = await ctx.dnaClient
