@@ -1,4 +1,3 @@
-import { EOperator } from '@dna-platform/common-orm'
 import { headers } from 'next/headers'
 import React from 'react'
 
@@ -17,7 +16,7 @@ export default async function ConfigurationAliasGrid({
     perPage?: string
   }
 }) {
-  const { sorting } = (await getGridCacheData()) ?? {}
+  const { sorting, filters } = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity,,code] = pathname.split('/')
@@ -49,30 +48,10 @@ export default async function ConfigurationAliasGrid({
     current: +(searchParams.page ?? '0'),
     limit: +(searchParams.perPage ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
-    advance_filters: [
-      {
-        type: 'criteria',
-        field: 'device_id',
-        entity: 'device_configurations',
-        operator: EOperator.EQUAL,
-        values: [
-          record_id,
-        ],
-      },
-      {
-        type: 'operator',
-        operator: 'and',
-      },
-      {
-        type: 'criteria',
-        field: 'status',
-        entity: 'device_aliases',
-        operator: EOperator.EQUAL,
-        values: [
-          'Active',
-        ],
-      },
-    ],
+    device_id: record_id,
+    advance_filters: filters?.advanceFilter?.length
+      ? filters?.advanceFilter
+      : [],
   })
 
   return (

@@ -1,11 +1,14 @@
 import {
+  EOperator,
   EOrderDirection,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
+import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
 import { pluralize } from '~/server/utils/pluralize'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
@@ -14,30 +17,55 @@ export const deviceAliasRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   mainGrid: privateProcedure
     // Define input using zod for validation
-    .input(ZodItems)
+    .input(ZodItems.extend({
+      device_id: z.string(),
+    }))
     .query(async ({ input, ctx }) => {
       const {
         limit = 50,
         current = 1,
         advance_filters: _advance_filters = [],
         pluck,
+        device_id,
       } = input
 
-      const pluck_object = {
-        device_aliases: pluck as string[],
-        device_configurations: [
-          'id',
-          'device_id',
-          'raw_content',
-        ],
-      }
+      const device_configuration = await ctx.dnaClient.findAll({
+        entity: 'device_configurations',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'created_date', 'timestamp'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'device_configurations',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+
+      }).execute()
+
+      const device_conf_id = device_configuration?.data?.[0]?.id as string
+
       const device_aliases = await ctx.dnaClient
         .findAll({
           entity: 'device_aliases',
           token: ctx.token.value,
           query: {
-            pluck_object,
-            advance_filters: _advance_filters as IAdvanceFilters[],
+            pluck,
+            advance_filters: _advance_filters?.length
+              ? _advance_filters as IAdvanceFilters[]
+              : createAdvancedFilter({
+                device_configuration_id: device_conf_id,
+                status: 'Active',
+              }) as IAdvanceFilters[],
             order: {
               starts_at:
                 (input.current || 0) === 0
@@ -51,19 +79,6 @@ export const deviceAliasRouter = createTRPCRouter({
             multiple_sort: input.sorting?.length
               ? formatSorting(input.sorting)
               : [],
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'device_configurations',
-              field: 'id',
-            },
-            from: {
-              entity: 'device_aliases',
-              field: 'device_configuration_id',
-            },
           },
         })
         .execute()

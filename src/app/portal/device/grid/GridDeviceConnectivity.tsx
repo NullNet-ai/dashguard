@@ -1,13 +1,11 @@
 'use client'
 import React from 'react'
 import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { type BarProps } from 'recharts/types/cartesian/Bar'
-import { type ActiveShape } from 'recharts/types/util/types'
 
 import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
-import { getBarPath } from '../utils/getBarPath';
 
+import { getBarPath } from '../utils/getBarPath'
 
 interface ShapeProps {
   x: number
@@ -16,6 +14,7 @@ interface ShapeProps {
   height: number
   value: number
   payload: { hour: string }
+  chart_data: any
 }
 
 const chartConfig = {
@@ -42,8 +41,8 @@ const getLastTwentyFourHoursTimeStamp = () => {
 }
 
 const CustomBarShape = (props: ShapeProps) => {
-  const { x, y, width, height, value, payload } = props
-  const d = getBarPath(x, y, width, height, value, payload.hour)
+  const { x, y, width, height, value, payload, chart_data } = props
+  const d = getBarPath(x, y, width, height, value, payload.hour, chart_data)
   return <path d={d} fill={chartConfig.heartbeats.color} />
 }
 
@@ -81,7 +80,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
             maxBarSize={6}
             minPointSize={0}
             shape={
-              CustomBarShape as unknown as ActiveShape<BarProps, SVGPathElement>
+              (prop: any) => CustomBarShape({ ...prop, chart_data: record }) as any
             }
             strokeWidth={0}
           />

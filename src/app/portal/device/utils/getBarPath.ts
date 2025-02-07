@@ -1,38 +1,13 @@
-export const chartData = [
-  { hour: '1 hour', heartbeats: 100 },
-  { hour: '2 hours', heartbeats: 0 },
-  { hour: '3 hours', heartbeats: 0 },
-  { hour: '4 hours', heartbeats: 0 },
-  { hour: '5 hours', heartbeats: 100 },
-  { hour: '6 hours', heartbeats: 100 },
-  { hour: '7 hours', heartbeats: 100 },
-  { hour: '8 hours', heartbeats: 100 },
-  { hour: '9 hours', heartbeats: 0 },
-  { hour: '10 hours', heartbeats: 100 },
-  { hour: '11 hours', heartbeats: 100 },
-  { hour: '12 hours', heartbeats: 0 },
-  { hour: '13 hours', heartbeats: 0 },
-  { hour: '14 hours', heartbeats: 100 },
-  { hour: '15 hours', heartbeats: 0 },
-  { hour: '16 hours', heartbeats: 0 },
-  { hour: '17 hours', heartbeats: 0 },
-  { hour: '18 hours', heartbeats: 0 },
-  { hour: '19 hours', heartbeats: 0 },
-  { hour: '20 hours', heartbeats: 0 },
-  { hour: '21 hours', heartbeats: 0 },
-  { hour: '22 hours', heartbeats: 0 },
-  { hour: '23 hours', heartbeats: 0 },
-  { hour: '24 hours', heartbeats: 0 },
-]
-
-export const getBarPath = (x: number, y: number, width: number, height: number, value: number, hour: string) => {
+export const getBarPath = (x: number, y: number, width: number, height: number, value: number, hour: string, chart_data: any) => {
   const CONTAINER_RADIUS = 8
-
+  const chartData = [] as { heartbeats: number, hour: string }[]
   // Extract the number from the hour string
   const hourNumber = parseInt(hour?.split(' ')[0] || '0', 10)
 
   // Find first and last active hours
-  const firstActiveHour = parseInt(chartData.find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10)
+  const firstActiveHour = parseInt(chartData.find((d:
+  { heartbeats: number }
+  ) => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10)
   const lastActiveHour = parseInt([...chartData].reverse().find(d => d.heartbeats > 0)?.hour?.split(' ')[0] || '0', 10)
 
   if (value === 0) return ''

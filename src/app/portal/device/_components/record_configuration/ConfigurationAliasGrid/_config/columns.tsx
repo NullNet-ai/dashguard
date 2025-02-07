@@ -35,6 +35,14 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
+    cell: ({ row }) => {
+      const value = row?.original?.value
+      return (
+        <span>
+          {value?.split(' ').join(', ')}
+        </span>
+      )
+    },
   },
   {
     header: 'Description',

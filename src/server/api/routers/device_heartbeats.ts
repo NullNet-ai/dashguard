@@ -34,13 +34,13 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
       time_range: z.array(z.string()),
     })
   ).query(async ({ ctx, input }) => {
-    const { time_range } = input
+    const { time_range, device_id } = input
 
     const [start, end] = time_range || {}
     const hour_range = generateHourlyRange(new Date(start as string), new Date(end as string))
 
     const res = await ctx.dnaClient.aggregate({
-      //@ts-ignore
+      // @ts-ignore
       query: {
         entity: 'device_heartbeats',
         aggregations: [
@@ -58,19 +58,19 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
-          // {
-          //   type: 'operator',
-          //   operator: EOperator.AND,
-          // },
-          // {
-          //   type: 'criteria',
-          //   field: 'device_id',
-          //   entity: 'device_heartbeats',
-          //   operator: EOperator.EQUAL,
-          //   values: [
-          //   device_id,
-          //   ],
-          // },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'device_heartbeats',
+            operator: EOperator.EQUAL,
+            values: [
+              device_id,
+            ],
+          },
         ],
         bucket_size: '1h',
         order: {

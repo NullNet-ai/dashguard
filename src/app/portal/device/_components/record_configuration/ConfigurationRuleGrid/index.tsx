@@ -1,4 +1,3 @@
-import { EOperator } from '@dna-platform/common-orm'
 import { headers } from 'next/headers'
 import React from 'react'
 
@@ -40,39 +39,17 @@ export default async function ConfigurationRuleGrid() {
 
   const { sorting, pagination, filters } = (await getGridCacheData()) ?? {}
 
-  const record_id = record?.data?.id
+  const record_id = record?.data?.id as string
   const { items = [], totalCount } = await api.deviceRule.mainGrid({
     entity: 'device_rules',
     pluck: _pluck,
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
+    device_id: record_id,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
-      : [
-          {
-            type: 'criteria',
-            field: 'device_id',
-            entity: 'device_configurations',
-            operator: EOperator.EQUAL,
-            values: [
-              record_id,
-            ],
-          },
-          {
-            type: 'operator',
-            operator: 'and',
-          },
-          {
-            type: 'criteria',
-            field: 'status',
-            entity: 'device_rules',
-            operator: EOperator.EQUAL,
-            values: [
-              'Active',
-            ],
-          },
-        ],
+      : [],
   })
 
   return (
