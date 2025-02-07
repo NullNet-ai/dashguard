@@ -1,23 +1,32 @@
-'use client';
+'use client'
 
 import {
   CheckIcon,
   EyeIcon,
   EyeSlashIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline';
-import React, { useEffect, useState } from 'react';
+} from '@heroicons/react/24/outline'
+import React, { useEffect, useState } from 'react'
 
-import { Button } from '~/components/ui/button';
+import { Button } from '~/components/ui/button'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/components/ui/form';
-import { Input } from '~/components/ui/input';
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
 
-import { type IPasswordStrength, type IProps } from './types';
+import { type IPasswordStrength, type IProps } from './types'
+
+const getNestedValue = ({
+  record, path,
+}: {
+  record: Record<string, any>
+  path: string
+}) => {
+  return path.split('.').reduce((acc, key) => acc?.[key], record)
+}
 
 export default function FormPassword({
   fieldConfig,
@@ -29,12 +38,12 @@ export default function FormPassword({
 }: IProps) {
   // Destructure configurable properties with default values
   const { showPasswordStrengthBar = false, hasComplexValidation = false }
-  = fieldConfig;
+  = fieldConfig
 
   const isDisabled = fieldConfig.isCustomFormField
     ? fieldConfig?.disabled
-    : formRenderProps?.field?.disabled;
-  const [showPassword, setShowPassword] = useState(false);
+    : formRenderProps?.field?.disabled
+  const [showPassword, setShowPassword] = useState(false)
 
   // State for password validation rules
   const [passwordValidation, setPasswordValidation] = useState({
@@ -43,18 +52,21 @@ export default function FormPassword({
     hasLowercase: false,
     hasNumber: false,
     hasSpecialChar: false,
-  });
+  })
 
   // State for password strength
   const [passwordStrength, setPasswordStrength] = useState<IPasswordStrength>({
     level: 0,
     text: 'Too Short',
-  });
+  })
 
-  // TODO: dynamically get the formKey to get the dirty values
+  const isPasswordDirty = !!getNestedValue({
+    record: form?.formState?.dirtyFields,
+    path: fieldConfig.id,
+  })
 
   const showPasswordStrengthBarAndValidations
-  = !isDisabled && formRenderProps?.field?.value;
+  = !isDisabled && isPasswordDirty && formRenderProps?.field?.value
   // Function to validate password against rules
   const validatePassword = (password: string) => {
     return {
@@ -63,8 +75,8 @@ export default function FormPassword({
       hasLowercase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
       hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    };
-  };
+    }
+  }
 
   // Function to calculate password strength
   const getPasswordStrength = (validation: {
@@ -74,21 +86,25 @@ export default function FormPassword({
     hasNumber: boolean
     hasSpecialChar: boolean
   }) => {
-    const rulesSatisfied = Object.values(validation).filter(Boolean).length;
-    if (rulesSatisfied === 0) return { level: 0, text: 'Too Short' };
-    if (rulesSatisfied === 1) return { level: 1, text: 'Weak' };
-    if (rulesSatisfied === 2) return { level: 2, text: 'Okay' };
-    if (rulesSatisfied === 3) return { level: 3, text: 'Good' };
-    return { level: 4, text: 'Strong' };
-  };
+    const rulesSatisfied = Object.values(validation).filter(Boolean).length
+
+    switch (rulesSatisfied) {
+      case 0: return { level: 0, text: 'Too Short' }
+      case 1: return { level: 1, text: 'Weak' }
+      case 2: return { level: 2, text: 'Okay' }
+      case 3: return { level: 3, text: 'Good' }
+      case 4: return { level: 4, text: 'Strong' }
+      default: return { level: 0, text: 'Too Short' }
+    }
+  }
 
   // Effect to update validation and strength when password changes
   useEffect(() => {
     if (formRenderProps?.field?.value) {
-      const validation = validatePassword(String(formRenderProps.field.value));
-      setPasswordValidation(validation);
-      setPasswordStrength(getPasswordStrength(validation));
-      return;
+      const validation = validatePassword(String(formRenderProps.field.value))
+      setPasswordValidation(validation)
+      setPasswordStrength(getPasswordStrength(validation))
+      return
     }
     // Reset validation and strength if password is empty
     setPasswordValidation({
@@ -97,9 +113,9 @@ export default function FormPassword({
       hasLowercase: false,
       hasNumber: false,
       hasSpecialChar: false,
-    });
-    setPasswordStrength({ level: 0, text: 'Too Short' });
-  }, [formRenderProps?.field?.value]);
+    })
+    setPasswordStrength({ level: 0, text: 'Too Short' })
+  }, [formRenderProps?.field?.value])
 
   return (
     <FormItem>
