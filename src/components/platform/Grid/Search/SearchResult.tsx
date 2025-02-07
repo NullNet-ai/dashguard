@@ -9,8 +9,10 @@ import { type ISearchItemResult } from './types';
 
 export default function SearchResult({
   results,
+  closeDialog,
 }: {
   results: ISearchItemResult[] | null
+  closeDialog?: () => void
 }) {
   const { actions } = useContext(SearchGridContext);
   if (!results)
@@ -31,6 +33,7 @@ export default function SearchResult({
                 value={result}
                 onClick={() => {
                   void actions?.handleAddSearchItem(result);
+                  closeDialog && closeDialog();
                 }}
               >
                 <div className="mb-2 ml-3">

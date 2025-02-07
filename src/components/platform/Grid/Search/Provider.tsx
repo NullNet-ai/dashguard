@@ -38,7 +38,7 @@ export default function GridSearchProvider({ children }: IProps) {
     onFetchRecords,
   } = gridState?.config ?? {};
 
-  const { parentType } = gridState ?? {}
+  const { parentType } = gridState ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
@@ -60,7 +60,6 @@ export default function GridSearchProvider({ children }: IProps) {
       // eslint-disable-next-line no-unused-vars
       (acc: any, { accessorKey: _, ...item }: any, index) => {
         return [
-          ...acc,
           {
             type: 'criteria',
             operator: 'equal',
@@ -72,15 +71,17 @@ export default function GridSearchProvider({ children }: IProps) {
             entity: defaultEntity,
             ...item,
           },
-          ...(searchableFields.length - 1 === index
-            ? []
-            : [{ type: 'operator', operator: 'or' }]),
+          ...(index !== 0
+            ? [{ type: 'operator', operator: 'or' }]
+            : []),
+          ...acc,
         ];
-      }, [
-        ...advanceFilter,
+      },
+      [
         ...(advanceFilter?.length
-          ? [{ type: 'operator', operator: 'or' }]
+          ? [{ type: 'operator', operator: 'and' }]
           : []),
+        ...advanceFilter,
       ],
     );
   }, [_query, columns.length]);
@@ -125,13 +126,14 @@ export default function GridSearchProvider({ children }: IProps) {
             ? [rest?.values?.[0]?.replace(/[^\d]/g, '')]
             : [rest?.values?.[0]],
         display_value: rest?.values?.[0],
+        operator: rest?.operator === 'like' ? 'equal' : rest?.operator,
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       onFetchRecords?.({
         advance_filters: updateSearchItems,
-      })
+      });
       return;
     }
 
@@ -147,7 +149,7 @@ export default function GridSearchProvider({ children }: IProps) {
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
-      })
+      });
       return;
     }
 
@@ -163,14 +165,14 @@ export default function GridSearchProvider({ children }: IProps) {
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       onFetchRecords?.({
         advance_filters: gridState?.defaultAdvanceFilter || [],
-      })
+      });
       return;
     }
 
     await UpdateReportFilter({
       filters: gridState?.defaultAdvanceFilter || [],
     });
-  }
+  };
 
   const state_context = {
     open,

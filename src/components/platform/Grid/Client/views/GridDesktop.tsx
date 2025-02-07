@@ -1,36 +1,37 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo } from 'react';
 
-import SearchDialog from '~/components/application-layout/Header/Search'
-import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
-import { Card, CardFooter, CardHeader } from '~/components/ui/card'
-import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
-import { useSidebar } from '~/components/ui/sidebar'
-import { Table, TableHeader } from '~/components/ui/table'
-import useWindowSize from '~/hooks/use-resize'
-import { cn } from '~/lib/utils'
-import { remToPx } from '~/utils/fetcher'
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
+import { Card, CardFooter, CardHeader } from '~/components/ui/card';
+import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
+import { useSidebar } from '~/components/ui/sidebar';
+import { Table, TableHeader } from '~/components/ui/table';
+import useWindowSize from '~/hooks/use-resize';
+import { cn } from '~/lib/utils';
+import { remToPx } from '~/utils/fetcher';
 
-import Pagination from '../../Pagination'
-import { GridContext } from '../../Provider'
-import Search from '../../Search'
-import Sorting from '../../Sorting'
-import MyTableBody from '../../TableBody'
-import MyTableHead from '../../TableHead'
+import Pagination from '../../Pagination';
+import { GridContext } from '../../Provider';
+import Search from '../../Search';
+import Sorting from '../../Sorting';
+import MyTableBody from '../../TableBody';
+import MyTableHead from '../../TableHead';
+import GridSearchProvider from '../../Search/Provider';
+import SearchDialog from '../../Search/SearchDialog';
 
 interface IGridDesktopProps {
-  parentType: 'grid' | 'form' | 'field' | 'grid_expansion'
-  hideSearch?: boolean
-  height?: string
-  showAction?: boolean
+  parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
+  hideSearch?: boolean;
+  height?: string;
+  showAction?: boolean;
   parentProps?: {
-    width?: string
-    open?: boolean
-    summary?: boolean
-  }
-  showPagination?: boolean
-  gridLevel?: number
-  isLoading?: boolean
+    width?: string;
+    open?: boolean;
+    summary?: boolean;
+  };
+  showPagination?: boolean;
+  gridLevel?: number;
+  isLoading?: boolean;
 }
 
 function GridDesktop({
@@ -43,37 +44,33 @@ function GridDesktop({
   gridLevel = 1,
   isLoading,
 }: IGridDesktopProps) {
-  const { state, actions } = useContext(GridContext)
+  const { state, actions } = useContext(GridContext);
   const { open: sidebarOpen } = useSidebar();
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
   const _width = sidebarOpen ? newWidth - remToPx(17) : newWidth - remToPx(6);
 
-  const { open, summary } = parentProps || {}
+  const { open, summary } = parentProps || {};
 
   const conWidth = useMemo(() => {
     if (open && summary) {
-      return 'lg:w-[calc(100vw-578px)]'
-    }
-    else if (!open && summary) {
-      return 'w-auto'
-    }
-    else if (open && !summary) {
-      return 'w-[calc(100vw-320px)]'
-    }
-    else return ''
-  }, [open, summary])
+      return 'lg:w-[calc(100vw-578px)]';
+    } else if (!open && summary) {
+      return 'w-auto';
+    } else if (open && !summary) {
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
+  }, [open, summary]);
 
-  const isExpandedTable = parentType === 'grid_expansion'
+  const isExpandedTable = parentType === 'grid_expansion';
 
   const expandedWidth = useMemo(() => {
     if (isExpandedTable) {
-      return _width - 90 - (gridLevel === 3 ? 100 : 0)
-    }
-    else {
+      return _width - 90 - (gridLevel === 3 ? 100 : 0);
+    } else {
       return undefined;
     }
-  }, [isExpandedTable])
+  }, [isExpandedTable]);
 
   return (
     <>
@@ -83,29 +80,41 @@ function GridDesktop({
     <Separator /> */}
       {/* {hideSearch ? null : ( */}
       <div
-        className={cn(`flex justify-between `, `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`)}
-        style={{ width: isExpandedTable ? expandedWidth : 'calc(100vw - 37rem)' }}
+        className={cn(
+          `flex justify-between`,
+          `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`,
+        )}
+        style={{
+          width: isExpandedTable ? expandedWidth : 'calc(100vw - 37rem)',
+        }}
       >
-        {!hideSearch && !isExpandedTable && <Search parentType='form' />}
-        <SearchDialog />
-        {['form', 'grid_expansion'].includes(parentType) && <Sorting className={cn(`${isExpandedTable ? 'self-end mb-[2px]' : ''}`)} />}
+        {!hideSearch && <Search parentType={parentType} />}
+        {/* <GridSearchProvider>
+          <SearchDialog />
+        </GridSearchProvider> */}
+        {['form', 'grid_expansion'].includes(parentType) && (
+          <Sorting
+            className={cn(`${isExpandedTable ? 'mb-[2px] self-end' : ''}`)}
+          />
+        )}
       </div>
 
       <Card
         className={cn(
-          `col-span-full border-0 shadow-none`, `${isExpandedTable ? 'bg-transparent' : ''}`,
+          `col-span-full border-0 shadow-none`,
+          `${isExpandedTable ? 'bg-transparent' : ''}`,
         )}
       >
         {parentType !== 'field' && (
           <CardHeader
             className={cn(`${parentType === 'grid_expansion' ? 'py-0' : ''}`)}
           >
-            <div className='flex flex-row space-x-2'>
+            <div className="flex flex-row space-x-2">
               {state?.config?.actionType === 'multi-select' && (
                 <Button
                   type="button"
                   onClick={() => {
-                    actions?.handleMultiSelect()
+                    actions?.handleMultiSelect();
                   }}
                 >
                   <Badge className="mx-2 text-white" color="green">
@@ -123,7 +132,9 @@ function GridDesktop({
         >
           <ScrollArea
             className={cn(
-              `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`, conWidth, parentType === 'grid'
+              `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
+              conWidth,
+              parentType === 'grid'
                 ? 'w-[350px] md:w-[460px]'
                 : 'w-[350px] md:w-[100%]',
             )}
@@ -140,21 +151,24 @@ function GridDesktop({
               <TableHeader parentType={parentType}>
                 <MyTableHead parentType={parentType} />
               </TableHeader>
-              <MyTableBody showAction={showAction} gridLevel={gridLevel} isLoading={isLoading} showPagination={showPagination} />
+              <MyTableBody
+                showAction={showAction}
+                gridLevel={gridLevel}
+                isLoading={isLoading}
+                showPagination={showPagination}
+              />
             </Table>
-            <ScrollBar orientation='horizontal' />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        {parentType === 'grid' || showPagination
-          ? (
-              <CardFooter>
-                <Pagination width={expandedWidth} />
-              </CardFooter>
-            )
-          : null}
+        {parentType === 'grid' || showPagination ? (
+          <CardFooter>
+            <Pagination width={expandedWidth} />
+          </CardFooter>
+        ) : null}
       </Card>
     </>
-  )
+  );
 }
 
-export default GridDesktop
+export default GridDesktop;

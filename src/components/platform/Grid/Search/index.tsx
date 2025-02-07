@@ -6,6 +6,7 @@ import FilterButton from '../Header/FilterButton';
 import TableViewButton from '../Header/TableViewButton';
 
 import GridSearchProvider from './Provider';
+import SearchDialog from './SearchDialog';
 import SearchList from './SearchList';
 import SearchListMobile from './SearchListMobile';
 import Search from './View';
@@ -37,21 +38,33 @@ export default function Main({ parentType = 'grid' }: any) {
               </div>
             </div>
           )
-        : (
-            <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">
-              <div className="relative flex flex-1 flex-row gap-x-2">
-                <div className="my-2 h-[40px] w-full md:my-0">
-                  <Search />
+        : parentType === 'grid_expansion'
+          ? (
+              <>
+                <SearchDialog />
+                <div className="hidden min-h-[40px] lg:block">
+                  <SearchList />
+                </div>
+                <div className="min-h-[40px] lg:hidden">
+                  <SearchListMobile />
+                </div>
+              </>
+            )
+          : (
+              <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">
+                <div className="relative flex flex-1 flex-row gap-x-2">
+                  <div className="my-2 h-[40px] w-full md:my-0">
+                    <Search />
+                  </div>
+                </div>
+                <div className="hidden min-h-[40px] lg:block">
+                  <SearchList />
+                </div>
+                <div className="min-h-[40px] lg:hidden">
+                  <SearchListMobile />
                 </div>
               </div>
-              <div className="hidden min-h-[40px] lg:block">
-                <SearchList />
-              </div>
-              <div className="min-h-[40px] lg:hidden">
-                <SearchListMobile />
-              </div>
-            </div>
-          )}
+            )}
     </GridSearchProvider>
   );
 }
