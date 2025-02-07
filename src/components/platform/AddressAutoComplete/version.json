@@ -1,7 +1,7 @@
 {
   "app_name": "platform__AddressAutoComplete",
-  "tag": "1.9.1<unreleased>",
-  "branch": "unreleased/fix/2384/1.9.1<unreleased>",
-  "message": "Fix to show only the list of the locations when the user will type ",
+  "tag": "1.9.2<unreleased>",
+  "branch": "unreleased/fix/1845/1.9.2<unreleased>",
+  "message": "Clear the search input when done clicking the chosen location",
   "publish_name": "Rob Caldosa"
 }
