@@ -78,6 +78,7 @@ const gridColumns = [
   {
     header: "Updated Date",
     accessorKey: "updated_date",
+    sortKey: ["updated_date", "updated_time"],
     cell: ({ row }) => {
       const date = row?.original?.updated_date;
       const time = row?.original?.updated_time;
@@ -102,6 +103,7 @@ const gridColumns = [
   {
     header: "Created Date",
     accessorKey: "created_date",
+    sortKey: ["created_date", "created_time"],
     cell: ({ row }) => {
       const date = row?.original?.created_date;
       const time = row?.original?.created_time;

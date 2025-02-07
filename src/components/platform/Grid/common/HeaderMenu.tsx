@@ -1,30 +1,25 @@
-"use client";
-import { Button } from "@headlessui/react";
-import { type Header } from "@tanstack/react-table";
+'use client';
+import { Button } from '@headlessui/react';
+import { type Header } from '@tanstack/react-table';
 import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
-  ChevronUp,
-  Files,
-  ListFilter,
-  Pencil,
-  Pin,
-} from "lucide-react";
-import { useContext, useState } from "react";
+  ChevronUp
+} from 'lucide-react';
+import { useContext, useState } from 'react';
 
+import { Badge } from '~/components/ui/badge';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuSeparator,
   DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
-import { GridContext } from "../Provider";
-import { cn } from "~/lib/utils";
-import { ISearchItem } from "../Search/types";
-import { Badge } from "~/components/ui/badge";
-import { Separator } from "~/components/ui/separator";
+  DropdownMenuTrigger
+} from '~/components/ui/dropdown-menu';
+import { Separator } from '~/components/ui/separator';
+import { cn } from '~/lib/utils';
+import { GridContext } from '../Provider';
+import { ISearchItem } from '../Search/types';
 
 interface HeaderMenuProps {
   header: Header<any, unknown>;
@@ -33,10 +28,12 @@ interface HeaderMenuProps {
 
 const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
   const { state } = useContext(GridContext);
+  const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
+  const sortingKey = Array.isArray(columnSortKey)
+    ? columnSortKey[0]
+    : columnSortKey;
   const sortingState = state?.sorting?.find(
-    (item) =>
-      item.id === header?.id ||
-      item.id === (header?.column?.columnDef as any)?.sortKey,
+    (item) => item.id === header?.id || item.id === sortingKey,
   );
   const enableSorting = header.column.getCanSort();
   const [open, setOpen] = useState(false);
@@ -45,7 +42,7 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
     return <></>;
   }
   const formattedFilter = defaultFilter?.reduce((acc, filter, index) => {
-    return `${acc} "${filter?.display_value || filter?.values?.[0]}" ${index < defaultFilter.length - 1 ? "or" : ""}`;
+    return `${acc} "${filter?.display_value || filter?.values?.[0]}" ${index < defaultFilter.length - 1 ? 'or' : ''}`;
   }, `${header?.column?.columnDef.header} is`);
 
   return (
@@ -64,7 +61,7 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
         <Button
           className={cn(
             `group-hover:block group-hover:opacity-100`,
-            `${open ? "opacity-100" : "opacity-0"}`,
+            `${open ? 'opacity-100' : 'opacity-0'}`,
           )}
         >
           {!open ? (
@@ -79,12 +76,10 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
           <>
             <DropdownMenuItem className="flex gap-2">
               <div className="flex flex-col gap-y-2">
-                <span className="text-xs font-semibold">
-                  Filter
-                </span>
+                <span className="text-xs font-semibold">Filter</span>
                 <Badge variant="primary" className="mx-1">
-                {formattedFilter}
-              </Badge>
+                  {formattedFilter}
+                </Badge>
               </div>
             </DropdownMenuItem>
             <Separator />
