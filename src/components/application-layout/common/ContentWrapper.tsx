@@ -14,9 +14,9 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
 
   const mtop
     = application === 'record'
-      ? 'lg:mt-[0px] md:mt-[53px] mt-[80px]'
+      ? 'lg:mt-[0px] md:mt-[53px] mt-[88px]'
       : application === 'wizard'
-        ? 'lg:mt-[0] mt-[80px] md:mt-[53px]'
+        ? 'lg:mt-[0] mt-[88px] md:mt-[53px]'
         : firstSegment === 'dashboard'
           ? 'lg:mt-[50px] md:mt-[80px] mt-[100px]'
           : 'mt-[140px]';
