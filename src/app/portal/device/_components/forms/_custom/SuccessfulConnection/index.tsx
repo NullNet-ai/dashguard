@@ -1,3 +1,4 @@
+import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
@@ -16,14 +17,25 @@ interface ISuccessfulConnectionDetails {
 export default function CustomSuccessfulConnectionDetails({
   form,
 }: ISuccessfulConnectionDetails) {
+  const pathName = usePathname()
+  const [, , entity,, identifier] = pathName.split('/')
+
   const [chartData, setChartData] = React.useState([])
   // const createPackets = api.packet.createDynamicRecord.useMutation()
+
+  const {
+    data: record_device = { data: { id: null } },
+  } = api.record.getByCode.useQuery({
+    id: identifier!,
+    pluck_fields: ['id', 'code', 'status'],
+    main_entity: entity!,
+  })
 
   const {
     refetch: fetchBandWidth,
 
   } = api.packet.getBandwithPerSecond.useQuery({
-    code: 'CV100006',
+    device_id: record_device?.data?.id,
     time_range: getLastMinutesTimeStamp(3),
     bucket_size: '1s',
 
