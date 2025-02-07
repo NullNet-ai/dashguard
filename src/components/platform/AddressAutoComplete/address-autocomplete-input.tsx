@@ -176,6 +176,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                                       onClick={() => {
                                         handleSelectAddress(place)
                                         inputRef.current?.blur()
+                                        setSearchedAddress("")
                                       }}
                                     >
                                       <div className="flex flex-row">
