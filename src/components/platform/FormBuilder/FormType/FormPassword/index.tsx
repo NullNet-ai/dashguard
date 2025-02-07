@@ -51,10 +51,10 @@ export default function FormPassword({
     text: 'Too Short',
   });
 
-  const isPasswordDirty
-  = !!form?.formState?.dirtyFields?.accounts?.[0]?.account_secret;
+  // TODO: dynamically get the formKey to get the dirty values
+
   const showPasswordStrengthBarAndValidations
-  = !isDisabled && isPasswordDirty && formRenderProps?.field?.value;
+  = !isDisabled && formRenderProps?.field?.value;
   // Function to validate password against rules
   const validatePassword = (password: string) => {
     return {
