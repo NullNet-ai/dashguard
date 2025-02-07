@@ -191,7 +191,7 @@ export const recordRouter = createTRPCRouter({
               type: "criteria",
               field: "account_id",
               operator: EOperator.EQUAL,
-              values: [response.email],
+              values: [response?.email],
             },
           ],
           pluck_object: {

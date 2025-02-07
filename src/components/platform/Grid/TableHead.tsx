@@ -25,20 +25,23 @@ export default function MyTableHead({ parentType }: MyTableHeadProps) {
   return (
     state?.table.getHeaderGroups().map((headerGroup, index) => (
       <TableRow
-        className={cn(` ${parentType === 'grid_expansion' ? 'bg-white' : 'backdrop-blur-lg'}`)}
-        key={headerGroup.id + 'group' + index}
-        data-test-id={testIDFormatter(
-          `${state.config.entity}-grd-tbl-thead-row`,
-        )}
-      >
-        {headerGroup.headers.map((header, index) => {
-          const sortingState = state?.sorting?.find(
-            item => item.id === header?.id
-              || item.id === (header?.column?.columnDef as any)?.sortKey,
-          )
-          const defaultFilter = state?.defaultAdvanceFilter?.filter(
-            filter => filter.field === header.id,
-          )
+          className="backdrop-blur-lg"
+          key={headerGroup.id + 'group' + index}
+          data-test-id={testIDFormatter(
+            `${state.config.entity}-grd-tbl-thead-row`,
+          )}
+        >
+          {headerGroup.headers.map((header, index) => {
+            const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
+            const sortingKey = Array.isArray(columnSortKey)
+              ? columnSortKey[0]
+              : columnSortKey;
+            const sortingState = state?.sorting?.find(
+              (item) => item.id === header?.id || item.id === sortingKey,
+            );
+            const defaultFilter = state?.defaultAdvanceFilter?.filter(
+              (filter) => filter.field === header.id,
+            );
 
           const cellValue = header.isPlaceholder
             ? null
@@ -63,11 +66,26 @@ export default function MyTableHead({ parentType }: MyTableHeadProps) {
                   'flex flex-row items-center', header.column.id === 'action'
                     ? 'justify-center'
                     : 'justify-between',
+                  'group relative font-medium text-muted-foreground', // originally bg-grid-header
+                  getCommonPinningStyles(header?.column).className,
+                  // @ts-expect-error - TS doesn't know about meta
+                  header.column.columnDef.meta?.className,
                 )}
               >
                 <div className="flex flex-row items-center gap-1 whitespace-nowrap text-default">
                   {cellValue}
                   {/* {!!cellValue &&
+                <div
+                  className={cn(
+                    'flex flex-row items-center',
+                    header.column.id === 'action'
+                      ? 'justify-center'
+                      : 'justify-between',
+                  )}
+                >
+                  <div className="flex flex-row items-center gap-1 whitespace-nowrap">
+                    {cellValue}
+                    {/* {!!cellValue &&
                       header.column.id !== "action" &&
                       typeof cellValue === "string" &&
                       cellValue !== "Actions" && (

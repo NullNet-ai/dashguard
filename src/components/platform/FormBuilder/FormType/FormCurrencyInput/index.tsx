@@ -251,8 +251,9 @@ export default function FormCurrencyInput({
       <FormControl>
         <div
           className={cn(
-            "flex rounded-md border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
+            "flex  rounded-md border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
             error ? "border-destructive" : "",
+            fieldConfig.disabled && "bg-secondary"
           )}
         >
           <CurrencyInput
@@ -282,7 +283,7 @@ export default function FormCurrencyInput({
             disabled={formRenderProps.field.disabled}
           >
             <SelectTrigger
-              className="h-[36px] w-fit border-0 py-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
+              className="h-[36px] disabled:bg-secondary w-fit border-0 py-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
               data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue

@@ -106,7 +106,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const newItems = useMemo(() => {
     if (!isClient || !winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
-    const showItem = max_width / 88
+    const showItem = max_width / 98
     const result = sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
     const lastItem = result[result.length - 1]
     Cookies.set('lastInnerTabItem', lastItem.name)
@@ -117,7 +117,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const dropdownItems = useMemo(() => {
     if (!winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
-    const showItem = max_width / 88
+    const showItem = max_width / 98
 
     return sortTabsActiveWillSecond.slice(Math.floor(showItem))
   }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
