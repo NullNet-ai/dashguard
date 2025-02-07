@@ -14,3 +14,22 @@ export const getLastSecondsTimeStamp = (seconds: number) => {
 
   return result
 }
+
+
+export const getLastMinutesTimeStamp = (minutes: number) => {
+  const now = new Date()
+
+  const last_minutes = new Date(now)
+  last_minutes.setMinutes(now.getMinutes() - minutes)
+
+  const replace = (_date: Date) => _date.toISOString().replace('T', ' ')
+    .substring(0, 19) + '+00'
+
+  const formatted_now = replace(now)
+  const formatted_ast = replace(last_minutes)
+
+  const result = [formatted_ast, formatted_now]
+
+  
+  return result
+}

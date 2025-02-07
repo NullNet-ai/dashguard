@@ -7,7 +7,7 @@ import { FormField } from '~/components/ui/form'
 import { api } from '~/trpc/react'
 
 import { AreaChartSample } from '../../../charts/AreaChart'
-import { getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat';
+import { getLastMinutesTimeStamp, getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat';
 
 
 interface ISuccessfulConnectionDetails {
@@ -31,8 +31,8 @@ export default function CustomSuccessfulConnectionDetails({
 
   } = api.packet.getBandwithPerSecond.useQuery({
     code:'CV100006' ,
-    time_range:getLastSecondsTimeStamp(60),
-    bucket_size: '5s'
+    time_range:getLastMinutesTimeStamp(3),
+    bucket_size: '1s'
 
   })
  
@@ -46,16 +46,16 @@ export default function CustomSuccessfulConnectionDetails({
       const a = await createPackets.mutateAsync({ entity: 'packets',
         data: {}})
 
-        console.log('%c Line:81 🍇', 'color:#4fff4B', a);
+        
       return true
-    }, 3000)
+    }, 2000)
 
     const isnterval = setInterval(async () => {
       const { data } = await fetchBandWidth()
-      console.log('%c Line:87 🎂 data', 'color:#e41a6a', data);
+      if(!data) return
       setChartData(data as any)
 
-    }, 5000)
+    }, 1000)
 
 
     return () => clearInterval(interval)
