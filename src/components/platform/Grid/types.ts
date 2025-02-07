@@ -41,7 +41,7 @@ export type AppRouterKeys = keyof typeof appRouter;
 export type TArchiveType = "warning" | "archive";
 
 type CustomColumnDef<TData> = ColumnDef<TData> & {
-  sortKey?: string;
+  sortKey?: string | Array<string>;
 };
 
 export interface IConfigGrid {

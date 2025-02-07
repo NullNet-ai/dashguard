@@ -1,17 +1,18 @@
-"use client";
+'use client';
 
-import { useContext } from "react";
-import { TableHead, TableRow } from "~/components/ui/table";
-import { GridContext } from "./Provider";
-import { cn } from "~/lib/utils";
-import { ColumnResizer } from "./column-resizer";
-import { flexRender } from "@tanstack/react-table";
-import { getCommonPinningStyles } from "./ColumnPining";
-import HeaderMenu from "./common/HeaderMenu";
-import { ScrollContainerContext } from "./Server/views/common/GridScrollContainer";
-import { testIDFormatter } from "~/utils/formatter";
-import { FilterIcon, ChevronUp, ChevronDown, ArrowBigDown, ArrowBigUp } from "lucide-react";
-import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/solid";
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/solid';
+import { flexRender } from '@tanstack/react-table';
+import {
+  FilterIcon
+} from 'lucide-react';
+import { useContext } from 'react';
+import { TableHead, TableRow } from '~/components/ui/table';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
+import { ColumnResizer } from './column-resizer';
+import { getCommonPinningStyles } from './ColumnPining';
+import HeaderMenu from './common/HeaderMenu';
+import { GridContext } from './Provider';
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
   return (
@@ -19,16 +20,18 @@ export default function MyTableHead() {
       {state?.table.getHeaderGroups().map((headerGroup, index) => (
         <TableRow
           className="backdrop-blur-lg"
-          key={headerGroup.id + "group" + index}
+          key={headerGroup.id + 'group' + index}
           data-test-id={testIDFormatter(
             `${state.config.entity}-grd-tbl-thead-row`,
           )}
         >
           {headerGroup.headers.map((header, index) => {
+            const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
+            const sortingKey = Array.isArray(columnSortKey)
+              ? columnSortKey[0]
+              : columnSortKey;
             const sortingState = state?.sorting?.find(
-              (item) =>
-                item.id === header?.id ||
-                item.id === (header?.column?.columnDef as any)?.sortKey,
+              (item) => item.id === header?.id || item.id === sortingKey,
             );
             const defaultFilter = state?.defaultAdvanceFilter?.filter(
               (filter) => filter.field === header.id,
@@ -44,7 +47,7 @@ export default function MyTableHead() {
                   `${state.config.entity}-grd-tbl-thead-row-${header.column.id}`,
                 )}
                 className={cn(
-                  "group relative font-medium text-muted-foreground", // originally bg-grid-header
+                  'group relative font-medium text-muted-foreground', // originally bg-grid-header
                   getCommonPinningStyles(header?.column).className,
                   // @ts-expect-error - TS doesn't know about meta
                   header.column.columnDef.meta?.className,
@@ -56,10 +59,10 @@ export default function MyTableHead() {
               >
                 <div
                   className={cn(
-                    "flex flex-row items-center",
-                    header.column.id === "action"
-                      ? "justify-center"
-                      : "justify-between",
+                    'flex flex-row items-center',
+                    header.column.id === 'action'
+                      ? 'justify-center'
+                      : 'justify-between',
                   )}
                 >
                   <div className="flex flex-row items-center gap-1 whitespace-nowrap">

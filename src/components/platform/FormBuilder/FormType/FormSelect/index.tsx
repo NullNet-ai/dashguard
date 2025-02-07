@@ -140,7 +140,8 @@ export default function FormSelect({
     fieldConfig?.selectEnableCreate,
   ]);
 
-  const createNewRecord = async () => {
+  const createNewRecord = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
       return;
