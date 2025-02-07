@@ -9,12 +9,12 @@ const FormServerFetch = async () => {
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
   const fetched_device = application === 'wizard'
-    ? await api.device.getByCode({
+    ? await api.device.getSetupDetails({
       main_entity: main_entity!,
       id: identifier!,
       pluck_fields: ['id', 'code'],
     })
-    : await api.record.getByCode({
+    : await api.device.getByCode({
       main_entity: main_entity!,
       id: identifier!,
       pluck_fields: ['id', 'code'],

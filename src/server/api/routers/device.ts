@@ -1,11 +1,14 @@
 import {
+  EOperator,
   EOrderDirection,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
 import argon2 from 'argon2'
+import moment from 'moment'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
+import { getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { CredentialsGenerator } from '~/server/utils/credentials'
 import { formatSorting } from '~/server/utils/formatSorting'
@@ -1013,7 +1016,7 @@ export const deviceRouter = createTRPCRouter({
       }
     }),
 
-  getByCode: privateProcedure
+  getSetupDetails: privateProcedure
     .input(
       z.object({
         id: z.string().min(1),
@@ -1070,6 +1073,168 @@ export const deviceRouter = createTRPCRouter({
           success: false,
           error,
         } as Record<string, any>
+      }
+    }),
+  getByCode: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        pluck_fields: z.array(z.string()),
+        main_entity: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      if (!input?.id) return null
+      try {
+        const recordByCode = await ctx.dnaClient
+          .findByCode(input.id, {
+            entity: input.main_entity,
+            token: ctx.token.value,
+            query: {
+              pluck: input.pluck_fields,
+            },
+          })
+          .execute()
+        const { data, ...rest } = recordByCode ?? {}
+        return {
+          ...rest,
+          data: data?.[0],
+        }
+      }
+      catch (error) {
+        return {
+          data: undefined,
+          status_code: 404,
+          message: 'Record not found',
+          success: false,
+          error,
+        } as Record<string, any>
+      }
+    }),
+
+  fetchRecordShellSummary: privateProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        code: z.string().optional(),
+      }),
+    )
+
+    .query(async ({ input, ctx }) => {
+      const { id: device_id, code } = input
+      let id = device_id
+      if (!device_id) {
+        const res = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: code! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
+
+        id = res.data[0]?.id
+      }
+
+      const res = await Promise.all([
+        ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: [
+                'id',
+                'model',
+                'instance_name',
+                'address_id',
+                'created_date',
+                'updated_date',
+                'categories',
+                'host_name',
+                'device_version',
+                'updated_time',
+                'created_time',
+                'ip_address',
+              ],
+              pluck_object: {
+                device: [
+                  'id',
+                  'model',
+                  'instance_name',
+                  'address_id',
+                  'created_date',
+                  'updated_date',
+                  'categories',
+                  'host_name',
+                  'device_version',
+                  'ip_address',
+                ],
+                addresses: ['id', 'country', 'city', 'state'],
+                device_heartbeats: ['id', 'device_id', 'timestamp'],
+              },
+              advance_filters: createAdvancedFilter({ id: id! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute(),
+        await ctx.dnaClient
+          .findAll({
+            entity: 'device_groups',
+            token: ctx.token.value,
+            query: {
+              pluck_object: {
+                device_group_settings: ['id', 'name'],
+                device_groups: ['id', 'device_group_setting_id'],
+              },
+              advance_filters: createAdvancedFilter({ device_id: id! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_group_settings',
+                field: 'id',
+              },
+              from: {
+                entity: 'device_groups',
+                field: 'device_group_setting_id',
+              },
+            },
+          })
+          .execute(),
+
+      ])
+      const [device, device_group] = res
+
+      const { id: device_group_setting_id, name }
+          = device_group.data[0]?.device_group_settings?.[0] || {}
+      const { addresses, device_heartbeats, ...rest } = device?.data?.[0] || {}
+      const { id: add_id, ...rest_address } = addresses?.[0] || {}
+
+      return {
+        data: {
+          ...rest,
+          ...rest_address,
+          grouping: device_group_setting_id,
+          grouping_name: name,
+        },
       }
     }),
 })

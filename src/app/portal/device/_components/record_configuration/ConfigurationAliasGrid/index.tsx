@@ -32,6 +32,8 @@ export default async function ConfigurationAliasGrid({
     'updated_by',
     'created_date',
     'updated_date',
+    'updated_time',
+    'created_time',
     'status',
   ]
 
