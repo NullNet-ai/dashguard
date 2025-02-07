@@ -1,4 +1,4 @@
-// https://typescript-eslint.io/rules/no-misused-promises
+import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 
@@ -17,24 +17,44 @@ interface ISuccessfulConnectionDetails {
 export default function CustomSuccessfulConnectionDetails({
   form,
 }: ISuccessfulConnectionDetails) {
+  const pathName = usePathname()
+  const [, , entity,, identifier] = pathName.split('/')
+
   const [chartData, setChartData] = React.useState([])
+  // const createPackets = api.packet.createDynamicRecord.useMutation()
+
+  const {
+    data: record_device = { data: { id: null } },
+  } = api.record.getByCode.useQuery({
+    id: identifier!,
+    pluck_fields: ['id', 'code', 'status'],
+    main_entity: entity!,
+  })
 
   const {
     refetch: fetchBandWidth,
 
   } = api.packet.getBandwithPerSecond.useQuery({
-    code: 'CV100006',
+    device_id: record_device?.data?.id,
     time_range: getLastMinutesTimeStamp(3),
     bucket_size: '1s',
 
   })
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    // setInterval(async () => {
+    //   await createPackets.mutateAsync({ entity: 'packets',
+    //     data: {} })
+
+    //   return true
+    // }, 1000)
+    const fetchChartData = async () => {
       const { data } = await fetchBandWidth()
-      if (!data) return
-      setChartData(data as any)
-    }, 1000)
+      if (data) {
+        setChartData(data as any)
+      }
+    }
+    const interval = setInterval(fetchChartData, 1000)
 
     return () => clearInterval(interval)
   }, [])

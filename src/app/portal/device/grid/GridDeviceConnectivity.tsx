@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
-import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
-import { type ChartConfig, ChartContainer } from '~/components/ui/chart'
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
 
 import { getBarPath } from '../utils/getBarPath'
@@ -73,7 +73,19 @@ export default function Connectivity({ device_id }: { device_id: string }) {
         >
           <XAxis dataKey="hour" hide={true} />
           <YAxis hide={true} />
-          <Tooltip />
+          {/* <Tooltip />
+           */}
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                indicator="dot"
+                labelFormatter={(value) => {
+                  return value
+                }}
+              />
+            }
+            cursor={false}
+          />
           <Bar
             dataKey="heartbeats"
             fill={chartConfig.heartbeats.color}

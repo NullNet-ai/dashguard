@@ -29,6 +29,7 @@ export default async function ConfigurationRuleGrid() {
     'updated_by',
     'created_date',
     'updated_date',
+    'disabled',
   ]
 
   const record = await api.record.getByCode({
