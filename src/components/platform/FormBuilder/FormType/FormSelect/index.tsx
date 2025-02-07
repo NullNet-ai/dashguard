@@ -116,9 +116,10 @@ export default function FormSelect({
     return sortOptions(filtered ?? [])
   }, [query, options, sortOptions])
 
-  // React.useEffect(() => {
-  //   setOptions(selectOptions?.[fieldConfig?.name] ?? [])
-  // }, [selectOptions, fieldConfig?.name])
+  React.useEffect(() => {
+    if(fieldConfig?.selectEnableCreate) return
+    setOptions(selectOptions?.[fieldConfig?.name] ?? [])
+  }, [selectOptions, fieldConfig?.name])
 
   const label = useMemo(() => {
     return options?.find(opt => opt.value === formRenderProps?.field.value)

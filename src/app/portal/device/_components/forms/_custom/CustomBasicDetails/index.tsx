@@ -135,11 +135,6 @@ export default function CustomBasicDetails({
                   label: 'Grouping',
                   selectSearchable: true,
                   selectEnableCreate: true,
-                  // selectOnCreateRecord: {
-                  //   entity: 'device_grouping_settings',
-                  //   fieldIdentifier: 'name',
-
-                  // },
                   selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
                     const response = await createDeviceGroupSettings.mutateAsync({
                       entity: 'device_group_settings',

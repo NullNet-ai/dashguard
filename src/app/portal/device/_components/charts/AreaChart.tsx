@@ -17,20 +17,19 @@ import {
 } from '~/components/ui/chart'
 
 const chartConfig = {
-  visitors: {
-    label: 'Visitors',
-  },
   bandwidth: {
     label: 'Bandwidth',
-    color: 'hsl(var(--chart-1))',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: 'hsl(var(--chart-2))',
+    color: '#60a5fa',
   },
 } satisfies ChartConfig
 
 export function AreaChartSample({ chartData }: any) {
+  const maxBandwidth = Math.max(...chartData.map((item: any) => item.bandwidth))
+  const minBandwidth = Math.min(...chartData.map((item: any) => item.bandwidth))
+
+  const yAxisMax = Math.ceil(maxBandwidth * 1.1)
+  const yAxisMin = Math.floor(minBandwidth * 0.9)
+
   return (
     <Card>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -38,41 +37,39 @@ export function AreaChartSample({ chartData }: any) {
           className="aspect-auto h-[250px] w-full"
           config={chartConfig}
         >
-          <AreaChart data={
-            chartData
-          }
+          <AreaChart
+            data={chartData}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="fillBandwidth" x1="1" y1="1">
+              <linearGradient id = "fillBandwidth" x1 = "0" x2 = "0" y1 = "0" y2 = "1">
                 <stop
                   offset="0%"
-                  stopColor="var(--color-bandwidth)"
-                  stopOpacity={0.1}
+                  stopColor="#60a5fa"
+                  stopOpacity={0.4}
                 />
                 <stop
-                  offset="95%"
-                  stopColor="var(--color-bandwidth)"
-                  stopOpacity={0.1}
+                  offset="100%"
+                  stopColor="#60a5fa"
+                  stopOpacity={0}
                 />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               axisLine={false}
               dataKey="second"
               minTickGap={30}
-              tickFormatter={(value) => {
-                // Only display values that are in the legendLabels array
-
-                // return legendLabels.includes(value) ? value : value;
-                return moment(value).format('mm:ss')
-              }}
+              padding={{ left: 0, right: 0 }}
+              tickFormatter={(value: string) => moment(value).format('mm:ss')}
               tickLine={false}
               tickMargin={8}
             />
             <YAxis
               axisLine={false}
-              tickCount={3}
+              domain={[yAxisMin, yAxisMax]}
+              padding={{ top: 20, bottom: 20 }}
+              tickCount={5}
               tickLine={false}
               tickMargin={8}
             />
@@ -80,9 +77,7 @@ export function AreaChartSample({ chartData }: any) {
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  labelFormatter={(value) => {
-                    return moment(value).format('MM/DD HH:mm:ss')
-                  }}
+                  labelFormatter={(value) => moment(value).format('MM/DD HH:mm:ss')}
                 />
               }
               cursor={false}
@@ -90,9 +85,10 @@ export function AreaChartSample({ chartData }: any) {
             <Area
               dataKey="bandwidth"
               fill="url(#fillBandwidth)"
-              stackId="a"
-              stroke="var(--color-bandwidth)"
-              type="natural"
+              isAnimationActive={false}
+              stroke="#60a5fa"
+              strokeWidth={2}
+              type="monotone"
             />
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
