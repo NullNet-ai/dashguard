@@ -380,8 +380,7 @@ export const FormBuilder = (props: IPropsForms) => {
         if (
           !!Object.keys(form.formState.errors).length
           || form_errors.length
-          || !httpStatus
-          || !isSuccessStatus(httpStatus)
+          || (httpStatus && !isSuccessStatus(httpStatus))
         ) {
           eventEmitter.emit(`formStatus:${formKey}`, {
             status: 'failed',
