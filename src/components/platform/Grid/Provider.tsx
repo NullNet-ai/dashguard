@@ -202,7 +202,7 @@ export default function GridProvider({
       );
  
       const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-        ? sortFields?.sortKey?.map((sortKey) => ({
+        ? sortFields.sortKey.map((sortKey) => ({
             ...sort,
             sort_key: sortKey,
           }))
