@@ -156,4 +156,15 @@ export interface IPropsGrid {
   defaultSorting?: SortingState
   defaultAdvanceFilter?: ISearchItem[]
   advanceFilter?: ISearchItem[]
+  parentExpanded?: IExpandedRow[]
+}
+
+export interface IExpandedRow {
+  id: string
+  level: number
+}
+
+export interface IExpansionComponentProps {
+  rowData?: Record<string, any>
+  parentExpanded?: IExpandedRow[]
 }

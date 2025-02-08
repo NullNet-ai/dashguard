@@ -2,11 +2,11 @@
 import React, { useEffect } from 'react'
 
 import Grid from '~/components/platform/Grid/Client'
+import { type IExpansionComponentProps } from '~/components/platform/Grid/types'
 import StatusCell from '~/components/ui/status-cell'
 import { api } from '~/trpc/react'
 
-const OrganizationGridExpansion = () => {
-  // const { rowData } = props ?? {}
+const OrganizationGridExpansion = (props: IExpansionComponentProps) => {
   const _pluck = ['id', 'code', 'name', 'status']
 
   const gridColumns = [
@@ -67,6 +67,7 @@ const OrganizationGridExpansion = () => {
 
   return (
     <Grid
+      parentExpanded={props?.parentExpanded}
       totalCount={totalCount || 0}
       data={items}
       isLoading={isLoading}

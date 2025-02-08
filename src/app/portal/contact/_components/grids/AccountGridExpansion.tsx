@@ -2,10 +2,11 @@
 import Grid from '~/components/platform/Grid/Client';
 import StatusCell from '~/components/ui/status-cell';
 
+import { type IExpansionComponentProps } from '~/components/platform/Grid/types';
 import useFetchData from './hooks/useFetchData';
 import OrganizationGridExpansion from './OrganizationGridExpansion';
 
-const AccountGridExpansion = (props: any) => {
+const AccountGridExpansion = (props: IExpansionComponentProps ) => {
   const { rowData } = props ?? {};
   const _pluck = [
     'id',
@@ -59,7 +60,7 @@ const AccountGridExpansion = (props: any) => {
       field: 'contact_id',
       operator: 'equal',
       entity: 'organization_account',
-      values: [rowData.id],
+      values: [rowData?.id],
     },
   ];
 
@@ -76,6 +77,7 @@ const AccountGridExpansion = (props: any) => {
 
   return (
     <Grid
+      parentExpanded={props.parentExpanded}
       config={{
         entity: 'organization_account',
         title: 'Accounts',

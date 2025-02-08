@@ -16,8 +16,7 @@ import Search from '../../Search';
 import Sorting from '../../Sorting';
 import MyTableBody from '../../TableBody';
 import MyTableHead from '../../TableHead';
-import GridSearchProvider from '../../Search/Provider';
-import SearchDialog from '../../Search/SearchDialog';
+import { type IExpandedRow } from '../../types';
 
 interface IGridDesktopProps {
   parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
@@ -32,6 +31,7 @@ interface IGridDesktopProps {
   showPagination?: boolean;
   gridLevel?: number;
   isLoading?: boolean;
+  parentExpanded?: IExpandedRow[];
 }
 
 function GridDesktop({
@@ -43,6 +43,7 @@ function GridDesktop({
   showPagination = false,
   gridLevel = 1,
   isLoading,
+  parentExpanded
 }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
   const { open: sidebarOpen } = useSidebar();
@@ -156,6 +157,7 @@ function GridDesktop({
                 gridLevel={gridLevel}
                 isLoading={isLoading}
                 showPagination={showPagination}
+                parentExpanded={parentExpanded}
               />
             </Table>
             <ScrollBar orientation="horizontal" />

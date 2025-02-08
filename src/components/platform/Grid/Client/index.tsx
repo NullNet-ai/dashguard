@@ -50,6 +50,7 @@ function MainClient({
   isLoading,
   gridLevel,
   isError = false,
+  parentExpanded
 }: IClientProps) {
   const { open } = useSidebar()
   const { width } = useWindowSize()
@@ -106,6 +107,7 @@ function MainClient({
           showPagination={showPagination ?? false}
           isLoading
           gridLevel={gridLevel}
+          parentExpanded={parentExpanded}
         />
       </div>
 

@@ -1,4 +1,4 @@
-import { flexRender } from '@tanstack/react-table'
+import { flexRender, Row } from '@tanstack/react-table'
 import React, { useContext } from 'react'
 
 import { TableBody, TableCell, TableRow } from '~/components/ui/table'
@@ -10,20 +10,38 @@ import { GridContext } from './Provider'
 import { ScrollContainerContext } from './Server/views/common/GridScrollContainer'
 import ArchiveConfirmationModal from './views/ArchiveConfirmationModal'
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal'
+import { type IExpandedRow } from './types'
 
 type MyTableBodyProps = {
   showAction?: boolean
   gridLevel?: number
   isLoading?: boolean
   showPagination?: boolean
+  parentExpanded?: IExpandedRow[]
 }
 
-export default function MyTableBody({ showAction, gridLevel }: MyTableBodyProps) {
+export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded }: MyTableBodyProps) {
   const { state, actions } = useContext(GridContext)
 
   const context = useContext(ScrollContainerContext)
   const { isEndReached = false } = context ?? {}
+  const expandedState = state?.table.getState().expanded as Record<string, boolean> | undefined;
 
+  const getExpandedRows = (rows: Row<any>[], expandedState: Record<string, boolean> | undefined, level: number) => {
+    const expandedRows: IExpandedRow[] = [];
+
+    rows.forEach((row) => {
+      if (expandedState?.[row.id]) {
+        expandedRows.push({ id: row.id, level });
+      }
+    });
+
+    return expandedRows;
+  };
+
+  const expandedRows = getExpandedRows(state?.table.getExpandedRowModel().rows ?? [], expandedState, gridLevel);
+  const allExpandedRows = [...parentExpanded ?? [], ...expandedRows];
+  console.log("%c 🇬🇫: MyTableBody -> expandedRows ", "font-size:16px;background-color:#381b14;color:white;",gridLevel, '-----------', allExpandedRows)
   return (
     <>
       <TableBody
@@ -128,7 +146,7 @@ export default function MyTableBody({ showAction, gridLevel }: MyTableBodyProps)
                                     )
                                   : (
                                       React.cloneElement(
-                                        state?.config?.rowExpansionBuilder, { rowData: row.original },
+                                        state?.config?.rowExpansionBuilder, { rowData: row.original, parentExpanded: allExpandedRows },
                                       )
                                     )
                               )
