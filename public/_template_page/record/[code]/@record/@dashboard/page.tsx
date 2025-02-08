@@ -1,4 +1,4 @@
-import NewComingSoon from "~/app/coming-soon";
+import NewComingSoon from '~/components/ui/coming-soon';
 import RecordImplementationGuide from "../../../../_components/record_guideline";
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const RecordTabContainer = async () => {
