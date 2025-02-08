@@ -19,28 +19,29 @@ function getAllHoursBetweenDates(startDate: Date, endDate: Date): string[] {
     throw new Error('Invalid date(s) provided')
   }
 
-  // Calculate the difference in milliseconds
-  const total_milliseconds = end_moment.getTime() - start_moment.getTime()
-
-  // Calculate the difference in hours
-  const total_hours = Math.floor(total_milliseconds / (1000 * 60 * 60))
+  // Reset minutes, seconds, and milliseconds for the start date
+  start_moment.setMinutes(0, 0, 0)
 
   // Array to hold all the hours involved
   const hours_array: string[] = []
 
   // Loop through and generate each hour
-  for (let i = 0; i <= total_hours; i++) {
-    const current_moment = new Date(start_moment.getTime() + i * 60 * 60 * 1000)
-
-    // Format each hour as "YYYY-MM-DD HH:mm:ss+00"
-    const formatted_date = current_moment.toISOString().replace('T', ' ')
-      .split('.')[0] + '+00'
+  while (start_moment <= end_moment) {
+    // Format each hour as "YYYY-MM-DD HH:00:00+00"
+    const formatted_date
+      = start_moment.toISOString().replace('T', ' ')
+        .split('.')[0] + '+00'
 
     hours_array.push(formatted_date)
+
+    // Increment the time by one hour
+    start_moment.setHours(start_moment.getHours() + 1)
   }
 
   return hours_array
 }
+
+// Example usage:
 
 const entity = 'device_heartbeats'
 export const deviceHeartbeatsRouter = createTRPCRouter({
@@ -101,19 +102,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
 
     const time_status = hour_range.map((hour) => {
       const found = res.data?.find(r => r.bucket === hour)
-
-      // Formatting the hour to 'mm/dd HH:mm' format
-      const date = new Date(hour)
-      const formattedHour = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}/${date
-        .getUTCDate()
-        .toString()
-        .padStart(2, '0')} ${date.getUTCHours().toString()
-        .padStart(2, '0')}:${date
-        .getUTCMinutes()
-        .toString()
-        .padStart(2, '0')}`
-
-      return { hour: found?.bucket || formattedHour, heartbeats: found?.count ? 100 : 0 }
+      return { hour: found?.bucket || hour, heartbeats: found?.count ? 100 : 0 }
     })
 
     return time_status

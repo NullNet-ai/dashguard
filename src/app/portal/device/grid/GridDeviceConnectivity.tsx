@@ -31,7 +31,7 @@ const getLastTwentyFourHoursTimeStamp = () => {
   const last_hours = new Date(now)
   last_hours.setHours(now.getHours() - 24)
   const replace = (_date: Date) => _date.toISOString().replace('T', ' ')
-    .substring(0, 13) + ':00:00+00'
+    .substring(0, 19) + '+00'
 
   const formattedNow = replace(now)
   const formattedLast24 = replace(last_hours)
@@ -81,10 +81,13 @@ export default function Connectivity({ device_id }: { device_id: string }) {
           <ChartTooltip
             content={
               <ChartTooltipContent
-                indicator="dot"
-                labelFormatter={(value) => {
-                  return moment(value).format('MM/DD/YYYY HH:mm')
+                formatter = { (value, name) => {
+                  return [`${name}: `, `${value ? 'Active' : 'Inactive'}`]
                 }}
+                indicator = "dot"
+                labelFormatter = { (value) => {
+                  return moment(value).format('MM/DD/YYYY HH:mm')
+                } }
               />
             }
             cursor={false}
