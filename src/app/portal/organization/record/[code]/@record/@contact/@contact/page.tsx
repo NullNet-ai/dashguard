@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 // import gridColumns, {
 //   TO_HIDE_COLUMNS_WHEN_MOBILE,
 // } from "~/app/portal/contact/grid/_config/columns";
-import NewComingSoon from "~/app/coming-soon";
+import NewComingSoon from '~/components/ui/coming-soon';
 
 export default async function Page() {
   const headerList = headers();

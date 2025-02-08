@@ -12,6 +12,7 @@ import { TRPCReactProvider } from '~/trpc/react'
 
 import { ToastProvider } from '../context/ToastProvider'
 
+
 export const metadata: Metadata = {
   title: 'Platform',
   description: 'All in one platform for recruitment',
@@ -25,12 +26,12 @@ export default function RootLayout({
   return (
     <html
       className={`${GeistSans.className}`}
-      lang="en"
+      lang='en'
       suppressHydrationWarning={true}
     >
       <head>
-        <meta content="telephone=no" name="format-detection" />
-        <meta content="email=no" name="format-detection" />
+        <meta content='telephone=no' name='format-detection' />
+        <meta content='email=no' name='format-detection' />
       </head>
       <body>
         <Suspense fallback={<div>Loading...</div>}>
@@ -39,8 +40,8 @@ export default function RootLayout({
               <TooltipProvider>
                 <ToastProvider>
                   <ThemeProvider
-                    attribute="class"
-                    defaultTheme="light"
+                    attribute='class'
+                    defaultTheme='light'
                     disableTransitionOnChange={true}
                     enableSystem={true}
                     layout={config.ApplicationLayout}
