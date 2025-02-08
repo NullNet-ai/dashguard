@@ -114,7 +114,7 @@ export default function SessionChecker() {
     )
   }
 
-  if (timeLeft !== null) {
+  if (timeLeft !== null && timeLeft <= 3600)  {
     return (
       <div
         className='bg-[#FBBF24] text-black font-normal text-center p-2 fixed flex items-center justify-center gap-4'
