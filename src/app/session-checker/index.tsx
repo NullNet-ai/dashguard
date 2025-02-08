@@ -125,8 +125,8 @@ export default function SessionChecker() {
       >
         <span className='inline-block w-4 h-4 bg-destructive rounded-full self-center'></span>
         <span className='text-md'>
-          {'Your session will expire in'}
-          {formatTimeLeft(timeLeft)}. Please save your work or log out.
+          {'Your session will expire in '}
+          {formatTimeLeft(timeLeft)}.<span className='ms-1'>Please save your work or log out.</span>   
         </span>
       </div>
     )
