@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.8.2<unreleased>",
-  "branch": "unreleased/fix/1.8.2<unreleased>",
-  "message": "Refactor grid and form filter component",
+  "tag": "1.9.0",
+  "branch": "released/feat/PLATFORM7-2313/1.9.0",
+  "message": "Fixed grid alignment issues and action missing in mobile",
   "publish_name": "Juphet Vitualla"
 }
