@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "1.11.1<unreleased>",
-  "branch": "unreleased/fix/1.11.1<unreleased>",
-  "message": "Select Value to set the font-size to 14px",
+  "tag": "1.12.0",
+  "branch": "released/fix/56/1.12.0",
+  "message": "Release FormSelect",
   "publish_name": "Rob Caldosa"
 }
