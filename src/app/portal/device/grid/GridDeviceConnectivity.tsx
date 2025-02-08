@@ -1,4 +1,5 @@
 'use client'
+import moment from 'moment'
 import React from 'react'
 import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
@@ -58,6 +59,8 @@ export default function Connectivity({ device_id }: { device_id: string }) {
     time_range: getLastTwentyFourHoursTimeStamp(),
   })
 
+  if (!device_id) return null
+
   return (
     <ChartContainer
       className="h-9 w-40 border border-gray-300"
@@ -80,7 +83,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
               <ChartTooltipContent
                 indicator="dot"
                 labelFormatter={(value) => {
-                  return value
+                  return moment(value).format('MM/DD/YYYY HH:mm')
                 }}
               />
             }

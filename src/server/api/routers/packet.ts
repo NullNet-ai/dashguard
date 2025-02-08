@@ -19,71 +19,31 @@ interface OutputData {
   bandwidth: number
 }
 
-function getAllSecondsBetweenDates(startDate: Date, endDate: Date) {
-  // Convert the input date strings to Date objects by using the format 'YYYY-MM-DD HH:mm:ss+00'
-  const startMoment = new Date(startDate)
-  const endMoment = new Date(endDate)
+function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
+  const start_moment = new Date(startDate)
+  const end_moment = new Date(endDate)
+  const per_seconds = second_count * 1000
 
-  // Check if both dates are valid
-  if (isNaN(startMoment.getTime()) || isNaN(endMoment.getTime())) {
+  if (isNaN(start_moment.getTime()) || isNaN(end_moment.getTime())) {
     throw new Error('Invalid date(s) provided')
   }
 
-  // Calculate the difference in seconds
-  const totalSeconds = (endMoment.getTime() - startMoment.getTime()) / 1000
+  const seconds_array = []
 
-  // Array to hold all the seconds involved
-  const secondsArray = []
+  for (let current_time = start_moment.getTime(); current_time <= end_moment.getTime(); current_time += per_seconds) {
+    const current_moment = new Date(current_time)
 
-  // Loop through and generate each second
-  for (let i = 0; i <= totalSeconds; i++) {
-    const currentMoment = new Date(startMoment.getTime() + i * 1000)
-
-    // Format each second as "YYYY-MM-DD HH:mm:ss+00"
-    const formattedDate = currentMoment.toISOString().replace('T', ' ')
+    const formatted_date = current_moment.toISOString().replace('T', ' ')
       .split('.')[0] + '+00'
 
-    secondsArray.push(formattedDate)
+    seconds_array.push(formatted_date)
   }
 
-  return secondsArray
+  return seconds_array
 }
 
-function transformData({ start_date, end_date }: { start_date: string, end_date: string }, data: InputData[]): OutputData[] {
-  // const result: OutputData[] = [];
-  const seconds = getAllSecondsBetweenDates(new Date(start_date), new Date(end_date))
-  // Iterate over 1 to 180 to ensure complete data
-  // for (let i = 180; i >= 1; i--) {
-  //   const item = data[i - 1]; // Account for 0-based indexing
-  //   //
-
-  //   // Calculate minutes and seconds
-  //   const minutes = Math.floor(i / 60);
-  //   const seconds = i % 60;
-
-  //   let timeString = '';
-
-  //   if (minutes > 0) {
-  //     timeString += `${minutes}m`;
-  //   }
-
-  //   if (seconds > 0) {
-  //     if (minutes > 0) {
-  //       timeString += ` ${seconds}s`; // Add seconds if there are minutes
-  //     } else {
-  //       timeString += `${seconds}s`; // Just seconds if no minutes
-  //     }
-  //   }
-
-  //   const _d ={
-  //     second: timeString || `${i}s`, // Handle case where there's no time
-  //     bandwidth: item ?item.bandwidth as any : 0, // Use 0 if no bandwidth exists
-  //   }
-  //   if(item && data?.[i +1] ==undefined){
-
-  //   }
-  //   result.push(_d);
-  // }
+function transformData({ start_date, end_date, second_count }: { start_date: string, end_date: string, second_count: number }, data: InputData[]): OutputData[] {
+  const seconds = getAllSecondsBetweenDates(new Date(start_date), new Date(end_date), second_count)
   const result = seconds.map((second) => {
     const item = data.find(d => d.bucket === second)
     return {
@@ -97,66 +57,6 @@ function transformData({ start_date, end_date }: { start_date: string, end_date:
 
 export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
-  // aggregatePackets: privateProcedure.query(async ({ ctx }) => {
-  //   const filter = async ({
-  //     entity,
-  //     pluck,
-  //     advance_filters,
-  //     limit,
-  //   }: {
-  //     entity: string
-  //     pluck: string[]
-  //     advance_filters: IAdvanceFilters<string | number>[]
-  //     limit?: number
-  //   }) => {
-  //     return await ctx.dnaClient
-  //       .findAll({
-  //         entity,
-  //         token: ctx.token.value,
-  //         query: {
-  //           pluck,
-  //           advance_filters: [
-  //             {
-  //               type: 'criteria',
-  //               field: 'timestamp',
-  //               entity: 'packets',
-  //               operator: EOperator.IS_BETWEEN,
-  //               values: [
-  //                 '2025-02-05 04:00:00+00',
-  //                 '2025-02-05 04:00:20+00',
-  //                 '2025-02-05 04:00:40+00',
-  //                 '2025-02-05 04:01:00+00',
-  //                 '2025-02-05 04:01:20+00',
-  //                 '2025-02-05 04:01:40+00',
-  //               ],
-  //             },
-  //           ],
-  //           // joins: [],
-  //           aggregations: [
-  //             {
-  //               aggregation: 'count',
-  //               aggregate_on: 'id',
-  //               bucket_name: 'count',
-  //             },
-  //           ],
-  //           order: {
-  //             limit: 100,
-  //             by_field: 'bucket',
-  //             by_direction: EOrderDirection.DESC,
-  //           },
-  //           bucket_size: '20s',
-  //         },
-  //       })
-  //       .execute()
-  //   }
-
-  // return country_options.data?.map((item) => {
-  //   const { id, country } = item;
-  //   return {
-  //     value: id,
-  //     label: country,
-  //   };
-  // });
   getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()) })).query(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range } = input
 
@@ -186,7 +86,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'device_id',
-            entity: 'device_heartbeats',
+            entity: 'packets',
             operator: EOperator.EQUAL,
             values: [
               device_id,
@@ -202,30 +102,11 @@ export const packetRouter = createTRPCRouter({
       token: ctx.token.value,
 
     }).execute()
-    //
-
-    // [
-    //   { bucket: '2025-02-06 05:14:07+00', bandwidth: '1' },
-    //   { bucket: '2025-02-06 05:14:02+00', bandwidth: '5' },
-    //   { bucket: '2025-02-06 05:13:57+00', bandwidth: '1' },
-    //   { bucket: '2025-02-06 05:13:52+00', bandwidth: '4' },
-    //   { bucket: '2025-02-06 05:13:47+00', bandwidth: '9' },
-    //   { bucket: '2025-02-06 05:13:42+00', bandwidth: '0' },
-    //   { bucket: '2025-02-06 05:13:37+00', bandwidth: '5' },
-    //   { bucket: '2025-02-06 05:13:32+00', bandwidth: '9' },
-    //   { bucket: '2025-02-06 05:13:27+00', bandwidth: '3' },
-    //   { bucket: '2025-02-06 05:13:22+00', bandwidth: '6' },
-    //   { bucket: '2025-02-06 05:13:17+00', bandwidth: '1' },
-    //   { bucket: '2025-02-06 05:13:12+00', bandwidth: '3' }
-    // ]
-
-    // Function to transform the data
-    // console.log('%c Line:199 🍭 res?.data', 'color:#7f2b82', res?.data);
     const transformedData: OutputData[] = transformData({
       start_date: time_range[0] as string,
       end_date: time_range[1] as string,
+      second_count: parseInt(bucket_size),
     }, res?.data as InputData[])
-    //
 
     return transformedData
   }),
@@ -235,6 +116,7 @@ export const packetRouter = createTRPCRouter({
       z.object({
         entity: z.string().min(1),
         data: z.object({}),
+        device_id: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -246,7 +128,6 @@ export const packetRouter = createTRPCRouter({
           + `${String(date.getUTCMilliseconds()).padStart(3, '0')}+00`
       }
 
-      const timestamp = formatDate(new Date())
       // Example output: '2025-02-04 04:51:37.134+00'
 
       const sampleData = {
@@ -261,6 +142,7 @@ export const packetRouter = createTRPCRouter({
         // organization_id: 'ee1b9a50-51ec-4ecf-bcc2-8f9511f9feb8',
         // created_by: 'a0922bd1-d994-47ab-bf63-2c855b5ea9ab',
         timestamp: new Date().toISOString(),
+        device_id: input.device_id,
         // tags: [],
         hypertable_timestamp: '2025-02-04T04:51:37.134Z',
         interface_name: 'vtnet0',
@@ -268,6 +150,7 @@ export const packetRouter = createTRPCRouter({
         destination_mac: '01:00:5e:00:00:fb',
         ether_type: 'unknown',
         ip_header_length: 20,
+        total_length: Math.floor(Math.random() * 500),
         payload_length: Math.floor(Math.random() * 500),
         protocol: 'udp',
         source_ip: '172.18.51.11',

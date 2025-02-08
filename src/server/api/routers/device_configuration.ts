@@ -60,9 +60,17 @@ export const deviceConfigurationRouter = createTRPCRouter({
             }],
             order: {
               limit: 1,
-              by_field: 'created_date',
-              by_direction: EOrderDirection.DESC,
             },
+            multiple_sort: [
+              {
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+              {
+                by_field: 'created_time',
+                by_direction: EOrderDirection.DESC,
+              },
+            ],
           },
         })
         .join({
