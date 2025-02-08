@@ -108,7 +108,7 @@ export default function FormCheckbox({
               <FormControl>
                 <Checkbox
                   className={cn(fieldState.error && "border-destructive")}
-                  disabled={field.disabled}
+                  disabled={fieldConfig.readonly || fieldConfig.disabled || field.disabled}
                   data-test-id={`${formKey}-chk-${fieldConfig?.name}-${index + 1}`}
                   checked={field?.value?.includes(item.value)}
                   onCheckedChange={(checked) => {

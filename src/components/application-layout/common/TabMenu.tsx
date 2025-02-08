@@ -54,7 +54,8 @@ const TabMenu = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           className="flex gap-2"
-          onClick={() => {
+          onSelect={(event) => {
+            event.preventDefault()
             void closeOtherInnerClassTabs({
               pathname: href,
               current,
@@ -67,7 +68,8 @@ const TabMenu = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           className="flex gap-2"
-          onClick={() => {
+          onSelect={(event) => {
+            event.preventDefault()
             void closeAllInnerClassTabs({
               pathname: href,
               current,
