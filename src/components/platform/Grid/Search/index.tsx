@@ -40,15 +40,15 @@ export default function Main({ parentType = 'grid' }: any) {
           )
         : parentType === 'grid_expansion'
           ? (
-              <>
-                <SearchDialog />
-                <div className="hidden min-h-[40px] lg:block">
+              <div className='grid-expansion-search  flex-row flex lg:w-[49%] justify-between'>
+                <div className="hidden min-h-[40px] lg:block flex-1">
                   <SearchList />
                 </div>
                 <div className="min-h-[40px] lg:hidden">
                   <SearchListMobile />
                 </div>
-              </>
+                <SearchDialog />
+              </div>
             )
           : (
               <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">

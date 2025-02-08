@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 
-import { Loader } from '~/components/ui/loader'
-import { useSidebar } from '~/components/ui/sidebar'
-import useWindowSize from '~/hooks/use-resize'
-import { remToPx } from '~/utils/fetcher'
+import { Loader } from '~/components/ui/loader';
+import { useSidebar } from '~/components/ui/sidebar';
+import useWindowSize from '~/hooks/use-resize';
+import { remToPx } from '~/utils/fetcher';
 
-import ErrorPage from '../common/ErrorPage'
-import GridProvider from '../Provider'
-import { type IPropsGrid } from '../types'
+import ErrorPage from '../common/ErrorPage';
+import GridProvider from '../Provider';
+import { type IPropsGrid } from '../types';
 
-import { GridDesktop, GridMobile } from './views'
-import GridMobileForm from './views/GridMobileForm'
+import { GridDesktop, GridMobile } from './views';
+import GridMobileForm from './views/GridMobileForm';
 
 interface IClientProps extends IPropsGrid {
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
-  height?: string
-  showPagination?: boolean
-  hideSearch?: boolean
-  showAction?: boolean
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  height?: string;
+  showPagination?: boolean;
+  hideSearch?: boolean;
+  showAction?: boolean;
   parentProps?: {
-    width?: string
-    open?: boolean
-    summary?: boolean
-  }
-  isLoading?: boolean
-  gridLevel?: number
-  isError?: boolean
+    width?: string;
+    open?: boolean;
+    summary?: boolean;
+  };
+  isLoading?: boolean;
+  gridLevel?: number;
+  isError?: boolean;
 }
 
 function MainClient({
@@ -51,15 +51,15 @@ function MainClient({
   gridLevel,
   isError = false,
 }: IClientProps) {
-  const { open } = useSidebar()
-  const { width } = useWindowSize()
-  const newWidth = width <= 0 ? 1920 : width
-  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6)
+  const { open } = useSidebar();
+  const { width } = useWindowSize();
+  const newWidth = width <= 0 ? 1920 : width;
+  const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6);
 
   if (isLoading && !data?.length) {
     return (
       <div
-        className='flex h-full items-center justify-center'
+        className="flex h-full items-center justify-center"
         style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <Loader
@@ -69,17 +69,17 @@ function MainClient({
           variant="circularShadow"
         />
       </div>
-    )
+    );
   }
   if (isError) {
     return (
       <div
-        className='flex h-full items-center justify-center'
+        className="flex h-full items-center justify-center"
         style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <ErrorPage refetch={() => config?.onFetchRecords?.({})} />
       </div>
-    )
+    );
   }
 
   return (
@@ -95,8 +95,9 @@ function MainClient({
       sorting={sorting}
       totalCount={totalCount}
       onSelectRecords={onSelectRecords}
+      gridLevel={gridLevel}
     >
-      <div className='hidden lg:grid'>
+      <div className="hidden lg:grid">
         <GridDesktop
           height={height}
           hideSearch={hideSearch}
@@ -109,23 +110,21 @@ function MainClient({
         />
       </div>
 
-      <div className='flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]'>
-        {parentType === 'grid'
-          ? (
-              <GridMobile
-                parentType={parentType}
-                shownPagination={showPagination ?? true}
-              />
-            )
-          : (
-              <GridMobileForm
-                parentType={parentType}
-                shownPagination={showPagination ?? true}
-              />
-            )}
+      <div className="flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]">
+        {parentType === 'grid' ? (
+          <GridMobile
+            parentType={parentType}
+            shownPagination={showPagination ?? true}
+          />
+        ) : (
+          <GridMobileForm
+            parentType={parentType}
+            shownPagination={showPagination ?? true}
+          />
+        )}
       </div>
     </GridProvider>
-  )
+  );
 }
 
-export default MainClient
+export default MainClient;

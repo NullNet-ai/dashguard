@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Combobox,
@@ -7,63 +7,63 @@ import {
   Dialog,
   DialogPanel,
   DialogBackdrop,
-} from '@headlessui/react'
-import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import {
-  FolderIcon,
-} from '@heroicons/react/24/outline'
-import { SearchIcon } from 'lucide-react'
-import { Fragment, useState } from 'react'
+} from '@headlessui/react';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { FolderIcon } from '@heroicons/react/24/outline';
+import { SearchIcon } from 'lucide-react';
+import { Fragment, useState } from 'react';
 
-import { Button } from '~/components/ui/button'
+import { Button } from '~/components/ui/button';
 
 const projects = [
   { id: 1, name: 'Workflow Inc. / Website Redesign', url: '#' },
   // More projects...
 ] as {
-  id: number
-  name: string
-  url: string
-}[]
+  id: number;
+  name: string;
+  url: string;
+}[];
 
 export default function SearchDialog() {
-  const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
 
-  const filteredProjects
-    = query === ''
+  const filteredProjects =
+    query === ''
       ? []
       : projects.filter((project) => {
-          return project.name.toLowerCase().includes(query.toLowerCase())
-        })
+          return project.name.toLowerCase().includes(query.toLowerCase());
+        });
 
   const handleOpen = () => {
-    setOpen(true)
+    setOpen(true);
   };
 
   return (
     <>
       <Button
-        variant="outline"
-        className="flex items-center gap-2 mb-2"
+        variant="softPrimary"
+        className="mb-2 gap-x-2"
+        size="md"
         onClick={() => {
-          handleOpen()
+          handleOpen();
         }}
       >
-        <SearchIcon className='size-4' />
+        <SearchIcon className="size-4" />
+        <span className="mr-1">Search</span>
       </Button>
 
       <Dialog
         className="relative z-50"
         open={open}
         onClose={() => {
-          setOpen(false)
-          setQuery('')
+          setOpen(false);
+          setQuery('');
         }}
       >
         <DialogBackdrop
           transition
-          className="fixed inset-0  bg-gray-500/80 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
+          className="fixed inset-0 bg-gray-500/80 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
         />
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
@@ -80,7 +80,7 @@ export default function SearchDialog() {
                 <ComboboxInput
                   className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
                   placeholder="Search..."
-                  onChange={event => setQuery(event.target.value)}
+                  onChange={(event) => setQuery(event.target.value)}
                   onBlur={() => setQuery('')}
                 />
               </div>
@@ -118,5 +118,5 @@ export default function SearchDialog() {
         </div>
       </Dialog>
     </>
-  )
+  );
 }
