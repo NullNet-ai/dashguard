@@ -14,13 +14,8 @@ import { getCommonPinningStyles } from './ColumnPining'
 import HeaderMenu from './common/HeaderMenu'
 import { GridContext } from './Provider'
 
-type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion'
 
-type MyTableHeadProps = {
-  parentType: GridParentType
-}
-
-export default function MyTableHead({ parentType }: MyTableHeadProps) {
+export default function MyTableHead() {
   const { state } = useContext(GridContext)
   return (
     state?.table.getHeaderGroups().map((headerGroup, index) => (

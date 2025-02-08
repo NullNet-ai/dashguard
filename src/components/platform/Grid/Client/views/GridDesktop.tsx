@@ -150,7 +150,7 @@ function GridDesktop({
           >
             <Table>
               <TableHeader parentType={parentType}>
-                <MyTableHead parentType={parentType} />
+                <MyTableHead />
               </TableHeader>
               <MyTableBody
                 showAction={showAction}

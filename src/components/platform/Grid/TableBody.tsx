@@ -41,7 +41,6 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded 
 
   const expandedRows = getExpandedRows(state?.table.getExpandedRowModel().rows ?? [], expandedState, gridLevel);
   const allExpandedRows = [...parentExpanded ?? [], ...expandedRows];
-  console.log("%c 🇬🇫: MyTableBody -> expandedRows ", "font-size:16px;background-color:#381b14;color:white;",gridLevel, '-----------', allExpandedRows)
   return (
     <>
       <TableBody

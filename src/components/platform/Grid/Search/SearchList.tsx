@@ -91,7 +91,6 @@ const SearchList = () => {
           Search By:
         </span>
         {defaultSearchItems.length
-          // eslint-disable-next-line @stylistic/multiline-ternary
           ? (
               <div className="flex flex-nowrap py-1 ">
                 {defaultSearchItems?.map((item, index) => {

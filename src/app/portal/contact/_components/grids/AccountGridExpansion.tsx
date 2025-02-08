@@ -3,8 +3,8 @@ import Grid from '~/components/platform/Grid/Client';
 import StatusCell from '~/components/ui/status-cell';
 
 import { type IExpansionComponentProps } from '~/components/platform/Grid/types';
-import useFetchData from './hooks/useFetchData';
 import OrganizationGridExpansion from './OrganizationGridExpansion';
+import useFetchGridData from '~/hooks/useFetchGridData';
 
 const AccountGridExpansion = (props: IExpansionComponentProps ) => {
   const { rowData } = props ?? {};
@@ -41,7 +41,6 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
     },
   ];
 
-  // const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
   const defaultSorting = [
     {
       id: 'created_date',
@@ -64,7 +63,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
     },
   ];
 
-  const { fetchData, data, error, isLoading } = useFetchData({
+  const { fetchData, data, error, isLoading } = useFetchGridData({
     current: pagination?.current_page,
     limit: pagination?.limit_per_page,
     entity: 'organization_account',
