@@ -19,7 +19,7 @@ export default function SessionChecker() {
     const minutes = Math.floor((seconds % 3600) / 60)
     const remainingSeconds = seconds % 60
     return (
-      <Badge className='mx-2 border border-destructive bg-destructive/10 text-destructive'>
+      <Badge className='mx-0.5 border border-destructive bg-destructive/10 text-destructive py-0'>
         {hours}
         h
         {minutes}
@@ -109,24 +109,24 @@ export default function SessionChecker() {
           zIndex: 9999,
         }}
       >
-        Your session has expired. Please log in.
+       <span className='size-4 bg-destructive rounded-full'></span> Your session has expired. Please log in.
       </div>
     )
   }
 
-  if (timeLeft !== null && timeLeft <= 3600) {
+  if (timeLeft !== null) {
     return (
       <div
-        className='bg-yellow-200 text-black font-normal text-center p-1 fixed'
+        className='bg-[#FBBF24] text-black font-normal text-center p-2 fixed flex items-center justify-center gap-4'
         style={{
           position: 'relative',
           zIndex: 9999,
         }}
       >
-        <span>
-          {'Your session will expire in '}
-          {formatTimeLeft(timeLeft)}
-          . Please save your work or log out.
+        <span className='inline-block w-4 h-4 bg-destructive rounded-full self-center'></span>
+        <span className='text-md'>
+          {'Your session will expire in'}
+          {formatTimeLeft(timeLeft)}. Please save your work or log out.
         </span>
       </div>
     )

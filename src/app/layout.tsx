@@ -12,7 +12,6 @@ import { TRPCReactProvider } from '~/trpc/react'
 
 import { ToastProvider } from '../context/ToastProvider'
 
-import SessionChecker from './session-checker'
 
 export const metadata: Metadata = {
   title: 'Platform',
@@ -47,7 +46,6 @@ export default function RootLayout({
                     enableSystem={true}
                     layout={config.ApplicationLayout}
                   >
-                    <SessionChecker />
                     {children}
                   </ThemeProvider>
                 </ToastProvider>
