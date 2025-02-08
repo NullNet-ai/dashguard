@@ -5,6 +5,7 @@ import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import {
   type ColumnDef,
   type ColumnSizingState,
+  ExpandedState,
   // eslint-disable-next-line import/named
   getCoreRowModel,
   type Row,
@@ -51,6 +52,7 @@ interface IProps extends IPropsGrid {
   totalCount: number;
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   onRefetch?: (gridData: any) => void;
+  gridLevel?: number;
 }
 
 export default function GridProvider({
@@ -66,6 +68,7 @@ export default function GridProvider({
   defaultAdvanceFilter = [],
   pagination,
   parentType,
+  gridLevel = 1,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -328,9 +331,9 @@ export default function GridProvider({
           <Button
             className="mx-auto flex"
             disabled={disableActions}
-            variant={'ghost'}
             type="button"
-            onClick={() => handleSingleSelect(row.original)}
+            variant="ghost"
+            onClick={() => void handleSingleSelect(row.original)}
           >
             <FileIcon className="h-5 w-5 text-primary" />
           </Button>
@@ -456,7 +459,6 @@ export default function GridProvider({
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
   });
-
   /** @ACTIONS */
   const handleCreate = async () => {
     try {

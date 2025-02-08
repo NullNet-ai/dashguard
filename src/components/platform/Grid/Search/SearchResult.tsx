@@ -28,7 +28,7 @@ export default function SearchResult({
             <>
               <ComboboxOption
                 as="li"
-                className="cursor-pointer hover:bg-muted/70"
+                className="cursor-pointer hover:bg-muted/70 p-2 rounded-md"
                 key={result.id}
                 value={result}
                 onClick={() => {

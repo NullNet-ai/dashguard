@@ -22,6 +22,7 @@ import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
 import { ISearchItemResult } from './types';
 import { transformSearchData } from './utils/transformSearchData';
+import { cn } from '~/lib/utils';
 
 export default function SearchDialog() {
   const { state, actions } = useContext(SearchGridContext);
@@ -75,14 +76,14 @@ export default function SearchDialog() {
   return (
     <>
       <Button
-        variant="outline"
-        className="mb-2 flex items-center gap-2"
-        onClick={() => {
-          handleOpenDialog();
-        }}
-      >
-        <SearchIcon className="size-4" />
-      </Button>
+          className={cn('flex gap-x-1')}
+          size='md'
+          variant='softPrimary'
+          onClick={() => handleOpenDialog()}
+        >
+           <SearchIcon className="size-4" />
+           <span className="mr-1">Search</span> 
+        </Button>
 
       <Dialog
         className="relative z-50"
@@ -133,7 +134,7 @@ export default function SearchDialog() {
                   className="max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto"
                 >
                   <li className="p-2">
-                    <h2 className="mb-2 mt-4 px-3 text-xs font-semibold text-gray-500">
+                    <h2 className="mb-2 mt-1 px-3 text-xs font-semibold text-gray-500">
                       <SearchResult
                         results={
                           (transformSearchData(

@@ -35,7 +35,7 @@ const TableHeader = React.forwardRef<
       ref={ref}
       className={cn(
         'sticky top-0',
-        `${parentType !== 'grid_expansion' ? 'z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100' : 'z-0 border-b border-b-default/20'}`,
+        `${parentType !== 'grid_expansion' ? 'z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100' : 'z-0 border-b border-b-gray-200'}`,
         className,
       )}
       {...props}
