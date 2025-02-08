@@ -44,7 +44,6 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
   }, [loading])
 
   useEffect(() => {
-    // This is a temporary solution to simulate the connection establishment
     const interval = setInterval(async () => {
       const { data } = await fetchConnectionStatus.refetch()
       const { is_connection_established = false } = data || {}
@@ -54,13 +53,6 @@ const Confirmation = ({ params, defaultValues }: IFormProps) => {
         clearInterval(interval)
       }
     }, 2000)
-
-    // setTimeout(() => {
-    //   updateConnectionStatus.mutate({
-    //     id: params.id,
-    //   });
-    // }, 10000);
-
     return () => clearInterval(interval)
   }, [])
 

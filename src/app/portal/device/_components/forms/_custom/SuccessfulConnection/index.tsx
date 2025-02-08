@@ -37,27 +37,25 @@ export default function CustomSuccessfulConnectionDetails({
   } = api.packet.getBandwithPerSecond.useQuery({
     device_id: record_device?.data?.id,
     time_range: getLastMinutesTimeStamp(3),
-    bucket_size: '1s',
+    bucket_size: '5s',
 
   })
 
   useEffect(() => {
-    // setInterval(async () => {
-    //   await createPackets.mutateAsync({ entity: 'packets',
-    //     data: {} })
+    if (!record_device?.data?.id) return
 
-    //   return true
-    // }, 1000)
     const fetchChartData = async () => {
       const { data } = await fetchBandWidth()
       if (data) {
         setChartData(data as any)
       }
     }
-    const interval = setInterval(fetchChartData, 1000)
+    const interval = setInterval(fetchChartData, 5000)
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => {
+      clearInterval(interval)
+    }
+  }, [record_device?.data?.id])
 
   return (
     <FormField

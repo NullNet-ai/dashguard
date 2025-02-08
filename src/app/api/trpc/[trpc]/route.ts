@@ -23,6 +23,7 @@ const handler = (req: NextRequest) =>
     router: appRouter,
     createContext: () => createContext(req),
     onError: ({ path, error }) => {
+      
       console.error("@@@@@@@@@@@@@@@@@@@", path, error.code);
       // console.error(
       //   `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,

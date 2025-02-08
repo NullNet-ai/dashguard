@@ -45,9 +45,19 @@ export const deviceAliasRouter = createTRPCRouter({
           ],
           order: {
             limit: 1,
-            by_field: 'timestamp',
-            by_direction: EOrderDirection.DESC,
+            // by_field: 'timestamp',
+            // by_direction: EOrderDirection.DESC,
           },
+          multiple_sort: [
+            {
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+            {
+              by_field: 'created_time',
+              by_direction: EOrderDirection.DESC,
+            },
+          ],
         },
 
       }).execute()
