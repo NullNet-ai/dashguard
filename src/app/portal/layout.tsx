@@ -3,6 +3,7 @@ import React from 'react'
 
 import AppLayout from '~/components/application-layout/AppLayout'
 import SideBarMenu from '~/components/application-layout/SideBarMenu'
+import { SideDrawerProvider, SideDrawerView } from '~/components/platform/SideDrawer'
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { SmartProvider } from '~/components/ui/smart-component'
 import { Toaster } from '~/components/ui/sonner'
@@ -18,11 +19,14 @@ const layout = async ({ children }: Props) => {
 
   return (
     <SmartProvider>
-      <SidebarProvider defaultOpen={value}>
-        <Toaster />
-        <SideBarMenu />
-        <AppLayout>{children}</AppLayout>
-      </SidebarProvider>
+      <SideDrawerProvider>
+        <SideDrawerView />
+        <SidebarProvider defaultOpen={value}>
+          <Toaster />
+          <SideBarMenu />
+          <AppLayout>{children}</AppLayout>
+        </SidebarProvider>
+      </SideDrawerProvider>
     </SmartProvider>
   )
 }

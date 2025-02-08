@@ -22,7 +22,8 @@ import { UpdateReportPagination } from "./Action/UpdateReportPagination";
 export default function Pagination() {
   const { state } = useContext(GridContext);
 
-  const { open } = useSidebar();
+  // const { open } = useSidebar();
+  const open = false
 
   const { currentPage, totalPages, rows, totalRows } = useMemo(() => {
     const { current_page = 1, limit_per_page = 100 } = state?.pagination ?? {};

@@ -5,6 +5,10 @@ import React, { Suspense } from 'react'
 
 import LinkTab from '~/components/platform/LinkTab'
 import { useTabPersistence } from '~/components/platform/LinkTab/hooks/useTabPersistence'
+import { useSideDrawer } from '~/components/platform/SideDrawer'
+import { Button } from '~/components/ui/button'
+
+import ConfigHistoryGrid from '../../../_components/ConfigVersionHistory/grid/page'
 
 interface RecordLayoutProps {
   params: { code: string }
@@ -16,6 +20,8 @@ interface RecordLayoutProps {
 
 const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
   const { params, rules, aliases, raw_data } = props || {}
+  const { actions } = useSideDrawer()
+  const { openSideDrawer } = actions
   const searchParams = useSearchParams()
   const pathName = usePathname()
   const currentTab = searchParams.get('sub_tab')
@@ -71,8 +77,25 @@ const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
     )
   }, [searchParams, rules, aliases, baseUrl])
 
+  const handleOpenSideDrawer = () => {
+    openSideDrawer?.({
+      title: 'Configuration 1 Version History',
+      sideDrawerWidth: '30dvw',
+      body: {
+        component: ConfigHistoryGrid,
+        componentProps: {
+          params,
+          userId: '123',
+          onSave: () => {
+          },
+        },
+      },
+    })
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-col">
+      <Button className='ml-auto' onClick={handleOpenSideDrawer}>Config History</Button>
       <LinkTab
         defaultHref={`${baseUrl}?current_tab=dashboard&tab=users`}
         orientation="horizontal"

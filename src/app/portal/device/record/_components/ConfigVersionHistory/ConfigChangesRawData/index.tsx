@@ -1,16 +1,15 @@
 'use client'
 
-import 'highlight.js/styles/github.css' // For syntax highlighting
+import 'highlight.js/styles/github.css'
 import hljs from 'highlight.js'
 import React, { useEffect, useRef } from 'react'
 
-import { Card, CardContent } from '~/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 
-import styles from './CodeBlock.module.css' // Import your custom styles
+import styles from './CodeBlock.module.css'
 
 const CodeBlock = ({
   code,
-  language,
   backgroundColor = '#f5faf9',
   textColor = '#333',
 }: {
@@ -70,9 +69,9 @@ const CodeBlock = ({
 
   return (
     <div
-      dangerouslySetInnerHTML = { { __html: formatCode(code) } }
-      ref = { codeRef }
-      style = { {
+      dangerouslySetInnerHTML={{ __html: formatCode(code) }}
+      ref={codeRef}
+      style={{
         backgroundColor,
         color: textColor,
         padding: '1rem',
@@ -80,7 +79,7 @@ const CodeBlock = ({
         overflow: 'auto',
         paddingRight: '1rem',
 
-      } }
+      }}
     />
   )
 }
@@ -106,15 +105,16 @@ const RawData = () => {
   }, [])
 
   return (
-    <div>
+    <Card className="border-none p-0 shadow-none">
+      <CardHeader>
+        <CardTitle>Raw Data</CardTitle>
+      </CardHeader>
       {xmlCode.map((code, index) => (
-        <Card className="border-none p-0 shadow-none" key={index}>
-          <CardContent className="mt-2">
-            <CodeBlock code={code} language="html" />
-          </CardContent>
-        </Card>
+        <CardContent className="mt-2" key={index}>
+          <CodeBlock code={code} language="html" />
+        </CardContent>
       ))}
-    </div>
+    </Card>
   )
 }
 

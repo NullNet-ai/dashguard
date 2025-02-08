@@ -94,5 +94,124 @@ export const deviceConfigurationRouter = createTRPCRouter({
 
       return decodedString
     }),
+  fetchDeviceConfigurations: privateProcedure
+    .input(
+      z.object({
+        code: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { code } = input
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: 'devices',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code', 'updated_date', 'updated_time', 'updated_by', 'created_date', 'created_time', 'created_by'],
+            pluck_object: {
+              devices: ['id', 'code'],
+              contacts: ['first_name', 'last_name', 'id'],
+              organization_accounts: ['contact_id', 'id', 'device_id'],
+              organization_account_updated_by: ['contact_id', 'id', 'device_id'],
+              device_configurations: ['id', 'device_id', 'created_by', 'updated_by', 'created_date', 'created_time', 'updated_date', 'updated_time', 'code'],
+            },
+            advance_filters: [{
+              type: 'criteria',
+              field: 'code',
+              entity: 'devices',
+              operator: EOperator.EQUAL,
+              values: [
+                code,
+              ],
+            }],
+            // @ts-expect-error - order is not defined
+            order: {
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'device_configurations',
+              field: 'device_id',
+            },
+            from: {
+              entity: 'devices',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_configurations',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              alias: 'organization_account_updated_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'device_configurations',
+              field: 'updated_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              alias: 'updated_by',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .execute()
 
+      const modifiedData = res?.data?.[0]?.device_configurations?.map((item: any) => {
+        if (!item?.organization_accounts?.[0]?.contact_id) {
+          return {
+            ...item,
+            created_by: 'Wallguard Client',
+            updated_by: 'Wallguard Client',
+          }
+        }
+
+        return item
+      })
+
+      return { items: modifiedData, totalCount: res?.data?.[0]?.device_configurations?.length }
+    }),
 })

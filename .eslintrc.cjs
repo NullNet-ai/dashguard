@@ -1,6 +1,6 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
-  ignorePatterns: ['scripts/**/*', 'public/**/*', '.eslintrc*', 'prettier.config.js', 'src/components/**/**/*'],
+  ignorePatterns: ['scripts/**/*', 'public/**/*', '.eslintrc*', 'prettier.config.js', 'src/components/**/**/*', 'src/**/**/*'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: true,

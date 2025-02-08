@@ -21,8 +21,8 @@ export default function MyTableBody({showAction} : {showAction?: boolean}) {
         className="overflow-y-auto"
         data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody`)}
       >
-        {state?.table.getRowModel().rows?.length ? (
-          state?.table.getRowModel().rows.map((row, index) => (
+        {state?.table?.getRowModel()?.rows?.length ? (
+          state?.table?.getRowModel()?.rows?.map((row, index) => (
             <TableRow
               className="group relative border-b hover:bg-border/50"
               key={row.id + index}

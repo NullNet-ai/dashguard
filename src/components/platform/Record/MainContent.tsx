@@ -16,14 +16,14 @@ const MainContent = ({
   const { open } = useSidebar();
 
   const width = !open
-    ? `${application === "record" ? "w-full" : "md:w-[calc(100vw-300px-3rem)]"} w-full`
+    ? `${application === "record" ? "w-full" : ""} w-full`
     : "md:w-[calc(100vw-300px-16rem)] w-full";
   const height = "h-[calc(100vh-200px)]";
 
   return (
     <section
       className={cn(
-        "main-content max-h-full space-y-2 overflow-auto overflow-x-auto",
+        "main-content max-h-full space-y-2 overflow-auto",
         width,
         height,
         className,

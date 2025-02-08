@@ -11,6 +11,7 @@ import { LinkTabProvider, useLinkTab } from "./Provider";
 import { getTabStyles } from "./tabStyles";
 
 import { type LinkTabProps } from "./types";
+import { cn } from "~/lib/utils";
 
 export function LinkTabList({
   className,
@@ -52,7 +53,7 @@ export function LinkTabList({
   const tabStyles = getTabStyles(orientation, className);
 
   return (
-    <div className={tabStyles.container}>
+    <div className={cn(tabStyles.container,"sticky top-0 z-[100] bg-white")}>
       <div
         role="tablist"
         aria-orientation={orientation}

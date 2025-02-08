@@ -31,7 +31,7 @@ const ScrollContainer: React.FC<any> = ({ children }) => {
         ref={scrollableRef}
         onScroll={handleScroll}
         // className="w-full -auto px-2"
-        className="mx-2 h-[690px] overflow-x-auto rounded-md border bg-card text-card-foreground"
+        className="mx-2 h-[690px] w-fit  rounded-md  bg-card text-card-foreground"
       >
         {children}
       </div>
