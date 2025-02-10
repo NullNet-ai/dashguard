@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.11.0",
-  "branch": "released/fix/1.11.0",
-  "message": "Release UI Components ",
-  "publish_name": "Rob Caldosa"
+  "tag": "1.12.0",
+  "branch": "released/feat/812/1.12.0",
+  "message": "Added Coming-Soon Component",
+  "publish_name": "Juphet Vitualla"
 }
