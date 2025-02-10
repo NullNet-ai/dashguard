@@ -198,7 +198,7 @@ export default function AccountDetailsForm({
                   name:
                     field?.status === "Active"
                       ? "Deactivate Account"
-                      : "Activate Account",
+                      : "Reactivate Account",
                   onClick: () => {
                     if (field?.status === "Active") {
                       setDialogContext({
