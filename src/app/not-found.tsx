@@ -27,7 +27,7 @@ export default function NotFound() {
             <p className="mt-4 text-xl leading-7 text-slate-400 mb-4 font-light">
               Sorry, we couldn’t find the page you’re looking for.
             </p>
-            <Button variant={'outline'} className="border border-primary/80 text-primary" size={'xs'}>Try Again</Button>
+            <Button variant={'outline'} className="border border-primary/80 text-primary hover:text-primary" size={'xs'}>Try Again</Button>
           </div>
         </main>
         <div className="lg:relative lg:col-start-2 lg:row-start-1 lg:row-end-4  lg:flex lg:items-center lg:justify-center">
