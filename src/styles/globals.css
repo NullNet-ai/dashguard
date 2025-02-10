@@ -163,12 +163,14 @@ footer {
 
 /* Apply to specific elements */
 .main-grid-scroll-container::-webkit-scrollbar {
-  width: 4px; /* Adjust thickness */
-  height: 4px; /* For horizontal scrollbars */
+  width: 10px; /* Adjust thickness */
+  height: 10px; /* For horizontal scrollbars */
 }
 
 .main-grid-scroll-container::-webkit-scrollbar-thumb {
-  background: #888; /* Scrollbar color */
+  background-color: #c5c5c5; /* Changed to a medium grey color */
+  border-radius: 10px;
+  border: 2px solid #f0f0f0; /* Changed to match the track color */
   border-radius: 10px; /* Rounded edges */
 }
 
