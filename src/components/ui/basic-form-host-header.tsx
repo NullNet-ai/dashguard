@@ -94,7 +94,7 @@ export default function BasicFormHostHeader({
                   <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
                 )}
 
-                <DropdownMenuContent align="start">
+                <DropdownMenuContent align="end" side='bottom'>
                   {ellipseOptions?.map((option) => (
                     <DropdownMenuItem
                       key={option.id}
