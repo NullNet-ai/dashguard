@@ -202,7 +202,7 @@ export default function FormFilterGrid({
             columns: gridColumns!,
             actionType,
             searchConfig,
-            onFetchRecords: void fetchData,
+            onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (
                 row.original.id === _form_filter_selected_record?.[0]?.id
