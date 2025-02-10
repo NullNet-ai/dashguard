@@ -135,6 +135,7 @@ function GridDesktop({
             className={cn(
               `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
               conWidth,
+              `scroll-grid-aria-${parentType}`,
               parentType === 'grid'
                 ? 'w-[350px] md:w-[460px]'
                 : 'w-[350px] md:w-[100%]',
