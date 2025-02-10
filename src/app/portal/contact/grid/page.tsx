@@ -4,6 +4,7 @@ import Grid from "~/components/platform/Grid/Server";
 import { defaultSorting } from "./_config/sorting";
 import { defaultAdvanceFilter } from "./_config/advanceFilter";
 import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import AccountGridExpansion from "../_components/grids/AccountGridExpansion";
 
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page({
@@ -72,6 +73,8 @@ export default async function Page({
             pluck: _pluck,
           },
         },
+        enableRowExpansion: true,
+        rowExpansionBuilder: <AccountGridExpansion />
       }}
     />
   );
