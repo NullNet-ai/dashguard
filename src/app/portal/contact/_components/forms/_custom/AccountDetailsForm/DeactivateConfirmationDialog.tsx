@@ -25,7 +25,7 @@ const DeactivateConfirmationDialog = ({
     onChangeContext({ open, account_id: "", status: "", index: 0 });
   };
   return (
-    <Dialog open={context?.open ?? false}>
+    <Dialog open={context?.open ?? false} onOpenChange={onOpenChange}>
       <DialogContent className="w-5/6 bg-white sm:w-3/6">
         <div className="mb-2 text-sm">
           <ShieldMinus
