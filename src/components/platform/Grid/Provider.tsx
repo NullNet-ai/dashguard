@@ -1,7 +1,12 @@
 'use client';
+
+import { Button as Button2, Button as HeadlessBtn } from '@headlessui/react';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import {
   type ColumnDef,
   type ColumnSizingState,
+  ExpandedState,
+  // eslint-disable-next-line import/named
   getCoreRowModel,
   type Row,
   type RowSelectionState,
@@ -9,9 +14,25 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
+import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
+
+import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
+import StatusCell from '~/components/ui/status-cell';
 import { useToast } from '~/context/ToastProvider';
+
+import { BulkArchive } from './Action/BulkArchive';
+import { Create } from './Action/Create';
+import { UpdateReportSorting } from './Action/UpdateReportSorting';
+import {
+  ArchiveComponent,
+  DeleteComponent,
+  EditComponent,
+  RestoreComponent,
+} from './DefatultRow/Actions';
+import { type ISearchItem } from './Search/types';
 import {
   type IAction,
   type IConfigGrid,
@@ -20,23 +41,6 @@ import {
   type IState,
   type TActionType,
 } from './types';
-
-import { Button as Button2 } from '@headlessui/react';
-import { PlusCircleIcon } from '@heroicons/react/24/outline';
-import { FileIcon } from 'lucide-react';
-import { useMediaQuery } from 'react-responsive';
-import { Button } from '~/components/ui/button';
-import { Create } from './Action/Create';
-import StatusCell from '~/components/ui/status-cell';
-import { BulkArchive } from './Action/BulkArchive';
-import { UpdateReportSorting } from './Action/UpdateReportSorting';
-import {
-  ArchiveComponent,
-  DeleteComponent,
-  EditComponent,
-  RestoreComponent,
-} from './DefatultRow/Actions';
-import { ISearchItem } from './Search/types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 
 export const GridContext = React.createContext<ICreateContext>({});
@@ -46,7 +50,9 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field';
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  onRefetch?: (gridData: any) => void;
+  gridLevel?: number;
 }
 
 export default function GridProvider({
@@ -62,6 +68,7 @@ export default function GridProvider({
   defaultAdvanceFilter = [],
   pagination,
   parentType,
+  gridLevel = 1,
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -105,12 +112,17 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
 
+  const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
+    ...filter,
+    default: true,
+  })) as ISearchItem[];
+
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
       if (curr?.default) return acc;
       return [...acc, curr];
     },
-    [...defaultAdvanceFilter],
+    [...resolvedDefaultFilter],
   );
 
   // use effects
@@ -133,6 +145,8 @@ export default function GridProvider({
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
+    enableRowExpansion: false,
+    enableRowSelection: true,
     hideCreateButton:
       playgroundGridIsShowCreateButton != null
         ? !(playgroundGridIsShowCreateButton == 'true')
@@ -182,11 +196,10 @@ export default function GridProvider({
     setSorting((prevSorting) =>
       prevSorting.filter((sort) => sort.id !== columnId),
     );
-
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
     if (parentType === 'form') {
       return config?.onFetchRecords?.({
-        sort: updatedSorting,
+        sorting: updatedSorting,
       });
     }
     handleUpdateReportSorting(updatedSorting);
@@ -195,28 +208,27 @@ export default function GridProvider({
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
     const updatedSorting =
       typeof updater === 'function' ? updater(sorting) : updater;
-    
-    const resolvedSorting = updatedSorting?.reduce((acc: SortingState, sort) => {
-      const sortFields = config?.columns?.find(
-        (column: any) => column?.accessorKey === sort.id,
-      );
- 
-      const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-        ? sortFields.sortKey.map((sortKey) => ({
-            ...sort,
-            sort_key: sortKey,
-          }))
-        : [{ ...sort, sort_key: sortFields?.sortKey || sort.id }];
-      
-      return [
-        ...acc,
-        ...resolvedSortFields,
-      ];
-    }, []);
 
-    if (parentType === 'form') {
+    const resolvedSorting = updatedSorting?.reduce(
+      (acc: SortingState, sort) => {
+        const sortFields = config?.columns?.find(
+          (column: any) => column?.accessorKey === sort.id,
+        );
+
+        const resolvedSortFields = Array.isArray(sortFields?.sortKey)
+          ? sortFields.sortKey.map((sortKey) => ({
+              ...sort,
+              sort_key: sortKey,
+            }))
+          : [{ ...sort, sort_key: sortFields?.sortKey || sort.id }];
+
+        return [...acc, ...resolvedSortFields];
+      },
+      [],
+    );
+    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       return config?.onFetchRecords?.({
-        sort: resolvedSorting,
+        sorting: resolvedSorting,
       });
     }
     UpdateReportSorting({ sorting: resolvedSorting });
@@ -234,24 +246,42 @@ export default function GridProvider({
     enableResizing: false,
     header: ({ table }) => (
       <Checkbox
+        aria-label="Select all"
         checked={
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        className="border-foreground"
+        className="ml-1 border-foreground"
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
-        className="border-foreground"
+        aria-label="Select row"
         checked={row.getIsSelected()}
+        className="ml-1 border-foreground"
         onCheckedChange={(value) => {
           row.toggleSelected(!!value);
         }}
-        aria-label="Select row"
       />
+    ),
+    enableSorting: false,
+    enableHiding: true,
+  });
+
+  const expandTableRow = useRef<ColumnDef<any>>({
+    id: 'expand',
+    size: 50,
+    enableResizing: false,
+    header: '',
+    cell: ({ row }: any) => (
+      <HeadlessBtn onClick={() => row.toggleExpanded()}>
+        {row.getIsExpanded() ? (
+          <ChevronUp className="h-6 w-6 text-primary" />
+        ) : (
+          <ChevronRight className="h-6 w-6 text-default/40" />
+        )}
+      </HeadlessBtn>
     ),
     enableSorting: false,
     enableHiding: true,
@@ -284,8 +314,8 @@ export default function GridProvider({
       if (config?.actionType === 'single-select') {
         return (
           <Button2
-            disabled={disableActions}
             className="mx-auto flex cursor-pointer"
+            disabled={disableActions}
             type="button"
             onClick={() => handleSingleSelect(row.original)}
           >
@@ -299,10 +329,10 @@ export default function GridProvider({
       if (config?.actionType === 'multi-select') {
         return (
           <Button
-            disabled={disableActions}
             className="mx-auto flex"
-            variant={'ghost'}
+            disabled={disableActions}
             type="button"
+            variant="ghost"
             onClick={() => handleSingleSelect(row.original)}
           >
             <FileIcon className="h-5 w-5 text-primary" />
@@ -315,18 +345,18 @@ export default function GridProvider({
           <EditComponent row={row} config={config!} />
           {!['Archived', 'Delete'].includes(row.original?.status) && (
             <ArchiveComponent
-              row={row}
               config={config!}
               open={showArchiveConfirmationModal}
-              setOpen={setShowArchiveConfirmationModal}
               record={row}
+              row={row}
+              setOpen={setShowArchiveConfirmationModal}
               setRecord={setRowToArchive}
             />
           )}
           {row.original?.status === 'Archived' && (
             <>
-              <RestoreComponent row={row} config={config!} />
-              <DeleteComponent row={row} config={config!} />
+              <RestoreComponent config={config!} row={row} />
+              <DeleteComponent config={config!} row={row} />
             </>
           )}
         </>
@@ -337,9 +367,9 @@ export default function GridProvider({
   });
 
   const actionTypeColumnCondition = (
-    actionsType: TActionType,
     viewMode: string,
     defaultAdvanceFilter: ISearchItem[],
+    actionsType?: TActionType,
   ) => {
     const isDefaultFilterArchived = defaultAdvanceFilter?.find(
       (filter) =>
@@ -383,18 +413,18 @@ export default function GridProvider({
         }
 
         return [...columns, actionRow?.current];
-      case 'default':
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...columns];
-        }
-        return [selectTableRow?.current, ...columns, actionRow?.current];
-
       default:
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...columns];
+        if (config?.enableRowExpansion) {
+          columns.unshift(expandTableRow?.current);
+        }
+        if (config?.enableRowSelection) {
+          columns.unshift(selectTableRow?.current);
+        }
+        if (!config?.disableDefaultAction) {
+          columns.push(actionRow?.current);
         }
 
-        return [selectTableRow?.current, ...columns, actionRow?.current];
+        return columns;
     }
   };
 
@@ -403,9 +433,9 @@ export default function GridProvider({
     data,
     getRowId: (row) => row.id,
     columns: actionTypeColumnCondition(
-      config?.actionType || 'default',
       viewMode,
       defaultAdvanceFilter,
+      config?.actionType,
     ),
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
@@ -429,7 +459,6 @@ export default function GridProvider({
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
   });
-
   /** @ACTIONS */
   const handleCreate = async () => {
     try {
@@ -485,15 +514,15 @@ export default function GridProvider({
       ...config,
       columns: [
         selectTableRow?.current,
-        ...config?.columns,
         actionRow?.current,
+        ...(config?.columns ?? []),
       ],
     },
     parentType,
     data,
     table,
     selectTableRow,
-    totalCount: totalCount,
+    totalCount,
     createLoading,
     archiveBulkLoading,
     showArchiveConfirmationModal,
@@ -502,7 +531,7 @@ export default function GridProvider({
     viewMode,
     sorting,
     advanceFilter: resolvedAdvanceFilter,
-    defaultAdvanceFilter,
+    defaultAdvanceFilter: resolvedDefaultFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
@@ -527,7 +556,7 @@ export default function GridProvider({
     <GridContext.Provider
       value={{
         state: state_context,
-        actions: actions,
+        actions,
       }}
     >
       {children}

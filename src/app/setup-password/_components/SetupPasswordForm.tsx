@@ -46,7 +46,7 @@ const SetupPasswordForm = () => {
       <form
         className='space-y-6'
         onSubmit={(event) => {
-          void form.handleSubmit(onSubmit)(event)
+          form.handleSubmit(onSubmit)(event)
         }}
       >
         <FormField

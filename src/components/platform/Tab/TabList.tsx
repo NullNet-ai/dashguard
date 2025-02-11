@@ -43,7 +43,7 @@ const getSessionTabs = async (): Promise<{
     });
   }
 
-  void api.tab.insertMainTabs(newTabs);
+  api.tab.insertMainTabs(newTabs);
   return { pathname, newTabs };
 };
 

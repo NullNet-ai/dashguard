@@ -29,7 +29,7 @@ const Item = ({ tab, actions }: ItemProps) => {
   }, [entity])
 
   useEffect(() => {
-    void updateTabs.mutateAsync({
+    updateTabs.mutateAsync({
       tab_name: entity!,
       is_active: isActive,
     })

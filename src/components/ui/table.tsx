@@ -1,40 +1,56 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { cn } from "~/lib/utils";
-import { handleEdit } from "../platform/Grid/DefatultRow/Actions";
+import { cn } from '~/lib/utils';
+import { handleEdit } from '../platform/Grid/DefatultRow/Actions';
+
+type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
   // <div className="inline-block min-w-full align-middle">
-  <table ref={ref} className={cn("min-w-full", className)} {...props} />
+  <table ref={ref} className={cn('min-w-full', className)} {...props} />
   // </div>
 ));
-Table.displayName = "Table";
+Table.displayName = 'Table';
 
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <thead
-    ref={ref}
-    className={cn(
-      "sticky top-0 z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100",
+  React.HTMLAttributes<
+    HTMLTableSectionElement & { parentType?: GridParentType }
+  > & { parentType?: GridParentType }
+>(
+  (
+    {
       className,
-    )}
-    {...props}
-  />
-));
-TableHeader.displayName = "TableHeader";
+      parentType,
+      ...props
+    }: React.HTMLAttributes<HTMLTableSectionElement> & {
+      parentType?: GridParentType;
+    },
+    ref,
+  ) => (
+    <thead
+      ref={ref}
+      className={cn(
+        'sticky top-0',
+        `${parentType !== 'grid_expansion' ? 'z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100' : 'z-0 border-b border-b-gray-200'}`,
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+TableHeader.displayName = 'TableHeader';
 
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("bg-background", className)} {...props} />
+  <tbody ref={ref} className={cn('bg-background', className)} {...props} />
 ));
-TableBody.displayName = "TableBody";
+TableBody.displayName = 'TableBody';
 
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
@@ -42,11 +58,11 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn("bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
+    className={cn('bg-muted/50 font-medium [&>tr]:last:border-b-0', className)}
     {...props}
   />
 ));
-TableFooter.displayName = "TableFooter";
+TableFooter.displayName = 'TableFooter';
 
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
@@ -55,13 +71,13 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "transition-colors hover:bg-muted/50 data-[state=selected]:bg-sky-50",
+      'transition-colors hover:bg-muted/50 data-[state=selected]:bg-sky-50',
       className,
     )}
     {...props}
   />
 ));
-TableRow.displayName = "TableRow";
+TableRow.displayName = 'TableRow';
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
@@ -71,13 +87,13 @@ const TableHead = React.forwardRef<
     scope="col"
     ref={ref}
     className={cn(
-      "px-2 py-2.5 text-left text-sm font-semibold text-gray-900 h-[44px]",
+      'h-[35px] px-2 text-left text-sm font-semibold text-gray-900',
       className,
     )}
     {...props}
   />
 ));
-TableHead.displayName = "TableHead";
+TableHead.displayName = 'TableHead';
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
@@ -90,7 +106,10 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     onClick={() => {
-      if (!["select", "action"].includes(column_id) && config?.enableRowClick) {
+      if (
+        !['select', 'action', 'expand'].includes(column_id) &&
+        config?.enableRowClick
+      ) {
         if (config?.rowClickCustomAction) {
           config.rowClickCustomAction({ row, config });
           return;
@@ -99,14 +118,14 @@ const TableCell = React.forwardRef<
       }
     }}
     className={cn(
-      "whitespace-nowrap px-2 py-1 text-sm text-gray-500" +
-        (config?.enableRowClick ? " cursor-pointer" : ""),
+      'whitespace-nowrap px-2 py-1 text-sm text-gray-500' +
+        (config?.enableRowClick ? ' cursor-pointer' : ''),
       className,
     )}
     {...props}
   />
 ));
-TableCell.displayName = "TableCell";
+TableCell.displayName = 'TableCell';
 
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
@@ -114,11 +133,11 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn('mt-4 text-sm text-muted-foreground', className)}
     {...props}
   />
 ));
-TableCaption.displayName = "TableCaption";
+TableCaption.displayName = 'TableCaption';
 
 export {
   Table,
