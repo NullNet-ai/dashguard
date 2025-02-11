@@ -39,7 +39,7 @@ const InnerTabitem = ({
   }
 
   useEffect(() => {
-    void updateSubtabs.mutateAsync({
+    updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
       is_active: isActive,
       tab_name: tab.name,

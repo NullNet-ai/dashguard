@@ -36,7 +36,7 @@ const BulkActionConfirmationModal = ({
   }
 
   const confirm_actions: IConfirmAction = {
-    archive: void actions?.handleArchiveBulkRecord,
+    archive: actions?.handleArchiveBulkRecord,
   }
 
   return (
