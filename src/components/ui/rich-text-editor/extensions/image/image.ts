@@ -80,7 +80,7 @@ const handleError = (
   error: unknown,
   props: ImageActionProps,
   errorHandler?: (error: Error, props: ImageActionProps) => void,
-): void => {
+): => {
   const typedError =
     error instanceof Error ? error : new Error("Unknown error");
   errorHandler?.(typedError, props);
