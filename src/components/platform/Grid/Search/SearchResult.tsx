@@ -32,7 +32,7 @@ export default function SearchResult({
                 key={result.id}
                 value={result}
                 onClick={() => {
-                  void actions?.handleAddSearchItem(result);
+                  actions?.handleAddSearchItem(result);
                   closeDialog && closeDialog();
                 }}
               >

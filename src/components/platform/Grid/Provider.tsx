@@ -189,7 +189,7 @@ export default function GridProvider({
 
   const handleResetSorting = () => {
     setSorting(_defaultSorting);
-    void handleUpdateReportSorting(_defaultSorting);
+    handleUpdateReportSorting(_defaultSorting);
   };
 
   const handleRemoveSorting = (columnId: string) => {
@@ -202,7 +202,7 @@ export default function GridProvider({
         sorting: updatedSorting,
       });
     }
-    void handleUpdateReportSorting(updatedSorting);
+    handleUpdateReportSorting(updatedSorting);
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
@@ -231,12 +231,12 @@ export default function GridProvider({
         sorting: resolvedSorting,
       });
     }
-    void UpdateReportSorting({ sorting: resolvedSorting });
+    UpdateReportSorting({ sorting: resolvedSorting });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
     setSorting(updater);
-    void handleUpdateReportSorting(updater);
+    handleUpdateReportSorting(updater);
   };
 
   /** @REFS */
@@ -317,7 +317,7 @@ export default function GridProvider({
             className="mx-auto flex cursor-pointer"
             disabled={disableActions}
             type="button"
-            onClick={() => void handleSingleSelect(row.original)}
+            onClick={() => handleSingleSelect(row.original)}
           >
             <PlusCircleIcon
               className={`h-5 w-5 ${disableActions ? 'text-gray-400' : 'text-primary'}`}
@@ -333,7 +333,7 @@ export default function GridProvider({
             disabled={disableActions}
             type="button"
             variant="ghost"
-            onClick={() => void handleSingleSelect(row.original)}
+            onClick={() => handleSingleSelect(row.original)}
           >
             <FileIcon className="h-5 w-5 text-primary" />
           </Button>

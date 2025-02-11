@@ -30,7 +30,7 @@ const InnerDropTabItem = ({
   }, [code, application]);
 
   useEffect(() => {
-    void updateSubtabs.mutateAsync({
+    updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
       is_active: active,
       tab_name: tab.name,

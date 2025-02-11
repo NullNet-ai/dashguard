@@ -42,7 +42,7 @@ const TabMenu = ({
           className="relative flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
-            void closeInnerClassTab({
+            closeInnerClassTab({
               pathname: href,
               current,
               tabs,
@@ -56,7 +56,7 @@ const TabMenu = ({
           className="flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
-            void closeOtherInnerClassTabs({
+            closeOtherInnerClassTabs({
               pathname: href,
               current,
               tabs,
@@ -70,7 +70,7 @@ const TabMenu = ({
           className="flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
-            void closeAllInnerClassTabs({
+            closeAllInnerClassTabs({
               pathname: href,
               current,
               tabs,

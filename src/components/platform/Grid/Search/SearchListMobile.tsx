@@ -127,7 +127,7 @@ const SearchListMobile = () => {
                           variant="ghost"
                           onClick={() => {
                             if (isHidden) return
-                            void actions?.handleRemoveSearchItem(item)
+                            actions?.handleRemoveSearchItem(item)
                           }}
                         >
                           <X className="h-3 w-3" />
@@ -193,7 +193,7 @@ const SearchListMobile = () => {
                                     size="xs"
                                     variant="ghost"
                                     onClick={() => {
-                                      void actions?.handleRemoveSearchItem(item)
+                                      actions?.handleRemoveSearchItem(item)
                                     }}
                                   >
                                     <X className="h-3 w-3" />
@@ -224,7 +224,7 @@ const SearchListMobile = () => {
                   }}
                   variant="link"
                   onClick={() => {
-                    void actions?.handleClearSearchItems()
+                    actions?.handleClearSearchItems()
                   }}
                 >
                   Clear All
