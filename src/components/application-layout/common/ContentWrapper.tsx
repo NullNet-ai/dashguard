@@ -14,9 +14,9 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
 
   const mtop
     = application === 'record'
-      ? 'lg:mt-[0px] md:mt-[53px] mt-[88px]'
+      ? 'lg:mt-[0px] md:mt-[53px] mt-[126px]'
       : application === 'wizard'
-        ? 'lg:mt-[0] mt-[88px] md:mt-[53px]'
+        ? 'lg:mt-[0] mt-[128px] md:mt-[53px]'
         : firstSegment === 'dashboard'
           ? 'lg:mt-[50px] md:mt-[80px] mt-[100px]'
           : 'mt-[140px]';
@@ -24,7 +24,7 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
   return (
     <div
       className={cn(
-        'mb-12 lg:mb-0 lg:mt-0', `${application === 'grid' ? 'mt-[80px] pt-2 md:mt-[45px] lg:mt-[0px] lg:pt-0' : mtop}`,
+        'mb-12 lg:mb-0 lg:mt-0', `${application === 'grid' ? 'mt-[114px] pt-2 md:mt-[45px] lg:mt-[0px] lg:pt-0' : mtop}`,
       )}
     >
       {children}

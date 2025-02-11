@@ -195,7 +195,7 @@ const TabItems = ({ items }: TabItemsProps) => {
 
   return (
     <div
-      className="main-tab-container flex flex-1 overflow-hidden"
+      className="main-tab-container flex flex-1 "
       ref={contRef}
     >
       <div className="flex w-full flex-1">
