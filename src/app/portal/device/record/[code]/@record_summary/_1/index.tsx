@@ -116,7 +116,7 @@ const RecordShellSummary = ({
                                 _data[value].map((interfaceObj: { name: string; address: string }, index: number) => (
                                   <div key={index}>
                                     <span className="text-slate-400">
-                                      {interfaceObj.name}
+                                      {interfaceObj.name.toUpperCase()}
                                       {':'}
                                       {' '}
                                     </span>
