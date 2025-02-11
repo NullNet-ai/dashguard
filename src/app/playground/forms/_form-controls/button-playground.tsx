@@ -121,7 +121,7 @@ const IconButtonsSection = () => (
     {ICON_BUTTONS.map((config, index) => (
       <div key={index} className="flex flex-col space-y-2">
         <Label>{config.label}</Label>
-        {/* @ts-expect-error will fix it later but working*/}
+        {/* @ts-expect-error will fix it later*/}
         <Button {...config}>
           Button
         </Button>
