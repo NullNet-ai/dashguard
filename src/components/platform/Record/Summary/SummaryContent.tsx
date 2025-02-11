@@ -7,6 +7,7 @@ import SystemDates from "./Header/SystemDate";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
+import moment from "moment";
 
 const RecordSummaryContent = async () => {
   const headerList = headers();
@@ -58,6 +59,9 @@ const RecordSummaryContent = async () => {
     throw recordDetails.message;
   }
 
+  const formatted_created_date = moment(recordDetails?.data?.created_date).format('YYYY/MM/DD') || ''
+  const formatted_updated_date = moment(recordDetails?.data?.updated_date).format('YYYY/MM/DD') || ''
+
   return (
     <div className="">
       {/* <Separator /> */}
@@ -68,9 +72,9 @@ const RecordSummaryContent = async () => {
       <SummaryRecordTab />
       <ProfileImage />
       <SystemDates
-        created_date={recordDetails?.data?.created_date!}
+        created_date={formatted_created_date!}
         created_time={recordDetails?.data?.created_time!}
-        updated_date={recordDetails?.data?.updated_date!}
+        updated_date={formatted_updated_date!}
         updated_time={recordDetails?.data?.updated_time!}
         created_by_first_name={
           recordDetails?.data?.created_by_data?.first_name || ""

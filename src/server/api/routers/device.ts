@@ -1188,6 +1188,39 @@ export const deviceRouter = createTRPCRouter({
             },
           })
           .execute(),
+
+          await ctx.dnaClient
+          .findAll({
+            entity: 'device_configurations',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id', 'device_id', 'hostname'],
+              pluck_object:{
+                device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
+                device_configurations: ['id', 'device_id', 'hostname'],
+              },
+              advance_filters: createAdvancedFilter({ device_id: id! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          }).join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_interfaces',
+                field: 'device_configuration_id',
+              },
+              from: {
+                entity: 'device_configurations',
+                field: 'id',
+              },
+            },
+          })
+          .execute(),
+          
         await ctx.dnaClient
           .findAll({
             entity: 'device_groups',
@@ -1219,12 +1252,13 @@ export const deviceRouter = createTRPCRouter({
             },
           })
           .execute(),
-
       ])
-      const [device, device_group] = res
+      const [device, device_configuration, device_group] = res
 
       const { id: device_group_setting_id, name }
           = device_group.data[0]?.device_group_settings?.[0] || {}
+      const {hostname} = device_configuration.data[0] || {}
+      const {device_interfaces} = device_configuration?.data?.[0] || {}
       const { addresses, device_heartbeats, ...rest } = device?.data?.[0] || {}
       const { id: add_id, ...rest_address } = addresses?.[0] || {}
 
@@ -1232,6 +1266,8 @@ export const deviceRouter = createTRPCRouter({
         data: {
           ...rest,
           ...rest_address,
+          hostname,
+          interfaces: device_interfaces,
           grouping: device_group_setting_id,
           grouping_name: name,
         },

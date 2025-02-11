@@ -177,6 +177,36 @@ export const packetRouter = createTRPCRouter({
       return a
     }),
 
+  fetchPacketsIP: privateProcedure
+  .input(z.object({})).query(async ({ ctx }) => {
+    const res = await ctx.dnaClient
+      .findAll({
+        entity: 'packets',
+        token: ctx.token.value,
+        query: {
+          pluck: ['source_ip', 'destination_ip'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'status',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: ["Active", "active"],
+            },
+          ],
+          order: {
+            limit: 100,
+            by_field: 'code',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+        
+      })
+      .execute()
+
+    return res?.data
+  }),
+
 })
 
 // create an interval that adds data in the packets
