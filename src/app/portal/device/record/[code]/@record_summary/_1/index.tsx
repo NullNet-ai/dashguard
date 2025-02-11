@@ -13,14 +13,10 @@ const fields = {
   'Status': 'status',
   'Last Heartbeat': 'last_heartbeat',
   'Instance': 'instance_name',
-  'Host Name': 'host_name',
+  'Host Name': 'hostname',
   'Version': 'version',
   'Grouping': 'grouping',
-  'Interfaces': {
-    WAN: 'wan',
-    LAN: 'lan',
-    OPT1: 'opt1',
-  },
+  'Interfaces': 'interfaces',
   'Category': 'categories',
 }
 
@@ -117,25 +113,25 @@ const RecordShellSummary = ({
                           )
                         : key === 'Last Heartbeat'
                           ? (<RecordDeviceLastHeartbeat device_id={data?.id} />)
-                          : key === 'Interfaces'
-                            ? (
-                              <div className="pl-4">
-                                  {Object.entries(value).map(([subKey, subValue]) => (
-                                  <div key={subKey}>
-                                      <span className="text-slate-400">
-                                      {subKey}
+                          : key === 'Interfaces' ? (
+                            <div className="pl-4">
+                              {Array.isArray(value) && value.length > 0 ? (
+                                value.map((interfaceObj: { name: string; address: string }, index: number) => (
+                                  <div key={index}>
+                                    <span className="text-slate-400">
+                                      {interfaceObj.name}
                                       {':'}
                                       {' '}
                                     </span>
-                                      <span>
-                                      {(mock_data.interfaces as { [key: string]: any })?.[
-                                          subValue
-                                        ] || 'None'}
+                                    <span>
+                                      {interfaceObj.address || 'None'}
                                     </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )
+                                  </div>
+                                ))
+                              ) : 'None'
+                              }
+                            </div>
+                          ) 
                             : (
                                 (mock_data as { [key: string]: any })?.[value as string]
                                 || 'None'
