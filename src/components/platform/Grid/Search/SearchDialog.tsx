@@ -20,7 +20,7 @@ import { GridContext } from '../Provider';
 
 import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
-import { ISearchItemResult } from './types';
+import { type ISearchItemResult } from './types';
 import { transformSearchData } from './utils/transformSearchData';
 import { cn } from '~/lib/utils';
 

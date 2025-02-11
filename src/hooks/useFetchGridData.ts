@@ -68,7 +68,7 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
   }, [data, isLoading])
 
   useEffect(() => {
-    void refetch()
+    refetch()
   }, [args, refetch])
 
   const fetchData = (newArgs?: IFetchDataParams) => {

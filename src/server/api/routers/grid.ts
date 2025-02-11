@@ -88,12 +88,12 @@ export const gridRouter = createTRPCRouter({
       if (hasTabMenu) return hasTabMenu
       if (input?.application === 'grid') {
         const setIdTab = SetIdTab(input.entity)
-        void ctx.redisClient.cacheData(
+        ctx.redisClient.cacheData(
           getGridLink({
             mainEntity: input.entity,
           }), setIdTab,
         )
-        void ctx.redisClient.cacheData(_tabMenuId, setIdTab)
+        ctx.redisClient.cacheData(_tabMenuId, setIdTab)
       }
     }),
   items: privateProcedure
@@ -270,7 +270,7 @@ export const gridRouter = createTRPCRouter({
       }
     })
 
-    void ctx.redisClient.cacheData(_tabMenuId, setActiveTab)
+    ctx.redisClient.cacheData(_tabMenuId, setActiveTab)
 
     return setActiveTab
   }),

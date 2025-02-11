@@ -136,7 +136,7 @@ export default function AppSideBar(config: ISideBarProps) {
                 </DropdownMenuTrigger>
                 <Button
                   variant="ghost"
-                  onClick={() => void handleLogout()}
+                  onClick={() => handleLogout()}
                   data-test-id="sdnavmenu-ftr-logout-btn"
                   className={cn(
                     `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${open && !isMobile ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,

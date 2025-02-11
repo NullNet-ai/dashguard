@@ -94,7 +94,7 @@ const TabItems = ({ items }: TabItemsProps) => {
       };
     }) as IPropsTabList[];
     setNewTabList(newTab);
-    void insertTabs.mutateAsync(newTab);
+    insertTabs.mutateAsync(newTab);
     // Drop by into database
   };
 
@@ -188,14 +188,14 @@ const TabItems = ({ items }: TabItemsProps) => {
 
   useEffect(() => {
     if (newTabList.length !== 0) {
-      void insertTabs.mutateAsync(newTabList);
+      insertTabs.mutateAsync(newTabList);
       return;
     }
   }, [newTabList]);
 
   return (
     <div
-      className="main-tab-container flex flex-1 overflow-hidden"
+      className="main-tab-container flex flex-1 "
       ref={contRef}
     >
       <div className="flex w-full flex-1">

@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.10.0",
-  "branch": "released/feat/platform-2177/1.10.0",
-  "message": "Added Feature > Nested Grid",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.11.0-rc.1<unreleased>",
+  "branch": "unreleased/fix/1.11.0-rc.1<unreleased>",
+  "message": "sync form filter search capability",
+  "publish_name": "Franklin"
 }

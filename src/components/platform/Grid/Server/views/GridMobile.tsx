@@ -12,7 +12,7 @@ function GridMobile() {
         <MobileHeader />
       </CardHeader>
       <ScrollArea
-        style={{ height: "calc(100vh - 16rem)" }}
+        style={{ height: "calc(100vh - 23rem)" }}
         className="rounded-md text-card-foreground"
       >
         <section className="px-2 lg:px-0">

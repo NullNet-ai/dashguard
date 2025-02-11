@@ -334,7 +334,7 @@ const MultipleSelector = React.forwardRef<
         }
       };
 
-      void exec();
+      exec();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
 
@@ -360,7 +360,7 @@ const MultipleSelector = React.forwardRef<
         }
       };
 
-      void exec();
+      exec();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
 
@@ -538,7 +538,7 @@ const MultipleSelector = React.forwardRef<
               }}
               onFocus={(event) => {
                 setOpen(true);
-                void (triggerSearchOnFocus && onSearch?.(debouncedSearchTerm));
+                (triggerSearchOnFocus && onSearch?.(debouncedSearchTerm));
                 inputProps?.onFocus?.(event);
               }}
               placeholder={
