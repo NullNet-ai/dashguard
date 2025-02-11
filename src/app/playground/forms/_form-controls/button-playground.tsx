@@ -31,13 +31,13 @@ const ICON_BUTTONS = [
   {
     label: "Home Navigation Button with Left Icon",
     Icon: HomeIcon,
-    iconPlacement: "left" as const,
+    iconPlacement: "left",
     className: "w-28 justify-center"
   },
   {
     label: "Create Item Button with Right Icon",
     Icon: PlusIcon,
-    iconPlacement: "right" as const,
+    iconPlacement: "right",
     className: "w-28 justify-center"
   },
   {
@@ -73,6 +73,7 @@ const BADGE_VARIANTS = [
   { variant: "primary", label: "Primary" }
 ];
 
+// Reusable Section Component
 const Section = ({ title, children, columns = 7 }: { 
   title: string; 
   children: React.ReactNode;
@@ -86,6 +87,7 @@ const Section = ({ title, children, columns = 7 }: {
   </section>
 );
 
+// Variants Section Component
 const VariantsSection = () => (
   <Section title="Button Variants" columns={7}>
     {BUTTON_VARIANTS.map(({ variant, label }) => (
@@ -99,6 +101,7 @@ const VariantsSection = () => (
   </Section>
 );
 
+// Sizes Section Component
 const SizesSection = () => (
   <Section title="Button Sizes" columns={3}>
     {BUTTON_SIZES.map(({ size, label }) => (
@@ -112,12 +115,13 @@ const SizesSection = () => (
   </Section>
 );
 
+// Icon Buttons Section Component
 const IconButtonsSection = () => (
   <Section title="Buttons with Icons" columns={4}>
     {ICON_BUTTONS.map((config, index) => (
       <div key={index} className="flex flex-col space-y-2">
         <Label>{config.label}</Label>
-        {/* @ts-expect-error Minor typescript error but is working*/}
+        {/* @ts-expect-error will fix it later but working*/}
         <Button {...config}>
           Button
         </Button>
@@ -126,6 +130,7 @@ const IconButtonsSection = () => (
   </Section>
 );
 
+// Dropdown Buttons Section Component
 const DropdownSection = () => (
   <Section title="Buttons with Dropdown" columns={7}>
     {BUTTON_VARIANTS.map(({ variant }) => (
@@ -146,6 +151,7 @@ const DropdownSection = () => (
   </Section>
 );
 
+// Loading States Section Component
 const LoadingStatesSection = () => (
   <Section title="Loading States" columns={4}>
     <div className="flex flex-col space-y-2">
@@ -163,6 +169,7 @@ const LoadingStatesSection = () => (
   </Section>
 );
 
+// Circular Buttons Section Component
 const CircularButtonsSection = () => (
   <Section title="Circular Buttons" columns={6}>
     {CIRCULAR_BUTTONS.map(({ label, variant, Icon, loading }, index) => (
@@ -181,6 +188,7 @@ const CircularButtonsSection = () => (
   </Section>
 );
 
+// Badges Section Component
 const BadgesSection = () => (
   <Section title="Badges / Pills" columns={7}>
     {BADGE_VARIANTS.map(({ variant, label }) => (
@@ -196,6 +204,7 @@ const BadgesSection = () => (
   </Section>
 );
 
+// Disabled Components Section Component
 const DisabledSection = () => (
   <>
     <Section title="Disabled Buttons" columns={7}>
