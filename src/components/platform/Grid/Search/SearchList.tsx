@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -10,20 +10,14 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import useWindowSize from '~/hooks/use-resize'
-import useScreenType from '~/hooks/use-screen-type'
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGridContext } from './Provider'
 
-const SortingListMobile = () => {
+const SearchList = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGridContext)
-
-  const { width } = useWindowSize()
-  const screenSize = useScreenType()
-  const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg'
 
   const { searchItems = [] } = state ?? {}
   const selectedSearchItems = searchItems?.filter(item => !item?.default)
@@ -37,7 +31,7 @@ const SortingListMobile = () => {
       const allItems: any[] = []
       const newData = items || defaultSearchItems?.filter(item => item.type !== 'operator')
       // clear width, more width, and search by
-      const clearWidth = 63 + 61
+      const clearWidth = 65 + 63 + 61
       let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth
       const containerWidth = conref.current?.offsetWidth || 0
 
@@ -85,11 +79,9 @@ const SortingListMobile = () => {
 
   return (
     <div
-      className="mobile-container-ref flex  flex-col  gap-2 md:flex-row overflow-hidden relative"
+      className="container-ref flex flex-col items-center gap-2 md:flex-row overflow-hidden relative"
       ref={conref}
-      style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
     >
-
       <div className="flex flex-row items-center">
         <span
           className={cn(
@@ -97,7 +89,6 @@ const SortingListMobile = () => {
           )}
         >
           Search By:
-          {' '}
         </span>
         {defaultSearchItems.length
           ? (
@@ -127,7 +118,7 @@ const SortingListMobile = () => {
                           variant="ghost"
                           onClick={() => {
                             if (isHidden) return
-                            actions?.handleRemoveSearchItem(item)
+                            void actions?.handleRemoveSearchItem(item)
                           }}
                         >
                           <X className="h-3 w-3" />
@@ -136,7 +127,7 @@ const SortingListMobile = () => {
                     </Badge>
                   )
                 })}
-                {data?.length && data.some(item => item.hidden) && (
+                {!!data?.length && data.some(item => item.hidden) && (
                   <div
                     className="py-1 absolute max-w-[63px]"
                     style={{
@@ -161,7 +152,7 @@ const SortingListMobile = () => {
                           size="xs"
                           variant="outline"
                           onClick={() => {
-                            //
+                          //
                           }}
                         >
                           More (
@@ -193,7 +184,8 @@ const SortingListMobile = () => {
                                     size="xs"
                                     variant="ghost"
                                     onClick={() => {
-                                      actions?.handleRemoveSearchItem(item)
+                                      setData(prev => prev.filter(prevData => prevData.id !== item.id))
+                                      void actions?.handleRemoveSearchItem(item)
                                     }}
                                   >
                                     <X className="h-3 w-3" />
@@ -209,32 +201,24 @@ const SortingListMobile = () => {
                 ) }
 
                 <Button
-                  className={cn(
-                    `h-[30px] text-default/60 underline hover:no-underline`, `${
-                      data?.length && data.some(item => item.hidden)
-                        ? 'absolute mt-[2px]'
-                        : ''
-                    }`
+                  className={cn(`h-[30px] text-default/60 underline hover:no-underline`, `${data?.length && data.some(item => item.hidden) ? 'absolute mt-[2px]' : ''}`
                   )}
                   name="resetSortButton"
                   style={{
-                    left: lastHiddenIndexLeftPos
-                      ? lastHiddenIndexLeftPos + 63
-                      : 0,
+                    left: lastHiddenIndexLeftPos ? lastHiddenIndexLeftPos + 63 : 0,
                   }}
-                  variant="link"
+                  variant='link'
                   onClick={() => {
-                    // platform dev will add this
+                    void actions?.handleClearSearchItems()
                   }}
                 >
                   Clear All
                 </Button>
               </div>
-            )
-          : null}
+            ) : null}
       </div>
     </div>
   )
 }
 
-export default SortingListMobile
+export default SearchList

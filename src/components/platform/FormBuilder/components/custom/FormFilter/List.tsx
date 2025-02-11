@@ -63,13 +63,13 @@ export default function FormFilterGrid({
       limit,
       pluck,
       advance_filters = [],
-      sort = [],
+      sorting = [],
     }: {
       current: number
       limit: number
       pluck: string[]
       advance_filters: any[]
-      sort: any[]
+      sorting: any[]
     }) => {
       setIsLoading(true)
       try {
@@ -95,12 +95,12 @@ export default function FormFilterGrid({
             pluck_fields: query_params?.pluck || [],
             router,
             resolver,
-            sort,
+            sort: sorting,
           })
           setGridData({
             ...result,
             advance_filters,
-            sorting: sort,
+            sorting,
           })
         }
         else {
@@ -131,7 +131,7 @@ export default function FormFilterGrid({
       limit: limit || 100,
       pluck: pluck || [],
       advance_filters: [],
-      sort: [],
+      sorting: [],
     })
   }, [])
 
@@ -202,7 +202,7 @@ export default function FormFilterGrid({
             columns: gridColumns!,
             actionType,
             searchConfig,
-            onFetchRecords: void fetchData,
+            onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (
                 row.original.id === _form_filter_selected_record?.[0]?.id
