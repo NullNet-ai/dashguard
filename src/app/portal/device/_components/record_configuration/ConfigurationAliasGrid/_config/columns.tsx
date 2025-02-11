@@ -5,6 +5,21 @@ import React from 'react'
 
 import StatusCell from '~/components/ui/status-cell'
 
+const types = {
+
+host: 'Host(s)',
+network: 'Network(s)',
+port: 'Port(s)',
+url: 'URL (IPs)',
+url_ports: 'URL (Ports)',
+urltable: 'URL Table (IPs)',
+urltable_ports: 'URL Table (Ports)',
+
+}
+
+const typeKeys = Object.keys(types)
+
+
 const gridColumns = [
   {
     header: 'State',
@@ -27,6 +42,10 @@ const gridColumns = [
     accessorKey: 'type',
     search_config: {
       operator: 'like',
+    },
+    cell: ({ row }) => {
+      const value = row?.original?.type
+      return <>{types?.[value as keyof typeof types ] || ''}</>
     },
   },
   {
