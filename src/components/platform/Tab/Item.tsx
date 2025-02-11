@@ -55,16 +55,16 @@ const Item = ({ tab, actions }: ItemProps) => {
           )}
         >
           {formatAndCapitalize(checkIfUserRole(tab.name) ? 'role' : tab.name)}
-          {}
           <CloseTab actions={actions} {...tab} />
+          {isActive && (
+            <span className={cn(`absolute bottom-[-2px] md:bottom-[-6px] lg:bottom-[-4px] z-10 h-1 w-full bg-white`, 
+              `${tab.name === 'dashboard' || tab.name ==='grid' ? 'left-0 bottom-[-4px]' : 'left-[-8px]' }`)} />
+          )}
         </Link>
-
-        {isActive && (
-          <div className="absolute bottom-[-6px] lg:bottom-[-4px] z-10 h-1 w-full bg-white" />
-        )}
       </div>
     </Fragment>
   )
 }
+
 
 export default Item
