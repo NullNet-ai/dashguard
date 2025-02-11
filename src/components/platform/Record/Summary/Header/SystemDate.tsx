@@ -1,7 +1,7 @@
 interface IProps {
-  created_date: "string";
+  created_date: string;
   created_time: "string";
-  updated_date: "string";
+  updated_date: string;
   updated_time: "string";
   created_by_first_name: "string";
   created_by_last_name: "string";
