@@ -315,7 +315,7 @@ export default function FormSelect({
                   <button
                     className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
                     data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-                    onClick={void createNewRecord}
+                    onClick={createNewRecord}
                   >
                     {isCreateLoading ? "Creating..." : `Create "${query}"`}
                   </button>

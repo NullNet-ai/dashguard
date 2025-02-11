@@ -80,7 +80,7 @@ const handleError = (
   error: unknown,
   props: ImageActionProps,
   errorHandler?: (error: Error, props: ImageActionProps) => void,
-): void => {
+): => {
   const typedError =
     error instanceof Error ? error : new Error("Unknown error");
   errorHandler?.(typedError, props);
@@ -262,7 +262,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
       downloadImage: (attrs) => () => {
         const downloadFunc =
           this.options.customDownloadImage || defaultDownloadImage;
-        void downloadFunc(
+        downloadFunc(
           { ...attrs, action: "download" },
           this.options as CustomImageOptions,
         );
@@ -270,7 +270,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
       },
       copyImage: (attrs) => () => {
         const copyImageFunc = this.options.customCopyImage || defaultCopyImage;
-        void copyImageFunc(
+        copyImageFunc(
           { ...attrs, action: "copyImage" },
           this.options as CustomImageOptions,
         );
@@ -278,7 +278,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
       },
       copyLink: (attrs) => () => {
         const copyLinkFunc = this.options.customCopyLink || defaultCopyLink;
-        void copyLinkFunc(
+        copyLinkFunc(
           { ...attrs, action: "copyLink" },
           this.options as CustomImageOptions,
         );

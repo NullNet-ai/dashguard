@@ -28,7 +28,7 @@ export default function CreateButton({
       data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
       loading={state?.createLoading}
       size='md'
-      onClick={() => void actions?.handleCreate()}
+      onClick={() => actions?.handleCreate()}
     >
       {!state?.createLoading && <PlusIcon className="lg:h-5 lg:w-5 w-7 h-7" />}
       {title ? <span className="mr-1">{title}</span> : null}

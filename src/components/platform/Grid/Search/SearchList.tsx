@@ -118,7 +118,7 @@ const SearchList = () => {
                           variant="ghost"
                           onClick={() => {
                             if (isHidden) return
-                            void actions?.handleRemoveSearchItem(item)
+                            actions?.handleRemoveSearchItem(item)
                           }}
                         >
                           <X className="h-3 w-3" />
@@ -185,7 +185,7 @@ const SearchList = () => {
                                     variant="ghost"
                                     onClick={() => {
                                       setData(prev => prev.filter(prevData => prevData.id !== item.id))
-                                      void actions?.handleRemoveSearchItem(item)
+                                      actions?.handleRemoveSearchItem(item)
                                     }}
                                   >
                                     <X className="h-3 w-3" />
@@ -209,7 +209,7 @@ const SearchList = () => {
                   }}
                   variant='link'
                   onClick={() => {
-                    void actions?.handleClearSearchItems()
+                    actions?.handleClearSearchItems()
                   }}
                 >
                   Clear All
