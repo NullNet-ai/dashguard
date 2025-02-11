@@ -22,8 +22,16 @@ const ButtonPlayground = () => {
     {variant: "soft", label: "Soft"},
     { variant: "ghost", label: "Ghost" },
     { variant: "link", label: "Link" },
-    
+    {variant:"info", label: "Info"},
+    {variant:"warning", label: "Warning"},
+    {variant:"success", label: "Success"},
   ];
+
+const borderRadius = [
+    { borderRadius: "soft-edged", label: "Soft Edged Button" },
+    { borderRadius: "rounded", label: "Rounded Button" },
+    { borderRadius: "squared", label: "Squared Button" },
+]
 
   const sizes = [
     { size: "sm", label: "Small Button Size" },
@@ -80,6 +88,26 @@ const ButtonPlayground = () => {
           </div>
         </section>
 
+
+        {/* Border Radius Section */}
+        <section className="mb-12">
+          <h2 className="mb-6 text-2xl font-semibold text-gray-700">
+            Button Border Radius
+          </h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            {borderRadius.map(({ borderRadius, label }) => (
+              <div key={borderRadius} className="flex flex-col space-y-2">
+                <Label>{label}</Label>
+                <Button
+                  borderRadius={borderRadius as any}
+                  className="justify-center"
+                >
+                  Button
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
         {/* Icons Section */}
         <section className="mb-12">
           <h2 className="mb-6 text-2xl font-semibold text-gray-700">
