@@ -58,7 +58,7 @@ export default function Pagination({ width: customWidth }: { width?: string | nu
       });
       return;
     }
-    void UpdateReportPagination({
+    UpdateReportPagination({
       current_page: 1,
       limit_per_page: Number(value),
     });
@@ -76,7 +76,7 @@ export default function Pagination({ width: customWidth }: { width?: string | nu
       });
       return;
     }
-    void UpdateReportPagination({
+    UpdateReportPagination({
       current_page: Number(page),
       limit_per_page: Number(rows),
     });

@@ -67,7 +67,7 @@ export interface IConfigGrid {
   deleteCustomAction?: (args: DefaultRowActions) => void
   archiveCustomAction?: (
     args: Record<string, any>,
-  ) => void | Promise<void | string | Record<string, any>>
+  ) => | Promise<| string | Record<string, any>>
   restoreCustomAction?: (args: DefaultRowActions) => void
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void
   layer?: TLayerType

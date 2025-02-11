@@ -5,7 +5,7 @@ import React, { startTransition } from 'react'
 
 import { Button } from '~/components/ui/button'
 
-const ErrorPage = ({ refetch }: { refetch: () => void }) => {
+const ErrorPage = ({ refetch }: { refetch: () => }) => {
   const clearError = () => {
     startTransition(() => {
       refetch()

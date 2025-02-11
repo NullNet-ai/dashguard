@@ -126,7 +126,7 @@ export default function FormFilterGrid({
   )
 
   useEffect(() => {
-    void fetchData({
+    fetchData({
       current: current || 1,
       limit: limit || 100,
       pluck: pluck || [],
@@ -210,7 +210,7 @@ export default function FormFilterGrid({
                 || !onSelectRecords
               ) return
 
-              void Promise.resolve(
+              Promise.resolve(
                 onSelectRecords({
                   rows: [row?.original],
                   main_entity_id: main_entity_id || '',
@@ -247,7 +247,7 @@ export default function FormFilterGrid({
           totalCount={gridData?.totalCount || 0}
           onSelectRecords={(rows) => {
             if (!onSelectRecords) return
-            void Promise.resolve(
+            Promise.resolve(
               onSelectRecords({
                 rows,
                 main_entity_id,
