@@ -1255,7 +1255,6 @@ export const deviceRouter = createTRPCRouter({
       ])
       const [device, device_configuration, device_group] = res
 
-      console.log("%c Line:1262 🥑 device_configuration?.data", "color:#2eafb0", device_configuration?.data);
       const { id: device_group_setting_id, name }
           = device_group.data[0]?.device_group_settings?.[0] || {}
       const {hostname} = device_configuration.data[0] || {}
@@ -1263,7 +1262,6 @@ export const deviceRouter = createTRPCRouter({
       const { addresses, device_heartbeats, ...rest } = device?.data?.[0] || {}
       const { id: add_id, ...rest_address } = addresses?.[0] || {}
 
-      console.log("%c Line:1271 🍐 device_interfaces", "color:#ffdd4d", device_interfaces);
       return {
         data: {
           ...rest,

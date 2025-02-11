@@ -42,14 +42,11 @@ const RecordShellSummary = ({
     refetch,
     form_key,
   })
-  const mock_data = {
+  const _data = {
     ...data,
     type: data?.model,
     grouping: data?.grouping_name,
     version: data?.device_version,
-    interfaces: {
-      wan: data?.ip_address,
-    },
   }
 
   if (error) {
@@ -114,9 +111,9 @@ const RecordShellSummary = ({
                         : key === 'Last Heartbeat'
                           ? (<RecordDeviceLastHeartbeat device_id={data?.id} />)
                           : key === 'Interfaces' ? (
-                            <div className="pl-4">
-                              {Array.isArray(value) && value.length > 0 ? (
-                                value.map((interfaceObj: { name: string; address: string }, index: number) => (
+                            <div className="pl-4" key={key}>
+                              {Array.isArray(_data[value]) && _data[value].length > 0 ? (
+                                _data[value].map((interfaceObj: { name: string; address: string }, index: number) => (
                                   <div key={index}>
                                     <span className="text-slate-400">
                                       {interfaceObj.name}
@@ -128,12 +125,11 @@ const RecordShellSummary = ({
                                     </span>
                                   </div>
                                 ))
-                              ) : 'None'
-                              }
+                              ) : 'None'}
                             </div>
                           ) 
                             : (
-                                (mock_data as { [key: string]: any })?.[value as string]
+                                (_data as { [key: string]: any })?.[value as string]
                                 || 'None'
                               )}
                     </span>
