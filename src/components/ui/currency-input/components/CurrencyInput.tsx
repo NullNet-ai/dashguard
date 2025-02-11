@@ -136,7 +136,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
     const processChange = (
       value: string,
       selectionStart?: number | null,
-    ): => {
+    ): void => {
       setDirty(true);
 
       const { modifiedValue, cursorPosition } = repositionCursor({
@@ -213,7 +213,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
      */
     const handleOnChange = (
       event: React.ChangeEvent<HTMLInputElement>,
-    ): => {
+    ): void=> {
       const {
         target: { value, selectionStart },
       } = event;
@@ -238,7 +238,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
      *
      * Format value by padding/trimming decimals if required by
      */
-    const handleOnBlur = (event: React.FocusEvent<HTMLInputElement>): => {
+    const handleOnBlur = (event: React.FocusEvent<HTMLInputElement>): void=> {
       const {
         target: { value },
       } = event;
