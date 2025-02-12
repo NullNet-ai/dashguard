@@ -6,7 +6,7 @@ import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
 
-import { getBarPath } from '../utils/getBarPath'
+import {  getBarPath } from '../utils/getBarPath'
 
 interface ShapeProps {
   x: number
@@ -58,12 +58,11 @@ export default function Connectivity({ device_id }: { device_id: string }) {
     device_id,
     time_range: getLastTwentyFourHoursTimeStamp(),
   })
-
   if (!device_id) return null
 
   return (
     <ChartContainer
-      className="h-8 w-40 border border-gray-300 overflow-hidden"
+      className="h-9 w-40 border border-gray-300"
       config={chartConfig}
       style={{ margin: '2px', padding: '0', borderRadius: '8px' }}
     >

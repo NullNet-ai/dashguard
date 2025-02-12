@@ -37,6 +37,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-, "cypress/e2e/portal/contacts/contact_applicant_confirmation.spec.cy"  ],
+, "cypress/e2e/portal/contacts/contact_applicant_confirmation.spec.cy", "src/app/portal/dashboard/@reactflow_spike/page.tsx"  ],
   "exclude": ["node_modules"]
 }
