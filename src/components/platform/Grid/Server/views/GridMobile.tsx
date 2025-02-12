@@ -7,17 +7,17 @@ import InfiniteScrollContainer from "./InfiniteScroll";
 
 function GridMobile() {
   return (
-    <Card className="col-span-full border-0 shadow-none py-2">
+    <Card className="col-span-full border-0 shadow-none py-2 pt-0">
       <CardHeader>
         <MobileHeader />
       </CardHeader>
       <ScrollArea
-        style={{ height: "calc(100vh - 16rem)" }}
+        style={{ height: "calc(100vh - 23rem)" }}
         className="rounded-md text-card-foreground"
       >
         <section className="px-2 lg:px-0">
           <InfiniteScrollContainer />
-          <CreateButton className="fixed right-4 bottom-[8rem] md:bottom-[9rem]  z-10 w-14 h-14 rounded-full" />
+          <CreateButton className="fixed right-4 bottom-[5rem] md:bottom-[9rem]  size-10 rounded-full" />
         </section>
       </ScrollArea>
     </Card>

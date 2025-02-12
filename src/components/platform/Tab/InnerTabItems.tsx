@@ -1,11 +1,10 @@
 'use client'
 
+import Cookies from 'js-cookie'
 import { ChevronDownIcon } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
-import TabMenu from '~/components/application-layout/common/TabMenu'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +14,11 @@ import {
 import { useSidebar } from '~/components/ui/sidebar'
 import useWindowSize from '~/hooks/use-resize'
 import useScreenType from '~/hooks/use-screen-type'
-import { cn, formatTabName } from '~/lib/utils'
+import { cn } from '~/lib/utils'
 import { remToPx } from '~/utils/fetcher'
+
+import InnerDropTabItem from './InnerDropTabItem'
+import InnerTabitem from './InnerTabitem'
 
 type InnerTabItemsProps = {
   tabs: any[]
@@ -27,8 +29,12 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   const winWidth = useWindowSize().width
   const { open } = useSidebar()
   const newPathname = usePathname()
+  const searchParams = useSearchParams()
+  const isDropdown = searchParams.get('dropdown') === 'true'
+
   const [application, code] = (newPathname || '').split('/').slice(3)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
+
   let sidebar_width = remToPx(open ? 16 : 5)
   const size = useScreenType()
   if (size === 'xs' || size === 'sm' || size === 'md') {
@@ -52,75 +58,86 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     };
   }, [])
 
+  // Add this state to handle client-side rendering
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const sortTabsActiveWillSecond = useMemo(() => {
+    if (!isClient) return tabs
     if (tabs.length) {
       const activeIndex = tabs.findIndex(a => a.name === code)
+      const prevCurrent = Cookies.get('prevCurrent')
+      const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
+
       if (activeIndex !== -1) {
         const result = [...tabs]
         const activeTab = result.splice(activeIndex, 1)[0]
-        result.splice(1, 0, activeTab)
+        if (prevActiveIndex !== -1 && prevCurrent !== code) {
+          const prevActiveTab = result.splice(prevActiveIndex > activeIndex ? prevActiveIndex - 1 : prevActiveIndex, 1)[0]
+          result.splice(1, 0, activeTab)
+          result.splice(2, 0, prevActiveTab)
+        }
+        else {
+          result.splice(1, 0, activeTab)
+        }
+
+        if (isDropdown) {
+          const lastItem = Cookies.get('lastInnerTabItem')
+          const lastItemIndex = result.findIndex(a => a.name === lastItem)
+
+          if (lastItemIndex !== -1) {
+            const itemValue = result[lastItemIndex]
+            result.splice(lastItemIndex, 1)
+            result.push(itemValue)
+          }
+        }
+
         return result
       }
+
       return tabs
     }
     return tabs
-  }, [tabs, winWidth, sidebar_width, code])
+  }, [tabs, code, isClient])
 
   const newItems = useMemo(() => {
-    if (!winWidth) return sortTabsActiveWillSecond
+    if (!isClient || !winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
-    const showItem = max_width / 88
+    const showItem = max_width / 98
+    const result = sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
+    const lastItem = result[result.length - 1]
+    Cookies.set('lastInnerTabItem', lastItem.name)
 
-    return sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
+    return result
   }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
 
   const dropdownItems = useMemo(() => {
     if (!winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
-    const showItem = max_width / 88
-    return sortTabsActiveWillSecond.slice(Math.floor(showItem))
-  }, [sortTabsActiveWillSecond, winWidth, sidebar_width])
+    const showItem = max_width / 98
 
-  const entity = pathname?.split('/').at(2)
+    return sortTabsActiveWillSecond.slice(Math.floor(showItem))
+  }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])
+
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
 
   return (
     <nav
       aria-label="Tabs"
-      className={cn('scrollbar-hide flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px]  pl-0 lg:pl-0')}
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] md:top-[unset] flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px]  pl-0 lg:pl-0')}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
-          const isGrid = tab.name === 'Grid' || tab.name === 'grid'
-          const isGridActive = application === 'Grid' || application === 'grid'
-          const isActive = isGridActive ? !!isGrid : code === tab?.name
           return (
-            <div
+            <InnerTabitem
+              tab={tab}
+              newItems={newItems}
+              pathname={pathname}
               key={checkIfUserRole(tab.name) ? 'role' : tab.name}
-              className={cn(`group relative flex items-center  md:h-[32px] h-[36px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
-            >
-              <Link
-                data-test-id={
-                  entity + '-apptab-' + checkIfUserRole(tab.name)
-                    ? 'role'
-                    : tab.name.split(' ').join('-').toLowerCase()
-                }
-                href={tab.href}
-                aria-current={isActive ? 'page' : undefined}
-                className={cn(
-                  isActive ? 'text-primary' : 'text-default-foreground/60', 'whitespace-nowrap  text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`
-                )}
-              >
-                {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
-                <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-              </Link>
-              <TabMenu
-                current={tab.href.match(pathname) ? true : false}
-                href={tab.href}
-                tabs={newItems}
-                name={checkIfUserRole(tab.name) ? 'role' : tab.name}
-              />
-            </div>
+            />
           )
         })}
       </div>
@@ -138,36 +155,18 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
           <DropdownMenuContent className="">
             {dropdownItems.map((tab) => {
               const isGrid = tab.name === 'Grid' || tab.name === 'grid'
-              const isGridActive
-                = application === 'Grid' || application === 'grid'
+              const isGridActive = application === 'Grid' || application === 'grid'
               const isActive = isGridActive ? !!isGrid : code === tab?.name
               return (
                 <DropdownMenuItem
                   key={checkIfUserRole(tab.name) ? 'role' : tab.name}
                   className="group relative flex items-center p-2 py-3"
                 >
-                  <Link
-                    data-test-id={
-                      'apptab-' + checkIfUserRole(tab.name)
-                        ? 'role'
-                        : tab.name.split(' ').join('-').toLowerCase()
-                    }
-                    href={tab.href}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={cn(
-                      isActive ? 'text-primary' : 'text-gray-500', 'whitespace-nowrap px-4 pr-1 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',
-                    )}
-                  >
-                    {formatTabName(
-                      checkIfUserRole(tab.name) ? 'role' : tab.name,
-                    )}
-                  </Link>
-                  <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
-                  <TabMenu
-                    current={tab.href.match(pathname) ? true : false}
-                    href={tab.href}
-                    tabs={dropdownItems}
-                    name={checkIfUserRole(tab.name) ? 'role' : tab.name}
+                  <InnerDropTabItem
+                    tab={tab}
+                    dropItems={dropdownItems}
+                    pathname={pathname}
+                    isActive={isActive}
                   />
                 </DropdownMenuItem>
               )

@@ -4,6 +4,7 @@ import React, { type SetStateAction, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { type z } from 'zod'
 
+import { isSuccessStatus } from '~/components/platform/FormBuilder/Utils/http'
 import { Card } from '~/components/ui/card'
 import { Collapsible } from '~/components/ui/collapsible'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
@@ -153,7 +154,7 @@ export const FormBuilder = (props: IPropsForms) => {
             errors: form?.formState?.errors,
             status_code: 422,
           })
-          return
+          return;
         }
         resolve()
       }
@@ -165,7 +166,7 @@ export const FormBuilder = (props: IPropsForms) => {
     // Clean up the listener when the component unmounts
     return () => {
       eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler)
-    }
+    };
   }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent])
 
   useEffect(() => {
@@ -183,12 +184,12 @@ export const FormBuilder = (props: IPropsForms) => {
   //* handler to disable form
   const handleCloseGrid = () => {
     setOpenGrid('')
-  }
+  };
 
   const handleRemovedSelectedRecords = (records: any[]) => {
     if (!filterGridConfig?.onRemoveSelectedRecords) {
       toast.error('No onRemoveSelectedRecords function found')
-      return
+      return;
     }
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.resolve(
@@ -245,53 +246,53 @@ export const FormBuilder = (props: IPropsForms) => {
         form.reset(currentValues)
 
         setDisplayType('form')
-        return
+        return;
       }
       setDisplayType('selected')
     })
-  }
+  };
 
   const handleSearchOpen = () => {
     setIsOpenSearch(!isOpenSearch)
-  }
+  };
 
   const handleAccordionChange = (value: string) => {
     setIsAccordionExpanded(value === 'item-1')
     setOpenGrid(value)
-  }
+  };
 
   const handleOpenForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setIsFormOpened(!isFormOpened)
-  }
+  };
 
   const handleListLoading = (loading: boolean) => {
     setIsListLoading(loading)
-  }
+  };
 
   const handleDebug = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
     setDebugOn(!debugOn)
-  }
+  };
 
   const handleLock = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     disableForm()
-  }
+  };
 
   const handleAccordionExpand = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setIsAccordionExpanded(!isAccordionExpanded)
-  }
+  };
 
   const handleNewRecordFormFilterGrid = () => {
     setDisplayType('form')
-  }
+  };
 
   const handleSelectedGridRecords = (data: Record<string, any>[]) => {
     const record
-    = filterGridConfig?.actionType === 'single-select' ? data?.[0] : data
+      = filterGridConfig?.actionType === 'single-select' ? data?.[0] : data
 
     form.reset(record, {
       keepDirty: false,
@@ -302,22 +303,22 @@ export const FormBuilder = (props: IPropsForms) => {
     handleSearchOpen()
     handleCloseGrid()
     setDisplayType('selected')
-  }
+  };
 
   const handleAppendForm = () => {
     if (!enableAppendForm) return
     eventEmitter.emit(`${formKey}:${appendFormKey}`)
-  }
+  };
 
   const handleUpdateDisplayType = (type: SetStateAction<TDisplayType>) => {
     setDisplayType(type)
-  }
+  };
 
   //* ACTIONS
   const disableForm = () => {
     form.clearErrors()
     form.control._disableForm(!form.formState.disabled)
-  }
+  };
 
   const saveForm = async (data: z.infer<typeof formSchema>) => {
     if (!customRender) {
@@ -326,10 +327,10 @@ export const FormBuilder = (props: IPropsForms) => {
         form_key: 'action',
       })
       await onSubmit(data)
-      return
+      return;
     }
     await onSubmit(data)
-  }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSaveLoading(true)
@@ -346,13 +347,18 @@ export const FormBuilder = (props: IPropsForms) => {
         })
         setIsSaveLoading(false)
         form.control._disableForm(true)
-        return
+        return;
       }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
         const res = (await handleSubmit({ data, form })) as any
-        const { errors = {}, existing = false } = res || {}
+        const {
+          errors = {},
+          existing = false,
+          data: response_data,
+        } = res || {}
+        const { httpStatus } = response_data ?? {}
 
         const form_errors = errors?.form || []
         setIsSaveLoading(false)
@@ -368,17 +374,21 @@ export const FormBuilder = (props: IPropsForms) => {
           )
           setIsSaveLoading(false)
 
-          return
+          return;
         }
 
-        if (!!Object.keys(form.formState.errors).length || form_errors.length) {
+        if (
+          !!Object.keys(form.formState.errors).length
+          || form_errors.length
+          || (httpStatus && !isSuccessStatus(httpStatus))
+        ) {
           eventEmitter.emit(`formStatus:${formKey}`, {
             status: 'failed',
             form_key: formKey,
           })
           setIsSaveLoading(false)
 
-          return
+          return;
         }
         form.reset(data, {
           keepDirty: false,
@@ -474,7 +484,7 @@ export const FormBuilder = (props: IPropsForms) => {
         `${formProps?.entity}-${formProps?.shell_type}-${formKey}-form`,
       )}
     >
-      <Collapsible className='space-y-2' open={defaultDisplay === 'expanded'}>
+      <Collapsible className="space-y-2" open={defaultDisplay === 'expanded'}>
         <Card className={cn('border-none shadow-none', `p-0 sm:p-2`)}>
           <FormBuilderLayout
             {...props}
@@ -515,4 +525,4 @@ export const FormBuilder = (props: IPropsForms) => {
       </Collapsible>
     </form>
   )
-}
+};

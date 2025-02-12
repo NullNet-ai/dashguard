@@ -1,0 +1,7 @@
+{
+  "app_name": "platform__FileUpload",
+  "tag": "1.8.0",
+  "branch": "released/feat/1.8.0",
+  "message": "Fix Filled States to show file",
+  "publish_name": "Rob Caldosa"
+}

@@ -89,15 +89,15 @@ export default function AppSideBar(config: ISideBarProps) {
             <Fragment key={index}>
               {!item?.groups?.length
                 ? (
-                    <Menu item={item} screenType={screen || screenType} />
-                  )
+                  <Menu item={item} screenType={screen || screenType} />
+                )
                 : (
-                    <GroupMenu
-                      title={item?.groupTitle || ''}
-                      groups={item.groups}
-                      screenType={screen || screenType || ''}
-                    />
-                  )}
+                  <GroupMenu
+                    title={item?.groupTitle || ''}
+                    groups={item.groups}
+                    screenType={screen || screenType || ''}
+                  />
+                )}
               {item?.separator && <Separator className="my-2" />}
             </Fragment>
           )
@@ -111,32 +111,32 @@ export default function AppSideBar(config: ISideBarProps) {
                 <DropdownMenuTrigger asChild>
                   {open
                     ? (
-                        <div
-                          className={cn(`${open ? 'w-full border-b opacity-100' : 'h-0 w-0 opacity-0'} `)}
-                        >
-                          <SidebarMenuButton
-                            data-test-id="sdnavmenu-ftr-btn"
-                            size="lg"
-                            className="h-12 w-full p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                          >
-                            {footerComponent}
-                            <ChevronUpDownIcon className="ml-auto size-4" />
-                          </SidebarMenuButton>
-                        </div>
-                      )
-                    : (
-                        <div
-                          className={cn(
-                            `cursor-pointer ${!open ? 'w-full opacity-100' : 'h-0 w-0 opacity-0'}`,
-                          )}
+                      <div
+                        className={cn(`${open ? 'w-full border-b opacity-100 py-2' : 'h-0 w-0 opacity-0'} `)}
+                      >
+                        <SidebarMenuButton
+                          data-test-id="sdnavmenu-ftr-btn"
+                          size="lg"
+                          className="h-12 w-full p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                           {footerComponent}
-                        </div>
-                      )}
+                          <ChevronUpDownIcon className="ml-auto size-4" />
+                        </SidebarMenuButton>
+                      </div>
+                    )
+                    : (
+                      <div
+                        className={cn(
+                          `cursor-pointer ${!open ? 'w-full opacity-100' : 'h-0 w-0 opacity-0'}`,
+                        )}
+                      >
+                        {footerComponent}
+                      </div>
+                    )}
                 </DropdownMenuTrigger>
                 <Button
                   variant="ghost"
-                  onClick={() => void handleLogout()}
+                  onClick={() => handleLogout()}
                   data-test-id="sdnavmenu-ftr-logout-btn"
                   className={cn(
                     `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${open && !isMobile ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,
@@ -146,31 +146,31 @@ export default function AppSideBar(config: ISideBarProps) {
                     className="mr-2 ms-3 h-5 w-5"
                   />
                   {(open && !isMobile)
-                  || (openMobile && isMobile)
-                  || (open && !openMobile && !isMobile)
+                    || (openMobile && isMobile)
+                    || (open && !openMobile && !isMobile)
                     ? (
-                        <p>Logout</p>
-                      )
+                      <p>Logout</p>
+                    )
                     : null}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
                   {(open && !isMobile) || (openMobile && isMobile)
                     ? (
-                        <span>
-                          &copy;
-                          {' All Rights Reserved. '}
-                          {currentYear}
-                          {' '}
-                          DNA Micro
-                          <sup className="text-[8px]">TM</sup>
-                        </span>
-                      )
+                      <span>
+                        &copy;
+                        {' All Rights Reserved. '}
+                        {currentYear}
+                        {' '}
+                        DNA Micro
+                        <sup className="text-[8px]">TM</sup>
+                      </span>
+                    )
                     : (
-                        <span>
-                          &copy;
-                          {currentYear}
-                        </span>
-                      )}
+                      <span>
+                        &copy;
+                        {currentYear}
+                      </span>
+                    )}
                 </footer>
                 {footerMenuConfig && (
                   <DropdownMenuContent

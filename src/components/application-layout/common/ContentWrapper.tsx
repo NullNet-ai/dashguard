@@ -1,0 +1,35 @@
+'use client'
+import { usePathname } from 'next/navigation'
+import React from 'react'
+
+import { cn } from '~/lib/utils'
+
+interface ContentWraperProps {
+  children: React.ReactNode
+}
+
+const ContentWraper = ({ children }: ContentWraperProps) => {
+  const pathname = usePathname() || ''
+  const [, , firstSegment, application, ,] = pathname.split('/')
+
+  const mtop
+    = application === 'record'
+      ? 'lg:mt-[0px] md:mt-[53px] mt-[126px]'
+      : application === 'wizard'
+        ? 'lg:mt-[0] mt-[128px] md:mt-[53px]'
+        : firstSegment === 'dashboard'
+          ? 'lg:mt-[50px] md:mt-[80px] mt-[100px]'
+          : 'mt-[140px]';
+
+  return (
+    <div
+      className={cn(
+        'mb-12 lg:mb-0 lg:mt-0', `${application === 'grid' ? 'mt-[114px] pt-2 md:mt-[45px] lg:mt-[0px] lg:pt-0' : mtop}`,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
+export default ContentWraper;

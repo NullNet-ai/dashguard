@@ -4,8 +4,11 @@ import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 import { formatPhoneNumber } from "~/utils/formatter";
 import { cn } from "~/lib/utils";
+import { Badge } from '~/components/ui/badge';
+import { Separator } from '~/components/ui/separator';
 
 const fields = {
+  Category: "categories",
   "Primary Phone Number": "phone",
   "Primary Email": "email",
   "Full Name": "full_name",
@@ -62,6 +65,7 @@ const RecordShellSummary = ({
     code: identifier!,
     pluck_fields: [
       "id",
+      "categories",
       "first_name",
       "last_name",
       "middle_name",
@@ -84,8 +88,13 @@ const RecordShellSummary = ({
 
   const { organizations, user_roles } = org_record?.data || {};
 
+  const categories = data?.categories || [];
+
   const record_details = {
     ...data,
+    categories: categories.length
+      ? categories
+      : null,
     full_name:
       `${data?.first_name || ""} ${data?.middle_name || ""} ${data?.last_name || ""}`.trim() ||
       "None",
@@ -93,24 +102,24 @@ const RecordShellSummary = ({
     email,
     organization: organizations?.length
       ? organizations
-          .sort(
-            (
-              a: {
-                label: string;
-              },
-              b: {
-                label: string;
-              },
-            ) => a.label.localeCompare(b.label),
-          )
-          .map(({ label }: { label: string }) => label)
-          .join(", ")
+        .sort(
+          (
+            a: {
+              label: string;
+            },
+            b: {
+              label: string;
+            },
+          ) => a.label.localeCompare(b.label),
+        )
+        .map(({ label }: { label: string }) => label)
+        .join(", ")
       : "None",
     role: user_roles?.length
       ? user_roles
-          .sort((a, b) => a.label.localeCompare(b.label))
-          .map(({ label }: { label: string }) => label)
-          .join(", ")
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map(({ label }: { label: string }) => label)
+        .join(", ")
       : "None",
   };
 
@@ -137,21 +146,31 @@ const RecordShellSummary = ({
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value], index) => (
-        <div className={cn(`${index !== 0 ? 'pt-[4px]' : 'pt-2'}`)} key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {(record_details as { [key: string]: any })?.[value] ||
-                    "None"}
-                </span>
+      {Object.entries(fields).map(([key, value], index) => {
+        const fieldValue = (record_details as { [key: string]: any })?.[value];
+        if (value === "categories" && !fieldValue) {
+          return null;
+        }
+        return (
+          <div className={cn(`${index !== 0 ? 'pt-[4px]' : ''}`)} key={key}>
+            <div className="px-5">
+              <div className="p-1 text-sm">
+                <div>
+                  <span className="text-slate-400">{key}: </span>
+                  {value === "categories" ? (
+                    <div className='inline-flex gap-2 p-1'>{fieldValue.map((category: string) => (
+                      <Badge variant={"primary"} className='' key={category}>{category}</Badge>
+                    ))}</div>
+                  ) : (
+                    <span>{fieldValue || "None"}</span>
+                  )}
+                </div>
               </div>
             </div>
+            {value === "categories" && fieldValue && <Separator />}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCurrencyInput",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.6.2<unreleased>",
+  "branch": "unreleased/fix/1963/1.6.2<unreleased>",
+  "message": "Make the background secondary when disabled to include the select so whole currency input is disabled to look at",
+  "publish_name": "Rob Caldosa"
 }

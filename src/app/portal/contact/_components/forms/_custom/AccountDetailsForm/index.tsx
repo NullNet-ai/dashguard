@@ -198,7 +198,7 @@ export default function AccountDetailsForm({
                   name:
                     field?.status === "Active"
                       ? "Deactivate Account"
-                      : "Activate Account",
+                      : "Reactivate Account",
                   onClick: () => {
                     if (field?.status === "Active") {
                       setDialogContext({
@@ -210,7 +210,7 @@ export default function AccountDetailsForm({
                       });
                       return;
                     }
-                    void handleUpdateAccountStatus({
+                    handleUpdateAccountStatus({
                       index,
                       account_id: field?.id,
                       status:
@@ -221,7 +221,7 @@ export default function AccountDetailsForm({
               ]}
               form={form}
               handleCancel={() => handleCancel(index, field?.id)}
-              handleSave={() => void handleClickSave(index, field)}
+              handleSave={() => handleClickSave(index, field)}
               handleUnlock={() => handleUnlock(index)}
               hideEllipseOptions={formProps?.shell_type !== "record"}
               isLock={!!field?.disabled}

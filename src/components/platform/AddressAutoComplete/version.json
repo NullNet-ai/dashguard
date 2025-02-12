@@ -1,7 +1,7 @@
 {
   "app_name": "platform__AddressAutoComplete",
-  "tag": "1.9.0<unreleased>",
-  "branch": "unreleased/fix/1.9.0<unreleased>",
-  "message": "fix icon be invisible when disabled",
+  "tag": "1.10.0",
+  "branch": "released/feat/1.10.0",
+  "message": "Release AddressAutoComplete",
   "publish_name": "Rob Caldosa"
 }

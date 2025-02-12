@@ -14,9 +14,14 @@ import { Form, FormField, FormMessage } from '~/components/ui/form'
 import LoginSubmit from '../actions/loginSubmit'
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: 'Please enter your username.' }),
-  password: z.string().min(1, { message: 'Please enter your password.' }).min(5, 'Password must contain at least 5 characters.'),
-});
+  username: z.string({
+    required_error: 'Please enter your username.',
+  }),
+  password: z
+    .string({
+      required_error: 'Please enter your password.',
+    }),
+})
 
 export default function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,7 +38,13 @@ export default function LoginForm() {
     catch (error: any) {
       console.error('Error Details:', error.message)
       setIsSubmitting(false)
-      setError(error.message)
+      try {
+        const parsedError = JSON.parse(error.message);
+        setError(parsedError?.[0]?.message)
+      }
+      catch {
+        setError(error.message)
+      }
     }
   }
   const form = useForm({
@@ -45,12 +56,12 @@ export default function LoginForm() {
       <form
         className='space-y-6'
         onSubmit={(event) => {
-          void form.handleSubmit(onSubmit)(event)
+          form.handleSubmit(onSubmit)(event)
         }}
       >
         <FormField
-          name="username"
           control={form.control}
+          name="username"
           render={(formProps) => {
             return (
               <FormInput
@@ -63,7 +74,7 @@ export default function LoginForm() {
                   type: 'text',
                 }}
                 form={form}
-                formKey='Login'
+                formKey="Login"
                 formRenderProps={formProps}
               />
             )
@@ -71,7 +82,7 @@ export default function LoginForm() {
         />
         <FormField
           control={form.control}
-          name="password"
+          name='password'
           render={(formProps) => {
             return (
               <FormPassword
@@ -92,30 +103,26 @@ export default function LoginForm() {
         {error && <FormMessage>{error}</FormMessage>}
         <div className='flex w-full items-center justify-between'>
           <div className='flex items-center'>
-            <Checkbox
-              id='rememberMe'
-              name='rememberMe'
-            />
+            <Checkbox id='rememberMe' name='rememberMe' />
             <label
-              className="ml-2 block text-md font-semibold text-foreground"
-              htmlFor="rememberMe"
+              className='ml-2 block text-md font-semibold text-foreground'
+              htmlFor='rememberMe'
             >
               Remember me
             </label>
           </div>
           <div className='text-md'>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="font-semibold text-primary" href="#">
+            <a className='font-semibold text-primary' href='#'>
               Forgot Password?
             </a>
           </div>
         </div>
         <Button
-          className='!mt-8 flex h-auto w-full items-center justify-center\
-          rounded py-1.5 text-md font-semibold text-white shadow-sm'
+          className={'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'}
           data-test-id='login-submit-btn'
           loading={isSubmitting}
-          type="submit"
+          type='submit'
         >
           Sign in
         </Button>

@@ -1,0 +1,7 @@
+{
+  "app_name": "FormControl__FormFileUpload",
+  "tag": "1.11.0",
+  "branch": "released/fix/1.11.0",
+  "message": "Add the deleted prop form in the FileUpload ",
+  "publish_name": "Rob Caldosa"
+}
