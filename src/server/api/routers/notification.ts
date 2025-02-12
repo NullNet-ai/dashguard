@@ -62,12 +62,14 @@ export const notificationsRouter = createTRPCRouter({
               className: 'bg-red-500',
             },
           ],
-          contact_id: '123',
-          acknowledged: false,
-          metadata: JSON.stringify({
-            actionValue: 'yes',
-            actionMetadata: 'test',
-          }),
+          recipients: ['123'],
+          status : 'unread',
+          priority: 'high',
+          expires_at: '',
+          is_acknowledged: false,
+          metadata: {
+            
+          },
         },
         token,
       );

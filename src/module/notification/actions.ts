@@ -1,8 +1,12 @@
 import { notification_container } from './notifications.class';
 
-notification_container.set('yes', async (context: any, metadata: any) => {
-  console.log('Action: YES');
-  console.log('Context:', context);
-  console.log('Metadata:', metadata);
-  // Add your action handling logic here
-});
+const actionsMap = new Map([
+  ['yes', async (context : any, metadata : any) => {
+    console.log('Action: YES', context, metadata);
+  }],
+  ['no', async (context, metadata) => {
+    console.log('Action: NO', context, metadata);
+  }],
+]);
+
+notification_container.setActions(actionsMap);
