@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "~/lib/utils";
 import { handleEdit } from "../platform/Grid/DefatultRow/Actions";
+type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -15,18 +16,32 @@ Table.displayName = "Table";
 
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <thead
-    ref={ref}
-    className={cn(
-      "sticky top-0 z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100",
+  React.HTMLAttributes<
+    HTMLTableSectionElement & { parentType?: GridParentType }
+  > & { parentType?: GridParentType }
+>(
+  (
+    {
       className,
-    )}
-    {...props}
-  />
-));
-TableHeader.displayName = "TableHeader";
+      parentType,
+      ...props
+    }: React.HTMLAttributes<HTMLTableSectionElement> & {
+      parentType?: GridParentType;
+    },
+    ref,
+  ) => (
+    <thead
+      ref={ref}
+      className={cn(
+        'sticky top-0',
+        `${parentType !== 'grid_expansion' ? 'z-50 bg-muted [&_tr]:border-b [&_tr]:border-sky-100' : 'z-0 border-b border-b-gray-200'}`,
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+TableHeader.displayName = 'TableHeader';
 
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
