@@ -103,7 +103,6 @@ const FormHeader = (props: IFormHeaderProps) => {
             data-test-id={testIDFormatter(
               `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-append-btn`,
             )}
-            disabled={form.formState.disabled}
             size='xs'
             type='button'
             onClick={() => {
