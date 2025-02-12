@@ -1,5 +1,5 @@
-import React from "react";
+import React from 'react'
 
 export default function DefaultBasicPage() {
-  return <div>Default Record Page</div>;
+  return <div>Default Record Page</div>
 }

@@ -1,8 +1,8 @@
 export interface ILayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export interface IErrorProps {
-  error: Error & { digest?: string };
-  reset: () => void;
+  error: Error & { digest?: string }
+  reset: () => void
 }

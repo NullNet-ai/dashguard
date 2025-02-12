@@ -1,10 +1,10 @@
-import { SortingState } from "@tanstack/react-table";
+import { type SortingState } from '@tanstack/react-table'
 
 const defaultSorting = [
   {
-    id: "code",
+    id: 'code',
     desc: true,
   },
-] as SortingState;
+] as SortingState
 
-export default defaultSorting;
+export default defaultSorting

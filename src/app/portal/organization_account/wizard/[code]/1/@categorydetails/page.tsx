@@ -1,4 +1,4 @@
-import CategoryDetails from '../../../../_components/forms/category-details/server';
+import CategoryDetails from '../../../../_components/forms/category-details/server'
 export default function FormBuilderGuidePage() {
-  return <CategoryDetails />;
+  return <CategoryDetails />
 }

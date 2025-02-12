@@ -19,5 +19,5 @@ const stepsNavigation = {
     prev: true,
     skip: false,
   },
-};
-export default stepsNavigation;
+}
+export default stepsNavigation

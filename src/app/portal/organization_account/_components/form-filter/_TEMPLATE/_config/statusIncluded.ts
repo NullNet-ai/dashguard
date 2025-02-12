@@ -1,3 +1,3 @@
-const STATUS_INCLUDED = ['Active'];
+const STATUS_INCLUDED = ['Active']
 
-export default STATUS_INCLUDED;
+export default STATUS_INCLUDED

@@ -1,12 +1,12 @@
-import { getGridLink } from "~/lib/grid-get-link";
-import { ISidebarMenu } from "~/components/platform/SideBar/type";
+import { type ISidebarMenu } from '~/components/platform/SideBar/type'
+import { getGridLink } from '~/lib/grid-get-link'
 
 const menu = {
-  title: "Accounts",
+  title: 'Accounts',
   url: getGridLink({
-    mainEntity: "organization_account",
+    mainEntity: 'organization_account',
   }),
-  icon: "UserGroupIcon",
-} as ISidebarMenu;
+  icon: 'UserGroupIcon',
+} as ISidebarMenu
 
-export default menu;
+export default menu

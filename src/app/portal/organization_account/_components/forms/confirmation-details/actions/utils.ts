@@ -3,6 +3,6 @@ export const transformDataToOptions = (data: any) => {
     return {
       label: item,
       value: item,
-    };
-  });
-};
+    }
+  })
+}

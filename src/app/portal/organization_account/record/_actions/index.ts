@@ -1,6 +1,6 @@
-"use server";
+'use server'
 
-import { TStatus } from "./types";
+import { type TStatus } from './types'
 
 const handleChangeStatus = (
   status: TStatus,
@@ -14,9 +14,10 @@ const handleChangeStatus = (
     // });
     // toast.success("Status changed sucessfully.");
     // return response;
-  } catch (error) {
+  }
+  catch (error) {
     // toast.error("Failed to change status.");
   }
-};
+}
 
-export { handleChangeStatus };
+export { handleChangeStatus }

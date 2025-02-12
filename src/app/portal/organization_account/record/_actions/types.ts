@@ -1,3 +1,3 @@
-type TStatus = "Test" | "Failed" | "Passed";
+type TStatus = 'Test' | 'Failed' | 'Passed'
 
-export type { TStatus };
+export type { TStatus }

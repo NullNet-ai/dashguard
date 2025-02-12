@@ -1,3 +1,3 @@
-const FORM_FILTER_LABEL = "Test-Label";
+const FORM_FILTER_LABEL = 'Test-Label'
 
-export default FORM_FILTER_LABEL;
+export default FORM_FILTER_LABEL

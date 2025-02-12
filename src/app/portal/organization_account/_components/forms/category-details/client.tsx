@@ -1,29 +1,31 @@
-"use client";
+'use client'
 
-import { type z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { useToast } from "~/context/ToastProvider";
-import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { UpdateCategory } from "./actions/updateCategory";
-import { IFormProps } from "../types";
-import { XIcon } from "lucide-react";
-import CustomCategoryDetails from './CategoryDetails';
+import { XIcon } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { type z } from 'zod'
+
+import { FormBuilder } from '~/components/platform/FormBuilder'
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
+import { useToast } from '~/context/ToastProvider'
+import { ContactCategoryDetailsSchema } from '~/server/zodSchema/contact/categoryDetails'
+
+import { type IFormProps } from '../types'
+
+import { UpdateCategory } from './actions/updateCategory'
+import CustomCategoryDetails from './CategoryDetails'
 
 export default function CategoryDetails({ params, defaultValues }: IFormProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const toast = useToast();
+  const router = useRouter()
+  const pathname = usePathname()
+  const toast = useToast()
 
-  const { shell_type } = params;
-  const { categories } = defaultValues || {};
+  const { shell_type } = params
+  const { categories } = defaultValues || {}
 
   useEffect(() => {
-    if (shell_type === "wizard" && categories !== "Contact")
-      router.replace(`${pathname}?categories=${categories}`);
-  }, [categories, shell_type]);
+    if (shell_type === 'wizard' && categories !== 'Contact') router.replace(`${pathname}?categories=${categories}`)
+  }, [categories, shell_type])
 
   const handleSave = async ({
     data,
@@ -31,54 +33,55 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
     try {
       await UpdateCategory({
         id: params.id,
-        categories: data.categories ?? "",
-      });
-      toast.success("Category Details submitted successfully.");
-    } catch (error) {
-      toast.error("Failed to submit Category Details.");
+        categories: data.categories ?? '',
+      })
+      toast.success('Category Details submitted successfully.')
     }
-  };
+    catch (error) {
+      toast.error('Failed to submit Category Details.')
+    }
+  }
 
   return (
     <FormBuilder
-      myParent={params.shell_type}
-      enableFormRegisterToParent
-      formProps={params}
-      formLabel="Category Details"
-      handleSubmit={handleSave}
-      formKey="ContactCategoryDetails"
-      formSchema={ContactCategoryDetailsSchema}
-      defaultValues={defaultValues}
-      selectOptions={{}}
-      fields={[]}
-      customRender={(form) => <CustomCategoryDetails form={form} />}
-      customFormHostViewFormActions={[
-        {
-          label: "Custom Action",
-          onClick: () => {
-             // todo
-          },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
       customFormHostLockFormActions={[
         {
-          label: "Custom Action",
+          label: 'Custom Action',
           onClick: () => {
             // todo
           },
-          icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
+          icon: <XIcon className={"h-3 w-3 text-slate-500"} strokeWidth={3} />,
           disabled: false,
           hidden: false,
         },
       ]}
+      customFormHostViewFormActions={[
+        {
+          label: 'Custom Action',
+          onClick: () => {
+            // todo
+          },
+          icon: <XIcon className={"h-3 w-3 text-slate-500"} strokeWidth={3} />,
+          disabled: false,
+          hidden: false,
+        },
+      ]}
+      customRender={(form) => <CustomCategoryDetails form={form} />}
+      defaultValues={defaultValues}
+      enableFormRegisterToParent={ true }
       features={
         {
           // enableFormHostLockActions: false,
         }
       }
+      fields={[]}
+      formKey={"ContactCategoryDetails"}
+      formLabel={"Category Details"}
+      formProps={params}
+      formSchema={ContactCategoryDetailsSchema}
+      handleSubmit={handleSave}
+      myParent={params.shell_type}
+      selectOptions={{}}
     />
-  );
+  )
 }

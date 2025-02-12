@@ -1,3 +1,3 @@
 export interface IWizardLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
