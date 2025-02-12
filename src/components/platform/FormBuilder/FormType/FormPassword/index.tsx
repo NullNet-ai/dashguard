@@ -75,7 +75,7 @@ export default function FormPassword({
       hasUppercase: /[A-Z]/.test(password),
       hasLowercase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      hasSpecialChar: /[!@#$^()_+\-=\\[\]{}:'",.?<>/]/.test(password),
     };
   };
 
@@ -209,12 +209,12 @@ export default function FormPassword({
           <div className="mt-2 space-y-1">
             {[
               { key: 'minLength', label: 'At least 12 characters' },
-              { key: 'hasUppercase', label: 'At least one uppercase letter' },
-              { key: 'hasLowercase', label: 'At least one lowercase letter' },
-              { key: 'hasNumber', label: 'At least one number' },
+              { key: 'hasLowercase', label: 'Contains one lowercase letter (a-z)' },
+              { key: 'hasUppercase', label: 'Contains one uppercase letter (A-Z)' },
+              { key: 'hasNumber', label: 'Contains one number (0-9)' },
               {
                 key: 'hasSpecialChar',
-                label: 'At least one special character',
+                label: 'Contains one special character (except *,%,&,;)',
               },
             ].map((rule) => (
               <div className="flex items-center" key={rule.key}>
