@@ -6,9 +6,9 @@ stages:
 
 master_build:
   stage: build
-  tags:
-    #- 'recruitment'
-    - 'runner-60-1-13'
+  # tags:
+  #   #- 'recruitment'
+  #   - 'runner-60-1-13'
   variables:
     REGISTRY_ADDRESS: 'registry.cebu.dnadev.net'
     REGISTRY_USERNAME: 'dna'
@@ -51,9 +51,9 @@ master_build:
 
 update_stack:
   stage: update_portainer-development
-  tags:
-     #- 'recruitment'
-    - 'runner-60-1-13'
+  # tags:
+  #    #- 'recruitment'
+  #   - 'runner-60-1-13'
   variables:
     ENDPOINT_ID: 2
     STACK_ID: 16
@@ -75,8 +75,8 @@ update_stack:
 
 update_stack_qa:
   stage: update_portainer-qa
-  tags:
-    - 'qa'
+  # tags:
+  #   - 'qa'
   variables:
     ENDPOINT_ID: 5
     STACK_ID: 20
