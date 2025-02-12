@@ -578,8 +578,7 @@ const MultipleSelector = React.forwardRef<
         <div className={`relative`}>
           {open && (
             <CommandList
-              // add top-0 instead of top-1 to avoid the border of the input field. Remove also border and shadow-md to not show the border when empty.
-              className="absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in pt-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none "
+              className="absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0"
               onMouseLeave={() => {
                 setOnScrollbar(false);
               }}
@@ -603,7 +602,7 @@ const MultipleSelector = React.forwardRef<
                     <CommandGroup
                       key={key}
                       heading={key}
-                      className="m-1 max-h-60 w-full h-full overflow-auto "
+                      className=" max-h-60 w-full h-full overflow-auto "
                     >
                       <>
                         {dropdowns.map((option) => {
