@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.9.0",
-  "branch": "released/feat/PLATFORM7-2313/1.9.0",
-  "message": "Fixed grid alignment issues and action missing in mobile",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.11.0-rc.1<unreleased>",
+  "branch": "unreleased/fix/1.11.0-rc.1<unreleased>",
+  "message": "sync form filter search capability",
+  "publish_name": "Franklin"
 }
