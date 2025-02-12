@@ -1,18 +1,21 @@
-import { EOperator } from '@dna-platform/common-orm'
-import argon2 from 'argon2'
-import { z } from 'zod'
+import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
+import argon2 from 'argon2';
+import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
-import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails'
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
-import { createDefineRoutes } from '../baseCrud'
-import { EStatus } from '../types'
+import { createDefineRoutes } from '../baseCrud';
+import { EStatus } from '../types';
+import ZodItems from '~/server/zodSchema/grid/items';
+import { formatSorting } from '~/server/utils/formatSorting';
+import { pluralize } from '~/server/utils/pluralize';
 
-const entity = 'organization_contacts'
+const ENTITY = 'organization_account';
 
 export const accountRouter = createTRPCRouter({
-  ...createDefineRoutes(entity),
+  ...createDefineRoutes(ENTITY),
   updateAccountDetails: privateProcedure
     .input(AccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
@@ -22,9 +25,9 @@ export const accountRouter = createTRPCRouter({
         account_id,
         account_secret,
         contact_id,
-      } = input ?? {}
+      } = input ?? {};
 
-      let { id } = input
+      let { id } = input;
       if (input.id) {
         const account = await ctx.dnaClient
           .update(input.id, {
@@ -51,12 +54,11 @@ export const accountRouter = createTRPCRouter({
               ],
             },
           })
-          .execute()
+          .execute();
         if (!account?.success) {
-          return null
+          return null;
         }
-      }
-      else {
+      } else {
         const [organizationRecord, contactRecord] = await Promise.all([
           ctx.dnaClient
             .findAll({
@@ -82,13 +84,13 @@ export const accountRouter = createTRPCRouter({
               },
             })
             .execute(),
-        ])
-        const userOrganization = ctx.session.account?.organization ?? {}
+        ]);
+        const userOrganization = ctx.session.account?.organization ?? {};
 
         const organization = {
           id: userOrganization?.id,
           name: userOrganization?.name || '',
-        }
+        };
 
         const account = {
           first_name: contactRecord?.data?.[0]?.first_name || '',
@@ -102,16 +104,16 @@ export const accountRouter = createTRPCRouter({
           account_organization_id: organization_id,
           account_organization_name: organizationRecord?.data?.[0]?.name || '',
           is_new_user: true,
-        }
+        };
 
         const result = await ctx.dnaClient
           .register(organization, account)
-          .execute()
+          .execute();
 
         if (!result?.success) {
-          return null
+          return null;
         }
-        id = result.data?.[0]?.organization_account_id
+        id = result.data?.[0]?.organization_account_id;
       }
 
       const updatedAccount = await ctx.dnaClient
@@ -133,16 +135,16 @@ export const accountRouter = createTRPCRouter({
             ],
           },
         })
-        .execute()
+        .execute();
 
-      const { account_organization_id, ...rest }
-        = updatedAccount?.data?.[0] ?? {}
+      const { account_organization_id, ...rest } =
+        updatedAccount?.data?.[0] ?? {};
       return {
         ...rest,
         organization_id: account_organization_id,
         account_secret: '************',
         disabled: true,
-      }
+      };
     }),
   fetchAccountDetails: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -175,7 +177,7 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       const accounts = await ctx.dnaClient
         .findAll({
@@ -196,9 +198,9 @@ export const accountRouter = createTRPCRouter({
             ],
           },
         })
-        .execute()
+        .execute();
 
-      const defaultAccountId = contactData?.data?.[0]?.contact_emails?.email
+      const defaultAccountId = contactData?.data?.[0]?.contact_emails?.email;
       const accountDetails = accounts.data.map(
         (account: Record<string, any>) => ({
           ...account,
@@ -206,7 +208,7 @@ export const accountRouter = createTRPCRouter({
           organization_id: account?.account_organization_id,
           disabled: true,
         }),
-      )
+      );
 
       return {
         contact: {
@@ -224,7 +226,7 @@ export const accountRouter = createTRPCRouter({
                 disabled: false,
               },
             ],
-      }
+      };
     }),
   fetchOrganizationRolesOptions: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -237,8 +239,8 @@ export const accountRouter = createTRPCRouter({
             pluck: ['id'],
           },
         })
-        .execute()
-      const contact_id = contactData.data?.[0]?.id
+        .execute();
+      const contact_id = contactData.data?.[0]?.id;
       const [userRole, organizationData] = await Promise.all([
         ctx.dnaClient
           .findAll({
@@ -291,23 +293,23 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute(),
-      ])
+      ]);
       const user_role = userRole.data.map(({ id, role }) => ({
         value: id,
         label: role,
-      }))
+      }));
 
       const organization = organizationData.data.map(
         (org: Record<string, any>) => {
-          const { id, name } = org?.organizations ?? {}
+          const { id, name } = org?.organizations ?? {};
           return {
             value: id,
             label: name,
-          }
+          };
         },
-      )
+      );
 
-      return { organization, user_role }
+      return { organization, user_role };
     }),
   updateAccountStatus: privateProcedure
     .input(z.object({ account_id: z.string(), status: z.string() }))
@@ -323,15 +325,15 @@ export const accountRouter = createTRPCRouter({
             pluck: ['id', 'status'],
           },
         })
-        .execute()
+        .execute();
 
-      return account
+      return account;
     }),
   validateAccountDetails: privateProcedure
     .input(AccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { organization_id, role_id, account_id, id, contact_id }
-        = input ?? {}
+      const { organization_id, role_id, account_id, id, contact_id } =
+        input ?? {};
       const [existingUsername, existingRoleOrg] = await Promise.all([
         ctx.dnaClient
           .findAll({
@@ -400,9 +402,9 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute(),
-      ])
-      const isValid
-        = !existingUsername.data.length && !existingRoleOrg.data.length
+      ]);
+      const isValid =
+        !existingUsername.data.length && !existingRoleOrg.data.length;
 
       return {
         isValid,
@@ -414,7 +416,7 @@ export const accountRouter = createTRPCRouter({
             ? 'Role already exists for this organization'
             : '',
         },
-      }
+      };
     }),
   fetchWizardSummary: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -487,7 +489,7 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       const existingAccounts = accounts.data?.map((account) => {
         return {
@@ -495,9 +497,126 @@ export const accountRouter = createTRPCRouter({
           organization: account.organizations.name,
           role: account.user_roles.role,
           account_id: account.organization_accounts.account_id,
-        }
-      })
+        };
+      });
 
-      return existingAccounts ?? []
+      return existingAccounts ?? [];
     }),
-})
+  fetchGridData: privateProcedure
+    .input(ZodItems)
+    .query(async ({ ctx, input }) => {
+      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+        .findAll({
+          entity: input?.entity,
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              organization_accounts: [
+                'account_id',
+                'status',
+                'code',
+                'categories',
+                'account_status',
+                'created_date',
+                'created_time',
+                'updated_date',
+                'updated_time',
+                'created_by',
+                'updated_by',
+                'contact_id'
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+              // created_by: ['first_name', 'last_name'],
+              // updated_by: ['first_name', 'last_name'],
+            },
+            track_total_records: true,
+            advance_filters: input.advance_filters as IAdvanceFilters[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+            },
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
+              : [],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'contact',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'created_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'updated_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'updated_by',
+            },
+          },
+        })
+        .execute();
+        
+        const formatted_items = items?.map((item: Record<string, any>) => {
+          const {
+            [pluralize(input?.entity)]: entity_data,
+            created_by,
+            updated_by,
+            contact,
+            ...rest
+          } = item
+          return {
+            ...entity_data,
+            ...rest,
+            first_name: contact?.first_name,
+            last_name: contact?.last_name,
+            created_by: created_by
+              ? `${created_by.first_name} ${created_by.last_name}`
+              : null,
+            updated_by: updated_by
+              ? `${updated_by.first_name} ${updated_by.last_name}`
+              : null,
+          }
+        })
+  
+        // Calculate total number of pages
+        const totalPages = Math.ceil(totalCount / (input.limit || 100))
+        return {
+          totalCount,
+          items: formatted_items,
+          currentPage: input.current || 1,
+          totalPages,
+        }
+    }),
+});

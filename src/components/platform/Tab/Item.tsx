@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { Fragment, useEffect, useMemo } from 'react'
 
-import { cn, formatAndCapitalize } from '~/lib/utils'
+import { cn, formatTabName } from '~/lib/utils'
 import { api } from '~/trpc/react'
 
 import CloseTab from './CloseKebab'
@@ -54,7 +54,7 @@ const Item = ({ tab, actions }: ItemProps) => {
               : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding
           )}
         >
-          {formatAndCapitalize(checkIfUserRole(tab.name) ? 'role' : tab.name)}
+          {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
           <CloseTab actions={actions} {...tab} />
           {isActive && (
             <span className={cn(`absolute bottom-[-2px] md:bottom-[-6px] lg:bottom-[-4px] z-10 h-1 w-full bg-white`, 
