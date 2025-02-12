@@ -4,6 +4,7 @@ import Entities from "~/auto-generated/entities";
 const ZodItems = z.object({
   entity: z.string().refine(
     (value) => {
+      console.log('%c Line:7 🥓 value', 'color:#6ec1c2', value);
       return Entities.includes(value);
     },
     {

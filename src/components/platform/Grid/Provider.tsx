@@ -50,10 +50,9 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
-  gridType?: 'card-list' | 'table';
 }
 
 export default function GridProvider({
@@ -416,13 +415,13 @@ export default function GridProvider({
         return [...columns, actionRow?.current];
       default:
         if (config?.enableRowExpansion) {
-          columns.unshift(expandTableRow?.current);
+          columns = [expandTableRow?.current, ...columns];
         }
         if (config?.enableRowSelection) {
-          columns.unshift(selectTableRow?.current);
+          columns = [selectTableRow?.current, ...columns];
         }
         if (!config?.disableDefaultAction) {
-          columns.push(actionRow?.current);
+          columns = [...columns, actionRow?.current];
         }
 
         return columns;

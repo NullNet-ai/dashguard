@@ -12,13 +12,13 @@ import ScrollContainer from "./common/GridScrollContainer";
 import GridDesktopContainer from "./common/GridDesktopContainer";
 
 
-function GridDesktop({parentType}: any) {
+function GridDesktop() {
   return (
     <Card className="col-span-full border-0 shadow-none">
       <CardHeader>
         <Header />
       </CardHeader>
-      <ScrollContainer parentType={parentType}>
+      <ScrollContainer >
           <GridDesktopContainer />
         {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollContainer>

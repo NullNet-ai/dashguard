@@ -6,7 +6,7 @@ import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
 
-import {  getBarPath } from '../utils/getBarPath'
+import {  _chartData, getBarPath } from '../utils/getBarPath'
 
 interface ShapeProps {
   x: number
@@ -43,6 +43,7 @@ const getLastTwentyFourHoursTimeStamp = () => {
 
 const CustomBarShape = (props: ShapeProps) => {
   const { x, y, width, height, value, payload, chart_data } = props
+  console.log('%c Line:47 🥛 payload.hour', 'color:#4fff4B', payload.hour);
   const d = getBarPath(x, y, width, height, value, payload.hour, chart_data)
   return <path d={d} fill={chartConfig.heartbeats.color} />
 }
@@ -70,7 +71,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
         <BarChart
           barCategoryGap={-4}
           barGap={-4}
-          data={record}
+          data={_chartData}
           margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
         >
           <XAxis dataKey="hour" hide={true} />

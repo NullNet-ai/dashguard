@@ -91,7 +91,7 @@ export interface IConfigGrid {
   // to hide/show checkbox
   enableRowSelection?: boolean
   // to identify if grid is a child grid
-  isChildGrid?: boolean,
+  isChildGrid?: boolean
 }
 
 interface IRowToArchive extends Row<any> {
@@ -157,7 +157,6 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[]
   advanceFilter?: ISearchItem[]
   parentExpanded?: IExpandedRow[]
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
 }
 
 export interface IExpandedRow {

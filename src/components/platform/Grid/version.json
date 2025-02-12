@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.11.0-rc.1<unreleased>",
-  "branch": "unreleased/fix/1.11.0-rc.1<unreleased>",
-  "message": "sync form filter search capability",
-  "publish_name": "Franklin"
+  "tag": "1.12.0",
+  "branch": "released/fix/1.12.0",
+  "message": "Grid Fixes > select row",
+  "publish_name": "Mary Grace Tiburillo-Tan"
 }
