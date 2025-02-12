@@ -21,7 +21,7 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.device_rule_status
-      return <Badge variant={value == 'Applied' ? 'success' : 'destructive'}>{value}</Badge>
+      return <Badge variant={value == 'Applied' ? 'success' : 'warning'}>{value}</Badge>
     },
   },
   {
