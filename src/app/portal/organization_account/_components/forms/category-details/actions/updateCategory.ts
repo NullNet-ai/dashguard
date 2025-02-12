@@ -17,12 +17,15 @@ export async function UpdateCategory({
 }: IProps) {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
+  const [, , mainEntity, application] = pathname.split('/')
 
-  await api.contact.updateCategoryDetails({
+  const result = await api.account.updateDraftAccount({
     id,
     categories,
   })
-  redirect(`${pathname}?categories=${categories}`)
+  if(application === 'wizard' && result?.data?.code) {
+    redirect(`/portal/${mainEntity}/wizard/${result?.data?.code}/1?categories=${categories}`)
+  }
 }
 
 export async function StepOneUpdateCategory({

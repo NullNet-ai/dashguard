@@ -12,7 +12,7 @@ const statuses = {
   'Invitation Expired': 'text-red-600 bg-red-400/10',
   'Access Disabled': 'text-red-600 bg-red-400/10',
   'Deactivated': 'text-red-600 bg-red-400/10',
-  'Internal User': 'text-green-600 bg-green-400/10',
+  'Internal User': 'text-blue-600 bg-blue-400/10',
   'External User': 'text-blue-600 bg-blue-400/10',
 }
 

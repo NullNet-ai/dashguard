@@ -11,6 +11,8 @@ import { EStatus } from '../types';
 import ZodItems from '~/server/zodSchema/grid/items';
 import { formatSorting } from '~/server/utils/formatSorting';
 import { pluralize } from '~/server/utils/pluralize';
+import { TRPCError } from '@trpc/server';
+import { headers } from 'next/headers';
 
 const ENTITY = 'organization_account';
 
@@ -512,6 +514,7 @@ export const accountRouter = createTRPCRouter({
           query: {
             pluck_object: {
               organization_accounts: [
+                'id',
                 'account_id',
                 'status',
                 'code',
@@ -523,7 +526,7 @@ export const accountRouter = createTRPCRouter({
                 'updated_time',
                 'created_by',
                 'updated_by',
-                'contact_id'
+                'contact_id',
               ],
               contacts: ['id', 'first_name', 'last_name'],
               // created_by: ['first_name', 'last_name'],
@@ -587,36 +590,97 @@ export const accountRouter = createTRPCRouter({
           },
         })
         .execute();
-        
-        const formatted_items = items?.map((item: Record<string, any>) => {
-          const {
-            [pluralize(input?.entity)]: entity_data,
-            created_by,
-            updated_by,
-            contact,
-            ...rest
-          } = item
-          return {
-            ...entity_data,
-            ...rest,
-            first_name: contact?.first_name,
-            last_name: contact?.last_name,
-            created_by: created_by
-              ? `${created_by.first_name} ${created_by.last_name}`
-              : null,
-            updated_by: updated_by
-              ? `${updated_by.first_name} ${updated_by.last_name}`
-              : null,
-          }
-        })
-  
-        // Calculate total number of pages
-        const totalPages = Math.ceil(totalCount / (input.limit || 100))
+
+      const formatted_items = items?.map((item: Record<string, any>) => {
+        const {
+          [pluralize(input?.entity)]: entity_data,
+          created_by,
+          updated_by,
+          contact,
+          ...rest
+        } = item;
         return {
-          totalCount,
-          items: formatted_items,
-          currentPage: input.current || 1,
-          totalPages,
+          ...entity_data,
+          ...rest,
+          first_name: contact?.first_name,
+          last_name: contact?.last_name,
+          created_by: created_by
+            ? `${created_by.first_name} ${created_by.last_name}`
+            : null,
+          updated_by: updated_by
+            ? `${updated_by.first_name} ${updated_by.last_name}`
+            : null,
+        };
+      });
+
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / (input.limit || 100));
+      return {
+        totalCount,
+        items: formatted_items,
+        currentPage: input.current || 1,
+        totalPages,
+      };
+    }),
+  updateDraftAccount: privateProcedure
+    .input(
+      z.object({
+        categories: z.string(),
+        id: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // const headerList = headers();
+      // const pathname = headerList.get('x-pathname') || '';
+      // const [, , , , identifier] = pathname.split('/');
+      if (input.id) {
+        const record = await ctx.dnaClient
+          .update(input.id, {
+            entity: ENTITY,
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                categories: [input.categories],
+              },
+              pluck: ['id', 'code', 'categories'],
+            },
+          })
+          .execute();
+        if (!record) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: `${ENTITY} update failed`,
+          });
         }
+        console.info('[Update Draft Account]', record);
+        return {
+          ...record,
+          data: record?.data?.[0],
+        };
+      }
+      const record = await ctx.dnaClient
+        .create({
+          entity: ENTITY,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              categories: [input.categories],
+              status: 'Draft',
+            },
+            pluck: ['id', 'code', 'categories'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `${ENTITY} creation failed`,
+        });
+      }
+      console.info('[Create Draft Account]', record);
+      return {
+        ...record,
+        data: record?.data?.[0],
+      };
     }),
 });
