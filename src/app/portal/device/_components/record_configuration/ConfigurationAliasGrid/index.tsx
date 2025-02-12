@@ -58,6 +58,7 @@ export default async function ConfigurationAliasGrid({
 
   return (
     <Grid
+       parentType="record"
       config={{
         entity: 'device_aliases',
         title: 'Aliases',

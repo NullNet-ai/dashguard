@@ -2,6 +2,18 @@ import { formatAndCapitalize } from "~/lib/utils";
 import { ISearchableField } from "../types";
 import { ulid } from "ulid";
 
+const findTextInValue = (value: unknown, searchText: string, operator: string) => {
+  if (["contains", "like"].includes(operator)) {
+    if (typeof value === "string") {
+      return value.toLowerCase().includes(searchText.toLowerCase()) ? value : null;
+    } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+      return value.find((v) => v.toLowerCase().includes(searchText.toLowerCase())) || null;
+    }
+  }
+  return value === searchText ? value : null;
+};
+
+
 export const transformSearchData = (
   items: Record<string, any>[] | undefined,
   searchText: string,
@@ -14,20 +26,15 @@ export const transformSearchData = (
       const searchableField = searchableFields.find(
         (field) => field.accessorKey === key,
       );
-      const isTextFound = ["contains", "like"].includes(
-        searchableField?.operator || "",
-      )
-        ? (value as any)?.includes(searchText)
-        : value === searchText;
-      if (isTextFound) {
+      const foundValue = findTextInValue(value, searchText, searchableField?.operator ?? "like");
+      if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
-          field: key,
-          values: [searchText],
+          values: [foundValue],
           operator: searchableField?.operator || "equal",
           type: "criteria",
-          label: searchableField?.label || formatAndCapitalize(key),
           ...searchableField,
+          label: searchableField?.label || formatAndCapitalize(key),
         });
       }
     }

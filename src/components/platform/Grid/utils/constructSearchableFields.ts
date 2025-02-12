@@ -11,7 +11,7 @@ export const constructSearchableFields = ({columns, entity}: {columns: ColumnDef
         field: accessorKey,
         label: header,
         entity,
-        operator: "equal",
+        operator: "like",
         ...(search_config ?? {}),
       } as ISearchableField;
     }

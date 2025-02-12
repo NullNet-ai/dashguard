@@ -161,6 +161,22 @@ footer {
   width: 10px;
 }
 
+/* Apply to specific elements */
+.main-grid-scroll-container::-webkit-scrollbar {
+  width: 10px; /* Adjust thickness */
+  height: 10px; /* For horizontal scrollbars */
+}
+
+.main-grid-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #c5c5c5; /* Changed to a medium grey color */
+  border-radius: 10px;
+  border: 2px solid #f0f0f0; /* Changed to match the track color */
+  border-radius: 10px; /* Rounded edges */
+}
+
+.main-grid-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background track */
+}
 ::-webkit-scrollbar-thumb {
   background-color: #888888; /* Changed to a medium grey color */
   border-radius: 10px;
@@ -227,21 +243,3 @@ input[type="number"] {
   display: none; /* Chrome, Safari, and Opera */
 }
 
-
-.leaflet-popup-content  {
-  margin: 10px!important;
-  margin-top: 14px!important;
-}
-
-
-
-.leaflet-left {
-  right: 10px!important;
-  left: auto!important;
-}
-
-
-.leaflet-top {
-  bottom: 20px!important;
-  top: auto!important;
-}

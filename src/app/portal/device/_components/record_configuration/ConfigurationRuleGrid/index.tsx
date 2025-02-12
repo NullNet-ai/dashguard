@@ -55,6 +55,7 @@ export default async function ConfigurationRuleGrid() {
 
   return (
     <Grid
+      parentType="record"
       config={{
         entity: 'device_rules',
         title: 'Rules',

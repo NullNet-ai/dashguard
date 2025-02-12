@@ -1,28 +1,31 @@
-"use client";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ColumnSort } from "@tanstack/react-table";
-import { Trash2, X } from "lucide-react";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { GridContext } from "../Provider";
-import { cn, formatAndCapitalize } from "~/lib/utils";
-import { testIDFormatter } from "~/utils/formatter";
+'use client';
+import { type ColumnSort } from '@tanstack/react-table';
+import { X } from 'lucide-react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
+import { cn, formatAndCapitalize } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
 
-const Sorting = () => {
+import { GridContext } from '../Provider';
+
+const Sorting = ({ className }: { className?: string }) => {
   const conref = useRef<any>(null);
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(GridContext);
-
-
   const entity = state?.config?.entity;
-
   const [data, setData] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+
+  const sortingFields = state?.sorting?.filter(
+    (item, index, self) => index === self.findIndex((i) => i.id === item.id),
+  );
 
   const getLabel = (id: string) => {
     const column = state?.config?.columns.find(
@@ -34,9 +37,9 @@ const Sorting = () => {
   useEffect(() => {
     const calc = (items?: any[]) => {
       const allItems: any[] = [];
-      const newData = items || state?.sorting || [];
-
-      const clearWidth = 65 + 63 + 42; // clear width, more width, and sort by
+      const newData = items || sortingFields || [];
+      // clear width, more width, and sort by
+      const clearWidth = 65 + 63 + 42;
       let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth;
       const containerWidth = conref.current?.offsetWidth || 0;
 
@@ -65,18 +68,18 @@ const Sorting = () => {
         setData(items);
       }
     };
-    if (document.readyState === "complete") {
-      handleResize()
+    if (document.readyState === 'complete') {
+      handleResize();
     } else {
-      window.addEventListener("load", handleResize);
+      window.addEventListener('load', handleResize);
     }
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("load", handleResize);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', handleResize);
     };
-  }, [state?.sorting, open]);
+  }, [sortingFields, open]);
 
   const lastHiddenIndexLeftPos = useMemo(() => {
     const lastIndex = data?.findIndex((item) => item.hidden);
@@ -88,46 +91,51 @@ const Sorting = () => {
       itemsRef.current[lastIndex - 1]?.offsetWidth +
       5
     );
-  }, [data, state?.sorting, itemsRef.current]);
+  }, [data, sortingFields, itemsRef.current]);
 
-  if (!state?.sorting?.length) return null;
+  if (!sortingFields?.length) return null;
 
   return (
     <div
-      className="sort-ref flex w-full flex-1 items-center overflow-hidden"
+      className={cn(
+        `sort-ref flex w-full flex-1 items-center overflow-hidden`,
+        className,
+      )}
       ref={conref}
     >
       <span className="text-nowrap text-xs text-foreground">Sort By</span>
-      {state?.sorting?.map((item: ColumnSort, index) => {
+      {sortingFields?.map((item: ColumnSort, index) => {
         const isHidden = data?.[index]?.hidden;
         return (
           <Badge
-            key={item.id}
-            variant="secondary"
             className={cn(
               `item-ref m-1 flex items-center gap-1 whitespace-nowrap`,
-              { "opacity-0": isHidden },
+              { 'opacity-0': isHidden },
             )}
+            key={item.id}
             ref={(el) => {
               if (el) {
                 itemsRef.current[index] = el;
               }
             }}
+            variant="secondary"
           >
-            {getLabel(item.id) as string} ({item.desc ? "Desc" : "Asce"})
-            <Button
-              variant="ghost"
-              size="xs"
-              name="removeSortingButton"
-              data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
-              key={`${item.id}-remove`}
-              className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
-              onClick={() => {
-                actions?.handleRemoveSorting(item.id);
-              }}
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            {getLabel(item.id) as string} ({item.desc ? 'Desc' : 'Asce'})
+            {sortingFields && sortingFields.length > 1 && (
+              <Button
+                className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                data-test-id={testIDFormatter(`${entity}-remove-sorting-btn`)}
+                key={`${item.id}-remove`}
+                name="removeSortingButton"
+                size="xs"
+                variant="ghost"
+                onClick={() => {
+                  actions?.handleRemoveSorting(item.id);
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </Badge>
         );
       })}
@@ -145,16 +153,16 @@ const Sorting = () => {
             }}
           >
             <DropdownMenuTrigger
-              asChild
+              asChild={true}
               onClick={() => {
                 setOpen(!open);
               }}
             >
               <Button
-                variant="outline"
-                size="xs"
-                name="removeSortingButton"
                 className="h-[24px] w-auto text-nowrap bg-muted px-2 text-default/70 hover:bg-transparent focus:outline-none"
+                name="removeSortingButton"
+                size="xs"
+                variant="outline"
                 onClick={() => {
                   //
                 }}
@@ -170,25 +178,26 @@ const Sorting = () => {
                   }
                   return (
                     <Badge
+                      className="flex items-center gap-1 self-start whitespace-nowrap"
                       key={item.id}
-                      variant="secondary"
-                      className="flex items-center gap-1 whitespace-nowrap self-start"
                       ref={(el: any) => (itemsRef.current[index] = el)}
+                      variant="secondary"
                     >
-                     {getLabel(item.id) as string} ({item.desc ? "Desc" : "Asce"})
-                       <Button
-                          variant="ghost"
-                          size="xs"
-                          name="removeSortingButton"
-                          key={`${item.id}-remove`}
-                          className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
-                          onClick={() => {
-                            actions?.handleRemoveSorting(item.id);
-                            setOpen(false);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                      {getLabel(item.id) as string} (
+                      {item.desc ? 'Desc' : 'Asce'})
+                      <Button
+                        className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                        key={`${item.id}-remove`}
+                        name="removeSortingButton"
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => {
+                          actions?.handleRemoveSorting(item.id);
+                          setOpen(false);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </Badge>
                   );
                 })}
@@ -198,21 +207,21 @@ const Sorting = () => {
         </div>
       ) : null}
       <Button
+        className={cn(
+          `h-[30px] text-default/60 underline hover:no-underline`,
+          `${data?.length && data.some((item) => item.hidden) ? 'absolute mt-[2px]' : ''}`,
+        )}
         name="resetSortButton"
-        variant={"link"}
         style={{
           left: lastHiddenIndexLeftPos ? lastHiddenIndexLeftPos + 63 : 0,
         }}
-        className={cn(
-          `h-[30px] text-default/60 underline hover:no-underline`,
-          `${data?.length && data.some((item) => item.hidden) ? "absolute mt-[2px]" : ""}`,
-        )}
+        variant="link"
         onClick={() => {
-          // platform dev will add this
+          actions?.handleResetSorting();
         }}
       >
-        <Trash2 className="size-4 block lg:hidden"/>
-        <span className="hidden md:block">Clear All</span>
+        {/* <Trash2 className="size-4 block lg:hidden"/> */}
+        <span>Reset Sort</span>
       </Button>
     </div>
   );
