@@ -246,8 +246,9 @@ export default function AccountDetailsForm({
                     formType: "select",
                     label: "Organization",
                     required: true,
-                    disabled: !!field?.disabled,
-                    readonly: field?.id && formProps?.shell_type === "record",
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -256,7 +257,9 @@ export default function AccountDetailsForm({
                     formType: "select",
                     label: "Role",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -265,7 +268,9 @@ export default function AccountDetailsForm({
                     formType: "input",
                     label: "Username",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -274,7 +279,9 @@ export default function AccountDetailsForm({
                     formType: "password",
                     label: "Password",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     placeholder: field?.id ? "Change password" : "",
                     isCustomFormField: true,
                     showPasswordStrengthBar: true,
