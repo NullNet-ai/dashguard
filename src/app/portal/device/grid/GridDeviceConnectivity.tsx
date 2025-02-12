@@ -63,7 +63,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
 
   return (
     <ChartContainer
-      className="h-9 w-40 border border-gray-300"
+      className="h-8 w-40 border border-gray-300 overflow-hidden"
       config={chartConfig}
       style={{ margin: '2px', padding: '0', borderRadius: '8px' }}
     >
