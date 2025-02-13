@@ -67,6 +67,7 @@ export default async function Page({
         categories: ['Firewall'],
       },
       hideColumnsOnMobile: [],
+      deleteCustomAction: () => {},
       searchConfig: {
         router: "device",
         resolver: "mainGrid",
