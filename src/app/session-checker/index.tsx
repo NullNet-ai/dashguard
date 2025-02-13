@@ -18,22 +18,7 @@ export default function SessionChecker() {
   const [isSessionExpired, setIsSessionExpired] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const shouldShowBanner = timeLeft !== null && timeLeft <= 3600
-
-  useEffect(() => {
-    const shouldRender = shouldShowBanner
-    setIsBannerPresent(shouldRender)
-
-    const interval = setInterval(() => {
-      setIsBannerPresent(shouldRender)
-    }, 1000)
-
-    return () => {
-      clearInterval(interval)
-      setIsBannerPresent(false)
-
-    }
-  }, [isSessionExpired, timeLeft])
-
+  
   const formatTimeLeft = (seconds: number | null) => {
     if (seconds === null) return ''
     const hours = Math.floor(seconds / 3600)
@@ -51,7 +36,7 @@ export default function SessionChecker() {
     )
   }
   const apiAuth = api.auth.logout.useMutation()
-
+  
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
       router.replace('/login')
@@ -59,53 +44,55 @@ export default function SessionChecker() {
       sessionStorage.setItem('sessionExpired', 'true')
     })
   }
-
+  
   const handleSessionExpiration = async () => {
     setIsSessionExpired(true)
     await handleLogout()
   }
-
+  
   useEffect(() => {
-    const checkSession = async () => {
+    const checkSessionAndUpdateBanner = async () => {
       const token = Cookies.get('token')
-
-      if (token) {
-        setIsSessionExpired(false)
-      }
-
+      
       if (!token) {
         setTimeLeft(null)
+        setIsBannerPresent(false)
         return
       }
-
+  
       try {
         const payload = JSON.parse(atob(token?.split('.')[1] || ''))
         const { exp } = payload
         const currentTime = Math.floor(Date.now() / 1000)
         const remainingTime = exp - currentTime
-
+  
         if (!remainingTime) {
           setTimeLeft(null)
+          setIsBannerPresent(false)
           return
         }
+  
         if (remainingTime <= 0) {
           await handleSessionExpiration()
           return
         }
-
+  
         setTimeLeft(remainingTime)
-      }
-      catch (error) {
+        setIsSessionExpired(false)
+        setIsBannerPresent(shouldShowBanner)
+      } catch (error) {
         await handleSessionExpiration()
       }
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const interval = setInterval(checkSession, 1000)
-    checkSession().catch(console.error)
-
-    return () => clearInterval(interval)
-  }, [])
+  
+    checkSessionAndUpdateBanner().catch(console.error)
+    const interval = setInterval(checkSessionAndUpdateBanner, 1000)
+  
+    return () => {
+      clearInterval(interval)
+      setIsBannerPresent(false)
+    }
+  }, [shouldShowBanner]) 
 
   useEffect(() => {
     if (pathname === '/login') {
