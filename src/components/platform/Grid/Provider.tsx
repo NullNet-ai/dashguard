@@ -50,7 +50,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
 }

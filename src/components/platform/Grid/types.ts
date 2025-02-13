@@ -157,6 +157,7 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[]
   advanceFilter?: ISearchItem[]
   parentExpanded?: IExpandedRow[]
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
 }
 
 export interface IExpandedRow {
