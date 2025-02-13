@@ -5,7 +5,7 @@ export const _chartData = [
   },
   {
       "hour": "2025-02-11 22:00:00+00",
-      "heartbeats": 0
+      "heartbeats": 100
   },
   {
       "hour": "2025-02-11 23:00:00+00",
@@ -163,36 +163,31 @@ export const getBarPath = (
   const CONTAINER_RADIUS = 11;
   const chartData = _chartData as { heartbeats: number; hour: string }[];
 
-  // Extract the hour as a number
-  const hourNumber = hour;
-
-  
-
-  // Find first and last active hours
+  // Find first and last active hours with their full datetime
   const activeData = chartData.filter((d) => d.heartbeats > 0);
-  const firstActiveHour = activeData.length > 0 ? new Date(activeData[0].hour).getUTCHours() : null;
-  
-  const lastActiveHour = activeData.length > 0 ? new Date(activeData[activeData.length - 1].hour).getUTCHours() : null;
-  
+  const firstActiveDateTime = activeData.length > 0 ? activeData[0].hour : null;
+  const lastActiveDateTime = activeData.length > 0 ? activeData[activeData.length - 1].hour : null;
 
   if (value === 0) return '';
 
   let leftRadius = 0;
   let rightRadius = 0;
 
-  // Apply left radius only to first active bar
-  if (hourNumber === firstActiveHour) leftRadius = CONTAINER_RADIUS;
-
-  // Apply right radius only to last active bar
-  if (hourNumber === lastActiveHour) rightRadius = CONTAINER_RADIUS;
+  // Compare full datetime strings for exact matches
+  if (hour === firstActiveDateTime) {
+    leftRadius = CONTAINER_RADIUS;
+  }
+  if (hour === lastActiveDateTime) {
+    rightRadius = CONTAINER_RADIUS;
+  }
 
   // Ensure no gaps
-  const adjustedWidth = width + 4
-  const adjustedX = x - 2
+  const adjustedWidth = width + 4;
+  const adjustedX = x - 2;
 
   // Ensure the height covers the full container
-  const adjustedY = y - 0.5
-  const adjustedHeight = height + 1
+  const adjustedY = y - 0.5;
+  const adjustedHeight = height + 1;
   return `
     M ${adjustedX + leftRadius},${adjustedY}
     H ${adjustedX + adjustedWidth - rightRadius}
