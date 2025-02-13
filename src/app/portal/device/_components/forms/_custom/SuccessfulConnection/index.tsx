@@ -47,7 +47,6 @@ export default function CustomSuccessfulConnectionDetails({
     const fetchChartData = async () => {
       const { data } = await fetchBandWidth()
       if (data) {
-        console.log('%c Line:50 🍓 data', 'color:#93c0a4', data)
         setChartData(data as any)
       }
     }
