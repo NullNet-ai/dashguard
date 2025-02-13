@@ -76,8 +76,6 @@ export default function Connectivity({ device_id }: { device_id: string }) {
         >
           <XAxis dataKey="hour" hide={true} />
           <YAxis hide={true} />
-          {/* <Tooltip />
-           */}
           <ChartTooltip
             content={
               <ChartTooltipContent
