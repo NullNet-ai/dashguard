@@ -61,7 +61,6 @@ export const packetRouter = createTRPCRouter({
     const { device_id, bucket_size, time_range } = input
 
     const res = await ctx.dnaClient.aggregate({
-      // @ts-ignore
       query: {
         entity: 'packets',
         aggregations: [
@@ -72,17 +71,17 @@ export const packetRouter = createTRPCRouter({
           },
         ],
         advance_filters: [
-          {
-            type: 'criteria',
-            field: 'timestamp',
-            entity: 'packets',
-            operator: EOperator.IS_BETWEEN,
-            values: time_range,
-          },
-          {
-            type: 'operator',
-            operator: EOperator.AND,
-          },
+          // {
+          //   type: 'criteria',
+          //   field: 'timestamp',
+          //   entity: 'packets',
+          //   operator: EOperator.IS_BETWEEN,
+          //   values: time_range,
+          // },
+          // {
+          //   type: 'operator',
+          //   operator: EOperator.AND,
+          // },
           {
             type: 'criteria',
             field: 'device_id',
@@ -93,7 +92,9 @@ export const packetRouter = createTRPCRouter({
             ],
           },
         ],
+        joins:[],
         bucket_size,
+        limit:10,
         order: {
           order_by: 'bucket',
           order_direction: EOrderDirection.DESC,

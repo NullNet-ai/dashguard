@@ -161,7 +161,7 @@ export const getBarPath = (
   chart_data: any
 ) => {
   const CONTAINER_RADIUS = 11;
-  const chartData = _chartData as { heartbeats: number; hour: string }[];
+  const chartData = chart_data as { heartbeats: number; hour: string }[];
 
   // Extract the hour as a number
   const hourNumber = hour;
