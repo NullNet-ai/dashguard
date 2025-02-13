@@ -45,7 +45,7 @@ export type AppRouterKeys = keyof typeof appRouter
 export type TArchiveType = 'warning' | 'archive'
 
 type CustomColumnDef<TData> = ColumnDef<TData> & {
-  sortKey?: string | Array<string>;
+  sortKey?: string | Array<string>
 };
 
 export interface IConfigGrid {
@@ -67,7 +67,7 @@ export interface IConfigGrid {
   deleteCustomAction?: (args: DefaultRowActions) => void
   archiveCustomAction?: (
     args: Record<string, any>,
-  ) => void | Promise<| string | Record<string, any>>
+  ) => void | Promise< | string | Record<string, any>>
   restoreCustomAction?: (args: DefaultRowActions) => void
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void
   layer?: TLayerType
@@ -92,6 +92,7 @@ export interface IConfigGrid {
   enableRowSelection?: boolean
   // to identify if grid is a child grid
   isChildGrid?: boolean
+  expandTriggerPosition?: 'left' | 'right'
 }
 
 interface IRowToArchive extends Row<any> {
@@ -157,6 +158,7 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[]
   advanceFilter?: ISearchItem[]
   parentExpanded?: IExpandedRow[]
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record'
 }
 
 export interface IExpandedRow {
