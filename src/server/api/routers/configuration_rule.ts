@@ -31,6 +31,7 @@ export const deviceRuleRouter = createTRPCRouter({
         entity: 'device_configurations',
         token: ctx.token.value,
         query: {
+          track_total_records: true,
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
             {
@@ -93,9 +94,16 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
-            : [],
+          multiple_sort: [
+            {
+              by_field: 'interface',
+              by_direction: EOrderDirection.ASC,
+            },
+            {
+              by_field: 'order',
+              by_direction: EOrderDirection.ASC,
+            },
+          ]
         },
       })
         .execute()

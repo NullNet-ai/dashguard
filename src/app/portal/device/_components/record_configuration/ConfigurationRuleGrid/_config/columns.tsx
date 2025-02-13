@@ -49,6 +49,20 @@ const gridColumns = [
     },
   },
   {
+    header: 'Priority Order',
+    accessorKey: 'order',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Interface',
+    accessorKey: 'interface',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
     header: 'Protocol',
     accessorKey: 'protocol',
     search_config: {
