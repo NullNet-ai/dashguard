@@ -69,6 +69,7 @@ export const deviceAliasRouter = createTRPCRouter({
           entity: 'device_aliases',
           token: ctx.token.value,
           query: {
+            track_total_records: true,
             pluck,
             advance_filters: _advance_filters?.length
               ? _advance_filters as IAdvanceFilters[]
@@ -110,9 +111,11 @@ export const deviceAliasRouter = createTRPCRouter({
         }
       })
 
-      const totalPages = Math.ceil(totalCount / limit)
+      const totalPages = Math.ceil(formatted_items?.length / limit)
+      
+     
       return {
-        totalCount,
+        totalCount: formatted_items?.length,
         items: formatted_items,
         currentPage: current,
         totalPages,

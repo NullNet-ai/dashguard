@@ -1,15 +1,15 @@
 export const _chartData = [
     {
         "hour": "2025-02-12 04:00:00+00",
-        "heartbeats": 100
+        "heartbeats": 0
     },
     {
         "hour": "2025-02-12 05:00:00+00",
-        "heartbeats": 100
+        "heartbeats": 0
     },
     {
         "hour": "2025-02-12 06:00:00+00",
-        "heartbeats": 100
+        "heartbeats": 0
     },
     {
         "hour": "2025-02-12 07:00:00+00",
@@ -89,7 +89,7 @@ export const _chartData = [
     },
     {
         "hour": "2025-02-13 02:00:00+00",
-        "heartbeats": 100
+        "heartbeats": 0
     },
     {
         "hour": "2025-02-13 03:00:00+00",
@@ -160,7 +160,7 @@ export const getBarPath = (
   chart_data: any
 ) => {
   const CONTAINER_RADIUS = 11;
-  const chartData = _chartData as { heartbeats: number; hour: string }[];
+  const chartData = chart_data as { heartbeats: number; hour: string }[];
 
   // Find first and last items in the chart data
   const firstItem = chartData[0];

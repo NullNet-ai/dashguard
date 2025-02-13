@@ -6,7 +6,7 @@ import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
 
-import {  _chartData, getBarPath } from '../utils/getBarPath'
+import { getBarPath } from '../utils/getBarPath'
 
 interface ShapeProps {
   x: number
@@ -71,14 +71,14 @@ export default function Connectivity({ device_id }: { device_id: string }) {
         <BarChart
           barCategoryGap={-4}
           barGap={-4}
-          data={_chartData}
+          data={record}
           margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
         >
           <XAxis dataKey="hour" hide={true} />
           <YAxis hide={true} />
           {/* <Tooltip />
            */}
-          <ChartTooltip
+         {record?.length == 24 && <ChartTooltip
             content={
               <ChartTooltipContent
                 formatter = { (value, name) => {
@@ -91,7 +91,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
               />
             }
             cursor={false}
-          />
+          />}
           <Bar
             dataKey="heartbeats"
             fill={chartConfig.heartbeats.color}

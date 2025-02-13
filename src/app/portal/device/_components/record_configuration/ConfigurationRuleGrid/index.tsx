@@ -30,6 +30,8 @@ export default async function ConfigurationRuleGrid() {
     'created_date',
     'updated_date',
     'disabled',
+    'interface',
+    'order'
   ]
 
   const record = await api.record.getByCode({
@@ -55,30 +57,33 @@ export default async function ConfigurationRuleGrid() {
 
   return (
     <Grid
-      parentType="record"
-      config={{
-        entity: 'device_rules',
-        title: 'Rules',
-        columns: gridColumns,
-        defaultValues: {
-          entity_prefix: 'DR',
+    parentType="record"
+    totalCount={totalCount || 0}
+    data={items}
+    defaultSorting={defaultSorting}
+    defaultAdvanceFilter={ []}
+    advanceFilter={filters?.reportFilters || []}
+    sorting={sorting || []}
+    pagination={pagination}
+    config={{
+      entity: 'device_rules',
+      title: 'Rules',
+      columns: gridColumns,
+      defaultValues: {
+        entity_prefix: 'DR',
+      },
+      disableDefaultAction: true,
+      hideCreateButton: true,
+      searchConfig: {
+        router: 'deviceRule',
+        resolver: 'mainGrid',
+        query_params: {
+          entity: 'device_rules',
+          pluck: _pluck,
         },
-        disableDefaultAction: true,
-        hideCreateButton: true,
-        searchConfig: {
-          router: 'deviceRule',
-          resolver: 'mainGrid',
-          query_params: {
-            entity: 'device_rules',
-            pluck: _pluck,
-          },
-        },
-        enableRowSelection: false,
-      }}
-      data={items}
-      defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
-      totalCount={totalCount}
-    />
+      },
+      enableRowSelection: false,
+    }}
+  />
   )
 }

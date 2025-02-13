@@ -46,6 +46,7 @@ export default async function Page({
     advance_filters: filters?.advanceFilter?.length
     ? filters?.advanceFilter
     : [],
+    // advance_filters: [],
   })
 
   return (
@@ -65,8 +66,8 @@ export default async function Page({
         entity_prefix: 'DV',
         categories: ['Firewall'],
       },
-      enableAutoCreate: false,
       hideColumnsOnMobile: [],
+      deleteCustomAction: () => {},
       searchConfig: {
         router: "device",
         resolver: "mainGrid",

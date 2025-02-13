@@ -27,19 +27,19 @@ export const defaultAdvanceFilter = [
     values: ["Draft"],
     default: true,
   },
-  {
-    operator: "or",
-    type: "operator",
-    default: true,
-  },
-  {
-    entity: "devices",
-    operator: "equal",
-    type: "criteria",
-    field: "status",
-    id: ulid(),
-    label: "Status",
-    values: ["Archived"],
-    default: true,
-  }
+  // {
+  //   operator: "or",
+  //   type: "operator",
+  //   default: true,
+  // },
+  // {
+  //   entity: "devices",
+  //   operator: "equal",
+  //   type: "criteria",
+  //   field: "status",
+  //   id: ulid(),
+  //   label: "Status",
+  //   values: ["Archived"],
+  //   default: true,
+  // }
 ] as ISearchItem[];

@@ -23,7 +23,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function AreaChartSample({ chartData }: any) {
+export function BandwidthChart({ chartData }: any) {
   const maxBandwidth = Math.max(...chartData.map((item: any) => item.bandwidth))
   const minBandwidth = Math.min(...chartData.map((item: any) => item.bandwidth))
 
@@ -58,10 +58,12 @@ export function AreaChartSample({ chartData }: any) {
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               axisLine={false}
-              dataKey="second"
+              dataKey="bucket"
               minTickGap={30}
-              padding={{ left: 0, right: 0 }}
-              tickFormatter={(value: string) => moment(value).format('mm:ss')}
+              padding={{ left: 2, right: 2 }}
+              tickFormatter={(value: string) => {
+                
+                return moment(value).format('MM/DD HH:mm')}}
               tickLine={false}
               tickMargin={8}
             />
@@ -69,15 +71,18 @@ export function AreaChartSample({ chartData }: any) {
               axisLine={false}
               domain={[yAxisMin, yAxisMax]}
               padding={{ top: 20, bottom: 20 }}
-              tickCount={5}
+              tickCount={20}
               tickLine={false}
+              tickFormatter={(value: number) =>{
+                
+                return ` ${value}`}}
               tickMargin={8}
             />
             <ChartTooltip
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  labelFormatter={(value) => moment(value).format('MM/DD HH:mm:ss')}
+                  labelFormatter={(value) => moment(value).format('MM/DD HH:mm')}
                 />
               }
               cursor={false}
