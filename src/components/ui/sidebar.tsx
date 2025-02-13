@@ -32,6 +32,8 @@ interface SidebarContext {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  isBannerPresent: boolean
+  setIsBannerPresent: (isBannerPresent: boolean) => void
 }
 
 interface SidebarInsetProps extends React.ComponentProps<'main'> {
@@ -72,7 +74,7 @@ const SidebarProvider = React.forwardRef<
         const isMobile = useIsMobile()
         const [openMobile, setOpenMobile] = React.useState(false)
         const [_open, _setOpen] = React.useState(defaultOpen)
-
+        const [isBannerPresent, setIsBannerPresent] = React.useState(false)
         const open = openProp ?? _open
         const setOpen = React.useCallback(
           (value: boolean | ((value: boolean) => boolean)) => {
@@ -125,6 +127,8 @@ const SidebarProvider = React.forwardRef<
             openMobile,
             setOpenMobile,
             toggleSidebar,
+            isBannerPresent,
+            setIsBannerPresent,
           }), [
             state,
             open,
@@ -133,6 +137,8 @@ const SidebarProvider = React.forwardRef<
             openMobile,
             setOpenMobile,
             toggleSidebar,
+            isBannerPresent,
+            setIsBannerPresent,
           ],
         )
 
@@ -183,8 +189,7 @@ const Sidebar = React.forwardRef<
     },
     ref,
   ) => {
-    const { state, openMobile, setOpenMobile, setOpen } = useSidebar()
-
+    const { state, openMobile, setOpenMobile, setOpen,isBannerPresent } = useSidebar()
     const size = useScreenType()
     React.useEffect(() => {
       if (size === 'md' || size === 'sm' || size === 'xs') {
@@ -214,7 +219,7 @@ const Sidebar = React.forwardRef<
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden z-[200]"
             data-mobile="true"
             data-sidebar="sidebar"
             side={ side }
@@ -239,18 +244,21 @@ const Sidebar = React.forwardRef<
           // data-collapsible={state === "collapsed" ? collapsible : ""}
           data-variant={variant}
         >
-          {/* This is what handles the sidebar gap on desktop */}
+          {/* This is what handles the sidebar gap on tablets, */}
           <div
             className={cn(
               'relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear', 'group-data-[collapsible=offcanvas]:w-0', 'group-data-[side=right]:rotate-180', variant === 'floating' || variant === 'inset'
                 ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]'
                 : 'group-data-[collapsible=icon]:w-[--sidebar-width-icon]',
+
             )} />
           <div
             className={cn(
-              'fixed inset-y-0 z-[100] hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex', side === 'left'
+              'fixed bottom-0 z-[100] hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex', side === 'left'
                 ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
                 : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+                isBannerPresent ? 'h-[calc(100svh-40px)]' : 'h-svh',
+
               // Adjust the padding for floating and inset variants.
               variant === 'floating' || variant === 'inset'
                 ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
@@ -259,12 +267,12 @@ const Sidebar = React.forwardRef<
             {...props}
           >            
             <div
-              className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+              className="flex h-full relative w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
               data-sidebar="sidebar">
               {children}
               <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
                 <SheetContent
-                  className="z-[100] w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+                  className="z-[200]  w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
                   data-mobile="true"
                   data-sidebar="sidebar"
                   side={ side }
@@ -273,7 +281,8 @@ const Sidebar = React.forwardRef<
                       '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
                     } as React.CSSProperties
                   }>
-                  <div className="flex h-full w-full flex-col">{children}</div>
+                  <div className={cn("flex w-full h-full flex-col relative bottom-0",
+                  )}>{children}</div>
                 </SheetContent>
               </Sheet>
             </div>
@@ -293,15 +302,16 @@ const Sidebar = React.forwardRef<
         {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
-            'relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear', 'group-data-[collapsible=offcanvas]:w-0', 'group-data-[side=right]:rotate-180', variant === 'floating' || variant === 'inset'
+            'relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-300 ease-linear', 'group-data-[collapsible=offcanvas]:w-0', 'group-data-[side=right]:rotate-180', variant === 'floating' || variant === 'inset'
               ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]'
               : 'group-data-[collapsible=icon]:w-[--sidebar-width-icon]',
           )} />
         <div
           className={cn(
-            'fixed inset-y-0 z-[100] hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex', side === 'left'
+            'fixed bottom-0  z-[100] hidden  w-[--sidebar-width] transition-[left,right,width,height]  duration-300 ease-linear md:flex', side === 'left'
               ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
               : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+              isBannerPresent ? 'h-[calc(100svh-38px)]'  : 'h-svh ',
             // Adjust the padding for floating and inset variants.
             variant === 'floating' || variant === 'inset'
               ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'

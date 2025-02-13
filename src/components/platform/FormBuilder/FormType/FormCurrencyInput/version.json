@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCurrencyInput",
-  "tag": "1.6.2<unreleased>",
-  "branch": "unreleased/fix/1963/1.6.2<unreleased>",
-  "message": "Make the background secondary when disabled to include the select so whole currency input is disabled to look at",
+  "tag": "1.6.2-rc.2<unreleased>",
+  "branch": "unreleased/hotfix/1.6.2-rc.2<unreleased>",
+  "message": "Fix Readonly Issues",
   "publish_name": "Rob Caldosa"
 }
