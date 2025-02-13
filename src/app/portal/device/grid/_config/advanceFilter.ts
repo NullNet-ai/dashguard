@@ -3,7 +3,7 @@ import { ISearchItem } from "~/components/platform/Grid/Search/types";
 
 export const defaultAdvanceFilter = [
   {
-    entity: "contacts",
+    entity: "devices",
     operator: "equal",
     type: "criteria",
     field: "status",
@@ -18,7 +18,7 @@ export const defaultAdvanceFilter = [
     default: true,
   },
   {
-    entity: "contacts",
+    entity: "devices",
     operator: "equal",
     type: "criteria",
     field: "status",
@@ -33,7 +33,7 @@ export const defaultAdvanceFilter = [
     default: true,
   },
   {
-    entity: "contacts",
+    entity: "devices",
     operator: "equal",
     type: "criteria",
     field: "status",

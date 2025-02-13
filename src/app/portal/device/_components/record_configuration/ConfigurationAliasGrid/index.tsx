@@ -76,11 +76,13 @@ export default async function ConfigurationAliasGrid({
             pluck: _pluck,
           },
         },
+      enableRowSelection: false,
       }}
       data={items}
       defaultSorting={defaultSorting}
       sorting={sorting?.length ? sorting : []}
       totalCount={totalCount}
+      
     />
   )
 }

@@ -13,7 +13,6 @@ import { type IPropsGrid } from '../types';
 
 import { GridDesktop, GridMobile } from './views';
 import GridMobileForm from './views/GridMobileForm';
-import GridCardLists from './views/GridCardLists';
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
@@ -29,7 +28,6 @@ interface IClientProps extends IPropsGrid {
   isLoading?: boolean;
   gridLevel?: number;
   isError?: boolean;
-  gridType?: 'card-list' | 'table';
 }
 
 function MainClient({
@@ -51,9 +49,8 @@ function MainClient({
   pagination,
   isLoading,
   gridLevel,
-  gridType = 'table',
   isError = false,
-  parentExpanded,
+  parentExpanded
 }: IClientProps) {
   const { open } = useSidebar();
   const { width } = useWindowSize();
@@ -100,41 +97,34 @@ function MainClient({
       totalCount={totalCount}
       onSelectRecords={onSelectRecords}
       gridLevel={gridLevel}
-      gridType={gridType}
     >
-      {gridType === 'table' ? (
-        <>
-          <div className="hidden lg:grid">
-            <GridDesktop
-              height={height}
-              hideSearch={hideSearch}
-              parentProps={parentProps}
-              parentType={parentType}
-              showAction={showAction}
-              showPagination={showPagination ?? false}
-              isLoading
-              gridLevel={gridLevel}
-              parentExpanded={parentExpanded}
-            />
-          </div>
+      <div className="hidden lg:grid">
+        <GridDesktop
+          height={height}
+          hideSearch={hideSearch}
+          parentProps={parentProps}
+          parentType={parentType}
+          showAction={showAction}
+          showPagination={showPagination ?? false}
+          isLoading
+          gridLevel={gridLevel}
+          parentExpanded={parentExpanded}
+        />
+      </div>
 
-          <div className="flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]">
-            {parentType === 'grid' ? (
-              <GridMobile
-                parentType={parentType}
-                shownPagination={showPagination ?? true}
-              />
-            ) : (
-              <GridMobileForm
-                parentType={parentType}
-                shownPagination={showPagination ?? true}
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <GridCardLists />
-      )}
+      <div className="flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]">
+        {parentType === 'grid' ? (
+          <GridMobile
+            parentType={parentType}
+            shownPagination={showPagination ?? true}
+          />
+        ) : (
+          <GridMobileForm
+            parentType={parentType}
+            shownPagination={showPagination ?? true}
+          />
+        )}
+      </div>
     </GridProvider>
   );
 }

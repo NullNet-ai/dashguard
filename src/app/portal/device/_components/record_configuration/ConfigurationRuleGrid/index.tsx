@@ -73,6 +73,7 @@ export default async function ConfigurationRuleGrid() {
             pluck: _pluck,
           },
         },
+        enableRowSelection: false,
       }}
       data={items}
       defaultSorting={defaultSorting}

@@ -1,6 +1,6 @@
 import React from "react";
 import { CategoryProvider } from "./Provider";
-import { type IFilterBy } from "../Category/type";
+import { type IFilterBy } from "./type";
 import TabSettings from "./Tab";
 
 interface IProps extends IFilterBy {
