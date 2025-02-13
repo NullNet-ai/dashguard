@@ -1,106 +1,105 @@
 export const _chartData = [
-  {
-      "hour": "2025-02-11 21:00:00+00",
-      "heartbeats": 100
-  },
-  {
-      "hour": "2025-02-11 22:00:00+00",
-      "heartbeats": 100
-  },
-  {
-      "hour": "2025-02-11 23:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 00:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 01:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 02:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 03:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 04:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 05:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 06:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 07:00:00+00",
-      "heartbeats": 100
-  },
-  {
-      "hour": "2025-02-12 08:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 09:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 10:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 11:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 12:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 13:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 14:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 15:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 16:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 17:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 18:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 19:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 20:00:00+00",
-      "heartbeats": 0
-  },
-  {
-      "hour": "2025-02-12 21:00:00+00",
-      "heartbeats": 100
-  }
+    {
+        "hour": "2025-02-12 04:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-12 05:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-12 06:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-12 07:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 08:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 09:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 10:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 11:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 12:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 13:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 14:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 15:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 16:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 17:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 18:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 19:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 20:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 21:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 22:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-12 23:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-13 00:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-13 01:00:00+00",
+        "heartbeats": 0
+    },
+    {
+        "hour": "2025-02-13 02:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-13 03:00:00+00",
+        "heartbeats": 100
+    },
+    {
+        "hour": "2025-02-13 04:00:00+00",
+        "heartbeats": 100
+    }
 ]
-
 
 
 
@@ -163,28 +162,23 @@ export const getBarPath = (
   const CONTAINER_RADIUS = 11;
   const chartData = chart_data as { heartbeats: number; hour: string }[];
 
-  // Find first and last active hours with their full datetime
-  const activeData = chartData.filter((d) => d.heartbeats > 0);
-  const firstActiveDateTime = activeData.length > 0 ? activeData[0].hour : null;
-  const lastActiveDateTime = activeData.length > 0 ? activeData[activeData.length - 1].hour : null;
-
-  if (value === 0) return '';
-
+  // Find first and last items in the chart data
+  const firstItem = chartData[0];
+  const lastItem = chartData[chartData.length - 1];
   let leftRadius = 0;
   let rightRadius = 0;
 
-  // Compare full datetime strings for exact matches
-  if (hour === firstActiveDateTime) {
+  // Only add radius if first/last items have heartbeats of 100
+  if (firstItem?.heartbeats === 100 && hour === firstItem.hour) {
     leftRadius = CONTAINER_RADIUS;
   }
-  if (hour === lastActiveDateTime) {
+  if (lastItem?.heartbeats === 100 && hour === lastItem.hour) {
     rightRadius = CONTAINER_RADIUS;
   }
-
+  if (value === 0) return '';
   // Ensure no gaps
   const adjustedWidth = width + 4;
   const adjustedX = x - 2;
-
   // Ensure the height covers the full container
   const adjustedY = y - 0.5;
   const adjustedHeight = height + 1;
