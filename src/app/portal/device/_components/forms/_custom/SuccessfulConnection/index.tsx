@@ -50,11 +50,16 @@ export default function CustomSuccessfulConnectionDetails({
         setChartData(data as any)
       }
     }
-    const interval = setInterval(fetchChartData, 5000)
-
-    return () => {
-      clearInterval(interval)
-    }
+    fetchChartData().then(
+      () => {
+        const interval = setInterval(fetchChartData, 5000)
+        return () => {
+          clearInterval(interval)
+        }
+      }, (err) => {
+        console.error(err)
+      },
+    )
   }, [record_device?.data?.id])
 
   return (
