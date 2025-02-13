@@ -5,13 +5,34 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { Badge } from '~/components/ui/badge'
+import { useSidebar } from '~/components/ui/sidebar'
 import { api } from '~/trpc/react'
 
+
 export default function SessionChecker() {
+  const {
+    setIsBannerPresent,
+  } = useSidebar();
   const router = useRouter()
   const pathname = usePathname()
-  const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isSessionExpired, setIsSessionExpired] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const shouldShowBanner = timeLeft !== null && timeLeft <= 3600
+
+  useEffect(() => {
+    const shouldRender = shouldShowBanner
+    setIsBannerPresent(shouldRender)
+
+    const interval = setInterval(() => {
+      setIsBannerPresent(shouldRender)
+    }, 1000)
+
+    return () => {
+      clearInterval(interval)
+      setIsBannerPresent(false)
+
+    }
+  }, [isSessionExpired, timeLeft])
 
   const formatTimeLeft = (seconds: number | null) => {
     if (seconds === null) return ''
@@ -87,13 +108,11 @@ export default function SessionChecker() {
   }, [])
 
   useEffect(() => {
-    // Reset both states when on login page
     if (pathname === '/login') {
       setTimeLeft(null)
       setIsSessionExpired(false)
     }
 
-    // Only show expired message if we're on login page and have the flag
     if (pathname === '/login' && sessionStorage.getItem('sessionExpired')) {
       setIsSessionExpired(true)
       sessionStorage.removeItem('sessionExpired')
@@ -103,33 +122,30 @@ export default function SessionChecker() {
   if (isSessionExpired) {
     return (
       <div
-        className='bg-yellow-200 text-black font-normal text-center p-1 fixed'
-        style={{
-          position: 'relative',
-          zIndex: 9999,
-        }}
+        className='bg-amber-200 text-black font-normal text-center p-2 fixed flex top-0 items-center justify-center md:gap-4 gap-2 transition-opacity duration-500 ease-in-out opacity-100 z-[200]'
       >
-       <span className='size-4 bg-destructive rounded-full'></span> Your session has expired. Please log in.
+        <div className='md:text-md flex items-center gap-2 justify-center'>
+          <span className='inline-block md:size-4 size-3 bg-destructive rounded-full' />
+          <span>
+            Your session has expired. Please log in.
+          </span>
+        </div>
       </div>
     )
   }
 
-  if (timeLeft !== null && timeLeft <= 3600)  {
-    return (
-      <div
-        className='bg-[#FBBF24] text-black font-normal text-center p-2 fixed flex items-center justify-center gap-4'
-        style={{
-          position: 'relative',
-          zIndex: 9999,
-        }}
-      >
-        <span className='inline-block w-4 h-4 bg-destructive rounded-full self-center'></span>
-        <span className='text-md'>
-          {'Your session will expire in '}
-          {formatTimeLeft(timeLeft)}.<span className='ms-1'>Please save your work or log out.</span>   
-        </span>
-      </div>
-    )
+  if (shouldShowBanner) {
+  return (
+    <div
+      className={`bg-amber-200 fixed top-0 z-[200] text-black p-1 font-normal text-center md:p-2 flex items-center justify-center md:gap-4 transition-transform duration-500 ease-in-out ${timeLeft !== null && timeLeft <= 3600 ? 'translate-y-full' : 'translate-y-0'} w-screen`}
+    >
+      <span className='size-[17px] bg-destructive rounded-full hidden md:block' />
+      <span className='md:text-md'>
+      <span className='size-3 bg-destructive rounded-full inline-flex md:hidden me-2' />
+      {'Your session will expire in '}{formatTimeLeft(timeLeft)}.<span className='ms-1 hidden md:inline'>Please save your work or log out.</span> <br /><span className='ms-1 md:hidden'>Please save your work or log out.</span>
+      </span>
+    </div>
+  )
   }
 
   return null
