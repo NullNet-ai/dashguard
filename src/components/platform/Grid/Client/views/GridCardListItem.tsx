@@ -12,6 +12,7 @@ import {
 import { cn } from '~/lib/utils'
 
 import { GridContext } from '../../Provider'
+import useScreenType from '~/hooks/use-screen-type'
 
 type GridCardListItemProp = {
   row: Row<any>
@@ -20,7 +21,9 @@ type GridCardListItemProp = {
 const GridCardListItem = ({ row }: GridCardListItemProp) => {
   const [isOpen, setIsOpen] = useState(false)
   const { state } = useContext(GridContext)
-
+  const screenType = useScreenType()
+  const isMobile  = screenType === 'sm' || screenType ==='xs' || screenType ==='md'
+ 
   const expandIconPos = state?.config?.expandTriggerPosition ?? 'right'
 
   const label = row
@@ -66,31 +69,42 @@ const GridCardListItem = ({ row }: GridCardListItemProp) => {
       6: 'grid-cols-7',
     }[visibleCells.length] || 'grid-cols-auto'
 
+  const triggerButton = (
+    <CollapsibleTrigger className="flex justify-end px-2">
+      <ChevronDown
+        className={cn(
+          'h-5 w-5 text-muted-foreground transition-transform', isOpen && 'rotate-180 transform',
+        )}
+      />
+    </CollapsibleTrigger>
+  )
+
+
   return (
     <div className="rounded-md border border-default/10">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div
           className={cn(
-            'grid grid-cols-2 gap-4', isOpen && 'border-b border-default/10',
+            'grid grid-cols-1 lg:grid-cols-2 lg:gap-4 gap-1 ', 
+            isOpen && 'border-b border-default/10',
           )}
         >
 
-          <div className="flex items-center">
-            {expandIconPos === 'left'
+          <div className="flex items-center justify-between lg:justify-start">
+            {expandIconPos === 'left' && !isMobile
               ? (
-                  <CollapsibleTrigger className="flex justify-end px-2">
-                    <ChevronDown
-                      className={cn(
-                        'h-5 w-5 text-muted-foreground transition-transform', isOpen && 'rotate-180 transform',
-                      )}
-                    />
-                  </CollapsibleTrigger>
+                triggerButton
                 )
               : null}
-            {headerComponent}
-            <div className="text-sm font-semibold ml-4">{label || 'Label Here'}</div>
+            <div className='flex-row flex items-center'>
+              {headerComponent}
+              <div className="text-sm font-semibold ml-4">{label || 'Label Here'}</div>
+            </div>
+            {isMobile ? (
+             triggerButton
+            ) : null}
           </div>
-          <div className={cn('grid items-center', gridColsClass)}>
+          <div className={cn('grid items-center p-2', gridColsClass)}>
             {visibleCells.map(cell => (
               <div className="flex items-center gap-2" key={cell.column.id}>
                 <span className="text-sm font-semibold text-muted-foreground">
@@ -101,15 +115,9 @@ const GridCardListItem = ({ row }: GridCardListItemProp) => {
                 </span>
               </div>
             ))}
-            {expandIconPos === 'right'
+            {expandIconPos === 'right' && !isMobile
               ? (
-                  <CollapsibleTrigger className="flex justify-end px-2">
-                    <ChevronDown
-                      className={cn(
-                        'h-5 w-5 text-muted-foreground transition-transform', isOpen && 'rotate-180 transform',
-                      )}
-                    />
-                  </CollapsibleTrigger>
+                  triggerButton
                 )
               : null}
           </div>
