@@ -6,6 +6,7 @@ import SideBarMenu from '~/components/application-layout/SideBarMenu'
 import { SideDrawerProvider } from '~/components/platform/SideDrawer'
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { SmartProvider } from '~/components/ui/smart-component'
+import SessionChecker from '../session-checker'
 
 interface Props {
   children: React.ReactNode
@@ -21,6 +22,7 @@ const layout = async ({ children }: Props) => {
       <SideDrawerProvider>
         <SidebarProvider defaultOpen={value}>
           <SideBarMenu />
+          <SessionChecker />
           <AppLayout>{children}</AppLayout>
         </SidebarProvider>
       </SideDrawerProvider>
