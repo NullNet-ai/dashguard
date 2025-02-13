@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.12.1-rc.1<unreleased>",
-  "branch": "unreleased/fix/1.12.1-rc.1<unreleased>",
-  "message": "revert missing prop in table header",
-  "publish_name": "Shem Alexis Chavez"
+  "tag": "1.12.1-rc.4<unreleased>",
+  "branch": "unreleased/feat/1.12.1-rc.4<unreleased>",
+  "message": "add Separator configuration to be centered vertically/horizontally and sidebar to handle banner to not break the layout",
+  "publish_name": "Rob Caldosa"
 }

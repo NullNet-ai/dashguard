@@ -211,7 +211,7 @@ const DisabledSection = () => (
       {BUTTON_VARIANTS.map(({ variant, label }) => (
         <div key={variant} className="flex flex-col space-y-2">
           <Label>{label}</Label>
-          <Button variant={variant as any} disabled className="w-28 justify-center">
+          <Button variant={variant as any} disabled className="justify-center">
             Disabled
           </Button>
         </div>

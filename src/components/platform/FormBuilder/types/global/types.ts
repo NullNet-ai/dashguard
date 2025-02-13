@@ -28,6 +28,8 @@ type TDisplayType = "form" | "selected";
   | "switch"
   | "rich-text-editor"
   | 'alert'
+  | 'space'
+  | 'separator'
   | "currency-input";
 
 type TSelectionType = "single" | "multiple";
