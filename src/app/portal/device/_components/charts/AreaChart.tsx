@@ -69,7 +69,7 @@ export function BandwidthChart({ chartData }: any) {
               minTickGap={30}
               padding={{ left: 2, right: 2 }}
               tickFormatter={(value: string) => {
-                return moment(value).format('MM/DD HH:mm')
+                return moment(value).format('MM/DD HH:mm:ss')
               }}
               tickLine={false}
               tickMargin={8}
