@@ -53,6 +53,7 @@ interface IProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
+  gridType?: 'card-list' | 'table';
 }
 
 export default function GridProvider({
