@@ -108,10 +108,10 @@ export const _chartData = [
 // export const getBarPath = (x: number, y: number, width: number, height: number, value: number, hour: string, chart_data: any) => {
 //   const CONTAINER_RADIUS = 11
 //   const chartData = _chartData as { heartbeats: number, hour: string }[]
-//   console.log('%c Line:35 🌽 chart_data', 'color:#42b983', chart_data);
+//   
 //   // Extract the number from the hour string
 //   const hourNumber = parseInt(hour)
-//   console.log('%c Line:38 🌮 hourNumber', 'color:#3f7cff', hourNumber);
+//   
 
 //   // Find first and last active hours
 //   const firstActiveHour = parseInt(chartData.find((d:
@@ -166,14 +166,14 @@ export const getBarPath = (
   // Extract the hour as a number
   const hourNumber = hour;
 
-  console.log('%c Line:38 🌮 hourNumber', 'color:#3f7cff', hourNumber);
+  
 
   // Find first and last active hours
   const activeData = chartData.filter((d) => d.heartbeats > 0);
   const firstActiveHour = activeData.length > 0 ? new Date(activeData[0].hour).getUTCHours() : null;
-  console.log('%c Line:174 🥚 firstActiveHour', 'color:#93c0a4', firstActiveHour);
+  
   const lastActiveHour = activeData.length > 0 ? new Date(activeData[activeData.length - 1].hour).getUTCHours() : null;
-  console.log('%c Line:176 🍊 lastActiveHour', 'color:#ed9ec7', lastActiveHour);
+  
 
   if (value === 0) return '';
 

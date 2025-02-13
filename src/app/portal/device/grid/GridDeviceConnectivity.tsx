@@ -43,7 +43,7 @@ const getLastTwentyFourHoursTimeStamp = () => {
 
 const CustomBarShape = (props: ShapeProps) => {
   const { x, y, width, height, value, payload, chart_data } = props
-  console.log('%c Line:47 🥛 payload.hour', 'color:#4fff4B', payload.hour);
+  
   const d = getBarPath(x, y, width, height, value, payload.hour, chart_data)
   return <path d={d} fill={chartConfig.heartbeats.color} />
 }

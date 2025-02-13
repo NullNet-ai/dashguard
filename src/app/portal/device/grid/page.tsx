@@ -20,7 +20,6 @@ export default async function Page({
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity] = pathname.split('/')
-  console.log('%c Line:23 🍖 main_entity', 'color:#42b983', main_entity);
   const _pluck = [
     'id',
     'code',
@@ -50,21 +49,6 @@ export default async function Page({
   })
 
   return (
-    // <Grid
-    //   config={{
-    //     entity: main_entity!,
-    //     title: 'Device',
-    //     columns: gridColumns,
-    //     defaultValues: {
-          // entity_prefix: 'DV',
-          // categories: ['Firewall'],
-    //     },
-    //   }}
-    //   data={items}
-    //   defaultSorting={defaultSorting}
-    //   sorting={sorting?.length ? sorting : []}
-    //   totalCount={totalCount || 0}
-    // />
     <Grid
     totalCount={totalCount || 0}
     data={items}
