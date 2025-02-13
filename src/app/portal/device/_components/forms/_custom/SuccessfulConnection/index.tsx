@@ -7,7 +7,7 @@ import { Alert, AlertContent } from '~/components/ui/alert'
 import { FormField } from '~/components/ui/form'
 import { api } from '~/trpc/react'
 
-import { AreaChartSample } from '../../../charts/AreaChart'
+import { BandwidthChart } from '../../../charts/AreaChart'
 
 interface ISuccessfulConnectionDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>
@@ -70,7 +70,7 @@ export default function CustomSuccessfulConnectionDetails({
               </AlertContent>
             </Alert>
 
-            <AreaChartSample chartData={chartData} />
+            <BandwidthChart chartData={chartData} />
           </div>
         )
       }}
