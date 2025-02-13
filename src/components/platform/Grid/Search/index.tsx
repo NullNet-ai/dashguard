@@ -13,7 +13,7 @@ import SearchList from './SearchList';
 import SearchListMobile from './SearchListMobile';
 import Search from './View';
 // eslint-disable-next-line react/destructuring-assignment
-export default function Main({ parentType = 'grid', creatable = true, switchable = true }: any) {
+export default function Main({ parentType = 'grid', creatable = true, switchable = true, gridType='table' }: any) {
   return (
     <GridSearchProvider>
       {parentType === 'grid'
@@ -21,7 +21,7 @@ export default function Main({ parentType = 'grid', creatable = true, switchable
             <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:mt-0 lg:w-[40%] lg:max-w-[40%]">
               <div className={cn(`relative flex flex-1 flex-row `, `${switchable ? 'gap-x-2' : ''}`)}>
                 <div className="my-2 h-[40px] w-full md:my-0">
-                  <Search />
+                  <Search gridType={gridType}/>
                 </div>
                 <div className="hidden h-[36px] flex-shrink-0 flex-row items-center lg:flex">
                   {
@@ -49,7 +49,7 @@ export default function Main({ parentType = 'grid', creatable = true, switchable
                 <SearchList />
               </div>
               <div className="min-h-[40px] lg:hidden">
-                <SearchListMobile />
+                <SearchListMobile gridType={gridType}/>
               </div>
             </div>
           )

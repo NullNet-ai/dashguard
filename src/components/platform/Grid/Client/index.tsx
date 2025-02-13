@@ -147,6 +147,7 @@ function MainClient({
               isLoading
               gridLevel={gridLevel}
               parentExpanded={parentExpanded}
+              gridType={gridType}
             />
           )}
     </GridProvider>
