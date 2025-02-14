@@ -2,9 +2,9 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
-import { ILayoutProps } from "./types";
+import { type ILayoutProps } from "./types";
 import ComingSoon from "../../_components/coming_soon";
-const Layout = (props: ILayoutProps) => {
+const Layout: React.FC<ILayoutProps> = (props) => {
   const searchParams = useSearchParams();
   const slot = props[searchParams.get("current_tab") ?? "dashboard"];
   if (!slot) return <ComingSoon />;
