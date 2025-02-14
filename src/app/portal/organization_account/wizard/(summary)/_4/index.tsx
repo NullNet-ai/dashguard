@@ -31,8 +31,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
       </div>
     )
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>
+  return null
 }
 
 const SummaryConfig = {
@@ -40,8 +39,8 @@ const SummaryConfig = {
   required: true,
   components: [
     {
-      label: 'Record Details',
-      component: <Summary form_key="BasicDetails" />,
+      label: 'Confirmation',
+      component: <Summary form_key="Confirmation" />,
     },
   ],
 }

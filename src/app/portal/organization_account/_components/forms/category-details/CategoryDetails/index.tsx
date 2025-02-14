@@ -27,6 +27,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
               name: `categories`,
               label: 'Category',
               required: true,
+              radioOrientation: 'vertical',
             }}
             form={form}
             formKey="ContactCategoryDetails"
@@ -46,8 +47,8 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
             }}
             radioOptions={{
               categories: [
-                { label: 'External User', value: 'External User' },
                 { label: 'Internal User', value: 'Internal User' },
+                { label: 'External User', value: 'External User' },
               ],
             }}
           />

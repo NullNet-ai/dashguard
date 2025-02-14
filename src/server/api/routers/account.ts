@@ -12,10 +12,23 @@ import ZodItems from '~/server/zodSchema/grid/items';
 import { formatSorting } from '~/server/utils/formatSorting';
 import { pluralize } from '~/server/utils/pluralize';
 import { TRPCError } from '@trpc/server';
+import { formatPhoneNumber } from '~/utils/formatter';
 import { headers } from 'next/headers';
+import nodemailer from 'nodemailer';
 
 const ENTITY = 'organization_account';
-
+const transporter = nodemailer.createTransport({
+  auth: {
+    user: 'admin@dnaplatform.net',
+    pass: 'w@ckyPart10',
+  },
+  host: 'smtp.communications.dnamicro.net',
+  port: 25,
+  secure: false,
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 export const accountRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
   updateAccountDetails: privateProcedure
@@ -681,6 +694,332 @@ export const accountRouter = createTRPCRouter({
       return {
         ...record,
         data: record?.data?.[0],
+      };
+    }),
+  fetchExternalInternalUserDetails: privateProcedure
+    .input(z.object({ code: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const accounts = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'code',
+                operator: EOperator.EQUAL,
+                values: [input.code],
+              },
+            ],
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'categories',
+                'role_id',
+                'account_id',
+                'contact_id',
+                'account_secret',
+                'status',
+                'email',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+              user_roles: ['role'],
+              organizations: ['name'],
+              contact_phone_numbers: [
+                'raw_phone_number',
+                'iso_code',
+                'country_code',
+                'is_primary',
+              ],
+              contact_emails: ['email', 'is_primary'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contact_phone_numbers',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contacts',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contact_emails',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contacts',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'role_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'account_organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const accountRecord = accounts.data?.[0] ?? {};
+      const phoneNumber = accountRecord?.contact_phone_numbers;
+      const email = accountRecord?.contact_emails;
+
+      return {
+        ...accountRecord?.organization_accounts,
+        role: accountRecord?.user_roles?.role,
+        phoneNumber,
+        email,
+        contact: {
+          ...accountRecord?.contacts,
+          phone: phoneNumber ? formatPhoneNumber(phoneNumber) : '',
+          email: email?.email,
+        },
+      };
+    }),
+  updateUserAccountRecord: privateProcedure
+    .input(
+      z.object({
+        entity: z.string().min(1),
+        id: z.string().min(1),
+        data: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const account_secret = await argon2.hash(input.data.account_secret);
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: input.entity,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              ...input.data,
+              account_secret,
+            },
+          },
+        })
+        .execute();
+    }),
+  createInvitationRecord: privateProcedure
+    .input(
+      z.object({
+        account_code: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.dnaClient
+        .findByCode(input.account_code, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code', 'account_id', 'email'],
+          },
+        })
+        .execute();
+
+      const accountRecord = account?.data?.[0];
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_id: accountRecord?.id,
+              status: 'Active',
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Draft]', record);
+
+      const headerList = headers();
+      const host = headerList.get('host'); // Get the host from request headers
+      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
+
+      const baseURL = `${protocol}://${host}`; // Construct base URL
+
+      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}`;
+      const loggedInUser = ctx.session.account;
+
+      try {
+        await transporter.sendMail({
+          from: loggedInUser.email,
+          to: accountRecord?.email,
+          subject: 'Account Invitation',
+          html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Welcome to Our Platform!</h2>
+            <p>You have been invited to join our platform. Please follow the instructions below to access your account:</p>
+            <ol>
+              <li>Click on the invitation link below.</li>
+              <li>Log in using your registered email and temporary password.</li>
+              <li>Follow the prompts to set up your account.</li>
+            </ol>
+            <p><strong>Invitation Link:</strong> <a href="${invitationLink}" style="color: #1a73e8;">Click here to join</a></p>
+            <p>If you have any issues, please contact our support team.</p>
+            <p>Best regards,<br> The Team</p>
+          </div>`,
+        });
+        console.info('Invitation email sent successfully');
+      } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+      }
+
+      return {
+        ...record,
+        data: record?.data?.[0],
+      };
+    }),
+  getInvitationAccountDetails: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [input.id],
+              },
+            ],
+            pluck_object: {
+              invitations: ['id', 'account_id', 'status'],
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'contact_id',
+                'status',
+                'email',
+              ],
+              // contacts: ['id', 'first_name', 'last_name'],
+              // organizations: ['name'],
+              // contact_emails: ['email', 'is_primary'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'invitations',
+              field: 'account_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'role_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const invitationRecord = invitation.data?.[0] ?? {};
+     
+      const email = invitationRecord?.contact_emails;
+
+      return {
+        ...invitationRecord?.organization_accounts,
+        organization: invitationRecord?.organizations?.name,
+        role: invitationRecord?.user_roles?.role,
+        contact: {
+          ...invitationRecord?.contacts,
+          email: email?.email,
+        },
       };
     }),
 });

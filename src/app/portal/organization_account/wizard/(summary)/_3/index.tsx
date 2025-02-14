@@ -1,49 +1,61 @@
-'use client'
-import { usePathname } from 'next/navigation'
+'use client';
+import { usePathname } from 'next/navigation';
 
-import { api } from '~/trpc/react'
+import { api } from '~/trpc/react';
 
-import useRefetchRecord from '../hooks/useFetchMainRecord'
+import useRefetchRecord from '../hooks/useFetchMainRecord';
 
 const Summary = ({ form_key }: { form_key: string }) => {
-  const pathName = usePathname()
-  const [, , entity, _, identifier] = pathName.split('/')
+  const pathName = usePathname();
+  const [, , , _, identifier, current_step] = pathName.split('/');
   const {
-    data: record = { data: { id: null } },
+    data: record,
     refetch,
     error,
-  } = api.record.getByCode.useQuery({
-    id: identifier!,
-    pluck_fields: ['id', 'code', 'status'],
-    main_entity: entity!,
-  })
+  } = api.account.fetchExternalInternalUserDetails.useQuery({
+    code: identifier!,
+  });
 
   useRefetchRecord({
     refetch,
     form_key,
-  })
+  });
 
   if (error) {
     return (
       <div>
-        {"Error:"}
+        {'Error:'}
         {error.message}
       </div>
-    )
+    );
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>
-}
+  if(record?.categories?.[0] !== 'Internal User' && current_step === '3') return null;
+  
+  return (
+    <div>
+      <p className="mb-[8px] no-underline">
+        <strong> Username: </strong>
+        &nbsp;
+        {record?.account_id || 'None'}
+      </p>
+      <p className="mb-[8px] no-underline">
+        <strong> Role: </strong>
+        &nbsp;
+        {record?.role || 'None'}
+      </p>
+    </div>
+  );
+};
 
 const SummaryConfig = {
   label: 'Step 3',
   required: true,
   components: [
     {
-      label: 'Record Details',
-      component: <Summary form_key="BasicDetails" />,
+      label: 'Account Details',
+      component: <Summary form_key="AccountDetails" />,
     },
   ],
-}
+};
 
-export default SummaryConfig
+export default SummaryConfig;

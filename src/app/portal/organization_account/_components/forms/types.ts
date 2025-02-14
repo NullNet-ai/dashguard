@@ -6,9 +6,11 @@ export interface IFormProps<T = Record<string, any>> {
     navigate?: {
       wizard_step?: string
       record_tab?: string
-    }
+    },
+    pluck_fields?: string[];
   }
   config?: T
   defaultValues?: any
   selectOptions?: Record<string, any>
+  selectedRecords?: Array<Record<string, any>>
 }

@@ -11,13 +11,11 @@ const Summary = ({ form_key }: { form_key: string }) => {
   const category = useCategory();
   const [, , entity, _, identifier] = pathName.split('/');
   const {
-    data: record = { data: { id: null } },
+    data: record,
     refetch,
     error,
-  } = api.record.getByCode.useQuery({
-    id: identifier!,
-    pluck_fields: ['id', 'code', 'status'],
-    main_entity: entity!,
+  } = api.account.fetchExternalInternalUserDetails.useQuery({
+    code: identifier!,
   });
 
   useRefetchRecord({
@@ -39,12 +37,12 @@ const Summary = ({ form_key }: { form_key: string }) => {
         <p className="mb-[8px] no-underline">
           <strong> Role: </strong>
           &nbsp;
-          {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+          {record?.role || 'None'}
         </p>
         <p className="mb-[8px] no-underline">
           <strong> Email: </strong>
           &nbsp;
-          {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+          {record?.email || 'None'}
         </p>
       </div>
     )
@@ -54,37 +52,40 @@ const Summary = ({ form_key }: { form_key: string }) => {
       <p className="mb-[8px] no-underline">
         <strong> Primary Phone Number: </strong>
         &nbsp;
-        {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+        {record?.contact?.phone || 'None'}
       </p>
       <p className="mb-[8px] no-underline">
         <strong> Primary Email: </strong>
         &nbsp;
-        {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+        {record?.contact?.email || 'None'}
       </p>
       <p className="mb-[8px] no-underline">
         <strong> First Name: </strong>
         &nbsp;
-        {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+        {record?.contact?.first_name || 'None'}
       </p>
       <p className="mb-[8px] no-underline">
         <strong> Last Name: </strong>
         &nbsp;
-        {record?.data?.categories?.[0] ? record?.data?.categories?.[0] : 'None'}
+        {record?.data?.last_name || 'None'}
       </p>
     </div>
   );
 };
 
-// const getSummaryConfig = (category: string | null) => ({
-//   label: category === 'External User' ? 'Invite External User' : 'Selelct Internal User',
-//   required: true,
-//   components: [
-//     {
-//       label: category === 'External User' ? 'External User Details' : 'User Details',
-//       component: <Summary form_key="BasicDetails" />,
-//     },
-//   ],
-// });
+// const SummaryConfig = () => {
+//   const category = useCategory();
+//   return ({
+//     label: category === 'External User' ? 'Invite External User' : 'Selelct Internal User',
+//     required: true,
+//     components: [
+//       {
+//         label: category === 'External User' ? 'External User Details' : 'User Details',
+//         component: <Summary form_key="BasicDetails" />,
+//       },
+//     ],
+//   })
+// };
 
 const SummaryConfig = {
   label: 'Step 2',

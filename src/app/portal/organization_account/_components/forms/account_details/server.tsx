@@ -1,19 +1,16 @@
-import { api } from '~/trpc/server';
-import { headers } from 'next/headers';
-import BasicDetails from './client';
+import { api } from "~/trpc/server";
+import { headers } from "next/headers";
+import BasicDetails from "./client";
 import { EOperator } from '@dna-platform/common-orm';
 import { EStatus } from '~/server/api/types';
 
 const FormServerFetch = async () => {
   const headerList = headers();
-  const pathname = headerList.get('x-pathname') || '';
-  const [, , main_entity, application, identifier] = pathname.split('/');
-
+  const pathname = headerList.get("x-pathname") || "";
+  const [, , main_entity, application, identifier] = pathname.split("/");
   const [record, roles] = await Promise.all([
-    api.record.getByCode({
-      main_entity: main_entity!,
-      id: identifier!,
-      pluck_fields: ['id', 'code', 'role_id', 'email', 'categories'],
+    api.account.fetchExternalInternalUserDetails({
+      code: identifier!,
     }),
     api.grid.items({
       entity: 'user_role',
@@ -29,12 +26,12 @@ const FormServerFetch = async () => {
       ],
     }),
   ]);
-
-  if(record?.data?.categories?.[0] !== 'External User') return null;
+  if(record?.categories?.[0] !== 'Internal User') return null;
 
   const defaultValues = {
-    role: record?.data?.role_id,
-    email: [{ email: record?.data?.email }],
+    role: record?.role_id ?? '',
+    username: record?.account_id || record?.contact?.email,
+    password: record?.account_secret ? '************' : '',
   };
   const user_roles = roles.items?.map(({ id, role }) => ({
     value: id,
@@ -46,8 +43,8 @@ const FormServerFetch = async () => {
         defaultValues={defaultValues ?? {}}
         selectOptions={{ role: user_roles }}
         params={{
-          id: record?.data?.id!,
-          shell_type: application! as 'record' | 'wizard',
+          id: record?.id!,
+          shell_type: application! as "record" | "wizard",
           entity: main_entity,
         }}
       />

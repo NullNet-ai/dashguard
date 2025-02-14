@@ -7,14 +7,27 @@ import totalSteps from '../_config/totalSteps';
 import WizardSummaryComponent from '../_config/wizardSummaryConfig';
 import { type IWizardLayoutProps } from '../types';
 import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation';
+import wizardCallbacks from './actions/wizardCallbacks';
+import { api } from '~/trpc/server';
 //* * Wizard Configuration */
 
 const WizardLayout = async (props: IWizardLayoutProps) => {
   const { children } = props;
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
-  const category = headerList.get('x-categories') || '';
+  let category = headerList.get('x-categories') || '';
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/');
+
+  if (identifier !== 'new') {
+    const accountRecord = await api.record.getByCode({
+      main_entity: mainEntity!,
+      id: identifier!,
+      pluck_fields: ['id', 'code', 'categories'],
+    });
+    if (accountRecord?.data?.categories?.[0]) {
+      category = accountRecord?.data?.categories?.[0];
+    }
+  }
 
   await stepValidator({
     currentStep: currentStep!,
@@ -23,6 +36,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
   });
 
   let resolvedTotalSteps = totalSteps;
+
   switch (category) {
     case 'External User':
       resolvedTotalSteps = 3;
@@ -37,10 +51,13 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
 
   const stepLabels = {
     1: 'Category Details',
-    2: category === 'External User' ? 'Invite External User' : 'User',
+    2:
+      category === 'External User'
+        ? 'Invite External User'
+        : 'Select Internal User',
     3: category === 'Internal User' ? 'Account Details' : 'Confirmation',
     4: 'Confirmation',
-  }
+  };
 
   const wizard_summary = WizardSummaryComponent();
   return (
@@ -53,7 +70,8 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
           entityName: mainEntity,
           totalSteps: resolvedTotalSteps,
           stepLabels,
-          title: 'Account'
+          title: 'Account',
+          callbackHandlers: wizardCallbacks,
         }}
         stepsNavigation={stepsNavigation}
         summary={wizard_summary}

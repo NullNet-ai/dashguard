@@ -1,0 +1,244 @@
+'use client';
+
+import { z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { api } from '~/trpc/react';
+import gridColumns from '~/app/portal/contact/grid/_config/columns';
+import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns';
+import { ulid } from 'ulid';
+import SelectedView from './components/SelectedView';
+import { type InternalUserDetailsSchema } from '~/server/zodSchema/account/internalUserDetails';
+
+const FormSchema = z.object({});
+
+const defaultAdvanceFilter = [
+  {
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Active'],
+    default: true,
+  },
+];
+
+export default function BasicDetails({
+  params,
+  defaultValues,
+  selectedRecords,
+}: IFormProps) {
+
+  const toast = useToast();
+
+  const update = api.record.updateDynamicRecord.useMutation();
+
+  const handleRemoveRecord = async ({
+    filter_entity,
+  }: {
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
+  }) => {
+    try {
+      const response = await update.mutateAsync({
+        id: params.id,
+        entity: 'organization_account',
+        data: {
+          contact_id: null,
+        },
+      });
+
+      if (response) {
+        toast.success('Internal User removed successfully');
+        return {
+          rows: [],
+          filter_entity,
+          main_entity_id: '',
+        };
+      }
+    } catch (error) {
+      toast.error('Failed to remove Internal User');
+    }
+  };
+
+  const handleSelectRecord = async ({
+    rows,
+    filter_entity,
+    main_entity_id,
+  }: {
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
+  }) => {
+    try {
+      const response = await update.mutateAsync({
+        id: params.id,
+        entity: 'organization_account',
+        data: {
+          contact_id: rows[0].id,
+        },
+      });
+      if (response) {
+        toast.success('Internal User details submitted successfully');
+        return {
+          rows,
+          filter_entity,
+          main_entity_id,
+        };
+      }
+    } catch (error) {
+      toast.error('Failed to select Internal User');
+    }
+  };
+  return (
+    <FormBuilder
+      create_mode={false}
+      myParent={params.shell_type}
+      formProps={params}
+      formLabel="User"
+      formKey="UserDetails"
+      formSchema={FormSchema}
+      defaultValues={defaultValues}
+      fields={[
+        {
+          id: 'phone',
+          formType: 'phone-input',
+          name: 'phone',
+          label: 'Phone Number',
+          required: true,
+          placeholder: '',
+          gridPosition: 'left',
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: 'contact_phone_numbers',
+            field: 'raw_phone_number',
+          },
+        },
+        {
+          id: 'email',
+          formType: 'email-input',
+          name: 'email',
+          label: 'Email',
+          required: true,
+          placeholder: 'Example: yourmail@example.com',
+          withGridFilter: true,
+          gridPosition: 'right',
+          filterFieldConfig: {
+            entity: 'contact_emails',
+            field: 'email',
+          },
+        },
+        {
+          id: 'first_name',
+          formType: 'input',
+          name: 'first_name',
+          label: 'First Name',
+          required: true,
+          placeholder: 'Example: John',
+        },
+        {
+          id: 'last_name',
+          formType: 'input',
+          name: 'last_name',
+          label: 'Last Name',
+          required: true,
+          placeholder: 'Example: Smith',
+        },
+        {
+          id: 'middle_name',
+          formType: 'input',
+          name: 'middle_name',
+          label: 'Middle Name',
+          required: false,
+          placeholder: 'Example: Robert',
+        },
+      ]}
+      filterGridConfig={{
+        selectedRecords,
+        statusesIncluded: ['Active'],
+        actionType: 'single-select',
+        hideSearch: false,
+        pluck: params?.pluck_fields,
+        filter_entity: 'contact',
+        is_same_entity_id: true,
+        main_entity_id: params.id,
+        gridColumns,
+        fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
+        current: 1,
+        limit: 1000,
+        label: 'Contacts',
+        searchConfig: {
+          router: 'contact',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: 'contact',
+            pluck: params?.pluck_fields,
+            default_advance_filters: defaultAdvanceFilter,
+            default_sorting: [
+              {
+                id: 'created_date',
+                desc: true,
+                sort_key: 'created_date',
+              },
+            ],
+          },
+        },
+        onSelectRecords: async ({ filter_entity, main_entity_id, rows }) => {
+          const response = (await handleSelectRecord({
+            rows,
+            filter_entity,
+            main_entity_id,
+          })) as {
+            rows: any[];
+            main_entity_id: string;
+            filter_entity: string;
+          };
+
+          return {
+            rows: response.rows,
+            filter_entity: response.filter_entity,
+            main_entity_id: response.main_entity_id,
+          };
+        },
+        onRemoveSelectedRecords: async ({
+          filter_entity,
+          main_entity_id,
+          rows,
+        }) => {
+          const response = (await handleRemoveRecord({
+            rows,
+            filter_entity,
+            main_entity_id,
+          })) as {
+            rows: any[];
+            filter_entity: string;
+            main_entity_id: string;
+          };
+          return {
+            rows: response.rows,
+            filter_entity: response.filter_entity,
+            main_entity_id: response.main_entity_id,
+          };
+        },
+        onFilterFieldChange: (search_params, options) => {
+          const { data } = api.contact.mainGrid.useQuery(
+            search_params,
+            options,
+          );
+          return data;
+        },
+        renderComponentSelected: (record) => {
+          return <SelectedView record={record} />;
+        },
+      }}
+      features={{
+        enableFormFilterCreate: false,
+      }}
+    />
+  );
+}
