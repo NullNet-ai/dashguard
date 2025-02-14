@@ -9,7 +9,6 @@ import { getGridCacheData } from "~/lib/grid-get-cache-data";
  *
  */
 import gridColumns from "./_config/columns";
-import defaultAdvanceFilter from "./_config/advanceFilter";
 import defaultSorting from "./_config/sorting";
 
 export default async function Page() {
@@ -37,7 +36,6 @@ export default async function Page() {
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter}
       sorting={sorting?.length ? sorting : []}
       config={{
         entity: main_entity!,
