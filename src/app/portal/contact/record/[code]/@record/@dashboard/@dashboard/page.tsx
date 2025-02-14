@@ -36,7 +36,7 @@ const RecordTabContainer = () => {
 
         return (
           <div className={cn(
-            'flex h-8 w-16 items-center justify-center rounded font-semibold', colorMap[color as keyof typeof colorMap] || colorMap.red
+            'flex h-[2.2rem] w-16 items-center justify-center rounded font-semibold', colorMap[color as keyof typeof colorMap] || colorMap.red
           )}
           >
             {renderContent()}
@@ -70,7 +70,7 @@ const RecordTabContainer = () => {
       accessorKey: 'content',
       cell: () => {
         return (
-          <div className="flex flex-col gap-6 p-4 pl-10">
+          <div className="flex flex-col gap-6 p-4 lg:pl-10">
             <div className="flex items-start gap-4">
               <code className="block w-full rounded bg-slate-900 p-4 font-mono text-sm text-slate-100">
                 This is sample Code here
@@ -95,6 +95,7 @@ const RecordTabContainer = () => {
                 href="https://www.grandcentralartcenter.com/category/past/page/37/"
                 target="_blank"
                 rel="noopener noreferrer"
+                className='break-all line-clamp-1'
               >
                 https://www.grandcentralartcenter.com/category/past/page/37/
               </a>

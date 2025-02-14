@@ -8,16 +8,16 @@ import GridClientTabs from '../components/GridClientTabs'
 
 import GridCardListItem from './GridCardListItem'
 
-const GridCardLists = ({ hideSearch, parentType }: any) => {
+const GridCardLists = ({ hideSearch, parentType, gridType }: any) => {
   const { state } = useContext(GridContext)
 
   return (
     <>
-      <div className='flex justify-between'>
-        <div className='w-[40%] h-[36px]'>
+      <div className='flex flex-col lg:flex-row justify-between gap-y-2 lg:gap-y-0'>
+        <div className='lg:w-[40%] w-full h-[36px]'>
           <GridClientTabs />
         </div>
-        {!hideSearch && <Search parentType={parentType} creatable={false} switchable={false} />}
+        {!hideSearch && <Search parentType={parentType} creatable={false} switchable={false} gridType={gridType} />}
       </div>
       <div className='flex flex-col gap-y-2 lg:h-[calc(100vh-350px)] overflow-y-auto'>
         {state?.table.getRowModel().rows?.length
