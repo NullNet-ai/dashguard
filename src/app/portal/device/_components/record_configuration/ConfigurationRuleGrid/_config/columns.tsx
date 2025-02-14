@@ -55,6 +55,7 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
+    cell: ({row}) => row.original.protocol.toUpperCase()
   },
   {
     header: 'Source',
