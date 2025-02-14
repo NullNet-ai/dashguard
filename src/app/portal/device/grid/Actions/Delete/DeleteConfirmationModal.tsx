@@ -52,7 +52,7 @@ const DeleteConfirmationModal = ({
           <Button
             className="r-2"
             color="rimary"
-            variant="host"
+            variant="ghost"
             onClick={() => {
               setOpen(false)
             }}
