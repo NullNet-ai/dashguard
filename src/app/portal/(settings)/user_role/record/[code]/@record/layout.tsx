@@ -2,7 +2,7 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
-import type { ILayoutProps } from "./types";
+import { type ILayoutProps } from "./types";
 
 const Layout = (props: ILayoutProps) => {
 
