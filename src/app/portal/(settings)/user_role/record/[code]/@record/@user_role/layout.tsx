@@ -8,12 +8,14 @@ type LayoutProps = {
   [key: string]: ReactNode | undefined
 }
 
-const Layout = (props: LayoutProps) => {
-  const { user_role, category_details } = props;
-
+export default function Layout({
+  user_role,
+  category_details,
+}: {
+  user_role: React.ReactNode
+  category_details: React.ReactNode
+}) {
   const slots = [user_role, category_details]
 
   return <div className='space-y-2'>{slots}</div>
 }
-
-export default Layout
