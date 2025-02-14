@@ -12,6 +12,6 @@ export default function Layout(props: { current_tab?: React.ReactNode, dashboard
     return <div>Coming Soon</div>
   }
   return <div>
-    {slot}
+    {[slot]}
   </div> 
 }
