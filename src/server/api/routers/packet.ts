@@ -7,8 +7,6 @@ import { z } from 'zod'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
-import { EStatus } from '../types'
-
 interface InputData {
   bucket: string
   bandwidth: string
@@ -42,13 +40,13 @@ function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count:
   return seconds_array
 }
 
-function transformData( data: InputData[]): OutputData[] {
-const result = data.map((item) => {
+function transformData(data: InputData[]): OutputData[] {
+  const result = data.map((item) => {
     return {
       ...item,
       bandwidth: parseInt(item.bandwidth),
     }
-})
+  })
 
   return result
 }
@@ -57,7 +55,7 @@ export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
   getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()) })).query(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range } = input
- 
+
     const res = await ctx.dnaClient.aggregate({
       query: {
         entity: 'packets',
@@ -90,52 +88,51 @@ export const packetRouter = createTRPCRouter({
             ],
           },
         ],
-        joins:[],
+        joins: [],
         bucket_size,
-        limit:20,
+        limit: 20,
         order: {
           order_by: 'bucket',
-          order_direction: EOrderDirection.DESC,
+          order_direction: EOrderDirection.ASC,
         },
       },
       token: ctx.token.value,
 
     }).execute()
-    const transformedData: OutputData[] = transformData( res?.data as InputData[])
+    const transformedData: OutputData[] = transformData(res?.data as InputData[])
 
-   
     return transformedData
   }),
 
   fetchPacketsIP: privateProcedure
-  .input(z.object({})).query(async ({ ctx }) => {
-    const res = await ctx.dnaClient
-      .findAll({
-        entity: 'packets',
-        token: ctx.token.value,
-        query: {
-          pluck: ['source_ip', 'destination_ip'],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'status',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: ["Active", "active"],
+    .input(z.object({})).query(async ({ ctx }) => {
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: 'packets',
+          token: ctx.token.value,
+          query: {
+            pluck: ['source_ip', 'destination_ip'],
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'status',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: ['Active', 'active'],
+              },
+            ],
+            order: {
+              limit: 100,
+              by_field: 'code',
+              by_direction: EOrderDirection.DESC,
             },
-          ],
-          order: {
-            limit: 100,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
           },
-        },
-        
-      })
-      .execute()
 
-    return res?.data
-  }),
+        })
+        .execute()
+
+      return res?.data
+    }),
 
 })
 
