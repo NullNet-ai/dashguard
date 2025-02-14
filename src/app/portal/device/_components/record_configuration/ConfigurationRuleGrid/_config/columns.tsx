@@ -55,7 +55,7 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
-    cell: ({row}) => row.original.protocol.toUpperCase()
+    cell: ({row}) => row.original?.protocol?.toUpperCase() ?? "*"
   },
   {
     header: 'Source',
@@ -64,8 +64,8 @@ const gridColumns = [
       operator: 'like',
     },
     cell: ({row}) => {
-      const source_type = row.original.source_type;
-      const source_addr = row.original.source_addr;
+      const source_type = row.original?.source_type ?? "address";
+      const source_addr = row.original?.source_addr ?? "*";
       return <>{mapRuleEndpointAddress(source_addr, source_type)}</>
     }
   },
@@ -84,8 +84,8 @@ const gridColumns = [
       operator: 'like',
     },
     cell: ({row}) => {
-      const destination_type = row.original.destination_type;
-      const destination_addr = row.original.destination_addr;
+      const destination_type = row.original?.destination_type ?? "address";
+      const destination_addr = row.original?.destination_addr ?? "*";
       return <>{mapRuleEndpointAddress(destination_addr, destination_type)}</>
     }
   },
