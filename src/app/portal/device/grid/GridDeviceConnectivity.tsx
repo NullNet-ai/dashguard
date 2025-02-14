@@ -6,7 +6,7 @@ import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
 
-import { getBarPath } from '../utils/getBarPath'
+import {  getBarPath } from '../utils/getBarPath'
 
 interface ShapeProps {
   x: number
@@ -54,7 +54,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
       hour: '',
       heartbeats: 0,
     }],
-
+    
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastTwentyFourHoursTimeStamp(),
