@@ -1,6 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import { useSidebar } from '~/components/ui/sidebar'
 
 import { cn } from '~/lib/utils'
 
@@ -11,14 +12,14 @@ interface ContentWraperProps {
 const ContentWraper = ({ children }: ContentWraperProps) => {
   const pathname = usePathname() || ''
   const [, , firstSegment, application, ,] = pathname.split('/')
-
-  const mtop
-    = application === 'record'
+  const { isBannerPresent } = useSidebar()
+  const mtop: string =
+    application === 'record'
       ? 'lg:mt-[0px] md:mt-[53px] mt-[126px]'
       : application === 'wizard'
         ? 'lg:mt-[0] mt-[128px] md:mt-[53px]'
         : firstSegment === 'dashboard'
-          ? 'lg:mt-[50px] md:mt-[80px] mt-[100px]'
+          ? `lg:mt-[50px] md:mt-[80px] ${isBannerPresent ? 'mt-[150px]' : 'mt-[100px]'}`
           : 'mt-[140px]';
 
   return (
