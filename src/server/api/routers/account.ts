@@ -723,8 +723,9 @@ export const accountRouter = createTRPCRouter({
                 'account_secret',
                 'status',
                 'email',
+                'account_status',
               ],
-              contacts: ['id', 'first_name', 'last_name'],
+              contacts: ['id', 'first_name', 'last_name', 'middle_name'],
               user_roles: ['role'],
               organizations: ['name'],
               contact_phone_numbers: [
@@ -810,6 +811,7 @@ export const accountRouter = createTRPCRouter({
 
       return {
         ...accountRecord?.organization_accounts,
+        account_email: accountRecord?.organization_accounts?.email,
         role: accountRecord?.user_roles?.role,
         phoneNumber,
         email,
@@ -855,7 +857,7 @@ export const accountRouter = createTRPCRouter({
           entity: 'organization_accounts',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'code', 'account_id', 'email'],
+            pluck: ['id', 'code', 'account_id', 'email', 'categories'],
           },
         })
         .execute();
@@ -874,6 +876,22 @@ export const accountRouter = createTRPCRouter({
           },
         })
         .execute();
+
+      const category = accountRecord?.categories?.[0];
+      await ctx.dnaClient
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status:
+                category === 'External User' ? 'Invited' : 'Pending Setup',
+            },
+            pluck: ['id', 'status'],
+          },
+        })
+        .execute();
+
       if (!record) {
         throw new TRPCError({
           code: 'CONFLICT',
@@ -1009,7 +1027,7 @@ export const accountRouter = createTRPCRouter({
         .execute();
 
       const invitationRecord = invitation.data?.[0] ?? {};
-     
+
       const email = invitationRecord?.contact_emails;
 
       return {

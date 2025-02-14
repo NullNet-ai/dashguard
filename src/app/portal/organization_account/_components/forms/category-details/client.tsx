@@ -82,7 +82,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
         //   label: 'Category',
         // },
       ]}
-      formKey={'ContactCategoryDetails'}
+      formKey={'CategoryDetails'}
       formLabel={'Category Details'}
       formProps={params}
       formSchema={ContactCategoryDetailsSchema}

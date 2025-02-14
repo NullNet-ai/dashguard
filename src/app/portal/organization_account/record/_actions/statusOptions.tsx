@@ -1,26 +1,45 @@
-'use client'
-import { type IMenuOptionConfig } from '~/components/platform/Record/types'
+'use client';
+import { type IMenuOptionConfig } from '~/components/platform/Record/types';
 
-import { handleChangeStatus } from '.'
+import { handleChangeStatus } from '.';
+const applicationStatuses = [
+  'New',
+  'Screening',
+  'Assessment Test',
+  'Interviewing',
+  'Pending',
+  'Hired',
+  'Failed',
+  'On Hold',
+  'Job Offered',
+];
+
+const accountStatuses = {
+  'Disable Access': 'Access Disabled',
+  'Deactivate Account': 'Deactivated',
+  'Enable Access': 'Active',
+  'Activate Account': 'Active',
+  'Cancel Invitation': 'Invitation Canceled',
+  'Resend Invitation': 'Invited',
+  'Re-send Invite': 'Invited',
+};
+
 const statusOptions = [
   {
-    label: 'Identifier Option One',
-    onClick: handleChangeStatus.bind(null, 'Passed'),
-  },
-  {
-    label: 'Identifier Option Two',
-    onClick: handleChangeStatus.bind(null, 'Test'),
-    children: [
-      {
-        label: 'Identifier Option Three',
-        onClick: handleChangeStatus.bind(null, 'Test'),
+    label: 'Change Status',
+    onClick: () => ({}),
+    children: Object.entries(accountStatuses).map(([label, status]) => ({
+      label: label,
+      onClick: async (id, entityName) => {
+        await handleChangeStatus(
+          status,
+          id,
+          entityName,
+          'account_status',
+        );
       },
-      {
-        label: 'Identifier Option Four',
-        onClick: handleChangeStatus.bind(null, 'Test'),
-      },
-    ],
+    })),
   },
-] as IMenuOptionConfig[]
+] as IMenuOptionConfig[];
 
-export default statusOptions
+export default statusOptions;

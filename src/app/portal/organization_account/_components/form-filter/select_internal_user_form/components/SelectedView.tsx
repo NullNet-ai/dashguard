@@ -5,8 +5,10 @@ import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 
 const SelectedView = ({ record }: Record<string, any>) => {
-  const { first_name, last_name, middle_name, raw_phone_number, iso_code, email } = record?.[0] || {};
-
+  const { first_name, last_name, middle_name, email, phone } = record || {};
+  const [phone_data] = phone || [];
+  const [email_data] = email || [];
+  
   return (
     <>
       <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5">
@@ -25,14 +27,11 @@ const SelectedView = ({ record }: Record<string, any>) => {
                 colorScheme: 'normal',
               },
             }}
-            defaultCountry={iso_code || 'us'}
+            defaultCountry={phone_data?.iso_code || 'us'}
             disabled={true}
             required={true}
-            value={`+${raw_phone_number}`}
-            className={cn(
-              'mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100',
-              'border-transparent opacity-100 disabled:pointer-events-none',
-            )}
+            value={`+${phone_data?.raw_phone_number}`}
+            // className={"border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
             inputStyle={{
               width: '100%',
               backgroundColor: 'transparent',
@@ -41,7 +40,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
               padding: '1.2rem',
               opacity: 'inherit',
             }}
-            inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
+            // inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
           />
         </div>
         <div className="w-full md:w-1/2">
@@ -50,9 +49,8 @@ const SelectedView = ({ record }: Record<string, any>) => {
           </Label>
           <Input
             readOnly={true}
-            className={`${true && 'border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100'}`}
             placeholder={'Primary Email'}
-            value={email}
+            value={email_data?.email}
             Icon={EnvelopeIcon}
             iconPlacement="left"
           />
@@ -66,7 +64,6 @@ const SelectedView = ({ record }: Record<string, any>) => {
             required={true}
             value={first_name}
             placeholder={'First Name'}
-            className={`${true && 'border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100'}`}
 
           />
         </div>
@@ -74,7 +71,6 @@ const SelectedView = ({ record }: Record<string, any>) => {
           <Label className={cn('text-md font-semibold')}>Last Name *</Label>
           <Input
             readOnly={true}
-            className={`${true && 'border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100'}`}
             placeholder={'Last Name'}
             value={last_name}
             Icon={EnvelopeIcon}
@@ -90,7 +86,6 @@ const SelectedView = ({ record }: Record<string, any>) => {
             required={true}
             value={middle_name}
             placeholder={'Middle Name'}
-            className={`${true && 'border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100'}`}
           />
         </div>
       </div>

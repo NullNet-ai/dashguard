@@ -32,7 +32,6 @@ export default function BasicDetails({
   defaultValues,
   selectedRecords,
 }: IFormProps) {
-
   const toast = useToast();
 
   const update = api.record.updateDynamicRecord.useMutation();
@@ -83,10 +82,38 @@ export default function BasicDetails({
           contact_id: rows[0].id,
         },
       });
+      const {
+        first_name,
+        last_name,
+        middle_name,
+        email,
+        iso_code,
+        country_code,
+        raw_phone_numbers,
+      } = rows?.[0] ?? {};
+    
       if (response) {
         toast.success('Internal User details submitted successfully');
         return {
-          rows,
+          rows: {
+            first_name,
+            last_name,
+            middle_name,
+            email: [
+              {
+                email,
+                is_primary: true,
+              },
+            ],
+            phone: [
+              {
+                raw_phone_number: raw_phone_numbers?.[0],
+                iso_code,
+                country_code,
+                is_primary: true,
+              },
+            ],
+          },
           filter_entity,
           main_entity_id,
         };
@@ -100,7 +127,7 @@ export default function BasicDetails({
       create_mode={false}
       myParent={params.shell_type}
       formProps={params}
-      formLabel="User"
+      formLabel={params.shell_type === 'record' ? 'Contact Details' : 'User'}
       formKey="UserDetails"
       formSchema={FormSchema}
       defaultValues={defaultValues}
@@ -194,15 +221,44 @@ export default function BasicDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any[];
+            rows: any;
             main_entity_id: string;
             filter_entity: string;
           };
-
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
+          };
+        },
+        handleSelectFieldFilterGrid: async (data) => {
+          const {
+            first_name,
+            last_name,
+            middle_name,
+            email,
+            raw_phone_numbers,
+            iso_code,
+            country_code,
+          } = data ?? {};
+          return {
+            first_name,
+            last_name,
+            middle_name,
+            email: [
+              {
+                email,
+                is_primary: true,
+              },
+            ],
+            phone: [
+              {
+                raw_phone_number: raw_phone_numbers?.[0],
+                iso_code,
+                country_code,
+                is_primary: true,
+              },
+            ],
           };
         },
         onRemoveSelectedRecords: async ({
@@ -238,6 +294,7 @@ export default function BasicDetails({
       }}
       features={{
         enableFormFilterCreate: false,
+        enableUnlockFormFilter: params.shell_type !== 'record',
       }}
     />
   );

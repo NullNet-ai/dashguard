@@ -11,8 +11,12 @@ export const EmailSchema = z.object({
 });
 
 export const ExternalUserDetailsSchema = z.object({
-  role: z.string().min(1, {
-    message: 'Role is required',
-  }),
+  role: z
+    .string({
+      message: 'Role is required',
+    })
+    .min(1, {
+      message: 'Role is required',
+    }),
   email: z.array(EmailSchema),
 });

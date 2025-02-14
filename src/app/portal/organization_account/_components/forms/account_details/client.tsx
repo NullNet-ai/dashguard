@@ -75,6 +75,9 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
           placeholder: 'Example: Admin',
         },
       ]}
+      buttonConfig={{
+        hideLockButton: params.shell_type === 'record',
+      }}
     />
   );
 }

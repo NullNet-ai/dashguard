@@ -18,7 +18,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
   let category = headerList.get('x-categories') || '';
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/');
 
-  if (identifier !== 'new') {
+  if (identifier !== 'new' && !category) {
     const accountRecord = await api.record.getByCode({
       main_entity: mainEntity!,
       id: identifier!,
@@ -70,7 +70,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
           entityName: mainEntity,
           totalSteps: resolvedTotalSteps,
           stepLabels,
-          title: 'Account',
+          title: 'New Account',
           callbackHandlers: wizardCallbacks,
         }}
         stepsNavigation={stepsNavigation}

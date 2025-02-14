@@ -12,7 +12,6 @@ const Layout = (props: ILayoutProps) => {
   const slot = props[searchParams.get('current_tab') ?? 'dashboard']
   if (!slot) return (
     <div>
-      <RecordImplementationGuide />
       <ComingSoon />
     </div>
   )

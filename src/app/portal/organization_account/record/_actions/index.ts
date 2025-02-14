@@ -1,23 +1,21 @@
 'use server'
 
+import { api } from '~/trpc/server';
 import { type TStatus } from './types'
 
-const handleChangeStatus = (
-  status: TStatus,
+const handleChangeStatus = async (
+  record_status: string,
   recordId: string,
   entityName: string,
+  field_key: string,
 ) => {
-  try {
-    // const response = await changeContactStatus.mutateAsync({
-    //   id: contact_id!,
-    //   contact_status: status,
-    // });
-    // toast.success("Status changed sucessfully.");
-    // return response;
-  }
-  catch (error) {
-    // toast.error("Failed to change status.");
-  }
-}
+  const response = await api.record.updateRecordStatus({
+    id: recordId,
+    record_status,
+    entity: entityName,
+    field_key
+  });
+  return response;
+};
 
 export { handleChangeStatus }

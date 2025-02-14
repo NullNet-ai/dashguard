@@ -1,9 +1,10 @@
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
-import { z } from "zod";
-import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
-import { EOperator, type IAdvanceFilters } from "@dna-platform/common-orm";
-import { TRPCError } from "@trpc/server";
-import Entities from "~/auto-generated/entities";
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { z } from 'zod';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
+import { TRPCError } from '@trpc/server';
+import Entities from '~/auto-generated/entities';
+import { headers } from 'next/headers';
 
 export const recordRouter = createTRPCRouter({
   getById: privateProcedure
@@ -61,7 +62,7 @@ export const recordRouter = createTRPCRouter({
         return {
           data: undefined,
           status_code: 404,
-          message: "Record not found",
+          message: 'Record not found',
           success: false,
           error,
         } as Record<string, any>;
@@ -78,80 +79,80 @@ export const recordRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id, pluck_fields, main_entity: entity } = input;
       const join_type =
-        entity === "contact"
-          ? "self"
-          : ("left" as "self" | "left" | "right" | "inner");
+        entity === 'contact'
+          ? 'self'
+          : ('left' as 'self' | 'left' | 'right' | 'inner');
       const base_query = {
         entity,
         token: ctx.token.value,
         query: {
           advance_filters: [
             {
-              type: "criteria",
-              field: "code",
-              operator: "equal",
+              type: 'criteria',
+              field: 'code',
+              operator: 'equal',
               values: [id],
             },
           ] as IAdvanceFilters<string | number>[],
           pluck_object: {
             [`${entity}s`]: pluck_fields,
-            ...(join_type === "self"
+            ...(join_type === 'self'
               ? {}
-              : { contacts: ["first_name", "last_name"] }),
+              : { contacts: ['first_name', 'last_name'] }),
           },
         },
       };
       const created_by_join = {
         type: join_type,
         field_relation:
-          join_type === "self"
+          join_type === 'self'
             ? {
                 to: {
                   entity,
-                  field: "created_by",
+                  field: 'created_by',
                 },
                 from: {
-                  ...(join_type === "self" ? { alias: "created_by_data" } : {}),
-                  entity: "contact",
-                  field: "id",
+                  ...(join_type === 'self' ? { alias: 'created_by_data' } : {}),
+                  entity: 'contact',
+                  field: 'id',
                 },
               }
             : {
                 from: {
                   entity,
-                  field: "created_by",
+                  field: 'created_by',
                 },
                 to: {
-                  ...(join_type === "left" ? { alias: "created_by_data" } : {}),
-                  entity: "contact",
-                  field: "id",
+                  ...(join_type === 'left' ? { alias: 'created_by_data' } : {}),
+                  entity: 'contact',
+                  field: 'id',
                 },
               },
       };
       const updated_by_join = {
         type: join_type,
         field_relation:
-          join_type === "self"
+          join_type === 'self'
             ? {
                 to: {
                   entity,
-                  field: "updated_by",
+                  field: 'updated_by',
                 },
                 from: {
-                  ...(join_type === "self" ? { alias: "updated_by_data" } : {}),
-                  entity: "contact",
-                  field: "id",
+                  ...(join_type === 'self' ? { alias: 'updated_by_data' } : {}),
+                  entity: 'contact',
+                  field: 'id',
                 },
               }
             : {
                 from: {
                   entity,
-                  field: "updated_by",
+                  field: 'updated_by',
                 },
                 to: {
-                  ...(join_type === "left" ? { alias: "updated_by_data" } : {}),
-                  entity: "contact",
-                  field: "id",
+                  ...(join_type === 'left' ? { alias: 'updated_by_data' } : {}),
+                  entity: 'contact',
+                  field: 'id',
                 },
               },
       };
@@ -167,7 +168,7 @@ export const recordRouter = createTRPCRouter({
       const {
         created_by_data,
         updated_by_data,
-        [entity + "s"]: entity_data,
+        [entity + 's']: entity_data,
       } = data?.[0] ?? {};
       const formatted_data = {
         ...response,
@@ -183,73 +184,74 @@ export const recordRouter = createTRPCRouter({
     const response = ctx.session.account;
     const accounts = await ctx.dnaClient
       .findAll({
-        entity: "organization_accounts",
+        entity: 'organization_accounts',
         token: ctx.token.value,
         query: {
           advance_filters: [
             {
-              type: "criteria",
-              field: "account_id",
+              type: 'criteria',
+              field: 'account_id',
               operator: EOperator.EQUAL,
               values: [response?.email],
             },
           ],
           pluck_object: {
             organization_accounts: [
-              "id",
-              "organization_id",
-              "account_id",
-              "contact_id",
-              "status",
+              'id',
+              'organization_id',
+              'account_id',
+              'contact_id',
+              'status',
             ],
-            contacts: ["id", "first_name", "last_name"],
-            organizations: ["name"],
+            contacts: ['id', 'first_name', 'last_name'],
+            organizations: ['name'],
           },
         },
       })
       .join({
-        type: "left",
+        type: 'left',
         field_relation: {
           to: {
-            entity: "contacts",
-            field: "id",
+            entity: 'contacts',
+            field: 'id',
           },
           from: {
-            entity: "organization_accounts",
-            field: "contact_id",
+            entity: 'organization_accounts',
+            field: 'contact_id',
           },
         },
       })
       .join({
-        type: "left",
+        type: 'left',
         field_relation: {
           to: {
-            entity: "organizations",
-            field: "id",
+            entity: 'organizations',
+            field: 'id',
           },
           from: {
-            entity: "organization_accounts",
-            field: "organization_id",
+            entity: 'organization_accounts',
+            field: 'organization_id',
           },
         },
       })
       .execute();
-    const { organization_accounts, contacts, organizations } = accounts.data?.[0] ?? {};
+    const { organization_accounts, contacts, organizations } =
+      accounts.data?.[0] ?? {};
     const accountDetails = {
-      account_name: `${contacts?.first_name || ""} ${contacts?.last_name || ""}`,
-      username: organization_accounts?.account_id || "",
-      organization: organizations?.name || "",
+      account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
+      username: organization_accounts?.account_id || '',
+      organization: organizations?.name || '',
     };
     const advance_filters = createAdvancedFilter({
       organization_contact_id: response.contact.id,
     });
     const { data } = await ctx.dnaClient
       .findAll({
-        entity: "organization_contact_account",
+        entity: 'organization_contact_account',
         token: ctx.token.value,
         query: {
           advance_filters,
-          pluck: ["id", "email"],
+          pluck: ['id', 'email'],
         },
       })
       .execute();
@@ -269,7 +271,7 @@ export const recordRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              status: "Archived",
+              status: 'Archived',
             },
           },
         })
@@ -285,7 +287,7 @@ export const recordRouter = createTRPCRouter({
           },
           {
             message:
-              "Invalid entity name. It must be one of the DnaOrm models.",
+              'Invalid entity name. It must be one of the DnaOrm models.',
           },
         ),
         status: z.string().min(1),
@@ -297,15 +299,15 @@ export const recordRouter = createTRPCRouter({
           entity: input.entity,
           token: ctx.token.value,
           query: {
-            pluck: ["id"],
+            pluck: ['id'],
           },
         })
         .execute();
       const record_id = record?.data?.[0]?.id;
       if (!record_id) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Record not found",
+          code: 'NOT_FOUND',
+          message: 'Record not found',
         });
       }
 
@@ -317,7 +319,7 @@ export const recordRouter = createTRPCRouter({
             params: {
               status: input.status,
             },
-            pluck: ["id", "code"],
+            pluck: ['id', 'code'],
           },
         })
         .execute();
@@ -337,6 +339,58 @@ export const recordRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: input.data,
+          },
+        })
+        .execute();
+    }),
+  updateRecordStatus: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        entity: z.string().refine(
+          (value) => {
+            return Entities.includes(value);
+          },
+          {
+            message:
+              'Invalid entity name. It must be one of the DnaOrm models.',
+          },
+        ),
+        record_status: z.string().min(1),
+        field_key: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const [, , , , identifier] = pathName.split('/');
+      const { id, entity, record_status, field_key } = input ?? {};
+      const record = await ctx.dnaClient
+        .findByCode(identifier || id, {
+          entity,
+          token: ctx.token.value,
+          query: {
+            pluck: ['id'],
+          },
+        })
+        .execute();
+      const record_id = record?.data?.[0]?.id;
+      if (!record_id) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Record not found',
+        });
+      }
+
+      await ctx.dnaClient
+        .update(record_id, {
+          entity,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              [field_key]: record_status,
+            },
+            pluck: ['id', 'code', field_key],
           },
         })
         .execute();

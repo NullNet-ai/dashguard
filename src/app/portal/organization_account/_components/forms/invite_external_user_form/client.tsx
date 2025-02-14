@@ -8,7 +8,11 @@ import { type IFormProps } from '../types';
 import { api } from '~/trpc/react';
 import { ExternalUserDetailsSchema } from '~/server/zodSchema/account/externalUserDetails';
 
-export default function BasicDetails({ params, defaultValues, selectOptions }: IFormProps) {
+export default function BasicDetails({
+  params,
+  defaultValues,
+  selectOptions,
+}: IFormProps) {
   const toast = useToast();
 
   const update = api.record.updateDynamicRecord.useMutation();
@@ -23,10 +27,10 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
         data: {
           role_id: data.role,
           email: data.email?.[0]?.email,
-        }
+        },
       });
       if (response) {
-        toast.success("External User details submitted successfully");
+        toast.success('External User details submitted successfully');
         return response;
       }
     } catch (error) {
@@ -39,7 +43,11 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
       myParent={params.shell_type}
       enableFormRegisterToParent
       formProps={params}
-      formLabel="Invite External User"
+      formLabel={
+        params.shell_type === 'record'
+          ? 'Account Details'
+          : 'Invite External User'
+      }
       handleSubmit={handleSave}
       formKey="UserDetails"
       formSchema={ExternalUserDetailsSchema}
@@ -63,6 +71,9 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
           placeholder: 'Example: john@example.com',
         },
       ]}
+      buttonConfig={{
+        hideLockButton: params.shell_type === 'record',
+      }}
     />
   );
 }

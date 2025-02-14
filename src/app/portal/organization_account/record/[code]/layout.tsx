@@ -64,6 +64,7 @@ const Layout = async ({
       entity_name={ main_entity! }
       record={ record }
       record_summary={ record_summary }
+      record_details={ record_details?.data }
     />
   )
 }

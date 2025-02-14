@@ -1,19 +1,18 @@
 'use client';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import { api } from '~/trpc/react';
 
 import useRefetchRecord from '../hooks/useFetchMainRecord';
-import useCategory from '~/hooks/useCategory';
 
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const category = useCategory();
-  const [, , entity, _, identifier] = pathName.split('/');
+  const [, , , _, identifier] = pathName.split('/');
   const {
     data: record,
     refetch,
     error,
+    isLoading,
   } = api.account.fetchExternalInternalUserDetails.useQuery({
     code: identifier!,
   });
@@ -31,23 +30,22 @@ const Summary = ({ form_key }: { form_key: string }) => {
       </div>
     );
   }
-  if(category == 'External User') {
-    return (
-      <div>
-        <p className="mb-[8px] no-underline">
-          <strong> Role: </strong>
-          &nbsp;
-          {record?.role || 'None'}
-        </p>
-        <p className="mb-[8px] no-underline">
-          <strong> Email: </strong>
-          &nbsp;
-          {record?.email || 'None'}
-        </p>
-      </div>
-    )
-  }
-  return (
+  if (isLoading) return null;
+
+  return record?.categories?.includes('External User') ? (
+    <div>
+      <p className="mb-[8px] no-underline">
+        <strong> Role: </strong>
+        &nbsp;
+        {record?.role || 'None'}
+      </p>
+      <p className="mb-[8px] no-underline">
+        <strong> Email: </strong>
+        &nbsp;
+        {record?.account_email || 'None'}
+      </p>
+    </div>
+  ) : (
     <div>
       <p className="mb-[8px] no-underline">
         <strong> Primary Phone Number: </strong>
@@ -67,7 +65,12 @@ const Summary = ({ form_key }: { form_key: string }) => {
       <p className="mb-[8px] no-underline">
         <strong> Last Name: </strong>
         &nbsp;
-        {record?.data?.last_name || 'None'}
+        {record?.contact?.last_name || 'None'}
+      </p>
+      <p className="mb-[8px] no-underline">
+        <strong> Middle Name: </strong>
+        &nbsp;
+        {record?.contact?.middle_name || 'None'}
       </p>
     </div>
   );
