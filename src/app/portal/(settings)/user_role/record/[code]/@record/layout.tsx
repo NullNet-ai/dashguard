@@ -2,14 +2,16 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function Layout(props: {
+type LayoutProps = {
   dashboard: React.ReactNode
   user_role: React.ReactNode
   category_details: React.ReactNode
-  [key: string]: React.ReactNode
-}) {
+}
+
+export default function Layout(props: LayoutProps) {
   const searchParams = useSearchParams()
-  const slot = props[searchParams.get('current_tab') ?? 'dashboard']
+  const currentTab = searchParams.get('current_tab') ?? 'dashboard'
+  const slot = props[currentTab as keyof LayoutProps]
 
   if (!slot) {
     return <div>Coming Soon</div>
