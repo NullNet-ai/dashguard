@@ -74,7 +74,7 @@ export default function Search({gridType}: any) {
             className="h-5 w-5 text-muted-foreground"
           />
           <ComboboxInput
-            className="flex-grow border-none px-1.5 md:px-3 h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
+            className="flex-grow border-none text-sm lg:text-md px-1.5 pl-2 md:pl-0 md:px-3 h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
             placeholder="Search..."
             value={query}
             onBlur={() => {
