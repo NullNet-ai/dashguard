@@ -147,7 +147,7 @@ export default function GridMobileRow({ parent = 'grid' }: { parent?: string }) 
                           cell.column.columnDef.header, cell.getContext(),
                         )}
                       </div>
-                      <div className={cn(
+                      <div className={cn('flex gap-y-1 flex-wrap',
                         ['email', 'phone'].includes(cell.column.id)
                           ? 'break-all'
                           : 'break-normal'
