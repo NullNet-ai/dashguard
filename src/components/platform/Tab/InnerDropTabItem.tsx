@@ -1,4 +1,6 @@
+import Cookies from 'js-cookie';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
@@ -10,6 +12,7 @@ type InnerTabitemProps = {
   pathname?: string
   dropItems: any
   isActive: boolean
+  onSelect?: () => void
 };
 
 const InnerDropTabItem = ({
@@ -17,10 +20,13 @@ const InnerDropTabItem = ({
   pathname,
   dropItems,
   isActive,
+  onSelect,
 }: InnerTabitemProps) => {
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
-  const [, , entityName, application, code] = (pathname || '').split('/');
+  const newPathname = usePathname()
+  const [, , entityName, application] = (pathname || '').split('/');
+  const [, , , , code] = (newPathname || '').split('/')
   const active = useMemo(() => {
     if (isGrid && application === 'grid') {
       return true;
@@ -28,6 +34,14 @@ const InnerDropTabItem = ({
 
     return code === tab?.name;
   }, [code, application]);
+
+  const getActiveName = () => {
+    if (isGrid && application === 'grid') {
+      return 'grid'
+    }
+    return code
+  }
+
 
   useEffect(() => {
     updateSubtabs.mutateAsync({
@@ -46,6 +60,11 @@ const InnerDropTabItem = ({
             ? 'role'
             : tab.name.split(' ').join('-').toLowerCase()
         }
+        onClick={() => {
+          const getCurrent = getActiveName() || ''
+          Cookies.set('prevCurrent', getCurrent)
+          onSelect?.()
+        }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
         aria-current={isActive ? 'page' : undefined}
         className={cn(

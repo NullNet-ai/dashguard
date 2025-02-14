@@ -27,6 +27,9 @@ type TDisplayType = "form" | "selected";
   | "password"
   | "switch"
   | "rich-text-editor"
+  | 'alert'
+  | 'space'
+  | 'separator'
   | "currency-input";
 
 type TSelectionType = "single" | "multiple";
