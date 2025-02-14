@@ -5,7 +5,6 @@ import {
   createTRPCRouter,
   privateProcedure,
 } from '~/server/api/trpc'
-import { formatSorting } from '~/server/utils/formatSorting'
 import { pluralize } from '~/server/utils/pluralize'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
@@ -103,7 +102,7 @@ export const deviceRuleRouter = createTRPCRouter({
               by_field: 'order',
               by_direction: EOrderDirection.ASC,
             },
-          ]
+          ],
         },
       })
         .execute()

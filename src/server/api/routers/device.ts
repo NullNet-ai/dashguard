@@ -343,8 +343,8 @@ export const deviceRouter = createTRPCRouter({
             },
           })
       }
-      const { total_count: totalCount = 1, data: items }
-        = await query.execute()
+      const { total_count: totalCount = 0, data: items }
+      = await query.execute()
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
