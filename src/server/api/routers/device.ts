@@ -1301,7 +1301,7 @@ export const deviceRouter = createTRPCRouter({
           ids.map(async (id: string) => {
             return await ctx.dnaClient
               .delete(id, {
-                entity,
+                entity: _entity,
                 token: ctx.token.value,
                 is_permanent: true,
               })

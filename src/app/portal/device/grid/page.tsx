@@ -44,10 +44,9 @@ export default async function Page({
     current: +(searchParams.page ?? '0'),
     limit: +(searchParams.perPage ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
-    // advance_filters: filters?.advanceFilter?.length
-    //   ? filters?.advanceFilter
-    //   : [],
-    advance_filters: [],
+    advance_filters: filters?.advanceFilter?.length
+      ? filters?.advanceFilter
+      : [],
   })
 
   return (

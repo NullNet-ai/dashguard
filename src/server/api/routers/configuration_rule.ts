@@ -30,7 +30,6 @@ export const deviceRuleRouter = createTRPCRouter({
         entity: 'device_configurations',
         token: ctx.token.value,
         query: {
-          track_total_records: true,
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
             {
@@ -75,6 +74,7 @@ export const deviceRuleRouter = createTRPCRouter({
         entity: 'device_rules',
         token: ctx.token.value,
         query: {
+          track_total_records: true,
           pluck,
           advance_filters: _advance_filters?.length
             ? _advance_filters as IAdvanceFilters[]
