@@ -1,6 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
+import { mapRuleEndpointAddress } from '~/app/portal/device/utils/mapRuleEndpointAddress'
 
 import { Badge } from '~/components/ui/badge'
 import StatusCell from '~/components/ui/status-cell'
@@ -61,6 +62,11 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
+    cell: ({row}) => {
+      const source_type = row.original.source_type;
+      const source_addr = row.original.source_addr;
+      return <>{mapRuleEndpointAddress(source_addr, source_type)}</>
+    }
   },
   {
     header: 'Src Port',
@@ -76,6 +82,11 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
+    cell: ({row}) => {
+      const destination_type = row.original.destination_type;
+      const destination_addr = row.original.destination_addr;
+      return <>{mapRuleEndpointAddress(destination_addr, destination_type)}</>
+    }
   },
   {
     header: 'Dest Port',
