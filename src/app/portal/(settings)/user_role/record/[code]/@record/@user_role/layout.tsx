@@ -8,7 +8,7 @@ interface LayoutProps {
   [key: string]: ReactNode
 }
 
-const RecordLayout: React.FC<LayoutProps> = (props) => {
+const RecordLayout = (props: LayoutProps) => {
   const { user_role, category_details } = props;
 
   const slots = [user_role, category_details]
