@@ -1,14 +1,14 @@
 import React, { type ReactNode } from 'react'
 
-interface LayoutProps {
+type LayoutProps = {
   children?: ReactNode
   params?: any
   user_role?: ReactNode
   category_details?: ReactNode
-  [key: string]: ReactNode
+  [key: string]: ReactNode | undefined
 }
 
-const RecordLayout = (props: LayoutProps) => {
+const Layout = (props: LayoutProps) => {
   const { user_role, category_details } = props;
 
   const slots = [user_role, category_details]
@@ -16,4 +16,4 @@ const RecordLayout = (props: LayoutProps) => {
   return <div className='space-y-2'>{slots}</div>
 }
 
-export default RecordLayout
+export default Layout
