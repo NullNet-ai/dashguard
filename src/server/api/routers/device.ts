@@ -1,14 +1,11 @@
 import {
-  EOperator,
   EOrderDirection,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
 import argon2 from 'argon2'
-import moment from 'moment'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
-import { getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { CredentialsGenerator } from '~/server/utils/credentials'
 import { formatSorting } from '~/server/utils/formatSorting'
@@ -1189,13 +1186,13 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute(),
 
-          await ctx.dnaClient
+        await ctx.dnaClient
           .findAll({
             entity: 'device_configurations',
             token: ctx.token.value,
             query: {
               pluck: ['id', 'device_id', 'hostname'],
-              pluck_object:{
+              pluck_object: {
                 device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
                 device_configurations: ['id', 'device_id', 'hostname'],
               },
@@ -1220,7 +1217,7 @@ export const deviceRouter = createTRPCRouter({
             },
           })
           .execute(),
-          
+
         await ctx.dnaClient
           .findAll({
             entity: 'device_groups',
@@ -1257,8 +1254,8 @@ export const deviceRouter = createTRPCRouter({
 
       const { id: device_group_setting_id, name }
           = device_group.data[0]?.device_group_settings?.[0] || {}
-      const {hostname} = device_configuration.data[0] || {}
-      const {device_interfaces} = device_configuration?.data?.[0] || {}
+      const { hostname } = device_configuration.data[0] || {}
+      const { device_interfaces } = device_configuration?.data?.[0] || {}
       const { addresses, device_heartbeats, ...rest } = device?.data?.[0] || {}
       const { id: add_id, ...rest_address } = addresses?.[0] || {}
 
@@ -1273,4 +1270,87 @@ export const deviceRouter = createTRPCRouter({
         },
       }
     }),
+
+  deleteDevice: privateProcedure.input(z.object({ id: z.string() })).mutation(
+    async ({ input, ctx }) => {
+      const { id } = input
+
+      const deleteRecords = async (
+        _entity: string,
+        advance_filters: IAdvanceFilters[],
+      ) => {
+        const filter_res = await ctx.dnaClient
+          .findAll({
+            entity: _entity,
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters,
+              order: {
+                limit: 500,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
+
+        const ids = filter_res.data.map((item: Record<string, any>) => item?.id)
+        if (!ids.length) return { success: true, message: 'No records found' }
+        return await Promise.all(
+          ids.map(async (id: string) => {
+            return await ctx.dnaClient
+              .delete(id, {
+                entity,
+                token: ctx.token.value,
+                is_permanent: true,
+              })
+              .execute()
+          }),
+        )
+      }
+
+      const related_entities = {
+        device_groups: 'device_id',
+        organization_accounts: 'device_id',
+        device_heartbeats: 'device_id',
+        device_rules: 'device_configuration_ids',
+        device_aliases: 'device_configuration_id',
+        device_interfaces: 'device_configuration_id',
+        device_configurations: 'device_id',
+        devices: 'id',
+      }
+
+      const filter_configurations = await ctx.dnaClient.findAll({
+        entity: 'device_configurations',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id'],
+          advance_filters: createAdvancedFilter({ device_id: id }),
+        },
+      }).execute()
+
+      const device_configuration_ids = filter_configurations.data.map((item: Record<string, any>) => item?.id)
+
+      const advance_filters = {
+        device_id: createAdvancedFilter({ device_id: id }),
+        device_configuration_id: createAdvancedFilter({ device_configuration_id: device_configuration_ids }),
+        id: createAdvancedFilter({ id }),
+      }
+
+      await Promise.all(
+        Object.entries(related_entities).map(async ([entity, field]) => {
+          const filters = advance_filters[field as keyof typeof advance_filters]
+
+          if (!filters?.[0]?.values?.length) return { success: true, message: 'No records found' }
+          return await deleteRecords(entity, filters)
+        }),
+      )
+
+      return {
+        success: true,
+        message: 'Device deleted successfully',
+      }
+    },
+  ),
 })
