@@ -28,7 +28,7 @@ export const authRouter = createTRPCRouter({
         const token = response?.data?.[0]?.token
 
         ctx.storeCookies.set('token', token)
-        return { token }
+        return response;
       }
       catch (error: any) {
         let errorMessage = 'Something went wrong please try again'
@@ -52,6 +52,20 @@ export const authRouter = createTRPCRouter({
           type: errorType,
         }
       }
+    }),
+  registerAccount: privateProcedure
+    .input(
+      z.object({
+        account: z.record(z.any()),
+        organization: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account, organization } = input
+      const result = await ctx.dnaClient
+        .register(organization, account)
+        .execute()
+      return result
     }),
   getAccountData: privateProcedure
     .input(
