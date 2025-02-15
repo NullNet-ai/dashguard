@@ -36,7 +36,7 @@ export default function NotFound() {
             width={"1000"}
             height={"720"}
             src="/not-found.png"
-            className="lg:transform lg:-translate-y-5 lg:translate-x-[150px]"
+            className="lg:transform lg:-translate-y-1 lg:translate-x-[150px]"
           />
         </div>
         <footer>

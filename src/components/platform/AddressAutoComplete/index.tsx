@@ -79,7 +79,7 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
       // "country",
     ].forEach((key) => {
       const data = response.data[key as keyof AddressType];
-      form.setValue(`details.${key}`, data, { shouldDirty: true });
+      form.setValue(`details.${key}`, data);
     });
 
     const country = deburr(response.data.country);

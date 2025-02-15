@@ -1,7 +1,6 @@
-import { EClientDatabaseProvider, ORM } from "@dna-platform/common-orm";
 import axios from "axios";
 import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { api } from "~/trpc/server";
 
 export async function GET(
@@ -12,9 +11,6 @@ export async function GET(
     params: { file_id: string };
   },
 ) {
-  const orm = ORM({
-    storage_type: EClientDatabaseProvider.LOCAL,
-  });
   const cookieStore = cookies();
   const { value: token = null } = cookieStore.get("token") || {};
 
