@@ -251,8 +251,8 @@ export default function FormCurrencyInput({
       <FormControl>
         <div
           className={cn(
-            "flex  rounded-md border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
-            error ? "border-destructive" : "",
+            "flex  rounded-md border focus-within:ring-1 focus-within:border-primary focus-within:ring-ring",
+            error ? "border-destructive " : "",
             fieldConfig.disabled && "bg-secondary"
           )}
         >
@@ -265,7 +265,7 @@ export default function FormCurrencyInput({
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
-            className="border-0 py-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
+            className="border-0 py-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0"
             onChange={handleValueChange}
             onKeyDown={handleKeyDown}
             value={values.value}
@@ -280,10 +280,11 @@ export default function FormCurrencyInput({
               .toString()}
             onValueChange={handleCurrencySelect}
             data-test-id={`${formKey}-sel-${fieldConfig.name}`}
-            disabled={formRenderProps.field.disabled}
+            disabled={formRenderProps.field.disabled || fieldConfig.readonly}
           >
             <SelectTrigger
-              className="h-[36px] disabled:bg-secondary w-fit border-0 py-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
+              className={cn("h-[36px] disabled:bg-transparent w-fit border-0 py-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0",
+              )}
               data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue

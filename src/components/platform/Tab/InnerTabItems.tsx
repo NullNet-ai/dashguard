@@ -34,6 +34,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
 
   const [application, code] = (newPathname || '').split('/').slice(3)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   let sidebar_width = remToPx(open ? 16 : 5)
   const size = useScreenType()
@@ -142,7 +143,10 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
         })}
       </div>
       {dropdownItems.length > 0 && isWindowLoaded && (
-        <DropdownMenu>
+        <DropdownMenu
+          open={isDropdownOpen} 
+          onOpenChange={setIsDropdownOpen}
+        >
           <DropdownMenuTrigger
             className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
             data-test-id="apptab-ddn-btn"
@@ -166,6 +170,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
                     tab={tab}
                     dropItems={dropdownItems}
                     pathname={pathname}
+                    onSelect={() => setIsDropdownOpen(false)}
                     isActive={isActive}
                   />
                 </DropdownMenuItem>

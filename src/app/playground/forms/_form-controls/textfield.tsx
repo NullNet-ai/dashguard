@@ -1,5 +1,6 @@
 "use client";
 
+import { UserIcon } from 'lucide-react';
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
@@ -49,6 +50,101 @@ export default function UserProfileForm() {
             required: true,
             placeholder: "Enter your full name...",
             readonly:true
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertIcon: UserIcon
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'error',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'info',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'warning',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+          },
+          {
+            id: "space-test",
+            formType: "space",
+            name: "space-test",
+          },
+          {
+            id: "separator-test",
+            formType: "separator",
+            name: "separator-test",
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'success',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertIcon: UserIcon,
+            alertWithAccentBorder: true
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'error',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertWithAccentBorder: true
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'info',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertWithAccentBorder: true
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'warning',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertWithAccentBorder: true
+          },
+          {
+            id: "alert-test",
+            formType: "alert",
+            name: "alert-test",
+            alertVariant:'success',
+            alertContent: 'This is an alert test',
+            alertTitle: 'Alert Title',
+            alertWithAccentBorder: true
           },
         ]}
       />
