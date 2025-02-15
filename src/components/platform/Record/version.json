@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Record",
-  "tag": "1.8.1<unreleased>",
-  "branch": "unreleased/fix/2349/1.8.1<unreleased>",
-  "message": "Add Category Section in Record if there is data regarding category and improve record ui (cursor-pointer to all clickable,turn identifier into font-semibold, record tab to set display as flex-grow will take whole space regardless of number of tabs",
-  "publish_name": "Rob Caldosa"
+  "tag": "1.9.0",
+  "branch": "released/fix/1.9.0",
+  "message": "Record Application > Record Summary - UI issues",
+  "publish_name": "Juphet Vitualla"
 }
