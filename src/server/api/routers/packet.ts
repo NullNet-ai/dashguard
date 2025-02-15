@@ -114,7 +114,7 @@ export const packetRouter = createTRPCRouter({
         entity: 'packets',
         token: ctx.token.value,
         query: {
-          pluck: ['source_ip', 'destination_ip'],
+          pluck: ['source_ip', 'destination_ip', 'timestamp'],
           advance_filters: [
             {
               type: 'criteria',
@@ -125,7 +125,7 @@ export const packetRouter = createTRPCRouter({
             },
           ],
           order: {
-            limit: 10,
+            limit: 20,
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
