@@ -55,10 +55,9 @@ export default class Notifications {
         token: token,
         mutation: {
           params: {
-            notification: {
               ...notification,
+              metadata: JSON.stringify(notification.metadata),
               status: notification.status || 'unread', // Default to unread
-            },
           },
         },
       })
