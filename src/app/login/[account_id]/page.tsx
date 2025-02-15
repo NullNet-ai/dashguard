@@ -3,14 +3,13 @@ import LoginForm from '../_components/loginForm';
 import SignUpLabel from '../_components/SignUpLabel';
 import { api } from '~/trpc/server';
 
-export default async function Login({ params }) {
+export default async function Login({ params, searchParams }: any) {
 
-  const response = await api.organizationAccount.getById({
+  const response = await api.organizationAccount.getByIdPublicly({
     id: params.account_id,
+    token: searchParams.token,
     pluck_fields: ['account_id'],
   });
-
-
 
   return (
     <>

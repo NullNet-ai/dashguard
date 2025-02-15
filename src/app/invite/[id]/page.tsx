@@ -4,16 +4,24 @@ import { api } from '~/trpc/server';
 import { headers } from 'next/headers';
 import SignInLabel from '~/app/sign-up/_components/SignInLabel';
 import SignUpForm from '~/app/sign-up/_components/SignUpForm';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 
-export default async function Invite() {
+export default async function Invite({ searchParams }: any) {
+  if (!searchParams.token) {
+    return redirect('/login');
+  }
+
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
-  const record = await api.account.getInvitationAccountDetails({
+  const record = await api.account.getInvitationAccountDetailsPublicly({
     id: id!,
+    token: searchParams.token
   });
 
+  if (record?.categories.includes('Internal User')) {
+    return redirect(`/login/${record.id}?token=${searchParams.token}`, RedirectType.push)
+  }
   
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -37,7 +45,10 @@ export default async function Invite() {
 
           <div className="mt-11">
             <div>
-              <SignUpForm />
+              <SignUpForm defaultValues={{
+                organization_name: record?.organization.name,
+                email: record?.email,
+              }} />
             </div>
             <SignInLabel />
           </div>

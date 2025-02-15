@@ -2,7 +2,7 @@ import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
 import argon2 from 'argon2';
 import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { createTRPCRouter, privateProcedure, publicProcedure } from '~/server/api/trpc';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
@@ -909,7 +909,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}`;
+      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}?token=${ctx.token.value}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -1003,7 +1003,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}`;
+      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}?token=${ctx.token.value}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -1124,6 +1124,82 @@ export const accountRouter = createTRPCRouter({
         })
         .execute();
 
+      const invitationRecord = invitation.data?.[0] ?? {};
+
+      const email = invitationRecord?.contact_emails;
+
+      return {
+        ...invitationRecord?.organization_accounts,
+        organization: {
+          categories: invitationRecord?.organizations?.categories,
+          name: invitationRecord?.organizations?.name,
+        },
+        role: invitationRecord?.user_roles?.role,
+        contact: {
+          ...invitationRecord?.contacts,
+          email: email?.email,
+        },
+      };
+    }),
+  getInvitationAccountDetailsPublicly: publicProcedure
+    .input(z.object({ id: z.string(), token: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: input.token,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [input.id],
+              },
+            ],
+            pluck_object: {
+              invitations: ['id', 'account_id', 'status'],
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'status',
+                'email',
+                'categories'
+              ],
+              organizations: ['name'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'invitations',
+              field: 'account_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'organization_id',
+            },
+          },
+        })
+        .execute();
+      
       const invitationRecord = invitation.data?.[0] ?? {};
 
       const email = invitationRecord?.contact_emails;
