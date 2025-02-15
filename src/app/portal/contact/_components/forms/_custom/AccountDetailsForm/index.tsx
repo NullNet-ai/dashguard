@@ -15,6 +15,7 @@ import { api } from "~/trpc/react";
 import DeactivateConfirmationDialog, {
   type IDialogContext,
 } from "./DeactivateConfirmationDialog";
+import { updateAccountStatusByAccountId } from '~/app/portal/organization_account/wizard/[code]/actions';
 interface IAccountDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   selectOptions?: {
@@ -83,6 +84,7 @@ export default function AccountDetailsForm({
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unused-vars
       const { disabled: _disabled, ...rest } = field_values;
+      
       const isValid = await form.trigger(`accounts.${index}`);
       if (!isValid) {
         return;
@@ -107,7 +109,12 @@ export default function AccountDetailsForm({
       const response = await updateAccountDetails.mutateAsync({
         ...rest,
         contact_id: formProps?.id,
-      });
+      });  
+      
+      if (response && 'id' in response) {
+        await updateAccountStatusByAccountId(response.id as string)
+      }
+
       actions?.setFormSave({});
       if (response) {
         toast.success("Account Details submit successfully");
@@ -246,8 +253,9 @@ export default function AccountDetailsForm({
                     formType: "select",
                     label: "Organization",
                     required: true,
-                    disabled: !!field?.disabled,
-                    readonly: field?.id && formProps?.shell_type === "record",
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -256,7 +264,9 @@ export default function AccountDetailsForm({
                     formType: "select",
                     label: "Role",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -265,7 +275,9 @@ export default function AccountDetailsForm({
                     formType: "input",
                     label: "Username",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     isCustomFormField: true,
                   },
                   {
@@ -274,7 +286,9 @@ export default function AccountDetailsForm({
                     formType: "password",
                     label: "Password",
                     required: true,
-                    disabled: !!field?.disabled,
+                    ...(field?.disabled && {
+                      readonly: field?.id && formProps?.shell_type === "record",
+                    }),
                     placeholder: field?.id ? "Change password" : "",
                     isCustomFormField: true,
                     showPasswordStrengthBar: true,

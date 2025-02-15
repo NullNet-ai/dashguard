@@ -12,3 +12,16 @@ export const updateAccountStatus = async (data: any) => {
     throw error;
   }
 };
+
+export const updateAccountStatusByAccountId = async (id: string) => {
+  try {
+    const result = await api.account.createInvitationRecordByAccountId({
+      account_id: id,
+    });
+    return result.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+

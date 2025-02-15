@@ -20,7 +20,8 @@ import { Input } from '~/components/ui/input'
 import { type IPasswordStrength, type IProps } from './types'
 
 const getNestedValue = ({
-  record, path,
+  record,
+  path,
 }: {
   record: Record<string, any>
   path: string
@@ -38,7 +39,7 @@ export default function FormPassword({
 }: IProps) {
   // Destructure configurable properties with default values
   const { showPasswordStrengthBar = false, hasComplexValidation = false }
-  = fieldConfig
+    = fieldConfig
 
   const isDisabled = fieldConfig.isCustomFormField
     ? fieldConfig?.disabled
@@ -66,7 +67,7 @@ export default function FormPassword({
   })
 
   const showPasswordStrengthBarAndValidations
-  = !isDisabled && isPasswordDirty && formRenderProps?.field?.value
+    = !isDisabled && isPasswordDirty && formRenderProps?.field?.value
   // Function to validate password against rules
   const validatePassword = (password: string) => {
     return {
@@ -74,7 +75,7 @@ export default function FormPassword({
       hasUppercase: /[A-Z]/.test(password),
       hasLowercase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      hasSpecialChar: /[!@#$^()_+\-=\\[\]{}:'",.?<>/]/.test(password),
     }
   }
 
@@ -89,12 +90,18 @@ export default function FormPassword({
     const rulesSatisfied = Object.values(validation).filter(Boolean).length
 
     switch (rulesSatisfied) {
-      case 0: return { level: 0, text: 'Too Short' }
-      case 1: return { level: 1, text: 'Weak' }
-      case 2: return { level: 2, text: 'Okay' }
-      case 3: return { level: 3, text: 'Good' }
-      case 4: return { level: 4, text: 'Strong' }
-      default: return { level: 0, text: 'Too Short' }
+      case 0:
+        return { level: 0, text: 'Too Short' }
+      case 1:
+      case 2:
+        return { level: 1, text: 'Weak' }
+      case 3:
+      case 4:
+        return { level: 2, text: 'Moderate' }
+      case 5:
+        return { level: 3, text: 'Strong' }
+      default:
+        return { level: 3, text: 'Strong' }
     }
   }
 
@@ -142,7 +149,8 @@ export default function FormPassword({
             readOnly={
               (fieldConfig.isCustomFormField
                 ? fieldConfig?.readonly
-                : formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+                : formRenderProps.field.disabled || fieldConfig?.readonly)
+              ?? false
             }
             value={value}
           />
@@ -164,20 +172,30 @@ export default function FormPassword({
         </div>
       </FormControl>
 
+      {(!(showPasswordStrengthBarAndValidations && hasComplexValidation) && (
+        // Single FormMessage for simple validation
+        <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+      )) || (
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+          isMultiple={true}
+        />
+      )}
+
       {showPasswordStrengthBar && showPasswordStrengthBarAndValidations && (
         <div className="mt-2">
           <div className="flex gap-1">
-            {[1, 2, 3, 4].map(bar => (
+            {[1, 2, 3].map(bar => (
               <div
                 className={`h-2 flex-1 rounded-full ${
                   passwordStrength.level >= bar
                     ? passwordStrength.level === 1
                       ? 'bg-red-500'
                       : passwordStrength.level === 2
-                        ? 'bg-yellow-500'
+                        ? 'bg-orange-500'
                         : passwordStrength.level === 3
-                          ? 'bg-blue-500'
-                          : 'bg-green-500'
+                          ? 'bg-green-500'
+                          : 'bg-gray-200'
                     : 'bg-gray-200'
                 }`}
                 key={bar}
@@ -191,42 +209,38 @@ export default function FormPassword({
       )}
 
       {/* Complex Validation Rules (Conditional) */}
-      {showPasswordStrengthBarAndValidations && (
-        hasComplexValidation
-          ? (
-              <div className="mt-2 space-y-1">
-                {[
-                  { key: 'minLength', label: 'At least 12 characters' },
-                  { key: 'hasUppercase', label: 'At least one uppercase letter' },
-                  { key: 'hasLowercase', label: 'At least one lowercase letter' },
-                  { key: 'hasNumber', label: 'At least one number' },
-                  {
-                    key: 'hasSpecialChar',
-                    label: 'At least one special character',
-                  },
-                ].map(rule => (
-                  <div className="flex items-center" key={rule.key}>
-                    {passwordValidation[
-                      rule.key as keyof typeof passwordValidation
-                    ]
-                      ? (
-                          <CheckIcon className="h-4 w-4 text-green-500" />
-                        )
-                      : (
-                          <XMarkIcon className="h-4 w-4 text-red-500" />
-                        )}
-                    <span className='ml-2 text-sm'>{rule.label}</span>
-                  </div>
-                ))}
-              </div>
-            )
-          : (
-              // Single FormMessage for simple validation
-              <FormMessage
-                data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-                isMultiple={true}
-              />
-            )
+      {showPasswordStrengthBarAndValidations && hasComplexValidation && (
+        <div className="mt-2 space-y-1">
+          {[
+            { key: 'minLength', label: 'At least 12 characters' },
+            {
+              key: 'hasLowercase',
+              label: 'Contains one lowercase letter (a-z)',
+            },
+            {
+              key: 'hasUppercase',
+              label: 'Contains one uppercase letter (A-Z)',
+            },
+            { key: 'hasNumber', label: 'Contains one number (0-9)' },
+            {
+              key: 'hasSpecialChar',
+              label: 'Contains one special character (except *,%,&,;)',
+            },
+          ].map(rule => (
+            <div className="flex items-center" key={rule.key}>
+              {passwordValidation[
+                rule.key as keyof typeof passwordValidation
+              ]
+                ? (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )
+                : (
+                    <XMarkIcon className="h-4 w-4 text-red-500" />
+                  )}
+              <span className="ml-2 text-sm">{rule.label}</span>
+            </div>
+          ))}
+        </div>
       )}
     </FormItem>
   )

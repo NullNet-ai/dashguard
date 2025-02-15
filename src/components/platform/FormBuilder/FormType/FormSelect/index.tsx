@@ -279,7 +279,7 @@ export default function FormSelect({
               ref={setPopperElement}
               style={styles.popper}
               {...attributes.popper}
-              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
               data-test-id={`${formKey}-opts-${fieldConfig.name}`}
             >
               {filteredOptions?.slice(0, 700).map((opt) => (

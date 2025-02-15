@@ -14,7 +14,8 @@ import type {
   ISelectOptions,
   IFilterGridConfig,
   IField,
-  TFormSchema } from '../../../types'
+  TFormSchema,
+} from '../../../types'
 import FormInputGridWrapper from '../../custom/FormFilter/FormInputGridWrapper'
 
 import RenderFormType from './RenderFormType'
@@ -62,16 +63,25 @@ export default function FormModule({
         switch (_field.formType) {
           case 'address-input':
             return (
-              <FormAddress
-                fieldConfig={fieldConfig || _field}
-                form={form}
-                formKey={formattedFormKey}
+              <div
+                className={_field?.fieldClassName}
                 key={_field.id + index}
-              />
+                style={_field?.fieldStyle}
+              >
+                <FormAddress
+                  fieldConfig={fieldConfig || _field}
+                  form={form}
+                  formKey={formattedFormKey}
+                />
+              </div>
             )
           default:
             return (
-              <div key={_field.id}>
+              <div
+                className={_field?.fieldClassName}
+                key={_field.id}
+                style={_field?.fieldStyle}
+              >
                 <FormField
                   control={form.control}
                   disabled={_field.disabled}
@@ -86,25 +96,30 @@ export default function FormModule({
                           gridConfig={gridConfig!}
                           onSelectFieldFilterGrid={onSelectFieldFilterGrid}
                         >
-                          {RenderFormType(_field, formProps, form, formKey, formSchema, {
+                          {RenderFormType(
+                            _field, formProps, form, formKey, formSchema, {
+                              checkboxOptions: subConfig?.checkboxOptions,
+                              multiSelectOptions: subConfig?.multiSelectOptions,
+                              multiSelectOnSearch: subConfig?.multiSelectOnSearch,
+                              radioOptions: subConfig?.radioOptions,
+                              selectOptions: subConfig?.selectOptions,
+                              currencyInputOptions:
+                              subConfig?.currencyInputOptions,
+                            },
+                          )}
+                        </FormInputGridWrapper>
+                      )
+                    : (
+                        RenderFormType(
+                          _field, formProps, form, formKey, formSchema, {
                             checkboxOptions: subConfig?.checkboxOptions,
                             multiSelectOptions: subConfig?.multiSelectOptions,
                             multiSelectOnSearch: subConfig?.multiSelectOnSearch,
                             radioOptions: subConfig?.radioOptions,
                             selectOptions: subConfig?.selectOptions,
                             currencyInputOptions: subConfig?.currencyInputOptions,
-                          })}
-                        </FormInputGridWrapper>
-                      )
-                    : (
-                        RenderFormType(_field, formProps, form, formKey, formSchema, {
-                          checkboxOptions: subConfig?.checkboxOptions,
-                          multiSelectOptions: subConfig?.multiSelectOptions,
-                          multiSelectOnSearch: subConfig?.multiSelectOnSearch,
-                          radioOptions: subConfig?.radioOptions,
-                          selectOptions: subConfig?.selectOptions,
-                          currencyInputOptions: subConfig?.currencyInputOptions,
-                        })
+                          },
+                        )
                       )}
                 />
               </div>

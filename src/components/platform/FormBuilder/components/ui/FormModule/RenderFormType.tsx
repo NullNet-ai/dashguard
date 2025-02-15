@@ -12,6 +12,7 @@ import { Input } from '~/components/ui/input'
 import { type Option } from '~/components/ui/multi-select'
 
 import FormAddress from '../../../FormType/FormAddress'
+import FormAlertComponent from '../../../FormType/FormAlert'
 import FormCheckbox from '../../../FormType/FormCheckbox'
 import FormCurrencyInput from '../../../FormType/FormCurrencyInput'
 import FormDatePicker from '../../../FormType/FormDate'
@@ -43,6 +44,8 @@ import {
   type IField,
   type TFormSchema,
 } from '../../../types'
+import FormSpaceComponent from '../../../FormType/FormSpace'
+import FormSeparator from '../../../FormType/FormSeparator'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -295,6 +298,12 @@ export default function RenderFormType(
           formRenderProps={formRenderProps}
         />
       )
+    case 'alert':
+      return <FormAlertComponent fieldConfig={fieldConfig} />
+    case 'space':
+      return <FormSpaceComponent />
+    case 'separator':
+      return <FormSeparator fieldConfig={fieldConfig} />
     default:
       return <Input />
   }
