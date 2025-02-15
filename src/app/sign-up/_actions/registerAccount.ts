@@ -1,16 +1,16 @@
-'use server'
-import { redirect } from 'next/navigation'
+'use server';
+import { redirect } from 'next/navigation';
 
-import { verifySession } from '~/app/login/actions/loginSubmit'
-import { api } from '~/trpc/server'
-import { handleLoginError } from '~/utils/login-validator'
+import { verifySession } from '~/app/login/actions/loginSubmit';
+import { api } from '~/trpc/server';
+import { handleLoginError } from '~/utils/login-validator';
 
 interface RegisterAccountArgs {
-  first_name: string
-  last_name: string
-  email: string
-  password: string
-  organization_name?: string
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  organization_name?: string;
 }
 
 export default async function registerAccount({
@@ -22,6 +22,42 @@ export default async function registerAccount({
 }: RegisterAccountArgs) {
   try {
     /**
+     * Registration data
+     */
+    const organization = {
+      name: organization_name,
+    };
+
+    const account = {
+      first_name,
+      last_name,
+      email,
+      password,
+      account_id: email,
+      account_secret: password,
+      account_organization_name: organization_name,
+      is_new_user: false,
+    };
+
+    /**
+     * Register account
+     */
+    await api.auth.registerAccount({
+      account,
+      organization,
+    });
+
+    /**
+     * Login using username and password
+     */
+    await api.auth.login({
+      username: email,
+      password,
+    });
+
+    await verifySession();
+
+    /**
      * Create organization
      */
     const createdOrganizationResponse = await api.form.createDynamicRecord({
@@ -31,18 +67,18 @@ export default async function registerAccount({
         categories: ['User'],
         entity: 'Contact',
       },
-    })
+    });
 
-    const organizationDataError = handleLoginError(createdOrganizationResponse)
+    const organizationDataError = handleLoginError(createdOrganizationResponse);
     if (organizationDataError) {
-      return organizationDataError
+      return organizationDataError;
     }
 
-    const organization_id = createdOrganizationResponse?.data?.[0]?.id
+    const organization_id = createdOrganizationResponse?.data?.[0]?.id;
 
     /**
-       * Create contact
-       */
+     * Create contact
+     */
     const createdContactResponse = await api.form.createDynamicRecord({
       entity: 'contact',
       data: {
@@ -51,13 +87,13 @@ export default async function registerAccount({
         status: 'Draft',
         categories: ['Contact'],
       },
-    })
+    });
 
-    const contact_id = createdContactResponse?.data?.[0]?.id
+    const contact_id = createdContactResponse?.data?.[0]?.id;
 
     /**
-       * Create organization contact
-       */
+     * Create organization contact
+     */
     await api.form.createDynamicRecord({
       entity: 'organization_contacts',
       data: {
@@ -65,11 +101,11 @@ export default async function registerAccount({
         contact_id,
         is_primary: true,
       },
-    })
+    });
 
     /**
-       * Create contact email
-       */
+     * Create contact email
+     */
     await api.form.createDynamicRecord({
       entity: 'contact_email',
       data: {
@@ -77,55 +113,18 @@ export default async function registerAccount({
         is_primary: true,
         contact_id,
       },
-    })
+    });
 
-    /**
-       * Registration data
-       */
-    const organization = {
-      id: organization_id,
-      name: organization_name,
-    }
+    
 
-    const account = {
-      first_name,
-      last_name,
-      email,
-      password,
-      account_id: email,
-      account_secret: password,
-      contact_id,
-      account_organization_id: organization_id,
-      account_organization_name: organization_name,
-      is_new_user: false,
-    }
-
-    /**
-       * Register account
-       */
-    await api.auth.registerAccount({
-      account,
-      organization,
-    })
-
-    /**
-       * Login using username and password
-       */
-    await api.auth.login({
-      username: email,
-      password,
-    })
-
-    await verifySession()
-  }
-  catch (error) {
-    console.error(error)
+    
+  } catch (error) {
+    console.error(error);
     return {
       error: 'Something went wrong please try again',
       type: 'unknown',
-    }
-  }
-  finally {
-    redirect('/portal/dashboard')
+    };
+  } finally {
+    redirect('/portal/dashboard');
   }
 }

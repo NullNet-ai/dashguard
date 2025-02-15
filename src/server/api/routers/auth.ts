@@ -53,7 +53,7 @@ export const authRouter = createTRPCRouter({
         }
       }
     }),
-  registerAccount: privateProcedure
+  registerAccount: publicProcedure
     .input(
       z.object({
         account: z.record(z.any()),

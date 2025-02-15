@@ -1,4 +1,6 @@
+'use client'
 import { Fragment } from "react";
+import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 import { DropdownMenuItem, DropdownMenuSeparator } from "~/components/ui/dropdown-menu";
 
 interface IMenuItemProps {
@@ -7,6 +9,9 @@ interface IMenuItemProps {
 }
 
 export default function MenuItem({ children, onClick,...props  }: IMenuItemProps) {
+  
+
+ 
   const handleClick = () => {
     // ? Feel free to add your logic here
     onClick();

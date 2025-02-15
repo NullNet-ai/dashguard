@@ -1168,7 +1168,7 @@ export const accountRouter = createTRPCRouter({
                 'email',
                 'categories'
               ],
-              organizations: ['name'],
+              organizations: ['id', 'name'],
             },
           },
         })

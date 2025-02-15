@@ -4,7 +4,7 @@ import { UserPlusIcon } from '@heroicons/react/24/outline'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { omit } from 'lodash'
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Control, FieldValues, useForm, UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 
 import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
@@ -34,12 +34,10 @@ const SignUpSchema = z
     path: ['confirmed_password'],
   })
 
-type PickedSignUpSchema = Pick<z.infer<typeof SignUpSchema>, 'organization_name' | 'email'>
 
-const SignUpForm: React.FC<{defaultValues: PickedSignUpSchema}> = (props) => {
+const SignUpForm = () => {
   const form = useForm({
     resolver: zodResolver(SignUpSchema),
-    defaultValues: props.defaultValues,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -80,7 +78,7 @@ const SignUpForm: React.FC<{defaultValues: PickedSignUpSchema}> = (props) => {
         }}
       >
         <SignUpFormField
-          control={form.control}
+          control={form.control as unknown as Control<FieldValues, any>}
           fields={[
             {
               FormComponent: FormInput,
@@ -138,7 +136,7 @@ const SignUpForm: React.FC<{defaultValues: PickedSignUpSchema}> = (props) => {
               required: true,
             },
           ]}
-          form={form}
+          form={form as unknown as UseFormReturn<FieldValues, any, undefined>}
           formKey='SignUp'
         />
         {error && <FormMessage>{error}</FormMessage>}
