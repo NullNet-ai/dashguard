@@ -1,5 +1,5 @@
 import { ArchiveX } from 'lucide-react'
-import { redirect } from 'next/navigation'
+import {  useRouter } from 'next/navigation'
 import React from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -19,13 +19,14 @@ const DeleteConfirmationModal = ({
   setOpen: (open: boolean) => void
   record: any
 }) => {
+  const router = useRouter()
   const delete_device = api.device.deleteDevice.useMutation()
 
   const handleDelete = async () => {
     try {
       await delete_device.mutateAsync({ id: record.id })
       setOpen(false)
-      redirect(`/portal/device/grid`)
+      router.push(`/portal/device/grid`)
     }
     catch (error) {
       console.error(error)
