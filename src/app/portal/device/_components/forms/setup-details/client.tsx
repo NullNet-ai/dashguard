@@ -62,6 +62,9 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
           params={params}
         />
       )}
+      buttonConfig={{
+        hideLockButton: true,
+      }}
       defaultValues={defaultValues}
       enableFormRegisterToParent={true}
       fields={[]}

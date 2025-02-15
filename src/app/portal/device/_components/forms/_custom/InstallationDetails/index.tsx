@@ -1,6 +1,7 @@
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import React from 'react'
 import { type UseFormReturn } from 'react-hook-form'
+import { useToast } from '~/context/ToastProvider'
 
 import { FormField } from '~/components/ui/form'
 
@@ -12,14 +13,16 @@ interface IInstallationDetails {
 export default function CustomInstallationDetails({
   form,
 }: IInstallationDetails) {
+  const toast = useToast()
   const copyToClipboard = async (value: string) => {
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(value)
+        toast.success('Copied to clipboard!')
         return
       }
       catch (err) {
-        console.error('Clipboard API failed:', err)
+        toast.error('Failed to copy to clipboard')
       }
     }
 
@@ -40,13 +43,14 @@ export default function CustomInstallationDetails({
       textArea.remove()
 
       if (successful) {
+        toast.success('Copied to clipboard!')
       }
       else {
-        console.error('execCommand copy failed')
+        toast.error('Failed to copy to clipboard')
       }
     }
     catch (err) {
-      console.error('Fallback copy method failed:', err)
+      toast.error('Failed to copy to clipboard')
     }
   }
 
