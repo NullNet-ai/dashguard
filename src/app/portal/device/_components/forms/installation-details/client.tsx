@@ -32,6 +32,9 @@ export default function InstallationDetails({
       customDesign={{
         formClassName: "!grid-cols-1",
       }}
+      buttonConfig={{
+        hideLockButton: true,
+      }}
       formSchema={FormSchema}
       myParent={params.shell_type}
       formProps={params}
