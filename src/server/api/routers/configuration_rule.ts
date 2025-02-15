@@ -10,6 +10,7 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import { formatSorting } from '~/server/utils/formatSorting';
 const entity = 'device_rules'
 export const deviceRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -24,6 +25,7 @@ export const deviceRuleRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck,
         device_id,
+        sorting,
       } = input
 
       const device_configuration = await ctx.dnaClient.findAll({
@@ -93,16 +95,9 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: [
-            {
-              by_field: 'interface',
-              by_direction: EOrderDirection.ASC,
-            },
-            {
-              by_field: 'order',
-              by_direction: EOrderDirection.ASC,
-            },
-          ],
+          multiple_sort: sorting?.length
+            ? formatSorting(sorting)
+            : [],
         },
       })
         .execute()
