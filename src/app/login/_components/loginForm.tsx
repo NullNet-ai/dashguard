@@ -18,8 +18,7 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Please enter your password." }),
 })
 
-export default function LoginForm(props) {
-  // console.log("%c Line:22 🍊 props", "color:#e41a6a", props);
+export default function LoginForm(props: any) {
   const {defaultValues} = props;
 
   const form = useForm({

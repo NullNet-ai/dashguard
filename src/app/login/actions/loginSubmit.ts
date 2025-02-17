@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 
 import { api } from '~/trpc/server'
+import { handleLoginError } from '~/utils/login-validator'
 
 export const verifySession = async () => {
   try {
@@ -21,10 +22,15 @@ export default async function LoginSubmit({
   username: string
   password: string
 }) {
-  await api.auth.login({
+  const loginDetails = await api.auth.login({
     username,
     password,
   })
+
+  const loginDataError = handleLoginError(loginDetails);
+  if (loginDataError) {
+    return loginDataError
+  }
 
   const accountDataResponse = await api.auth.getAccountData({ username })
   if (accountDataResponse?.is_new_user) {

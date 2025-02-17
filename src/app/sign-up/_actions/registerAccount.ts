@@ -20,12 +20,14 @@ export default async function registerAccount({
   password,
   organization_name,
 }: RegisterAccountArgs) {
+  let error = null;
   try {
     /**
      * Registration data
      */
     const organization = {
       name: organization_name,
+      id: '',
     };
 
     const account = {
@@ -42,10 +44,16 @@ export default async function registerAccount({
     /**
      * Register account
      */
-    await api.auth.registerAccount({
+    const registeredAccountDetails = await api.auth.registerAccount({
       account,
       organization,
     });
+
+    const accountDataError = handleLoginError(registeredAccountDetails);
+    if (accountDataError) {
+      error = accountDataError;
+      return error;
+    }
 
     /**
      * Login using username and password
@@ -114,17 +122,17 @@ export default async function registerAccount({
         contact_id,
       },
     });
-
     
-
-    
-  } catch (error) {
+  } catch (err: any) {
     console.error(error);
-    return {
-      error: 'Something went wrong please try again',
-      type: 'unknown',
-    };
+    error = err;
   } finally {
+    if (error as any) {
+      return {
+        error: (error as any)?.message ?? 'Something went wrong please try again',
+        type: 'unknown',
+      };
+    }
     redirect('/portal/dashboard');
   }
 }

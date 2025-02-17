@@ -3,9 +3,7 @@ import Image from 'next/image'
 import SignInLabel from './_components/SignInLabel'
 import SignUpForm from './_components/SignUpForm'
 
-// import SetupPasswordForm from './_components/SetupPasswordForm'
-
-const SetupPassword = () => {
+const SignUp = () => {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
@@ -54,4 +52,4 @@ const SetupPassword = () => {
   )
 }
 
-export default SetupPassword
+export default SignUp
