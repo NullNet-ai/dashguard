@@ -33,10 +33,10 @@ export default function NotFound() {
         <div className="lg:relative lg:col-start-2 lg:row-start-1 lg:row-end-4  lg:flex lg:items-center lg:justify-center">
           <Image
             alt=""
-            width={"900"}
+            width={"1000"}
             height={"720"}
             src="/not-found.png"
-            className="lg:transform lg:-translate-y-4 lg:translate-x-[100px]"
+            className="lg:transform lg:-translate-y-1 lg:translate-x-[150px]"
           />
         </div>
         <footer>

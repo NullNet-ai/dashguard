@@ -2,20 +2,17 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 
-import type { ILayoutProps } from "./types";
+// TODO: Add type later
+export default function Layout(props: any) {
+  const searchParams = useSearchParams()
+  const slotName = searchParams.get('current_tab') ?? 'dashboard'
 
-const Layout = (props: ILayoutProps) => {
+  const slot = props[slotName]
 
-    const searchParams = useSearchParams()
-
-    const slot = props[searchParams.get('current_tab') ?? 'dashboard']
-
-    if (!slot) {
-        return <div>Coming Soon</div>
-    }
-    return <div>
-        {slot}
-    </div> 
+  if (!slot) {
+    return <div>Coming Soon</div>
+  }
+  return <div>
+    {slot}
+  </div> 
 }
-
-export default Layout;

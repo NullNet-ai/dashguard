@@ -84,6 +84,16 @@ export default function UserProfileForm() {
             alertTitle: 'Alert Title',
           },
           {
+            id: "space-test",
+            formType: "space",
+            name: "space-test",
+          },
+          {
+            id: "separator-test",
+            formType: "separator",
+            name: "separator-test",
+          },
+          {
             id: "alert-test",
             formType: "alert",
             name: "alert-test",

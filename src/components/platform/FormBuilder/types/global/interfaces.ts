@@ -79,6 +79,7 @@ interface IField {
   alertContent?: string
   alertIcon?: ElementType<any> | undefined
   alertWithAccentBorder?: boolean
+  separatorType?: 'dashed' | 'decorative'
   dateGranularity?: DateTimeGranularity
   dateMinDate?: Date
   dateMaxDate?: Date

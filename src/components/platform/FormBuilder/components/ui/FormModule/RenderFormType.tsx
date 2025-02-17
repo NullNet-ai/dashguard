@@ -44,6 +44,8 @@ import {
   type IField,
   type TFormSchema,
 } from '../../../types'
+import FormSpaceComponent from '../../../FormType/FormSpace'
+import FormSeparator from '../../../FormType/FormSeparator'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -298,6 +300,10 @@ export default function RenderFormType(
       )
     case 'alert':
       return <FormAlertComponent fieldConfig={fieldConfig} />
+    case 'space':
+      return <FormSpaceComponent />
+    case 'separator':
+      return <FormSeparator fieldConfig={fieldConfig} />
     default:
       return <Input />
   }

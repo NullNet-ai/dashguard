@@ -13,12 +13,14 @@ interface IRecursiveMenuItemProps {
   recordId: string;
   entityName: string;
   menuOptionConfig?: IMenuOptionConfig[];
+  isMobile?: boolean;
 }
 
 export default function RecursiveMenuItem({
   menuOptionConfig = [],
   recordId,
   entityName,
+  isMobile = false,
 }: IRecursiveMenuItemProps) {
   const [menuItemLoadingState, setMenuItemLoadingState] = useState<
     Record<string, boolean>
@@ -55,7 +57,7 @@ export default function RecursiveMenuItem({
               </MenuItem>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="right">
+          <DropdownMenuContent align="start" side={isMobile ? 'left' : 'right'} className='z-[1000]'>
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}
