@@ -1276,7 +1276,6 @@ export const deviceRouter = createTRPCRouter({
   deleteDevice: privateProcedure.input(z.object({ id: z.string() })).mutation(
     async ({ input, ctx }) => {
       const { id } = input
-      let current_total_records = 0
 
       const deleteRecords = async (
         _entity: string,
@@ -1291,7 +1290,7 @@ export const deviceRouter = createTRPCRouter({
               pluck: ['id'],
               advance_filters,
               order: {
-                limit: 1000,
+                limit: 500,
                 by_field: 'created_date',
                 by_direction: EOrderDirection.DESC,
               },
@@ -1299,7 +1298,7 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute()
 
-          const { total_count } = filter_res
+          const { total_count = 1 } = filter_res
 
         const ids = filter_res.data.map((item: Record<string, any>) => item?.id)
         if (!ids.length) return { success: true, message: 'No records found' }
@@ -1318,7 +1317,7 @@ export const deviceRouter = createTRPCRouter({
         //       .execute()
         //   }),
         // )
-        return await Bluebird.map(
+        const deleted_records =  await Bluebird.map(
           ids,
           async (_id: string) => {
             const a = await ctx.dnaClient
@@ -1332,7 +1331,18 @@ export const deviceRouter = createTRPCRouter({
               return a
           },
           { concurrency: 10 },
+          
         );
+
+        
+        if (total_count > 500) {
+         return await deleteRecords(
+            _entity,
+            advance_filters,
+          )
+        }
+        return `${_entity} deleted successfully.`
+      
       }
 
       const related_entities = {
@@ -1387,9 +1397,9 @@ export const deviceRouter = createTRPCRouter({
           const filters = advance_filters[field as keyof typeof advance_filters]
 
           if (!filters?.[0]?.values?.length) return { success: true, message: 'No records found' }
-          const a = await deleteRecords(_entity, filters)
+          return await deleteRecords(_entity, filters)
           // console.log('%c Line:1383 🍣 a', 'color:#4fff4B', _entity, JSON.stringify(a,null,2));
-          return a
+          // return a
         },
         { concurrency: 1 },
       );
