@@ -1320,7 +1320,7 @@ export const deviceRouter = createTRPCRouter({
           await Bluebird.map(
           ids,
           async (_id: string) => {
-            const a = await ctx.dnaClient
+            return await ctx.dnaClient
               .delete(_id, {
                 entity: _entity,
                 token: ctx.token.value,
@@ -1328,7 +1328,6 @@ export const deviceRouter = createTRPCRouter({
               })
               .execute();
 
-              return a
           },
           { concurrency: 10 },
           
