@@ -7,8 +7,8 @@ export const zodNotificationSchema = z.object({
   timestamp: z.string(),
   link: z.string().optional(),
   categories: z.array(z.string()).optional(),
-  icon: z.string().optional(),  // New: For different notification types
-  source: z.string().optional(),  // New: Source of notification (e.g., "Day Data", "System", etc.)
+  icon: z.string().optional(),
+  source: z.string().optional(),
   is_pinned: z.boolean().default(false),
   actions: z.array(
     z.object({

@@ -1,12 +1,16 @@
-import { notification_container } from './notifications.class';
+import { notification_container } from './notifications.class'
 
-const actionsMap = new Map([
-  ['yes', async (context : any, metadata : any) => {
-    console.log('Action: YES', context, metadata);
-  }],
-  ['no', async (context, metadata) => {
-    console.log('Action: NO', context, metadata);
-  }],
-]);
+interface NotificationActions {
+  setActions(actions: Map<string, () => Promise<void>>): void
+}
 
-notification_container.setActions(actionsMap);
+const actionsMap = new Map<string, () => Promise<void>>([
+  ['yes', async () => {
+  }],
+  ['no', async () => {
+  }],
+])
+
+if (notification_container && 'setActions' in notification_container) {
+  (notification_container as NotificationActions).setActions(actionsMap)
+}

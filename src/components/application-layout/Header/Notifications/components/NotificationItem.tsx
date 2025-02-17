@@ -1,56 +1,64 @@
-'use client';
-import { useNotifications } from '../NotificationProvider';
-import { Button } from '~/components/ui/button';
-import { BellDot, EllipsisVertical, Mail, MailOpen, Pin } from 'lucide-react';
+/* eslint-disable @stylistic/jsx-curly-brace-presence */
+'use client'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@radix-ui/react-dropdown-menu';
-import { INotificationSchema } from '../types';
-import EmptyNotification from './EmptyNotification';
-import { useEffect } from 'react';
+} from '@radix-ui/react-dropdown-menu'
+import { BellDot, EllipsisVertical, Mail, MailOpen, Pin } from 'lucide-react'
+import { useEffect } from 'react'
+
+import { Button } from '~/components/ui/button'
+
+import { useNotifications } from '../NotificationProvider'
+import { type INotificationSchema } from '../types'
+
+import EmptyNotification from './EmptyNotification'
 
 const NotificationItem = ({ type }: { type: string }) => {
-  const { state, actions } = useNotifications();
-  const { notifications } = state;
+  const { state, actions } = useNotifications()
+  const { notifications } = state
 
   useEffect(() => {
-    actions.handleChangeType(type);
-  }, []);
+    actions.handleChangeType(type)
+  }, [])
 
   if (!notifications?.length) {
-    return <EmptyNotification />;
+    return <EmptyNotification />
   }
 
   // Function to format the timestamp
-const formatTimestamp = (timestamp: string) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime(); // Difference in milliseconds
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffSec = Math.floor(diffMs / 1000)
+    const diffMin = Math.floor(diffSec / 60)
+    const diffHour = Math.floor(diffMin / 60)
 
-  // If less than 24 hours, show relative time
-  if (diffHour < 24) {
-    if (diffMin < 1) return "Just now";
-    if (diffMin < 60) return `${diffMin} min${diffMin > 1 ? "s" : ""} ago`;
-    return `${diffHour} hour${diffHour > 1 ? "s" : ""} ago`;
+    // If less than 24 hours, show relative time
+    if (diffHour < 24) {
+      if (diffMin < 1) return 'Just now'
+      if (diffMin < 60) return `${diffMin} min${diffMin > 1 ? 's' : ''} ago`
+      return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`
+    }
+
+    // Otherwise, format as "Wed 02-15"
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date)
+      .replace(',', '')
   }
 
-  // Otherwise, format as "Wed 02-15"
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date).replace(",", "");
-};
-
+  const handleOpenNewTab = (link: string) => {
+    window.open(link, '_blank')
+  }
 
   return (
-    <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[70vh] min-h-80 flex-col gap-2 overflow-y-auto">
+    <div className='scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100flex h-[70vh] min-h-80 flex-col gap-2 overflow-y-auto'>
       {notifications.map((notification: INotificationSchema) => (
         <div
           className={`relative flex flex-col gap-2 rounded-lg border ${
@@ -61,42 +69,47 @@ const formatTimestamp = (timestamp: string) => {
           key={notification.id}
         >
           {/* Title & Priority */}
-          <div className="flex items-start justify-between">
+          <div className='flex items-start justify-between'>
             {/* icon */}
             {/* Icon & Title */}
-            <div className="flex items-center gap-2">
-              {notification.icon ? (
-                <BellDot className="h-5 w-5 text-gray-500" />
-              ) : (
-                <Mail className="h-5 w-5 text-gray-500" />
-              )}
-              <h4 className="text-sm font-semibold hover:underline" onClick={() => window.open(notification.link, '_blank')}
-              >{notification.title}</h4>
+            <div className='flex items-center gap-2'>
+              {notification.icon
+                ? (
+                    <BellDot className='h-5 w-5 text-gray-500' />
+                  )
+                : (
+                    <Mail className='h-5 w-5 text-gray-500' />
+                  )}
+              <h4
+                className="text-sm font-semibold hover:underline"
+                onClick={() => notification.link && handleOpenNewTab(notification.link)}
+                aria-hidden="true"
+              >
+                {notification.title}
+              </h4>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               {/* Read / Unread Icon */}
-              {notification.notification_status === 'read' ? (
-                <MailOpen
-                  className="h-4 w-4 text-gray-300"
-                  onClick={() =>
-                    actions?.handleSingleReadUnread({
-                      id: notification.id,
-                      notification_status: 'unread',
-                    })
-                  }
-                />
-              ) : (
-                <Mail
-                  className="h-4 w-4 text-gray-300"
-                  onClick={() =>
-                    actions?.handleSingleReadUnread({
-                      id: notification.id,
-                      notification_status: 'read',
-                    })
-                  }
-                />
-              )}
+              {notification.notification_status === 'read'
+                ? (
+                    <MailOpen
+                      className='h-4 w-4 text-gray-300'
+                      onClick={() => actions?.handleSingleReadUnread({
+                        id: notification.id,
+                        notification_status: 'unread',
+                      })}
+                    />
+                  )
+                : (
+                    <Mail
+                      className='h-4 w-4 text-gray-300'
+                      onClick={() => actions?.handleSingleReadUnread({
+                        id: notification.id,
+                        notification_status: 'read',
+                      })}
+                    />
+                  )}
               {/* Pin Icon */}
               <Pin
                 className={`h-4 w-4 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300'}`}
@@ -119,66 +132,76 @@ const formatTimestamp = (timestamp: string) => {
               </span>
               {/* Dropdown Actions */}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <EllipsisVertical className="h-4 w-4 cursor-pointer text-gray-500" />
+                <DropdownMenuTrigger asChild={true}>
+                  <EllipsisVertical className='h-4 w-4 cursor-pointer text-gray-500' />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 shadow-md animate-in fade-in-80"
+                <DropdownMenuContent
+                  align='end'
+                  className='z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 shadow-md animate-in fade-in-80'
                 >
-                  {type === 'archive' ? (
-                    <>
-                      <DropdownMenuItem
-                        className="relative flex cursor-pointer select-none items-center rounded-sm
-                        px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900"
-                        onClick={() => actions?.handleRestoreNotificationStatus(notification.id)}
-                      >
-                        Restore
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm 
-                        text-red-600 outline-none transition-colors hover:bg-red-50"
-                        onClick={() => actions?.handleDeleteNotification(notification.id)}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <DropdownMenuItem
-                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
-                      outline-none transition-colors hover:bg-gray-100 hover:text-gray-900"
-                      onClick={() => actions?.handleArchiveNotification(notification.id)}
-                    >
-                      Archive
-                    </DropdownMenuItem>
-                  )}
+                  {type === 'archive'
+                    ? (
+                        <>
+                          <DropdownMenuItem
+                            className='relative flex cursor-pointer select-none items-center rounded-sm
+                        px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
+                            onClick={() => actions?.handleRestoreNotificationStatus(notification.id)}
+                          >
+                            <p>Restore</p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
+                        text-red-600 outline-none transition-colors hover:bg-red-50'
+                            onClick={() => actions?.handleDeleteNotification(notification.id)}
+                          >
+                            <p>Delete</p>
+                          </DropdownMenuItem>
+                        </>
+                      )
+                    : (
+                        <DropdownMenuItem
+                          className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
+                      outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
+                          onClick={() => actions?.handleArchiveNotification(notification.id)}
+                        >
+                          Archive
+                        </DropdownMenuItem>
+                      )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-500">{notification.description}</p>
+          <p className='text-sm text-gray-500'>{notification.description}</p>
 
           {/* Actions */}
           {notification.actions && notification.actions.length > 0 && (
-            <div className="mt-2 flex gap-2">
+            <div className='mt-2 flex gap-2'>
               {notification.actions.map((action, index) => (
-                <Button key={index} size="sm" className={action.className}>
+                <Button className={action.className} key={index} size="sm">
                   {action.label}
                 </Button>
               ))}
             </div>
           )}
           {/* Metadata */}
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="text-gray-800"> {formatTimestamp(notification.timestamp)}</span>
-            <span className="text-gray-500">| {notification.source} |</span>
+          <div className='flex items-center gap-2 text-xs text-gray-500'>
+            <span className='text-gray-800'>
+              {' '}
+              {formatTimestamp(notification.timestamp)}
+            </span>
+            <span className='text-gray-500'>
+              {'|'}
+              {notification.source}
+              {' '}
+              |
+            </span>
             <span>
               {notification.categories?.map((category, index) => (
                 <span
-                  key={index}
                   className="mr-0.5 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700"
+                  key={index}
                 >
                   {category}
                 </span>
@@ -188,7 +211,7 @@ const formatTimestamp = (timestamp: string) => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default NotificationItem;
+export default NotificationItem

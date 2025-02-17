@@ -6,29 +6,29 @@ export enum controlEnum {
   dropdown = 'dropdown',
 }
 
-export type NotificationActionType = {
-  label: string;
-  control: controlEnum;
-  value?: string; // Optional since some actions may not need a value
-  className?: string;
-};
+export interface NotificationActionType {
+  label: string
+  control: controlEnum
+  value?: string
+  className?: string
+}
 
-export type TNotificationSchema = {
-  id: string; // ulid format
-  title: string;
-  description: string;
-  timestamp: string; // Changed from string to Date object for proper handling
-  link?: string; // Optional URL
-  category?: string[]; // Optional categories
-  icon?: string; // Optional icon URL
-  source?: string; // Optional source
-  is_pinned?: boolean; // New: Flag to indicate if the notification is pinned
-  actions?: NotificationActionType[]; // Actions are optional
-  recipient_id?: string; // Supports multiple recipients (UUIDs)
-  notification_status: 'unread' | 'read' | 'dismissed'; // Enum type for status
-  priority_label: 'low' | 'medium' | 'high'; // Enum type for priority
+export interface TNotificationSchema {
+  id: string
+  title: string
+  description: string
+  timestamp: string
+  link?: string
+  category?: string[]
+  icon?: string
+  source?: string
+  is_pinned?: boolean
+  actions?: NotificationActionType[]
+  recipient_id?: string
+  notification_status: 'unread' | 'read' | 'dismissed'
+  priority_label: 'low' | 'medium' | 'high'
   priority_level: number
-  expiry_date?: string; // Optional expiration timestamp
-  status: string;
-  metadata?: Record<string, any>; // Structured JSON data instead of just a string
-};
+  expiry_date?: string
+  status: string
+  metadata?: Record<string, any>
+}
