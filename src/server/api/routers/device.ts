@@ -1317,7 +1317,7 @@ export const deviceRouter = createTRPCRouter({
         //       .execute()
         //   }),
         // )
-        const deleted_records =  await Bluebird.map(
+          await Bluebird.map(
           ids,
           async (_id: string) => {
             const a = await ctx.dnaClient
