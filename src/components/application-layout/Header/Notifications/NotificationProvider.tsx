@@ -55,7 +55,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       try {
         setLoading(true)
 
-        const additionalFilters = [...filters]
+        const additionalFilters = []
 
         switch (type) {
           case 'all':
@@ -113,8 +113,21 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             })
             break
         }
+
         const data = await getNotifications({
-          filters: additionalFilters,
+          filters: [
+            ...additionalFilters,
+            ...(filters?.length
+              ? [
+                  {
+                    operator: 'and',
+                    type: 'operator',
+                    default: true,
+                  },
+                  ...filters,
+                ]
+              : []),
+          ],
           order,
         })
 
@@ -135,15 +148,28 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   /**
    * Toggle between showing all notifications and only unread ones.
    */
-  const toggleUnread = useCallback(async () => {
-    setShowRead(prev => !prev)
+  const toggleUnread = async () => {
     if (!showRead) {
-      await fetchNotifications({ type: 'all' })
+      // When showing all notifications
+      await fetchNotifications({
+        type,
+        filters: [],
+      })
     }
     else {
-      setNotifications(prev => prev.filter(n => n.notification_status === 'unread'))
+      // When showing only unread notifications
+      await fetchNotifications({
+        type,
+        filters: [{
+          type: 'criteria',
+          field: 'notification_status',
+          operator: 'equal',
+          values: ['unread'],
+        }],
+      })
     }
-  }, [showRead, fetchNotifications])
+    setShowRead(prev => !prev)
+  }
 
   /**
    * Mark a single notification as read/unread.
