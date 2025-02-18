@@ -1,10 +1,10 @@
-import { SortingState } from "@tanstack/react-table";
+import { SortingState } from '@tanstack/react-table';
 import {
   IAdvanceFilter,
   IPagination,
   ISearchItem,
-} from "~/components/platform/Grid/Search/types";
-import { api } from "~/trpc/server";
+} from '~/components/platform/Grid/Search/types';
+import { api } from '~/trpc/server';
 
 interface IGridCacheDataResponse {
   filters: {
@@ -16,8 +16,21 @@ interface IGridCacheDataResponse {
   pagination: IPagination;
 }
 export const getGridCacheData =
-  async (): Promise<IGridCacheDataResponse | null> => {
+  async (): Promise<IGridCacheDataResponse> => {
     const cachedData =
       (await api.grid.getReportCachedData()) as IGridCacheDataResponse;
-    return typeof cachedData === "object" ? cachedData : null;
+    return typeof cachedData === 'object'
+      ? cachedData
+      : ({
+          sorting: [],
+          pagination: {
+            current_page: 1,
+            limit_per_page: 100,
+          },
+          filters: {
+            advanceFilter: [],
+            reportFilters: [],
+            defaultFilters: [],
+          },
+        } as IGridCacheDataResponse);
   };

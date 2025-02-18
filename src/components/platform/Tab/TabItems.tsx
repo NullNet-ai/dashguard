@@ -14,7 +14,7 @@ import {
 import { useSidebar } from '~/components/ui/sidebar';
 import useWindowSize from '~/hooks/use-resize';
 import useScreenType from '~/hooks/use-screen-type';
-import { cn, formatAndCapitalize } from '~/lib/utils';
+import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { remToPx } from '~/utils/fetcher';
 
@@ -244,7 +244,7 @@ const TabItems = ({ items }: TabItemsProps) => {
                     }`}
                     href={tab.href}
                   >
-                    {formatAndCapitalize(
+                    {formatTabName(
                       isUserRole(tab.name) ? 'role' : tab.name,
                     )}
                   </Link>

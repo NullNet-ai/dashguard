@@ -83,7 +83,7 @@ export default function FormFilterGrid({
           const updateSearchItems = query_params?.default_advance_filters.length
             ? [
                 ...query_params?.default_advance_filters ?? [],
-                ...(query_params?.default_advance_filters.length
+                ...(query_params?.default_advance_filters.length > 1
                   ? [{ id: ulid(), type: 'operator', operator: 'and' }]
                   : []),
                 ...advance_filters,

@@ -18,7 +18,14 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Please enter your password." }),
 })
 
-export default function LoginForm() {
+export default function LoginForm(props: any) {
+  const {defaultValues} = props;
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  })
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string>('')
 
@@ -42,9 +49,7 @@ export default function LoginForm() {
       }
     }
   }
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-  })
+  
 
   return (
     <Form {...form}>
