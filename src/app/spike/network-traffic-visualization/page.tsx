@@ -9,7 +9,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } 
 
 const normalizeTraffic = (traffic, maxTraffic) => {
   if (maxTraffic <= 0) return 0;
-  console.log("%c Line:13 🧀 Math.log(1 + traffic) / Math.log(1 + maxTraffic)", "color:#4fff4B", Math.log(1 + traffic) / Math.log(1 + maxTraffic));
   return Math.log(1 + traffic) / Math.log(1 + maxTraffic);
 };
 
@@ -65,13 +64,9 @@ const generateFlowData = (bandwidthData, previousData = {}) => {
       const normalizedValue = normalizeTraffic(bwValue, maxBandwidth);
       const _maxBandwidth = formatBandwidth(bwValue);
       
-      console.log("%c Line:67 🍔 maxBandwidth", "color:#ffdd4d", {bwValue, maxBandwidth, _maxBandwidth});
-      console.log("%c Line:71 🍧 _maxBandwidth", "color:#4fff4B", _maxBandwidth);
       const minWidth = 20;
       const maxWidth = 150;
       const width = minWidth + (maxWidth - minWidth) * normalizedValue;
-      console.log("%c Line:69 🌰 _maxBandwidth", "color:#e41a6a", _maxBandwidth);
-      
       nodes.push({
         id: trafficNodeId,
         type: "trafficNode",
@@ -122,10 +117,7 @@ const TrafficNode = ({ data }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   const value = data._maxBandwidth;
-  console.log("%c Line:125 🍻 value", "color:#f5ce50", value);
-  console.log("%c Line:120 🍰 data", "color:#ed9ec7", data);
   const tooltipData = [{ name: "1", value }];
-  console.log("%c Line:121 🌽 tooltipData", "color:#ea7e5c", tooltipData);
 
   // Generate dynamic ticks based on the value
   const generateTicks = (value) => {
@@ -231,7 +223,6 @@ export default function NetworkFlow() {
 const [elements, setElements] = useState({ nodes: [], edges: [] });
 
 const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({});
-console.log("%c Line:151 🍢 packetsIP", "color:#b03734", packetsIP);
 const { data: bandwidth } = api.packet.getBandwidthOfSourceIPandDestinationIP.useQuery(
   { packet_data: packetsIP },
   { enabled: !!packetsIP }

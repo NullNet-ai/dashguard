@@ -111,7 +111,6 @@ export const packetRouter = createTRPCRouter({
   .input(z.object({})).query(async ({input, ctx }) => {
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    console.log("%c Line:112 🍊 input", "color:#e41a6a", input);
     const res = await ctx.dnaClient
       .findAll({
         entity: 'packets',
@@ -127,15 +126,19 @@ export const packetRouter = createTRPCRouter({
               values: ["Active", "active"],
             },
             {
+              type: "operator",
+              operator: EOperator.OR
+          },
+            {
               type: 'criteria',
               field: 'timestamp',
               entity: 'packets',
               operator: EOperator.GREATER_THAN_OR_EQUAL,
-              values: [oneDayAgo.toISOString()],
+              values: ["2025-02-15 04:26:26.386+00"],
             },
           ],
           order: {
-            limit: 1000,
+            limit: 10,
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
@@ -143,7 +146,6 @@ export const packetRouter = createTRPCRouter({
         
       })
       .execute()
-    console.log("%c Line:137 🍖 res?.data", "color:#f5ce50", res?.data);
     return res?.data
   }),
 
@@ -151,7 +153,6 @@ export const packetRouter = createTRPCRouter({
     const {packet_data} = input
     return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
       const { source_ip, destination_ip } = item
-      console.log("%c Line:145 🍡 item", "color:#6ec1c2", item);
       const res = await ctx.dnaClient.aggregate({
         query: {
           entity: 'packets',
@@ -196,7 +197,6 @@ export const packetRouter = createTRPCRouter({
         token: ctx.token.value,
       }).execute()
 
-      console.log("%c Line:190 🍬 res?.data", "color:#93c0a4", {source_ip, destination_ip, result:res?.data});
       return {source_ip, destination_ip, result:res?.data}
     },{concurrency: 10} )
   }),
