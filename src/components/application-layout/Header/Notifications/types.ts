@@ -70,3 +70,6 @@ export interface INotificationContext {
   state: any
   actions: IActions
 }
+
+
+export type TNotificationType = 'all' | 'system' | 'social' | 'archive'

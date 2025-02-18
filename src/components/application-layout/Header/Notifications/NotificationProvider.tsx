@@ -18,7 +18,7 @@ import {
   updateBatchRead,
   changeNotificationStatus,
 } from './actions'
-import type { IActions, INotificationSchema, INotificationContext } from './types'
+import type { IActions, INotificationSchema, INotificationContext, TNotificationType } from './types'
 
 const NotificationContext = createContext<INotificationContext | undefined>(
   undefined
@@ -29,7 +29,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [notificationCount, setNotificationCount] = useState<number>(0)
   const [showRead, setShowRead] = useState<boolean>(true)
   const [loading, setLoading] = useState<boolean>(false)
-  const [type, setType] = useState<'all' | 'system' | 'social' | 'archive'>('all')
+  const [type, setType] = useState<TNotificationType>('all')
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false)
   const [selectedSort, setSelectedSort] = useState<string>('timestamp')
   const [selectedOrder, setSelectedOrder] = useState<'asc' | 'desc'>('desc')
@@ -45,7 +45,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       },
       showRead: showReadValue = showRead,
     }: {
-      type?: 'all' | 'system' | 'social' | 'archive'
+      type?: TNotificationType
       order?: {
         sortBy: string
         sortOrder: 'asc' | 'desc'
@@ -288,8 +288,8 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   }
 
   const handleChangeType = async (type: string) => {
-    setType(type as 'all' | 'system' | 'social' | 'archive')
-    await fetchNotifications({ type: type as 'all' | 'system' | 'social' | 'archive' })
+    setType(type as TNotificationType)
+    await fetchNotifications({ type: type as TNotificationType })
   }
 
   const handleArchiveNotification = async (id: string) => {
