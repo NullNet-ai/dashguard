@@ -31,6 +31,6 @@ export async function SaveAndContinue({
   if (process.env.IS_PLAYGROUND) {
     redirect(`/portal/record/version/1/${identifier}/?current_tab=dashboard`);
   } else {
-    redirect(`/portal/${entity}/record/${identifier}/?current_tab=dashboard`);
+    redirect(`/portal/${entity}/record/${identifier}/?current_tab=${entity}`);
   }
 }

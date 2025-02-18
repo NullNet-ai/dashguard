@@ -107,6 +107,7 @@ export interface IState extends IConfigWizard {
   isSummaryOpen?: boolean;
   stepsNavigation?: TStepsNavigationButtons;
   callbackHandlers?: ICallbackHandler;
+  title?: string;
 }
 
 export interface IAction {

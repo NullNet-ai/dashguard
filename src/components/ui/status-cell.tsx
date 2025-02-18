@@ -2,8 +2,9 @@ import { cn } from '~/lib/utils';
 
 interface StatusCellProps {
   value: string;
+  additionalStatuses?: Record<string, string>;
 }
-const StatusCell: React.FC<StatusCellProps> = ({ value }) => {
+const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {} }) => {
   const statuses = {
     active: 'text-green-600 bg-green-400/10',
     draft: 'text-yellow-500 bg-yellow-400/10',
@@ -11,6 +12,7 @@ const StatusCell: React.FC<StatusCellProps> = ({ value }) => {
     Draft: 'text-yellow-500 bg-yellow-400/10',
     archived: 'text-gray-600 bg-gray-400/10',
     Archived: 'text-gray-600 bg-gray-400/10',
+    ...additionalStatuses,
   };
 
   return (

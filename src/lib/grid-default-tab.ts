@@ -1,5 +1,10 @@
 import { ulid } from "ulid";
 
+const tabName: Record<string, string> = {
+  user_role: "role",
+  organization_account: "Accounts",
+}
+
 export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   const _id = ulid();
   return {
@@ -12,7 +17,7 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
 };
 
 export const SetIdTab = (mainEntity: string) => {
-  const modified_entity = mainEntity === "user_role" ? "role" : mainEntity;
+  const modified_entity = tabName[mainEntity] || mainEntity;
 
   return [
     {
