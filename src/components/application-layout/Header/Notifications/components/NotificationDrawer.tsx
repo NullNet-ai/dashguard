@@ -23,11 +23,9 @@ const NotificationDrawer = () => {
   const { state, actions } = useNotifications()
   const {
     notifications,
-    showRead,
     isDropdownOpen,
     selectedSort,
     selectedOrder,
-    notificationCount,
   } = state
 
   // archive tab will only show if there is one archive on notifications
@@ -51,30 +49,19 @@ const NotificationDrawer = () => {
     },
     ...(!archiveTab
       ? [
-          {
-            id: 'archive',
-            label: 'Archive',
-            content: <NotificationItem type="archive" />,
-          },
-        ]
+        {
+          id: 'archive',
+          label: 'Archive',
+          content: <NotificationItem type="archive" />,
+        },
+      ]
       : []),
   ]
 
   return (
-    <div className='flex h-full flex-col p-4'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>
-          Notifications (
-          {notificationCount}
-          )
-        </h2>
-        <div className='flex items-center gap-2'>
-          <span className='text-sm text-muted-foreground'>Show read</span>
-          <Switch checked={showRead} onCheckedChange={actions.toggleUnread} />
-        </div>
-      </div>
+    <div className='flex h-full flex-col p-4 pt-2 px-2 flex-1'>
       {/* Filter & Actions */}
-      <div className='relative mt-3 flex items-center justify-between'>
+      <div className='relative flex items-center justify-between'>
         <div className='flex gap-3'>
           <Button
             size="icon"
@@ -87,14 +74,13 @@ const NotificationDrawer = () => {
           {/* Dropdown Menu */}
           {isDropdownOpen && (
             <div className='absolute left-0 top-10 z-10 w-48 rounded-md border border-gray-200 bg-white p-2 shadow-lg'>
-              <p className='mb-1 px-3 py-1 text-xs font-medium text-gray-500'>Sort by</p>
+              <p className='mb-1 px-3 py-1 text-md font-medium text-gray-500'>Sort by</p>
               {sortOptions.map(option => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-sm transition-colors ${
-                    selectedSort === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedSort === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortChange(option.id)}
                 >
@@ -105,11 +91,10 @@ const NotificationDrawer = () => {
               <p className='mb-1 px-3 py-1 text-xs font-medium text-gray-500'>Sort order</p>
               {sortOrderOptions.map(option => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-sm transition-colors ${
-                    selectedOrder === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedOrder === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortOrderChange(option.id)}
                 >
@@ -129,7 +114,7 @@ const NotificationDrawer = () => {
           </Button>
         )}
         <Button
-          className="text-sm text-blue-600"
+          className="text-md text-blue-600"
           variant="link"
           onClick={actions.handleBatchRead}
         >
@@ -147,3 +132,23 @@ const NotificationDrawer = () => {
 }
 
 export default NotificationDrawer
+
+
+export function HeaderSection() {
+  const { state, actions } = useNotifications()
+  const { notificationCount, showRead } = state;
+  const { toggleUnread } = actions;
+
+  return (
+    <div className='flex items-center justify-around flex-1'>
+      <h2 className='text-lg font-semibold mr-auto'>
+        Notifications ({notificationCount})
+      </h2>
+      <div className='flex items-center gap-2 mr-2'>
+        <span className='text-sm text-muted-foreground'>Show read</span>
+        <Switch checked={showRead} onCheckedChange={toggleUnread} />
+      </div>
+    </div>
+  )
+
+}
