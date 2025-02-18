@@ -1,4 +1,3 @@
-/* eslint-disable @stylistic/jsx-curly-brace-presence */
 'use client'
 import {
   DropdownMenu,
@@ -192,10 +191,7 @@ const NotificationItem = ({ type }: { type: string }) => {
               {formatTimestamp(notification.timestamp)}
             </span>
             <span className='text-gray-500'>
-              {'|'}
-              {notification.source}
-              {' '}
-              |
+              {`| ${notification.source} |`}
             </span>
             <span>
               {notification.categories?.map((category, index) => (

@@ -1,6 +1,3 @@
-/* eslint-disable @stylistic/jsx-one-expression-per-line */
-/* eslint-disable react/jsx-curly-brace-presence */
-
 import { ArrowsUpDownIcon } from '@heroicons/react/24/outline'
 
 import StateTab from '~/components/platform/StateTab'
@@ -67,7 +64,9 @@ const NotificationDrawer = () => {
     <div className='flex h-full flex-col p-4'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>
-          Notifications ({notificationCount})
+          Notifications (
+          {notificationCount}
+          )
         </h2>
         <div className='flex items-center gap-2'>
           <span className='text-sm text-muted-foreground'>Show read</span>

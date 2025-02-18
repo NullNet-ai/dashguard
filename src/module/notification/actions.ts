@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { notification_container } from './notifications.class'
 
 interface NotificationActions {

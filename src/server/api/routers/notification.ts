@@ -1,17 +1,17 @@
-import { ulid } from 'ulid';
-import { z } from 'zod';
-import Notifications from '~/module/notification/notifications.class';
-import { zodNotificationSchema } from '~/module/notification/schema';
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
-import { mockNotifications } from '../mock-data/notification';
-import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
-import Bluebird from 'bluebird';
+import { EOperator, type EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import Bluebird from 'bluebird'
+import { z } from 'zod'
 
-const ENTITY = 'notification';
+import Notifications from '~/module/notification/notifications.class'
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
+
+import { mockNotifications } from '../mock-data/notification'
+
+const ENTITY = 'notification'
 
 export const notificationsRouter = createTRPCRouter({
   getNotificationsCountByContact: privateProcedure.query(async ({ ctx }) => {
-    const id = ctx?.session?.account?.contact?.id;
+    const id = ctx?.session?.account?.contact?.id
 
     if (id) {
       const { total_count } = await ctx.dnaClient
@@ -50,8 +50,8 @@ export const notificationsRouter = createTRPCRouter({
             ],
           },
         })
-        .execute();
-      return total_count;
+        .execute()
+      return total_count
     }
   }),
 
@@ -75,7 +75,7 @@ export const notificationsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const id = ctx?.session?.account?.contact?.id;
+      const id = ctx?.session?.account?.contact?.id
 
       if (id) {
         const filters = [
@@ -95,7 +95,7 @@ export const notificationsRouter = createTRPCRouter({
                 ...input.filters,
               ]
             : []),
-        ];
+        ]
 
         const { data } = await ctx.dnaClient
           .findAll({
@@ -120,7 +120,7 @@ export const notificationsRouter = createTRPCRouter({
                 'expiry_date',
                 'metadata',
               ],
-              advance_filters: filters,
+              advance_filters: filters as IAdvanceFilters<string | number>[],
               order: {
                 limit: 50,
                 by_field: input.order.sortBy,
@@ -128,25 +128,24 @@ export const notificationsRouter = createTRPCRouter({
               },
             },
           })
-          .execute();
-        return data;
+          .execute()
+        return data
       }
-      return [];
+      return []
     }),
 
   populateDatabase: privateProcedure.mutation(async ({ ctx }) => {
-    const token = ctx?.token.value;
+    const token = ctx?.token.value
     for (const notification of mockNotifications) {
       await Notifications.send(
         {
           ...(notification as any),
-        },
-        token,
-      );
+        }, token,
+      )
     }
     return {
       success: true,
-    };
+    }
   }),
 
   handleSingleReadUnread: privateProcedure
@@ -167,8 +166,8 @@ export const notificationsRouter = createTRPCRouter({
             },
           },
         })
-        .execute();
-      return res;
+        .execute()
+      return res
     }),
 
   handleBatchRead: privateProcedure
@@ -180,8 +179,7 @@ export const notificationsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const res = await Bluebird.map(
-        input.ids,
-        async (id) => {
+        input.ids, async (id) => {
           return await ctx.dnaClient
             .update(id, {
               entity: ENTITY,
@@ -192,14 +190,13 @@ export const notificationsRouter = createTRPCRouter({
                 },
               },
             })
-            .execute();
-        },
-        {
+            .execute()
+        }, {
           concurrency: 5,
         },
-      );
+      )
 
-      return res;
+      return res
     }),
 
   handlePinNotification: privateProcedure
@@ -220,8 +217,8 @@ export const notificationsRouter = createTRPCRouter({
             },
           },
         })
-        .execute();
-      return res;
+        .execute()
+      return res
     }),
 
   handleChangeStatus: privateProcedure
@@ -232,10 +229,9 @@ export const notificationsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
       if (input.status === 'Delete') {
         const res = await ctx.dnaClient
-         .delete(input.id, {
+          .delete(input.id, {
             is_permanent: true,
             entity: ENTITY,
             token: ctx.token.value,
@@ -245,8 +241,8 @@ export const notificationsRouter = createTRPCRouter({
               },
             },
           })
-         .execute();
-        return res;
+          .execute()
+        return res
       }
 
       const res = await ctx.dnaClient
@@ -259,8 +255,8 @@ export const notificationsRouter = createTRPCRouter({
             },
           },
         })
-        .execute();
-      return res;
+        .execute()
+      return res
     }),
 
   // sendNotification: privateProcedure
@@ -311,15 +307,15 @@ export const notificationsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx }) => {
-      Notifications.handleAction('yes', {
+      await Notifications.handleAction('yes', {
         context: ctx,
         metadata: {
           actionValue: 'yes',
           actionMetadata: 'test',
         },
-      });
+      })
       return {
         success: true,
-      };
+      }
     }),
-});
+})
