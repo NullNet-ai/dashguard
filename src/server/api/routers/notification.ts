@@ -136,10 +136,12 @@ export const notificationsRouter = createTRPCRouter({
 
   populateDatabase: privateProcedure.mutation(async ({ ctx }) => {
     const token = ctx?.token.value
+    const id = ctx?.session?.account?.contact?.id
     for (const notification of mockNotifications) {
       await Notifications.send(
         {
           ...(notification as any),
+          recipient_id: id,
         }, token,
       )
     }
