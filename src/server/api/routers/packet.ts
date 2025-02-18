@@ -107,34 +107,46 @@ export const packetRouter = createTRPCRouter({
   }),
 
   fetchPacketsIP: privateProcedure
-    .input(z.object({})).query(async ({ ctx }) => {
-      const res = await ctx.dnaClient
-        .findAll({
-          entity: 'packets',
-          token: ctx.token.value,
-          query: {
-            pluck: ['source_ip', 'destination_ip'],
-            advance_filters: [
-              {
-                type: 'criteria',
-                field: 'status',
-                entity: 'packets',
-                operator: EOperator.EQUAL,
-                values: ['Active', 'active'],
-              },
-            ],
-            order: {
-              limit: 10,
-              by_field: 'code',
-              by_direction: EOrderDirection.DESC,
+  .input(z.object({})).query(async ({input, ctx }) => {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const res = await ctx.dnaClient
+      .findAll({
+        entity: 'packets',
+        token: ctx.token.value,
+        query: {
+          pluck: ['source_ip', 'destination_ip', 'timestamp'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'status',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: ["Active", "active"],
             },
+            {
+              type: "operator",
+              operator: EOperator.OR
           },
-
-        })
-        .execute()
-
-      return res?.data
-    }),
+            {
+              type: 'criteria',
+              field: 'timestamp',
+              entity: 'packets',
+              operator: EOperator.GREATER_THAN_OR_EQUAL,
+              values: ["2025-02-15 04:26:26.386+00"],
+            },
+          ],
+          order: {
+            limit: 10,
+            by_field: 'code',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+        
+      })
+      .execute()
+    return res?.data
+  }),
 
   getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
     const { packet_data } = input
@@ -184,9 +196,8 @@ export const packetRouter = createTRPCRouter({
         token: ctx.token.value,
       }).execute()
 
-      console.log('%c Line:190 🍬 res?.data', 'color:#93c0a4', { source_ip, destination_ip, result: res?.data })
-      return { source_ip, destination_ip, result: res?.data }
-    })
+      return {source_ip, destination_ip, result:res?.data}
+    },{concurrency: 10} )
   }),
 
 })
