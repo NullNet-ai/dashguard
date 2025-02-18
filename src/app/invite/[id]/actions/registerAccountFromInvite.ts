@@ -1,6 +1,7 @@
 'use server';
 import { redirect } from 'next/navigation';
 import { api } from '~/trpc/server';
+import { handleLoginError } from '~/utils/login-validator';
 
 interface LoginSubmitArgs {
   first_name: string;
@@ -30,7 +31,7 @@ export default async function registerAccountFromInvite({
   last_name,
 }: LoginSubmitArgs) {
   // register user
-
+  let error = null;
   const account = {
     first_name,
     last_name,
@@ -57,10 +58,15 @@ export default async function registerAccountFromInvite({
     /**
      * Login
      */
-    await api.auth.login({
+    const loginDetailsResponse = await api.auth.login({
       username: email,
       password,
-    })
+    });
+
+    const loginDetailsError = handleLoginError(loginDetailsResponse);
+    if (loginDetailsError) {
+      return loginDetailsResponse;
+    }
   
     /**
      * Verify session
@@ -70,8 +76,10 @@ export default async function registerAccountFromInvite({
     /**
      * create contact
      */
-    const createdContactResponse = await api.form.createDynamicRecord({
+    const contact_id = registrationDetails.data?.[0]?.contact_id;
+    const contactDetailsResponse = await api.form.updateDynamicRecord({
       entity: 'contact',
+      id: contact_id,
       data: {
         first_name,
         last_name,
@@ -79,42 +87,23 @@ export default async function registerAccountFromInvite({
         categories: ['Contact'],
       },
     })
-  
-    const contact_id = createdContactResponse?.data?.[0]?.id
-    
-    /**
-     * Create contact email
-     */
-    await api.form.createDynamicRecord({
-      entity: 'contact_email',
-      data: {
-        email,
-        is_primary: true,
-        contact_id,
-      },
-    })
-  
-    /**
-     * Create contact organization
-     */
-    await api.form.createDynamicRecord({
-      entity: 'organization_contacts',
-      data: {
-        contact_organization_id: organization_id,
-        contact_id,
-        is_primary: true,
-      },
-    })
+
+    const contactDetailsError = handleLoginError(contactDetailsResponse);
+    if (contactDetailsError) {
+      return contactDetailsResponse;
+    }
 
     return registrationDetails;
 
-  } catch (error) {
+  } catch (err) {
+    error = err;
     return {
       statusCode: 500,
       message: 'Something went wrong',
     }
   } finally {
-    // TODO: create an error handler for this
-    redirect('/portal/dashboard')
+    if (!error) {
+      redirect('/portal/dashboard')
+    }
   }
 }

@@ -1,7 +1,6 @@
 import Image from 'next/image';
-import LoginForm from '../_components/loginForm';
-import SignUpLabel from '../_components/SignUpLabel';
 import { api } from '~/trpc/server';
+import LoginForm from '../_components/loginForm';
 
 export default async function Login({ params, searchParams }: any) {
 
@@ -33,7 +32,6 @@ export default async function Login({ params, searchParams }: any) {
               <div>
                 <LoginForm defaultValues={{ username: response?.data?.account_id ?? "" }}/>
               </div>
-              <SignUpLabel />
             </div>
           </div>
           <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
