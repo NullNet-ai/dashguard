@@ -30,6 +30,7 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
+    notificationCount,
   } = state
 
   // archive tab will only show if there is one archive on notifications
@@ -66,7 +67,7 @@ const NotificationDrawer = () => {
     <div className='flex h-full flex-col p-4'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>
-          Notifications ({notifications.length})
+          Notifications ({notificationCount})
         </h2>
         <div className='flex items-center gap-2'>
           <span className='text-sm text-muted-foreground'>Show read</span>

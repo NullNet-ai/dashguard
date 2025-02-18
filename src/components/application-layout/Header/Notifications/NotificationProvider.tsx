@@ -184,8 +184,14 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
           : notification
         )
         )
-
-        await getNotificationsCountByContact()
+        setNotificationCount((prev) => {
+          if (notification_status === 'read') {
+            return prev - 1
+          }
+          else {
+            return prev + 1
+          }
+        })
       }
       catch (error) {
         console.error('❌ Failed to update notification:', error)
@@ -240,7 +246,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       )
       )
 
-      await getNotificationsCountByContact()
+      setNotificationCount(0)
     }
     catch (error) {
       console.error('❌ Failed to batch update notifications:', error)
