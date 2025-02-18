@@ -5,13 +5,18 @@ import { IMenuOptionConfig } from '../platform/Record/types';
 import { accountStatuses } from '~/app/portal/organization_account/record/_actions/statusOptions';
 
 type Props = {
-  menu_options: Array<{ label: string, params: { key: string } }>;
+  menu_options: Array<{ label: string; params: { key: string } }>;
   children: React.ReactNode;
   categories: Array<any>;
 };
 
 export const RecordMenuOptionContext = createContext<{
-  menu_items: Array<{ params: { key: string } }>;
+  menu_items: Array<{
+    params: { key: string };
+    onClick?: any;
+    children?: any;
+    label?: string;
+  }>;
 }>({
   menu_items: [],
 });

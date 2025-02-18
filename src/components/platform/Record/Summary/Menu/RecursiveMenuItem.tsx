@@ -56,7 +56,7 @@ export default function RecursiveMenuItem({
                 data-test-id={
                   entityName +
                   "-rcrd-ddn-menu-" +
-                  formatFormTestID(option.label)
+                  formatFormTestID(option.label ?? '')
                 }
               >
                 <ChevronRight className="size-5 text-default/40" />{" "}
@@ -82,7 +82,7 @@ export default function RecursiveMenuItem({
               handleLoadingStateChange,
             )}
             data-test-id={
-              entityName + "-rcrd-menu-" + formatFormTestID(option.label)
+              entityName + "-rcrd-menu-" + formatFormTestID(option.label ?? '')
             }
           >
             {option.label}

@@ -16,13 +16,16 @@ export default async function Invite({ searchParams }: any) {
   const [, , id] = pathname.split('/');
   const record = await api.account.getInvitationAccountDetailsPublicly({
     id: id!,
-    token: searchParams.token
+    token: searchParams.token,
   });
 
   if (record?.categories.includes('Internal User')) {
-    return redirect(`/login/${record.id}?token=${searchParams.token}`, RedirectType.push)
+    return redirect(
+      `/login/${record.id}?token=${searchParams.token}`,
+      RedirectType.push,
+    );
   }
-  
+
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
@@ -45,10 +48,7 @@ export default async function Invite({ searchParams }: any) {
 
           <div className="mt-11">
             <div>
-              <SignUpForm defaultValues={{
-                organization_name: record?.organization.name,
-                email: record?.email,
-              }} />
+              <SignUpForm />
             </div>
             <SignInLabel />
           </div>
@@ -56,9 +56,7 @@ export default async function Invite({ searchParams }: any) {
         <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
           &copy;
           {' All Rights Reserved. '}
-          {new Date().getFullYear()}
-          {' '}
-          DNA Micro
+          {new Date().getFullYear()} DNA Micro
           <sup>TM</sup>
           {'. '}
         </footer>
@@ -71,6 +69,5 @@ export default async function Invite({ searchParams }: any) {
         />
       </div>
     </div>
-  )
-
+  );
 }
