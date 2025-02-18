@@ -14,7 +14,7 @@ const normalizeTraffic = (traffic, maxTraffic) => {
 
 const formatBandwidth = (bandwidth) => {
   const bw = parseInt(bandwidth);
-  return `${(bw / 1000).toFixed(2)} KB/s`;
+  return `${(bw / 1000)} KB/s`;
 };
 
 const formatTimestamp = (timestamp) => {
@@ -146,7 +146,7 @@ const TrafficNode = ({ data }) => {
                   tick={{ fontSize: 10, fill: "#333" }}
                   axisLine={{ stroke: "#333" }}
                   tickLine={{ stroke: "#333" }}
-                  tickFormatter={(val) => val.toFixed(3)} // Format ticks to 3 decimal places
+                  tickFormatter={(val) => val} // Format ticks to 3 decimal places
                 />
                 <YAxis 
                   dataKey="name" 
@@ -162,7 +162,7 @@ const TrafficNode = ({ data }) => {
                   <LabelList 
                     dataKey="value" 
                     position="right" 
-                    formatter={(val) => val.toFixed(3)} // Format value to 3 decimal places
+                    formatter={(val) => val} // Format value to 3 decimal places
                     style={{ 
                       fontSize: '12px',
                       fill: '#333'

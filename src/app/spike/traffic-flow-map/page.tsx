@@ -27,12 +27,12 @@ const PHILIPPINES_COORD = [121.774, 12.8797];
 
 // Color Function (For Country Fill & Server Highlight)
 const getTrafficColor = (count, isServer = false) => {
-  if (isServer) return "rgba(0, 0, 255, 0.7)"; // 🔵 BLUE for the Server (Philippines)
+  if (isServer) return "rgba(46, 218, 228, 0.8)"; // 🔵 BLUE for the Server (Philippines)
   if (count > 25) return "rgba(255, 0, 0, 0.7)"; // 🔴 Very High
   if (count >= 15) return "rgba(255, 165, 0, 0.7)"; // 🟠 High
   if (count >= 5) return "rgba(255, 255, 0, 0.7)"; // 🟡 Medium
   if (count > 0) return "rgba(0, 128, 0, 0.7)"; // 🟢 Low
-  return "rgba(255, 255, 255, 1)"; // ⚪ Default: White
+  return "rgba(0, 0, 0, 0)"; // ⚪ Default: White
 };
 
 // GeoJSON URL for country shapes
@@ -108,15 +108,25 @@ const HeatmapMap = () => {
           const isServer = countryName === "Philippines"; // Check if it's the server
 
           // **Ensure Full Country Coloring**
+          // feature.setStyle(new Style({
+          //   fill: new Fill({
+          //     color: getTrafficColor(trafficInfo?.count, isServer) // Apply special color for PH
+          //   }),
+          //   stroke: new Stroke({
+          //     color: isServer ? "#0000FF" : "#000000", // Blue border for PH
+          //     width: isServer ? 3 : 1.5
+          //   })
+          // }));
           feature.setStyle(new Style({
             fill: new Fill({
-              color: getTrafficColor(trafficInfo?.count, isServer) // Apply special color for PH
+              color: getTrafficColor(trafficInfo?.count, isServer) // Keep blue fill for PH
             }),
             stroke: new Stroke({
-              color: isServer ? "#0000FF" : "#000000", // Blue border for PH
-              width: isServer ? 3 : 1.5
+              color: isServer ? "#000000" : "#000000", // 🔥 Now PH has a black border like other countries
+              width: 1.5
             })
           }));
+          
 
           // **Ensure Traffic Flow from PH → Target Country**
           if (trafficInfo && !isServer) {
