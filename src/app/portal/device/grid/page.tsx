@@ -48,7 +48,11 @@ export default async function Page({
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
+<<<<<<< HEAD
     // advance_filters:[]
+=======
+    // advance_filters: []
+>>>>>>> 387f5294f90355e0270bbccedd0538cb9659de9b
   })
 
   return (

@@ -14,6 +14,8 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import { transformResMessage } from '~/server/utils/transformResponseMessage'
 import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicDetails'
 import ZodItems from '~/server/zodSchema/grid/items'
+import Bluebird from 'bluebird';
+
 
 import { createDefineRoutes } from '../baseCrud'
 
@@ -1284,6 +1286,7 @@ export const deviceRouter = createTRPCRouter({
             entity: _entity,
             token: ctx.token.value,
             query: {
+              track_total_records: true,
               pluck: ['id'],
               advance_filters,
               order: {
@@ -1295,30 +1298,62 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute()
 
+          const { total_count = 1 } = filter_res
+
         const ids = filter_res.data.map((item: Record<string, any>) => item?.id)
         if (!ids.length) return { success: true, message: 'No records found' }
-        return await Promise.all(
-          ids.map(async (id: string) => {
+        console.log('%c Line:1302 🍭 ids', 'color:#7f2b82', ids, _entity);
+        // return ids
+        // return ids
+        // return true
+        // return await Promise.all(
+        //   ids.map(async (id: string) => {
+        //     return await ctx.dnaClient
+        //       .delete(id, {
+        //         entity: _entity,
+        //         token: ctx.token.value,
+        //         is_permanent: true,
+        //       })
+        //       .execute()
+        //   }),
+        // )
+          await Bluebird.map(
+          ids,
+          async (_id: string) => {
             return await ctx.dnaClient
-              .delete(id, {
+              .delete(_id, {
                 entity: _entity,
                 token: ctx.token.value,
                 is_permanent: true,
               })
-              .execute()
-          }),
-        )
+              .execute();
+
+          },
+          { concurrency: 10 },
+          
+        );
+
+        
+        if (total_count > 500) {
+         return await deleteRecords(
+            _entity,
+            advance_filters,
+          )
+        }
+        return `${_entity} deleted successfully.`
+      
       }
 
       const related_entities = {
+        devices: 'id',
         device_groups: 'device_id',
         organization_accounts: 'device_id',
-        device_heartbeats: 'device_id',
         device_rules: 'device_configuration_ids',
         device_aliases: 'device_configuration_id',
         device_interfaces: 'device_configuration_id',
         device_configurations: 'device_id',
-        devices: 'id',
+        device_heartbeats: 'device_id',
+        packets: 'device_id',
       }
 
       const filter_configurations = await ctx.dnaClient.findAll({
@@ -1338,14 +1373,35 @@ export const deviceRouter = createTRPCRouter({
         id: createAdvancedFilter({ id }),
       }
 
-      await Promise.all(
-        Object.entries(related_entities).map(async ([entity, field]) => {
+      //  Promise.allSettled(
+      //   Object.entries(related_entities).map(async ([entity, field]) => {
+          // const filters = advance_filters[field as keyof typeof advance_filters]
+
+          // if (!filters?.[0]?.values?.length) return { success: true, message: 'No records found' }
+          // return await deleteRecords(entity, filters)
+      //   }),
+      // )
+
+      Bluebird.map(
+        Object.entries(related_entities),
+        async ([_entity, field]) => {
+          // return await ctx.dnaClient
+          //   .delete(id, {
+          //     entity: _entity,
+          //     token: ctx.token.value,
+          //     is_permanent: true,
+          //   })
+          //   .execute();
+
           const filters = advance_filters[field as keyof typeof advance_filters]
 
           if (!filters?.[0]?.values?.length) return { success: true, message: 'No records found' }
-          return await deleteRecords(entity, filters)
-        }),
-      )
+          return await deleteRecords(_entity, filters)
+          // console.log('%c Line:1383 🍣 a', 'color:#4fff4B', _entity, JSON.stringify(a,null,2));
+          // return a
+        },
+        { concurrency: 1 },
+      );
 
       return {
         success: true,

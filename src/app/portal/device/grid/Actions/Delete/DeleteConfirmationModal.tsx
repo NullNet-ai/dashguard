@@ -5,7 +5,7 @@ import React from 'react'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogFooter } from '~/components/ui/dialog'
 import { Separator } from '~/components/ui/separator'
-import { api } from '~/trpc/react'
+import { DeleteDevice } from './Delete';
 
 const DEFAULT_ARCHIVE_TITLE = 'Delete Record'
 const DEFAULT_ARCHIVE_PROMPT_MESSAGE = `Are you sure you want to delete this record? This action will permanently remove the record and all related records from the system.`
@@ -20,13 +20,10 @@ const DeleteConfirmationModal = ({
   record: any
 }) => {
   const router = useRouter()
-  const delete_device = api.device.deleteDevice.useMutation()
 
   const handleDelete = async () => {
     try {
-      await delete_device.mutateAsync({ id: record.id })
-      setOpen(false)
-      router.push(`/portal/device/grid`)
+      await DeleteDevice({ id: record.id })
     }
     catch (error) {
       console.error(error)

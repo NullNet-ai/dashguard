@@ -1,25 +1,31 @@
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import React from 'react'
 import { type UseFormReturn } from 'react-hook-form'
+import { useToast } from '~/context/ToastProvider'
 
 import { FormField } from '~/components/ui/form'
 
 interface IInstallationDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>
   selectOptions?: Record<string, any>
+  defaultValues?: Record<string, any>
 }
 
 export default function CustomInstallationDetails({
   form,
+  defaultValues
 }: IInstallationDetails) {
+  const toast = useToast()
+  const {download_url} = defaultValues ?? {}
   const copyToClipboard = async (value: string) => {
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(value)
+        toast.success('Copied to clipboard!')
         return
       }
       catch (err) {
-        console.error('Clipboard API failed:', err)
+        toast.error('Failed to copy to clipboard')
       }
     }
 
@@ -40,13 +46,14 @@ export default function CustomInstallationDetails({
       textArea.remove()
 
       if (successful) {
+        toast.success('Copied to clipboard!')
       }
       else {
-        console.error('execCommand copy failed')
+        toast.error('Failed to copy to clipboard')
       }
     }
     catch (err) {
-      console.error('Fallback copy method failed:', err)
+      toast.error('Failed to copy to clipboard')
     }
   }
 
@@ -78,12 +85,12 @@ export default function CustomInstallationDetails({
                   className='mt-1 md:w-96 rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500'
                   readOnly={ true }
                   type='text'
-                  value='curl-o https://wallmon.ai/wallmon.pkg'
+                  value={download_url}
                 />
                 <button
                   className='my-auto'
                   onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(
-                    event, 'curl-o https://wallmon.ai/wallmon.pkg',
+                    event, `${download_url}`,
                   ) }
                 >
                   <DocumentDuplicateIcon

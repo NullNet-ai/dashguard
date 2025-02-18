@@ -52,7 +52,7 @@ export default function CustomSetupDetails({
         return
       }
       catch (err) {
-        console.error('Clipboard API failed:', err)
+        toast.error('Failed to copy to clipboard')
       }
     }
 
@@ -238,7 +238,6 @@ export default function CustomSetupDetails({
                           {!is_from_record && (
                             <button
                               className="absolute inset-y-0 right-2 flex items-center"
-                              disabled={field?.disabled}
                               type="button"
                               onClick={() => setShowSecret(!showSecret)}
                             >
