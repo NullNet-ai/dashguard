@@ -24,6 +24,7 @@ export interface ConfigProps {
   identifierOption?: IMenuOptionConfig[];
   categories?: string[];
   recordId?: string;
+  recordDetails?: Record<string, any>;
 }
 export interface RecordProps extends PropsWithChildren {
   config: ConfigProps;

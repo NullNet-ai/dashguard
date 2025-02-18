@@ -9,7 +9,7 @@ export const RecordContext = createContext<RecordContextProps>({});
 export default function RecordProvider({ children, config }: RecordProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { entityCode, entityName, categories } = config;
+  const { entityCode, entityName, categories, recordDetails = {}} = config;
 
   useEffect(() => {
     if (categories?.length) {
@@ -21,6 +21,7 @@ export default function RecordProvider({ children, config }: RecordProps) {
     entityName,
     entityCode,
     identifierOption: config?.identifierOption,
+    recordDetails,
   } as const;
 
   return (

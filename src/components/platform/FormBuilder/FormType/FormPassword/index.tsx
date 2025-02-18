@@ -172,9 +172,14 @@ export default function FormPassword({
         </div>
       </FormControl>
 
-      {!(showPasswordStrengthBarAndValidations && hasComplexValidation) && (
+      {(!(showPasswordStrengthBarAndValidations && hasComplexValidation) && (
         // Single FormMessage for simple validation
         <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+      )) || (
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+          isMultiple={true}
+        />
       )}
 
       {showPasswordStrengthBar && showPasswordStrengthBarAndValidations && (

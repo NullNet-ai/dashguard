@@ -1,18 +1,41 @@
-import { EOperator } from '@dna-platform/common-orm'
-import argon2 from 'argon2'
-import { z } from 'zod'
+import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
+import argon2 from 'argon2';
+import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
-import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails'
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from '~/server/api/trpc';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
-import { createDefineRoutes } from '../baseCrud'
-import { EStatus } from '../types'
+import { createDefineRoutes } from '../baseCrud';
+import { EStatus } from '../types';
+import ZodItems from '~/server/zodSchema/grid/items';
+import { formatSorting } from '~/server/utils/formatSorting';
+import { pluralize } from '~/server/utils/pluralize';
+import { TRPCError } from '@trpc/server';
+import { formatPhoneNumber } from '~/utils/formatter';
+import { headers } from 'next/headers';
+import nodemailer from 'nodemailer';
 
-const entity = 'organization_contacts'
-
+const ENTITY = 'organization_account';
+const transporter = nodemailer.createTransport({
+  // todo: add user, pass, host, port to the .env.example
+  auth: {
+    user: 'admin@dnaplatform.net',
+    pass: 'w@ckyPart10',
+  },
+  host: 'smtp.communications.dnamicro.net',
+  port: 25,
+  secure: false,
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 export const accountRouter = createTRPCRouter({
-  ...createDefineRoutes(entity),
+  ...createDefineRoutes(ENTITY),
   updateAccountDetails: privateProcedure
     .input(AccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
@@ -22,9 +45,9 @@ export const accountRouter = createTRPCRouter({
         account_id,
         account_secret,
         contact_id,
-      } = input ?? {}
+      } = input ?? {};
 
-      let { id } = input
+      let { id } = input;
       if (input.id) {
         const account = await ctx.dnaClient
           .update(input.id, {
@@ -51,12 +74,11 @@ export const accountRouter = createTRPCRouter({
               ],
             },
           })
-          .execute()
+          .execute();
         if (!account?.success) {
-          return null
+          return null;
         }
-      }
-      else {
+      } else {
         const [organizationRecord, contactRecord] = await Promise.all([
           ctx.dnaClient
             .findAll({
@@ -82,13 +104,13 @@ export const accountRouter = createTRPCRouter({
               },
             })
             .execute(),
-        ])
-        const userOrganization = ctx.session.account?.organization ?? {}
+        ]);
+        const userOrganization = ctx.session.account?.organization ?? {};
 
         const organization = {
           id: userOrganization?.id,
           name: userOrganization?.name || '',
-        }
+        };
 
         const account = {
           first_name: contactRecord?.data?.[0]?.first_name || '',
@@ -102,16 +124,17 @@ export const accountRouter = createTRPCRouter({
           account_organization_id: organization_id,
           account_organization_name: organizationRecord?.data?.[0]?.name || '',
           is_new_user: true,
-        }
+          categories: ['Internal User'],
+        };
 
         const result = await ctx.dnaClient
           .register(organization, account)
-          .execute()
+          .execute();
 
         if (!result?.success) {
-          return null
+          return null;
         }
-        id = result.data?.[0]?.organization_account_id
+        id = result.data?.[0]?.organization_account_id;
       }
 
       const updatedAccount = await ctx.dnaClient
@@ -124,6 +147,7 @@ export const accountRouter = createTRPCRouter({
             }),
             pluck: [
               'id',
+              'code',
               'account_organization_id',
               'role_id',
               'account_id',
@@ -133,16 +157,16 @@ export const accountRouter = createTRPCRouter({
             ],
           },
         })
-        .execute()
+        .execute();
 
-      const { account_organization_id, ...rest }
-        = updatedAccount?.data?.[0] ?? {}
+      const { account_organization_id, ...rest } =
+        updatedAccount?.data?.[0] ?? {};
       return {
         ...rest,
         organization_id: account_organization_id,
         account_secret: '************',
         disabled: true,
-      }
+      };
     }),
   fetchAccountDetails: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -175,7 +199,7 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       const accounts = await ctx.dnaClient
         .findAll({
@@ -196,9 +220,9 @@ export const accountRouter = createTRPCRouter({
             ],
           },
         })
-        .execute()
+        .execute();
 
-      const defaultAccountId = contactData?.data?.[0]?.contact_emails?.email
+      const defaultAccountId = contactData?.data?.[0]?.contact_emails?.email;
       const accountDetails = accounts.data.map(
         (account: Record<string, any>) => ({
           ...account,
@@ -206,7 +230,7 @@ export const accountRouter = createTRPCRouter({
           organization_id: account?.account_organization_id,
           disabled: true,
         }),
-      )
+      );
 
       return {
         contact: {
@@ -224,7 +248,7 @@ export const accountRouter = createTRPCRouter({
                 disabled: false,
               },
             ],
-      }
+      };
     }),
   fetchOrganizationRolesOptions: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -237,8 +261,8 @@ export const accountRouter = createTRPCRouter({
             pluck: ['id'],
           },
         })
-        .execute()
-      const contact_id = contactData.data?.[0]?.id
+        .execute();
+      const contact_id = contactData.data?.[0]?.id;
       const [userRole, organizationData] = await Promise.all([
         ctx.dnaClient
           .findAll({
@@ -291,23 +315,23 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute(),
-      ])
+      ]);
       const user_role = userRole.data.map(({ id, role }) => ({
         value: id,
         label: role,
-      }))
+      }));
 
       const organization = organizationData.data.map(
         (org: Record<string, any>) => {
-          const { id, name } = org?.organizations ?? {}
+          const { id, name } = org?.organizations ?? {};
           return {
             value: id,
             label: name,
-          }
+          };
         },
-      )
+      );
 
-      return { organization, user_role }
+      return { organization, user_role };
     }),
   updateAccountStatus: privateProcedure
     .input(z.object({ account_id: z.string(), status: z.string() }))
@@ -323,15 +347,15 @@ export const accountRouter = createTRPCRouter({
             pluck: ['id', 'status'],
           },
         })
-        .execute()
+        .execute();
 
-      return account
+      return account;
     }),
   validateAccountDetails: privateProcedure
     .input(AccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { organization_id, role_id, account_id, id, contact_id }
-        = input ?? {}
+      const { organization_id, role_id, account_id, id, contact_id } =
+        input ?? {};
       const [existingUsername, existingRoleOrg] = await Promise.all([
         ctx.dnaClient
           .findAll({
@@ -400,9 +424,9 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute(),
-      ])
-      const isValid
-        = !existingUsername.data.length && !existingRoleOrg.data.length
+      ]);
+      const isValid =
+        !existingUsername.data.length && !existingRoleOrg.data.length;
 
       return {
         isValid,
@@ -414,7 +438,7 @@ export const accountRouter = createTRPCRouter({
             ? 'Role already exists for this organization'
             : '',
         },
-      }
+      };
     }),
   fetchWizardSummary: privateProcedure
     .input(z.object({ contact_code: z.string() }))
@@ -487,7 +511,7 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .execute()
+        .execute();
 
       const existingAccounts = accounts.data?.map((account) => {
         return {
@@ -495,9 +519,794 @@ export const accountRouter = createTRPCRouter({
           organization: account.organizations.name,
           role: account.user_roles.role,
           account_id: account.organization_accounts.account_id,
-        }
-      })
+        };
+      });
 
-      return existingAccounts ?? []
+      return existingAccounts ?? [];
     }),
-})
+  fetchGridData: privateProcedure
+    .input(ZodItems)
+    .query(async ({ ctx, input }) => {
+      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+        .findAll({
+          entity: input?.entity,
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'account_id',
+                'status',
+                'code',
+                'categories',
+                'account_status',
+                'created_date',
+                'created_time',
+                'updated_date',
+                'updated_time',
+                'created_by',
+                'updated_by',
+                'contact_id',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+              // created_by: ['first_name', 'last_name'],
+              // updated_by: ['first_name', 'last_name'],
+            },
+            track_total_records: true,
+            advance_filters: input.advance_filters as IAdvanceFilters[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+            },
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
+              : [],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'contact',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'created_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              alias: 'updated_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_account',
+              field: 'updated_by',
+            },
+          },
+        })
+        .execute();
+
+      const formatted_items = items?.map((item: Record<string, any>) => {
+        const {
+          [pluralize(input?.entity)]: entity_data,
+          created_by,
+          updated_by,
+          contact,
+          ...rest
+        } = item;
+        return {
+          ...entity_data,
+          ...rest,
+          first_name: contact?.first_name,
+          last_name: contact?.last_name,
+          created_by: created_by
+            ? `${created_by.first_name} ${created_by.last_name}`
+            : null,
+          updated_by: updated_by
+            ? `${updated_by.first_name} ${updated_by.last_name}`
+            : null,
+        };
+      });
+
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / (input.limit || 100));
+      return {
+        totalCount,
+        items: formatted_items,
+        currentPage: input.current || 1,
+        totalPages,
+      };
+    }),
+  updateDraftAccount: privateProcedure
+    .input(
+      z.object({
+        categories: z.string(),
+        id: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // const headerList = headers();
+      // const pathname = headerList.get('x-pathname') || '';
+      // const [, , , , identifier] = pathname.split('/');
+      if (input.id) {
+        const record = await ctx.dnaClient
+          .update(input.id, {
+            entity: ENTITY,
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                categories: [input.categories],
+              },
+              pluck: ['id', 'code', 'categories'],
+            },
+          })
+          .execute();
+        if (!record) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: `${ENTITY} update failed`,
+          });
+        }
+        console.info('[Update Draft Account]', record);
+        return {
+          ...record,
+          data: record?.data?.[0],
+        };
+      }
+      const record = await ctx.dnaClient
+        .create({
+          entity: ENTITY,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              categories: [input.categories],
+              status: 'Draft',
+            },
+            pluck: ['id', 'code', 'categories'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `${ENTITY} creation failed`,
+        });
+      }
+      console.info('[Create Draft Account]', record);
+      return {
+        ...record,
+        data: record?.data?.[0],
+      };
+    }),
+  fetchExternalInternalUserDetails: privateProcedure
+    .input(z.object({ code: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const accounts = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'code',
+                operator: EOperator.EQUAL,
+                values: [input.code],
+              },
+            ],
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'categories',
+                'role_id',
+                'account_id',
+                'contact_id',
+                'account_secret',
+                'status',
+                'email',
+                'account_status',
+              ],
+              contacts: ['id', 'first_name', 'last_name', 'middle_name'],
+              user_roles: ['role'],
+              organizations: ['name'],
+              contact_phone_numbers: [
+                'raw_phone_number',
+                'iso_code',
+                'country_code',
+                'is_primary',
+              ],
+              contact_emails: ['email', 'is_primary'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contact_phone_numbers',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contacts',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contact_emails',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contacts',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'role_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'account_organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const accountRecord = accounts.data?.[0] ?? {};
+      const phoneNumber = accountRecord?.contact_phone_numbers;
+      const email = accountRecord?.contact_emails;
+
+      return {
+        ...accountRecord?.organization_accounts,
+        account_email: accountRecord?.organization_accounts?.email,
+        role: accountRecord?.user_roles?.role,
+        phoneNumber,
+        email,
+        contact: {
+          ...accountRecord?.contacts,
+          phone: phoneNumber ? formatPhoneNumber(phoneNumber) : '',
+          email: email?.email,
+        },
+      };
+    }),
+  updateUserAccountRecord: privateProcedure
+    .input(
+      z.object({
+        entity: z.string().min(1),
+        id: z.string().min(1),
+        data: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const account_secret = await argon2.hash(input.data.account_secret);
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: input.entity,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              ...input.data,
+              account_secret,
+            },
+          },
+        })
+        .execute();
+    }),
+  createInvitationRecord: privateProcedure
+    .input(
+      z.object({
+        account_code: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.dnaClient
+        .findByCode(input.account_code, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            pluck: [
+              'id',
+              'code',
+              'account_id',
+              'email',
+              'categories',
+              'contact_id',
+            ],
+          },
+        })
+        .execute();
+
+      const accountRecord = account?.data?.[0];
+      if (accountRecord?.contact_id) {
+        const contact = await ctx.dnaClient
+          .findAll({
+            entity: 'contact_emails',
+            token: ctx.token.value,
+            query: {
+              advance_filters: createAdvancedFilter({
+                contact_id: accountRecord?.contact_id,
+              }),
+              pluck: ['id', 'email', 'is_primary'],
+            },
+          })
+          .execute();
+
+        accountRecord.email = contact.data?.[0]?.email;
+      }
+
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({
+              account_id: accountRecord?.id,
+              status: 'Active',
+            }),
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+
+      let invitationRecord = invitation.data?.[0] ?? null;
+
+      if (!invitationRecord) {
+        const record = await ctx.dnaClient
+          .create({
+            entity: 'invitations',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                account_id: accountRecord?.id,
+                status: 'Active',
+              },
+              pluck: ['id', 'code', 'status'],
+            },
+          })
+          .execute();
+        if (!record) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: `Invitation creation failed`,
+          });
+        }
+        console.info('[Create Draft]', record);
+        invitationRecord = record?.data?.[0] ?? {};
+      }
+
+      const category = accountRecord?.categories?.[0];
+
+      const headerList = headers();
+      const host = headerList.get('host'); // Get the host from request headers
+      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
+
+      const baseURL = `${protocol}://${host}`; // Construct base URL
+
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}?token=${ctx.token.value}`;
+      const loggedInUser = ctx.session.account;
+
+      try {
+        await transporter.sendMail({
+          from: loggedInUser.email,
+          to: accountRecord?.email,
+          subject: 'Account Invitation',
+          html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Welcome to Our Platform!</h2>
+            <p>You have been invited to join our platform. Please follow the instructions below to access your account:</p>
+            <ol>
+              <li>Click on the invitation link below.</li>
+              <li>Log in using your registered email and temporary password.</li>
+              <li>Follow the prompts to set up your account.</li>
+            </ol>
+            <p><strong>Invitation Link:</strong> <a href="${invitationLink}" style="color: #1a73e8;">Click here to join</a></p>
+            <p>If you have any issues, please contact our support team.</p>
+            <p>Best regards,<br> The Team</p>
+          </div>`,
+        });
+        console.info('Invitation email sent successfully');
+      } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+      }
+      await ctx.dnaClient
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status:
+                category === 'External User' ? 'Invited' : 'Pending Setup',
+            },
+            pluck: ['id', 'status'],
+          },
+        })
+        .execute();
+      return {
+        data: invitationRecord,
+      };
+    }),
+  createInvitationRecordByAccountId: privateProcedure
+    .input(
+      z.object({
+        account_id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.dnaClient
+        .findOne(input.account_id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code', 'account_id', 'email', 'categories'],
+          },
+        })
+        .execute();
+
+      const accountRecord = account?.data?.[0];
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_id: accountRecord?.id,
+              status: 'Active',
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+
+      const category = accountRecord?.categories?.[0];
+      await ctx.dnaClient
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status:
+                category === 'External User' ? 'Invited' : 'Pending Setup',
+            },
+            pluck: ['id', 'status'],
+          },
+        })
+        .execute();
+
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Draft]', record);
+
+      const headerList = headers();
+      const host = headerList.get('host'); // Get the host from request headers
+      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
+
+      const baseURL = `${protocol}://${host}`; // Construct base URL
+
+      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}?token=${ctx.token.value}`;
+      const loggedInUser = ctx.session.account;
+
+      try {
+        await transporter.sendMail({
+          from: loggedInUser.email,
+          to: accountRecord?.email,
+          subject: 'Account Invitation',
+          html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Welcome to Our Platform!</h2>
+            <p>You have been invited to join our platform. Please follow the instructions below to access your account:</p>
+            <ol>
+              <li>Click on the invitation link below.</li>
+              <li>Log in using your registered email and temporary password.</li>
+              <li>Follow the prompts to set up your account.</li>
+            </ol>
+            <p><strong>Invitation Link:</strong> <a href="${invitationLink}" style="color: #1a73e8;">Click here to join</a></p>
+            <p>If you have any issues, please contact our support team.</p>
+            <p>Best regards,<br> The Team</p>
+          </div>`,
+        });
+        console.info('Invitation email sent successfully');
+      } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+      }
+
+      return {
+        ...record,
+        data: record?.data?.[0],
+      };
+    }),
+  getInvitationAccountDetails: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [input.id],
+              },
+            ],
+            pluck_object: {
+              invitations: ['id', 'account_id', 'status'],
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'contact_id',
+                'status',
+                'email',
+                'categories',
+              ],
+              // contacts: ['id', 'first_name', 'last_name'],
+              // organizations: ['name'],
+              // contact_emails: ['email', 'is_primary'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'invitations',
+              field: 'account_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'role_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const invitationRecord = invitation.data?.[0] ?? {};
+
+      const email = invitationRecord?.contact_emails;
+
+      return {
+        ...invitationRecord?.organization_accounts,
+        organization: {
+          categories: invitationRecord?.organizations?.categories,
+          name: invitationRecord?.organizations?.name,
+        },
+        role: invitationRecord?.user_roles?.role,
+        contact: {
+          ...invitationRecord?.contacts,
+          email: email?.email,
+        },
+      };
+    }),
+  checkUsernameExist: privateProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        username: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { username, id } = input ?? {};
+      const existingUsername = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              ...createAdvancedFilter({
+                account_id: username,
+              }),
+              ...(id
+                ? [
+                    {
+                      type: 'operator',
+                      operator: EOperator.AND,
+                    },
+                    {
+                      type: 'criteria',
+                      field: 'id',
+                      operator: EOperator.NOT_EQUAL,
+                      values: [id],
+                    },
+                  ]
+                : []),
+            ],
+            pluck: ['id', 'account_id'],
+          },
+        })
+        .execute();
+      const isValid = !existingUsername.data.length;
+
+      return {
+        isValid,
+        message: {
+          username: existingUsername.data.length
+            ? 'Username already exists'
+            : '',
+        },
+      };
+    }),
+  getInvitationAccountDetailsPublicly: publicProcedure
+    .input(z.object({ id: z.string(), token: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: input.token,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [input.id],
+              },
+            ],
+            pluck_object: {
+              invitations: ['id', 'account_id', 'status'],
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'status',
+                'email',
+                'categories',
+              ],
+              organizations: ['id', 'name'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'invitations',
+              field: 'account_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const invitationRecord = invitation.data?.[0] ?? {};
+
+      const email = invitationRecord?.contact_emails;
+
+      return {
+        ...invitationRecord?.organization_accounts,
+        organization: {
+          categories: invitationRecord?.organizations?.categories,
+          name: invitationRecord?.organizations?.name,
+        },
+        role: invitationRecord?.user_roles?.role,
+        contact: {
+          ...invitationRecord?.contacts,
+          email: email?.email,
+        },
+      };
+    }),
+});

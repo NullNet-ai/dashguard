@@ -395,6 +395,7 @@ export default function WizardProvider({
     isSummaryOpen,
     stepsNavigation,
     callbackHandlers,
+    title: config?.title,
   } as IState;
 
   const actions = {

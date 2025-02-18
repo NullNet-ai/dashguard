@@ -1,19 +1,23 @@
-"use client";
+'use client';
 
-import { useContext } from "react";
-import { WizardContext } from "./Provider";
-import { BreadcrumbSeparator } from "~/components/ui/breadcrumb";
-import { camelCase } from "lodash";
-import { testIDFormatter } from "~/utils/formatter";
+import { useContext } from 'react';
+import { WizardContext } from './Provider';
+import { BreadcrumbSeparator } from '~/components/ui/breadcrumb';
+import { camelCase } from 'lodash';
+import { testIDFormatter } from '~/utils/formatter';
 
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
-  const { entityName, stepLabels } = state ?? {};
-  const modified_entity = entityName === "user_role" ? "role" : entityName;
+  const { entityName, stepLabels, title } = state ?? {};
+  const modified_entity = title
+    ? title
+    : entityName === 'user_role'
+      ? 'role'
+      : entityName;
   const formatEntitiyName = modified_entity
-    ?.split("_")
+    ?.split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+    .join(' ');
   const wizard_step_title = `${formatEntitiyName} `;
   const currentStep = state?.currentStep;
 
@@ -21,7 +25,7 @@ export default function WizardNavigator() {
     <div>
       <nav
         aria-label="breadcrumb"
-        data-test-id={camelCase(entityName) + "Breadcrumb"}
+        data-test-id={camelCase(entityName) + 'Breadcrumb'}
       >
         <ol className="flex items-center gap-2 font-semibold">
           <li>
@@ -42,11 +46,10 @@ export default function WizardNavigator() {
                 `${entityName}-wzrd-breadcrumb-${currentStep}-link`,
               )}
             >
-              Step {currentStep} -{" "}
+              Step {currentStep} -{' '}
               {currentStep !== undefined
-                ? (stepLabels?.[currentStep] ?? "")
-                : ""} 
-
+                ? (stepLabels?.[currentStep] ?? '')
+                : ''}
             </span>
           </li>
         </ol>

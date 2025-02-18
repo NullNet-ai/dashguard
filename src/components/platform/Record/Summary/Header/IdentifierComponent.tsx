@@ -34,6 +34,7 @@ export default function IdentifierComponent({
     status: status,
     recordId: state?.entityCode ?? "",
     entityName: state?.entityName,
+    recordDetails: state?.recordDetails,
   }), [state?.entityCode, state?.entityName, code, status]);
 
   const handleClickCollapseButton = () => onClickCollapseButton?.();
