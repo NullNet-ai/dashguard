@@ -62,6 +62,7 @@ export default function GridMobileRow({ parent }: { parent?: string }) {
             .getVisibleCells()
             .find((cell) => cell.column.id === 'status');
 
+          const statusValue = statusCell?.getValue();
           return (
             <div
               className="flex flex-col justify-start rounded-md border border-b border-l-2 border-l-primary p-4 hover:bg-border/50"
@@ -95,14 +96,13 @@ export default function GridMobileRow({ parent }: { parent?: string }) {
                           side="right"
                         >
                            <Button
-                              // disabled={disableActions}
-                              className="relative flex cursor-pointer items-center gap-2 text-primary p-1"
+                              disabled={statusValue === 'Active'}
+                              className={cn(`relative flex cursor-pointer items-center gap-2 text-primary p-1`, `${statusValue === 'Active' ? 'text-gray-400' : 'text-primary'}`)}
                               type="button"
                               onClick={() => actions?.handleSingleSelect(row.original)}
                             >
                               <PlusCircleIcon
-                                // className={`h-5 w-5 ${disableActions ? "text-gray-400" : "text-primary"}`}
-                                className={`h-4 w-4 text-primary`}
+                                className={`h-4 w-4 ${statusValue === 'Active' ? "text-gray-400" : "text-primary"}`}
                               />
                               <span className='text-sm'>Select</span>
                             </Button>
