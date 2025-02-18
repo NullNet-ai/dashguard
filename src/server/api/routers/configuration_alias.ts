@@ -112,10 +112,9 @@ export const deviceAliasRouter = createTRPCRouter({
       })
 
       const totalPages = Math.ceil(formatted_items?.length / limit)
-      
-     
+
       return {
-        totalCount: formatted_items?.length,
+        totalCount,
         items: formatted_items,
         currentPage: current,
         totalPages,

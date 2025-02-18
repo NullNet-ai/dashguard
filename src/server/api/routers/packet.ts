@@ -2,12 +2,12 @@ import {
   EOperator,
   EOrderDirection,
 } from '@dna-platform/common-orm'
+import Bluebird from 'bluebird'
 import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
-import Bluebird from 'bluebird'
 
 interface InputData {
   bucket: string
@@ -42,13 +42,13 @@ function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count:
   return seconds_array
 }
 
-function transformData( data: InputData[]): OutputData[] {
-const result = data.map((item) => {
+function transformData(data: InputData[]): OutputData[] {
+  const result = data.map((item) => {
     return {
       ...item,
       bandwidth: parseInt(item.bandwidth),
     }
-})
+  })
 
   return result
 }
@@ -57,7 +57,7 @@ export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
   getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()) })).query(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range } = input
- 
+
     const res = await ctx.dnaClient.aggregate({
       query: {
         entity: 'packets',
@@ -90,20 +90,19 @@ export const packetRouter = createTRPCRouter({
             ],
           },
         ],
-        joins:[],
+        joins: [],
         bucket_size,
-        limit:20,
+        limit: 20,
         order: {
           order_by: 'bucket',
-          order_direction: EOrderDirection.DESC,
+          order_direction: EOrderDirection.ASC,
         },
       },
       token: ctx.token.value,
 
     }).execute()
-    const transformedData: OutputData[] = transformData( res?.data as InputData[])
+    const transformedData: OutputData[] = transformData(res?.data as InputData[])
 
-   
     return transformedData
   }),
 
@@ -156,52 +155,33 @@ export const packetRouter = createTRPCRouter({
       const res = await ctx.dnaClient.aggregate({
         query: {
           entity: 'packets',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_length',
-              bucket_name: 'bandwidth',
+          token: ctx.token.value,
+          query: {
+            pluck: ['source_ip', 'destination_ip'],
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'status',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: ['Active', 'active'],
+              },
+            ],
+            order: {
+              limit: 10,
+              by_field: 'code',
+              by_direction: EOrderDirection.DESC,
             },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'source_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                source_ip,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'destination_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                destination_ip,
-              ],
-            },
-          ],
-          joins:[],
-          limit:20,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
-          },
+          }
         },
-        token: ctx.token.value,
-      }).execute()
+        }).execute()
 
       return {source_ip, destination_ip, result:res?.data}
     },{concurrency: 10} )
-  }),
 
     
+  }),
+
 })
 
 // create an interval that adds data in the packets

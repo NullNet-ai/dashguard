@@ -4,9 +4,10 @@ import Grid from '~/components/platform/Grid/Server'
 import { getGridCacheData } from '~/lib/grid-get-cache-data'
 import { api } from '~/trpc/server'
 
+import { defaultAdvanceFilter } from './_config/advanceFilter'
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
-import { defaultAdvanceFilter } from './_config/advanceFilter';
+import DeleteConfirmation from './Actions/Delete/DeleteConfirmation'
 
 export default async function Page({
   searchParams = {},
@@ -35,48 +36,49 @@ export default async function Page({
     'device_version',
     'updated_time',
     'created_time',
+    'previous_status',
   ]
 
   const { items = [], totalCount } = await api.device.mainGrid({
-    entity:main_entity!,
+    entity: main_entity!,
     pluck: _pluck,
     current: +(searchParams.page ?? '0'),
     limit: +(searchParams.perPage ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
-    ? filters?.advanceFilter
-    : [],
-    // advance_filters: [],
+      ? filters?.advanceFilter
+      : [],
+    // advance_filters: []
   })
 
   return (
     <Grid
-    totalCount={totalCount || 0}
-    data={items}
-    defaultSorting={defaultSorting}
-    defaultAdvanceFilter={defaultAdvanceFilter || []}
-    advanceFilter={filters?.reportFilters || []}
-    sorting={sorting || []}
-    pagination={pagination}
-    config={{
-      entity:main_entity!,
-      title: "Device",
-      columns: gridColumns,
-      defaultValues: {
-        entity_prefix: 'DV',
-        categories: ['Firewall'],
-      },
-      hideColumnsOnMobile: [],
-      // deleteCustomAction: () => {},
-      searchConfig: {
-        router: "device",
-        resolver: "mainGrid",
-        query_params: {
-          entity: main_entity!,
-          pluck: _pluck,
+      advanceFilter={filters?.reportFilters || []}
+      config={{
+        entity: main_entity!,
+        title: 'Device',
+        columns: gridColumns,
+        defaultValues: {
+          entity_prefix: 'DV',
+          categories: ['Firewall'],
         },
-      },
-    }}
-  />
+        hideColumnsOnMobile: [],
+        deleteCustomComponent: DeleteConfirmation,
+        searchConfig: {
+          router: 'device',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: main_entity!,
+            pluck: _pluck,
+          },
+        },
+      }}
+      data={items}
+      defaultAdvanceFilter={defaultAdvanceFilter || []}
+      defaultSorting={defaultSorting}
+      pagination={pagination}
+      sorting={sorting || []}
+      totalCount={totalCount || 0}
+    />
   )
 }

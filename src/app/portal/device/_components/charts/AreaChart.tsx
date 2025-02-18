@@ -23,6 +23,12 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const formatNumber = (num: number) => {
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
+  return num.toString()
+}
+
 export function BandwidthChart({ chartData }: any) {
   const maxBandwidth = Math.max(...chartData.map((item: any) => item.bandwidth))
   const minBandwidth = Math.min(...chartData.map((item: any) => item.bandwidth))
@@ -57,33 +63,42 @@ export function BandwidthChart({ chartData }: any) {
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
+              allowDataOverflow={true}
               axisLine={false}
               dataKey="bucket"
               minTickGap={30}
               padding={{ left: 2, right: 2 }}
               tickFormatter={(value: string) => {
-                
-                return moment(value).format('MM/DD HH:mm')}}
+                return moment(value).format('MM/DD HH:mm:ss')
+              }}
               tickLine={false}
               tickMargin={8}
             />
+
             <YAxis
+              allowDataOverflow={true}
               axisLine={false}
               domain={[yAxisMin, yAxisMax]}
-              padding={{ top: 20, bottom: 20 }}
-              tickCount={20}
+              tickCount={4}
+              tickFormatter={formatNumber}
               tickLine={false}
-              tickFormatter={(value: number) =>{
-                
-                return ` ${value}`}}
               tickMargin={8}
+              ticks={[
+                yAxisMin,
+                yAxisMin + (yAxisMax - yAxisMin) / 3,
+                yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
+                yAxisMax,
+              ]}
             />
+
             <ChartTooltip
               content={
-                <ChartTooltipContent
-                  indicator="dot"
-                  labelFormatter={(value) => moment(value).format('MM/DD HH:mm')}
-                />
+                (
+                  <ChartTooltipContent
+                    indicator="dot"
+                    labelFormatter={(value: string) => moment(value).format('MM/DD HH:mm')}
+                  />
+                )
               }
               cursor={false}
             />

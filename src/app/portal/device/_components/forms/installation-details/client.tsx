@@ -32,6 +32,9 @@ export default function InstallationDetails({
       customDesign={{
         formClassName: "!grid-cols-1",
       }}
+      buttonConfig={{
+        hideLockButton: true,
+      }}
       formSchema={FormSchema}
       myParent={params.shell_type}
       formProps={params}
@@ -39,7 +42,7 @@ export default function InstallationDetails({
       formLabel="Firewall"
       formKey="firewall"
       fields={[]}
-      customRender={(form) => <CustomInstallationDetails form={form} />}
+      customRender={(form) => <CustomInstallationDetails form={form} defaultValues={defaultValues}/>}
     />
   );
 }

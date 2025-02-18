@@ -5,12 +5,12 @@ import {
   createTRPCRouter,
   privateProcedure,
 } from '~/server/api/trpc'
-import { formatSorting } from '~/server/utils/formatSorting'
 import { pluralize } from '~/server/utils/pluralize'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import { formatSorting } from '~/server/utils/formatSorting';
 const entity = 'device_rules'
 export const deviceRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -25,13 +25,13 @@ export const deviceRuleRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck,
         device_id,
+        sorting,
       } = input
 
       const device_configuration = await ctx.dnaClient.findAll({
         entity: 'device_configurations',
         token: ctx.token.value,
         query: {
-          track_total_records: true,
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
             {
@@ -76,6 +76,7 @@ export const deviceRuleRouter = createTRPCRouter({
         entity: 'device_rules',
         token: ctx.token.value,
         query: {
+          track_total_records: true,
           pluck,
           advance_filters: _advance_filters?.length
             ? _advance_filters as IAdvanceFilters[]
@@ -94,16 +95,9 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: [
-            {
-              by_field: 'interface',
-              by_direction: EOrderDirection.ASC,
-            },
-            {
-              by_field: 'order',
-              by_direction: EOrderDirection.ASC,
-            },
-          ]
+          multiple_sort: sorting?.length
+            ? formatSorting(sorting)
+            : [],
         },
       })
         .execute()
