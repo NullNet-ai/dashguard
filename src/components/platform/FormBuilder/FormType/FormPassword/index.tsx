@@ -136,7 +136,7 @@ export default function FormPassword({
 
       {/* Password Input Field */}
       <FormControl>
-        <div className="group relative">
+        <div className='group relative'>
           <Input
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? 'text' : 'password'}
@@ -144,7 +144,7 @@ export default function FormPassword({
             disabled={isDisabled}
             hasError={!!formRenderProps.fieldState.error}
             Icon={icon}
-            iconPlacement="left"
+            iconPlacement='left'
             placeholder={fieldConfig?.placeholder}
             readOnly={
               (fieldConfig.isCustomFormField
@@ -160,12 +160,12 @@ export default function FormPassword({
             data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
             disabled={isDisabled}
             Icon={showPassword ? EyeIcon : EyeSlashIcon}
-            size="sm"
-            type="button"
-            variant="ghost"
+            size='sm'
+            type='button'
+            variant='ghost'
             onClick={() => setShowPassword(prev => !prev)}
           >
-            <span className="sr-only">
+            <span className='sr-only'>
               {showPassword ? 'Hide password' : 'Show password'}
             </span>
           </Button>
@@ -183,8 +183,8 @@ export default function FormPassword({
       )}
 
       {showPasswordStrengthBar && showPasswordStrengthBarAndValidations && (
-        <div className="mt-2">
-          <div className="flex gap-1">
+        <div className='mt-2'>
+          <div className='flex gap-1'>
             {[1, 2, 3].map(bar => (
               <div
                 className={`h-2 flex-1 rounded-full ${
@@ -202,46 +202,46 @@ export default function FormPassword({
               />
             ))}
           </div>
-          <div className="me-2 mt-1 flex justify-end text-sm text-gray-600">
+          <div className='me-2 mt-1 flex justify-end text-sm text-gray-600'>
             {passwordStrength.text}
           </div>
         </div>
       )}
 
       {/* Complex Validation Rules (Conditional) */}
-      {showPasswordStrengthBarAndValidations && hasComplexValidation && (
-        <div className="mt-2 space-y-1">
+      {showPasswordStrengthBarAndValidations
+      && ((hasComplexValidation && (
+        <div className='mt-2 space-y-1'>
           {[
             { key: 'minLength', label: 'At least 12 characters' },
-            {
-              key: 'hasLowercase',
-              label: 'Contains one lowercase letter (a-z)',
-            },
-            {
-              key: 'hasUppercase',
-              label: 'Contains one uppercase letter (A-Z)',
-            },
+            { key: 'hasLowercase', label: 'Contains one lowercase letter (a-z)' },
+            { key: 'hasUppercase', label: 'Contains one uppercase letter (A-Z)' },
             { key: 'hasNumber', label: 'Contains one number (0-9)' },
             {
               key: 'hasSpecialChar',
               label: 'Contains one special character (except *,%,&,;)',
             },
           ].map(rule => (
-            <div className="flex items-center" key={rule.key}>
+            <div className='flex items-center' key={rule.key}>
               {passwordValidation[
                 rule.key as keyof typeof passwordValidation
               ]
                 ? (
-                    <CheckIcon className="h-4 w-4 text-green-500" />
+                    <CheckIcon className='h-4 w-4 text-green-500' />
                   )
                 : (
-                    <XMarkIcon className="h-4 w-4 text-red-500" />
+                    <XMarkIcon className='h-4 w-4 text-red-500' />
                   )}
-              <span className="ml-2 text-sm">{rule.label}</span>
+              <span className='ml-2 text-sm'>{rule.label}</span>
             </div>
           ))}
         </div>
-      )}
+      )) || (
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+          isMultiple={true}
+        />
+      ))}
     </FormItem>
   )
 }

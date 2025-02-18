@@ -13,7 +13,6 @@ import { TRPCReactProvider } from '~/trpc/react'
 import { ToastProvider } from '../context/ToastProvider'
 import { SidebarProvider } from '~/components/ui/sidebar'
 
-
 export const metadata: Metadata = {
   title: 'Platform',
   description: 'All in one platform for recruitment',
