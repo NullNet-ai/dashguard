@@ -43,7 +43,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         sortBy: selectedSort,
         sortOrder: selectedOrder,
       },
-      filters = [],
+      showRead: showReadValue = showRead,
     }: {
       type?: 'all' | 'system' | 'social' | 'archive'
       order?: {
@@ -51,6 +51,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         sortOrder: 'asc' | 'desc'
       }
       filters?: any[]
+      showRead?: boolean
     }) => {
       try {
         setLoading(true)
@@ -114,20 +115,22 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             break
         }
 
+        if (additionalFilters.length > 0 && !showReadValue) {
+          additionalFilters.push({
+            operator: 'and',
+            type: 'operator',
+            default: true,
+          })
+          additionalFilters.push({
+            type: 'criteria',
+            field: 'notification_status',
+            operator: 'equal',
+            values: ['unread'],
+          })
+        }
+
         const data = await getNotifications({
-          filters: [
-            ...additionalFilters,
-            ...(filters?.length
-              ? [
-                  {
-                    operator: 'and',
-                    type: 'operator',
-                    default: true,
-                  },
-                  ...filters,
-                ]
-              : []),
-          ],
+          filters: additionalFilters,
           order,
         })
 
@@ -142,33 +145,19 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       finally {
         setLoading(false)
       }
-    }, []
+    }, [showRead]
   )
 
   /**
    * Toggle between showing all notifications and only unread ones.
    */
   const toggleUnread = async () => {
-    if (!showRead) {
-      // When showing all notifications
-      await fetchNotifications({
-        type,
-        filters: [],
-      })
-    }
-    else {
-      // When showing only unread notifications
-      await fetchNotifications({
-        type,
-        filters: [{
-          type: 'criteria',
-          field: 'notification_status',
-          operator: 'equal',
-          values: ['unread'],
-        }],
-      })
-    }
-    setShowRead(prev => !prev)
+    const newShowRead = !showRead
+    setShowRead(newShowRead)
+    await fetchNotifications({
+      type,
+      showRead: newShowRead,
+    })
   }
 
   /**
