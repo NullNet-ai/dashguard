@@ -14,7 +14,6 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { testIDFormatter } from "~/utils/formatter";
-import { PlusIcon } from "lucide-react";
 
 interface DropdownOption {
   label: string;
@@ -77,7 +76,7 @@ export function ButtonWithDropdown({
       {/* Dropdown menu content with responsive handling */}
       <DropdownMenuContent
         align={side} // Align to the end (right), but Radix UI handles edge cases
-        className="w-56 max-w-full overflow-hidden rounded-md border border-gray-300 bg-white shadow-md ring-1 ring-black ring-opacity-5 focus:outline-none"
+        className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-md ring-1 ring-black ring-opacity-5 focus:outline-none"
         sideOffset={5} // Offset for the dropdown from the trigger button
         side="bottom" // Default side where the dropdown will open
         collisionPadding={10} // Avoid the content colliding with the edge of the screen

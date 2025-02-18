@@ -395,4 +395,61 @@ export const recordRouter = createTRPCRouter({
         })
         .execute();
     }),
+  getOptionsByCurrentState: privateProcedure
+    .input(
+      z.object({
+        code: z.string(),
+        status: z.string(),
+        categories: z.array(z.string()),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const menuOptions = {
+        Active: [
+          ...(input.categories.includes('External User')
+            ? [
+                {
+                  label: 'Disable Access',
+                  params: {
+                    key: 'DISABLE_ACCESS',
+                  },
+                },
+              ]
+            : [
+                {
+                  label: 'Deactivate Account',
+                  params: {
+                    key: 'DEACTIVATE_ACCOUNT',
+                  },
+                },
+              ]),
+        ],
+        'Access Disabled': [
+          {
+            label: 'Enable Access',
+            params: {
+              key: 'ENABLE_ACCESS',
+            },
+          },
+        ],
+        Deactivated: [
+          {
+            label: 'Activate Account',
+            params: {
+              key: 'ACTIVATE_ACCOUNT',
+            },
+          },
+        ],
+        Invited: [
+          {
+            label: 'Cancel Invitation',
+            params: {
+              key: 'CANCEL_INVITATION',
+            },
+          },
+        ],
+      };
+
+      return menuOptions[input.status as keyof typeof menuOptions] ?? [];
+    }),
 });

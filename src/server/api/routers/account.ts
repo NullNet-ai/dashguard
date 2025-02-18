@@ -2,7 +2,11 @@ import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
 import argon2 from 'argon2';
 import { z } from 'zod';
 
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from '~/server/api/trpc';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
@@ -18,6 +22,7 @@ import nodemailer from 'nodemailer';
 
 const ENTITY = 'organization_account';
 const transporter = nodemailer.createTransport({
+  // todo: add user, pass, host, port to the .env.example
   auth: {
     user: 'admin@dnaplatform.net',
     pass: 'w@ckyPart10',
@@ -119,6 +124,7 @@ export const accountRouter = createTRPCRouter({
           account_organization_id: organization_id,
           account_organization_name: organizationRecord?.data?.[0]?.name || '',
           is_new_user: true,
+          categories: ['Internal User'],
         };
 
         const result = await ctx.dnaClient
@@ -141,6 +147,7 @@ export const accountRouter = createTRPCRouter({
             }),
             pluck: [
               'id',
+              'code',
               'account_organization_id',
               'role_id',
               'account_id',
@@ -883,38 +890,40 @@ export const accountRouter = createTRPCRouter({
             },
           })
           .execute();
-       
+
         accountRecord.email = contact.data?.[0]?.email;
       }
 
-      const invitation = await ctx.dnaClient.findAll({
-        entity: 'invitations',
-        token: ctx.token.value,
-        query: {
-          advance_filters: createAdvancedFilter({
-            account_id: accountRecord?.id,
-            status: 'Active',
-          }),
-          pluck: ['id', 'code', 'status'],
-        },
-      }).execute();
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({
+              account_id: accountRecord?.id,
+              status: 'Active',
+            }),
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
 
       let invitationRecord = invitation.data?.[0] ?? null;
 
       if (!invitationRecord) {
         const record = await ctx.dnaClient
-        .create({
-          entity: 'invitations',
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              account_id: accountRecord?.id,
-              status: 'Active',
+          .create({
+            entity: 'invitations',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                account_id: accountRecord?.id,
+                status: 'Active',
+              },
+              pluck: ['id', 'code', 'status'],
             },
-            pluck: ['id', 'code', 'status'],
-          },
-        })
-        .execute();
+          })
+          .execute();
         if (!record) {
           throw new TRPCError({
             code: 'CONFLICT',
@@ -924,7 +933,7 @@ export const accountRouter = createTRPCRouter({
         console.info('[Create Draft]', record);
         invitationRecord = record?.data?.[0] ?? {};
       }
-      
+
       const category = accountRecord?.categories?.[0];
 
       const headerList = headers();
@@ -933,7 +942,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}`;
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}?token=${ctx.token.value}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -961,20 +970,114 @@ export const accountRouter = createTRPCRouter({
         throw error;
       }
       await ctx.dnaClient
-      .update(accountRecord?.id, {
-        entity: 'organization_accounts',
-        token: ctx.token.value,
-        mutation: {
-          params: {
-            account_status:
-              category === 'External User' ? 'Invited' : 'Pending Setup',
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status:
+                category === 'External User' ? 'Invited' : 'Pending Setup',
+            },
+            pluck: ['id', 'status'],
           },
-          pluck: ['id', 'status'],
-        },
-      })
-      .execute();
+        })
+        .execute();
       return {
         data: invitationRecord,
+      };
+    }),
+  createInvitationRecordByAccountId: privateProcedure
+    .input(
+      z.object({
+        account_id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const account = await ctx.dnaClient
+        .findOne(input.account_id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code', 'account_id', 'email', 'categories'],
+          },
+        })
+        .execute();
+
+      const accountRecord = account?.data?.[0];
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_id: accountRecord?.id,
+              status: 'Active',
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+
+      const category = accountRecord?.categories?.[0];
+      await ctx.dnaClient
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status:
+                category === 'External User' ? 'Invited' : 'Pending Setup',
+            },
+            pluck: ['id', 'status'],
+          },
+        })
+        .execute();
+
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Draft]', record);
+
+      const headerList = headers();
+      const host = headerList.get('host'); // Get the host from request headers
+      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
+
+      const baseURL = `${protocol}://${host}`; // Construct base URL
+
+      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}?token=${ctx.token.value}`;
+      const loggedInUser = ctx.session.account;
+
+      try {
+        await transporter.sendMail({
+          from: loggedInUser.email,
+          to: accountRecord?.email,
+          subject: 'Account Invitation',
+          html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Welcome to Our Platform!</h2>
+            <p>You have been invited to join our platform. Please follow the instructions below to access your account:</p>
+            <ol>
+              <li>Click on the invitation link below.</li>
+              <li>Log in using your registered email and temporary password.</li>
+              <li>Follow the prompts to set up your account.</li>
+            </ol>
+            <p><strong>Invitation Link:</strong> <a href="${invitationLink}" style="color: #1a73e8;">Click here to join</a></p>
+            <p>If you have any issues, please contact our support team.</p>
+            <p>Best regards,<br> The Team</p>
+          </div>`,
+        });
+        console.info('Invitation email sent successfully');
+      } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+      }
+
+      return {
+        ...record,
+        data: record?.data?.[0],
       };
     }),
   getInvitationAccountDetails: privateProcedure
@@ -1003,6 +1106,7 @@ export const accountRouter = createTRPCRouter({
                 'contact_id',
                 'status',
                 'email',
+                'categories',
               ],
               // contacts: ['id', 'first_name', 'last_name'],
               // organizations: ['name'],
@@ -1070,7 +1174,10 @@ export const accountRouter = createTRPCRouter({
 
       return {
         ...invitationRecord?.organization_accounts,
-        organization: invitationRecord?.organizations?.name,
+        organization: {
+          categories: invitationRecord?.organizations?.categories,
+          name: invitationRecord?.organizations?.name,
+        },
         role: invitationRecord?.user_roles?.role,
         contact: {
           ...invitationRecord?.contacts,
@@ -1123,6 +1230,82 @@ export const accountRouter = createTRPCRouter({
           username: existingUsername.data.length
             ? 'Username already exists'
             : '',
+        },
+      };
+    }),
+  getInvitationAccountDetailsPublicly: publicProcedure
+    .input(z.object({ id: z.string(), token: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const invitation = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: input.token,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [input.id],
+              },
+            ],
+            pluck_object: {
+              invitations: ['id', 'account_id', 'status'],
+              organization_accounts: [
+                'id',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'status',
+                'email',
+                'categories',
+              ],
+              organizations: ['id', 'name'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'id',
+            },
+            from: {
+              entity: 'invitations',
+              field: 'account_id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'organization_id',
+            },
+          },
+        })
+        .execute();
+
+      const invitationRecord = invitation.data?.[0] ?? {};
+
+      const email = invitationRecord?.contact_emails;
+
+      return {
+        ...invitationRecord?.organization_accounts,
+        organization: {
+          categories: invitationRecord?.organizations?.categories,
+          name: invitationRecord?.organizations?.name,
+        },
+        role: invitationRecord?.user_roles?.role,
+        contact: {
+          ...invitationRecord?.contacts,
+          email: email?.email,
         },
       };
     }),

@@ -14,16 +14,18 @@ import { Form, FormField, FormMessage } from '~/components/ui/form'
 import LoginSubmit from '../actions/loginSubmit'
 
 const formSchema = z.object({
-  username: z.string({
-    required_error: 'Please enter your username.',
-  }),
-  password: z
-    .string({
-      required_error: 'Please enter your password.',
-    }),
+  username: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
+  password: z.string().min(1, { message: "Please enter your password." }),
 })
 
-export default function LoginForm() {
+export default function LoginForm(props: any) {
+  const {defaultValues} = props;
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  })
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string>('')
 
@@ -47,9 +49,7 @@ export default function LoginForm() {
       }
     }
   }
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-  })
+  
 
   return (
     <Form {...form}>

@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.12.1-rc.1<unreleased>",
-  "branch": "unreleased/fix/1.12.1-rc.1<unreleased>",
-  "message": "revert missing prop in table header",
-  "publish_name": "Shem Alexis Chavez"
+  "tag": "1.13.0",
+  "branch": "released/fix/1.13.0",
+  "message": "release version 1.13.0 ",
+  "publish_name": "Rob Caldosa"
 }

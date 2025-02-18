@@ -1,28 +1,37 @@
+'use client'
 import {
+
+
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { IMenuOptionConfig } from "../../types";
-import { Fragment, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import MenuItem from "./MenuItem";
 import { formatFormTestID } from "~/lib/utils";
 import { ChevronRight } from "lucide-react";
+import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 
 interface IRecursiveMenuItemProps {
   recordId: string;
   entityName: string;
   menuOptionConfig?: IMenuOptionConfig[];
+  isMobile?: boolean;
 }
 
 export default function RecursiveMenuItem({
   menuOptionConfig = [],
   recordId,
   entityName,
+  isMobile = false,
 }: IRecursiveMenuItemProps) {
   const [menuItemLoadingState, setMenuItemLoadingState] = useState<
     Record<string, boolean>
   >({});
+
+  const { menu_items
+  } = useContext(RecordMenuOptionContext)
 
   const handleLoadingStateChange = (itemName: string, isLoading: boolean) => {
     setMenuItemLoadingState((prev) => ({
@@ -31,7 +40,7 @@ export default function RecursiveMenuItem({
     }));
   };
   // ! All iterations should wrap the MenuItem component with a Fragment
-  return menuOptionConfig.map((option) => (
+  return menu_items.map((option) => (
     <Fragment key={recordId}>
       {(option.children && option.children.length > 0 && (
         <DropdownMenu>
@@ -55,7 +64,7 @@ export default function RecursiveMenuItem({
               </MenuItem>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="right">
+          <DropdownMenuContent align="start" side={isMobile ? 'left' : 'right'} className='z-[1000]'>
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}

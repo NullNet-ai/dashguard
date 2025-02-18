@@ -4,7 +4,8 @@ import { useSidebar } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
 
 const HeaderContainer: React.FC<any> = ({ children }) => {
-  const { open } = useSidebar();
+  const { open,isBannerPresent } = useSidebar();
+
 
   const width = open
     ? "lg:w-[calc(100%-16rem)] lg:left-[16rem] md:w-[calc(100%-265px)] md:left-[258px]"
@@ -13,8 +14,9 @@ const HeaderContainer: React.FC<any> = ({ children }) => {
   return (
     <div
       className={cn(
-        `fixed top-0 z-50 w-full bg-background transition-all duration-300 ease-in-out lg:fixed`,
+        `fixed z-50 w-full bg-background transition-all duration-300 ease-in-out lg:fixed`,
         width,
+        isBannerPresent ? 'top-12 md:top-8' : 'top-0',
       )}
     >
       {children}

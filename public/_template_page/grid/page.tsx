@@ -9,7 +9,6 @@ import { getGridCacheData } from "~/lib/grid-get-cache-data";
  *
  */
 import gridColumns from "./_config/columns";
-// import defaultAdvanceFilter from "./_config/advanceFilter";
 import defaultSorting from "./_config/sorting";
 
 export default async function Page() {

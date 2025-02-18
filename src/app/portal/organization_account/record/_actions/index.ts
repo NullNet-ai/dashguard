@@ -1,8 +1,6 @@
 'use server'
 
 import { api } from '~/trpc/server';
-import { type TStatus } from './types'
-
 const handleChangeStatus = async (
   record_status: string,
   recordId: string,

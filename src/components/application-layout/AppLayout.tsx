@@ -15,9 +15,9 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
   const [, , , app, ,] = pathname.split('/')
 
   return (
+    <>
     <SidebarInset application_name={app}>
       <HeaderContainer>
-      <SessionChecker/>
         <Header />
       </HeaderContainer>
       <AppContent>{children}</AppContent>
@@ -25,6 +25,7 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
       <SmartMobileComponent />
       <SideDrawerView />
     </SidebarInset>
+    </>
   )
 }
 

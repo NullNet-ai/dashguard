@@ -5,11 +5,13 @@ import RecordSummaryMobile from '~/components/platform/Record/Summary/RecordSumm
 import HeaderTabs from '~/components/platform/Record/Tabs/HeaderTabs';
 import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 
-import statusOptions from '../../../_actions/statusOptions';
 
+import { IMenuOptionConfig } from '~/components/platform/Record/types';
+import RecordMenuOptionsProvider from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
+import { api } from '~/trpc/server';
 import type { IProps } from './types';
 
-const Wrapper = ({
+const Wrapper =  async ({
   record,
   record_summary,
   entity_code,
@@ -42,12 +44,23 @@ const Wrapper = ({
       tabName: 'communication?categories=',
     },
   ];
+
+  const statusOptions = await api.record.getOptionsByCurrentState({
+    code: entity_code,
+    categories: record_details?.categories,
+    status: record_details?.account_status,
+  })
+
+
+
   return (
+    <RecordMenuOptionsProvider categories={record_details?.categories} menu_options={statusOptions}>
+
     <RecordProvider
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption:  statusOptions,
+        identifierOption:  statusOptions as unknown as IMenuOptionConfig[],
       }}
     >
       <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
@@ -67,6 +80,8 @@ const Wrapper = ({
       </section>
       <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
     </RecordProvider>
+    </RecordMenuOptionsProvider>
+
   );
 };
 

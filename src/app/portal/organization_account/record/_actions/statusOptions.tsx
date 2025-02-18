@@ -1,7 +1,6 @@
 'use client';
 import { type IMenuOptionConfig } from '~/components/platform/Record/types';
-
-import { handleChangeStatus } from '.';
+import { handleChangeStatus } from '~/app/portal/organization_account/record/_actions'
 const applicationStatuses = [
   'New',
   'Screening',
@@ -14,7 +13,7 @@ const applicationStatuses = [
   'Job Offered',
 ];
 
-const accountStatuses = {
+export const accountStatuses = {
   'Disable Access': 'Access Disabled',
   'Deactivate Account': 'Deactivated',
   'Enable Access': 'Active',
