@@ -60,4 +60,4 @@ const updateMockBandwidth = () => {
 };
 
 // Update the mock_bandwidth array every second
-setInterval(updateMockBandwidth, 1000);
+// setInterval(updateMockBandwidth, 1000);

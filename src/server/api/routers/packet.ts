@@ -108,7 +108,10 @@ export const packetRouter = createTRPCRouter({
   }),
 
   fetchPacketsIP: privateProcedure
-  .input(z.object({})).query(async ({ ctx }) => {
+  .input(z.object({})).query(async ({input, ctx }) => {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    console.log("%c Line:112 🍊 input", "color:#e41a6a", input);
     const res = await ctx.dnaClient
       .findAll({
         entity: 'packets',
@@ -123,9 +126,16 @@ export const packetRouter = createTRPCRouter({
               operator: EOperator.EQUAL,
               values: ["Active", "active"],
             },
+            {
+              type: 'criteria',
+              field: 'timestamp',
+              entity: 'packets',
+              operator: EOperator.GREATER_THAN_OR_EQUAL,
+              values: [oneDayAgo.toISOString()],
+            },
           ],
           order: {
-            limit: 20,
+            limit: 1000,
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
@@ -133,8 +143,7 @@ export const packetRouter = createTRPCRouter({
         
       })
       .execute()
-
-      console.log("%c Line:138 🍒 res?.data", "color:#e41a6a", res?.data);
+    console.log("%c Line:137 🍖 res?.data", "color:#f5ce50", res?.data);
     return res?.data
   }),
 
@@ -189,7 +198,7 @@ export const packetRouter = createTRPCRouter({
 
       console.log("%c Line:190 🍬 res?.data", "color:#93c0a4", {source_ip, destination_ip, result:res?.data});
       return {source_ip, destination_ip, result:res?.data}
-    })
+    },{concurrency: 10} )
   }),
 
     

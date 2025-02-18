@@ -2,19 +2,20 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ReactFlow, Background, Controls, Handle } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { api } from "~/trpc/react";
 import { mock_bandwidth } from "./mock_bandwidth";
+import { api } from "~/trpc/react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } from "recharts";
+
 
 const normalizeTraffic = (traffic, maxTraffic) => {
   if (maxTraffic <= 0) return 0;
+  console.log("%c Line:13 🧀 Math.log(1 + traffic) / Math.log(1 + maxTraffic)", "color:#4fff4B", Math.log(1 + traffic) / Math.log(1 + maxTraffic));
   return Math.log(1 + traffic) / Math.log(1 + maxTraffic);
 };
 
 const formatBandwidth = (bandwidth) => {
   const bw = parseInt(bandwidth);
-  if (bw >= 1000000) return `${(bw / 1000000).toFixed(1)}MB/s`;
-  if (bw >= 1000) return `${(bw / 1000).toFixed(1)}KB/s`;
-  return `${bw}B/s`;
+  return `${(bw / 1000).toFixed(2)} KB/s`;
 };
 
 const formatTimestamp = (timestamp) => {
@@ -62,9 +63,14 @@ const generateFlowData = (bandwidthData, previousData = {}) => {
       
       const trafficNodeId = `traffic-${source_ip}-${destination_ip}-${timeIndex}`;
       const normalizedValue = normalizeTraffic(bwValue, maxBandwidth);
+      const _maxBandwidth = formatBandwidth(bwValue);
+      
+      console.log("%c Line:67 🍔 maxBandwidth", "color:#ffdd4d", {bwValue, maxBandwidth, _maxBandwidth});
+      console.log("%c Line:71 🍧 _maxBandwidth", "color:#4fff4B", _maxBandwidth);
       const minWidth = 20;
       const maxWidth = 150;
       const width = minWidth + (maxWidth - minWidth) * normalizedValue;
+      console.log("%c Line:69 🌰 _maxBandwidth", "color:#e41a6a", _maxBandwidth);
       
       nodes.push({
         id: trafficNodeId,
@@ -73,7 +79,7 @@ const generateFlowData = (bandwidthData, previousData = {}) => {
         data: {
           normalizedValue,
           width,
-          tooltip: `${formatTimestamp(bucket)}\n${formatBandwidth(bandwidth)}`,
+          _maxBandwidth: parseInt(_maxBandwidth),
         },
       });
       
@@ -111,61 +117,145 @@ const IPNode = ({ data }) => (
   </div>
 );
 
+
 const TrafficNode = ({ data }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const value = data._maxBandwidth;
+  console.log("%c Line:125 🍻 value", "color:#f5ce50", value);
+  console.log("%c Line:120 🍰 data", "color:#ed9ec7", data);
+  const tooltipData = [{ name: "1", value }];
+  console.log("%c Line:121 🌽 tooltipData", "color:#ea7e5c", tooltipData);
+
+  // Generate dynamic ticks based on the value
+  const generateTicks = (value) => {
+    const maxValue = Math.ceil(value * 1.2); // Add 20% padding
+    const tickCount = 5;
+    const ticks = [];
+    
+    for (let i = 0; i <= tickCount; i++) {
+      ticks.push((maxValue / tickCount) * i);
+    }
+    
+    return ticks;
+  };
+
   return (
-    <div
-      title={data.tooltip}
-      style={{
-        width: `${data.width}px`,
-        height: "30px",
-        backgroundColor: `rgba(239, 68, 68, ${Math.max(0.3, data.normalizedValue)})`,
-        borderRadius: "4px",
-        transition: "all 0.3s ease",
-      }}
-    >
-      <Handle type="source" position="right" />
-      <Handle type="target" position="left" />
+    <div className="relative group" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50">
+          <div className="flex flex-col items-center">
+            <ResponsiveContainer width="100%" height={70}>
+              <BarChart data={tooltipData} layout="vertical" margin={{ top: 5, right: 30, left: 5, bottom: 5 }}>
+                <XAxis
+                  type="number"
+                  domain={[0, Math.ceil(value * 1.2)]} // Dynamic domain based on value
+                  ticks={generateTicks(value)}
+                  tick={{ fontSize: 10, fill: "#333" }}
+                  axisLine={{ stroke: "#333" }}
+                  tickLine={{ stroke: "#333" }}
+                  tickFormatter={(val) => val.toFixed(3)} // Format ticks to 3 decimal places
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  hide={true}
+                />
+                <Bar 
+                  dataKey="value" 
+                  fill="#60a5fa" 
+                  radius={[4, 4, 4, 4]}
+                  barSize={20}
+                >
+                  <LabelList 
+                    dataKey="value" 
+                    position="right" 
+                    formatter={(val) => val.toFixed(3)} // Format value to 3 decimal places
+                    style={{ 
+                      fontSize: '12px',
+                      fill: '#333'
+                    }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="absolute w-3 h-3 bg-white border-b border-r border-gray-200 -bottom-1.5 left-1/2 -translate-x-1/2 transform rotate-45"></div>
+        </div>
+      )}
+
+      <div
+        className="relative transition-all duration-300 ease-in-out"
+        style={{
+          width: `${Math.max(50, data.width || 100)}px`,
+          height: "36px",
+          backgroundColor: `rgba(239, 68, 68, ${Math.max(0.3, data._maxBandwidth / 1000)})`,
+          borderRadius: "6px",
+          border: "2px solid rgb(239, 68, 68)",
+        }}
+      >
+        <Handle
+          type="target"
+          position="left"
+          className="w-3 h-3 -left-1.5 border-2 bg-white"
+        />
+        <Handle
+          type="source"
+          position="right"
+          className="w-3 h-3 -right-1.5 border-2 bg-white"
+        />
+      </div>
     </div>
   );
 };
 
+
 export default function NetworkFlow() {
-  // const [elements, setElements] = useState({ nodes: [], edges: [] });
-  
-  // const { data: packetsIP } = api.packet.fetchPacketsIP.useQuery({});
-  // const { data: bandwidth } = api.packet.getBandwidthOfSourceIPandDestinationIP.useQuery(
-  //   { packet_data: packetsIP },
-  //   { enabled: !!packetsIP }
-  // );
+//   const [elements, setElements] = useState({ nodes: [], edges: [] });
+//   const [data, setData] = useState(mock_bandwidth);
+//   const [previousData, setPreviousData] = useState({});
 
-  // useEffect(() => {
-  //   if (bandwidth) {
-  //     setElements(generateFlowData(bandwidth));
-  //   }
-  // }, [bandwidth]);
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setPreviousData(data);
+//       setData([...mock_bandwidth]);
+//     }, 1000);
+//     return () => clearInterval(interval);
+//   }, [data]);
+//  useEffect(() => {
+//     if (data) {
+//       setElements(generateFlowData(data, previousData));
+//     }
+//   }, [data, previousData]);
 
-  const [elements, setElements] = useState({ nodes: [], edges: [] });
-  const [data, setData] = useState(mock_bandwidth);
-  const [previousData, setPreviousData] = useState({});
+const [elements, setElements] = useState({ nodes: [], edges: [] });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPreviousData(data);
-      setData([...mock_bandwidth]);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data]);
+const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({});
+console.log("%c Line:151 🍢 packetsIP", "color:#b03734", packetsIP);
+const { data: bandwidth } = api.packet.getBandwidthOfSourceIPandDestinationIP.useQuery(
+  { packet_data: packetsIP },
+  { enabled: !!packetsIP }
+);
 
-  useEffect(() => {
-    if (data) {
-      setElements(generateFlowData(data, previousData));
-    }
-  }, [data, previousData]);
+useEffect(() => {
+  if (packetsIP) {
+    refetch();
+  }
+},[packetsIP, refetch])
 
-  const nodeTypes = useCallback(
-    { ipNode: IPNode, trafficNode: TrafficNode },
-    []
-  );
+useEffect(() => {
+  if (bandwidth) {
+    setElements(generateFlowData(bandwidth));
+  }
+}, [bandwidth, refetch]);
+
+
+
+const nodeTypes = useCallback(
+  { ipNode: IPNode, trafficNode: TrafficNode },
+  []
+);
+ 
 
   return (
     <div className="h-screen w-screen p-4">
