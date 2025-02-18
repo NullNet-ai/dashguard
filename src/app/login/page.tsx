@@ -3,8 +3,7 @@ import LoginForm from './_components/loginForm';
 
 export default function Login() {
   return (
-    <>
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
         <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
           <div className="w-full max-w-[655px]">
             <div className="flex flex-col items-center lg:items-start">
@@ -21,9 +20,7 @@ export default function Login() {
             </div>
 
             <div className="mt-11">
-              <div>
                 <LoginForm defaultValue={{}} />
-              </div>
             </div>
           </div>
           <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
@@ -39,6 +36,5 @@ export default function Login() {
           />
         </div>
       </div>
-    </>
   );
 }

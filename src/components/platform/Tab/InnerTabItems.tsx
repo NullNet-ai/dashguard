@@ -26,6 +26,7 @@ type InnerTabItemsProps = {
 }
 
 const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
+  const {isBannerPresent} = useSidebar()
   const winWidth = useWindowSize().width
   const { open } = useSidebar()
   const newPathname = usePathname()
@@ -128,7 +129,9 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] md:top-[unset] flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px]  pl-0 lg:pl-0')}
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 border-b md:min-h-[2.3rem]  pl-0 lg:pl-0',
+        isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
+      )}
     >
       <div className="flex items-center">
         {newItems.map((tab) => {
