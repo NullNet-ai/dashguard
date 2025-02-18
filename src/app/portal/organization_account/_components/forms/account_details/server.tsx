@@ -29,6 +29,7 @@ const FormServerFetch = async () => {
   if(record?.categories?.[0] !== 'Internal User') return null;
 
   const defaultValues = {
+    id: record?.id,
     role: record?.role_id ?? '',
     username: record?.account_id || record?.contact?.email,
     password: record?.account_secret ? '************' : '',

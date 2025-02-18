@@ -857,13 +857,52 @@ export const accountRouter = createTRPCRouter({
           entity: 'organization_accounts',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'code', 'account_id', 'email', 'categories'],
+            pluck: [
+              'id',
+              'code',
+              'account_id',
+              'email',
+              'categories',
+              'contact_id',
+            ],
           },
         })
         .execute();
 
       const accountRecord = account?.data?.[0];
-      const record = await ctx.dnaClient
+      if (accountRecord?.contact_id) {
+        const contact = await ctx.dnaClient
+          .findAll({
+            entity: 'contact_emails',
+            token: ctx.token.value,
+            query: {
+              advance_filters: createAdvancedFilter({
+                contact_id: accountRecord?.contact_id,
+              }),
+              pluck: ['id', 'email', 'is_primary'],
+            },
+          })
+          .execute();
+       
+        accountRecord.email = contact.data?.[0]?.email;
+      }
+
+      const invitation = await ctx.dnaClient.findAll({
+        entity: 'invitations',
+        token: ctx.token.value,
+        query: {
+          advance_filters: createAdvancedFilter({
+            account_id: accountRecord?.id,
+            status: 'Active',
+          }),
+          pluck: ['id', 'code', 'status'],
+        },
+      }).execute();
+
+      let invitationRecord = invitation.data?.[0] ?? null;
+
+      if (!invitationRecord) {
+        const record = await ctx.dnaClient
         .create({
           entity: 'invitations',
           token: ctx.token.value,
@@ -876,29 +915,17 @@ export const accountRouter = createTRPCRouter({
           },
         })
         .execute();
-
-      const category = accountRecord?.categories?.[0];
-      await ctx.dnaClient
-        .update(accountRecord?.id, {
-          entity: 'organization_accounts',
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              account_status:
-                category === 'External User' ? 'Invited' : 'Pending Setup',
-            },
-            pluck: ['id', 'status'],
-          },
-        })
-        .execute();
-
-      if (!record) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: `Invitation creation failed`,
-        });
+        if (!record) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: `Invitation creation failed`,
+          });
+        }
+        console.info('[Create Draft]', record);
+        invitationRecord = record?.data?.[0] ?? {};
       }
-      console.info('[Create Draft]', record);
+      
+      const category = accountRecord?.categories?.[0];
 
       const headerList = headers();
       const host = headerList.get('host'); // Get the host from request headers
@@ -906,7 +933,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}`;
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -933,10 +960,21 @@ export const accountRouter = createTRPCRouter({
         console.error('Error sending email:', error);
         throw error;
       }
-
+      await ctx.dnaClient
+      .update(accountRecord?.id, {
+        entity: 'organization_accounts',
+        token: ctx.token.value,
+        mutation: {
+          params: {
+            account_status:
+              category === 'External User' ? 'Invited' : 'Pending Setup',
+          },
+          pluck: ['id', 'status'],
+        },
+      })
+      .execute();
       return {
-        ...record,
-        data: record?.data?.[0],
+        data: invitationRecord,
       };
     }),
   getInvitationAccountDetails: privateProcedure
@@ -1037,6 +1075,54 @@ export const accountRouter = createTRPCRouter({
         contact: {
           ...invitationRecord?.contacts,
           email: email?.email,
+        },
+      };
+    }),
+  checkUsernameExist: privateProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        username: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { username, id } = input ?? {};
+      const existingUsername = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              ...createAdvancedFilter({
+                account_id: username,
+              }),
+              ...(id
+                ? [
+                    {
+                      type: 'operator',
+                      operator: EOperator.AND,
+                    },
+                    {
+                      type: 'criteria',
+                      field: 'id',
+                      operator: EOperator.NOT_EQUAL,
+                      values: [id],
+                    },
+                  ]
+                : []),
+            ],
+            pluck: ['id', 'account_id'],
+          },
+        })
+        .execute();
+      const isValid = !existingUsername.data.length;
+
+      return {
+        isValid,
+        message: {
+          username: existingUsername.data.length
+            ? 'Username already exists'
+            : '',
         },
       };
     }),

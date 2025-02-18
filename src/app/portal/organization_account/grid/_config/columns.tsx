@@ -75,6 +75,7 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.account_status;
+      if(!value) return null;
       return <StatusCell value={value} additionalStatuses={statuses} />;
     },
   },

@@ -122,9 +122,57 @@ export default function BasicDetails({
       toast.error('Failed to select Internal User');
     }
   };
+
+  const handleFieldSelectRecord = async (data: Record<string, any>) => {
+    try {
+      const response = await update.mutateAsync({
+        id: params.id,
+        entity: 'organization_account',
+        data: {
+          contact_id: data.id,
+        },
+      });
+      const {
+        first_name,
+        last_name,
+        middle_name,
+        email,
+        raw_phone_numbers,
+        iso_code,
+        country_code,
+      } = data ?? {};
+    
+      if (response) {
+        toast.success('Internal User details submitted successfully');
+        return {
+          first_name,
+          last_name,
+          middle_name,
+          email: [
+            {
+              email,
+              is_primary: true,
+            },
+          ],
+          phone: [
+            {
+              raw_phone_number: raw_phone_numbers?.[0],
+              iso_code,
+              country_code,
+              is_primary: true,
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      toast.error('Failed to select Internal User');
+    }
+  };
+
   return (
     <FormBuilder
       create_mode={false}
+      enableFormRegisterToParent
       myParent={params.shell_type}
       formProps={params}
       formLabel={params.shell_type === 'record' ? 'Contact Details' : 'User'}
@@ -231,36 +279,7 @@ export default function BasicDetails({
             main_entity_id: response.main_entity_id,
           };
         },
-        handleSelectFieldFilterGrid: async (data) => {
-          const {
-            first_name,
-            last_name,
-            middle_name,
-            email,
-            raw_phone_numbers,
-            iso_code,
-            country_code,
-          } = data ?? {};
-          return {
-            first_name,
-            last_name,
-            middle_name,
-            email: [
-              {
-                email,
-                is_primary: true,
-              },
-            ],
-            phone: [
-              {
-                raw_phone_number: raw_phone_numbers?.[0],
-                iso_code,
-                country_code,
-                is_primary: true,
-              },
-            ],
-          };
-        },
+        handleSelectFieldFilterGrid: handleFieldSelectRecord,
         onRemoveSelectedRecords: async ({
           filter_entity,
           main_entity_id,

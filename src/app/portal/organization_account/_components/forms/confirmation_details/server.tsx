@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
-import ConfirmationSummary from '../confirmation-details/custom/ConfirmationSummary';
+import ConfirmationSummary from './custom/ConfirmationSummary';
 
 const FormServerFetch = async () => {
   const headerList = headers();

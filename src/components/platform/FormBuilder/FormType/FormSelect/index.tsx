@@ -211,7 +211,7 @@ export default function FormSelect({
         onChange={(value) => {
           setTimeout(() => setOpen(false), 100);
           setQuery("");
-          formRenderProps?.field.onChange(value?.value || "");
+          formRenderProps?.field?.onChange(value?.value || "");
         }}
         disabled={isDisabled}
       >

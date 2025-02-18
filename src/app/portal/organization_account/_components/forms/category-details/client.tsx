@@ -44,57 +44,19 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
 
   return (
     <FormBuilder
-      customFormHostLockFormActions={[
-        {
-          label: 'Custom Action',
-          onClick: () => {
-            // todo
-          },
-          icon: <XIcon className={'h-3 w-3 text-slate-500'} strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
-      customFormHostViewFormActions={[
-        {
-          label: 'Custom Action',
-          onClick: () => {
-            // todo
-          },
-          icon: <XIcon className={'h-3 w-3 text-slate-500'} strokeWidth={3} />,
-          disabled: false,
-          hidden: false,
-        },
-      ]}
       customRender={(form) => <CustomCategoryDetails form={form} />}
       defaultValues={defaultValues}
       enableFormRegisterToParent={true}
-      features={
-        {
-          // enableFormHostLockActions: false,
-        }
-      }
-      fields={[
-        // {
-        //   id: 'categories',
-        //   formType: 'radio',
-        //   name: 'categories',
-        //   label: 'Category',
-        // },
-      ]}
+      features={{
+        enableFormHostLockActions: false,
+      }}
+      fields={[]}
       formKey={'CategoryDetails'}
       formLabel={'Category Details'}
       formProps={params}
       formSchema={ContactCategoryDetailsSchema}
       handleSubmit={handleSave}
       myParent={params.shell_type}
-      selectOptions={{}}
-      // radioOptions={{
-      //   categories: [
-      //     { label: 'External User', value: 'External User' },
-      //     { label: 'Internal User', value: 'Internal User' },
-      //   ],
-      // }}
     />
   );
 }

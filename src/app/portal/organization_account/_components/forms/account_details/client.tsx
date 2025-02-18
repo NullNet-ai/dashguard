@@ -8,9 +8,14 @@ import { type IFormProps } from '../types';
 import { api } from '~/trpc/react';
 import { AccountDetailSchema } from '~/server/zodSchema/account/internalUserDetails';
 
-export default function BasicDetails({ params, defaultValues, selectOptions }: IFormProps) {
+export default function BasicDetails({
+  params,
+  defaultValues,
+  selectOptions,
+}: IFormProps) {
   const toast = useToast();
   const update = api.account.updateUserAccountRecord.useMutation();
+
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof AccountDetailSchema>>) => {
@@ -25,10 +30,10 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
           is_new_user: true,
           email: data.username,
           password: data.password,
-        }
+        },
       });
       if (response) {
-        toast.success("Account details submitted successfully");
+        toast.success('Account details submitted successfully');
         return response;
       }
     } catch (error) {
@@ -40,6 +45,7 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
     <FormBuilder
       myParent={params.shell_type}
       formProps={params}
+      enableFormRegisterToParent
       formLabel="Account Details"
       handleSubmit={handleSave}
       formKey="AccountDetails"
@@ -56,6 +62,14 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
           placeholder: 'Enter your username',
         },
         {
+          id: 'role',
+          formType: 'select',
+          name: 'role',
+          label: 'Role',
+          required: true,
+          placeholder: 'Example: Admin',
+        },
+        {
           id: 'password',
           formType: 'password',
           name: 'password',
@@ -65,14 +79,6 @@ export default function BasicDetails({ params, defaultValues, selectOptions }: I
           isCustomFormField: true,
           showPasswordStrengthBar: true,
           hasComplexValidation: true,
-        },
-        {
-          id: 'role',
-          formType: 'select',
-          name: 'role',
-          label: 'Role',
-          required: true,
-          placeholder: 'Example: Admin',
         },
       ]}
       buttonConfig={{

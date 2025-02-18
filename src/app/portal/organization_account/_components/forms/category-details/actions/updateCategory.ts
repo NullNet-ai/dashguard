@@ -27,26 +27,3 @@ export async function UpdateCategory({
     redirect(`/portal/${mainEntity}/wizard/${result?.data?.code}/1?categories=${categories}`)
   }
 }
-
-export async function StepOneUpdateCategory({
-  id,
-  categories,
-  code,
-}: IProps) {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, portal, mainEntity] = pathname.split('/')
-  const currentContext = '/' + portal + '/' + mainEntity
-
-  await api.contact.updateCategoryDetails({
-    id,
-    categories,
-  })
-
-  await api.tab.closeCurrentInnerClassTab({
-    href: pathname,
-    current_context: currentContext,
-  })
-
-  redirect(`/portal/contact/wizard/${code}/1?categories=${categories}`)
-}

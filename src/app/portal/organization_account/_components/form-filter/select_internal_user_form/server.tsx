@@ -31,18 +31,18 @@ const FormServerFetch = async () => {
 
   if(record?.categories?.[0] !== 'Internal User') return null;
 
-  const defaultValues = {
+  const defaultValues = record?.contact_id ? {
     first_name: record?.contact?.first_name,
     last_name: record?.contact?.last_name,
     email: [record?.email],
     phone: [record?.phoneNumber],
-  };
+  } : null;
   const contact_id = record?.contact?.id;
 
   return (
     <div className="space-y-2">
       <BasicDetails
-        defaultValues={defaultValues ?? {}}
+        defaultValues={defaultValues}
         params={{
           id: record?.id!,
           shell_type: application! as 'record' | 'wizard',
