@@ -14,12 +14,15 @@ export const authRouter = createTRPCRouter({
       z.object({
         username: z.string().min(1),
         password: z.string().min(1),
+        organization_id: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const { password, username, organization_id } = input;
       try {
         const response = await ctx.dnaClient
-          .login(input.username, input.password)
+        .login(username, password)
+          /* TODO: add organization_id as an argument  */
           .execute()
         if (!response.success) {
           throw response
@@ -88,7 +91,7 @@ export const authRouter = createTRPCRouter({
                   values: [input.username],
                 },
               ],
-              pluck: ['id', 'is_new_user'],
+              pluck: ['id', 'is_new_user', 'contact_id'],
             },
           })
           .execute()

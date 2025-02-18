@@ -22,22 +22,40 @@ export default async function LoginSubmit({
   username: string
   password: string
 }) {
-  const loginDetails = await api.auth.login({
+  const loginDetailsResponse = await api.auth.login({
     username,
     password,
   })
 
-  const loginDataError = handleLoginError(loginDetails);
-  if (loginDataError) {
-    return loginDataError
+  const loginDetailsError = handleLoginError(loginDetailsResponse);
+
+  if (loginDetailsError) {
+    return loginDetailsError
   }
 
   const accountDataResponse = await api.auth.getAccountData({ username })
-  if (accountDataResponse?.is_new_user) {
-    redirect(`/setup-password?filter_id=${accountDataResponse?.id ?? ''}`)
+  const { id, is_new_user, contact_id } = accountDataResponse ?? {};
+
+  if (is_new_user) {
+    redirect(`/setup-password?filter_id=${id ?? ''}`);
   }
 
-  const verificationResponse = await verifySession()
+  /**
+   * fetch organizations from contact_id
+   */
+  const fetchedOrganizations = await api.organizationContact.fetchOrganizations({
+    contact_id,
+  });
+  const { data } = fetchedOrganizations?? {};
+
+  
+  if (data?.organizations?.length) {
+  // if (data?.organizations?.length > 0) {
+    // redirect(`/login-organization/${contact_id?? ''}`);
+    
+  }
+
+  const verificationResponse = await verifySession();
   if (verificationResponse) {
     redirect('/portal/dashboard')
   }

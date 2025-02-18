@@ -1,11 +1,11 @@
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
-import { createDefineRoutes } from "../baseCrud";
-import { z } from "zod";
-import { EOrderDirection } from "@dna-platform/common-orm";
-import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
-import { EStatus } from "../types";
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { createDefineRoutes } from '../baseCrud';
+import { z } from 'zod';
+import { EOrderDirection } from '@dna-platform/common-orm';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import { EStatus } from '../types';
 
-const entity = "organization_contacts";
+const entity = 'organization_contacts';
 
 export const organizationContactsRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -36,7 +36,7 @@ export const organizationContactsRouter = createTRPCRouter({
             query: {
               order: {
                 limit: 100,
-                by_field: "created_date",
+                by_field: 'created_date',
                 by_direction: EOrderDirection.DESC,
               },
               pluck,
@@ -47,8 +47,8 @@ export const organizationContactsRouter = createTRPCRouter({
       };
 
       const org_contacts: any = await findAll({
-        _entity: "organization_contacts",
-        pluck: ["id"],
+        _entity: 'organization_contacts',
+        pluck: ['id'],
         adv_filter: { contact_id },
       });
 
@@ -57,8 +57,8 @@ export const organizationContactsRouter = createTRPCRouter({
       );
 
       const org_contacts_user_roles = await findAll({
-        _entity: "organization_contact_user_roles",
-        pluck: ["id"],
+        _entity: 'organization_contact_user_roles',
+        pluck: ['id'],
         adv_filter: { organization_contact_id: org_contact_ids },
       });
 
@@ -80,7 +80,7 @@ export const organizationContactsRouter = createTRPCRouter({
         ...org_contacts_user_role_ids.map((id: string) =>
           ctx.dnaClient
             .update(id, {
-              entity: "organization_contact_user_roles",
+              entity: 'organization_contact_user_roles',
               ...add_params,
             })
             .execute(),
@@ -90,7 +90,7 @@ export const organizationContactsRouter = createTRPCRouter({
         ...org_contact_ids.map((id: string) =>
           ctx.dnaClient
             .update(id, {
-              entity: "organization_contacts",
+              entity: 'organization_contacts',
               ...add_params,
             })
             .execute(),
@@ -101,11 +101,11 @@ export const organizationContactsRouter = createTRPCRouter({
         contact_organization_ids.map(async (org_id: string, index: number) => {
           const contact_org = await ctx.dnaClient
             .create({
-              entity: "organization_contacts",
+              entity: 'organization_contacts',
               token: ctx.token.value,
 
               mutation: {
-                pluck: ["id"],
+                pluck: ['id'],
                 params: {
                   contact_id,
                   contact_organization_id: org_id,
@@ -122,7 +122,7 @@ export const organizationContactsRouter = createTRPCRouter({
             user_role_ids.map(async (user_role_id: string) => {
               return await ctx.dnaClient
                 .create({
-                  entity: "organization_contact_user_roles",
+                  entity: 'organization_contact_user_roles',
                   token: ctx.token.value,
                   mutation: {
                     params: {
@@ -159,10 +159,10 @@ export const organizationContactsRouter = createTRPCRouter({
       if (!contact_id) {
         const contact = await ctx.dnaClient
           .findAll({
-            entity: "contacts",
+            entity: 'contacts',
             token: ctx.token.value,
             query: {
-              pluck: ["id"],
+              pluck: ['id'],
               advance_filters: createAdvancedFilter({ code: code! }),
             },
           })
@@ -173,15 +173,15 @@ export const organizationContactsRouter = createTRPCRouter({
 
       const org_contacts: any = await ctx.dnaClient
         .findAll({
-          entity: "organization_contacts",
+          entity: 'organization_contacts',
           token: ctx.token.value,
           query: {
             pluck_object: {
-              organizations: ["id", "name"],
+              organizations: ['id', 'name'],
               organization_contacts: [
-                "id",
-                "contact_organization_id",
-                "is_primary",
+                'id',
+                'contact_organization_id',
+                'is_primary',
               ],
             },
             advance_filters: createAdvancedFilter({
@@ -190,15 +190,15 @@ export const organizationContactsRouter = createTRPCRouter({
           },
         })
         .join({
-          type: "left",
+          type: 'left',
           field_relation: {
             to: {
-              entity: "organizations",
-              field: "id",
+              entity: 'organizations',
+              field: 'id',
             },
             from: {
               entity,
-              field: "contact_organization_id",
+              field: 'contact_organization_id',
             },
           },
         })
@@ -210,7 +210,7 @@ export const organizationContactsRouter = createTRPCRouter({
 
       const org_contact_user_roles = await ctx.dnaClient
         .findAll({
-          entity: "organization_contact_user_roles",
+          entity: 'organization_contact_user_roles',
           token: ctx.token.value,
           query: {
             pluck_object: {
@@ -223,15 +223,15 @@ export const organizationContactsRouter = createTRPCRouter({
           },
         })
         .join({
-          type: "left",
+          type: 'left',
           field_relation: {
             to: {
-              entity: "user_roles",
-              field: "id",
+              entity: 'user_roles',
+              field: 'id',
             },
             from: {
-              entity: "organization_contact_user_roles",
-              field: "user_role_id",
+              entity: 'organization_contact_user_roles',
+              field: 'user_role_id',
             },
           },
         })
@@ -257,5 +257,47 @@ export const organizationContactsRouter = createTRPCRouter({
           ),
         },
       };
+    }),
+  fetchOrganizationsWithPrimaryOrg: privateProcedure
+    .input(
+      z.object({
+        contact_id: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const org_contacts: any = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_contacts',
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              organizations: ['id', 'name'],
+              organization_contacts: [
+                'id',
+                'contact_organization_id',
+                'is_primary',
+              ],
+            },
+            advance_filters: createAdvancedFilter({
+              contact_id: input.contact_id,
+            }),
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organizations',
+              field: 'id',
+            },
+            from: {
+              entity,
+              field: 'contact_organization_id',
+            },
+          },
+        })
+        .execute();
+
+        return org_contacts;
     }),
 });

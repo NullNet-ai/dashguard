@@ -35,6 +35,7 @@ export default function RootLayout({
       </head>
       <body>
         <Suspense fallback={<div>Loading...</div>}>
+        <SidebarProvider defaultOpen={false} className='block'>
           <TRPCReactProvider>
             <EventEmitterProvider>
               {/** TODO: put side bar inside the portal */}
@@ -56,6 +57,7 @@ export default function RootLayout({
               </SidebarProvider>
             </EventEmitterProvider>
           </TRPCReactProvider>
+        </SidebarProvider>
         </Suspense>
       </body>
     </html>
