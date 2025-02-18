@@ -2,7 +2,7 @@ import React from "react";
 
 import { DropdownMenu } from "~/components/ui/dropdown-menu";
 import ThemeSwitcher from "~/components/platform/ThemeSwitcher";
-import Notifications from "./Notifications/Notifications";
+import Notifications from "./Notifications/NotificationBadge";
 
 export default async function RecordDetails() {
   return (
