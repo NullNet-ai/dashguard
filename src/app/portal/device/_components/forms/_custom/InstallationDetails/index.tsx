@@ -85,12 +85,12 @@ export default function CustomInstallationDetails({
                   className='mt-1 md:w-96 rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500'
                   readOnly={ true }
                   type='text'
-                  value={`curl-o ${download_url}`}
+                  value={`curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`}
                 />
                 <button
                   className='my-auto'
                   onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(
-                    event, `curl-o ${download_url}`,
+                    event, `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
                   ) }
                 >
                   <DocumentDuplicateIcon

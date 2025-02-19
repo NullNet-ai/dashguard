@@ -12,16 +12,19 @@ const Summary = ({ form_key }: { form_key: string }) => {
 
   const [, , , , identifier] = pathName.split("/");
   const {
-    data: record = { data: { id: null } },
+    // data: record = { data: { id: null } },
+    data: record,
     refetch,
     error,
   } = api.device.fetchSetupDetails.useQuery({
     code: identifier!,
   });
 
+  const {server_url } = record ?? {}
+
   const data = {
-    ...record.data,
-    server_url: "https://wallguard.ai/",
+    ...record,
+    server_url: server_url || "https://wallguard.ai/"
   };
 
   useRefetchRecord({
