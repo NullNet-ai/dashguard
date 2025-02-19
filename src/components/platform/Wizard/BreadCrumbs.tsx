@@ -9,15 +9,15 @@ import { testIDFormatter } from '~/utils/formatter';
 export default function WizardNavigator() {
   const { state } = useContext(WizardContext);
   const { entityName, stepLabels, title } = state ?? {};
-  const modified_entity = title
+  const modified_entity = entityName === 'user_role' ? 'role' : entityName;
+  const formatEntitiyName = title
     ? title
-    : entityName === 'user_role'
-      ? 'role'
-      : entityName;
-  const formatEntitiyName = modified_entity
-    ?.split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    : modified_entity
+        ?.split('_')
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(' ');
   const wizard_step_title = `${formatEntitiyName} `;
   const currentStep = state?.currentStep;
 
