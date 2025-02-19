@@ -157,7 +157,7 @@ const MapComponent = () => {
             </div>`,
             { 
               permanent: false,
-              direction: 'center',
+              direction: 'auto',
               className: 'custom-tooltip'
             }
           );
@@ -177,18 +177,18 @@ const MapComponent = () => {
       const marker = L.marker(coordinates, { icon: divIcon }).addTo(map);
       
       // Add tooltip to the dot
-      marker.bindTooltip(
-        `<div style="text-align: center;">
-          <strong>${country}</strong><br/>
-          Traffic Level: ${trafficLevel}%<br/>
-          City: ${trafficData[country]?.city || 'Philippines Server'}
-        </div>`,
-        { 
-          permanent: false,
-          direction: 'top',
-          className: 'custom-tooltip'
-        }
-      );
+      // marker.bindTooltip(
+      //   `<div style="text-align: center;">
+      //     <strong>${country}</strong><br/>
+      //     Traffic Level: ${trafficLevel}%<br/>
+      //     City: ${trafficData[country]?.city || 'Philippines Server'}
+      //   </div>`,
+      //   { 
+      //     permanent: false,
+      //     direction: 'top',
+      //     className: 'custom-tooltip'
+      //   }
+      // );
 
       return marker;
     };

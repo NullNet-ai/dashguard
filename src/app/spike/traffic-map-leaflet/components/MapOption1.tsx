@@ -6,7 +6,6 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 import 'leaflet-arc';
 
-// Function to fetch country and US state borders
 const fetchCountryBorders = async () => {
   const response = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
   return await response.json();
@@ -17,7 +16,6 @@ const fetchUSStatesBorders = async () => {
   return await response.json();
 };
 
-// Function to get coordinates of a city
 const geocodeAddress = async (address) => {
   const url = `https://nominatim.openstreetmap.org/search?q=${address}&format=json`;
   try {
@@ -35,7 +33,6 @@ const geocodeAddress = async (address) => {
   }
 };
 
-// Traffic data with city-level coordinates
 const trafficData = {
   'United Kingdom': { city: 'London, UK', trafficLevel: 75 },
   'United States of America': { city: 'New York, USA', trafficLevel: 85 },
@@ -59,22 +56,19 @@ const trafficData = {
   'Argentina': { city: 'Buenos Aires, Argentina', trafficLevel: 45 },
   'Thailand': { city: 'Bangkok, Thailand', trafficLevel: 35 },
   'Sweden': { city: 'Stockholm, Sweden', trafficLevel: 25 },
-  // 'Russia': { city: 'Moscow, Russia', trafficLevel: 45 },
+  'Russia': { city: 'Moscow, Russia', trafficLevel: 45 },
 };
 
-
-// Function to determine traffic color
 const getTrafficColor = (trafficLevel) => {
-  if (trafficLevel > 80) return "rgba(255, 0, 0, 0.7)"; // 🔴 Very High
-  if (trafficLevel >= 50) return "rgba(255, 165, 0, 0.7)"; // 🟠 High
-  if (trafficLevel >= 30) return "rgba(255, 255, 0, 0.7)"; // 🟡 Medium
- return "rgba(0, 128, 0, 0.7)"; // 🟢 Low
+  if (trafficLevel > 80) return "#DC2626";
+  if (trafficLevel >= 50) return "#EAB308";
+  if (trafficLevel >= 30) return "#F97316";
+  return "#16A34A";
 };
 
-// Function to create a **curved** traffic flow line using Bezier curves
 const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
   const curvePoints = [];
-  const segments = 50; // Higher = smoother curve
+  const segments = 50;
 
   for (let i = 0; i <= segments; i++) {
     const t = i / segments;
@@ -82,7 +76,7 @@ const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
     const y =
       fromCoord[0] * (1 - t) +
       toCoord[0] * t +
-      Math.sin(Math.PI * t) * 20; // Adjust curve height
+      Math.sin(Math.PI * t) * 20;
 
     curvePoints.push([y, x]);
   }
@@ -91,10 +85,9 @@ const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
     color: getTrafficColor(trafficLevel),
     weight: Math.max(3, trafficLevel / 20),
     opacity: 0.8,
-    dashArray: '5, 5', // Dotted curve
+    dashArray: '5, 5',
   });
 };
-
 
 const MapComponent = () => {
   const fn = async () => {
@@ -107,22 +100,23 @@ const MapComponent = () => {
       maxBounds: [[-85, -180], [85, 180]],
       maxBoundsViscosity: 1.0,
     });
-    
+
     const cityCoordinates = {};
     for (const country in trafficData) {
       cityCoordinates[country] = await geocodeAddress(trafficData[country].city);
     }
     const philippinesCoordinates = await geocodeAddress('Manila, Philippines');
 
-    L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://stamen.com/">Stamen Maps</a>',
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
       maxZoom: 20,
+      noWrap: true,
     }).addTo(map);
 
     const [countries, states] = await Promise.all([fetchCountryBorders(), fetchUSStatesBorders()]);
     const geojson = { ...countries, features: [...countries.features, ...states.features] };
 
-    // Add tooltips to regions
     L.geoJSON(geojson, {
       style: (feature) => {
         const countryName = feature.properties.name;
@@ -139,34 +133,42 @@ const MapComponent = () => {
       onEachFeature: (feature, layer) => {
         const countryName = feature.properties.name;
         const trafficLevel = trafficData[countryName]?.trafficLevel;
-    
+        
         if (trafficLevel) {
-          // Add country label
-          const center = layer.getBounds().getCenter();
-          const label = L.divIcon({
-            className: 'country-label',
-            html: `<div style="color: gray; font-family: geist; font-weight: bold; font-size: .8em ">${countryName.toUpperCase()}</div>`,
-          });
-          L.marker(center, { icon: label }).addTo(map);
-
-          // Add tooltip to the region
-          layer.bindTooltip(
-            `<div style="text-align: center;">
+          // Add tooltip to the country
+          layer.bindTooltip(`
+            <div style="font-family: Arial, sans-serif; padding: 5px;">
               <strong>${countryName}</strong><br/>
               Traffic Level: ${trafficLevel}%
-            </div>`,
-            { 
-              permanent: false,
-              direction: 'center',
-              className: 'custom-tooltip'
+            </div>
+          `, {
+            permanent: false,
+            direction: 'auto',
+            className: 'country-tooltip'
+          });
+
+          // Add hover effects
+          layer.on({
+            mouseover: (e) => {
+              const layer = e.target;
+              layer.setStyle({
+                fillOpacity: 0.7,
+                weight: 2
+              });
+            },
+            mouseout: (e) => {
+              const layer = e.target;
+              layer.setStyle({
+                fillOpacity: 0.4,
+                weight: 1
+              });
             }
-          );
+          });
         }
-      },
+      }
     }).addTo(map);
 
-    // Function to create a twinkling dot with tooltip
-    const createTwinklingDot = (coordinates, country, trafficLevel) => {
+    const createTwinklingDot = (coordinates, trafficLevel) => {
       const divIcon = L.divIcon({
         className: 'twinkling-dot',
         html: `<div class="dot" style="background:${getTrafficColor(trafficLevel)};"></div>`,
@@ -174,50 +176,21 @@ const MapComponent = () => {
         iconAnchor: [6, 6],
       });
 
-      const marker = L.marker(coordinates, { icon: divIcon }).addTo(map);
-      
-      // Add tooltip to the dot
-      marker.bindTooltip(
-        `<div style="text-align: center;">
-          <strong>${country}</strong><br/>
-          Traffic Level: ${trafficLevel}%<br/>
-          City: ${trafficData[country]?.city || 'Philippines Server'}
-        </div>`,
-        { 
-          permanent: false,
-          direction: 'top',
-          className: 'custom-tooltip'
-        }
-      );
-
-      return marker;
+      return L.marker(coordinates, { icon: divIcon }).addTo(map);
     };
 
-    // Add twinkling dots & curved lines for each traffic location
     Object.keys(trafficData).forEach((country) => {
       const { trafficLevel } = trafficData[country];
       const coordinates = cityCoordinates[country];
 
-      createTwinklingDot(coordinates, country, trafficLevel);
+      createTwinklingDot(coordinates, trafficLevel);
 
-      // Create and add curved line using Bezier interpolation
       const curvedLine = createCurvedFlowLine(coordinates, philippinesCoordinates, trafficLevel);
-      curvedLine.bindTooltip(
-        `<div style="text-align: center;">
-          <strong>${country} to Philippines</strong><br/>
-          Traffic Level: ${trafficLevel}%
-        </div>`,
-        { 
-          permanent: false,
-          direction: 'center',
-          className: 'custom-tooltip'
-        }
-      );
+      curvedLine.bindPopup(`${country} to PH: Traffic Level - ${trafficLevel}`);
       curvedLine.addTo(map);
     });
 
-    // Add a twinkling dot for the Philippines Server
-    createTwinklingDot(philippinesCoordinates, 'Philippines Server', 100);
+    createTwinklingDot(philippinesCoordinates, 100);
 
     return () => {
       map.remove();
@@ -232,7 +205,6 @@ const MapComponent = () => {
     <>
       <style>
         {`
-          /* Twinkling Dot Animation */
           @keyframes twinkle {
             0% { opacity: 0.3; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.2); }
@@ -247,15 +219,11 @@ const MapComponent = () => {
             animation: twinkle 1.5s infinite ease-in-out;
           }
 
-          /* Custom Tooltip Styles */
-          .custom-tooltip {
-            background-color: rgba(255, 255, 255, 0.9);
+          .country-tooltip {
+            background-color: white;
             border: 1px solid #ccc;
             border-radius: 4px;
-            padding: 5px;
-            font-family: geist, sans-serif;
-            font-size: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
           }
         `}
       </style>
