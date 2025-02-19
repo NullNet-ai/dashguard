@@ -209,7 +209,8 @@ export const recordRouter = createTRPCRouter({
               'status',
             ],
             contacts: ['id', 'first_name', 'last_name'],
-            organizations: ['name'],
+            organizations: ['name', 'id'],
+            user_roles: ['role', 'id'],
           },
         },
       })
@@ -239,18 +240,57 @@ export const recordRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'user_roles',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_accounts',
+            field: 'role_id',
+          },
+        },
+      })
       .execute();
 
-    const { organization_accounts, contacts, organizations } =
-      accounts.data?.[0] ?? {};
- 
-    const accountDetails = {
-      account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
-      username: organization_accounts?.account_id || '',
-      organization: organizations?.name || '',
-    };
+    const accountOrganizations = accounts.data?.reduce(
+      (orgs: any, account: any) => {
+        const { organization_accounts, contacts, organizations, user_roles } =
+          account ?? {};
+        if (organizations?.id === response?.organization_id) {
+          return {
+            ...orgs,
+            current_organization: {
+              account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
+              username: organization_accounts?.account_id || '',
+              organization: organizations?.name || '',
+              role: user_roles?.role
+            },
+          };
+        }
 
-    return accountDetails;
+        return {
+          ...orgs,
+          other_organizations: [
+            ...orgs.other_organizations,
+            {
+              account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
+              username: organization_accounts?.account_id || '',
+              organization: organizations?.name || '',
+              role: user_roles?.role
+            },
+          ],
+        };
+      },
+      {
+        current_organization: {},
+        other_organizations: [],
+      },
+    );
+ 
+    return accountOrganizations;
   }),
   archiveRecord: privateProcedure
     .input(
