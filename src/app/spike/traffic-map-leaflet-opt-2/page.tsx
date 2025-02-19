@@ -76,12 +76,13 @@
 // pages/index.js
 import Map from './components/Map';
 import MapOption1 from './components/MapOption1';
+import MapOption2NoCountry from './components/MapOption2NoCountry';
 
 export default function Home() {
   return (
     <div>
       <h1>Traffic Flow to Philippines Server</h1>
-      <Map />
+      <MapOption2NoCountry />
     </div>
   );
 }
