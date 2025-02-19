@@ -44,7 +44,6 @@ const SignUpForm = () => {
   const [error, setError] = useState('')
 
   const onSubmit = async (data: any) => {
-    alert(JSON.stringify(data, null, 2))
     setIsSubmitting(true)
     const registrationData = omit(data, ['confirmed_password']) as {
       first_name: string
