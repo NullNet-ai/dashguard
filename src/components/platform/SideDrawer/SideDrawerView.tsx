@@ -9,14 +9,17 @@ import React from 'react'
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
 
 import { useSideDrawer } from './SideDrawerProvider'
+import { useSidebar } from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
 
 export const SideDrawerView: React.FC = () => {
   const { state, actions } = useSideDrawer()
   const { closeSideDrawer } = actions
   const { config, isOpen } = state
+  const {isBannerPresent} = useSidebar()
 
   const {
-    title,
+    header,
     body,
     sideDrawerWidth = '982px',
     overlayEnabled = false,
@@ -36,8 +39,8 @@ export const SideDrawerView: React.FC = () => {
     <div
       aria-labelledby='side-drawer-title'
       aria-modal='true'
-      className={`fixed inset-0 z-[101] overflow-hidden transition-opacity duration-300 ${isOpen && config ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } ${overlayEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`fixed inset-0 z-[101] overflow-hidden transition-all ease-in-out  duration-500 ${isOpen && config ? 'translate-x-0' : 'translate-x-full'
+      } ${overlayEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
       role='dialog'
     >
       {/* Overlay */}
@@ -53,17 +56,20 @@ export const SideDrawerView: React.FC = () => {
 
       {/* Drawer Content */}
       <Card
-        className={`fixed  z-[102] h-[90vh] md:h-screen w-full md:w-[var(--drawer-width)] transform-gpu transition-all duration-500 ease-out
-          bottom-0 left-0 right-0 md:top-0 md:right-0 md:bottom-auto md:left-auto
-          ${isOpen ? 'translate-y-0 md:translate-x-0 pointer-events-auto' : 'pointer-events-none translate-y-full md:translate-y-0 md:translate-x-full'}`}
+        className={cn(
+          `fixed  z-[102] transition-none h-[90vh]  w-full md:w-[var(--drawer-width)] transform-gpu duration-800 ease-out
+          bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto
+          ${isOpen ? 'translate-y-0 md:translate-x-0 pointer-events-auto' : 'pointer-events-none translate-y-full md:translate-y-0 md:translate-x-full'}`,
+          isBannerPresent ? 'md:h-[calc(100vh-75px)]' : 'md:h-[calc(100vh-43px)]'
+        )}
         style={{ '--drawer-width': sideDrawerWidth } as React.CSSProperties}
       >
         {config && (
           <>
-            <CardHeader className="flex items-center gap-4 p-3">
-              <h1 className='text-md flex-grow font-bold' id='side-drawer-title'>
-                {title}
-              </h1>
+            <CardHeader className="flex items-center gap-4 p-3 pb-0 justify-between">
+                {header}
+              {/* <h1 className='text-md flex-grow font-bold' id='side-drawer-title'>
+              </h1> */}
               <button
                 aria-label='Close side drawer'
                 data-test-id='side-drawer-close'
@@ -76,7 +82,7 @@ export const SideDrawerView: React.FC = () => {
 
             <Separator />
 
-            <CardContent className='flex flex-1 flex-col gap-2 overflow-y-auto'>
+            <CardContent className='flex flex-1 flex-col gap-2  h-full'>
               {BodyComponent && <BodyComponent {...componentProps} />}
             </CardContent>
 
