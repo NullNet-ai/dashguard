@@ -131,6 +131,7 @@ const HeatmapMap = () => {
           // **Ensure Traffic Flow from PH → Target Country**
           if (trafficInfo && !isServer) {
             const countryCenter = getCentroid(feature.getGeometry());
+            console.log('%c Line:134 🥥 countryCenter', 'color:#f5ce50', countryCenter);
             if (countryCenter) {
               flowLines.addFeature(createCurvedFlowLine(countryCenter, trafficInfo.count));
             }
@@ -178,3 +179,10 @@ const HeatmapMap = () => {
 };
 
 export default HeatmapMap;
+
+
+// the line should be in the city
+// the color should be the opacity of the line
+//color should be at the back and just do the text app
+// amount of resulution
+// layer of colors
