@@ -1,10 +1,11 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { z } from 'zod';
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
 import { TRPCError } from '@trpc/server';
 import Entities from '~/auto-generated/entities';
 import { headers } from 'next/headers';
+
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
 export const recordRouter = createTRPCRouter({
   getById: privateProcedure
@@ -182,10 +183,14 @@ export const recordRouter = createTRPCRouter({
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const response = ctx.session.account;
+    const rootAccount = await ctx.dnaClient
+      .login('root', ROOT_ACCOUNT_PASSWORD)
+      .execute();
+    const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accounts = await ctx.dnaClient
       .findAll({
         entity: 'organization_accounts',
-        token: ctx.token.value,
+        token: rootAccountToken,
         query: {
           advance_filters: [
             {
@@ -235,26 +240,16 @@ export const recordRouter = createTRPCRouter({
         },
       })
       .execute();
+
     const { organization_accounts, contacts, organizations } =
       accounts.data?.[0] ?? {};
+ 
     const accountDetails = {
       account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
       username: organization_accounts?.account_id || '',
       organization: organizations?.name || '',
     };
-    const advance_filters = createAdvancedFilter({
-      organization_contact_id: response.contact.id,
-    });
-    const { data } = await ctx.dnaClient
-      .findAll({
-        entity: 'organization_contact_account',
-        token: ctx.token.value,
-        query: {
-          advance_filters,
-          pluck: ['id', 'email'],
-        },
-      })
-      .execute();
+
     return accountDetails;
   }),
   archiveRecord: privateProcedure

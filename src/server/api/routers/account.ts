@@ -20,19 +20,21 @@ import { formatPhoneNumber } from '~/utils/formatter';
 import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 
+const {
+  MAILER_AUTH_USER,
+  MAILER_AUTH_PASS,
+  MAILER_HOST,
+  MAILER_PORT,
+} = process.env;
+
 const ENTITY = 'organization_account';
 const transporter = nodemailer.createTransport({
-  // todo: add user, pass, host, port to the .env.example
   auth: {
-    user: 'admin@dnaplatform.net',
-    pass: 'w@ckyPart10',
+    user: MAILER_AUTH_USER,
+    pass:   MAILER_AUTH_PASS,
   },
-  host: 'smtp.communications.dnamicro.net',
-  port: 25,
-  secure: false,
-  tls: {
-    rejectUnauthorized: false,
-  },
+  host: MAILER_HOST,
+  port: Number(MAILER_PORT)
 });
 export const accountRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
