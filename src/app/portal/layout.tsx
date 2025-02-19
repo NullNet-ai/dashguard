@@ -4,7 +4,7 @@ import React from 'react'
 import AppLayout from '~/components/application-layout/AppLayout'
 import { NotificationProvider } from '~/components/application-layout/Header/Notifications/NotificationProvider'
 import SideBarMenu from '~/components/application-layout/SideBarMenu'
-import { SideDrawerProvider } from '~/components/platform/SideDrawer'
+import { SideDrawerProvider, SideDrawerView } from '~/components/platform/SideDrawer'
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { SmartProvider } from '~/components/ui/smart-component'
 
@@ -26,7 +26,9 @@ const layout = async ({ children }: Props) => {
           <SidebarProvider defaultOpen={value}>
             <SideBarMenu />
             <SessionChecker />
-            <AppLayout>{children}</AppLayout>
+            <AppLayout>{children}
+              <SideDrawerView/>
+            </AppLayout>
           </SidebarProvider>
         </SideDrawerProvider>
       </SmartProvider>

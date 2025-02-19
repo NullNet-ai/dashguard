@@ -109,7 +109,7 @@ export default function SessionChecker() {
   if (isSessionExpired) {
     return (
       <div
-        className={'bg-amber-200 text-black font-normal w-screen text-center p-2 fixed flex top-0 items-center justify-center md:gap-4 gap-2 transition-opacity duration-500 ease-in-out opacity-100 z-[200]'}
+        className={'bg-amber-200 text-black font-normal w-screen text-center p-2  flex top-0 items-center justify-center md:gap-4 gap-2 transition-opacity duration-500 ease-in-out opacity-100 z-[200]'}
       >
         <div className={'md:text-md flex items-center gap-2 justify-center'}>
           <span className={'inline-block md:size-4 size-3 bg-destructive rounded-full'} />
