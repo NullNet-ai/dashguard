@@ -6,6 +6,31 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
 import "leaflet-arc"; // Add Leaflet Arc Plugin
 
+
+const singaporeFeature = {
+  "type": "Feature",
+  "properties": { "name": "Singapore" },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [103.640098, 1.260585], [103.710898, 1.258038], [103.743156, 1.283078], 
+        [103.773727, 1.316053], [103.818138, 1.360389], [103.865906, 1.382468], 
+        [103.892601, 1.388595], [103.925774, 1.375625], [103.977585, 1.343852], 
+        [103.994675, 1.315953], [104.001122, 1.289962], [104.001550, 1.266249], 
+        [103.993813, 1.241437], [103.963013, 1.204795], [103.927307, 1.183375], 
+        [103.876869, 1.170306], [103.822311, 1.162489], [103.771187, 1.162089], 
+        [103.719063, 1.173606], [103.673637, 1.192195], [103.649261, 1.214515], 
+        [103.640098, 1.260585]
+      ]
+    ]
+  }
+}
+
+
+
+
+
 const fetchCountryBorders = async () => {
   const response = await fetch(
     "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
@@ -34,7 +59,7 @@ const geocodeAddress = async (address) => {
 
 const trafficData = {
   'United Kingdom': { city: 'London, UK', trafficLevel: 75 },
-  // 'United States of America': { city: 'New York, USA', trafficLevel: 85 },
+  'United States of America': { city: 'New York, USA', trafficLevel: 85 },
   'Japan': { city: 'Tokyo, Japan', trafficLevel: 30 },
   'Germany': { city: 'Berlin, Germany', trafficLevel: 50 },
   'France': { city: 'Paris, France', trafficLevel: 60 },
@@ -102,7 +127,10 @@ const MapComponent = () => {
 
     const [countries, states] = await Promise.all([fetchCountryBorders(), fetchUSStatesBorders()]);
     const geojson = { ...countries, features: [...countries.features, ...states.features] };
-
+    console.log('%c Line:105 🌽 countries', 'color:#f5ce50', countries);
+    console.log('%c Line:105 🍐 geojson', 'color:#4fff4B', geojson);
+// Add to existing GeoJSON
+geojson.features.push(singaporeFeature);
     const tooltip = L.tooltip({
       permanent: false,
       direction: "top",
@@ -111,11 +139,11 @@ const MapComponent = () => {
 
     L.geoJSON(geojson, {
       style: (feature) => {
-        const countryName = feature.properties.name;
+        let countryName = feature.properties.name;
     
-        // Merge all US states into one country
-        if (feature.properties.name === "United States") {
-          feature.properties.name = "United States of America";
+        // Check if it's a US state
+        if (states.features.some(state => state.properties.name === countryName)) {
+          countryName = "United States of America"; // Assign US traffic data
         }
     
         const trafficLevel = trafficData[countryName]?.trafficLevel;
@@ -128,15 +156,19 @@ const MapComponent = () => {
         };
       },
       onEachFeature: (feature, layer) => {
-        const countryName = feature.properties.name;
+        let countryName = feature.properties.name;
+    
+        // Check if it's a US state
+        if (states.features.some(state => state.properties.name === countryName)) {
+          countryName = "United States of America";
+        }
     
         if (trafficData[countryName]) {
           layer.on("mouseover", function (e) {
-            // Make sure the whole country is hoverable
             layer.setStyle({ fillOpacity: 0.7 });
     
             tooltip.setLatLng(e.latlng).setContent(
-              `<strong>${countryName}</strong><br>Traffic Level: ${trafficData[countryName].trafficLevel}`
+              `<strong>${feature.properties.name}</strong><br>Traffic Level: ${trafficData[countryName].trafficLevel}`
             );
             tooltip.addTo(map);
           });
