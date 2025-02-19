@@ -8,7 +8,6 @@ import AppContent from './common/AppContent'
 import HeaderContainer from './common/HeaderContainer'
 import Header from './Header'
 import SmartComponent, { SmartMobileComponent } from './SmartComponent'
-import SessionChecker from '~/app/session-checker'
 const AppLayout = async ({ children }: PropsWithChildren) => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
