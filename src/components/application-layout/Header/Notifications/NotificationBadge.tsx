@@ -4,7 +4,7 @@ import { BellIcon } from '@heroicons/react/24/outline'
 
 import { useSideDrawer } from '~/components/platform/SideDrawer'
 
-import NotificationDrawer from './components/NotificationDrawer'
+import NotificationDrawer, { HeaderSection } from './components/NotificationDrawer'
 import { useNotifications } from './NotificationProvider'
 
 function NotificationBadge() {
@@ -15,8 +15,8 @@ function NotificationBadge() {
 
   const handleOpenSideDrawer = () => {
     actions?.openSideDrawer({
-      title: '',
-      sideDrawerWidth: '500px',
+      header: <HeaderSection/>,
+      sideDrawerWidth: '500px', 
       body: {
         component: NotificationDrawer,
       },

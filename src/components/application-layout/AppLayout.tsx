@@ -15,15 +15,14 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
 
   return (
     <>
-    <SidebarInset application_name={app}>
-      <HeaderContainer>
-        <Header />
-      </HeaderContainer>
-      <AppContent>{children}</AppContent>
-      <SmartComponent />
-      <SmartMobileComponent />
-      <SideDrawerView />
-    </SidebarInset>
+      <SidebarInset application_name={app}>
+        <HeaderContainer>
+          <Header />
+        </HeaderContainer>
+        <AppContent>{children} </AppContent>
+        <SmartComponent />
+        <SmartMobileComponent />
+      </SidebarInset>
     </>
   )
 }
