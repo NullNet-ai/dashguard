@@ -1,14 +1,17 @@
 "use client";
 
+import { getActualDownloadURL } from "~/app/api/device/get_actual_download_url";
+
 const fields = {
   Package: "package",
   "Installation Package": "installation_package",
   "Installation Confirmation": "installation_confirmation",
 };
 
-const Summary = ({}: { form_key: string }) => {
+const Summary = async ({}: { form_key: string }) => {
+  const download_url = await getActualDownloadURL();
   const data = {
-    package: "curl-o https://wallmon.ai/wallmon.pkg",
+    package: `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
     installation_package: "pkg install Wallmon.pkg",
     installation_confirmation: "Wallmon --version",
   };

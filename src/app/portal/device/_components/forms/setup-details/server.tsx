@@ -21,9 +21,11 @@ const FormServerFetch = async () => {
     })
   const defaultValues = fetched_device?.data
 
+  const server_url  = process.env.SERVER_URL
+
   return (
     <SetupDetails
-      defaultValues={defaultValues || {}}
+      defaultValues={{...defaultValues, server_url}}
       params={{
         id: defaultValues?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',

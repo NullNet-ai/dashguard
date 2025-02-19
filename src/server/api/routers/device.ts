@@ -784,7 +784,7 @@ export const deviceRouter = createTRPCRouter({
         .execute()
 
       return {
-        data: res.data[0],
+        server_url: process.env.SERVER_URL,
       }
     }),
 

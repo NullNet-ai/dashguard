@@ -21,43 +21,43 @@ export const mock_bandwidth = [{
     { bucket: '2025-02-14 00:13:47+00', bandwidth: '5765756' },
     { bucket: '2025-02-14 00:13:46+00', bandwidth: '0' },
     { bucket: '2025-02-14 00:13:45+00', bandwidth: '0' },
-    { bucket: '2025-02-14 00:13:44+00', bandwidth: '134450' }
-  ]
-}];
+    { bucket: '2025-02-14 00:13:44+00', bandwidth: '134450' },
+  ],
+}]
 
 // Function to generate new data points
-const generateNewDataPoint = () => {
-  const now = new Date();
-  const formattedTime = now.toISOString().split('.')[0] + '+00';
-  const newBandwidth = Math.floor(Math.random() * 20).toString(); // Random bandwidth value within a smaller range
+// const generateNewDataPoint = () => {
+//   const now = new Date()
+//   const formattedTime = now.toISOString().split('.')[0] + '+00'
+//   const newBandwidth = Math.floor(Math.random() * 20).toString() // Random bandwidth value within a smaller range
 
-  return { bucket: formattedTime, bandwidth: newBandwidth };
-};
+//   return { bucket: formattedTime, bandwidth: newBandwidth }
+// }
 
-// Function to generate new IP addresses
-const generateNewIP = () => {
-  const getRandomOctet = () => Math.floor(Math.random() * 256);
-  return `172.25.${getRandomOctet()}.${getRandomOctet()}`;
-};
+// // Function to generate new IP addresses
+// const generateNewIP = () => {
+//   const getRandomOctet = () => Math.floor(Math.random() * 256)
+//   return `172.25.${getRandomOctet()}.${getRandomOctet()}`
+// }
 
 // Function to update the mock_bandwidth array
-const updateMockBandwidth = () => {
-  mock_bandwidth.forEach((entry) => {
-    entry.result.unshift(generateNewDataPoint()); // Add new data point to the beginning of the array
-    if (entry.result.length > 20) {
-      entry.result.pop(); // Remove the oldest data point if the array exceeds 20 items
-    }
-  });
+// const updateMockBandwidth = () => {
+//   mock_bandwidth.forEach((entry) => {
+//     entry.result.unshift(generateNewDataPoint()); // Add new data point to the beginning of the array
+//     if (entry.result.length > 20) {
+//       entry.result.pop(); // Remove the oldest data point if the array exceeds 20 items
+//     }
+//   });
 
-  // Add new IPs with the same structure
-  const newSourceIP = generateNewIP();
-  const newDestinationIP = generateNewIP();
-  mock_bandwidth.push({
-    source_ip: newSourceIP,
-    destination_ip: newDestinationIP,
-    result: Array.from({ length: 20 }, generateNewDataPoint), // Generate initial data points
-  });
-};
+//   // Add new IPs with the same structure
+//   const newSourceIP = generateNewIP();
+//   const newDestinationIP = generateNewIP();
+//   mock_bandwidth.push({
+//     source_ip: newSourceIP,
+//     destination_ip: newDestinationIP,
+//     result: Array.from({ length: 20 }, generateNewDataPoint), // Generate initial data points
+//   });
+// };
 
 // Update the mock_bandwidth array every second
 // setInterval(updateMockBandwidth, 1000);
