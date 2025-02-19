@@ -27,7 +27,6 @@ export default async function registerAccount({
      */
     const organization = {
       name: organization_name,
-      id: '',
     };
 
     const account = {
