@@ -18,7 +18,7 @@ import SignUpFormField from './SignUpFormField'
 
 const SignUpSchema = z
   .object({
-    organization_name: z.string().optional(),
+    organization_name: z.string().default('My Organization'),
     first_name: z.string({ required_error: 'Please enter the first name' }),
     last_name: z.string({ required_error: 'Please enter the last name.' }),
     email: z
@@ -44,6 +44,7 @@ const SignUpForm = () => {
   const [error, setError] = useState('')
 
   const onSubmit = async (data: any) => {
+    alert(JSON.stringify(data, null, 2))
     setIsSubmitting(true)
     const registrationData = omit(data, ['confirmed_password']) as {
       first_name: string

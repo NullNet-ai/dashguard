@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import LoginForm from './_components/loginForm';
+import SignUpLabel from './_components/SignUpLabel';
 
 export default function Login() {
   return (
@@ -22,6 +23,7 @@ export default function Login() {
             <div className="mt-11">
                 <LoginForm defaultValue={{}} />
             </div>
+            <SignUpLabel />
           </div>
           <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
             &copy; All Rights Reserved. {new Date().getFullYear()} DNA Micro
