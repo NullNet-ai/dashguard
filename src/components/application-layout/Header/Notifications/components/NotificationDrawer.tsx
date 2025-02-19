@@ -7,6 +7,7 @@ import { Switch } from '~/components/ui/switch'
 import { useNotifications } from '../NotificationProvider'
 
 import NotificationItem from './NotificationItem'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -26,6 +27,7 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
+    hasMore, // Add this to your state
   } = state
 
   // archive tab will only show if there is one archive on notifications
@@ -124,7 +126,28 @@ const NotificationDrawer = () => {
       <StateTab
         persistKey="notifications-tab"
         size="sm"
-        tabs={tabs}
+        tabs={tabs.map(tab => ({
+          ...tab,
+          content: (
+            <div id="scrollable-div" className='scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100flex h-[70vh] min-h-80 flex-col gap-2 overflow-y-auto'>
+              <InfiniteScroll
+                dataLength={notifications.length}
+                next={actions.fetchMoreNotifications}
+                hasMore={hasMore}
+                loader={<div className="text-center py-4">Loading more notifications...</div>}
+                scrollableTarget="scrollable-div"
+                className="flex flex-col gap-2"
+                endMessage={
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    No more notifications
+                  </div>
+                }
+              >
+                {tab.content}
+              </InfiniteScroll>
+            </div>
+          ),
+        }))}
         variant="default"
       />
     </div>

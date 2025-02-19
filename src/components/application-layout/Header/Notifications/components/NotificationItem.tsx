@@ -57,7 +57,7 @@ const NotificationItem = ({ type }: { type: string }) => {
   }
 
   return (
-    <div className='scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100flex h-[70vh] min-h-80 flex-col gap-2 overflow-y-auto'>
+    <div>
       {notifications.map((notification: INotificationSchema) => (
         <div
           className={`relative flex flex-col gap-2 rounded-lg border ${

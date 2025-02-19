@@ -11,11 +11,18 @@ export const getNotifications = async ({
   order = {
     sortBy: 'timestamp',
     sortOrder: 'desc',
+    limit: 50,
+    starts_at: 0,
   },
 }: {
   filters?: any[]
-  order?: { sortBy: string, sortOrder: 'asc' | 'desc' }
-}) => {
+  order?: { 
+    sortBy: string, 
+    sortOrder: 'asc' | 'desc'
+    limit: number,
+    starts_at: number,
+  }
+}) : Promise<Record<string,any>> => {
   const notifications = await api.notification.getNotifications({
     filters,
     order,

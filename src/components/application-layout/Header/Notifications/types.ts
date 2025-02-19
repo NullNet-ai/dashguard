@@ -59,6 +59,7 @@ export interface IActions {
   handleArchiveNotification: (id: string) => void
   handleRestoreNotificationStatus: (id: string) => void
   handleDeleteNotification: (id: string) => void
+  fetchMoreNotifications: () => void
 }
 
 export interface IState {
