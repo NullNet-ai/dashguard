@@ -20,6 +20,7 @@ import Skeleton from '../../../../Grid/Skeleton'
 import { type IFilterGridConfig, type IGridData } from '../../../types/global/interfaces'
 
 import { fetchRecords } from './actions'
+import { usePathname } from 'next/navigation'
 
 export default function FormFilterGrid({
   config,
@@ -51,7 +52,18 @@ export default function FormFilterGrid({
     searchConfig,
   } = config
   const eventEmitter = useEventEmitter()
-  const { state } = useContext(WizardContext)
+  const path = usePathname()
+  const [,,,,versionNumber] = path.split('/')
+  const [dynamicWizardContext, setDynamicWizardContext] = useState()
+  useEffect(() => {
+    if (!!process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
+      import(`~/components/platform/Wizard_${versionNumber}/Provider`)
+        .then(e => {
+          setDynamicWizardContext(e.WizardContext)
+        })
+    }
+  }, [versionNumber])
+  const { state } = useContext(dynamicWizardContext ?? WizardContext)
   const { open } = useSidebar()
 
   const [gridData, setGridData] = useState<IGridData | null>(null)
