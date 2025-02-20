@@ -167,7 +167,7 @@ const NotificationItem = ({ type }: { type: string }) => {
                 />
               {/* Priority Badge */}
               <Badge
-              className='text-xs'
+              className='text-xs font-medium'
                 borderRadius={'md'}
                 variant={notification.priority_level === 2 ? 'destructive' : notification.priority_level === 1 ? 'warning' : 'secondary'}
                 
@@ -189,14 +189,18 @@ const NotificationItem = ({ type }: { type: string }) => {
                           <DropdownMenuItem
                             className='relative flex cursor-pointer select-none items-center rounded-sm
                         px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                            onClick={() => actions?.handleRestoreNotificationStatus(notification.id)}
+                            onClick={(e) =>{ 
+                              e.stopPropagation()
+                              actions?.handleRestoreNotificationStatus(notification.id)}}
                           >
                             <p>Restore</p>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                         text-red-600 outline-none transition-colors hover:bg-red-50'
-                            onClick={() => actions?.handleDeleteNotification(notification.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              actions?.handleDeleteNotification(notification.id)}}
                           >
                             <p>Delete</p>
                           </DropdownMenuItem>
@@ -206,7 +210,10 @@ const NotificationItem = ({ type }: { type: string }) => {
                         <DropdownMenuItem
                           className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                       outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                          onClick={() => actions?.handleArchiveNotification(notification.id)}
+                          onClick={(e) => 
+                            {
+                              e.stopPropagation()
+                              actions?.handleArchiveNotification(notification.id)}}
                         >
                           Archive
                         </DropdownMenuItem>
