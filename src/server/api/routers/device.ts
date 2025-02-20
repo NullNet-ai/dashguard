@@ -180,6 +180,8 @@ export const deviceRouter = createTRPCRouter({
         device_group_settings: ['name', 'id'],
         device_created_by: ['id', 'instance_name'],
         device_updated_by: ['id', 'instance_name'],
+        device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
+        device_configurations: ['id', 'device_id', 'hostname'],
       }
 
       const query = ctx.dnaClient.findAll({
@@ -345,9 +347,36 @@ export const deviceRouter = createTRPCRouter({
               },
             },
           })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_configurations',
+                field: 'device_id',
+              },
+              from: {
+                entity: input?.entity,
+                field: 'id',
+              },
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_interfaces',
+                field: 'device_configuration_id',
+              },
+              from: {
+                entity: 'device_configurations',
+                field: 'id',
+              },
+            },
+          })
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
+      console.log("%c Line:378 🥔 items", "color:#3f7cff", items);
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -357,9 +386,14 @@ export const deviceRouter = createTRPCRouter({
           device_group_settings,
           device_updated_by,
           device_created_by,
+          device_interfaces,
           ...rest
         } = item
 
+        const wan_address = device_interfaces?.find(
+          (item: {name: string}) => item.name === 'wan',
+        )?.address
+        
         return {
           ...entity_data,
           ...rest,
@@ -371,6 +405,7 @@ export const deviceRouter = createTRPCRouter({
             : device_created_by?.length
               ? `${device_created_by?.[0].instance_name}`
               : null,
+          ip_address: wan_address,
           updated_by: updated_by?.length
             ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
             : device_updated_by?.length
