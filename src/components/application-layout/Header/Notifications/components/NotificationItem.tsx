@@ -41,13 +41,16 @@ const NotificationItem = ({ type }: { type: string }) => {
     actions.handleChangeType(type)
   }, [])
 
-  if (!notificationTotalCount) {
+  // if no notification at all
+  if (!notificationTotalCount && !notificationCount) {
+    return <EmptyNotification />
+  }
+
+  // if no unread notification
+  if (!notifications.length) {
     return <EmptyUnreadNotification />
   }
   
-  if (notificationTotalCount && !notificationCount) {
-    return <EmptyNotification />
-  }
 
 
 

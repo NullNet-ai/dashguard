@@ -148,11 +148,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
    */
   const toggleUnread = async () => {
     const newShowRead = !showRead;
-    setShowRead(newShowRead);
     await fetchNotifications({
       type,
       showRead: newShowRead,
     });
+    setShowRead(newShowRead);
   };
 
   /**
@@ -249,7 +249,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         ),
       );
       setLoadingMarkAllAsRead(false);
-      setNotificationCount(0);
+      setNotificationCount((prev) => prev - unreadNotificationIds.length);
     } catch (error) {
       console.error('❌ Failed to batch update notifications:', error);
     }
