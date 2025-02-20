@@ -76,14 +76,15 @@
 // pages/index.js
 // import Map from './components/Map';
 import MapOption1 from './components/MapOption1';
+import MapOption3 from './components/MapOption3';
 import Map from './components/MapOption3';
 
 export default function Home() {
   return (
     <div>
       <h1>Traffic Flow to Philippines Server</h1>
-      <Map />
-      {/* <MapOption1 /> */}
+      {/* <Map /> */}
+      <MapOption3 />
     </div>
   );
 }
