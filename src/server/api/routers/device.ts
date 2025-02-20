@@ -376,7 +376,6 @@ export const deviceRouter = createTRPCRouter({
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
-      console.log("%c Line:378 🥔 items", "color:#3f7cff", items);
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
