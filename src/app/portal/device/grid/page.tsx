@@ -42,8 +42,8 @@ export default async function Page({
   const { items = [], totalCount } = await api.device.mainGrid({
     entity: main_entity!,
     pluck: _pluck,
-    current: +(searchParams.page ?? '0'),
-    limit: +(searchParams.perPage ?? '100'),
+    current: +(pagination?.current_page ?? '0'),
+    limit:+(pagination?.limit_per_page ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
