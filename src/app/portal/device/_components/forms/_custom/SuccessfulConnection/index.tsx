@@ -52,7 +52,7 @@ export default function CustomSuccessfulConnectionDetails({
     }
     fetchChartData()
 
-    const interval = setInterval(fetchChartData, 2000)
+    const interval = setInterval(fetchChartData, 1000)
     return () => {
       clearInterval(interval)
     }

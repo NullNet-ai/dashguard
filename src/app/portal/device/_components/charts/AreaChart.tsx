@@ -69,7 +69,13 @@ export function BandwidthChart({ chartData }: any) {
               minTickGap={30}
               padding={{ left: 2, right: 2 }}
               tickFormatter={(value: string) => {
-                return moment(value).format('MM/DD HH:mm:ss')
+                //if date is not the current date display the date if not display the time
+                if (moment(value).isSame(new Date(), 'day')) {
+                  return moment(value).format('HH:mm:ss')
+                } else {
+                  return moment(value).format('MM/DD HH:mm:ss')
+                }
+                // return moment(value).format('HH:mm:ss')
               }}
               tickLine={false}
               tickMargin={8}
@@ -96,7 +102,7 @@ export function BandwidthChart({ chartData }: any) {
                 (
                   <ChartTooltipContent
                     indicator="dot"
-                    labelFormatter={(value: string) => moment(value).format('MM/DD HH:mm')}
+                    labelFormatter={(value: string) => moment(value).format('MM/DD HH:mm:ss')}
                   />
                 )
               }
