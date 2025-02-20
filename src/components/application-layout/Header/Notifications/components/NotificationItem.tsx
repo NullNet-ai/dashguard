@@ -12,7 +12,7 @@ import capitalize from 'lodash/capitalize';
 import { Button } from '~/components/ui/button'
 
 import { useNotifications } from '../NotificationProvider'
-import { type INotificationSchema } from '../types'
+import { TNotificationType, type INotificationSchema } from '../types'
 
 import EmptyNotification from './EmptyNotification'
 import { Separator } from '~/components/ui/separator'
@@ -33,7 +33,7 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
 
   return <IconComponent {...props} />;
 };
-const NotificationItem = ({ type }: { type: string }) => {
+const NotificationItem = ({ type }: { type: TNotificationType }) => {
   const { state, actions } = useNotifications()
   const { notifications, notificationCount, notificationTotalCount } = state
 
@@ -173,6 +173,7 @@ const NotificationItem = ({ type }: { type: string }) => {
                     actions?.handlePinNotification({
                       id: notification.id,
                       is_pinned: !notification.is_pinned,
+                      type,
                     })
                   }}
                 />

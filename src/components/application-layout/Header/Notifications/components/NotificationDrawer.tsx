@@ -39,6 +39,11 @@ const NotificationDrawer = () => {
       content: <NotificationItem type="all" />,
     },
     {
+      id: 'pinned',
+      label: 'Pinned',
+      content: <NotificationItem type="pinned" />,
+    },
+    {
       id: 'system',
       label: 'System',
       content: <NotificationItem type="system" />,

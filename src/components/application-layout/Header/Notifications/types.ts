@@ -46,15 +46,17 @@ export interface IActions {
   handlePinNotification: ({
     id,
     is_pinned,
+    type,
   }: {
     id: string
     is_pinned: boolean
+    type: TNotificationType
   }) => void
   handleBatchRead: () => void
   handleDropdownOpen: () => void
   handleSortChange: (option: string) => void
   handleSortOrderChange: (option: string) => void
-  handleChangeType: (type: string) => void
+  handleChangeType: (type: TNotificationType) => void
   handleInsert: () => void
   handleArchiveNotification: (notification: INotificationSchema) => void
   handleRestoreNotificationStatus: (id: string) => void
@@ -81,4 +83,4 @@ export interface INotificationContext {
 }
 
 
-export type TNotificationType = 'all' | 'system' | 'social' | 'archive'
+export type TNotificationType = 'all' | 'pinned' | 'system' | 'social' | 'archive'

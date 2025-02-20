@@ -38,7 +38,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showRead, setShowRead] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
-  const [type, setType] = useState<TNotificationType>();
+  const [type, setType] = useState<TNotificationType>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedSort, setSelectedSort] = useState<string>('timestamp');
   const [selectedOrder, setSelectedOrder] = useState<'asc' | 'desc'>('desc');
@@ -122,10 +122,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const fetchMoreNotifications = useCallback(async () => {
     if (!hasMore || loading) return;
 
-    // await fetchNotifications({
-    //   type,
-    //   isLoadMore: true,
-    // });
     if (buffer.length > 0) {
       // Move items from buffer to displayed notifications
       setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
@@ -205,13 +201,18 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
    * Toggle the pinned status of a notification.
    */
   const handlePinNotification = useCallback(
-    async ({ id, is_pinned }: { id: string; is_pinned: boolean }) => {
+    async ({ id, is_pinned,type }: { id: string; is_pinned: boolean, type: TNotificationType }) => {
       try {
          updatePinnedNotification({
           id,
           is_pinned,
         });
 
+        if(type === 'pinned' && !is_pinned){
+          setNotifications((prev) => prev.filter((n) => n.id !== id));
+          setNotificationCount((prev) => prev - 1);
+          return;
+        }
         setNotifications((prev) =>
           prev.map((notification) =>
             notification.id === id
@@ -292,8 +293,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const handleChangeType = async (type: string) => {
-    setType(type as TNotificationType);
+  const handleChangeType = async (type: TNotificationType) => {
+    setType(type);
     setPage(1); // Reset page
     setNotifications([]);
     await fetchNotifications({ type: type as TNotificationType });
