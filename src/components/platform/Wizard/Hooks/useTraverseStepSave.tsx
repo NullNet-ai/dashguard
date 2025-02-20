@@ -10,7 +10,7 @@ const useTraverseSteppedSaved = (traverseSteps: Record<string, "Stepped">) => {
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
   const path = pathname.split("/");
   let [, , mainEntity, , identifier, step] = path;
-  if (process.env.IS_PLAYGROUND) {
+  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
     const [, , , , , playgroundIdentifier, playgroundStep] = path
     identifier = playgroundIdentifier
     step = playgroundStep
