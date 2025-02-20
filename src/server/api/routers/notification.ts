@@ -138,7 +138,10 @@ export const notificationsRouter = createTRPCRouter({
           total_count,
         }
       }
-      return []
+      return {
+        data: [],
+        total_count: 0,
+      }
     }),
 
   populateDatabase: privateProcedure.mutation(async ({ ctx }) => {

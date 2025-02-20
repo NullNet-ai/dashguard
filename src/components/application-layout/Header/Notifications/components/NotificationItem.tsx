@@ -214,10 +214,10 @@ const NotificationItem = ({ type }: { type: string }) => {
                         <DropdownMenuItem
                           className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                       outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            actions?.handleArchiveNotification(notification.id)
-                          }}
+                          onClick={(e) => 
+                            {
+                              e.stopPropagation()
+                              actions?.handleArchiveNotification(notification)}}
                         >
                           Archive
                         </DropdownMenuItem>
