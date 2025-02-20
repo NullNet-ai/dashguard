@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const zodNotificationSchema = z.object({
-  id: z.string().ulid(),
   title: z.string().min(1),
   description: z.string().min(1),
   timestamp: z.string(),

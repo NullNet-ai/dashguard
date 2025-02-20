@@ -20,6 +20,7 @@ function NotificationBadge() {
       body: {
         component: NotificationDrawer,
       },
+      
     })
   }
 
