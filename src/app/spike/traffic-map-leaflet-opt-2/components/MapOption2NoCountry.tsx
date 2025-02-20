@@ -161,6 +161,19 @@ const MapComponent = () => {
               className: 'custom-tooltip'
             }
           );
+
+          // Highlight country on hover
+          layer.on('mouseover', function () {
+            layer.setStyle({
+              fillOpacity: 0.7,
+            });
+          });
+
+          layer.on('mouseout', function () {
+            layer.setStyle({
+              fillOpacity: trafficLevel ? 0.4 : 0.1,
+            });
+          });
         }
       },
     }).addTo(map);
