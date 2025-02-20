@@ -206,7 +206,6 @@ const MapComponent = () => {
       return marker;
     };
 
-    // Add twinkling dots & curved lines for each traffic location
     Object.keys(trafficData).forEach((country) => {
       const { trafficLevel } = trafficData[country];
       const coordinates = cityCoordinates[country];
