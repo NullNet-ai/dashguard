@@ -28,11 +28,11 @@ function NotificationBadge() {
     <Menu as='div' className='relative inline-block text-left'>
       <div>
         <MenuButton
-          className='flex items-center rounded-full bg-gray-100 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100'
+          className='flex items-center rounded-full'
           onClick={handleOpenSideDrawer}
         >
           <span className='sr-only'>Open Notifcations</span>
-          <BellIcon className='h-6 w-6 text-muted-foreground' />
+          <BellIcon className='h-6 w-6 text-foreground' />
         </MenuButton>
       </div>
 

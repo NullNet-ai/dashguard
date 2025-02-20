@@ -150,11 +150,6 @@ const NotificationDrawer = () => {
                 }
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2"
-                endMessage={
-                  <div className="py-4 text-center text-sm text-gray-500">
-                    No more notifications
-                  </div>
-                }
               >
                 {tab.content}
               </InfiniteScroll>

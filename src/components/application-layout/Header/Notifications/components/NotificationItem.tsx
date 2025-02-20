@@ -18,6 +18,7 @@ import EmptyNotification from './EmptyNotification'
 import { Separator } from '~/components/ui/separator'
 import { Badge } from '~/components/ui/badge'
 import TextTruncate from '~/components/ui/text-truncate';
+import EmptyUnreadNotification from './EmptyUnreadNotification';
 
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
@@ -34,15 +35,21 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
 };
 const NotificationItem = ({ type }: { type: string }) => {
   const { state, actions } = useNotifications()
-  const { notifications } = state
+  const { notifications, notificationCount, notificationTotalCount } = state
 
   useEffect(() => {
     actions.handleChangeType(type)
   }, [])
 
-  if (!notifications?.length) {
+  if (!notificationTotalCount) {
+    return <EmptyUnreadNotification />
+  }
+  
+  if (notificationTotalCount && !notificationCount) {
     return <EmptyNotification />
   }
+
+
 
   // Function to format the timestamp
   const formatTimestamp = (timestamp: string) => {
@@ -72,7 +79,6 @@ const NotificationItem = ({ type }: { type: string }) => {
   const handleOpenNewTab = (link: string) => {
     window.open(link, '_blank')
   }
-
 
 
   function handleButtonVariants(className: string) {
@@ -121,7 +127,8 @@ const NotificationItem = ({ type }: { type: string }) => {
                     <Mail className='size-4 text-gray-500 ' />
                   )}
                 <a
-                  className="text-sm font-semibold hover:underline text-primary cursor-pointer"
+                  className={`text-sm font-semibold hover:underline text-primary cursor-pointer ${notification.notification_status === 'read' ? '!text-foreground !no-underline ' : ''
+                    }`}
                   onClick={() => notification.link && handleOpenNewTab(notification.link)}
                   aria-hidden="true"
                 >
@@ -214,10 +221,10 @@ const NotificationItem = ({ type }: { type: string }) => {
                         <DropdownMenuItem
                           className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                       outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                          onClick={(e) => 
-                            {
-                              e.stopPropagation()
-                              actions?.handleArchiveNotification(notification)}}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            actions?.handleArchiveNotification(notification)
+                          }}
                         >
                           Archive
                         </DropdownMenuItem>
@@ -228,11 +235,12 @@ const NotificationItem = ({ type }: { type: string }) => {
             </div>
 
             {/* Description */}
+            <TextTruncate className='text-sm text-secondary-foreground ms-6' text={"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."} maxCharacters={65} />
 
-            <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} />
+            {/* <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} /> */}
             {/* Actions */}
             {notification.actions && notification.actions.length > 0 && (
-              <div className='my-2 flex gap-2 ms-6 mt-2'>
+              <div className='my-2 flex gap-2 ms-6 mt-1'>
                 {notification.actions.map((action, index) => (
                   //*  To be discussed whether to add property buttonVariant as identitifier on which button to use instead of className
                   // <Button className={action?.className}  key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
@@ -243,7 +251,7 @@ const NotificationItem = ({ type }: { type: string }) => {
               </div>
             )}
             {/* Metadata */}
-            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-4'>
+            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6'>
               <span className='!text-gray-500'>
                 {' '}
                 {formatTimestamp(notification.timestamp)}
