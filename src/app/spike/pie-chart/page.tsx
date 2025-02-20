@@ -31,6 +31,7 @@ const chartConfig = {
 const Component = () => {
   const [traffic, setTraffic] = useState(initialTraffic);
   const [previousTraffic, setPreviousTraffic] = useState(initialTraffic);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -87,7 +88,14 @@ const Component = () => {
           </ChartContainer>
           {/* SVG Gauge Needle */}
           <div className="absolute inset-0 flex items-center justify-center z-20">
-            <svg width="100" height="100" viewBox="0 0 100 100" className="absolute">
+            <svg
+              width="100"
+              height="100"
+              viewBox="0 0 100 100"
+              className="absolute"
+              onMouseEnter={() => setTooltipVisible(true)}
+              onMouseLeave={() => setTooltipVisible(false)}
+            >
               <line
                 x1="50" y1="50" x2="50" y2="10" // Adjust the line length and position
                 stroke="black" strokeWidth="4"
@@ -95,6 +103,11 @@ const Component = () => {
               />
               <circle cx="50" cy="50" r="5" fill="black" />
             </svg>
+            {tooltipVisible && (
+              <div className="absolute bottom-12 bg-gray-700 text-white text-xs px-2 py-1 rounded">
+                Traffic: {traffic}%
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
