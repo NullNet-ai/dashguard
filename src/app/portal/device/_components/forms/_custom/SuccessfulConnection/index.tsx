@@ -68,7 +68,7 @@ export default function CustomSuccessfulConnectionDetails({
           <div className="flex flex-col gap-2">
             <Alert className="pb-2" dismissible={true} variant="success">
               <AlertContent className="">
-                Firewall Connected Successfully!
+                Firewall connected successfully!
               </AlertContent>
             </Alert>
 
