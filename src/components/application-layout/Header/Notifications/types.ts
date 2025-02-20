@@ -63,12 +63,20 @@ export interface IActions {
 }
 
 export interface IState {
-  notifications: INotificationSchema[]
-
+  notifications : INotificationSchema[],
+  notificationCount : number,
+  showRead : boolean,
+  loading : boolean,
+  isDropdownOpen : boolean,
+  selectedSort : string,
+  selectedOrder : string,
+  notificationTotalCount : number,
+  hasMore : boolean,
+  loadingPopulateData : boolean,
+  loadingMarkAllAsRead : boolean,
 }
-
 export interface INotificationContext {
-  state: any
+  state: IState
   actions: IActions
 }
 

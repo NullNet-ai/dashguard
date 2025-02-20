@@ -45,10 +45,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState<number>(1);
 
-
   const [ buffer, setBuffer ] = useState<INotificationSchema[]>([]);
 
   const [loadingPopulateData, setLoadingPopulateData] = useState<boolean>(false);
+  const [loadingMarkAllAsRead, setLoadingMarkAllAsRead] = useState<boolean>(false);
 
   /**
    * Fetch notifications dynamically with filters, sorting, and ordering.
@@ -104,9 +104,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           setNotifications(data.slice(0, PAGE_SIZE));
           setBuffer(data.slice(PAGE_SIZE));
           setPage(1);
-  
+          setHasMore(data.slice(0, PAGE_SIZE).length < total_count);
         }
-        setHasMore(data.length < total_count);
         setNotificationTotalCount(total_count);
 
         const count = await getNotificationsCountByContact();
@@ -130,6 +129,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     if (buffer.length > 0) {
       // Move items from buffer to displayed notifications
       setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
+      setHasMore([...notifications,...buffer.slice(0, PAGE_SIZE)].length < notificationTotalCount);
       setBuffer((prev) => prev.slice(PAGE_SIZE));
   
       // If buffer is almost empty, prefetch more notifications
@@ -235,9 +235,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .filter((n) => n.notification_status === 'unread')
         .map((n) => n.id);
 
-      // Optimistic updates
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      updateBatchRead({
+      setLoadingMarkAllAsRead(true);
+      await updateBatchRead({
         ids: unreadNotificationIds,
         notification_status: 'read',
       });
@@ -249,7 +248,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             : notification,
         ),
       );
-
+      setLoadingMarkAllAsRead(false);
       setNotificationCount(0);
     } catch (error) {
       console.error('❌ Failed to batch update notifications:', error);
@@ -331,11 +330,17 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch notifications on mount
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchNotifications({ type });
+    const fetchNotificationCount = async () => {
+      await getNotificationsCountByContact()
+        .then((count) => {
+          setNotificationCount(count as number);
+        })
+        .catch((error) => {
+          console.error('❌ Failed to fetch notifications:', error);
+        });
     };
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetchData();
+    fetchNotificationCount();
   }, []);
 
   const actions: IActions = {
@@ -369,6 +374,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           notificationTotalCount,
           hasMore,
           loadingPopulateData,
+          loadingMarkAllAsRead
         },
         actions,
       }}

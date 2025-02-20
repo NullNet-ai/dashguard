@@ -28,7 +28,8 @@ const NotificationDrawer = () => {
     selectedSort,
     selectedOrder,
     hasMore, // Add this to your state
-    loadingPopulateData
+    loadingPopulateData,
+    loadingMarkAllAsRead,
   } = state;
 
   const tabs = [
@@ -110,15 +111,23 @@ const NotificationDrawer = () => {
           onClick={actions.handleInsert}
           loading={loadingPopulateData}
         >
-          {loadingPopulateData ? "...populating database" : "Populate Database"}
+          {loadingPopulateData ? '...populating database' : 'Populate Database'}
         </Button>
-        <Button
-          className="text-md text-blue-600"
-          variant="link"
-          onClick={actions.handleBatchRead}
-        >
-          Mark all as read
-        </Button>
+        <div className="items-center flex flex-col">
+          <Button
+            className="text-md text-blue-600"
+            variant="link"
+            onClick={actions.handleBatchRead}
+            loading={loadingMarkAllAsRead}
+          >
+            {loadingMarkAllAsRead
+              ? 'Marking all as read'
+              : 'Mark all as read'}
+          </Button>
+          {loadingMarkAllAsRead && (
+            <p className="text-xs text-slate-400">(Please don't close the drawer)</p>
+          )}
+        </div>
       </div>
       <StateTab
         persistKey="notifications-tab"
