@@ -37,7 +37,7 @@ export default function CustomSuccessfulConnectionDetails({
   } = api.packet.getBandwithPerSecond.useQuery({
     device_id: record_device?.data?.id,
     time_range: getLastMinutesTimeStamp(3),
-    bucket_size: '2s',
+    bucket_size: '1s',
 
   })
 
@@ -52,7 +52,7 @@ export default function CustomSuccessfulConnectionDetails({
     }
     fetchChartData()
 
-    const interval = setInterval(fetchChartData, 2000)
+    const interval = setInterval(fetchChartData, 1000)
     return () => {
       clearInterval(interval)
     }
