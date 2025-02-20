@@ -148,59 +148,59 @@ export const packetRouter = createTRPCRouter({
     return res?.data
   }),
 
-  getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
-    const { packet_data } = input
-    return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
-      const { source_ip, destination_ip } = item
-      const res = await ctx.dnaClient.aggregate({
-        query: {
-          entity: 'packets',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_length',
-              bucket_name: 'bandwidth',
-            },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'source_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                source_ip,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'destination_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                destination_ip,
-              ],
-            },
-          ],
-          joins: [],
-          limit: 20,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
-          },
-        },
-        token: ctx.token.value,
-      }).execute()
+  // getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
+  //   const { packet_data } = input
+  //   return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
+  //     const { source_ip, destination_ip } = item
+  //     const res = await ctx.dnaClient.aggregate({
+  //       query: {
+  //         entity: 'packets',
+  //         aggregations: [
+  //           {
+  //             aggregation: 'SUM',
+  //             aggregate_on: 'total_length',
+  //             bucket_name: 'bandwidth',
+  //           },
+  //         ],
+  //         advance_filters: [
+  //           {
+  //             type: 'criteria',
+  //             field: 'source_ip',
+  //             entity: 'packets',
+  //             operator: EOperator.EQUAL,
+  //             values: [
+  //               source_ip,
+  //             ],
+  //           },
+  //           {
+  //             type: 'operator',
+  //             operator: EOperator.AND,
+  //           },
+  //           {
+  //             type: 'criteria',
+  //             field: 'destination_ip',
+  //             entity: 'packets',
+  //             operator: EOperator.EQUAL,
+  //             values: [
+  //               destination_ip,
+  //             ],
+  //           },
+  //         ],
+  //         joins: [],
+  //         limit: 20,
+  //         order: {
+  //           order_by: 'bucket',
+  //           order_direction: EOrderDirection.DESC,
+  //         },
+  //       },
+  //       token: ctx.token.value,
+  //     }).execute()
 
-      return {source_ip, destination_ip, result:res?.data}
-    },{concurrency: 10} )
+  //     return {source_ip, destination_ip, result:res?.data}
+  //   },{concurrency: 10} )
 
     
-  }),
+  // }),
 
 })
 
