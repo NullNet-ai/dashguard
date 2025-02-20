@@ -124,13 +124,12 @@ const NotificationItem = ({ type }: { type: string }) => {
                   ? (
                     // @ts-expect-error fix this later
                     <DynamicIcon name={capitalize(notification.icon)} className='size-4 text-gray-500 ' />
-                    // <BellDot className='h-5 w-5 text-gray-500' />
                   )
                   : (
                     <Mail className='size-4 text-gray-500 ' />
                   )}
                 <a
-                  className={`text-sm font-semibold hover:underline text-primary cursor-pointer ${notification.notification_status === 'read' ? '!text-foreground !no-underline ' : ''
+                  className={`text-sm font-semibold hover:underline text-primary cursor-pointer ${notification.notification_status === 'read' ? '' : '!text-foreground'
                     }`}
                   onClick={() => notification.link && handleOpenNewTab(notification.link)}
                   aria-hidden="true"
@@ -168,7 +167,7 @@ const NotificationItem = ({ type }: { type: string }) => {
                   )}
                 {/* Pin Icon */}
                 <Pin
-                  className={`h-4 w-4 cursor-pointer me-1 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
+                  className={`h-4 w-4 cursor-pointer mx-2 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
                   onClick={(e) => {
                     e.stopPropagation()
                     actions?.handlePinNotification({
@@ -243,7 +242,7 @@ const NotificationItem = ({ type }: { type: string }) => {
             {/* <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} /> */}
             {/* Actions */}
             {notification.actions && notification.actions.length > 0 && (
-              <div className='my-2 flex gap-2 ms-6 mt-1'>
+              <div className='flex gap-2 ms-6 mt-1'>
                 {notification.actions.map((action, index) => (
                   //*  To be discussed whether to add property buttonVariant as identitifier on which button to use instead of className
                   // <Button className={action?.className}  key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
@@ -254,7 +253,7 @@ const NotificationItem = ({ type }: { type: string }) => {
               </div>
             )}
             {/* Metadata */}
-            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6'>
+            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-2'>
               <span className='!text-gray-500'>
                 {' '}
                 {formatTimestamp(notification.timestamp)}
