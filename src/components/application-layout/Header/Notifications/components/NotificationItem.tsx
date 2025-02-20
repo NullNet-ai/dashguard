@@ -100,8 +100,8 @@ const NotificationItem = ({ type }: { type: string }) => {
         <>
           <div
             className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
-              ? 'border-l-primary border-l-2'
-              : 'border-blue-100 '
+              ? 'border-blue-100 '
+              : 'border-l-primary border-l-2'
               } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
             onClick={() => notification.link && handleOpenNewTab(notification.link)}
             key={notification.id}
