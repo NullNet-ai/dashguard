@@ -181,7 +181,7 @@ export const deviceRouter = createTRPCRouter({
         device_created_by: ['id', 'instance_name'],
         device_updated_by: ['id', 'instance_name'],
         device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
-        device_configurations: ['id', 'device_id', 'hostname'],
+        device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time'],
       }
 
       const query = ctx.dnaClient.findAll({
@@ -208,7 +208,6 @@ export const deviceRouter = createTRPCRouter({
             : [],
         },
       })
-
       if (pluck_object) {
         query
           .join({
@@ -347,36 +346,50 @@ export const deviceRouter = createTRPCRouter({
               },
             },
           })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'device_configurations',
-                field: 'device_id',
-              },
-              from: {
-                entity: input?.entity,
-                field: 'id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'device_interfaces',
-                field: 'device_configuration_id',
-              },
-              from: {
-                entity: 'device_configurations',
-                field: 'id',
-              },
-            },
-          })
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
 
+      const fetchConfiguration = await Bluebird.map(items, async (item: Record<string, any>) => {
+        const configurations = await ctx.dnaClient.findAll({
+          entity: 'device_configurations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({ device_id: item?.id }),
+            pluck: ['id', 'device_id', 'created_date', 'created_time', 'device_configuration_id'],
+          },
+        }).execute();
+      
+        // Sort configurations by created_date and created_time to get the latest one
+        const sortedConfigurations = configurations.data.sort((a: Record<string, any>, b: Record<string, any>) => {
+          const dateA = new Date(`${a.created_date}T${a.created_time}`);
+          const dateB = new Date(`${b.created_date}T${b.created_time}`);
+          return dateB.getTime() - dateA.getTime();
+        });
+      
+        return sortedConfigurations[0]; // Return the latest configuration
+      })?.filter(Boolean);
+      
+      
+      const fetchDeviceInterfaces = await Bluebird.map(fetchConfiguration, async (item) => {
+        if (!item) return null; // Handle case where there is no configuration
+      
+        const interfaces = await ctx.dnaClient.findAll({
+          entity: 'device_interfaces',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({ device_configuration_id: item.id }),
+            pluck: ['id', 'device_configuration_id', 'name', 'address'],
+          },
+        }).execute();
+      
+        return {
+          configuration: item,
+          interfaces: interfaces.data,
+        };
+      });
+      
+      
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
@@ -386,13 +399,14 @@ export const deviceRouter = createTRPCRouter({
           device_updated_by,
           device_created_by,
           device_interfaces,
+          device_configurations,
           ...rest
-        } = item
-
-        const wan_address = device_interfaces?.find(
-          (item: {name: string}) => item.name === 'wan',
-        )?.address
-        
+        } = item;
+      
+      
+        const configuration:any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === item.id);
+        const wan_address = configuration?.interfaces?.find((iface: { name: string }) => iface.name === 'wan')?.address;
+      
         return {
           ...entity_data,
           ...rest,
@@ -410,8 +424,9 @@ export const deviceRouter = createTRPCRouter({
             : device_updated_by?.length
               ? `${device_updated_by?.[0].instance_name}`
               : null,
-        }
-      })
+        };
+      });
+      
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit)
@@ -1217,43 +1232,12 @@ export const deviceRouter = createTRPCRouter({
               order: {
                 limit: 1,
                 by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
+                // by_direction: EOrderDirection.DESC,
               },
             },
           })
           .execute(),
 
-        await ctx.dnaClient
-          .findAll({
-            entity: 'device_configurations',
-            token: ctx.token.value,
-            query: {
-              pluck: ['id', 'device_id', 'hostname'],
-              pluck_object: {
-                device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
-                device_configurations: ['id', 'device_id', 'hostname'],
-              },
-              advance_filters: createAdvancedFilter({ device_id: id! }),
-              order: {
-                limit: 1,
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-            },
-          }).join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'device_interfaces',
-                field: 'device_configuration_id',
-              },
-              from: {
-                entity: 'device_configurations',
-                field: 'id',
-              },
-            },
-          })
-          .execute(),
 
         await ctx.dnaClient
           .findAll({
@@ -1287,12 +1271,53 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute(),
       ])
-      const [device, device_configuration, device_group] = res
+      const [device, device_group] = res
+
+      const fetchConfiguration = await Bluebird.map(device?.data, async (item: Record<string, any>) => {
+        const configurations = await ctx.dnaClient.findAll({
+          entity: 'device_configurations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({ device_id: item?.id }),
+            pluck: ['id', 'device_id', 'created_date', 'created_time', 'device_configuration_id', 'hostname'],
+          },
+        }).execute();
+      
+        // Sort configurations by created_date and created_time to get the latest one
+        const sortedConfigurations = configurations.data.sort((a: Record<string, any>, b: Record<string, any>) => {
+          const dateA = new Date(`${a.created_date}T${a.created_time}`);
+          const dateB = new Date(`${b.created_date}T${b.created_time}`);
+          return dateB.getTime() - dateA.getTime();
+        });
+      
+        return sortedConfigurations[0]; // Return the latest configuration
+      })?.filter(Boolean);
+      
+      
+      const fetchDeviceInterfaces = await Bluebird.map(fetchConfiguration, async (item) => {
+        if (!item) return null; // Handle case where there is no configuration
+        
+        const interfaces = await ctx.dnaClient.findAll({
+          entity: 'device_interfaces',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({ device_configuration_id: item.id }),
+            pluck: ['id', 'device_configuration_id', 'name', 'address'],
+          },
+        }).execute();
+      
+        return {
+          configuration: item,
+          interfaces: interfaces.data,
+        };
+      });
+
+      const configuration: any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === device?.data?.[0]?.id);
 
       const { id: device_group_setting_id, name }
           = device_group.data[0]?.device_group_settings?.[0] || {}
-      const { hostname } = device_configuration.data[0] || {}
-      const { device_interfaces } = device_configuration?.data?.[0] || {}
+      // const { hostname } = device_configuration.data[0] || {}
+      // const { device_interfaces } = device_configuration?.data?.[0] || {}
       const { addresses, device_heartbeats, ...rest } = device?.data?.[0] || {}
       const { id: add_id, ...rest_address } = addresses?.[0] || {}
 
@@ -1300,8 +1325,8 @@ export const deviceRouter = createTRPCRouter({
         data: {
           ...rest,
           ...rest_address,
-          hostname,
-          interfaces: device_interfaces,
+          hostname: configuration?.hostname,
+          interfaces: configuration?.interfaces,
           grouping: device_group_setting_id,
           grouping_name: name,
         },
