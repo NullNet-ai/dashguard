@@ -113,7 +113,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
               contacts: ['first_name', 'last_name', 'id'],
               organization_accounts: ['contact_id', 'id', 'device_id'],
               organization_account_updated_by: ['contact_id', 'id', 'device_id'],
-              device_configurations: ['id', 'device_id', 'created_by', 'updated_by', 'created_date', 'created_time', 'updated_date', 'updated_time', 'code'],
+              device_configurations: ['id', 'device_id', 'created_by', 'updated_by', 'created_date', 'created_time', 'updated_date', 'updated_time', 'code', 'config_version'],
             },
             advance_filters: [{
               type: 'criteria',
@@ -208,10 +208,10 @@ export const deviceConfigurationRouter = createTRPCRouter({
             updated_by: 'Wallguard Client',
           }
         }
-
+        
         return item
       })
-
+      
       return { items: modifiedData, totalCount: res?.data?.[0]?.device_configurations?.length }
     }),
 })

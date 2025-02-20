@@ -1,6 +1,7 @@
 "use client";
 
-import { getActualDownloadURL } from "~/app/api/device/get_actual_download_url";
+import { api } from "~/trpc/react";
+import useRefetchRecord from "../hooks/useFetchMainRecord";
 
 const fields = {
   Package: "package",
@@ -8,10 +9,30 @@ const fields = {
   "Installation Confirmation": "installation_confirmation",
 };
 
-const Summary = async ({}: { form_key: string }) => {
-  const download_url = await getActualDownloadURL();
+const Summary =  ({form_key}: { form_key: string }) => {
+
+  const {
+      data: record,
+      refetch,
+      error,
+    } = api.device.fetchDownloadURL.useQuery({
+    })
+
+    useRefetchRecord({
+      refetch,
+      form_key,
+    })
+
+    if (error) {
+      return (
+        <div>
+          {"Error:"}
+          {error.message}
+        </div>
+      )
+    }
   const data = {
-    package: `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
+    // package: `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
     installation_package: "pkg install Wallmon.pkg",
     installation_confirmation: "Wallmon --version",
   };

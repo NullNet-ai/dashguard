@@ -2,7 +2,6 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import InstallationDetails from "./client";
 import { getActualDownloadURL } from "~/app/api/device/get_actual_download_url";
-import { getActualServerURL } from "~/app/api/device/get_server_url";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -14,10 +13,8 @@ const FormServerFetch = async () => {
     pluck_fields: ["id", "code"],
   });
   const defaultValues = fetched_user_role?.data;
-  const download_url = await getActualDownloadURL()
+  const download_url = await api.device.fetchDownloadURL({})
   
-
-
   return (
     <div className="space-y-2">
       <InstallationDetails

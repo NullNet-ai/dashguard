@@ -1468,4 +1468,15 @@ export const deviceRouter = createTRPCRouter({
       }
     },
   ),
+
+  fetchDownloadURL: privateProcedure
+  .input(z.object({})).query(async ({ }) => {
+    return ''
+    // const url = await getActualDownloadURL()
+    // console.log("%c Line:1476 🌶 url", "color:#b03734", url);
+    // return {
+    //   url,
+    // }
+  }
+  ),
 })

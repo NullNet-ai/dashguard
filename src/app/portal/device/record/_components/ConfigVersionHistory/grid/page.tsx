@@ -8,6 +8,7 @@ import { api } from '~/trpc/react'
 import RawData from '../ConfigChangesRawData'
 
 import gridColumns from './_config/columns'
+import { SidebarProvider } from '~/components/ui/sidebar'
 
 export default function ConfigHistoryGrid(props: Record<string, any>) {
   const { params } = props
@@ -23,6 +24,8 @@ export default function ConfigHistoryGrid(props: Record<string, any>) {
       <Separator />
       {showGrid
         ? (
+          <SidebarProvider defaultOpen={false} className='block'>
+
             <Grid
             config = { {
                 statusesIncluded: ['draft', 'active', 'Draft', 'Active'],
@@ -44,6 +47,7 @@ export default function ConfigHistoryGrid(props: Record<string, any>) {
             data = {items}
             totalCount = { totalCount}
           />
+          </SidebarProvider>
           )
         : (
           <>

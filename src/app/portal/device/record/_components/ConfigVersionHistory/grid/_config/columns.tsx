@@ -21,7 +21,7 @@ const gridColumns = [
   },
   {
     header: 'Version',
-    accessorKey: 'device_version',
+    accessorKey: 'config_version',
   },
   {
     header: 'Updated Date',
