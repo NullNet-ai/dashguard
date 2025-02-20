@@ -1303,7 +1303,6 @@ export const deviceRouter = createTRPCRouter({
 
         const ids = filter_res.data.map((item: Record<string, any>) => item?.id)
         if (!ids.length) return { success: true, message: 'No records found' }
-        console.log('%c Line:1302 🍭 ids', 'color:#7f2b82', ids, _entity);
         // return ids
         // return ids
         // return true
