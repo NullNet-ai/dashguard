@@ -186,6 +186,7 @@ export const deviceRouter = createTRPCRouter({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
+          track_total_records: true,
           pluck: input.pluck,
           pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
