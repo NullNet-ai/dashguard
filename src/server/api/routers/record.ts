@@ -266,7 +266,8 @@ export const recordRouter = createTRPCRouter({
               account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
               username: organization_accounts?.account_id || '',
               organization: organizations?.name || '',
-              role: user_roles?.role
+              role: user_roles?.role,
+              organization_id: organizations?.id,
             },
           };
         }
@@ -279,7 +280,8 @@ export const recordRouter = createTRPCRouter({
               account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
               username: organization_accounts?.account_id || '',
               organization: organizations?.name || '',
-              role: user_roles?.role
+              role: user_roles?.role,
+              organization_id: organizations?.id,
             },
           ],
         };

@@ -20,22 +20,19 @@ import { formatPhoneNumber } from '~/utils/formatter';
 import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 
-const {
-  MAILER_AUTH_USER,
-  MAILER_AUTH_PASS,
-  MAILER_HOST,
-  MAILER_PORT,
-} = process.env;
+const { MAILER_AUTH_USER, MAILER_AUTH_PASS, MAILER_HOST, MAILER_PORT} =
+  process.env;
 
 const ENTITY = 'organization_account';
 const transporter = nodemailer.createTransport({
   auth: {
     user: MAILER_AUTH_USER,
-    pass:   MAILER_AUTH_PASS,
+    pass: MAILER_AUTH_PASS,
   },
   host: MAILER_HOST,
-  port: Number(MAILER_PORT)
+  port: Number(MAILER_PORT),
 });
+
 export const accountRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
   updateAccountDetails: privateProcedure
@@ -652,9 +649,6 @@ export const accountRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // const headerList = headers();
-      // const pathname = headerList.get('x-pathname') || '';
-      // const [, , , , identifier] = pathname.split('/');
       if (input.id) {
         const record = await ctx.dnaClient
           .update(input.id, {
@@ -1000,48 +994,75 @@ export const accountRouter = createTRPCRouter({
           entity: 'organization_accounts',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'code', 'account_id', 'email', 'categories'],
+            pluck: [
+              'id',
+              'code',
+              'account_id',
+              'email',
+              'categories',
+              'contact_id',
+              'account_status',
+            ],
           },
         })
         .execute();
 
       const accountRecord = account?.data?.[0];
-      const record = await ctx.dnaClient
-        .create({
+      if (accountRecord?.contact_id) {
+        const contact = await ctx.dnaClient
+          .findAll({
+            entity: 'contact_emails',
+            token: ctx.token.value,
+            query: {
+              advance_filters: createAdvancedFilter({
+                contact_id: accountRecord?.contact_id,
+              }),
+              pluck: ['id', 'email', 'is_primary'],
+            },
+          })
+          .execute();
+
+        accountRecord.email = contact.data?.[0]?.email;
+      }
+      const invitation = await ctx.dnaClient
+        .findAll({
           entity: 'invitations',
           token: ctx.token.value,
-          mutation: {
-            params: {
+          query: {
+            advance_filters: createAdvancedFilter({
               account_id: accountRecord?.id,
               status: 'Active',
-            },
+            }),
             pluck: ['id', 'code', 'status'],
           },
         })
         .execute();
 
-      const category = accountRecord?.categories?.[0];
-      await ctx.dnaClient
-        .update(accountRecord?.id, {
-          entity: 'organization_accounts',
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              account_status:
-                category === 'External User' ? 'Invited' : 'Pending Setup',
-            },
-            pluck: ['id', 'status'],
-          },
-        })
-        .execute();
+      let invitationRecord = invitation.data?.[0] ?? null;
 
-      if (!record) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: `Invitation creation failed`,
-        });
+      if (!invitationRecord) {
+        const record = await ctx.dnaClient
+          .create({
+            entity: 'invitations',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                account_id: accountRecord?.id,
+                status: 'Active',
+              },
+              pluck: ['id', 'code', 'status'],
+            },
+          })
+          .execute();
+        if (!record) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: `Invitation creation failed`,
+          });
+        }
+        console.info('[Create Draft]', record);
+        invitationRecord = record?.data?.[0] ?? {};
       }
-      console.info('[Create Draft]', record);
 
       const headerList = headers();
       const host = headerList.get('host'); // Get the host from request headers
@@ -1049,7 +1070,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${record?.data?.[0]?.id}?token=${ctx.token.value}`;
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}?token=${ctx.token.value}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -1077,9 +1098,26 @@ export const accountRouter = createTRPCRouter({
         throw error;
       }
 
+      await ctx.dnaClient
+        .update(accountRecord?.id, {
+          entity: 'organization_accounts',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              account_status: accountRecord?.account_status
+                ? accountRecord?.account_status
+                : 'Pending Setup',
+              categories: accountRecord?.categories?.length
+                ? accountRecord?.categories
+                : ['Internal User'],
+            },
+            pluck: ['id', 'status'],
+          },
+        })
+        .execute();
+
       return {
-        ...record,
-        data: record?.data?.[0],
+        data: invitationRecord,
       };
     }),
   getInvitationAccountDetails: privateProcedure
@@ -1252,7 +1290,7 @@ export const accountRouter = createTRPCRouter({
               },
             ],
             pluck_object: {
-              invitations: ['id', 'account_id', 'status'],
+              invitations: ['id', 'account_id', 'status', 'created_date'],
               organization_accounts: [
                 'id',
                 'account_organization_id',
@@ -1309,6 +1347,7 @@ export const accountRouter = createTRPCRouter({
           ...invitationRecord?.contacts,
           email: email?.email,
         },
+        invitation: invitationRecord?.invitations,
       };
     }),
 });

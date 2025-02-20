@@ -10,7 +10,7 @@ import { MainMenuConfig } from "./config";
 import SideUserInfo from "./UserInfo";
 
 const getInitials = (name: string) => {
-  const matches = name.match(/\b\w/g) || [];
+  const matches = name?.match(/\b\w/g) || [];
   return ((matches.shift() || "") + (matches.pop() || "")).toUpperCase();
 };
 
@@ -31,7 +31,7 @@ export default async function SideBarMenu() {
           email={username}
           screenType={screenType?.value}
           organization={organization}
-          other_organizations={[accountOrganization?.current_organization]}
+          other_organizations={accountOrganization?.other_organizations ?? []}
         />
       }
       headerComponent={

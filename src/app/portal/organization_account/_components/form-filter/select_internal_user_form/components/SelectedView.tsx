@@ -1,4 +1,4 @@
-import { PhoneInput } from 'react-international-phone';
+import  PhoneInput  from '~/components/ui/phone-input';
 import { EnvelopeIcon } from '@heroicons/react/20/solid';
 import { cn } from '~/lib/utils';
 import { Label } from '~/components/ui/label';
@@ -11,7 +11,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
   
   return (
     <>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-y-0 mb-5">
         <div className="w-full md:w-1/2">
           <Label className={cn('text-md font-semibold')}>
             Primary Phone Number *
@@ -22,8 +22,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
                 padding: '1.2rem',
                 paddingInline: '0.5rem',
                 backgroundColor: 'inherit',
-                borderColor: 'transparent',
-                borderRightColor: `inherit`,
+                borderColor: 'inherit',
                 colorScheme: 'normal',
               },
             }}
@@ -31,12 +30,12 @@ const SelectedView = ({ record }: Record<string, any>) => {
             disabled={true}
             required={true}
             value={`+${phone_data?.raw_phone_number}`}
-            // className={"border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
+            className={"placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
             inputStyle={{
               width: '100%',
               backgroundColor: 'transparent',
               color: 'inherit',
-              borderColor: `transparent`,
+              borderColor: `inherit`,
               padding: '1.2rem',
               opacity: 'inherit',
             }}
@@ -56,7 +55,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-y-0 mb-5">
         <div className="w-full md:w-1/2">
           <Label className={cn('text-md font-semibold')}>First Name *</Label>
           <Input
@@ -78,7 +77,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-y-0">
         <div className="w-full md:w-1/2">
           <Label className={cn('text-md font-semibold')}>Middle Name </Label>
           <Input

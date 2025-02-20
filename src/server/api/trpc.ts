@@ -153,6 +153,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
 });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const storeCookies = cookies();
+  // const id = storeCookies.get('logged_id');
   const token = storeCookies.get('token');
 
   if (!token) {

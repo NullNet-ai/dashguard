@@ -36,7 +36,11 @@ const SideUserInfo = ({
   const screen = useScreenType() || screenType;
   const mobile = screen !== 'lg' && screen !== 'xl' && screen !== '2xl';
   const handleSwitchOrganization = async (organization: Record<string, any>) => {
-    const response  = await switchOrganization.mutateAsync();
+    const response  = await switchOrganization.mutateAsync({
+      organization_id: organization.organization_id
+    });
+    console.log("%c 🍵: handleSwitchOrganization -> response ", "font-size:16px;background-color:#2d4ac2;color:white;", response)
+    return
   }
 
   return (
@@ -72,12 +76,12 @@ const SideUserInfo = ({
           className="w-52"
           side="right"
           align="end"
-          sideOffset={65}
+          sideOffset={95}
         >
           <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {other_organizations?.map((account, index) => (
-            <DropdownMenuItem key={index} onClick={handleSwitchOrganization}>
+            <DropdownMenuItem key={index} onClick={() => handleSwitchOrganization(account)}>
               <span className="mr-1 font-medium">{account.organization} </span>
               {account.role ? `(${account.role})` : ''}
             </DropdownMenuItem>
