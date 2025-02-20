@@ -78,7 +78,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
           <YAxis hide={true} />
           {/* <Tooltip />
            */}
-         {record?.length == 24 && <ChartTooltip
+         {record?.length >=24 && <ChartTooltip
             content={
               <ChartTooltipContent
                 formatter = { (value, name) => {
@@ -92,6 +92,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
             }
             cursor={false}
           />}
+          
           <Bar
             dataKey="heartbeats"
             fill={chartConfig.heartbeats.color}
