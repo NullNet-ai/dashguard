@@ -12,7 +12,7 @@ import { ZodError } from 'zod';
 import { dnaClient } from '../dnaOrm';
 import redisClient from '~/server/redis/cache';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { TokenData } from './types';
 import { ulid } from 'ulid';
 import { colors } from '../utils/choychoy';
@@ -34,11 +34,15 @@ export const createTRPCContext = async (opts: {
   token?: string;
 }) => {
   const storeCookies = cookies();
+  const headerStore = headers();
+  const account_id = headerStore.get('x-trpc-session-data');
+
   return {
     redisClient,
     dnaClient,
     transaction_id: ulid(),
     storeCookies,
+    account_id,
     ...opts,
   };
 };
@@ -153,8 +157,12 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
 });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const storeCookies = cookies();
-  // const id = storeCookies.get('logged_id');
-  const token = storeCookies.get('token');
+  const cookiesToken = storeCookies.get('token');
+
+  const token = {
+    ...cookiesToken,
+    value: ctx.token || cookiesToken!.value,
+  };
 
   if (!token) {
     throw new TRPCError({
@@ -223,6 +231,23 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   });
 });
 
+const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
+  const storeCookies = cookies();
+  const account_id = ctx.account_id;
+  const token_id = storeCookies.get(`account_token_id:${account_id}`)?.value;
+
+  const token = await ctx.redisClient.getCachedData(
+    `account_token:${token_id}`,
+  );
+
+  return next({
+    ctx: {
+      ...ctx,
+      token,
+    },
+  });
+});
+
 /**
  * Private (authenticated) procedure
  *
@@ -230,5 +255,6 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
  * that a user querying is authorized and authenticated.
  */
 export const privateProcedure = t.procedure
+  .use(tokenIdMiddleware)
   .use(timingMiddleware)
   .use(verificationMiddleware);

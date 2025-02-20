@@ -8,6 +8,7 @@ import {
   publicProcedure,
 } from '~/server/api/trpc';
 import type { TokenData } from '../types';
+import { ulid } from 'ulid';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -167,7 +168,6 @@ export const authRouter = createTRPCRouter({
       ctx.session.accounts?.[0]?.organization_account_id ?? '';
     ctx.storeCookies.set('logged_id', loggedAccountId);
     ctx.storeCookies.set(loggedAccountId, ctx.token.value);
-    sessionStorage.setItem('account_id', loggedAccountId)
     return true;
   }),
   switchOrganization: privateProcedure
@@ -177,36 +177,50 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const currentToken = ctx.token.value;
-      const rootAccount = await ctx.dnaClient
-        .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
-        .execute();
-      const rootAccountToken = rootAccount?.data?.[0]?.token;
-      const newOrganization = await ctx.dnaClient
-        .rootSwitchAccount(currentToken, input.organization_id, {
-          token: rootAccountToken,
-        })
-        .execute();
-      const session = await ctx.dnaClient
-        .verifyToken(newOrganization?.data?.[0]?.token)
-        .execute()
-        .then((res) => {
-          return res.data?.[0] as TokenData;
-        })
-        .catch(() => {
-          throw new Error('Invalid Token')
-        });
+      try {
+        const currentToken = ctx.token.value;
+        const rootAccount = await ctx.dnaClient
+          .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+          .execute();
+        const rootAccountToken = rootAccount?.data?.[0]?.token;
+        const newOrganization = await ctx.dnaClient
+          .rootSwitchAccount(currentToken, input.organization_id, {
+            token: rootAccountToken,
+          })
+          .execute();
 
-      if (session) {
-        ctx.storeCookies.set(
-          session.account.organization_account_id,
+        const session = await ctx.dnaClient
+          .verifyToken(newOrganization?.data?.[0]?.token)
+          .execute()
+          .then((res) => {
+            return res.data?.[0] as TokenData;
+          })
+          .catch(() => {
+            throw new Error('Invalid Token');
+          });
+
+        ctx.storeCookies;
+
+        const token_id = ulid();
+        await ctx.redisClient.cacheData(
+          `account_token:${token_id}`,
           newOrganization?.data?.[0]?.token,
+          60 * 60 * 24,
         );
-        return {
-          session,
-          token: newOrganization?.data?.[0]?.token
+
+        if (session) {
+          ctx.storeCookies.set(
+            `account_token_id:${session.account.organization_account_id}`,
+            token_id,
+          );
+          return {
+            session,
+            token: token_id,
+          };
         }
+        throw new Error('Unable to switch organization');
+      } catch (error) {
+        throw error;
       }
-      throw new Error('Unable to switch organization');
     }),
 });

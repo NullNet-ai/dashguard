@@ -306,7 +306,6 @@ export default function AccountDetailsForm({
                 }}
               />
             </div>
-            <Separator className="!my-4" dashed={true} />
           </Fragment>
         );
       })}

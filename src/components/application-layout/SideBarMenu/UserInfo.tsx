@@ -35,13 +35,18 @@ const SideUserInfo = ({
   const { open, openMobile } = useSidebar();
   const screen = useScreenType() || screenType;
   const mobile = screen !== 'lg' && screen !== 'xl' && screen !== '2xl';
-  const handleSwitchOrganization = async (organization: Record<string, any>) => {
-    const response  = await switchOrganization.mutateAsync({
-      organization_id: organization.organization_id
+  const handleSwitchOrganization = async (
+    organization: Record<string, any>,
+  ) => {
+    const response = await switchOrganization.mutateAsync({
+      organization_id: organization.organization_id,
     });
-    console.log("%c 🍵: handleSwitchOrganization -> response ", "font-size:16px;background-color:#2d4ac2;color:white;", response)
-    return
-  }
+    if (response) {
+      const { organization_account_id } = response?.session?.account ?? {};
+      window.open(`/?account_id=${organization_account_id}`, '_blank');
+    }
+    return;
+  };
 
   return (
     <DropdownMenu>
@@ -81,7 +86,10 @@ const SideUserInfo = ({
           <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {other_organizations?.map((account, index) => (
-            <DropdownMenuItem key={index} onClick={() => handleSwitchOrganization(account)}>
+            <DropdownMenuItem
+              key={index}
+              onClick={() => handleSwitchOrganization(account)}
+            >
               <span className="mr-1 font-medium">{account.organization} </span>
               {account.role ? `(${account.role})` : ''}
             </DropdownMenuItem>

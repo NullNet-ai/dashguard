@@ -292,9 +292,9 @@ export const accountRouter = createTRPCRouter({
                 organizations: ['id', 'name'],
                 organization_contacts: ['id', 'contact_organization_id'],
               },
-              advance_filters: createAdvancedFilter({
-                contact_id,
-              }),
+              // advance_filters: createAdvancedFilter({
+              //   contact_id,
+              // }),
               order: {
                 limit: 100,
               },
@@ -1104,9 +1104,7 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              account_status: accountRecord?.account_status
-                ? accountRecord?.account_status
-                : 'Pending Setup',
+              account_status: 'Pending Setup',
               categories: accountRecord?.categories?.length
                 ? accountRecord?.categories
                 : ['Internal User'],
