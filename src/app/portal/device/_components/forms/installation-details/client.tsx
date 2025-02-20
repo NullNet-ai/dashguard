@@ -42,7 +42,7 @@ export default function InstallationDetails({
       formLabel="Firewall"
       formKey="firewall"
       fields={[]}
-      customRender={(form) => <CustomInstallationDetails form={form} />}
+      customRender={(form) => <CustomInstallationDetails form={form} defaultValues={defaultValues}/>}
     />
   );
 }

@@ -8,12 +8,15 @@ import { FormField } from '~/components/ui/form'
 interface IInstallationDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>
   selectOptions?: Record<string, any>
+  defaultValues?: Record<string, any>
 }
 
 export default function CustomInstallationDetails({
   form,
+  defaultValues
 }: IInstallationDetails) {
   const toast = useToast()
+  const {download_url} = defaultValues ?? {}
   const copyToClipboard = async (value: string) => {
     if (navigator.clipboard && window.isSecureContext) {
       try {
@@ -82,12 +85,12 @@ export default function CustomInstallationDetails({
                   className='mt-1 md:w-96 rounded-md border-orange-300 bg-orange-100 p-2 text-orange-500'
                   readOnly={ true }
                   type='text'
-                  value='curl-o https://wallmon.ai/wallmon.pkg'
+                  value={`curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`}
                 />
                 <button
                   className='my-auto'
                   onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(
-                    event, 'curl-o https://wallmon.ai/wallmon.pkg',
+                    event, `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
                   ) }
                 >
                   <DocumentDuplicateIcon

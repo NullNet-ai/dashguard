@@ -60,6 +60,7 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
           isFromRecord={is_from_record}
           orgAccount={orgAccount}
           params={params}
+          defaultValues={defaultValues}
         />
       )}
       buttonConfig={{

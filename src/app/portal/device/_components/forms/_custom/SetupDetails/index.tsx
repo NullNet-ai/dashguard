@@ -18,6 +18,7 @@ interface ISetupDetails {
   orgAccount?: Record<string, string> | null
   isFromRecord?: boolean
   params?: Record<string, any>
+  defaultValues?: Record<string, any>
 }
 
 const addTestIdName = ({
@@ -33,9 +34,10 @@ export default function CustomSetupDetails({
   orgAccount,
   isFromRecord,
   params,
+  defaultValues
 }: ISetupDetails) {
-  const { control, formState } = form || {}
-  const { defaultValues } = formState || {}
+  const { control } = form || {}
+  const {account_secret: default_values_account_secret, server_url} = defaultValues || {}
   const { account_id, account_secret } = orgAccount || {}
 
   const toast = useToast()
@@ -120,7 +122,7 @@ export default function CustomSetupDetails({
 
   const acct_secret = form.watch('app_secret')
 
-  const app_secret = defaultValues?.account_secret || acct_secret
+  const app_secret = default_values_account_secret || acct_secret
 
   const is_from_record = params?.shell_type === 'record'
 
@@ -150,7 +152,7 @@ export default function CustomSetupDetails({
                       })}
                       readOnly={true}
                       type="text"
-                      value="https://wallgaurd.ai/"
+                      value={server_url || 'https://wallgaurd.ai/'}
                     />
                     <button
                       className="my-auto"
@@ -158,7 +160,7 @@ export default function CustomSetupDetails({
                         type: 'cpy',
                         name: 'server_url',
                       })}
-                      onClick={(event) => handleCopyClick(event, 'https://wallgaurd.ai/') }
+                      onClick={(event) => handleCopyClick(event, server_url || 'https://wallgaurd.ai/') }
                     >
                       <DocumentDuplicateIcon className="h-5 w-5 text-gray-400" />
                     </button>

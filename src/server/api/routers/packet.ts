@@ -107,34 +107,100 @@ export const packetRouter = createTRPCRouter({
   }),
 
   fetchPacketsIP: privateProcedure
-    .input(z.object({})).query(async ({ ctx }) => {
-      const res = await ctx.dnaClient
-        .findAll({
-          entity: 'packets',
-          token: ctx.token.value,
-          query: {
-            pluck: ['source_ip', 'destination_ip'],
-            advance_filters: [
-              {
-                type: 'criteria',
-                field: 'status',
-                entity: 'packets',
-                operator: EOperator.EQUAL,
-                values: ['Active', 'active'],
-              },
-            ],
-            order: {
-              limit: 10,
-              by_field: 'code',
-              by_direction: EOrderDirection.DESC,
+  .input(z.object({})).query(async ({input, ctx }) => {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const res = await ctx.dnaClient
+      .findAll({
+        entity: 'packets',
+        token: ctx.token.value,
+        query: {
+          pluck: ['source_ip', 'destination_ip', 'timestamp'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'status',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: ["Active", "active"],
             },
+            {
+              type: "operator",
+              operator: EOperator.OR
           },
+            {
+              type: 'criteria',
+              field: 'timestamp',
+              entity: 'packets',
+              operator: EOperator.GREATER_THAN_OR_EQUAL,
+              values: ["2025-02-15 04:26:26.386+00"],
+            },
+          ],
+          order: {
+            limit: 10,
+            by_field: 'code',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+        
+      })
+      .execute()
+    return res?.data
+  }),
 
-        })
-        .execute()
+  getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
+    const { packet_data } = input
+    return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
+      const { source_ip, destination_ip } = item
+      const res = await ctx.dnaClient.aggregate({
+        query: {
+          entity: 'packets',
+          aggregations: [
+            {
+              aggregation: 'SUM',
+              aggregate_on: 'total_length',
+              bucket_name: 'bandwidth',
+            },
+          ],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'source_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                source_ip,
+              ],
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'destination_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                destination_ip,
+              ],
+            },
+          ],
+          joins: [],
+          limit: 20,
+          order: {
+            order_by: 'bucket',
+            order_direction: EOrderDirection.DESC,
+          },
+        },
+        token: ctx.token.value,
+      }).execute()
 
-      return res?.data
-    }),
+      return {source_ip, destination_ip, result:res?.data}
+    },{concurrency: 10} )
+
+    
+  }),
 
 })
 
