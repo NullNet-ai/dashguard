@@ -61,17 +61,20 @@ const NotificationDrawer = () => {
   ]
 
   return (
-    <div className='flex h-full flex-col p-4 pt-2 px-2 flex-1'>
+    <div className='flex h-full flex-col p-4 pt-2 px-0 flex-1'>
       {/* Filter & Actions */}
       <div className='relative flex items-center justify-between'>
         <div className='flex gap-3'>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={actions?.handleDropdownOpen}
-          >
-            <ArrowsUpDownIcon className='h-5 w-5 text-gray-500' />
-          </Button>
+          <section>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={actions?.handleDropdownOpen}
+            >
+              <ArrowsUpDownIcon className='h-5 w-5 text-gray-500' />
+            </Button>
+
+          </section>
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
@@ -108,7 +111,7 @@ const NotificationDrawer = () => {
         </div>
         {!notifications?.length && (
           <Button
-            className="text-sm text-blue-600"
+            className="text-md text-blue-600"
             variant="link"
             onClick={actions.handleInsert}
           >
@@ -129,14 +132,14 @@ const NotificationDrawer = () => {
         tabs={tabs.map(tab => ({
           ...tab,
           content: (
-            <div id="scrollable-div" className='scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100flex h-[70vh] min-h-80 flex-col gap-2 overflow-y-auto'>
+            <div id="scrollable-div" className='scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto'>
               <InfiniteScroll
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
                 loader={<div className="text-center py-4">Loading more notifications...</div>}
                 scrollableTarget="scrollable-div"
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-2 h-full min-h-full"
                 endMessage={
                   <div className="text-center py-4 text-sm text-gray-500">
                     No more notifications
@@ -148,7 +151,7 @@ const NotificationDrawer = () => {
             </div>
           ),
         }))}
-        variant="default"
+        variant="shadow"
       />
     </div>
   )
@@ -168,8 +171,8 @@ export function HeaderSection() {
         Notifications ({notificationCount})
       </h2>
       <div className='flex items-center gap-2 mr-2'>
-        <span className='text-sm text-muted-foreground'>Show read</span>
-        <Switch checked={showRead} onCheckedChange={toggleUnread} />
+        <Switch checked={showRead} size='sm' onCheckedChange={toggleUnread} />
+        <span className='text-sm text-muted-foreground'>Show unread</span>
       </div>
     </div>
   )

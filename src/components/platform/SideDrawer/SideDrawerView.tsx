@@ -82,7 +82,7 @@ export const SideDrawerView: React.FC = () => {
 
             <Separator />
 
-            <CardContent className='flex flex-1 flex-col gap-2  h-full'>
+            <CardContent className='flex flex-1 flex-col gap-2  h-full p-0'>
               {BodyComponent && <BodyComponent {...componentProps} />}
             </CardContent>
 
