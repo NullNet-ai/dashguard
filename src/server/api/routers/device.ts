@@ -1348,12 +1348,12 @@ export const deviceRouter = createTRPCRouter({
         devices: 'id',
         device_groups: 'device_id',
         organization_accounts: 'device_id',
-        device_rules: 'device_configuration_ids',
-        device_aliases: 'device_configuration_id',
-        device_interfaces: 'device_configuration_id',
         device_configurations: 'device_id',
-        device_heartbeats: 'device_id',
-        packets: 'device_id',
+        device_rules: 'device_configuration_ids',
+        device_aliases: 'device_configuration_ids',
+        device_interfaces: 'device_configuration_ids',
+        // device_heartbeats: 'device_id',
+        // packets: 'device_id',
       }
 
       const filter_configurations = await ctx.dnaClient.findAll({
