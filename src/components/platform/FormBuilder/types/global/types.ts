@@ -3,34 +3,36 @@ import { type z } from "zod";
 type TDisplayType = "form" | "selected";
 
  type TFormType =
-  | "input"
-  | "draggable"
-  | "multi-field"
-  | "input-grid"
-  | "time-picker"
-  | "number-input"
-  | "textarea"
-  | "select"
-  | "radio"
-  | "checkbox"
-  | "date"
-  | "smart-date"
-  | "file"
-  | "multi-select"
-  | "inputs"
-  | "input-label-value"
-  | "phone-input"
-  | "email-input"
-  | "date-range"
-  | "address-input"
-  | "slider"
-  | "password"
-  | "switch"
-  | "rich-text-editor"
-  | 'alert'
-  | 'space'
-  | 'separator'
-  | "currency-input";
+   | 'input'
+   | 'draggable'
+   | 'multi-field'
+   | 'input-grid'
+   | 'time-picker'
+   | 'number-input'
+   | 'textarea'
+   | 'select'
+   | 'radio'
+   | 'checkbox'
+   | 'date'
+   | 'smart-date'
+   | 'file'
+   | 'multi-select'
+   | 'inputs'
+   | 'input-label-value'
+   | 'phone-input'
+   | 'email-input'
+   | 'date-range'
+   | 'address-input'
+   | 'slider'
+   | 'password'
+   | 'switch'
+   | 'rich-text-editor'
+   | 'alert'
+   | 'space'
+   | 'separator'
+   | 'group-multi-field'
+   | 'group-tab'
+   | 'currency-input';
 
 type TSelectionType = "single" | "multiple";
 
