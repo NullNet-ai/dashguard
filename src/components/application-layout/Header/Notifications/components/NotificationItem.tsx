@@ -8,7 +8,7 @@ import {
 import { EllipsisVertical, Mail, MailOpen, Pin } from 'lucide-react'
 import { useEffect } from 'react'
 import * as Lucide from 'lucide-react';
-import  capitalize  from 'lodash/capitalize';
+import capitalize from 'lodash/capitalize';
 import { Button } from '~/components/ui/button'
 
 import { useNotifications } from '../NotificationProvider'
@@ -17,6 +17,7 @@ import { type INotificationSchema } from '../types'
 import EmptyNotification from './EmptyNotification'
 import { Separator } from '~/components/ui/separator'
 import { Badge } from '~/components/ui/badge'
+import TextTruncate from '~/components/ui/text-truncate';
 
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
@@ -74,7 +75,7 @@ const NotificationItem = ({ type }: { type: string }) => {
 
 
 
-  function handleButtonVariants(className:string){
+  function handleButtonVariants(className: string) {
     switch (className) {
 
       case 'bg-blue-500 text-white':
@@ -91,107 +92,109 @@ const NotificationItem = ({ type }: { type: string }) => {
         return 'default'
 
     }
-  } 
-  console.log("notifications", notifications)
+  }
 
   return (
     <div className='mt-2'>
       {notifications.map((notification: INotificationSchema) => (
-         <>
-        <div
-          className={`relative flex flex-col group cursor-pointer ${
-            notification.notification_status === 'read'
+        <>
+          <div
+            className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
               ? 'border-l-primary border-l-2'
               : 'border-blue-100 '
-          } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
-          onClick={() => notification.link && handleOpenNewTab(notification.link)}
-          key={notification.id}
-        >
-          {/* Title & Priority */}
-          <div className='flex item-start justify-between'>
-            {/* icon */}
-            {/* Icon & Title */}
-            <div className='flex items-center gap-2 cursor-default' onClick={(e)=>{e.stopPropagation()}}>
-              {notification.icon
-                ? (
-                  // @ts-expect-error fix this later
-                  <DynamicIcon name={capitalize(notification.icon)} className='size-4 text-gray-500 '/>
+              } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
+            onClick={() => notification.link && handleOpenNewTab(notification.link)}
+            key={notification.id}
+          >
+            {/* Title & Priority */}
+            <div className='flex item-start justify-between'>
+              {/* icon */}
+              {/* Icon & Title */}
+              <div className='flex items-center gap-2 cursor-default' onClick={(e) => { e.stopPropagation() }}>
+                {notification.icon
+                  ? (
+                    // @ts-expect-error fix this later
+                    <DynamicIcon name={capitalize(notification.icon)} className='size-4 text-gray-500 ' />
                     // <BellDot className='h-5 w-5 text-gray-500' />
                   )
-                : (
+                  : (
                     <Mail className='size-4 text-gray-500 ' />
                   )}
-              <a
-                className="text-sm font-semibold hover:underline text-primary cursor-pointer"
-                onClick={() => notification.link && handleOpenNewTab(notification.link)}
-                aria-hidden="true"
-              >
-                {notification.title}
-              </a>
-            </div>
+                <a
+                  className="text-sm font-semibold hover:underline text-primary cursor-pointer"
+                  onClick={() => notification.link && handleOpenNewTab(notification.link)}
+                  aria-hidden="true"
+                >
+                  {notification.title}
+                </a>
+              </div>
 
-            <div className=' items-center flex'>
-              {/* Read / Unread Icon */}
-              {notification.notification_status === 'read'
-                ? (
+              <div className=' items-center flex'>
+                {/* Read / Unread Icon */}
+                {notification.notification_status === 'read'
+                  ? (
                     <MailOpen
                       className='h-4 w-4 text-gray-300 group-hover:block hidden cursor-pointer'
-                      onClick={(e) => 
-                       { e.stopPropagation() 
+                      onClick={(e) => {
+                        e.stopPropagation()
                         actions?.handleSingleReadUnread({
-                        id: notification.id,
-                        notification_status: 'unread',
-                      })}}
+                          id: notification.id,
+                          notification_status: 'unread',
+                        })
+                      }}
                     />
                   )
-                : (
+                  : (
                     <Mail
                       className='h-4 w-4 text-gray-300 group-hover:block hidden cursor-pointer'
                       onClick={(e) => {
                         e.stopPropagation()
                         actions?.handleSingleReadUnread({
-                        id: notification.id,
-                        notification_status: 'read',
-                      })}}
+                          id: notification.id,
+                          notification_status: 'read',
+                        })
+                      }}
                     />
                   )}
-              {/* Pin Icon */}
+                {/* Pin Icon */}
                 <Pin
-                className={`h-4 w-4 cursor-pointer ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  actions?.handlePinNotification({
-                  id: notification.id,
-                  is_pinned: !notification.is_pinned,
-                })}}
+                  className={`h-4 w-4 cursor-pointer me-1 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    actions?.handlePinNotification({
+                      id: notification.id,
+                      is_pinned: !notification.is_pinned,
+                    })
+                  }}
                 />
-              {/* Priority Badge */}
-              <Badge
-              className='text-xs font-medium'
-                borderRadius={'md'}
-                variant={notification.priority_level === 2 ? 'destructive' : notification.priority_level === 1 ? 'warning' : 'secondary'}
-                
-              >
-                {notification.priority_label.toUpperCase()}
-              </Badge>
-              {/* Dropdown Actions */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild={true} onClick={(e) => e.stopPropagation()}>
-                  <EllipsisVertical className='h-4 w-4 cursor-pointer text-gray-500' />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align='end'
-                  className='z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 shadow-md animate-in fade-in-80'
+                {/* Priority Badge */}
+                <Badge
+                  className='text-xs font-medium'
+                  borderRadius={'md'}
+                  variant={notification.priority_level === 2 ? 'destructive' : notification.priority_level === 1 ? 'warning' : 'secondary'}
+
                 >
-                  {type === 'archive'
-                    ? (
+                  {notification.priority_label.toUpperCase()}
+                </Badge>
+                {/* Dropdown Actions */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild={true} onClick={(e) => e.stopPropagation()}>
+                    <EllipsisVertical className='h-4 w-4 cursor-pointer text-gray-500' />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align='end'
+                    className='z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 shadow-md animate-in fade-in-80'
+                  >
+                    {type === 'archive'
+                      ? (
                         <>
                           <DropdownMenuItem
                             className='relative flex cursor-pointer select-none items-center rounded-sm
                         px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                            onClick={(e) =>{ 
+                            onClick={(e) => {
                               e.stopPropagation()
-                              actions?.handleRestoreNotificationStatus(notification.id)}}
+                              actions?.handleRestoreNotificationStatus(notification.id)
+                            }}
                           >
                             <p>Restore</p>
                           </DropdownMenuItem>
@@ -200,67 +203,68 @@ const NotificationItem = ({ type }: { type: string }) => {
                         text-red-600 outline-none transition-colors hover:bg-red-50'
                             onClick={(e) => {
                               e.stopPropagation()
-                              actions?.handleDeleteNotification(notification.id)}}
+                              actions?.handleDeleteNotification(notification.id)
+                            }}
                           >
                             <p>Delete</p>
                           </DropdownMenuItem>
                         </>
                       )
-                    : (
+                      : (
                         <DropdownMenuItem
                           className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                       outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                          onClick={(e) => 
-                            {
-                              e.stopPropagation()
-                              actions?.handleArchiveNotification(notification.id)}}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            actions?.handleArchiveNotification(notification.id)
+                          }}
                         >
                           Archive
                         </DropdownMenuItem>
                       )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Description */}
+
+            <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} />
+            {/* Actions */}
+            {notification.actions && notification.actions.length > 0 && (
+              <div className='my-2 flex gap-2 ms-6 mt-2'>
+                {notification.actions.map((action, index) => (
+                  //*  To be discussed whether to add property buttonVariant as identitifier on which button to use instead of className
+                  // <Button className={action?.className}  key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
+                  <Button key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+            {/* Metadata */}
+            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-4'>
+              <span className='!text-gray-500'>
+                {' '}
+                {formatTimestamp(notification.timestamp)}
+              </span>
+              <span className='!text-gray-500'>
+                {`| ${notification.source} |`}
+              </span>
+              <span>
+                {notification.categories?.map((category, index) => (
+                  <span
+                    className="mr-0.5 rounded-full bg-gray-200 px-2 py-0.5 text-[10px]  !text-gray-500"
+                    key={index}
+                  >
+                    {category}
+                  </span>
+                ))}
+              </span>
             </div>
           </div>
-
-          {/* Description */}
-          <p className='text-sm text-secondary-foreground ms-6'>{notification.description}</p>
-
-          {/* Actions */}
-          {notification.actions && notification.actions.length > 0 && (
-            <div className='my-2 flex gap-2 ms-6 mt-2'>
-              {notification.actions.map((action, index) => (
-                //*  To be discussed whether to add property buttonVariant as identitifier on which button to use instead of className
-                // <Button className={action?.className}  key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
-                <Button   key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          )}
-          {/* Metadata */}
-          <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-4'>
-            <span className='!text-gray-500'>
-              {' '}
-              {formatTimestamp(notification.timestamp)}
-            </span>
-            <span className='!text-gray-500'>
-              {`| ${notification.source} |`}
-            </span>
-            <span>
-              {notification.categories?.map((category, index) => (
-                <span
-                  className="mr-0.5 rounded-full bg-gray-200 px-2 py-0.5 text-[10px]  !text-gray-500"
-                  key={index}
-                >
-                  {category}
-                </span>
-              ))}
-            </span>
-          </div>
-        </div>
           <Separator dashed />
-         </>
+        </>
       ))}
     </div>
   )
