@@ -199,7 +199,6 @@ export const authRouter = createTRPCRouter({
             throw new Error('Invalid Token');
           });
 
-        ctx.storeCookies;
 
         const token_id = ulid();
         await ctx.redisClient.cacheData(
