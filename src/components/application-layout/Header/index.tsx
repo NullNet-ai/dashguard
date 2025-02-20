@@ -40,7 +40,7 @@ export function Logo() {
   return (
     <Image
       alt="Your Company"
-      src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
+      src="/tailwindLogo.svg"
       className="ml-4 mr-auto h-10 sm:hidden"
       width={40}
       height={40}
