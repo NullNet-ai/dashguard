@@ -190,16 +190,17 @@ export const recordRouter = createTRPCRouter({
     })
     const { data } = await ctx.dnaClient
       .findAll({
-        entity: 'organization_contact_account',
+        entity: 'organization_accounts',
         token: ctx.token.value,
         query: {
           advance_filters,
-          pluck: ['id', 'email'],
+          pluck: ['id', 'account_id'],
         },
       })
       .execute()
+      
     return {
-      contact: { ...response?.contact, email: data?.[0]?.email },
+      contact: { ...response?.contact, email: data?.[0]?.account_id },
       organization: { ...response.organization },
     }
   }),
