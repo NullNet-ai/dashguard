@@ -41,7 +41,26 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const CustomTooltip = ({ active, payload, label, hoveredBar }) => {
+  if (!active || !payload || !payload.length || !hoveredBar) return null;
+
+  // Find the specific data point that matches our hovered bar
+  const dataPoint = payload.find(p => p.dataKey === hoveredBar.key);
+  if (!dataPoint) return null;
+
+  return (
+    <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
+      <p className="font-medium">{`Country: ${label}`}</p>
+      <p className="text-sm">
+        {`${chartConfig[hoveredBar.key].label}: ${dataPoint.value}`}
+      </p>
+    </div>
+  );
+};
+
 const Component = () => {
+  const [hoveredBar, setHoveredBar] = React.useState(null);
+
   const total = React.useMemo(
     () => ({
       wan: chartData.reduce((acc, curr) => acc + curr.wan, 0),
@@ -56,28 +75,7 @@ const Component = () => {
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle>Bar Chart - Multiple</CardTitle>
-          {/* <CardDescription>
-            Showing total visitors for the last 3 months
-          </CardDescription> */}
         </div>
-        {/* <div className="flex">
-          {["wan", "lan", "opt1"].map((key) => {
-            const chart = key as keyof typeof chartConfig
-            return (
-              <button
-                key={chart}
-                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-              >
-                <span className="text-xs text-muted-foreground">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="text-lg font-bold leading-none sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
-                </span>
-              </button>
-            )
-          })}
-        </div> */}
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
@@ -98,21 +96,42 @@ const Component = () => {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              minTickGap={0} // Ensure labels have enough space
-              interval={0} // Ensure all labels are displayed
+              minTickGap={0}
+              interval={0}
             />
             <YAxis />
             <Tooltip
-              formatter={(value, name) => {
-                const label = chartConfig[name as keyof typeof chartConfig]?.label || name
-                return [`${value}`, label]
-              }}
-              labelFormatter={(label) => `Country: ${label}`}
+              cursor={false}
+              content={<CustomTooltip hoveredBar={hoveredBar} />}
+              isAnimationActive={false}
             />
             <Legend />
             {Object.keys(chartConfig).map((key) => (
               key !== "views" && (
-                <Bar key={key} dataKey={key} fill={chartConfig[key].color} />
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  fill={chartConfig[key].color}
+                  onMouseEnter={(data, index) => {
+                    setHoveredBar({ key, index });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredBar(null);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                  shape={(props) => {
+                    const isHovered = hoveredBar?.key === key && hoveredBar?.index === props.index;
+                    return (
+                      <path
+                        d={`M ${props.x},${props.y} h ${props.width} v ${props.height} h -${props.width} Z`}
+                        fill={props.fill}
+                        fillOpacity={isHovered ? 0.8 : 0.8}
+                        stroke={isHovered ? "#000" : "none"}
+                        strokeWidth={isHovered ? 1 : 0}
+                      />
+                    );
+                  }}
+                />
               )
             ))}
           </BarChart>
