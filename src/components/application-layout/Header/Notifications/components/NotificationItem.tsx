@@ -92,7 +92,6 @@ const NotificationItem = ({ type }: { type: string }) => {
 
     }
   } 
-  console.log("notifications", notifications)
 
   return (
     <div className='mt-2'>
@@ -213,7 +212,7 @@ const NotificationItem = ({ type }: { type: string }) => {
                           onClick={(e) => 
                             {
                               e.stopPropagation()
-                              actions?.handleArchiveNotification(notification.id)}}
+                              actions?.handleArchiveNotification(notification)}}
                         >
                           Archive
                         </DropdownMenuItem>

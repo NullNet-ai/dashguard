@@ -66,7 +66,7 @@ export const buildNotificationFilters = ({
       break
   }
 
-  if (filters.length > 0 && !showRead) {
+  if (filters.length > 0 && showRead) {
     filters.push(
       {
         operator: 'and',

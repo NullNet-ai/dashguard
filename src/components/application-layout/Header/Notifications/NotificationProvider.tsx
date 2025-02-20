@@ -45,6 +45,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState<number>(1);
 
+
+  const [ buffer, setBuffer ] = useState<INotificationSchema[]>([]);
+
+  const [loadingPopulateData, setLoadingPopulateData] = useState<boolean>(false);
+
   /**
    * Fetch notifications dynamically with filters, sorting, and ordering.
    */
@@ -81,26 +86,27 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         });
 
         const { data, total_count }  = await getNotifications({
+          isLoadMore,
           filters: additionalFilters,
           order: {
             sortBy: order.sortBy || selectedSort,
             sortOrder: order.sortOrder || selectedOrder,
             ...order,
-            limit: PAGE_SIZE,
+            limit: isLoadMore ? PAGE_SIZE : PAGE_SIZE * 3,
             starts_at: isLoadMore ? page * PAGE_SIZE : 0,
           },
         });
 
         if (isLoadMore) {
-          setNotifications((prev) => [...prev, ...data]);
-          setPage((prev) => prev + 1);
-          const notifications_length = [...notifications,...data].length
-          setHasMore(notifications_length !== total_count);
+          setBuffer((prev) => [...prev, ...data]);
+          setPage((prev) => prev + 3);
         } else {
-          setNotifications(data);
+          setNotifications(data.slice(0, PAGE_SIZE));
+          setBuffer(data.slice(PAGE_SIZE));
           setPage(1);
-          setHasMore(data.length < total_count);
+  
         }
+        setHasMore(data.length < total_count);
         setNotificationTotalCount(total_count);
 
         const count = await getNotificationsCountByContact();
@@ -117,11 +123,25 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const fetchMoreNotifications = useCallback(async () => {
     if (!hasMore || loading) return;
 
-    await fetchNotifications({
-      type,
-      isLoadMore: true,
-    });
-  }, [type, hasMore, loading, fetchNotifications]);
+    // await fetchNotifications({
+    //   type,
+    //   isLoadMore: true,
+    // });
+    if (buffer.length > 0) {
+      // Move items from buffer to displayed notifications
+      setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
+      setBuffer((prev) => prev.slice(PAGE_SIZE));
+  
+      // If buffer is almost empty, prefetch more notifications
+      if (buffer.length <= PAGE_SIZE) {
+        await fetchNotifications({
+          type,
+          isLoadMore: true,
+        });
+      }
+    }
+  
+  }, [type, hasMore, loading, fetchNotifications, buffer]);
 
   /**
    * Toggle between showing all notifications and only unread ones.
@@ -238,7 +258,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // to be deleted
   const handleInsert = async () => {
+    setLoadingPopulateData(true)
     await handlePopulateData();
+    setLoadingPopulateData(false)
   };
 
   const handleDropdownOpen = () => {
@@ -278,13 +300,17 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     await fetchNotifications({ type: type as TNotificationType });
   };
 
-  const handleArchiveNotification = async (id: string) => {
-    await changeNotificationStatus({
-      id,
+  const handleArchiveNotification = async (notification : INotificationSchema) => {
+    changeNotificationStatus({
+      id : notification.id,
       status: 'Archived',
     });
 
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if(notification.notification_status === 'unread'){
+      setNotificationCount((prev) => prev - 1);
+    }
+
+    setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
   };
 
   const handleRestoreNotificationStatus = async (id: string) => {
@@ -342,6 +368,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           selectedOrder,
           notificationTotalCount,
           hasMore,
+          loadingPopulateData,
         },
         actions,
       }}
