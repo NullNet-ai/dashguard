@@ -69,6 +69,8 @@ export const notificationsRouter = createTRPCRouter({
           }),
         ),
         order: z.object({
+          limit: z.number(),
+          starts_at: z.number(),
           sortBy: z.string(),
           sortOrder: z.enum(['asc', 'desc']),
         }),
@@ -97,11 +99,12 @@ export const notificationsRouter = createTRPCRouter({
             : []),
         ]
 
-        const { data } = await ctx.dnaClient
+        const { data, total_count } = await ctx.dnaClient
           .findAll({
             entity: ENTITY,
             token: ctx.token.value,
             query: {
+              track_total_records: true,
               pluck: [
                 'id',
                 'title',
@@ -122,14 +125,18 @@ export const notificationsRouter = createTRPCRouter({
               ],
               advance_filters: filters as IAdvanceFilters<string | number>[],
               order: {
-                limit: 50,
+                limit: input.order.limit || 50,
+                starts_at: input.order.starts_at || 0,
                 by_field: input.order.sortBy,
                 by_direction: input.order.sortOrder as EOrderDirection,
               },
             },
           })
           .execute()
-        return data
+        return {
+          data,
+          total_count,
+        }
       }
       return []
     }),

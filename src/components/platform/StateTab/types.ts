@@ -12,7 +12,7 @@ export interface TabItem {
 
 export interface StateTabContextType {
   tabs: TabItem[]
-  variant?: 'default' | 'pills' | 'underline'
+  variant?: 'default' | 'pills' | 'underline'|'shadow'
   size?: 'sm' | 'md' | 'lg'
   orientation?: 'horizontal' | 'vertical'
   defaultValue?: string

@@ -13,6 +13,7 @@ export interface SwitchProps
   rightLabel?: React.ReactNode
   rightLabelClassName?: string
   leftLabelClassName?: string
+  size?: "default" | "sm" // New size prop, default is "default"
 }
 
 const Switch = React.forwardRef<
@@ -27,6 +28,7 @@ const Switch = React.forwardRef<
   rightLabel,
   rightLabelClassName,
   leftLabelClassName,
+  size = "default", // default size is "default"
   checked: checkedProp,
   onCheckedChange,
   defaultChecked,
@@ -43,6 +45,8 @@ const Switch = React.forwardRef<
     onCheckedChange?.(newChecked)
   }
 
+  const switchSizeClasses = size === "sm" ? "h-4 w-8" : "h-6 w-12" // Adjust the size based on the "sm" value
+
   return (
     <div className="flex items-center gap-2">
       {leftLabel && (
@@ -52,7 +56,8 @@ const Switch = React.forwardRef<
       )}
       <SwitchPrimitives.Root
         className={cn(
-          "peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+          "peer inline-flex items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+          switchSizeClasses, // Add the size class
           className
         )}
         checked={checked}
@@ -62,7 +67,8 @@ const Switch = React.forwardRef<
       >
         <SwitchPrimitives.Thumb
           className={cn(
-            "pointer-events-none relative flex h-5 w-5 items-center justify-center rounded-full bg-background shadow-lg ring-0 transition-transform duration-300 data-[state=checked]:translate-x-6 data-[state=unchecked]:translate-x-0"
+            "pointer-events-none relative flex items-center justify-center rounded-full bg-background shadow-lg ring-0 transition-transform duration-300",
+            size === "sm" ? "h-3 w-3 data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0" : "h-5 w-5 data-[state=checked]:translate-x-6 data-[state=unchecked]:translate-x-0" // Thumb size and translate adjustment
           )}
         >
           {leftIcon && (
