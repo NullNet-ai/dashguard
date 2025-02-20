@@ -65,7 +65,7 @@ function StateTabList({
           )
         })}
       </TabsList>
-      <div className="mt-4">
+      <div>
         {tabs.map((tab) => {
           return (
             <TabsContent key={tab.id} value={tab.id}>

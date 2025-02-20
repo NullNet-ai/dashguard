@@ -187,7 +187,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const handlePinNotification = useCallback(
     async ({ id, is_pinned }: { id: string; is_pinned: boolean }) => {
       try {
-        await updatePinnedNotification({
+         updatePinnedNotification({
           id,
           is_pinned,
         });
