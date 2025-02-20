@@ -1,109 +1,82 @@
-'use client'
-import moment from 'moment'
-import React from 'react'
-import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+"use client";
+import moment from "moment";
+import React from "react";
 
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
-import { api } from '~/trpc/react'
+import { api } from "~/trpc/react";
 
-import {  getBarPath } from '../utils/getBarPath'
+import { cn } from "~/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
-interface ShapeProps {
-  x: number
-  y: number
-  width: number
-  height: number
-  value: number
-  payload: { hour: string }
-  chart_data: any
-}
 
-const chartConfig = {
-  heartbeats: {
-    label: 'Heartbeats',
-    color: '#008000',
-  },
-} satisfies ChartConfig
 
 const getLastTwentyFourHoursTimeStamp = () => {
-  const now = new Date()
+  const now = new Date();
 
-  const last_hours = new Date(now)
-  last_hours.setHours(now.getHours() - 24)
-  const replace = (_date: Date) => _date.toISOString().replace('T', ' ')
-    .substring(0, 19) + '+00'
+  const last_hours = new Date(now);
+  last_hours.setHours(now.getHours() - 24);
+  const replace = (_date: Date) =>
+    _date.toISOString().replace("T", " ").substring(0, 19) + "+00";
 
-  const formattedNow = replace(now)
-  const formattedLast24 = replace(last_hours)
+  const formattedNow = replace(now);
+  const formattedLast24 = replace(last_hours);
 
-  const result = [formattedLast24, formattedNow]
+  const result = [formattedLast24, formattedNow];
 
-  return result
-}
+  return result;
+};
 
-const CustomBarShape = (props: ShapeProps) => {
-  const { x, y, width, height, value, payload, chart_data } = props
-  
-  const d = getBarPath(x, y, width, height, value, payload.hour, chart_data)
-  return <path d={d} fill={chartConfig.heartbeats.color} />
-}
 
 export default function Connectivity({ device_id }: { device_id: string }) {
   const {
-    data: record = [{
-      hour: '',
-      heartbeats: 0,
-    }],
-    
+    data: record = [
+      {
+        hour: "",
+        heartbeats: 0,
+      },
+    ],
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastTwentyFourHoursTimeStamp(),
-  })
-  if (!device_id) return null
+  });
+  if (!device_id) return null;
 
   return (
-    <ChartContainer
-      className="h-9 w-44 border border-gray-300"
-      config={chartConfig}
-      style={{ margin: '2px', padding: '0', borderRadius: '8px' }}
-    >
-      <ResponsiveContainer className="h-full w-full">
-        <BarChart
-          barCategoryGap={-4}
-          barGap={-4}
-          data={record}
-          margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
-        >
-          <XAxis dataKey="hour" hide={true} />
-          <YAxis hide={true} />
-          {/* <Tooltip />
-           */}
-         {record?.length == 24 && <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter = { (value, name) => {
-                  return [`${name}: `, `${value ? 'Active' : 'Inactive'}`]
-                }}
-                indicator = "dot"
-                labelFormatter = { (value) => {
-                  return moment(value).format('MM/DD/YYYY HH:mm')
-                } }
-              />
-            }
-            cursor={false}
-          />}
-          <Bar
-            dataKey="heartbeats"
-            fill={chartConfig.heartbeats.color}
-            maxBarSize={6}
-            minPointSize={0}
-            shape={
-              (prop: any) => CustomBarShape({ ...prop, chart_data: record }) as any
-            }
-            strokeWidth={0}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    </ChartContainer>
-  )
+    <div className="flex h-9 w-[170px] flex-row rounded-lg border border-gray-300">
+      {record?.map((chart, index) => {
+        const lastCls = index === record.length - 1 ? "rounded-r-md" : "";
+        const firstCls = index === 0 ? "rounded-l-md" : "";
+
+        return (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger className="h-full w-[calc(100%/24)]">
+                <div
+                  className={cn(
+                    `h-full w-full`,
+                    `${chart.heartbeats === 100 ? "bg-green-700" : "bg-transparent"}`,
+                    lastCls,
+                    firstCls,
+                  )}
+                ></div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <div className="flex flex-col gap-y-1">
+                  <span className="font-semibold">{moment(chart.hour).format("MM/DD HH:mm")}</span>
+                  <div>
+                    Heartbeats:{" "}
+                    <span className="font-semibold">{chart.heartbeats === 100 ? "Active" : "Inactive"}</span>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      })}
+    </div>
+  );
 }
