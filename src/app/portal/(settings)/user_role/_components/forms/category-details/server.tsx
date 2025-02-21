@@ -1,29 +1,33 @@
-import { headers } from 'next/headers'
-import React from 'react'
+import { headers } from 'next/headers';
+import React from 'react';
 
-import { api } from '~/trpc/server'
+import { api } from '~/trpc/server';
 
-import CategoryDetails from './client'
+import CategoryDetails from './client';
 
 const StepOneOrganizationForm = async () => {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity, application, identifier] = pathname.split('/')
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , main_entity, application, identifier] = pathname.split('/');
 
-  const pluck_fields = ['id', 'code', 'categories', 'entity']
+  const pluck_fields = ['id', 'code', 'categories', 'entity'];
 
   const fetched_role_data = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
     pluck_fields,
-  })
+  });
 
-  const categories = fetched_role_data?.data?.categories?.[0]
-  const default_values = {
-    ...(fetched_role_data?.data || {}),
+  const {
     categories,
-  }
-  const user_role_id = default_values?.id
+    entity,
+    id: user_role_id,
+  } = fetched_role_data?.data || {};
+
+  const default_values = {
+    entity: entity ?? '',
+    categories: categories[0] ?? '',
+  };
 
   return (
     <div className="space-y-2">
@@ -40,7 +44,7 @@ const StepOneOrganizationForm = async () => {
         }}
       />
     </div>
-  )
-}
+  );
+};
 
-export default StepOneOrganizationForm
+export default StepOneOrganizationForm;
