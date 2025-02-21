@@ -38,17 +38,19 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showRead, setShowRead] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
-  const [type, setType] = useState<TNotificationType>();
+  const [type, setType] = useState<TNotificationType>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedSort, setSelectedSort] = useState<string>('timestamp');
   const [selectedOrder, setSelectedOrder] = useState<'asc' | 'desc'>('desc');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState<number>(1);
 
+  const [buffer, setBuffer] = useState<INotificationSchema[]>([]);
 
-  const [ buffer, setBuffer ] = useState<INotificationSchema[]>([]);
-
-  const [loadingPopulateData, setLoadingPopulateData] = useState<boolean>(false);
+  const [loadingPopulateData, setLoadingPopulateData] =
+    useState<boolean>(false);
+  const [loadingMarkAllAsRead, setLoadingMarkAllAsRead] =
+    useState<boolean>(false);
 
   /**
    * Fetch notifications dynamically with filters, sorting, and ordering.
@@ -78,43 +80,38 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }) => {
       try {
         if (!type) return [];
-        setLoading(true);
 
         const additionalFilters = buildNotificationFilters({
           type,
-          showRead: showReadValue
+          showRead: showReadValue,
         });
 
-        const { data, total_count }  = await getNotifications({
+        const { data, total_count } = await getNotifications({
           isLoadMore,
           filters: additionalFilters,
           order: {
-            sortBy: order.sortBy || selectedSort,
+            sortBy: order.sortBy || selectedOrder,
             sortOrder: order.sortOrder || selectedOrder,
-            ...order,
             limit: isLoadMore ? PAGE_SIZE : PAGE_SIZE * 3,
-            starts_at: isLoadMore ? page * PAGE_SIZE : 0,
+            starts_at: isLoadMore ? (page + 2) * PAGE_SIZE : 0,
           },
         });
 
         if (isLoadMore) {
           setBuffer((prev) => [...prev, ...data]);
-          setPage((prev) => prev + 3);
+          setPage((prev) => prev + 1);
         } else {
           setNotifications(data.slice(0, PAGE_SIZE));
           setBuffer(data.slice(PAGE_SIZE));
           setPage(1);
-  
+          setHasMore(data.slice(0, PAGE_SIZE).length < total_count);
+          setNotificationTotalCount(total_count);
         }
-        setHasMore(data.length < total_count);
-        setNotificationTotalCount(total_count);
 
         const count = await getNotificationsCountByContact();
         setNotificationCount(count as number);
       } catch (error) {
         console.error('❌ Failed to fetch notifications:', error);
-      } finally {
-        setLoading(false);
       }
     },
     [showRead, page, notifications.length],
@@ -123,36 +120,36 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const fetchMoreNotifications = useCallback(async () => {
     if (!hasMore || loading) return;
 
-    // await fetchNotifications({
-    //   type,
-    //   isLoadMore: true,
-    // });
-    if (buffer.length > 0) {
-      // Move items from buffer to displayed notifications
-      setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
-      setBuffer((prev) => prev.slice(PAGE_SIZE));
-  
-      // If buffer is almost empty, prefetch more notifications
-      if (buffer.length <= PAGE_SIZE) {
-        await fetchNotifications({
-          type,
-          isLoadMore: true,
-        });
-      }
-    }
-  
+    setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
+    setHasMore(
+      [...notifications, ...buffer.slice(0, PAGE_SIZE)].length <
+        notificationTotalCount,
+    );
+    setBuffer((prev) => prev.slice(PAGE_SIZE));
+    await fetchNotifications({
+      type,
+      isLoadMore: true,
+      showRead: showRead,
+      order: {
+        sortBy: selectedSort,
+        sortOrder: selectedOrder,
+      },
+    });
+
   }, [type, hasMore, loading, fetchNotifications, buffer]);
 
   /**
    * Toggle between showing all notifications and only unread ones.
    */
   const toggleUnread = async () => {
+    setLoading(true);
     const newShowRead = !showRead;
-    setShowRead(newShowRead);
     await fetchNotifications({
       type,
       showRead: newShowRead,
     });
+    setShowRead(newShowRead);
+    setLoading(false);
   };
 
   /**
@@ -205,13 +202,26 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
    * Toggle the pinned status of a notification.
    */
   const handlePinNotification = useCallback(
-    async ({ id, is_pinned }: { id: string; is_pinned: boolean }) => {
+    async ({
+      id,
+      is_pinned,
+      type,
+    }: {
+      id: string;
+      is_pinned: boolean;
+      type: TNotificationType;
+    }) => {
       try {
-         updatePinnedNotification({
+        updatePinnedNotification({
           id,
           is_pinned,
         });
 
+        if (type === 'pinned' && !is_pinned) {
+          setNotifications((prev) => prev.filter((n) => n.id !== id));
+          setNotificationCount((prev) => prev - 1);
+          return;
+        }
         setNotifications((prev) =>
           prev.map((notification) =>
             notification.id === id
@@ -235,9 +245,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         .filter((n) => n.notification_status === 'unread')
         .map((n) => n.id);
 
-      // Optimistic updates
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      updateBatchRead({
+      setLoadingMarkAllAsRead(true);
+      await updateBatchRead({
         ids: unreadNotificationIds,
         notification_status: 'read',
       });
@@ -249,8 +258,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             : notification,
         ),
       );
-
-      setNotificationCount(0);
+      setLoadingMarkAllAsRead(false);
+      setNotificationCount((prev) => prev - unreadNotificationIds.length);
     } catch (error) {
       console.error('❌ Failed to batch update notifications:', error);
     }
@@ -258,9 +267,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // to be deleted
   const handleInsert = async () => {
-    setLoadingPopulateData(true)
+    setLoadingPopulateData(true);
     await handlePopulateData();
-    setLoadingPopulateData(false)
+    setLoadingPopulateData(false);
   };
 
   const handleDropdownOpen = () => {
@@ -268,6 +277,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleSortChange = async (option: string) => {
+    setLoading(true)
     setSelectedSort(option);
     setIsDropdownOpen(false);
     setPage(1); // Reset page
@@ -278,9 +288,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         sortOrder: selectedOrder,
       },
     });
+    setLoading(false)
   };
 
   const handleSortOrderChange = async (order: string) => {
+    setLoading(true)
     setSelectedOrder(order as 'asc' | 'desc');
     setIsDropdownOpen(false);
     setPage(1); // Reset page
@@ -291,22 +303,34 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         sortOrder: order as 'asc' | 'desc',
       },
     });
+    setLoading(false)
   };
 
-  const handleChangeType = async (type: string) => {
-    setType(type as TNotificationType);
+  const handleChangeType = async (type: TNotificationType) => {
+    setLoading(true);
+
+    setType(type);
     setPage(1); // Reset page
     setNotifications([]);
-    await fetchNotifications({ type: type as TNotificationType });
+    setSelectedSort('timestamp');
+    setSelectedOrder('desc');
+    await fetchNotifications({ type: type as TNotificationType, order : {
+      sortBy: 'timestamp',
+      sortOrder: 'desc',
+    } });
+
+    setLoading(false)
   };
 
-  const handleArchiveNotification = async (notification : INotificationSchema) => {
+  const handleArchiveNotification = async (
+    notification: INotificationSchema,
+  ) => {
     changeNotificationStatus({
-      id : notification.id,
+      id: notification.id,
       status: 'Archived',
     });
 
-    if(notification.notification_status === 'unread'){
+    if (notification.notification_status === 'unread') {
       setNotificationCount((prev) => prev - 1);
     }
 
@@ -331,11 +355,17 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch notifications on mount
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchNotifications({ type });
+    const fetchNotificationCount = async () => {
+      await getNotificationsCountByContact()
+        .then((count) => {
+          setNotificationCount(count as number);
+        })
+        .catch((error) => {
+          console.error('❌ Failed to fetch notifications:', error);
+        });
     };
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetchData();
+    fetchNotificationCount();
   }, []);
 
   const actions: IActions = {
@@ -369,6 +399,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           notificationTotalCount,
           hasMore,
           loadingPopulateData,
+          loadingMarkAllAsRead,
         },
         actions,
       }}

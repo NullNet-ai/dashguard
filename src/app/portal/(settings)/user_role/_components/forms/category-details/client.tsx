@@ -12,10 +12,7 @@ import { api } from '~/trpc/react'
 import { type IFormProps } from '../types'
 
 export default function CategoryDetails(props: IFormProps) {
-  const { params } = props
-  const { defaultValues } = props
-  const { multiSelectOptions } = props
-  const { selectOptions } = props
+  const { params, defaultValues, selectOptions } = props
   const toast = useToast()
   const updateCategoryDetails = api.user_role.saveCategoryDetails.useMutation()
   const handleSave = async ({
@@ -62,7 +59,6 @@ export default function CategoryDetails(props: IFormProps) {
       formProps={params}
       formSchema={RoleCategoryDetailsSchema}
       handleSubmit={handleSave}
-      multiSelectOptions={multiSelectOptions}
       myParent={params.shell_type}
       selectOptions={selectOptions}
     />
