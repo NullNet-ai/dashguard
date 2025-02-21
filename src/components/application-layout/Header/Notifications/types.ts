@@ -72,5 +72,4 @@ export interface INotificationContext {
   actions: IActions
 }
 
-
 export type TNotificationType = 'all' | 'system' | 'social' | 'archive'

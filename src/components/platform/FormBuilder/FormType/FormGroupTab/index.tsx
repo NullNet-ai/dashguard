@@ -263,7 +263,17 @@ const FormGroupTab = ({
         if(SelectedComponent) {
           // If it's a ComponentType, render it as a component
           if (typeof SelectedComponent === 'function') {
-            return <SelectedComponent {...metadata} {...item} index={innerIndex} form={form} formSchema={formSchema}/>
+            return (
+              <SelectedComponent 
+                {...metadata} 
+                {...item} 
+                index={innerIndex} 
+                form={form} 
+                formSchema={formSchema} 
+                fieldConfig={fieldConfig} 
+                formRenderProps={formRenderProps}
+              />
+            )
           }
           // If it's a JSX.Element, return it directly
           return SelectedComponent;

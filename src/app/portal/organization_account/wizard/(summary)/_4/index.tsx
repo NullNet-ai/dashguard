@@ -40,7 +40,7 @@ const SummaryConfig = {
   components: [
     {
       label: 'Confirmation',
-      component: <Summary form_key="Confirmation" />,
+      component: <Summary form_key='Confirmation' />,
     },
   ],
 }

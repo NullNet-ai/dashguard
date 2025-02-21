@@ -37,6 +37,7 @@ import {
 } from "../../types/global/interfaces";
 import { cn } from "~/lib/utils";
 import { ButtonWithDropdown } from "~/components/platform/ButtonWithDropdown";
+import { capitalize } from 'lodash';
 
 interface IProps {
   fieldConfig: IField;
@@ -61,19 +62,25 @@ const FormMultiField = ({
   });
   const { register } = form;
 
+  const parentProps = fieldConfig?.multiFieldConfig?.parentProps
+
   const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
-  const initialVal = {
-    fieldType: "input",
-    name: fieldConfig?.multiFieldConfig?.fields?.name ?? "",
-  };
+
   const defValue = fieldConfig.multiFieldConfig?.fields?.name
-    ? { [fieldConfig.multiFieldConfig.fields.name]: "" }
+    ? { [fieldConfig.multiFieldConfig.fields.name]: "", fieldType: "input" }
     : { name: "", fieldType: "input" };
 
+
   useEffect(() => {
-    if (!fields?.length) {
-      append({ ...initialVal, ...defValue });
+    if (!parentProps && !fields?.length) {
+        append(defValue)
+    } else {
+      if(parentProps && !fields?.length) {
+        parentProps.fields?.map((field: any) => {
+          append(field)
+        })
+      }
     }
   }, []);
   if (isHidden) {
@@ -89,6 +96,7 @@ const FormMultiField = ({
     index: number,
     fieldType: string,
     selectOptions?: any,
+    customname?: string
   ) => {
 
     const commonProps = {
@@ -102,7 +110,7 @@ const FormMultiField = ({
           <FormItem>
             <FormControl>
               <Input
-                {...register(`${fieldConfig.name}.${index}.${field.name}`)}
+                {...register(`${customname ? customname : `${fieldConfig.name} {index}.${field.name}`}`)}
                 {...commonProps}
                 placeholder={field.placeholder}
               />
@@ -186,8 +194,9 @@ const FormMultiField = ({
           onMove={({ activeIndex, overIndex }) => move(activeIndex, overIndex)}
         >
           <div className="!m-0 flex w-full flex-col">
-            {fields.map((field, index) => (
-              <SortableItem key={field.id} value={field.id} asChild
+            {fields.map((field, index) => {
+              return (
+                <SortableItem key={field.id} value={field.id} asChild
                 draggable={isDisabled ? false : true}
               >
                 <div className="border-default-100 flex flex-row items-center gap-2 border-b py-2">
@@ -204,7 +213,8 @@ const FormMultiField = ({
                   <div className="min-w-[150px]">
                     <FormLabel className="font-normal"
                     >
-                      {form.getValues(`${fieldConfig.name}.${index}.name`) ??
+                     {/* @ts-expect-error temporary */}
+                      { parentProps ? capitalize(field.name.replace(/[-_]/g, ' ')) :  form.getValues(`${fieldConfig.name}.${index}.name`) ??
                         fieldConfig.multiFieldConfig?.fields?.label}
                     </FormLabel>
                   </div>
@@ -218,8 +228,9 @@ const FormMultiField = ({
                       control={form.control}
                       disabled={isDisabled}
                       name={`${fieldConfig.multiFieldConfig?.fields.name}-${index}-${fieldConfig?.name ?? ""}`}
-                      render={() =>
-                        fieldConfig.multiFieldConfig ? (
+                      render={() => {
+                        const fieldname = parentProps ? `${parentProps?.fieldConfig?.name}.${parentProps?.index}.metadata.fields.${index}.value` : undefined
+                        return fieldConfig.multiFieldConfig ? (
                           (renderFormControl(
                             fieldConfig.multiFieldConfig.fields,
                             index,
@@ -229,12 +240,14 @@ const FormMultiField = ({
                             fieldConfig.multiFieldConfig?.fieldOptions[form.getValues(
                               `${fieldConfig.name}.${index}.optionId`,
                             )]?.options ?? []
-                       
                            ,
+                           fieldname
                           ) ?? <div />)
                         ) : (
                           <div />
                         )
+                      }
+                        
                       }
                     />
                   </div>
@@ -256,7 +269,8 @@ const FormMultiField = ({
                   ) : null}
                 </div>
               </SortableItem>
-            ))}
+              )
+            })}
           </div>
         </Sortable>
       </FormControl>

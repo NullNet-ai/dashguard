@@ -36,6 +36,7 @@ interface OptionType {
 }
 
 interface DraggableConfig {
+  parentProps?: any
   fields: IField & {
     selectOptions?: ISelectOptions[]
     radioOptions?: IRadioOptions[]

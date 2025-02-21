@@ -11,21 +11,23 @@ import MultiFieldForms from './components/multfield-form'
 
 export default function GroupTabView2() {
 
+  const customFieldSchema =  z.object({
+    fields: z
+      .array(
+        z.object({})
+          .catchall(
+            z.string()
+              .min(2, { message: "Field value must be at least 2 characters long" })
+          )
+      )
+      .optional(),
+  })
+
   const metadataSchema = z
   .object({})
   .catchall(z.any()) // ✅ Allows any additional dynamic keys
   .merge(
-    z.object({
-      draggable: z
-        .array(
-          z.object({
-            "full-name": z
-              .string({ message: "Full Name is required" })
-              .min(2, { message: "Full Name must be at least 2 characters long" }),
-          })
-        )
-        .optional(), // ✅ Makes draggable optional
-    })
+    customFieldSchema
   );
 
 const FormSchema = z.object({
@@ -97,13 +99,17 @@ const FormSchema = z.object({
             tabName: 'Multi fields',
             order:2,
             metadata:{
-              draggable: [
+              fields: [
                 {
-                  "full-name": "John Doe",
+                  "value": "John Doesss",
+                  "name": 'full-name',
+                  "fieldType": "input",
                 },
                 {
-                  "full-name": "Jane Doe",
-                },
+                  "value": "John Doesss",
+                  "name": 'age',
+                  "fieldType": "input",
+                }
               ],
             },
             tabChildren: [],
