@@ -4,7 +4,7 @@ import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { Button } from '~/components/ui/button';
 import GridManageFilter from './SideDrawer';
 
-export default function ManageFilter() {
+export default function ManageFilter(tab : any) {
   const { actions } = useSideDrawer();
 
   const handleManageFilter = () => {
@@ -13,12 +13,13 @@ export default function ManageFilter() {
       sideDrawerWidth: '1000px',
       body: {
         component: () => <GridManageFilter />,
+        componentProps : tab
       },
     });
   };
 
   return (
-    <Button
+      <Button
       onClick={handleManageFilter}
       Icon={Table}
       iconPlacement="left"

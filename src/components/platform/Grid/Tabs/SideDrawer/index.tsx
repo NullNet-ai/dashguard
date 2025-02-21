@@ -5,6 +5,9 @@ import FilterContent from './Tabs/Filter';
 import Header from './Header';
 import NameInput from './NameInput';
 import ColumnContent from './Tabs/Columns';
+import SortContent from './Tabs/Sort';
+import GroupContent from './Tabs/Group';
+import { useSideDrawer } from '~/components/platform/SideDrawer';
 
 interface FilterCondition {
   field: string;
@@ -15,9 +18,11 @@ interface FilterCondition {
 type TabType = 'filter' | 'sort' | 'group' | 'columns';
 
 export default function SideDrawer() {
-  const [filterName, setFilterName] = useState('');
-  const [conditions, setConditions] = useState<FilterCondition[]>([]);
+  const { state } = useSideDrawer();
+  const { config } = state || {};
 
+  const { tab } = config?.body?.componentProps || {};
+  
   const tabs = [
     {
       id: 'filter',
@@ -27,20 +32,12 @@ export default function SideDrawer() {
     {
       id: 'sort',
       label: 'Sort',
-      content: (
-        <div className="p-4 text-center text-gray-500">
-          Sort functionality coming soon
-        </div>
-      ),
+      content: <SortContent />,
     },
     {
       id: 'group',
       label: 'Group',
-      content: (
-        <div className="p-4 text-center text-gray-500">
-          Group functionality coming soon
-        </div>
-      ),
+      content: <GroupContent />,
     },
     {
       id: 'columns',
@@ -54,7 +51,7 @@ export default function SideDrawer() {
       <div className="flex mx-4 h-full flex-col">
         <Header />
 
-        <NameInput />
+        <NameInput tab={tab}/>
 
         {/* Tabs */}
         <div className="flex-1 overflow-y-auto">

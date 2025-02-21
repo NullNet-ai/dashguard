@@ -6,7 +6,7 @@ const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
 });
 
-export default function NameInput() {
+export default function NameInput(tab : any) {
   const form = useForm();
   return (
     <div className="border-b p-4">

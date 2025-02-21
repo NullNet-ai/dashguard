@@ -20,7 +20,7 @@ export default function TabGridMenu({
 }: IProps) {
   return (
     <DropdownMenuContent align="end">
-      <ManageFilter />
+      <ManageFilter tab={tab} />
     </DropdownMenuContent>
   );
 }
