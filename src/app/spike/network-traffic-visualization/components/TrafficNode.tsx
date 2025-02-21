@@ -1,6 +1,7 @@
 import { Handle, Position } from '@xyflow/react'
 import { useState } from 'react'
 import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { generateTicks } from '../functions/generateTicks'
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
   const [showTooltip, setShowTooltip] = useState(false)
@@ -8,11 +9,7 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
   const value = data._maxBandwidth
   const tooltipData = [{ name: '1', value }]
 
-  const generateTicks = (value: number) => {
-    const maxValue = Math.ceil(value * 1.2)
-    const tickCount = 5
-    return Array.from({ length: tickCount + 1 }, (_, i) => (maxValue / tickCount) * i)
-  }
+  
 
   const minOpacity = 0.2
   const maxOpacity = 1.0

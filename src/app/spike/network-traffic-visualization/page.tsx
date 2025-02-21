@@ -5,10 +5,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 import '@xyflow/react/dist/style.css'
 import { api } from '~/trpc/react'
 
-import { generateFlowData } from './generateFlowData'
-import IPNode from './IPNode'
-import TrafficNode from './TrafficNode'
+import IPNode from './components/IPNode'
+import TrafficNode from './components/TrafficNode'
 import { type Edge, type FlowElement } from './types'
+import { generateFlowData } from './functions/generateFlowData'
 
 export default function NetworkFlow() {
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
