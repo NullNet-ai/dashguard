@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Wizard",
-  "tag": "1.7.0-rc.2<unreleased>",
-  "branch": "unreleased/test/1.7.0-rc.2<unreleased>",
-  "message": "remove pagination",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.8.1-rc.2<unreleased>",
+  "branch": "unreleased/fixPLATFORM7-2835/1.8.1-rc.2<unreleased>",
+  "message": "Fix some env flags outdated",
+  "publish_name": "Shem Alexis Chavez"
 }

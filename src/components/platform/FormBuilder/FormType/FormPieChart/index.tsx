@@ -2,7 +2,7 @@
 
 import { capitalize } from "lodash";
 import React, { useMemo } from "react";
-import { Pie, PieChart, Tooltip } from "recharts";
+import { LabelList, Pie, PieChart, Tooltip } from "recharts";
 
 import {
   CardContent,
@@ -75,7 +75,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[350px] w-[420px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+          className="mx-auto aspect-square max-h-[350px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
         >
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent hideLabel />}/>
@@ -84,7 +84,8 @@ const FormPieChart = (props: IFormPieChartProps) => {
               dataKey="value"
               label={renderCustomPieChartLabel ?? true}
               nameKey="key"
-            />
+              labelLine={false}
+              />
            <ChartLegend
               content={<ChartLegendContent nameKey="key" />}
               className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center mt-8"

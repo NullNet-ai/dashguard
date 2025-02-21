@@ -56,9 +56,10 @@ export interface IActions {
   handleSortOrderChange: (option: string) => void
   handleChangeType: (type: string) => void
   handleInsert: () => void
-  handleArchiveNotification: (id: string) => void
+  handleArchiveNotification: (notification: INotificationSchema) => void
   handleRestoreNotificationStatus: (id: string) => void
   handleDeleteNotification: (id: string) => void
+  fetchMoreNotifications: () => void
 }
 
 export interface IState {

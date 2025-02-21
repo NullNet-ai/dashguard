@@ -14,7 +14,7 @@ export async function NextPage() {
     = pathname.split('/')
   let [, , mainEntity, application = 'wizard', identifier, currentStep] = path
   let version = '1'
-  if (process.env.IS_PLAYGROUND) {
+  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
     const [, , playgroundApplication, , playgroundVersion, playgroundIdentifier, playgroundCurrentStep] = path
     application = playgroundApplication || 'wizard'
     version = playgroundVersion || '1'
@@ -32,7 +32,7 @@ export async function NextPage() {
   })
 
   if (fullSearchQueryParams) {
-    if (process.env.IS_PLAYGROUND) {
+    if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
       redirect(
         `/portal/wizard/version/${version}/${identifier}/${step}?${fullSearchQueryParams}`,
       )
@@ -43,7 +43,7 @@ export async function NextPage() {
       )
     }
   }
-  if (process.env.IS_PLAYGROUND) {
+  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
     redirect(`/portal/wizard/version/${version}/${identifier}/${step}`)
   }
   else {

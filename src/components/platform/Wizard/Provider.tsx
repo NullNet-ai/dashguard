@@ -62,7 +62,7 @@ export default function WizardProvider({
   const path =
   usePathname().split("/");
   let [, portal, mainEntity, application = "wizard", identifier, step] = path;
-  if (process.env.IS_PLAYGROUND) {
+  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
     const [, , playgroundPortal, playgroundApplication, , playgroundIdentifier, playgroundStep] = path
     portal = playgroundPortal
     application = playgroundApplication || "wizard"
