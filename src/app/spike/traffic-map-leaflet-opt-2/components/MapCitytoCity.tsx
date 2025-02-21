@@ -29,9 +29,7 @@ const geocodeAddress = async (address) => {
 
 const trafficData = {
   'United Kingdom': { city: 'London, UK', trafficLevel: 75 },
-  // 'United States of America': { city: 'New York, USA', trafficLevel: 85 },
   'Japan': { city: 'Tokyo, Japan', trafficLevel: 30 },
-  // 'Germany': { city: 'Berlin, Germany', trafficLevel: 50 },
   'France': { city: 'Paris, France', trafficLevel: 60 },
   'China': { city: 'Beijing, China', trafficLevel: 95 },
   'India': { city: 'Mumbai, India', trafficLevel: 70 },
@@ -39,7 +37,6 @@ const trafficData = {
   'South Korea': { city: 'Seoul, South Korea', trafficLevel: 35 },
   'Australia': { city: 'Sydney, Australia', trafficLevel: 25 },
   'Italy': { city: 'Rome, Italy', trafficLevel: 50 },
-  // 'Mexico': { city: 'Mexico City, Mexico', trafficLevel: 65 },
   'Spain': { city: 'Madrid, Spain', trafficLevel: 40 },
   'Netherlands': { city: 'Amsterdam, Netherlands', trafficLevel: 30 },
   'Indonesia': { city: 'Jakarta, Indonesia', trafficLevel: 80 },
@@ -62,6 +59,7 @@ const createFlowLine = (map, fromCoord, toCoord, trafficLevel, cityName) => {
   const options = {
     color: color,
     weight: weight,
+    dashArray: '10, 10',
     vertices: 200,
     offset: 20
   };
@@ -108,8 +106,8 @@ const MapComponent = () => {
       const style = {
         fillColor: color,
         fillOpacity: 0.6,
-        color: color,
-        weight: 2,
+        color: color, // Removed border
+        weight: 0,
         opacity: 0.8
       };
       return L.geoJSON(geojson, {

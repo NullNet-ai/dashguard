@@ -20,6 +20,10 @@
 // }
 'use client';
 
+import MapCitytoCity from "./components/MapCitytoCity";
+import MapCountrytoCountry from "./components/MapCountrytoCountry";
+import MapRegiontoRegion from "./components/MapRegiontoRegion";
+
 // import { useEffect } from 'react';
 // import L from 'leaflet';
 // import 'leaflet/dist/leaflet.css';
@@ -74,15 +78,14 @@
 // export default Map;
 
 // pages/index.js
-import Map from './components/Map';
-import MapOption1 from './components/MapOption1';
-import MapOption2NoCountry from './components/MapOption2NoCountry';
 
 export default function Home() {
   return (
     <div>
       <h1>Traffic Flow to Philippines Server</h1>
-      <MapOption2NoCountry />
+      {/* <MapCitytoCity /> */}
+      <MapRegiontoRegion />
+      {/* <MapCountrytoCountry /> */}
     </div>
   );
 }
