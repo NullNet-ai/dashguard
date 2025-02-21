@@ -182,6 +182,7 @@ export function HeaderSection() {
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
+        Notifications
         ({notificationCount > 99 ? '99+' : notificationCount})
       </h2>
       <div className="mr-2 flex items-center gap-2">
