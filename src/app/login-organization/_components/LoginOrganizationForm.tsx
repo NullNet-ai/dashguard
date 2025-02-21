@@ -9,6 +9,7 @@ import FormSelect from '~/components/platform/FormBuilder/FormType/FormSelect';
 import { Button } from '~/components/ui/button';
 import { Form, FormField, FormMessage } from '~/components/ui/form';
 import redirectToSignIn from '../_actions/redirectToSignIn';
+import loginOrganization from '../_actions/logInOrganization';
 
 const LoginOrganizationFormSchema = z.object({
   organization: z
@@ -22,12 +23,22 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
     defaultValues,
   });
 
-  const [isSubmitting] = useState(false);
-  const [error] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const onSubmit = async (data: any) => {
-    alert(JSON.stringify(data, null, 2));
-    
+    setIsSubmitting(true);
+    try {
+      await loginOrganization(data.organization);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Invalid credentials');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleRedirectToSignIn = async () => {
@@ -57,12 +68,12 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
                 selectOptions={selectOptions}
               />
             );
-          } }
+          }}
         />
         {error && <FormMessage>{error}</FormMessage>}
         <div className="flex justify-between gap-4">
           <Button
-            className="flex h-auto w-full items-center justify-center gap-2 rounded bg-white py-1.5 text-md font-semibold text-foreground shadow-sm border border-foreground"
+            className="flex h-auto w-full items-center justify-center gap-2 rounded border border-foreground bg-white py-1.5 text-md font-semibold text-foreground shadow-sm"
             type="button"
             onClick={handleRedirectToSignIn}
           >
@@ -84,5 +95,3 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
 };
 
 export default LoginOrganizationForm;
-
-

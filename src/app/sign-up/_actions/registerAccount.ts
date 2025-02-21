@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation';
 
 import { verifySession } from '~/app/login/actions/loginSubmit';
+import { EStatus } from '~/server/api/types';
 import { api } from '~/trpc/server';
 import { handleLoginError } from '~/utils/login-validator';
 
@@ -36,7 +37,6 @@ export default async function registerAccount({
       password,
       account_id: email,
       account_secret: password,
-      account_organization_name: organization_name,
       is_new_user: false,
     };
 
@@ -65,28 +65,9 @@ export default async function registerAccount({
     await verifySession();
 
     /**
-     * Create organization
-     */
-    const createdOrganizationResponse = await api.form.createDynamicRecord({
-      entity: 'organization',
-      data: {
-        organization_name,
-        categories: ['User'],
-        entity: 'Contact',
-      },
-    });
-
-    const organizationDataError = handleLoginError(createdOrganizationResponse);
-    if (organizationDataError) {
-      return organizationDataError;
-    }
-
-    const organization_id = createdOrganizationResponse?.data?.[0]?.id;
-
-    /**
      * Create contact
      */
-    const createdContactResponse = await api.form.createDynamicRecord({
+    await api.form.createDynamicRecord({
       entity: 'contact',
       data: {
         first_name,
@@ -96,39 +77,14 @@ export default async function registerAccount({
       },
     });
 
-    const contact_id = createdContactResponse?.data?.[0]?.id;
-
-    /**
-     * Create organization contact
-     */
-    await api.form.createDynamicRecord({
-      entity: 'organization_contacts',
-      data: {
-        contact_organization_id: organization_id,
-        contact_id,
-        is_primary: true,
-      },
-    });
-
-    /**
-     * Create contact email
-     */
-    await api.form.createDynamicRecord({
-      entity: 'contact_email',
-      data: {
-        email,
-        is_primary: true,
-        contact_id,
-      },
-    });
-    
   } catch (err: any) {
     console.error(error);
     error = err;
   } finally {
     if (error as any) {
       return {
-        error: (error as any)?.message ?? 'Something went wrong please try again',
+        error:
+          (error as any)?.message ?? 'Something went wrong please try again',
         type: 'unknown',
       };
     }

@@ -34,24 +34,19 @@ export default async function LoginSubmit({
   }
 
   const accountDataResponse = await api.auth.getAccountData({ username })
-  const { id, is_new_user, contact_id } = accountDataResponse ?? {};
+  const { id, is_new_user } = accountDataResponse ?? {};
 
   if (is_new_user) {
-    redirect(`/setup-password?filter_id=${id ?? ''}`);
+    return redirect(`/setup-password?filter_id=${id ?? ''}`);
   }
 
   /**
    * fetch organizations from contact_id
    */
-  const fetchedOrganizations = await api.organizationContact.fetchOrganizations({
-    contact_id,
-  });
-  const { data } = fetchedOrganizations?? {};
-
+  const fetchedOrganizations = await api.auth.fetchAccountDetailsThruEmail();
   
-  if (data?.organizations?.length) {
-  // if (data?.organizations?.length > 0) {
-    // redirect(`/login-organization/${contact_id?? ''}`);
+  if (fetchedOrganizations?.data?.length > 1) {
+    return redirect('/login-organization');
     
   }
 
