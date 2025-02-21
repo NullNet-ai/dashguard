@@ -1,7 +1,7 @@
 import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
 import argon2 from 'argon2';
 import { z } from 'zod';
-import Bluebird from 'bluebird'
+import Bluebird from 'bluebird';
 import {
   createTRPCRouter,
   privateProcedure,
@@ -20,6 +20,7 @@ import { formatPhoneNumber } from '~/utils/formatter';
 import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 import { pick } from 'lodash';
+import { formatDate } from '~/server/utils/formatDate';
 
 const { MAILER_AUTH_USER, MAILER_AUTH_PASS, MAILER_HOST, MAILER_PORT } =
   process.env;
@@ -293,9 +294,9 @@ export const accountRouter = createTRPCRouter({
                 organizations: ['id', 'name'],
                 organization_contacts: ['id', 'contact_organization_id'],
               },
-              // advance_filters: createAdvancedFilter({
-              //   contact_id,
-              // }),
+              advance_filters: createAdvancedFilter({
+                contact_id,
+              }),
               order: {
                 limit: 100,
               },
@@ -916,6 +917,9 @@ export const accountRouter = createTRPCRouter({
               params: {
                 account_id: accountRecord?.id,
                 status: 'Active',
+                expiration_date: formatDate(
+                  new Date(new Date().setDate(new Date().getDate() + 1)),
+                ).date,
               },
               pluck: ['id', 'code', 'status'],
             },
@@ -1291,12 +1295,13 @@ export const accountRouter = createTRPCRouter({
               },
             ],
             pluck_object: {
-              invitations: ['id', 'account_id', 'status', 'created_date'],
+              invitations: ['id', 'account_id', 'status', 'created_date', 'expiration_date'],
               organization_accounts: [
                 'id',
                 'account_organization_id',
                 'role_id',
                 'account_id',
+                'organization_id',
                 'status',
                 'email',
                 'categories',
@@ -1343,6 +1348,7 @@ export const accountRouter = createTRPCRouter({
           categories: invitationRecord?.organizations?.categories,
           name: invitationRecord?.organizations?.name,
         },
+        organization_name: invitationRecord?.organizations?.name,
         role: invitationRecord?.user_roles?.role,
         contact: {
           ...invitationRecord?.contacts,
@@ -1351,290 +1357,293 @@ export const accountRouter = createTRPCRouter({
         invitation: invitationRecord?.invitations,
       };
     }),
-  getUserGridItem: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
-    const hasAdvanceFilters = input?.advance_filters?.length
-      ? [
-          // {
-          //   type: "operator",
-          //   operator: EOperator.AND,
-          // },
-          ...(input?.advance_filters ?? []),
-        ]
-      : [...(input?.advance_filters ?? [])]
-
-    const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
-      .findAll({
-        entity: 'contacts',
-        token: ctx.token.value,
-        query: {
-          pluck_group_object: {
-            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
-            contact_emails: ['email', 'is_primary'],
-          },
-          pluck_object: {
-            contact_emails: ['email', 'is_primary'],
-            contact_phone_numbers: [
-              'raw_phone_number',
-              'iso_code',
-              'country_code',
-              'is_primary',
-            ],
-            contacts: [...input.pluck, 'previous_status'],
-          },
-          track_total_records: true,
-          advance_filters: [
+  getUserGridItem: privateProcedure
+    .input(ZodItems)
+    .query(async ({ ctx, input }) => {
+      const hasAdvanceFilters = input?.advance_filters?.length
+        ? [
             // {
-            //   type: "criteria",
-            //   field: "id",
-            //   operator: EOperator.NOT_EQUAL,
-            //   // ! TODO ENV
-            //   values: ["01JCSAG79KQ1WM0F9B47Q700P1"],
+            //   type: "operator",
+            //   operator: EOperator.AND,
             // },
-            ...hasAdvanceFilters,
-          ] as IAdvanceFilters[],
-          order: {
-            starts_at:
-              // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
-                ? 0
-                : (input.current || 1) * (input.limit || 100)
-                  - (input.limit || 100),
-            limit: input.limit || 1,
-            // by_field: "created_date",
-            // by_direction: EOrderDirection.ASC,
-          },
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
-            : [],
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'contact_email',
-            field: 'contact_id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'contact_phone_number',
-            field: 'contact_id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'organization_accounts',
-            field: 'contact_id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'created_by',
-          },
-          from: {
-            alias: 'created_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'updated_by',
-          },
-          from: {
-            alias: 'updated_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .execute()
+            ...(input?.advance_filters ?? []),
+          ]
+        : [...(input?.advance_filters ?? [])];
 
-    const fetchOrganizations = async (contact_id: string) => {
-      const org_contacts: any = await ctx.dnaClient
+      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
         .findAll({
-          entity: 'organization_contacts',
+          entity: 'contacts',
           token: ctx.token.value,
           query: {
+            pluck_group_object: {
+              contact_phone_numbers: ['raw_phone_number', 'is_primary'],
+              contact_emails: ['email', 'is_primary'],
+            },
             pluck_object: {
-              organizations: ['id', 'name'],
-              organization_contacts: [
-                'id',
-                'contact_organization_id',
+              contact_emails: ['email', 'is_primary'],
+              contact_phone_numbers: [
+                'raw_phone_number',
+                'iso_code',
+                'country_code',
                 'is_primary',
               ],
+              contacts: [...input.pluck, 'previous_status'],
             },
-            advance_filters: createAdvancedFilter({
-              contact_id,
-            }),
+            track_total_records: true,
+            advance_filters: [
+              // {
+              //   type: "criteria",
+              //   field: "id",
+              //   operator: EOperator.NOT_EQUAL,
+              //   // ! TODO ENV
+              //   values: ["01JCSAG79KQ1WM0F9B47Q700P1"],
+              // },
+              ...hasAdvanceFilters,
+            ] as IAdvanceFilters[],
+            order: {
+              starts_at:
+                // current 5 *  input.limit 50 = 250
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+              // by_field: "created_date",
+              // by_direction: EOrderDirection.ASC,
+            },
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
+              : [],
           },
         })
         .join({
           type: 'left',
           field_relation: {
             to: {
-              entity: 'organizations',
-              field: 'id',
+              entity: 'contact_email',
+              field: 'contact_id',
             },
             from: {
-              entity: 'organization_contacts',
-              field: 'contact_organization_id',
+              entity: 'contacts',
+              field: 'id',
             },
-          },
-        })
-        .execute()
-
-      const primary_org = org_contacts.data.find(
-        (org: Record<string, any>) => !!org.organization_contacts.is_primary,
-      )
-
-      const org_contact_user_roles = await ctx.dnaClient
-        .findAll({
-          entity: 'organization_contact_user_roles',
-          token: ctx.token.value,
-          query: {
-            pluck_object: {
-              user_roles: ['id', 'role'],
-              organization_contact_user_roles: ['id'],
-            },
-            advance_filters: createAdvancedFilter({
-              organization_contact_id: primary_org?.organization_contacts?.id,
-            }),
           },
         })
         .join({
           type: 'left',
           field_relation: {
             to: {
-              entity: 'user_roles',
-              field: 'id',
+              entity: 'contact_phone_number',
+              field: 'contact_id',
             },
             from: {
-              entity: 'organization_contact_user_roles',
-              field: 'user_role_id',
+              entity: 'contacts',
+              field: 'id',
             },
           },
         })
-        .execute()
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contacts',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'contact',
+              field: 'created_by',
+            },
+            from: {
+              alias: 'created_by',
+              entity: 'contact',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'contact',
+              field: 'updated_by',
+            },
+            from: {
+              alias: 'updated_by',
+              entity: 'contact',
+              field: 'id',
+            },
+          },
+        })
+        .execute();
 
-      return {
-        organization: primary_org?.organizations?.name ?? '',
-        roles: org_contact_user_roles?.data
-          ? org_contact_user_roles.data.map(item => item?.user_roles?.role)
-          : [],
-      }
-    }
+      const fetchOrganizations = async (contact_id: string) => {
+        const org_contacts: any = await ctx.dnaClient
+          .findAll({
+            entity: 'organization_contacts',
+            token: ctx.token.value,
+            query: {
+              pluck_object: {
+                organizations: ['id', 'name'],
+                organization_contacts: [
+                  'id',
+                  'contact_organization_id',
+                  'is_primary',
+                ],
+              },
+              advance_filters: createAdvancedFilter({
+                contact_id,
+              }),
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'organizations',
+                field: 'id',
+              },
+              from: {
+                entity: 'organization_contacts',
+                field: 'contact_organization_id',
+              },
+            },
+          })
+          .execute();
 
-    let formatted_items = await Bluebird.map(items, async (item: any) => {
-      const { organization, roles } = await fetchOrganizations(
-        item?.contacts?.id,
-      )
-      return {
-        organization,
-        roles,
-        ...item,
-      }
-    })
+        const primary_org = org_contacts.data.find(
+          (org: Record<string, any>) => !!org.organization_contacts.is_primary,
+        );
 
-    formatted_items = formatted_items.reduce(
-      (acc: Record<string, string>[], item: Record<string, any>) => {
-        const {
-          contacts,
-          contact_emails,
-          contact_phone_numbers,
-          created_by,
-          updated_by,
-          roles,
+        const org_contact_user_roles = await ctx.dnaClient
+          .findAll({
+            entity: 'organization_contact_user_roles',
+            token: ctx.token.value,
+            query: {
+              pluck_object: {
+                user_roles: ['id', 'role'],
+                organization_contact_user_roles: ['id'],
+              },
+              advance_filters: createAdvancedFilter({
+                organization_contact_id: primary_org?.organization_contacts?.id,
+              }),
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'user_roles',
+                field: 'id',
+              },
+              from: {
+                entity: 'organization_contact_user_roles',
+                field: 'user_role_id',
+              },
+            },
+          })
+          .execute();
+
+        return {
+          organization: primary_org?.organizations?.name ?? '',
+          roles: org_contact_user_roles?.data
+            ? org_contact_user_roles.data.map((item) => item?.user_roles?.role)
+            : [],
+        };
+      };
+
+      let formatted_items = await Bluebird.map(items, async (item: any) => {
+        const { organization, roles } = await fetchOrganizations(
+          item?.contacts?.id,
+        );
+        return {
           organization,
-        } = item
+          roles,
+          ...item,
+        };
+      });
 
-        const emails = pick(contact_emails, ['emails', 'is_primaries'])
-        const phones = pick(contact_phone_numbers, [
-          'raw_phone_numbers',
-          'iso_code',
-          'country_code',
-          'is_primaries',
-        ])
-        const existing_contact = acc?.find(
-          (acc_item: any) => acc_item?.id === contacts?.id,
-        )
-
-        if (existing_contact) return acc
-
-        const {
-          raw_phone_numbers,
-          iso_code,
-          is_primaries: p_is_primaries,
-        } = phones
-        const { emails: _emails, is_primaries: e_is_primaries } = emails
-        const filterPrimary = (li: string[], is_primaries: number[]) => {
-          if (!li || !is_primaries) return null
-          const index = is_primaries?.findIndex(
-            is_primary => is_primary === 1,
-          )
-          return index !== -1 ? li[index] : null
-        }
-        const _primary_phone_number = filterPrimary(
-          raw_phone_numbers, p_is_primaries,
-        )
-        const primary_email = filterPrimary(_emails, e_is_primaries)
-
-        const primary_phone_number = formatPhoneNumber({
-          raw_phone_number: _primary_phone_number as string,
-          iso_code,
-        })
-
-        return [
-          ...acc,
-          {
+      formatted_items = formatted_items.reduce(
+        (acc: Record<string, string>[], item: Record<string, any>) => {
+          const {
+            contacts,
+            contact_emails,
+            contact_phone_numbers,
+            created_by,
+            updated_by,
             roles,
             organization,
-            ...contacts,
-            ...emails,
-            ...phones,
-            created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
-            updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
-            raw_phone_number: primary_phone_number,
-            email: primary_email,
-          },
-        ]
-      }, [],
-    )
-    const totalPages = Math.ceil(totalCount / (input.limit || 100))
+          } = item;
 
-    return {
-      totalCount,
-      items: formatted_items,
-      currentPage: 0,
-      totalPages,
-    }
-  }),
+          const emails = pick(contact_emails, ['emails', 'is_primaries']);
+          const phones = pick(contact_phone_numbers, [
+            'raw_phone_numbers',
+            'iso_code',
+            'country_code',
+            'is_primaries',
+          ]);
+          const existing_contact = acc?.find(
+            (acc_item: any) => acc_item?.id === contacts?.id,
+          );
+
+          if (existing_contact) return acc;
+
+          const {
+            raw_phone_numbers,
+            iso_code,
+            is_primaries: p_is_primaries,
+          } = phones;
+          const { emails: _emails, is_primaries: e_is_primaries } = emails;
+          const filterPrimary = (li: string[], is_primaries: number[]) => {
+            if (!li || !is_primaries) return null;
+            const index = is_primaries?.findIndex(
+              (is_primary) => is_primary === 1,
+            );
+            return index !== -1 ? li[index] : null;
+          };
+          const _primary_phone_number = filterPrimary(
+            raw_phone_numbers,
+            p_is_primaries,
+          );
+          const primary_email = filterPrimary(_emails, e_is_primaries);
+
+          const primary_phone_number = formatPhoneNumber({
+            raw_phone_number: _primary_phone_number as string,
+            iso_code,
+          });
+
+          return [
+            ...acc,
+            {
+              roles,
+              organization,
+              ...contacts,
+              ...emails,
+              ...phones,
+              created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
+              updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
+              raw_phone_number: primary_phone_number,
+              email: primary_email,
+            },
+          ];
+        },
+        [],
+      );
+      const totalPages = Math.ceil(totalCount / (input.limit || 100));
+
+      return {
+        totalCount,
+        items: formatted_items,
+        currentPage: 0,
+        totalPages,
+      };
+    }),
 });
-

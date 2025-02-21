@@ -34,9 +34,21 @@ const SignUpSchema = z
     path: ['confirmed_password'],
   })
 
+interface SignUpFormProps { 
+  recordData?: Record<string, any>
+}
 
-const SignUpForm = () => {
+const SignUpForm = (props: SignUpFormProps) => {
+  const {recordData} = props
   const form = useForm({
+    defaultValues: {
+      organization_name: recordData?.organization_name || 'My Organization',
+      first_name: recordData?.first_name || '',
+      last_name: recordData?.last_name || '',
+      email: recordData?.email || '',
+      password: '',
+      confirmed_password: '',
+    },
     resolver: zodResolver(SignUpSchema),
   })
 

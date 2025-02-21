@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import SignInLabel from '~/app/sign-up/_components/SignInLabel';
 import SignUpForm from '~/app/sign-up/_components/SignUpForm';
 import { redirect, RedirectType } from 'next/navigation';
+import { formatDate } from '~/server/utils/formatDate';
 
 const INVITATION_LINK_EXPIRED = parseInt(
   process.env.INVITATION_LINK_EXPIRED || '1',
@@ -14,9 +15,8 @@ const isInvitationLinkExpired = (createdDate: string): boolean => {
   const created = new Date(createdDate);
   const expirationDate = new Date(created);
   expirationDate.setDate(created.getDate() + INVITATION_LINK_EXPIRED);
-
-  const currentDate = new Date();
-  return currentDate > expirationDate;
+  const currentDate = formatDate(new Date()).date;
+  return new Date(currentDate) > expirationDate;
 };
 
 export default async function Invite({ searchParams }: any) {
@@ -82,7 +82,7 @@ export default async function Invite({ searchParams }: any) {
 
           <div className="mt-11">
             <div>
-              <SignUpForm />
+              <SignUpForm recordData={record} />
             </div>
             <SignInLabel />
           </div>

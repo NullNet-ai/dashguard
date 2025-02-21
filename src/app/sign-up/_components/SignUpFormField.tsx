@@ -16,7 +16,8 @@ interface SignUpFormFieldProps {
     type: string
     required?: boolean
     showPasswordStrengthBar?: boolean
-    hasComplexValidation?: boolean
+    hasComplexValidation?: boolean,
+    readOnly?: boolean
   }[]
 }
 
