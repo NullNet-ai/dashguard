@@ -125,7 +125,6 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
           >
             {/* Title & Priority */}
             <div className='flex item-start justify-between'>
-              {/* icon */}
               {/* Icon & Title */}
               <div className='flex items-center gap-2 cursor-default' onClick={(e) => { e.stopPropagation() }}>
                 {notification.icon
@@ -249,7 +248,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
 
             {/* Description */}
             <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} />
-            
+
             {/* Actions */}
             {notification.actions && notification.actions.length > 0 && (
               <div className='flex gap-2 ms-6 mt-1'>
