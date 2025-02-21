@@ -152,6 +152,7 @@ const NotificationDrawer = () => {
                 }
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
+                scrollThreshold={1}
                 endMessage={
                     <div className="flex justify-center py-4">
                     <p className="text-center text-sm text-gray-500">
@@ -175,13 +176,14 @@ export default NotificationDrawer;
 
 export function HeaderSection() {
   const { state, actions } = useNotifications();
-  const { notificationCount, showRead } = state;
+  const { notificationCount, showRead,notifications } = state;
   const { toggleUnread } = actions;
 
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
-        Notifications ({notificationCount > 99 ? '99+' : notificationCount})
+        Notifications {notifications.length}
+        {/* ({notificationCount > 99 ? '99+' : notificationCount}) */}
       </h2>
       <div className="mr-2 flex items-center gap-2">
         <Switch checked={showRead} size="sm" onCheckedChange={toggleUnread} />

@@ -40,7 +40,7 @@ function NotificationBadge() {
       </div>
 
       {notificationCount > 0 && (
-        <span className='absolute right-2 top-1 inline-flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold leading-none text-red-100'>
+        <span className='absolute right-0 top-0 inline-flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-600 px-1 py-1 text-[12px] font-bold leading-none text-red-100'>
           {notificationCount > 99 ? '99+' : notificationCount}
         </span>
       )}
