@@ -10,7 +10,6 @@ import gridColumns from '~/app/portal/contact/grid/_config/columns';
 import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns';
 import { ulid } from 'ulid';
 import SelectedView from './components/SelectedView';
-import { type InternalUserDetailsSchema } from '~/server/zodSchema/account/internalUserDetails';
 
 const FormSchema = z.object({});
 
@@ -23,6 +22,21 @@ const defaultAdvanceFilter = [
     id: ulid(),
     label: 'Status',
     values: ['Active'],
+    default: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+  {
+    entity: 'organization_accounts',
+    operator: 'is_null',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: '',
+    values: [],
     default: true,
   },
 ];
@@ -248,8 +262,8 @@ export default function BasicDetails({
         limit: 1000,
         label: 'Contacts',
         searchConfig: {
-          router: 'contact',
-          resolver: 'mainGrid',
+          router: 'account',
+          resolver: 'getUserGridItem',
           query_params: {
             entity: 'contact',
             pluck: params?.pluck_fields,

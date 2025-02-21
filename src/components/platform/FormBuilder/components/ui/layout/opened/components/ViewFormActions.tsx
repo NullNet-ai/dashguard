@@ -74,9 +74,41 @@ const ViewFormActions = ({
             )}
             onClick={() => {
               const currentValues = form.getValues();
-              Object.keys(currentValues).forEach((key) =>
-                form.setValue(key, ""),
-              );
+              Object.keys(currentValues).forEach((key) => {
+                const value = currentValues[key];
+      
+                if (Array.isArray(value)) {
+                  if (["email", "emails"].includes(key.toLowerCase())) {
+                    currentValues[key] = [
+                      {
+                        ...value,
+                        email: "",
+                      }
+                    ];
+                  } else if (["phone_numbers", "phones", "phone"].includes(key.toLowerCase())) {
+                    currentValues[key] = [
+                      {
+                        ...value,
+                        raw_phone_number: "",
+                        iso_code: "us",
+                        country_code: "+1",
+                        is_primary: true,
+                      },
+                    ];
+                  } else {
+                    currentValues[key] = [];
+                  }
+                } else if (typeof value === "string") {
+                  currentValues[key] = "";
+                } else if (typeof value === "object" && value !== null) {
+                  currentValues[key] = {};
+                } else {
+                  currentValues[key] = null;
+                }
+              });
+              form.reset(currentValues, {
+                keepDefaultValues: true,
+              });
             }}
             className="flex gap-2"
           >
