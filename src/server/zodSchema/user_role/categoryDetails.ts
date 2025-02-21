@@ -1,12 +1,12 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const RoleCategoryDetailsSchema = z.object({
-  categories: z
-    .string()
-    .min(1, { message: 'Category is required' }),
-  entity: z
-    .string()
-    .min(1, { message: 'Entity is required' }),
-})
+  categories: z.string().min(1, {
+    message: 'Please select a category',
+  }),
+  entity: z.string().min(1, {
+    message: 'Please select an entity',
+  }),
+});
 
-export default RoleCategoryDetailsSchema
+export default RoleCategoryDetailsSchema;

@@ -76,7 +76,7 @@ export const SideDrawerView: React.FC = () => {
                 onClick={closeSideDrawer}
                 className="z-[103]"
               >
-                <XMarkIcon className="h-6 w-6 text-muted-foreground" />
+                <XMarkIcon className="h-5 w-5 text-muted-foreground" />
               </button>
             </CardHeader>
 

@@ -8,6 +8,7 @@ import { useNotifications } from '../NotificationProvider';
 
 import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { Skeleton } from '~/components/ui/skeleton';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -27,8 +28,9 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
-    hasMore, // Add this to your state
-    loadingPopulateData
+    hasMore, 
+    loadingPopulateData,
+    loadingMarkAllAsRead,
   } = state;
 
   const tabs = [
@@ -36,6 +38,11 @@ const NotificationDrawer = () => {
       id: 'all',
       label: `All`,
       content: <NotificationItem type="all" />,
+    },
+    {
+      id: 'pinned',
+      label: 'Pinned',
+      content: <NotificationItem type="pinned" />,
     },
     {
       id: 'system',
@@ -72,11 +79,10 @@ const NotificationDrawer = () => {
               </p>
               {sortOptions.map((option) => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${
-                    selectedSort === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedSort === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortChange(option.id)}
                 >
@@ -89,11 +95,10 @@ const NotificationDrawer = () => {
               </p>
               {sortOrderOptions.map((option) => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${
-                    selectedOrder === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedOrder === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortOrderChange(option.id)}
                 >
@@ -110,15 +115,23 @@ const NotificationDrawer = () => {
           onClick={actions.handleInsert}
           loading={loadingPopulateData}
         >
-          {loadingPopulateData ? "...populating database" : "Populate Database"}
+          {loadingPopulateData ? '...populating database' : 'Populate Database'}
         </Button>
-        <Button
-          className="text-md text-blue-600"
-          variant="link"
-          onClick={actions.handleBatchRead}
-        >
-          Mark all as read
-        </Button>
+        <div className="items-center flex flex-col">
+          <Button
+            className="text-md text-blue-600"
+            variant="link"
+            onClick={actions.handleBatchRead}
+            loading={loadingMarkAllAsRead}
+          >
+            {loadingMarkAllAsRead
+              ? 'Marking all as read'
+              : 'Mark all as read'}
+          </Button>
+          {loadingMarkAllAsRead && (
+            <p className="text-xs text-slate-400">(Please don't close the drawer)</p>
+          )}
+        </div>
       </div>
       <StateTab
         persistKey="notifications-tab"
@@ -128,23 +141,24 @@ const NotificationDrawer = () => {
           content: (
             <div
               id="scrollable-div"
-              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
+              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
             >
               <InfiniteScroll
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
                 loader={
-                  <div className="py-4 text-center">
-                    Loading more notifications...
-                  </div>
+                  <Skeleton />
                 }
                 scrollableTarget="scrollable-div"
-                className="flex h-full min-h-full flex-col gap-2"
+                className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
+                scrollThreshold={1}
                 endMessage={
-                  <div className="py-4 text-center text-sm text-gray-500">
-                    No more notifications
-                  </div>
+                    <div className="flex justify-center py-4">
+                    <p className="text-center text-sm text-gray-500">
+                      No more notifications
+                    </p>
+                    </div>
                 }
               >
                 {tab.content}
@@ -168,7 +182,8 @@ export function HeaderSection() {
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
-        Notifications ({notificationCount > 99 ? '99+' : notificationCount})
+        Notifications
+        ({notificationCount > 99 ? '99+' : notificationCount})
       </h2>
       <div className="mr-2 flex items-center gap-2">
         <Switch checked={showRead} size="sm" onCheckedChange={toggleUnread} />
