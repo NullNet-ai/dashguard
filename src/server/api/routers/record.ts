@@ -327,7 +327,7 @@ export const recordRouter = createTRPCRouter({
       z.object({
         entity: z.string().min(1),
         id: z.string().min(1),
-        data: z.object({}),
+        data: z.any(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
