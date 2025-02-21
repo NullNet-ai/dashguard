@@ -15,8 +15,7 @@ const Summary =  ({form_key}: { form_key: string }) => {
       data: record,
       refetch,
       error,
-    } = api.device.fetchDownloadURL.useQuery({
-    })
+    } = api.device.fetchDownloadURL.useQuery({})
 
     useRefetchRecord({
       refetch,
@@ -32,7 +31,7 @@ const Summary =  ({form_key}: { form_key: string }) => {
       )
     }
   const data = {
-    // package: `curl -o pfSense-pkg-wallguard.pkg -L ${download_url}`,
+    package: `curl -o pfSense-pkg-wallguard.pkg -L ${record || ''}`,
     installation_package: "pkg install Wallmon.pkg",
     installation_confirmation: "Wallmon --version",
   };

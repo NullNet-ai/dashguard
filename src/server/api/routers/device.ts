@@ -18,6 +18,7 @@ import Bluebird from 'bluebird';
 
 
 import { createDefineRoutes } from '../baseCrud'
+import { getActualDownloadURL } from '~/app/api/device/get_actual_download_url'
 
 const entity = 'device'
 
@@ -1471,12 +1472,10 @@ export const deviceRouter = createTRPCRouter({
 
   fetchDownloadURL: privateProcedure
   .input(z.object({})).query(async ({ }) => {
-    return ''
-    // const url = await getActualDownloadURL()
-    // console.log("%c Line:1476 🌶 url", "color:#b03734", url);
-    // return {
-    //   url,
-    // }
+   
+    const url = await getActualDownloadURL()
+    
+    return url
   }
   ),
 })
