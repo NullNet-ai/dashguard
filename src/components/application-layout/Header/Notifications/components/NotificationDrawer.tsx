@@ -28,7 +28,7 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
-    hasMore, // Add this to your state
+    hasMore, 
     loadingPopulateData,
     loadingMarkAllAsRead,
   } = state;
@@ -176,14 +176,13 @@ export default NotificationDrawer;
 
 export function HeaderSection() {
   const { state, actions } = useNotifications();
-  const { notificationCount, showRead,notifications } = state;
+  const { notificationCount, showRead } = state;
   const { toggleUnread } = actions;
 
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
-        Notifications {notifications.length}
-        {/* ({notificationCount > 99 ? '99+' : notificationCount}) */}
+        ({notificationCount > 99 ? '99+' : notificationCount})
       </h2>
       <div className="mr-2 flex items-center gap-2">
         <Switch checked={showRead} size="sm" onCheckedChange={toggleUnread} />
