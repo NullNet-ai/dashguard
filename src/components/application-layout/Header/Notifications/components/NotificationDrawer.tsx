@@ -8,7 +8,7 @@ import { useNotifications } from '../NotificationProvider';
 
 import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Loader, Loader2 } from 'lucide-react';
+import { Skeleton } from '~/components/ui/skeleton';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -148,12 +148,7 @@ const NotificationDrawer = () => {
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
                 loader={
-                    <div className="flex justify-center py-4">
-                    <div className="flex items-center gap-2 flex-col">
-                      <Loader2 size={24} className="animate-spin text-gray-500" />
-                      <span className="text-gray-500 text-sm">Loading more notifications...</span>
-                    </div>
-                    </div>
+                  <Skeleton />
                 }
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"

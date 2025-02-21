@@ -20,6 +20,7 @@ import { Badge } from '~/components/ui/badge'
 import TextTruncate from '~/components/ui/text-truncate';
 import EmptyUnreadNotification from './EmptyUnreadNotification';
 import { cn } from '~/lib/utils';
+import Skeleton from '~/components/platform/Grid/Skeleton';
 
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
@@ -36,12 +37,18 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
 };
 const NotificationItem = ({ type }: { type: TNotificationType }) => {
   const { state, actions } = useNotifications()
-  const { notifications, notificationCount, notificationTotalCount } = state
+  const { notifications, notificationCount, notificationTotalCount, loading } = state
 
   useEffect(() => {
     actions.handleChangeType(type)
   }, [])
 
+
+  if(loading) {
+    return (
+      <Skeleton />
+    );
+  }
   // if no notification at all
   if (!notificationTotalCount && !notificationCount) {
     return <EmptyNotification />
