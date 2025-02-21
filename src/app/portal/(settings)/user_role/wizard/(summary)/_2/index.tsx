@@ -7,8 +7,8 @@ import { api } from '~/trpc/react'
 import useRefetchRecord from '../hooks/useFetchMainRecord'
 
 const fields = {
-  Categories: 'categories',
   Entity: 'entity',
+  Category: 'categories',
 }
 
 const Summary = (props: { form_key: string }) => {
