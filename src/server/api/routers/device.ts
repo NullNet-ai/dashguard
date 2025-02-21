@@ -182,7 +182,7 @@ export const deviceRouter = createTRPCRouter({
         device_created_by: ['id', 'instance_name'],
         device_updated_by: ['id', 'instance_name'],
         device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
-        device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time'],
+        device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
       }
 
       const query = ctx.dnaClient.findAll({
@@ -1326,7 +1326,7 @@ export const deviceRouter = createTRPCRouter({
         data: {
           ...rest,
           ...rest_address,
-          hostname: configuration?.hostname,
+          hostname: configuration?.configuration?.hostname,
           interfaces: configuration?.interfaces,
           grouping: device_group_setting_id,
           grouping_name: name,
