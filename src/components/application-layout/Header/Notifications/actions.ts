@@ -28,20 +28,7 @@ export const getNotifications = async ({
 
 
   const { data : notifications, total_count} = await api.notification.getNotifications({
-    filters : [
-      ...filters,
-      {
-        operator: 'and',
-        type: 'operator',
-        default: true,
-      },
-      {
-        type: 'criteria',
-        field: 'is_pinned',
-        operator: 'equal',
-        values: [false],
-      },
-    ],
+    filters,
     order,
   })
 
@@ -73,12 +60,10 @@ export const updateBatchRead = async ({
   ids: string[]
   notification_status: 'read' | 'unread'
 }) => {
-  const update_notification = await api.notification.handleBatchRead({
+  await api.notification.handleBatchRead({
     ids,
     notification_status,
   })
-
-  return update_notification
 }
 
 export const updatePinnedNotification = async ({
