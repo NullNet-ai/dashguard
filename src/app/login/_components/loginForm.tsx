@@ -14,7 +14,9 @@ import { Form, FormField, FormMessage } from '~/components/ui/form'
 import LoginSubmit from '../actions/loginSubmit'
 
 const formSchema = z.object({
-  username: z.string({ required_error: "Please enter your email address." }).email("Please enter a valid email address."),
+  username: z.string({
+    required_error: 'Please enter your username.',
+  }),
   password: z.string().min(1, { message: "Please enter your password." }),
 })
 
