@@ -243,7 +243,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
                       )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>ß
+              </div>
             </div>
 
             {/* Description */}
