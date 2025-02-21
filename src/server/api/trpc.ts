@@ -34,15 +34,12 @@ export const createTRPCContext = async (opts: {
   token?: string;
 }) => {
   const storeCookies = cookies();
-  const headerStore = headers();
-  const account_id = headerStore.get('x-trpc-session-data');
 
   return {
     redisClient,
     dnaClient,
     transaction_id: ulid(),
     storeCookies,
-    account_id,
     ...opts,
   };
 };
@@ -156,12 +153,8 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   });
 });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
-  const storeCookies = cookies();
-  const cookiesToken = storeCookies.get('token');
-
   const token = {
-    ...cookiesToken,
-    value: ctx.token || cookiesToken!.value,
+    value: ctx.token!,
   };
 
   if (!token) {
@@ -233,11 +226,10 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
 
 const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
   const storeCookies = cookies();
-  const account_id = ctx.account_id;
-  const token_id = storeCookies.get(`account_token_id:${account_id}`)?.value;
+  const username = storeCookies.get('username')?.value;
 
   const token = await ctx.redisClient.getCachedData(
-    `account_token:${token_id}`,
+    `account_token:${username}`,
   );
 
   return next({

@@ -44,7 +44,6 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
-  const sessionData = sessionStorage && sessionStorage?.getItem("account_id") || null
 
   const [trpcClient] = useState(() =>
     api.createClient({
@@ -62,7 +61,6 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             headers: () => {
               const headers = new Headers();
               headers.set("x-trpc-source", "nextjs-react");
-              headers.set("x-trpc-session-data", sessionData ?? "");
               return headers;
             },
           }),
@@ -72,7 +70,6 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             headers: () => {
               const headers = new Headers();
               headers.set("x-trpc-source", "nextjs-react");
-              headers.set("x-trpc-session-data", sessionData ?? "");
               return headers;
             },
           }),

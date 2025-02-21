@@ -30,8 +30,9 @@ export const authRouter = createTRPCRouter({
         }
 
         const token = response?.data?.[0]?.token;
+        ctx.redisClient.cacheData(`account_token:${input.username}`, token, 60 * 60 * 24);
+        ctx.storeCookies.set('username', input.username);
 
-        ctx.storeCookies.set('token', token);
         return response;
       } catch (error: any) {
         let errorMessage = 'Something went wrong please try again';
@@ -160,14 +161,11 @@ export const authRouter = createTRPCRouter({
       return response?.data?.[0];
     }),
   logout: privateProcedure.mutation(async ({ ctx }) => {
-    ctx.storeCookies.delete('token');
+    ctx.storeCookies.delete('username');
+    ctx.redisClient.deleteCachedData(`account_token:${ctx.session.account?.email}`);
     return { message: 'User logged out' };
   }),
-  verify: privateProcedure.mutation(async ({ ctx }) => {
-    const loggedAccountId =
-      ctx.session.accounts?.[0]?.organization_account_id ?? '';
-    ctx.storeCookies.set('logged_id', loggedAccountId);
-    ctx.storeCookies.set(loggedAccountId, ctx.token.value);
+  verify: privateProcedure.mutation(async () => {
     return true;
   }),
   switchOrganization: privateProcedure
@@ -188,36 +186,15 @@ export const authRouter = createTRPCRouter({
             token: rootAccountToken,
           })
           .execute();
+        const username = ctx.storeCookies.get('username')?.value;
 
-        const session = await ctx.dnaClient
-          .verifyToken(newOrganization?.data?.[0]?.token)
-          .execute()
-          .then((res) => {
-            return res.data?.[0] as TokenData;
-          })
-          .catch(() => {
-            throw new Error('Invalid Token');
-          });
-
-
-        const token_id = ulid();
         await ctx.redisClient.cacheData(
-          `account_token:${token_id}`,
+          `account_token:${username}`,
           newOrganization?.data?.[0]?.token,
           60 * 60 * 24,
         );
 
-        if (session) {
-          ctx.storeCookies.set(
-            `account_token_id:${session.account.organization_account_id}`,
-            token_id,
-          );
-          return {
-            session,
-            token: token_id,
-          };
-        }
-        throw new Error('Unable to switch organization');
+        return newOrganization;
       } catch (error) {
         throw error;
       }

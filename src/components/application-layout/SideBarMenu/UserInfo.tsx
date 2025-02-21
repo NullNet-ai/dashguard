@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import {
   DropdownMenu,
@@ -31,6 +32,7 @@ const SideUserInfo = ({
   organization,
   other_organizations,
 }: SideInfoProps) => {
+  const router = useRouter();
   const switchOrganization = api.auth.switchOrganization.useMutation();
   const { open, openMobile } = useSidebar();
   const screen = useScreenType() || screenType;
@@ -42,8 +44,7 @@ const SideUserInfo = ({
       organization_id: organization.organization_id,
     });
     if (response) {
-      const { organization_account_id } = response?.session?.account ?? {};
-      window.open(`/?account_id=${organization_account_id}`, '_blank');
+      router.push('/organization-bus');
     }
     return;
   };
