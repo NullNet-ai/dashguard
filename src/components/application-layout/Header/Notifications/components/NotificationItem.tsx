@@ -19,6 +19,7 @@ import { Separator } from '~/components/ui/separator'
 import { Badge } from '~/components/ui/badge'
 import TextTruncate from '~/components/ui/text-truncate';
 import EmptyUnreadNotification from './EmptyUnreadNotification';
+import { cn } from '~/lib/utils';
 
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
@@ -50,7 +51,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
   if (!notifications.length) {
     return <EmptyUnreadNotification />
   }
-  
+
 
 
 
@@ -109,8 +110,8 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
         <>
           <div
             className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
-              ? 'border-l-primary border-l-2'
-              : 'border-blue-100 '
+              ? ''
+              : ' border-l-primary border-l-2'
               } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
             onClick={() => notification.link && handleOpenNewTab(notification.link)}
             key={notification.id}
@@ -129,8 +130,10 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
                     <Mail className='size-4 text-gray-500 ' />
                   )}
                 <a
-                  className={`text-sm font-semibold hover:underline text-primary cursor-pointer ${notification.notification_status === 'read' ? '' : '!text-foreground'
-                    }`}
+                  className={cn(
+                    `text-sm font-semibold hover:underline text-primary cursor-pointer `,
+                    notification.notification_status === 'read' ? 'text-foreground font-normal' : ''
+                  )}
                   onClick={() => notification.link && handleOpenNewTab(notification.link)}
                   aria-hidden="true"
                 >

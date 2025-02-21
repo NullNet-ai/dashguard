@@ -8,6 +8,7 @@ import { useNotifications } from '../NotificationProvider';
 
 import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { Loader, Loader2 } from 'lucide-react';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -78,11 +79,10 @@ const NotificationDrawer = () => {
               </p>
               {sortOptions.map((option) => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${
-                    selectedSort === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedSort === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortChange(option.id)}
                 >
@@ -95,11 +95,10 @@ const NotificationDrawer = () => {
               </p>
               {sortOrderOptions.map((option) => (
                 <button
-                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${
-                    selectedOrder === option.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full px-3 py-1.5 text-left text-md transition-colors ${selectedOrder === option.id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-50'
+                    }`}
                   key={option.id}
                   onClick={() => actions?.handleSortOrderChange(option.id)}
                 >
@@ -142,19 +141,29 @@ const NotificationDrawer = () => {
           content: (
             <div
               id="scrollable-div"
-              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
+              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
             >
               <InfiniteScroll
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
                 loader={
-                  <div className="py-4 text-center">
-                    Loading more notifications...
-                  </div>
+                    <div className="flex justify-center py-4">
+                    <div className="flex items-center gap-2 flex-col">
+                      <Loader2 size={24} className="animate-spin text-gray-500" />
+                      <span className="text-gray-500 text-sm">Loading more notifications...</span>
+                    </div>
+                    </div>
                 }
                 scrollableTarget="scrollable-div"
-                className="flex h-full min-h-full flex-col gap-2"
+                className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
+                endMessage={
+                    <div className="flex justify-center py-4">
+                    <p className="text-center text-sm text-gray-500">
+                      No more notifications
+                    </p>
+                    </div>
+                }
               >
                 {tab.content}
               </InfiniteScroll>

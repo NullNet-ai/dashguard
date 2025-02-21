@@ -9,19 +9,22 @@ import { useNotifications } from './NotificationProvider'
 
 function NotificationBadge() {
   const { state } = useNotifications()
-  const { actions } = useSideDrawer()
+  const { actions,state:drawerState } = useSideDrawer()
 
   const { notificationCount } = state
 
-  const handleOpenSideDrawer = () => {
-    actions?.openSideDrawer({
-      header: <HeaderSection/>,
-      sideDrawerWidth: '500px', 
-      body: {
-        component: NotificationDrawer,
-      },
-      
-    })
+  const handleToggleSideDrawer = () => {
+    if (drawerState.isOpen) {
+      actions?.closeSideDrawer()
+    } else {
+      actions?.openSideDrawer({
+        header: <HeaderSection />,
+        sideDrawerWidth: '500px',
+        body: {
+          component: NotificationDrawer,
+        },
+      })
+    }
   }
 
   return (
@@ -29,9 +32,9 @@ function NotificationBadge() {
       <div>
         <MenuButton
           className='flex items-center rounded-full'
-          onClick={handleOpenSideDrawer}
+          onClick={handleToggleSideDrawer}
         >
-          <span className='sr-only'>Open Notifcations</span>
+          <span className='sr-only'>Open Notifications</span>
           <BellIcon className='h-6 w-6 text-foreground' />
         </MenuButton>
       </div>
