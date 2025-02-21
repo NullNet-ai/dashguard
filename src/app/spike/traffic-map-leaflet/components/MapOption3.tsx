@@ -31,10 +31,18 @@ const singaporeFeature = {
 
 
 
+// const fetchCountryBorders = async () => {
+//   const response = await fetch(
+//     "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
+//   );
+//   return await response.json();
+// };
+
 const fetchCountryBorders = async () => {
-  const response = await fetch(
-    "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json"
-  );
+  const response = await fetch("https://datahub.io/core/geo-countries/r/countries.geojson");
+  if (!response.ok) {
+    throw new Error("Failed to fetch country borders");
+  }
   return await response.json();
 };
 
@@ -259,3 +267,19 @@ geojson.features.push(singaporeFeature);
 };
 
 export default MapComponent;
+
+
+//region
+// color the city
+// no coutry add unknown
+
+// city and region being shaded
+// city to city
+
+// lines on the same country
+
+
+
+//delete
+//  spike traffic graph a bar graph show traffic flow
+// pie graph bandwidth usage at the time being viewed
