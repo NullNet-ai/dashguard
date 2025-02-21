@@ -6,9 +6,16 @@ import { api } from "~/trpc/server";
 
 export async function PrevPage() {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , mainEntity, application = "wizard", identifier, currentStep] =
-    pathname.split("/");
+  const pathname = (headerList.get("x-pathname") || "").split('/');
+  let [, , mainEntity, application = "wizard", identifier, currentStep] =
+    pathname
+  if (!!process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
+    const [,,playgroundApplication,,,playgroundIdentifier, playgroundStep] = pathname
+    application = playgroundApplication || "wizard"
+    identifier = playgroundIdentifier
+    currentStep = playgroundStep
+    mainEntity = "contact";
+  }
   const fullSearchQueryParams =
     headerList.get("x-full-search-query-params") || "";
   if (application !== "wizard" || !identifier) return;
