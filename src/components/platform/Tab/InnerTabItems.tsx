@@ -67,9 +67,17 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     setIsClient(true)
   }, [])
 
+  useEffect(() => {
+
+    setTimeout(() => {
+      console.log("tabs Xxxx")
+    }, 4000);
+  }, [tabs, code])
+
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) return tabs
     if (tabs.length) {
+      console.log("tabs", tabs)
       const activeIndex = tabs.findIndex(a => a.name === code)
       const prevCurrent = Cookies.get('prevCurrent')
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
@@ -86,16 +94,18 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
           result.splice(1, 0, activeTab)
         }
 
-        if (isDropdown) {
-          const lastItem = Cookies.get('lastInnerTabItem')
-          const lastItemIndex = result.findIndex(a => a.name === lastItem)
+        // if (isDropdown) {
+        //   const lastItem = Cookies.get('lastInnerTabItem')
+        //   console.log("lastItem", lastItem)
+        //   const lastItemIndex = result.findIndex(a => a.name === lastItem)
 
-          if (lastItemIndex !== -1) {
-            const itemValue = result[lastItemIndex]
-            result.splice(lastItemIndex, 1)
-            result.push(itemValue)
-          }
-        }
+        //   if (lastItemIndex !== -1) {
+           
+        //     const itemValue = result[lastItemIndex]
+        //     result.splice(lastItemIndex, 1)
+        //     result.push(itemValue)
+        //   }
+        // }
 
         return result
       }
@@ -109,9 +119,31 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     if (!isClient || !winWidth) return sortTabsActiveWillSecond
     const max_width = winWidth - sidebar_width - 57
     const showItem = max_width / 98
+
+    if (isDropdown) {
+      const cookieLastItem = Cookies.get('lastInnerTabItem')
+     
+      const lastItemIndex = sortTabsActiveWillSecond.findIndex(a => a.name === cookieLastItem)
+      const newResult = [...sortTabsActiveWillSecond]
+
+
+
+      // if (lastItemIndex !== -1) {
+       
+      //   const itemValue = newResult[lastItemIndex]
+      //   newResult.splice(lastItemIndex, 1)
+      //   newResult.push(itemValue)
+      // }
+
+      // console.log("firstnewResult", newResult, sortTabsActiveWillSecond)
+    }
     const result = sortTabsActiveWillSecond.slice(0, Math.floor(showItem))
     const lastItem = result[result.length - 1]
-    Cookies.set('lastInnerTabItem', lastItem.name)
+
+    
+
+
+ 
 
     return result
   }, [sortTabsActiveWillSecond, code, winWidth, sidebar_width])

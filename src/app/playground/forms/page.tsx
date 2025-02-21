@@ -25,7 +25,7 @@ import GroupTabView2 from "./_dummy-controls/multifield-view-2";
 export default function PlatformPlayGround() {
   return (
     <>
-      <ButtonPlayGround />
+      {/* <ButtonPlayGround />
       <Separator className="my-6" />
       <div className="space-y-20 p-5">
 
@@ -38,7 +38,7 @@ export default function PlatformPlayGround() {
             <PasswordDetails />
             <PhoneInputDetails />
           </div>
-        </section>
+        </section> */}
 
 
       <section>
@@ -59,7 +59,7 @@ export default function PlatformPlayGround() {
         </section>
 
 
-
+{/* 
         <Separator />
 
         <section>
@@ -113,8 +113,8 @@ export default function PlatformPlayGround() {
           </div>
         </section>
 
-        <Toaster />
-      </div>
+        <Toaster /> */}
+      {/* </div> */}
     </>
   );
 }

@@ -1,25 +1,56 @@
 'use client'
 
+import { group } from 'console'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { FormBuilder } from '~/components/platform/FormBuilder'
+import NewComingSoon from '~/components/ui/coming-soon'
+import Guidelines from './components/guildelines'
+import MultiFieldForms from './components/multfield-form'
 
 export default function GroupTabView2() {
-  const FormSchema = z.object({
-    tabs: z.array(
+
+  const metadataSchema = z
+  .object({})
+  .catchall(z.any()) // ✅ Allows any additional dynamic keys
+  .merge(
+    z.object({
+      draggable: z
+        .array(
+          z.object({
+            "full-name": z
+              .string({ message: "Full Name is required" })
+              .min(2, { message: "Full Name must be at least 2 characters long" }),
+          })
+        )
+        .optional(), // ✅ Makes draggable optional
+    })
+  );
+
+const FormSchema = z.object({
+  tabs: z
+    .array(
       z.object({
         id: z.string(),
         tabName: z.string(),
-        fields: z.array(
+        order: z.number().min(1),
+        metadata: metadataSchema, // ✅ Uses extended metadata
+        tabChildren: z.array(
           z.object({
-            fieldType: z.string(),
-            fieldName: z.string(),
-          }),
+            id: z.string(),
+            tabName: z.string(),
+            order: z.number().min(1),
+            metadata: metadataSchema, // ✅ Same logic for children
+            component: z.string(),
+          })
         ),
-      }),
-    ),
-  })
+        component: z.string(),
+      })
+    )
+    .transform((items) => [...items].sort((a, b) => a.order - b.order)),
+});
+
 
   const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
     return new Promise<void>((resolve, reject) => {
@@ -55,74 +86,49 @@ export default function GroupTabView2() {
         tabs: [
           {
             id: crypto.randomUUID(),
-            tabName: 'Group Tab 1',
-            fields: [
-              {
-                fieldType: 'input',
-                fullname: 'juphter',
-              },
-            ],
+            tabName: 'Tab 1',
+            order:1,
+            metadata:{},
+            tabChildren: [],
+            component: ''
+          },
+          {
+            id: crypto.randomUUID(),
+            tabName: 'Multi fields',
+            order:2,
+            metadata:{
+              draggable: [
+                {
+                  "full-name": "John Doe",
+                },
+                {
+                  "full-name": "Jane Doe",
+                },
+              ],
+            },
+            tabChildren: [],
+            component: 'MultiFieldForms'
           },
         ],
       }}
       fields={[
         {
           id: 'tabs',
-          formType: 'group-multi-field',
+          disabled: false,
+          formType: 'group-tab',
           name: 'tabs',
           label: 'Group Multi Field',
-          multiFieldConfig: {
-            fields: {
-              id: 'fullName',
-              formType: 'input',
-              name: 'fullname',
-              label: 'Full Name',
-              required: true,
-              disabled: false,
-              placeholder: 'Enter your full name...',
-            },
-            fieldOptions: [
-              {
-                fieldType: 'input',
-                label: 'Full Name',
-                name: 'fullname',
-              },
-              {
-                fieldType: 'select',
-                label: 'Select Control',
-                placeholder: 'Select an option...',
-                name: 'email',
-                options: [
-                  {
-                    value: 'john.doe@example.com',
-                    label: 'john.doe@example.com',
-                  },
-                  {
-                    value: 'test.doe@example.com',
-                    label: 'test.doe@example.com',
-                  },
-                ],
-              },
-              {
-                fieldType: 'select',
-                label: 'Select Control 2',
-                placeholder: 'Select an option...',
-                name: 'email2',
-                options: [
-                  {
-                    value: 'ss.doe@example.com',
-                    label: 'ss.doe@example.com',
-                  },
-                  {
-                    value: 'ff.doe@example.com',
-                    label: 'ff.doe@example.com',
-                  },
-                ],
-              },
+          groupConfig: {
+            prefix: 'Tab',
+            defaultComponent: Guidelines,
+            components: [
+              NewComingSoon,
+              MultiFieldForms
             ],
-          },
+          }
         },
       ]}
     />
-  )
+  ) 
+ 
 }

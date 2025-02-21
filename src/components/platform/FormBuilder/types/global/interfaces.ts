@@ -28,6 +28,8 @@ import {
   type TSelectionType,
 } from './types'
 
+import { type ComponentType } from 'react';  // Add this import at the top
+
 interface OptionType {
   label: string
   value: string
@@ -162,6 +164,11 @@ interface IField {
   showPasswordStrengthBar?: boolean
   hasComplexValidation?: boolean
   isCustomFormField?: boolean
+  groupConfig?: {
+    prefix?: string,
+    components?: ComponentType<any>[] |  JSX.Element[]
+    defaultComponent?: ComponentType<any>
+  }
 }
 
 interface ISelectOptions {

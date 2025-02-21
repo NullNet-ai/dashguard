@@ -211,7 +211,7 @@ const FormMultiField = ({
                   <div
                     className={cn(
                       "flex-1",
-                      `${form.getValues(`${fieldConfig.name}.${index}.fieldType`) === "input" ? "-mt-[8px]" : ""}`,
+                      `${form.getValues(`${fieldConfig.name}.${index}.fieldType`) === "input" ? "" : ""}`,
                     )}
                   >
                     <FormField
@@ -244,7 +244,7 @@ const FormMultiField = ({
                     type="button"
                     variant="softDestructive"
                     size="icon"
-                    className="mt-2 size-6 shrink-0 rounded-full"
+                    className=" size-6 shrink-0 rounded-full"
                     onClick={() => remove(index)}
                   >
                     <MinusIcon
