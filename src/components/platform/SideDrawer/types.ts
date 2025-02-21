@@ -1,4 +1,5 @@
 import type React from 'react'
+import { ReactNode } from 'react'
 export interface ISideDrawerContextProps {
   state: {
     isOpen: boolean
@@ -13,7 +14,7 @@ export interface IActions {
 }
 
 export interface ISideDrawerConfig {
-  title: string
+  header: ReactNode
   sideDrawerWidth?: string
   body: {
     component: React.ComponentType<any>

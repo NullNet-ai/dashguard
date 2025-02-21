@@ -60,10 +60,10 @@ function SomeComponent() {
         component: PermissionForm,
         componentProps: {
           userId: "123",
-          onSave: (data) => console.log("Saved data:", data),
+          onSave: (data) => // console.log("Saved data:", data),
         },
       },
-      onCloseCallback: () => console.log("SideDrawer closed!"),
+      onCloseCallback: () => // console.log("SideDrawer closed!"),
     });
   };
 

@@ -1,6 +1,6 @@
-import { type z } from "zod";
+import { type z } from 'zod';
 
-type TDisplayType = "form" | "selected";
+type TDisplayType = 'form' | 'selected';
 
  type TFormType =
    | 'input'
@@ -34,13 +34,12 @@ type TDisplayType = "form" | "selected";
    | 'group-tab'
    | 'currency-input';
 
-type TSelectionType = "single" | "multiple";
+type TSelectionType = 'single' | 'multiple';
 
-type DateTimeGranularity = "year" | "month" | "day" | "hour" | "minute" | "second";
+type DateTimeGranularity = 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
 
 type TFormSchema = z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
 
 export type {
-  DateTimeGranularity, TDisplayType, TFormSchema, TFormType, TSelectionType
+  DateTimeGranularity, TDisplayType, TFormSchema, TFormType, TSelectionType,
 };
-

@@ -19,16 +19,15 @@ export type GroupTabType = {
 
 export interface GroupTabProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: GroupTabType | null;
-  tabs: GroupTabType[];
+  fields: any[];
   onValueChange?: (value: GroupTabType[]) => void;
   onTabSelect?: (tab: GroupTabType) => void;
   onClickAddTab?: () => void;
   disabled?: boolean;
   render?: (arg: any, index: number) => any;
-  renderContent?: (arg?: any) => any;
+  renderContent?: (arg: any, index: number) => any;
   move: any
   replace: any
-  fields: any[]
 }
 
 const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
@@ -62,7 +61,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
     }, [fields]);
 
     return (
-      <div className="flex p-4 text-md gap-x-2" ref={ref}>
+      <div className="flex gap-x-2 p-4 text-md" ref={ref}>
         <Sortable
           value={fields}
           collisionDetection={closestCorners}
@@ -113,10 +112,10 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             <div className="mt-2 flex justify-center">
               <Button
                 disabled={disabled}
-                className="w-[80%] border-2 border-dashed border-primary text-primary text-md"
-                variant={"ghost"}
+                className="w-[80%] border-2 border-dashed border-primary text-md text-primary"
+                variant={'ghost'}
                 onClick={() => {
-                    onClickAddTab?.();
+                  onClickAddTab?.();
                 }}
               >
                 Add new Attribute
@@ -124,14 +123,16 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             </div>
           </div>
         </Sortable>
-        <div className="flex-1">
-                {selected?.content}
-        </div>
+        {
+          fields?.map((field, index) => {
+            return renderContent?.(field, index)
+          })
+        }
       </div>
     );
   },
 );
 
-GroupTab.displayName = "GroupTab";
+GroupTab.displayName = 'GroupTab';
 
 export default GroupTab;

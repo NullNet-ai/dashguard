@@ -8,7 +8,6 @@ import AppContent from './common/AppContent'
 import HeaderContainer from './common/HeaderContainer'
 import Header from './Header'
 import SmartComponent, { SmartMobileComponent } from './SmartComponent'
-import SessionChecker from '~/app/session-checker'
 const AppLayout = async ({ children }: PropsWithChildren) => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
@@ -16,15 +15,14 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
 
   return (
     <>
-    <SidebarInset application_name={app}>
-      <HeaderContainer>
-        <Header />
-      </HeaderContainer>
-      <AppContent>{children}</AppContent>
-      <SmartComponent />
-      <SmartMobileComponent />
-      <SideDrawerView />
-    </SidebarInset>
+      <SidebarInset application_name={app}>
+        <HeaderContainer>
+          <Header />
+        </HeaderContainer>
+        <AppContent>{children} </AppContent>
+        <SmartComponent />
+        <SmartMobileComponent />
+      </SidebarInset>
     </>
   )
 }

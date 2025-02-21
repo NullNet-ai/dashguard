@@ -69,9 +69,6 @@ const FormGroupTab = ({
   const [selected, setSelected] = React.useState<any>(undefined)
 
   const isDisabled = formRenderProps.field.disabled || false
-
-  console.log("isDisabled", formRenderProps)
-
   const isHidden = fieldConfig.hidden
 
   useEffect(() => {
@@ -240,8 +237,6 @@ const FormGroupTab = ({
         if (parentIdx !== selected?.id) {
           return null
         }
-
-        console.log("field", field, innerIndex)
 
         return 1;
 

@@ -26,7 +26,7 @@ interface IMenuOptionConfig {
 interface IDefaultSummaryMenuOptionsProps {
   title?: string;
   memoizedRecordData: IMemoizedRecordData;
-  menuOptionConfig?: IMenuOptionConfig[];
+  menuOptionConfig?: IMenuOptionConfig[] 
 }
 
 export default function DefaultSummaryMenuOptions({

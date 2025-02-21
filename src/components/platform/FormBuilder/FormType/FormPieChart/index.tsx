@@ -2,7 +2,7 @@
 
 import { capitalize } from "lodash";
 import React, { useMemo } from "react";
-import { Pie, PieChart, Tooltip } from "recharts";
+import { LabelList, Pie, PieChart, Tooltip } from "recharts";
 
 import {
   CardContent,
@@ -84,7 +84,8 @@ const FormPieChart = (props: IFormPieChartProps) => {
               dataKey="value"
               label={renderCustomPieChartLabel ?? true}
               nameKey="key"
-            />
+              labelLine={false}
+              />
            <ChartLegend
               content={<ChartLegendContent nameKey="key" />}
               className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center mt-8"

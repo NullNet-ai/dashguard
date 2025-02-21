@@ -58,8 +58,10 @@ type MultiFieldConfig = DraggableConfig & {
 
 interface MultiFieldOption {
   label: string
+  name?: string
   fieldType: 'input' | 'select' | 'radio' | 'checkbox'
   options?: OptionType[]
+  placeholder?: string
 }
 
 interface IField {

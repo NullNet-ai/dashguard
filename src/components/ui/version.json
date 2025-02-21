@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.12.1-rc.4<unreleased>",
-  "branch": "unreleased/feat/1.12.1-rc.4<unreleased>",
-  "message": "add Separator configuration to be centered vertically/horizontally and sidebar to handle banner to not break the layout",
+  "tag": "1.13.0",
+  "branch": "released/fix/1.13.0",
+  "message": "release version 1.13.0 ",
   "publish_name": "Rob Caldosa"
 }

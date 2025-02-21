@@ -1,7 +1,8 @@
 import { EClientDatabaseProvider, ORM } from '@dna-platform/common-orm'
 import axios from 'axios'
-import { cookies } from 'next/headers'
-import { type NextRequest, NextResponse } from 'next/server'
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { api } from "~/trpc/server";
 
 export async function GET(
   _: NextRequest,
@@ -15,7 +16,7 @@ export async function GET(
     storage_type: EClientDatabaseProvider.LOCAL,
   })
   const cookieStore = cookies()
-  const { value: token = null } = cookieStore.get('token') || {}
+  const { value: token = null } = cookieStore.get("token") || {};
 
   if (!token) {
     return NextResponse.json({ message: 'No token found' }, { status: 401 })

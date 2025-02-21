@@ -11,7 +11,7 @@ import config from '~/styles/config/config.json'
 import { TRPCReactProvider } from '~/trpc/react'
 
 import { ToastProvider } from '../context/ToastProvider'
-
+import { SidebarProvider } from '~/components/ui/sidebar'
 
 export const metadata: Metadata = {
   title: 'Platform',
@@ -37,19 +37,23 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <TRPCReactProvider>
             <EventEmitterProvider>
-              <TooltipProvider>
-                <ToastProvider>
-                  <ThemeProvider
-                    attribute='class'
-                    defaultTheme='light'
-                    disableTransitionOnChange={true}
-                    enableSystem={true}
-                    layout={config.ApplicationLayout}
-                  >
-                    {children}
-                  </ThemeProvider>
-                </ToastProvider>
-              </TooltipProvider>
+              {/** TODO: put side bar inside the portal */}
+              <SidebarProvider defaultOpen={false} className='block'>
+                <TooltipProvider>
+                  <ToastProvider>
+                    <ThemeProvider
+                      attribute='class'
+                      defaultTheme='light'
+                      disableTransitionOnChange={true}
+                      enableSystem={true}
+                      layout={config.ApplicationLayout}
+                    >
+                      {children}
+                    </ThemeProvider>
+                  </ToastProvider>
+                </TooltipProvider>
+
+              </SidebarProvider>
             </EventEmitterProvider>
           </TRPCReactProvider>
         </Suspense>

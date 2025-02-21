@@ -5,4 +5,4 @@ export interface ILayoutProps {
 
 export interface IRouteParams {
     id: string;
-  }
+}

@@ -20,6 +20,7 @@ import FormDateRange from '../../../FormType/FormDateRange'
 import FormDraggable from '../../../FormType/FormDraggable'
 import FormEmailInput from '../../../FormType/FormEmailInput'
 import FormFileUpload from '../../../FormType/FormFileUpload'
+import FormGroupMultiField from '../../../FormType/FormGroupMultiField'
 import FormInput from '../../../FormType/FormInput'
 import FormInputGrid from '../../../FormType/FormInputGrid'
 import FormTextInputs from '../../../FormType/FormInputs'
@@ -32,8 +33,10 @@ import FormPhoneInput from '../../../FormType/FormPhoneInput'
 import FormRadio from '../../../FormType/FormRadio'
 import FormRichTextEditor from '../../../FormType/FormRichTextEditor'
 import FormSelect from '../../../FormType/FormSelect'
+import FormSeparator from '../../../FormType/FormSeparator'
 import FormSlider from '../../../FormType/FormSlider'
 import FormSmartDate from '../../../FormType/FormSmartDate'
+import FormSpaceComponent from '../../../FormType/FormSpace'
 import FormSwitch from '../../../FormType/FormSwitch'
 import FormTextArea from '../../../FormType/FormTextArea'
 import FormTimePicker from '../../../FormType/FormTimePicker'
@@ -45,8 +48,6 @@ import {
   type TFormSchema,
 } from '../../../types'
 import FormGroupTab from '../../../FormType/FormGroupTab'
-import FormSpaceComponent from '../../../FormType/FormSpace'
-import FormSeparator from '../../../FormType/FormSeparator'
 
 export default function RenderFormType(
   fieldConfig: IField,

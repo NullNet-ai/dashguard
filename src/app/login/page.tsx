@@ -1,11 +1,11 @@
-import LoginForm from "./_components/loginForm";
-import Image from "next/image";
+import Image from 'next/image';
+import LoginForm from './_components/loginForm';
+import SignUpLabel from './_components/SignUpLabel';
 
 export default function Login() {
   return (
-    <>
-      <div className="grid lg:grid-cols-2 grid-cols-1 min-h-screen">
-        <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10 relative">
+      <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+        <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
           <div className="w-full max-w-[655px]">
             <div className="flex flex-col items-center lg:items-start">
               <Image
@@ -21,23 +21,22 @@ export default function Login() {
             </div>
 
             <div className="mt-11">
-              <div>
-                <LoginForm />
-              </div>
+                <LoginForm defaultValue={{}} />
             </div>
+            <SignUpLabel />
           </div>
-          <footer className="absolute bottom-0 text-[10px] w-full text-center py-4 text-muted-foreground">
-            &copy; All Rights Reserved. {new Date().getFullYear()} DNA Micro<sup>TM</sup>. 
+          <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
+            &copy; All Rights Reserved. {new Date().getFullYear()} DNA Micro
+            <sup>TM</sup>.
           </footer>
         </div>
         <div className="relative hidden lg:block">
           <img
             alt=""
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
             src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
           />
         </div>
       </div>
-    </>
   );
 }

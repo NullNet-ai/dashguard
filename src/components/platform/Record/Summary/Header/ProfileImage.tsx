@@ -110,7 +110,7 @@ export default function ProfileImage({details, entity} : any) {
 
   const { actions } = useSideDrawer()
   const config = {
-    title: 'Upload Image',
+    header: 'Upload Image',
     sideDrawerWidth: '30dvw',
     overlayEnabled: true,
     body: {

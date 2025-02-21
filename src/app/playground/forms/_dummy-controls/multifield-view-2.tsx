@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { group } from 'console'
 import { toast } from 'sonner'
@@ -7,10 +7,7 @@ import { z } from 'zod'
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import NewComingSoon from '~/components/ui/coming-soon'
 
-import GroupTabWithMultiField from "./page";
-
-
-export default function GroupTabView2({}: any) {
+export default function GroupTabView2() {
   const FormSchema = z.object({
     tabs: z.array(
       z.object({
@@ -35,6 +32,25 @@ export default function GroupTabView2({}: any) {
     ),
   })
 
+  const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        toast(
+          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+            <code className="text-white">
+              {JSON.stringify(values.data, null, 2)}
+            </code>
+          </pre>,
+        )
+        resolve()
+      }
+      catch (error) {
+        console.error('Profile update error', error)
+        toast.error('Failed to update profile. Please try again.')
+        reject(new Error('Profile update error'))
+      }
+    })
+  };
 
   return (
     <FormBuilder
@@ -46,17 +62,8 @@ export default function GroupTabView2({}: any) {
       customDesign={{
         formClassName: 'grid-cols-1 lg:grid-cols-1',
       }}
-      customRender={(form, options) => {
-        return (
-          <GroupTabWithMultiField
-            form={form}
-            options={options}
-            handleSave={handleSave}
-          />
-        )
-      }}
       defaultValues={{
-        "multi-field": [
+        tabs: [
           {
             id: crypto.randomUUID(),
             tabName: 'Tab 1',
