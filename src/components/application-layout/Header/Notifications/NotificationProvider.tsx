@@ -90,11 +90,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           isLoadMore,
           filters: additionalFilters,
           order: {
-            sortBy: order.sortBy || selectedSort,
+            sortBy: order.sortBy || selectedOrder,
             sortOrder: order.sortOrder || selectedOrder,
-            ...order,
             limit: isLoadMore ? PAGE_SIZE : PAGE_SIZE * 3,
-            starts_at: isLoadMore ? page * PAGE_SIZE : 0,
+            starts_at: isLoadMore ? (page + 2) * PAGE_SIZE : 0,
           },
         });
 
@@ -127,11 +126,14 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         notificationTotalCount,
     );
     setBuffer((prev) => prev.slice(PAGE_SIZE));
-
     await fetchNotifications({
       type,
       isLoadMore: true,
       showRead: showRead,
+      order: {
+        sortBy: selectedSort,
+        sortOrder: selectedOrder,
+      },
     });
 
   }, [type, hasMore, loading, fetchNotifications, buffer]);
@@ -275,6 +277,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleSortChange = async (option: string) => {
+    setLoading(true)
     setSelectedSort(option);
     setIsDropdownOpen(false);
     setPage(1); // Reset page
@@ -285,9 +288,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         sortOrder: selectedOrder,
       },
     });
+    setLoading(false)
   };
 
   const handleSortOrderChange = async (order: string) => {
+    setLoading(true)
     setSelectedOrder(order as 'asc' | 'desc');
     setIsDropdownOpen(false);
     setPage(1); // Reset page
@@ -298,6 +303,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         sortOrder: order as 'asc' | 'desc',
       },
     });
+    setLoading(false)
   };
 
   const handleChangeType = async (type: TNotificationType) => {
@@ -306,7 +312,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     setType(type);
     setPage(1); // Reset page
     setNotifications([]);
-    await fetchNotifications({ type: type as TNotificationType });
+    setSelectedSort('timestamp');
+    setSelectedOrder('desc');
+    await fetchNotifications({ type: type as TNotificationType, order : {
+      sortBy: 'timestamp',
+      sortOrder: 'desc',
+    } });
 
     setLoading(false)
   };
