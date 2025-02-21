@@ -75,7 +75,7 @@ export default function CustomInstallationDetails({
           <div className='grid grid-cols-1 gap-2'>
             <p className='col-span-2'>
               {"Download the following package for your PfSense and install"}
-              {"using the following directions:"}
+              {" using the following directions:"}
             </p>
             <div className='col-span-2'>
 
