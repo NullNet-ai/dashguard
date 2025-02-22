@@ -141,7 +141,7 @@ const NotificationDrawer = () => {
           content: (
             <div
               id="scrollable-div"
-              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[77dvh] md:h-[82dvh]  flex-col gap-2 overflow-auto overscroll-none"
+              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[77dvh] md:h-[80dvh]  flex-col gap-2 overflow-auto overscroll-none"
             >
                 <InfiniteScroll
                 dataLength={notifications.length}
