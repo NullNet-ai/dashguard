@@ -1,58 +1,56 @@
 'use client'
 
-import { group } from 'console'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import NewComingSoon from '~/components/ui/coming-soon'
+
 import Guidelines from './components/guildelines'
 import MultiFieldForms from './components/multfield-form'
 
 export default function GroupTabView2() {
-
-  const customFieldSchema =  z.object({
+  const customFieldSchema = z.object({
     fields: z
       .array(
         z.object({})
           .catchall(
             z.string()
-              .min(2, { message: "Field value must be at least 2 characters long" })
+              .min(2, { message: 'Field value must be at least 2 characters long' })
           )
       )
       .optional(),
   })
 
   const metadataSchema = z
-  .object({})
-  .catchall(z.any()) // ✅ Allows any additional dynamic keys
-  .merge(
-    customFieldSchema
-  );
+    .object({})
+    .catchall(z.any())
+    .merge(
+      customFieldSchema
+    );
 
-const FormSchema = z.object({
-  tabs: z
-    .array(
-      z.object({
-        id: z.string(),
-        tabName: z.string(),
-        order: z.number().min(1),
-        metadata: metadataSchema, // ✅ Uses extended metadata
-        tabChildren: z.array(
-          z.object({
-            id: z.string(),
-            tabName: z.string(),
-            order: z.number().min(1),
-            metadata: metadataSchema, // ✅ Same logic for children
-            component: z.string(),
-          })
-        ),
-        component: z.string(),
-      })
-    )
-    .transform((items) => [...items].sort((a, b) => a.order - b.order)),
-});
-
+  const FormSchema = z.object({
+    tabs: z
+      .array(
+        z.object({
+          id: z.string(),
+          tabName: z.string(),
+          order: z.number().min(1),
+          metadata: metadataSchema,
+          tabChildren: z.array(
+            z.object({
+              id: z.string(),
+              tabName: z.string(),
+              order: z.number().min(1),
+              metadata: metadataSchema,
+              component: z.string(),
+            })
+          ),
+          component: z.string(),
+        })
+      )
+      .transform((items: any) => [...items].sort((a, b) => a.order - b.order)),
+  });
 
   const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
     return new Promise<void>((resolve, reject) => {
@@ -89,31 +87,33 @@ const FormSchema = z.object({
           {
             id: crypto.randomUUID(),
             tabName: 'Tab 1',
-            order:1,
-            metadata:{},
+            order: 1,
+            metadata: {},
             tabChildren: [],
-            component: ''
+            component: '',
           },
           {
             id: crypto.randomUUID(),
             tabName: 'Multi fields',
-            order:2,
-            metadata:{
+            order: 2,
+            metadata: {
               fields: [
                 {
-                  "value": "John Doesss",
-                  "name": 'full-name',
-                  "fieldType": "input",
+                  id: crypto.randomUUID(),
+                  value: 'John Doesss',
+                  name: 'full-name',
+                  fieldType: 'input',
                 },
                 {
-                  "value": "John Doesss",
-                  "name": 'age',
-                  "fieldType": "input",
-                }
+                  id: crypto.randomUUID(),
+                  value: 'John Doesss',
+                  name: 'age',
+                  fieldType: 'input',
+                },
               ],
             },
             tabChildren: [],
-            component: 'MultiFieldForms'
+            component: 'MultiFieldForms',
           },
         ],
       }}
@@ -129,12 +129,11 @@ const FormSchema = z.object({
             defaultComponent: Guidelines,
             components: [
               NewComingSoon,
-              MultiFieldForms
+              MultiFieldForms,
             ],
-          }
+          },
         },
       ]}
     />
-  ) 
- 
+  )
 }

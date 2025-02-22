@@ -1,8 +1,6 @@
-import { closestCorners } from '@dnd-kit/core'
-import { DevTool } from '@hookform/devtools'
 import { capitalize } from 'lodash'
-import { GripVerticalIcon, MinusIcon, PlusIcon } from 'lucide-react'
-import React, { ComponentType, useEffect } from 'react'
+import { GripVerticalIcon } from 'lucide-react'
+import React, { useEffect } from 'react'
 import {
   type ControllerFieldState,
   type ControllerRenderProps,
@@ -10,38 +8,16 @@ import {
   type UseFormReturn,
 } from 'react-hook-form'
 
-import { ButtonWithDropdown } from '~/components/platform/ButtonWithDropdown'
-import { Button } from '~/components/ui/button'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
 import GroupTab from '~/components/ui/group-tab'
-import { Input } from '~/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
-import {
-  Sortable,
   SortableDragHandle,
   SortableItem,
 } from '~/components/ui/sortable'
 import { cn } from '~/lib/utils'
 
 import {
-  type ICheckboxOptions,
-  type IRadioOptions,
-  type ISelectOptions,
   type IField,
 } from '../../types/global/interfaces'
-import { metadata } from '~/app/layout'
 
 interface IProps {
   fieldConfig: IField
@@ -59,14 +35,12 @@ const FormGroupTab = ({
   fieldConfig,
   formRenderProps,
   form,
-  formKey,
   formSchema,
 }: IProps) => {
   const { fields, append, move, replace, update } = useFieldArray({
     control: form.control,
     name: formRenderProps.field.name,
   })
-
   const { register } = form
   const [selected, setSelected] = React.useState<any>(undefined)
 
@@ -83,10 +57,10 @@ const FormGroupTab = ({
         {
           id: crypto.randomUUID(),
           tabName: `${fieldConfig.groupConfig?.prefix} 1`,
-          component : 'NewComingSoon',
+          component: 'NewComingSoon',
           order: 1,
-          metadata : {},
-          tabChildren: []
+          metadata: {},
+          tabChildren: [],
         },
       ])
       // append({ ...initialVal, ...defValue });
@@ -97,102 +71,13 @@ const FormGroupTab = ({
     return null
   }
 
-  const renderFormControl = (
-    field: IField & {
-      selectOptions?: ISelectOptions[]
-      radioOptions?: IRadioOptions[]
-      checkboxOptions?: ICheckboxOptions[]
-    },
-    index: number,
-    fieldType: string,
-    selectOptions?: any,
-    options?: any
-  ) => {
-    const commonProps = {
-      disabled: isDisabled,
-      className: 'h-10 px-3',
-    }
-
-    const handleChange = (e: string) => {
-      form.setValue(`tabs.${options.index}.fields.${index}.${field.name}`, e, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      })
-    }
-
-    switch (fieldType) {
-      case 'input':
-        return (
-          <FormItem>
-            <FormControl>
-              <Input
-                {...register(`${fieldConfig.name}.${options.index}.fields.${index}.${field.name}`)}
-                {...commonProps}
-                placeholder={field.placeholder}
-              />
-            </FormControl>
-          </FormItem>
-        )
-      case 'select':
-        return (
-          <FormItem>
-            <FormControl>
-              <Select
-                {...register(`${fieldConfig.name}.${options.index}.fields.${index}.${field.name}`)}
-                defaultValue={form.getValues(
-                  `${fieldConfig.name}.${options.index}.fields.${index}.${field.name}`,
-                )}
-                onValueChange={handleChange}
-              >
-                <SelectTrigger {...commonProps}>
-                  <SelectValue placeholder={options?.fieldOptions?.placeholder || field.placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.isArray(selectOptions)
-                  && selectOptions.map((option: any) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-          </FormItem>
-        )
-      default:
-        return null
-    }
-  }
-
-  const dropOptions
-    = fieldConfig.multiFieldConfig?.fieldOptions.map((option, index) => {
-      return {
-        label: option.label,
-        onClick: (arg: any) => {
-          const { index: parentIdx } = arg
-
-          if (fields && fields[parentIdx]) {
-            // @ts-expect-error 'fields' is possibly 'undefined'.
-            const updatedFields = [...fields[parentIdx].fields, { fieldType: option.fieldType, name: option.name, optionId: index }]
-            const updatedField = { ...fields[parentIdx], fields: updatedFields }
-
-            update(parentIdx, updatedField)
-            setTimeout(() => {
-              setSelected({ id: parentIdx })
-            }, 1000)
-          }
-        },
-      }
-    }) ?? []
-
   return (
     <GroupTab
       selected={selected}
       move={move}
       replace={replace}
       fields={fields}
-      render={(field: any, idx) => {
+      render={(field: any) => {
         return (
           <SortableItem
             key={field.id}
@@ -201,14 +86,14 @@ const FormGroupTab = ({
             onClick={() => {
               if (!isDisabled) {
                 setSelected({
-                  id: idx,
+                  id: field.tabName,
                 })
               }
             }}
           >
             <div
               className={cn(
-                `${selected?.id === idx ? 'border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'}`, 'border-b-default-100 flex flex-row items-center gap-2 border-b py-2', 'cursor-pointer bg-white',
+                `${selected?.id === field.tabName ? 'border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'}`, 'border-b-default-100 flex flex-row items-center gap-2 border-b py-2', 'cursor-pointer bg-white',
               )}
             >
               <SortableDragHandle
@@ -219,7 +104,7 @@ const FormGroupTab = ({
               >
                 <GripVerticalIcon
                   className={cn(
-                    `${isDisabled ? 'h-0 w-0 opacity-0' : 'size-5'}`, '',
+                    `${isDisabled ? ' opacity-60' : 'size-5'}`, '',
                   )}
                   aria-hidden="true"
                 />
@@ -227,7 +112,7 @@ const FormGroupTab = ({
               <div className="min-w-[150px]">
                 <span
                   className={cn(
-                    `${idx === selected?.id ? 'font-semibold text-primary' : ''}`,
+                    `${isDisabled ? 'text-gray-500' : ''}`, `${field.tabName === selected?.id ? 'font-semibold text-primary' : ''}`,
                   )}
                 >
                   {capitalize(field.tabName)}
@@ -239,39 +124,40 @@ const FormGroupTab = ({
       }}
       disabled={isDisabled}
       renderContent={(item: any, innerIndex: number) => {
-
         const { component, metadata } = item ?? {}
 
-        if (innerIndex !== selected?.id) {
+        if (item.tabName !== selected?.id) {
           return null
         }
-  
-        const SelectedComponent = components?.find((Component: ComponentType<any> | JSX.Element) => {
+        // eslint-disable-next-line @stylistic/max-len
+        const SelectedComponent
+        = components?.find((Component: any) => {
           // If it's a ComponentType, check its name
           if (typeof Component === 'function' && Component.name === component) {
             return true;
           }
           // If it's a JSX.Element, check its type name
-          if (React.isValidElement(Component) && 
-              typeof Component.type === 'function' && 
-              Component.type.name === component) {
+          if (React.isValidElement(Component)
+            && typeof Component.type === 'function'
+            && Component.type.name === component) {
             return true;
           }
           return false;
         });
 
-        if(SelectedComponent) {
+        if (SelectedComponent) {
           // If it's a ComponentType, render it as a component
           if (typeof SelectedComponent === 'function') {
             return (
-              <SelectedComponent 
-                {...metadata} 
-                {...item} 
-                index={innerIndex} 
-                form={form} 
-                formSchema={formSchema} 
-                fieldConfig={fieldConfig} 
+              <SelectedComponent
+                {...metadata}
+                {...item}
+                index={innerIndex}
+                form={form}
+                formSchema={formSchema}
+                fieldConfig={fieldConfig}
                 formRenderProps={formRenderProps}
+                customMeta={{ fields, append, move, replace, update, register }}
               />
             )
           }
@@ -279,7 +165,7 @@ const FormGroupTab = ({
           return SelectedComponent;
         }
 
-        if(DefaultComponent) {
+        if (DefaultComponent) {
           if (typeof DefaultComponent === 'function') {
             return <DefaultComponent />
           }
@@ -290,10 +176,10 @@ const FormGroupTab = ({
         append({
           id: crypto.randomUUID(),
           tabName: `${fieldConfig.groupConfig?.prefix} ${fields?.length + 1}`,
-          component : DefaultComponent?.name,
-          order:  fields?.length + 1,
-          metadata : {},
-          tabChildren: []
+          component: DefaultComponent?.name,
+          order: fields?.length + 1,
+          metadata: {},
+          tabChildren: [],
         })
       }}
       // disabled={isdisabled}

@@ -1,34 +1,10 @@
-'use client';
+'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
-import { Form } from '~/components/ui/form';
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
+import { Form } from '~/components/ui/form'
 
 export default function MultiFieldForms(props: any) {
-  const { form, formSchema, fieldConfig,  formRenderProps, index } = props;
-
-
-  const handleSave = async (values: { data: z.infer<any> }) => {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        toast(
-          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            <code className="text-white">
-              {JSON.stringify(values.data, null, 2)}
-            </code>
-          </pre>,
-        );
-        resolve();
-      } catch (error) {
-        console.error('Profile update error', error);
-        toast.error('Failed to update profile. Please try again.');
-        reject(new Error('Profile update error'));
-      }
-    });
-  };
+  const { form, formSchema, fieldConfig } = props
 
   return (
     <div className="w-full">
@@ -41,8 +17,8 @@ export default function MultiFieldForms(props: any) {
             {
               id: 'multi-field',
               formType: 'multi-field',
-              name: `multi-field`,
-              label: 'Multi Field',
+              name: `group-tab-field`,
+              label: `${fieldConfig.label}`,
               multiFieldConfig: {
                 parentProps: props,
                 fields: {
@@ -93,5 +69,5 @@ export default function MultiFieldForms(props: any) {
         />
       </Form>
     </div>
-  );
+  )
 }
