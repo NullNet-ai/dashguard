@@ -28,7 +28,7 @@ const FormServerFetch = async () => {
   const selectedRecords = default_values[form_filter_entity] || []
 
   return (
-    <div className='space-y-2'>
+    <div className={"space-y-2"}>
       <BasicDetails
         defaultValues={
           selectedRecords.length

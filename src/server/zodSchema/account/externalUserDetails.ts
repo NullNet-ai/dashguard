@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const EmailSchema = z.object({
   id: z.string().optional(),
@@ -6,9 +6,10 @@ export const EmailSchema = z.object({
     .string({ message: 'Email is required.' })
     .min(1, { message: 'Email is required.' })
     .email({ message: 'Email is invalid.' })
-    .transform((email) => email.toLowerCase()), // Transform email to lowercase
-  is_primary: z.boolean().optional().default(true),
-});
+    .transform(email => email.toLowerCase()), // Transform email to lowercase
+  is_primary: z.boolean().optional()
+    .default(true),
+})
 
 export const ExternalUserDetailsSchema = z.object({
   role: z
@@ -19,4 +20,4 @@ export const ExternalUserDetailsSchema = z.object({
       message: 'Role is required',
     }),
   email: z.array(EmailSchema),
-});
+})

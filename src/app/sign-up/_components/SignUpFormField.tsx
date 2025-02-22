@@ -40,13 +40,13 @@ const SignUpFormField: React.FC<SignUpFormFieldProps> = ({
     } = field
     return (
       <FormField
-        key={id}
-        control={control}
-        name={name}
-        render={(formProps) => {
+        control={ control }
+        key={ id }
+        name={ name }
+        render={ (formProps) => {
           return (
             <FormComponent
-              fieldConfig={{
+              fieldConfig={ {
                 id,
                 name,
                 label,
@@ -61,13 +61,13 @@ const SignUpFormField: React.FC<SignUpFormFieldProps> = ({
                 ...(required && {
                   required: true,
                 }),
-              }}
-              form={form}
-              formKey={formKey}
-              formRenderProps={formProps}
+              } }
+              form={ form }
+              formKey={ formKey }
+              formRenderProps={ formProps }
             />
           )
-        }}
+        } }
       />
     )
   })

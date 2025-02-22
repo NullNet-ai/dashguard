@@ -1,7 +1,7 @@
 {
   "app_name": "platform__SideDrawer",
-  "tag": "1.1.0",
-  "branch": "released/fix/1.1.0",
-  "message": "Release Platform SideDrawer ",
+  "tag": "1.2.0-rc.1<unreleased>",
+  "branch": "unreleased/fix2864/1.2.0-rc.1<unreleased>",
+  "message": "remove padding to side drawer content and adjust size of close button to make it smaller",
   "publish_name": "Rob Caldosa"
 }
