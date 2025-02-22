@@ -16,7 +16,7 @@ interface ProgressProps {
   label?: string | React.ReactNode | ((percentage: number) => React.ReactNode);
   labelColor?: string;
   labelPosition?: 'start' | 'start-outside' | 'follow' | 'end' | 'end-outside';
-  colorThresholds?: { percentage: number; color: string; textColor?: string }[];
+  colorThresholds?: { percentage: number; color: string }[];
   className?: string;
 }
 
@@ -30,7 +30,7 @@ const Progress = ({
   secondaryColor = '#e2e8f0',
   showLabel = true,
   label,
-  labelColor = 'white',
+  labelColor,
   labelPosition = 'end',
   colorThresholds,
   className,
@@ -39,17 +39,16 @@ const Progress = ({
   let percentage = Math.min(rawPercentage, maxLimit ?? 100);
   percentage = Math.max(percentage, 0);
 
+  // Set default label color based on progress type
+  const finalLabelColor = labelColor ?? (type === 'radial' ? 'black' : 'white');
+  
   let currentColor = primaryColor;
-  let currentTextColor = labelColor !== 'white' ? labelColor : type === 'linear' ? 'white' : 'black';
   
   if (colorThresholds?.length) {
     const sorted = [...colorThresholds].sort((a, b) => a.percentage - b.percentage);
     for (let i = sorted.length - 1; i >= 0; i--) {
-      if (sorted[i] && percentage >= sorted[i]!.percentage) {
-        currentColor = sorted[i]!.color;
-        if (sorted[i]!.textColor) {
-          currentTextColor = sorted[i]!.textColor ?? labelColor;
-        }
+      if ((sorted[i]?.percentage ?? -1) !== undefined && percentage >= (sorted[i]?.percentage ?? -1)) {
+        currentColor = sorted[i]?.color ?? primaryColor;
         break;
       }
     }
@@ -69,7 +68,7 @@ const Progress = ({
         gaugePrimaryColor={currentColor}
         gaugeSecondaryColor={secondaryColor}
         label={labelContent}
-        textColor={currentTextColor}
+        textColor={finalLabelColor}
       />
     );
   }
@@ -82,12 +81,14 @@ const Progress = ({
       labelPosition={labelPosition}
       primaryColor={currentColor}
       secondaryColor={secondaryColor}
-      labelColor={currentTextColor}
+      labelColor={finalLabelColor}
     />
   );
 };
 
 export { Progress };
+
+
 
 interface LinearProgressProps {
   className?: string;

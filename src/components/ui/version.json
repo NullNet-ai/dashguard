@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.13.0",
-  "branch": "released/fix/1.13.0",
-  "message": "release version 1.13.0 ",
+  "tag": "1.14.0-rc.2<unreleased>",
+  "branch": "unreleased/fix/1.14.0-rc.2<unreleased>",
+  "message": "remove text color threshold in progress ",
   "publish_name": "Rob Caldosa"
 }

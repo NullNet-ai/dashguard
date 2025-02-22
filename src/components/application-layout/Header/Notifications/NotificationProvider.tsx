@@ -34,7 +34,7 @@ const PAGE_SIZE = 10
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<INotificationSchema[]>([]);
-  const [notificationTotalCount, setNotificationTotalCount] = useState(0);
+  const [totalNotificationCount, setTotalNotificationCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showRead, setShowRead] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -105,11 +105,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           setBuffer(data.slice(PAGE_SIZE));
           setPage(1);
           setHasMore(data.slice(0, PAGE_SIZE).length < total_count);
-          setNotificationTotalCount(total_count);
+          setNotificationCount(total_count);
         }
-
-        const count = await getNotificationsCountByContact();
-        setNotificationCount(count as number);
       } catch (error) {
         console.error('❌ Failed to fetch notifications:', error);
       }
@@ -125,7 +122,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
     setHasMore(
       [...notifications, ...buffer.slice(0, PAGE_SIZE)].length <
-        notificationTotalCount,
+        notificationCount,
     );
     setBuffer((prev) => prev.slice(PAGE_SIZE));
     await fetchNotifications({
@@ -220,7 +217,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
         if (type === 'pinned' && !is_pinned) {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
-          setNotificationCount((prev) => prev - 1);
           return;
         }
         setNotifications((prev) =>
@@ -357,8 +353,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchNotificationCount = async () => {
       await getNotificationsCountByContact()
-        .then((count) => {
-          setNotificationCount(count as number);
+        .then(({
+          allUnreadNotificationCount,
+          allNotificationCount,
+        }) => {
+          setNotificationCount(allUnreadNotificationCount as number);
+          setTotalNotificationCount(allNotificationCount as number);
         })
         .catch((error) => {
           console.error('❌ Failed to fetch notifications:', error);
@@ -396,7 +396,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           isDropdownOpen,
           selectedSort,
           selectedOrder,
-          notificationTotalCount,
+          totalNotificationCount,
           hasMore,
           loadingPopulateData,
           loadingMarkAllAsRead,
