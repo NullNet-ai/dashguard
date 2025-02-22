@@ -37,6 +37,8 @@ export default async function Page({
     'updated_time',
     'created_time',
     'previous_status',
+    'last_heartbeat',
+    'device_status',
   ]
 
   const { items = [], totalCount } = await api.device.mainGrid({
