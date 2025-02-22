@@ -69,7 +69,7 @@ export default async function Page({
           resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
-            pluck: _pluck,
+            pluck: _pluck?.filter((item) => item !== 'system_id'),
           },
         },
       }}

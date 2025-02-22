@@ -21,22 +21,42 @@ const gridColumns = [
   {
     header: 'ID',
     accessorKey: 'code',
+    search_config: {
+      operator: 'like',
+    },
+
   },
   {
     header: 'Instance Name',
     accessorKey: 'instance_name',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Type',
     accessorKey: 'model',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Hierarchy',
     accessorKey: 'hierarchy',
+    search_config: {
+      operator: 'like',
+      entity:'device_group_settings',
+      field: 'name'
+    },
   },
   {
     header: 'WAN Address',
     accessorKey: 'ip_address',
+    search_config: {
+      operator: 'like',
+      entity:'device_interfaces',
+      field: 'name'
+    },
   },
   {
     header: 'Connectivity',
@@ -56,10 +76,16 @@ const gridColumns = [
   {
     header: 'UUID',
     accessorKey: 'system_id',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Version',
     accessorKey: 'device_version',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Last Heartbeat',

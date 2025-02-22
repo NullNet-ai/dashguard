@@ -346,6 +346,34 @@ export const deviceRouter = createTRPCRouter({
               },
             },
           })
+          . join( {
+            "type": "left",
+            "field_relation": {
+                "to": {
+                    "entity": "device_configurations",
+                    "field": "device_id",
+                    "order_by": "timestamp",
+                    "limit": 1
+                },
+                "from": {
+                    "entity": "devices",
+                    "field": "id"
+                }
+            }
+        })
+        .join({
+            "type": "left",
+            "field_relation": {
+                "to": {
+                    "entity": "device_interfaces",
+                    "field": "device_configuration_id"
+                },
+                "from": {
+                    "entity": "device_configurations",
+                    "field": "id"
+                }
+            }
+        })
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
@@ -404,8 +432,8 @@ export const deviceRouter = createTRPCRouter({
         } = item;
       
       
-        const configuration:any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === item.id);
-        const wan_address = configuration?.interfaces?.find((iface: { name: string }) => iface.name === 'wan')?.address;
+        // const configuration:any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === item.id);
+        const wan_address = device_interfaces?.find((iface: { name: string }) => iface.name === 'wan')?.address;
       
         return {
           ...entity_data,
