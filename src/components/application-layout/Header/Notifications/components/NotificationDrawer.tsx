@@ -9,6 +9,7 @@ import { useNotifications } from '../NotificationProvider';
 import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Separator } from '~/components/ui/separator';
+import Skeleton from '~/components/platform/Grid/Skeleton';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -147,7 +148,7 @@ const NotificationDrawer = () => {
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
-                loader={<NotificationSkeleton />}
+                loader={<Skeleton />}
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
                 scrollThreshold={1}
