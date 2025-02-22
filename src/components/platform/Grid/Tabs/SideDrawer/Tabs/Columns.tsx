@@ -7,9 +7,12 @@ import {
   SortableItem,
 } from '~/components/ui/sortable';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useManageFilter } from '../Provider';
 
 
 export default function ColumnContent() {
+  const { actions } = useManageFilter()
+  const { handleUpdateFilter } = actions;
   const form = useForm({
     defaultValues: {
       columns: [
@@ -71,7 +74,7 @@ export default function ColumnContent() {
   }, [fields, searchQuery]);
 
   const handleToggle = (index: number, id: string) => {
-    update(index, {
+    const updatedColumn = {
       ...(fields?.find((column) => column.id === id) ?? {
         value: false,
         icon: '≡',
@@ -80,8 +83,37 @@ export default function ColumnContent() {
         id: '',
       }),
       value: !fields?.find((column) => column.id === id)?.value,
+    };
+    update(index, updatedColumn);
+
+    const updated_fields = fields?.map((column) => {
+      if (column.id === id) {
+        return {
+          ...column,
+          value:updatedColumn.value,
+        };
+      }
+      return column;
+    });
+    handleUpdateFilter({
+      columns: updated_fields
     });
   };
+
+  const handleColumnMove = (activeIndex: number, overIndex: number) => {
+    move(activeIndex, overIndex);
+    const updatedColumns = [...fields];
+    const [movedItem] = updatedColumns.splice(activeIndex, 1);
+    updatedColumns.splice(overIndex, 0, movedItem!);
+    const updated_fields = updatedColumns.map((column, index) => ({
+      ...column,
+      order: index,
+    }));
+    handleUpdateFilter({
+      columns: updated_fields
+    });
+  };
+
 
   return (
     <div className="space-y-4">
@@ -99,7 +131,7 @@ export default function ColumnContent() {
       <Sortable
         value={filteredColumns}
         onMove={({ activeIndex, overIndex }) => {
-          move(activeIndex, overIndex);
+          handleColumnMove(activeIndex, overIndex);
         }}
       >
         {filteredColumns.map((column, index) => (

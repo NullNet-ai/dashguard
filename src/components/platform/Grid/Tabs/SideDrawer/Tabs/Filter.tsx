@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { CircleMinus, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
@@ -11,25 +11,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { useManageFilter } from '../Provider';
 
 interface FilterItem {
   field: string;
   operator: string;
   value: string;
+  logicalOperator?: 'AND' | 'OR';
 }
 
 export default function FilterContent() {
+  const { actions } = useManageFilter()
+  const { handleUpdateFilter } = actions;
+  
   const [filters, setFilters] = useState<FilterItem[]>([
-    { field: 'State', operator: 'Equals', value: 'Draft' },
+    { field: '', operator: '', value: '' },
   ]);
 
   const handleAddFilter = () => {
-    setFilters([...filters, { field: '', operator: '', value: '' }]);
+    const newFilters = [...filters, { field: '', operator: '', value: '' }];
+    setFilters(newFilters);
+    updateProviderFilters(newFilters);
   };
 
   const handleRemoveFilter = (index: number) => {
     const newFilters = filters.filter((_, i) => i !== index);
     setFilters(newFilters);
+    updateProviderFilters(newFilters);
   };
 
   const handleFilterChange = (
@@ -44,6 +52,20 @@ export default function FilterContent() {
       return filter;
     });
     setFilters(newFilters);
+    updateProviderFilters(newFilters);
+  };
+
+  const updateProviderFilters = (filters: FilterItem[]) => {
+    const formattedFilters = filters.map((filter) => ({
+      operator: filter.operator.toLowerCase(),
+      type: 'criteria',
+      field: filter.field.toLowerCase(),
+      label: filter.field,
+      values: [filter.value],
+      default: true
+    }));
+
+    handleUpdateFilter({ default_filter: formattedFilters });
   };
 
   return (
@@ -62,25 +84,44 @@ export default function FilterContent() {
 
       {filters.map((filter, index) => (
         <div key={index} className="flex items-center gap-2">
-          <Select defaultValue={filter.field}>
+          {index > 0 && (
+            <Select defaultValue="AND">
+              <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+                <SelectValue placeholder="AND" />
+              </SelectTrigger>
+              <SelectContent className="z-[9999]">
+                <SelectItem value="AND">AND</SelectItem>
+                <SelectItem value="OR">OR</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <Select
+            value={filter.field}
+            onValueChange={(value) => handleFilterChange(index, 'field', value)}
+          >
             <SelectTrigger className="w-[200px] border-gray-200 bg-white">
               <SelectValue placeholder="Select field" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="State">State</SelectItem>
-              <SelectItem value="Category">Category</SelectItem>
-              <SelectItem value="Status">Status</SelectItem>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="state">State</SelectItem>
+              <SelectItem value="category">Category</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select defaultValue={filter.operator}>
+          <Select
+            value={filter.operator}
+            onValueChange={(value) =>
+              handleFilterChange(index, 'operator', value)
+            }
+          >
             <SelectTrigger className="w-[200px] border-gray-200 bg-white">
               <SelectValue placeholder="Select operator" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Equals">Equals</SelectItem>
-              <SelectItem value="Contains">Contains</SelectItem>
-              <SelectItem value="StartsWith">Starts with</SelectItem>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="equal">Equals</SelectItem>
+              <SelectItem value="contains">Contains</SelectItem>
+              <SelectItem value="startsWith">Starts with</SelectItem>
             </SelectContent>
           </Select>
 
@@ -90,22 +131,28 @@ export default function FilterContent() {
               onChange={(e) =>
                 handleFilterChange(index, 'value', e.target.value)
               }
-              className="border-gray-200 bg-white pr-20"
+              className="border-gray-200 bg-white"
+              placeholder="Enter the value"
             />
             {filter.value && (
               <div className="absolute left-2 top-1/2 flex -translate-y-1/2 items-center">
                 <span className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-0.5 text-sm text-blue-700">
                   {filter.value}
-                  <button
-                    onClick={() => handleRemoveFilter(index)}
-                    className="ml-1 hover:text-blue-900"
-                  >
-                    ×
-                  </button>
                 </span>
               </div>
             )}
           </div>
+
+          {filters.length > 1 && 
+          <Button
+            onClick={() => handleRemoveFilter(index)}
+            Icon={CircleMinus}
+            iconPlacement="left"
+            iconClassName="text-red-600 h-4 w-4"
+            className="ms-2"
+            variant={'ghost'}
+          />
+          }
         </div>
       ))}
 

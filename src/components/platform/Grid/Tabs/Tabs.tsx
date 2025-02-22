@@ -2,7 +2,7 @@ import { toCapitalize } from '~/lib/capitalize';
 import GridMenu from './GridMenu';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/server';
-import { PlusCircle } from 'lucide-react';
+import CreateNewFilter from './CreateNewFilter';
 
 const GridTabs = async () => {
   const gridTabsData = await api.grid.getSessionGridTabs();
@@ -31,7 +31,7 @@ const GridTabs = async () => {
           </a>
         );
       })}
-      <PlusCircle className="h-5 w-5 text-primary" />
+      <CreateNewFilter />
     </div>
   );
 };
