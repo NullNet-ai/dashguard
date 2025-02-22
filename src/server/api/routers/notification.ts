@@ -10,7 +10,7 @@ import { mockNotifications } from '../mock-data/notification'
 const ENTITY = 'notification'
 
 export const notificationsRouter = createTRPCRouter({
-  getNotificationsCountByContact: privateProcedure.query(async ({ ctx }) => {
+  getUnreadNotificationsCountByContact: privateProcedure.query(async ({ ctx }) => {
     const id = ctx?.session?.account?.contact?.id
 
     if (id) {
@@ -54,6 +54,42 @@ export const notificationsRouter = createTRPCRouter({
       return total_count
     }
   }),
+
+  getAllNotificationsCountByContact: privateProcedure.query(async ({ ctx }) => {
+    const id = ctx?.session?.account?.contact?.id
+
+    if (id) {
+      const { total_count } = await ctx.dnaClient
+        .findAll({
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            track_total_records: true,
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'recipient_id',
+                operator: EOperator.EQUAL,
+                values: [id],
+              },
+              {
+                operator: EOperator.AND,
+                type: 'operator',
+              },
+              {
+                type: 'criteria',
+                field: 'status',
+                operator: EOperator.EQUAL,
+                values: ['Active'],
+              },
+            ],
+          },
+        })
+        .execute()
+      return total_count
+    }
+  }),
+
 
   getNotifications: privateProcedure
     .input(

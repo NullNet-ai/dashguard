@@ -1,9 +1,14 @@
 'use server'
 import { api } from '~/trpc/server'
 
-export const getNotificationsCountByContact = async () : Promise<number>  => {
-  const count = await api.notification.getNotificationsCountByContact()
-  return count || 0
+export const getNotificationsCountByContact = async () : Promise<Record<string, any>>  => {
+  const allUnreadNotificationCount = await api.notification.getUnreadNotificationsCountByContact()
+
+  const allNotificationCount = await api.notification.getAllNotificationsCountByContact()
+  return {
+    allUnreadNotificationCount,
+    allNotificationCount,
+  }
 }
 
 export const getNotifications = async ({
