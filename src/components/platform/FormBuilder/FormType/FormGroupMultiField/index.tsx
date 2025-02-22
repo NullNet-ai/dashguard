@@ -59,7 +59,7 @@ const FormGroupMultiField = ({
   form,
   formKey,
 }: IProps) => {
-  const { fields, append, move, update } = useFieldArray({
+  const { fields, append, move, update, replace } = useFieldArray({
     control: form.control,
     name: formRenderProps.field.name,
   })
@@ -183,6 +183,7 @@ const FormGroupMultiField = ({
 
   return (
     <GroupTab
+      replace={replace}
       disabled={ isDisabled }
       fields={ fields }
       move={ move }

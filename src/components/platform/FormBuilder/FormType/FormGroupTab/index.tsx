@@ -129,7 +129,6 @@ const FormGroupTab = ({
         if (item.tabName !== selected?.id) {
           return null
         }
-        // eslint-disable-next-line @stylistic/max-len
         const SelectedComponent
         = components?.find((Component: any) => {
           // If it's a ComponentType, check its name

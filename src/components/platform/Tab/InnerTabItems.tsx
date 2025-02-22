@@ -67,17 +67,9 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     setIsClient(true)
   }, [])
 
-  useEffect(() => {
-
-    setTimeout(() => {
-      console.log("tabs Xxxx")
-    }, 4000);
-  }, [tabs, code])
-
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) return tabs
     if (tabs.length) {
-      console.log("tabs", tabs)
       const activeIndex = tabs.findIndex(a => a.name === code)
       const prevCurrent = Cookies.get('prevCurrent')
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
