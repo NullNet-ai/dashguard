@@ -219,7 +219,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
         if (type === 'pinned' && !is_pinned) {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
-          setNotificationCount((prev) => prev - 1);
           return;
         }
         setNotifications((prev) =>
