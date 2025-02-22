@@ -1,9 +1,14 @@
 'use server'
 import { api } from '~/trpc/server'
 
-export const getNotificationsCountByContact = async () : Promise<number>  => {
-  const count = await api.notification.getNotificationsCountByContact()
-  return count || 0
+export const getNotificationsCountByContact = async () : Promise<Record<string, any>>  => {
+  const allUnreadNotificationCount = await api.notification.getUnreadNotificationsCountByContact()
+
+  const allNotificationCount = await api.notification.getAllNotificationsCountByContact()
+  return {
+    allUnreadNotificationCount,
+    allNotificationCount,
+  }
 }
 
 export const getNotifications = async ({
@@ -18,23 +23,21 @@ export const getNotifications = async ({
 }: {
   isLoadMore?: boolean
   filters?: any[]
-  order?: { 
-    sortBy: string, 
+  order?: {
+    sortBy: string
     sortOrder: 'asc' | 'desc'
-    limit: number,
-    starts_at: number,
+    limit: number
+    starts_at: number
   }
-}) : Promise<Record<string,any>> => {
-
-
-  const { data : notifications, total_count} = await api.notification.getNotifications({
+}): Promise<Record<string, any>> => {
+  const { data: notifications, total_count } = await api.notification.getNotifications({
     filters,
     order,
   })
 
   return {
-    data : notifications,
-    total_count
+    data: notifications,
+    total_count,
   }
 }
 

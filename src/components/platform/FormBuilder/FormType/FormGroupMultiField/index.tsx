@@ -59,7 +59,7 @@ const FormGroupMultiField = ({
   form,
   formKey,
 }: IProps) => {
-  const { fields, append, move, update } = useFieldArray({
+  const { fields, append, move, update, replace } = useFieldArray({
     control: form.control,
     name: formRenderProps.field.name,
   })
@@ -167,7 +167,7 @@ const FormGroupMultiField = ({
         onClick: (arg: any) => {
           const { index: parentIdx } = arg
 
-          if (fields && fields[parentIdx]) {
+          if (fields?.[parentIdx]) {
             // @ts-expect-error 'fields' is possibly 'undefined'.
             const updatedFields = [...fields[parentIdx].fields, { fieldType: option.fieldType, name: option.name, optionId: index }]
             const updatedField = { ...fields[parentIdx], fields: updatedFields }
@@ -183,15 +183,16 @@ const FormGroupMultiField = ({
 
   return (
     <GroupTab
-      selected={selected}
-      move={move}
-      fields={fields}
-      render={(field: any, idx) => {
+      replace={replace}
+      disabled={ isDisabled }
+      fields={ fields }
+      move={ move }
+      render={ (field: any, idx) => {
         return (
           <SortableItem
+            asChild={ true }
             key={field.id}
             value={field.id}
-            asChild
             onClick={() => {
               if (!isDisabled) {
                 setSelected({
@@ -201,28 +202,28 @@ const FormGroupMultiField = ({
             }}
           >
             <div
-              className={cn(
+              className={ cn(
                 `${selected?.id === idx ? 'border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'}`, 'border-b-default-100 flex flex-row items-center gap-2 border-b py-2', 'cursor-pointer bg-white',
-              )}
+              ) }
             >
               <SortableDragHandle
+                className={"size-8 shrink-0 text-default/40"}
                 disabled={isDisabled}
-                variant="link"
-                size="icon"
-                className="size-8 shrink-0 text-default/40"
+                size={"icon"}
+                variant={"link"}
               >
                 <GripVerticalIcon
+                  aria-hidden={"true"}
                   className={cn(
                     `${isDisabled ? 'h-0 w-0 opacity-0' : 'size-5'}`, '',
                   )}
-                  aria-hidden="true"
                 />
               </SortableDragHandle>
               <div className="min-w-[150px]">
                 <span
-                  className={cn(
+                  className={ cn(
                     `${idx === selected?.id ? 'font-semibold text-primary' : ''}`,
-                  )}
+                  ) }
                 >
                   {capitalize(field.tabName)}
                 </span>
@@ -230,9 +231,8 @@ const FormGroupMultiField = ({
             </div>
           </SortableItem>
         )
-      }}
-      disabled={isDisabled}
-      renderContent={(item,) => {
+      } }
+      renderContent={ (item,) => {
         const { field, index: parentIdx } = item
         if (parentIdx !== selected?.id) {
           return null
@@ -243,15 +243,15 @@ const FormGroupMultiField = ({
             <FormItem>
               <div className="h-[49px] py-2">
                 <ButtonWithDropdown
-                  entity='group-tab-btn-drpdwn'
-                  buttonClassName=""
-                  buttonVariant='default'
-                  leftIcon={PlusIcon}
-                  buttonLabel='Add'
-                  dropdownOptions={dropOptions}
-                  side="start"
+                  buttonClassName={""}
+                  buttonLabel="Add"
+                  buttonVariant="default"
                   disabled={isDisabled}
+                  dropdownOptions={dropOptions}
+                  entity="group-tab-btn-drpdwn"
+                  leftIcon={PlusIcon}
                   options={item}
+                  side={"start"}
                 />
               </div>
               <div className="border-t-default-100 !m-0 flex h-[49px] items-center border-b border-t border-b-primary">
@@ -259,8 +259,8 @@ const FormGroupMultiField = ({
               </div>
               <FormControl>
                 <Sortable
-                  value={field?.fields}
                   collisionDetection={closestCorners}
+                  value={field?.fields}
                   orientation="vertical"
                   // onMove={({ activeIndex, overIndex }) =>
                   //   move(activeIndex, overIndex)
@@ -272,19 +272,19 @@ const FormGroupMultiField = ({
                           field?.fields.map((innerField: any, index: number) => {
                             return (
                               <SortableItem
+                                asChild={ true }
+                                draggable={!isDisabled}
                                 key={index}
                                 value={index}
-                                draggable={!isDisabled}
-                                asChild
                               >
                                 <div className="border-default-100 flex flex-row items-center gap-2 border-b py-2">
                                   {!isDisabled
                                     ? (
                                         <SortableDragHandle
-                                          variant="link"
-                                          size="icon"
-                                          className="size-8 shrink-0 text-default/40"
+                                          className={"size-8 shrink-0 text-default/40"}
                                           disabled={isDisabled}
+                                          size={"icon"}
+                                          variant={"link"}
                                         >
                                           <GripVerticalIcon />
                                         </SortableDragHandle>
@@ -299,15 +299,15 @@ const FormGroupMultiField = ({
                                     </FormLabel>
                                   </div>
                                   <div
-                                    className={cn(
+                                    className={ cn(
                                       'flex-1', `${form.getValues(`${fieldConfig.name}.${index}.fieldType`) === 'input' ? '-mt-[8px]' : ''}`,
-                                    )}
+                                    ) }
                                   >
                                     <FormField
-                                      control={form.control}
-                                      disabled={isDisabled}
-                                      name={`${fieldConfig.multiFieldConfig?.fields.name}-${parentIdx}-fields-${index}-${fieldConfig?.name ?? ''}`}
-                                      render={() => fieldConfig.multiFieldConfig
+                                      control={ form.control }
+                                      disabled={ isDisabled }
+                                      name={ `${fieldConfig.multiFieldConfig?.fields.name}-${parentIdx}-fields-${index}-${fieldConfig?.name ?? ''}` }
+                                      render={ () => fieldConfig.multiFieldConfig
                                         ? (
                                             (renderFormControl(
                                               fieldConfig.multiFieldConfig.fields, index, innerField.fieldType, fieldConfig.multiFieldConfig
@@ -323,35 +323,35 @@ const FormGroupMultiField = ({
                                         : (
                                             // eslint-disable-next-line react/jsx-no-useless-fragment
                                             <></>
-                                          )}
+                                          ) }
                                     />
                                   </div>
                                   {!isDisabled && (
                                     <Button
+                                      className={"mt-2 size-6 shrink-0 rounded-full"}
                                       disabled={isDisabled}
-                                      type="button"
-                                      variant="softDestructive"
-                                      size="icon"
-                                      className="mt-2 size-6 shrink-0 rounded-full"
+                                      size={"icon"}
+                                      type={"button"}
+                                      variant={"softDestructive"}
                                       onClick={() => {
                                         if (fields?.[parentIdx]) {
                                           // @ts-expect-error 'fields' is possibly 'undefined'.
                                           const updatedFields = fields[parentIdx]?.fields.filter(
                                             (_: any, idx: number) => idx !== index
-                                          );
+                                          )
                                           const updatedField = {
                                             ...fields[parentIdx],
                                             fields: updatedFields,
-                                          };
-                                          update(parentIdx, updatedField);
+                                          }
+                                          update(parentIdx, updatedField)
                                         }
                                       }}
                                     >
                                       <MinusIcon
-                                        className="size-4 text-destructive"
-                                        aria-hidden="true"
+                                        aria-hidden={"true"}
+                                        className={"size-4 text-destructive"}
                                       />
-                                      <span className="sr-only">Remove</span>
+                                      <span className="sr-only">{"Remove"}</span>
                                     </Button>
                                   )}
                                 </div>
@@ -361,20 +361,21 @@ const FormGroupMultiField = ({
                         )
                       : (
                           <div className="text-left text-sm text-default-400 py-4 px-2">
-                            No fields added
+                            {"No fields added"}
                           </div>
                         )}
                   </div>
                 </Sortable>
               </FormControl>
-              <DevTool control={form.control} />
+              <DevTool control={ form.control } />
               <FormMessage
-                data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+                data-test-id={ `${formKey}-err-msg-${fieldConfig.name}` }
               />
             </FormItem>
           </div>
         )
-      }}
+      } }
+      selected={ selected }
       onClickAddTab={() => {
         append({
           id: crypto.randomUUID(),
@@ -402,6 +403,6 @@ const FormGroupMultiField = ({
       // }}
     />
   )
-};
+}
 
 export default FormGroupMultiField

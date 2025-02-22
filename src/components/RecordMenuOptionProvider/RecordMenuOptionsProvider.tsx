@@ -1,38 +1,40 @@
-'use client';
-import React, { createContext } from 'react';
-import { handleChangeStatus } from '~/app/portal/organization_account/record/_actions';
-import { IMenuOptionConfig } from '../platform/Record/types';
-import { accountStatuses } from '~/app/portal/organization_account/record/_actions/statusOptions';
+'use client'
+import React, { createContext } from 'react'
 
-type Props = {
-  menu_options: Array<{ label: string; params: { key: string } }>;
-  children: React.ReactNode;
-  categories: Array<any>;
-};
+import { handleChangeStatus } from '~/app/portal/organization_account/record/_actions'
+import { accountStatuses } from '~/app/portal/organization_account/record/_actions/statusOptions'
+
+import { IMenuOptionConfig } from '../platform/Record/types'
+
+interface Props {
+  menu_options: Array<{ label: string, params: { key: string } }>
+  children: React.ReactNode
+  categories: Array<any>
+}
 
 export const RecordMenuOptionContext = createContext<{
   menu_items: Array<{
-    params: { key: string };
-    onClick?: any;
-    children?: any;
-    label?: string;
-  }>;
+    params: { key: string }
+    onClick?: any
+    children?: any
+    label?: string
+  }>
 }>({
   menu_items: [],
-});
+})
 
 const RecordMenuOptionsProvider = (props: Props) => {
   const modifiedMenuItems = props.menu_options.map((item) => {
-    const { label } = item;
+    const { label } = item
     return {
       ...item,
       onClick: async (id: string, entityName: string) => {
-        const status = accountStatuses[label as keyof typeof accountStatuses];
+        const status = accountStatuses[label as keyof typeof accountStatuses]
 
-        await handleChangeStatus(status, id, entityName, 'account_status');
+        await handleChangeStatus(status, id, entityName, 'account_status')
       },
-    };
-  });
+    }
+  })
 
   return (
     <RecordMenuOptionContext.Provider
@@ -42,7 +44,7 @@ const RecordMenuOptionsProvider = (props: Props) => {
     >
       {props.children}
     </RecordMenuOptionContext.Provider>
-  );
-};
+  )
+}
 
-export default RecordMenuOptionsProvider;
+export default RecordMenuOptionsProvider

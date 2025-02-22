@@ -113,8 +113,8 @@ export default function PlatformPlayGround() {
           </div>
         </section>
 
-        <Toaster />
-      </div>
+        <Toaster /> 
+    </div>
     </>
   );
 }

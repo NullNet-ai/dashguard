@@ -11,7 +11,7 @@ function NotificationBadge() {
   const { state } = useNotifications()
   const { actions,state:drawerState } = useSideDrawer()
 
-  const { notificationCount } = state
+  const { totalUnreadNotificationCount } = state
 
   const handleToggleSideDrawer = () => {
     if (drawerState.isOpen) {
@@ -28,7 +28,7 @@ function NotificationBadge() {
   }
 
   return (
-    <Menu as='div' className='relative inline-block text-left'>
+    <Menu as='div' className='relative inline-block text-left mx-4'>
       <div>
         <MenuButton
           className='flex items-center rounded-full'
@@ -39,9 +39,9 @@ function NotificationBadge() {
         </MenuButton>
       </div>
 
-      {notificationCount > 0 && (
-        <span className='absolute right-0 top-0 inline-flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-600 px-1 py-1 text-[12px] font-bold leading-none text-red-100'>
-          {notificationCount > 99 ? '99+' : notificationCount}
+      {totalUnreadNotificationCount > 0 && (
+        <span className='absolute right-0 top-[3px] inline-flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-red-600 px-1 py-1 text-[12px] font-bold leading-none text-red-100'>
+          {totalUnreadNotificationCount > 99 ? '99+' : totalUnreadNotificationCount}
         </span>
       )}
     </Menu>

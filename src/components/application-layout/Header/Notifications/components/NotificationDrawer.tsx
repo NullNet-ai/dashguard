@@ -8,7 +8,7 @@ import { useNotifications } from '../NotificationProvider';
 
 import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Skeleton } from '~/components/ui/skeleton';
+import { Separator } from '~/components/ui/separator';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -28,7 +28,7 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
-    hasMore, 
+    hasMore,
     loadingPopulateData,
     loadingMarkAllAsRead,
   } = state;
@@ -141,28 +141,28 @@ const NotificationDrawer = () => {
           content: (
             <div
               id="scrollable-div"
-              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
+              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[77dvh] md:h-[80dvh]  flex-col gap-2 overflow-auto overscroll-none"
             >
-              <InfiniteScroll
+                <InfiniteScroll
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
-                loader={
-                  <Skeleton />
-                }
+                loader={<NotificationSkeleton />}
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
                 scrollThreshold={1}
                 endMessage={
-                    <div className="flex justify-center py-4">
+                  notifications.length ? (
+                  <div className="flex justify-center py-4">
                     <p className="text-center text-sm text-gray-500">
-                      No more notifications
+                    No more notifications
                     </p>
-                    </div>
+                  </div>
+                  ) : null
                 }
-              >
+                >
                 {tab.content}
-              </InfiniteScroll>
+                </InfiniteScroll>
             </div>
           ),
         }))}
@@ -176,18 +176,56 @@ export default NotificationDrawer;
 
 export function HeaderSection() {
   const { state, actions } = useNotifications();
-  const { notificationCount, showRead } = state;
+  const { showRead, totalUnreadNotificationCount } = state;
   const { toggleUnread } = actions;
 
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
         Notifications
-        ({notificationCount > 99 ? '99+' : notificationCount})
+        ({totalUnreadNotificationCount > 99 ? '99+' : totalUnreadNotificationCount})
       </h2>
       <div className="mr-2 flex items-center gap-2">
         <Switch checked={showRead} size="sm" onCheckedChange={toggleUnread} />
         <span className="text-sm text-muted-foreground">Show unread</span>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+export  function NotificationSkeleton() {
+  return (
+    <div className="w-full max-w-full  h-full animate-pulse  ">
+
+      {/* List skeleton items */}
+      <div className="space-y-3 mt-2 p-2">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <>
+            <div className="flex-row gap-2 ml-0 flex">
+              <div className="h-6 w-8 rounded-full ml-0 mt-0 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+              <div className="flex-col gap-1 mt-2 w-full ml-0 flex">
+                <div className="h-4 w-24 rounded-sm animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+                <div className="h-5 w-full rounded-sm animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+              </div>
+              <div className="h-7 w-20 rounded-lg ml-1.5 mr-3 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+            </div>
+            <div className="flex-col gap-0 mt-4 flex">
+              <div className="flex-row h-6 ml-9 flex">
+                <div className="h-4 w-16 rounded-sm ml-0 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+                <div className="h-4 w-20 rounded-sm ml-2 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+                <div className="h-4 w-11 rounded-full ml-2 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+                <div className="h-4 w-11 rounded-full ml-2 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
+              </div>
+            </div>
+
+
+            <Separator dashed />
+          </>
+        ))}
       </div>
     </div>
   );

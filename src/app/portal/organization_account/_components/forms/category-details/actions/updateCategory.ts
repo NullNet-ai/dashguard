@@ -23,7 +23,7 @@ export async function UpdateCategory({
     id,
     categories,
   })
-  if(application === 'wizard' && result?.data?.code) {
+  if (application === 'wizard' && result?.data?.code) {
     redirect(`/portal/${mainEntity}/wizard/${result?.data?.code}/1?categories=${categories}`)
   }
 }

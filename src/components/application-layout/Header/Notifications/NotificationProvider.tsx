@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, {
   createContext,
@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
-} from 'react';
+} from 'react'
 
 import {
   getNotifications,
@@ -17,24 +17,26 @@ import {
   handlePopulateData,
   updateBatchRead,
   changeNotificationStatus,
-} from './actions';
+} from './actions'
 import type {
   IActions,
   INotificationSchema,
   INotificationContext,
   TNotificationType,
-} from './types';
-import { buildNotificationFilters } from './utils/buildNotificationFilters';
+} from './types'
+import { buildNotificationFilters } from './utils/buildNotificationFilters'
 
 const NotificationContext = createContext<INotificationContext | undefined>(
   undefined,
-);
+)
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<INotificationSchema[]>([]);
-  const [notificationTotalCount, setNotificationTotalCount] = useState(0);
+  const [totalNotificationCount, setTotalNotificationCount] = useState(0);
+  const [totalUnreadNotificationCount, setTotalUnreadNotificationCount] =
+    useState(0);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showRead, setShowRead] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -67,16 +69,16 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       showRead: showReadValue = showRead,
       isLoadMore = false,
     }: {
-      type?: TNotificationType;
+      type?: TNotificationType
       order?: {
-        sortBy?: string;
-        sortOrder?: 'asc' | 'desc';
-        limit?: number;
-        starts_at?: number;
-      };
-      showRead?: boolean;
-      page?: number;
-      isLoadMore?: boolean;
+        sortBy?: string
+        sortOrder?: 'asc' | 'desc'
+        limit?: number
+        starts_at?: number
+      }
+      showRead?: boolean
+      page?: number
+      isLoadMore?: boolean
     }) => {
       try {
         if (!type) return [];
@@ -95,7 +97,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             limit: isLoadMore ? PAGE_SIZE : PAGE_SIZE * 3,
             starts_at: isLoadMore ? (page + 2) * PAGE_SIZE : 0,
           },
-        });
+        })
 
         if (isLoadMore) {
           setBuffer((prev) => [...prev, ...data]);
@@ -105,25 +107,24 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           setBuffer(data.slice(PAGE_SIZE));
           setPage(1);
           setHasMore(data.slice(0, PAGE_SIZE).length < total_count);
-          setNotificationTotalCount(total_count);
+          setNotificationCount(total_count);
         }
-
-        const count = await getNotificationsCountByContact();
-        setNotificationCount(count as number);
       } catch (error) {
         console.error('❌ Failed to fetch notifications:', error);
       }
-    },
-    [showRead, page, notifications.length],
-  );
+      finally {
+        setLoading(false)
+      }
+    }, [showRead, page, notifications.length],
+  )
 
   const fetchMoreNotifications = useCallback(async () => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loading) return
 
     setNotifications((prev) => [...prev, ...buffer.slice(0, PAGE_SIZE)]);
     setHasMore(
       [...notifications, ...buffer.slice(0, PAGE_SIZE)].length <
-        notificationTotalCount,
+        notificationCount,
     );
     setBuffer((prev) => prev.slice(PAGE_SIZE));
     await fetchNotifications({
@@ -160,8 +161,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       id,
       notification_status,
     }: {
-      id: string;
-      notification_status: 'read' | 'unread';
+      id: string
+      notification_status: 'read' | 'unread'
     }) => {
       try {
         // Optimistic Updates.
@@ -169,34 +170,42 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         updateReadStatus({
           id,
           notification_status,
-        });
+        })
 
-        setNotifications((prev) =>
-          prev.map((notification) =>
-            notification.id === id
-              ? {
-                  ...notification,
-                  notification_status:
+        setNotifications(prev => prev.map(notification => notification.id === id
+          ? {
+              ...notification,
+              notification_status:
                     notification.notification_status === 'unread'
                       ? 'read'
                       : 'unread',
-                }
-              : notification,
-          ),
-        );
+            }
+          : notification,
+        ),
+        )
         setNotificationCount((prev) => {
           if (notification_status === 'read') {
-            return prev - 1;
-          } else {
-            return prev + 1;
+            return prev - 1
           }
-        });
-      } catch (error) {
-        console.error('❌ Failed to update notification:', error);
+          else {
+            return prev + 1
+          }
+        })
+
+        setTotalUnreadNotificationCount((prev) => {
+          if (notification_status ==='read') {
+            return prev - 1
+          }
+          else {
+            return prev + 1
+          }
+        })
       }
-    },
-    [],
-  );
+      catch (error) {
+        console.error('❌ Failed to update notification:', error)
+      }
+    }, [],
+  )
 
   /**
    * Toggle the pinned status of a notification.
@@ -215,11 +224,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         updatePinnedNotification({
           id,
           is_pinned,
-        });
+        })
 
         if (type === 'pinned' && !is_pinned) {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
-          setNotificationCount((prev) => prev - 1);
           return;
         }
         setNotifications((prev) =>
@@ -232,9 +240,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error('❌ Failed to update pinned notification:', error);
       }
-    },
-    [],
-  );
+    }, [],
+  )
 
   /**
    * Mark all unread notifications as read.
@@ -242,14 +249,14 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const handleBatchRead = useCallback(async () => {
     try {
       const unreadNotificationIds = notifications
-        .filter((n) => n.notification_status === 'unread')
-        .map((n) => n.id);
+        .filter(n => n.notification_status === 'unread')
+        .map(n => n.id)
 
       setLoadingMarkAllAsRead(true);
       await updateBatchRead({
         ids: unreadNotificationIds,
         notification_status: 'read',
-      });
+      })
 
       setNotifications((prev) =>
         prev.map((notification) =>
@@ -260,10 +267,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       );
       setLoadingMarkAllAsRead(false);
       setNotificationCount((prev) => prev - unreadNotificationIds.length);
+      setTotalUnreadNotificationCount((prev) => prev - unreadNotificationIds.length);
     } catch (error) {
       console.error('❌ Failed to batch update notifications:', error);
     }
-  }, [notifications]);
+  }, [notifications])
 
   // to be deleted
   const handleInsert = async () => {
@@ -273,8 +281,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleDropdownOpen = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+    setIsDropdownOpen(!isDropdownOpen)
+  }
 
   const handleSortChange = async (option: string) => {
     setLoading(true)
@@ -328,37 +336,42 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     changeNotificationStatus({
       id: notification.id,
       status: 'Archived',
-    });
+    })
 
     if (notification.notification_status === 'unread') {
       setNotificationCount((prev) => prev - 1);
     }
 
-    setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-  };
+    setNotifications(prev => prev.filter(n => n.id !== notification.id))
+  }
 
   const handleRestoreNotificationStatus = async (id: string) => {
     await changeNotificationStatus({
       id,
       status: 'Active',
-    });
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+    })
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
 
   const handleDeleteNotification = async (id: string) => {
     await changeNotificationStatus({
       id,
       status: 'Delete',
-    });
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+    })
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
 
   // Fetch notifications on mount
   useEffect(() => {
     const fetchNotificationCount = async () => {
       await getNotificationsCountByContact()
-        .then((count) => {
-          setNotificationCount(count as number);
+        .then(({
+          allUnreadNotificationCount,
+          allNotificationCount,
+        }) => {
+          setTotalUnreadNotificationCount(allUnreadNotificationCount as number);
+          setTotalNotificationCount(allNotificationCount as number);
+          setNotificationCount(allUnreadNotificationCount as number);
         })
         .catch((error) => {
           console.error('❌ Failed to fetch notifications:', error);
@@ -383,7 +396,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     handleRestoreNotificationStatus,
     handleDeleteNotification,
     fetchMoreNotifications,
-  };
+  }
 
   return (
     <NotificationContext.Provider
@@ -396,7 +409,8 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           isDropdownOpen,
           selectedSort,
           selectedOrder,
-          notificationTotalCount,
+          totalNotificationCount,
+          totalUnreadNotificationCount,
           hasMore,
           loadingPopulateData,
           loadingMarkAllAsRead,
@@ -406,15 +420,15 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
     </NotificationContext.Provider>
-  );
-};
+  )
+}
 
 export const useNotifications = () => {
-  const context = useContext(NotificationContext);
+  const context = useContext(NotificationContext)
   if (!context) {
     throw new Error(
       'useNotifications must be used within a NotificationProvider',
-    );
+    )
   }
-  return context;
-};
+  return context
+}

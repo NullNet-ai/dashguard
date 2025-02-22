@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { closestCorners } from '@dnd-kit/core';
 
 import {
@@ -22,26 +22,41 @@ export interface GroupTabProps extends React.HTMLAttributes<HTMLDivElement> {
   onClickAddTab?: () => void;
   disabled?: boolean;
   render?: (arg: any, index: number) => any;
-  renderContent?: (arg?: any) => any;
+  renderContent?: (arg: any, index: number) => any;
   move: any
+  replace: any
 }
 
 const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
-  (
-    {
-      selected,
-      fields,
-      onValueChange,
-      onTabSelect,
-      onClickAddTab,
-      disabled,
-      move,
-      render,
-      renderContent,
-      ...props
-    },
-    ref,
-  ) => {
+  ({
+    selected,
+    fields,
+    onValueChange,
+    onTabSelect,
+    onClickAddTab,
+    disabled,
+    move,
+    render,
+    renderContent,
+    replace,
+    ...props
+  }, ref) => {
+    const handleMove = ({ activeIndex, overIndex }: { activeIndex: number; overIndex: number }) => {
+        move(activeIndex, overIndex);        
+    };
+
+    useEffect(() => {
+      if (fields.some((field, index) => field.order !== index + 1)) {
+        const newFields = fields.map((field, index) => {
+          return {
+            ...field,
+            order: index + 1,
+          };
+        });
+        replace(newFields);
+      }
+    }, [fields]);
+
     return (
       <div className="flex gap-x-2 p-4 text-md" ref={ref}>
         <Sortable
@@ -49,8 +64,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
           collisionDetection={closestCorners}
           onValueChange={onValueChange}
           orientation="vertical"
-          onMove={({ activeIndex, overIndex }) => move(activeIndex, overIndex)}
-
+          onMove={handleMove}
         >
           <div className="flex min-h-[200px] w-full max-w-[200px] flex-col bg-gray-100 pb-4 md:min-h-[300px]">
             {fields.map((field, index) => (
@@ -72,7 +86,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
         </Sortable>
         {
           fields?.map((field, index) => {
-            return renderContent?.({field: field, index})
+            return renderContent?.(field, index)
           })
         }
       </div>

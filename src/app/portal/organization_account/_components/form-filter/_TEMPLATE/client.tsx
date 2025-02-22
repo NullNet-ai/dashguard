@@ -86,8 +86,8 @@ export default function ContactDetails({
         handleSelectFieldFilterGrid,
         renderComponentSelected: renderComponentSelected(SelectedView),
       }}
-      formKey={"basicDetails"}
-      formLabel={"Basic Details"}
+      formKey="basicDetails"
+      formLabel="Basic Details"
       formProps={params}
       formSchema={ContactPhoneEmailSchema}
       handleSubmitFormGrid={handleSave}
