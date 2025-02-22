@@ -21,7 +21,6 @@ import TextTruncate from '~/components/ui/text-truncate';
 import EmptyUnreadNotification from './EmptyUnreadNotification';
 import { cn } from '~/lib/utils';
 import Skeleton from '~/components/platform/Grid/Skeleton';
-
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
 }
@@ -37,7 +36,7 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
 };
 const NotificationItem = ({ type }: { type: TNotificationType }) => {
   const { state, actions } = useNotifications()
-  const { notifications, notificationCount, notificationTotalCount, loading } = state
+  const { notificationCount, loading, totalNotificationCount, notifications } = state
 
   useEffect(() => {
     actions.handleChangeType(type)
@@ -49,15 +48,15 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
       <Skeleton />
     );
   }
-  // if no notification at all
-  if (!notificationTotalCount && !notificationCount) {
+  // if no unread notification
+  if (totalNotificationCount === 0) {
     return <EmptyNotification />
   }
-
-  // if no unread notification
-  if (!notifications.length) {
+  // if no notification at all
+  if (!notificationCount && totalNotificationCount > 0) {
     return <EmptyUnreadNotification />
   }
+
 
 
 
@@ -118,8 +117,8 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
           <div
             className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
               ? ''
-              : ' border-l-primary border-l-2'
-              } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
+              : ' border-l-primary border-l-4 sm:border-l-2'
+              } p-3 shadow-sm lg:hover:bg-primary/10 transition-colors duration-200 `}
             onClick={() => notification.link && handleOpenNewTab(notification.link)}
             key={notification.id}
           >

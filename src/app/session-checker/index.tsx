@@ -106,7 +106,7 @@ export default function SessionChecker() {
     }
   }, [pathname])
 
-  if (isSessionExpired) {
+  if (isSessionExpired && pathname === '/login') {
     return (
       <div
         className={'bg-amber-200 text-black font-normal w-screen text-center p-2  flex top-0 items-center justify-center md:gap-4 gap-2 transition-opacity duration-500 ease-in-out opacity-100 z-[200]'}

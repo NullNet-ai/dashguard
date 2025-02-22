@@ -28,7 +28,7 @@ const NotificationDrawer = () => {
     isDropdownOpen,
     selectedSort,
     selectedOrder,
-    hasMore, 
+    hasMore,
     loadingPopulateData,
     loadingMarkAllAsRead,
   } = state;
@@ -141,28 +141,28 @@ const NotificationDrawer = () => {
           content: (
             <div
               id="scrollable-div"
-              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[82vh] flex-col gap-2 overflow-y-auto"
+              className="scrollbar-thin scroll-smooth scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex h-[77dvh] md:h-[80dvh]  flex-col gap-2 overflow-auto overscroll-none"
             >
-              <InfiniteScroll
+                <InfiniteScroll
                 dataLength={notifications.length}
                 next={actions.fetchMoreNotifications}
                 hasMore={hasMore}
-                loader={
-                  <Skeleton />
-                }
+                loader={<Skeleton />}
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
                 scrollThreshold={1}
                 endMessage={
-                    <div className="flex justify-center py-4">
+                  notifications.length ? (
+                  <div className="flex justify-center py-4">
                     <p className="text-center text-sm text-gray-500">
-                      No more notifications
+                    No more notifications
                     </p>
-                    </div>
+                  </div>
+                  ) : null
                 }
-              >
+                >
                 {tab.content}
-              </InfiniteScroll>
+                </InfiniteScroll>
             </div>
           ),
         }))}

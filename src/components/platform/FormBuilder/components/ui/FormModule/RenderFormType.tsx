@@ -48,6 +48,7 @@ import {
   type TFormSchema,
 } from '../../../types'
 import FormGroupTab from '../../../FormType/FormGroupTab'
+import FormCustom from '../../../FormType/FormCustom'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -325,6 +326,10 @@ export default function RenderFormType(
       return <FormSpaceComponent />
     case 'separator':
       return <FormSeparator fieldConfig={fieldConfig} />
+    case 'custom-field':
+      return (
+        <FormCustom fieldConfig={fieldConfig} formRenderProps={formRenderProps} form={form} formKey={formKey} />
+      )
     default:
       return <Input />
   }

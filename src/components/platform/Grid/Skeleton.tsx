@@ -6,7 +6,7 @@ export default function Skeleton() {
 
       {/* List skeleton items */}
       <div className="space-y-3 mt-2 p-2">
-        {Array.from({ length: 7 }).map((_, index) => (
+        {Array.from({ length: 20 }).map((_, index) => (
           <>
             <div className="flex-row gap-2 ml-0 flex">
               <div className="h-6 w-8 rounded-full ml-0 mt-0 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
