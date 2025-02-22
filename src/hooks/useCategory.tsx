@@ -1,9 +1,9 @@
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation'
 
 const useCategory = () => {
-  const searchParams = useSearchParams();
-  const category = searchParams.get('categories') || '';
-  return category;
-};
+  const searchParams = useSearchParams()
+  const category = searchParams.get('categories') || ''
+  return category
+}
 
-export default useCategory;
+export default useCategory

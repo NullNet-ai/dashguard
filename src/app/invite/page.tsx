@@ -1,4 +1,4 @@
-import PageNotFound from "~/components/platform/PageNotFound";
+import PageNotFound from '~/components/platform/PageNotFound'
 export default async function Page() {
-  return <PageNotFound />;
+  return <PageNotFound />
 }

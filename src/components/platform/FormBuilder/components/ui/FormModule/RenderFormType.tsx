@@ -47,6 +47,7 @@ import {
   type IField,
   type TFormSchema,
 } from '../../../types'
+import FormGroupTab from '../../../FormType/FormGroupTab'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -308,6 +309,16 @@ export default function RenderFormType(
           formRenderProps={formRenderProps}
         />
       )
+      case 'group-tab':
+        return (
+          <FormGroupTab
+            fieldConfig={fieldConfig}
+            form={form}
+            formKey={formKey}
+            formRenderProps={formRenderProps}
+            formSchema={formSchema}
+          />
+        )
     case 'alert':
       return <FormAlertComponent fieldConfig={fieldConfig} />
     case 'space':

@@ -16,7 +16,7 @@ const FormServerFetch = async () => {
   })
   const defaultValues = record?.data
   return (
-    <div className='space-y-2'>
+    <div className={"space-y-2"}>
       <BasicDetails
         defaultValues={defaultValues ?? {}}
         params={{

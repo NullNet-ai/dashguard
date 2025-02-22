@@ -1,18 +1,21 @@
-'use client';
+'use client'
 
-import { z } from 'zod';
-import { FormBuilder } from '~/components/platform/FormBuilder';
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
-import { useToast } from '~/context/ToastProvider';
-import { type IFormProps } from '../types';
-import { api } from '~/trpc/react';
-import gridColumns from '~/app/portal/contact/grid/_config/columns';
-import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns';
-import { ulid } from 'ulid';
-import SelectedView from './components/SelectedView';
-import { type InternalUserDetailsSchema } from '~/server/zodSchema/account/internalUserDetails';
+import { ulid } from 'ulid'
+import { z } from 'zod'
 
-const FormSchema = z.object({});
+import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns'
+import gridColumns from '~/app/portal/contact/grid/_config/columns'
+import { FormBuilder } from '~/components/platform/FormBuilder'
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
+import { useToast } from '~/context/ToastProvider'
+import { type InternalUserDetailsSchema } from '~/server/zodSchema/account/internalUserDetails'
+import { api } from '~/trpc/react'
+
+import { type IFormProps } from '../types'
+
+import SelectedView from './components/SelectedView'
+
+const FormSchema = z.object({})
 
 const defaultAdvanceFilter = [
   {
@@ -25,23 +28,23 @@ const defaultAdvanceFilter = [
     values: ['Active'],
     default: true,
   },
-];
+]
 
 export default function BasicDetails({
   params,
   defaultValues,
   selectedRecords,
 }: IFormProps) {
-  const toast = useToast();
+  const toast = useToast()
 
-  const update = api.record.updateDynamicRecord.useMutation();
+  const update = api.record.updateDynamicRecord.useMutation()
 
   const handleRemoveRecord = async ({
     filter_entity,
   }: {
-    rows: any[];
-    main_entity_id: string;
-    filter_entity: string;
+    rows: any[]
+    main_entity_id: string
+    filter_entity: string
   }) => {
     try {
       const response = await update.mutateAsync({
@@ -50,29 +53,30 @@ export default function BasicDetails({
         data: {
           contact_id: null,
         },
-      });
+      })
 
       if (response) {
-        toast.success('Internal User removed successfully');
+        toast.success('Internal User removed successfully')
         return {
           rows: [],
           filter_entity,
           main_entity_id: '',
-        };
+        }
       }
-    } catch (error) {
-      toast.error('Failed to remove Internal User');
     }
-  };
+    catch (error) {
+      toast.error('Failed to remove Internal User')
+    }
+  }
 
   const handleSelectRecord = async ({
     rows,
     filter_entity,
     main_entity_id,
   }: {
-    rows: any[];
-    main_entity_id: string;
-    filter_entity: string;
+    rows: any[]
+    main_entity_id: string
+    filter_entity: string
   }) => {
     try {
       const response = await update.mutateAsync({
@@ -81,7 +85,7 @@ export default function BasicDetails({
         data: {
           contact_id: rows[0].id,
         },
-      });
+      })
       const {
         first_name,
         last_name,
@@ -90,10 +94,10 @@ export default function BasicDetails({
         iso_code,
         country_code,
         raw_phone_numbers,
-      } = rows?.[0] ?? {};
-    
+      } = rows?.[0] ?? {}
+
       if (response) {
-        toast.success('Internal User details submitted successfully');
+        toast.success('Internal User details submitted successfully')
         return {
           rows: {
             first_name,
@@ -116,12 +120,13 @@ export default function BasicDetails({
           },
           filter_entity,
           main_entity_id,
-        };
+        }
       }
-    } catch (error) {
-      toast.error('Failed to select Internal User');
     }
-  };
+    catch (error) {
+      toast.error('Failed to select Internal User')
+    }
+  }
 
   const handleFieldSelectRecord = async (data: Record<string, any>) => {
     try {
@@ -131,7 +136,7 @@ export default function BasicDetails({
         data: {
           contact_id: data.id,
         },
-      });
+      })
       const {
         first_name,
         last_name,
@@ -140,10 +145,10 @@ export default function BasicDetails({
         raw_phone_numbers,
         iso_code,
         country_code,
-      } = data ?? {};
-    
+      } = data ?? {}
+
       if (response) {
-        toast.success('Internal User details submitted successfully');
+        toast.success('Internal User details submitted successfully')
         return {
           first_name,
           last_name,
@@ -162,23 +167,23 @@ export default function BasicDetails({
               is_primary: true,
             },
           ],
-        };
+        }
       }
-    } catch (error) {
-      toast.error('Failed to select Internal User');
     }
-  };
+    catch (error) {
+      toast.error('Failed to select Internal User')
+    }
+  }
 
   return (
     <FormBuilder
       create_mode={false}
-      enableFormRegisterToParent
-      myParent={params.shell_type}
-      formProps={params}
-      formLabel={params.shell_type === 'record' ? 'Contact Details' : 'User'}
-      formKey="UserDetails"
-      formSchema={FormSchema}
       defaultValues={defaultValues}
+      enableFormRegisterToParent={ true }
+      features={{
+        enableFormFilterCreate: false,
+        enableUnlockFormFilter: params.shell_type !== 'record',
+      }}
       fields={[
         {
           id: 'phone',
@@ -269,15 +274,15 @@ export default function BasicDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any;
-            main_entity_id: string;
-            filter_entity: string;
-          };
+            rows: any
+            main_entity_id: string
+            filter_entity: string
+          }
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          };
+          }
         },
         handleSelectFieldFilterGrid: handleFieldSelectRecord,
         onRemoveSelectedRecords: async ({
@@ -290,31 +295,31 @@ export default function BasicDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any[];
-            filter_entity: string;
-            main_entity_id: string;
-          };
+            rows: any[]
+            filter_entity: string
+            main_entity_id: string
+          }
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          };
+          }
         },
         onFilterFieldChange: (search_params, options) => {
           const { data } = api.contact.mainGrid.useQuery(
-            search_params,
-            options,
-          );
-          return data;
+            search_params, options,
+          )
+          return data
         },
         renderComponentSelected: (record) => {
-          return <SelectedView record={record} />;
+          return <SelectedView record={record} />
         },
       }}
-      features={{
-        enableFormFilterCreate: false,
-        enableUnlockFormFilter: params.shell_type !== 'record',
-      }}
+      formKey={"UserDetails"}
+      formLabel={params.shell_type === 'record' ? 'Contact Details' : 'User'}
+      formProps={params}
+      formSchema={FormSchema}
+      myParent={params.shell_type}
     />
-  );
+  )
 }

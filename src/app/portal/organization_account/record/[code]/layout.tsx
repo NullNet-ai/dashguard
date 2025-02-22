@@ -40,7 +40,7 @@ const Layout = async ({
       'created_time',
       'updated_date',
       'updated_time',
-      'account_status'
+      'account_status',
     ],
   })
 
@@ -61,11 +61,11 @@ const Layout = async ({
 
   return (
     <RecordWrapper
-      entity_code={ identifier! }
-      entity_name={ main_entity! }
-      record={ record }
-      record_summary={ record_summary }
-      record_details={ record_details?.data }
+      entity_code={identifier!}
+      entity_name={main_entity!}
+      record={record}
+      record_details={record_details?.data}
+      record_summary={record_summary}
     />
   )
 }

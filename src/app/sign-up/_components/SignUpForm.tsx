@@ -4,7 +4,7 @@ import { UserPlusIcon } from '@heroicons/react/24/outline'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { omit } from 'lodash'
 import React, { useState } from 'react'
-import { Control, FieldValues, useForm, UseFormReturn } from 'react-hook-form'
+import { type Control, type FieldValues, useForm, type UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 
 import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
@@ -33,7 +33,6 @@ const SignUpSchema = z
     message: 'Passwords don\'t match',
     path: ['confirmed_password'],
   })
-
 
 const SignUpForm = () => {
   const form = useForm({
@@ -72,7 +71,7 @@ const SignUpForm = () => {
   return (
     <Form {...form}>
       <form
-        className='space-y-6'
+        className={"space-y-6"}
         onSubmit={(event) => {
           void form.handleSubmit(onSubmit)(event)
         }}
@@ -137,16 +136,16 @@ const SignUpForm = () => {
             },
           ]}
           form={form as unknown as UseFormReturn<FieldValues, any, undefined>}
-          formKey='SignUp'
+          formKey={"SignUp"}
         />
         {error && <FormMessage>{error}</FormMessage>}
         <Button
           className={'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'}
-          data-test-id='login-submit-btn'
+          data-test-id={"login-submit-btn"}
           loading={isSubmitting}
-          type='submit'
+          type={"submit"}
         >
-          <UserPlusIcon className='mr-2 h-5 w-5' />
+          <UserPlusIcon className={"mr-2 h-5 w-5"} />
           Create Account
         </Button>
       </form>
