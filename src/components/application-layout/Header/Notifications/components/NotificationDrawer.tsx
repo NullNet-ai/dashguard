@@ -176,14 +176,14 @@ export default NotificationDrawer;
 
 export function HeaderSection() {
   const { state, actions } = useNotifications();
-  const { notificationCount, showRead } = state;
+  const { showRead, totalUnreadNotificationCount } = state;
   const { toggleUnread } = actions;
 
   return (
     <div className="flex flex-1 items-center justify-around">
       <h2 className="mr-auto text-lg font-semibold">
         Notifications
-        ({notificationCount > 99 ? '99+' : notificationCount})
+        ({totalUnreadNotificationCount > 99 ? '99+' : totalUnreadNotificationCount})
       </h2>
       <div className="mr-2 flex items-center gap-2">
         <Switch checked={showRead} size="sm" onCheckedChange={toggleUnread} />

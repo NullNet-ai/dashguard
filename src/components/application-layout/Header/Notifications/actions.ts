@@ -31,20 +31,7 @@ export const getNotifications = async ({
   }
 }): Promise<Record<string, any>> => {
   const { data: notifications, total_count } = await api.notification.getNotifications({
-    filters: [
-      ...filters,
-      {
-        operator: 'and',
-        type: 'operator',
-        default: true,
-      },
-      {
-        type: 'criteria',
-        field: 'is_pinned',
-        operator: 'equal',
-        values: [false],
-      },
-    ],
+    filters,
     order,
   })
 
