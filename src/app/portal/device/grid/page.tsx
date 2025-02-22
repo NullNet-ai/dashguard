@@ -37,6 +37,8 @@ export default async function Page({
     'updated_time',
     'created_time',
     'previous_status',
+    'last_heartbeat',
+    'device_status',
   ]
 
   const { items = [], totalCount } = await api.device.mainGrid({
@@ -69,7 +71,7 @@ export default async function Page({
           resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
-            pluck: _pluck,
+            pluck: _pluck?.filter((item) => item !== 'system_id'),
           },
         },
       }}

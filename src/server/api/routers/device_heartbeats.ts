@@ -130,6 +130,40 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
         },
       },
     }).execute()
+
+    //this is for grid search
+    if(device_heartbeats?.data?.[0]?.timestamp) {
+       ctx.dnaClient
+      .create({
+        entity: 'devices',
+        token: ctx.token.value,
+        mutation: {
+          params: {
+            id: device_id,
+            last_heartbeat: device_heartbeats.data?.[0]?.timestamp,
+            device_status: 'Online',
+          },
+        },
+      })
+      .execute()
+    }else{
+      ctx.dnaClient
+      .create({
+        entity: 'devices',
+        token: ctx.token.value,
+        mutation: {
+          params: {
+            id: device_id,
+            device_status: 'Offline',
+          },
+        },
+      })
+      .execute()
+    }
+
+
+
+
     return device_heartbeats
   }),
 })
