@@ -1,16 +1,16 @@
-'use server';
-import { redirect } from 'next/navigation';
+'use server'
+import { redirect } from 'next/navigation'
 
-import { verifySession } from '~/app/login/actions/loginSubmit';
-import { api } from '~/trpc/server';
-import { handleLoginError } from '~/utils/login-validator';
+import { verifySession } from '~/app/login/actions/loginSubmit'
+import { api } from '~/trpc/server'
+import { handleLoginError } from '~/utils/login-validator'
 
 interface RegisterAccountArgs {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  organization_name?: string;
+  first_name: string
+  last_name: string
+  email: string
+  password: string
+  organization_name?: string
 }
 
 export default async function registerAccount({
@@ -20,14 +20,14 @@ export default async function registerAccount({
   password,
   organization_name,
 }: RegisterAccountArgs) {
-  let error = null;
+  let error = null
   try {
     /**
      * Registration data
      */
     const organization = {
       name: organization_name,
-    };
+    }
 
     const account = {
       first_name,
@@ -38,7 +38,7 @@ export default async function registerAccount({
       account_secret: password,
       account_organization_name: organization_name,
       is_new_user: false,
-    };
+    }
 
     /**
      * Register account
@@ -46,12 +46,12 @@ export default async function registerAccount({
     const registeredAccountDetails = await api.auth.registerAccount({
       account,
       organization,
-    });
+    })
 
-    const accountDataError = handleLoginError(registeredAccountDetails);
+    const accountDataError = handleLoginError(registeredAccountDetails)
     if (accountDataError) {
-      error = accountDataError;
-      return error;
+      error = accountDataError
+      return error
     }
 
     /**
@@ -60,9 +60,9 @@ export default async function registerAccount({
     await api.auth.login({
       username: email,
       password,
-    });
+    })
 
-    await verifySession();
+    await verifySession()
 
     /**
      * Create organization
@@ -74,14 +74,14 @@ export default async function registerAccount({
         categories: ['User'],
         entity: 'Contact',
       },
-    });
+    })
 
-    const organizationDataError = handleLoginError(createdOrganizationResponse);
+    const organizationDataError = handleLoginError(createdOrganizationResponse)
     if (organizationDataError) {
-      return organizationDataError;
+      return organizationDataError
     }
 
-    const organization_id = createdOrganizationResponse?.data?.[0]?.id;
+    const organization_id = createdOrganizationResponse?.data?.[0]?.id
 
     /**
      * Create contact
@@ -94,9 +94,9 @@ export default async function registerAccount({
         status: 'Draft',
         categories: ['Contact'],
       },
-    });
+    })
 
-    const contact_id = createdContactResponse?.data?.[0]?.id;
+    const contact_id = createdContactResponse?.data?.[0]?.id
 
     /**
      * Create organization contact
@@ -108,7 +108,7 @@ export default async function registerAccount({
         contact_id,
         is_primary: true,
       },
-    });
+    })
 
     /**
      * Create contact email
@@ -120,18 +120,19 @@ export default async function registerAccount({
         is_primary: true,
         contact_id,
       },
-    });
-    
-  } catch (err: any) {
-    console.error(error);
-    error = err;
-  } finally {
+    })
+  }
+  catch (err: any) {
+    console.error(error)
+    error = err
+  }
+  finally {
     if (error as any) {
       return {
         error: (error as any)?.message ?? 'Something went wrong please try again',
         type: 'unknown',
-      };
+      }
     }
-    redirect('/portal/dashboard');
+    redirect('/portal/dashboard')
   }
 }

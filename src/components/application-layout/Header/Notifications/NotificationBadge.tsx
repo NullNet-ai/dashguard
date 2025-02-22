@@ -28,7 +28,7 @@ function NotificationBadge() {
   }
 
   return (
-    <Menu as='div' className='relative inline-block text-left'>
+    <Menu as={"div"} className={"relative inline-block text-left"}>
       <div>
         <MenuButton
           className='flex items-center rounded-full'

@@ -1,21 +1,23 @@
-'use client';
+'use client'
 
-import { z } from 'zod';
-import { FormBuilder } from '~/components/platform/FormBuilder';
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
-import { useToast } from '~/context/ToastProvider';
-import { type IFormProps } from '../types';
-import { api } from '~/trpc/react';
-import { ExternalUserDetailsSchema } from '~/server/zodSchema/account/externalUserDetails';
+import { type z } from 'zod'
+
+import { FormBuilder } from '~/components/platform/FormBuilder'
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
+import { useToast } from '~/context/ToastProvider'
+import { ExternalUserDetailsSchema } from '~/server/zodSchema/account/externalUserDetails'
+import { api } from '~/trpc/react'
+
+import { type IFormProps } from '../types'
 
 export default function BasicDetails({
   params,
   defaultValues,
   selectOptions,
 }: IFormProps) {
-  const toast = useToast();
+  const toast = useToast()
 
-  const update = api.record.updateDynamicRecord.useMutation();
+  const update = api.record.updateDynamicRecord.useMutation()
 
   const handleSave = async ({
     data,
@@ -28,31 +30,24 @@ export default function BasicDetails({
           role_id: data.role,
           email: data.email?.[0]?.email,
         },
-      });
+      })
       if (response) {
-        toast.success('External User details submitted successfully');
-        return response;
+        toast.success('External User details submitted successfully')
+        return response
       }
-    } catch (error) {
-      toast.error('Failed to submit External User details');
     }
-  };
+    catch (error) {
+      toast.error('Failed to submit External User details')
+    }
+  }
 
   return (
     <FormBuilder
-      myParent={params.shell_type}
-      enableFormRegisterToParent
-      formProps={params}
-      formLabel={
-        params.shell_type === 'record'
-          ? 'Account Details'
-          : 'Invite External User'
-      }
-      handleSubmit={handleSave}
-      formKey="UserDetails"
-      formSchema={ExternalUserDetailsSchema}
+      buttonConfig={{
+        hideLockButton: params.shell_type === 'record',
+      }}
       defaultValues={defaultValues}
-      selectOptions={selectOptions}
+      enableFormRegisterToParent={ true }
       fields={[
         {
           id: 'role',
@@ -71,9 +66,17 @@ export default function BasicDetails({
           placeholder: 'Example: john@example.com',
         },
       ]}
-      buttonConfig={{
-        hideLockButton: params.shell_type === 'record',
-      }}
+      formKey={"UserDetails"}
+      formLabel={
+        params.shell_type === 'record'
+          ? 'Account Details'
+          : 'Invite External User'
+      }
+      formProps={params}
+      formSchema={ExternalUserDetailsSchema}
+      handleSubmit={handleSave}
+      myParent={params.shell_type}
+      selectOptions={selectOptions}
     />
-  );
+  )
 }

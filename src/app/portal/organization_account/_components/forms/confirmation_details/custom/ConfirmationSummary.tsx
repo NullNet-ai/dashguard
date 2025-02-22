@@ -11,16 +11,16 @@ import {
 
 const ConfirmationSummary = () => {
   return (
-    <Card className='border-none p-0 shadow-none sm:p-2'>
+    <Card className={"border-none p-0 shadow-none sm:p-2"}>
       <CardHeader
-        className="flex flex-row items-center justify-between bg-slate-100"
+        className='flex flex-row items-center justify-between bg-slate-100'
       >
-        <CardDescription className='text-md font-bold text-foreground'>
+        <CardDescription className={"text-md font-bold text-foreground"}>
           Confirmation
         </CardDescription>
       </CardHeader>
-      <CardContent className='mt-2'>
-        <p className='text-md'>
+      <CardContent className={"mt-2"}>
+        <p className={"text-md"}>
           {"Confirm that the summary has the correct information."}
         </p>
       </CardContent>
