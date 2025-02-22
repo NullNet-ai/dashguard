@@ -9,6 +9,7 @@ import config from '~/styles/config/config.json'
 import { TRPCReactProvider } from '~/trpc/react'
 
 import { ToastProvider } from '../context/ToastProvider'
+import { OpenReplayProvider } from '~/context/OpenReplay';
 
 export const metadata: Metadata = {
   title: 'Nullnet',
@@ -31,7 +32,8 @@ export default function RootLayout({
         <meta content = "email=no" name = "format-detection" />
       </head>
       <body>
-        <TRPCReactProvider>
+       <OpenReplayProvider>
+       <TRPCReactProvider>
           <EventEmitterProvider>
             <TooltipProvider>
               <ToastProvider>
@@ -48,6 +50,7 @@ export default function RootLayout({
             </TooltipProvider>
           </EventEmitterProvider>
         </TRPCReactProvider>
+        </OpenReplayProvider>
       </body>
     </html>
   )
