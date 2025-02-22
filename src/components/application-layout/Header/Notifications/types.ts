@@ -76,6 +76,7 @@ export interface IState {
   hasMore : boolean,
   loadingPopulateData : boolean,
   loadingMarkAllAsRead : boolean,
+  totalUnreadNotificationCount : number,
 }
 export interface INotificationContext {
   state: IState

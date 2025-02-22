@@ -35,6 +35,8 @@ const PAGE_SIZE = 10
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<INotificationSchema[]>([]);
   const [totalNotificationCount, setTotalNotificationCount] = useState(0);
+  const [totalUnreadNotificationCount, setTotalUnreadNotificationCount] =
+    useState(0);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [showRead, setShowRead] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -189,6 +191,15 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             return prev + 1
           }
         })
+
+        setTotalUnreadNotificationCount((prev) => {
+          if (notification_status ==='read') {
+            return prev - 1
+          }
+          else {
+            return prev + 1
+          }
+        })
       }
       catch (error) {
         console.error('❌ Failed to update notification:', error)
@@ -256,6 +267,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       );
       setLoadingMarkAllAsRead(false);
       setNotificationCount((prev) => prev - unreadNotificationIds.length);
+      setTotalUnreadNotificationCount((prev) => prev - unreadNotificationIds.length);
     } catch (error) {
       console.error('❌ Failed to batch update notifications:', error);
     }
@@ -357,8 +369,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           allUnreadNotificationCount,
           allNotificationCount,
         }) => {
-          setNotificationCount(allUnreadNotificationCount as number);
+          setTotalUnreadNotificationCount(allUnreadNotificationCount as number);
           setTotalNotificationCount(allNotificationCount as number);
+          setNotificationCount(allUnreadNotificationCount as number);
         })
         .catch((error) => {
           console.error('❌ Failed to fetch notifications:', error);
@@ -397,6 +410,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           selectedSort,
           selectedOrder,
           totalNotificationCount,
+          totalUnreadNotificationCount,
           hasMore,
           loadingPopulateData,
           loadingMarkAllAsRead,

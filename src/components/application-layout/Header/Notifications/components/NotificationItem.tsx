@@ -21,6 +21,7 @@ import TextTruncate from '~/components/ui/text-truncate';
 import EmptyUnreadNotification from './EmptyUnreadNotification';
 import { cn } from '~/lib/utils';
 import Skeleton from '~/components/platform/Grid/Skeleton';
+import { NotificationSkeleton } from './NotificationDrawer';
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
 }
@@ -45,7 +46,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
 
   if (loading) {
     return (
-      <Skeleton />
+      <NotificationSkeleton />
     );
   }
   // if no unread notification
