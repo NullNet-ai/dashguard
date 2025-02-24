@@ -76,14 +76,10 @@ export default function BasicDetails({
           label: 'Password',
           required: true,
           placeholder: 'Enter your password',
-          isCustomFormField: true,
           showPasswordStrengthBar: true,
           hasComplexValidation: true,
         },
       ]}
-      buttonConfig={{
-        hideLockButton: params.shell_type === 'record',
-      }}
     />
   );
 }

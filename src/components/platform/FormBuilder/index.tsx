@@ -130,8 +130,7 @@ export const FormBuilder = (props: IPropsForms) => {
   //* Effect to listen to event emitter
   useEffect(() => {
     if (!eventEmitter) return
-    if (!enableFormRegisterToParent) return
-    if (myParent === 'wizard' && actions?.registerSaveHandler) {
+    if (myParent === 'wizard' && actions?.registerSaveHandler && enableFormRegisterToParent) {
       actions?.registerSaveHandler?.(formKey)
     }
 

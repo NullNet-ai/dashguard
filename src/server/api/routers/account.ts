@@ -1263,7 +1263,7 @@ export const accountRouter = createTRPCRouter({
                   ]
                 : []),
             ],
-            pluck: ['id', 'account_id'],
+            pluck: ['id', 'account_id', 'categories'],
           },
         })
         .execute();
@@ -1276,6 +1276,7 @@ export const accountRouter = createTRPCRouter({
             ? 'Username already exists'
             : '',
         },
+        record: existingUsername.data?.[0],
       };
     }),
   getInvitationAccountDetailsPublicly: publicProcedure

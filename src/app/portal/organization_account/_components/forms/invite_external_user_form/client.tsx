@@ -27,6 +27,7 @@ export default function BasicDetails({
         data: {
           role_id: data.role,
           email: data.email?.[0]?.email,
+          account_id: data.email?.[0]?.email,
         },
       });
       if (response) {
@@ -69,11 +70,9 @@ export default function BasicDetails({
           label: 'Email',
           required: true,
           placeholder: 'Example: john@example.com',
+          disabled: params.shell_type === 'record',
         },
       ]}
-      buttonConfig={{
-        hideLockButton: params.shell_type === 'record',
-      }}
     />
   );
 }

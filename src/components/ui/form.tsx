@@ -157,10 +157,13 @@ const FormMessage = React.forwardRef<
   
   let errorMessages: string[] = [];
   if (error) {
+
     if (Array.isArray(error.message)) {
       errorMessages = error.message;
-    } else if (typeof error.message === "string") {
+    } else if (typeof error.message === "string" && isMultiple) {
       errorMessages = error.message.split(". ").filter(Boolean); // Split if multiple messages are combined
+    }else if (typeof error.message === "string") {
+      errorMessages = [error.message];
     }
   }
 
@@ -169,7 +172,7 @@ const FormMessage = React.forwardRef<
   }
   return (
     <div ref={ref} id={formMessageId} className={cn("text-sm font-medium text-destructive !mt-[6px]", className)} {...props}>
-      {isMultiple ? (
+      {isMultiple && errorMessages?.length > 1 ? (
         <ul className="list-disc list-inside">
           {errorMessages.map((msg, index) => (
             <li key={index}>{msg}</li>
