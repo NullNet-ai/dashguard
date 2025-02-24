@@ -88,7 +88,7 @@ const SignUpForm = (props: SignUpFormProps) => {
   return (
     <Form {...form}>
       <form
-        className="space-y-6"
+        className={"space-y-6"}
         onSubmit={(event) => {
           void form.handleSubmit(onSubmit)(event);
         }}

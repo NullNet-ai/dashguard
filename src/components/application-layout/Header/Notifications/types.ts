@@ -72,10 +72,11 @@ export interface IState {
   isDropdownOpen : boolean,
   selectedSort : string,
   selectedOrder : string,
-  notificationTotalCount : number,
+  totalNotificationCount : number,
   hasMore : boolean,
   loadingPopulateData : boolean,
   loadingMarkAllAsRead : boolean,
+  totalUnreadNotificationCount : number,
 }
 export interface INotificationContext {
   state: IState

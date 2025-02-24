@@ -30,7 +30,9 @@ type TDisplayType = 'form' | 'selected';
    | 'alert'
    | 'space'
    | 'separator'
+   | 'custom-field'
    | 'group-multi-field'
+   | 'group-tab'
    | 'currency-input';
 
 type TSelectionType = 'single' | 'multiple';

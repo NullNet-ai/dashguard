@@ -1,6 +1,6 @@
-'use client';
-import { type IMenuOptionConfig } from '~/components/platform/Record/types';
+'use client'
 import { handleChangeStatus } from '~/app/portal/organization_account/record/_actions'
+import { type IMenuOptionConfig } from '~/components/platform/Record/types'
 const applicationStatuses = [
   'New',
   'Screening',
@@ -11,7 +11,7 @@ const applicationStatuses = [
   'Failed',
   'On Hold',
   'Job Offered',
-];
+]
 
 export const accountStatuses = {
   'Disable Access': 'Access Disabled',
@@ -21,24 +21,21 @@ export const accountStatuses = {
   'Cancel Invitation': 'Invitation Canceled',
   'Resend Invitation': 'Invited',
   'Re-send Invite': 'Invited',
-};
+}
 
 const statusOptions = [
   {
     label: 'Change Status',
     onClick: () => ({}),
     children: Object.entries(accountStatuses).map(([label, status]) => ({
-      label: label,
+      label,
       onClick: async (id, entityName) => {
         await handleChangeStatus(
-          status,
-          id,
-          entityName,
-          'account_status',
-        );
+          status, id, entityName, 'account_status',
+        )
       },
     })),
   },
-] as IMenuOptionConfig[];
+] as IMenuOptionConfig[]
 
-export default statusOptions;
+export default statusOptions

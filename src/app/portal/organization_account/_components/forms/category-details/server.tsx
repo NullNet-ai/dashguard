@@ -15,13 +15,13 @@ const FormServerFetch = async () => {
   })
 
   const record_id = fetched_category_details?.data?.id
- 
+
   const default_values = {
     categories: fetched_category_details?.data?.categories?.[0] || '',
   }
 
   return (
-    <div className='space-y-2'>
+    <div className={"space-y-2"}>
       <CategoryDetails
         defaultValues={default_values}
         params={{

@@ -1,6 +1,6 @@
 'use server'
 
-import { api } from '~/trpc/server';
+import { api } from '~/trpc/server'
 const handleChangeStatus = async (
   record_status: string,
   recordId: string,
@@ -11,9 +11,9 @@ const handleChangeStatus = async (
     id: recordId,
     record_status,
     entity: entityName,
-    field_key
-  });
-  return response;
-};
+    field_key,
+  })
+  return response
+}
 
 export { handleChangeStatus }

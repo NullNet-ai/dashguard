@@ -41,7 +41,7 @@ const SummaryConfig = {
   components: [
     {
       label: 'Record Details',
-      component: <Summary form_key="BasicDetails" />,
+      component: <Summary form_key='BasicDetails' />,
     },
   ],
 }

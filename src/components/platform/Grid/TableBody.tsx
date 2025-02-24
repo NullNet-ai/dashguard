@@ -18,9 +18,10 @@ type MyTableBodyProps = {
   isLoading?: boolean
   showPagination?: boolean
   parentExpanded?: IExpandedRow[]
+  reachEnd?: boolean
 }
 
-export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded }: MyTableBodyProps) {
+export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded, reachEnd }: MyTableBodyProps) {
   const { state, actions } = useContext(GridContext)
 
   const context = useContext(ScrollContainerContext)
@@ -73,7 +74,7 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded 
                             className={cn(
                               'items-center',
                               `${showAction ? 'opacity-100' : 'opacity-0'}`,
-                              !isEndReached
+                              !isEndReached && !reachEnd
                                 ? 'group-hover:opacity-100'
                                 : 'opacity-100',
                             )}
