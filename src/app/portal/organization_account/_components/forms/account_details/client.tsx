@@ -46,9 +46,6 @@ export default function BasicDetails({
 
   return (
     <FormBuilder
-      buttonConfig={{
-        hideLockButton: params.shell_type === 'record',
-      }}
       defaultValues={defaultValues}
       enableFormRegisterToParent={ true }
       fields={[
@@ -75,7 +72,6 @@ export default function BasicDetails({
           label: 'Password',
           required: true,
           placeholder: 'Enter your password',
-          isCustomFormField: true,
           showPasswordStrengthBar: true,
           hasComplexValidation: true,
         },

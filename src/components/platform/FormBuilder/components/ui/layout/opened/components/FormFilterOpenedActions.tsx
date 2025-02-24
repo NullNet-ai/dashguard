@@ -115,7 +115,6 @@ export default function FormFilterOpenedActions({
         const currentValues = form.getValues();
         Object.keys(currentValues).forEach((key) => {
           const value = currentValues[key];
-
           if (Array.isArray(value)) {
             if (["email", "emails"].includes(key.toLowerCase())) {
               currentValues[key] = [

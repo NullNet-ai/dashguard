@@ -23,8 +23,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
                 padding: '1.2rem',
                 paddingInline: '0.5rem',
                 backgroundColor: 'inherit',
-                borderColor: 'transparent',
-                borderRightColor: `inherit`,
+                borderColor: 'inherit',
                 colorScheme: 'normal',
               },
             }}
@@ -32,12 +31,12 @@ const SelectedView = ({ record }: Record<string, any>) => {
             disabled={true}
             required={true}
             value={`+${phone_data?.raw_phone_number}`}
-            // className={"border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
+            className={"placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
             inputStyle={{
               width: '100%',
               backgroundColor: 'transparent',
               color: 'inherit',
-              borderColor: `transparent`,
+              borderColor: `inherit`,
               padding: '1.2rem',
               opacity: 'inherit',
             }}

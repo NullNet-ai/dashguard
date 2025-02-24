@@ -11,9 +11,8 @@ const wizardCallbacks = {
     try {
       const result = await updateAccountStatus(data)
       if (result?.id) {
-        toast.success('Account is activated successfully and invitation is sent')
-        await next()
-        return
+        await next('Account is created successfully and invitation is sent');
+        return;
       }
       toast.error('Failed to activate the account')
       return

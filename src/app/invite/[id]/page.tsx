@@ -1,12 +1,23 @@
-import { headers } from 'next/headers'
-import Image from 'next/image'
-import { redirect, RedirectType } from 'next/navigation'
+import Image from 'next/image';
+import { api } from '~/trpc/server';
+import { headers } from 'next/headers';
+import SignInLabel from '~/app/sign-up/_components/SignInLabel';
+import SignUpForm from '~/app/sign-up/_components/SignUpForm';
+import { redirect, RedirectType } from 'next/navigation';
+import { formatDate } from '~/server/utils/formatDate';
 
-import SignInLabel from '~/app/sign-up/_components/SignInLabel'
-import SignUpForm from '~/app/sign-up/_components/SignUpForm'
-import { api } from '~/trpc/server'
+const INVITATION_LINK_EXPIRED = parseInt(
+  process.env.INVITATION_LINK_EXPIRED || '1',
+  10,
+);
 
-import CreateAccountForm from './_components/createAccountForm'
+const isInvitationLinkExpired = (createdDate: string): boolean => {
+  const created = new Date(createdDate);
+  const expirationDate = new Date(created);
+  expirationDate.setDate(created.getDate() + INVITATION_LINK_EXPIRED);
+  const currentDate = formatDate(new Date()).date;
+  return new Date(currentDate) > expirationDate;
+};
 
 export default async function Invite({ searchParams }: any) {
   if (!searchParams.token) {
@@ -20,6 +31,27 @@ export default async function Invite({ searchParams }: any) {
     id: id!,
     token: searchParams.token,
   })
+
+  if (isInvitationLinkExpired(record.invitation.created_date)) {
+    Promise.all([
+      api.record.updateDynamicRecord({
+        entity: 'organization_account',
+        id: record?.id,
+        data: {
+          account_status: 'Invitation Expired',
+        },
+      }),
+      api.record.updateDynamicRecord({
+        entity: 'invitation',
+        id: record.invitation?.id,
+        data: {
+          status: 'Archived',
+        },
+      }),
+    ]);
+
+    return redirect('/expired-link', RedirectType.push);
+  }
 
   if (record?.categories.includes('Internal User')) {
     return redirect(
@@ -49,7 +81,7 @@ export default async function Invite({ searchParams }: any) {
 
           <div className='mt-11'>
             <div>
-              <SignUpForm />
+              <SignUpForm recordData={record} />
             </div>
             <SignInLabel />
           </div>
