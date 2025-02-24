@@ -1,9 +1,14 @@
 'use server'
 import { api } from '~/trpc/server'
 
-export const getNotificationsCountByContact = async () : Promise<number>  => {
-  const count = await api.notification.getNotificationsCountByContact()
-  return count || 0
+export const getNotificationsCountByContact = async () : Promise<Record<string, any>>  => {
+  const allUnreadNotificationCount = await api.notification.getUnreadNotificationsCountByContact()
+
+  const allNotificationCount = await api.notification.getAllNotificationsCountByContact()
+  return {
+    allUnreadNotificationCount,
+    allNotificationCount,
+  }
 }
 
 export const getNotifications = async ({
@@ -18,36 +23,21 @@ export const getNotifications = async ({
 }: {
   isLoadMore?: boolean
   filters?: any[]
-  order?: { 
-    sortBy: string, 
+  order?: {
+    sortBy: string
     sortOrder: 'asc' | 'desc'
-    limit: number,
-    starts_at: number,
+    limit: number
+    starts_at: number
   }
-}) : Promise<Record<string,any>> => {
-
-
-  const { data : notifications, total_count} = await api.notification.getNotifications({
-    filters : [
-      ...filters,
-      {
-        operator: 'and',
-        type: 'operator',
-        default: true,
-      },
-      {
-        type: 'criteria',
-        field: 'is_pinned',
-        operator: 'equal',
-        values: [false],
-      },
-    ],
+}): Promise<Record<string, any>> => {
+  const { data: notifications, total_count } = await api.notification.getNotifications({
+    filters,
     order,
   })
 
   return {
-    data : notifications,
-    total_count
+    data: notifications,
+    total_count,
   }
 }
 
@@ -73,12 +63,10 @@ export const updateBatchRead = async ({
   ids: string[]
   notification_status: 'read' | 'unread'
 }) => {
-  const update_notification = await api.notification.handleBatchRead({
+  await api.notification.handleBatchRead({
     ids,
     notification_status,
   })
-
-  return update_notification
 }
 
 export const updatePinnedNotification = async ({

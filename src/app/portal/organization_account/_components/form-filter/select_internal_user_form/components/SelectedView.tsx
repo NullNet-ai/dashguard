@@ -1,18 +1,19 @@
-import { PhoneInput } from 'react-international-phone';
-import { EnvelopeIcon } from '@heroicons/react/20/solid';
-import { cn } from '~/lib/utils';
-import { Label } from '~/components/ui/label';
-import { Input } from '~/components/ui/input';
+import { EnvelopeIcon } from '@heroicons/react/20/solid'
+import { PhoneInput } from 'react-international-phone'
+
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { cn } from '~/lib/utils'
 
 const SelectedView = ({ record }: Record<string, any>) => {
-  const { first_name, last_name, middle_name, email, phone } = record || {};
-  const [phone_data] = phone || [];
-  const [email_data] = email || [];
-  
+  const { first_name, last_name, middle_name, email, phone } = record || {}
+  const [phone_data] = phone || []
+  const [email_data] = email || []
+
   return (
     <>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5">
-        <div className="w-full md:w-1/2">
+      <div className='flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5'>
+        <div className='w-full md:w-1/2'>
           <Label className={cn('text-md font-semibold')}>
             Primary Phone Number *
           </Label>
@@ -22,8 +23,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
                 padding: '1.2rem',
                 paddingInline: '0.5rem',
                 backgroundColor: 'inherit',
-                borderColor: 'transparent',
-                borderRightColor: `inherit`,
+                borderColor: 'inherit',
                 colorScheme: 'normal',
               },
             }}
@@ -31,66 +31,66 @@ const SelectedView = ({ record }: Record<string, any>) => {
             disabled={true}
             required={true}
             value={`+${phone_data?.raw_phone_number}`}
-            // className={"border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
+            className={"placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}
             inputStyle={{
               width: '100%',
               backgroundColor: 'transparent',
               color: 'inherit',
-              borderColor: `transparent`,
+              borderColor: `inherit`,
               padding: '1.2rem',
               opacity: 'inherit',
             }}
             // inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
           />
         </div>
-        <div className="w-full md:w-1/2">
+        <div className='w-full md:w-1/2'>
           <Label className={cn('text-md font-semibold')}>
             Primary Email *
           </Label>
           <Input
-            readOnly={true}
-            placeholder={'Primary Email'}
-            value={email_data?.email}
-            Icon={EnvelopeIcon}
+            Icon={ EnvelopeIcon }
             iconPlacement="left"
+            placeholder={"Primary Email"}
+            readOnly={ true }
+            value={ email_data?.email }
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5">
-        <div className="w-full md:w-1/2">
+      <div className='flex flex-col gap-y-4 md:flex-row md:gap-y-0 mb-5'>
+        <div className='w-full md:w-1/2'>
           <Label className={cn('text-md font-semibold')}>First Name *</Label>
           <Input
-            readOnly={true}
-            required={true}
-            value={first_name}
-            placeholder={'First Name'}
+            placeholder={"First Name"}
+            readOnly={ true }
+            required={ true }
+            value={ first_name }
 
           />
         </div>
-        <div className="w-full md:w-1/2">
+        <div className='w-full md:w-1/2'>
           <Label className={cn('text-md font-semibold')}>Last Name *</Label>
           <Input
-            readOnly={true}
-            placeholder={'Last Name'}
-            value={last_name}
-            Icon={EnvelopeIcon}
+            Icon={ EnvelopeIcon }
             iconPlacement="left"
+            placeholder={"Last Name"}
+            readOnly={ true }
+            value={ last_name }
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-4 md:flex-row md:gap-y-0">
-        <div className="w-full md:w-1/2">
-          <Label className={cn('text-md font-semibold')}>Middle Name </Label>
+      <div className='flex flex-col gap-y-4 md:flex-row md:gap-y-0'>
+        <div className='w-full md:w-1/2'>
+          <Label className={cn('text-md font-semibold')}>{'Middle Name '}</Label>
           <Input
-            readOnly={true}
-            required={true}
-            value={middle_name}
-            placeholder={'Middle Name'}
+            placeholder={"Middle Name"}
+            readOnly={ true }
+            required={ true }
+            value={ middle_name }
           />
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default SelectedView;
+export default SelectedView

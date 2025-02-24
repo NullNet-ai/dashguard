@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const zodNotificationSchema = z.object({
   title: z.string().min(1),
@@ -23,4 +23,4 @@ export const zodNotificationSchema = z.object({
   priority_level: z.number().default(0),
   expiry_date: z.string().optional(),
   metadata: z.record(z.any()).optional(),
-});
+})

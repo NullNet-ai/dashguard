@@ -28,6 +28,7 @@ interface Account {
   organization: Organization;
   organization_id: string;
   email: string
+  organization_account_id: string;
 }
 
 interface Contact {
@@ -76,6 +77,7 @@ interface Organization {
 
 export interface TokenData {
   account: Account;
+  accounts?: Account[];
   iat: number;
   exp: number;
 }

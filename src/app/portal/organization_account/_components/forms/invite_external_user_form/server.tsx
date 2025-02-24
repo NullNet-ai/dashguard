@@ -1,13 +1,15 @@
-import { api } from '~/trpc/server';
-import { headers } from 'next/headers';
-import BasicDetails from './client';
-import { EOperator } from '@dna-platform/common-orm';
-import { EStatus } from '~/server/api/types';
+import { EOperator } from '@dna-platform/common-orm'
+import { headers } from 'next/headers'
+
+import { EStatus } from '~/server/api/types'
+import { api } from '~/trpc/server'
+
+import BasicDetails from './client'
 
 const FormServerFetch = async () => {
-  const headerList = headers();
-  const pathname = headerList.get('x-pathname') || '';
-  const [, , main_entity, application, identifier] = pathname.split('/');
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , main_entity, application, identifier] = pathname.split('/')
 
   const [record, roles] = await Promise.all([
     api.record.getByCode({
@@ -28,31 +30,31 @@ const FormServerFetch = async () => {
         },
       ],
     }),
-  ]);
+  ])
 
-  if(record?.data?.categories?.[0] !== 'External User') return null;
+  if (record?.data?.categories?.[0] !== 'External User') return null
 
   const defaultValues = {
     role: record?.data?.role_id,
     email: [{ email: record?.data?.email }],
-  };
+  }
   const user_roles = roles.items?.map(({ id, role }) => ({
     value: id,
     label: role,
-  }));
+  }))
   return (
-    <div className="space-y-2">
+    <div className='space-y-2'>
       <BasicDetails
-        defaultValues={defaultValues ?? {}}
-        selectOptions={{ role: user_roles }}
-        params={{
+        defaultValues={ defaultValues ?? {} }
+        params={ {
           id: record?.data?.id!,
           shell_type: application! as 'record' | 'wizard',
           entity: main_entity,
-        }}
+        } }
+        selectOptions={ { role: user_roles } }
       />
     </div>
-  );
-};
+  )
+}
 
-export default FormServerFetch;
+export default FormServerFetch

@@ -25,7 +25,7 @@ const GRID_COLUMNS = [
       const date = row?.original?.updated_date
       const time = row?.original?.updated_time
       return (
-        <div className='flex items-center gap-x-2'>
+        <div className={"flex items-center gap-x-2"}>
           <div>{date}</div>
           <div>{time}</div>
         </div>
@@ -39,7 +39,7 @@ const GRID_COLUMNS = [
       const date = row?.original?.created_date
       const time = row?.original?.created_time
       return (
-        <div className='flex items-center gap-x-2'>
+        <div className={"flex items-center gap-x-2"}>
           <div>{date}</div>
           <div>{time}</div>
         </div>

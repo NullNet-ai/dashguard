@@ -5,7 +5,7 @@ import RecordImplementationGuide from '../../../../_components/record_guideline'
 const RecordTabContainer = async () => {
   return (
     <div>
-      <NewComingSoon type='inner-component' />
+      <NewComingSoon type={"inner-component"} />
     </div>
   )
 }

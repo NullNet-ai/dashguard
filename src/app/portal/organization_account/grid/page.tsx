@@ -1,18 +1,18 @@
-import Grid from '~/components/platform/Grid/Server';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
-import { api } from '~/trpc/server';
+import Grid from '~/components/platform/Grid/Server'
+import { getGridCacheData } from '~/lib/grid-get-cache-data'
+import { api } from '~/trpc/server'
 
 /**
  *
  * @Default Grid Features
  *
  */
-import defaultAdvanceFilter from './_config/advanceFilter';
-import gridColumns from './_config/columns';
-import defaultSorting from './_config/sorting';
+import defaultAdvanceFilter from './_config/advanceFilter'
+import gridColumns from './_config/columns'
+import defaultSorting from './_config/sorting'
 
 export default async function Page() {
-  const { sorting, pagination, filters } = await getGridCacheData();
+  const { sorting, pagination, filters } = await getGridCacheData()
 
   const { items = [], totalCount } = await api.account.fetchGridData({
     entity: 'organization_account',
@@ -22,7 +22,7 @@ export default async function Page() {
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
-  });
+  })
   return (
     <Grid
       advanceFilter={filters?.reportFilters || []}
@@ -58,5 +58,5 @@ export default async function Page() {
       sorting={sorting?.length ? sorting : []}
       totalCount={totalCount || 0}
     />
-  );
+  )
 }

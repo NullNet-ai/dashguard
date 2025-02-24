@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { type DropzoneOptions } from 'react-dropzone'
-import { type Field, type UseFormReturn } from 'react-hook-form'
+import { ControllerFieldState, ControllerRenderProps, type Field, type UseFormReturn } from 'react-hook-form'
 
 import { type TActionType } from '~/components/platform/Grid/types'
 import {
@@ -36,6 +36,7 @@ interface OptionType {
 }
 
 interface DraggableConfig {
+  parentProps?: any
   fields: IField & {
     selectOptions?: ISelectOptions[]
     radioOptions?: IRadioOptions[]
@@ -55,7 +56,13 @@ interface DraggableConfig {
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[]
 }
-
+interface CustomFieldProps {
+  field: ControllerRenderProps<Record<string, any>, string>;
+  fieldState: ControllerFieldState;
+  form: UseFormReturn<Record<string, any>>;
+  formKey: string;
+  fieldConfig: IField;
+}
 interface MultiFieldOption {
   label: string
   name?: string
@@ -107,6 +114,7 @@ interface IField {
   min?: number
   max?: number
   step?: number
+  render?: (props: CustomFieldProps) => React.ReactNode
   checkboxOrientation?: 'horizontal' | 'vertical'
   radioOrientation?: 'horizontal' | 'vertical'
   sliderLabel?: (value: number | undefined) => ReactNode
@@ -166,7 +174,8 @@ interface IField {
   isCustomFormField?: boolean
   groupConfig?: {
     prefix?: string,
-    components?: ComponentType<any>[]  // Update this type
+    components?: ComponentType<any>[] |  JSX.Element[]
+    defaultComponent?: ComponentType<any>
   }
 }
 

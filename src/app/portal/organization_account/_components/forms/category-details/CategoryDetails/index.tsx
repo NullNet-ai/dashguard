@@ -1,23 +1,23 @@
-import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, Fragment } from 'react';
-import { type UseFormReturn } from 'react-hook-form';
+import { usePathname, useRouter } from 'next/navigation'
+import React, { useEffect, Fragment } from 'react'
+import { type UseFormReturn } from 'react-hook-form'
 
-import FormRadio from '~/components/platform/FormBuilder/FormType/FormRadio';
-import { FormField } from '~/components/ui/form';
+import FormRadio from '~/components/platform/FormBuilder/FormType/FormRadio'
+import { FormField } from '~/components/ui/form'
 
 interface ICategoryDetails {
-  form: UseFormReturn<Record<string, any>, any, undefined>;
-  selectOptions?: Record<string, any>;
+  form: UseFormReturn<Record<string, any>, any, undefined>
+  selectOptions?: Record<string, any>
 }
 
 export default function CustomCategoryDetails({ form }: ICategoryDetails) {
-  const router = useRouter();
-  const pathname = usePathname();
+  const router = useRouter()
+  const pathname = usePathname()
 
   return (
     <FormField
       control={form.control}
-      name={'categories'}
+      name="categories"
       render={(formProps) => {
         return (
           <FormRadio
@@ -30,7 +30,7 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
               radioOrientation: 'vertical',
             }}
             form={form}
-            formKey="ContactCategoryDetails"
+            formKey='ContactCategoryDetails'
             formRenderProps={{
               ...formProps,
               field: {
@@ -39,9 +39,9 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
                   form.setValue('categories', value, {
                     shouldValidate: true,
                     shouldDirty: true,
-                  });
-                  router.replace(`${pathname}?categories=${value}`);
-                  router.refresh();
+                  })
+                  router.replace(`${pathname}?categories=${value}`)
+                  router.refresh()
                 },
               },
             }}
@@ -52,8 +52,8 @@ export default function CustomCategoryDetails({ form }: ICategoryDetails) {
               ],
             }}
           />
-        );
-      }}
+        )
+      } }
     />
-  );
+  )
 }

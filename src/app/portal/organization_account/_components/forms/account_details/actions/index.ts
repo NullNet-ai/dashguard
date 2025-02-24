@@ -7,7 +7,7 @@ export const checkUsernameExist = async ({
   id,
 }: {
   username: string
-  id: string
+  id?: string
 }) => {
   const result = await api.account.checkUsernameExist({ username, id })
   return result

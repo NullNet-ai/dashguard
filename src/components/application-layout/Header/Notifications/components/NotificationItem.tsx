@@ -12,13 +12,16 @@ import capitalize from 'lodash/capitalize';
 import { Button } from '~/components/ui/button'
 
 import { useNotifications } from '../NotificationProvider'
-import { type INotificationSchema } from '../types'
+import { TNotificationType, type INotificationSchema } from '../types'
 
 import EmptyNotification from './EmptyNotification'
 import { Separator } from '~/components/ui/separator'
 import { Badge } from '~/components/ui/badge'
 import TextTruncate from '~/components/ui/text-truncate';
-
+import EmptyUnreadNotification from './EmptyUnreadNotification';
+import { cn } from '~/lib/utils';
+import Skeleton from '~/components/platform/Grid/Skeleton';
+import { NotificationSkeleton } from './NotificationDrawer';
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
 }
@@ -32,17 +35,32 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
 
   return <IconComponent {...props} />;
 };
-const NotificationItem = ({ type }: { type: string }) => {
+const NotificationItem = ({ type }: { type: TNotificationType }) => {
   const { state, actions } = useNotifications()
-  const { notifications } = state
+  const { notificationCount, loading, totalNotificationCount, notifications } = state
 
   useEffect(() => {
     actions.handleChangeType(type)
   }, [])
 
-  if (!notifications?.length) {
+
+  if (loading) {
+    return (
+      <NotificationSkeleton />
+    );
+  }
+  // if no unread notification
+  if (totalNotificationCount === 0) {
     return <EmptyNotification />
   }
+  // if no notification at all
+  if (!notificationCount && totalNotificationCount > 0) {
+    return <EmptyUnreadNotification />
+  }
+
+
+
+
 
   // Function to format the timestamp
   const formatTimestamp = (timestamp: string) => {
@@ -74,7 +92,6 @@ const NotificationItem = ({ type }: { type: string }) => {
   }
 
 
-
   function handleButtonVariants(className: string) {
     switch (className) {
 
@@ -100,28 +117,29 @@ const NotificationItem = ({ type }: { type: string }) => {
         <>
           <div
             className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
-              ? 'border-blue-100 '
-              : 'border-l-primary border-l-2'
-              } p-3 shadow-sm hover:bg-primary/10 transition-colors duration-200 `}
+              ? ''
+              : ' border-l-primary border-l-4 sm:border-l-2'
+              } p-3 shadow-sm lg:hover:bg-primary/10 transition-colors duration-200 `}
             onClick={() => notification.link && handleOpenNewTab(notification.link)}
             key={notification.id}
           >
             {/* Title & Priority */}
             <div className='flex item-start justify-between'>
-              {/* icon */}
               {/* Icon & Title */}
               <div className='flex items-center gap-2 cursor-default' onClick={(e) => { e.stopPropagation() }}>
                 {notification.icon
                   ? (
                     // @ts-expect-error fix this later
                     <DynamicIcon name={capitalize(notification.icon)} className='size-4 text-gray-500 ' />
-                    // <BellDot className='h-5 w-5 text-gray-500' />
                   )
                   : (
                     <Mail className='size-4 text-gray-500 ' />
                   )}
                 <a
-                  className="text-sm font-semibold hover:underline text-primary cursor-pointer"
+                  className={cn(
+                    `text-sm font-semibold hover:underline text-primary cursor-pointer `,
+                    notification.notification_status === 'read' ? 'text-foreground font-normal' : ''
+                  )}
                   onClick={() => notification.link && handleOpenNewTab(notification.link)}
                   aria-hidden="true"
                 >
@@ -158,12 +176,13 @@ const NotificationItem = ({ type }: { type: string }) => {
                   )}
                 {/* Pin Icon */}
                 <Pin
-                  className={`h-4 w-4 cursor-pointer me-1 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
+                  className={`h-4 w-4 cursor-pointer mx-2 ${notification.is_pinned ? 'fill-yellow-300 text-yellow-500' : 'text-gray-300 group-hover:block hidden'}`}
                   onClick={(e) => {
                     e.stopPropagation()
                     actions?.handlePinNotification({
                       id: notification.id,
                       is_pinned: !notification.is_pinned,
+                      type,
                     })
                   }}
                 />
@@ -214,10 +233,10 @@ const NotificationItem = ({ type }: { type: string }) => {
                         <DropdownMenuItem
                           className='relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm
                       outline-none transition-colors hover:bg-gray-100 hover:text-gray-900'
-                          onClick={(e) => 
-                            {
-                              e.stopPropagation()
-                              actions?.handleArchiveNotification(notification)}}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            actions?.handleArchiveNotification(notification)
+                          }}
                         >
                           Archive
                         </DropdownMenuItem>
@@ -228,11 +247,11 @@ const NotificationItem = ({ type }: { type: string }) => {
             </div>
 
             {/* Description */}
-
             <TextTruncate className='text-sm text-secondary-foreground ms-6' text={notification.description} maxCharacters={70} />
+
             {/* Actions */}
             {notification.actions && notification.actions.length > 0 && (
-              <div className='my-2 flex gap-2 ms-6 mt-2'>
+              <div className='flex gap-2 ms-6 mt-1'>
                 {notification.actions.map((action, index) => (
                   //*  To be discussed whether to add property buttonVariant as identitifier on which button to use instead of className
                   // <Button className={action?.className}  key={index} size="sm" variant={handleButtonVariants(action?.className || '')}>
@@ -243,7 +262,7 @@ const NotificationItem = ({ type }: { type: string }) => {
               </div>
             )}
             {/* Metadata */}
-            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-4'>
+            <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-2'>
               <span className='!text-gray-500'>
                 {' '}
                 {formatTimestamp(notification.timestamp)}

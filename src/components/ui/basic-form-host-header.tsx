@@ -1,13 +1,14 @@
-import { EllipsisVertical, SaveIcon } from "lucide-react";
+import { EllipsisVertical, SaveIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { Button } from "~/components/ui/button";
-import { XMarkIcon } from "@heroicons/react/20/solid";
-import { LockClosedIcon } from "@heroicons/react/24/outline";
+} from './dropdown-menu';
+import { Button } from '~/components/ui/button';
+import { XMarkIcon } from '@heroicons/react/20/solid';
+import { LockClosedIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface IEllipsisOptions {
   id: number;
@@ -25,6 +26,7 @@ interface IProps {
   handleCancel?: () => void;
   handleUnlock: () => void;
   hideEllipseOptions?: boolean;
+  isSaving?: boolean;
 }
 
 export default function BasicFormHostHeader({
@@ -32,14 +34,20 @@ export default function BasicFormHostHeader({
   label,
   ellipseOptions = [],
   isDisable,
-  form,
   handleSave,
   handleCancel,
   handleUnlock,
   hideEllipseOptions = false,
+  isSaving = false,
 }: IProps) {
+  const [isSubmitting, setIsSubmitting] = useState(isSaving);
+ 
+  useEffect(() => {
+    setIsSubmitting(isSaving);
+  }, [isSaving]);
+
   const Label =
-    typeof label === "string" ? (
+    typeof label === 'string' ? (
       <span className="text-sm font-semibold leading-none tracking-tight">
         {label}
       </span>
@@ -48,13 +56,13 @@ export default function BasicFormHostHeader({
     );
 
   return (
-    <div className={"flex flex-row items-center justify-between p-2"}>
+    <div className={'flex flex-row items-center justify-between p-2'}>
       {Label}
       <div className="flex gap-2">
         {isLock ? (
           <Button
-            size={"icon"}
-            variant={"ghost"}
+            size={'icon'}
+            variant={'ghost'}
             onClick={handleUnlock}
             className="m-auto h-6 w-6 rounded-full"
           >
@@ -63,11 +71,11 @@ export default function BasicFormHostHeader({
         ) : (
           <>
             <Button
-              variant={"default"}
+              variant={'default'}
               onClick={handleSave}
               type="button"
-              // loading={}
-              size={"xs"}
+              loading={isSubmitting}
+              size={'xs'}
               className="items-center gap-1 text-sm"
               // {...props}
             >
@@ -75,10 +83,10 @@ export default function BasicFormHostHeader({
               Save
             </Button>
             <Button
-              variant={"outline"}
+              variant={'outline'}
               onClick={handleCancel}
               type="button"
-              size={"xs"}
+              size={'xs'}
             >
               <XMarkIcon className="h-4 w-4" />
               Cancel
@@ -94,7 +102,7 @@ export default function BasicFormHostHeader({
                   <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
                 )}
 
-                <DropdownMenuContent align="end" side='bottom'>
+                <DropdownMenuContent align="end" side="bottom">
                   {ellipseOptions?.map((option) => (
                     <DropdownMenuItem
                       key={option.id}

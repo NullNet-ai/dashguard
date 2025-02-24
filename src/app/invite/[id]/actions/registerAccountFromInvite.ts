@@ -1,15 +1,16 @@
-'use server';
-import { redirect } from 'next/navigation';
-import { api } from '~/trpc/server';
-import { handleLoginError } from '~/utils/login-validator';
+'use server'
+import { redirect } from 'next/navigation'
+
+import { api } from '~/trpc/server'
+import { handleLoginError } from '~/utils/login-validator'
 
 interface LoginSubmitArgs {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  organization_name?: string;
-  organization_id?: string;
+  first_name: string
+  last_name: string
+  email: string
+  password: string
+  organization_name?: string
+  organization_id?: string
 }
 
 const verifySession = async () => {
@@ -31,7 +32,7 @@ export default async function registerAccountFromInvite({
   last_name,
 }: LoginSubmitArgs) {
   // register user
-  let error = null;
+  let error = null
   const account = {
     first_name,
     last_name,
@@ -42,7 +43,7 @@ export default async function registerAccountFromInvite({
     account_organization_id: organization_id,
     account_organization_name: organization_name,
     is_new_user: false,
-  };
+  }
 
   const organization = {
     id: organization_id,
@@ -53,30 +54,30 @@ export default async function registerAccountFromInvite({
     const registrationDetails = await api.auth.registerAccount({
       account,
       organization,
-    });
-  
+    })
+
     /**
      * Login
      */
     const loginDetailsResponse = await api.auth.login({
       username: email,
       password,
-    });
+    })
 
-    const loginDetailsError = handleLoginError(loginDetailsResponse);
+    const loginDetailsError = handleLoginError(loginDetailsResponse)
     if (loginDetailsError) {
-      return loginDetailsResponse;
+      return loginDetailsResponse
     }
-  
+
     /**
      * Verify session
      */
-    await verifySession();
-  
+    await verifySession()
+
     /**
      * create contact
      */
-    const contact_id = registrationDetails.data?.[0]?.contact_id;
+    const contact_id = registrationDetails.data?.[0]?.contact_id
     const contactDetailsResponse = await api.form.updateDynamicRecord({
       entity: 'contact',
       id: contact_id,
@@ -88,20 +89,21 @@ export default async function registerAccountFromInvite({
       },
     })
 
-    const contactDetailsError = handleLoginError(contactDetailsResponse);
+    const contactDetailsError = handleLoginError(contactDetailsResponse)
     if (contactDetailsError) {
-      return contactDetailsResponse;
+      return contactDetailsResponse
     }
 
-    return registrationDetails;
-
-  } catch (err) {
-    error = err;
+    return registrationDetails
+  }
+  catch (err) {
+    error = err
     return {
       statusCode: 500,
       message: 'Something went wrong',
     }
-  } finally {
+  }
+  finally {
     if (!error) {
       redirect('/portal/dashboard')
     }

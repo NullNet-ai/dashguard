@@ -1,13 +1,13 @@
-import { type TNotificationType } from '../types'
+import { type TNotificationType } from '../types';
 
 export const buildNotificationFilters = ({
   type,
   showRead,
 }: {
-  type: TNotificationType
-  showRead: boolean
+  type: TNotificationType;
+  showRead: boolean;
 }) => {
-  const filters = []
+  const filters = [];
 
   switch (type) {
     case 'all':
@@ -16,54 +16,73 @@ export const buildNotificationFilters = ({
         field: 'status',
         operator: 'equal',
         values: ['Active'],
-      })
-      break
+      });
+      break;
+    case 'pinned':
+      filters.push({
+        type: 'criteria',
+        field: 'status',
+        operator: 'equal',
+        values: ['Active'],
+      });
+      filters.push({
+        operator: 'and',
+        type: 'operator',
+        default: true,
+      });
+      filters.push({
+        type: 'criteria',
+        field: 'is_pinned',
+        operator: 'equal',
+        values: [true],
+      });
+      break;
     case 'system':
       filters.push({
         type: 'criteria',
         field: 'status',
         operator: 'equal',
         values: ['Active'],
-      })
+      });
       filters.push({
         operator: 'and',
         type: 'operator',
         default: true,
-      })
+      });
       filters.push({
         type: 'criteria',
         field: 'categories',
         operator: 'contains',
         values: ['System'],
-      })
-      break
+      });
+      break;
     case 'social':
       filters.push({
         type: 'criteria',
         field: 'status',
         operator: 'equal',
         values: ['Active'],
-      })
+      });
       filters.push({
         operator: 'and',
         type: 'operator',
         default: true,
-      })
+      });
       filters.push({
         type: 'criteria',
         field: 'categories',
         operator: 'contains',
         values: ['Social'],
-      })
-      break
+      });
+      break;
     case 'archive':
       filters.push({
         type: 'criteria',
         field: 'status',
         operator: 'equal',
         values: ['Archived'],
-      })
-      break
+      });
+      break;
   }
 
   if (filters.length > 0 && showRead) {
@@ -72,14 +91,15 @@ export const buildNotificationFilters = ({
         operator: 'and',
         type: 'operator',
         default: true,
-      }, {
+      },
+      {
         type: 'criteria',
         field: 'notification_status',
         operator: 'equal',
         values: ['unread'],
       },
-    )
+    );
   }
 
-  return filters
-}
+  return filters;
+};

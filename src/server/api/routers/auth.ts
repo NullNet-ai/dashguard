@@ -1,12 +1,16 @@
-import { EOperator } from '@dna-platform/common-orm'
-import argon2 from 'argon2'
-import { z } from 'zod'
+import { EOperator } from '@dna-platform/common-orm';
+import argon2 from 'argon2';
+import { z } from 'zod';
 
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
-} from '~/server/api/trpc'
+} from '~/server/api/trpc';
+import type { TokenData } from '../types';
+import { ulid } from 'ulid';
+
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -20,29 +24,29 @@ export const authRouter = createTRPCRouter({
       try {
         const response = await ctx.dnaClient
           .login(input.username, input.password)
-          .execute()
+          .execute();
         if (!response.success) {
-          throw response
+          throw response;
         }
 
-        const token = response?.data?.[0]?.token
+        const token = response?.data?.[0]?.token;
+        ctx.redisClient.cacheData(`account_token:${input.username}`, token, 60 * 60 * 24);
+        ctx.storeCookies.set('username', input.username);
 
-        ctx.storeCookies.set('token', token)
         return response;
-      }
-      catch (error: any) {
-        let errorMessage = 'Something went wrong please try again'
-        let errorType = 'unknown'
+      } catch (error: any) {
+        let errorMessage = 'Something went wrong please try again';
+        let errorType = 'unknown';
 
         switch (error?.message) {
           case 'Invalid Credentials':
-            errorMessage = 'The email or password you entered is incorrect.'
-            errorType = 'invalid'
-            break
+            errorMessage = 'The email or password you entered is incorrect.';
+            errorType = 'invalid';
+            break;
           case 'Account not found':
-            errorMessage = 'No account was found with this email address.'
-            errorType = ' notfound'
-            break
+            errorMessage = 'No account was found with this email address.';
+            errorType = ' notfound';
+            break;
         }
 
         return {
@@ -50,7 +54,7 @@ export const authRouter = createTRPCRouter({
           statusCode: error?.status_code || 500,
           error: error?.errors || error,
           type: errorType,
-        }
+        };
       }
     }),
   registerAccount: publicProcedure
@@ -61,11 +65,11 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { account, organization } = input
+      const { account, organization } = input;
       const result = await ctx.dnaClient
         .register(organization, account)
-        .execute()
-      return result
+        .execute();
+      return result;
     }),
   getAccountData: privateProcedure
     .input(
@@ -91,20 +95,19 @@ export const authRouter = createTRPCRouter({
               pluck: ['id', 'is_new_user'],
             },
           })
-          .execute()
+          .execute();
 
         if (!response.success) {
-          return null
+          return null;
         }
 
-        return response?.data?.[0]
-      }
-      catch (error: any) {
+        return response?.data?.[0];
+      } catch (error: any) {
         return {
           message: 'Something went wrong please try again',
           statusCode: error?.status_code || 500,
           error: error?.errors || error,
-        }
+        };
       }
     }),
   setNewPassword: privateProcedure
@@ -127,13 +130,13 @@ export const authRouter = createTRPCRouter({
             pluck: ['id', 'account_secret', 'is_new_user'],
           },
         })
-        .execute()
+        .execute();
 
       if (!response?.success) {
-        return null
+        return null;
       }
 
-      return response?.data?.[0]
+      return response?.data?.[0];
     }),
   fetchAccountDataById: privateProcedure
     .input(
@@ -151,17 +154,49 @@ export const authRouter = createTRPCRouter({
             pluck: input.pluck_fields,
           },
         })
-        .execute()
+        .execute();
       if (!response?.success) {
-        return null
+        return null;
       }
-      return response?.data?.[0]
+      return response?.data?.[0];
     }),
   logout: privateProcedure.mutation(async ({ ctx }) => {
-    ctx.storeCookies.delete('token')
-    return { message: 'User logged out' }
+    ctx.storeCookies.delete('username');
+    ctx.redisClient.deleteCachedData(`account_token:${ctx.session.account?.email}`);
+    return { message: 'User logged out' };
   }),
   verify: privateProcedure.mutation(async () => {
-    return true
+    return true;
   }),
-})
+  switchOrganization: privateProcedure
+    .input(
+      z.object({
+        organization_id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const currentToken = ctx.token.value;
+        const rootAccount = await ctx.dnaClient
+          .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+          .execute();
+        const rootAccountToken = rootAccount?.data?.[0]?.token;
+        const newOrganization = await ctx.dnaClient
+          .rootSwitchAccount(currentToken, input.organization_id, {
+            token: rootAccountToken,
+          })
+          .execute();
+        const username = ctx.storeCookies.get('username')?.value;
+
+        await ctx.redisClient.cacheData(
+          `account_token:${username}`,
+          newOrganization?.data?.[0]?.token,
+          60 * 60 * 24,
+        );
+
+        return newOrganization;
+      } catch (error) {
+        throw error;
+      }
+    }),
+});

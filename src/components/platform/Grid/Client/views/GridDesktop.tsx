@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
@@ -50,6 +50,8 @@ function GridDesktop({
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
   const _width = sidebarOpen ? newWidth - remToPx(17) : newWidth - remToPx(6);
+
+  const [isEndReached, setIsEndReached] = useState(false);
 
   const { open, summary } = parentProps || {};
 
@@ -132,6 +134,16 @@ function GridDesktop({
           style={{ width: expandedWidth }}
         >
           <ScrollArea
+            onReachEnd={() => {
+              if (!isEndReached) {
+                setIsEndReached(true);
+              }
+            }}
+            onNotReachEnd={() => {
+              if (isEndReached) {
+                setIsEndReached(false);
+              }
+            }}
             className={cn(
               `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
               conWidth,
@@ -154,6 +166,7 @@ function GridDesktop({
                 <MyTableHead />
               </TableHeader>
               <MyTableBody
+                reachEnd={isEndReached}
                 showAction={showAction}
                 gridLevel={gridLevel}
                 isLoading={isLoading}

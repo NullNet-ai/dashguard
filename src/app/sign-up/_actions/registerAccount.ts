@@ -1,16 +1,16 @@
-'use server';
-import { redirect } from 'next/navigation';
+'use server'
+import { redirect } from 'next/navigation'
 
-import { verifySession } from '~/app/login/actions/loginSubmit';
-import { api } from '~/trpc/server';
-import { handleLoginError } from '~/utils/login-validator';
+import { verifySession } from '~/app/login/actions/loginSubmit'
+import { api } from '~/trpc/server'
+import { handleLoginError } from '~/utils/login-validator'
 
 interface RegisterAccountArgs {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  organization_name?: string;
+  first_name: string
+  last_name: string
+  email: string
+  password: string
+  organization_name?: string
 }
 
 export default async function registerAccount({
@@ -20,14 +20,14 @@ export default async function registerAccount({
   password,
   organization_name,
 }: RegisterAccountArgs) {
-  let error = null;
+  let error = null
   try {
     /**
      * Registration data
      */
     const organization = {
       name: organization_name,
-    };
+    }
 
     const account = {
       first_name,
@@ -38,6 +38,7 @@ export default async function registerAccount({
       account_secret: password,
       account_organization_name: organization_name,
       is_new_user: false,
+      contact_categories: ['Contact', 'User'],
     };
 
     /**
@@ -46,13 +47,16 @@ export default async function registerAccount({
     const registeredAccountDetails = await api.auth.registerAccount({
       account,
       organization,
-    });
+    })
 
-    const accountDataError = handleLoginError(registeredAccountDetails);
+    const accountDataError = handleLoginError(registeredAccountDetails)
     if (accountDataError) {
-      error = accountDataError;
-      return error;
+      error = accountDataError
+      return error
     }
+
+    const { organization_account_id, organization_id, contact_id } =
+      registeredAccountDetails?.data?.[0] ?? {};
 
     /**
      * Login using username and password
@@ -60,78 +64,64 @@ export default async function registerAccount({
     await api.auth.login({
       username: email,
       password,
-    });
+    })
 
-    await verifySession();
+    await verifySession()
 
     /**
-     * Create organization
+     * Create user Role
      */
-    const createdOrganizationResponse = await api.form.createDynamicRecord({
-      entity: 'organization',
+    const userRole = await api.form.createDynamicRecord({
+      entity: 'user_roles',
       data: {
-        organization_name,
-        categories: ['User'],
+        role: 'Administrator',
         entity: 'Contact',
+        categories: ['User'],
+        status: 'Active',
       },
-    });
-
-    const organizationDataError = handleLoginError(createdOrganizationResponse);
-    if (organizationDataError) {
-      return organizationDataError;
-    }
-
-    const organization_id = createdOrganizationResponse?.data?.[0]?.id;
+    })
 
     /**
-     * Create contact
+     * Update account record
      */
-    const createdContactResponse = await api.form.createDynamicRecord({
-      entity: 'contact',
+    await api.form.updateDynamicRecord({
+      id: organization_account_id,
+      entity: 'organization_account',
       data: {
-        first_name,
-        last_name,
-        status: 'Draft',
-        categories: ['Contact'],
+        role_id: userRole.data?.[0]?.id,
+        categories: ['Internal User'],
+        status: 'Active',
+        account_status: 'Active',
       },
     });
-
-    const contact_id = createdContactResponse?.data?.[0]?.id;
-
-    /**
-     * Create organization contact
-     */
-    await api.form.createDynamicRecord({
+    const organizationContact = await api.form.createDynamicRecord({
       entity: 'organization_contacts',
       data: {
         contact_organization_id: organization_id,
-        contact_id,
+        contact_id: contact_id,
         is_primary: true,
+        status: 'Active',
       },
     });
-
-    /**
-     * Create contact email
-     */
     await api.form.createDynamicRecord({
-      entity: 'contact_email',
+      entity: 'organization_contact_user_roles',
       data: {
-        email,
-        is_primary: true,
-        contact_id,
+        organization_contact_id: organizationContact?.data?.[0]?.id,
+        user_role_id: userRole?.data?.[0]?.id,
+        status: 'Active',
       },
     });
-    
   } catch (err: any) {
     console.error(error);
     error = err;
   } finally {
     if (error as any) {
       return {
-        error: (error as any)?.message ?? 'Something went wrong please try again',
+        error:
+          (error as any)?.message ?? 'Something went wrong please try again',
         type: 'unknown',
-      };
+      }
     }
-    redirect('/portal/dashboard');
+    redirect('/portal/dashboard')
   }
 }

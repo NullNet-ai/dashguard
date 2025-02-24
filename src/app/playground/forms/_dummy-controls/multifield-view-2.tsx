@@ -7,30 +7,51 @@ import { z } from 'zod'
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import NewComingSoon from '~/components/ui/coming-soon'
 
+import Guidelines from './components/guildelines'
+import MultiFieldForms from './components/multfield-form'
+
 export default function GroupTabView2() {
-  const FormSchema = z.object({
-    tabs: z.array(
-      z.object({
-        id: z.string(),
-        tabName: z.string(),
-        order: z.number().min(1), // Ensure order is at least 1
-        metadata: z.object({}),
-        tabChildren: z.array(
-          z.object({
-            id: z.string(),
-            tabName: z.string(),
-            order: z.number().min(1),
-            metadata: z.object({}),
-            component: z.string(),
-          }),
-        ),
-        component: z.string(),
-      }),
-    ).transform(items => 
-      // Sort items by order when retrieving
-      [...items].sort((a, b) => a.order - b.order)
-    ),
+  const customFieldSchema = z.object({
+    fields: z
+      .array(
+        z.object({})
+          .catchall(
+            z.string()
+              .min(2, { message: 'Field value must be at least 2 characters long' })
+          )
+      )
+      .optional(),
   })
+
+  const metadataSchema = z
+    .object({})
+    .catchall(z.any())
+    .merge(
+      customFieldSchema
+    );
+
+  const FormSchema = z.object({
+    tabs: z
+      .array(
+        z.object({
+          id: z.string(),
+          tabName: z.string(),
+          order: z.number().min(1),
+          metadata: metadataSchema,
+          tabChildren: z.array(
+            z.object({
+              id: z.string(),
+              tabName: z.string(),
+              order: z.number().min(1),
+              metadata: metadataSchema,
+              component: z.string(),
+            })
+          ),
+          component: z.string(),
+        })
+      )
+      .transform((items: any) => [...items].sort((a, b) => a.order - b.order)),
+  });
 
   const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
     return new Promise<void>((resolve, reject) => {
@@ -67,10 +88,33 @@ export default function GroupTabView2() {
           {
             id: crypto.randomUUID(),
             tabName: 'Tab 1',
-            order:1,
-            metadata:{},
+            order: 1,
+            metadata: {},
             tabChildren: [],
-            component: 'NewComingSoon'
+            component: '',
+          },
+          {
+            id: crypto.randomUUID(),
+            tabName: 'Multi fields',
+            order: 2,
+            metadata: {
+              fields: [
+                {
+                  id: crypto.randomUUID(),
+                  value: 'John Doesss',
+                  name: 'full-name',
+                  fieldType: 'input',
+                },
+                {
+                  id: crypto.randomUUID(),
+                  value: 'John Doesss',
+                  name: 'age',
+                  fieldType: 'input',
+                },
+              ],
+            },
+            tabChildren: [],
+            component: 'MultiFieldForms',
           },
         ],
       }}
@@ -83,8 +127,10 @@ export default function GroupTabView2() {
           label: 'Group Multi Field',
           groupConfig: {
             prefix: 'Tab',
+            defaultComponent: Guidelines,
             components: [
               NewComingSoon,
+              MultiFieldForms,
             ],
           }
         },

@@ -12,6 +12,7 @@ import { TRPCReactProvider } from '~/trpc/react'
 
 import { ToastProvider } from '../context/ToastProvider'
 import { SidebarProvider } from '~/components/ui/sidebar'
+import { OpenReplayProvider } from "~/context/OpenReplay";
 
 export const metadata: Metadata = {
   title: 'Platform',
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
       <body>
         <Suspense fallback={<div>Loading...</div>}>
+          <OpenReplayProvider>
           <TRPCReactProvider>
             <EventEmitterProvider>
               {/** TODO: put side bar inside the portal */}
@@ -56,6 +58,7 @@ export default function RootLayout({
               </SidebarProvider>
             </EventEmitterProvider>
           </TRPCReactProvider>
+          </OpenReplayProvider>
         </Suspense>
       </body>
     </html>
