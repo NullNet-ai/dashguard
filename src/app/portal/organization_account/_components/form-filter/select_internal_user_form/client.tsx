@@ -1,19 +1,14 @@
 'use client'
 
-import { ulid } from 'ulid'
-import { z } from 'zod'
-
-import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns'
-import gridColumns from '~/app/portal/contact/grid/_config/columns'
-import { FormBuilder } from '~/components/platform/FormBuilder'
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
-import { useToast } from '~/context/ToastProvider'
-import { type InternalUserDetailsSchema } from '~/server/zodSchema/account/internalUserDetails'
-import { api } from '~/trpc/react'
-
-import { type IFormProps } from '../types'
-
-import SelectedView from './components/SelectedView'
+import { ulid } from 'ulid';
+import { z } from 'zod';
+import { FIELD_FILTER_GRID_COLUMNS } from '~/app/portal/contact/_components/form-filter/basic-details/_config/columns';
+import gridColumns from '~/app/portal/contact/grid/_config/columns';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { useToast } from '~/context/ToastProvider';
+import { api } from '~/trpc/react';
+import { type IFormProps } from '../types';
+import SelectedView from './components/SelectedView';
 
 const FormSchema = z.object({})
 
@@ -28,7 +23,22 @@ const defaultAdvanceFilter = [
     values: ['Active'],
     default: true,
   },
-]
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+  {
+    entity: 'organization_accounts',
+    operator: 'is_null',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: '',
+    values: [],
+    default: true,
+  },
+];
 
 export default function BasicDetails({
   params,
@@ -253,8 +263,8 @@ export default function BasicDetails({
         limit: 1000,
         label: 'Contacts',
         searchConfig: {
-          router: 'contact',
-          resolver: 'mainGrid',
+          router: 'account',
+          resolver: 'getUserGridItem',
           query_params: {
             entity: 'contact',
             pluck: params?.pluck_fields,

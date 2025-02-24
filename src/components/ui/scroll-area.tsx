@@ -18,7 +18,8 @@ const ScrollArea = React.forwardRef<
     if (!viewportRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = viewportRef.current;
-    const isAtEnd = Math.abs(scrollWidth - clientWidth - scrollLeft) < 1;
+    const isAtEnd = (Math.abs(scrollWidth - clientWidth - scrollLeft ) - 20) < 1;
+
 
     if (isAtEnd && onReachEnd) {
       onReachEnd();

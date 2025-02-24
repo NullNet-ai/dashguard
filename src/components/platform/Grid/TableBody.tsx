@@ -67,7 +67,7 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                     return (
                       <td
                         key={cell.id + index}
-                        className={cn('right-0', isEndReached ? '' : 'sticky')}
+                        className={cn('right-0', (isEndReached || reachEnd) ? '' : 'sticky')}
                       >
                         <div className="px-3">
                           <div

@@ -1,8 +1,8 @@
-"use client";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useEventEmitter } from "~/context/EventEmitterProvider";
-import { useToast } from "~/context/ToastProvider";
+'use client';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
+import { useToast } from '~/context/ToastProvider';
 import {
   type ICallbackHandler,
   type Summary,
@@ -10,21 +10,21 @@ import {
   type IAction,
   type ICreateContext,
   type IState,
-} from "./type";
-import { omit } from "lodash";
-import { SaveAndContinue } from "./Action/SaveAndContinue";
-import { SaveAndNew } from "./Action/SaveAndNew";
-import { SaveAndClose } from "./Action/SaveAndClose";
-import { PrevPage } from "./Action/PrevPage";
+} from './type';
+import { omit } from 'lodash';
+import { SaveAndContinue } from './Action/SaveAndContinue';
+import { SaveAndNew } from './Action/SaveAndNew';
+import { SaveAndClose } from './Action/SaveAndClose';
+import { PrevPage } from './Action/PrevPage';
 // import { NextPage } from "./Action/NextPage";
 
-import { api } from "~/trpc/react";
-import useDeepCompareEffect from "./Hooks/useDeepCompareEffect";
-import useTraverseStepped from "./Hooks/useTraverseStepped";
-import useTraverseSteppedSaved from "./Hooks/useTraverseStepSave";
-import usePrefetchWizardTraverse from "./Hooks/usePrefetchWizardTraverse";
-import { NextPage } from "./Action/NextPage";
-import { Create } from "../Grid/Action/Create";
+import { api } from '~/trpc/react';
+import useDeepCompareEffect from './Hooks/useDeepCompareEffect';
+import useTraverseStepped from './Hooks/useTraverseStepped';
+import useTraverseSteppedSaved from './Hooks/useTraverseStepSave';
+import usePrefetchWizardTraverse from './Hooks/usePrefetchWizardTraverse';
+import { NextPage } from './Action/NextPage';
+import { Create } from '../Grid/Action/Create';
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -40,7 +40,7 @@ export const useWizard = (): ICreateContext => {
   const context = useContext(WizardContext);
   if (!context) {
     // throw new Error("use Wizard must be used within a WizardProvider");
-    console.warn("use Wizard must be used within a WizardProvider");
+    console.warn('use Wizard must be used within a WizardProvider');
   }
 
   return context;
@@ -59,18 +59,25 @@ export default function WizardProvider({
   const toast = useToast();
   const searchParams = useSearchParams();
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
-  const path =
-  usePathname().split("/");
-  let [, portal, mainEntity, application = "wizard", identifier, step] = path;
+  const path = usePathname().split('/');
+  let [, portal, mainEntity, application = 'wizard', identifier, step] = path;
   if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-    const [, , playgroundPortal, playgroundApplication, , playgroundIdentifier, playgroundStep] = path
-    portal = playgroundPortal
-    application = playgroundApplication || "wizard"
-    identifier = playgroundIdentifier
-    step = playgroundStep
-    mainEntity = "contact";
+    const [
+      ,
+      ,
+      playgroundPortal,
+      playgroundApplication,
+      ,
+      playgroundIdentifier,
+      playgroundStep,
+    ] = path;
+    portal = playgroundPortal;
+    application = playgroundApplication || 'wizard';
+    identifier = playgroundIdentifier;
+    step = playgroundStep;
+    mainEntity = 'contact';
   }
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const currentContext = '/' + portal + '/' + mainEntity;
 
   // Now:
   // section -> Represents the main section of the portal (e.g., "contacts")
@@ -81,7 +88,7 @@ export default function WizardProvider({
   /** @STATES */
   const [formSave, setFormSave] = React.useState<Record<string, string>>({});
   const [traverseSteps, setTraverseStep] = React.useState<
-    Record<string, "Stepped">
+    Record<string, 'Stepped'>
   >({
     // one: "Stepped",
   });
@@ -91,7 +98,7 @@ export default function WizardProvider({
   const [errorMessage] = React.useState<Record<string, string[]> | null>(null);
 
   const currentStep = useMemo(() => {
-    return +(step || "1");
+    return +(step || '1');
   }, [step]);
 
   const [prevLoading, setPrevLoading] = React.useState(false);
@@ -102,7 +109,9 @@ export default function WizardProvider({
   const [nextLoading, setNextLoading] = useState(false);
   const [skipLoading, setSkipLoading] = useState(false);
   const [savedStep, setSavedStep] = useState<null | number>(null);
-  const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>(config?.callbackHandlers || {});
+  const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>(
+    config?.callbackHandlers || {},
+  );
 
   /** @STATES */
   const nextStep = api.wizard.wizardCreateStep.useMutation();
@@ -113,7 +122,7 @@ export default function WizardProvider({
   const triggerHandler = () => {
     const filtered_handlers = Object.entries(formSave).reduce(
       (acc: string[], [key, value]: [string, string]) => {
-        if (["failed", "dirty"].includes(value)) {
+        if (['failed', 'dirty'].includes(value)) {
           return acc.concat(key);
         }
         return acc;
@@ -144,14 +153,14 @@ export default function WizardProvider({
   const processResults = (data: { status: string; form_key: string }) => {
     const { status, form_key } = data;
     const field_name =
-      form_key == "action" ? form_key : `submitForm:${form_key}`;
+      form_key == 'action' ? form_key : `submitForm:${form_key}`;
 
     setFormSave((prev) => ({
       ...prev,
       [field_name]: status,
     }));
 
-    if (status !== "done") return;
+    if (status !== 'done') return;
 
     setSavedStep(currentStep);
   };
@@ -181,7 +190,7 @@ export default function WizardProvider({
       })
       .catch(() => {
         setLoading(false);
-        toast.error("Previous step failed");
+        toast.error('Previous step failed');
       });
   };
 
@@ -203,18 +212,18 @@ export default function WizardProvider({
       })
       .catch(() => {
         setPrevLoading(false);
-        toast.error("Previous step failed");
+        toast.error('Previous step failed');
       });
   };
 
   const handleNext = async () => {
     try {
       setNextLoading(true);
-      setFormSave((prev) => ({ ...prev, action: "next" }));
+      setFormSave((prev) => ({ ...prev, action: 'next' }));
       triggerHandler();
     } catch (error) {
-      console.error("An error occurred while incrementing the step", error);
-      toast.error("Failed to increment step");
+      console.error('An error occurred while incrementing the step', error);
+      toast.error('Failed to increment step');
     }
   };
 
@@ -223,8 +232,8 @@ export default function WizardProvider({
       setFormSave({});
       handleIncrementStep(setSkipLoading);
     } catch (error) {
-      console.error("An error occurred while incrementing the step", error);
-      toast.error("Failed to increment step");
+      console.error('An error occurred while incrementing the step', error);
+      toast.error('Failed to increment step');
     }
   };
 
@@ -234,24 +243,28 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
-      }
-      const next = async () => {
+      };
+      const next = async (toastMessage?: string) => {
+        if (toastMessage) {
+          toast.success(toastMessage);
+        }
         await SaveAndClose(data);
       };
       setSaveCloseLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
           data,
-          action_type: "save_close",
+          action_type: 'save_close',
           next,
         });
+
         setSaveCloseLoading(false);
         return;
       }
       await next();
       setSaveCloseLoading(false);
     } catch (error) {
-      console.error("An error occurred while saving and closing", error);
+      console.error('An error occurred while saving and closing', error);
       setSaveCloseLoading(false);
     }
   };
@@ -265,11 +278,14 @@ export default function WizardProvider({
         currentContext: currentContext,
         is_from_grid: false,
       };
-      const next = async () => {
+      const next = async (toastMessage?: string) => {
         if (config?.enableAutoCreate === false) {
           Create(data);
           setSaveNewLoading(false);
           return;
+        }
+        if (toastMessage) {
+          toast.success(toastMessage);
         }
         await SaveAndNew(data);
       };
@@ -277,7 +293,7 @@ export default function WizardProvider({
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
           data,
-          action_type: "save_new",
+          action_type: 'save_new',
           next,
         });
         setSaveNewLoading(false);
@@ -286,7 +302,7 @@ export default function WizardProvider({
       await next();
       setSaveNewLoading(false);
     } catch (error) {
-      console.error("An error occurred while saving and new", error);
+      console.error('An error occurred while saving and new', error);
       setSaveNewLoading(false);
     }
   };
@@ -297,15 +313,18 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
-      }
-      const next = async () => {
+      };
+      const next = async (toastMessage?: string) => {
+        if (toastMessage) {
+          toast.success(toastMessage);
+        }
         await SaveAndContinue(data);
       };
       setSaveContinueLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
         await callbackHandlers?.onClickWizardSave({
           data,
-          action_type: "save_continue",
+          action_type: 'save_continue',
           next,
         });
         setSaveContinueLoading(false);
@@ -314,7 +333,7 @@ export default function WizardProvider({
       await next();
       setSaveContinueLoading(false);
     } catch (error) {
-      console.error("An error occurred while saving and continuing", error);
+      console.error('An error occurred while saving and continuing', error);
       setSaveContinueLoading(false);
     }
   };
@@ -328,12 +347,12 @@ export default function WizardProvider({
   };
 
   const registerSaveHandler = (eventName: string) => {
-    const formHandler = "submitForm:" + eventName;
+    const formHandler = 'submitForm:' + eventName;
 
     if (formSave?.[formHandler]) return;
     setFormSave((prev) => ({
       ...prev,
-      [formHandler]: "dirty",
+      [formHandler]: 'dirty',
     }));
 
     eventEmitter.on(`formStatus:${eventName}`, processResults);
@@ -344,7 +363,7 @@ export default function WizardProvider({
   };
 
   const unregisterSaveHandler = (eventName: string) => {
-    const formHandler = "submitForm:" + eventName;
+    const formHandler = 'submitForm:' + eventName;
     setFormSave((prev) => omit(prev, formHandler));
   };
   const setCallback = (callback: ICallbackHandler) => {
@@ -352,10 +371,10 @@ export default function WizardProvider({
   };
 
   useDeepCompareEffect(() => {
-    if (formSave.action === "next") {
-      const omitted_form_save = omit(formSave, "action");
+    if (formSave.action === 'next') {
+      const omitted_form_save = omit(formSave, 'action');
       const form_values = Object.values(omitted_form_save).filter(
-        (status) => status !== "done",
+        (status) => status !== 'done',
       );
       if (!form_values.length) {
         handleIncrementStep(setNextLoading);

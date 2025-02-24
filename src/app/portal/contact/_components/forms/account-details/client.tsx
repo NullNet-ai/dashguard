@@ -20,7 +20,6 @@ export default function AccountDetails({
       formSchema={ContactAccountDetailsSchema}
       defaultValues={defaultValues}
       selectOptions={selectOptions}
-      enableAppendForm={true}
       appendFormKey="add_account"
       customRender={(form, options) => (
         <AccountDetailsForm

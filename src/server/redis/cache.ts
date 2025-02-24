@@ -41,7 +41,16 @@ const getCachedData = async (key: string) => {
   }
 };
 
+const deleteCachedData = async (key: string) => {
+  if (redisClient) {
+    await redisClient.del(key);
+  } else {
+    delete inMemoryCache[key];
+  }
+}
+
 export default {
   cacheData,
   getCachedData,
+  deleteCachedData
 };
