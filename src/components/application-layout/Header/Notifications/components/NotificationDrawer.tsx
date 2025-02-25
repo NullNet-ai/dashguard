@@ -151,7 +151,7 @@ const NotificationDrawer = () => {
                 loader={<Skeleton />}
                 scrollableTarget="scrollable-div"
                 className="flex h-full min-h-full flex-col gap-2 scroll-smooth"
-                scrollThreshold={1}
+                scrollThreshold={0.9}
                 endMessage={
                   notifications.length ? (
                   <div className="flex justify-center py-4">
