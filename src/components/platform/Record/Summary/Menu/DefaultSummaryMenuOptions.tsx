@@ -1,7 +1,7 @@
 "use client";
 
 import { EllipsisVertical } from "lucide-react";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 import { getDefaultMenuOptionConfig } from "../../constants";
 import RecursiveMenuItem from "./RecursiveMenuItem";
 import useScreenType from '~/hooks/use-screen-type';
+import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 
 export interface IMemoizedRecordData {
   entityName?: string;
@@ -37,13 +38,16 @@ export default function DefaultSummaryMenuOptions({
   const { recordId, entityName } = memoizedRecordData;
   const screenType = useScreenType()
   const isMobile = screenType === "md" || screenType === "sm" || screenType === "xs";
-
+  const { menu_items
+  } = useContext(RecordMenuOptionContext)
+  
   const memoizedMenuOptionConfig = useMemo(() => {
     return [
       ...getDefaultMenuOptionConfig(memoizedRecordData),
       ...(menuOptionConfig || []),
+      ...(menu_items || []),
     ];
-  }, [menuOptionConfig]);
+  }, [menuOptionConfig, menu_items, memoizedRecordData]) as IMenuOptionConfig[];
 
   return (
     <DropdownMenu

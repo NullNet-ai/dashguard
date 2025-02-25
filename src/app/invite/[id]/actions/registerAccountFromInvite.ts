@@ -46,6 +46,7 @@ export default async function registerAccountFromInvite({
     account_secret: password,
     account_organization_id: organization_id,
     account_organization_name: organization_name,
+    categories: ['External User'],
     // is_new_user: false,
   }
 
@@ -59,7 +60,6 @@ export default async function registerAccountFromInvite({
       account,
       organization,
     })
-    console.log("%c 🇮🇹: registrationDetails ", "font-size:16px;background-color:#6dd5e4;color:black;", registrationDetails)
 
     if(!account_id) {
       throw new Error('Account ID is required')

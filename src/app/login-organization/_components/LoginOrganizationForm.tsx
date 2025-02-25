@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -73,20 +73,23 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
         {error && <FormMessage>{error}</FormMessage>}
         <div className="flex justify-between gap-4">
           <Button
-            className="flex h-auto w-full items-center justify-center gap-2 rounded border border-foreground bg-white py-1.5 text-md font-semibold text-foreground shadow-sm"
+            className="flex h-auto w-full items-center justify-center gap-3 rounded border border-foreground py-1.5 text-md font-semibold text-foreground shadow-sm"
             type="button"
             onClick={handleRedirectToSignIn}
+            variant={'outline'}
           >
             <ArrowLeftIcon className="h-4 w-4" />
             Back
           </Button>
           <Button
-            className="flex h-auto w-full items-center justify-center rounded py-1.5 text-md font-semibold text-white shadow-sm"
+            className="flex h-auto w-full items-center justify-center gap-3 rounded py-1.5 text-md font-semibold shadow-sm"
             data-test-id="login-submit-btn"
             loading={isSubmitting}
             type="submit"
+            variant={'default'}
           >
             Proceed
+            <ArrowRightIcon className="h-4 w-4" />
           </Button>
         </div>
       </form>

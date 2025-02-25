@@ -248,8 +248,8 @@ export const authRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_contacts',
-            field: 'contact_organization_id',
+            entity: 'organization_accounts',
+            field: 'organization_id',
           },
         },
       })
@@ -315,7 +315,9 @@ export const authRouter = createTRPCRouter({
           60 * 60 * 24,
         );
 
-        return newOrganization;
+        return {
+          token: newOrganization?.data?.[0]?.token
+        };
       } catch (error) {
         throw error;
       }
@@ -329,7 +331,6 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const { account, organization } = input;
-      console.log("%c 🚦: input ", "font-size:16px;background-color:#9675bd;color:white;", input)
       const result = await ctx.dnaClient
         .updateOrganizationAccount(organization, account)
         .execute();

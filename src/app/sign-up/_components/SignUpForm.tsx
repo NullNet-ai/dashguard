@@ -49,7 +49,6 @@ interface SignUpFormProps {
 
 const SignUpForm = (props: SignUpFormProps) => {
   const { recordData, account_id } = props;
-  console.log("%c 🚬: SignUpForm -> props ", "font-size:16px;background-color:#d84b3a;color:white;", props)
   const form = useForm({
     defaultValues: {
       organization_name: recordData?.organization_name || 'My Organization',

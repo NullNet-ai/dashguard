@@ -118,7 +118,6 @@ export default function FormSelect({
 
     return sortOptions(filtered ?? []);
   }, [query, options, sortOptions]);
-    console.log("%c 🛫: filteredOptions -> filteredOptions ", "font-size:16px;background-color:#12eedf;color:black;", filteredOptions)
 
   React.useEffect(() => {
     setOptions(selectOptions?.[fieldConfig?.name] ?? []);
@@ -127,8 +126,6 @@ export default function FormSelect({
   const label = useMemo(() => {
     return options?.find((opt) => opt.value === formRenderProps?.field.value);
   }, [formRenderProps?.field.value, options]);
-  console.log("%c 🚔: label -> formRenderProps?.field.value ", "font-size:16px;background-color:#89bc43;color:white;", formRenderProps?.field.value)
-    console.log("%c 🇵🇸: label -> label ", "font-size:16px;background-color:#45b904;color:white;", label)
 
   const inputReadOnly = useMemo(() => {
     return (
@@ -179,7 +176,6 @@ export default function FormSelect({
   };
 
   const isOptionsExist = options?.find((p) => p.label === query);
-  console.log("%c ↙️: pillOptions ", "font-size:16px;background-color:#0caea5;color:white;", pillOptions)
 
   return (
     <FormItem>
