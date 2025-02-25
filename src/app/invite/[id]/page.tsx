@@ -81,7 +81,7 @@ export default async function Invite({ searchParams }: any) {
 
           <div className='mt-11'>
             <div>
-              <SignUpForm recordData={record} />
+              <SignUpForm recordData={record} account_id={record?.id} />
             </div>
             <SignInLabel />
           </div>

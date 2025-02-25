@@ -16,6 +16,7 @@ import registerAccount from '../_actions/registerAccount';
 
 import SignUpFormField from './SignUpFormField';
 import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
+import registerAccountFromInvite from '~/app/invite/[id]/actions/registerAccountFromInvite';
 
 const SignUpSchema = z
   .object({
@@ -43,10 +44,12 @@ const SignUpSchema = z
 
 interface SignUpFormProps {
   recordData?: Record<string, any>;
+  account_id?: string;
 }
 
 const SignUpForm = (props: SignUpFormProps) => {
-  const { recordData } = props;
+  const { recordData, account_id } = props;
+  console.log("%c 🚬: SignUpForm -> props ", "font-size:16px;background-color:#d84b3a;color:white;", props)
   const form = useForm({
     defaultValues: {
       organization_name: recordData?.organization_name || 'My Organization',
@@ -73,6 +76,10 @@ const SignUpForm = (props: SignUpFormProps) => {
     };
 
     try {
+      if(account_id) {
+        registerAccountFromInvite({...registrationData, account_id, organization_id: recordData?.organization_id});
+        return 
+      }
       await registerAccount(registrationData);
     } catch (error) {
       if (error instanceof Error) {
@@ -103,6 +110,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               label: 'Organization Name',
               placeholder: 'Example: DNA Micro',
               type: 'text',
+              readonly: !!recordData?.organization_name
             },
             {
               FormComponent: FormInput,
@@ -130,6 +138,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               placeholder: 'Example: john@example.com',
               type: 'email',
               required: true,
+              readonly: !!recordData?.email
             },
             {
               FormComponent: FormPassword,

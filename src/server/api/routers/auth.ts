@@ -30,7 +30,11 @@ export const authRouter = createTRPCRouter({
         }
 
         const token = response?.data?.[0]?.token;
-        ctx.redisClient.cacheData(`account_token:${input.username}`, token, 60 * 60 * 24);
+        ctx.redisClient.cacheData(
+          `account_token:${input.username}`,
+          token,
+          60 * 60 * 24,
+        );
         ctx.storeCookies.set('username', input.username);
 
         return response;
@@ -162,7 +166,9 @@ export const authRouter = createTRPCRouter({
     }),
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete('username');
-    ctx.redisClient.deleteCachedData(`account_token:${ctx.session.account?.email}`);
+    ctx.redisClient.deleteCachedData(
+      `account_token:${ctx.session.account?.email}`,
+    );
     return { message: 'User logged out' };
   }),
   verify: privateProcedure.mutation(async () => {
@@ -198,5 +204,20 @@ export const authRouter = createTRPCRouter({
       } catch (error) {
         throw error;
       }
+    }),
+  updateOrganizationAccount: publicProcedure
+    .input(
+      z.object({
+        account: z.record(z.any()),
+        organization: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account, organization } = input;
+      console.log("%c 🚦: input ", "font-size:16px;background-color:#9675bd;color:white;", input)
+      const result = await ctx.dnaClient
+        .updateOrganizationAccount(organization, account)
+        .execute();
+      return result;
     }),
 });
