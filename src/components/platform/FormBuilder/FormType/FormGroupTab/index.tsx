@@ -112,7 +112,7 @@ const FormGroupTab = ({
               <div className="min-w-[150px]">
                 <span
                   className={cn(
-                    `${isDisabled ? 'text-gray-500' : ''}`, `${field.tabName === selected?.id ? 'font-semibold text-primary' : ''}`,
+                    `${isDisabled ? '!text-gray-500' : ''}`, `${field.tabName === selected?.id ? 'font-semibold text-primary' : ''}`,
                   )}
                 >
                   {capitalize(field.tabName)}
