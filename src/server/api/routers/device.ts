@@ -1472,11 +1472,22 @@ export const deviceRouter = createTRPCRouter({
   ),
 
   fetchDownloadURL: privateProcedure
-  .input(z.object({})).query(async ({ }) => {
+  .input(z.object({})).query(async ({ctx }) => {
    
     const url = await getActualDownloadURL()
+
+    if(url){
+       ctx.redisClient.cacheData('pfsense-package-url', { url});
+      return url
+    }
+
+    const cachedUrl = await ctx.redisClient.getCachedData('pfsense-package-url')
+    if(cachedUrl){
+        return cachedUrl
+      }
+
+      return ''
     
-    return url
   }
   ),
 })
