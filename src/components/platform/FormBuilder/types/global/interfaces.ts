@@ -114,6 +114,7 @@ interface IField {
   min?: number
   max?: number
   step?: number
+  hasFormMessage?: boolean
   render?: (props: CustomFieldProps) => React.ReactNode
   checkboxOrientation?: 'horizontal' | 'vertical'
   radioOrientation?: 'horizontal' | 'vertical'
