@@ -357,7 +357,7 @@ export const deviceRouter = createTRPCRouter({
                     "field": "device_id",
                     "order_by": "timestamp",
                     "limit": 1,
-                    order_direction: "desc"
+                    order_direction:EOrderDirection.DESC,
                 },
                 "from": {
                     "entity": "devices",
@@ -373,7 +373,7 @@ export const deviceRouter = createTRPCRouter({
                     "field": "device_configuration_id",
                     "order_by": "timestamp",
                     "limit": 1,
-                    order_direction: "desc",
+                    order_direction:EOrderDirection.DESC,
                     filters:[
                         {
                             field: "name",
