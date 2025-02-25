@@ -50,9 +50,10 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     z.object({
       device_id: z.string(),
       time_range: z.array(z.string()),
+      device_status: z.boolean().optional(),
     })
   ).query(async ({ ctx, input }) => {
-    const { time_range, device_id } = input
+    const { time_range, device_id, device_status= false } = input
 
     const [start, end] = time_range || {}
     const hour_range = getAllHoursBetweenDates(new Date(start as string), new Date(end as string))
@@ -105,6 +106,37 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
       return { hour: found?.bucket || hour, heartbeats: found?.count ? 100 : 0 }
     })
 
+
+    if(device_status){
+      if(time_status?.[0]?.heartbeats){
+          ctx.dnaClient.update(device_id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              last_heartbeat: res?.data?.[0]?.timestamp,
+              device_status: 'Online',
+            },
+          },
+        })
+        .execute()
+        
+      }else{
+
+        ctx.dnaClient.update(device_id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              device_status: 'Offline',
+            },
+          },
+        })
+        .execute()
+      }
+    }
+   
+
     return time_status
   }),
   getLastHeartbeat: privateProcedure.input(
@@ -131,31 +163,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
       },
     }).execute()
 
-    //this is for grid search
-    if(device_heartbeats?.data?.[0]?.timestamp) {
-      ctx.dnaClient.update(device_id, {
-      entity: 'devices',
-      token: ctx.token.value,
-      mutation: {
-        params: {
-          last_heartbeat: device_heartbeats.data?.[0]?.timestamp,
-          device_status: 'Online',
-        },
-      },
-    })
-    .execute()
-    }else{
-      ctx.dnaClient.update(device_id, {
-        entity: 'devices',
-        token: ctx.token.value,
-        mutation: {
-          params: {
-            device_status: 'Offline',
-          },
-        },
-      })
-      .execute()
-    }
+  
 
 
 

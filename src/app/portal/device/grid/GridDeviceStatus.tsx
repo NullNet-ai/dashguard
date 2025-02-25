@@ -16,6 +16,7 @@ export default function GridDeviceStatus({ device_id }: { device_id: string }) {
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastSecondsTimeStamp(30),
+    device_status: true
   })
 
   const status = useMemo(() => record?.[0]?.heartbeats ? 'Online' : 'Offline', [

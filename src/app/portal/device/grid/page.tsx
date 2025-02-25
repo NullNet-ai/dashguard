@@ -71,7 +71,7 @@ export default async function Page({
           resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
-            pluck: _pluck?.filter((item) => item !== 'system_id'),
+            pluck: _pluck?.filter((item) => item !== 'last_heartbeat'),
           },
         },
       }}

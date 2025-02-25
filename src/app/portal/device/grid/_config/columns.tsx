@@ -55,7 +55,7 @@ const gridColumns = [
     search_config: {
       operator: 'like',
       entity:'device_interfaces',
-      field: 'name'
+      field: 'address'
     },
   },
   {
@@ -71,6 +71,12 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       return <GridDeviceStatus device_id={ row?.original?.id } />
+    },
+    accessorKey: 'device_status',
+    search_config: {
+      operator: 'like',
+      entity:'devices',
+      field: 'device_status'
     },
   },
   {
@@ -94,6 +100,11 @@ const gridColumns = [
       const device_id = row?.original?.id
 
       return <GridDeviceLastHeartbeat device_id={device_id} />
+    },
+    search_config: {
+      operator: 'like',
+      entity:'devices',
+      field: 'last_heartbeat'
     },
   },
   {

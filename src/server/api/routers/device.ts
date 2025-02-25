@@ -1,4 +1,5 @@
 import {
+  EOperator,
   EOrderDirection,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
@@ -170,6 +171,7 @@ export const deviceRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck,
         pluck_object: _pluck_object,
+        sorting
       } = input
 
       const pluck_object = {
@@ -204,8 +206,8 @@ export const deviceRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
+          multiple_sort: sorting?.length
+            ? formatSorting(sorting)
             : [],
         },
       })
@@ -347,14 +349,15 @@ export const deviceRouter = createTRPCRouter({
               },
             },
           })
-          . join( {
+          .join( {
             "type": "left",
             "field_relation": {
                 "to": {
                     "entity": "device_configurations",
                     "field": "device_id",
                     "order_by": "timestamp",
-                    "limit": 1
+                    "limit": 1,
+                    order_direction: "desc"
                 },
                 "from": {
                     "entity": "devices",
@@ -367,7 +370,18 @@ export const deviceRouter = createTRPCRouter({
             "field_relation": {
                 "to": {
                     "entity": "device_interfaces",
-                    "field": "device_configuration_id"
+                    "field": "device_configuration_id",
+                    "order_by": "timestamp",
+                    "limit": 1,
+                    order_direction: "desc",
+                    filters:[
+                        {
+                            field: "name",
+                            type: "criteria",
+                            operator: EOperator.EQUAL,
+                            values:[ "wan"]
+                        }
+                    ]
                 },
                 "from": {
                     "entity": "device_configurations",
@@ -378,46 +392,6 @@ export const deviceRouter = createTRPCRouter({
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
-
-      const fetchConfiguration = await Bluebird.map(items, async (item: Record<string, any>) => {
-        const configurations = await ctx.dnaClient.findAll({
-          entity: 'device_configurations',
-          token: ctx.token.value,
-          query: {
-            advance_filters: createAdvancedFilter({ device_id: item?.id }),
-            pluck: ['id', 'device_id', 'created_date', 'created_time', 'device_configuration_id'],
-          },
-        }).execute();
-      
-        // Sort configurations by created_date and created_time to get the latest one
-        const sortedConfigurations = configurations.data.sort((a: Record<string, any>, b: Record<string, any>) => {
-          const dateA = new Date(`${a.created_date}T${a.created_time}`);
-          const dateB = new Date(`${b.created_date}T${b.created_time}`);
-          return dateB.getTime() - dateA.getTime();
-        });
-      
-        return sortedConfigurations[0]; // Return the latest configuration
-      })?.filter(Boolean);
-      
-      
-      const fetchDeviceInterfaces = await Bluebird.map(fetchConfiguration, async (item) => {
-        if (!item) return null; // Handle case where there is no configuration
-      
-        const interfaces = await ctx.dnaClient.findAll({
-          entity: 'device_interfaces',
-          token: ctx.token.value,
-          query: {
-            advance_filters: createAdvancedFilter({ device_configuration_id: item.id }),
-            pluck: ['id', 'device_configuration_id', 'name', 'address'],
-          },
-        }).execute();
-      
-        return {
-          configuration: item,
-          interfaces: interfaces.data,
-        };
-      });
-      
       
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -433,8 +407,7 @@ export const deviceRouter = createTRPCRouter({
         } = item;
       
       
-        // const configuration:any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === item.id);
-        const wan_address = device_interfaces?.find((iface: { name: string }) => iface.name === 'wan')?.address;
+        const wan_address = device_interfaces?.[0]?.address;
       
         return {
           ...entity_data,
