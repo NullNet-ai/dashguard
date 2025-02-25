@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { api } from '~/trpc/server'
 import { handleLoginError } from '~/utils/login-validator'
+import argon2 from 'argon2';
 
 interface LoginSubmitArgs {
   first_name: string
@@ -11,6 +12,7 @@ interface LoginSubmitArgs {
   password: string
   organization_name?: string
   organization_id?: string
+  account_id?: string
 }
 
 const verifySession = async () => {
@@ -30,10 +32,12 @@ export default async function registerAccountFromInvite({
   password,
   first_name,
   last_name,
+  account_id
 }: LoginSubmitArgs) {
   // register user
   let error = null
   const account = {
+    id: account_id,
     first_name,
     last_name,
     email,
@@ -42,7 +46,8 @@ export default async function registerAccountFromInvite({
     account_secret: password,
     account_organization_id: organization_id,
     account_organization_name: organization_name,
-    is_new_user: false,
+    categories: ['External User'],
+    // is_new_user: false,
   }
 
   const organization = {
@@ -51,10 +56,32 @@ export default async function registerAccountFromInvite({
   }
 
   try {
-    const registrationDetails = await api.auth.registerAccount({
+    const registrationDetails = await api.auth.updateOrganizationAccount({
       account,
       organization,
     })
+
+    if(!account_id) {
+      throw new Error('Account ID is required')
+    }
+     /**
+     * update account
+     */
+
+
+    //  const hashedPassword = await argon2.hash(password)
+    //  const accountDetailsResponse = await api.form.updateDynamicRecord({
+    //    entity: 'organization_account',
+    //    id: account_id,
+    //    data: {
+    //     account_organization_id: organization_id,
+    //     email,
+    //     account_secret: hashedPassword,
+    //     password: hashedPassword,
+    //     account_id: email,
+    //     is_new_user: false,
+    //    },
+    //  })
 
     /**
      * Login
@@ -74,25 +101,26 @@ export default async function registerAccountFromInvite({
      */
     await verifySession()
 
-    /**
-     * create contact
-     */
-    const contact_id = registrationDetails.data?.[0]?.contact_id
-    const contactDetailsResponse = await api.form.updateDynamicRecord({
-      entity: 'contact',
-      id: contact_id,
-      data: {
-        first_name,
-        last_name,
-        status: 'Draft',
-        categories: ['Contact'],
-      },
-    })
+    // /**
+    //  * create contact
+    //  */
+    // const contact_id = registrationDetails.data?.[0]?.contact_id
+    // const contactDetailsResponse = await api.form.updateDynamicRecord({
+    //   entity: 'contact',
+    //   id: contact_id,
+    //   data: {
+    //     first_name,
+    //     last_name,
+    //     status: 'Draft',
+    //     categories: ['Contact'],
+    //   },
+    // })
 
-    const contactDetailsError = handleLoginError(contactDetailsResponse)
-    if (contactDetailsError) {
-      return contactDetailsResponse
-    }
+
+    // const contactDetailsError = handleLoginError(contactDetailsResponse)
+    // if (contactDetailsError) {
+    //   return contactDetailsResponse
+    // }
 
     return registrationDetails
   }
