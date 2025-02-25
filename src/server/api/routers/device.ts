@@ -1458,7 +1458,7 @@ export const deviceRouter = createTRPCRouter({
 
           if (!filters?.[0]?.values?.length) return { success: true, message: 'No records found' }
           return await deleteRecords(_entity, filters)
-          // console.log('%c Line:1383 🍣 a', 'color:#4fff4B', _entity, JSON.stringify(a,null,2));
+          // 
           // return a
         },
         { concurrency: 1 },
@@ -1480,13 +1480,14 @@ export const deviceRouter = createTRPCRouter({
        ctx.redisClient.cacheData('pfsense-package-url', { url});
       return url
     }
-
+    
     const cachedUrl = await ctx.redisClient.getCachedData('pfsense-package-url')
-    if(cachedUrl){
-        return cachedUrl
-      }
 
-      return ''
+    if(cachedUrl){
+        return cachedUrl?.url
+      }
+      
+    return ''
     
   }
   ),
