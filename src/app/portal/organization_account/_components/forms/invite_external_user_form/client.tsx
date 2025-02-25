@@ -62,7 +62,7 @@ export default function BasicDetails({
           label: 'Email',
           required: true,
           placeholder: 'Example: john@example.com',
-          disabled: params.shell_type === 'record',
+          readonly: params.shell_type === 'record',
         },
       ]}
       formKey={"UserDetails"}

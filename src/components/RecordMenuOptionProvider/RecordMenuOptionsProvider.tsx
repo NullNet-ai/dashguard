@@ -1,20 +1,26 @@
 'use client'
 import React, { createContext } from 'react'
+import { handleChangeStatus } from './actions/updateRecordStatus';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-import { handleChangeStatus } from '~/app/portal/organization_account/record/_actions'
-import { accountStatuses } from '~/app/portal/organization_account/record/_actions/statusOptions'
+interface IChildMenuOption {
+  label: string, status: string 
+}
 
-import { IMenuOptionConfig } from '../platform/Record/types'
+export interface IMenuOption{
+  label: string;
+  children?: IChildMenuOption[];
+}
 
 interface Props {
-  menu_options: Array<{ label: string, params: { key: string } }>
+  menu_options: Array<IMenuOption | IChildMenuOption> 
   children: React.ReactNode
-  categories: Array<any>
+  entity_field: string,
+  formKey: string
 }
 
 export const RecordMenuOptionContext = createContext<{
   menu_items: Array<{
-    params: { key: string }
     onClick?: any
     children?: any
     label?: string
@@ -24,14 +30,39 @@ export const RecordMenuOptionContext = createContext<{
 })
 
 const RecordMenuOptionsProvider = (props: Props) => {
-  const modifiedMenuItems = props.menu_options.map((item) => {
-    const { label } = item
-    return {
-      ...item,
-      onClick: async (id: string, entityName: string) => {
-        const status = accountStatuses[label as keyof typeof accountStatuses]
+  const {menu_options = [], entity_field, formKey } = props ?? {}
+  const eventEmitter = useEventEmitter();
 
-        await handleChangeStatus(status, id, entityName, 'account_status')
+  const modifiedMenuItems = menu_options.map((item) => {
+    if('children' in item){
+      const { label = '', children } = item
+      return {
+        label,
+        onClick: () => null,
+        children: children?.map((child) => {
+          const { label, status } = child
+          return {
+            label,
+            onClick: async (id: string, entityName: string) => {
+              await handleChangeStatus(status, id, entityName, entity_field)
+              eventEmitter.emit(`formStatus:${formKey}`, {
+                status: 'status',
+                form_key: formKey,
+              })
+            },
+          }
+        }),
+      }
+    }
+    const { label = '', status } = item as IChildMenuOption
+    return {
+      label,
+      onClick: async (id: string, entityName: string) => {
+        await handleChangeStatus(status, id, entityName, entity_field)
+        eventEmitter.emit(`formStatus:${formKey}`, {
+          status: 'status',
+          form_key: formKey,
+        })
       },
     }
   })

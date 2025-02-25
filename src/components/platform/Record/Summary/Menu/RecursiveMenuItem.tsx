@@ -30,9 +30,6 @@ export default function RecursiveMenuItem({
     Record<string, boolean>
   >({});
 
-  const { menu_items
-  } = useContext(RecordMenuOptionContext)
-
   const handleLoadingStateChange = (itemName: string, isLoading: boolean) => {
     setMenuItemLoadingState((prev) => ({
       ...prev,
@@ -40,7 +37,7 @@ export default function RecursiveMenuItem({
     }));
   };
   // ! All iterations should wrap the MenuItem component with a Fragment
-  return menu_items.map((option) => (
+  return menuOptionConfig.map((option) => (
     <Fragment key={recordId}>
       {(option.children && option.children.length > 0 && (
         <DropdownMenu>
