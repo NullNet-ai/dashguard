@@ -1,15 +1,19 @@
 "use client";
 
-import { UserIcon } from 'lucide-react';
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
-import FormInput from '~/components/platform/FormBuilder/FormType/FormInput';
-
+import { Button } from '~/components/ui/button';
+import { FormItem, FormLabel } from '~/components/ui/form';
 const FormSchema = z.object({
   "full-name": z
     .string({ message: "Full Name is required" })
     .min(2, { message: "Full Name must be at least 2 characters long" }),
+  "gender": z.string({ message: "Gender is required" }),
+  "bio": z.string().optional(),
+  "dob": z
+    .string({ message: "Date of Birth is required" })
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
 });
 
 export default function UserProfileForm() {
@@ -33,28 +37,94 @@ export default function UserProfileForm() {
   };
 
   return (
-      <FormBuilder
-        enableFormRegisterToParent
-        formLabel="User Profile Form"
-        formKey="user-profile"
-        handleSubmit={handleSave}
-        formSchema={FormSchema}
-        fields={[
-          {
-            id: "full-name",
-            type: "custom-field",
-            label: "Full Name",
-            placeholder: "Enter your full name",
-            required: true,
-            name: "full-name",
-            render: ({ fieldConfig,form,field,fieldState,formKey }) => (
-              <div className="flex gap-2">
-                {field.name}
-               <FormInput fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={{field,fieldState}} />
-              </div>
-            )
-          },
-        ]}
-      />
+    <FormBuilder
+      enableFormRegisterToParent
+      formLabel="User Profile Form"
+      formKey="user-profile"
+      handleSubmit={handleSave}
+      formSchema={FormSchema}
+      fields={[
+        {
+          id: "full-name",
+          formType: "custom-field",
+          label: "Full Name",
+          placeholder: "Enter your full name",
+          required: true,
+          name: "full-name",
+          render: ({ field, fieldConfig, fieldState, }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{fieldConfig.label}</FormLabel>
+              <input
+                {...field}
+                value={field.value ?? ""}
+                className={`${fieldState.error && "border-red-500 border-2"}`}
+              />
+            </FormItem>
+          ),
+        },
+        {
+          id: "gender",
+          formType: "custom-field",
+          label: "Gender",
+          placeholder: "Select your gender",
+          required: true,
+          name: "gender",
+          render: ({ field, fieldConfig, fieldState }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{fieldConfig.label}</FormLabel>
+              <select
+                {...field}
+                className={`${fieldState.error && "border-red-500 border-2"}`}
+              >
+                <option value="">Select your gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </FormItem>
+          ),
+        },
+        {
+          id: "bio",
+          formType: "custom-field",
+          label: "Bio",
+          placeholder: "Tell us about yourself",
+          required: false,
+          name: "bio",
+          render: ({ field, fieldConfig, fieldState }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{fieldConfig.label}</FormLabel>
+              <textarea
+                {...field}
+                placeholder={fieldConfig.placeholder}
+                className={`${fieldState.error && "border-red-500 border-2"}`}
+              />
+            </FormItem>
+          ),
+        },
+        {
+          id: "dob",
+          formType: "custom-field",
+          label: "Date of Birth",
+          placeholder: "Enter your date of birth",
+          required: true,
+          name: "dob",
+          render: ({ field, fieldConfig, fieldState,form }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>{fieldConfig.label}</FormLabel>
+              <input
+                type="date"
+                {...field}
+                value={field.value ?? ""}
+                className={`${fieldState.error && "border-red-500 border-2"}`}
+              />
+              <Button onClick={() => { form.reset() }} type='reset'>
+                Reset
+              </Button>
+            </FormItem>
+          ),
+        },
+      ]}
+    />
   );
 }

@@ -19,6 +19,7 @@ import type {
 import FormInputGridWrapper from '../../custom/FormFilter/FormInputGridWrapper'
 
 import RenderFormType from './RenderFormType'
+import FormCustom from '../../../FormType/FormCustom'
 
 export default function FormModule({
   fields,
@@ -69,7 +70,7 @@ export default function FormModule({
                 style={_field?.fieldStyle}
               >
                 <FormAddress
-                  fieldConfig={fieldConfig || _field}
+                  fieldConfig={fieldConfig as unknown as IField || _field}
                   form={form}
                   formKey={formattedFormKey}
                 />
@@ -89,38 +90,38 @@ export default function FormModule({
                   name={_field.name}
                   render={formProps => _field.withGridFilter
                     ? (
-                        <FormInputGridWrapper
-                          fieldConfig={_field!}
-                          form={form}
-                          formSchema={formSchema}
-                          gridConfig={gridConfig!}
-                          onSelectFieldFilterGrid={onSelectFieldFilterGrid}
-                        >
-                          {RenderFormType(
-                            _field, formProps, form, formKey, formSchema, {
-                              checkboxOptions: subConfig?.checkboxOptions,
-                              multiSelectOptions: subConfig?.multiSelectOptions,
-                              multiSelectOnSearch: subConfig?.multiSelectOnSearch,
-                              radioOptions: subConfig?.radioOptions,
-                              selectOptions: subConfig?.selectOptions,
-                              currencyInputOptions:
-                              subConfig?.currencyInputOptions,
-                            },
-                          )}
-                        </FormInputGridWrapper>
-                      )
-                    : (
-                        RenderFormType(
+                      <FormInputGridWrapper
+                        fieldConfig={_field!}
+                        form={form}
+                        formSchema={formSchema}
+                        gridConfig={gridConfig!}
+                        onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+                      >
+                        {RenderFormType(
                           _field, formProps, form, formKey, formSchema, {
-                            checkboxOptions: subConfig?.checkboxOptions,
-                            multiSelectOptions: subConfig?.multiSelectOptions,
-                            multiSelectOnSearch: subConfig?.multiSelectOnSearch,
-                            radioOptions: subConfig?.radioOptions,
-                            selectOptions: subConfig?.selectOptions,
-                            currencyInputOptions: subConfig?.currencyInputOptions,
-                          },
-                        )
-                      )}
+                          checkboxOptions: subConfig?.checkboxOptions,
+                          multiSelectOptions: subConfig?.multiSelectOptions,
+                          multiSelectOnSearch: subConfig?.multiSelectOnSearch,
+                          radioOptions: subConfig?.radioOptions,
+                          selectOptions: subConfig?.selectOptions,
+                          currencyInputOptions:
+                            subConfig?.currencyInputOptions,
+                        },
+                        )}
+                      </FormInputGridWrapper>
+                    )
+                    : (
+                      RenderFormType(
+                        _field, formProps, form, formKey, formSchema, {
+                        checkboxOptions: subConfig?.checkboxOptions,
+                        multiSelectOptions: subConfig?.multiSelectOptions,
+                        multiSelectOnSearch: subConfig?.multiSelectOnSearch,
+                        radioOptions: subConfig?.radioOptions,
+                        selectOptions: subConfig?.selectOptions,
+                        currencyInputOptions: subConfig?.currencyInputOptions,
+                      },
+                      )
+                    )}
                 />
               </div>
             )
