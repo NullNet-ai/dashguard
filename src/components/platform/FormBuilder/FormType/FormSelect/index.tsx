@@ -108,7 +108,7 @@ export default function FormSelect({
       ? options?.filter(opt => !!opt?.label)?.slice(0, 250)
       : options
         ?.filter((opt) => {
-          return opt.label.toLowerCase().includes(query.toLowerCase())
+          return opt.label.toLowerCase().includes(query.toLowerCase().trim())
         })
         ?.slice(0, 5)
         ?.filter(opt => !!opt?.label)
@@ -175,7 +175,7 @@ export default function FormSelect({
     setTimeout(() => setOpen(false), 100)
   }
 
-  const isOptionsExist = options?.find(p => p.label === query)
+  const isOptionsExist = options?.find(p => p.label === query?.trim())
 
   return (
     <FormItem>
