@@ -291,7 +291,7 @@ export const recordRouter = createTRPCRouter({
         other_organizations: [],
       },
     );
- 
+
     return accountOrganizations;
   }),
   archiveRecord: privateProcedure
@@ -447,46 +447,46 @@ export const recordRouter = createTRPCRouter({
             ? [
                 {
                   label: 'Disable Access',
-                  params: {
-                    key: 'DISABLE_ACCESS',
-                  },
+                  status: 'Access Disabled',
                 },
               ]
             : [
                 {
                   label: 'Deactivate Account',
-                  params: {
-                    key: 'DEACTIVATE_ACCOUNT',
-                  },
+                  status: 'Deactivated',
                 },
               ]),
         ],
         'Access Disabled': [
           {
             label: 'Enable Access',
-            params: {
-              key: 'ENABLE_ACCESS',
-            },
+            status: 'Active',
           },
         ],
         Deactivated: [
           {
             label: 'Activate Account',
-            params: {
-              key: 'ACTIVATE_ACCOUNT',
-            },
+            status: 'Active',
           },
         ],
         Invited: [
           {
             label: 'Cancel Invitation',
-            params: {
-              key: 'CANCEL_INVITATION',
-            },
+            status: 'Invitation Canceled',
           },
         ],
       };
 
-      return menuOptions[input.status as keyof typeof menuOptions] ?? [];
+      const options =
+        menuOptions[input.status as keyof typeof menuOptions] ?? [];
+
+      return options.length
+        ? [
+            {
+              label: 'Change Status',
+              children: options,
+            },
+          ]
+        : [];
     }),
 });

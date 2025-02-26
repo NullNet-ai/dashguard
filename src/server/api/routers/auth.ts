@@ -18,19 +18,25 @@ export const authRouter = createTRPCRouter({
       z.object({
         username: z.string().min(1),
         password: z.string().min(1),
+        organization_id: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const { password, username } = input;
       try {
         const response = await ctx.dnaClient
-          .login(input.username, input.password)
+          .login(username, password)
           .execute();
         if (!response.success) {
           throw response;
         }
 
         const token = response?.data?.[0]?.token;
-        ctx.redisClient.cacheData(`account_token:${input.username}`, token, 60 * 60 * 24);
+        ctx.redisClient.cacheData(
+          `account_token:${input.username}`,
+          token,
+          60 * 60 * 24,
+        );
         ctx.storeCookies.set('username', input.username);
 
         return response;
@@ -106,7 +112,7 @@ export const authRouter = createTRPCRouter({
                   values: [input.username],
                 },
               ],
-              pluck: ['id', 'is_new_user'],
+              pluck: ['id', 'is_new_user', 'contact_id'],
             },
           })
           .execute();
@@ -121,6 +127,53 @@ export const authRouter = createTRPCRouter({
           message: 'Something went wrong please try again',
           statusCode: error?.status_code || 500,
           error: error?.errors || error,
+        };
+      }
+    }),
+  loginOrganization: privateProcedure
+    .input(
+      z.object({
+        organization_id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const currentToken = ctx.token.value;
+      const rootAccount = await ctx.dnaClient
+        .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const newOrganization = await ctx.dnaClient
+        .rootSwitchAccount(currentToken, input.organization_id, {
+          token: rootAccountToken,
+        })
+        .execute();
+
+      const session = await ctx.dnaClient
+        .verifyToken(newOrganization?.data?.[0]?.token)
+        .execute()
+        .then((res) => {
+          return res.data?.[0] as TokenData;
+        })
+        .catch(() => {
+          throw new Error('Invalid Token');
+        });
+
+      if (session) {
+        ctx.storeCookies.set(
+          session.account.organization_account_id,
+          newOrganization?.data?.[0]?.token,
+        );
+        return {
+          session,
+          token: newOrganization?.data?.[0]?.token,
+        };
+      }
+      } catch (error: any) {
+        return {
+          message: error?.message ??  'Something went wrong please try again',
+          statusCode: 500,
+          error,
         };
       }
     }),
@@ -152,6 +205,72 @@ export const authRouter = createTRPCRouter({
 
       return response?.data?.[0];
     }),
+  fetchAccountDetailsThruEmail: privateProcedure.query(async ({ ctx }) => {
+    const response = ctx.session.account;
+    const rootAccount = await ctx.dnaClient
+      .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+      .execute();
+    const rootAccountToken = rootAccount?.data?.[0]?.token;
+    const accountDetails = await ctx.dnaClient
+      .rootFindAll({
+        entity: 'organization_accounts',
+        token: rootAccountToken,
+        query: {
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'account_id',
+              operator: EOperator.EQUAL,
+              values: [response?.email],
+            },
+          ],
+          pluck_object: {
+            organization_accounts: [
+              'id',
+              'organization_id',
+              'account_id',
+              'contact_id',
+              'status',
+            ],
+            organizations: ['id', 'name'],
+            organization_contacts: [
+              'id',
+              'contact_organization_id',
+              'is_primary',
+            ],
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organization_contacts',
+            field: 'contact_organization_id',
+          },
+          from: {
+            entity: 'organization_accounts',
+            field: 'organization_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_accounts',
+            field: 'organization_id',
+          },
+        },
+      })
+      .execute();
+
+    return accountDetails;
+  }),
   fetchAccountDataById: privateProcedure
     .input(
       z.object({
@@ -176,7 +295,9 @@ export const authRouter = createTRPCRouter({
     }),
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete('username');
-    ctx.redisClient.deleteCachedData(`account_token:${ctx.session.account?.email}`);
+    ctx.redisClient.deleteCachedData(
+      `account_token:${ctx.session.account?.email}`,
+    );
     return { message: 'User logged out' };
   }),
   verify: privateProcedure.mutation(async () => {
@@ -208,9 +329,25 @@ export const authRouter = createTRPCRouter({
           60 * 60 * 24,
         );
 
-        return newOrganization;
+        return {
+          token: newOrganization?.data?.[0]?.token
+        };
       } catch (error) {
         throw error;
       }
+    }),
+  updateOrganizationAccount: publicProcedure
+    .input(
+      z.object({
+        account: z.record(z.any()),
+        organization: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account, organization } = input;
+      const result = await ctx.dnaClient
+        .updateOrganizationAccount(organization, account)
+        .execute();
+      return result;
     }),
 });

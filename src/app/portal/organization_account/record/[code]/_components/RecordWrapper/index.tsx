@@ -3,7 +3,6 @@ import RecordProvider from '~/components/platform/Record/Provider'
 import RecordWrapperProvider from '~/components/platform/Record/providers/RecordWrapperProvider'
 import RecordSummaryMobile from '~/components/platform/Record/Summary/RecordSummaryMobile'
 import HeaderTabs from '~/components/platform/Record/Tabs/HeaderTabs'
-import { type IMenuOptionConfig } from '~/components/platform/Record/types'
 import RecordMenuOptionsProvider from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider'
 import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable'
 import { api } from '~/trpc/server'
@@ -51,13 +50,11 @@ const Wrapper = async ({
   })
 
   return (
-    <RecordMenuOptionsProvider categories={record_details?.categories} menu_options={statusOptions}>
-
+    <RecordMenuOptionsProvider menu_options={statusOptions} entity_field='account_status' formKey='account_details'>
       <RecordProvider
         config={{
           entityCode: entity_code,
           entityName: entity_name!,
-          identifierOption: statusOptions as unknown as IMenuOptionConfig[],
         }}
       >
         <section className='mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]'>

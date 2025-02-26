@@ -21,6 +21,7 @@ const statuses = {
 }
 
 const RecordShellSummary = ({
+  form_key,
   identifier,
 }: {
   form_key: string
@@ -34,6 +35,11 @@ const RecordShellSummary = ({
   } = api.account.fetchExternalInternalUserDetails.useQuery({
     code: identifier!,
   })
+
+  useRefetchRecord({
+    refetch,
+    form_key,
+  });
 
   return (
     <div>
@@ -82,7 +88,7 @@ const RecordShellSummary = ({
         <div className='p-1 px-5 text-sm'>
           <div>
             <span className='text-slate-400'>{'First Name: '}</span>
-            <span>{record?.account_email || 'None'}</span>
+            <span>{record?.contact?.first_name || 'None'}</span>
           </div>
         </div>
       )}
@@ -91,7 +97,7 @@ const RecordShellSummary = ({
         <div className='p-1 px-5 text-sm'>
           <div>
             <span className='text-slate-400'>{'Last Name: '}</span>
-            <span>{record?.account_email || 'None'}</span>
+            <span>{record?.contact?.last_name|| 'None'}</span>
           </div>
         </div>
       )}
