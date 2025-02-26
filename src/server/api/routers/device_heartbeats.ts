@@ -37,6 +37,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     const { time_range, device_id, device_status= false } = input
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.debug('%c Line:40 🍫 timezone', 'color:#465975', timezone);
 
     const [start, end] = time_range || {}
     const _start =  moment(start as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
