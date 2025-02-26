@@ -209,6 +209,7 @@ export const deviceRouter = createTRPCRouter({
           multiple_sort: sorting?.length
             ? formatSorting(sorting)
             : [],
+          date_format: "YYYY/MM/DD",
         },
       })
       if (pluck_object) {
