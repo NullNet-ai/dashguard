@@ -257,9 +257,7 @@ export default function AccountDetailsForm({
                     formType: 'select',
                     label: 'Organization',
                     required: true,
-                    ...(field?.disabled && {
-                      readonly: field?.id && formProps?.shell_type === 'record',
-                    }),
+                    readonly: !!field?.disabled || field?.id && formProps?.shell_type === "record",
                     isCustomFormField: true,
                   },
                   {
@@ -268,9 +266,7 @@ export default function AccountDetailsForm({
                     formType: 'select',
                     label: 'Role',
                     required: true,
-                    ...(field?.disabled && {
-                      readonly: field?.id && formProps?.shell_type === 'record',
-                    }),
+                    readonly: !!field?.disabled,
                     isCustomFormField: true,
                   },
                   {
@@ -279,9 +275,7 @@ export default function AccountDetailsForm({
                     formType: 'input',
                     label: 'Username',
                     required: true,
-                    ...(field?.disabled && {
-                      readonly: field?.id && formProps?.shell_type === 'record',
-                    }),
+                    readonly: !!field?.disabled,
                     isCustomFormField: true,
                   },
                   {
@@ -290,9 +284,8 @@ export default function AccountDetailsForm({
                     formType: 'password',
                     label: 'Password',
                     required: true,
-                    ...(field?.disabled && {
-                      readonly: field?.id && formProps?.shell_type === 'record',
-                    }),
+                    disabled: false,
+                    readonly: !!field?.disabled,
                     placeholder: field?.id ? 'Change password' : '',
                     isCustomFormField: true,
                     showPasswordStrengthBar: true,

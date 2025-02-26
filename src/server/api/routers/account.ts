@@ -86,9 +86,15 @@ export const accountRouter = createTRPCRouter({
               entity: 'organizations',
               token: ctx.token.value,
               query: {
-                advance_filters: createAdvancedFilter({
-                  id: organization_id,
-                }),
+                ...(organization_id
+                  ? {
+                      advance_filters: createAdvancedFilter({
+                        id: organization_id,
+                      }),
+                    }
+                  : {
+                      advance_filters: [],
+                    }),
                 pluck: ['id', 'name'],
               },
             })
@@ -166,7 +172,6 @@ export const accountRouter = createTRPCRouter({
         ...rest,
         organization_id: account_organization_id,
         account_secret: '************',
-        disabled: true,
       };
     }),
   fetchAccountDetails: privateProcedure
@@ -238,17 +243,14 @@ export const accountRouter = createTRPCRouter({
           ...contactData?.data?.[0]?.contacts,
         },
         accounts: accountDetails?.length
-          ? accountDetails
-          : [
-              {
-                organization_id: '',
-                role_id: '',
-                account_id: defaultAccountId,
-                account_secret: '',
-                contact_id: contactData?.data?.[0]?.contacts?.id,
-                disabled: false,
-              },
-            ],
+          ? (accountDetails[0] ?? {})
+          : {
+              organization_id: '',
+              role_id: '',
+              account_id: defaultAccountId,
+              account_secret: '',
+              contact_id: contactData?.data?.[0]?.contacts?.id,
+            },
       };
     }),
   fetchOrganizationRolesOptions: privateProcedure
@@ -394,7 +396,9 @@ export const accountRouter = createTRPCRouter({
               advance_filters: [
                 ...createAdvancedFilter({
                   role_id,
-                  account_organization_id: organization_id,
+                  ...(organization_id
+                    ? { account_organization_id: organization_id }
+                    : {}),
                 }),
                 {
                   type: 'operator',
@@ -1296,7 +1300,13 @@ export const accountRouter = createTRPCRouter({
               },
             ],
             pluck_object: {
-              invitations: ['id', 'account_id', 'status', 'created_date', 'expiration_date'],
+              invitations: [
+                'id',
+                'account_id',
+                'status',
+                'created_date',
+                'expiration_date',
+              ],
               organization_accounts: [
                 'id',
                 'account_organization_id',
