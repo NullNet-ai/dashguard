@@ -6,7 +6,6 @@ import { type ISelectOptions } from '~/components/platform/FormBuilder/types';
 import { useWizard } from '~/components/platform/Wizard/Provider';
 import { Badge } from '~/components/ui/badge';
 import BasicFormHostHeader from '~/components/ui/basic-form-host-header';
-import { Separator } from '~/components/ui/separator';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 import { useToast } from '~/context/ToastProvider';
 import { useEventListener } from '~/hooks/useEventListener';

@@ -8,7 +8,7 @@ import {
   publicProcedure,
 } from '~/server/api/trpc';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
-import { AccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
+import { ContactAccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
 import { createDefineRoutes } from '../baseCrud';
 import { EStatus } from '../types';
@@ -38,7 +38,7 @@ const transporter = nodemailer.createTransport({
 export const accountRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
   updateAccountDetails: privateProcedure
-    .input(AccountDetailSchema)
+    .input(ContactAccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
       const {
         organization_id,
@@ -355,7 +355,7 @@ export const accountRouter = createTRPCRouter({
       return account;
     }),
   validateAccountDetails: privateProcedure
-    .input(AccountDetailSchema)
+    .input(ContactAccountDetailSchema)
     .mutation(async ({ input, ctx }) => {
       const { organization_id, role_id, account_id, id, contact_id } =
         input ?? {};
@@ -1239,10 +1239,11 @@ export const accountRouter = createTRPCRouter({
       z.object({
         id: z.string().optional(),
         username: z.string(),
+        contact_id: z.string().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { username, id } = input ?? {};
+      const { username, id, contact_id } = input ?? {};
       const existingUsername = await ctx.dnaClient
         .findAll({
           entity: 'organization_accounts',
@@ -1266,6 +1267,18 @@ export const accountRouter = createTRPCRouter({
                     },
                   ]
                 : []),
+              ...(contact_id ? [
+                {
+                  type: 'operator',
+                  operator: EOperator.AND,
+                },
+                {
+                  type: 'criteria',
+                  field: 'contact_id',
+                  operator: EOperator.NOT_EQUAL,
+                  values: [contact_id],
+                },
+              ] : []),
             ],
             pluck: ['id', 'account_id', 'categories'],
           },
