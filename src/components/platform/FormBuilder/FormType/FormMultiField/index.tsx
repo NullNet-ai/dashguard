@@ -57,13 +57,17 @@ const FormMultiField = ({
   form,
   formKey,
 }: IProps) => {
-  const fieldhook = useFieldArray({
+  const parentProps = fieldConfig?.multiFieldConfig?.parentProps
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const fieldhook = !parentProps ? useFieldArray({
     control: form.control,
-    name: 'custom_only_fields',
-  })
+    name: 'example_field_only',
+    shouldUnregister: true,
+  }) : null
 
   const [customFields, setCustomFields] = React.useState([])
-  const parentProps = fieldConfig?.multiFieldConfig?.parentProps
+
   const register = parentProps ? parentProps?.customMeta?.register : form.register
 
   const { fields, append, move, remove, update } = parentProps?.customMeta || fieldhook

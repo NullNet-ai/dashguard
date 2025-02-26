@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.0-rc.2<unreleased>",
-  "branch": "unreleased/fix/1.14.0-rc.2<unreleased>",
-  "message": "remove text color threshold in progress ",
+  "tag": "1.14.1-rc.3<unreleased>",
+  "branch": "unreleased/feat/1.14.1-rc.3<unreleased>",
+  "message": "add size variations on  progress",
   "publish_name": "Rob Caldosa"
 }
