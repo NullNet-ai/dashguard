@@ -15,7 +15,7 @@ import { useManageFilter } from './Provider';
 
 export default function SideDrawer() {
   const { state, actions } = useManageFilter();
-  const { tab_props } = state ?? {};
+  const { tab_props, filterDetails, createFilterLoading } = state ?? {};
   const tabs = [
     {
       id: 'filter',
@@ -48,6 +48,7 @@ export default function SideDrawer() {
               variant="default"
               className="bg-blue-600 text-white hover:bg-blue-700"
               onClick={actions.handleUpdateFilter}
+              loading={createFilterLoading}
             >
               ✓ Update Filter
             </Button>
@@ -55,6 +56,7 @@ export default function SideDrawer() {
               variant="default"
               className="bg-blue-600 text-white hover:bg-blue-700"
               onClick={actions.handleCreateNewFilter}
+              loading={createFilterLoading}
             >
               ✓ Create as New Filter
             </Button>
@@ -64,6 +66,7 @@ export default function SideDrawer() {
             variant="default"
             className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={actions.handleCreateNewFilter}
+            loading={createFilterLoading}
           >
             ✓ Create New Filter
           </Button>
@@ -72,8 +75,10 @@ export default function SideDrawer() {
       <div className="flex items-center justify-between">
         <Input
           placeholder="Filter Name"
-          value={state.filterName}
-          onChange={(e) => actions.setFilterName(e.target.value)}
+          value={filterDetails.name}
+          onChange={(e) => actions.handleUpdateFilter({
+            name : e.target.value
+          })}
           className="max-w-full"
         />
       </div>

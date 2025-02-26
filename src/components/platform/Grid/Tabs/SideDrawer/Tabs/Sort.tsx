@@ -22,39 +22,68 @@ import { useManageFilter } from '../Provider';
 interface SortItem {
   id: string;
   field: string;
+  label: string;
   order: 'asc' | 'desc';
 }
 
 export default function SortContent() {
-  const { actions } = useManageFilter()
+  const { actions, state } = useManageFilter()
+  const { columns } = state ?? {}
   const { handleUpdateFilter } = actions;
-  const form = useForm({
+  
+  const form = useForm<{ sorts: SortItem[] }>({
     defaultValues: {
-      sort: [{ id: '1', field: '', order: 'asc' }],
+      sorts: state?.filterDetails?.sorts ?? [
+        {
+          id: '1',
+          field: '',
+          label: '',
+          order: 'asc',
+        },
+      ],
     },
   });
 
   const { fields, append, remove, move } = useFieldArray({
     control: form.control,
-    name: 'sort',
+    name: 'sorts',
   });
 
   const handleAddSort = () => {
-    append({ id: String(fields.length + 1), field: '', order: 'asc' });
-    handleUpdateFilter({ sort: [...fields, { id: String(fields.length + 1), field: '', order: 'asc' }] });
+    const newSort = { id: String(fields.length + 1), field: '', label: '', order: 'asc' };
+    append(newSort);
+    handleUpdateFilter({ 
+      sorts: [...fields, newSort].map(({ field, order, label }) => ({ field, order, label }))
+    });
   };
 
   const handleSortChange = (index: number, field: keyof SortItem, value: string) => {
     const updatedSorts = [...fields];
-    updatedSorts[index]![field] = value;
-    form.setValue('sort', updatedSorts);
-    handleUpdateFilter({ sort: updatedSorts });
+    if (field === 'field') {
+      const header = columns?.find((col: any) => col.accessorKey === value)?.header || value;
+      updatedSorts[index] = {
+        ...updatedSorts[index]!,
+        field: value,
+        label: header
+      };
+    } else {
+      updatedSorts[index] = {
+        ...updatedSorts[index]!,
+        [field]: value
+      };
+    }
+    form.setValue('sorts', updatedSorts);
+    handleUpdateFilter({ 
+      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
+    });
   };
 
   const handleSortRemove = (index: number) => {
     const updatedSorts = fields.filter((_, i) => i !== index);
     remove(index);
-    handleUpdateFilter({ sort: updatedSorts });
+    handleUpdateFilter({ 
+      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
+    });
   };
 
   const handleSortMove = (activeIndex: number, overIndex: number) => {
@@ -62,7 +91,9 @@ export default function SortContent() {
     const updatedSorts = [...fields];
     const [movedItem] = updatedSorts.splice(activeIndex, 1);
     updatedSorts.splice(overIndex, 0, movedItem!);
-    handleUpdateFilter({ sort: updatedSorts });
+    handleUpdateFilter({ 
+      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
+    });
   };
 
 
@@ -102,10 +133,11 @@ export default function SortContent() {
                     <SelectValue placeholder="Select Field" />
                   </SelectTrigger>
                   <SelectContent className='z-[9999]'>
-                    <SelectItem value="created_at">Created At</SelectItem>
-                    <SelectItem value="updated_at">Updated At</SelectItem>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="status">Status</SelectItem>
+                    {columns?.map((column : any, index : number) => (
+                      <SelectItem key={index} value={column.accessorKey}>
+                        {column.header}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 

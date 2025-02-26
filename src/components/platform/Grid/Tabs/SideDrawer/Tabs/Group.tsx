@@ -20,82 +20,53 @@ import { useManageFilter } from '../Provider';
 interface GroupItem {
   id: string;
   field: string;
-  order: 'asc' | 'desc';
+  label: string;
 }
 
-const FIELDS = [
-  {
-    label: 'Category',
-    id: 'category',
-    value: 'category',
-  },
-  {
-    label: 'Status',
-    id: 'status',
-    value: 'status',
-  },
-  {
-    label: 'Priority',
-    id: 'priority',
-    value: 'priority',
-  },
-  {
-    label: 'Assignee',
-    id: 'assignee',
-    value: 'assignee',
-  },
-] as const;
-
-const ORDERS = [
-  {
-    label: 'Ascending',
-    id: 'asc',
-    value: 'asc',
-  },
-  {
-    label: 'Descending',
-    id: 'desc',
-    value: 'desc',
-  },
-] as const;
-
 export default function GroupContent() {
-  const { actions } = useManageFilter()
+  const { actions, state } = useManageFilter()
+  const { columns } = state ?? {}
   const { handleUpdateFilter } = actions;
-  const form = useForm({
+  
+  const form = useForm<{ groups: GroupItem[] }>({
     defaultValues: {
-      groups: [{ id: '1', field: 'priority', order: 'desc' }],
+      groups: state?.filterDetails?.groups ?? [
+        { id: '1', field: '', label: '' },
+      ],
     },
   });
 
-  const { fields, append, remove, move, replace, update } = useFieldArray({
+  const { fields, append, remove, move, update } = useFieldArray({
     control: form.control,
     name: 'groups',
   });
+  
   const handleAddGroup = () => {
-    const newGroup = { id: String(fields.length + 1), field: '', order: 'desc' };
+    const newGroup = { id: String(fields.length + 1), field: '', label: '' };
     append(newGroup);
-    handleUpdateFilter({ groups: [...fields, newGroup] });
+    handleUpdateFilter({ 
+      groups: [...fields, newGroup].map(({ field, label }) => ({ field, label }))
+    });
   };
 
   const handleGroupChange = (
     index: number,
-    field: keyof Omit<GroupItem, 'id'>,
     value: string,
+    header: string
   ) => {
-    const newValue = field === 'order' ? (value as 'asc' | 'desc') : value;
     update(index, {
       ...fields[index]!,
-      [field]: newValue,
+      field: value,
+      label: header,
     });
-    handleUpdateFilter({ groups: fields.map((item, i) => 
-      i === index ? { ...item, [field]: newValue } : item
-    )});
-  };
-
-  const handleGroupRemove = (index: number) => {
-    remove(index);
-    handleUpdateFilter({ groups: fields.filter((_, i) => i !== index) });
+    
+    handleUpdateFilter({ 
+      groups: fields.map((item, i) => 
+        i === index 
+          ? { field: value, label: header }
+          : { field: item.field, label: item.label }
+      )
+    });
   };
 
   const handleGroupMove = (activeIndex: number, overIndex: number) => {
@@ -103,17 +74,27 @@ export default function GroupContent() {
     const updatedGroups = [...fields];
     const [movedItem] = updatedGroups.splice(activeIndex, 1);
     updatedGroups.splice(overIndex, 0, movedItem!);
-    handleUpdateFilter({ groups: updatedGroups });
+    
+    handleUpdateFilter({ 
+      groups: updatedGroups.map(({ field, label }) => ({ field, label }))
+    });
   };
 
+  const handleGroupRemove = (index: number) => {
+    const updatedGroups = fields.filter((_, i) => i !== index);
+    remove(index);
+    handleUpdateFilter({ 
+      groups: updatedGroups.map(({ field, label }) => ({ field, label }))
+    });
+  };
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="grid gap-3">
         <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center text-sm font-medium text-gray-500">
           <div></div>
-          <div>Field</div>
-          <div>Order</div>
+          <div className="text-center">Field</div>
+          <div></div>
         </div>
 
         <Sortable
@@ -124,7 +105,7 @@ export default function GroupContent() {
         >
           {fields.map((group, index) => (
             <SortableItem value={group.id} key={group.id} id={group.id}>
-              <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2">
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
                 <SortableDragHandle
                   variant="ghost"
                   size="icon"
@@ -135,35 +116,20 @@ export default function GroupContent() {
 
                 <Select
                   value={group.field}
-                  onValueChange={(value) =>
-                    handleGroupChange(index, 'field', value)
-                  }
+                  onValueChange={(value) => {
+                    const header = columns?.find(
+                      (col: any) => col.accessorKey === value
+                    )?.header || value;
+                    handleGroupChange(index, value, header);
+                  }}
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
                     <SelectValue placeholder="Select Field" />
                   </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    {FIELDS.map((field) => (
-                      <SelectItem key={field.id} value={field.value}>
-                        {field.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={group.order}
-                  onValueChange={(value) =>
-                    handleGroupChange(index, 'order', value)
-                  }
-                >
-                  <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select Order" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    {ORDERS.map((order) => (
-                      <SelectItem key={order.id} value={order.value}>
-                          {order.label}
+                  <SelectContent className='z-[9999]'>
+                    {columns?.map((column : any, index : any) => (
+                      <SelectItem key={index} value={column.accessorKey}>
+                        {column.header}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -171,13 +137,13 @@ export default function GroupContent() {
 
                 {fields.length > 1 && (
                   <Button
-                  onClick={() => handleGroupRemove(index)}
-                  Icon={CircleMinus}
-                  iconPlacement="left"
-                  iconClassName="text-red-600 h-4 w-4"
-                  className="ms-2"
-                  variant={'ghost'}
-                />
+                    onClick={() => handleGroupRemove(index)}
+                    Icon={CircleMinus}
+                    iconPlacement="left"
+                    iconClassName="text-red-600 h-4 w-4"
+                    className="ms-2"
+                    variant={'ghost'}
+                  />
                 )}
               </div>
             </SortableItem>

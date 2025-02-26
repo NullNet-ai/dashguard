@@ -1,79 +1,69 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
+import { saveGridFilter } from './actions';
+import { useSideDrawer } from '~/components/platform/SideDrawer';
 
 interface ManageFilterContextType {
   state: {
-    filterName: string;
-    activeTab: string;
     tab_props: any;
     filterDetails: any;
+    columns: Record<string,any>[]
+    createFilterLoading: boolean;
   };
   actions: {
-    setFilterName: (name: string) => void;
-    setActiveTab: (tab: string) => void;
     handleUpdateFilter: (data : any) => void;
     handleCreateNewFilter: () => void;
+    handleSaveFilter: () => void;
   };
 }
 
-const sample_filter = {
-  "name": "Draft",
-  "current": false,
-  "href": "/portal/contact/grid?filter_id=01JMJZ6MXK4FS8AFGMR99GGSA4",
-  "default": true,
-  "default_filter": [
-      // {
-      //     "operator": "equal",
-      //     "type": "criteria",
-      //     "field": "status",
-      //     "id": "01JMJZ6MXK2KCTH9HA1PWK5SRV",
-      //     "label": "Status",
-      //     "values": [
-      //         "Draft"
-      //     ],
-      //     "default": true
-      // }
-  ],
-  "id": "01JMJZ6MXK4FS8AFGMR99GGSA4"
-}
 
 const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined);
 
-export function ManageFilterProvider({ children, tab }: { children: React.ReactNode; tab: any }) {
-  const [filterName, setFilterName] = useState(tab.name || 'New Filter');
-  const [activeTab, setActiveTab] = useState('filter');
-  const [filterDetails, setFilterDetails] = useState<any>(sample_filter);
+export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode; tab: any, columns: Record<string,any> }) {
+  const { actions } = useSideDrawer();
+  const { closeSideDrawer } = actions ?? {};
+  const [filterDetails, setFilterDetails] = useState<any>(tab);
+  const [createFilterLoading, setCreateFilterLoading] = useState(false);
   console.log("🚀 ~ ManageFilterProvider ~ filterDetails:", filterDetails)
 
   const handleUpdateFilter = (data : any) => {
-    // Implementation for updating filter
-    console.info('Updating filter:', { filterName, tab });
     setFilterDetails({
       ...filterDetails,
      ...data
     });
   };
 
-  const handleCreateNewFilter = () => {
+  const handleSaveFilter = async() => {
+    setCreateFilterLoading(true);
+    const saveFilter = await saveGridFilter(filterDetails);
+
+    setCreateFilterLoading(false)
+    return saveFilter
+  };
+
+  const handleCreateNewFilter = async() => {
     // Implementation for creating new filter
-    console.info('Creating new filter:', { filterName });
+    setCreateFilterLoading(true);
+    await saveGridFilter(filterDetails);
+    setCreateFilterLoading(false)
+    closeSideDrawer()
   };
 
   return (
     <ManageFilterContext.Provider
       value={{
         state: {
-          filterName,
-          activeTab,
           tab_props: tab,
-          filterDetails
+          filterDetails,
+          columns,
+          createFilterLoading
         },
         actions: {
-          setFilterName,
-          setActiveTab,
           handleUpdateFilter,
           handleCreateNewFilter,
+          handleSaveFilter
         },
       }}
     >

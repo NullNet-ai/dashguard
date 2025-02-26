@@ -10,79 +10,53 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useManageFilter } from '../Provider';
 
 
+interface Column {
+  id?: string;
+  header?: string;
+  accessorKey?: string;
+  isShow?: boolean;
+  icon?: string;
+  order?: number;
+  label?: string;
+}
+
+interface ColumnFormValues {
+  columns: Column[];
+}
+
 export default function ColumnContent() {
-  const { actions } = useManageFilter()
+  const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
-  const form = useForm({
+  const { columns } = state ?? {};
+  
+  const form = useForm<ColumnFormValues>({
     defaultValues: {
-      columns: [
-        {
-          id: '1',
-          label: 'ID',
-          value: true,
-          icon: '≡',
-          order: 0,
-        },
-        {
-          id: '2',
-          label: 'Name',
-          value: true,
-          icon: '≡',
-          order: 1,
-        },
-        {
-          id: '3',
-          label: 'Status',
-          value: true,
-          icon: '≡',
-          order: 2,
-        },
-        {
-          id: '4',
-          label: 'Created Date',
-          value: false,
-          icon: '≡',
-          order: 3,
-        },
-        {
-          id: '5',
-          label: 'Modified Date',
-          value: false,
-          icon: '≡',
-          order: 4,
-        },
-        {
-          id: '6',
-          label: 'Description',
-          value: false,
-          icon: '≡',
-          order: 5,
-        },
-      ],
+      columns
     },
   });
+
   const [searchQuery, setSearchQuery] = useState('');
-  const { fields, move, update } = useFieldArray({
+  const { fields, move, update } = useFieldArray<ColumnFormValues>({
     control: form.control,
     name: 'columns',
   });
-
+  
   const filteredColumns = useMemo(() => {
     return fields.filter((column) =>
-      column.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      column.label?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [fields, searchQuery]);
 
   const handleToggle = (index: number, id: string) => {
+    const columnToUpdate = fields?.find((column) => column.id === id);
     const updatedColumn = {
-      ...(fields?.find((column) => column.id === id) ?? {
-        value: false,
-        icon: '≡',
+      ...(columnToUpdate ?? {
+        isShow: false,
         order: 0,
         label: '',
         id: '',
       }),
-      value: !fields?.find((column) => column.id === id)?.value,
+      isShow: !columnToUpdate?.isShow,
     };
     update(index, updatedColumn);
 
@@ -90,7 +64,7 @@ export default function ColumnContent() {
       if (column.id === id) {
         return {
           ...column,
-          value:updatedColumn.value,
+          isShow: updatedColumn.isShow,
         };
       }
       return column;
@@ -104,7 +78,10 @@ export default function ColumnContent() {
     move(activeIndex, overIndex);
     const updatedColumns = [...fields];
     const [movedItem] = updatedColumns.splice(activeIndex, 1);
-    updatedColumns.splice(overIndex, 0, movedItem!);
+    if (movedItem) {
+      updatedColumns.splice(overIndex, 0, movedItem);
+    }
+
     const updated_fields = updatedColumns.map((column, index) => ({
       ...column,
       order: index,
@@ -116,7 +93,7 @@ export default function ColumnContent() {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       <div className="relative my-4">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <input
@@ -127,6 +104,7 @@ export default function ColumnContent() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      <div className="max-h-[calc(100vh-250px)] overflow-y-auto space-y-2">
 
       <Sortable
         value={filteredColumns}
@@ -151,13 +129,14 @@ export default function ColumnContent() {
               </div>
               <Switch
                 size="sm"
-                checked={column.value}
+                checked={column.isShow}
                 onCheckedChange={() => handleToggle(index, column.id)}
               />
             </div>
           </SortableItem>
         ))}
       </Sortable>
+      </div>
     </div>
   );
 }

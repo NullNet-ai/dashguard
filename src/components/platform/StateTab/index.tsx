@@ -23,21 +23,25 @@ function StateTabList({
 
   const [activeTab, setActiveTab] = useState<string>(() => {
     // Only run on client side
+    if (defaultValue) {
+      return defaultValue;
+    }
+
     if (typeof window !== 'undefined' && persistKey) {
       const savedTab = localStorage.getItem(`tab-${persistKey}`)
       if (savedTab && tabs.some((tab) => tab.id === savedTab)) {
         return savedTab
       }
     }
-    return defaultValue || tabs[0]?.id || ''
+    return tabs[0]?.id || '';
   })
 
   // Persist active tab
   useEffect(() => {
-    if (persistKey && activeTab) {
+    if (persistKey && activeTab && !defaultValue) {
       localStorage.setItem(`tab-${persistKey}`, activeTab)
     }
-  }, [activeTab, persistKey])
+  }, [activeTab, persistKey, defaultValue])
 
   // Remove the restore effect since we handle it in initial state
 

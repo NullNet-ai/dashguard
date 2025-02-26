@@ -4,6 +4,7 @@ import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { Button } from '~/components/ui/button';
 import GridManageFilter from './SideDrawer/View';
 import { ManageFilterProvider } from './SideDrawer/Provider';
+import { useGrid } from '../Provider';
 
 const ACTIONS = [
   {
@@ -24,6 +25,18 @@ const ACTIONS = [
 ];
 export default function ManageFilter({ tab }: { tab: any }) {
   const { actions } = useSideDrawer();
+  const { state } = useGrid();
+  const { config } = state ?? {}; 
+
+  const { columns = [] } = config ?? {};
+
+  const gridColumns = columns?.slice(2).map((column: any, index : number) => ({
+    header: column.header,
+    accessorKey: column.accessorKey,
+    label: column.header,
+    isShow: column.isShow || true,
+    order: column.order || index,
+  }));
 
   const handleManageFilter = () => {
     actions?.openSideDrawer({
@@ -31,7 +44,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider tab={tab}>
+          <ManageFilterProvider tab={tab} columns={gridColumns}>
             <GridManageFilter />
           </ManageFilterProvider>
         ),

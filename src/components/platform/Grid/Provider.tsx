@@ -15,7 +15,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
 import { Button } from '~/components/ui/button';
@@ -563,4 +563,12 @@ export default function GridProvider({
       {children}
     </GridContext.Provider>
   );
+}
+
+export function useGrid() {
+  const context = useContext(GridContext)
+  if (!context) {
+    throw new Error('useGrid must be used within a GridProvider')
+  }
+  return context
 }
