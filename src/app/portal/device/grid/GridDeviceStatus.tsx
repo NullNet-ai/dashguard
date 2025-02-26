@@ -6,6 +6,9 @@ import { api } from '~/trpc/react'
 
 import { getLastSecondsTimeStamp } from '../utils/getHeartbeat'
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+
 export default function GridDeviceStatus({ device_id }: { device_id: string }) {
   const {
     data: record = [{
@@ -16,7 +19,8 @@ export default function GridDeviceStatus({ device_id }: { device_id: string }) {
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastSecondsTimeStamp(30),
-    device_status: true
+    device_status: true,
+    timezone
   })
 
   const status = useMemo(() => record?.[0]?.heartbeats ? 'Online' : 'Offline', [

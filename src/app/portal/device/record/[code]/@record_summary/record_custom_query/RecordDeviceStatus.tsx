@@ -5,6 +5,7 @@ import { getLastSecondsTimeStamp } from '~/app/portal/device/utils/getHeartbeat'
 import { Badge } from '~/components/ui/badge'
 import { api } from '~/trpc/react'
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 
 export default function GridDeviceStatus({ device_id }: { device_id: string }) {
@@ -17,6 +18,7 @@ export default function GridDeviceStatus({ device_id }: { device_id: string }) {
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastSecondsTimeStamp(30),
+    timezone
   })
 
   const status = useMemo(() => record?.[0]?.heartbeats ? 'Online' : 'Offline', [

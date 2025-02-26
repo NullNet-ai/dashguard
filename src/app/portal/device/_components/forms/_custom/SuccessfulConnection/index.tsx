@@ -8,6 +8,7 @@ import { FormField } from '~/components/ui/form'
 import { api } from '~/trpc/react'
 
 import { BandwidthChart } from '../../../charts/AreaChart'
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 interface ISuccessfulConnectionDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>
@@ -38,7 +39,7 @@ export default function CustomSuccessfulConnectionDetails({
     device_id: record_device?.data?.id,
     time_range: getLastMinutesTimeStamp(3),
     bucket_size: '1s',
-
+    timezone
   })
 
   useEffect(() => {

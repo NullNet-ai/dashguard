@@ -32,12 +32,12 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
       device_id: z.string(),
       time_range: z.array(z.string()),
       device_status: z.boolean().optional(),
+      timezone: z.string(),
     })
   ).query(async ({ ctx, input }) => {
-    const { time_range, device_id, device_status= false } = input
 
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.debug('%c Line:40 🍫 timezone', 'color:#465975', timezone);
+    const { time_range, device_id, device_status= false , timezone} = input
+
 
     const [start, end] = time_range || {}
     const _start =  moment(start as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
