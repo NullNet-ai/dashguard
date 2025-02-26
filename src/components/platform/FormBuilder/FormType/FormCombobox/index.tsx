@@ -36,7 +36,7 @@ export default function FormComboBox({
         const valueStr = Array.isArray(combinedValue) ? combinedValue.join('') : String(combinedValue);
 
         // Find which select option prefix matches the combined value
-        const selectedOption = options.find(option =>
+        const selectedOption = options.find((option: { value: string; }) =>
             valueStr.startsWith(option.value)
         );
 
