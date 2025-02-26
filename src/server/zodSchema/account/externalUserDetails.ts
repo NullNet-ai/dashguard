@@ -7,13 +7,13 @@ export const EmailSchema = z.object({
     .string({ message: 'Email is required.' })
     .min(1, { message: 'Email is required.' })
     .email({ message: 'Email is invalid.' })
-    .transform(email => email.toLowerCase()), // Transform email to lowercase
-  is_primary: z.boolean().optional()
-    .default(true),
-})
+    .transform((email) => email.toLowerCase()), // Transform email to lowercase
+  is_primary: z.boolean().optional().default(true),
+});
 
 export const ExternalUserDetailsSchema = z
   .object({
+    id: z.string().optional(),
     role: z
       .string({
         message: 'Role is required',
@@ -28,6 +28,7 @@ export const ExternalUserDetailsSchema = z
       // Call the tRPC validation endpoint
       const response = await checkUsernameExist({
         username: data.email?.[0]?.email as string,
+        id: data.id ?? '',
       });
       if (!response?.isValid) {
         ctx.addIssue({

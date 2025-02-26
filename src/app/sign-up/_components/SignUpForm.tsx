@@ -51,7 +51,7 @@ const SignUpForm = (props: SignUpFormProps) => {
   const { recordData, account_id } = props;
   const form = useForm({
     defaultValues: {
-      organization_name: recordData?.organization_name || 'My Organization',
+      organization_name: recordData?.organization_name,
       first_name: recordData?.first_name || '',
       last_name: recordData?.last_name || '',
       email: recordData?.email || '',

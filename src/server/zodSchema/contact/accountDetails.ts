@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
 import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
 
 // Wrap the full validation schema to allow "test" to bypass validation
@@ -13,17 +12,15 @@ const account_secret = z
     platformPasswordValidator(value, ctx);
   });
 
-export const AccountDetailSchema = z.object({
+export const ContactAccountDetailSchema = z.object({
   id: z.string().optional(),
   contact_id: z.string(),
-  organization_id: z.string().min(1, {
-    message: 'Organization is required',
-  }),
+  organization_id: z.string().optional(),
   role_id: z.string().min(1, { message: 'Role is required.' }),
   account_id: z.string().min(1, { message: 'Username is required.' }),
   account_secret,
-});
+})
 
 export const ContactAccountDetailsSchema = z.object({
-  accounts: z.array(AccountDetailSchema),
+  accounts: z.array(ContactAccountDetailSchema),
 });

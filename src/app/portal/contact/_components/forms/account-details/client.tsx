@@ -1,15 +1,84 @@
-"use client";
+'use client';
 
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { ContactAccountDetailsSchema } from "~/server/zodSchema/contact/accountDetails";
-import AccountDetailsForm from "../_custom/AccountDetailsForm";
-import { type IFormProps } from "../types";
+import { z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import {type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { api } from '~/trpc/react';
+import { type IFormProps } from '../types';
+import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
+import { checkUsernameExist } from './actions';
+
+const account_secret = z
+  .string()
+  .min(1, { message: 'Please enter your password.' })
+  .superRefine((value, ctx) => {
+    if (value === '************') {
+      return;
+    }
+    platformPasswordValidator(value, ctx);
+  });
+
+const ContactAccountDetailSchema = z.object({
+  id: z.string().optional(),
+  contact_id: z.string(),
+  organization_id: z.string().optional(),
+  role_id: z.string().min(1, { message: 'Role is required.' }),
+  account_id: z.string().min(1, { message: 'Username is required.' }),
+  account_secret: account_secret,
+})
+.superRefine(async (data, ctx) => {
+  try {
+    // Call the tRPC validation endpoint
+    const response = await checkUsernameExist({
+      username: data.account_id as string,
+      id: data.id ?? '',
+      contact_id: data.contact_id ?? '',
+    });
+    if (!response?.isValid) {
+      ctx.addIssue({
+        path: ['account_id'],
+        message: 'Username already exists.',
+        code: 'custom',
+      });
+    }
+  } catch (error) {
+    ctx.addIssue({
+      path: ['username'],
+      message: 'Error checking username availability.',
+      code: 'custom',
+    });
+  }
+});
 
 export default function AccountDetails({
   params,
   defaultValues,
   selectOptions,
 }: IFormProps) {
+  const toast = useToast();
+  const updateAccountDetails = api.account.updateAccountDetails.useMutation();
+  
+  const handleSave = async ({
+    data,
+  }: IHandleSubmit<z.infer<typeof ContactAccountDetailSchema>>) => {
+    try {
+      const response = await updateAccountDetails.mutateAsync({
+        ...data,
+        contact_id: params?.id,
+      });
+
+      if (response) {
+        toast.success('Account Details submit successfully');
+        return response;
+      }
+      throw new Error('Failed to submit Account Details');
+    } catch (error) {
+      // setIsSaving(false);
+      toast.error('Failed to submit Account Details');
+    }
+  };
+
   return (
     <FormBuilder
       myParent={params.shell_type}
@@ -17,30 +86,51 @@ export default function AccountDetails({
       formProps={params}
       formLabel="Account Details"
       formKey="account_details"
-      formSchema={ContactAccountDetailsSchema}
+      formSchema={ContactAccountDetailSchema}
       defaultValues={defaultValues}
       selectOptions={selectOptions}
-      appendFormKey="add_account"
-      customRender={(form, options) => (
-        <AccountDetailsForm
-          form={form}
-          selectOptions={selectOptions}
-          formSchema={ContactAccountDetailsSchema}
-          appendFormKey={options?.appendButtonKey || ""}
-          formProps={params}
-          defaultValues={defaultValues}
-        />
-      )}
-      features={{
-        enableFormHostViewActions: false,
-      }}
-      customDesign={{
-        formClassName: "lg:grid-cols-1 sm:grid-cols-1 ",
-      }}
-      buttonConfig={{
-        hideLockButton: true,
-      }}
-      fields={[]}
+      handleSubmit={handleSave}
+      fields={[
+        {
+          id: 'organization_id',
+          name: 'organization_id',
+          formType: 'select',
+          label: 'Organization',
+          required: false,
+          isCustomFormField: true,
+          ...(params.shell_type === 'record'
+            ? {
+                readonly: true,
+              }
+            : {}),
+        },
+        {
+          id: 'role_id',
+          formType: 'select',
+          name: 'role_id',
+          label: 'Role',
+          required: true,
+          placeholder: 'Example: Admin',
+        },
+        {
+          id: 'account_id',
+          formType: 'input',
+          name: 'account_id',
+          label: 'Username',
+          required: true,
+          placeholder: 'Enter your username',
+        },
+        {
+          id: 'account_secret',
+          formType: 'password',
+          name: 'account_secret',
+          label: 'Password',
+          required: true,
+          placeholder: 'Enter your password',
+          showPasswordStrengthBar: true,
+          hasComplexValidation: true,
+        },
+      ]}
     />
   );
 }
