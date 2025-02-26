@@ -6,42 +6,23 @@ import {
   privateProcedure,
 } from '~/server/api/trpc'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
-
+import moment from 'moment-timezone'
 import { createDefineRoutes } from '../baseCrud'
 
-function getAllHoursBetweenDates(startDate: Date, endDate: Date): string[] {
-  // Convert the input date strings to Date objects
-  const start_moment = new Date(startDate)
-  const end_moment = new Date(endDate)
 
-  // Check if both dates are valid
-  if (isNaN(start_moment.getTime()) || isNaN(end_moment.getTime())) {
-    throw new Error('Invalid date(s) provided')
+function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
+  const start = moment(startDate, "YYYY-MM-DD HH:mm:ss").startOf("hour"); // Round to hour
+  const end = moment(endDate, "YYYY-MM-DD HH:mm:ss");
+  const hoursArray: string[] = [];
+
+  while (start.isSameOrBefore(end)) {
+    hoursArray.push(start.format("YYYY-MM-DD HH:00:00"));
+    start.add(1, "hour"); // Increment by 1 hour
   }
 
-  // Reset minutes, seconds, and milliseconds for the start date
-  start_moment.setMinutes(0, 0, 0)
-
-  // Array to hold all the hours involved
-  const hours_array: string[] = []
-
-  // Loop through and generate each hour
-  while (start_moment <= end_moment) {
-    // Format each hour as "YYYY-MM-DD HH:00:00+00"
-    const formatted_date
-      = start_moment.toISOString().replace('T', ' ')
-        .split('.')[0] + '+00'
-
-    hours_array.push(formatted_date)
-
-    // Increment the time by one hour
-    start_moment.setHours(start_moment.getHours() + 1)
-  }
-
-  return hours_array
+  return hoursArray;
 }
 
-// Example usage:
 
 const entity = 'device_heartbeats'
 export const deviceHeartbeatsRouter = createTRPCRouter({
@@ -55,8 +36,13 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
   ).query(async ({ ctx, input }) => {
     const { time_range, device_id, device_status= false } = input
 
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const [start, end] = time_range || {}
-    const hour_range = getAllHoursBetweenDates(new Date(start as string), new Date(end as string))
+    const _start =  moment(start as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+    const _end = moment(end as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+
+    const hour_range = getAllHoursBetweenDates(_start,_end)
 
     const res = await ctx.dnaClient.aggregate({
       // @ts-ignore
@@ -96,6 +82,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
           order_by: 'bucket',
           order_direction: EOrderDirection.DESC,
         },
+        timezone
       },
       token: ctx.token.value,
 
