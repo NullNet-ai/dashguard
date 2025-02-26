@@ -15,17 +15,21 @@ import { Loader } from '~/components/ui/loader'
 import DeleteConfirmationDialog from '../_components/DeleteConfirmationDialog'
 
 import { handleSaveUrl } from './action/updateImageUrl'
+import { api } from '~/trpc/react'
 
 const FormSchema = z.object({
   upload: z.array(z.string()),
 });
 
 function UploadComponent(props: any) {
-  const { details, entity, actions } = props || {}
+  const { details, entity, actions, token } = props || {}
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>): Promise<any[]> => {
+
+    console.log("datadata", data)
+    return ''
     try {
       if (!details.data?.id || !entity || !data?.upload?.length) {
         return await Promise.resolve([]);
@@ -47,7 +51,7 @@ function UploadComponent(props: any) {
       toast.error('Failed to save image');
       return [];
     }
-  };
+  };  
 
   return (
     <FormBuilder
@@ -81,31 +85,34 @@ function UploadComponent(props: any) {
   )
 }
 
-export default function ProfileImage({details, entity} : any) {
+export default function ProfileImage({details, entity, token} : any) {
   const [openDialog, setOpenDialog] = useState(false)
   const [imageUrl, setImageUrl] = useState<string>('')
   const [loading, setLoading] = useState(false)
-
   useEffect(() => {
     const convertToBase64 = async () => {
+ 
       try {
-        setLoading(true)
-        const response = await fetch(`/api/file/${details?.data?.image_url}/download`)
-        const blob = await response.blob()
-        
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setImageUrl(reader.result as string)
-          setLoading(false)
+        if(token) {
+          setLoading(true)
+          const response = await fetch(`/api/file/${details?.data?.image_url}/download`)
+          const blob = await response.blob()
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setImageUrl(reader.result as string)
+            setLoading(false)
+          }
+          reader.readAsDataURL(blob)
         }
-        reader.readAsDataURL(blob)
       } catch (error) {
         console.error('Error converting image:', error)
       }
+
+     
     }
     
     convertToBase64()
-  }, [])
+  }, [token])
 
 
   const { actions } = useSideDrawer()

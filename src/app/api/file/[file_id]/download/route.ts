@@ -16,14 +16,18 @@ export async function GET(
     storage_type: EClientDatabaseProvider.LOCAL,
   })
   const cookieStore = cookies()
-  const { value: token = null } = cookieStore.get("token") || {};
+  const { value: email = '' } = cookieStore.get("username") || {};
+
+  const token = await api.auth.getToken({
+    username: email,
+  })
 
   if (!token) {
-    return NextResponse.json({ message: 'No token found' }, { status: 401 })
+    return NextResponse.json({ message: 'No token found', error: 'no token' }, { status: 401 })
   }
 
   if (!params.file_id) {
-    return NextResponse.json({ message: 'No file_id found' }, { status: 400 })
+    return NextResponse.json({ message: 'No file_id found', error: 'no file' }, { status: 400 })
   }
 
   const { data } = await orm

@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import React from 'react'
 
 import { Separator } from '~/components/ui/separator'
@@ -12,6 +12,7 @@ import SystemDates from './Header/SystemDate'
 const RecordSummaryContent = async () => {
   const headerList = headers()
 
+  const username = cookies().get('username')?.value || ''
   const pathname = headerList.get('x-pathname') || ''
   const [, , mainEntity, , identifier] = pathname.split('/')
 
@@ -34,6 +35,11 @@ const RecordSummaryContent = async () => {
     main_entity: mainEntity!,
   })
 
+  const token = await api.auth.getToken({
+    username: username,
+  })
+  
+
   if (recordDetails?.status_code === 500) {
     throw recordDetails.message
   }
@@ -46,7 +52,7 @@ const RecordSummaryContent = async () => {
         status={recordDetails?.data?.status!}
       />
       <SummaryRecordTab />
-      <ProfileImage details={recordDetails} entity={mainEntity}/>
+      <ProfileImage details={recordDetails} entity={mainEntity} token={token}/>
       <SystemDates
         created_date={recordDetails?.data?.created_date!}
         created_time={recordDetails?.data?.created_time!}

@@ -184,6 +184,8 @@ export const FileUploaderItem = React.forwardRef<
           } else {
             resultString = reader.result as string;
           }
+
+          console.log("resultString", resultString)
           setImageSrc(resultString);
           setPreviewSrc(resultString);
         };
