@@ -55,9 +55,9 @@ function transformData(data: InputData[]): OutputData[] {
 
 export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
-  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()) })).query(async ({ input, ctx }) => {
-    const { device_id, bucket_size, time_range } = input
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string() 
+   })).query(async ({ input, ctx }) => {
+    const { device_id, bucket_size, time_range, timezone } = input
 
     const res = await ctx.dnaClient.aggregate({
       query: {

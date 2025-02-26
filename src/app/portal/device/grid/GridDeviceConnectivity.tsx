@@ -30,6 +30,8 @@ const getLastTwentyFourHoursTimeStamp = () => {
   return result;
 };
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 
 export default function Connectivity({ device_id }: { device_id: string }) {
   const {
@@ -42,6 +44,7 @@ export default function Connectivity({ device_id }: { device_id: string }) {
   } = api.deviceHeartbeats.getLastHoursStatus.useQuery({
     device_id,
     time_range: getLastTwentyFourHoursTimeStamp(),
+    timezone,
   });
   if (!device_id) return null;
 
