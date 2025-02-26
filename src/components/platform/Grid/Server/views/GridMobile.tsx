@@ -5,11 +5,11 @@ import CreateButton from "../../Header/ButtonHeader";
 import MobileHeader from "../../Header/MobileHeader";
 import InfiniteScrollContainer from "./InfiniteScroll";
 
-function GridMobile() {
+function GridMobile({parentType} : any) {
   return (
     <Card className="col-span-full border-0 shadow-none py-2 pt-0">
       <CardHeader>
-        <MobileHeader />
+        <MobileHeader parentType={parentType}/>
       </CardHeader>
       <ScrollArea
         style={{ height: "calc(100vh - 23rem)" }}

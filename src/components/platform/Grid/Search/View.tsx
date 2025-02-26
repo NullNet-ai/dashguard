@@ -17,7 +17,7 @@ import SearchResult from './SearchResult'
 import { type ISearchItemResult } from './types'
 import { transformSearchData } from './utils/transformSearchData'
 
-export default function Search() {
+export default function Search({parentType} : any) {
   const { state, actions } = useContext(SearchGridContext)
   const { state: gridState } = useContext(GridContext)
 
@@ -66,7 +66,7 @@ export default function Search() {
     <Combobox>
       <div
         className={cn(`relative`)}
-        style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
+        style={{ width: isMobile ? parentType ==='record'  ? '100%' : width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
       >
         <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
           <MagnifyingGlassIcon
