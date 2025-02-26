@@ -57,6 +57,12 @@ export default function Main({ parentType = 'grid' }: any) {
                 <div className="my-2 h-[40px] w-full md:my-0">
                   <Search parentType ={parentType}/>
                 </div>
+                <div className=" h-[36px] flex-shrink-0 flex-row items-center flex">
+                  <TableViewButton />
+                  <CardViewButton />
+                  <div className="mx-2 h-full w-[1px] bg-tertiary" />
+                  <FilterButton />
+                </div>
               </div>
               <div className="hidden min-h-[40px] lg:block">
                 <SearchList />
