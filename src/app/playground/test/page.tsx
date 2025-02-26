@@ -4,8 +4,11 @@ import { UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
+
 const FormSchema = z.object({
     combobox: z.string({ message: "Select with Options is required" }),
+    disabledField: z.string().optional(),
+    readonlyField: z.string().optional(),
 });
 
 function handleSubmit(values: {
@@ -35,12 +38,13 @@ const sampleSelectOptionsAlphabetical = [
     { label: "Banana", value: "banana" },
     { label: "Elderberry", value: "elderberry" },
     { label: "Cherry", value: "cherry" },
+    { label: "Fig", value: "fig" },
+    { label: "Grape", value: "grape" },
 ];
 
-export default function SelectDetails({}) {
+export default function SelectDetails({ }) {
     return (
         <>
-            {/* FormBuilder 3: Select */}
             <FormBuilder
                 handleSubmit={handleSubmit}
                 enableFormRegisterToParent
@@ -48,7 +52,9 @@ export default function SelectDetails({}) {
                 formKey="FormBuilderSelect"
                 formSchema={FormSchema}
                 // defaultValues={{
-                //     combobox: "applehehe",
+                //     combobox: "apple",
+                //     disabledField: "This field is disabled",
+                //     readonlyField: "This field is readonly",
                 // }}
                 fields={[
                     {
@@ -57,11 +63,36 @@ export default function SelectDetails({}) {
                         name: "combobox",
                         label: "Select with Options",
                         required: true,
-                        comboboxConfig:{
+                        comboboxConfig: {
                             selectOptions: sampleSelectOptionsAlphabetical,
                             inputPlaceholder: "Type to search",
                             selectPlaceholder: "Select",
-                        }
+                        },
+                    },
+                    {
+                        id: "disabledField",
+                        formType: "combobox",
+                        name: "disabledField",
+                        label: "Disabled Field",
+                        disabled: true,
+                        comboboxConfig: {
+                            selectOptions: sampleSelectOptionsAlphabetical,
+                            inputPlaceholder: "Type to search",
+                            selectPlaceholder: "disabled",
+
+                        },
+                    },
+                    {
+                        id: "readonlyField",
+                        formType: "combobox",
+                        name: "readonlyField",
+                        label: "Readonly Field",
+                        readonly: true,
+                        comboboxConfig: {
+                            selectOptions: sampleSelectOptionsAlphabetical,
+                            inputPlaceholder: "Type to search",
+                            selectPlaceholder: "Select",
+                        },
                     },
                 ]}
             />

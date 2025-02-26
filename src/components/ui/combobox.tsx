@@ -5,7 +5,7 @@ import { Input } from "./input";
 import { cn } from "~/lib/utils";
 import { useFormField } from './form';
 
-interface ComboBoxProps {
+export interface ComboBoxProps {
   selectOptions: { value: string; label: string }[];
   inputPlaceholder?: string;
   selectPlaceholder?: string;

@@ -84,7 +84,7 @@ export default function FormComboBox({
                     className={comboboxConfig?.className}
                     selectValue={selectValue}
                     inputValue={inputValue}
-                    onCombinedChange={handleCombinedChange}
+                    onCombinedChange={comboboxConfig?.onCombinedChange || handleCombinedChange}
                     disabled={fieldConfig?.disabled}
                     readonly={((formRenderProps.field.disabled || fieldConfig?.readonly) ??
                         false)}

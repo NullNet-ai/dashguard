@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { type DropzoneOptions } from 'react-dropzone'
-import { ControllerFieldState, ControllerRenderProps, type Field, type UseFormReturn } from 'react-hook-form'
+import { type ControllerFieldState, type ControllerRenderProps, type Field, type UseFormReturn } from 'react-hook-form'
 
 import { type TActionType } from '~/components/platform/Grid/types'
 import {
@@ -29,7 +29,7 @@ import {
 } from './types'
 
 import { type ComponentType } from 'react';  // Add this import at the top
-import { ComboBoxProps } from '~/components/ui/combobox'
+import { type ComboBoxProps } from '~/components/ui/combobox'
 
 interface OptionType {
   label: string
