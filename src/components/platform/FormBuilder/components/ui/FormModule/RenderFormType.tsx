@@ -49,6 +49,7 @@ import {
 } from '../../../types'
 import FormGroupTab from '../../../FormType/FormGroupTab'
 import FormCustom from '../../../FormType/FormCustom'
+import FormComboBox from '../../../FormType/FormCombobox'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -326,6 +327,8 @@ export default function RenderFormType(
       return <FormSpaceComponent />
     case 'separator':
       return <FormSeparator fieldConfig={fieldConfig} />
+    case 'combobox':
+      return <FormComboBox fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
     case 'custom-field':
       return (
         <FormCustom fieldConfig={fieldConfig} formRenderProps={formRenderProps} form={form} formKey={formKey} />

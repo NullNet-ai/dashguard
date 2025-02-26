@@ -29,6 +29,7 @@ import {
 } from './types'
 
 import { type ComponentType } from 'react';  // Add this import at the top
+import { ComboBoxProps } from '~/components/ui/combobox'
 
 interface OptionType {
   label: string
@@ -108,6 +109,7 @@ interface IField {
   switchConfig?: SwitchProps
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?]
   multiFieldConfig?: MultiFieldConfig
+  comboboxConfig?: ComboBoxProps
   required?: boolean
   type?: HTMLInputTypeAttribute | undefined
   customRender?: React.JSX.Element
