@@ -223,6 +223,7 @@ const FormGroupMultiField = ({
                 <span
                   className={ cn(
                     `${idx === selected?.id ? 'font-semibold text-primary' : ''}`,
+                    `${isDisabled ? '!text-default-400' : ''}`,
                   ) }
                 >
                   {capitalize(field.tabName)}
