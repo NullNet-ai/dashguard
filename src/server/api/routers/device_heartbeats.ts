@@ -107,33 +107,44 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     })
 
 
-    if(device_status){
-      if(time_status?.[0]?.heartbeats){
-          ctx.dnaClient.update(device_id, {
-          entity: 'devices',
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              last_heartbeat: res?.data?.[0]?.timestamp,
-              device_status: 'Online',
-            },
-          },
-        })
-        .execute()
-        
-      }else{
+    const updateDeviceStatus =async () => {
+      const device = await ctx.dnaClient
+      .findOne(device_id!, {
+        entity: 'devices',
+        token: ctx.token.value,
+        query: {
+          pluck: ['device_status'],
+        },
+      })
+      .execute()
 
-        ctx.dnaClient.update(device_id, {
+      const device_status = device?.data?.[0]?.device_status
+      const heartbeats = time_status?.[0]?.heartbeats
+
+      const updateStatus = async (status: string) => {
+       await ctx.dnaClient.update(device_id, {
           entity: 'devices',
           token: ctx.token.value,
           mutation: {
             params: {
-              device_status: 'Offline',
+              device_status: status,
             },
           },
         })
         .execute()
       }
+
+      if(heartbeats && (device_status === 'Offline' || !device_status)){
+        updateStatus('Online')
+      }else if(
+        !heartbeats && (device_status === 'Online' || !device_status)
+      ){
+        updateStatus('Offline')
+      }
+    }
+    
+    if(device_status){
+      updateDeviceStatus()
     }
    
 
