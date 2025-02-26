@@ -35,6 +35,7 @@ const FormServerFetch = async () => {
   if (record?.data?.categories?.[0] !== 'External User') return null
 
   const defaultValues = {
+    id: record?.data?.id,
     role: record?.data?.role_id,
     email: [{ email: record?.data?.email }],
   }

@@ -1,11 +1,11 @@
-import { headers } from "next/headers";
-import { api } from "~/trpc/server";
-import AccountDetails from "./client";
+import { headers } from 'next/headers';
+import { api } from '~/trpc/server';
+import AccountDetails from './client';
 
 const FormServerFetch = async () => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , , application, identifier] = pathname.split("/");
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , , application, identifier] = pathname.split('/');
 
   const [accountDetails, options] = await Promise.all([
     api.account.fetchAccountDetails({
@@ -21,11 +21,14 @@ const FormServerFetch = async () => {
   return (
     <div className="space-y-2">
       <AccountDetails
-        defaultValues={{ accounts }}
-        selectOptions={options}
+        defaultValues={{ ...accounts }}
+        selectOptions={{
+          organization_id: options?.organization,
+          role_id: options?.user_role,
+        }}
         params={{
           id: contact?.id,
-          shell_type: application! as "record" | "wizard",
+          shell_type: application! as 'record' | 'wizard',
         }}
       />
     </div>
