@@ -13,7 +13,7 @@ function GridDesktop({parentType}: any) {
   return (
     <Card className="col-span-full border-0 shadow-none">
       <CardHeader>
-        <Header />
+        <Header parentType={parentType}/>
       </CardHeader>
       <ScrollContainer parentType={parentType}>
           <GridDesktopContainer />

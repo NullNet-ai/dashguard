@@ -33,7 +33,7 @@ function MainServer({
       <GridDesktop parentType={parentType}/>
       </GridScrollView>
       <div className="my-0 lg:my-8 h-full md:my-8 md:mt-0 md:mb-12 lg:mb-0 lg:hidden">
-        <GridMobile />
+        <GridMobile parentType={parentType}/>
       </div>
     </GridProvider>
   )
