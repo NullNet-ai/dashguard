@@ -22,11 +22,12 @@ interface ManageFilterContextType {
 const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined);
 
 export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode; tab: any, columns: Record<string,any> }) {
+  console.log("🚀 ~ ManageFilterProvider ~ columns:", columns)
   const { actions } = useSideDrawer();
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>(tab);
-  const [createFilterLoading, setCreateFilterLoading] = useState(false);
   console.log("🚀 ~ ManageFilterProvider ~ filterDetails:", filterDetails)
+  const [createFilterLoading, setCreateFilterLoading] = useState(false);
 
   const handleUpdateFilter = (data : any) => {
     setFilterDetails({
@@ -44,11 +45,30 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   };
 
   const handleCreateNewFilter = async() => {
+
+    // !Temporary solution
+    // todo: remove this temporary solution
+    const modifyFilterDetails = {
+      ...filterDetails,
+      default_filter : filterDetails.default_filter.map((item: any) => {
+        return {
+          ...item,
+          values: [item.values]
+        }
+      }),
+      sorts : filterDetails.sorts.map((item: any) => {
+        return {
+         id: item.value,
+         desc : item.desc,
+        }
+      })
+    }
+    
     // Implementation for creating new filter
     setCreateFilterLoading(true);
-    await saveGridFilter(filterDetails);
+    await saveGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false)
-    closeSideDrawer()
+    // closeSideDrawer()
   };
 
   return (

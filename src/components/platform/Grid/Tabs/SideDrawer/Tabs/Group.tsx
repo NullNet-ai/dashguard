@@ -91,12 +91,6 @@ export default function GroupContent() {
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="grid gap-3">
-        <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center text-sm font-medium text-gray-500">
-          <div></div>
-          <div className="text-center">Field</div>
-          <div></div>
-        </div>
-
         <Sortable
           value={fields}
           onMove={({ activeIndex, overIndex }) => {

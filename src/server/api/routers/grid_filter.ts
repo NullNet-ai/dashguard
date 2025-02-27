@@ -2,6 +2,7 @@ import { ulid } from 'ulid'
 import { createDefineRoutes } from '../baseCrud'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { z } from 'zod';
+import { headers } from 'next/headers';
 
 const ENTITY = 'grid_filter'
 
@@ -15,9 +16,8 @@ const filterCriteriaSchema = z.object({
   });
   
   const sortSchema = z.object({
-    field: z.string(),
-    order: z.enum(['asc', 'desc']),
-    label: z.string(),
+    id: z.string(),
+    desc: z.boolean(),
   });
   
   const groupSchema = z.object({
@@ -49,7 +49,9 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
         const token = ctx?.token.value
         const id = ctx?.session?.account?.contact?.id
-
+        const headerList = headers()
+        const pathName = headerList.get('x-pathname') || ''
+        const [, , mainEntity, application] = pathName.split('/')
         const filter_id = ulid();
         
         const { data, message, success, errors } = await ctx.dnaClient
@@ -59,13 +61,13 @@ export const gridFilterRouter = createTRPCRouter({
             mutation: {
                 params: {
                     id: filter_id,
-                    name : 'Test Filter',
+                    name : input.name, 
                     grid_id : '',
                     contact_id: id,
-                    link : `/portal/contact/grid?filter_id=${filter_id}`,
-                    is_current : true,
+                    link : `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
+                    is_current : false,
                     is_default : true,
-                    entity : 'contact',
+                    entity : mainEntity,
                     columns : input.columns,
                     groups : input.groups,
                     sorts : input.sorts,

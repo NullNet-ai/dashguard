@@ -6,6 +6,7 @@ import Notifications from '~/module/notification/notifications.class'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { mockNotifications } from '../mock-data/notification'
+import { mockUserRoles } from '../mock-data/user-roles'
 
 const ENTITY = 'notification'
 
@@ -191,6 +192,22 @@ export const notificationsRouter = createTRPCRouter({
         }, token,
       )
     }
+
+    for(const userRole of mockUserRoles) {
+      await ctx.dnaClient
+      .create({
+        entity: 'user_role',
+        token: ctx.token.value,
+        mutation: {
+          params: {
+            ...userRole
+          },
+        },
+      })
+      .execute();
+
+    }
+
     return {
       success: true,
     }

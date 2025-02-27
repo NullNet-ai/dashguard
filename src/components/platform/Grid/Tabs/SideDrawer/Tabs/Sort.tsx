@@ -16,29 +16,37 @@ import {
   SortableItem,
 } from '~/components/ui/sortable';
 import { GripVerticalIcon } from 'lucide-react';
-import { useEffect } from 'react';
 import { useManageFilter } from '../Provider';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface SortItem {
-  id: string;
-  field: string;
-  label: string;
-  order: 'asc' | 'desc';
+  id?: string;
+  value: string;
+  desc: boolean;
 }
 
+const ZodSchema = z.object({
+  sorts: z.array(
+    z.object({
+      desc: z.boolean(),
+      value : z.string().min(1, 'Field is required'),
+    }),
+  ),
+});
+
 export default function SortContent() {
-  const { actions, state } = useManageFilter()
-  const { columns } = state ?? {}
+  const { actions, state } = useManageFilter();
+  const { columns } = state ?? {};
   const { handleUpdateFilter } = actions;
-  
+
   const form = useForm<{ sorts: SortItem[] }>({
+    resolver: zodResolver(ZodSchema),
     defaultValues: {
       sorts: state?.filterDetails?.sorts ?? [
         {
-          id: '1',
-          field: '',
-          label: '',
-          order: 'asc',
+          value:'',
+          desc: true,
         },
       ],
     },
@@ -48,42 +56,34 @@ export default function SortContent() {
     control: form.control,
     name: 'sorts',
   });
+  console.log("🚀 ~ SortContent ~ fields:", fields)
 
   const handleAddSort = () => {
-    const newSort = { id: String(fields.length + 1), field: '', label: '', order: 'asc' };
+    const newSort = { value: '', desc: true };
     append(newSort);
-    handleUpdateFilter({ 
-      sorts: [...fields, newSort].map(({ field, order, label }) => ({ field, order, label }))
+    handleUpdateFilter({
+      sorts: [...fields, newSort],
     });
   };
 
-  const handleSortChange = (index: number, field: keyof SortItem, value: string) => {
+  const handleSortChange = (
+    index: number,
+    field: keyof SortItem,
+    value: any,
+  ) => {
     const updatedSorts = [...fields];
-    if (field === 'field') {
-      const header = columns?.find((col: any) => col.accessorKey === value)?.header || value;
-      updatedSorts[index] = {
-        ...updatedSorts[index]!,
-        field: value,
-        label: header
-      };
-    } else {
-      updatedSorts[index] = {
-        ...updatedSorts[index]!,
-        [field]: value
-      };
-    }
+    updatedSorts[index] = {
+      ...updatedSorts[index]!,
+      [field]: field === 'desc' ? value === 'desc' : value,
+    };
     form.setValue('sorts', updatedSorts);
-    handleUpdateFilter({ 
-      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
-    });
+    handleUpdateFilter({ sorts: updatedSorts });
   };
 
   const handleSortRemove = (index: number) => {
     const updatedSorts = fields.filter((_, i) => i !== index);
     remove(index);
-    handleUpdateFilter({ 
-      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
-    });
+    handleUpdateFilter({ sorts: updatedSorts });
   };
 
   const handleSortMove = (activeIndex: number, overIndex: number) => {
@@ -91,23 +91,27 @@ export default function SortContent() {
     const updatedSorts = [...fields];
     const [movedItem] = updatedSorts.splice(activeIndex, 1);
     updatedSorts.splice(overIndex, 0, movedItem!);
-    handleUpdateFilter({ 
-      sorts: updatedSorts.map(({ field, order, label }) => ({ field, order, label }))
-    });
+    handleUpdateFilter({ sorts: updatedSorts });
   };
 
-
-
+  const handleValidate = () => {
+    console.log('validating');
+  };
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
+      <div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={form.handleSubmit(handleValidate)}
+          className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+        >
+          <Plus className="h-4 w-4" />
+          Validate Sort
+        </Button>
+      </div>
       <div className="grid gap-3">
-        <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center text-sm font-medium text-gray-500">
-          <div></div>
-          <div>Field</div>
-          <div>Order</div>
-        </div>
-
         <Sortable
           value={fields}
           onMove={({ activeIndex, overIndex }) => {
@@ -115,7 +119,7 @@ export default function SortContent() {
           }}
         >
           {fields.map((sort, index) => (
-            <SortableItem value={sort.id} key={sort.id} id={sort.id}>
+            <SortableItem value={sort.id} key={index} id={String(index)}>
               <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2">
                 <SortableDragHandle
                   variant="ghost"
@@ -126,15 +130,17 @@ export default function SortContent() {
                 </SortableDragHandle>
 
                 <Select
-                  value={sort.field}
-                  onValueChange={(value) => handleSortChange(index, 'field', value)}
+                  value={sort.value}
+                  onValueChange={(value) =>
+                    handleSortChange(index, 'value', value)
+                  }
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
                     <SelectValue placeholder="Select Field" />
                   </SelectTrigger>
-                  <SelectContent className='z-[9999]'>
-                    {columns?.map((column : any, index : number) => (
-                      <SelectItem key={index} value={column.accessorKey}>
+                  <SelectContent className="z-[9999]">
+                    {columns?.map((column: any, columnIndex: number) => (
+                      <SelectItem key={columnIndex} value={column.accessorKey}>
                         {column.header}
                       </SelectItem>
                     ))}
@@ -142,13 +148,15 @@ export default function SortContent() {
                 </Select>
 
                 <Select
-                  value={sort.order}
-                  onValueChange={(value) => handleSortChange(index, 'order', value)}
+                  value={sort.desc ? 'desc' : 'asc'}
+                  onValueChange={(value) =>
+                    handleSortChange(index, 'desc', value)
+                  }
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
                     <SelectValue placeholder="Select Order" />
                   </SelectTrigger>
-                  <SelectContent className='z-[9999]'>
+                  <SelectContent className="z-[9999]">
                     <SelectItem value="asc">Ascending</SelectItem>
                     <SelectItem value="desc">Descending</SelectItem>
                   </SelectContent>
@@ -156,13 +164,13 @@ export default function SortContent() {
 
                 {fields.length > 1 && (
                   <Button
-                  onClick={() => handleSortRemove(index)}
-                  Icon={CircleMinus}
-                  iconPlacement="left"
-                  iconClassName="text-red-600 h-4 w-4"
-                  className="ms-2"
-                  variant={'ghost'}
-                />
+                    onClick={() => handleSortRemove(index)}
+                    Icon={CircleMinus}
+                    iconPlacement="left"
+                    iconClassName="text-red-600 h-4 w-4"
+                    className="ms-2"
+                    variant={'ghost'}
+                  />
                 )}
               </div>
             </SortableItem>

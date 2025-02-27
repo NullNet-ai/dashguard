@@ -3,6 +3,7 @@ import GridMenu from './GridMenu';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/server';
 import CreateNewFilter from './CreateNewFilter';
+import Link from 'next/link';
 
 const GridTabs = async () => {
   const gridTabsData = await api.grid.getSessionGridTabs();
@@ -14,8 +15,8 @@ const GridTabs = async () => {
         const applicationType = tab?.href?.split('/').at(3)?.split('?')[0];
 
         return (
-          <a
-            href={tab?.href}
+          <Link
+            href={tab?.href ?? ''}
             key={tab.id}
             data-test-id={
               entity +
@@ -28,7 +29,7 @@ const GridTabs = async () => {
           >
             <span className={cn(active, '')}>{toCapitalize(tab.name)}</span>
             <GridMenu tab={tab} filter_id={tab?.id} />
-          </a>
+          </Link>
         );
       })}
       <CreateNewFilter />

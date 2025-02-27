@@ -1,6 +1,7 @@
 'use client';
-
-import { CircleMinus, Plus } from 'lucide-react';
+import { useEffect } from 'react';
+import { CircleMinus, GripVerticalIcon, Plus } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '~/components/ui/button';
 import {
   Select,
@@ -9,8 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import {
+  Sortable,
+  SortableDragHandle,
+  SortableItem,
+} from '~/components/ui/sortable';
 import { useManageFilter } from '../Provider';
 import MultipleSelector from '~/components/ui/multi-select';
+import { z } from 'zod';
+import { Form } from '~/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
 
 interface FilterItem {
   operator: string;
@@ -43,98 +53,115 @@ const OPERATORS = [
   { value: 'is_not_between', label: 'Is Not Between' },
   { value: 'like', label: 'Like' },
 ] as const;
+const ZodSchema = z.object({
+  filters: z.array(
+    z.discriminatedUnion('type', [
+      z.object({
+        field: z.string().min(1, "Field is required"),
+        operator: z.string().min(1, "Operator is required"),
+        label: z.string(),
+        // values: z.array(z.string()).min(1, "Value is required"),
+        values: z.string().min(1, "Value is required"),
+        type: z.literal('criteria'),
+        default: z.boolean(),
+      }),
+      z.object({
+        operator: z.enum(['and', 'or']),
+        type: z.literal('operator'),
+        default: z.boolean(),
+      }),
+    ])
+  ),
+});
 
 export default function FilterContent() {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
   const { filterDetails, columns } = state ?? {};
-  const filters: FilterItem[] = filterDetails?.default_filter ?? [
-    {
-      operator: '',
-      type: 'criteria',
-      field: '',
-      label: '',
-      values: [],
-    }
-  ]
+  console.log('🚀 ~ FilterContent ~ columns:', columns);
 
-  const handleAddFilter = () => {
-    if (filters?.length > 0) {
-      const newFilters: FilterItem[] = [
-        ...filters,
+  const form = useForm<z.infer<typeof ZodSchema>>({
+    resolver: zodResolver(ZodSchema),
+    defaultValues: {
+      filters: filterDetails?.default_filter?.filter(
+        (f) => f.type === 'criteria',
+      ) ?? [
         {
-          operator: 'and',
-          type: 'operator',
-          default: true,
-        },
-        {
-          operator: '',
-          type: 'criteria',
           field: '',
+          operator: 'equal',
           label: '',
           values: [],
+          type: 'criteria',
           default: true,
         },
-      ];
-      handleUpdateFilter({ default_filter: newFilters });
-    }
-  };
+      ],
+    },
+    shouldFocusError: false,
+  });
 
-  const handleRemoveFilter = (criteriaIndex: number) => {
-    const actualIndex = criteriaIndex * 2;
-    const newFilters = filters.filter((_, index) => 
-      index !== actualIndex && index !== actualIndex - 1
-    );
-    handleUpdateFilter({ default_filter: newFilters });
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'filters',
+  });
 
-  const handleFilterChange = (
-    criteriaIndex: number,
-    field: 'field' | 'operator',
-    value: string,
-  ) => {
-    const actualIndex = criteriaIndex * 2;
-    const newFilters = filters.map((filter, index) => {
-      if (index === actualIndex) {
-        return {
-          ...filter,
-          ...(field === 'field' ? { field: value, label: value } : { operator: value }),
-        };
-      }
-      return filter;
+  form.watch((fields) => {
+    // values must be an array
+    handleUpdateFilter({ default_filter: fields.filters });
+  });
+
+
+  const handleAppend = () => {
+    const newFilter = {
+      field: '',
+      operator: 'equal',
+      label: '',
+      values: [],
+      type: 'criteria',
+      default: true,
+    };
+
+    append({
+      operator: 'and',
+      type: 'operator',
+      default: true,
     });
-    handleUpdateFilter({ default_filter: newFilters });
+    append(newFilter);
+    const updatedFilters = form.getValues().filters;
+    handleUpdateFilter({ default_filter: updatedFilters });
   };
 
-  const handleValueChange = (criteriaIndex: number, values: string[]) => {
-    const actualIndex = criteriaIndex * 2;
-    const newFilters = filters.map((filter, index) => 
-      index === actualIndex ? { ...filter, values } : filter
-    );
-    handleUpdateFilter({ default_filter: newFilters });
+  const handleRemoveFilter = (index: number) => {
+    remove(index);
+    handleUpdateFilter({ default_filter: form.getValues().filters });
   };
 
-  const handleLogicalOperatorChange = (criteriaIndex: number, value: string) => {
-    const operatorIndex = (criteriaIndex * 2) - 1;
-    const newFilters = filters.map((filter, index) => 
-      index === operatorIndex && filter.type === 'operator'
-        ? { ...filter, operator: value.toLowerCase() }
-        : filter
-    );
-    handleUpdateFilter({ default_filter: newFilters });
+  const handleUpdateJunctionOperator = (index: number, operator: string) => {
+    const updatedFilters = [...form.getValues().filters];
+    updatedFilters[index]!.operator = operator;
+    form.setValue('filters', updatedFilters);
+    handleUpdateFilter({ default_filter: updatedFilters });
   };
 
-  const criteriaFilters = filters.filter((filter): filter is FilterItem => 
-    filter.type === 'criteria'
-  );
+  const handleValidate = () => {
+    console.log("SAVING FORM")
+  }
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+      <Button
+          variant="ghost"
+          size="sm"
+          onClick={form.handleSubmit(handleValidate)}
+          className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+        >
+          <Plus className="h-4 w-4" />
+          Validate Filter
+        </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleAddFilter}
+          onClick={handleAppend}
           className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
         >
           <Plus className="h-4 w-4" />
@@ -142,82 +169,95 @@ export default function FilterContent() {
         </Button>
       </div>
 
-      <div className="space-y-3">
-        {criteriaFilters.map((filter, index) => (
-          <div key={index} className="flex items-center gap-2">
-            {index > 0 && (
-              <Select
-                defaultValue="and"
-                onValueChange={(value) => handleLogicalOperatorChange(index, value)}
+      <Form {...form}>
+        <div className="space-y-4">
+          {fields.map((field, index) => {
+            const prefix = `filters.${index}.`;
+            return (
+              <div
+                key={field.id}
+                className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
               >
-                <SelectTrigger className="w-[100px] border-gray-200 bg-white">
-                  <SelectValue placeholder="AND" />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="and">AND</SelectItem>
-                  <SelectItem value="or">OR</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            
-            <Select
-              value={filter.field}
-              onValueChange={(value) => handleFilterChange(index, 'field', value)}
-            >
-              <SelectTrigger className="w-[200px] border-gray-200 bg-white">
-                <SelectValue placeholder="Select field" />
-              </SelectTrigger>
-              <SelectContent className="z-[9999]">
-                {columns?.map((column: any, idx: number) => (
-                  <SelectItem key={idx} value={column.accessorKey}>
-                    {column.header}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filter.operator}
-              onValueChange={(value) => handleFilterChange(index, 'operator', value)}
-            >
-              <SelectTrigger className="w-[200px] border-gray-200 bg-white">
-                <SelectValue placeholder="Select operator" />
-              </SelectTrigger>
-              <SelectContent className="z-[9999]">
-                {OPERATORS.map((operator) => (
-                  <SelectItem key={operator.value} value={operator.value}>
-                    {operator.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="relative flex-1">
-              <MultipleSelector 
-                onChange={(e: MultiSelectOption[]) => {
-                  const values = e.map((item) => item.value);
-                  handleValueChange(index, values);
-                }}
-                value={filter.values?.map((value) => ({ label: value, value }))}
-                placeholder="Enter value"
-                creatable={true}
-                emptyIndicator=""
-              />
-            </div>
-
-            {filters.length > 1 && (
-              <Button
-                onClick={() => handleRemoveFilter(index)}
-                Icon={CircleMinus}
-                iconPlacement="left"
-                iconClassName="text-red-600 h-4 w-4"
-                className="ms-2"
-                variant="ghost"
-              />
-            )}
-          </div>
-        ))}
-      </div>
+                {index > 0 && field.type === "operator" && (
+                  <div className="col-span-4 mb-2">
+                    <Select
+                      defaultValue="and"
+                      value={field.operator}
+                      onValueChange={(operator) =>
+                        handleUpdateJunctionOperator(index, operator)
+                      }
+                    >
+                      <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+                        <SelectValue placeholder="AND" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[9999]">
+                        <SelectItem value="and">AND</SelectItem>
+                        <SelectItem value="or">OR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {field.type === 'criteria' && (
+                  <>
+                    <FormModule
+                      form={form}
+                      formKey="filters"
+                      formSchema={ZodSchema}
+                      
+                      fields={[
+                        {
+                          id: `${prefix}.field`,
+                          formType: 'select',
+                          name: `${prefix}.field`,
+                          placeholder: 'Select field',
+                          selectSearchable: true
+                        },
+                        {
+                          id: `${prefix}.operator`,
+                          formType: 'select',
+                          name: `${prefix}.operator`,
+                          placeholder: 'Select operator',
+                          selectSearchable: true
+                        },
+                        {
+                          id: `${prefix}.values`,
+                          formType: 'input',
+                          type: 'multi_select',
+                          name: `${prefix}.values`,
+                          placeholder: 'Enter values',
+                          selectEnableCreate: true,
+                          selectSearchable: true,
+                        },
+                      ]}
+                      subConfig={{
+                        selectOptions: {
+                          // [`${prefix}.overall_result`]: overall_result || [],
+                          // [`${prefix}.rating`]: rating || [],
+                          [`${prefix}.field`]:
+                            columns?.map((column) => ({
+                              label: column.label,
+                              value: column.accessorKey,
+                            })) || [],
+                          [`${prefix}.operator`]: OPERATORS,
+                        },
+                      }}
+                    />
+                    {fields.length > 1 && (
+                      <Button
+                        onClick={() => handleRemoveFilter(index)}
+                        Icon={CircleMinus}
+                        iconPlacement="left"
+                        iconClassName="text-red-600 h-4 w-4"
+                        variant="ghost"
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Form>
     </div>
   );
 }

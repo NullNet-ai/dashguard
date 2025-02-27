@@ -1,4 +1,4 @@
-import { type IAdvanceFilters, type IResponse } from '@dna-platform/common-orm'
+import { EOperator, type IAdvanceFilters, type IResponse } from '@dna-platform/common-orm'
 import { EOrderDirection } from '@dna-platform/common-orm/build/enums/model'
 import { type SortingState } from '@tanstack/react-table'
 import { headers } from 'next/headers'
@@ -96,6 +96,103 @@ export const gridRouter = createTRPCRouter({
         ctx.redisClient.cacheData(_tabMenuId, setIdTab)
       }
     }),
+    getCustomGridTabs : privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+        application: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const headerList = headers()
+      const gridTabId = headerList.get('x-grid-tab-id') || ''
+      const pathName = headerList.get('x-pathname') || ''
+      const [, , mainEntity, application] = pathName.split('/')
+
+      const contact_id = ctx.session.account.contact.id
+
+      const query = ctx.dnaClient.findAll({
+        entity: 'grid_filter',
+        token: ctx.token.value,
+        query: {
+          pluck: [
+            'id',
+            'name',
+            'entity',
+            'link',
+            'is_current',
+            'is_default',
+            'columns',
+            'groups',
+            'sorts',
+            'advance_filters'
+          ],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'contact_id',
+              operator: EOperator.EQUAL,
+              values: [contact_id],
+            },
+            {
+              operator: EOperator.AND,
+              type: "operator",
+              default: true,
+            },
+            {
+              type: 'criteria',
+              field: 'entity',
+              operator: EOperator.EQUAL,
+              values: [mainEntity!],
+            },
+
+          ] as IAdvanceFilters[],
+        },
+      })
+      const { data: items }
+      = await query.execute()
+
+      // get data from redis cache and save the fetch data to redis
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+      })
+
+      const gridTabFilterList = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[]
+
+      // Create a map to store unique tabs based on id
+      const uniqueTabsMap = new Map()
+
+      // Add existing tabs from cache to the map
+      if (gridTabFilterList) {
+        gridTabFilterList.forEach(tab => {
+          uniqueTabsMap.set(tab.id, tab)
+        })
+      }
+
+      // Add new items, overwriting any existing entries with the same id
+      items.forEach(item => {
+        uniqueTabsMap.set(item.id, {
+          ...item,
+          href: item.link,
+          default_filter: item.advance_filters,
+          current: false,
+        })
+      })
+
+      // Convert map values back to array
+      const merged_tabs = Array.from(uniqueTabsMap.values())
+
+      await ctx.redisClient.cacheData(
+        _tabMenuId,
+        merged_tabs,
+      )
+
+    }),
+
   items: privateProcedure
     // Define input using zod for validation
     .input(ZodItems)
@@ -105,10 +202,10 @@ export const gridRouter = createTRPCRouter({
         current = 1,
         advance_filters: _advance_filters = [],
         entity,
+        sorting,
       } = input
       // Calculate the number of items to skip based on the current page
       // Fetch the total count of users
-
       /**
        *
        * @Logic to get filters from the grid tab
@@ -195,10 +292,12 @@ export const gridRouter = createTRPCRouter({
                 : (input.current || 1) * (input.limit || 100)
                   - (input.limit || 100),
             limit: input.limit || 1,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
+            by_field: input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+            by_direction: input?.sorting?.length === 1 
+              ? (input.sorting[0]?.desc ? EOrderDirection.DESC : EOrderDirection.ASC)
+              : EOrderDirection.DESC,
           },
-          multiple_sort: input.sorting?.length
+          multiple_sort: input.sorting?.length && input?.sorting.length > 1
             ? formatSorting(input.sorting)
             : [],
         },
@@ -633,6 +732,9 @@ export const gridRouter = createTRPCRouter({
   getReportCachedData: privateProcedure.query(async ({ ctx }) => {
     const headerList = headers()
     const pathName = headerList.get('x-pathname') || ''
+    const searchQueryParams = headerList.get('x-full-search-query-params') || ''
+    const searchParams = new URLSearchParams(searchQueryParams)
+    const filter_id = searchParams.get('filter_id');
     const [, , mainEntity, application] = pathName.split('/')
     if (!['grid', 'record'].includes(application ?? '') || !mainEntity) return []
     const cacheTypes: TReportDataType[] = [
@@ -645,23 +747,30 @@ export const gridRouter = createTRPCRouter({
       cacheTypes.map(type => gridCacheId({ context: ctx, type })),
     )
 
-    const [filters, sorting, pagination, gridTabs] = await Promise.all(
+    const [pagination, gridTabs, filters, sorting] = await Promise.all(
       cacheIds
         .map(id => (id ? ctx.redisClient.getCachedData(id) : null))
         .filter(Boolean),
     )
 
-    const gridReports = Array.isArray(gridTabs) ? gridTabs : []
-    const cachedFilters: ISearchItem[] = Array.isArray(filters) ? filters : []
-    const reportSorting: SortingState = Array.isArray(sorting) ? sorting : []
+    const tabDetails = Array.isArray(sorting) ? sorting : []
     const reportPagination: IPagination
       = typeof pagination === 'object' ? pagination : {}
-    const defaultFilters
-      = gridReports?.find(report => report.current)?.default_filter ?? []
-    const reportFilters = cachedFilters?.length
-      ? cachedFilters
-      : (defaultFilters as ISearchItem[])
-    const advanceFilter = reportFilters?.map(
+
+      const defaultFilters: ISearchItem[] = filter_id 
+      ? tabDetails?.find(tab => tab.id === filter_id)?.default_filter ?? []
+      : tabDetails?.find(tab => tab.current)?.default_filter ?? []
+
+    const defaultSort: ISortBy = filter_id
+      ? tabDetails?.find(tab => tab.id === filter_id)?.sorts ?? []
+      : tabDetails?.find(tab => tab.current)?.sorts ?? []
+      console.log("🚀 ~ getReportCachedData:privateProcedure.query ~ tabDetails:", tabDetails)
+
+    const gridColumns = filter_id
+     ? tabDetails?.find(tab => tab.id === filter_id)?.columns?? []
+      : tabDetails?.find(tab => tab.current)?.columns?? []
+      
+    const advanceFilter = defaultFilters?.map(
       ({ entity, operator, type, field, values }) => ({
         entity,
         operator,
@@ -673,12 +782,13 @@ export const gridRouter = createTRPCRouter({
 
     return {
       filters: {
+        reportFilter : defaultFilters,
         advanceFilter,
-        reportFilters,
         defaultFilters,
       },
-      sorting: reportSorting,
+      sorting: defaultSort,
       pagination: reportPagination,
+      columns : gridColumns
     }
   }),
   updateGridTabs: privateProcedure

@@ -9,11 +9,12 @@ import { api } from '~/trpc/server';
 interface IGridCacheDataResponse {
   filters: {
     advanceFilter: IAdvanceFilter[];
-    reportFilters: ISearchItem[];
+    reportFilters: [];
     defaultFilters: ISearchItem[];
   };
   sorting: SortingState;
   pagination: IPagination;
+  columns : Record<string,any>[];
 }
 export const getGridCacheData =
   async (): Promise<IGridCacheDataResponse> => {
@@ -32,5 +33,6 @@ export const getGridCacheData =
             reportFilters: [],
             defaultFilters: [],
           },
+          columns : []
         } as IGridCacheDataResponse);
   };
