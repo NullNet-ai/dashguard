@@ -105,7 +105,7 @@ export const packetRouter = createTRPCRouter({
     }).execute()
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
 
-    return transformedData
+   return  transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket));
   }),
 
   fetchPacketsIP: privateProcedure
