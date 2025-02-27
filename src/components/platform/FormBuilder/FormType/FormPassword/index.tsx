@@ -67,8 +67,8 @@ export default function FormPassword({
   });
 
   const showPasswordStrengthBarAndValidations =
-    !isDisabled && isPasswordDirty && formRenderProps?.field?.value;
-
+  !isDisabled && isPasswordDirty && formRenderProps?.field?.value;
+  
   // Function to validate password against rules
   const validatePassword = (password: string) => {
     return {
@@ -141,14 +141,14 @@ export default function FormPassword({
           <Input
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             type={showPassword ? 'text' : 'password'}
-            {...form.register(fieldConfig?.name)}
-            // disabled={isDisabled}
+            {...formRenderProps.field}
             hasError={!!formRenderProps.fieldState.error}
             Icon={icon}
             iconPlacement="left"
             placeholder={fieldConfig?.placeholder}
             readOnly={(isDisabled || fieldConfig?.readonly) ?? false}
-            value={value}
+            defaultValue={value}
+            disabled={false}
           />
           {/* Show/Hide Password Button */}
           <Button

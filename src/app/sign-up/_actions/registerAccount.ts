@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { verifySession } from '~/app/login/actions/loginSubmit'
 import { api } from '~/trpc/server'
 import { handleLoginError } from '~/utils/login-validator'
-import { EStatus } from '~/server/api/types';
 interface RegisterAccountArgs {
   first_name: string
   last_name: string
@@ -26,7 +25,7 @@ export default async function registerAccount({
      * Registration data
      */
     const organization = {
-      name: organization_name,
+      name: organization_name || 'My Organization',
     }
 
     const account = {
@@ -38,6 +37,7 @@ export default async function registerAccount({
       account_secret: password,
       is_new_user: false,
       contact_categories: ['Contact', 'User'],
+      categories: ['Internal User'],
     };
 
     /**
