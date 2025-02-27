@@ -107,11 +107,11 @@ export default function CustomInstallationDetails({
                   className='mt-1  md:w-96 rounded-md border-indigo-300 bg-indigo-50 p-2 text-indigo-700'
                   readOnly={ true }
                   type='text'
-                  value='pkg install Wallmon.pkg'
+                  value='pkg install pfSense-pkg-wallguard'
                 />
                 <button
                   className='my-auto'
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'pkg install Wallmon.pkg') }
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'pkg install pfSense-pkg-wallguard') }
                 >
                   <DocumentDuplicateIcon
                     className='h-5 w-5 text-gray-400'
@@ -127,11 +127,11 @@ export default function CustomInstallationDetails({
                 className='mt-1  md:w-96 rounded-md border-green-300 bg-green-100 p-2 text-green-600'
                 readOnly={true}
                 type='text'
-                value='Wallmon --version'
+                value='wallguard --version'
               />
               <button
                 className='my-auto'
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'Wallmon --version') }
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'wallguard --version') }
               >
                 <DocumentDuplicateIcon
                   className='h-5 w-5 text-gray-400'
