@@ -1,0 +1,7 @@
+{
+  "app_name": "FormControl__FormCombobox",
+  "tag": "0.1.0-rc.1<unreleased>",
+  "branch": "unreleased/fix3060/0.1.0-rc.1<unreleased>",
+  "message": "To wrap useMemo of options for performance optimization",
+  "publish_name": "Rob Caldosa"
+}

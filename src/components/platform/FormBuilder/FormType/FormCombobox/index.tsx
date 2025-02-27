@@ -26,7 +26,7 @@ export default function FormComboBox({
     formKey,
 }: FormComboBoxProps) {
     const isHidden = fieldConfig.hidden;
-    const options = fieldConfig.comboboxConfig?.selectOptions || [];
+    const options = React.useMemo(() => fieldConfig.comboboxConfig?.selectOptions || [], [fieldConfig.comboboxConfig]);
 
     // Parse the combined value into select and input parts
     const parseCombinedValue = React.useCallback((combinedValue: string | undefined = '') => {
