@@ -43,9 +43,14 @@ export default function SortContent() {
   const form = useForm<{ sorts: SortItem[] }>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
-      sorts: state?.filterDetails?.sorts ?? [
+      sorts: state?.filterDetails?.sorts?.map((sort: any) => ({
+        id: sort.id,
+        value: sort.id, // Use the same value as id
+        desc: sort.desc,
+      })) ?? [
         {
-          value:'',
+          id: '',
+          value: '',
           desc: true,
         },
       ],
@@ -56,10 +61,9 @@ export default function SortContent() {
     control: form.control,
     name: 'sorts',
   });
-  console.log("🚀 ~ SortContent ~ fields:", fields)
 
   const handleAddSort = () => {
-    const newSort = { value: '', desc: true };
+    const newSort = { id: '', value: '', desc: true };
     append(newSort);
     handleUpdateFilter({
       sorts: [...fields, newSort],
@@ -72,10 +76,19 @@ export default function SortContent() {
     value: any,
   ) => {
     const updatedSorts = [...fields];
-    updatedSorts[index] = {
-      ...updatedSorts[index]!,
-      [field]: field === 'desc' ? value === 'desc' : value,
-    };
+    if (field === 'value') {
+      // Update both id and value when value changes
+      updatedSorts[index] = {
+        ...updatedSorts[index]!,
+        id: value,
+        value: value,
+      };
+    } else {
+      updatedSorts[index] = {
+        ...updatedSorts[index]!,
+        [field]: field === 'desc' ? value === 'desc' : value,
+      };
+    }
     form.setValue('sorts', updatedSorts);
     handleUpdateFilter({ sorts: updatedSorts });
   };

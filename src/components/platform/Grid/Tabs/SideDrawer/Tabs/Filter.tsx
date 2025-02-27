@@ -60,8 +60,12 @@ const ZodSchema = z.object({
         field: z.string().min(1, "Field is required"),
         operator: z.string().min(1, "Operator is required"),
         label: z.string(),
-        // values: z.array(z.string()).min(1, "Value is required"),
-        values: z.string().min(1, "Value is required"),
+        values: z.array(
+          z.object({
+            label: z.string(),
+            value: z.string()
+          })
+        ).min(1, "Value is required"),
         type: z.literal('criteria'),
         default: z.boolean(),
       }),
@@ -85,7 +89,16 @@ export default function FilterContent() {
     defaultValues: {
       filters: filterDetails?.default_filter?.filter(
         (f) => f.type === 'criteria',
-      ) ?? [
+      )?.map((filter: any) => ({
+        ...filter,
+        // Convert array of strings to array of objects for multi-select
+        values: Array.isArray(filter.values) 
+          ? filter.values.map(value => ({
+              label: value,
+              value: value
+            }))
+          : []
+      })) ?? [
         {
           field: '',
           operator: 'equal',
@@ -96,6 +109,7 @@ export default function FilterContent() {
         },
       ],
     },
+
     shouldFocusError: false,
   });
 
@@ -143,7 +157,7 @@ export default function FilterContent() {
   };
 
   const handleValidate = () => {
-    console.log("SAVING FORM")
+    console.info("saving form")
   }
 
   return (

@@ -7,7 +7,6 @@ import { api } from '~/trpc/server'
 
 import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
-import { sortColumns } from '~/components/platform/Grid/utils/sortColumns'
 
 export default async function UserRoleGridPage({
   searchParams = {},
@@ -35,8 +34,7 @@ export default async function UserRoleGridPage({
     'updated_by',
   ]
 
-  const { sorting, filters, pagination, columns } = (await getGridCacheData()) ?? {}
-  console.log("🚀 ~ sorting 123:", sorting)
+  const { sorting, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
@@ -49,20 +47,13 @@ export default async function UserRoleGridPage({
     : [],
   })
 
-  // const orderMap = new Map(columns.map((item, index) => [item.accessorKey, item.order ?? index]));
-
-  // const sortedGridColumns = [...gridColumns].sort((a : any, b : any) => {
-  //   const orderA = orderMap.has(a.accessorKey) ? orderMap.get(a.accessorKey)! : Infinity;
-  //   const orderB = orderMap.has(b.accessorKey) ? orderMap.get(b.accessorKey)! : Infinity;
-  //   return orderA - orderB;
-  // });
-
   return (
     <Grid
       config={{
         entity: main_entity!,
         title: 'User Roles',
         columns: gridColumns,
+        columnsOrder: columnOrder,
         enableAutoCreate: false,
       }}
       data={items}

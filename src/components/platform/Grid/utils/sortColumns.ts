@@ -1,11 +1,6 @@
-type GridColumn = {
-  accessorKey: string;
-  order?: number;
-}
-
 export function sortColumns(
-  gridOrders: GridColumn[],
-  gridColumns: GridColumn[]
+  gridOrders: any[],
+  gridColumns: any[]
 ) {
   const orderMap = new Map(gridOrders.map((item, index) => [item.accessorKey, item.order ?? index]));
 

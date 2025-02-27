@@ -42,6 +42,7 @@ import {
   type TActionType,
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
+import { sortColumns } from './utils/sortColumns';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -385,6 +386,10 @@ export default function GridProvider({
       (column) => column.header === 'State',
     );
     let columns = config?.columns || [];
+
+    if(!!config?.columnsOrder?.length) {
+      columns = sortColumns(config?.columnsOrder, columns);
+    }
 
     if (isDefaultFilterArchived) {
       const newColumn = {
