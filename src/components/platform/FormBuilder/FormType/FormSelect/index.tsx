@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type UseFormReturn,
   type ControllerFieldState,
@@ -66,24 +66,47 @@ export default function FormSelect({
     selectOptions?.[fieldConfig?.name] ?? [],
   );
   const [isCreateLoading, setIsCreateLoading] = useState(false);
-
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+  const { styles, attributes, update } = usePopper(referenceElement, popperElement, {
     placement: "bottom-start",
     modifiers: [
       {
         name: "preventOverflow",
         options: {
           rootBoundary: "viewport",
+          boundary: "clippingParents",
+          padding: 8,  
         },
       },
       {
         name: "flip",
         options: {
-          fallbackPlacements: ["top-start"],
+          fallbackPlacements: ["top", "right", "left"],  // Expanded fallback placements
+          padding: 8,
+        },
+      },
+      {
+        name: "offset",
+        options: {
+          offset: [0, 0],  
+        },
+      },
+      {
+        name: "computeStyles",
+        options: {
+          gpuAcceleration: true,  
         },
       },
     ],
   });
+  
+  // Add popper position update when opening
+  useEffect(() => {
+    if (open && update) {
+      setTimeout(() => {
+        update();
+      }, 0);
+    }
+  }, [open, update]);
 
   const SelectIcon = fieldConfig.selectIcon;
 
@@ -277,10 +300,13 @@ export default function FormSelect({
             <ComboboxOptions
               static={open}
               ref={setPopperElement}
-              style={styles.popper}
+              style={{...styles.popper,
+                width:  referenceElement?.offsetWidth,
+              }}
               {...attributes.popper}
               className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
               data-test-id={`${formKey}-opts-${fieldConfig.name}`}
+              portal={true}
             >
               {filteredOptions?.slice(0, 700).map((opt) => (
                 <ComboboxOption
@@ -333,7 +359,7 @@ export default function FormSelect({
         </div>
       </Combobox>
 
-      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+      <FormMessage className='text-md' data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }
