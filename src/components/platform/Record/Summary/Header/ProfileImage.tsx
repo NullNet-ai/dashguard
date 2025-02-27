@@ -15,35 +15,37 @@ import { Loader } from '~/components/ui/loader'
 import DeleteConfirmationDialog from '../_components/DeleteConfirmationDialog'
 
 import { handleSaveUrl } from './action/updateImageUrl'
-import { api } from '~/trpc/react'
+import { cn } from '~/lib/utils'
+import { FilePreview } from '~/components/platform/FileUpload/FilePreview'
 
 const FormSchema = z.object({
   upload: z.array(z.string()),
+  edited_files: z.array(z.string()),
 });
 
 function UploadComponent(props: any) {
-  const { details, entity, actions, token } = props || {}
+  const { details, entity, actions, metadata } = props || {}
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>): Promise<any[]> => {
-
-    console.log("datadata", data)
-    return ''
     try {
-      if (!details.data?.id || !entity || !data?.upload?.length) {
+      if ((!details.data?.id || !entity || !data?.upload?.length) && !data?.edited_files?.length) {
         return await Promise.resolve([]);
       }
+      const image_url = data?.edited_files?.[0] ? data?.edited_files[0] : data?.upload[0]
 
       const formData = {
         id: details?.data?.id,
         entity,
         params: {
-          image_url: data?.upload?.[0],
+          image_url: image_url ,
         },
       }
 
       await handleSaveUrl(formData)
+      metadata?.setImageId(image_url)
+
       actions?.closeSideDrawer()
       return await Promise.resolve([]);
     }
@@ -51,8 +53,8 @@ function UploadComponent(props: any) {
       toast.error('Failed to save image');
       return [];
     }
-  };  
-
+  }; 
+  
   return (
     <FormBuilder
       formLabel='Upload Image'
@@ -62,7 +64,12 @@ function UploadComponent(props: any) {
       customDesign={ {
         formClassName: '!grid-cols-1',
       } }
-
+     defaultValues={ {
+        upload: [
+          metadata?.imageId || details?.data?.image_url || '',
+        ],
+        edited_files: [],
+      }}
       fields={ [
         {
           id: 'upload',
@@ -88,14 +95,17 @@ function UploadComponent(props: any) {
 export default function ProfileImage({details, entity, token} : any) {
   const [openDialog, setOpenDialog] = useState(false)
   const [imageUrl, setImageUrl] = useState<string>('')
+  const [imageId, setImageId] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+
   useEffect(() => {
     const convertToBase64 = async () => {
- 
       try {
-        if(token) {
+        if((token && details?.data?.image_url) || (imageId && token)) {
+          const stringID = imageId ? imageId : details?.data?.image_url
           setLoading(true)
-          const response = await fetch(`/api/file/${details?.data?.image_url}/download`)
+          const response = await fetch(`/api/file/${stringID}/download`)
           const blob = await response.blob()
           const reader = new FileReader()
           reader.onloadend = () => {
@@ -112,20 +122,23 @@ export default function ProfileImage({details, entity, token} : any) {
     }
     
     convertToBase64()
-  }, [token])
+  }, [token, imageId])
 
 
   const { actions } = useSideDrawer()
   const config = {
     header: 'Upload Image',
     sideDrawerWidth: '30dvw',
-    overlayEnabled: true,
     body: {
       component: UploadComponent,
       componentProps: {
         details: details,
         entity: entity,
         actions: actions,
+        metadata: {
+          setImageId,
+          imageId
+        }
       }
     },
     onCloseSideDrawer() {
@@ -133,12 +146,27 @@ export default function ProfileImage({details, entity, token} : any) {
     },
   }
 
+  const handleRemove = async () => {
+      const formData = {
+        id: details?.data?.id,
+        entity,
+        params: {
+          image_url: null ,
+        },
+      }
+      await handleSaveUrl(formData)
+      setImageUrl('')
+      setImageId('')
+  }
+
+
   return (
-    <div className="mt-1 px-4 flex justify-center">
+    <>
+      <div className="mt-1 px-4 flex justify-center">
       <div className='relative group'>
         <div
-          title="image placeholder"
-          className="bg-muted w-full md:w-[300px] h-[150px] flex items-center justify-center cursor-pointer"
+          title="Record summary image"
+          className="bg-muted w-full md:w-[277px] h-[150px] flex items-center justify-center cursor-pointer"
           onClick={ () => {
             actions?.openSideDrawer(config)
           } }
@@ -157,24 +185,30 @@ export default function ProfileImage({details, entity, token} : any) {
         </div>
         <div className='absolute left-0 bottom-0 opacity-0 group-hover:opacity-100 flex gap-x-2 justify-center transition-opacity duration-300 bg-default/20 w-full p-1'>
           <Button
-            className='bg-white rounded-md p-1 hover:opacity-45'
+            className={cn(`bg-white rounded-md p-1 hover:opacity-45`, `${!imageUrl ? 'opacity-45' : ''}`)}
             aria-label="View image"
             title="View image"
+            disabled={ !imageUrl }
+            onClick={ () => {
+              setIsPreviewModalOpen(true)
+            } }
           >
             <ImageIcon className="size-3 text-default/70" />
           </Button>
           <Button
-            className='bg-white rounded-md p-1 hover:opacity-45'
+            className={cn(`bg-white rounded-md p-1 hover:opacity-45`, `${!imageUrl ? 'opacity-45' : ''}`)}
             aria-label="Edit image"
             title="Edit image"
+            disabled={ !imageUrl }
             onClick={ () => {
-              actions?.openSideDrawer(config)
+              actions?.openSideDrawer({...config})
             } }
           >
             <Pencil className="size-3 text-primary" />
           </Button>
           <Button
-            className='bg-white rounded-md p-1 hover:opacity-45'
+            className={cn(`bg-white rounded-md p-1 hover:opacity-45`, `${!imageUrl ? 'opacity-45' : ''}`)}
+            disabled={ !imageUrl }
             onClick={ () => {
               setOpenDialog(true)
             } }
@@ -189,9 +223,20 @@ export default function ProfileImage({details, entity, token} : any) {
         open={ openDialog }
         onChangeContext={ (setOpenDialog) }
         onConfirm={ async () => {
+           await handleRemove()
           setOpenDialog(false)
         } }
       />
     </div>
+    <FilePreview
+      imageSrc={imageUrl || ''}
+      isPreviewModalOpen={isPreviewModalOpen}
+      setIsPreviewModalOpen={setIsPreviewModalOpen}
+      isImageFile={true}
+      previewSrc={null}
+      isPdfFile={false}
+    />
+    
+    </>
   )
 }

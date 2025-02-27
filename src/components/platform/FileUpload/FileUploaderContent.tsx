@@ -19,8 +19,11 @@ import React from "react";
 
 export const FileUploaderContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ children, className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    form?: any;
+    fileUploaderContentProps?: Record<string, any>;
+  }
+>(({ children, className, form, fileUploaderContentProps, ...props }, ref) => {
   const {
     orientation,
     value: files,
@@ -28,6 +31,7 @@ export const FileUploaderContent = React.forwardRef<
     progressState,
   } = useFileUpload();
   const containerRef = useRef<HTMLDivElement>(null);
+
 
   return (
     <div
@@ -76,12 +80,15 @@ export const FileUploaderContent = React.forwardRef<
 
             return (
               <FileUploaderItem
+                form={form}
                 file={file}
                 className="flex items-center justify-center rounded-lg border px-2 py-8"
                 key={file.name}
                 index={i}
                 progressState={progressState}
-                onRemove={() => removeFileFromSet(i)}
+                onRemove={() => {
+                  removeFileFromSet(i)
+                }}
                 {...props}
               >
                 <Image src={ImagePath} width={40} height={40} alt="FileImage" />

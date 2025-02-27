@@ -15,6 +15,7 @@ import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
 import { useFileUpload } from "./Provider";
 import type { CropState, PixelCrop } from "./canvasUtils";
 import { blobToFile, canvasPreview, createImage } from "./canvasUtils";
+import axios from 'axios';
 
 export enum UploadState {
   IDLE = "idle",
@@ -28,6 +29,7 @@ export const FileUploaderItem = React.forwardRef<
   {
     index: number;
     file: File & { download_path?: string };
+    form?: any
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
     uploadError?: string;
@@ -42,6 +44,7 @@ export const FileUploaderItem = React.forwardRef<
       children: _children,
       progressState,
       uploadError,
+      form,
       ...props
     },
     ref,
@@ -176,16 +179,60 @@ export const FileUploaderItem = React.forwardRef<
         setCroppedFile(newCroppedFile);
 
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           let resultString: string;
+          let resultId: string
 
           if (typeof reader.result === "object") {
             resultString = JSON.stringify(reader.result);
-          } else {
-            resultString = reader.result as string;
-          }
+          } else if (reader.result) {
+            const base64String = reader.result as string;
+            const base64Data = base64String.split(',')[1];
+            const binaryData = atob(base64Data as string);
+            const byteArray = new Uint8Array(binaryData.length);
+            for (let i = 0; i < binaryData.length; i++) {
+                byteArray[i] = binaryData.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray], { type: file.type });
+            const newFile = new File([blob], file.name, { type: file.type });
 
-          console.log("resultString", resultString)
+            const formData = new FormData();
+            formData.append('file', newFile);
+
+            try {
+              const response = await axios.post('/api/upload', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              });
+              if (!response.data.success) {
+                throw new Error(response.data.message || 'Upload failed');
+              }
+              const uploadedFileId = response.data.data[0].id;
+              resultId = uploadedFileId;
+              resultString =  URL.createObjectURL(blob);
+              //set id
+              form.setValue('edited_files', [
+                resultId
+              ], {
+                shouldDirty: true,
+                shouldTouch: true,
+              });
+              toast.success('File uploaded successfully');
+            } catch (error) {
+              console.error('Upload error:', error);
+              toast.error('Failed to upload file');
+              resultString = URL.createObjectURL(blob);
+            }
+            
+            
+          } else {
+            throw new Error("FileReader result is undefined");
+          }
+          
+
+         
+          
           setImageSrc(resultString);
           setPreviewSrc(resultString);
         };
@@ -346,6 +393,7 @@ export const FileUploaderItem = React.forwardRef<
                 size={"xs"}
                 variant={"softDestructive"}
                 onClick={(e) => {
+                  form.setValue('edited_files', [])
                   removeFileFromSet(index);
                   e.stopPropagation();
                 }}
