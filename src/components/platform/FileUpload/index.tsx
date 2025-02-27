@@ -24,7 +24,13 @@ const FileUpload = ({
   fileUploaderContentProps,
   form,
   ...props
+
+
+
 }: FileProps) => {
+
+  
+
   const getAcceptedFileTypesText = (dropzoneOptions: any) => {
     const acceptedTypes = dropzoneOptions?.accept
       ? `${Object.keys(dropzoneOptions.accept)
@@ -69,7 +75,10 @@ const FileUpload = ({
               </p>
         </div>
       </FileInput>
-      <FileUploaderContent {...fileUploaderContentProps} />
+      <FileUploaderContent 
+        {...fileUploaderContentProps} 
+        form={form}
+      />
     </FileUploader>
   );
 };

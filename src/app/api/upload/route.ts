@@ -1,10 +1,15 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { api } from '~/trpc/server';
 
 export async function POST(req: NextRequest) {
   const cookieStore = cookies();
-  const { value: token = null } = cookieStore.get("token") || {};
+  const { value: email = '' } = cookieStore.get("username") || {};
+
+  const token = await api.auth.getToken({
+    username: email,
+  })
 
   if (!token) {
     return NextResponse.json({ message: "No token found" }, { status: 401 });

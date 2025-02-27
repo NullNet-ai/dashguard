@@ -67,6 +67,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     setIsClient(true)
   }, [])
 
+
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) return tabs
     if (tabs.length) {

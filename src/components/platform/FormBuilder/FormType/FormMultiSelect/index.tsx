@@ -119,22 +119,22 @@ export default function FormMultiSelect({
           hidePlaceholderWhenSelected={
             fieldConfig.multiSelectHidePlaceholderWhenSelected ?? false
           }
-          creatable={fieldConfig.selectEnableCreate ?? false}
+          creatable={(fieldConfig.multiSelectEnableCreate || fieldConfig.selectEnableCreate) ?? false}
           triggerSearchOnFocus={
             fieldConfig.multiSelectTriggerSearchOnFocus ?? false
           }
           defaultOptions={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label?.localeCompare(b.label),
-                )
+                a.label?.localeCompare(b.label),
+              )
               : multiselectOptions?.[fieldConfig.name]
           }
           options={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label?.localeCompare(b.label),
-                )
+                a.label?.localeCompare(b.label),
+              )
               : multiselectOptions?.[fieldConfig.name]
           }
           placeholder={fieldConfig.placeholder}
@@ -142,7 +142,10 @@ export default function FormMultiSelect({
             fieldConfig.multiSelectHideClearAllButton ??
             fieldConfig.multiSelectMaxSelected === 1
           }
-          onCreateRecord={createNewRecord}
+          onCreateRecord={fieldConfig.selectOnCreateRecord
+            ? createNewRecord
+            : undefined}
+          showCreatableItem={fieldConfig.multiSelectShowCreatableItem}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
