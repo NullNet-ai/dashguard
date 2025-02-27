@@ -4,6 +4,7 @@ type TDisplayType = 'form' | 'selected';
 
  type TFormType =
    | 'input'
+   | 'combobox'
    | 'draggable'
    | 'multi-field'
    | 'input-grid'
