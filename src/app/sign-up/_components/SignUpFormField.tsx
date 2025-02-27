@@ -16,7 +16,8 @@ interface SignUpFormFieldProps {
     type: string
     required?: boolean
     showPasswordStrengthBar?: boolean
-    hasComplexValidation?: boolean
+    hasComplexValidation?: boolean,
+    readonly?: boolean
   }[]
 }
 
@@ -37,6 +38,7 @@ const SignUpFormField: React.FC<SignUpFormFieldProps> = ({
       required,
       showPasswordStrengthBar,
       hasComplexValidation,
+      readonly = false
     } = field
     return (
       <FormField
@@ -52,6 +54,7 @@ const SignUpFormField: React.FC<SignUpFormFieldProps> = ({
                 label,
                 placeholder,
                 type,
+                readonly,
                 ...(showPasswordStrengthBar && {
                   showPasswordStrengthBar: true,
                 }),

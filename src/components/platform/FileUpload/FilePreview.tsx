@@ -5,6 +5,7 @@ import {
   FileText as FilePDFIcon,
   ImageIcon,
 } from "lucide-react";
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,8 @@ import {
 } from "~/components/ui/dialog";
 
 type FilePreviewProps = {
-  file: File;
+  file?: File;
+  imageSrc?: string;
   isPreviewModalOpen: boolean;
   setIsPreviewModalOpen: (isOpen: boolean) => void;
   isImageFile: boolean;
@@ -58,8 +60,21 @@ export const FilePreview = ({
   setIsPreviewModalOpen,
   isImageFile,
   previewSrc,
+  imageSrc
 }: FilePreviewProps) => {
   const renderPreviewContent = () => {
+    if(imageSrc) {
+      return (
+        <Image
+          src={imageSrc}
+          alt="File Preview"
+          height={ 300 }
+          width={ 300 }
+          className="max-h-[400px] max-w-full object-contain w-full"
+        />
+      );
+    }
+
     if (isImageFile && previewSrc) {
       return (
         <img
@@ -82,7 +97,7 @@ export const FilePreview = ({
 
     return (
       <div className="flex flex-col items-center justify-center p-4">
-        {getFileTypeIcon(file)}
+        {file ? getFileTypeIcon(file) : <GifIcon className="h-10 w-10 text-primary" />}
         <p className="mt-2 text-sm text-muted-foreground">
           No preview available for this file type
         </p>
@@ -94,7 +109,7 @@ export const FilePreview = ({
     <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
       <DialogContent className="h-[600px] w-[600px]">
         <DialogHeader>
-          <DialogTitle>File Preview: {file.name}</DialogTitle>
+          <DialogTitle>File Preview: {file ? file.name : ''}</DialogTitle>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-auto">
           {renderPreviewContent()}

@@ -29,6 +29,7 @@ export default function BasicDetails({
         data: {
           role_id: data.role,
           email: data.email?.[0]?.email,
+          account_id: data.email?.[0]?.email,
         },
       })
       if (response) {
@@ -43,9 +44,6 @@ export default function BasicDetails({
 
   return (
     <FormBuilder
-      buttonConfig={{
-        hideLockButton: params.shell_type === 'record',
-      }}
       defaultValues={defaultValues}
       enableFormRegisterToParent={ true }
       fields={[
@@ -64,6 +62,7 @@ export default function BasicDetails({
           label: 'Email',
           required: true,
           placeholder: 'Example: john@example.com',
+          readonly: params.shell_type === 'record',
         },
       ]}
       formKey={"UserDetails"}

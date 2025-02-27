@@ -10,15 +10,14 @@ import { MainMenuConfig } from "./config";
 import SideUserInfo from "./UserInfo";
 
 const getInitials = (name: string) => {
-  const matches = name.match(/\b\w/g) || [];
+  const matches = name?.match(/\b\w/g) || [];
   return ((matches.shift() || "") + (matches.pop() || "")).toUpperCase();
 };
 
 export default async function SideBarMenu() {
   const mainConfig = await MainMenuConfig();
-
-  const { account_name, username, organization } =
-    await api.record.getSessionInfo();
+  const accountOrganization =  await api.record.getSessionInfo();
+  const { account_name, username, organization } = accountOrganization?.current_organization ?? {}
   const initials = getInitials(account_name);
   const cookieStore = cookies(); // Access cookies
   const screenType = cookieStore.get("screen-type");
@@ -32,6 +31,7 @@ export default async function SideBarMenu() {
           email={username}
           screenType={screenType?.value}
           organization={organization}
+          other_organizations={accountOrganization?.other_organizations ?? []}
         />
       }
       headerComponent={

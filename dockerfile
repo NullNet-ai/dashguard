@@ -18,6 +18,11 @@ COPY .npmrc /var/app/.npmrc
 RUN pnpm install
 COPY ./ /var/app
 RUN touch .env
+RUN echo $(pnpm -v)
+
+RUN rm -rf .next/server
+RUN rm -rf .next/static
+
 RUN pnpm run build
 
 EXPOSE 3000

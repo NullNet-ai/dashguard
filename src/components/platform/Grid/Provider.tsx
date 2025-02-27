@@ -360,6 +360,11 @@ export default function GridProvider({
               <DeleteComponent config={config!} row={row} />
             </>
           )}
+          {config?.customRowAction &&
+            config?.customRowAction({
+              row,
+              config,
+            })}
         </>
       );
     },
