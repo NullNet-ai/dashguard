@@ -203,7 +203,6 @@ export default function FilterContent() {
                       form={form}
                       formKey="filters"
                       formSchema={ZodSchema}
-                      
                       fields={[
                         {
                           id: `${prefix}.field`,
@@ -221,12 +220,11 @@ export default function FilterContent() {
                         },
                         {
                           id: `${prefix}.values`,
-                          formType: 'input',
-                          type: 'multi_select',
+                          formType: 'multi-select',
                           name: `${prefix}.values`,
                           placeholder: 'Enter values',
-                          selectEnableCreate: true,
-                          selectSearchable: true,
+                          multiSelectEnableCreate: true,
+                          multiSelectShowCreatableItem: false,
                         },
                       ]}
                       subConfig={{
