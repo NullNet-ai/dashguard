@@ -132,6 +132,7 @@ interface IField {
   multiSelectLoadingIndicator?: ReactNode
   multiSelectEmptyIndicator?: ReactNode
   multiSelectHideClearAllButton?: boolean
+  multiSelectShowCreatableItem?: boolean
   richTextOutput?: 'html' | 'json' | 'text'
   inputRightAddOns?: ReactNode | string
   inputLeftAddOns?: ReactNode | string
@@ -162,6 +163,7 @@ interface IField {
   selectSearchable?: boolean
   accuracy?: number
   selectEnableCreate?: boolean
+  multiSelectEnableCreate?: boolean
   selectOnCreateRecord?:
     | {
       fieldIdentifier: string
