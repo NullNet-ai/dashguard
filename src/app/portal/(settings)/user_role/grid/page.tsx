@@ -49,20 +49,20 @@ export default async function UserRoleGridPage({
     : [],
   })
 
-  const orderMap = new Map(columns.map((item, index) => [item.accessorKey, item.order ?? index]));
+  // const orderMap = new Map(columns.map((item, index) => [item.accessorKey, item.order ?? index]));
 
-  const sortedGridColumns = [...gridColumns].sort((a : any, b : any) => {
-    const orderA = orderMap.has(a.accessorKey) ? orderMap.get(a.accessorKey)! : Infinity;
-    const orderB = orderMap.has(b.accessorKey) ? orderMap.get(b.accessorKey)! : Infinity;
-    return orderA - orderB;
-  });
+  // const sortedGridColumns = [...gridColumns].sort((a : any, b : any) => {
+  //   const orderA = orderMap.has(a.accessorKey) ? orderMap.get(a.accessorKey)! : Infinity;
+  //   const orderB = orderMap.has(b.accessorKey) ? orderMap.get(b.accessorKey)! : Infinity;
+  //   return orderA - orderB;
+  // });
 
   return (
     <Grid
       config={{
         entity: main_entity!,
         title: 'User Roles',
-        columns: sortedGridColumns,
+        columns: gridColumns,
         enableAutoCreate: false,
       }}
       data={items}
