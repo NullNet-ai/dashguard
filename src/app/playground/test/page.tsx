@@ -48,8 +48,6 @@ const sampleSelectOptionsAlphabetical = [
 
 export default function SelectDetails({}) {
     return (
-        <>
-            {/* FormBuilder 3: Select */}
             <div className="h-96">
                 <FormBuilder
                     handleSubmit={handleSubmit}
@@ -70,7 +68,6 @@ export default function SelectDetails({}) {
                             required: true,
                             selectSearchable: true,
                             selectIcon: UserIcon,
-                            // readonly:true,
                         },
                         {
                             id: "select_single",
@@ -80,91 +77,10 @@ export default function SelectDetails({}) {
                             required: true,
                             selectIcon: UserIcon,
                             selectSearchable: true,
-                            // disabled:true
                         },
                     ]}
                 />
             </div>
-        </>
     );
 }
 
-
-
-// 'use client'
-// import React, { useState, useRef } from 'react';
-// import { usePopper } from 'react-popper';
-
-// const PopperComponent = () => {
-//   const [visible, setVisible] = useState(false);
-//   const referenceRef = useRef(null);
-//   const popperRef = useRef(null);
-  
-//   const { styles, attributes, update } = usePopper(referenceRef.current, popperRef.current, {
-//     placement: 'bottom', // Starting placement
-//     modifiers: [
-//       {
-//         name: 'preventOverflow',
-//         options: {
-//           rootBoundary: 'viewport',
-//           padding: 8, // Extra padding from the viewport edges
-//         },
-//       },
-//       {
-//         name: 'flip',
-//         options: {
-//           fallbackPlacements: ['top', 'right', 'left'], // Order of placements to try if original placement doesn't fit
-//           padding: 8,
-//         },
-//       },
-//       {
-//         name: 'offset',
-//         options: {
-//           offset: [0, 10], // [skidding, distance] - horizontal and vertical offset
-//         },
-//       },
-//       {
-//         name: 'computeStyles',
-//         options: {
-//           gpuAcceleration: true, // Uses transform: translate3d for better performance
-//         },
-//       },
-//     ],
-//   });
-
-//   const togglePopper = () => {
-//     setVisible(!visible);
-//     // When popper becomes visible, call update to ensure proper positioning
-//     if (!visible && update) {
-//       setTimeout(() => {
-//         update();
-//       }, 0);
-//     }
-//   };
-
-//   return (
-//     <div className="p-4 h-96 border border-black flex items-center justify-center">
-//       <button
-//         ref={referenceRef}
-//         onClick={togglePopper}
-//         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-//       >
-//         Toggle Popper
-//       </button>
-
-//       {visible && (
-//         <div
-//           ref={popperRef}
-//           style={styles.popper}
-//           {...attributes.popper}
-//           className="bg-white border border-gray-200 shadow-lg rounded p-4 z-10 w-64"
-//         >
-//           <h3 className="text-lg font-semibold mb-2">Popper Content</h3>
-//           <p>This popper will reposition itself to stay within the viewport and avoid collision.</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default PopperComponent;
