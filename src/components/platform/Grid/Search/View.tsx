@@ -68,7 +68,7 @@ export default function Search() {
         className={cn(`relative`)}
         style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
       >
-        <div className="flex flex-wrap items-center md:gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
+        <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
           <MagnifyingGlassIcon
             aria-hidden="true"
             className="h-5 w-5 text-muted-foreground"

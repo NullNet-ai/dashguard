@@ -17,7 +17,7 @@ export default function Main({ parentType = 'grid' }: any) {
     <GridSearchProvider>
       {parentType === 'grid'
         ? (
-            <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:mt-0 lg:w-[40%] lg:max-w-[40%]">
+          <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:mt-0 lg:w-[50%] lg:max-w-[50%]">
               <div className="relative flex flex-1 flex-row gap-x-2">
                 <div className="my-2 h-[40px] w-full md:my-0">
                   <Search />
