@@ -858,6 +858,7 @@ export const accountRouter = createTRPCRouter({
     .input(
       z.object({
         account_code: z.string(),
+        manual_trigger: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -980,8 +981,11 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              account_status:
-                category === 'External User' ? 'Invited' : 'Pending Setup',
+              account_status: input.manual_trigger
+                ? 'Invited'
+                : category === 'External User'
+                  ? 'Invited'
+                  : 'Pending Setup',
             },
             pluck: ['id', 'status'],
           },
@@ -1267,18 +1271,20 @@ export const accountRouter = createTRPCRouter({
                     },
                   ]
                 : []),
-              ...(contact_id ? [
-                {
-                  type: 'operator',
-                  operator: EOperator.AND,
-                },
-                {
-                  type: 'criteria',
-                  field: 'contact_id',
-                  operator: EOperator.NOT_EQUAL,
-                  values: [contact_id],
-                },
-              ] : []),
+              ...(contact_id
+                ? [
+                    {
+                      type: 'operator',
+                      operator: EOperator.AND,
+                    },
+                    {
+                      type: 'criteria',
+                      field: 'contact_id',
+                      operator: EOperator.NOT_EQUAL,
+                      values: [contact_id],
+                    },
+                  ]
+                : []),
             ],
             pluck: ['id', 'account_id', 'categories'],
           },
