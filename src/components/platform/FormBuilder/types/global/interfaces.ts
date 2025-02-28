@@ -133,6 +133,7 @@ interface IField {
   multiSelectEmptyIndicator?: ReactNode
   multiSelectHideClearAllButton?: boolean
   multiSelectShowCreatableItem?: boolean
+  multiSelectUseStringValues?: boolean
   richTextOutput?: 'html' | 'json' | 'text'
   inputRightAddOns?: ReactNode | string
   inputLeftAddOns?: ReactNode | string

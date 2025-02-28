@@ -45,6 +45,7 @@ export default function FormMultiSelect({
   const toast = useToast();
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
+  const useStringValues = fieldConfig.multiSelectUseStringValues ?? false;
 
   const createNewRecord = async (query: string) => {
     if (!fieldConfig?.selectOnCreateRecord) {
@@ -101,9 +102,12 @@ export default function FormMultiSelect({
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
             "data-test-id": `${formKey}-inp-${fieldConfig.name}`,
-            "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`,
+            "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string } | string) => 
+              typeof item === 'string' ? item : item.value
+            ).join(",")}`,
             className: `flex w-full rounded-md border bg-background px-2 py-0 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
           }}
+          useStringValues={useStringValues}
           onSearch={multiSelectOnSearch?.[fieldConfig.name]}
           loadingIndicator={
             fieldConfig.multiSelectLoadingIndicator ?? (
