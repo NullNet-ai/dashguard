@@ -27,6 +27,7 @@ interface IGridDesktopProps {
     width?: string;
     open?: boolean;
     summary?: boolean;
+     metadata?: any
   };
   showPagination?: boolean;
   gridLevel?: number;
