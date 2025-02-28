@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { ulid } from 'ulid';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { api } from '~/trpc/react';
 import { type IFormProps } from '../types';
 import SelectedView from './components/SelectedView';
 
-const FormSchema = z.object({})
+const FormSchema = z.object({});
 
 const defaultAdvanceFilter = [
   {
@@ -32,7 +32,7 @@ const defaultAdvanceFilter = [
     entity: 'organization_accounts',
     operator: 'is_null',
     type: 'criteria',
-    field: 'status',
+    field: 'contact_id',
     id: ulid(),
     label: '',
     values: [],
@@ -45,16 +45,16 @@ export default function BasicDetails({
   defaultValues,
   selectedRecords,
 }: IFormProps) {
-  const toast = useToast()
+  const toast = useToast();
 
-  const update = api.record.updateDynamicRecord.useMutation()
+  const update = api.record.updateDynamicRecord.useMutation();
 
   const handleRemoveRecord = async ({
     filter_entity,
   }: {
-    rows: any[]
-    main_entity_id: string
-    filter_entity: string
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
   }) => {
     try {
       const response = await update.mutateAsync({
@@ -63,30 +63,29 @@ export default function BasicDetails({
         data: {
           contact_id: null,
         },
-      })
+      });
 
       if (response) {
-        toast.success('Internal User removed successfully')
+        toast.success('Internal User removed successfully');
         return {
           rows: [],
           filter_entity,
           main_entity_id: '',
-        }
+        };
       }
+    } catch (error) {
+      toast.error('Failed to remove Internal User');
     }
-    catch (error) {
-      toast.error('Failed to remove Internal User')
-    }
-  }
+  };
 
   const handleSelectRecord = async ({
     rows,
     filter_entity,
     main_entity_id,
   }: {
-    rows: any[]
-    main_entity_id: string
-    filter_entity: string
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
   }) => {
     try {
       const response = await update.mutateAsync({
@@ -95,7 +94,7 @@ export default function BasicDetails({
         data: {
           contact_id: rows[0].id,
         },
-      })
+      });
       const {
         first_name,
         last_name,
@@ -104,10 +103,10 @@ export default function BasicDetails({
         iso_code,
         country_code,
         raw_phone_numbers,
-      } = rows?.[0] ?? {}
+      } = rows?.[0] ?? {};
 
       if (response) {
-        toast.success('Internal User details submitted successfully')
+        toast.success('Internal User details submitted successfully');
         return {
           rows: {
             first_name,
@@ -130,13 +129,12 @@ export default function BasicDetails({
           },
           filter_entity,
           main_entity_id,
-        }
+        };
       }
+    } catch (error) {
+      toast.error('Failed to select Internal User');
     }
-    catch (error) {
-      toast.error('Failed to select Internal User')
-    }
-  }
+  };
 
   const handleFieldSelectRecord = async (data: Record<string, any>) => {
     try {
@@ -146,7 +144,7 @@ export default function BasicDetails({
         data: {
           contact_id: data.id,
         },
-      })
+      });
       const {
         first_name,
         last_name,
@@ -155,10 +153,10 @@ export default function BasicDetails({
         raw_phone_numbers,
         iso_code,
         country_code,
-      } = data ?? {}
+      } = data ?? {};
 
       if (response) {
-        toast.success('Internal User details submitted successfully')
+        toast.success('Internal User details submitted successfully');
         return {
           first_name,
           last_name,
@@ -177,19 +175,18 @@ export default function BasicDetails({
               is_primary: true,
             },
           ],
-        }
+        };
       }
+    } catch (error) {
+      toast.error('Failed to select Internal User');
     }
-    catch (error) {
-      toast.error('Failed to select Internal User')
-    }
-  }
+  };
 
   return (
     <FormBuilder
       create_mode={false}
       defaultValues={defaultValues}
-      enableFormRegisterToParent={ true }
+      enableFormRegisterToParent={true}
       features={{
         enableFormFilterCreate: false,
         enableUnlockFormFilter: params.shell_type !== 'record',
@@ -284,15 +281,15 @@ export default function BasicDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any
-            main_entity_id: string
-            filter_entity: string
-          }
+            rows: any;
+            main_entity_id: string;
+            filter_entity: string;
+          };
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          }
+          };
         },
         handleSelectFieldFilterGrid: handleFieldSelectRecord,
         onRemoveSelectedRecords: async ({
@@ -305,31 +302,42 @@ export default function BasicDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any[]
-            filter_entity: string
-            main_entity_id: string
-          }
+            rows: any[];
+            filter_entity: string;
+            main_entity_id: string;
+          };
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          }
+          };
         },
         onFilterFieldChange: (search_params, options) => {
-          const { data } = api.contact.mainGrid.useQuery(
-            search_params, options,
-          )
-          return data
+          const { data } = api.account.getUserGridItem.useQuery(
+            {
+              ...search_params,
+              advance_filters: [
+                ...defaultAdvanceFilter,
+                {
+                  operator: 'and',
+                  type: 'operator',
+                },
+                ...(search_params.advance_filters ?? []),
+              ],
+            },
+            options,
+          );
+          return data;
         },
         renderComponentSelected: (record) => {
-          return <SelectedView record={record} />
+          return <SelectedView record={record} />;
         },
       }}
-      formKey={"UserDetails"}
+      formKey={'UserDetails'}
       formLabel={params.shell_type === 'record' ? 'Contact Details' : 'User'}
       formProps={params}
       formSchema={FormSchema}
       myParent={params.shell_type}
     />
-  )
+  );
 }

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, {
   useCallback,
@@ -6,21 +6,24 @@ import React, {
   useEffect,
   useMemo,
   useState,
-} from 'react'
-import { ulid } from 'ulid'
+} from 'react';
+import { ulid } from 'ulid';
 
-import { WizardContext } from '~/components/platform/Wizard/Provider'
-import { useSidebar } from '~/components/ui/sidebar'
-import { useEventEmitter } from '~/context/EventEmitterProvider'
-import { cn } from '~/lib/utils'
-import { api } from '~/trpc/react'
+import { WizardContext } from '~/components/platform/Wizard/Provider';
+import { useSidebar } from '~/components/ui/sidebar';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
+import { cn } from '~/lib/utils';
+import { api } from '~/trpc/react';
 
-import Grid from '../../../../Grid/Client'
-import Skeleton from '../../../../Grid/Skeleton'
-import { type IFilterGridConfig, type IGridData } from '../../../types/global/interfaces'
+import Grid from '../../../../Grid/Client';
+import Skeleton from '../../../../Grid/Skeleton';
+import {
+  type IFilterGridConfig,
+  type IGridData,
+} from '../../../types/global/interfaces';
 
-import { fetchRecords } from './actions'
-import { usePathname } from 'next/navigation'
+import { fetchRecords } from './actions';
+import { usePathname } from 'next/navigation';
 
 export default function FormFilterGrid({
   config,
@@ -30,12 +33,12 @@ export default function FormFilterGrid({
   className,
   formKey,
 }: {
-  handleSelectedGridRecords: (records: any[]) => void
-  handleCloseGrid: () => void
-  handleListLoading: (loading: boolean) => void
-  className?: string
-  config: IFilterGridConfig
-  formKey?: string
+  handleSelectedGridRecords: (records: any[]) => void;
+  handleCloseGrid: () => void;
+  handleListLoading: (loading: boolean) => void;
+  className?: string;
+  config: IFilterGridConfig;
+  formKey?: string;
 }) {
   const {
     current,
@@ -50,24 +53,25 @@ export default function FormFilterGrid({
     hideSearch,
     selectedRecords: _form_filter_selected_record,
     searchConfig,
-  } = config
-  const eventEmitter = useEventEmitter()
-  const path = usePathname()
-  const [,,,,versionNumber] = path.split('/')
-  const [dynamicWizardContext, setDynamicWizardContext] = useState()
+  } = config;
+  const eventEmitter = useEventEmitter();
+  const path = usePathname();
+  const [, , , , versionNumber] = path.split('/');
+  const [dynamicWizardContext, setDynamicWizardContext] = useState();
   useEffect(() => {
     if (!!process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-      import(`~/components/platform/Wizard_${versionNumber}/Provider`)
-        .then(e => {
-          setDynamicWizardContext(e.WizardContext)
-        })
+      import(`~/components/platform/Wizard_${versionNumber}/Provider`).then(
+        (e) => {
+          setDynamicWizardContext(e.WizardContext);
+        },
+      );
     }
-  }, [versionNumber])
-  const { state } = useContext(dynamicWizardContext ?? WizardContext)
-  const { open } = useSidebar()
+  }, [versionNumber]);
+  const { state } = useContext(dynamicWizardContext ?? WizardContext);
+  const { open } = useSidebar();
 
-  const [gridData, setGridData] = useState<IGridData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [gridData, setGridData] = useState<IGridData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(
     async ({
@@ -77,30 +81,30 @@ export default function FormFilterGrid({
       advance_filters = [],
       sorting = [],
     }: {
-      current: number
-      limit: number
-      pluck: string[]
-      advance_filters: any[]
-      sorting: any[]
+      current: number;
+      limit: number;
+      pluck: string[];
+      advance_filters: any[];
+      sorting: any[];
     }) => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         if (Object.keys(searchConfig ?? {}).length) {
           const {
             router = 'grid',
             resolver = 'items',
             query_params,
-          } = searchConfig ?? {}
+          } = searchConfig ?? {};
 
           const updateSearchItems = query_params?.default_advance_filters.length
             ? [
-                ...query_params?.default_advance_filters ?? [],
+                ...(query_params?.default_advance_filters ?? []),
                 ...(query_params?.default_advance_filters.length > 1
                   ? [{ id: ulid(), type: 'operator', operator: 'and' }]
                   : []),
                 ...advance_filters,
               ]
-            : advance_filters
+            : advance_filters;
 
           const result = await fetchRecords({
             advance_filters: updateSearchItems,
@@ -108,34 +112,32 @@ export default function FormFilterGrid({
             router,
             resolver,
             sort: sorting,
-          })
+          });
           setGridData({
             ...result,
             advance_filters,
             sorting,
-          })
-        }
-        else {
+          });
+        } else {
           const [, list] = api.grid.items.useSuspenseQuery({
             entity: filter_entity!,
             current,
             limit: limit || 100,
             pluck,
-          })
-          const { isLoading: list_is_loading, data } = list ?? {}
-          setIsLoading(list_is_loading)
-          const { items, totalCount } = data ?? {}
-          setGridData({ items: items || [], totalCount: totalCount || 0 })
+          });
+          const { isLoading: list_is_loading, data } = list ?? {};
+          setIsLoading(list_is_loading);
+          const { items, totalCount } = data ?? {};
+          setGridData({ items: items || [], totalCount: totalCount || 0 });
         }
+      } catch (error) {
+        console.error('Error fetching grid data:', error);
+      } finally {
+        setIsLoading(false);
       }
-      catch (error) {
-        console.error('Error fetching grid data:', error)
-      }
-      finally {
-        setIsLoading(false)
-      }
-    }, [filter_entity, searchConfig],
-  )
+    },
+    [filter_entity, searchConfig],
+  );
 
   useEffect(() => {
     fetchData({
@@ -144,58 +146,53 @@ export default function FormFilterGrid({
       pluck: pluck || [],
       advance_filters: [],
       sorting: [],
-    })
-  }, [])
+    });
+  }, []);
 
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
-    .filter(Boolean) as string[]
+    .filter(Boolean) as string[];
 
   const calcWidth = useMemo(() => {
     if (className) {
-      return className
+      return className;
     }
     if (open && state?.isSummaryOpen) {
-      return 'w-full'
-    }
-    else if (!open && state?.isSummaryOpen) {
-      return 'w-auto'
-    }
-    else if (open && !state?.isSummaryOpen) {
-      return 'w-[calc(100vw-320px)]'
-    }
-    else return ''
-  }, [open, state?.isSummaryOpen, className])
+      return 'w-full';
+    } else if (!open && state?.isSummaryOpen) {
+      return 'w-auto';
+    } else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
+  }, [open, state?.isSummaryOpen, className]);
 
   const containerWidth = useMemo(() => {
     if (className) {
-      return className
+      return className;
     }
     if (open && state?.isSummaryOpen) {
-      return 'lg:w-[calc(100vw-550px)]'
-    }
-    else if (!open && state?.isSummaryOpen) {
-      return 'w-auto'
-    }
-    else if (open && !state?.isSummaryOpen) {
-      return 'w-[calc(100vw-320px)]'
-    }
-    else return ''
-  }, [open, state?.isSummaryOpen, className])
+      return 'lg:w-[calc(100vw-550px)]';
+    } else if (!open && state?.isSummaryOpen) {
+      return 'w-auto';
+    } else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
+  }, [open, state?.isSummaryOpen, className]);
 
-  handleListLoading(isLoading)
+  handleListLoading(isLoading);
 
   if (isLoading) {
     return (
-      <div className='bg-white'>
+      <div className="bg-white">
         <Skeleton />
       </div>
-    )
+    );
   }
 
   const initialSelectedRecords = selectedRecords.reduce(
-    (acc, id) => ({ ...acc, [id]: true }), {},
-  )
+    (acc, id) => ({ ...acc, [id]: true }),
+    {},
+  );
 
   return (
     <div className={cn('w-full', containerWidth)}>
@@ -217,10 +214,11 @@ export default function FormFilterGrid({
             onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (
-                row.original.id === _form_filter_selected_record?.[0]?.id
-                || !config?.statusesIncluded?.includes(row.original.status)
-                || !onSelectRecords
-              ) return
+                row.original.id === _form_filter_selected_record?.[0]?.id ||
+                !config?.statusesIncluded?.includes(row.original.status) ||
+                !onSelectRecords
+              )
+                return;
 
               Promise.resolve(
                 onSelectRecords({
@@ -236,9 +234,9 @@ export default function FormFilterGrid({
 
                 handleSelectedGridRecords(
                   Object.keys(data?.rows).length ? [data?.rows] : [],
-                )
-                handleCloseGrid()
-              })
+                );
+                handleCloseGrid();
+              });
             },
           }}
           data={gridData?.items || []}
@@ -258,7 +256,7 @@ export default function FormFilterGrid({
           sorting={gridData?.sorting}
           totalCount={gridData?.totalCount || 0}
           onSelectRecords={(rows) => {
-            if (!onSelectRecords) return
+            if (!onSelectRecords) return;
             Promise.resolve(
               onSelectRecords({
                 rows,
@@ -269,13 +267,18 @@ export default function FormFilterGrid({
               eventEmitter.emit(`formStatus:${formKey}`, {
                 status: 'done',
                 form_key: formKey,
-              })
-              handleSelectedGridRecords(data?.rows || [])
-              handleCloseGrid()
-            })
+              });
+              handleSelectedGridRecords(
+                Object.keys(data?.rows).length ? [data?.rows] : [],
+              );
+              handleCloseGrid();
+            });
           }}
+          defaultAdvanceFilter={
+            config?.searchConfig?.query_params?.default_advance_filters || []
+          }
         />
       </div>
     </div>
-  )
+  );
 }

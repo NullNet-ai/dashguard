@@ -8,6 +8,11 @@ import { Edit } from '../Action/Edit';
 import { Restore } from '../Action/Restore';
 import { type DefaultRowActions } from '../types';
 import { getActionConditionResult } from '../utils/getActionConditionResult';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 
 /**
  *
@@ -69,18 +74,25 @@ export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
   }
 
   return (
-    <Button
-      disabled={isDisabled}
-      onClick={() => {
-        if (config?.editCustomAction) {
-          config?.editCustomAction({ row, config });
-          return;
-        }
-        handleEdit({ row, config });
-      }}
-    >
-      <PencilIcon className="h-3 w-3 text-primary" />
-    </Button>
+    <Tooltip key={'edit'}>
+      <TooltipTrigger asChild>
+        <Button
+          disabled={isDisabled}
+          onClick={() => {
+            if (config?.editCustomAction) {
+              config?.editCustomAction({ row, config });
+              return;
+            }
+            handleEdit({ row, config });
+          }}
+        >
+          <PencilIcon className="h-3 w-3 text-primary" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="z-[9999]">
+        <p>{'Edit'}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -136,18 +148,25 @@ export function DeleteComponent({ row, config, viewMode }: DefaultRowActions) {
   }
 
   return (
-    <Button
-      disabled={isDisabled}
-      onClick={() => {
-        if (config?.deleteCustomAction) {
-          config?.deleteCustomAction({ row, config });
-          return;
-        }
-        handleDelete({ row, config });
-      }}
-    >
-      <Trash2 className="h-3 w-3 text-destructive" />
-    </Button>
+    <Tooltip key={'delete'}>
+      <TooltipTrigger asChild>
+        <Button
+          disabled={isDisabled}
+          onClick={() => {
+            if (config?.deleteCustomAction) {
+              config?.deleteCustomAction({ row, config });
+              return;
+            }
+            handleDelete({ row, config });
+          }}
+        >
+          <Trash2 className="h-3 w-3 text-destructive" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="z-[9999]">
+        <p>{'Delete'}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -215,17 +234,24 @@ export function ArchiveComponent({
   }
 
   return (
-    <Button
-      {...((row.original.disabled || isDisabled) && { disabled: true })}
-      onClick={() => {
-        setRecord?.(record);
-        setOpen?.(true);
-      }}
-    >
-      <ArchiveIcon
-        className={`h-3 w-3 ${row.original.disabled || isDisabled ? 'bg-gray:300 opacity-50' : 'text-destructive'}`}
-      />
-    </Button>
+    <Tooltip key={'archive'}>
+      <TooltipTrigger asChild>
+        <Button
+          {...((row.original.disabled || isDisabled) && { disabled: true })}
+          onClick={() => {
+            setRecord?.(record);
+            setOpen?.(true);
+          }}
+        >
+          <ArchiveIcon
+            className={`h-3 w-3 ${row.original.disabled || isDisabled ? 'bg-gray:300 opacity-50' : 'text-destructive'}`}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="z-[9999]">
+        <p>{'Archive'}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 /**
@@ -279,17 +305,24 @@ export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
     );
   }
   return (
-    <Button
-      disabled={isDisabled}
-      onClick={() => {
-        if (config?.restoreCustomAction) {
-          config?.restoreCustomAction({ row, config });
-          return;
-        }
-        handleRestore({ row, config });
-      }}
-    >
-      <RotateCcw className="h-3 w-3 text-primary" />
-    </Button>
+    <Tooltip key={'restore'}>
+      <TooltipTrigger asChild>
+        <Button
+          disabled={isDisabled}
+          onClick={() => {
+            if (config?.restoreCustomAction) {
+              config?.restoreCustomAction({ row, config });
+              return;
+            }
+            handleRestore({ row, config });
+          }}
+        >
+          <RotateCcw className="h-3 w-3 text-primary" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="z-[9999]">
+        <p>{'Restore'}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
