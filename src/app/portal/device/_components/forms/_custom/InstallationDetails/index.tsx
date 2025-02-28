@@ -107,11 +107,11 @@ export default function CustomInstallationDetails({
                   className='mt-1  md:w-96 rounded-md border-indigo-300 bg-indigo-50 p-2 text-indigo-700'
                   readOnly={ true }
                   type='text'
-                  value='pkg add pfSense-pkg-wallguard'
+                  value='pkg add pfSense-pkg-wallguard.pkg'
                 />
                 <button
                   className='my-auto'
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'pkg add pfSense-pkg-wallguard') }
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleCopyClick(event, 'pkg add pfSense-pkg-wallguard.pkg') }
                 >
                   <DocumentDuplicateIcon
                     className='h-5 w-5 text-gray-400'
