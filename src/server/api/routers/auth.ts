@@ -179,6 +179,7 @@ export const authRouter = createTRPCRouter({
             params: {
               is_new_user: false,
               account_secret: await argon2.hash(input.account_secret),
+              account_status: 'Active'
             },
             pluck: ['id', 'account_secret', 'is_new_user'],
           },

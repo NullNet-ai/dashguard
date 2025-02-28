@@ -733,6 +733,7 @@ export const accountRouter = createTRPCRouter({
                 'status',
                 'email',
                 'account_status',
+                'is_new_user',
               ],
               contacts: ['id', 'first_name', 'last_name', 'middle_name'],
               user_roles: ['role'],
@@ -841,14 +842,19 @@ export const accountRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const account_secret = await argon2.hash(input.data.account_secret);
+
       return ctx.dnaClient
         .update(input.id, {
           entity: input.entity,
           token: ctx.token.value,
           mutation: {
             params: {
-              ...input.data,
-              account_secret,
+              account_id: input.data.account_id,
+              role_id: input.data.role_id,
+              email: input.data.account_id,
+              ...(input.data.account_secret === '************'
+                ? {}
+                : { account_secret }),
             },
           },
         })
@@ -981,6 +987,9 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
+              ...(!input.manual_trigger && category === 'Internal User'
+                ? { is_new_user: true }
+                : {}),
               account_status: input.manual_trigger
                 ? 'Invited'
                 : category === 'External User'
