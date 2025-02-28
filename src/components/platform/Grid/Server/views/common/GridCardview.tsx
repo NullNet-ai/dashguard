@@ -145,8 +145,7 @@ export default function GridCardView() {
                       <div className="mr-2 text-slate-500">
                         {flexRender(
                           // @ts-expect-error temp fix
-                          cell.column.columnDef.header,
-                          cell.getContext(),
+                          cell.column.columnDef.header, cell.getContext(),
                         )}
                       </div>
                       <div
