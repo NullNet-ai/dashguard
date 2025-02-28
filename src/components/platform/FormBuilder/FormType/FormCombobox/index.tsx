@@ -26,7 +26,7 @@ export default function FormComboBox({
     formKey,
 }: FormComboBoxProps) {
     const isHidden = fieldConfig.hidden;
-    const options = fieldConfig.comboboxConfig?.selectOptions || [];
+    const options = React.useMemo(() => fieldConfig.comboboxConfig?.selectOptions || [], [fieldConfig.comboboxConfig]);
 
     // Parse the combined value into select and input parts
     const parseCombinedValue = React.useCallback((combinedValue: string | undefined = '') => {
@@ -60,7 +60,27 @@ export default function FormComboBox({
     // Handle combined value changes
     const handleCombinedChange = (combinedValue: string) => {
         formRenderProps.field.onChange(combinedValue);
+        
+        // Call the onValueParsed callback if provided
+        if (comboboxConfig?.onValueParsed) {
+            const parsedValues = parseCombinedValue(combinedValue);
+            // Ensure selectValue is always a string to match ValueProps type
+            comboboxConfig.onValueParsed({
+                selectValue: parsedValues.selectValue || '',
+                inputValue: parsedValues.inputValue
+            });
+        }
     };
+
+    // Expose the current parsed values to the parent via callback
+    React.useEffect(() => {
+        if (comboboxConfig?.onValueParsed) {
+            comboboxConfig.onValueParsed({
+                selectValue: selectValue || '',
+                inputValue: inputValue || ''
+            });
+        }
+    }, [selectValue, inputValue]);
 
     if (isHidden) {
         return null;

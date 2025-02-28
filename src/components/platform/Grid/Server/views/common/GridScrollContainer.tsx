@@ -1,12 +1,11 @@
 "use client";
-import { set } from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import useWindowSize from "~/hooks/use-resize";
 import { remToPx } from "~/utils/fetcher";
 
 export const ScrollContainerContext = React.createContext<any>(null);
 
-const ScrollContainer: React.FC<any> = ({ children }) => {
+const ScrollContainer: React.FC<any> = ({ children, parentType }) => {
   const { height } = useWindowSize();
   const _height = height - remToPx(16);
   const scrollableRef = useRef<any>(null);
@@ -27,11 +26,11 @@ const ScrollContainer: React.FC<any> = ({ children }) => {
   return (
     <ScrollContainerContext.Provider value={{ scrollLeft, isEndReached }}>
       <div
-        style={{ height: _height - 20 }}
+        style={{ height: _height - (parentType === 'record' ? 200: 20 )}}
         ref={scrollableRef}
         onScroll={handleScroll}
         // className="w-full -auto px-2"
-        className="mx-2 main-grid-scroll-container h-[690px] overflow-x-auto rounded-md border bg-card text-card-foreground"
+        className="mx-2 main-grid-scroll-container h-[619px] overflow-x-auto rounded-md border bg-card text-card-foreground"
       >
         {children}
       </div>

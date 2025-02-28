@@ -16,44 +16,56 @@ import useScreenType from '~/hooks/use-screen-type'
 
 type GridCardListItemProp = {
   row: Row<any>
+  options : any
 }
 
-const GridCardListItem = ({ row }: GridCardListItemProp) => {
+const GridCardListItem = ({ row, options }: GridCardListItemProp) => {
+
+  const {targetColumns, excludedCols} = options ?? {}
   const [isOpen, setIsOpen] = useState(false)
   const { state } = useContext(GridContext)
   const screenType = useScreenType()
   const isMobile  = screenType === 'sm' || screenType ==='xs' || screenType ==='md'
- 
+
   const expandIconPos = state?.config?.expandTriggerPosition ?? 'right'
 
-  const label = row
+  const labelCell = row
     .getVisibleCells()
-    .find(cell => cell.column.id === 'label')
-    ?.getValue() as string
+    .find(cell => cell.column.id === targetColumns?.label)
+
+
+
   const contentCell = row
     .getVisibleCells()
-    .find(cell => cell.column.id === 'content')
+    .find(cell => cell.column.id === targetColumns?.content)
 
   const headerCell = row
     .getVisibleCells()
-    .find(cell => cell.column.id === 'header-cell')
+    .find(cell => cell.column.id === targetColumns?.headerCell)
+    
 
   const headerComponent = headerCell
     ? flexRender(headerCell.column.columnDef.cell, headerCell.getContext())
     : null
 
+
   const content = contentCell
     ? flexRender(contentCell.column.columnDef.cell, contentCell.getContext())
     : null
 
-  const excludedColumns = [
+    const labelContent = labelCell
+    ? flexRender(labelCell.column.columnDef.cell, labelCell.getContext())
+    : null
+
+
+
+  const excludedColumns = excludedCols || [
     'select',
     'id',
     'header-cell',
-    'label',
+    'code',
     'action',
-    'content',
-  ]
+  ];
 
   const visibleCells = row
     .getVisibleCells()
@@ -61,13 +73,13 @@ const GridCardListItem = ({ row }: GridCardListItemProp) => {
 
   const gridColsClass
     = {
-      1: 'grid-cols-2',
-      2: 'grid-cols-3',
-      3: 'grid-cols-4',
-      4: 'grid-cols-5',
-      5: 'grid-cols-6',
-      6: 'grid-cols-7',
-    }[visibleCells.length] || 'grid-cols-auto'
+      1: 'lg:grid-cols-2',
+      2: 'lg:grid-cols-3',
+      3: 'lg:grid-cols-4',
+      4: 'lg:grid-cols-5',
+      5: 'lg:grid-cols-6',
+      6: 'lg:grid-cols-7',
+    }[visibleCells.length] || 'lg:grid-cols-auto'
 
   const triggerButton = (
     <CollapsibleTrigger className="flex justify-end px-2">
@@ -98,20 +110,24 @@ const GridCardListItem = ({ row }: GridCardListItemProp) => {
               : null}
             <div className='flex-row flex items-center'>
               {headerComponent}
-              <div className="text-sm font-semibold ml-4">{label || 'Label Here'}</div>
+                {labelContent}
+              {/* <div className="text-sm font-semibold ml-4">{label || 'N/A'}</div> */}
             </div>
             {isMobile ? (
              triggerButton
             ) : null}
           </div>
-          <div className={cn('grid items-center p-2', gridColsClass)}>
+          <div className={cn('lg:grid flex items-center p-2 flex-wrap gap-x-3 lg:gap-x-0 flex-row-reverse lg:direction-rtl', gridColsClass)}>
             {visibleCells.map(cell => (
-              <div className="flex items-center gap-2" key={cell.column.id}>
+              <div className="flex items-center gap-2 justify-end" key={cell.column.id}>
                 <span className="text-sm font-semibold text-muted-foreground">
-                  {capitalize(cell.column.id)}
+                  {capitalize(cell.column.id.replace(/_/g, ' '))}
                 </span>
                 <span className="text-sm font-medium">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {(() => {
+                    const rendered = flexRender(cell.column.columnDef.cell, cell.getContext())
+                    return rendered ?? 'N/A'
+                  })()}
                 </span>
               </div>
             ))}

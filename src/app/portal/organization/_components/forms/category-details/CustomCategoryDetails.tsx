@@ -1,0 +1,57 @@
+import { Fragment, useEffect } from 'react';
+import { type UseFormReturn } from 'react-hook-form';
+import FormRadio from '~/components/platform/FormBuilder/FormType/FormRadio';
+import { FormField } from '~/components/ui/form';
+
+interface ICategoryDetails {
+  form: UseFormReturn<Record<string, any>, any, undefined>;
+  selectOptions?: Record<string, any>;
+}
+
+export default function CustomCategoryDetails({ form }: ICategoryDetails) {
+  // this is needed to trigger the setting of the default value
+  useEffect(() => {
+    form.setValue('categories', 'Department', {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, []);
+
+  return (
+    <Fragment>
+      <FormField
+        name="categories"
+        control={form.control}
+        render={(formProps) => {
+          return (
+            <FormRadio
+              formKey="category_details"
+              fieldConfig={{
+                id: `categories`,
+                formType: 'radio',
+                name: `categories`,
+                label: 'Category',
+              }}
+              formRenderProps={{
+                ...formProps,
+                field: {
+                  ...formProps.field,
+                  onChange: (value) => {
+                    form.setValue('categories', value, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  },
+                },
+              }}
+              form={form}
+              radioOptions={{
+                categories: [{ label: 'Department', value: 'Department' }],
+              }}
+            />
+          );
+        }}
+      />
+    </Fragment>
+  );
+}
