@@ -4,7 +4,6 @@ import { api } from "~/trpc/react";
 import { usePathname } from "next/navigation";
 
 const fields = {
-  "Parent Organization": "parent_organization",
   Name: "name",
 };
 

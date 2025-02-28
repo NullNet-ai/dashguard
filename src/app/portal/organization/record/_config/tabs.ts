@@ -10,11 +10,6 @@ const tabs = [
     tabName: "organization",
   },
   {
-    id: "suborganizations",
-    name: "Sub-Organizations",
-    tabName: "suborganizations",
-  },
-  {
     id: "contact",
     name: "Contact",
     tabName: "contact",
