@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.17.1",
-  "branch": "released/1.17.1",
-  "message": "release grid cardlist fixed issues",
+  "tag": "1.17.2",
+  "branch": "released/1.17.2",
+  "message": "added metadata key in parentprop in grid",
   "publish_name": "Juphet Vitualla"
 }
