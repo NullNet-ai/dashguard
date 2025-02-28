@@ -74,7 +74,7 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
           : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 text-sm">
+      <div className="grid grid-cols-1 gap-4 gap-y-2 text-sm">
         {visibleCells.map((cell: any, cellIndex: any) => {
           // Skip id and status as they're already shown above
           if (
@@ -101,7 +101,7 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
               </div>
               <div
                 className={cn(
-                  'flex flex-wrap gap-y-1', ['email', 'phone'].includes(cell.column.id)
+                  'flex flex-wrap gap-y-1 gap-x-1', ['email', 'phone'].includes(cell.column.id)
                     ? 'break-all'
                     : 'break-normal',
                 )}
@@ -113,7 +113,7 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
         })}
       </div>
       <button
-        className="mt-4 text-sm text-primary"
+        className="mt-2 text-sm text-primary"
         onClick={() => {
           setShowMore(!showMore)
         }}
