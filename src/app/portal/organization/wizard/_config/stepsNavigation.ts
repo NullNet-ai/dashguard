@@ -9,5 +9,10 @@ const stepsNavigation = {
     prev: true,
     skip: false,
   },
+  three: {
+    next: true,
+    prev: true,
+    skip: true,
+  },
 };
 export default stepsNavigation;
