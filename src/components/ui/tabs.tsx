@@ -22,9 +22,11 @@ const TabsList = React.forwardRef<
       ref={ref}
       className={cn(
         'flex',
+
         orientation === 'vertical' ? 'flex-col' : 'flex-row',
         {
-          'border-b border-gray-200': !['pills', 'shadow'].includes(variant),
+          'border-b border-gray-200': !['pills', 'shadow'].includes(variant) && !(variant === 'underline' && orientation === 'vertical'),
+          'border-r border-gray-200': variant === 'underline' && orientation === 'vertical',
           'rounded-lg bg-gray-50 p-1': variant === 'pills',
           'shadow-lg': variant === 'shadow',
         },

@@ -15,6 +15,7 @@ export interface StateTabContextType {
   variant?: 'default' | 'pills' | 'underline'|'shadow'
   size?: 'sm' | 'md' | 'lg'
   orientation?: 'horizontal' | 'vertical'
+  position?: 'left' | 'right'
   defaultValue?: string
 }
 

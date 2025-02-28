@@ -19,6 +19,7 @@ function StateTabList({
     variant = 'default',
     size = 'md',
     orientation = 'horizontal',
+    position = 'right',
   } = useStateTab()
 
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -39,40 +40,57 @@ function StateTabList({
     }
   }, [activeTab, persistKey])
 
-  // Remove the restore effect since we handle it in initial state
-
   return (
     <Tabs
       defaultValue={activeTab}
-      value={activeTab} // Add controlled value
+      value={activeTab}
       className={cn('w-full', className)}
       onValueChange={setActiveTab}
     >
-      <TabsList variant={variant} orientation={orientation}>
-        {tabs.map((tab) => {
-          return (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              disabled={tab.disabled}
-              size={size}
-              variant={variant}
-              iconPosition={tab.iconPosition}
-            >
-              {tab.icon}
-              {tab.label}
-            </TabsTrigger>
-          )
-        })}
-      </TabsList>
-      <div>
-        {tabs.map((tab) => {
-          return (
-            <TabsContent key={tab.id} value={tab.id}>
-              {tab.content}
-            </TabsContent>
-          )
-        })}
+      <div className={cn(
+        'flex',
+        orientation === 'vertical' ? 'flex-row gap-4' : 'flex-col',
+        orientation === 'vertical' && position === 'left' && 'flex-row-reverse'
+      )}>
+        <TabsList 
+          variant={variant} 
+          orientation={orientation}
+          className={cn(
+            orientation === 'vertical' && 'flex-col h-auto min-w-fit'
+          )}
+        >
+          {tabs.map((tab) => {
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                disabled={tab.disabled}
+                size={size}
+                variant={variant}
+                iconPosition={tab.iconPosition}
+                className={cn(
+                  orientation === 'vertical' && 'justify-start w-full'
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+        <div className={cn(
+          orientation === 'vertical' ? 'flex-1' : 'w-full',
+          orientation === 'vertical' && position === 'left' && 'mr-4',
+          orientation === 'vertical' && position === 'right' && 'ml-4'
+        )}>
+          {tabs.map((tab) => {
+            return (
+              <TabsContent key={tab.id} value={tab.id}>
+                {tab.content}
+              </TabsContent>
+            )
+          })}
+        </div>
       </div>
     </Tabs>
   )
@@ -83,13 +101,14 @@ const StateTab = ({
   variant,
   size,
   orientation,
+  position,
   className,
   persistKey,
   defaultValue,
 }: StateTabProps) => {
   return (
     <StateTabProvider
-      value={{ tabs, variant, size, orientation, defaultValue }}
+      value={{ tabs, variant, size, orientation, position, defaultValue }}
     >
       <StateTabList className={className} persistKey={persistKey} />
     </StateTabProvider>
