@@ -5,8 +5,14 @@ import { Input } from "./input";
 import { cn } from "~/lib/utils";
 import { useFormField } from './form';
 
+interface ValueProps {
+  selectValue: string;
+  inputValue: string;
+}
+
 export interface ComboBoxProps {
   selectOptions: { value: string; label: string }[];
+  onValueParsed?: (values: ValueProps) => void;
   inputPlaceholder?: string;
   selectPlaceholder?: string;
   className?: string;
