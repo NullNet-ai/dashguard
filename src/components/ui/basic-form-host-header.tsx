@@ -8,7 +8,7 @@ import {
 import { Button } from '~/components/ui/button';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 interface IEllipsisOptions {
   id: number;
@@ -26,6 +26,7 @@ interface IProps {
   handleCancel?: () => void;
   handleUnlock: () => void;
   hideEllipseOptions?: boolean;
+  hideSaveCancelButton?: boolean;
   isSaving?: boolean;
 }
 
@@ -38,10 +39,11 @@ export default function BasicFormHostHeader({
   handleCancel,
   handleUnlock,
   hideEllipseOptions = false,
+  hideSaveCancelButton = true,
   isSaving = false,
 }: IProps) {
   const [isSubmitting, setIsSubmitting] = useState(isSaving);
- 
+
   useEffect(() => {
     setIsSubmitting(isSaving);
   }, [isSaving]);
@@ -59,7 +61,7 @@ export default function BasicFormHostHeader({
     <div className={'flex flex-row items-center justify-between p-2'}>
       {Label}
       <div className="flex gap-2">
-        {isLock ? (
+        {isLock && !hideSaveCancelButton ? (
           <Button
             size={'icon'}
             variant={'ghost'}
@@ -70,27 +72,31 @@ export default function BasicFormHostHeader({
           </Button>
         ) : (
           <>
-            <Button
-              variant={'default'}
-              onClick={handleSave}
-              type="button"
-              loading={isSubmitting}
-              size={'xs'}
-              className="items-center gap-1 text-sm"
-              // {...props}
-            >
-              <SaveIcon className="h-4 w-4" />
-              Save
-            </Button>
-            <Button
-              variant={'outline'}
-              onClick={handleCancel}
-              type="button"
-              size={'xs'}
-            >
-              <XMarkIcon className="h-4 w-4" />
-              Cancel
-            </Button>
+            {!hideSaveCancelButton && (
+              <Fragment>
+                <Button
+                  variant={'default'}
+                  onClick={handleSave}
+                  type="button"
+                  loading={isSubmitting}
+                  size={'xs'}
+                  className="items-center gap-1 text-sm"
+                  // {...props}
+                >
+                  <SaveIcon className="h-4 w-4" />
+                  Save
+                </Button>
+                <Button
+                  variant={'outline'}
+                  onClick={handleCancel}
+                  type="button"
+                  size={'xs'}
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                  Cancel
+                </Button>
+              </Fragment>
+            )}
 
             {!hideEllipseOptions && (
               <DropdownMenu>

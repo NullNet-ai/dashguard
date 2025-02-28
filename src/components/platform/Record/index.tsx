@@ -10,6 +10,7 @@ import MainContent from "./MainContent";
 import RecordWrapperProvider from "./providers/RecordWrapperProvider";
 import RecordSummaryMobile from "./Summary/RecordSummaryMobile";
 import RecordSummaryContent from "./Summary/SummaryContent";
+import { SideDrawerProvider, SideDrawerView } from '../SideDrawer';
 
 const Record = ({
   config: { tabs, entityCode, entityName, categories, identifierOption },
@@ -22,6 +23,8 @@ const Record = ({
     (child) => (child as ReactElement).type !== RecordSummaryViewContent,
   );
   return (
+    <SideDrawerProvider>
+            <SideDrawerView />
     <RecordProvider
       config={{
         entityCode: entityCode,
@@ -54,6 +57,7 @@ const Record = ({
         <RecordSummaryContent />
       </RecordSummaryMobile>
     </RecordProvider>
+    </SideDrawerProvider>
   );
 };
 

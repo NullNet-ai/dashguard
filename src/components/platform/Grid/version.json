@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.17.0",
-  "branch": "released/feat/platform7-3112/1.17.0",
-  "message": "Grid Application > Allow to add multiple custom row actions",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.17.2",
+  "branch": "released/1.17.2",
+  "message": "added metadata key in parentprop in grid",
+  "publish_name": "Juphet Vitualla"
 }

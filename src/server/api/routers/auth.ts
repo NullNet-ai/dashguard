@@ -77,6 +77,20 @@ export const authRouter = createTRPCRouter({
         .execute();
       return result;
     }),
+
+  getToken: privateProcedure
+   .input(
+      z.object({
+        username: z.string().min(1),
+      }),
+    )
+   .mutation(async ({ input, ctx }) => {
+      const token = await ctx.redisClient.getCachedData(
+        `account_token:${input.username}`,
+      );
+      return token;
+    }),
+
   getAccountData: privateProcedure
     .input(
       z.object({
