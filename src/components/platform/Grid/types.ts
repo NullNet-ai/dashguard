@@ -95,6 +95,11 @@ export interface IConfigGrid {
   onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
   is_warning_archive?: boolean;
+  infiniteConfig:{
+    router: AppRouterKeys,
+    resolver?: string;
+    query_params?: ISearchParams;
+  }
   searchConfig?: {
     router?: AppRouterKeys;
     resolver?: string;
@@ -148,6 +153,7 @@ export interface IState {
   pagination?: IPagination;
   defaultAdvanceFilter?: ISearchItem[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  hasMore?: boolean;
 }
 
 export interface IAction {
@@ -163,6 +169,8 @@ export interface IAction {
   setRowToArchive: React.Dispatch<any>;
   setBulkActionType: (type: string | null) => void;
   setShowBulkActionConfirmationModal: (show: boolean) => void;
+  handleGetInfiniteData: (params?: any) => Promise<void>
+  setHasMore: React.Dispatch<any>;
 }
 
 export interface ICreateContext {

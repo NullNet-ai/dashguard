@@ -4,6 +4,8 @@ import { type SortingState } from '@tanstack/react-table'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
+
+import Entities from "~/auto-generated/entities";
 import { type ISortBy } from '~/components/platform/Grid/Category/type'
 import {
   type IAdvanceFilter,
@@ -681,6 +683,32 @@ export const gridRouter = createTRPCRouter({
       pagination: reportPagination,
     }
   }),
+  getInfiniteData: privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+        query_params: z.any()
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+
+      const { entity, query_params } = input
+      const query = ctx.dnaClient.findAll({
+        entity: entity,
+        token: ctx.token.value,
+        query:{
+          pluck: query_params.pluck,
+        }
+      })
+
+      const result = await query.execute()
+      const { data, total_count } = result
+      return {
+        data,
+        total_count,
+      }
+     
+    }),
   updateGridTabs: privateProcedure
     .input(
       z.object({

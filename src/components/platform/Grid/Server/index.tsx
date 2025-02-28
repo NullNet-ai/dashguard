@@ -15,6 +15,7 @@ function MainServer({
   defaultAdvanceFilter,
   advanceFilter,
   pagination,
+  
 }: IPropsGrid) {
   return (
     <GridProvider
