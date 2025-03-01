@@ -14,6 +14,8 @@ const FormServerFetch = async () => {
     })
   const defaultValues = fetched_device?.data
 
+  
+
   return (
     <InteractiveGraph
       defaultValues={defaultValues ?? {}}

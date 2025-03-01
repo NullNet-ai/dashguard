@@ -66,8 +66,6 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
   // }, [graphType])
 
 
-  console.log("%c Line:110 🍯 time_range", "color:#ea7e5c", moment().format('YYYY-MM-DD'),);
-
   const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
     {
       bucket_size: '1s',
@@ -89,7 +87,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
   const add_static_bandwidth = filteredData?.map((item) => {
     return {
       ...item,
-      // static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
+      static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
     }
   }
   )
@@ -105,61 +103,9 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
 
   return (
     <Card>
-      {/* <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>{`${cardTitle} - Interactive`}</CardTitle>
-        </div>
-        Interfaces
-        <Select value={interfaces} onValueChange={setInterfaces}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Interfaces" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {resolutionOpt.map((options: any) => Object.entries(options).map(([key, label]) => (
-              <SelectItem className="rounded-lg" key={key} value={key}>
-                {label as string}
-              </SelectItem>
-            ))
-            )}
-          </SelectContent>
-        </Select>
-        Graph Type
-        <Select value={graphType} onValueChange={setGraphType}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem className="rounded-lg" value="default">
-              Default
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="bar">
-              Bar Chart
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="line">
-              Line Chart
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
-          className="aspect-auto h-full w-full p-5"
-          config={chartConfig}
-        >
-          {renderChart({ filteredData: add_static_bandwidth, graphType })}
-
-        </ChartContainer>
-      </CardContent> */}
-
-
+      <div className='px-4'>
       <Form {...form}>
-        <div className='grid !grid-cols-6 gap-4'>
+        <div className='pt-2 grid !grid-cols-8 gap-4'>
           <FormModule
             // customDesign={{
             //   formClassName: 'grid !grid-cols-2 gap-4',
@@ -173,8 +119,6 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
                 interfaces: [
                   { label: 'wan (vtnet0)', value: 'wan (vtnet0)' },
                   { label: 'lan (vtnet1)', value: 'lan (vtnet1)' },
-                  { label: 'lan (vtnet2)', value: 'lan (vtnet2)' },
-                  { label: 'lan (vtnet3)', value: 'lan (vtnet3)' },
                 ]
               },
               selectOptions: {
@@ -187,37 +131,46 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
             }}
             fields={[
               {
-                id: "field_1740796330359",
-                formType: "space",
-                name: "field_1740796330359",
-                label: "New Field 1",
-                description: "Field Description",
-                placeholder: "Enter value...",
-                fieldClassName: "",
-                fieldStyle: {
-                  gridColumn: "1 / span 4",
-                  gridRow: "1 / span 1"
+                "id": "pie_chart",
+                "formType": "custom-field",
+                "name": "pie_chart",
+                "label": "Pie Chart",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 4",
+                  "gridRow": "1 / span 1"
+                },
+                render: () => {
+                  return <div className='ml-20 mt-10'>Pie Chart</div>
+                },
+              },
+              {
+                "id": "interfaces",
+                "formType": "multi-select",
+                "name": "interfaces",
+                "label": "Interfaces",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "5 / span 2",
+                  "gridRow": "1 / span 1"
                 }
               },
               {
-                id: "interfaces",
-                formType: "multi-select",
-                name: "interfaces",
-                label: "Interfaces",
-                description: "Field Description",
-                placeholder: "Enter value...",
-                fieldClassName: "",
-                fieldStyle: {},
-              },
-              {
-                id: "graph_type",
-                formType: "select",
-                name: "graph_type",
-                label: "Graph Type",
-                description: "Field Description",
-                placeholder: "Enter value...",
-                fieldClassName: "",
-                fieldStyle: {}
+                "id": "graph_type",
+                "formType": "select",
+                "name": "graph_type",
+                "label": "Graph Type",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "7 / span 2",
+                  "gridRow": "1 / span 1"
+                }
               },
               {
                 id: "field_1740796359046",
@@ -231,7 +184,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
                   gridColumn: "1 / span 2",
                   gridRow: "2 / span 2"
                 },
-                render: ({ field, fieldConfig, fieldState }) => {
+                render: () => {
                   return <FormClientFetch />
                 },
               },
@@ -244,22 +197,47 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
                 placeholder: "Enter value...",
                 fieldClassName: "",
                 fieldStyle: {
-                  gridColumn: "3 / span 4",
-                  gridRow: "2 / span 2"
+                  gridColumn: "3 / span 6",
+                  gridRow: "2 / span 4"
                 },
-                render: ({ form, field, fieldConfig, fieldState }) => {
+                render: ({ form }) => {
                   const interfacesData = form?.watch('interfaces')
 
                   setInterfaces(interfacesData)
                   const graphType = form?.watch('graph_type')
-                  // px-2 pt-4 sm:px-6 sm:pt-6
-                  return <div className='px-2 pt-4 sm:px-6 sm:pt-6'><ChartContainer
-                    className="aspect-auto h-full w-full p-5"
+                    return <div className='px-2 pt-4 sm:px-6 sm:pt-6'><ChartContainer
+                    className="h-full w-full p-5"
                     config={chartConfig}
                   >
                     {renderChart({ filteredData: add_static_bandwidth, graphType })}
 
                   </ChartContainer></div>
+                },
+              },
+              {
+                "id": "tabs",
+                "formType": "space",
+                "name": "tabs",
+                "label": "Tabs",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 8",
+                  "gridRow": "3 / span 1"
+                }
+              },
+              {
+                "id": "graphs",
+                "formType": "space",
+                "name": "graphs",
+                "label": "Graphs",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 8",
+                  "gridRow": "4 / span 1"
                 },
               }
 
@@ -268,6 +246,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
           />
         </div>
       </Form>
+      </div>
 
     </Card>
   )
