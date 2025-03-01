@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { ulid } from 'ulid';
 
 import { WizardContext } from '~/components/platform/Wizard/Provider';
@@ -11,10 +17,13 @@ import { api } from '~/trpc/react';
 
 import Grid from '../../../../Grid/Client';
 import Skeleton from '../../../../Grid/Skeleton';
-import { type IFilterGridConfig } from '../../../types/global/interfaces';
+import {
+  type IFilterGridConfig,
+  type IGridData,
+} from '../../../types/global/interfaces';
 
+import { fetchRecords } from './actions';
 import { usePathname } from 'next/navigation';
-import useDynamicWidth from './hooks/useDynamicWidth';
 
 export default function FormFilterGrid({
   config,
@@ -61,76 +70,121 @@ export default function FormFilterGrid({
   const { state } = useContext(dynamicWizardContext ?? WizardContext);
   const { open } = useSidebar();
 
-  // const fetchData = () => {
+  const [gridData, setGridData] = useState<IGridData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    
+  const fetchData = useCallback(
+    async ({
+      current,
+      limit,
+      pluck,
+      advance_filters = [],
+      sorting = [],
+    }: {
+      current: number;
+      limit: number;
+      pluck: string[];
+      advance_filters: any[];
+      sorting: any[];
+    }) => {
+      setIsLoading(true);
+      try {
+        if (Object.keys(searchConfig ?? {}).length) {
+          const {
+            router = 'grid',
+            resolver = 'items',
+            query_params,
+          } = searchConfig ?? {};
 
-  //   const res = api.contact.mainGrid.useQuery({
-  //     entity: filter_entity!,
-  //     current,
-  //     limit: limit || 100,
-  //     pluck,
-  //     advance_filters: updateSearchItems,
-  //     sorting: [],
-  //   } , {
-  //     retry:false
-  //   });
-  //   console.log('@#@@' , res)
-  //   return res
-  // };
-  const router = searchConfig?.router || 'grid';
-  const resolver = searchConfig?.resolver || 'items';
-  const query_params = searchConfig?.query_params;
-  const updateSearchItems = (query_params?.default_advance_filters ?? [])
-    .length
-    ? [
-        ...(query_params?.default_advance_filters ?? []),
-        // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
-        ...(query_params?.default_advance_filters?.length > 1
-          ? [{ id: ulid(), type: 'operator', operator: 'and' }]
-          : []),
-        ...[],
-      ]
-    : [];
+          const updateSearchItems = query_params?.default_advance_filters.length
+            ? [
+                ...(query_params?.default_advance_filters ?? []),
+                ...(query_params?.default_advance_filters.length > 1
+                  ? [{ id: ulid(), type: 'operator', operator: 'and' }]
+                  : []),
+                ...advance_filters,
+              ]
+            : advance_filters;
 
-  const { data, isLoading, isError } = api.contact.mainGrid.useQuery({
-    entity: filter_entity!,
-    current,
-    limit: limit || 100,
-    pluck,
-    advance_filters: updateSearchItems,
-    sorting: [],
-  } , {
-    retry:false
-  })
+          const result = await fetchRecords({
+            advance_filters: updateSearchItems,
+            pluck_fields: query_params?.pluck || [],
+            router,
+            resolver,
+            sort: sorting,
+          });
+          setGridData({
+            ...result,
+            advance_filters,
+            sorting,
+          });
+        } else {
+          const [, list] = api.grid.items.useSuspenseQuery({
+            entity: filter_entity!,
+            current,
+            limit: limit || 100,
+            pluck,
+          });
+          const { isLoading: list_is_loading, data } = list ?? {};
+          setIsLoading(list_is_loading);
+          const { items, totalCount } = data ?? {};
+          setGridData({ items: items || [], totalCount: totalCount || 0 });
+        }
+      } catch (error) {
+        console.error('Error fetching grid data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [filter_entity, searchConfig],
+  );
 
-  const gridData = {
-    ...data,
-    advance_filters: [],
-    sorting: [],
-  };
+  useEffect(() => {
+    fetchData({
+      current: current || 1,
+      limit: limit || 100,
+      pluck: pluck || [],
+      advance_filters: [],
+      sorting: [],
+    });
+  }, []);
+
   const selectedRecords = (config.selectedRecords || [])
     ?.map((record: any) => record?.id)
     .filter(Boolean) as string[];
 
-  const { calcWidth, containerWidth } = useDynamicWidth(
-    open,
-    state ?? undefined,
-    className,
-  );
+  const calcWidth = useMemo(() => {
+    if (className) {
+      return className;
+    }
+    if (open && state?.isSummaryOpen) {
+      return 'w-full';
+    } else if (!open && state?.isSummaryOpen) {
+      return 'w-auto';
+    } else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
+  }, [open, state?.isSummaryOpen, className]);
+
+  const containerWidth = useMemo(() => {
+    if (className) {
+      return className;
+    }
+    if (open && state?.isSummaryOpen) {
+      return 'lg:w-[calc(100vw-550px)]';
+    } else if (!open && state?.isSummaryOpen) {
+      return 'w-auto';
+    } else if (open && !state?.isSummaryOpen) {
+      return 'w-[calc(100vw-320px)]';
+    } else return '';
+  }, [open, state?.isSummaryOpen, className]);
+
   handleListLoading(isLoading);
+
   if (isLoading) {
     return (
       <div className="bg-white">
         <Skeleton />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center bg-white">
-        <p>Error loading data</p>
       </div>
     );
   }
@@ -156,9 +210,8 @@ export default function FormFilterGrid({
             title: label,
             columns: gridColumns!,
             actionType,
-            // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
-            searchConfig: searchConfig ?? {},
-            // onFetchRecords: fetchData,
+            searchConfig,
+            onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (
                 row.original.id === _form_filter_selected_record?.[0]?.id ||
@@ -221,11 +274,8 @@ export default function FormFilterGrid({
               handleCloseGrid();
             });
           }}
-          // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
           defaultAdvanceFilter={
-            config?.searchConfig?.query_params?.default_advance_filters?.length
-              ? config?.searchConfig?.query_params?.default_advance_filters
-              : []
+            config?.searchConfig?.query_params?.default_advance_filters || []
           }
         />
       </div>
