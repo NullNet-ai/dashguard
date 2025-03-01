@@ -9,7 +9,7 @@ const GridTabs = async () => {
   const gridTabsData = await api.grid.getSessionGridTabs();
   return (
     <div className="flex flex-row gap-2">
-      {gridTabsData?.map((tab) => {
+      {gridTabsData?.map((tab, index) => {
         const active = tab.current ? 'text-primary' : 'text-foreground';
         const entity = tab?.href?.split('/').at(2);
         const applicationType = tab?.href?.split('/').at(3)?.split('?')[0];
@@ -28,7 +28,9 @@ const GridTabs = async () => {
             className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
           >
             <span className={cn(active, '')}>{toCapitalize(tab.name)}</span>
-            <GridMenu tab={tab} filter_id={tab?.id} />
+            {index !== 0 && index !== 1 && (
+              <GridMenu tab={tab} filter_id={tab?.id} />
+            )}
           </Link>
         );
       })}

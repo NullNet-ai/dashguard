@@ -16,6 +16,7 @@ import {
   SortableItem,
 } from '~/components/ui/sortable';
 import { useManageFilter } from '../Provider';
+import ComingSoon from '~/app/portal/coming-soon/_components/coming_soon';
 
 interface GroupItem {
   id: string;
@@ -88,6 +89,7 @@ export default function GroupContent() {
     });
   };
 
+  return <ComingSoon />
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="grid gap-3">

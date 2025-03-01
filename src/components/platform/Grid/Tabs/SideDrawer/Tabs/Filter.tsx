@@ -1,8 +1,11 @@
 'use client';
-import { useEffect } from 'react';
-import { CircleMinus, GripVerticalIcon, Plus } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CircleMinus, Plus } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
 import { Button } from '~/components/ui/button';
+import { Form } from '~/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -10,31 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import {
-  Sortable,
-  SortableDragHandle,
-  SortableItem,
-} from '~/components/ui/sortable';
 import { useManageFilter } from '../Provider';
-import MultipleSelector from '~/components/ui/multi-select';
-import { z } from 'zod';
-import { Form } from '~/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
-
-interface FilterItem {
-  operator: string;
-  type: 'criteria' | 'operator';
-  field?: string;
-  label?: string;
-  values?: string[];
-  default: boolean;
-}
-
-interface MultiSelectOption {
-  label: string;
-  value: string;
-}
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -52,7 +31,7 @@ const OPERATORS = [
   { value: 'is_between', label: 'Is Between' },
   { value: 'is_not_between', label: 'Is Not Between' },
   { value: 'like', label: 'Like' },
-] as const;
+];
 const ZodSchema = z.object({
   filters: z.array(
     z.discriminatedUnion('type', [
@@ -60,12 +39,8 @@ const ZodSchema = z.object({
         field: z.string().min(1, "Field is required"),
         operator: z.string().min(1, "Operator is required"),
         label: z.string(),
-        values: z.array(
-          z.object({
-            label: z.string(),
-            value: z.string()
-          })
-        ).min(1, "Value is required"),
+        // values: z.array(z.string()).min(1, "Value is required"),
+        values: z.string().min(1, "Value is required"),
         type: z.literal('criteria'),
         default: z.boolean(),
       }),
@@ -82,23 +57,11 @@ export default function FilterContent() {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
   const { filterDetails, columns } = state ?? {};
-  console.log('🚀 ~ FilterContent ~ columns:', columns);
 
   const form = useForm<z.infer<typeof ZodSchema>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
-      filters: filterDetails?.default_filter?.filter(
-        (f) => f.type === 'criteria',
-      )?.map((filter: any) => ({
-        ...filter,
-        // Convert array of strings to array of objects for multi-select
-        values: Array.isArray(filter.values) 
-          ? filter.values.map(value => ({
-              label: value,
-              value: value
-            }))
-          : []
-      })) ?? [
+      filters: filterDetails?.default_filter ?? [
         {
           field: '',
           operator: 'equal',
@@ -109,7 +72,6 @@ export default function FilterContent() {
         },
       ],
     },
-
     shouldFocusError: false,
   });
 
@@ -139,7 +101,7 @@ export default function FilterContent() {
       type: 'operator',
       default: true,
     });
-    append(newFilter);
+    append(newFilter as any);
     const updatedFilters = form.getValues().filters;
     handleUpdateFilter({ default_filter: updatedFilters });
   };
@@ -157,7 +119,7 @@ export default function FilterContent() {
   };
 
   const handleValidate = () => {
-    console.info("saving form")
+    console.info("SAVING FORM")
   }
 
   return (
@@ -243,8 +205,6 @@ export default function FilterContent() {
                       ]}
                       subConfig={{
                         selectOptions: {
-                          // [`${prefix}.overall_result`]: overall_result || [],
-                          // [`${prefix}.rating`]: rating || [],
                           [`${prefix}.field`]:
                             columns?.map((column) => ({
                               label: column.label,

@@ -1,10 +1,12 @@
 'use client';
 import { CopyPlus, Table, Trash } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { Button } from '~/components/ui/button';
-import GridManageFilter from './SideDrawer/View';
-import { ManageFilterProvider } from './SideDrawer/Provider';
 import { useGrid } from '../Provider';
+import { duplicateFilterTab, removeGridFilter } from './SideDrawer/actions';
+import { ManageFilterProvider } from './SideDrawer/Provider';
+import GridManageFilter from './SideDrawer/View';
 
 const ACTIONS = [
   {
@@ -24,6 +26,7 @@ const ACTIONS = [
   },
 ];
 export default function ManageFilter({ tab }: { tab: any }) {
+  const router = useRouter();
   const { actions } = useSideDrawer();
   const { state } = useGrid();
   const { config } = state ?? {}; 
@@ -53,12 +56,16 @@ export default function ManageFilter({ tab }: { tab: any }) {
     });
   };
 
-  const handleDeleteFilter = () => {
-    console.info('delete filter');
+  const handleDeleteFilter = async() => {
+    const url = await removeGridFilter(tab.id);
+    router.replace(url as string)
   };
 
-  const handleDuplicateFilter = () => {
+  const handleDuplicateFilter = async() => {
     console.info('duplicate filter');
+
+    const url = await duplicateFilterTab(tab.id);
+    router.push(url)
   };
 
   return (
