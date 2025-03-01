@@ -1,37 +1,25 @@
 'use client';
 import { flexRender } from '@tanstack/react-table';
-import { EllipsisVertical, Grid } from 'lucide-react';
 import React, { useContext, useMemo } from 'react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
 import useScreenType from '~/hooks/use-screen-type';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import {
-  ArchiveComponent,
-  DeleteComponent,
-  EditComponent,
-  RestoreComponent,
-} from '../../../DefatultRow/Actions';
 import { GridContext } from '../../../Provider';
 import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
+
 import GridMobileRowContent from './GridMobileRowContent';
 
 export default function GridMobileRow({
   parent = 'grid',
 }: {
-  parent?: string;
+  parent?: string
 }) {
   const { state, actions } = useContext(GridContext);
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
-
 
   const getCols = useMemo(() => {
     switch (size) {
@@ -56,38 +44,41 @@ export default function GridMobileRow({
         `${state?.config.entity}-grd-crd-container`,
       )}
     >
-      {state?.table.getRowModel().rows?.length ? (
-        state?.table.getRowModel().rows.map((row, rowIndex) => {
-          // Get visible cells excluding action column
-          const visibleCells = row
-            .getVisibleCells()
-            .filter((cell) => cell.column.id !== 'action');
+      {state?.table.getRowModel().rows?.length
+        ? (
+            state?.table.getRowModel().rows.map((row, rowIndex) => {
+              // Get visible cells excluding action column
+              const visibleCells = row
+                .getVisibleCells()
+                .filter(cell => cell.column.id !== 'action')
 
-          const statusCell = row
-            .getVisibleCells()
-            .find((cell) => cell.column.id === 'status');
+              const statusCell = row
+                .getVisibleCells()
+                .find(cell => cell.column.id === 'status')
 
-          return (
-            <GridMobileRowContent
-              row={row}
-              rowIndex={rowIndex}
-              state={state}
-              statusCell={statusCell}
-              flexRender={flexRender}
-              parent={parent}
-              config={config}
-              showArchiveConfirmationModal={showArchiveConfirmationModal}
-              setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
-              setRowToArchive={setRowToArchive}
-              visibleCells={visibleCells}
-            />
-          );
-        })
-      ) : (
-        <div className="p-4 lg:p-0">
-          <div className="h-24 text-center text-foreground">No results.</div>
-        </div>
-      )}
+              return (
+                <GridMobileRowContent
+                  row={row}
+                  key={row.id}
+                  rowIndex={rowIndex}
+                  state={state}
+                  statusCell={statusCell}
+                  flexRender={flexRender}
+                  parent={parent}
+                  config={config}
+                  showArchiveConfirmationModal={showArchiveConfirmationModal}
+                  setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
+                  setRowToArchive={setRowToArchive}
+                  visibleCells={visibleCells}
+                />
+              )
+            })
+          )
+        : (
+            <div className="p-4 lg:p-0">
+              <div className="h-24 text-center text-foreground">No results.</div>
+            </div>
+          )}
       {state?.showArchiveConfirmationModal && (
         <ArchiveConfirmationModal
           config={state?.config}
