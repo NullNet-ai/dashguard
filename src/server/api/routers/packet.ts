@@ -2,7 +2,7 @@ import {
   EOperator,
   EOrderDirection,
 } from '@dna-platform/common-orm'
-import { z } from 'zod'
+import { object, z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
@@ -56,7 +56,7 @@ function transformData(data: InputData[]): OutputData[] {
 
 export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
-  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string()
+  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string()
    })).query(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone } = input
 
@@ -248,13 +248,25 @@ export const packetRouter = createTRPCRouter({
                 entity: 'packets',
                 operator: EOperator.EQUAL,
                 values: [
-                  device_id,
+                  // device_id,
+                  "6cb6c156-e8df-461b-83ec-23aee142a664"
                 ],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'packets',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
               },
             ],
             joins: [],
             bucket_size,
-            limit: 20,
+            limit: 2,
             order: {
               order_by: 'bucket',
               order_direction: EOrderDirection.DESC,
@@ -265,11 +277,44 @@ export const packetRouter = createTRPCRouter({
     
         }).execute()
         const transformedData: OutputData[] = transformData(res?.data as InputData[])
-        return {interface_name: transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))};
+        return {[interface_name]: transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))};
      }))
+     //data = [{"vtnet1":[]},{"vtnet0":[{"bucket":"2025-03-01 13:43:22","bandwidth":634},{"bucket":"2025-03-01 13:43:23","bandwidth":382}]}]
 
-     console.log('%c Line:286 🍯 res', 'color:#465975', res);
-     return res
+      //[ { bucket: "2024-04-01", bandwidth: 222, static_bandwidth: 150 },  { bucket: "2024-04-02", bandwidth: 97, static_bandwidth: 180 }]
+      const [start, end] = time_range || []
+      const _start =  moment(start as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+      const _end = moment(end as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+  
+      // const unit = bucket_size.slice(-1)
+      // const unitFull = getUnit(unit)
+      // console.log('%c Line:262 🍣 unitFull', 'color:#7f2b82', unitFull);
+      const {unit, value = ''} = parseTimeString(bucket_size) as any || {}
+  
+      const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
+     console.log('%c Line:286 🍯 res', 'color:#465975', JSON.stringify(res));
+     const transform_data = timestamps?.map((item) => {
+
+      const interface_val = res?.reduce((acc, intrfce: any) => {
+
+        console.log('%c Line:300 🍞', 'color:#6ec1c2', Object.entries(intrfce) );
+        const [key,val] = Object.entries(intrfce)?.[0] 
+        const same_val = val?.find((element: any) => element.bucket === item)
+        return {
+          ...acc,
+          [key]: same_val?.bandwidth || 0
+        }
+      },{})
+      // []
+      console.log('%c Line:310 🍑 interface_val', 'color:#e41a6a', interface_val);
+      return {
+        bucket: item,
+        ...interface_val
+      }
+
+     })
+     console.log('%c Line:317 🍿 transform_data', 'color:#ed9ec7', transform_data);
+     return transform_data
 
    }
 
