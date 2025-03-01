@@ -493,8 +493,6 @@ export default function GridProvider({
         }
       );
 
-      console.log("resres", res)
-
       setInfiniteData(prev=> {
         return [...prev, 
           ...res.data
@@ -587,6 +585,7 @@ export default function GridProvider({
     bulkActionType,
     pagination,
     hasMore,
+    gridLevel,
   } as IState;
   const actions = {
     handleCreate,

@@ -95,7 +95,7 @@ export interface IConfigGrid {
   onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
   is_warning_archive?: boolean;
-  infiniteConfig:{
+  infiniteConfig?: {
     router: AppRouterKeys,
     resolver?: string;
     query_params?: ISearchParams;
@@ -154,6 +154,7 @@ export interface IState {
   defaultAdvanceFilter?: ISearchItem[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   hasMore?: boolean;
+  gridLevel?: number;
 }
 
 export interface IAction {

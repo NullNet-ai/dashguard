@@ -4,9 +4,10 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import GridMobileRow from "./common/GridMobileRow";
 import Pagination from "../../Pagination";
 
-function GridMobileForm({shownPagination, parentType } : {
+function GridMobileForm({shownPagination, parentType, gridLevel } : {
   shownPagination?: boolean;
   parentType?: string
+  gridLevel?: number
 }) {
   return (
     <Card className="col-span-full border-0 shadow-none flex-1">
@@ -19,7 +20,7 @@ function GridMobileForm({shownPagination, parentType } : {
       >
         <section>
           <div>
-            <GridMobileRow parent={parentType} />
+            <GridMobileRow parent={parentType}  gridLevel={gridLevel}/>
           </div>
         </section>
         {/* <Table>

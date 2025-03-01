@@ -15,11 +15,15 @@ export default function GridMobileRow({
   parent = 'grid',
 }: {
   parent?: string
+  gridLevel?: number
 }) {
   const { state, actions } = useContext(GridContext);
+  
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
+
+  const level = state?.gridLevel
 
   const getCols = useMemo(() => {
     switch (size) {
@@ -39,7 +43,7 @@ export default function GridMobileRow({
 
   return (
     <div
-      className={cn('grid gap-4 overflow-y-auto', getCols)}
+      className={cn('grid lg:gap-4 lg:gap-y-4 gap-y-2 overflow-y-auto', getCols)}
       data-test-id={testIDFormatter(
         `${state?.config.entity}-grd-crd-container`,
       )}
@@ -70,6 +74,7 @@ export default function GridMobileRow({
                   setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
                   setRowToArchive={setRowToArchive}
                   visibleCells={visibleCells}
+                  gridLevel={level}
                 />
               )
             })

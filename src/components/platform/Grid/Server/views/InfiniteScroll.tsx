@@ -34,7 +34,7 @@ const InfiniteScrollContainer = () => {
           </div>
         )}
       >
-        <GridMobileRow />
+        <GridMobileRow gridLevel={state?.gridLevel} />
       </InfiniteScroll>
 
   )

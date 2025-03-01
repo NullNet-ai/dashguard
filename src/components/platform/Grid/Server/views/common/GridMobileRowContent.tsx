@@ -1,4 +1,4 @@
-import { EllipsisVertical } from 'lucide-react'
+import { ChevronDown, ChevronUp, EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
@@ -6,19 +6,33 @@ import { cn } from '~/lib/utils'
 import { testIDFormatter } from '~/utils/formatter'
 
 import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
+import {Button as HeadlessBtn} from '@headlessui/react'
 
-const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells }: any) => {
+const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells, gridLevel }: any) => {
   const [showMore, setShowMore] = React.useState(false)
+
+  const hasExpandButton = visibleCells.some((cell: any) => cell.column.id === 'expand')
+
   return (
-    <div
-      className='flex flex-col justify-start rounded-md border border-b border-l-2 border-l-primary p-4'
+   <>
+     <div
+      className={cn(`flex flex-col justify-start rounded-md  p-4 relative`, `${hasExpandButton ? 'pl-8' : ''}`, `${gridLevel === 1 ? 'border border-b border-l-2 border-l-primary' : 'border border-b border-l-1 border-l-gray-300'}`)}
       data-state={row.getIsSelected() && 'selected'}
       data-test-id={testIDFormatter(
         `${state?.config.entity}-grd-crd-item-${rowIndex + 1}`,
       )}
       key={row.id}
     >
-      <div className="b-4 flex items-start justify-between gap-2">
+      {hasExpandButton ?  <HeadlessBtn 
+        onClick={() => {
+          row.toggleExpanded()
+        }}
+        
+      className={cn(`h-full left-0 absolute w-5  top-0 flex items-center justify-center`, `${row.getIsExpanded() ? 'bg-primary/15' : 'border-r border-gray-200'}`)}>
+        {row.getIsExpanded() ?  <ChevronUp className='size-5 text-primary' /> : <ChevronDown className='size-5 text-default/40' />}
+     </HeadlessBtn> : null}
+     
+      <div className={cn(`b-4 flex items-start justify-between gap-2`)}>
         {statusCell
         && flexRender(statusCell.column.columnDef.cell, {
           ...statusCell.getContext(),
@@ -112,16 +126,43 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
           )
         })}
       </div>
-      <button
-        className="mt-2 text-sm text-primary"
-        onClick={() => {
-          setShowMore(!showMore)
-        }}
-      >
-        {'Show '}
-        {!showMore ? 'more' : 'less'}
-      </button>
+      {visibleCells?.length > 5 && (
+        <button
+            className='mt-2 text-sm text-primary'
+            onClick={() => {
+                setShowMore(!showMore)
+            }}
+            >
+            {'Show '}
+            {!showMore ? 'more' : 'less'}
+        </button>
+      )}
     </div>
+      {row.getIsExpanded()  ? (
+        <div className='relative'>
+          <div className={cn(`absolute left-1 w-[1px]  bg-primary/65`, `${gridLevel > 1 ? 'h-[50%]' : 'h-[90%]'} `)}>
+            <div className='absolute w-2 h-[1px] bg-primary/65 left-0 bottom-0'>
+              <div className='absolute w-[6px] h-[6px] rounded-full bg-primary right-[-3px] bottom-[-2px]' />
+            </div>
+          </div>
+           {state?.config?.rowExpansionBuilder ? (
+                    typeof state?.config?.rowExpansionBuilder ===
+                    'function' ? (
+                      state?.config?.rowExpansionBuilder({
+                        rowData: row.original,
+                      })
+                    ) : (
+                      React.cloneElement(
+                        state?.config?.rowExpansionBuilder,
+                        { rowData: row.original },
+                      )
+                    )
+                  ) : (
+                    <span>Provide your expand component</span>
+                  )}
+        </div>
+      ) : null  }
+   </>
   )
 };
 

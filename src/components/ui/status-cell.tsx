@@ -3,7 +3,7 @@ import { cn } from '~/lib/utils';
 interface StatusCellProps {
   value: string;
   additionalStatuses?: Record<string, string>;
-  key?: string;
+  key?: string | number;
 }
 const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {}, key }) => {
   const statuses = {
