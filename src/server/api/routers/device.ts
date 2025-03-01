@@ -171,7 +171,7 @@ export const deviceRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck,
         pluck_object: _pluck_object,
-        sorting
+        sorting,
       } = input
 
       const pluck_object = {
@@ -210,6 +210,29 @@ export const deviceRouter = createTRPCRouter({
             ? formatSorting(sorting)
             : [],
           date_format: "YYYY/MM/DD",
+          concatenate_fields: [
+            {
+                fields: [
+                    "first_name",
+                    "last_name"
+                ],
+                field_name: "created_by",
+                separator: " ",
+                entity: "contacts",
+                aliased_entity: "contacts"
+            },
+            {
+              fields: [
+                  "first_name",
+                  "last_name"
+              ],
+              field_name: "updated_by",
+              separator: " ",
+              entity: "contacts",
+              aliased_entity: "contacts"
+          },
+         
+        ],
         },
       })
       if (pluck_object) {
@@ -393,6 +416,7 @@ export const deviceRouter = createTRPCRouter({
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
+      console.log('%c Line:418 🍇 items', 'color:#4fff4B', items);
       
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -406,7 +430,8 @@ export const deviceRouter = createTRPCRouter({
           device_configurations,
           ...rest
         } = item;
-      
+        
+        console.log('%c Line:426 🍊 contacts', 'color:#3f7cff', contacts);
       
         const wan_address = device_interfaces?.[0]?.address;
       
