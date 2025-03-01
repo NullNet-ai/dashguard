@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
+import moment from 'moment-timezone'
+import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
 
 interface InputData {
   bucket: string
@@ -148,6 +150,79 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
     return res?.data
+  }),
+
+  getBandwith: privateProcedure.input(z.object({  bucket_size: z.string().nullable(), time_range: z.array(z.string()) , timezone: z.string()})).query(async ({ input, ctx }) => {
+  
+    const { bucket_size, time_range , timezone} = input
+    if(
+      !bucket_size
+    ){return []}
+    const res = await ctx.dnaClient.aggregate({
+      query: {
+        entity: 'packets',
+        aggregations: [
+          {
+            aggregation: 'SUM',
+            aggregate_on: 'total_length',
+            bucket_name: 'bandwidth',
+          },
+        ],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'timestamp',
+            entity: 'packets',
+            operator: EOperator.IS_BETWEEN,
+            values: time_range,
+          },
+          // {
+          //   type: 'operator',
+          //   operator: EOperator.AND,
+          // },
+          // {
+          //   type: 'criteria',
+          //   field: 'device_id',
+          //   entity: 'packets',
+          //   operator: EOperator.EQUAL,
+          //   values: [
+          //     device_id,
+          //   ],
+          // },
+        ],
+        joins: [],
+        bucket_size,
+        order: {
+          order_by: 'bucket',
+          order_direction: EOrderDirection.ASC,
+        },
+        timezone
+      },
+      token: ctx.token.value,
+
+    }).execute()
+
+    const [start, end] = time_range || {}
+    const _start =  moment(start as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+    const _end = moment(end as string).tz(timezone).format('YYYY-MM-DD HH:mm:ss')
+
+    // const unit = bucket_size.slice(-1)
+    // const unitFull = getUnit(unit)
+    // console.log('%c Line:262 🍣 unitFull', 'color:#7f2b82', unitFull);
+    const {unit = '', value = ''} = parseTimeString(bucket_size) || {}
+
+    const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
+    
+    const result = timestamps.map((item) => {
+      const data = res?.data.find((element: any) => element.bucket === item)
+      if (data) {
+        return { bucket: item, bandwidth: data.bandwidth }
+      }
+      return { bucket: item, bandwidth: 0 }
+
+    })
+    
+    return result
   }),
 
   // getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
