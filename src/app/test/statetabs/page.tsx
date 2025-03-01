@@ -4,31 +4,43 @@ import { useState } from "react";
 import StateTab from "~/components/platform/StateTab";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { UserIcon, SettingsIcon, BellIcon, HomeIcon, ArrowLeftRight } from "lucide-react";
+import { UserIcon, SettingsIcon, BellIcon, HomeIcon, ArrowLeftRight, RotateCw } from "lucide-react";
 
 export default function StateTabsExample() {
   const [count, setCount] = useState(0);
   const [tabPosition, setTabPosition] = useState<"left" | "right">("left");
+  const [rotateText, setRotateText] = useState(true);
 
   const togglePosition = () => {
     setTabPosition(tabPosition === "left" ? "right" : "left");
   };
 
+  const toggleRotateText = () => {
+    setRotateText(!rotateText);
+  };
+
   return (
-    <div className="container mx-auto p-6">
+    <div className=" overflow-auto h-screen p-12">
       <h1 className="text-2xl font-bold mb-6">StateTab Vertical Orientation Example</h1>
-      
-      <div className="flex justify-end mb-4">
-        <Button 
-          onClick={togglePosition} 
-          variant="outline" 
+      <div className="flex justify-end mb-4 gap-2">
+        <Button
+          onClick={toggleRotateText}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <RotateCw className="h-4 w-4" />
+          {rotateText ? "Disable" : "Enable"} Rotated Text
+        </Button>
+        <Button
+          onClick={togglePosition}
+          variant="outline"
           className="flex items-center gap-2"
         >
           <ArrowLeftRight className="h-4 w-4" />
           Toggle Position: {tabPosition === "left" ? "Left" : "Right"}
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-6">
         {/* Vertical Orientation Example */}
         <Card>
@@ -44,6 +56,7 @@ export default function StateTabsExample() {
               variant="default"
               persistKey="vertical-tabs-example"
               position={tabPosition}
+              rotateText={rotateText}
               tabs={[
                 {
                   id: "profile",
@@ -57,7 +70,7 @@ export default function StateTabsExample() {
                         on the {tabPosition} side.
                       </p>
                       <div className="flex items-center gap-2">
-                        <Button 
+                        <Button
                           onClick={() => setCount(count + 1)}
                           variant="outline"
                         >
@@ -129,6 +142,7 @@ export default function StateTabsExample() {
               <div>
                 <h3 className="text-md font-medium mb-3">Pills Variant</h3>
                 <StateTab
+                  rotateText={rotateText}
                   orientation="vertical"
                   variant="pills"
                   persistKey="vertical-pills-example"
@@ -157,6 +171,7 @@ export default function StateTabsExample() {
               <div>
                 <h3 className="text-md font-medium mb-3">Underline Variant</h3>
                 <StateTab
+                  rotateText={rotateText}
                   orientation="vertical"
                   variant="underline"
                   persistKey="vertical-underline-example"
@@ -186,6 +201,7 @@ export default function StateTabsExample() {
                 <h3 className="text-md font-medium mb-3">Shadow Variant</h3>
                 <StateTab
                   orientation="vertical"
+                  rotateText={rotateText}
                   variant="shadow"
                   persistKey="vertical-shadow-example"
                   position={tabPosition}
@@ -211,8 +227,6 @@ export default function StateTabsExample() {
             </div>
           </CardContent>
         </Card>
-
-        
       </div>
     </div>
   );
