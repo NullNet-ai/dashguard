@@ -8,7 +8,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
     <AreaChart data={filteredData} height={300} width={1870}>
       <defs>
         {interfaces?.map((item:any) => {
-          return <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
+          return <linearGradient id={`${item?.value}`} x1="0" x2="0" y1="0" y2="1">
           <stop
             offset="5%"
             stopColor={`var(--color-${item?.value})`}
@@ -70,7 +70,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
       />
       {interfaces?.map((item: any) => <Area
         dataKey={item?.value}
-        fill="url(#fillBandwidth)"
+        fill={`url(#fill${item?.value})`}
         stackId="a"
         stroke={`var(--color-${item.value})`}
         type="natural"
