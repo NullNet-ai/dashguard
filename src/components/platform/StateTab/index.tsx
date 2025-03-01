@@ -20,6 +20,7 @@ function StateTabList({
     size = 'md',
     orientation = 'horizontal',
     position = 'right',
+    rotateText = false,
   } = useStateTab()
 
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -49,14 +50,15 @@ function StateTabList({
     >
       <div className={cn(
         'flex',
-        orientation === 'vertical' ? 'flex-row gap-4' : 'flex-col',
+        orientation === 'vertical' ? 'flex-row gap-2' : 'flex-col',
         orientation === 'vertical' && position === 'left' && 'flex-row-reverse'
       )}>
         <TabsList 
           variant={variant} 
           orientation={orientation}
+          position={position}
           className={cn(
-            orientation === 'vertical' && 'flex-col h-auto min-w-fit'
+            orientation === 'vertical' && 'flex-col h-auto min-w-fit '
           )}
         >
           {tabs.map((tab) => {
@@ -68,20 +70,36 @@ function StateTabList({
                 size={size}
                 variant={variant}
                 iconPosition={tab.iconPosition}
+                rotateText={rotateText}
+                position={position}
                 className={cn(
-                  orientation === 'vertical' && 'justify-start w-full'
+                  orientation === 'vertical' && 'justify-start w-full',
+                  orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl'
                 )}
               >
-                {tab.icon}
-                {tab.label}
+                
+                {tab.icon && (
+                  <span className={cn(
+                    orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
+                    orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform'
+                  )}>
+                    {tab.icon}
+                  </span>
+                )}
+                <span className={cn(
+                  orientation === 'vertical' && rotateText && position === 'right' && 'rotate-180 transform',
+                  orientation === 'vertical' && rotateText && position === 'left' && 'rotate-0 transform'
+                )}>
+                  {tab.label}
+                </span>
               </TabsTrigger>
             )
           })}
         </TabsList>
         <div className={cn(
           orientation === 'vertical' ? 'flex-1' : 'w-full',
-          orientation === 'vertical' && position === 'left' && 'mr-4',
-          orientation === 'vertical' && position === 'right' && 'ml-4'
+          orientation === 'vertical' && position === 'left' && 'mr-2',
+          orientation === 'vertical' && position === 'right' && 'ml-2'
         )}>
           {tabs.map((tab) => {
             return (
@@ -105,10 +123,11 @@ const StateTab = ({
   className,
   persistKey,
   defaultValue,
+  rotateText,
 }: StateTabProps) => {
   return (
     <StateTabProvider
-      value={{ tabs, variant, size, orientation, position, defaultValue }}
+      value={{ tabs, variant, size, orientation, position, defaultValue, rotateText }}
     >
       <StateTabList className={className} persistKey={persistKey} />
     </StateTabProvider>
