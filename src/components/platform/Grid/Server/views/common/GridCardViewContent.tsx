@@ -117,7 +117,6 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
           )
         })}
       </div>
-      {visibleCells?.length}
       {visibleCells?.length > 6 && (
         <button
             className='mt-2 text-sm text-primary'
@@ -125,7 +124,7 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
                 setShowMore(!showMore)
             }}
             >
-            {'Show '} {visibleCells?.length}
+            {'Show '}
             {!showMore ? 'more' : 'less'}
         </button>
       )}
