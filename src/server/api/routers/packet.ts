@@ -2,7 +2,6 @@ import {
   EOperator,
   EOrderDirection,
 } from '@dna-platform/common-orm'
-import Bluebird from 'bluebird'
 import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
@@ -57,9 +56,9 @@ function transformData(data: InputData[]): OutputData[] {
 
 export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
-  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string() 
+  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string(), interface_name: z.string().optional() 
    })).query(async ({ input, ctx }) => {
-    const { device_id, bucket_size, time_range, timezone } = input
+    const { device_id, bucket_size, time_range, timezone , interface_name} = input
 
     const res = await ctx.dnaClient.aggregate({
       query: {
@@ -72,19 +71,23 @@ export const packetRouter = createTRPCRouter({
           },
         ],
         advance_filters: [
-          // {
-          //   type: 'criteria',
-          //   field: 'timestamp',
-          //   entity: 'packets',
-          //   operator: EOperator.IS_BETWEEN,
-          //   values: time_range,
-          // },
-          // {
-          //   type: 'operator',
-          //   operator: EOperator.AND,
-          // },
+          ...(interface_name?
+            [
+              {
+                type: 'criteria' as 'criteria',
+                field: 'interface_name',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: [interface_name],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+            ] : []
+          ),
           {
-            type: 'criteria',
+            type: 'criteria' as 'criteria',
             field: 'device_id',
             entity: 'packets',
             operator: EOperator.EQUAL,
