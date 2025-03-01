@@ -9,7 +9,7 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 
-const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
     <BarChart data={filteredData}>
@@ -50,8 +50,8 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
         }
         cursor={false}
       />
-      <Bar dataKey="bandwidth" fill="var(--color-bandwidth)" />
-      <Bar dataKey="static_bandwidth" fill="var(--color-static_bandwidth)" />
+      {interfaces?.map((item: any) => {
+        return <Bar dataKey={item.label} fill={`var(--color-${item?.label})`} />})}
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
     </ResponsiveContainer>
