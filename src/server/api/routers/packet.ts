@@ -215,6 +215,7 @@ export const packetRouter = createTRPCRouter({
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional()
   })).query(async ({ input, ctx }) => {
    const { device_id, bucket_size, time_range, timezone , interface_names} = input
+   console.log("%c Line:218 🍬 time_range", "color:#42b983", time_range);
    console.log('%c Line:233 🍎 interface_names', 'color:#ffdd4d', interface_names);
    if(
     interface_names?.length

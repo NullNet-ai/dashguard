@@ -1,8 +1,8 @@
 'use client'
 
-import * as React from 'react'
+import React, {useEffect} from 'react'
 
-import {getLastSecondsTimeStamp } from '~/app/portal/device/utils/timeRange'
+import {getLastMinutesTimeStamp, getLastSecondsTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
 } from '~/components/ui/card'
@@ -21,20 +21,6 @@ import { Form } from '~/components/ui/form'
 import { z } from 'zod'
 import FormClientFetch from '../pie-chart/client-fetch'
 
-
-// const chartConfig = {
-//   visitors: {
-//     label: 'Visitors',
-//   },
-//   static_bandwidth: {
-//     label: 'Static Bandwidth',
-//     color: 'hsl(var(--chart-1))',
-//   },
-//   bandwidth: {
-//     label: 'Bandwidth',
-//     color: 'hsl(var(--chart-2))',
-//   },
-// } satisfies ChartConfig
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -69,7 +55,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       bucket_size: '1s',
       timezone: timezone,
       device_id: defaultValues?.id,
-      time_range: getLastSecondsTimeStamp(20),
+      time_range: getLastMinutesTimeStamp(3),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
     
@@ -82,10 +68,13 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       }
   })
 
-  React.useEffect(() => {
-    refetch()
-  },[])
- 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch()
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [interfaces, defaultValues?.id, defaultValues?.device_status])
+
   return (
     <Card>
       <div className='px-4'>
