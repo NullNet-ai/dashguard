@@ -17,6 +17,7 @@ export interface StateTabContextType {
   orientation?: 'horizontal' | 'vertical'
   position?: 'left' | 'right'
   defaultValue?: string
+  rotateText?:boolean
 }
 
 export interface StateTabProps extends StateTabContextType {
