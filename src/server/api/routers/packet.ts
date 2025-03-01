@@ -249,8 +249,7 @@ export const packetRouter = createTRPCRouter({
                 entity: 'packets',
                 operator: EOperator.EQUAL,
                 values: [
-                  // device_id,
-                  "6cb6c156-e8df-461b-83ec-23aee142a664"
+                  device_id,
                 ],
               },
               {
@@ -267,7 +266,7 @@ export const packetRouter = createTRPCRouter({
             ],
             joins: [],
             bucket_size,
-            limit: 2,
+            // limit: 2,
             order: {
               order_by: 'bucket',
               order_direction: EOrderDirection.DESC,

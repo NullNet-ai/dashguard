@@ -2,7 +2,7 @@
 
 import React, {useEffect} from 'react'
 
-import {getLastMinutesTimeStamp, getLastSecondsTimeStamp } from '~/app/portal/device/utils/timeRange'
+import {getLastMinutesTimeStamp, getLastSecondsTimeStamp, getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
 } from '~/components/ui/card'
@@ -26,6 +26,7 @@ const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   const [interfaces, setInterfaces] = React.useState<string[]>([])
+  const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const form = useForm({
     defaultValues: {
       graph_type: 'default',
@@ -49,13 +50,13 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   
   console.log("%c Line:52 🥕 chartConfig", "color:#e41a6a", chartConfig);
 
-  const { data: packetsIP = [], refetch } = api.packet.getBandwithInterfacePerSecond.useQuery(
+  const { refetch: fetchBandWidth } = api.packet.getBandwithInterfacePerSecond.useQuery(
     {
       
       bucket_size: '1s',
       timezone: timezone,
       device_id: defaultValues?.id,
-      time_range: getLastMinutesTimeStamp(3),
+      time_range:  getLastTimeStamp(20,'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
     
@@ -67,11 +68,22 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
         bucket: date.format('HH:mm:ss')
       }
   })
+  
+  const fetchChartData = async () => {
+    const { data } = await fetchBandWidth();
+    console.log('%c Line:74 🍪 data', 'color:#4fff4B', data);
+    setPacketsIP(data as any)
+
+  }; 
 
   useEffect(() => {
+   
+    fetchChartData()
     const interval = setInterval(() => {
-      refetch()
-    }, 1000)
+
+      console.log('%c Line:74 🍊', 'color:#ed9ec7');
+      fetchChartData()
+    }, 2000)
     return () => clearInterval(interval)
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 

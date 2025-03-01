@@ -9,11 +9,20 @@ import {
 } from '~/components/ui/chart'
 
 export const modifyAxis = (chartData:any) => {
-  const maxBandwidth = Math.max(...chartData.map((item: any) => item.vtnet1), ...chartData.map((item: any) => item.vtnet0))
-  const minBandwidth = Math.min(...chartData.map((item: any) => item.vtnet1), ...chartData.map((item: any) => item.vtnet0))
+  if (!chartData?.length) return { yAxisMax: 0, yAxisMin: 0 }
+  const maxBandwidth = Math.max(
+    ...chartData.map((item: any) => item?.vtnet1 ?? 0),
+    ...chartData.map((item: any) => item?.vtnet0 ?? 0)
+  )
+
+  const minBandwidth = Math.min(
+    ...chartData.map((item: any) => item?.vtnet1 ?? Infinity),
+    ...chartData.map((item: any) => item?.vtnet0 ?? Infinity)
+  )
 
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
+  console.log("%c Line:16 🥪  yAxisMax", "color:#7f2b82", {yAxisMin, yAxisMax});
 
   return { yAxisMax, yAxisMin }
 }

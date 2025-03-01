@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "~/components/ui/chart";
 import { api } from "~/trpc/react";
-import { getLastMinutesTimeStamp } from "~/app/portal/device/utils/timeRange";
+import { getLastMinutesTimeStamp, getLastTimeStamp } from "~/app/portal/device/utils/timeRange";
 import { IFormProps } from "../types";
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -41,7 +41,7 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
 
   const { refetch: fetchBandWidth } = api.packet.getBandwithPerSecond.useQuery({
     device_id: defaultValues?.id,
-    time_range: getLastMinutesTimeStamp(3),
+    time_range: getLastTimeStamp(1,'second'),
     bucket_size: "1s",
     timezone,
   });
@@ -61,8 +61,8 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
     };
 
     fetchChartData();
-    const interval = setInterval(fetchChartData, 1000);
-    return () => clearInterval(interval);
+    // const interval = setInterval(fetchChartData, 1000);
+    // return () => clearInterval(interval);
   }, [defaultValues?.id, defaultValues?.device_status]);
 
   useEffect(() => {
