@@ -7,5 +7,5 @@ export const ContactOrganizationDetailsSchema = z.object({
         value: z.string(),
         label: z.string(),
       }),
-    )
+    ).optional()
 });

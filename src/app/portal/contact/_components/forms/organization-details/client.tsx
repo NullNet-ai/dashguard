@@ -57,6 +57,7 @@ export default function OrganizationDetails({
           formType: 'multi-select',
           name: 'organizations',
           label: 'Department',
+          required: false
         },
       ]}
     />
