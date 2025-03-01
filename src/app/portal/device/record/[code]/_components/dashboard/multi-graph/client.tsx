@@ -48,7 +48,7 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({ multiSelectOptions }: IFormProps) => {
+const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   const [interfaces, setInterfaces] = React.useState<string[]>([])
   const form = useForm({
     defaultValues: {
@@ -64,11 +64,14 @@ const InteractiveGraph = ({ multiSelectOptions }: IFormProps) => {
   // }, [graphType])
 
 
-  const { data: packetsIP = [], refetch } = api.packet.getBandwidthInterfacePerSecond.useQuery(
+  const { data: packetsIP = [], refetch } = api.packet.getBandwithInterfacePerSecond.useQuery(
     {
+
       bucket_size: '1s',
-      timeRange: getLastMinutesTimeStamp(3),
-      interface_name: interfaces?.map((item: any) => item?.value),
+      timezone: timezone,
+      device_id: defaultValues?.id,
+      time_range: getLastMinutesTimeStamp(3),
+      interface_names: interfaces?.map((item: any) => item?.value),
     })
 
   const filteredData = packetsIP?.map((item) => {
