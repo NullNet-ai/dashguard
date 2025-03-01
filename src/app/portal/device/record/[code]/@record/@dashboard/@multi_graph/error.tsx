@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const RecordError = ({
+const ErrorContainer = ({
   error,
   reset,
 }: {
@@ -21,4 +21,4 @@ const RecordError = ({
   );
 };
 
-export default RecordError;
+export default ErrorContainer;
