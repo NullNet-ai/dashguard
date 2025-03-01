@@ -1,9 +1,10 @@
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
   return (
+    <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
       <defs>
         <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
@@ -81,7 +82,7 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         type="natural"
       />
       <ChartLegend content={<ChartLegendContent />} />
-    </AreaChart>
+    </AreaChart></ResponsiveContainer>
   )
 }
 

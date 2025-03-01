@@ -18,6 +18,7 @@ import {
 } from "~/components/ui/chart";
 import { api } from "~/trpc/react";
 import { getLastMinutesTimeStamp } from "~/app/portal/device/utils/timeRange";
+import { IFormProps } from "../types";
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -30,7 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const PieChartComponent = ({defaultValues}:any) => {
+const PieChartComponent = ({defaultValues}: IFormProps) => {
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
     previousTraffic: initialTraffic,

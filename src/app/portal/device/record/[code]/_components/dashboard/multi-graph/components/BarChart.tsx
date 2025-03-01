@@ -1,6 +1,6 @@
 'use client'
 
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis } from 'recharts'
 
 import {
   ChartLegend,
@@ -11,7 +11,8 @@ import {
 
 const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
   return (
-    <BarChart data={filteredData} height={300} width={1870}>
+    <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={filteredData}>
       <CartesianGrid vertical={false} />
       <XAxis
         axisLine={false}
@@ -53,6 +54,7 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
       <Bar dataKey="static_bandwidth" fill="var(--color-static_bandwidth)" />
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
+    </ResponsiveContainer>
   )
 }
 
