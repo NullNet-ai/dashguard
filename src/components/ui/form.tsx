@@ -151,26 +151,37 @@ FormDescription.displayName = "FormDescription";
 
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement> & { detail?: string }
->(({ className, children, ...props }, ref) => {
+  React.HTMLAttributes<HTMLParagraphElement> & { detail?: string, isMultiple?: boolean }
+>(({ className, children, isMultiple, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const error_message = error?.root?.message
-    ? String(error?.root?.message)
-    : String(error?.message);
-  const body = error ? String(error_message) : children;
-  if (!body) {
-    return null;
+  
+  let errorMessages: string[] = [];
+  if (error) {
+
+    if (Array.isArray(error.message)) {
+      errorMessages = error.message;
+    } else if (typeof error.message === "string" && isMultiple) {
+      errorMessages = error.message.split(". ").filter(Boolean); // Split if multiple messages are combined
+    }else if (typeof error.message === "string") {
+      errorMessages = [error.message];
+    }
   }
 
+  if (!errorMessages.length && !children) {
+    return null;
+  }
   return (
-    <p
-      ref={ref}
-      id={formMessageId}
-      className={cn("text-sm font-medium text-destructive !mt-[6px]", className)}
-      {...props}
-    >
-      {body}
-    </p>
+    <div ref={ref} id={formMessageId} className={cn("text-sm font-medium text-destructive !mt-[6px]", className)} {...props}>
+      {isMultiple && errorMessages?.length > 1 ? (
+        <ul className="list-disc list-inside">
+          {errorMessages.map((msg, index) => (
+            <li key={index}>{msg}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>{errorMessages[0] || children}</p>
+      )}
+    </div>
   );
 });
 FormMessage.displayName = "FormMessage";

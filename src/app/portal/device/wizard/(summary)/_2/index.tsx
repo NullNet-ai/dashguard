@@ -32,8 +32,8 @@ const Summary =  ({form_key}: { form_key: string }) => {
     }
   const data = {
     package: `curl -o pfSense-pkg-wallguard.pkg -L ${record || ''}`,
-    installation_package: "pkg install pfSense-pkg-wallguard",
-    installation_confirmation: "wallguard --version",
+    installation_package: "pkg add pfSense-pkg-wallguard.pkg",
+    installation_confirmation: "pkg info | grep wallguard",
   };
 
   return (

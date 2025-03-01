@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormMultiSelect",
-  "tag": "1.7.0",
-  "branch": "released/feat/Platform-1888/1.7.0",
-  "message": "Add create feature in Multi Select control",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.8.0-rc.1<unreleased>",
+  "branch": "unreleased/fix3114/1.8.0-rc.1<unreleased>",
+  "message": "add configurations to enable to create options without undergoing validation and triggering the selectOnCreateRecord function",
+  "publish_name": "Rob Caldosa"
 }

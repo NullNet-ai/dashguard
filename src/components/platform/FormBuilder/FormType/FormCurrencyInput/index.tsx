@@ -1,20 +1,18 @@
+import { useEffect, useRef, useState } from "react";
 import {
-  type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
+  type UseFormReturn,
 } from "react-hook-form";
 import CurrencyInput, {
   type CurrencyInputOnChangeValues,
-  type CurrencyInputProps,
 } from "~/components/ui/currency-input";
-import { type OptionType, type IField } from "../../types";
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { useState, useRef, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -23,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
+import { type IField, type OptionType } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
@@ -128,10 +127,16 @@ export default function FormCurrencyInput({
         formatted: "0.00",
       };
       setValues(updatedValues);
-      form.setValue(fieldConfig.name, {
-        amount: 0,
-        currency: selectedCurrency.label,
-      });
+      form.setValue(
+        fieldConfig.name,
+        {
+          amount: 0,
+          currency: selectedCurrency.label,
+        },
+        {
+          shouldDirty: true,
+        },
+      );
       return;
     }
 
@@ -149,10 +154,16 @@ export default function FormCurrencyInput({
       };
 
       setValues(updatedValues);
-      form.setValue(fieldConfig.name, {
-        amount: floatValue,
-        currency: selectedCurrency.label,
-      });
+      form.setValue(
+        fieldConfig.name,
+        {
+          amount: floatValue,
+          currency: selectedCurrency.label,
+        },
+        {
+          shouldDirty: true,
+        },
+      );
 
       // Restore cursor position after React updates the DOM
       setTimeout(() => {
@@ -183,10 +194,16 @@ export default function FormCurrencyInput({
           formatted: "0.00",
         };
         setValues(updatedValues);
-        form.setValue(fieldConfig.name, {
-          amount: 0,
-          currency: selectedCurrency.label,
-        });
+        form.setValue(
+          fieldConfig.name,
+          {
+            amount: 0,
+            currency: selectedCurrency.label,
+          },
+          {
+            shouldDirty: true,
+          },
+        );
       }
       // Handle regular backspace
       else if (e.key === "Backspace") {
@@ -207,10 +224,16 @@ export default function FormCurrencyInput({
       const currentValue = form.getValues(fieldConfig.name);
       const currentAmount = currentValue?.amount;
 
-      form.setValue(fieldConfig.name, {
-        amount: currentAmount,
-        currency: selectedOption.label,
-      });
+      form.setValue(
+        fieldConfig.name,
+        {
+          amount: currentAmount,
+          currency: selectedOption.label,
+        },
+        {
+          shouldDirty: true,
+        },
+      );
     }
   };
 
@@ -228,8 +251,9 @@ export default function FormCurrencyInput({
       <FormControl>
         <div
           className={cn(
-            "flex border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
-            error ? "border-destructive" : "",
+            "flex  rounded-md border focus-within:ring-1 focus-within:border-primary focus-within:ring-ring",
+            error ? "border-destructive " : "",
+            fieldConfig.disabled && "bg-secondary"
           )}
         >
           <CurrencyInput
@@ -241,7 +265,7 @@ export default function FormCurrencyInput({
             data-test-id={`${formKey}-inp-${fieldConfig.name}`}
             ref={inputRef}
             placeholder="Currency"
-            className="border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
+            className="border-0 py-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0"
             onChange={handleValueChange}
             onKeyDown={handleKeyDown}
             value={values.value}
@@ -256,10 +280,11 @@ export default function FormCurrencyInput({
               .toString()}
             onValueChange={handleCurrencySelect}
             data-test-id={`${formKey}-sel-${fieldConfig.name}`}
-            disabled={formRenderProps.field.disabled}
+            disabled={formRenderProps.field.disabled || fieldConfig.readonly}
           >
             <SelectTrigger
-              className="w-fit border-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0"
+              className={cn("h-[36px] disabled:bg-transparent w-fit border-0 py-0 text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0",
+              )}
               data-test-id={`${formKey}-trg-${fieldConfig.name}`}
             >
               <SelectValue
@@ -283,6 +308,7 @@ export default function FormCurrencyInput({
           </Select>
         </div>
       </FormControl>
+      {/* <DevTool control={form.control} /> */}
 
       {error &&
       "amount" in error &&

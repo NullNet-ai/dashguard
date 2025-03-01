@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "1.9.0",
-  "branch": "released/fix/1.9.0",
-  "message": "Form select dropdown fixes",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.12.1-rc.3<unreleased>",
+  "branch": "unreleased/fix3115/1.12.1-rc.3<unreleased>",
+  "message": "Fix viewport overflow able to dynamically reposition when there is not enough space for the selectdropdown to be displayed. Making the selectdropdown to use portal and be rendered at the same level as the body so that it would be seen by the user no matter where it is located",
+  "publish_name": "Rob Caldosa"
 }

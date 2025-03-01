@@ -1,300 +1,339 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client'
 
-import { type ReactElement } from "react";
+import React, { type ReactElement } from 'react'
 import {
-  Form,
   type ControllerFieldState,
   type ControllerRenderProps,
   type UseFormReturn,
-} from "react-hook-form";
+} from 'react-hook-form'
 
-import { Input } from "~/components/ui/input";
+import { Input } from '~/components/ui/input'
+import { type Option } from '~/components/ui/multi-select'
 
-import FormAddress from "../../../FormType/FormAddress";
-import FormCheckbox from "../../../FormType/FormCheckbox";
-import FormDatePicker from "../../../FormType/FormDate";
-import FormDateRange from "../../../FormType/FormDateRange";
-import FormEmailInput from "../../../FormType/FormEmailInput";
-import FormInput from "../../../FormType/FormInput";
-import FormTextInputs from "../../../FormType/FormInputs";
-import FormLabelValueInput from "../../../FormType/FormLabelValueInput";
-import FormMultiSelect from "../../../FormType/FormMultiSelect";
-import FormPhoneInput from "../../../FormType/FormPhoneInput";
-import FormRadio from "../../../FormType/FormRadio";
-import FormSelect from "../../../FormType/FormSelect";
-import FormTextArea from "../../../FormType/FormTextArea";
+import FormAddress from '../../../FormType/FormAddress'
+import FormAlertComponent from '../../../FormType/FormAlert'
+import FormCheckbox from '../../../FormType/FormCheckbox'
+import FormCurrencyInput from '../../../FormType/FormCurrencyInput'
+import FormDatePicker from '../../../FormType/FormDate'
+import FormDateRange from '../../../FormType/FormDateRange'
+import FormDraggable from '../../../FormType/FormDraggable'
+import FormEmailInput from '../../../FormType/FormEmailInput'
+import FormFileUpload from '../../../FormType/FormFileUpload'
+import FormGroupMultiField from '../../../FormType/FormGroupMultiField'
+import FormInput from '../../../FormType/FormInput'
+import FormInputGrid from '../../../FormType/FormInputGrid'
+import FormTextInputs from '../../../FormType/FormInputs'
+import FormLabelValueInput from '../../../FormType/FormLabelValueInput'
+import FormMultiField from '../../../FormType/FormMultiField'
+import FormMultiSelect from '../../../FormType/FormMultiSelect'
+import FormNumberInput from '../../../FormType/FormNumberInput'
+import FormPassword from '../../../FormType/FormPassword'
+import FormPhoneInput from '../../../FormType/FormPhoneInput'
+import FormRadio from '../../../FormType/FormRadio'
+import FormRichTextEditor from '../../../FormType/FormRichTextEditor'
+import FormSelect from '../../../FormType/FormSelect'
+import FormSeparator from '../../../FormType/FormSeparator'
+import FormSlider from '../../../FormType/FormSlider'
+import FormSmartDate from '../../../FormType/FormSmartDate'
+import FormSpaceComponent from '../../../FormType/FormSpace'
+import FormSwitch from '../../../FormType/FormSwitch'
+import FormTextArea from '../../../FormType/FormTextArea'
+import FormTimePicker from '../../../FormType/FormTimePicker'
 import {
   type ICheckboxOptions,
   type IRadioOptions,
   type ISelectOptions,
   type IField,
-} from "../../../types";
-import FormFileUpload from "../../../FormType/FormFileUpload";
-import FormSlider from "../../../FormType/FormSlider";
-import { type Option } from "~/components/ui/multi-select";
-import FormRichTextEditor from "../../../FormType/FormRichTextEditor";
-import FormNumberInput from "../../../FormType/FormNumberInput";
-import FormPassword from "../../../FormType/FormPassword";
-import FormCurrencyInput from "../../../FormType/FormCurrencyInput";
-import FormSmartDate from "../../../FormType/FormSmartDate";
-import FormInputGrid from "../../../FormType/FormInputGrid";
-import React from "react";
-import FormTimePicker from "../../../FormType/FormTimePicker";
-import FormDraggable from "../../../FormType/FormDraggable";
-import FormMultiField from "../../../FormType/FormMultiField";
-import FormSwitch from "../../../FormType/FormSwitch";
+  type TFormSchema,
+} from '../../../types'
+import FormGroupTab from '../../../FormType/FormGroupTab'
+import FormCustom from '../../../FormType/FormCustom'
+import FormComboBox from '../../../FormType/FormCombobox'
 
 export default function RenderFormType(
   fieldConfig: IField,
   formRenderProps: {
-    field: ControllerRenderProps<Record<string, any>, string>;
-    fieldState: ControllerFieldState;
+    field: ControllerRenderProps<Record<string, any>, string>
+    fieldState: ControllerFieldState
   },
   form: UseFormReturn<Record<string, any>, any, undefined>,
   formKey: string,
+  formSchema: TFormSchema,
   subConfig: {
-    selectOptions?: Record<string, ISelectOptions[]>;
-    multiSelectOptions?: Record<string, Option[]>;
-    radioOptions?: Record<string, IRadioOptions[]>;
-    checkboxOptions?: Record<string, ICheckboxOptions[]>;
-    currencyInputOptions?: Record<string, Option[]>;
-    multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
+    selectOptions?: Record<string, ISelectOptions[]>
+    multiSelectOptions?: Record<string, Option[]>
+    radioOptions?: Record<string, IRadioOptions[]>
+    checkboxOptions?: Record<string, ICheckboxOptions[]>
+    currencyInputOptions?: Record<string, Option[]>
+    multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>
   },
 ): ReactElement {
   switch (fieldConfig?.formType) {
-    case "input":
+    case 'input':
       return (
         <FormInput
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "input-grid":
+      )
+    case 'input-grid':
       return (
         <FormInputGrid
-          formKey={formKey}
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "textarea":
+      )
+    case 'textarea':
       return (
         <FormTextArea
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "select":
+      )
+    case 'select':
       return (
         <FormSelect
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
-          selectOptions={subConfig?.selectOptions}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
+          selectOptions={subConfig?.selectOptions}
         />
-      );
-    case "multi-select":
+      )
+    case 'multi-select':
       return (
         <FormMultiSelect
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
-          multiselectOptions={subConfig?.multiSelectOptions}
-          multiSelectOnSearch={subConfig?.multiSelectOnSearch}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
+          multiSelectOnSearch={subConfig?.multiSelectOnSearch}
+          multiselectOptions={subConfig?.multiSelectOptions}
         />
-      );
-    case "radio":
+      )
+    case 'radio':
       return (
         <FormRadio
           fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
           formRenderProps={formRenderProps}
           radioOptions={subConfig?.radioOptions}
-          form={form}
-          formKey={formKey}
         />
-      );
-    case "checkbox":
+      )
+    case 'checkbox':
       return (
         <FormCheckbox
-          form={form}
-          formRenderProps={formRenderProps}
           checkboxOptions={subConfig?.checkboxOptions}
           fieldConfig={fieldConfig}
+          form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "date":
+      )
+    case 'date':
       return (
         <FormDatePicker
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "date-range":
+      )
+    case 'date-range':
       return (
         <FormDateRange
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "smart-date":
+      )
+    case 'smart-date':
       return (
         <FormSmartDate
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "phone-input":
+      )
+    case 'phone-input':
       return (
         <FormPhoneInput
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "email-input":
+      )
+    case 'email-input':
       return (
         <FormEmailInput
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "inputs":
+      )
+    case 'inputs':
       return (
         <FormTextInputs
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "input-label-value":
+      )
+    case 'input-label-value':
       return (
         <FormLabelValueInput
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "address-input":
+      )
+    case 'address-input':
       return (
         <FormAddress
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "file":
+      )
+    case 'file':
       return (
         <FormFileUpload
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "slider":
+      )
+    case 'slider':
       return (
         <FormSlider
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "rich-text-editor":
+      )
+    case 'rich-text-editor':
       return (
         <FormRichTextEditor
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "number-input":
+      )
+    case 'number-input':
       return (
         <FormNumberInput
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "password":
+      )
+    case 'password':
       return (
         <FormPassword
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
+          formSchema={formSchema}
         />
-      );
-    case "currency-input":
+      )
+    case 'currency-input':
       return (
         <FormCurrencyInput
+          currencyInputOptions={subConfig?.currencyInputOptions}
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
-          currencyInputOptions={subConfig?.currencyInputOptions}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "time-picker":
+      )
+    case 'time-picker':
       return (
         <FormTimePicker
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "draggable":
+      )
+    case 'draggable':
       return (
         <FormDraggable
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "multi-field":
+      )
+    case 'multi-field':
       return (
         <FormMultiField
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
-    case "switch":
+      )
+    case 'switch':
       return (
         <FormSwitch
           fieldConfig={fieldConfig}
-          formRenderProps={formRenderProps}
           form={form}
           formKey={formKey}
+          formRenderProps={formRenderProps}
         />
-      );
+      )
+    case 'group-multi-field':
+      return (
+        <FormGroupMultiField
+          fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
+        />
+      )
+    case 'group-tab':
+      return (
+        <FormGroupTab
+          fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
+          formSchema={formSchema}
+        />
+      )
+    case 'alert':
+      return <FormAlertComponent fieldConfig={fieldConfig} />
+    case 'space':
+      return <FormSpaceComponent />
+    case 'separator':
+      return <FormSeparator fieldConfig={fieldConfig} />
+    case 'combobox':
+      return <FormComboBox fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
+    case 'custom-field':
+      return (
+        <FormCustom fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
+      )
     default:
-      return <Input />;
+      return <Input />
   }
 }

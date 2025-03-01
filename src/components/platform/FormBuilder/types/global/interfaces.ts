@@ -1,65 +1,90 @@
-import { type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef } from '@tanstack/react-table';
+import type React from 'react';
+// eslint-disable-next-line no-duplicate-imports
 import {
   type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
   type ReactElement,
   type ReactNode,
-} from "react";
-import { type DropzoneOptions } from "react-dropzone";
-import { type Field, type UseFormReturn } from "react-hook-form";
-
-import { type TActionType } from "~/components/platform/Grid/types";
+} from 'react';
+import { type DropzoneOptions } from 'react-dropzone';
 import {
-  TDisplayType,
-  type DateTimeGranularity,
-  type TFormSchema,
-  type TFormType,
-  type TSelectionType,
-} from "./types";
+  type ControllerFieldState,
+  type ControllerRenderProps,
+  type Field,
+  type UseFormReturn,
+} from 'react-hook-form';
+
+import {
+  AppRouterKeys,
+  type TActionType,
+} from '~/components/platform/Grid/types';
 import {
   type DateGranularity,
   type DateTimeLocalInputProps,
   type NaturalLanguageInputProps,
-} from "~/components/ui/smart-datetime-picker";
-import { type TimePickerProps } from "~/components/ui/time-picker";
-import { type RawSwitchProps } from "~/components/ui/switch";
+} from '~/components/ui/smart-datetime-picker';
+import { type SwitchProps } from '~/components/ui/switch';
+import { type TimePickerProps } from '~/components/ui/time-picker';
+
+import {
+  type TDisplayType,
+  type DateTimeGranularity,
+  type TFormSchema,
+  type TFormType,
+  type TSelectionType,
+} from './types';
+
+import { type ComponentType } from 'react'; // Add this import at the top
+import { type ComboBoxProps } from '~/components/ui/combobox';
 
 interface OptionType {
   label: string;
   value: string;
 }
 
-type DraggableConfig = {
+interface DraggableConfig {
+  parentProps?: any;
   fields: IField & {
     selectOptions?: ISelectOptions[];
     radioOptions?: IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
     formType?:
-      | "input"
-      | "select"
-      | "radio"
-      | "checkbox"
-      | "textarea"
-      | "number-input"
-      | "smart-date"
-      | "time-picker";
+      | 'input'
+      | 'select'
+      | 'radio'
+      | 'checkbox'
+      | 'textarea'
+      | 'number-input'
+      | 'smart-date'
+      | 'time-picker';
   };
-};
+}
 
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
 };
-
-type MultiFieldOption = {
+interface CustomFieldProps {
+  field: ControllerRenderProps<Record<string, any>, string>;
+  fieldState: ControllerFieldState;
+  form: UseFormReturn<Record<string, any>>;
+  formKey: string;
+  fieldConfig: IField;
+}
+interface MultiFieldOption {
   label: string;
-  fieldType: "input" | "select" | "radio" | "checkbox";
+  name?: string;
+  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
   options?: OptionType[];
-};
+  placeholder?: string;
+}
 
 interface IField {
   id: string;
-  className?: HTMLAttributes<HTMLDivElement>["className"];
+  className?: HTMLAttributes<HTMLDivElement>['className'];
+  fieldClassName?: HTMLAttributes<HTMLDivElement>['className'];
+  fieldStyle?: React.CSSProperties;
   formType?: TFormType;
   creatable?: boolean;
   name: string;
@@ -69,6 +94,12 @@ interface IField {
   disabled?: boolean;
   hidden?: boolean;
   readonly?: boolean;
+  alertVariant?: 'error' | 'warning' | 'info' | 'success';
+  alertTitle?: string;
+  alertContent?: string;
+  alertIcon?: ElementType<any> | undefined;
+  alertWithAccentBorder?: boolean;
+  separatorType?: 'dashed' | 'decorative';
   dateGranularity?: DateTimeGranularity;
   dateMinDate?: Date;
   dateMaxDate?: Date;
@@ -83,19 +114,22 @@ interface IField {
   };
   dateInputProps?: NaturalLanguageInputProps;
   description?: string;
-  switchConfig?: RawSwitchProps;
+  switchConfig?: SwitchProps;
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
   multiFieldConfig?: MultiFieldConfig;
+  comboboxConfig?: ComboBoxProps;
   required?: boolean;
   type?: HTMLInputTypeAttribute | undefined;
-  customRender?: JSX.Element;
+  customRender?: React.JSX.Element;
   min?: number;
   max?: number;
   step?: number;
-  checkboxOrientation?: "horizontal" | "vertical";
-  radioOrientation?: "horizontal" | "vertical";
+  hasFormMessage?: boolean;
+  render?: (props: CustomFieldProps) => React.ReactNode;
+  checkboxOrientation?: 'horizontal' | 'vertical';
+  radioOrientation?: 'horizontal' | 'vertical';
   sliderLabel?: (value: number | undefined) => ReactNode;
-  sliderLabelPosition?: "top" | "bottom";
+  sliderLabelPosition?: 'top' | 'bottom';
   fileDropzoneOptions?: DropzoneOptions;
   selectIcon?: ElementType;
   multiSelectMaxSelected?: number;
@@ -106,7 +140,10 @@ interface IField {
   multiSelectLoadingIndicator?: ReactNode;
   multiSelectEmptyIndicator?: ReactNode;
   multiSelectHideClearAllButton?: boolean;
-  richTextOutput?: "html" | "json" | "text";
+  multiSelectShowCreatableItem?: boolean;
+  selectContainerClassName?: string
+  multiSelectContainerClassName?: string
+  richTextOutput?: 'html' | 'json' | 'text';
   inputRightAddOns?: ReactNode | string;
   inputLeftAddOns?: ReactNode | string;
   isMultiSelectAlphabetical?: boolean;
@@ -123,7 +160,7 @@ interface IField {
   textAreaShowCharCount?: boolean;
   textAreaMaxCharCount?: number;
   withGridFilter?: boolean;
-  gridPosition?: "left" | "right";
+  gridPosition?: 'left' | 'right';
   /**
    * @description
    * This prop is used to determine the entity and field that will be used for the field filter grid.
@@ -136,6 +173,7 @@ interface IField {
   selectSearchable?: boolean;
   accuracy?: number;
   selectEnableCreate?: boolean;
+  multiSelectEnableCreate?: boolean;
   selectOnCreateRecord?:
     | {
         fieldIdentifier: string;
@@ -146,6 +184,14 @@ interface IField {
   selectOnCreateValidate?: (
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
+  showPasswordStrengthBar?: boolean;
+  hasComplexValidation?: boolean;
+  isCustomFormField?: boolean;
+  groupConfig?: {
+    prefix?: string;
+    components?: ComponentType<any>[] | JSX.Element[];
+    defaultComponent?: ComponentType<any>;
+  };
 }
 
 interface ISelectOptions {
@@ -208,7 +254,7 @@ export interface IFeatures {
   enableFormHostViewActions?: boolean;
   enableFormHostLockActions?: boolean;
   enableAutoSelect?: boolean;
-  formHostInitialView?: "lock" | "unlock";
+  formHostInitialView?: 'lock' | 'unlock';
   enableFormFilterCreate?: boolean;
 }
 
@@ -218,6 +264,25 @@ export interface ICustomActions {
   onClick: () => void;
   disabled?: boolean;
   hidden?: boolean;
+}
+
+interface SortingOption {
+  id: string;
+  desc: boolean;
+  sort_key: string;
+}
+
+interface QueryParams extends ISearchParams {
+  entity: string;
+  pluck?: string[];
+  default_advance_filters?: {
+    type: string;
+    values: string[];
+    field: string;
+    operator: string;
+    entity?: string;
+  }[]; // Replace with actual type if known
+  default_sorting?: SortingOption[];
 }
 
 interface IFilterGridConfig {
@@ -234,13 +299,17 @@ interface IFilterGridConfig {
   hideSearch?: boolean;
   gridColumns: ColumnDef<any>[];
   actionType: TActionType;
-  searchConfig?: any;
+  searchConfig?: {
+    router?: AppRouterKeys;
+    resolver?: string;
+    query_params?: QueryParams;
+  };
   onClipboardPaste?: (
     data: Record<string, any>,
     form: any,
     onSubmitFormGrid?: any,
   ) => any;
-  renderComponentSelected?: (record: any) => JSX.Element;
+  renderComponentSelected?: (record: any) => React.JSX.Element;
   onSelectRecords?: ({
     rows,
     main_entity_id,
@@ -312,20 +381,20 @@ interface IPropsForms {
   formKey: string;
   persistTimeout?: number;
   fields: IField[];
-  buttonHeaderRender?: JSX.Element;
+  buttonHeaderRender?: React.JSX.Element;
   defaultValues?: Record<string, any>;
   formSchema: TFormSchema;
   currencyInputOptions?: Record<string, OptionType[]>;
   selectOptions?: Record<string, ISelectOptions[]>;
   // multiSelectOptions?: Record<string, Option[]>;
-  multiSelectOptions?: Record<string, any[]>; // TODO: remove
+  multiSelectOptions?: Record<string, any[]>;
   // multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
-  multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>; // TODO: remove
+  multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>;
   radioOptions?: Record<string, IRadioOptions[]>;
   checkboxOptions?: Record<string, ICheckboxOptions[]>;
   fetching?: boolean;
-  defaultDisplay?: "expanded" | "collapsed";
-  myParent?: "wizard" | "record";
+  defaultDisplay?: 'expanded' | 'collapsed';
+  myParent?: 'wizard' | 'record';
   buttonConfig?: IButtonConfig;
   filterGridConfig?: IFilterGridConfig;
   enableAppendForm?: boolean;
@@ -342,7 +411,7 @@ interface IPropsForms {
     displayType: TDisplayType,
     handleUpdateDisplayType: (type: TDisplayType) => void,
     // ) => ReactElement<typeof FormField> | ReactElement<typeof FormField>[]; // Strictly allows FormField or array of FormField components
-  ) => ReactElement<any> | ReactElement<any>[]; // TODO: remove
+  ) => ReactElement<any> | ReactElement<any>[];
   features?: IFeatures;
   customFormHostViewFormActions?: ICustomActions[];
   customFormHostLockFormActions?: ICustomActions[];
