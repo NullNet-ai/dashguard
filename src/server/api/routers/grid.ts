@@ -200,7 +200,7 @@ export const gridRouter = createTRPCRouter({
             by_direction: EOrderDirection.DESC,
           },
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
+            ? formatSorting(input.sorting, input?.entity)
             : [],
         },
       });

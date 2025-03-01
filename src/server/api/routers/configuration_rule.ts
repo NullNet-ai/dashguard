@@ -27,6 +27,7 @@ export const deviceRuleRouter = createTRPCRouter({
         device_id,
         sorting,
       } = input
+      const _sorting = sorting?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
       const device_configuration = await ctx.dnaClient.findAll({
         entity: 'device_configurations',
@@ -78,6 +79,9 @@ export const deviceRuleRouter = createTRPCRouter({
         query: {
           track_total_records: true,
           pluck,
+          pluck_object:{
+            device_rules: pluck
+          },
           advance_filters: _advance_filters?.length
             ? _advance_filters as IAdvanceFilters[]
             : createAdvancedFilter({
@@ -95,8 +99,8 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: sorting?.length
-            ? formatSorting(sorting)
+          multiple_sort: _sorting?.length
+            ? formatSorting(_sorting, 'device_rules')
             : [],
         },
       })
