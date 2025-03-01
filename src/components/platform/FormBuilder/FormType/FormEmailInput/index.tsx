@@ -14,7 +14,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  useFormField,
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import { cn } from '~/lib/utils';
@@ -52,7 +51,8 @@ export default function FormEmailInput({
   fieldFilterActions,
   formKey,
 }: IProps) {
-  const { error }: any = useFormField();
+  const error :any = formRenderProps.fieldState.error
+
   const toast = useToast();
   const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
@@ -108,7 +108,9 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex h-[36px] items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${error?.[index] ? 'border-destructive' : ''} ${fieldConfig.disabled ? 'bg-secondary' : ''}`}
+                  className={`flex h-[36px] items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${
+                    error?.[index]?.email || error?.message ? 'border-destructive' : ''
+                  } ${fieldConfig.disabled ? 'bg-secondary' : ''}`}
                 >
                   <Input
                     // {...register(`${fieldConfig.name}.${index}.email`)}
