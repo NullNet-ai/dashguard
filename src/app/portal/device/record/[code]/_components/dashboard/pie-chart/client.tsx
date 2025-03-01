@@ -52,7 +52,7 @@ const PieChartComponent = ({defaultValues}: IFormProps) => {
     const fetchChartData = async () => {
       const { data } = await fetchBandWidth();
       if (data && data.length > 0) {
-        const sortedData = data.sort((a, b) => new Date(b.bucket) - new Date(a.bucket));
+        const sortedData = data.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
         const currentTraffic = sortedData[0]?.bandwidth || 0;
         const previousTraffic = sortedData[1]?.bandwidth || 0;
         const maxTraffic = Math.max(...data.map(d => d.bandwidth), 100);

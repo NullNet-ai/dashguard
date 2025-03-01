@@ -177,8 +177,8 @@ export function parseTimeString(timeString: string): { value: number; unit: stri
 
   if (match) {
     return {
-      value: parseInt(match[1], 10), // Extract number
-      unit: getUnit(match[2])  as string// Extract unit (e.g., "s", "m", "h")
+      value: parseInt(match[1] ?? '0', 10), // Extract number
+      unit: getUnit(match[2] ?? '0')  as string// Extract unit (e.g., "s", "m", "h")
     };
   }
 

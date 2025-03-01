@@ -134,7 +134,7 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
       const match = /^(\d+)([smhd])$/.exec(resolution)
       if (!match) return
 
-      const value = parseInt(match[1], 10)
+      const value = parseInt(match[1] ?? '0', 10)
       const unit = match[2]
 
       // Convert to milliseconds
@@ -145,7 +145,7 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
         d: 24 * 60 * 60 * 1000,
       }
 
-      const intervalMs = value * (unitToMs[unit] || 1000)
+      const intervalMs = value * ((unitToMs as any)[unit as any] || 1000)
       return intervalMs
     }
 

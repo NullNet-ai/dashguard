@@ -209,7 +209,7 @@ export const packetRouter = createTRPCRouter({
     // const unit = bucket_size.slice(-1)
     // const unitFull = getUnit(unit)
     // console.log('%c Line:262 🍣 unitFull', 'color:#7f2b82', unitFull);
-    const {unit = '', value = ''} = parseTimeString(bucket_size) || {}
+    const {unit, value = ''} = parseTimeString(bucket_size) as any || {}
 
     const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
     
