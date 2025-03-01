@@ -86,14 +86,14 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
 
  
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      refetch()
-    }, 1000)
-    return () => clearInterval(interval)
-    // Cleanup on unmount or resolution change
-  }
-    , [interfaces])
+  // React.useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     refetch()
+  //   }, 1000)
+  //   return () => clearInterval(interval)
+  //   // Cleanup on unmount or resolution change
+  // }
+  //   , [interfaces])
 
   return (
     <Card>
