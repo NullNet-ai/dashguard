@@ -47,6 +47,9 @@ export default function TimePickerDetails() {
             name: "time-picker",
             label: "Time Picker",
             required: true,
+            timePickerProps: {
+              is24Hour: false,
+            },
           },
           {
             id:"time-picker-24",
@@ -54,9 +57,6 @@ export default function TimePickerDetails() {
             name: "time-picker-24",
             label: "Time Picker 24 Hour",
             required: true,
-            timePickerProps: {
-              is24Hour: true,
-            },
           }
         ]}
       />
