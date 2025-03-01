@@ -112,7 +112,7 @@ export default function FormTimePicker({
       <FormControl>
         <div
           className={cn(
-            "w-full border border-input !m-0 focus-within:border-primary focus-within:ring-primary",
+            "w-full h-auto border border-input !m-0 rounded-md focus-within:border-primary focus-within:ring-primary focus-within:ring-1 ",
             !!form.formState.errors[formKey] && "border-destructive",
             fieldConfig.disabled && "bg-secondary"
           )}

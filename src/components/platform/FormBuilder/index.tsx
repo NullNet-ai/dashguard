@@ -291,7 +291,7 @@ export const FormBuilder = (props: IPropsForms) => {
 
   const handleSelectedGridRecords = (data: Record<string, any>[]) => {
     const record
-      = filterGridConfig?.actionType === 'single-select' ? data?.[0] : data
+    = filterGridConfig?.actionType === 'single-select' ? data?.[0] : data
 
     form.reset(record, {
       keepDirty: false,

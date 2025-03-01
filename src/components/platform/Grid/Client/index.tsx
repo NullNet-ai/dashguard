@@ -30,6 +30,14 @@ interface IClientProps extends IPropsGrid {
   gridLevel?: number
   isError?: boolean
   gridType?: 'card-list' | 'table'
+  cardListOption?: {
+    targetColumns: {
+      label: string;
+      headerCell: string;
+      content: string;
+    };
+    excludedCols: string[];
+  };
 }
 
 function MainClient({
@@ -54,6 +62,7 @@ function MainClient({
   gridType = 'table',
   isError = false,
   parentExpanded,
+  cardListOption,
 }: IClientProps) {
   const { open } = useSidebar()
   const { width } = useWindowSize()
@@ -148,6 +157,7 @@ function MainClient({
               gridLevel={gridLevel}
               parentExpanded={parentExpanded}
               gridType={gridType}
+              cardListOption={cardListOption}
             />
           )}
     </GridProvider>

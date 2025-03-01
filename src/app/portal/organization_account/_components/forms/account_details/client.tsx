@@ -29,9 +29,7 @@ export default function BasicDetails({
           account_id: data.username,
           account_secret: data.password,
           role_id: data.role,
-          is_new_user: true,
           email: data.username,
-          password: data.password,
         },
       })
       if (response) {

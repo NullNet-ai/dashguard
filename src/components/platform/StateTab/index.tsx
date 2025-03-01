@@ -19,6 +19,8 @@ function StateTabList({
     variant = 'default',
     size = 'md',
     orientation = 'horizontal',
+    position = 'right',
+    rotateText = false,
   } = useStateTab()
 
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -43,40 +45,74 @@ function StateTabList({
     }
   }, [activeTab, persistKey, defaultValue])
 
-  // Remove the restore effect since we handle it in initial state
-
   return (
     <Tabs
       defaultValue={activeTab}
-      value={activeTab} // Add controlled value
+      value={activeTab}
       className={cn('w-full', className)}
       onValueChange={setActiveTab}
     >
-      <TabsList variant={variant} orientation={orientation}>
-        {tabs.map((tab) => {
-          return (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              disabled={tab.disabled}
-              size={size}
-              variant={variant}
-              iconPosition={tab.iconPosition}
-            >
-              {tab.icon}
-              {tab.label}
-            </TabsTrigger>
-          )
-        })}
-      </TabsList>
-      <div>
-        {tabs.map((tab) => {
-          return (
-            <TabsContent key={tab.id} value={tab.id}>
-              {tab.content}
-            </TabsContent>
-          )
-        })}
+      <div className={cn(
+        'flex',
+        orientation === 'vertical' ? 'flex-row gap-2' : 'flex-col',
+        orientation === 'vertical' && position === 'left' && 'flex-row-reverse'
+      )}>
+        <TabsList 
+          variant={variant} 
+          orientation={orientation}
+          position={position}
+          className={cn(
+            orientation === 'vertical' && 'flex-col h-auto min-w-fit '
+          )}
+        >
+          {tabs.map((tab) => {
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                disabled={tab.disabled}
+                size={size}
+                variant={variant}
+                iconPosition={tab.iconPosition}
+                rotateText={rotateText}
+                position={position}
+                className={cn(
+                  orientation === 'vertical' && 'justify-start w-full',
+                  orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl'
+                )}
+              >
+                
+                {tab.icon && (
+                  <span className={cn(
+                    orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
+                    orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform'
+                  )}>
+                    {tab.icon}
+                  </span>
+                )}
+                <span className={cn(
+                  orientation === 'vertical' && rotateText && position === 'right' && 'rotate-180 transform',
+                  orientation === 'vertical' && rotateText && position === 'left' && 'rotate-0 transform'
+                )}>
+                  {tab.label}
+                </span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+        <div className={cn(
+          orientation === 'vertical' ? 'flex-1' : 'w-full',
+          orientation === 'vertical' && position === 'left' && 'mr-2',
+          orientation === 'vertical' && position === 'right' && 'ml-2'
+        )}>
+          {tabs.map((tab) => {
+            return (
+              <TabsContent key={tab.id} value={tab.id}>
+                {tab.content}
+              </TabsContent>
+            )
+          })}
+        </div>
       </div>
     </Tabs>
   )
@@ -87,13 +123,15 @@ const StateTab = ({
   variant,
   size,
   orientation,
+  position,
   className,
   persistKey,
   defaultValue,
+  rotateText,
 }: StateTabProps) => {
   return (
     <StateTabProvider
-      value={{ tabs, variant, size, orientation, defaultValue }}
+      value={{ tabs, variant, size, orientation, position, defaultValue, rotateText }}
     >
       <StateTabList className={className} persistKey={persistKey} />
     </StateTabProvider>

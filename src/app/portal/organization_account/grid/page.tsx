@@ -10,6 +10,7 @@ import { api } from '~/trpc/server'
 import defaultAdvanceFilter from './_config/advanceFilter'
 import gridColumns from './_config/columns'
 import defaultSorting from './_config/sorting'
+import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
 
 export default async function Page() {
   const { sorting, pagination, filters } = await getGridCacheData()
@@ -50,6 +51,7 @@ export default async function Page() {
             },
           },
         },
+        customRowAction: AccountCustomRowAction
       }}
       data={items}
       defaultAdvanceFilter={defaultAdvanceFilter}
