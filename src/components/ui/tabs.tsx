@@ -6,27 +6,27 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { cn } from '~/lib/utils'
 
 const Tabs = TabsPrimitive.Root
-
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
-    variant?: 'default' | 'pills' | 'underline'|'shadow'
+    variant?: 'default' | 'pills' | 'underline' | 'shadow'
     orientation?: 'horizontal' | 'vertical'
+    position?: 'left' | 'right'
   }
 >(
   (
-    { className, variant = 'default', orientation = 'horizontal', ...props },
+    { className, variant = 'default', orientation = 'horizontal', position = 'right', ...props },
     ref
   ) => (
     <TabsPrimitive.List
       ref={ref}
       className={cn(
         'flex',
-
         orientation === 'vertical' ? 'flex-col' : 'flex-row',
         {
-          'border-b border-gray-200': !['pills', 'shadow'].includes(variant) && !(variant === 'underline' && orientation === 'vertical'),
-          'border-r border-gray-200': variant === 'underline' && orientation === 'vertical',
+          ' border-gray-200': !['pills', 'shadow'].includes(variant) && !(variant === 'underline' && orientation === 'vertical'),
+          'border-r border-gray-200': variant === 'underline' && orientation === 'vertical' && position === 'right',
+          'border-l border-gray-200': variant === 'underline' && orientation === 'vertical' && position === 'left',
           'rounded-lg bg-gray-50 p-1': variant === 'pills',
           'shadow-lg': variant === 'shadow',
         },
@@ -44,6 +44,8 @@ const TabsTrigger = React.forwardRef<
     iconPosition?: 'left' | 'right'
     size?: 'sm' | 'md' | 'lg'
     variant?: 'default' | 'pills' | 'underline' | 'shadow'
+    rotateText?: boolean
+    position?: 'left' | 'right'
   }
 >(
   (
@@ -52,6 +54,8 @@ const TabsTrigger = React.forwardRef<
       iconPosition = 'left',
       size = 'md',
       variant = 'default',
+      rotateText = false,
+      position = 'right',
       ...props
     },
     ref
@@ -61,25 +65,48 @@ const TabsTrigger = React.forwardRef<
       className={cn(
         'inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all',
         {
-          // Size variants
-          'px-3 py-1 text-xs': size === 'sm',
-          'px-4 py-1.5 text-sm': size === 'md',
-          'px-6 py-2 text-base': size === 'lg',
+          // Size variants - swap padding x and y when rotateText is true
+          'px-3 py-1 text-xs': size === 'sm' && !rotateText,
+          'px-4 py-1.5 text-sm': size === 'md' && !rotateText,
+          'px-6 py-2 text-base': size === 'lg' && !rotateText,
+          
+          // Rotated text padding (swapped x and y)
+          'py-3 px-1 text-xs': size === 'sm' && rotateText,
+          'py-4 px-1.5 text-sm': size === 'md' && rotateText,
+          'py-6 px-2 text-base': size === 'lg' && rotateText,
 
-          // Style variants
+          // Style variants for horizontal orientation or non-rotated text
           'border-b-[3px] border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
-            variant === 'default',
+            ['default', 'shadow'].includes(variant) && (!rotateText || (rotateText && !position)),
+
+          // Style variants for rotated text in vertical orientation
+          'border-r-[3px] border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
+            ['default', 'shadow'].includes(variant) && rotateText && position === 'right',
+          'border-l-[3px] border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
+            ['default', 'shadow'].includes(variant) && rotateText && position === 'left',
+
+          // Pills variant
           'rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 data-[state=active]:bg-[#6366F1] data-[state=active]:text-white':
             variant === 'pills',
-          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full data-[state=active]:after:bg-blue-500':
-            variant === 'underline',
 
-          '  border-transparent border-b-[3px] hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:border-b-primary    data-[state=active]:text-blue-600':
+          // Underline variant for horizontal or non-rotated
+          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full data-[state=active]:after:bg-blue-500':
+            variant === 'underline' && (!rotateText || (rotateText && !position)),
+
+          // Underline variant for rotated text
+          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
+            variant === 'underline' && rotateText && position === 'right',
+          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
+            variant === 'underline' && rotateText && position === 'left',
+
+          // Shadow variant
+          'border-transparent  hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500  data-[state=active]:text-blue-600':
             variant === 'shadow',
 
           // Icon positioning
           'flex-row-reverse': iconPosition === 'right',
         },
+
         className
       )}
       {...props}
