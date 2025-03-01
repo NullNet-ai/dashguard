@@ -66,14 +66,15 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
 
   const { data: packetsIP = [], refetch } = api.packet.getBandwithInterfacePerSecond.useQuery(
     {
-
+      
       bucket_size: '1s',
       timezone: timezone,
       device_id: defaultValues?.id,
       time_range: getLastMinutesTimeStamp(3),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
-
+    console.log("%c Line:68 🍓 packetsIP", "color:#2eafb0", packetsIP);
+    
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
       return {

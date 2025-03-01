@@ -46,34 +46,34 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
     timezone,
   });
 
-  useEffect(() => {
-    if (!defaultValues?.id || defaultValues?.device_status.toLowerCase() === 'offline') return;
+  // useEffect(() => {
+  //   if (!defaultValues?.id || defaultValues?.device_status.toLowerCase() === 'offline') return;
 
-    const fetchChartData = async () => {
-      const { data } = await fetchBandWidth();
-      if (data && data.length > 0) {
-        const sortedData = data.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
-        const currentTraffic = sortedData[0]?.bandwidth || 0;
-        const previousTraffic = sortedData[1]?.bandwidth || 0;
-        const maxTraffic = Math.max(...data.map(d => d.bandwidth), 100);
-        setTrafficData({ traffic: currentTraffic, previousTraffic, maxTraffic });
-      }
-    };
+  //   const fetchChartData = async () => {
+  //     const { data } = await fetchBandWidth();
+  //     if (data && data.length > 0) {
+  //       const sortedData = data.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
+  //       const currentTraffic = sortedData[0]?.bandwidth || 0;
+  //       const previousTraffic = sortedData[1]?.bandwidth || 0;
+  //       const maxTraffic = Math.max(...data.map(d => d.bandwidth), 100);
+  //       setTrafficData({ traffic: currentTraffic, previousTraffic, maxTraffic });
+  //     }
+  //   };
 
-    fetchChartData();
-    const interval = setInterval(fetchChartData, 1000);
-    return () => clearInterval(interval);
-  }, [defaultValues?.id, defaultValues?.device_status]);
+  //   fetchChartData();
+  //   const interval = setInterval(fetchChartData, 1000);
+  //   return () => clearInterval(interval);
+  // }, [defaultValues?.id, defaultValues?.device_status]);
 
-  useEffect(() => {
-    const animationInterval = setInterval(() => {
-      setAnimatedTraffic((prev) => {
-        const diff = trafficData.traffic - prev;
-        return Math.abs(diff) < 0.1 ? trafficData.traffic : prev + diff * 0.1;
-      });
-    }, 16);
-    return () => clearInterval(animationInterval);
-  }, [trafficData.traffic]);
+  // useEffect(() => {
+  //   const animationInterval = setInterval(() => {
+  //     setAnimatedTraffic((prev) => {
+  //       const diff = trafficData.traffic - prev;
+  //       return Math.abs(diff) < 0.1 ? trafficData.traffic : prev + diff * 0.1;
+  //     });
+  //   }, 16);
+  //   return () => clearInterval(animationInterval);
+  // }, [trafficData.traffic]);
 
   const isTrendingUp = trafficData.traffic > trafficData.previousTraffic;
   const pieEndAngle = 180 - (animatedTraffic / trafficData.maxTraffic) * 180;
