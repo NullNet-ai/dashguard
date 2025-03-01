@@ -43,6 +43,7 @@ const gridColumns = [
   {
     header: 'Hierarchy',
     accessorKey: 'hierarchy',
+    sortKey: 'device_group_settings.name',
     search_config: {
       operator: 'like',
       entity:'device_group_settings',
@@ -52,6 +53,7 @@ const gridColumns = [
   {
     header: 'WAN Address',
     accessorKey: 'ip_address',
+    sortKey: 'device_interfaces.address',
     search_config: {
       operator: 'like',
       entity:'device_interfaces',
@@ -124,10 +126,10 @@ const gridColumns = [
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
-    sortKey: 'updated_by.first_name',
+    sortKey: 'contacts.contact_updated_by',
     search_config: {
-      entity: 'updated_by',
-      field: 'first_name',
+      entity: 'contacts',
+      field: 'contact_updated_by',
       operator: 'like',
     },
   },
@@ -148,10 +150,10 @@ const gridColumns = [
   {
     header: 'Created By',
     accessorKey: 'created_by',
-    sortKey: 'created_by.first_name',
+    sortKey: 'contacts.contact_created_by',
     search_config: {
-      entity: 'created_by',
-      field: 'first_name',
+      entity: 'contacts',
+      field: 'contact_created_by',
       operator: 'like',
     },
   },

@@ -60,17 +60,9 @@ export const deviceConfigurationRouter = createTRPCRouter({
             }],
             order: {
               limit: 1,
+              by_field: 'timestamp',
+              by_direction: EOrderDirection.DESC,
             },
-            multiple_sort: [
-              {
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-              {
-                by_field: 'created_time',
-                by_direction: EOrderDirection.DESC,
-              },
-            ],
           },
         })
         .join({
@@ -214,4 +206,104 @@ export const deviceConfigurationRouter = createTRPCRouter({
       
       return { items: modifiedData, totalCount: res?.data?.[0]?.device_configurations?.length }
     }),
+  fetchInterfaceOptions:  privateProcedure
+  .input(
+    z.object({
+      code: z.string(),
+    }),
+  )
+  .query(async ({ input, ctx }) => {
+    const res = await ctx.dnaClient
+      .findAll({
+        entity,
+        token: ctx.token.value,
+        query: {
+
+          pluck_object: {
+            device_configurations: [
+              'id',
+              'device_id',
+            ],
+            devices: [
+              'id', 'code',
+            ],
+            device_interfaces:[
+              'name',
+              "device",
+              "id"
+            ]
+          },
+          advance_filters: [{
+            type: 'criteria',
+            field: 'code',
+            entity: 'devices',
+            operator: EOperator.EQUAL,
+            values: [
+              input.code,
+            ],
+          },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'status',
+            entity: 'device_configurations',
+            operator: EOperator.EQUAL,
+            values: [
+              'Active',
+            ],
+          }],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+          }
+        },
+      })
+   
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_interfaces',
+            field: 'device_configuration_id',
+          },
+          from: {
+            entity,
+            field: 'id',
+          },
+        },
+      })
+      .execute()
+
+      
+      const data = res?.data?.[0]?.device_interfaces
+      const drpdwn_optn = data?.map((item: {
+        name: string
+        device: string
+      }) => {
+        const { device , name} = item
+        return {
+          label: `${name} (${device})`,
+          value: device
+        }
+      })
+      
+      return drpdwn_optn
+  }),
 })

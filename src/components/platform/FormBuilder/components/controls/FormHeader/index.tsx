@@ -1,13 +1,13 @@
-import { LockIcon, PlusIcon } from "lucide-react";
-import { Fragment } from "react";
+import { LockIcon, PlusIcon } from 'lucide-react';
 
-import { Button } from "~/components/ui/button";
-import { CardDescription, CardHeader } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
-import { type IFormHeaderProps } from "../../../types/controls/interface";
-import { DebugButton, UnlockButton } from "../../ui";
-import ShowHideForm from "../../ui/Buttons/ShowHideForm";
-import { testIDFormatter } from "~/utils/formatter";
+import { Button } from '~/components/ui/button';
+import { CardDescription, CardHeader } from '~/components/ui/card';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
+
+import { type IFormHeaderProps } from '../../../types/controls/interface';
+import { DebugButton, UnlockButton } from '../../ui';
+import ShowHideForm from '../../ui/Buttons/ShowHideForm';
 
 const FormHeader = (props: IFormHeaderProps) => {
   const {
@@ -15,9 +15,6 @@ const FormHeader = (props: IFormHeaderProps) => {
     buttonConfig,
     formLabel,
     form,
-    formSchema,
-    isButtonLoading,
-    isListLoading,
     open,
     buttonHeaderRender,
     filterGridConfig,
@@ -27,84 +24,92 @@ const FormHeader = (props: IFormHeaderProps) => {
     handleDebug,
     handleLock,
     handleOpen,
-    saveForm,
     handleAppendForm,
-    selectedRecords,
     handleUpdateDisplayType,
     formKey,
     features,
     formProps,
   } = props;
 
-  const { enableUnlockFormFilter = true } = features ?? {}
+  const { enableUnlockFormFilter = true } = features ?? {};
 
   return (
     <CardHeader
       className={cn(
-        "flex flex-row items-center justify-between bg-slate-100",
-        headerClassName,
+        'flex flex-row items-center justify-between bg-slate-100', headerClassName,
       )}
     >
-      <CardDescription className="text-md font-semibold text-foreground">
-        {formLabel}{" "}
+      <CardDescription className='text-md font-semibold text-foreground'>
+        {formLabel}
+        {' '}
       </CardDescription>
-      <div className="flex flex-row space-x-2">
+      <div className='flex flex-row space-x-2'>
         <DebugButton
           handleDebug={handleDebug}
-          // dataTestID={`${formKey}${formLabel.split(" ").join("")}FormDebugButton`}
-          dataTestID={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-debug-btn`)}
+          dataTestID={testIDFormatter(
+            `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-debug-btn`,
+          )}
         />
 
-        {displayType === "selected" && enableUnlockFormFilter && <Button
-          type="button"
-          variant={"ghost"}
-          onClick={() => handleUpdateDisplayType("form")}
-          className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
-          size={"icon"}
-          // data-test-id={`${formKey}${formLabel.split(" ").join("")}FormLockButton`}
-          data-test-id={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-lock-btn`)}
-        >
-          <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-primary" />
-        </Button>}
-
-        {form.formState.disabled && !filterGridConfig && (
-          <Fragment>
-            {buttonConfig?.hideLockButton ? null : (
-              <UnlockButton
-                handleLock={handleLock}
-                dataTestID={testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-unlock-btn`)}
-              />
+        {displayType === 'selected' && enableUnlockFormFilter && (
+          <Button
+            className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
+            type="button"
+            variant="ghost"
+            onClick={() => handleUpdateDisplayType('form')}
+            size="icon"
+            data-test-id={testIDFormatter(
+              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
             )}
-          </Fragment>
+          >
+            <LockIcon
+              className="h-4 w-4 cursor-pointer rounded-full border text-primary"
+            />
+          </Button>
         )}
+
+        {form.formState.disabled
+        && !filterGridConfig
+        && (buttonConfig?.hideLockButton
+          ? null
+          : (
+              <UnlockButton
+                dataTestID={testIDFormatter(
+                  `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-unlock-btn`,
+                )}
+                handleLock={handleLock}
+              />
+            ))}
         {buttonHeaderRender}
 
-        {displayType === "selected" &&
-          filterGridConfig?.actionType === "multi-select" && (
-            <Button
-              data-test-id={
-                testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-form-filter-grd-add-btn`)
-              }
-              onClick={() => {
-                handleNewRecordFormFilterGrid();
-              }}
-              type="button"
-              size={"xs"}
-            >
-              <PlusIcon className="h-4 w-4" />
-              <span>Add</span>
-            </Button>
-          )}
+        {displayType === 'selected'
+        && filterGridConfig?.actionType === 'multi-select' && (
+          <Button
+            data-test-id={testIDFormatter(
+              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-filter-grd-add-btn`,
+            )}
+            size='xs'
+            type='button'
+            onClick={() => {
+              handleNewRecordFormFilterGrid();
+            }}
+          >
+            <PlusIcon className='h-4 w-4' />
+            <span>Add</span>
+          </Button>
+        )}
         {enableAppendForm && (
           <Button
-            data-test-id={  testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-form-append-btn`)}
+            data-test-id={testIDFormatter(
+              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-append-btn`,
+            )}
+            size='xs'
+            type='button'
             onClick={() => {
               handleAppendForm();
             }}
-            type="button"
-            size={"xs"}
           >
-            <PlusIcon className="h-4 w-4" />
+            <PlusIcon className='h-4 w-4' />
             <span>Add</span>
           </Button>
         )}
@@ -114,10 +119,12 @@ const FormHeader = (props: IFormHeaderProps) => {
          *
          */}
         <ShowHideForm
+          data-test-id={testIDFormatter(
+            `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-${open ? 'hide' : 'show'}-form-btn`,
+          )}
           handleOpen={handleOpen}
-          open={open}
           hideAccordions={!!buttonConfig?.hideAccordions}
-          data-test-id={  testIDFormatter(`${formProps?.entity ?? "no_entity"}-wzrd-${formKey}-${open ? "hide" : "show"}-form-btn`)}
+          open={open}
         />
       </div>
     </CardHeader>

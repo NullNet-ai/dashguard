@@ -1,25 +1,30 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis } from 'recharts'
+import { useMemo } from 'react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
+import { formatNumber, modifyAxis } from './LineChart';
 
-const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+const AreaChartComponent = ({ filteredData, interfaces }: any) => {
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
       <defs>
-        <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
+        {interfaces?.map((item:any) => {
+          return <linearGradient id={`${item?.value}`} x1="0" x2="0" y1="0" y2="1">
           <stop
             offset="5%"
-            stopColor="var(--color-bandwidth)"
+            stopColor={`var(--color-${item?.value})`}
             stopOpacity={0.8}
           />
           <stop
             offset="95%"
-            stopColor="var(--color-bandwidth)"
+            stopColor={`var(--color-${item?.value})`}
             stopOpacity={0.1}
           />
-        </linearGradient>
-        <linearGradient id="fillStaticBandwidth" x1="0" x2="0" y1="0" y2="1">
+        </linearGradient>})}
+        {/* <linearGradient id="fillStaticBandwidth" x1="0" x2="0" y1="0" y2="1">
           <stop
             offset="5%"
             stopColor="var(--color-static_bandwidth)"
@@ -30,7 +35,7 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
             stopColor="var(--color-static_bandwidth)"
             stopOpacity={0.1}
           />
-        </linearGradient>
+        </linearGradient> */}
       </defs>
       <CartesianGrid vertical={false} />
       <XAxis
@@ -50,6 +55,21 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         tickLine={false}
         tickMargin={8}
       />
+        <YAxis
+          allowDataOverflow={true}
+          axisLine={false}
+          domain={[yAxisMin, yAxisMax]}
+          tickCount={4}
+          tickFormatter={formatNumber}
+          tickLine={false}
+          tickMargin={8}
+          ticks={[
+            yAxisMin,
+            yAxisMin + (yAxisMax - yAxisMin) / 3,
+            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
+            yAxisMax,
+          ]}
+        />
       <ChartTooltip
         content={(
           <ChartTooltipContent
@@ -67,20 +87,20 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         )}
         cursor={false}
       />
-      <Area
-        dataKey="bandwidth"
-        fill="url(#fillBandwidth)"
+      {interfaces?.map((item: any) => <Area
+        dataKey={item?.value}
+        fill={`url(#fill${item?.value})`}
         stackId="a"
-        stroke="var(--color-bandwidth)"
+        stroke={`var(--color-${item.value})`}
         type="natural"
-      />
-      <Area
+      />)}
+      {/* <Area
         dataKey="static_bandwidth"
         fill="url(#fillStaticBandwidth)"
         stackId="a"
         stroke="var(--color-static_bandwidth)"
         type="natural"
-      />
+      /> */}
       <ChartLegend content={<ChartLegendContent />} />
     </AreaChart></ResponsiveContainer>
   )

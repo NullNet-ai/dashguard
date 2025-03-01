@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCurrencyInput",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.7.0",
+  "branch": "released/fix/1.7.0",
+  "message": "release version 1.7.0",
+  "publish_name": "Rob Caldosa"
 }

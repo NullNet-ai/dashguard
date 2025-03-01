@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormRadio",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.6.2<unreleased>",
+  "branch": "unreleased/fix/1.6.2<unreleased>",
+  "message": "Handle front-end UI to indicate that is resetted or there is no value selected ",
+  "publish_name": "Rob Caldosa"
 }
