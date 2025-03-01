@@ -173,16 +173,14 @@ export const deviceRouter = createTRPCRouter({
         pluck_object: _pluck_object,
         sorting,
       } = input
+      // console.log('%c Line:175 🍎 sorting', 'color:#33a5ff', sorting);
 
       const pluck_object = {
         contacts: ['first_name', 'last_name', 'id'],
         organization_accounts: ['contact_id', 'id', 'device_id'],
         devices: pluck,
-        updated_by: ['first_name', 'last_name', 'id'],
         device_groups: ['device_group_setting_id', 'device_id', 'id'],
         device_group_settings: ['name', 'id'],
-        device_created_by: ['id', 'instance_name'],
-        device_updated_by: ['id', 'instance_name'],
         device_interfaces: ['id', 'device_configuration_id', 'name', 'address'],
         device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
       }
@@ -206,9 +204,9 @@ export const deviceRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: sorting?.length
-            ? formatSorting(sorting)
-            : [],
+          // multiple_sort: sorting?.length
+          //   ? formatSorting(sorting)
+          //   : [],
           date_format: "YYYY/MM/DD",
           concatenate_fields: [
             {
@@ -216,7 +214,7 @@ export const deviceRouter = createTRPCRouter({
                     "first_name",
                     "last_name"
                 ],
-                field_name: "created_by",
+                field_name: "contact_created_by",
                 separator: " ",
                 entity: "contacts",
                 aliased_entity: "contacts"
@@ -226,7 +224,7 @@ export const deviceRouter = createTRPCRouter({
                   "first_name",
                   "last_name"
               ],
-              field_name: "updated_by",
+              field_name: "contact_updated_by",
               separator: " ",
               entity: "contacts",
               aliased_entity: "contacts"
@@ -260,90 +258,6 @@ export const deviceRouter = createTRPCRouter({
               from: {
                 entity: 'organization_accounts',
                 field: 'contact_id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'organization_accounts',
-                alias: 'organization_account_updated_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'devices',
-                field: 'updated_by',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'contacts',
-                alias: 'updated_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_accounts',
-                field: 'contact_id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'organization_accounts',
-                alias: 'device_organization_account_created_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'devices',
-                field: 'created_by',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'devices',
-                alias: 'device_created_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_accounts',
-                field: 'device_id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'organization_accounts',
-                alias: 'device_organization_account_updated_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'devices',
-                field: 'updated_by',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'devices',
-                alias: 'device_updated_by',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_accounts',
-                field: 'device_id',
               },
             },
           })
@@ -442,16 +356,10 @@ export const deviceRouter = createTRPCRouter({
             ?.map((setting: { name: string }) => setting.name)
             .join(', '),
           created_by: contacts?.length
-            ? `${contacts?.[0].first_name} ${contacts?.[0].last_name}`
-            : device_created_by?.length
-              ? `${device_created_by?.[0].instance_name}`
-              : null,
+            ? `${contacts?.[0].contact_created_by}` : null,
           ip_address: wan_address,
-          updated_by: updated_by?.length
-            ? `${updated_by?.[0].first_name} ${updated_by?.[0].last_name}`
-            : device_updated_by?.length
-              ? `${device_updated_by?.[0].instance_name}`
-              : null,
+          updated_by: contacts?.length
+          ? `${contacts?.[0].contact_updated_by}` : null,
         };
       });
       
