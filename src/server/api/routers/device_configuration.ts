@@ -213,26 +213,24 @@ export const deviceConfigurationRouter = createTRPCRouter({
     }),
   )
   .query(async ({ input, ctx }) => {
-    console.log("%c Line:216 🍕 input", "color:#6ec1c2", input);
     const res = await ctx.dnaClient
       .findAll({
         entity,
         token: ctx.token.value,
         query: {
-          pluck: ['id', 'code', 'updated_date', 'updated_time', 'updated_by', 'created_date', 'created_time', 'created_by'],
+
           pluck_object: {
             device_configurations: [
               'id',
               'device_id',
-              'raw_content',
-              'status',
             ],
             devices: [
               'id', 'code',
             ],
             device_interfaces:[
               'name',
-              "device"
+              "device",
+              "id"
             ]
           },
           advance_filters: [{
@@ -265,35 +263,35 @@ export const deviceConfigurationRouter = createTRPCRouter({
         },
       })
    
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'devices',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity,
-      //       field: 'device_id',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'device_interfaces',
-      //       field: 'device_configuration_id',
-      //     },
-      //     from: {
-      //       entity,
-      //       field: 'id',
-      //     },
-      //   },
-      // })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_interfaces',
+            field: 'device_configuration_id',
+          },
+          from: {
+            entity,
+            field: 'id',
+          },
+        },
+      })
       .execute()
 
-      console.log("%c Line:295 🍐 res", "color:#3f7cff", res);
+      
       const data = res?.data?.[0]?.device_interfaces
       const drpdwn_optn = data?.map((item: {
         name: string
@@ -305,6 +303,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
           value: device
         }
       })
+      
       return drpdwn_optn
   }),
 })
