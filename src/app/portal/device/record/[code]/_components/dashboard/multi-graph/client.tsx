@@ -22,19 +22,19 @@ import { z } from 'zod'
 import FormClientFetch from '../pie-chart/client-fetch'
 
 
-const chartConfig = {
-  visitors: {
-    label: 'Visitors',
-  },
-  static_bandwidth: {
-    label: 'Static Bandwidth',
-    color: 'hsl(var(--chart-1))',
-  },
-  bandwidth: {
-    label: 'Bandwidth',
-    color: 'hsl(var(--chart-2))',
-  },
-} satisfies ChartConfig
+// const chartConfig = {
+//   visitors: {
+//     label: 'Visitors',
+//   },
+//   static_bandwidth: {
+//     label: 'Static Bandwidth',
+//     color: 'hsl(var(--chart-1))',
+//   },
+//   bandwidth: {
+//     label: 'Bandwidth',
+//     color: 'hsl(var(--chart-2))',
+//   },
+// } satisfies ChartConfig
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -48,6 +48,21 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   })
 
 
+  const chartConfig = interfaces.reduce((config, key) => {
+    console.log("%c Line:52 🥤 key", "color:#7f2b82", key);
+    const option = interfaces.find(option => {
+      return option.value === key?.value});
+    if (option) {
+      config[key?.value] = {
+        label: option.label,
+        color: `hsl(var(--chart-${interfaces.findIndex(opt => opt?.value === key?.value) + 1}))`,
+      };
+    }
+    return config;
+  }, {} as Record<string, { label: string; color: string }>);
+  
+  console.log("%c Line:52 🥕 chartConfig", "color:#e41a6a", chartConfig);
+
   const { data: packetsIP = [], refetch } = api.packet.getBandwithInterfacePerSecond.useQuery(
     {
       
@@ -58,11 +73,11 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       interface_names: interfaces?.map((item: any) => item?.value),
     })
     
+    console.log("%c Line:69 🥟 packetsIP", "color:#33a5ff", packetsIP);
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
       return {
         ...item,
-        static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
         bucket: date.format('HH:mm:ss')
       }
   })

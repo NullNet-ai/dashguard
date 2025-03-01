@@ -7,19 +7,20 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
       <defs>
-        <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
+        {interfaces?.map((item:any) => {
+          return <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
           <stop
             offset="5%"
-            stopColor="var(--color-bandwidth)"
+            stopColor={`var(--color-${item?.value})`}
             stopOpacity={0.8}
           />
           <stop
             offset="95%"
-            stopColor="var(--color-bandwidth)"
+            stopColor={`var(--color-${item?.value})`}
             stopOpacity={0.1}
           />
-        </linearGradient>
-        <linearGradient id="fillStaticBandwidth" x1="0" x2="0" y1="0" y2="1">
+        </linearGradient>})}
+        {/* <linearGradient id="fillStaticBandwidth" x1="0" x2="0" y1="0" y2="1">
           <stop
             offset="5%"
             stopColor="var(--color-static_bandwidth)"
@@ -30,7 +31,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
             stopColor="var(--color-static_bandwidth)"
             stopOpacity={0.1}
           />
-        </linearGradient>
+        </linearGradient> */}
       </defs>
       <CartesianGrid vertical={false} />
       <XAxis
@@ -68,10 +69,10 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         cursor={false}
       />
       {interfaces?.map((item: any) => <Area
-        dataKey={item?.label}
+        dataKey={item?.value}
         fill="url(#fillBandwidth)"
         stackId="a"
-        stroke={`var(--color-${item.label})`}
+        stroke={`var(--color-${item.value})`}
         type="natural"
       />)}
       {/* <Area

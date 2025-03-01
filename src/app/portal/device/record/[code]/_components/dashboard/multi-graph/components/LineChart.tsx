@@ -36,9 +36,9 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       {interfaces?.map((item: any) => {
         return <Line
-        dataKey={item?.label}
+        dataKey={item?.value}
         dot={false}
-        stroke={`var(--color-${item?.label})`}
+        stroke={`var(--color-${item?.value})`}
         strokeWidth={2}
         type="monotone"
       />
