@@ -47,7 +47,7 @@ export default async function registerAccountFromInvite({
     account_organization_id: organization_id,
     account_organization_name: organization_name,
     categories: ['External User'],
-    // is_new_user: false,
+    is_new_user: false,
   }
 
   const organization = {

@@ -42,6 +42,7 @@ import {
   type TActionType,
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
+import { TooltipProvider } from '~/components/ui/tooltip';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -172,6 +173,9 @@ export default function GridProvider({
     if (!row) {
       toast.error('Row is required');
       return;
+    }
+    if (onSelectRecords) {
+      onSelectRecords([row]);
     }
     setRowSelectedRecord([row]);
   };
@@ -312,6 +316,9 @@ export default function GridProvider({
         selectedRecords.includes(row.original.id) ||
         !statusesIncluded?.includes(row.original?.status);
 
+      const showCustomActionOnly =
+        config?.disableDefaultAction && config?.customRowAction;
+
       if (config?.actionType === 'single-select') {
         return (
           <Button2
@@ -341,8 +348,20 @@ export default function GridProvider({
         );
       }
 
+      if (showCustomActionOnly) {
+        return (
+          <>
+            {config?.customRowAction &&
+              config?.customRowAction({
+                row,
+                config,
+              })}
+          </>
+        );
+      }
+
       return (
-        <>
+        <TooltipProvider>
           <EditComponent row={row} config={config!} />
           {!['Archived', 'Delete'].includes(row.original?.status) && (
             <ArchiveComponent
@@ -364,8 +383,9 @@ export default function GridProvider({
             config?.customRowAction({
               row,
               config,
+              viewMode,
             })}
-        </>
+        </TooltipProvider>
       );
     },
     enableSorting: false,
@@ -508,12 +528,6 @@ export default function GridProvider({
       setArchiveBulkLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!onSelectRecords) return;
-    if (rowSelectedRecord?.length === 0) return;
-    onSelectRecords(rowSelectedRecord);
-  }, [onSelectRecords, rowSelectedRecord]);
 
   const state_context = {
     config: {

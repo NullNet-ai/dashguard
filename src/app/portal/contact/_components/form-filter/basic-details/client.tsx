@@ -1,26 +1,24 @@
-'use client'
+'use client';
 
-import { ulid } from 'ulid'
-import { type z } from 'zod'
+import { ulid } from 'ulid';
+import { type z } from 'zod';
 
-import { FormBuilder } from '~/components/platform/FormBuilder'
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
-import { useToast } from '~/context/ToastProvider'
-import {
-  ContactPhoneEmailSchema,
-} from '~/server/zodSchema/contact/contactPhoneEmail'
-import { api } from '~/trpc/react'
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
+import { api } from '~/trpc/react';
 
-import { type IFormProps } from '../types'
+import { type IFormProps } from '../types';
 
-import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from './_config/columns'
+import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from './_config/columns';
 import {
   closeCurrentInnerClassTab,
   removeRecord,
   saveContactDetails,
   selectRecord,
-} from './actions'
-import SelectedView from './components/SelectedView'
+} from './actions';
+import SelectedView from './components/SelectedView';
 
 const defaultAdvanceFilter = [
   {
@@ -48,7 +46,7 @@ const defaultAdvanceFilter = [
     values: ['Draft'],
     default: true,
   },
-]
+];
 
 export default function ContactDetails({
   params,
@@ -56,7 +54,7 @@ export default function ContactDetails({
   selectedRecords,
   grid_data,
 }: IFormProps) {
-  const toast = useToast()
+  const toast = useToast();
 
   const handleSave = async ({
     data,
@@ -66,73 +64,70 @@ export default function ContactDetails({
     any[]
   > => {
     try {
-      const response = await saveContactDetails(data)
+      const response = await saveContactDetails(data);
       if (response?.existing) {
         form?.setError('phones', {
           type: 'manual',
           message: 'Phone Number already exists.',
-        })
+        });
         form?.setError('emails', {
           type: 'manual',
           message: 'Email already exists.',
-        })
-        return []
+        });
+        return [];
       }
 
       if (action_type === 'Create') {
         await closeCurrentInnerClassTab({
           code: response.code!,
-        })
+        });
       }
-      return [response]
+      return [response];
+    } catch (error) {
+      toast.error('Failed to submit Basic Details');
+      return [];
     }
-    catch (error) {
-      toast.error('Failed to submit Basic Details')
-      return []
-    }
-  }
+  };
 
   const handleRemoveRecord = async ({
     filter_entity,
   }: {
-    rows: any[]
-    main_entity_id: string
-    filter_entity: string
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
   }) => {
     try {
-      await removeRecord()
+      await removeRecord();
       return {
         rows: [],
         filter_entity,
         main_entity_id: '',
-      }
+      };
+    } catch (error) {
+      toast.error('Failed to submit Basic Details');
     }
-    catch (error) {
-      toast.error('Failed to submit Basic Details')
-    }
-  }
+  };
 
   const handleSelectRecord = async ({
     rows,
     filter_entity,
     main_entity_id,
   }: {
-    rows: any[]
-    main_entity_id: string
-    filter_entity: string
+    rows: any[];
+    main_entity_id: string;
+    filter_entity: string;
   }) => {
     try {
-      await selectRecord(rows)
+      await selectRecord(rows);
       return {
         rows,
         filter_entity,
         main_entity_id,
-      }
+      };
+    } catch (error) {
+      toast.error('Failed to submit Basic Details');
     }
-    catch (error) {
-      toast.error('Failed to submit Basic Details')
-    }
-  }
+  };
 
   return (
     <FormBuilder
@@ -188,7 +183,13 @@ export default function ContactDetails({
           query_params: {
             entity: 'contact',
             pluck: params?.pluck_fields,
-            default_advance_filters: defaultAdvanceFilter,
+            default_advance_filters: defaultAdvanceFilter as {
+              entity: string;
+              operator: string;
+              type: string;
+              field: string;
+              values: string[];
+            }[],
             default_sorting: [
               {
                 id: 'created_date',
@@ -204,42 +205,47 @@ export default function ContactDetails({
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any[]
-            main_entity_id: string
-            filter_entity: string
-          }
+            rows: any[];
+            main_entity_id: string;
+            filter_entity: string;
+          };
 
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          }
+          };
         },
-        onRemoveSelectedRecords: async ({ filter_entity, main_entity_id, rows }) => {
+        onRemoveSelectedRecords: async ({
+          filter_entity,
+          main_entity_id,
+          rows,
+        }) => {
           const response = (await handleRemoveRecord({
             rows,
             filter_entity,
             main_entity_id,
           })) as {
-            rows: any[]
-            filter_entity: string
-            main_entity_id: string
-          }
+            rows: any[];
+            filter_entity: string;
+            main_entity_id: string;
+          };
           return {
             rows: response.rows,
             filter_entity: response.filter_entity,
             main_entity_id: response.main_entity_id,
-          }
+          };
         },
         onFilterFieldChange: (search_params, options) => {
           const { data } = api.contact.mainGrid.useQuery(
-            search_params, options,
-          )
-          return data
+            search_params,
+            options,
+          );
+          return data;
         },
         handleSelectFieldFilterGrid: (data) => {
-          const { raw_phone_number, iso_code, country_code, email, ...rest }
-            = data ?? {}
+          const { raw_phone_number, iso_code, country_code, email, ...rest } =
+            data ?? {};
           const resolvedData = {
             ...rest,
             phones: [
@@ -254,21 +260,21 @@ export default function ContactDetails({
                 email,
               },
             ],
-          }
+          };
 
-          return resolvedData
+          return resolvedData;
         },
         renderComponentSelected: (record) => {
-          return <SelectedView record={record} />
+          return <SelectedView record={record} />;
         },
         grid_data,
       }}
-      formKey='basicDetails'
-      formLabel='Basic Details'
+      formKey="basicDetails"
+      formLabel="Basic Details"
       formProps={params}
       formSchema={ContactPhoneEmailSchema}
       handleSubmitFormGrid={handleSave}
       myParent={params.shell_type}
     />
-  )
+  );
 }

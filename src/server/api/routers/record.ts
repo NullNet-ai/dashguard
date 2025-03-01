@@ -211,6 +211,7 @@ export const recordRouter = createTRPCRouter({
             contacts: ['id', 'first_name', 'last_name'],
             organizations: ['name', 'id'],
             user_roles: ['role', 'id'],
+            external_contacts: ['id', 'first_name', 'last_name'],
           },
         },
       })
@@ -253,17 +254,37 @@ export const recordRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'external_contacts',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_accounts',
+            field: 'external_contact_id',
+          },
+        },
+      })
       .execute();
 
     const accountOrganizations = accounts.data?.reduce(
       (orgs: any, account: any) => {
-        const { organization_accounts, contacts, organizations, user_roles } =
-          account ?? {};
+        const {
+          organization_accounts,
+          contacts,
+          organizations,
+          user_roles,
+          external_contacts,
+        } = account ?? {};
+        const firstname = `${contacts?.first_name || external_contacts?.first_name}`;
+        const lastname = `${contacts?.last_name || external_contacts?.last_name}`;
         if (organizations?.id === response?.organization_id) {
           return {
             ...orgs,
             current_organization: {
-              account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
+              account_name: `${firstname || ''} ${lastname || ''}`,
               username: organization_accounts?.account_id || '',
               organization: organizations?.name || '',
               role: user_roles?.role,
@@ -277,7 +298,7 @@ export const recordRouter = createTRPCRouter({
           other_organizations: [
             ...orgs.other_organizations,
             {
-              account_name: `${contacts?.first_name || ''} ${contacts?.last_name || ''}`,
+              account_name: `${firstname || ''} ${lastname || ''}`,
               username: organization_accounts?.account_id || '',
               organization: organizations?.name || '',
               role: user_roles?.role,
@@ -402,6 +423,7 @@ export const recordRouter = createTRPCRouter({
       const pathName = headerList.get('x-pathname') || '';
       const [, , , , identifier] = pathName.split('/');
       const { id, entity, record_status, field_key } = input ?? {};
+     
       const record = await ctx.dnaClient
         .findByCode(identifier || id, {
           entity,

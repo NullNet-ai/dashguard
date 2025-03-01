@@ -56,7 +56,7 @@ const FormServerFetch = async () => {
           pluck_fields: _pluck,
         }}
         selectedRecords={user_role_id ? [default_values] : []}
-        grid_data={{ items, totalCount }}
+        // grid_data={{ items, totalCount }}
       />
     </div>
   );
