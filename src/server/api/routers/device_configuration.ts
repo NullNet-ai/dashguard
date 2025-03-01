@@ -299,7 +299,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
       }) => {
         const { device , name} = item
         return {
-          label: name,
+          label: `${name} (${device})`,
           value: device
         }
       })
