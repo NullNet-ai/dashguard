@@ -265,7 +265,13 @@ export default function BasicDetails({
           query_params: {
             entity: 'contact',
             pluck: params?.pluck_fields,
-            default_advance_filters: defaultAdvanceFilter,
+            default_advance_filters: defaultAdvanceFilter as {
+              entity: string;
+              operator: string;
+              type: string;
+              field: string;
+              values: string[];
+            }[],
             default_sorting: [
               {
                 id: 'created_date',
