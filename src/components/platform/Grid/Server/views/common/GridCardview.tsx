@@ -1,37 +1,48 @@
-'use client'
-import { flexRender } from '@tanstack/react-table'
-import React, { useContext, useMemo } from 'react'
+'use client';
+import { flexRender } from '@tanstack/react-table';
+import { EllipsisVertical } from 'lucide-react';
+import React, { useContext, useMemo } from 'react';
 
-import useScreenType from '~/hooks/use-screen-type'
-import { cn } from '~/lib/utils'
-import { testIDFormatter } from '~/utils/formatter'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
+import useScreenType from '~/hooks/use-screen-type';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
 
-import { GridContext } from '../../../Provider'
-import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal'
+import {
+  ArchiveComponent,
+  DeleteComponent,
+  EditComponent,
+  RestoreComponent,
+} from '../../../DefatultRow/Actions';
+import { GridContext } from '../../../Provider';
+import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
+import GridCardViewContent from './GridCardViewContent';
 
-import GridCardViewContent from './GridCardViewContent'
-
-export default function GridCardView({ parentType }: any) {
-  const { state, actions } = useContext(GridContext)
-  const { config, showArchiveConfirmationModal } = state ?? {}
-  const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {}
-  const size = useScreenType()
+export default function GridCardView({parentType} : any) {
+  const { state, actions } = useContext(GridContext);
+  const { config, showArchiveConfirmationModal } = state ?? {};
+  const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
+  const size = useScreenType();
 
   const getCols = useMemo(() => {
     switch (size) {
       case 'sm':
-        return 'grid-cols-1'
+        return 'grid-cols-1';
       case 'md':
-        return 'grid-cols-2'
+        return 'grid-cols-2';
       case 'lg':
-        return 'grid-cols-2'
+        return 'grid-cols-2';
       case 'xl':
       case '2xl':
-        return 'grid-cols-2'
+        return 'grid-cols-2';
       default:
-        return 'grid-cols-1'
+        return 'grid-cols-1';
     }
-  }, [size])
+  }, [size]);
 
   return (
     <div
@@ -41,40 +52,36 @@ export default function GridCardView({ parentType }: any) {
       )}
       style={{ gridAutoFlow: 'row', gridAutoRows: 'auto' }}
     >
-      {state?.table.getRowModel().rows?.length
-        ? (
-            state?.table.getRowModel().rows.map((row, rowIndex) => {
-            // Get visible cells excluding action column
-              const visibleCells = row
-                .getVisibleCells()
-                .filter(cell => cell.column.id !== 'action')
-              const statusCell = row
-                .getVisibleCells()
-                .find(cell => cell.column.id === 'status')
+      {state?.table.getRowModel().rows?.length ? (
+        state?.table.getRowModel().rows.map((row, rowIndex) => {
+          // Get visible cells excluding action column
+          const visibleCells = row
+            .getVisibleCells()
+            .filter((cell) => cell.column.id !== 'action');
+          const statusCell = row
+            .getVisibleCells()
+            .find((cell) => cell.column.id === 'status');
 
-              return (
-                <GridCardViewContent
-                  row={row}
-                  key={row.id}
-                  rowIndex={rowIndex}
-                  state={state}
-                  statusCell={statusCell}
-                  flexRender={flexRender}
-                  parent={parentType}
-                  config={config}
-                  showArchiveConfirmationModal={showArchiveConfirmationModal}
-                  setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
-                  setRowToArchive={setRowToArchive}
-                  visibleCells={visibleCells}
-                />
-              )
-            })
-          )
-        : (
-            <div>
-              <div className="h-24 text-center text-foreground">No results.</div>
-            </div>
-          )}
+            return <GridCardViewContent
+                row={row}
+                key={row.id}
+                rowIndex={rowIndex}
+                state={state}
+                statusCell={statusCell}
+                flexRender={flexRender}
+                parent={parentType}
+                config={config}
+                showArchiveConfirmationModal={showArchiveConfirmationModal}
+                setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
+                setRowToArchive={setRowToArchive}
+                visibleCells={visibleCells}
+              />
+        })
+      ) : (
+        <div>
+          <div className="h-24 text-center text-foreground">No results.</div>
+        </div>
+      )}
       {state?.showArchiveConfirmationModal && (
         <ArchiveConfirmationModal
           config={state?.config}
@@ -85,5 +92,5 @@ export default function GridCardView({ parentType }: any) {
         />
       )}
     </div>
-  )
+  );
 }

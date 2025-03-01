@@ -86,21 +86,13 @@ export const organizationRouter = createTRPCRouter({
           id: z.string().min(1),
           name: z.string().min(1)
             .optional(),
-          parent_organization_id: z.string().optional(),
           tags: z.array(z.string()).optional(),
         })
-        .refine((data) => {
-          if (data.name && !data.parent_organization_id) {
-            return false
-          }
-          return true
-        }),
     )
     .mutation(async ({ input, ctx }) => {
       if (input.name) {
         const advance_filters = createAdvancedFilter({
           name: input.name,
-          parent_organization_id: input.parent_organization_id!,
         })
 
         const org = await ctx.dnaClient
@@ -150,9 +142,6 @@ export const organizationRouter = createTRPCRouter({
           mutation: {
             params: {
               name: input.name,
-              parent_organization_id:
-                input?.parent_organization_id
-                ?? ctx.session.account.organization_id,
               organization_id: ctx.session.account.organization_id,
               tags: input.tags,
             },

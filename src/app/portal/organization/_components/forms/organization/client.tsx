@@ -13,9 +13,6 @@ const FormSchema = z.object({
   name: z
     .string({ message: 'Name is required' })
     .min(1, { message: 'Name is required' }),
-  parent_organization_id: z
-    .string({ message: 'Parent Organization is required' })
-    .min(1, { message: 'Parent Organization is required' }),
 })
 
 export default function BasicDetails({
@@ -51,13 +48,6 @@ export default function BasicDetails({
       defaultValues={defaultValues}
       enableFormRegisterToParent={true}
       fields={[
-        {
-          id: 'parent_organization_id',
-          formType: 'select',
-          name: 'parent_organization_id',
-          label: 'Parent Organization',
-          required: true,
-        },
         {
           id: 'name',
           formType: 'input',

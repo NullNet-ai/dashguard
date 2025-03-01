@@ -32,7 +32,7 @@ export default async function Invite({ searchParams }: any) {
     token: searchParams.token,
   });
 
-  if (isInvitationLinkExpired(record.invitation.created_date)) {
+  if (isInvitationLinkExpired(record?.invitation?.created_date)) {
     Promise.all([
       api.record.updateDynamicRecord({
         entity: 'organization_account',

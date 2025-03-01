@@ -67,6 +67,12 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
                         />
                       </>
                     )}
+                     {config?.customRowAction &&
+                        config?.customRowAction({
+                        row,
+                        config,
+                        viewMode: 'card',
+                      })}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

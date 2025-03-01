@@ -81,6 +81,12 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
                         />
                       </>
                     )}
+                     {config?.customRowAction &&
+                        config?.customRowAction({
+                        row,
+                        config,
+                        viewMode: 'card',
+                      })}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
