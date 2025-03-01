@@ -1,6 +1,6 @@
 'use client'
 
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis } from 'recharts'
 
 import {
   ChartTooltip,
@@ -9,6 +9,7 @@ import {
 
 const LineChartComponent = ({ filteredData }: any) => {
   return (
+    <ResponsiveContainer width="100%" height={300}>
     <LineChart
       accessibilityLayer={true}
       data={filteredData}
@@ -49,6 +50,7 @@ const LineChartComponent = ({ filteredData }: any) => {
       />
 
     </LineChart>
+    </ResponsiveContainer>
   )
 }
 

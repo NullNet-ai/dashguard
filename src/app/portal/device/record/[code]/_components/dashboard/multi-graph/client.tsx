@@ -24,6 +24,7 @@ import { api } from '~/trpc/react'
 
 import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
+import { IFormProps } from '../types'
 
 const time_range_options = {
   '30d': '30 days',
@@ -71,7 +72,7 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = () => {
+const InteractiveGraph = ({defaultValues}: IFormProps) => {
   const [timeRange, setTimeRange] = React.useState('30d')
   const [resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
@@ -115,7 +116,8 @@ const InteractiveGraph = () => {
     }
     return {...item, bucket: date.format('MM/DD')}
   })
-
+  
+  console.log("%c Line:110 🍯 filteredData", "color:#ea7e5c", filteredData);
   const add_static_bandwidth = filteredData?.map((item) => {
     return {
       ...item,
