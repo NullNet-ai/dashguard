@@ -14,6 +14,7 @@ import MultipleSelector, { type Option } from "~/components/ui/multi-select";
 import { useToast } from "~/context/ToastProvider";
 import { createRecord } from "../../Actions/CreateRecord";
 import { type IField } from "../../types";
+import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -77,7 +78,7 @@ export default function FormMultiSelect({
   };
 
   return (
-    <FormItem className="overflow-visible">
+    <FormItem className={cn("overflow-visible", fieldConfig?.multiSelectContainerClassName)}>
       <FormLabel
         required={fieldConfig.required}
         data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
@@ -94,7 +95,7 @@ export default function FormMultiSelect({
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={fieldConfig.disabled || isDisabled}
           className={
-            formRenderProps?.fieldState.error
+            !!formRenderProps?.fieldState.error
               ? "border-destructive"
               : "flex items-center border border-input py-0 outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
           }
@@ -119,22 +120,22 @@ export default function FormMultiSelect({
           hidePlaceholderWhenSelected={
             fieldConfig.multiSelectHidePlaceholderWhenSelected ?? false
           }
-          creatable={fieldConfig.selectEnableCreate ?? false}
+          creatable={(fieldConfig.multiSelectEnableCreate || fieldConfig.selectEnableCreate) ?? false}
           triggerSearchOnFocus={
             fieldConfig.multiSelectTriggerSearchOnFocus ?? false
           }
           defaultOptions={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label?.localeCompare(b.label),
-                )
+                a.label?.localeCompare(b.label),
+              )
               : multiselectOptions?.[fieldConfig.name]
           }
           options={
             isAlphabeticalSorting
               ? multiselectOptions?.[fieldConfig.name]?.sort((a, b) =>
-                  a.label?.localeCompare(b.label),
-                )
+                a.label?.localeCompare(b.label),
+              )
               : multiselectOptions?.[fieldConfig.name]
           }
           placeholder={fieldConfig.placeholder}
@@ -142,7 +143,10 @@ export default function FormMultiSelect({
             fieldConfig.multiSelectHideClearAllButton ??
             fieldConfig.multiSelectMaxSelected === 1
           }
-          onCreateRecord={createNewRecord}
+          onCreateRecord={fieldConfig.selectOnCreateRecord
+            ? createNewRecord
+            : undefined}
+          showCreatableItem={fieldConfig.multiSelectShowCreatableItem}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

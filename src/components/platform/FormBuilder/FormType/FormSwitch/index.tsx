@@ -54,7 +54,8 @@ export default function FormSwitch({
           onCheckedChange={field.onChange}
           disabled={isDisabled}
           aria-readonly={fieldConfig.readonly}
-          icon={switchConfig?.icon}
+          leftIcon={switchConfig?.leftIcon}
+          rightIcon={switchConfig?.rightIcon}
           iconClassName={switchConfig?.iconClassName}
           leftLabel={switchConfig?.leftLabel}
           leftLabelClassName={switchConfig?.leftLabelClassName}

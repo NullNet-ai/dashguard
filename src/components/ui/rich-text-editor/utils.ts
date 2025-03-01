@@ -126,7 +126,7 @@ const validateFileOrBase64 = <T extends FileInput>(
   originalFile: T,
   validFiles: T[],
   errors: FileError[]
-): void => {
+): void=> {
   const { isValidType, isValidSize } = checkTypeAndSize(input, options)
 
   if (isValidType && isValidSize) {

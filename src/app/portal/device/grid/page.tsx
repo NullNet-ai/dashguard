@@ -49,8 +49,8 @@ export default async function Page({
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
-      : [],
-    // advance_filters: []
+      : [],    
+      // advance_filters: []
   })
 
   return (

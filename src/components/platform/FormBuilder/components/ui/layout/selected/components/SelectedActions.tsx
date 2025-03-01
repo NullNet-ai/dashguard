@@ -43,7 +43,7 @@ export default function SelectedActions({
               const currentValues = form.getValues();
 
               const mainEntity = filterGridConfig?.filter_entity;
-              // redirect(`/portal/${mainEntity}/record/${currentValues?.code}`);
+              redirect(`/portal/${mainEntity}/record/${currentValues?.code}`);
             }}
             className="flex gap-2"
           >

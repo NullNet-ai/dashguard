@@ -112,17 +112,21 @@ export default function FormFilterOpenedActions({
       icon: <XIcon className="h-4 w-4 text-muted-foreground" strokeWidth={3} />,
       label: "Clear",
       onClick: () => {
-        console.info("I am clearing the form");
         const currentValues = form.getValues();
         Object.keys(currentValues).forEach((key) => {
           const value = currentValues[key];
-
           if (Array.isArray(value)) {
-            if (key === "email") {
-              currentValues[key] = [{ email: "" }];
-            } else if (key === "phone") {
+            if (["email", "emails"].includes(key.toLowerCase())) {
               currentValues[key] = [
                 {
+                  ...value,
+                  email: "",
+                }
+              ];
+            } else if (["phone_numbers", "phones", "phone"].includes(key.toLowerCase())) {
+              currentValues[key] = [
+                {
+                  ...value,
                   raw_phone_number: "",
                   iso_code: "us",
                   country_code: "+1",

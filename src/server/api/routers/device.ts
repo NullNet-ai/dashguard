@@ -21,7 +21,7 @@ import Bluebird from 'bluebird';
 import { createDefineRoutes } from '../baseCrud'
 import { getActualDownloadURL } from '~/app/api/device/get_actual_download_url'
 
-const entity = 'device'
+const entity = 'devices'
 
 export const deviceRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -173,7 +173,7 @@ export const deviceRouter = createTRPCRouter({
         pluck_object: _pluck_object,
         sorting,
       } = input
-      // console.log('%c Line:175 🍎 sorting', 'color:#33a5ff', sorting);
+      
 
       const pluck_object = {
         contacts: ['first_name', 'last_name', 'id'],
@@ -204,9 +204,9 @@ export const deviceRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // multiple_sort: sorting?.length
-          //   ? formatSorting(sorting)
-          //   : [],
+          multiple_sort: sorting?.length
+            ? formatSorting(sorting, entity)
+            : [],
           date_format: "YYYY/MM/DD",
           concatenate_fields: [
             {
@@ -330,7 +330,7 @@ export const deviceRouter = createTRPCRouter({
       }
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
-      console.log('%c Line:418 🍇 items', 'color:#4fff4B', items);
+      
       
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -345,7 +345,7 @@ export const deviceRouter = createTRPCRouter({
           ...rest
         } = item;
         
-        console.log('%c Line:426 🍊 contacts', 'color:#3f7cff', contacts);
+        
       
         const wan_address = device_interfaces?.[0]?.address;
       
