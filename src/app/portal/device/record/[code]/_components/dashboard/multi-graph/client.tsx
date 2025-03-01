@@ -2,24 +2,14 @@
 
 import * as React from 'react'
 
-import { getLastMinutesTimeStamp, getLastTimeStamp, getUnit } from '~/app/portal/device/utils/timeRange'
+import {getLastSecondsTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
 } from '~/components/ui/card'
 import {
   type ChartConfig,
   ChartContainer,
 } from '~/components/ui/chart'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { api } from '~/trpc/react'
 
 import { renderChart } from './function/renderChart'
@@ -56,12 +46,6 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       interfaces: multiSelectOptions
     }
   })
-  console.log("%c Line:53 🥤 interfaces", "color:#93c0a4", interfaces);
-  // const [graphType, setGraphType] = React.useState('default')
-
-  // const cardTitle = React.useMemo(() => {
-  //   return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
-  // }, [graphType])
 
 
   const { data: packetsIP = [], refetch } = api.packet.getBandwithInterfacePerSecond.useQuery(
@@ -70,10 +54,9 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       bucket_size: '1s',
       timezone: timezone,
       device_id: defaultValues?.id,
-      time_range: getLastMinutesTimeStamp(3),
+      time_range: getLastSecondsTimeStamp(20),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
-    console.log("%c Line:68 🍓 packetsIP", "color:#2eafb0", packetsIP);
     
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
@@ -84,26 +67,16 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       }
   })
 
+  React.useEffect(() => {
+    refetch()
+  },[])
  
-
-  // React.useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     refetch()
-  //   }, 1000)
-  //   return () => clearInterval(interval)
-  //   // Cleanup on unmount or resolution change
-  // }
-  //   , [interfaces])
-
   return (
     <Card>
       <div className='px-4'>
       <Form {...form}>
         <div className='pt-2 grid !grid-cols-8 gap-4'>
           <FormModule
-            // customDesign={{
-            //   formClassName: 'grid !grid-cols-2 gap-4',
-            // }}
             myParent='record'
             form={form}
             formKey='AreaChart'
@@ -200,7 +173,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
                     className="h-full w-full p-5"
                     config={chartConfig}
                   >
-                    {renderChart({ filteredData, graphType })}
+                    {renderChart({ filteredData, graphType, interfaces: interfacesData})}
 
                   </ChartContainer></div>
                 },

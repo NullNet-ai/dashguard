@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 
-const LineChartComponent = ({ filteredData }: any) => {
+const LineChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
     <LineChart
@@ -34,7 +34,16 @@ const LineChartComponent = ({ filteredData }: any) => {
         tickMargin={8}
       />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-      <Line
+      {interfaces?.map((item: any) => {
+        return <Line
+        dataKey={item?.label}
+        dot={false}
+        stroke={`var(--color-${item?.label})`}
+        strokeWidth={2}
+        type="monotone"
+      />
+      })}
+      {/* <Line
         dataKey="bandwidth"
         dot={false}
         stroke="var(--color-bandwidth)"
@@ -47,7 +56,7 @@ const LineChartComponent = ({ filteredData }: any) => {
         stroke="var(--color-static_bandwidth)"
         strokeWidth={2}
         type="monotone"
-      />
+      /> */}
 
     </LineChart>
     </ResponsiveContainer>

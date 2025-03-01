@@ -2,7 +2,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis } from 'rech
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 
-const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
@@ -67,20 +67,20 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         )}
         cursor={false}
       />
-      <Area
-        dataKey="bandwidth"
+      {interfaces?.map((item: any) => <Area
+        dataKey={item?.label}
         fill="url(#fillBandwidth)"
         stackId="a"
-        stroke="var(--color-bandwidth)"
+        stroke={`var(--color-${item.label})`}
         type="natural"
-      />
-      <Area
+      />)}
+      {/* <Area
         dataKey="static_bandwidth"
         fill="url(#fillStaticBandwidth)"
         stackId="a"
         stroke="var(--color-static_bandwidth)"
         type="natural"
-      />
+      /> */}
       <ChartLegend content={<ChartLegendContent />} />
     </AreaChart></ResponsiveContainer>
   )
