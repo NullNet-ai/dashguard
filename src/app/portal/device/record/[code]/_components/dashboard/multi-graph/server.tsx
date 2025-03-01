@@ -13,9 +13,12 @@ const FormServerFetch = async () => {
     main_entity: main_entity!,
     })
   const defaultValues = fetched_device?.data
-
   
-
+  console.log("%c Line:19 🥃 identifier", "color:#ea7e5c", identifier);
+  const fetched_interfaces =await api.deviceConfiguration.fetchInterfaceOptions({
+      code: identifier!,
+  })
+  console.log("%c Line:18 🍡 fetched_interfaces", "color:#e41a6a", fetched_interfaces);
   return (
     <InteractiveGraph
       defaultValues={defaultValues ?? {}}

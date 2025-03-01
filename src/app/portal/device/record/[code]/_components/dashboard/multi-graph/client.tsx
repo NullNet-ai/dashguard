@@ -152,7 +152,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
                 "name": "interfaces",
                 "label": "Interfaces",
                 "description": "Field Description",
-                "placeholder": "Enter value...",
+                "placeholder": "",
                 "fieldClassName": "",
                 "fieldStyle": {
                   "gridColumn": "5 / span 2",
