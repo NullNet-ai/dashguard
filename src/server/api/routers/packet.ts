@@ -56,9 +56,9 @@ function transformData(data: InputData[]): OutputData[] {
 
 export const packetRouter = createTRPCRouter({
   ...createDefineRoutes('packets'),
-  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string(), interface_name: z.string().optional() 
+  getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string()
    })).query(async ({ input, ctx }) => {
-    const { device_id, bucket_size, time_range, timezone , interface_name} = input
+    const { device_id, bucket_size, time_range, timezone } = input
 
     const res = await ctx.dnaClient.aggregate({
       query: {
@@ -71,21 +71,6 @@ export const packetRouter = createTRPCRouter({
           },
         ],
         advance_filters: [
-          ...(interface_name?
-            [
-              {
-                type: 'criteria' as 'criteria',
-                field: 'interface_name',
-                entity: 'packets',
-                operator: EOperator.EQUAL,
-                values: [interface_name],
-              },
-              {
-                type: 'operator',
-                operator: EOperator.AND,
-              },
-            ] : []
-          ),
           {
             type: 'criteria' as 'criteria',
             field: 'device_id',
@@ -227,6 +212,105 @@ export const packetRouter = createTRPCRouter({
     
     return result
   }),
+  getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional()
+  })).query(async ({ input, ctx }) => {
+   const { device_id, bucket_size, time_range, timezone , interface_names} = input
+   console.log('%c Line:233 🍎 interface_names', 'color:#ffdd4d', interface_names);
+   if(
+    interface_names?.length
+   ){
+     const res = await Promise.all(interface_names.map(async (interface_name) => {
+        const res = await ctx.dnaClient.aggregate({
+          query: {
+            entity: 'packets',
+            aggregations: [
+              {
+                aggregation: 'SUM',
+                aggregate_on: 'total_length',
+                bucket_name: 'bandwidth',
+              },
+            ],
+            advance_filters: [
+              {
+                type: 'criteria' as 'criteria',
+                field: 'interface_name',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: [interface_name],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria' as 'criteria',
+                field: 'device_id',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: [
+                  device_id,
+                ],
+              },
+            ],
+            joins: [],
+            bucket_size,
+            limit: 20,
+            order: {
+              order_by: 'bucket',
+              order_direction: EOrderDirection.DESC,
+            },
+            timezone,
+          },
+          token: ctx.token.value,
+    
+        }).execute()
+        const transformedData: OutputData[] = transformData(res?.data as InputData[])
+        return {interface_name: transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))};
+     }))
+
+     console.log('%c Line:286 🍯 res', 'color:#465975', res);
+     return res
+
+   }
+
+   const res = await ctx.dnaClient.aggregate({
+     query: {
+       entity: 'packets',
+       aggregations: [
+         {
+           aggregation: 'SUM',
+           aggregate_on: 'total_length',
+           bucket_name: 'bandwidth',
+         },
+       ],
+       advance_filters: [
+         {
+           type: 'criteria' as 'criteria',
+           field: 'device_id',
+           entity: 'packets',
+           operator: EOperator.EQUAL,
+           values: [
+             device_id,
+           ],
+         },
+       ],
+       joins: [],
+       bucket_size,
+       limit: 20,
+       order: {
+         order_by: 'bucket',
+         order_direction: EOrderDirection.DESC,
+       },
+       timezone,
+     },
+     token: ctx.token.value,
+
+   }).execute()
+   const transformedData: OutputData[] = transformData(res?.data as InputData[])
+
+  return  transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket));
+ }),
+
 
   // getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
   //   const { packet_data } = input
