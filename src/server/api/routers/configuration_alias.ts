@@ -71,6 +71,9 @@ export const deviceAliasRouter = createTRPCRouter({
           query: {
             track_total_records: true,
             pluck,
+            pluck_object:{
+              device_aliases: pluck
+            },
             advance_filters: _advance_filters?.length
               ? _advance_filters as IAdvanceFilters[]
               : createAdvancedFilter({
@@ -88,7 +91,7 @@ export const deviceAliasRouter = createTRPCRouter({
               by_direction: EOrderDirection.DESC,
             },
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+              ? formatSorting(input.sorting, 'device_aliases')
               : [],
           },
         })

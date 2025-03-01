@@ -78,6 +78,9 @@ export const deviceRuleRouter = createTRPCRouter({
         query: {
           track_total_records: true,
           pluck,
+          pluck_object:{
+            device_rules: pluck
+          },
           advance_filters: _advance_filters?.length
             ? _advance_filters as IAdvanceFilters[]
             : createAdvancedFilter({
@@ -96,7 +99,7 @@ export const deviceRuleRouter = createTRPCRouter({
             by_direction: EOrderDirection.DESC,
           },
           multiple_sort: sorting?.length
-            ? formatSorting(sorting)
+            ? formatSorting(sorting, 'device_rules')
             : [],
         },
       })
