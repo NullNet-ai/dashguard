@@ -96,7 +96,7 @@ export default function FormFilterGrid({
             query_params,
           } = searchConfig ?? {};
 
-          const updateSearchItems = query_params?.default_advance_filters.length
+          const updateSearchItems = query_params?.default_advance_filters?.length
             ? [
                 ...(query_params?.default_advance_filters ?? []),
                 ...(query_params?.default_advance_filters.length > 1
@@ -210,7 +210,7 @@ export default function FormFilterGrid({
             title: label,
             columns: gridColumns!,
             actionType,
-            searchConfig,
+            searchConfig: searchConfig as any,
             onFetchRecords: fetchData,
             rowClickCustomAction: ({ row, config }) => {
               if (
@@ -275,7 +275,7 @@ export default function FormFilterGrid({
             });
           }}
           defaultAdvanceFilter={
-            config?.searchConfig?.query_params?.default_advance_filters || []
+            (config?.searchConfig?.query_params?.default_advance_filters || []) as any[]
           }
         />
       </div>
