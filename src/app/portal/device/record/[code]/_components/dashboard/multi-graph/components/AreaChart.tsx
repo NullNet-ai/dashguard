@@ -1,8 +1,12 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis } from 'recharts'
+import { useMemo } from 'react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
+import { formatNumber, modifyAxis } from './LineChart';
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
@@ -51,6 +55,21 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         tickLine={false}
         tickMargin={8}
       />
+        <YAxis
+          allowDataOverflow={true}
+          axisLine={false}
+          domain={[yAxisMin, yAxisMax]}
+          tickCount={4}
+          tickFormatter={formatNumber}
+          tickLine={false}
+          tickMargin={8}
+          ticks={[
+            yAxisMin,
+            yAxisMin + (yAxisMax - yAxisMin) / 3,
+            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
+            yAxisMax,
+          ]}
+        />
       <ChartTooltip
         content={(
           <ChartTooltipContent
