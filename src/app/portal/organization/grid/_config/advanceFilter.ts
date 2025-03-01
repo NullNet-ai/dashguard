@@ -1,5 +1,5 @@
 import { ulid } from "ulid";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
+import { type ISearchItem } from "~/components/platform/Grid/Search/types";
 
 export const defaultAdvanceFilter = [
   {
