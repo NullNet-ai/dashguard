@@ -45,10 +45,11 @@ const SignUpSchema = z
 interface SignUpFormProps {
   recordData?: Record<string, any>;
   account_id?: string;
+  invitation_id?: string;
 }
 
 const SignUpForm = (props: SignUpFormProps) => {
-  const { recordData, account_id } = props;
+  const { recordData, account_id, invitation_id } = props;
   const form = useForm({
     defaultValues: {
       organization_name: recordData?.organization_name,
@@ -75,9 +76,14 @@ const SignUpForm = (props: SignUpFormProps) => {
     };
 
     try {
-      if(account_id) {
-        registerAccountFromInvite({...registrationData, account_id, organization_id: recordData?.organization_id});
-        return 
+      if (account_id) {
+        registerAccountFromInvite({
+          ...registrationData,
+          account_id,
+          organization_id: recordData?.organization_id,
+          invitation_id
+        });
+        return;
       }
       await registerAccount(registrationData);
     } catch (error) {
@@ -94,7 +100,7 @@ const SignUpForm = (props: SignUpFormProps) => {
   return (
     <Form {...form}>
       <form
-        className={"space-y-6"}
+        className={'space-y-6'}
         onSubmit={(event) => {
           void form.handleSubmit(onSubmit)(event);
         }}
@@ -109,7 +115,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               label: 'Organization Name',
               placeholder: 'Example: DNA Micro',
               type: 'text',
-              readonly: !!recordData?.organization_name
+              readonly: !!recordData?.organization_name,
             },
             {
               FormComponent: FormInput,
@@ -137,7 +143,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               placeholder: 'Example: john@example.com',
               type: 'email',
               required: true,
-              readonly: !!recordData?.email
+              readonly: !!recordData?.email,
             },
             {
               FormComponent: FormPassword,

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { type z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { api } from "~/trpc/react";
-import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { ContactOrganizationDetailsSchema } from "~/server/zodSchema/contact/organizationDetails";
+import { type z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { api } from '~/trpc/react';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { ContactOrganizationDetailsSchema } from '~/server/zodSchema/contact/organizationDetails';
 
 export default function OrganizationDetails({
   params,
@@ -21,28 +21,30 @@ export default function OrganizationDetails({
     data,
   }: IHandleSubmit<z.infer<typeof ContactOrganizationDetailsSchema>>) => {
     try {
-      const { organizations, user_roles } = data;
+      const { organizations } = data;
       const response = await updateOrganization.mutateAsync({
         contact_organization_ids: organizations?.map((itm) => itm.value),
-        user_role_ids: user_roles?.map((itm) => itm.value),
         contact_id: params.id,
       });
       if (response) {
-        toast.success("Organization Details submit successfully");
+        toast.success('Department Details submit successfully');
         return response;
       }
-      throw new Error("Failed to submit Organization Details");
+      throw new Error('Failed to submit Department Details');
     } catch (error) {
-      toast.error("Failed to submit Organization Details");
+      toast.error('Failed to submit Department Details');
     }
   };
 
   return (
     <FormBuilder
+      customDesign={{
+        formClassName: 'grid !grid-cols-1 gap-4',
+      }}
       myParent={params.shell_type}
-      enableFormRegisterToParent={false}
+      enableFormRegisterToParent={true}
       formProps={params}
-      formLabel="Organization"
+      formLabel="Department Details"
       handleSubmit={handleSave}
       formKey="organization_details"
       formSchema={ContactOrganizationDetailsSchema}
@@ -51,18 +53,10 @@ export default function OrganizationDetails({
       selectOptions={selectOptions}
       fields={[
         {
-          id: "organizations",
-          formType: "multi-select",
-          name: "organizations",
-          label: "Organization",
-          required: true,
-        },
-        {
-          id: "user_roles",
-          formType: "multi-select",
-          name: "user_roles",
-          label: "Role",
-          required: true,
+          id: 'organizations',
+          formType: 'multi-select',
+          name: 'organizations',
+          label: 'Department',
         },
       ]}
     />

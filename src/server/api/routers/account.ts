@@ -25,6 +25,11 @@ import { formatDate } from '~/server/utils/formatDate';
 const { MAILER_AUTH_USER, MAILER_AUTH_PASS, MAILER_HOST, MAILER_PORT } =
   process.env;
 
+const INVITATION_LINK_EXPIRED = parseInt(
+  process.env.INVITATION_LINK_EXPIRED || '1',
+  10,
+);
+
 const ENTITY = 'organization_account';
 const transporter = nodemailer.createTransport({
   auth: {
@@ -132,6 +137,7 @@ export const accountRouter = createTRPCRouter({
           account_organization_name: organizationRecord?.data?.[0]?.name || '',
           is_new_user: true,
           categories: ['Internal User'],
+          account_status: 'Pending Setup',
         };
 
         const result = await ctx.dnaClient
@@ -255,86 +261,33 @@ export const accountRouter = createTRPCRouter({
     }),
   fetchOrganizationRolesOptions: privateProcedure
     .input(z.object({ contact_code: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const contactData = await ctx.dnaClient
-        .findByCode(input.contact_code, {
-          entity: 'contact',
+    .query(async ({ ctx }) => {
+      const userRole = await ctx.dnaClient
+        .findAll({
+          entity: 'user_role',
           token: ctx.token.value,
           query: {
-            pluck: ['id'],
+            pluck: ['id', 'role'],
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'status',
+                operator: EOperator.EQUAL,
+                values: [EStatus.ACTIVE],
+              },
+            ],
+            order: {
+              limit: 100,
+            },
           },
         })
         .execute();
-      const contact_id = contactData.data?.[0]?.id;
-      const [userRole, organizationData] = await Promise.all([
-        ctx.dnaClient
-          .findAll({
-            entity: 'user_role',
-            token: ctx.token.value,
-            query: {
-              pluck: ['id', 'role'],
-              advance_filters: [
-                {
-                  type: 'criteria',
-                  field: 'status',
-                  operator: EOperator.EQUAL,
-                  values: [EStatus.ACTIVE],
-                },
-              ],
-              order: {
-                limit: 100,
-              },
-            },
-          })
-          .execute(),
-        ctx.dnaClient
-          .findAll({
-            entity: 'organization_contacts',
-            token: ctx.token.value,
-            query: {
-              pluck_object: {
-                organizations: ['id', 'name'],
-                organization_contacts: ['id', 'contact_organization_id'],
-              },
-              advance_filters: createAdvancedFilter({
-                contact_id,
-              }),
-              order: {
-                limit: 100,
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'organizations',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_contacts',
-                field: 'contact_organization_id',
-              },
-            },
-          })
-          .execute(),
-      ]);
       const user_role = userRole.data.map(({ id, role }) => ({
         value: id,
         label: role,
       }));
 
-      const organization = organizationData.data.map(
-        (org: Record<string, any>) => {
-          const { id, name } = org?.organizations ?? {};
-          return {
-            value: id,
-            label: name,
-          };
-        },
-      );
-
-      return { organization, user_role };
+      return { user_role };
     }),
   updateAccountStatus: privateProcedure
     .input(z.object({ account_id: z.string(), status: z.string() }))
@@ -437,7 +390,7 @@ export const accountRouter = createTRPCRouter({
         isValid,
         message: {
           account_id: existingUsername.data.length
-            ? 'Username already exists'
+            ? 'Email already exists'
             : '',
           role_id: existingRoleOrg.data.length
             ? 'Role already exists for this organization'
@@ -734,6 +687,7 @@ export const accountRouter = createTRPCRouter({
                 'email',
                 'account_status',
                 'is_new_user',
+                'external_contact_id',
               ],
               contacts: ['id', 'first_name', 'last_name', 'middle_name'],
               user_roles: ['role'],
@@ -745,6 +699,7 @@ export const accountRouter = createTRPCRouter({
                 'is_primary',
               ],
               contact_emails: ['email', 'is_primary'],
+              external_contacts: ['id', 'first_name', 'last_name'],
             },
           },
         })
@@ -813,6 +768,19 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'external_contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'external_contact_id',
+            },
+          },
+        })
         .execute();
 
       const accountRecord = accounts.data?.[0] ?? {};
@@ -830,6 +798,7 @@ export const accountRouter = createTRPCRouter({
           phone: phoneNumber ? formatPhoneNumber(phoneNumber) : '',
           email: email?.email,
         },
+        external_contact: accountRecord?.external_contacts,
       };
     }),
   updateUserAccountRecord: privateProcedure
@@ -918,7 +887,10 @@ export const accountRouter = createTRPCRouter({
         .execute();
 
       let invitationRecord = invitation.data?.[0] ?? null;
-
+      const expirationDate = new Date();
+      expirationDate.setDate(
+        expirationDate.getDate() + INVITATION_LINK_EXPIRED,
+      );
       if (!invitationRecord) {
         const record = await ctx.dnaClient
           .create({
@@ -928,9 +900,7 @@ export const accountRouter = createTRPCRouter({
               params: {
                 account_id: accountRecord?.id,
                 status: 'Active',
-                expiration_date: formatDate(
-                  new Date(new Date().setDate(new Date().getDate() + 1)),
-                ).date,
+                expiration_date: formatDate(expirationDate).date,
               },
               pluck: ['id', 'code', 'status'],
             },
@@ -1061,7 +1031,10 @@ export const accountRouter = createTRPCRouter({
         .execute();
 
       let invitationRecord = invitation.data?.[0] ?? null;
-
+      const expirationDate = new Date();
+      expirationDate.setDate(
+        expirationDate.getDate() + INVITATION_LINK_EXPIRED,
+      );
       if (!invitationRecord) {
         const record = await ctx.dnaClient
           .create({
@@ -1071,6 +1044,7 @@ export const accountRouter = createTRPCRouter({
               params: {
                 account_id: accountRecord?.id,
                 status: 'Active',
+                expiration_date: formatDate(expirationDate).date,
               },
               pluck: ['id', 'code', 'status'],
             },
@@ -1305,7 +1279,7 @@ export const accountRouter = createTRPCRouter({
         isValid,
         message: {
           username: existingUsername.data.length
-            ? 'Username already exists'
+            ? 'Email already exists'
             : '',
         },
         record: existingUsername.data?.[0],
@@ -1344,6 +1318,7 @@ export const accountRouter = createTRPCRouter({
                 'status',
                 'email',
                 'categories',
+                'account_status',
               ],
               organizations: ['id', 'name'],
             },
@@ -1684,5 +1659,37 @@ export const accountRouter = createTRPCRouter({
         currentPage: 0,
         totalPages,
       };
+    }),
+  archiveAccountInvitation: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const invitations = await ctx.dnaClient
+        .findAll({
+          entity: 'invitations',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({
+              account_id: input?.id,
+              status: 'Active',
+            }),
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+
+      //archive all invitations
+      await Bluebird.map(invitations.data, async (invitation: any) => {
+        await ctx.dnaClient
+          .update(invitation.id, {
+            entity: 'invitations',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                status: 'Archived',
+              },
+            },
+          })
+          .execute();
+      });
     }),
 });
