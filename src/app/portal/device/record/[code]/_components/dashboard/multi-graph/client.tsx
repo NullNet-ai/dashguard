@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { getLastTimeStamp, getUnit } from '~/app/portal/device/utils/timeRange'
+import { getLastMinutesTimeStamp, getLastTimeStamp, getUnit } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
   CardContent,
@@ -48,17 +48,15 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({ defaultValues }: IFormProps) => {
-  const [interfaces, setInterfaces] = React.useState<string[]>()
+const InteractiveGraph = ({ multiSelectOptions }: IFormProps) => {
+  const [interfaces, setInterfaces] = React.useState<string[]>([])
   const form = useForm({
     defaultValues: {
       graph_type: 'default',
-      interfaces: [
-        { label: 'wan (vtnet0)', value: 'wan (vtnet0)' },
-        { label: 'lan (vtnet1)', value: 'lan (vtnet1)' },
-      ]
+      interfaces: multiSelectOptions
     }
   })
+  console.log("%c Line:53 🥤 interfaces", "color:#93c0a4", interfaces);
   // const [graphType, setGraphType] = React.useState('default')
 
   // const cardTitle = React.useMemo(() => {
@@ -66,31 +64,23 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
   // }, [graphType])
 
 
-  const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
+  const { data: packetsIP = [], refetch } = api.packet.getBandwidthInterfacePerSecond.useQuery(
     {
       bucket_size: '1s',
-      time_range: moment().format('YYYY-MM-DD'),
-      timezone,
+      timeRange: getLastMinutesTimeStamp(3),
+      interface_name: interfaces?.map((item: any) => item?.value),
     })
 
   const filteredData = packetsIP?.map((item) => {
-    const date = moment(item.bucket)
-    if (timeRange === '1d') {
+    const date = moment(item.bucket).tz(timezone)
       return {
         ...item,
+        static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
         bucket: date.format('HH:mm:ss')
       }
-    }
-    return { ...item, bucket: date.format('MM/DD') }
   })
 
-  const add_static_bandwidth = filteredData?.map((item) => {
-    return {
-      ...item,
-      static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
-    }
-  }
-  )
+ 
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -116,10 +106,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
             formSchema={z.object({})}
             subConfig={{
               multiSelectOptions: {
-                interfaces: [
-                  { label: 'wan (vtnet0)', value: 'wan (vtnet0)' },
-                  { label: 'lan (vtnet1)', value: 'lan (vtnet1)' },
-                ]
+                interfaces: multiSelectOptions ?? []
               },
               selectOptions: {
                 graph_type: [
@@ -209,7 +196,7 @@ const InteractiveGraph = ({ defaultValues }: IFormProps) => {
                     className="h-full w-full p-5"
                     config={chartConfig}
                   >
-                    {renderChart({ filteredData: add_static_bandwidth, graphType })}
+                    {renderChart({ filteredData, graphType })}
 
                   </ChartContainer></div>
                 },

@@ -22,6 +22,7 @@ const FormServerFetch = async () => {
   return (
     <InteractiveGraph
       defaultValues={defaultValues ?? {}}
+      multiSelectOptions={fetched_interfaces}
       params={{
         id: defaultValues?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',
