@@ -57,15 +57,31 @@ export default function ManageFilter({ tab }: { tab: any }) {
   };
 
   const handleDeleteFilter = async() => {
-    const url = await removeGridFilter(tab.id);
-    router.replace(url as string)
+    try {
+      const url = await removeGridFilter(tab.id);
+      if (url && typeof url === 'string') {
+        router.replace(url);
+      } else {
+        router.refresh(); // Fallback: refresh the current page if no URL is returned
+      }
+    } catch (error) {
+      console.error('Error deleting filter:', error);
+      router.refresh(); // Fallback: refresh the current page on error
+    }
   };
 
   const handleDuplicateFilter = async() => {
-    console.info('duplicate filter');
-
-    const url = await duplicateFilterTab(tab.id);
-    router.push(url)
+    try {
+      const url = await duplicateFilterTab(tab.id);
+      if (url && typeof url === 'string') {
+        router.push(url);
+      } else {
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Error duplicating filter:', error);
+      router.refresh();
+    }
   };
 
   return (
