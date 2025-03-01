@@ -206,7 +206,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
       
       return { items: modifiedData, totalCount: res?.data?.[0]?.device_configurations?.length }
     }),
-  fetchLatestInterfaceConfigurations:  privateProcedure
+  fetchInterfaceOptions:  privateProcedure
   .input(
     z.object({
       code: z.string(),
@@ -229,7 +229,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
               'id', 'code',
             ],
             device_interfaces:[
-              'name'
+              'name',
+              "device"
             ]
           },
           advance_filters: [{
@@ -256,17 +257,9 @@ export const deviceConfigurationRouter = createTRPCRouter({
           }],
           order: {
             limit: 1,
-          },
-          multiple_sort: [
-            {
-              by_field: 'created_date',
-              by_direction: EOrderDirection.DESC,
-            },
-            {
-              by_field: 'created_time',
-              by_direction: EOrderDirection.DESC,
-            },
-          ],
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+          }
         },
       })
    
@@ -299,7 +292,16 @@ export const deviceConfigurationRouter = createTRPCRouter({
       .execute()
 
       const data = res?.data?.[0]?.device_interfaces
-      console.log('%c Line:310 🍰 data', 'color:#ffdd4d', data);
-      return data
+      const drpdwn_optn = data?.map((item: {
+        name: string
+        device: string
+      }) => {
+        const { device , name} = item
+        return {
+          label: name,
+          value: device
+        }
+      })
+      return drpdwn_optn
   }),
 })
