@@ -25,36 +25,12 @@ import { api } from '~/trpc/react'
 import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
 import { IFormProps } from '../types'
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
+import { useForm } from 'react-hook-form'
+import { Form } from '~/components/ui/form'
+import { z } from 'zod'
+import FormClientFetch from '../pie-chart/client-fetch'
 
-const time_range_options = {
-  '30d': '30 days',
-  '7d': '1 Week',
-  '1d': '1 Day',
-  'live': 'Live',
-
-}
-
-const resolution_options = {
-  '30d':
-    {
-      '1d': '1 Day',
-      '7d': 'Last 7 days',
-    },
-  '7d':
-    {
-      '1d': '1 Day',
-    },
-  '1d':
-    {
-      '1h': '1 Hour',
-      '30m': '30 Minutes',
-    },
-  'live':
-    {
-      '1s': '1 Second',
-    },
-
-} as any
 
 const chartConfig = {
   visitors: {
@@ -72,132 +48,78 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({defaultValues}: IFormProps) => {
-  const [timeRange, setTimeRange] = React.useState('30d')
-  const [resolution, setResolution] = React.useState<null | string>(null)
-  const [graphType, setGraphType] = React.useState('default')
-
-  const cardTitle = React.useMemo(() => {
-    return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
-  }, [graphType])
-
-  const timeRangeFormat = React.useMemo(() => {
-    setResolution(null)
-    if (
-      timeRange === 'live'
-    ) {
-      return getLastTimeStamp(3, 'minute')
+const InteractiveGraph = ({ defaultValues }: IFormProps) => {
+  const [interfaces, setInterfaces] = React.useState<string[]>()
+  const form = useForm({
+    defaultValues: {
+      graph_type: 'default',
+      interfaces: [
+        { label: 'wan (vtnet0)', value: 'wan (vtnet0)' },
+        { label: 'lan (vtnet1)', value: 'lan (vtnet1)' },
+      ]
     }
+  })
+  // const [graphType, setGraphType] = React.useState('default')
 
-    const amount = parseInt(timeRange.slice(0, -1), 10)
-    const unit = timeRange.slice(-1)
-    const unitFull = getUnit(unit)
-    return getLastTimeStamp(amount, unitFull)
-  }, [timeRange])
+  // const cardTitle = React.useMemo(() => {
+  //   return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
+  // }, [graphType])
 
-  const resolutionOpt = React.useMemo(() => {
-    return [resolution_options?.[timeRange]] as any
-  }, [timeRange])
+
+  console.log("%c Line:110 🍯 time_range", "color:#ea7e5c", moment().format('YYYY-MM-DD'),);
 
   const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
     {
-      bucket_size: resolution === 'live' ? '1s' : resolution,
-      time_range: timeRangeFormat,
+      bucket_size: '1s',
+      time_range: moment().format('YYYY-MM-DD'),
       timezone,
     })
 
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket)
-    if(timeRange === '1d') {
+    if (timeRange === '1d') {
       return {
         ...item,
         bucket: date.format('HH:mm:ss')
       }
     }
-    return {...item, bucket: date.format('MM/DD')}
+    return { ...item, bucket: date.format('MM/DD') }
   })
-  
-  console.log("%c Line:110 🍯 filteredData", "color:#ea7e5c", filteredData);
+
   const add_static_bandwidth = filteredData?.map((item) => {
     return {
       ...item,
-      static_bandwidth:  !item.bandwidth ? 0 :  Number(item.bandwidth) + 100000000,
+      // static_bandwidth: !item.bandwidth ? 0 : Number(item.bandwidth) + 100000000,
     }
   }
   )
 
   React.useEffect(() => {
-    refetch()
-
-    const structMs = () => {
-      if (!resolution) return
-      const match = /^(\d+)([smhd])$/.exec(resolution)
-      if (!match) return
-
-      const value = parseInt(match[1] ?? '0', 10)
-      const unit = match[2]
-
-      // Convert to milliseconds
-      const unitToMs = {
-        s: 1000,
-        m: 60 * 1000,
-        h: 60 * 60 * 1000,
-        d: 24 * 60 * 60 * 1000,
-      }
-
-      const intervalMs = value * ((unitToMs as any)[unit as any] || 1000)
-      return intervalMs
-    }
-
-    // Fetch immediately and start interval
-    refetch()
-
-    const intervalMs = structMs()
-
     const interval = setInterval(() => {
-      if (!intervalMs) return
       refetch()
-    }, intervalMs)
+    }, 1000)
     return () => clearInterval(interval)
     // Cleanup on unmount or resolution change
   }
-  , [resolution])
+    , [interfaces])
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      {/* <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>{`${cardTitle} - Interactive`}</CardTitle>
         </div>
-        Time Range
-        <Select value={timeRange} onValueChange={setTimeRange}>
+        Interfaces
+        <Select value={interfaces} onValueChange={setInterfaces}>
           <SelectTrigger
             aria-label="Select a value"
             className="w-[160px] rounded-lg sm:ml-auto"
           >
-            <SelectValue placeholder="Select Time Range" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {
-              Object.entries(time_range_options).map(([key, label]) => (
-                <SelectItem className = "rounded-lg" key = { key } value = { key }>
-                  {label as string}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
-        Resolution
-        <Select value={resolution || ''} onValueChange={setResolution}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Resolution" />
+            <SelectValue placeholder="Select Interfaces" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             {resolutionOpt.map((options: any) => Object.entries(options).map(([key, label]) => (
-              <SelectItem className = "rounded-lg" key = { key } value = { key }>
+              <SelectItem className="rounded-lg" key={key} value={key}>
                 {label as string}
               </SelectItem>
             ))
@@ -233,7 +155,120 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
           {renderChart({ filteredData: add_static_bandwidth, graphType })}
 
         </ChartContainer>
-      </CardContent>
+      </CardContent> */}
+
+
+      <Form {...form}>
+        <div className='grid !grid-cols-6 gap-4'>
+          <FormModule
+            // customDesign={{
+            //   formClassName: 'grid !grid-cols-2 gap-4',
+            // }}
+            myParent='record'
+            form={form}
+            formKey='AreaChart'
+            formSchema={z.object({})}
+            subConfig={{
+              multiSelectOptions: {
+                interfaces: [
+                  { label: 'wan (vtnet0)', value: 'wan (vtnet0)' },
+                  { label: 'lan (vtnet1)', value: 'lan (vtnet1)' },
+                  { label: 'lan (vtnet2)', value: 'lan (vtnet2)' },
+                  { label: 'lan (vtnet3)', value: 'lan (vtnet3)' },
+                ]
+              },
+              selectOptions: {
+                graph_type: [
+                  { label: 'Default', value: 'default' },
+                  { label: 'Bar Chart', value: 'bar' },
+                  { label: 'Line Chart', value: 'line' },
+                ]
+              }
+            }}
+            fields={[
+              {
+                id: "field_1740796330359",
+                formType: "space",
+                name: "field_1740796330359",
+                label: "New Field 1",
+                description: "Field Description",
+                placeholder: "Enter value...",
+                fieldClassName: "",
+                fieldStyle: {
+                  gridColumn: "1 / span 4",
+                  gridRow: "1 / span 1"
+                }
+              },
+              {
+                id: "interfaces",
+                formType: "multi-select",
+                name: "interfaces",
+                label: "Interfaces",
+                description: "Field Description",
+                placeholder: "Enter value...",
+                fieldClassName: "",
+                fieldStyle: {},
+              },
+              {
+                id: "graph_type",
+                formType: "select",
+                name: "graph_type",
+                label: "Graph Type",
+                description: "Field Description",
+                placeholder: "Enter value...",
+                fieldClassName: "",
+                fieldStyle: {}
+              },
+              {
+                id: "field_1740796359046",
+                formType: "custom-field",
+                name: "field_1740796359046",
+                label: "New Field 7",
+                description: "Field Description",
+                placeholder: "Enter value...",
+                fieldClassName: "",
+                fieldStyle: {
+                  gridColumn: "1 / span 2",
+                  gridRow: "2 / span 2"
+                },
+                render: ({ field, fieldConfig, fieldState }) => {
+                  return <FormClientFetch />
+                },
+              },
+              {
+                id: "field_1740796360366",
+                formType: "custom-field",
+                name: "field_1740796360366",
+                label: "New Field 9",
+                description: "Field Description",
+                placeholder: "Enter value...",
+                fieldClassName: "",
+                fieldStyle: {
+                  gridColumn: "3 / span 4",
+                  gridRow: "2 / span 2"
+                },
+                render: ({ form, field, fieldConfig, fieldState }) => {
+                  const interfacesData = form?.watch('interfaces')
+
+                  setInterfaces(interfacesData)
+                  const graphType = form?.watch('graph_type')
+                  // px-2 pt-4 sm:px-6 sm:pt-6
+                  return <div className='px-2 pt-4 sm:px-6 sm:pt-6'><ChartContainer
+                    className="aspect-auto h-full w-full p-5"
+                    config={chartConfig}
+                  >
+                    {renderChart({ filteredData: add_static_bandwidth, graphType })}
+
+                  </ChartContainer></div>
+                },
+              }
+
+            ]}
+
+          />
+        </div>
+      </Form>
+
     </Card>
   )
 }

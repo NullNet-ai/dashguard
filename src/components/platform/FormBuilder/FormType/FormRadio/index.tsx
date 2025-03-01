@@ -52,9 +52,16 @@ export default function FormRadio({
               onValueChange={(value) => {
                 formRenderProps.field.onChange(value === 'true' ? true : value === 'false' ? false : value);
               }}
-              value={field.value}
+              value={field.value ?? undefined}
               className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
             >
+              {/* Hidden null option */}
+              <RadioGroupItem 
+                value="" 
+                className="hidden" 
+                checked={!field.value} 
+              />
+
               {radioOptions?.[fieldConfig?.id]?.map((option, index) => (
                 <FormItem
                   key={index}
@@ -62,8 +69,9 @@ export default function FormRadio({
                 >
                   <FormControl>
                     <RadioGroupItem
-                      value={String(option.value)}
+                      value={option.value != null ? String(option.value) : ""}
                       data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
+                      checked={field.value === option.value}
                     />
                   </FormControl>
                   <FormLabel

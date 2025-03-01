@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormEmailInput",
-  "tag": "1.6.0",
-  "branch": "released/1.6.0",
-  "message": "Update packages",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.7.0<unreleased>",
+  "branch": "unreleased/fix/2137/1.7.0<unreleased>",
+  "message": "fix disabled background color to included all of the formEmail Component",
+  "publish_name": "Rob Caldosa"
 }

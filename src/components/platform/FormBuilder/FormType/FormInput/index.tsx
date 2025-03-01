@@ -39,11 +39,11 @@ export default function FormInput({
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  // form.setValue(`${fieldConfig?.name}`, e.target.value, {
-  //   shouldDirty: true,
-  //   shouldValidate: true,
-  //   shouldTouch: true,
-  // });
+  //   form.setValue(`${fieldConfig?.name}`, e.target.value, {
+  //     shouldDirty: true,
+  //     shouldValidate: true,
+  //     shouldTouch: true,
+  //   });
   // };
   if (isHidden) {
     return null;
@@ -70,7 +70,10 @@ export default function FormInput({
           leftAddon={fieldConfig.inputLeftAddOns}
           rightAddon={fieldConfig.inputRightAddOns}
           readOnly={
-            (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
+            fieldConfig.isCustomFormField
+              ? fieldConfig?.readonly
+              : ((formRenderProps.field.disabled || fieldConfig?.readonly) ??
+                false)
           }
           {...formRenderProps.field}
           disabled={fieldConfig.disabled}

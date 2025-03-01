@@ -78,6 +78,7 @@ export default function FormFile({
           value={value as any[]}
           formRenderProps={formRenderProps}
           fieldConfig={fieldConfig}
+          form={form}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
