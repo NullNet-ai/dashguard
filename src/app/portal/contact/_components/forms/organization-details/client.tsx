@@ -23,7 +23,7 @@ export default function OrganizationDetails({
     try {
       const { organizations } = data;
       const response = await updateOrganization.mutateAsync({
-        contact_organization_ids: organizations?.map((itm) => itm.value),
+        contact_organization_ids: organizations?.map((itm) => itm.value) ?? [],
         contact_id: params.id,
       });
       if (response) {
