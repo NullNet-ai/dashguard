@@ -154,12 +154,6 @@ export const gridRouter = createTRPCRouter({
         },
       });
       const { data: items } = await query.execute();
-      console.log("🚀 ~ .mutation ~ items:", {
-        items,
-        contact_id,
-        mainEntity,
-      })
-
       // get data from redis cache and save the fetch data to redis
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',

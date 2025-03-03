@@ -92,9 +92,6 @@ const getSessionTabs = async () => {
     application: application || '',
     entity: mainEntity || '',
   })
-  
-  console.log("CUSTOM TABSSS", customTabs)
-
   return newTabs
 }
 

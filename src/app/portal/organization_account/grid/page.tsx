@@ -13,13 +13,13 @@ import defaultSorting from './_config/sorting'
 import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
 
 export default async function Page() {
-  const { sorting, pagination, filters } = await getGridCacheData()
+  const { sorts, pagination, filters } = await getGridCacheData()
 
   const { items = [], totalCount } = await api.account.fetchGridData({
     entity: 'organization_account',
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
@@ -57,7 +57,7 @@ export default async function Page() {
       defaultAdvanceFilter={defaultAdvanceFilter}
       defaultSorting={defaultSorting}
       pagination={pagination}
-      sorting={sorting?.length ? sorting : []}
+      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
     />
   )

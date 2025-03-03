@@ -58,7 +58,7 @@ export default function FilterContent() {
   const { handleUpdateFilter } = actions;
   const { filterDetails, columns } = state ?? {};
 
-  const form = useForm<z.infer<typeof ZodSchema>>({
+  const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
       filters: filterDetails?.default_filter ?? [
@@ -124,16 +124,7 @@ export default function FilterContent() {
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
-      <div className="flex justify-between">
-      <Button
-          variant="ghost"
-          size="sm"
-          onClick={form.handleSubmit(handleValidate)}
-          className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Validate Filter
-        </Button>
+      <div className="flex justify-end">
         <Button
           variant="ghost"
           size="sm"
@@ -147,7 +138,7 @@ export default function FilterContent() {
 
       <Form {...form}>
         <div className="space-y-4">
-          {fields.map((field, index) => {
+          {fields.map((field : any, index) => {
             const prefix = `filters.${index}.`;
             return (
               <div

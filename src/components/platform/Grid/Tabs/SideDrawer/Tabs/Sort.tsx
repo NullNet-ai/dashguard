@@ -107,23 +107,8 @@ export default function SortContent() {
     handleUpdateFilter({ sorts: updatedSorts });
   };
 
-  const handleValidate = () => {
-    console.log('validating');
-  };
-
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
-      <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={form.handleSubmit(handleValidate)}
-          className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Validate Sort
-        </Button>
-      </div>
       <div className="grid gap-3">
         <Sortable
           value={fields}

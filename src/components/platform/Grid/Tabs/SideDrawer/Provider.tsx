@@ -3,6 +3,7 @@
 import { createContext, useContext, useState } from 'react';
 import { saveGridFilter } from './actions';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
+import { useRouter } from 'next/navigation';
 
 interface ManageFilterContextType {
   state: {
@@ -21,8 +22,9 @@ interface ManageFilterContextType {
 
 const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined);
 
-export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode; tab: any, columns: Record<string,any> }) {
+export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode; tab: any, columns: Record<string,any>[] }) {
   const { actions } = useSideDrawer();
+  const router = useRouter();
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>(tab);
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
@@ -78,7 +80,8 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false)
-    closeSideDrawer()
+    closeSideDrawer();
+    router.refresh();
   };
 
   return (

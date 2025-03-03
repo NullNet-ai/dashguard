@@ -99,13 +99,13 @@ export const fetchRecords = async ({
     field?: string | undefined;
   }[];
 }) => {
-  const { sorting } = (await getGridCacheData()) ?? {};
+  const { sorts } = (await getGridCacheData()) ?? {};
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: 0,
     limit: 100,
     entity: "contact",
     pluck: pluck_fields,
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: advance_filters?.length
       ? advance_filters
       : defaultAdvanceFilter,

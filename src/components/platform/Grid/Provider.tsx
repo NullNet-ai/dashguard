@@ -73,11 +73,6 @@ export default function GridProvider({
   gridLevel = 1,
 }: IProps) {
 
-
-  console.log("TESSSSTTTTTT", {
-    defaultAdvanceFilter,
-    advanceFilter
-  })
   const _defaultSorting = defaultSorting
     ? defaultSorting
     : [

@@ -159,11 +159,6 @@ export const gridFilterRouter = createTRPCRouter({
       await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
       // return the href the tab that is current
       const currentHref = updatedTab.find((tab) => tab.current)?.href;
-      console.log("🚀 ~ .mutation ~ updatedTab:", {
-        updatedTab,
-        currentHref
-      })
-
       return currentHref
     }),
 
@@ -279,10 +274,6 @@ export const gridFilterRouter = createTRPCRouter({
       });
       await ctx.redisClient.cacheData(_tabMenuId, tabs);
 
-      
-      console.log("🚀 ~ .mutation ~ filter_id:", {
-        url: newData?.[0]?.link,
-      })
       return newData?.[0]?.link;
     }),
 });
