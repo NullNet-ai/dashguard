@@ -14,7 +14,7 @@ import { api } from '~/trpc/react';
 import DeactivateConfirmationDialog, {
   type IDialogContext,
 } from './DeactivateConfirmationDialog';
-import { updateAccountStatusByAccountId } from '~/app/portal/organization_account/wizard/[code]/actions';
+import { updateAccountStatusByAccountId } from '~/app/portal/organization_account/wizard/[code]/_actions';
 interface IAccountDetails {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   selectOptions?: {
