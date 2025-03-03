@@ -170,8 +170,8 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
                   },
                   render: () => {
                     return <Card>
-                      <CardHeader className='flex items-center justify-center'>
-                        <CardTitle>Pie Chart</CardTitle>
+                      <CardHeader className='flex items-left justify-center pt-4'>
+                        <CardTitle className='text-md text-default/90'>Pie Chart</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <FormClientFetch />
@@ -189,14 +189,14 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
                   "fieldClassName": "",
                   "fieldStyle": {
                     "gridColumn": "3 / span 4",
-                    "gridRow": "2 / span 2"
+                    "gridRow": "2 / span 1"
                   },
                   render: ({ form }) => {
                     const interfacesData = form?.watch('interfaces')
 
                     setInterfaces(interfacesData)
                     const graphType = form?.watch('graph_type')
-                    return <Card><ChartContainer
+                    return <Card className='max-h-[362px]'><ChartContainer
                       className="h-full w-full p-5"
                       config={chartConfig}
                     >
@@ -205,32 +205,32 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
                     </ChartContainer></Card>
                   },
                 },
-                {
-                  "id": "tabs",
-                  "formType": "space",
-                  "name": "tabs",
-                  "label": "Tabs",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 6",
-                    "gridRow": "4 / span 1"
-                  }
-                },
-                {
-                  "id": "new_graph",
-                  "formType": "space",
-                  "name": "new_graph",
-                  "label": "New Graph",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 6",
-                    "gridRow": "5 / span 1"
-                  }
-                }
+                // {
+                //   "id": "tabs",
+                //   "formType": "space",
+                //   "name": "tabs",
+                //   "label": "Tabs",
+                //   "description": "Field Description",
+                //   "placeholder": "Enter value...",
+                //   "fieldClassName": "",
+                //   "fieldStyle": {
+                //     "gridColumn": "1 / span 6",
+                //     "gridRow": "4 / span 1"
+                //   }
+                // },
+                // {
+                //   "id": "new_graph",
+                //   "formType": "space",
+                //   "name": "new_graph",
+                //   "label": "New Graph",
+                //   "description": "Field Description",
+                //   "placeholder": "Enter value...",
+                //   "fieldClassName": "",
+                //   "fieldStyle": {
+                //     "gridColumn": "1 / span 6",
+                //     "gridRow": "5 / span 1"
+                //   }
+                // }
 
               ]}
 
