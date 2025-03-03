@@ -248,10 +248,10 @@ const FormGroupMultiField = ({
                   buttonLabel="Add"
                   buttonVariant="default"
                   disabled={isDisabled}
-                  dropdownOptions={dropOptions}
+                  dropdownOptions={dropOptions as any}
                   entity="group-tab-btn-drpdwn"
                   leftIcon={PlusIcon}
-                  options={item}
+                  // options={item as any}
                   side={"start"}
                 />
               </div>

@@ -1,7 +1,0 @@
-{
-  "app_name": "FormControl__FormTimePicker",
-  "tag": "1.7.0",
-  "branch": "released/fix/1.7.0",
-  "message": "add fix time parsing and handling",
-  "publish_name": "Rob Caldosa"
-}

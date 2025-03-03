@@ -23,12 +23,13 @@ import { useForm } from 'react-hook-form'
 import { Form } from '~/components/ui/form'
 import { z } from 'zod'
 import FormClientFetch from '../pie-chart/client-fetch'
+import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
 
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => {
-  const [interfaces, setInterfaces] = React.useState<string[]>([])
+const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
+  const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const form = useForm({
     defaultValues: {
@@ -66,8 +67,8 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
       time_range: getLastTimeStamp(20, 'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
-
-  console.log("%c Line:69 🥟 packetsIP", "color:#33a5ff", packetsIP);
+    
+    
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
     return {
@@ -78,7 +79,7 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
 
   const fetchChartData = async () => {
     const { data } = await fetchBandWidth();
-    console.log('%c Line:74 🍪 data', 'color:#4fff4B', data);
+    
     setPacketsIP(data as any)
 
   };
@@ -88,7 +89,7 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
     fetchChartData()
     const interval = setInterval(() => {
 
-      console.log('%c Line:74 🍊', 'color:#ed9ec7');
+      
       fetchChartData()
     }, 2000)
     return () => clearInterval(interval)
