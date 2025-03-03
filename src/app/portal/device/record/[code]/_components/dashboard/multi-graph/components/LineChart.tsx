@@ -22,7 +22,7 @@ export const modifyAxis = (chartData:any) => {
 
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
-  console.log("%c Line:16 🥪  yAxisMax", "color:#7f2b82", {yAxisMin, yAxisMax});
+  
 
   return { yAxisMax, yAxisMin }
 }

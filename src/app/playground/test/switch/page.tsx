@@ -31,7 +31,7 @@ export default function Page() {
             formType: "switch",
             label: "Switch",
             switchConfig: {
-              icon: <Moon />,
+              leftIcon: <Moon />,
               leftLabel: "Off",
               rightLabel: "On",
             },

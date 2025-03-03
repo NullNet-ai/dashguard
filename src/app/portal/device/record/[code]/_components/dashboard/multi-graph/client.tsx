@@ -20,12 +20,13 @@ import { useForm } from 'react-hook-form'
 import { Form } from '~/components/ui/form'
 import { z } from 'zod'
 import FormClientFetch from '../pie-chart/client-fetch'
+import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
 
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
-  const [interfaces, setInterfaces] = React.useState<string[]>([])
+  const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const form = useForm({
     defaultValues: {
@@ -36,8 +37,8 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
 
 
   const chartConfig = interfaces.reduce((config, key) => {
-    console.log("%c Line:52 🥤 key", "color:#7f2b82", key);
-    const option = interfaces.find(option => {
+    
+    const option = interfaces.find((option : {value: string, label: string}) => {
       return option.value === key?.value});
     if (option) {
       config[key?.value] = {
@@ -48,7 +49,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
     return config;
   }, {} as Record<string, { label: string; color: string }>);
   
-  console.log("%c Line:52 🥕 chartConfig", "color:#e41a6a", chartConfig);
+  
 
   const { refetch: fetchBandWidth } = api.packet.getBandwithInterfacePerSecond.useQuery(
     {
@@ -60,7 +61,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       interface_names: interfaces?.map((item: any) => item?.value),
     })
     
-    console.log("%c Line:69 🥟 packetsIP", "color:#33a5ff", packetsIP);
+    
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
       return {
@@ -71,7 +72,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   
   const fetchChartData = async () => {
     const { data } = await fetchBandWidth();
-    console.log('%c Line:74 🍪 data', 'color:#4fff4B', data);
+    
     setPacketsIP(data as any)
 
   }; 
@@ -81,7 +82,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
     fetchChartData()
     const interval = setInterval(() => {
 
-      console.log('%c Line:74 🍊', 'color:#ed9ec7');
+      
       fetchChartData()
     }, 2000)
     return () => clearInterval(interval)
@@ -94,12 +95,12 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
         <div className='pt-2 grid !grid-cols-8 gap-4'>
           <FormModule
             myParent='record'
-            form={form}
+            form={form as any}
             formKey='AreaChart'
             formSchema={z.object({})}
             subConfig={{
               multiSelectOptions: {
-                interfaces: multiSelectOptions ?? []
+                interfaces: (multiSelectOptions ?? []) as any
               },
               selectOptions: {
                 graph_type: [
