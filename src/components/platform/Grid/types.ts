@@ -109,6 +109,7 @@ export interface IConfigGrid {
   // to identify if grid is a child grid
   isChildGrid?: boolean;
   expandTriggerPosition?: 'left' | 'right';
+  columnsOrder?: Record<string,any>[];
   rowActions?: {
     [R in TRowActionType]?: {
       state?: {

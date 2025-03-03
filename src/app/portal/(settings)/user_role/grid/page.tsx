@@ -1,5 +1,4 @@
 import { headers } from 'next/headers'
-import React from 'react'
 
 import Grid from '~/components/platform/Grid/Server'
 import { getGridCacheData } from '~/lib/grid-get-cache-data'
@@ -34,14 +33,17 @@ export default async function UserRoleGridPage({
     'updated_by',
   ]
 
-  const { sorting } = (await getGridCacheData()) ?? {}
+  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
     pluck: _pluck,
-    current: +(searchParams.page ?? '0'),
-    limit: +(searchParams.perPage ?? '100'),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    current: +(pagination?.current_page ?? "0"),
+    limit: +(pagination?.limit_per_page ?? "100"),
+    sorting: sorts.sorting?.length ? sorts.sorting : defaultSorting,
+    advance_filters: filters?.advanceFilter?.length
+    ? filters?.advanceFilter
+    : [],
   })
 
   return (
@@ -50,11 +52,23 @@ export default async function UserRoleGridPage({
         entity: main_entity!,
         title: 'User Roles',
         columns: gridColumns,
+        columnsOrder: columnOrder,
         enableAutoCreate: false,
+        searchConfig: {
+          router: "grid",
+          resolver: "items",
+          query_params: {
+            entity: main_entity!,
+            pluck: _pluck,
+          },
+        },
       }}
       data={items}
-      defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
+      defaultAdvanceFilter={filters?.defaultFilters || []}
+      defaultSorting={sorts.defaultSorting?.length ? sorts.defaultSorting : defaultSorting}
+      sorting={sorts.sorting?.length ? sorts.sorting : defaultSorting}
+      advanceFilter={filters?.advanceFilter || []}
+      pagination={pagination}
       totalCount={totalCount || 0}
     />
   )

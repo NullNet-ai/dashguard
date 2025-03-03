@@ -20,7 +20,7 @@ import SelectDetails from "./_form-controls/select-details";
 import FileDetails from "./_form-controls/file";
 import SliderDetails from "./_form-controls/slider";
 import MultiFieldForm from "./_form-controls/multifield";
-import GroupTabView2 from "./_dummy-controls/multifield-view-2";
+import GroupTabView2 from "./_dummy-controls/multifield-view";
 
 export default function PlatformPlayGround() {
   return (
