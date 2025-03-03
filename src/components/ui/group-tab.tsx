@@ -19,15 +19,16 @@ export type GroupTabType = {
 
 export interface GroupTabProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: GroupTabType | null;
-  fields: any[];
+  fields?: any[];
   onValueChange?: (value: GroupTabType[]) => void;
   onTabSelect?: (tab: GroupTabType) => void;
   onClickAddTab?: () => void;
   disabled?: boolean;
   render?: (arg: any, index: number) => any;
   renderContent?: (arg: any, index: number) => any;
-  move: any
-  replace: any
+  move?: any
+  replace?: any
+  tabs?: any
 }
 
 const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
