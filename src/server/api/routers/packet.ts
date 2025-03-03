@@ -298,7 +298,7 @@ export const packetRouter = createTRPCRouter({
       const interface_val = res?.reduce((acc, intrfce: any) => {
 
         
-        const [key,val] = Object.entries(intrfce)?.[0] 
+        const [key,val]  = Object.entries(intrfce)?.[0]  as any
         const same_val = val?.find((element: any) => element.bucket === item)
         return {
           ...acc,

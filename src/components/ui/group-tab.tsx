@@ -50,8 +50,8 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
     };
 
     useEffect(() => {
-      if (fields.some((field, index) => field.order !== index + 1)) {
-        const newFields = fields.map((field, index) => {
+      if (fields?.some((field, index) => field.order !== index + 1)) {
+        const newFields = fields?.map((field, index) => {
           return {
             ...field,
             order: index + 1,
@@ -64,7 +64,7 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
     return (
       <div className="flex gap-x-2 p-4 text-md" ref={ref}>
         <Sortable
-          value={fields}
+          value={fields ?? []}
           collisionDetection={closestCorners}
           onValueChange={onValueChange}
           orientation="vertical"
