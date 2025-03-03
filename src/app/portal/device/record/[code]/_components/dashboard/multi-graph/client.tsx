@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect} from 'react'
+import React, {useEffect, useMemo} from 'react'
 
 import {getLastMinutesTimeStamp, getLastSecondsTimeStamp, getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
@@ -35,18 +35,21 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
   })
 
 
-  const chartConfig = interfaces.reduce((config, key) => {
-    console.log("%c Line:52 🥤 key", "color:#7f2b82", key);
-    const option = interfaces.find(option => {
-      return option.value === key?.value});
-    if (option) {
-      config[key?.value] = {
-        label: option.label,
-        color: `hsl(var(--chart-${interfaces.findIndex(opt => opt?.value === key?.value) + 1}))`,
-      };
-    }
-    return config;
-  }, {} as Record<string, { label: string; color: string }>);
+  const chartConfig = useMemo(() => {
+    if(!interfaces?.length)return null
+
+   return interfaces.reduce((config, key) => {
+      const option = interfaces.find(option => {
+        return option.value === key?.value});
+      if (option) {
+        config[key?.value] = {
+          label: option.label,
+          color: `hsl(var(--chart-${interfaces.findIndex(opt => opt?.value === key?.value) + 1}))`,
+        };
+      }
+      return config;
+    }, {} as Record<string, { label: string; color: string }>)
+  }, [interfaces]);
   
   console.log("%c Line:52 🥕 chartConfig", "color:#e41a6a", chartConfig);
 
