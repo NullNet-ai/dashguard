@@ -38,19 +38,31 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
     maxTraffic: 100,
   });
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic);
+  // const { data, refetch: fetchBandWidth } = api?.packet.getBandwithPerSecond?.useQuery({
+  //   device_id: defaultValues?.id,
+  //   time_range: getLastTimeStamp(1,'second'),
+  //   bucket_size: "1s",
+  //   timezone,
+  // })
 
-  const { refetch: fetchBandWidth } = api?.packet.getBandwithPerSecond?.useQuery({
-    device_id: defaultValues?.id,
-    time_range: getLastTimeStamp(1,'second'),
-    bucket_size: "1s",
-    timezone,
-  });
+  const {data, refetch: fetchBandWidth} = api.packet.getBandwithInterfacePerSecond.useQuery(
+      {
+        
+        bucket_size: '1s',
+        timezone: timezone,
+        device_id: defaultValues?.id,
+        time_range:  getLastTimeStamp(20,'second', new Date()),
+        interface_names: ['vtnet0', 'vtnet1'],
+      })
+  console.log("%c Line:43 🍩 data", "color:#4fff4B", data);
 
   useEffect(() => {
     if (!defaultValues?.id || defaultValues?.device_status.toLowerCase() === 'offline') return;
 
     const fetchChartData = async () => {
+      console.log("%c Line:68 🍧 defaultValues", "color:#ed9ec7", defaultValues);
       const { data } = await fetchBandWidth();
+      console.log("%c Line:54 🍒 data", "color:#ed9ec7", {data, id: defaultValues?.id});
       if (data && data.length > 0) {
         const sortedData = data.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
         const currentTraffic = sortedData[0]?.bandwidth || 0;

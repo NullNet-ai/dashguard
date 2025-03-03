@@ -95,6 +95,7 @@ export const packetRouter = createTRPCRouter({
     }).execute()
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
 
+    console.log("%c Line:99 🍩 transformedData", "color:#42b983", {transformedData: transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))});
    return  transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket));
   }),
 
