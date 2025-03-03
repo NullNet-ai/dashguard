@@ -126,7 +126,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
                   "gridRow": "1 / span 1"
                 },
                 render: () => {
-                  return <div className='ml-20 mt-10'>Pie Chart</div>
+                  return <div className='ml-20 mt-10'>Bandwidth Per Second</div>
                 },
               },
               {
