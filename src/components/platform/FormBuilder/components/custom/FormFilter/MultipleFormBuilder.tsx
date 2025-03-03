@@ -1,35 +1,32 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Fragment, SetStateAction, useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { type z } from "zod";
-import { useWizard } from "~/components/platform/Wizard/Provider";
-import { Accordion, AccordionItem } from "~/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button as Button2 } from "@headlessui/react";
-import { Collapsible } from "~/components/ui/collapsible";
-import { useEventEmitter } from "~/context/EventEmitterProvider";
-import { useToast } from "~/context/ToastProvider";
-import { cn } from "~/lib/utils";
-import { testIDFormatter } from "~/utils/formatter";
-import { UpdateCurrentSubTab } from "../../../Actions/UpdateCurrentSubTab";
-import { IPropsForms, TDisplayType } from "../../../types";
-import FormHeader from "../../controls/FormHeader";
-import FormFilterGridLayout from "../../ui/FormFilterGridLayout";
-import OpenedFormLayout from "../../ui/layout/opened";
-import FormBodyMainActions from "../../ui/layout/opened/components/FormBodyMainActions";
-import SelectedViewLayout from "../../ui/layout/selected";
-import { ulid } from "ulid";
-import { Separator } from "~/components/ui/separator";
-import { Button } from "~/components/ui/button";
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Fragment, type SetStateAction, useEffect, useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { type z } from 'zod';
+import { useWizard } from '~/components/platform/Wizard/Provider';
+import { Accordion, AccordionItem } from '~/components/ui/accordion';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Button as Button2 } from '@headlessui/react';
+import { Collapsible } from '~/components/ui/collapsible';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
+import { useToast } from '~/context/ToastProvider';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
+import { UpdateCurrentSubTab } from '../../../Actions/UpdateCurrentSubTab';
+import type { IPropsForms, TDisplayType } from '../../../types';
+import FormHeader from '../../controls/FormHeader';
+import FormFilterGridLayout from '../../ui/FormFilterGridLayout';
+import OpenedFormLayout from '../../ui/layout/opened';
+import { Separator } from '~/components/ui/separator';
+import { Button } from '~/components/ui/button';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import {
   EyeSlashIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-} from "@heroicons/react/24/outline";
-import { Loader2 } from "lucide-react";
-import SelectedActions from "../../ui/layout/selected/components/SelectedActions";
-import FormFilterOpenedActions from "../../ui/layout/opened/components/FormFilterOpenedActions";
+} from '@heroicons/react/24/outline';
+import { Loader2 } from 'lucide-react';
+import SelectedActions from '../../ui/layout/selected/components/SelectedActions';
+import FormFilterOpenedActions from '../../ui/layout/opened/components/FormFilterOpenedActions';
 
 export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   const {
@@ -54,7 +51,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
     //* other
     enableFormRegisterToParent: _enableFormRegisterToParent,
     filterGridConfig,
-    defaultDisplay = "expanded",
+    defaultDisplay = 'expanded',
     customRender,
     formProps,
     features,
@@ -74,12 +71,12 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
   // this is to override the enableFormRegisterToParent if the parent is record which will cause rerendering of form builder
   const enableFormRegisterToParent =
-    myParent === "record" ? false : _enableFormRegisterToParent;
+    myParent === 'record' ? false : _enableFormRegisterToParent;
 
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
-    mode: "onChange",
+    mode: 'onChange',
     resolver: zodResolver(formSchema), // is this where the validation relies?
     defaultValues,
     shouldFocusError: false,
@@ -87,22 +84,22 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
   const fieldArray = useFieldArray({
     control: form.control,
-    name: "form_builder_fields",
-    keyName: "_id",
+    name: 'form_builder_fields',
+    keyName: '_id',
   });
 
-  form.watch("form_builder_fields");
+  form.watch('form_builder_fields');
 
   //* LOCAL STATES
-  const [isOpenGrid, setOpenGrid] = useState("");
+  const [isOpenGrid, setOpenGrid] = useState('');
   const [formGridSelected, setFormGridSelected] = useState<any[]>([]);
-  const [displayType, setDisplayType] = useState<TDisplayType>("form");
+  const [displayType, setDisplayType] = useState<TDisplayType>('form');
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [isListLoading, setIsListLoading] = useState(false);
   const [debugOn, setDebugOn] = useState(false);
   const [isFormOpened, setIsFormOpened] = useState(
-    defaultDisplay === "expanded",
+    defaultDisplay === 'expanded',
   );
   const [showFormActions, setShowFormActions] = useState(false);
   const [isOpenSearch, setIsOpenSearch] = useState(false);
@@ -113,7 +110,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   useEffect(() => {
     if (!form?.formState?.isDirty) return;
     eventEmitter.emit(`formStatus:${formKey}`, {
-      status: "dirty",
+      status: 'dirty',
       form_key: formKey,
     });
   }, [form?.formState?.isDirty]);
@@ -121,7 +118,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   //* Effect to listen to form errors
   useEffect(() => {
     if (form?.formState?.errors) {
-      console.debug(" 🇦🇨 [Form-Props ERRORS]", form?.formState?.errors);
+      console.debug(' 🇦🇨 [Form-Props ERRORS]', form?.formState?.errors);
     }
   }, [form?.formState?.errors]);
 
@@ -147,22 +144,22 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
-      setDisplayType("form");
+      setDisplayType('form');
       return;
     }
     setFormGridSelected(filterGridConfig?.selectedRecords);
-    setDisplayType("selected");
+    setDisplayType('selected');
   }, [filterGridConfig?.selectedRecords]);
 
   //* Effect to listen to event emitter
   useEffect(() => {
     if (!eventEmitter) return;
     if (!enableFormRegisterToParent) return;
-    if (myParent === "wizard" && actions?.registerSaveHandler) {
+    if (myParent === 'wizard' && actions?.registerSaveHandler) {
       actions?.registerSaveHandler?.(formKey);
     }
 
-    if (myParent === "record") {
+    if (myParent === 'record') {
       disableForm(); //when it is a record form is default disabled
     }
 
@@ -176,7 +173,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
         if (Object.keys(form?.formState?.errors).length > 0) {
           reject({
-            message: "Validation failed",
+            message: 'Validation failed',
             errors: form?.formState?.errors,
             status_code: 422, // 422 Unprocessable Entity
           });
@@ -198,7 +195,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
   //* handler to disable form
   const handleCloseGrid = () => {
-    setOpenGrid("");
+    setOpenGrid('');
   };
 
   const handleRemovedSelectedRecords = (
@@ -207,7 +204,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
     records: any[],
   ) => {
     if (!filterGridConfig?.onRemoveSelectedRecords) {
-      toast.error("No onRemoveSelectedRecords function found");
+      toast.error('No onRemoveSelectedRecords function found');
       return;
     }
 
@@ -227,10 +224,10 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
       handleCloseGrid();
       fieldArray.remove(index);
       if (!fields.length) {
-        setDisplayType("form");
+        setDisplayType('form');
         return;
       }
-      setDisplayType("selected");
+      setDisplayType('selected');
     });
   };
 
@@ -239,7 +236,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   };
 
   const handleAccordionChange = (value: string) => {
-    setIsAccordionExpanded(value === "item-1");
+    setIsAccordionExpanded(value === 'item-1');
     setOpenGrid(value);
   };
 
@@ -273,7 +270,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
     const mappedFields = fields.reduce((acc, field) => {
       return {
         ...acc,
-        [field.id]: "",
+        [field.id]: '',
       };
     }, {});
     fieldArray.append({
@@ -300,8 +297,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   const saveForm = async (data: z.infer<typeof formSchema>) => {
     if (!customRender) {
       eventEmitter.emit(`formStatus:${formKey}`, {
-        status: "form_save",
-        form_key: "action",
+        status: 'form_save',
+        form_key: 'action',
       });
       await onSubmit(data);
       return;
@@ -313,12 +310,12 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
     setIsSaveLoading(true);
     try {
       if (!form.formState.isDirty && !form.formState.defaultValues) {
-        return toast.error("Form is Unchanged");
+        return toast.error('Form is Unchanged');
       }
       // Handle form validation and other checks
       if (!form.formState.isDirty) {
         eventEmitter.emit(`formStatus:${formKey}`, {
-          status: "done",
+          status: 'done',
           form_key: formKey,
         });
         setIsSaveLoading(false);
@@ -337,7 +334,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
           form_errors.map(
             ({ field, message }: { field: string; message: string }) => {
               form.setError(field, {
-                type: "manual",
+                type: 'manual',
                 message: message,
               });
             },
@@ -349,7 +346,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
         if (!!Object.keys(form.formState.errors).length || form_errors.length) {
           eventEmitter.emit(`formStatus:${formKey}`, {
-            status: "failed",
+            status: 'failed',
             form_key: formKey,
           });
           setIsSaveLoading(false);
@@ -362,7 +359,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
         });
 
         eventEmitter.emit(`formStatus:${formKey}`, {
-          status: "done",
+          status: 'done',
           form_key: formKey,
         });
 
@@ -373,7 +370,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
       setIsSaveLoading(false);
     } catch (error) {
       setIsSaveLoading(false);
-      console.error("[Form-Filter] Failed to create new record", error);
+      console.error('[Form-Filter] Failed to create new record', error);
     }
   };
 
@@ -390,18 +387,18 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
         data: selected_item,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-        action_type: selected_item.id ? "Update" : "Create",
+        action_type: selected_item.id ? 'Update' : 'Create',
         form,
       });
       //TODO: Please cater setting error message in field and don't proceed to view mode.
-      if (!response?.length) throw new Error("Failed to submit form grid");
+      if (!response?.length) throw new Error('Failed to submit form grid');
       fields.splice(index, 1, response[0]);
       setFormGridSelected(fields);
-      setDisplayType("selected");
+      setDisplayType('selected');
       setIsSaveLoading(false);
     } catch (error) {
       setIsSaveLoading(false);
-      console.error("[Form-Filter] Failed to create new record", error);
+      console.error('[Form-Filter] Failed to create new record', error);
     }
   };
 
@@ -411,9 +408,9 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
         UpdateCurrentSubTab({ tab_name: data.code });
       }
       setFormGridSelected([...formGridSelected, data]);
-      setDisplayType("selected");
+      setDisplayType('selected');
     } catch (error) {
-      console.error("[Form-Filter] Failed onSelectFieldFilterGrid", error);
+      console.error('[Form-Filter] Failed onSelectFieldFilterGrid', error);
     }
   };
 
@@ -425,8 +422,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
         `${formProps?.entity}-${formProps?.shell_type}-${formKey}-form`,
       )}
     >
-      <Collapsible open={defaultDisplay === "expanded"} className="space-y-2">
-        <Card className={cn("border-none shadow-none", `p-0 sm:p-2`)}>
+      <Collapsible open={defaultDisplay === 'expanded'} className="space-y-2">
+        <Card className={cn('border-none shadow-none', `p-0 sm:p-2`)}>
           <div className="flex flex-col gap-2">
             <Accordion
               type="single"
@@ -501,26 +498,26 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                               }
                             /> */}
                             <div className="me-4 ms-auto mt-4 flex justify-end gap-2">
-                              {displayType !== "selected" &&
+                              {displayType !== 'selected' &&
                                 filterGridConfig &&
                                 !!Object.keys(filterGridConfig).length && (
                                   <>
                                     {!!field.code &&
                                       !formProps?.isOpenSearch && (
                                         <Button
-                                          variant={"outline"}
+                                          variant={'outline'}
                                           data-test-id={
-                                            entityName + "-wzrd" + "-cancel-btn"
+                                            entityName + '-wzrd' + '-cancel-btn'
                                           }
                                           onClick={() => {
                                             form.reset(
                                               form.formState.defaultValues,
                                             );
-                                            handleUpdateDisplayType("selected");
+                                            handleUpdateDisplayType('selected');
                                           }}
                                           type="button"
                                           loading={isSaveLoading}
-                                          size={"xs"}
+                                          size={'xs'}
                                         >
                                           <XMarkIcon className="h-4 w-4" />
                                           Cancel
@@ -529,30 +526,30 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                     {formLabel && !formProps?.isOpenSearch && (
                                       <>
                                         <Button
-                                          variant={"default"}
+                                          variant={'default'}
                                           name={
-                                            formLabel.split(" ").join("") +
-                                            `${field.code ? "FormUpdateButton" : "FormCreateButton"}`
+                                            formLabel.split(' ').join('') +
+                                            `${field.code ? 'FormUpdateButton' : 'FormCreateButton'}`
                                           }
                                           data-test-id={
                                             field.code
                                               ? entityName +
-                                                "-wzrd" +
-                                                "-update-btn"
+                                                '-wzrd' +
+                                                '-update-btn'
                                               : entityName +
-                                                "-wzrd" +
-                                                "-create-btn"
+                                                '-wzrd' +
+                                                '-create-btn'
                                           }
                                           onClick={form.handleSubmit(
                                             onSubmitFormGrid.bind(null, index),
                                           )}
                                           type="button"
                                           loading={isSaveLoading}
-                                          size={"xs"}
+                                          size={'xs'}
                                           className="items-center gap-1 text-sm"
                                         >
                                           <PlusIcon className="h-4 w-4" />
-                                          {field.code ? "Update" : "Create"}
+                                          {field.code ? 'Update' : 'Create'}
                                         </Button>
                                         <Separator
                                           orientation="vertical"
@@ -565,7 +562,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                       {isListLoading ? (
                                         <Loader2
                                           className={cn(
-                                            "h-5 w-5 animate-spin text-gray-400",
+                                            'h-5 w-5 animate-spin text-gray-400',
                                           )}
                                         />
                                       ) : (
@@ -577,11 +574,11 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                             data-test-id={
                                               !formProps?.isOpenSearch
                                                 ? entityName +
-                                                  "-wzrd" +
-                                                  "-show-grd-btn"
+                                                  '-wzrd' +
+                                                  '-show-grd-btn'
                                                 : entityName +
-                                                  "-wzrd" +
-                                                  "-hide-grd-btn"
+                                                  '-wzrd' +
+                                                  '-hide-grd-btn'
                                             }
                                             className="inline-flex h-7 items-center gap-1 rounded bg-indigo-100 px-2 py-2 text-sm text-primary hover:bg-indigo-200"
                                           >
@@ -592,8 +589,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                             )}
                                             <span className="text-primary">
                                               {!formProps?.isOpenSearch
-                                                ? "Show Grid"
-                                                : "Hide Grid"}
+                                                ? 'Show Grid'
+                                                : 'Hide Grid'}
                                             </span>
                                           </Button2>
                                         </>
@@ -601,7 +598,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                     </div>
                                   </>
                                 )}
-                              {displayType === "selected" && (
+                              {displayType === 'selected' && (
                                 <SelectedActions
                                   form={form}
                                   features={features}
@@ -614,7 +611,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
 
                               {!form?.formState?.disabled &&
                                 filterGridConfig &&
-                                displayType !== "selected" &&
+                                displayType !== 'selected' &&
                                 !formProps?.isOpenSearch && (
                                   <FormFilterOpenedActions
                                     features={features}
@@ -648,7 +645,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                               />
                             )}
                           </>
-                          {displayType === "form" && !searchActive && (
+                          {displayType === 'form' && !searchActive && (
                             <OpenedFormLayout
                               fieldConfig={fieldConfig}
                               myParent={myParent}
@@ -682,13 +679,13 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                               formSchema={formSchema}
                             />
                           )}
-                          {displayType === "selected" && (
+                          {displayType === 'selected' && (
                             <CardContent>
                               <Fragment key={prefix}>
                                 <Card className="border-none shadow-none">
                                   <CardHeader
                                     className={
-                                      "flex flex-row items-center justify-between"
+                                      'flex flex-row items-center justify-between'
                                     }
                                   >
                                     <CardTitle className="text-sm">

@@ -21,7 +21,7 @@ import { getContactsWithPhoneAndEmail } from "../../../utils/phone-email-validat
 import { formatPhoneNumber } from "~/utils/formatter";
 import Bluebird from "bluebird";
 
-const ENTITY = "contact";
+const ENTITY = "contacts";
 
 export const contactRouter = createTRPCRouter({
   updateContactDetails: privateProcedure
@@ -220,7 +220,7 @@ export const contactRouter = createTRPCRouter({
             // by_direction: EOrderDirection.ASC,
           },
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
+            ? formatSorting(input.sorting, ENTITY)
             : [],
         },
       })
@@ -491,7 +491,7 @@ export const contactRouter = createTRPCRouter({
               // by_direction: EOrderDirection.ASC,
             },
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+              ? formatSorting(input.sorting, input?.entity)
               : [],
           },
         })

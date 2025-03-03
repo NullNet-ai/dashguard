@@ -1,13 +1,40 @@
 'use client'
 
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis } from 'recharts'
+import { useMemo } from 'react';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
 
-const LineChartComponent = ({ filteredData }: any) => {
+export const modifyAxis = (chartData:any) => {
+  if (!chartData?.length) return { yAxisMax: 0, yAxisMin: 0 }
+  const maxBandwidth = Math.max(
+    ...chartData.map((item: any) => item?.vtnet1 ?? 0),
+    ...chartData.map((item: any) => item?.vtnet0 ?? 0)
+  )
+
+  const minBandwidth = Math.min(
+    ...chartData.map((item: any) => item?.vtnet1 ?? Infinity),
+    ...chartData.map((item: any) => item?.vtnet0 ?? Infinity)
+  )
+
+  const yAxisMax = Math.ceil(maxBandwidth * 1.1)
+  const yAxisMin = Math.floor(minBandwidth * 0.9)
+  
+
+  return { yAxisMax, yAxisMin }
+}
+export const formatNumber = (num: number) => {
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
+  return num.toString()
+}
+const LineChartComponent = ({ filteredData, interfaces }: any) => {
+
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <LineChart
@@ -33,8 +60,32 @@ const LineChartComponent = ({ filteredData }: any) => {
         tickLine={false}
         tickMargin={8}
       />
+        <YAxis
+          allowDataOverflow={true}
+          axisLine={false}
+          domain={[yAxisMin, yAxisMax]}
+          tickCount={4}
+          tickFormatter={formatNumber}
+          tickLine={false}
+          tickMargin={8}
+          ticks={[
+            yAxisMin,
+            yAxisMin + (yAxisMax - yAxisMin) / 3,
+            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
+            yAxisMax,
+          ]}
+        />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-      <Line
+      {interfaces?.map((item: any) => {
+        return <Line
+        dataKey={item?.value}
+        dot={false}
+        stroke={`var(--color-${item?.value})`}
+        strokeWidth={2}
+        type="monotone"
+      />
+      })}
+      {/* <Line
         dataKey="bandwidth"
         dot={false}
         stroke="var(--color-bandwidth)"
@@ -47,7 +98,7 @@ const LineChartComponent = ({ filteredData }: any) => {
         stroke="var(--color-static_bandwidth)"
         strokeWidth={2}
         type="monotone"
-      />
+      /> */}
 
     </LineChart>
     </ResponsiveContainer>

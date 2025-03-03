@@ -58,6 +58,7 @@ export default function FormTextArea({
           } `}
           {...formRenderProps?.field}
           disabled={fieldConfig.disabled}
+          value={formRenderProps.field.value || ""}
         />
       </FormControl>
 

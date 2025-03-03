@@ -1,7 +1,7 @@
 {
   "app_name": "platform__FormBuilder",
-  "tag": "1.8.1<unreleased>",
-  "branch": "unreleased/fix/1.8.1<unreleased>",
-  "message": "Refactor grid and form filter component",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.11.0",
+  "branch": "released/fix/1.11.0",
+  "message": "Form Filter Grid enchancement",
+  "publish_name": "Kit Mikhael Bagares"
 }

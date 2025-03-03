@@ -1,4 +1,5 @@
 import {
+  type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
@@ -9,23 +10,41 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import React from "react";
+
 
 interface IProps {
-  fieldConfig: IField;
+  fieldConfig: any;
   formRenderProps: {
     field: ControllerRenderProps<Record<string, any>, string>;
     fieldState: ControllerFieldState;
   };
+  form: UseFormReturn<Record<string, any>>;
+  value?: string;
+  formKey: string;
 }
 
-export default function FormCustom({ fieldConfig }: IProps) {
+export default function FormCustom({
+  fieldConfig,
+  form,
+  formKey,
+  formRenderProps,
+}: IProps) {
+  const hasFormMessage = fieldConfig.hasFormMessage ?? true;
+
   return (
     <FormItem>
-      <FormLabel required={fieldConfig?.required}>
-        {fieldConfig?.label}
-      </FormLabel>
-      <FormControl>{fieldConfig?.customRender}</FormControl>
-      <FormMessage />
+      <FormControl>
+        {fieldConfig.render?.({
+          ...formRenderProps,
+          form,
+          formKey,
+          fieldConfig,
+        })}
+      </FormControl>
+      {hasFormMessage && (
+        <FormMessage />
+      )}
     </FormItem>
   );
 }

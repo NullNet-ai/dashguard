@@ -1,26 +1,26 @@
-import { CheckIcon, EnvelopeIcon, TrashIcon } from "@heroicons/react/20/solid";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { useEffect } from "react";
+import { CheckIcon, EnvelopeIcon, TrashIcon } from '@heroicons/react/20/solid';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { useEffect } from 'react';
 import {
   useFieldArray,
   type ControllerFieldState,
   type ControllerRenderProps,
   type UseFormReturn,
-} from "react-hook-form";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
+} from 'react-hook-form';
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
   useFormField,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { cn } from "~/lib/utils";
-import { type IFieldFilterActions, type IField } from "../../types";
-import { ulid } from "ulid";
-import { useToast } from "~/context/ToastProvider";
+} from '~/components/ui/form';
+import { Input } from '~/components/ui/input';
+import { cn } from '~/lib/utils';
+import { type IFieldFilterActions, type IField } from '../../types';
+import { ulid } from 'ulid';
+import { useToast } from '~/context/ToastProvider';
 
 export interface IEmailData {
   id?: string;
@@ -60,7 +60,7 @@ export default function FormEmailInput({
   }) as IUseFieldArrayEmail;
 
   const handleAddEmail = () => {
-    append({ id: ulid(), email: "", is_primary: false });
+    append({ id: ulid(), email: '', is_primary: false });
   };
 
   const handleEmailChange = (index: number, value: string) => {
@@ -75,7 +75,7 @@ export default function FormEmailInput({
 
     // Check if the item at the specified index is primary
     if (email_input && email_input[index]?.is_primary && isMultiple) {
-      toast.error("Primary email cannot be removed");
+      toast.error('Primary email cannot be removed');
       return;
     }
 
@@ -84,12 +84,12 @@ export default function FormEmailInput({
 
   useEffect(() => {
     if (!fields?.length) {
-      append({ id: ulid(), email: "", is_primary: true });
+      append({ id: ulid(), email: '', is_primary: true });
     }
-  },[]);
+  }, []);
   const { name } = formRenderProps.field;
   const isDisabled = formRenderProps?.field?.disabled;
-  const isMultiple = fieldConfig?.options?.phoneEmailType === "multiple";
+  const isMultiple = fieldConfig?.options?.phoneEmailType === 'multiple';
   const values = form.watch(name);
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
 
@@ -108,7 +108,7 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 h-[36px] focus-within:ring-ring  ${error?.[index] ? "border-destructive" : ""} ${fieldConfig.disabled ? "bg-secondary" : ""}`}
+                  className={`flex h-[36px] items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${error?.[index] ? 'border-destructive' : ''} ${fieldConfig.disabled ? 'bg-secondary' : ''}`}
                 >
                   <Input
                     // {...register(`${fieldConfig.name}.${index}.email`)}
@@ -117,18 +117,18 @@ export default function FormEmailInput({
                         fieldConfig?.readonly) ??
                       false
                     }
-                    value={`${values?.[index]?.email || ""}`}
+                    value={`${values?.[index]?.email || ''}`}
                     disabled={fieldConfig.disabled}
                     containerClassName="!mt-0"
                     id={data?.id}
                     data-test-id={`${formKey}-inp-${index + 1}-${fieldConfig.name}`}
                     name={data?.id}
-                    defaultValue={`${values?.[index]?.email || ""}`}
+                    defaultValue={`${values?.[index]?.email || ''}`}
                     iconPlacement="left"
-                    className={`rounded-none border-0 !py-0 focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:border-0 h-[30px] ps-8`}
+                    className={`h-[30px] rounded-none border-0 !py-0 ps-8 focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:border-0`}
                     Icon={EnvelopeIcon}
                     placeholder={fieldConfig?.placeholder}
-                    type={"email"}
+                    type={'email'}
                     onChange={(e) => {
                       handleEmailChange(index, e.target.value);
                       if (handleSearch) {
@@ -139,7 +139,7 @@ export default function FormEmailInput({
                   />
                   {data?.is_primary && isMultiple && (
                     <Badge
-                      variant={"outline"}
+                      variant={'outline'}
                       className={`mx-auto bg-primary/10 py-1 font-normal text-primary hover:bg-primary/10`}
                       data-test-id={`${formKey}-prim-badge-${index + 1}-${fieldConfig.name}`}
                     >
@@ -157,9 +157,9 @@ export default function FormEmailInput({
                       }
                       data-test-id={`${formKey}-set-prim-btn-${index + 1}-${fieldConfig.name}`}
                       type="button"
-                      variant={"ghost"}
-                      size={"icon"}
-                      className={`rounded-none disabled:opacity-100 ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                      variant={'ghost'}
+                      size={'icon'}
+                      className={`rounded-none disabled:opacity-100 ${formRenderProps?.fieldState.error ? 'border-destructive' : ''}`}
                       onClick={() => {
                         const updatedFields = values.map(
                           (field: IEmailData, i: number) => ({
@@ -183,10 +183,10 @@ export default function FormEmailInput({
                         false
                       }
                       type="button"
-                      variant={"ghost"}
-                      size={"icon"}
+                      variant={'ghost'}
+                      size={'icon'}
                       data-test-id={`${formKey}-rmv-btn-${index + 1}-${fieldConfig.name}`}
-                      className={`rounded-none hover:bg-transparent hover:text-primary-foreground disabled:opacity-100 ${formRenderProps?.fieldState.error ? "border-destructive" : ""}`}
+                      className={`rounded-none hover:bg-transparent hover:text-primary-foreground disabled:opacity-100 ${formRenderProps?.fieldState.error ? 'border-destructive' : ''}`}
                       onClick={() => {
                         const _values = form.getValues(fieldConfig.name);
                         handleRemoveEmail(index, _values);
@@ -199,8 +199,9 @@ export default function FormEmailInput({
                 {error?.[index] && (
                   <p
                     id={data?.id}
-                    className={cn("py-1 text-md font-medium text-destructive")}
+                    className={cn('py-1 text-md font-medium text-destructive')}
                     data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}`}
+                    style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                   >
                     {error?.[index]?.email?.message}
                   </p>
@@ -222,7 +223,7 @@ export default function FormEmailInput({
           }
           type="button"
           Icon={PlusIcon}
-          variant={"link"}
+          variant={'link'}
           iconPlacement="left"
           onClick={handleAddEmail}
           className="mt-2 disabled:opacity-100"
@@ -232,7 +233,9 @@ export default function FormEmailInput({
       )}
 
       {(error?.root?.message || error?.message) && (
-        <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+        <FormMessage
+          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        />
       )}
     </FormItem>
   );

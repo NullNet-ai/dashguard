@@ -13,10 +13,16 @@ const FormServerFetch = async () => {
     main_entity: main_entity!,
     })
   const defaultValues = fetched_device?.data
-
+  
+  
+  const fetched_interfaces =await api.deviceConfiguration.fetchInterfaceOptions({
+      code: identifier!,
+  })
+  
   return (
     <InteractiveGraph
       defaultValues={defaultValues ?? {}}
+      multiSelectOptions={fetched_interfaces}
       params={{
         id: defaultValues?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',

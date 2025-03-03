@@ -31,6 +31,7 @@ export const getLastMinutesTimeStamp = (minutes: number) => {
   const formatted_ast = replace(last_minutes)
 
   const result = [formatted_ast, formatted_now]
+  
 
   
   return result
@@ -55,14 +56,18 @@ export const getLastTwentyFourHoursTimeStamp = () => {
 
 export const getLastTimeStamp = (
   amount: number,
-  unit: "second" | "minute" | "hour" | "day" | "month"
+  unit: "second" | "minute" | "hour" | "day" | "month",
+  _now?: Date
 ) => {
-  const now = new Date();
+  const now = _now || new Date();
+  
   const past = new Date(now);
 
   switch (unit) {
     case "second":
       past.setSeconds(now.getSeconds() - amount);
+
+      
       break;
     case "minute":
       past.setSeconds(0);

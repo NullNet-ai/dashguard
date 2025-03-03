@@ -1,7 +1,6 @@
-"use client";
-import { GripVerticalIcon } from "lucide-react";
-import React from "react";
-import { closestCorners } from "@dnd-kit/core";
+'use client';
+import React, { useEffect } from 'react';
+import { closestCorners } from '@dnd-kit/core';
 
 import {
   Sortable,
@@ -10,6 +9,7 @@ import {
 } from "~/components/ui/sortable";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import { GripVerticalIcon } from 'lucide-react';
 
 export type GroupTabType = {
   id: string;
@@ -19,26 +19,59 @@ export type GroupTabType = {
 
 export interface GroupTabProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: GroupTabType | null;
-  tabs: GroupTabType[];
+  fields?: any[];
   onValueChange?: (value: GroupTabType[]) => void;
   onTabSelect?: (tab: GroupTabType) => void;
   onClickAddTab?: () => void;
   disabled?: boolean;
+  render?: (arg: any, index: number) => any;
+  renderContent?: (arg: any, index: number) => any;
+  move?: any
+  replace?: any
+  tabs?: any
 }
 
 const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
-  ({ selected, tabs, onValueChange, onTabSelect, onClickAddTab, disabled, ...props }, ref) => {
+  ({
+    selected,
+    fields,
+    onValueChange,
+    onTabSelect,
+    onClickAddTab,
+    disabled,
+    move,
+    render,
+    renderContent,
+    replace,
+    ...props
+  }, ref) => {
+    const handleMove = ({ activeIndex, overIndex }: { activeIndex: number; overIndex: number }) => {
+        move(activeIndex, overIndex);        
+    };
+
+    useEffect(() => {
+      if (fields.some((field, index) => field.order !== index + 1)) {
+        const newFields = fields.map((field, index) => {
+          return {
+            ...field,
+            order: index + 1,
+          };
+        });
+        replace(newFields);
+      }
+    }, [fields]);
+
     return (
-      <div className="flex p-4 text-md gap-x-2" ref={ref}>
+      <div className="flex gap-x-2 p-4 text-md" ref={ref}>
         <Sortable
-          value={tabs}
+          value={fields}
           collisionDetection={closestCorners}
           onValueChange={onValueChange}
           orientation="vertical"
-        
+          onMove={handleMove}
         >
           <div className="flex w-full max-w-[200px] flex-col bg-gray-100 min-h-[200px] md:min-h-[300px]  pb-4">
-            {tabs.map((field) => (
+            {fields?.map((field) => (
               <>
                 <SortableItem key={field.id} value={field.id} asChild 
                 >
@@ -80,10 +113,10 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             <div className="mt-2 flex justify-center">
               <Button
                 disabled={disabled}
-                className="w-[80%] border-2 border-dashed border-primary text-primary text-md"
-                variant={"ghost"}
+                className="w-[80%] border-2 border-dashed border-primary text-md text-primary"
+                variant={'ghost'}
                 onClick={() => {
-                    onClickAddTab?.();
+                  onClickAddTab?.();
                 }}
               >
                 Add new Attribute
@@ -91,14 +124,16 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             </div>
           </div>
         </Sortable>
-        <div className="flex-1">
-                {selected?.content}
-        </div>
+        {
+          fields?.map((field, index) => {
+            return renderContent?.(field, index)
+          })
+        }
       </div>
     );
   },
 );
 
-GroupTab.displayName = "GroupTab";
+GroupTab.displayName = 'GroupTab';
 
 export default GroupTab;
