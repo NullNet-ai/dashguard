@@ -9,20 +9,18 @@ import {
 } from '~/components/ui/chart'
 
 export const modifyAxis = (chartData:any) => {
-  if (!chartData?.length) return { yAxisMax: 0, yAxisMin: 0 }
   const maxBandwidth = Math.max(
-    ...chartData.map((item: any) => item?.vtnet1 ?? 0),
-    ...chartData.map((item: any) => item?.vtnet0 ?? 0)
+    ...(chartData ?? [])?.map((item: any) => item?.vtnet1 ?? 0),
+    ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? 0)
   )
 
   const minBandwidth = Math.min(
-    ...chartData.map((item: any) => item?.vtnet1 ?? Infinity),
-    ...chartData.map((item: any) => item?.vtnet0 ?? Infinity)
+    ...(chartData ?? [])?.map((item: any) => item?.vtnet1 ?? Infinity),
+    ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? Infinity)
   )
 
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
-  console.log("%c Line:16 🥪  yAxisMax", "color:#7f2b82", {yAxisMin, yAxisMax});
 
   return { yAxisMax, yAxisMin }
 }
@@ -33,7 +31,7 @@ export const formatNumber = (num: number) => {
 }
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
 
-  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData])
 
   return (
     <ResponsiveContainer width="100%" height={300}>

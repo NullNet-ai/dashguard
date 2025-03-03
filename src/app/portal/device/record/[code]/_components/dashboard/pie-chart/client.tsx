@@ -39,7 +39,7 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
   });
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic);
 
-  const { refetch: fetchBandWidth } = api.packet.getBandwithPerSecond.useQuery({
+  const { refetch: fetchBandWidth } = api?.packet.getBandwithPerSecond?.useQuery({
     device_id: defaultValues?.id,
     time_range: getLastTimeStamp(1,'second'),
     bucket_size: "1s",
@@ -61,8 +61,8 @@ const PieChartComponent = ({ defaultValues }: IFormProps) => {
     };
 
     fetchChartData();
-    // const interval = setInterval(fetchChartData, 1000);
-    // return () => clearInterval(interval);
+    const interval = setInterval(fetchChartData, 1000);
+    return () => clearInterval(interval);
   }, [defaultValues?.id, defaultValues?.device_status]);
 
   useEffect(() => {
