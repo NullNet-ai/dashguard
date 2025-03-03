@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { forwardRef, useEffect, useMemo } from 'react';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatTabName } from '~/lib/utils';
@@ -11,15 +11,23 @@ type InnerTabitemProps = {
   tab: any
   pathname?: string
   newItems: any
+  index?: number
+  className?: string
+  isHidden?: boolean
+  lastShownItem: any
 }
 
-const InnerTabitem = ({
+const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   tab,
   pathname,
   newItems,
-}: InnerTabitemProps) => {
+  className,
+  lastShownItem,
+  isHidden,
+}, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
+
   const [, , entityName, application, code] = (newPathname || '').split('/')
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
 
@@ -39,7 +47,7 @@ const InnerTabitem = ({
   }
 
   useEffect(() => {
-    updateSubtabs.mutateAsync({
+    void updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
       is_active: isActive,
       tab_name: tab.name,
@@ -49,9 +57,10 @@ const InnerTabitem = ({
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
   return (
     <div
+      ref={ref}
       key={checkIfUserRole(tab.name) ? 'role' : tab.name}
       className={cn(
-        `group relative flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `,
+        `group relative whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
       <Link
@@ -61,26 +70,37 @@ const InnerTabitem = ({
             : tab.name.split(' ').join('-').toLowerCase()
         }
         onClick={() => {
+          if (isHidden) return
+          Cookies.set('innerLastShownItem', lastShownItem?.name)
+          Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
           const getCurrent = getActiveName() || ''
           Cookies.set('prevCurrent', getCurrent)
         }}
-        href={tab.href}
+        href={isHidden ? `${newPathname}#` : tab.href}
         aria-current={isActive ? 'page' : undefined}
         className={cn(
-          isActive ? 'text-primary' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`,
+          isActive ? 'text-primary' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
         )}
       >
         {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
         <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
       </Link>
-      <TabMenu
-        current={!!tab.href.match(pathname)}
-        href={tab.href}
-        tabs={newItems}
-        name={checkIfUserRole(tab.name) ? 'role' : tab.name}
-      />
+      {!isHidden
+        ? (
+            <TabMenu
+              current={!!tab.href.match(pathname)}
+              href={tab.href}
+              tabs={newItems}
+              name={checkIfUserRole(tab.name) ? 'role' : tab.name}
+            />
+          )
+        : (
+            null
+          )}
     </div>
   );
-};
+});
 
-export default InnerTabitem
+InnerTabitem.displayName = 'InnerTabitem';
+
+export default InnerTabitem;

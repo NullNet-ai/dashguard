@@ -13,6 +13,7 @@ type InnerTabitemProps = {
   dropItems: any
   isActive: boolean
   onSelect?: () => void
+  shownItems: any[]
 };
 
 const InnerDropTabItem = ({
@@ -21,6 +22,7 @@ const InnerDropTabItem = ({
   dropItems,
   isActive,
   onSelect,
+  shownItems,
 }: InnerTabitemProps) => {
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
@@ -42,13 +44,20 @@ const InnerDropTabItem = ({
     return code
   }
 
+  const lastShownItem = useMemo(() => {
+    if (shownItems?.length > 0) {
+      const removeHidden = shownItems.filter((item: any) => !item.hidden);
+      const lastItem = removeHidden[removeHidden.length - 1]
+      return lastItem
+    }
+  }, [shownItems]);
 
   useEffect(() => {
-    updateSubtabs.mutateAsync({
+    void updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
       is_active: active,
       tab_name: tab.name,
-    });
+    })
   }, [active]);
 
   const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false;
@@ -63,6 +72,8 @@ const InnerDropTabItem = ({
         onClick={() => {
           const getCurrent = getActiveName() || ''
           Cookies.set('prevCurrent', getCurrent)
+          Cookies.set('innerCopiedLastItems', JSON.stringify(shownItems))
+          Cookies.set('innerLastShownItem', lastShownItem?.name)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
