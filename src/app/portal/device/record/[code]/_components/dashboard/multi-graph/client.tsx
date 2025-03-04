@@ -38,7 +38,7 @@ const InteractiveGraph = ({
   })
   const [filteredData, setFilteredData] = React.useState<any[]>([])
 
-  const _pie_chart_interfaces = form.watch("pie_chart_interfaces");
+  const _pie_chart_interfaces = form.watch("pie_chart_interfaces") ?? [];
 
   const chartConfig = useMemo(() => {
     if (!interfaces?.length) return null;

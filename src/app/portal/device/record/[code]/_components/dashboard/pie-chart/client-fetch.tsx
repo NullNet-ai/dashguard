@@ -2,8 +2,9 @@
 import { api } from '~/trpc/react'
 import PieChartComponent from './client'
 import { usePathname } from 'next/navigation'
+import { IFormProps } from '../types'
 
-const FormClientFetch = ({interfaces}) => {
+const FormClientFetch = ({interfaces }: IFormProps) => {
   // const headerList = headers()
   // const pathname = headerList.get('x-pathname') || ''
   // const [, , main_entity, application, identifier] = pathname.split('/')
