@@ -375,6 +375,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  customConfig?:Record<string, any>;
   fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;
