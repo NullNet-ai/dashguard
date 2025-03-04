@@ -357,64 +357,68 @@ export const packetRouter = createTRPCRouter({
 
   return  transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket));
  }),
+ getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional()
+ })).query(async ({ input, ctx }) => {
+  const { device_id, bucket_size, time_range, timezone , interface_names} = input
+  
+  const res = await ctx.dnaClient.aggregate({
+    query: {
+      entity: 'packets',
+      aggregations: [
+        {
+          aggregation: 'SUM',
+          aggregate_on: 'total_length',
+          bucket_name: 'bandwidth',
+        },
+      ],
+      advance_filters: [
+        {
+          type: 'criteria' as 'criteria',
+          field: 'interface_name',
+          entity: 'packets',
+          operator: EOperator.EQUAL,
+          values: interface_names,
+        },
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        },
+        {
+          type: 'criteria' as 'criteria',
+          field: 'device_id',
+          entity: 'packets',
+          operator: EOperator.EQUAL,
+          values: [
+            device_id,
+          ],
+        },
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        },
+        {
+          type: 'criteria',
+          field: 'timestamp',
+          entity: 'packets',
+          operator: EOperator.IS_BETWEEN,
+          values: time_range,
+        },
+      ],
+      joins: [],
+      bucket_size,
+      limit: 1,
+      order: {
+        order_by: 'bucket',
+        order_direction: EOrderDirection.DESC,
+      },
+      timezone,
+    },
+    token: ctx.token.value,
 
+  }).execute()
 
-  // getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
-  //   const { packet_data } = input
-  //   return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
-  //     const { source_ip, destination_ip } = item
-  //     const res = await ctx.dnaClient.aggregate({
-  //       query: {
-  //         entity: 'packets',
-  //         aggregations: [
-  //           {
-  //             aggregation: 'SUM',
-  //             aggregate_on: 'total_length',
-  //             bucket_name: 'bandwidth',
-  //           },
-  //         ],
-  //         advance_filters: [
-  //           {
-  //             type: 'criteria',
-  //             field: 'source_ip',
-  //             entity: 'packets',
-  //             operator: EOperator.EQUAL,
-  //             values: [
-  //               source_ip,
-  //             ],
-  //           },
-  //           {
-  //             type: 'operator',
-  //             operator: EOperator.AND,
-  //           },
-  //           {
-  //             type: 'criteria',
-  //             field: 'destination_ip',
-  //             entity: 'packets',
-  //             operator: EOperator.EQUAL,
-  //             values: [
-  //               destination_ip,
-  //             ],
-  //           },
-  //         ],
-  //         joins: [],
-  //         limit: 20,
-  //         order: {
-  //           order_by: 'bucket',
-  //           order_direction: EOrderDirection.DESC,
-  //         },
-  //       },
-  //       token: ctx.token.value,
-  //     }).execute()
-
-  //     return {source_ip, destination_ip, result:res?.data}
-  //   },{concurrency: 10} )
-
-    
-  // }),
+  console.log('%c Line:420 🍰 res?.data?.[0]', 'color:#fca650', res?.data?.[0]);
+ return res?.data?.[0]?.bandwidth || 0
+}),
 
 })
-
-// create an interval that adds data in the packets
-
-// filter from 3 minutes ago include seconds,
