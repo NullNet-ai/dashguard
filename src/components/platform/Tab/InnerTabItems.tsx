@@ -58,7 +58,7 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       const prevActiveItem = tabs.find(a => a.name === prevCurrent)
       if (copiedItem?.length) {
         const result = reorderItems(copiedItem, prevActiveItem, activeItem?.name)
-        return result
+        return result.filter(Boolean)
       }
 
       if (activeIndex !== -1) {
@@ -73,12 +73,12 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
           result.splice(1, 0, activeTab)
         }
 
-        return result
+        return result.filter(Boolean)
       }
 
-      return tabs
+      return tabs.filter(Boolean)
     }
-    return tabs
+    return tabs.filter(Boolean)
   }, [tabs, code, isClient])
 
   return (

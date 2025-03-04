@@ -134,7 +134,7 @@ const InnerTabsContent = ({
               tab={tab}
               newItems={data}
               pathname={pathname}
-              key={tab.name}
+              key={index}
             />
           )
         })}
