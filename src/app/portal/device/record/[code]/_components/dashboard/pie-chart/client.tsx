@@ -35,7 +35,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
-    previousTraffic: initialTraffic,
     maxTraffic: 100,
   });
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic);
@@ -64,23 +63,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
     const fetchChartData = async () => {
       const { data } = await fetchBandWidth();
-      if (data && data.length > 0) {
-        const transformedData = data.map((item: any) => {
-          
-          const bandwidth = item.vtnet0 ?? item.vtnet1 ?? 0;
-          return {
-            bucket: item.bucket,
-            bandwidth,
-          };
-        });
-        
-        const sortedData = transformedData.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
-        
-        const currentTraffic = sortedData[1]?.bandwidth || 0;
-        const previousTraffic = sortedData[2]?.bandwidth || 0;
-        const maxTraffic = Math.max(...transformedData.map(d => d.bandwidth), 100);
-        setTrafficData({ traffic: currentTraffic, previousTraffic, maxTraffic });
-      }
+        const currentTraffic = Number(data) || 0;
+        const maxTraffic = currentTraffic * 2;
+        setTrafficData({ traffic: currentTraffic,  maxTraffic });
+
     };
 
     fetchChartData();
@@ -98,7 +84,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     return () => clearInterval(animationInterval);
   }, [trafficData.traffic]);
 
-  const isTrendingUp = trafficData.traffic > trafficData.previousTraffic;
   const pieEndAngle = 180 - (animatedTraffic / trafficData.maxTraffic) * 180;
   const arrowRotation = (animatedTraffic / trafficData.maxTraffic) * 180 - 90;
 
