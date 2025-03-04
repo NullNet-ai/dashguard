@@ -21,6 +21,7 @@ type FilePreviewProps = {
   isImageFile: boolean;
   previewSrc: string | null;
   isPdfFile: boolean;
+  filename?: string
 };
 
 export const FILE_TYPES = {
@@ -60,16 +61,17 @@ export const FilePreview = ({
   setIsPreviewModalOpen,
   isImageFile,
   previewSrc,
-  imageSrc
+  imageSrc,
+  filename,
 }: FilePreviewProps) => {
   const renderPreviewContent = () => {
-    if(imageSrc) {
+    if (imageSrc) {
       return (
         <Image
           src={imageSrc}
           alt="File Preview"
-          height={ 300 }
-          width={ 300 }
+          height={300}
+          width={300}
           className="max-h-[400px] max-w-full object-contain w-full"
         />
       );
@@ -109,7 +111,7 @@ export const FilePreview = ({
     <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
       <DialogContent className="h-[600px] w-[600px]">
         <DialogHeader>
-          <DialogTitle>File Preview: {file ? file.name : ''}</DialogTitle>
+          <DialogTitle>File Preview: {file ? file.name : filename ? filename : ''}</DialogTitle>
         </DialogHeader>
         <div className="flex h-full w-full items-center justify-center overflow-auto">
           {renderPreviewContent()}
