@@ -204,19 +204,47 @@ const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => 
             }}
             fields={[
               {
-                "id": "pie_chart",
-                "formType": "custom-field",
-                "name": "pie_chart",
-                "label": "pie chart",
+                "id": "title",
+                "formType": "space",
+                "name": "title",
+                "label": "Title",
                 "description": "Field Description",
                 "placeholder": "Enter value...",
                 "fieldClassName": "",
-                "fieldStyle": {},
+                "fieldStyle": {
+                  "gridColumn": "1 / span 2",
+                  "gridRow": "1 / span 1"
+                }
+              },
+              {
+                "id": "interfaces",
+                "formType": "select",
+                "name": "interfaces",
+                "label": "Interfaces",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "3 / span 2",
+                  "gridRow": "1 / span 1"
+                }
+              },
+              {
+                "id": "pie_chart",
+                "formType": "custom-field",
+                "name": "pie_chart",
+                "label": "Pie Chart",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 4",
+                  "gridRow": "2 / span 1"
+                },
                 render: () => {
                   return <FormClientFetch />
                 }
               }
-
             ]}
 
           />
