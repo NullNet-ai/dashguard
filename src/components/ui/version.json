@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.1",
-  "branch": "released/1.14.1",
-  "message": "release version 1.14.1",
+  "tag": "1.14.2-rc.1<unreleased>",
+  "branch": "unreleased/feat3059/1.14.2-rc.1<unreleased>",
+  "message": "add fix on ui and also functionality to enable datetime picker to render the timepicker component that is also used in formtimepicker component",
   "publish_name": "Rob Caldosa"
 }
