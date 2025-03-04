@@ -7,6 +7,12 @@ export const saveGridFilter = async (data : any)  => {
     return saveGridFilter
 }
 
+export const updateGridFilter = async (data : any)  => {
+    const updateGridFilter = await api.gridFilter.updateGridFilter(data)
+    
+    return updateGridFilter
+}
+
 export const removeGridFilter = async (id : string)  => {
     const url = await api.gridFilter.removeGridFilter({
         id

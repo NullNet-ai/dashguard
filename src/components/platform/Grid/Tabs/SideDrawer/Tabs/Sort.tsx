@@ -49,8 +49,8 @@ export default function SortContent() {
         desc: sort.desc,
       })) ?? [
         {
-          id: '',
-          value: '',
+          id: 'created_date',
+          value: 'created_date',
           desc: true,
         },
       ],

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
-import { saveGridFilter } from './actions';
+import { saveGridFilter, updateGridFilter } from './actions';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { useRouter } from 'next/navigation';
 
@@ -16,6 +16,7 @@ interface ManageFilterContextType {
     handleUpdateFilter: (data : any) => void;
     handleCreateNewFilter: () => void;
     handleSaveFilter: () => void;
+    saveUpdatedFilter: () => void;
   };
 }
 
@@ -26,7 +27,10 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   const { actions } = useSideDrawer();
   const router = useRouter();
   const { closeSideDrawer } = actions ?? {};
-  const [filterDetails, setFilterDetails] = useState<any>(tab);
+  const [filterDetails, setFilterDetails] = useState<any>({
+    ...tab,
+    columns
+  });
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
 
   const handleUpdateFilter = (data : any) => {
@@ -44,10 +48,19 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     return saveFilter
   };
 
-  const handleCreateNewFilter = async() => {
-
-    // !Temporary solution
-    // todo: remove this temporary solution
+  const saveUpdatedFilter = async() => {
+    const sorting = filterDetails?.sorts?.length ? filterDetails.sorts.map(
+      (item: any) => {
+        return {
+         id: item.value || item.id,
+         desc : item.desc,
+        }
+      }
+    ) : [{
+     id: 'created_date',
+     desc : true
+    }]
+    
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter : filterDetails.default_filter.map((item: any) => {
@@ -55,28 +68,53 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
           return {
             ...item,
             // Convert array of objects back to array of strings for database
-            values: Array.isArray(item.values) 
+            values: Array.isArray(item.values)  && item.values.length > 0 && typeof item.values[0] === 'object'
               ? item.values.map((obj: any) => obj.value)
-              : [item.values]
+              : item.values
           }
         }
         return item;
       }),
-      sorts : filterDetails.sorts.map((item: any) => {
-        return {
-         id: item.value,
-         desc : item.desc,
-        }
-      }),
-      default_sorts : filterDetails.sorts.map((item: any) => {
-        return {
-         id: item.value,
-         desc : item.desc,
-        }
-      })
+      sorts : sorting,
+      default_sorts : sorting
     }
+    setCreateFilterLoading(true);
+    await updateGridFilter(modifyFilterDetails);
+    setCreateFilterLoading(false)
+    closeSideDrawer();
+    router.refresh();
+  };
+
+  const handleCreateNewFilter = async() => {
+    const sorting = filterDetails?.sorts?.length ? filterDetails.sorts.map(
+      (item: any) => {
+        return {
+         id: item.value || item.id,
+         desc : item.desc,
+        }
+      }
+    ) : [{
+     id: 'created_date',
+     desc : true
+    }]
     
-    // Implementation for creating new filter
+    const modifyFilterDetails = {
+      ...filterDetails,
+      default_filter : filterDetails.default_filter.map((item: any) => {
+        if (item.type === 'criteria') {
+          return {
+            ...item,
+            // Convert array of objects back to array of strings for database
+            values: Array.isArray(item.values)  && item.values.length > 0 && typeof item.values[0] === 'object'
+              ? item.values.map((obj: any) => obj.value)
+              : item.values
+          }
+        }
+        return item;
+      }),
+      sorts : sorting,
+      default_sorts : sorting
+    }
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false)
@@ -96,7 +134,8 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
         actions: {
           handleUpdateFilter,
           handleCreateNewFilter,
-          handleSaveFilter
+          handleSaveFilter,
+          saveUpdatedFilter
         },
       }}
     >
