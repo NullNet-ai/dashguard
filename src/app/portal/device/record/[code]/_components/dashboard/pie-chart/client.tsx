@@ -98,6 +98,9 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     return () => clearInterval(animationInterval);
   }, [trafficData.traffic]);
 
+  const isTrendingUp = trafficData.traffic > trafficData.previousTraffic;
+  const pieEndAngle = 180 - (animatedTraffic / trafficData.maxTraffic) * 180;
+  const arrowRotation = (animatedTraffic / trafficData.maxTraffic) * 180 - 90;
 
   return (
     <ResponsiveContainer width="100%" height={300}>
