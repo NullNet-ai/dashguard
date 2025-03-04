@@ -93,6 +93,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         stackId="a"
         stroke={`var(--color-${item.value})`}
         type="natural"
+        isAnimationActive={false}
       />)}
       {/* <Area
         dataKey="static_bandwidth"

@@ -2,7 +2,7 @@
 
 import React, {useEffect} from 'react'
 
-import {getLastMinutesTimeStamp, getLastSecondsTimeStamp, getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
+import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
 } from '~/components/ui/card'

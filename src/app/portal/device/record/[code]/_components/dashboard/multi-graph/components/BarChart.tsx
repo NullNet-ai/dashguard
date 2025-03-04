@@ -71,7 +71,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         cursor={false}
       />
       {interfaces?.map((item: any) => {
-        return <Bar dataKey={item.value} fill={`var(--color-${item?.value})`} />})}
+        return <Bar dataKey={item.value} fill={`var(--color-${item?.value})`}  isAnimationActive={false}/>})}
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
     </ResponsiveContainer>

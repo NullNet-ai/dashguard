@@ -27,6 +27,7 @@ export const modifyAxis = (chartData:any) => {
   return { yAxisMax, yAxisMin }
 }
 export const formatNumber = (num: number) => {
+  if(!num) return ''
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
   if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
   return num.toString()
@@ -83,22 +84,9 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
         stroke={`var(--color-${item?.value})`}
         strokeWidth={2}
         type="monotone"
+        isAnimationActive={false} // disable animation for smooth effect
       />
       })}
-      {/* <Line
-        dataKey="bandwidth"
-        dot={false}
-        stroke="var(--color-bandwidth)"
-        strokeWidth={2}
-        type="monotone"
-      />
-      <Line
-        dataKey="static_bandwidth"
-        dot={false}
-        stroke="var(--color-static_bandwidth)"
-        strokeWidth={2}
-        type="monotone"
-      /> */}
 
     </LineChart>
     </ResponsiveContainer>
