@@ -58,18 +58,23 @@ function UploadComponent(props: any) {
   return (
     <FormBuilder
       formLabel='Upload Image'
+      customConfig={{
+        defaultState: 'unlock'
+      }}
       formKey="upload"
       formSchema={ FormSchema }
       handleSubmit={ handleSave }
       customDesign={ {
         formClassName: '!grid-cols-1',
       } }
-     defaultValues={ {
-        upload: [
-          metadata?.imageId || details?.data?.image_url || '',
-        ],
-        edited_files: [],
-      }}
+      { ...(metadata?.imageId || details?.data?.image_url ? {
+        defaultValues: {
+          upload: [
+            metadata?.imageId || details?.data?.image_url || '',
+          ],
+          edited_files: [],
+        }
+      } : {}) }
       fields={ [
         {
           id: 'upload',
