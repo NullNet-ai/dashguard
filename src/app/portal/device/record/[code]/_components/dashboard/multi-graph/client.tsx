@@ -2,7 +2,6 @@
 
 import React, {useEffect, useMemo} from 'react'
 
-import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   getLastMinutesTimeStamp,
   getLastSecondsTimeStamp,
@@ -34,7 +33,7 @@ const InteractiveGraph = ({
     defaultValues: {
       graph_type: 'default',
       interfaces: multiSelectOptions,
-      pie_chart_interfaces: multiSelectOptions?.[0]?.value,
+      pie_chart_interfaces: multiSelectOptions,
     }
   })
   const [filteredData, setFilteredData] = React.useState<any[]>([])
@@ -111,7 +110,7 @@ const InteractiveGraph = ({
                 formKey="PieChart"
                 formSchema={z.object({})}
                 subConfig={{
-                  selectOptions: {
+                  multiSelectOptions: {
                     pie_chart_interfaces: multiSelectOptions ?? [],
                   },
                 }}
@@ -131,7 +130,7 @@ const InteractiveGraph = ({
                   },
                   {
                     id: "pie_chart_interfaces",
-                    formType: "select",
+                    formType: "multi-select",
                     name: "pie_chart_interfaces",
                     label: "Interfaces",
                     description: "Field Description",

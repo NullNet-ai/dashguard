@@ -3,7 +3,7 @@ import { api } from '~/trpc/react'
 import PieChartComponent from './client'
 import { usePathname } from 'next/navigation'
 
-const FormClientFetch = () => {
+const FormClientFetch = ({interfaces}) => {
   // const headerList = headers()
   // const pathname = headerList.get('x-pathname') || ''
   // const [, , main_entity, application, identifier] = pathname.split('/')
@@ -24,6 +24,7 @@ const FormClientFetch = () => {
   return (
     <PieChartComponent
     defaultValues={data ?? {}}
+    interfaces={interfaces}
     selectOptions={fetched_interfaces?.data ?? []}
       params={{
         id: data?.id! ?? '',

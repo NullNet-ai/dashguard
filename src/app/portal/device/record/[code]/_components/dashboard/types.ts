@@ -13,6 +13,7 @@ export interface IFormProps<T = Record<string, any>> {
   };
   config?: T;
   defaultValues?: any;
+  interfaces?: string
   selectOptions?: Record<string, any>;
   multiSelectOptions?: Record<string, any>[];
   selectedRecords?: any;

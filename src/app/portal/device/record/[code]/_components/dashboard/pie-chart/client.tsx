@@ -31,8 +31,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const PieChartComponent = ({ defaultValues, selectOptions }: IFormProps) => {
-  console.log("%c Line:35 🍩 selectOptions", "color:#3f7cff", selectOptions);
+const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
+  console.log("%c Line:35 🍷 interfaces", "color:#465975", interfaces);
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
     previousTraffic: initialTraffic,
@@ -40,11 +40,12 @@ const PieChartComponent = ({ defaultValues, selectOptions }: IFormProps) => {
   });
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic);
   // const { data, refetch: fetchBandWidth } = api?.packet.getBandwithPerSecond?.useQuery({
-  //   device_id: defaultValues?.id,
-  //   time_range: getLastTimeStamp(1,'second'),
-  //   bucket_size: "1s",
-  //   timezone,
-  // })
+    //   device_id: defaultValues?.id,
+    //   time_range: getLastTimeStamp(1,'second'),
+    //   bucket_size: "1s",
+    //   timezone,
+    // })
+    console.log("%c Line:37 🍫 trafficData", "color:#93c0a4", trafficData);
 
   const {data, refetch: fetchBandWidth} = api.packet.getBandwithInterfacePerSecond.useQuery(
       {
@@ -53,7 +54,7 @@ const PieChartComponent = ({ defaultValues, selectOptions }: IFormProps) => {
         timezone: timezone,
         device_id: defaultValues?.id,
         time_range:  getLastTimeStamp(20,'second', new Date()),
-        interface_names: ['vtnet0', 'vtnet1'],
+        interface_names: interfaces?.map((item: any) => item?.value),
       })
   console.log("%c Line:43 🍩 data", "color:#4fff4B", data);
 
@@ -63,12 +64,24 @@ const PieChartComponent = ({ defaultValues, selectOptions }: IFormProps) => {
     const fetchChartData = async () => {
       console.log("%c Line:68 🍧 defaultValues", "color:#ed9ec7", defaultValues);
       const { data } = await fetchBandWidth();
+      
+      
       console.log("%c Line:54 🍒 data", "color:#ed9ec7", {data, id: defaultValues?.id});
       if (data && data.length > 0) {
-        const sortedData = data.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
-        const currentTraffic = sortedData[0]?.bandwidth || 0;
-        const previousTraffic = sortedData[1]?.bandwidth || 0;
-        const maxTraffic = Math.max(...data.map(d => d.bandwidth), 100);
+        const transformedData = data.map((item: any) => {
+          console.log("%c Line:72 🍇 item", "color:#ea7e5c", item);
+          const bandwidth = item.vtnet0 ?? item.vtnet1 ?? 0;
+          return {
+            bucket: item.bucket,
+            bandwidth,
+          };
+        });
+        console.log("%c Line:67 🌮 transformedData", "color:#b03734", transformedData);
+        const sortedData = transformedData.sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime());
+        console.log("%c Line:81 🍩 sortedData", "color:#93c0a4", sortedData);
+        const currentTraffic = sortedData[1]?.bandwidth || 0;
+        const previousTraffic = sortedData[2]?.bandwidth || 0;
+        const maxTraffic = Math.max(...transformedData.map(d => d.bandwidth), 100);
         setTrafficData({ traffic: currentTraffic, previousTraffic, maxTraffic });
       }
     };
