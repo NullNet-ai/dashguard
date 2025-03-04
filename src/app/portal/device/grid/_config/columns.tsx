@@ -2,11 +2,12 @@
 
 import { type ColumnDef } from '@tanstack/react-table'
 
+import { Badge } from '~/components/ui/badge'
 import StatusCell from '~/components/ui/status-cell'
 
+import Connectivity from '../GridDeviceConnectivity'
 import GridDeviceLastHeartbeat from '../GridDeviceLastHeartbeat'
 import GridDeviceStatus from '../GridDeviceStatus'
-import Connectivity from '../GridDeviceConnectivity';
 
 const gridColumns = [
   {
@@ -46,18 +47,33 @@ const gridColumns = [
     sortKey: 'device_group_settings.name',
     search_config: {
       operator: 'like',
-      entity:'device_group_settings',
-      field: 'name'
+      entity: 'device_group_settings',
+      field: 'name',
     },
   },
   {
     header: 'WAN Address',
     accessorKey: 'ip_address',
-    sortKey: 'device_interfaces.address',
+    sortKey: 'device_interface_addresses.address',
     search_config: {
       operator: 'like',
-      entity:'device_interfaces',
-      field: 'address'
+      entity: 'device_interface_addresses',
+      field: 'address',
+    },
+    cell: ({ row }) => {
+      const wan_addresses = row?.original?.wan_addresses
+      return (
+        <div className = 'flex flex-wrap gap-2'>
+
+          {wan_addresses?.map((address: string, idx: string) => {
+            return (
+              <Badge key = { idx } variant = 'primary'>
+                {address}
+              </Badge>
+            )
+          }) }
+        </div>
+      )
     },
   },
   {
@@ -77,8 +93,8 @@ const gridColumns = [
     accessorKey: 'device_status',
     search_config: {
       operator: 'like',
-      entity:'devices',
-      field: 'device_status'
+      entity: 'devices',
+      field: 'device_status',
     },
   },
   {
@@ -105,8 +121,8 @@ const gridColumns = [
     },
     search_config: {
       operator: 'like',
-      entity:'devices',
-      field: 'last_heartbeat'
+      entity: 'devices',
+      field: 'last_heartbeat',
     },
   },
   {

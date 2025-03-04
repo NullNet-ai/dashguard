@@ -9,14 +9,7 @@ import gridColumns from './_config/columns'
 import { defaultSorting } from './_config/sorting'
 import DeleteConfirmation from './Actions/Delete/DeleteConfirmation'
 
-export default async function Page({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string
-    perPage?: string
-  }
-}) {
+export default async function Page() {
   const { sorting, pagination, filters } = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
@@ -31,7 +24,6 @@ export default async function Page({
     'created_by',
     'updated_by',
     'model',
-    'ip_address',
     'system_id',
     'device_version',
     'updated_time',
@@ -45,12 +37,11 @@ export default async function Page({
     entity: main_entity!,
     pluck: _pluck,
     current: +(pagination?.current_page ?? '0'),
-    limit:+(pagination?.limit_per_page ?? '100'),
+    limit: +(pagination?.limit_per_page ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
-      : [],    
-      // advance_filters: []
+      : [],
   })
 
   return (
@@ -71,7 +62,7 @@ export default async function Page({
           resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
-            pluck: _pluck?.filter((item) => item !== 'last_heartbeat'),
+            pluck: _pluck?.filter((item: string) => item !== 'last_heartbeat'),
           },
         },
       }}
