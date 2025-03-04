@@ -30,7 +30,7 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     'updated_by',
   ];
 
-  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
 
   const { items = [], totalCount } = await api.grid.items({
     current: +(pagination?.current_page ?? "0"),
@@ -49,6 +49,7 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
         entity: 'organization',
         title: 'Organizations',
         columns: gridColumns,
+        columnsOrder: columnOrder,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
         archiveCustomAction: customArchive,

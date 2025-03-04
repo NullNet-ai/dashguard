@@ -13,7 +13,7 @@ import defaultSorting from './_config/sorting'
 import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
 
 export default async function Page() {
-  const { sorts, pagination, filters } = await getGridCacheData()
+  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
 
   const { items = [], totalCount } = await api.account.fetchGridData({
     entity: 'organization_account',
@@ -31,6 +31,7 @@ export default async function Page() {
         entity: 'organization_account',
         title: 'Accounts',
         columns: gridColumns,
+        columnsOrder: columnOrder,
         enableAutoCreate: false,
         searchConfig: {
           router: 'account',
