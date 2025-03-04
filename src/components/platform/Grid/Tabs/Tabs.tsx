@@ -13,7 +13,6 @@ const GridTabs = async () => {
         const active = tab.current ? 'text-primary' : 'text-foreground';
         const entity = tab?.href?.split('/').at(2);
         const applicationType = tab?.href?.split('/').at(3)?.split('?')[0];
-
         return (
           <Link
             href={tab?.href ?? ''}
@@ -28,9 +27,7 @@ const GridTabs = async () => {
             className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
           >
             <span className={cn(active, '')}>{toCapitalize(tab.name)}</span>
-            {index !== 0 && index !== 1 && (
-              <GridMenu tab={tab} filter_id={tab?.id} />
-            )}
+            <GridMenu tab={tab} filter_id={tab?.id} />
           </Link>
         );
       })}
