@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect} from 'react'
+import React, {useEffect, useMemo} from 'react'
 
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
@@ -34,6 +34,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       interfaces: multiSelectOptions
     }
   })
+  const [filteredData, setFilteredData] = React.useState<any[]>([])
 
 
   const chartConfig = interfaces.reduce((config, key) => {
@@ -62,13 +63,17 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
     })
     
     
-  const filteredData = packetsIP?.map((item) => {
-    const date = moment(item.bucket).tz(timezone)
-      return {
-        ...item,
-        bucket: date.format('HH:mm:ss')
-      }
-  })
+ useEffect(() => {
+    if(!packetsIP) return
+   const _data = packetsIP?.map((item) => {
+      const date = moment(item.bucket).tz(timezone)
+        return {
+          ...item,
+          bucket: date.format('HH:mm:ss')
+        }
+    })
+   setFilteredData(_data)
+  },[packetsIP])
   
   const fetchChartData = async () => {
     const { data } = await fetchBandWidth();
@@ -81,8 +86,6 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
    
     fetchChartData()
     const interval = setInterval(() => {
-
-      
       fetchChartData()
     }, 2000)
     return () => clearInterval(interval)
