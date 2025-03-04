@@ -54,20 +54,19 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     })
   }, [isActive])
 
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
+
+  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
   return (
     <div
       ref={ref}
-      key={checkIfUserRole(tab.name) ? 'role' : tab.name}
+      key={tabNameRole}
       className={cn(
         `group relative whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
       <Link
         data-test-id={
-          entityName + '-apptab-' + checkIfUserRole(tab.name)
-            ? 'role'
-            : tab.name.split(' ').join('-').toLowerCase()
+          entityName + '-apptab-' + tabNameRole
         }
         onClick={() => {
           if (isHidden) return
@@ -82,7 +81,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           isActive ? 'text-primary' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
         )}
       >
-        {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
+        {formatTabName(tabNameRole)}
         <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
       </Link>
       {!isHidden
@@ -91,7 +90,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
               current={!!tab.href.match(pathname)}
               href={tab.href}
               tabs={newItems}
-              name={checkIfUserRole(tab.name) ? 'role' : tab.name}
+              name={tabNameRole}
             />
           )
         : (

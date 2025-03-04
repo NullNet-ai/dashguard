@@ -86,7 +86,9 @@ export default function ManageFilter({ tab }: { tab: any }) {
 
   return (
     <div className="flex flex-col">
-      {ACTIONS.map((action: any, index) => (
+      {ACTIONS.filter(action => 
+        !(tab.default && action.id === 'delete_filter')
+      ).map((action) => (
         <Button
           key={action.id}
           Icon={action.icon}

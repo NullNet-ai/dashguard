@@ -19,7 +19,6 @@ import InnerTabitem from './InnerTabitem'
 const InnerTabsContent = ({
   par_items = [],
   pathname,
-  checkIfUserRole,
   isWindowLoaded,
   application,
   code,
@@ -135,7 +134,7 @@ const InnerTabsContent = ({
               tab={tab}
               newItems={data}
               pathname={pathname}
-              key={checkIfUserRole(tab.name) ? 'role' : tab.name}
+              key={index}
             />
           )
         })}
@@ -164,7 +163,7 @@ const InnerTabsContent = ({
 
               return (
                 <DropdownMenuItem
-                  key={checkIfUserRole(itm.name) ? 'role' : itm.name}
+                  key={itm.name}
                   className="group relative flex items-center p-2 py-3"
                 >
                   <InnerDropTabItem
