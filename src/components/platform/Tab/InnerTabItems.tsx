@@ -81,8 +81,6 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     return tabs
   }, [tabs, code, isClient])
 
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
-
   return (
     <nav
       aria-label="Tabs"
@@ -92,7 +90,6 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       <InnerTabsContent
         par_items={sortTabsActiveWillSecond}
         pathname={pathname}
-        checkIfUserRole={checkIfUserRole}
         isWindowLoaded={isWindowLoaded}
         application={application}
         code={code}
