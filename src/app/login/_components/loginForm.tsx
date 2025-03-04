@@ -1,64 +1,61 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
-import FormPassword from '~/components/platform/FormBuilder/FormType/FormPassword'
-import { Button } from '~/components/ui/button'
-import { Checkbox } from '~/components/ui/checkbox'
-import { Form, FormField, FormMessage } from '~/components/ui/form'
+import FormInput from '~/components/platform/FormBuilder/FormType/FormInput';
+import FormPassword from '~/components/platform/FormBuilder/FormType/FormPassword';
+import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/checkbox';
+import { Form, FormField, FormMessage } from '~/components/ui/form';
 
-import LoginSubmit from '../actions/loginSubmit'
+import LoginSubmit from '../actions/loginSubmit';
 
 const formSchema = z.object({
-  username: z.string({
-    required_error: 'Please enter your username.',
-  }),
-  password: z.string().min(1, { message: "Please enter your password." }),
-})
+  username: z
+    .string({ required_error: 'Please enter your email.' })
+    .email('Please enter a valid email.'),
+  password: z.string().min(1, { message: 'Please enter your password.' }),
+});
 
 export default function LoginForm(props: any) {
-  const {defaultValues} = props;
+  const { defaultValues, invitation_id } = props;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
-  })
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string>('')
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string>('');
 
   const onSubmit = async (data: any) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const response = await LoginSubmit(data)
+      const response = await LoginSubmit({ ...data, invitation_id });
       if (response && response.statusCode !== 200) {
-        throw response
+        throw response;
       }
-    }
-    catch (error: any) {
-      console.error('Error Details:', error.message)
-      setIsSubmitting(false)
+    } catch (error: any) {
+      console.error('Error Details:', error.message);
+      setIsSubmitting(false);
       try {
         const parsedError = JSON.parse(error.message);
-        setError(parsedError?.[0]?.message)
-      }
-      catch {
-        setError(error.message)
+        setError(parsedError?.[0]?.message);
+      } catch {
+        setError(error.message);
       }
     }
-  }
-  
+  };
 
   return (
     <Form {...form}>
       <form
-        className='space-y-6'
+        className="space-y-6"
         onSubmit={(event) => {
-          form.handleSubmit(onSubmit)(event)
+          form.handleSubmit(onSubmit)(event);
         }}
       >
         <FormField
@@ -70,21 +67,21 @@ export default function LoginForm(props: any) {
                 fieldConfig={{
                   id: 'username',
                   name: 'username',
-                  label: 'Username',
+                  label: 'Email',
                   required: true,
-                  placeholder: 'Enter your username',
+                  placeholder: 'Enter your email',
                   type: 'text',
                 }}
                 form={form}
                 formKey="Login"
                 formRenderProps={formProps}
               />
-            )
+            );
           }}
         />
         <FormField
           control={form.control}
-          name='password'
+          name="password"
           render={(formProps) => {
             return (
               <FormPassword
@@ -96,39 +93,41 @@ export default function LoginForm(props: any) {
                   placeholder: 'Enter at least 5 characters',
                 }}
                 form={form}
-                formKey='Login'
+                formKey="Login"
                 formRenderProps={formProps}
               />
-            )
+            );
           }}
         />
         {error && <FormMessage>{error}</FormMessage>}
-        <div className='flex w-full items-center justify-between'>
-          <div className='flex items-center'>
-            <Checkbox id='rememberMe' name='rememberMe' />
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center">
+            <Checkbox id="rememberMe" name="rememberMe" />
             <label
-              className='ml-2 block text-md font-semibold text-foreground'
-              htmlFor='rememberMe'
+              className="ml-2 block text-md font-semibold text-foreground"
+              htmlFor="rememberMe"
             >
               Remember me
             </label>
           </div>
-          <div className='text-md'>
+          <div className="text-md">
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className='font-semibold text-primary' href='#'>
+            <a className="font-semibold text-primary" href="#">
               Forgot Password?
             </a>
           </div>
         </div>
         <Button
-          className={'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'}
-          data-test-id='login-submit-btn'
+          className={
+            'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
+          }
+          data-test-id="login-submit-btn"
           loading={isSubmitting}
-          type='submit'
+          type="submit"
         >
           Sign in
         </Button>
       </form>
     </Form>
-  )
+  );
 }

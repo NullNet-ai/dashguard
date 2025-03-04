@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { FormBuilder } from '~/components/platform/FormBuilder';
-import {type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
 import { type IFormProps } from '../types';
@@ -19,37 +19,40 @@ const account_secret = z
     platformPasswordValidator(value, ctx);
   });
 
-const ContactAccountDetailSchema = z.object({
-  id: z.string().optional(),
-  contact_id: z.string(),
-  organization_id: z.string().optional(),
-  role_id: z.string().min(1, { message: 'Role is required.' }),
-  account_id: z.string().min(1, { message: 'Username is required.' }),
-  account_secret: account_secret,
-})
-.superRefine(async (data, ctx) => {
-  try {
-    // Call the tRPC validation endpoint
-    const response = await checkUsernameExist({
-      username: data.account_id as string,
-      id: data.id ?? '',
-      contact_id: data.contact_id ?? '',
-    });
-    if (!response?.isValid) {
+const ContactAccountDetailSchema = z
+  .object({
+    id: z.string().optional(),
+    contact_id: z.string(),
+    role_id: z.string().min(1, { message: 'Role is required.' }),
+    account_id: z
+      .string()
+      .min(1, { message: 'Email is required.' })
+      .email('Please enter a valid email.'),
+    account_secret: account_secret,
+  })
+  .superRefine(async (data, ctx) => {
+    try {
+      // Call the tRPC validation endpoint
+      const response = await checkUsernameExist({
+        username: data.account_id as string,
+        id: data.id ?? '',
+        contact_id: data.contact_id ?? '',
+      });
+      if (!response?.isValid) {
+        ctx.addIssue({
+          path: ['account_id'],
+          message: 'Email already exists.',
+          code: 'custom',
+        });
+      }
+    } catch (error) {
       ctx.addIssue({
-        path: ['account_id'],
-        message: 'Username already exists.',
+        path: ['username'],
+        message: 'Error checking Email availability.',
         code: 'custom',
       });
     }
-  } catch (error) {
-    ctx.addIssue({
-      path: ['username'],
-      message: 'Error checking username availability.',
-      code: 'custom',
-    });
-  }
-});
+  });
 
 export default function AccountDetails({
   params,
@@ -58,7 +61,7 @@ export default function AccountDetails({
 }: IFormProps) {
   const toast = useToast();
   const updateAccountDetails = api.account.updateAccountDetails.useMutation();
-  
+
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof ContactAccountDetailSchema>>) => {
@@ -92,17 +95,12 @@ export default function AccountDetails({
       handleSubmit={handleSave}
       fields={[
         {
-          id: 'organization_id',
-          name: 'organization_id',
-          formType: 'select',
-          label: 'Organization',
-          required: false,
-          isCustomFormField: true,
-          ...(params.shell_type === 'record'
-            ? {
-                readonly: true,
-              }
-            : {}),
+          id: 'account_id',
+          formType: 'input',
+          name: 'account_id',
+          label: 'Email',
+          required: true,
+          placeholder: 'Enter your email',
         },
         {
           id: 'role_id',
@@ -111,14 +109,6 @@ export default function AccountDetails({
           label: 'Role',
           required: true,
           placeholder: 'Example: Admin',
-        },
-        {
-          id: 'account_id',
-          formType: 'input',
-          name: 'account_id',
-          label: 'Username',
-          required: true,
-          placeholder: 'Enter your username',
         },
         {
           id: 'account_secret',

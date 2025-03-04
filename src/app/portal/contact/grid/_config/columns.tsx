@@ -60,9 +60,15 @@ const gridColumns = [
     }
   },
   {
-    header: "Primary Organization",
+    header: "Department",
     accessorKey: "organization",
     isSearchable: false,
+    cell: ({ row }) => {
+      const departments = row?.original?.organization || [];
+      return departments?.map((organization: string, index: number) => {
+        return <StatusCell key={index} value={organization} />;
+      });
+    },
   },
   {
     header: "Roles",

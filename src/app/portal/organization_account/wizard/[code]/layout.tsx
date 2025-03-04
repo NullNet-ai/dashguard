@@ -9,7 +9,7 @@ import totalSteps from '../_config/totalSteps'
 import WizardSummaryComponent from '../_config/wizardSummaryConfig'
 import { type IWizardLayoutProps } from '../types'
 
-import wizardCallbacks from './actions/wizardCallbacks'
+import wizardCallbacks from './_actions/wizardCallbacks'
 
 //* * Wizard Configuration */
 

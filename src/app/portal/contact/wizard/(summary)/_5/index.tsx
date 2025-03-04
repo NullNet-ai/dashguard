@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { Separator } from "~/components/ui/separator";
 
 const fields = {
-  account_id: "Username",
-  organization: "Organization",
+  account_id: "Email",
   role: "Role",
 };
 
@@ -42,7 +41,6 @@ const Summary = ({ form_key }: { form_key: string }) => {
         (account: IAccountDetails, index: number) =>
           account?.id && (
             <div key={account.id} className="mt-2">
-              <p className="font-bold">{`Account ${index + 1}`}</p>
               {Object.entries(fields).map(([key, value]) => (
                 <p key={key} className="mb-[8px] no-underline">
                   <strong> {value}: </strong>
