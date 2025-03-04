@@ -56,7 +56,7 @@ export default function CreateNewFilter() {
             onClick={handleManageFilter}
             className="text-primary"
           >
-            <PlusCircle className="h-5 w-5" />
+            <PlusCircle className="h-5 w-5 text-white fill-blue-700" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>

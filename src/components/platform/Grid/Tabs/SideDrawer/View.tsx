@@ -72,15 +72,21 @@ export default function SideDrawer() {
           </Button>
         )}
       </div>
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Filter Name"
-          value={filterDetails.name}
-          onChange={(e) => actions.handleUpdateFilter({
-            name : e.target.value
-          })}
-          className="max-w-full"
-        />
+      <div className="space-y-2">
+        <label htmlFor="filterName" className="text-sm font-bold text-gray-700">
+          Name
+        </label>
+        <div className="flex items-center justify-between">
+          <Input
+            id="filterName"
+            placeholder="Filter Name"
+            value={filterDetails.name}
+            onChange={(e) => actions.handleUpdateFilter({
+              name: e.target.value
+            })}
+            className="max-w-full"
+          />
+        </div>
       </div>
 
       {/* Tabs */}

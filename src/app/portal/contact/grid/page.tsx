@@ -34,7 +34,7 @@ export default async function Page({
     "updated_by",
   ];
 
-  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters, columns : columnOrder } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: +(pagination?.current_page ?? "0"),
@@ -59,6 +59,7 @@ export default async function Page({
       config={{
         entity: "contact",
         title: "Contacts",
+        columnsOrder: columnOrder,
         columns: gridColumns,
         defaultValues: {
           categories: ["Contact", "Employee"],

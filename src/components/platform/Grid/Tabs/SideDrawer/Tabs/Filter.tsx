@@ -64,7 +64,7 @@ export default function FilterContent() {
       filters: filterDetails?.default_filter ?? [
         {
           field: '',
-          operator: 'equal',
+          operator: '',
           label: '',
           values: [],
           type: 'criteria',
@@ -117,11 +117,6 @@ export default function FilterContent() {
     form.setValue('filters', updatedFilters);
     handleUpdateFilter({ default_filter: updatedFilters });
   };
-
-  const handleValidate = () => {
-    console.info("SAVING FORM")
-  }
-
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="flex justify-end">
@@ -175,21 +170,21 @@ export default function FilterContent() {
                           id: `${prefix}.field`,
                           formType: 'select',
                           name: `${prefix}.field`,
-                          placeholder: 'Select field',
+                          placeholder: 'Select a Field',
                           selectSearchable: true
                         },
                         {
                           id: `${prefix}.operator`,
                           formType: 'select',
                           name: `${prefix}.operator`,
-                          placeholder: 'Select operator',
+                          placeholder: 'Select an operator',
                           selectSearchable: true
                         },
                         {
                           id: `${prefix}.values`,
                           formType: 'multi-select',
                           name: `${prefix}.values`,
-                          placeholder: 'Enter values',
+                          placeholder: 'Enter the value',
                           multiSelectEnableCreate: true,
                           multiSelectShowCreatableItem: false,
                           multiSelectUseStringValues: true

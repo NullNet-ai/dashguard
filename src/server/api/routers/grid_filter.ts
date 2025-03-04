@@ -33,7 +33,7 @@ const columnSchema = z.object({
   label: z.string(),
   isShow: z.boolean(),
   order: z.number(),
-  id: z.string().ulid().optional(),
+  id: z.string().optional(),
 });
 
 const gridFilterSchema = z.object({
@@ -43,7 +43,7 @@ const gridFilterSchema = z.object({
   groups: z.array(groupSchema).optional(),
   columns: z.array(columnSchema),
   default_sorts: z.array(sortSchema),
-  id: z.string().ulid().optional(),
+  id: z.string().optional(),
 });
 
 export const gridFilterRouter = createTRPCRouter({
