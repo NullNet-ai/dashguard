@@ -31,7 +31,7 @@ const InteractiveGraph = ({
   const [packetsIP, setPacketsIP] = React.useState<any[]>([]);
   const form = useForm({
     defaultValues: {
-      graph_type: 'default',
+      graph_type: 'area',
       interfaces: multiSelectOptions,
       pie_chart_interfaces: multiSelectOptions,
     }
@@ -174,7 +174,7 @@ const InteractiveGraph = ({
                   },
                   selectOptions: {
                     graph_type: [
-                      { label: "Default", value: "default" },
+                      { label: "Area Chart", value: "area" },
                       { label: "Bar Chart", value: "bar" },
                       { label: "Line Chart", value: "line" },
                     ],
