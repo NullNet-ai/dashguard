@@ -1,5 +1,5 @@
 export interface IFormProps<T = Record<string, any>> {
-  params: {
+  params?: {
     id: string;
     shell_type: "wizard" | "record";
     entity?: string;
@@ -13,7 +13,7 @@ export interface IFormProps<T = Record<string, any>> {
   };
   config?: T;
   defaultValues?: any;
-  interfaces?: string[]
+  interfaces?: any
   selectOptions?: Record<string, any>;
   multiSelectOptions?: Record<string, any>[];
   selectedRecords?: any;

@@ -60,7 +60,7 @@ const InteractiveGraph = ({
     );
   }, [interfaces]);
 
-  console.log("%c Line:52 🥕 chartConfig", "color:#e41a6a", chartConfig);
+  
 
   const { refetch: fetchBandWidth } =
     api.packet.getBandwithInterfacePerSecond.useQuery({
@@ -106,12 +106,12 @@ const InteractiveGraph = ({
             <div className="grid !grid-cols-4 gap-4 pt-2">
               <FormModule
                 myParent="record"
-                form={form}
+                form={form as any}
                 formKey="PieChart"
                 formSchema={z.object({})}
                 subConfig={{
                   multiSelectOptions: {
-                    pie_chart_interfaces: multiSelectOptions ?? [],
+                    pie_chart_interfaces:( multiSelectOptions ?? []  as any),
                   },
                 }}
                 fields={[
@@ -171,12 +171,12 @@ const InteractiveGraph = ({
             <div className="grid !grid-cols-4 gap-4 pt-2">
               <FormModule
                 myParent="record"
-                form={form}
+                form={form as any}
                 formKey="AreaChart"
                 formSchema={z.object({})}
                 subConfig={{
                   multiSelectOptions: {
-                    interfaces: multiSelectOptions ?? [],
+                    interfaces: (multiSelectOptions ?? [] as any),
                   },
                   selectOptions: {
                     graph_type: [
@@ -244,7 +244,7 @@ const InteractiveGraph = ({
                         <div className="max-h-[337px]">
                           <ChartContainer
                             className="h-full w-full py-4"
-                            config={chartConfig}
+                            config={chartConfig as any}
                           >
                             {renderChart({
                               filteredData,
