@@ -17,7 +17,7 @@ import {
 } from 'react-hook-form';
 
 import {
-  AppRouterKeys,
+  type AppRouterKeys,
   type TActionType,
 } from '~/components/platform/Grid/types';
 import {
@@ -135,8 +135,19 @@ interface IField {
   sliderLabelPosition?: 'top' | 'bottom'
   fileDropzoneOptions?: DropzoneOptions
   selectIcon?: ElementType
-  multiSelectMaxSelected?: number
-  multiSelectDelay?: number
+  // InfiniteScroll configuration for select options
+  selectInfiniteScroll?: {
+    enabled?: boolean;
+    initialLimit?: number;
+    loadMoreStep?: number;
+    scrollThreshold?: number;
+    hasMore?: boolean;
+    loadingIndicator?: ReactNode;
+    endMessage?: ReactNode;
+    scrollableTarget?: string;
+  }
+  multiSelectMaxSelected?: number;
+  multiSelectDelay?: number;
   multiSelectHidePlaceholderWhenSelected?: boolean
   multiSelectTriggerSearchOnFocus?: boolean
   multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined
