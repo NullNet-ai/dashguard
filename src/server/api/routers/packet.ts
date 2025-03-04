@@ -427,6 +427,7 @@ getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet
   return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
     const { source_ip, destination_ip } = item
     const res = await ctx.dnaClient.aggregate({
+      // @ts-expect-error - TS is not able to infer the type of the object
       query: {
         entity: 'packets',
         aggregations: [

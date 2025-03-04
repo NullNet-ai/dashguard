@@ -39,9 +39,17 @@ const chartConfig = {
     label: "OPT1",
     color: "hsl(var(--chart-3))",
   },
-} satisfies ChartConfig
+} as any
 
-const CustomTooltip = ({ active, payload, label, hoveredBar }) => {
+interface ITooltip {
+  active: boolean
+  payload: any[]
+  label: string
+  hoveredBar: any
+}
+
+
+const CustomTooltip = ({ active, payload, label, hoveredBar }: ITooltip) => {
   if (!active || !payload || !payload.length || !hoveredBar) return null;
 
   // Find the specific data point that matches our hovered bar
@@ -52,14 +60,14 @@ const CustomTooltip = ({ active, payload, label, hoveredBar }) => {
     <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
       <p className="font-medium">{`Country: ${label}`}</p>
       <p className="text-sm">
-        {`${chartConfig[hoveredBar.key].label}: ${dataPoint.value}`}
+        {`${chartConfig[hoveredBar.key as keyof typeof chartConfig].label}: ${dataPoint.value}`}
       </p>
     </div>
   );
 };
 
 const Component = () => {
-  const [hoveredBar, setHoveredBar] = React.useState(null);
+  const [hoveredBar, setHoveredBar] = React.useState<{ key: string; index: number } | null>(null);
 
   const total = React.useMemo(
     () => ({
@@ -102,7 +110,7 @@ const Component = () => {
             <YAxis />
             <Tooltip
               cursor={false}
-              content={<CustomTooltip hoveredBar={hoveredBar} />}
+              content={<CustomTooltip hoveredBar={hoveredBar} active={false} payload={[]} label={""} />}
               isAnimationActive={false}
             />
             <Legend />
@@ -119,7 +127,7 @@ const Component = () => {
                     setHoveredBar(null);
                   }}
                   style={{ cursor: 'pointer' }}
-                  shape={(props) => {
+                  shape={(props: any) => {
                     const isHovered = hoveredBar?.key === key && hoveredBar?.index === props.index;
                     return (
                       <path
@@ -130,7 +138,8 @@ const Component = () => {
                         strokeWidth={isHovered ? 1 : 0}
                       />
                     );
-                  }}
+                  }
+                }
                 />
               )
             ))}
