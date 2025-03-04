@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, {useEffect, useMemo} from 'react'
 
+import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   getLastMinutesTimeStamp,
   getLastSecondsTimeStamp,
@@ -31,11 +32,12 @@ const InteractiveGraph = ({
   const [packetsIP, setPacketsIP] = React.useState<any[]>([]);
   const form = useForm({
     defaultValues: {
-      graph_type: "default",
+      graph_type: 'default',
       interfaces: multiSelectOptions,
       pie_chart_interfaces: multiSelectOptions?.[0]?.value,
-    },
-  });
+    }
+  })
+  const [filteredData, setFilteredData] = React.useState<any[]>([])
 
   const _pie_chart_interfaces = form.watch("pie_chart_interfaces");
 
@@ -68,16 +70,21 @@ const InteractiveGraph = ({
       device_id: defaultValues?.id,
       time_range: getLastTimeStamp(20, "second", new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
-    });
-
-  const filteredData = packetsIP?.map((item) => {
-    const date = moment(item.bucket).tz(timezone);
-    return {
-      ...item,
-      bucket: date.format("HH:mm:ss"),
-    };
-  });
-
+    })
+    
+    
+ useEffect(() => {
+    if(!packetsIP) return
+   const _data = packetsIP?.map((item) => {
+      const date = moment(item.bucket).tz(timezone)
+        return {
+          ...item,
+          bucket: date.format('HH:mm:ss')
+        }
+    })
+   setFilteredData(_data)
+  },[packetsIP])
+  
   const fetchChartData = async () => {
     const { data } = await fetchBandWidth();
 
@@ -87,10 +94,10 @@ const InteractiveGraph = ({
   useEffect(() => {
     fetchChartData();
     const interval = setInterval(() => {
-      fetchChartData();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [interfaces, defaultValues?.id, defaultValues?.device_status]);
+      fetchChartData()
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   return (
     <div className="flex flex-row gap-4 px-4">
