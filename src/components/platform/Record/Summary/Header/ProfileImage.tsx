@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@headlessui/react'
-import { ImageIcon, Pencil, Trash } from 'lucide-react'
+import { ImageIcon, Pencil, PencilIcon, Trash } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -183,7 +183,8 @@ export default function ProfileImage({details, entity, token} : any) {
           }
           
         </div>
-        <div className='absolute left-0 bottom-0 opacity-0 group-hover:opacity-100 flex gap-x-2 justify-center transition-opacity duration-300 bg-default/20 w-full p-1'>
+        {imageUrl ? (
+          <div className='absolute left-0 bottom-0 opacity-0 group-hover:opacity-100 flex gap-x-2 justify-center transition-opacity duration-300 bg-default/20 w-full p-1'>
           <Button
             className={cn(`bg-white rounded-md p-1 hover:opacity-45`, `${!imageUrl ? 'opacity-45' : ''}`)}
             aria-label="View image"
@@ -218,6 +219,13 @@ export default function ProfileImage({details, entity, token} : any) {
             <Trash className="size-3 text-danger" aria-hidden="true" />
           </Button>
         </div>
+        ): <button
+        onClick={ () => {
+          actions?.openSideDrawer(config)
+        } }
+        className='absolute bottom-1 right-1 text-primary text-sm bg-white size-6 p-1 flex items-center justify-center hover:opacity-70'>
+            <PencilIcon className='size-4'/>
+        </button> }
       </div>
       <DeleteConfirmationDialog
         open={ openDialog }
