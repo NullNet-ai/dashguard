@@ -24,10 +24,10 @@ export function formatTabName(tab_name: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 
-    //has number
-  if(result.match(/\d/)) {
+  if (/\d/.exec(result)) {
     return result.toUpperCase()
   }
+
 
   return result
 }
