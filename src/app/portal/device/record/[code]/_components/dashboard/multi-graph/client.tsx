@@ -28,7 +28,7 @@ import { IDropdown } from '~/app/portal/contact/_components/forms/category-detai
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
+const InteractiveGraph = ({ defaultValues, multiSelectOptions }: IFormProps) => {
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const form = useForm({
@@ -67,8 +67,8 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
       time_range: getLastTimeStamp(20, 'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
-    
-    
+
+
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket).tz(timezone)
     return {
@@ -79,7 +79,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
 
   const fetchChartData = async () => {
     const { data } = await fetchBandWidth();
-    
+
     setPacketsIP(data as any)
 
   };
@@ -89,7 +89,7 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
     fetchChartData()
     const interval = setInterval(() => {
 
-      
+
       fetchChartData()
     }, 2000)
     return () => clearInterval(interval)
@@ -97,148 +97,132 @@ const InteractiveGraph = ({defaultValues, multiSelectOptions }: IFormProps) => {
 
   return (
 
-      <div className='px-4'>
-        <Form {...form}>
-          <div className='pt-2 grid !grid-cols-6 gap-4'>
-            <FormModule
-              myParent='record'
-              form={form}
-              formKey='AreaChart'
-              formSchema={z.object({})}
-              subConfig={{
-                multiSelectOptions: {
-                  interfaces: multiSelectOptions ?? []
-                },
-                selectOptions: {
-                  graph_type: [
-                    { label: 'Default', value: 'default' },
-                    { label: 'Bar Chart', value: 'bar' },
-                    { label: 'Line Chart', value: 'line' },
-                  ]
+    <div className='px-4 flex flex-row gap-4'>
+      <Form {...form}>
+        <div className='pt-2 grid !grid-cols-4 gap-4'>
+          <FormModule
+            myParent='record'
+            form={form}
+            formKey='AreaChart'
+            formSchema={z.object({})}
+            subConfig={{
+              multiSelectOptions: {
+                interfaces: multiSelectOptions ?? []
+              },
+              selectOptions: {
+                graph_type: [
+                  { label: 'Default', value: 'default' },
+                  { label: 'Bar Chart', value: 'bar' },
+                  { label: 'Line Chart', value: 'line' },
+                ]
+              }
+            }}
+            fields={[
+              {
+                "id": "field_1741046129256",
+                "formType": "space",
+                "name": "field_1741046129256",
+                "label": "New Field 1",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 2",
+                  "gridRow": "1 / span 1"
                 }
-              }}
-              fields={[
-                {
-                  "id": "space",
-                  "formType": "space",
-                  "name": "space",
-                  "label": "Space",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 2",
-                    "gridRow": "1 / span 1"
-                  }
+              },
+              {
+                "id": "interfaces",
+                "formType": "multi-select",
+                "name": "interfaces",
+                "label": "Interfaces",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {}
+              },
+              {
+                "id": "graph_type",
+                "formType": "select",
+                "name": "graph_type",
+                "label": "Graph Type",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {}
+              },
+              {
+                "id": "field_1741046122848",
+                "formType": "custom-field",
+                "name": "field_1741046122848",
+                "label": "New Field 5",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {
+                  "gridColumn": "1 / span 4",
+                  "gridRow": "2 / span 1"
                 },
-                {
-                  "id": "interfaces",
-                  "formType": "multi-select",
-                  "name": "interfaces",
-                  "label": "Interfaces",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "3 / span 2",
-                    "gridRow": "1 / span 1"
-                  }
-                },
-                {
-                  "id": "graph_type",
-                  "formType": "select",
-                  "name": "graph_type",
-                  "label": "Graph Type",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "5 / span 2",
-                    "gridRow": "1 / span 1"
-                  }
-                },
-                {
-                  "id": "pie_chart",
-                  "formType": "custom-field",
-                  "name": "pie_chart",
-                  "label": "Pie Chart",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 2",
-                    "gridRow": "2 / span 2"
-                  },
-                  render: () => {
-                    return <Card>
-                      <CardHeader className='flex items-center justify-center'>
-                        <CardTitle>Pie Chart</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <FormClientFetch />
-                      </CardContent>
-                    </Card>
-                  },
-                },
-                {
-                  "id": "graph",
-                  "formType": "custom-field",
-                  "name": "graph",
-                  "label": "Graph",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "3 / span 4",
-                    "gridRow": "2 / span 2"
-                  },
-                  render: ({ form }) => {
-                    const interfacesData = form?.watch('interfaces')
+                render: ({ form }) => {
+                  const interfacesData = form?.watch('interfaces')
 
-                    setInterfaces(interfacesData)
-                    const graphType = form?.watch('graph_type')
-                    return <Card><ChartContainer
-                      className="h-full w-full p-5"
-                      config={chartConfig}
-                    >
-                      {renderChart({ filteredData, graphType, interfaces: interfacesData })}
+                  setInterfaces(interfacesData)
+                  const graphType = form?.watch('graph_type')
+                  return <Card><ChartContainer
+                    className="h-full w-full p-5"
+                    config={chartConfig}
+                  >
+                    {renderChart({ filteredData, graphType, interfaces: interfacesData })}
 
-                    </ChartContainer></Card>
-                  },
+                  </ChartContainer></Card>
                 },
-                {
-                  "id": "tabs",
-                  "formType": "space",
-                  "name": "tabs",
-                  "label": "Tabs",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 6",
-                    "gridRow": "4 / span 1"
-                  }
-                },
-                {
-                  "id": "new_graph",
-                  "formType": "space",
-                  "name": "new_graph",
-                  "label": "New Graph",
-                  "description": "Field Description",
-                  "placeholder": "Enter value...",
-                  "fieldClassName": "",
-                  "fieldStyle": {
-                    "gridColumn": "1 / span 6",
-                    "gridRow": "5 / span 1"
-                  }
+              }
+
+            ]}
+
+          />
+        </div>
+      </Form>
+      <Form {...form}>
+        <div className='pt-2 grid !grid-cols-4 gap-4'>
+          <FormModule
+            myParent='record'
+            form={form}
+            formKey='PieChart'
+            formSchema={z.object({})}
+            subConfig={{
+              multiSelectOptions: {
+                interfaces: multiSelectOptions ?? []
+              },
+              selectOptions: {
+                graph_type: [
+                  { label: 'Default', value: 'default' },
+                  { label: 'Bar Chart', value: 'bar' },
+                  { label: 'Line Chart', value: 'line' },
+                ]
+              }
+            }}
+            fields={[
+              {
+                "id": "pie_chart",
+                "formType": "custom-field",
+                "name": "pie_chart",
+                "label": "pie chart",
+                "description": "Field Description",
+                "placeholder": "Enter value...",
+                "fieldClassName": "",
+                "fieldStyle": {},
+                render: () => {
+                  return <FormClientFetch />
                 }
+              }
 
-              ]}
+            ]}
 
-            />
-          </div>
-        </Form>
-      </div>
+          />
+        </div>
+      </Form>
+    </div>
 
 
   )
