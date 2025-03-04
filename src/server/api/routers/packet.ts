@@ -10,6 +10,8 @@ import { createDefineRoutes } from '../baseCrud'
 import moment from 'moment-timezone'
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
 
+import Bluebird from 'bluebird'
+
 interface InputData {
   bucket: string
   bandwidth: string
@@ -420,5 +422,58 @@ export const packetRouter = createTRPCRouter({
   console.log('%c Line:420 🍰 res?.data?.[0]', 'color:#fca650', res?.data?.[0]);
  return res?.data?.[0]?.bandwidth || 0
 }),
+getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
+  const { packet_data } = input
+  return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
+    const { source_ip, destination_ip } = item
+    const res = await ctx.dnaClient.aggregate({
+      query: {
+        entity: 'packets',
+        aggregations: [
+          {
+            aggregation: 'SUM',
+            aggregate_on: 'total_length',
+            bucket_name: 'bandwidth',
+          },
+        ],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'source_ip',
+            entity: 'packets',
+            operator: EOperator.EQUAL,
+            values: [
+              source_ip,
+            ],
+          },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'destination_ip',
+            entity: 'packets',
+            operator: EOperator.EQUAL,
+            values: [
+              destination_ip,
+            ],
+          },
+        ],
+        joins: [],
+        limit: 20,
+        order: {
+          order_by: 'bucket',
+          order_direction: EOrderDirection.DESC,
+        },
+      },
+      token: ctx.token.value,
+    }).execute()
 
+    console.log("%c Line:474 🍋 res", "color:#ed9ec7", res);
+    return {source_ip, destination_ip, result:res?.data}
+  },{concurrency: 10} )
+
+  
+}),
 })
