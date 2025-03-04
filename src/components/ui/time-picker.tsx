@@ -42,7 +42,7 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
           className,
         )}
       >
-        <ClockIcon className="size-5 text-muted-foreground" />
+        <ClockIcon className="size-5 text-muted-foreground me-2" />
         <Input
           containerClassName="w-auto !my-auto"
           className={cn(
@@ -74,7 +74,7 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
             containerClassName="w-auto !my-auto"
             className={cn(
               timePickerInputBase,
-              "!w-full max-w-min opacity-100",
+              "!w-[62px] max-w-min opacity-100",
               readonly && "pointer-events-none",
             )}
             disabled={disabled}
