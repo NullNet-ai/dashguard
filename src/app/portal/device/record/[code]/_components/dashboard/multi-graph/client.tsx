@@ -102,9 +102,12 @@ const InteractiveGraph = ({
     <div className="flex flex-row gap-4 px-4">
       <div className="w-[30%]">
         <Card className="px-4 min-h-[432px]">
+        <div className='text-base py-2 pt-4'>
+          <h3>Bandwidth per second</h3>
+        </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
-              <div><p>Bandwidth per second</p></div>
+     
               <FormModule
                 myParent="record"
                 form={form}
@@ -155,9 +158,11 @@ const InteractiveGraph = ({
       </div>
       <div className="w-[70%]">
         <Card className="px-4">
+        <div className='text-base py-2 pt-4'>
+          <h3>Chart Label</h3>
+        </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
-              <div><p>Juphet</p></div>
               <FormModule
                 myParent="record"
                 form={form}

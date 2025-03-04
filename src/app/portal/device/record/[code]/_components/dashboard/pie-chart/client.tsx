@@ -94,8 +94,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
               data={[{ name: "Full", value: trafficData.maxTraffic, fill: "#E5E7EB" }]}
               dataKey="value"
               nameKey="name"
-              innerRadius={110}    // Increased from 70
-              outerRadius={140}   // Increased from 90
+              innerRadius={117}    // Increased from 110 by 7
+              outerRadius={147}    // Increased from 140 by 7
               startAngle={180}
               endAngle={0}
             />
@@ -104,12 +104,12 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
               data={[{ name: "Traffic", value: trafficData?.traffic, fill: chartConfig.traffic.color }]}
               dataKey="value"
               nameKey="name"
-              innerRadius={110}
-              outerRadius={140}
+              innerRadius={117}    // Increased from 110 by 7
+              outerRadius={147}    // Increased from 140 by 7
               startAngle={180}
               endAngle={pieEndAngle}
               animationBegin={0}
-              animationDuration={0} // Disable recharts animation since we handle it ourselves
+              animationDuration={0}
             />
           </PieChart>
         </ChartContainer>
