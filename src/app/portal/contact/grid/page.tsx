@@ -34,14 +34,14 @@ export default async function Page({
     "updated_by",
   ];
 
-  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: +(pagination?.current_page ?? "0"),
     limit: +(pagination?.limit_per_page ?? "100"),
     entity: "contact",
     pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
@@ -54,7 +54,7 @@ export default async function Page({
       defaultSorting={defaultSorting}
       defaultAdvanceFilter={defaultAdvanceFilter || []}
       advanceFilter={filters?.reportFilters || []}
-      sorting={sorting || []}
+      sorting={sorts?.sorting || []}
       pagination={pagination}
       config={{
         entity: "contact",

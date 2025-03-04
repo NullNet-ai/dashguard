@@ -33,7 +33,7 @@ export const ExternalUserDetailsSchema = z
       if (!response?.isValid) {
         ctx.addIssue({
           path: ['email'],
-          message: response?.record?.categories.includes('Internal User')
+          message: response?.record?.categories?.includes('Internal User')
             ? 'This email is already assigned to an internal user. You cannot invite an internal user as an external user.'
             : 'This email is already associated with an external user.',
           code: 'custom',

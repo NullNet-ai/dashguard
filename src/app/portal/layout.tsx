@@ -9,6 +9,7 @@ import { SidebarProvider } from '~/components/ui/sidebar'
 import { SmartProvider } from '~/components/ui/smart-component'
 
 import SessionChecker from '../session-checker'
+import { Toaster } from '~/components/ui/sonner'
 
 interface Props {
   children: React.ReactNode
@@ -26,6 +27,7 @@ const layout = async ({ children }: Props) => {
           <SidebarProvider defaultOpen={value}>
             <SideBarMenu />
             <SessionChecker />
+            <Toaster/>
             <AppLayout>{children}
               <SideDrawerView/>
             </AppLayout>

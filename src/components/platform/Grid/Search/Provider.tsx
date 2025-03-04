@@ -2,6 +2,7 @@
 import React, {
   type PropsWithChildren,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -127,6 +128,7 @@ export default function GridSearchProvider({ children }: IProps) {
             : [rest?.values?.[0]],
         display_value: rest?.values?.[0],
         operator: rest?.operator === 'like' ? 'equal' : rest?.operator,
+        default : false
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
@@ -136,11 +138,13 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-
-    await UpdateReportFilter({
+    const url = await UpdateReportFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
     });
+
+    window.location.href = url;
+
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery('');
@@ -152,11 +156,11 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-
-    await UpdateReportFilter({
+    const url = await UpdateReportFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
     });
+    window.location.href = url;
   };
 
   const handleClearSearchItems = async () => {
@@ -169,10 +173,18 @@ export default function GridSearchProvider({ children }: IProps) {
       return;
     }
 
-    await UpdateReportFilter({
+    const url = await UpdateReportFilter({
       filters: gridState?.defaultAdvanceFilter || [],
     });
+
+    window.location.href = url;
   };
+
+  // @use effects
+  useEffect(() => {
+    setSearchItems(gridState?.advanceFilter || []);
+    setQuery('');
+  }, [gridState?.advanceFilter]);
 
   const state_context = {
     open,
