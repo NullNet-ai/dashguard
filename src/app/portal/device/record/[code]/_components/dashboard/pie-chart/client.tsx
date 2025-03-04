@@ -31,7 +31,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const PieChartComponent = ({ defaultValues }: IFormProps) => {
+const PieChartComponent = ({ defaultValues, selectOptions }: IFormProps) => {
+  console.log("%c Line:35 🍩 selectOptions", "color:#3f7cff", selectOptions);
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
     previousTraffic: initialTraffic,

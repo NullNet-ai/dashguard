@@ -16,8 +16,9 @@ const FormServerFetch = async () => {
   
   
   const fetched_interfaces =await api.deviceConfiguration.fetchInterfaceOptions({
-      code: identifier!,
+    code: identifier!,
   })
+
   
   return (
     <InteractiveGraph

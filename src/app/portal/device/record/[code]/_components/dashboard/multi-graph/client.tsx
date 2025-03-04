@@ -33,8 +33,11 @@ const InteractiveGraph = ({
     defaultValues: {
       graph_type: "default",
       interfaces: multiSelectOptions,
+      pie_chart_interfaces: multiSelectOptions?.[0]?.value,
     },
   });
+
+  const _pie_chart_interfaces = form.watch("pie_chart_interfaces");
 
   const chartConfig = useMemo(() => {
     if (!interfaces?.length) return null;
@@ -92,10 +95,7 @@ const InteractiveGraph = ({
   return (
     <div className="flex flex-row gap-4 px-4">
       <div className="w-[30%]">
-        <Card className="px-4">
-          <CardHeader className="text-md font-semibold">
-              Pie Chart
-          </CardHeader>
+        <Card className="px-4 min-h-[432px]">
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
               <FormModule
@@ -104,15 +104,8 @@ const InteractiveGraph = ({
                 formKey="PieChart"
                 formSchema={z.object({})}
                 subConfig={{
-                  multiSelectOptions: {
-                    interfaces: multiSelectOptions ?? [],
-                  },
                   selectOptions: {
-                    graph_type: [
-                      { label: "Default", value: "default" },
-                      { label: "Bar Chart", value: "bar" },
-                      { label: "Line Chart", value: "line" },
-                    ],
+                    pie_chart_interfaces: multiSelectOptions ?? [],
                   },
                 }}
                 fields={[
@@ -130,9 +123,9 @@ const InteractiveGraph = ({
                     },
                   },
                   {
-                    id: "interfaces",
+                    id: "pie_chart_interfaces",
                     formType: "select",
-                    name: "interfaces",
+                    name: "pie_chart_interfaces",
                     label: "Interfaces",
                     description: "Field Description",
                     placeholder: "Enter value...",
@@ -155,7 +148,9 @@ const InteractiveGraph = ({
                       gridRow: "2 / span 1",
                     },
                     render: () => {
-                      return <FormClientFetch />;
+                      return <div>
+                        <FormClientFetch interfaces={_pie_chart_interfaces} />
+                      </div> ;
                     },
                   },
                 ]}

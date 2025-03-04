@@ -18,10 +18,13 @@ const FormClientFetch = () => {
   const {
     data
   } = fetched_device?.data ?? {}
-
+  const fetched_interfaces = api.deviceConfiguration.fetchInterfaceOptions.useQuery({
+    code: identifier!,
+})
   return (
     <PieChartComponent
-      defaultValues={data ?? {}}
+    defaultValues={data ?? {}}
+    selectOptions={fetched_interfaces?.data ?? []}
       params={{
         id: data?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',
