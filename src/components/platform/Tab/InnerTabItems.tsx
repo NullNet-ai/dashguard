@@ -53,7 +53,8 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       const activeIndex = tabs.findIndex(a => a.name === code)
       const activeItem = tabs.find(a => a.name === code)
       const prevCurrent = Cookies.get('prevCurrent')
-      const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
+      // const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
+      const copiedItem: any[] = []
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
       const prevActiveItem = tabs.find(a => a.name === prevCurrent)
       if (copiedItem?.length) {
