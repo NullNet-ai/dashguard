@@ -31,7 +31,7 @@ const InteractiveGraph = ({
   const [packetsIP, setPacketsIP] = React.useState<any[]>([]);
   const form = useForm({
     defaultValues: {
-      graph_type: 'default',
+      graph_type: 'area',
       interfaces: multiSelectOptions,
       pie_chart_interfaces: multiSelectOptions,
     }
@@ -102,8 +102,12 @@ const InteractiveGraph = ({
     <div className="flex flex-row gap-4 px-4">
       <div className="w-[30%]">
         <Card className="px-4 min-h-[432px]">
+        <div className='text-base py-2 pt-4'>
+          <h3>Bandwidth per second</h3>
+        </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
+     
               <FormModule
                 myParent="record"
                 form={form as any}
@@ -116,28 +120,15 @@ const InteractiveGraph = ({
                 }}
                 fields={[
                   {
-                    id: "title",
-                    formType: "space",
-                    name: "title",
-                    label: "Title",
-                    description: "Field Description",
-                    placeholder: "Enter value...",
-                    fieldClassName: "",
-                    fieldStyle: {
-                      gridColumn: "1 / span 2",
-                      gridRow: "1 / span 1",
-                    },
-                  },
-                  {
                     id: "pie_chart_interfaces",
                     formType: "multi-select",
                     name: "pie_chart_interfaces",
                     label: "Interfaces",
                     description: "Field Description",
-                    placeholder: "Enter value...",
-                    fieldClassName: "",
+                    placeholder: "",
+                    fieldClassName: "relative z-[100]",
                     fieldStyle: {
-                      gridColumn: "3 / span 2",
+                      gridColumn: "1 / span 4",
                       gridRow: "1 / span 1",
                     },
                   },
@@ -154,7 +145,7 @@ const InteractiveGraph = ({
                       gridRow: "2 / span 1",
                     },
                     render: () => {
-                      return <div>
+                      return <div className='flex items-center justify-center mt-10'>
                         <FormClientFetch interfaces={_pie_chart_interfaces} />
                       </div> ;
                     },
@@ -167,6 +158,9 @@ const InteractiveGraph = ({
       </div>
       <div className="w-[70%]">
         <Card className="px-4">
+        <div className='text-base py-2 pt-4'>
+          <h3>Chart Label</h3>
+        </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
               <FormModule
@@ -180,7 +174,7 @@ const InteractiveGraph = ({
                   },
                   selectOptions: {
                     graph_type: [
-                      { label: "Default", value: "default" },
+                      { label: "Area Chart", value: "area" },
                       { label: "Bar Chart", value: "bar" },
                       { label: "Line Chart", value: "line" },
                     ],
@@ -206,7 +200,7 @@ const InteractiveGraph = ({
                     name: "interfaces",
                     label: "Interfaces",
                     description: "Field Description",
-                    placeholder: "Enter value...",
+                    placeholder: "",
                     fieldClassName: "",
                     fieldStyle: {
                       gridColumn: "2 / span 2",
@@ -219,7 +213,7 @@ const InteractiveGraph = ({
                     name: "graph_type",
                     label: "Graph Type",
                     description: "Field Description",
-                    placeholder: "Enter value...",
+                    placeholder: "",
                     fieldClassName: "",
                     fieldStyle: {},
                   },
@@ -241,7 +235,7 @@ const InteractiveGraph = ({
                       setInterfaces(interfacesData);
                       const graphType = form?.watch("graph_type");
                       return (
-                        <div className="max-h-[337px]">
+                        <div className="max-h-[340px]">
                           <ChartContainer
                             className="h-full w-full py-4"
                             config={chartConfig as any}
