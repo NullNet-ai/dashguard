@@ -116,28 +116,15 @@ const InteractiveGraph = ({
                 }}
                 fields={[
                   {
-                    id: "title",
-                    formType: "space",
-                    name: "title",
-                    label: "Title",
-                    description: "Field Description",
-                    placeholder: "Enter value...",
-                    fieldClassName: "",
-                    fieldStyle: {
-                      gridColumn: "1 / span 2",
-                      gridRow: "1 / span 1",
-                    },
-                  },
-                  {
                     id: "pie_chart_interfaces",
                     formType: "multi-select",
                     name: "pie_chart_interfaces",
                     label: "Interfaces",
                     description: "Field Description",
                     placeholder: "Enter value...",
-                    fieldClassName: "",
+                    fieldClassName: "relative z-[100]",
                     fieldStyle: {
-                      gridColumn: "3 / span 2",
+                      gridColumn: "2 / span 3",
                       gridRow: "1 / span 1",
                     },
                   },
@@ -154,7 +141,7 @@ const InteractiveGraph = ({
                       gridRow: "2 / span 1",
                     },
                     render: () => {
-                      return <div>
+                      return <div className='flex items-center justify-center mt-10'>
                         <FormClientFetch interfaces={_pie_chart_interfaces} />
                       </div> ;
                     },
@@ -241,7 +228,7 @@ const InteractiveGraph = ({
                       setInterfaces(interfacesData);
                       const graphType = form?.watch("graph_type");
                       return (
-                        <div className="max-h-[337px]">
+                        <div className="max-h-[340px]">
                           <ChartContainer
                             className="h-full w-full py-4"
                             config={chartConfig}

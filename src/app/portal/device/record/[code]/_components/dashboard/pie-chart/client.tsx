@@ -94,8 +94,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
               data={[{ name: "Full", value: trafficData.maxTraffic, fill: "#E5E7EB" }]}
               dataKey="value"
               nameKey="name"
-              innerRadius={70}
-              outerRadius={90}
+              innerRadius={110}    // Increased from 70
+              outerRadius={140}   // Increased from 90
               startAngle={180}
               endAngle={0}
             />
@@ -104,8 +104,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
               data={[{ name: "Traffic", value: trafficData?.traffic, fill: chartConfig.traffic.color }]}
               dataKey="value"
               nameKey="name"
-              innerRadius={70}
-              outerRadius={90}
+              innerRadius={110}
+              outerRadius={140}
               startAngle={180}
               endAngle={pieEndAngle}
               animationBegin={0}
@@ -116,14 +116,14 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
         <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
           {/* Gauge needle */}
           <svg
-            width="200"
-            height="200"
-            viewBox="0 0 200 200"
+            width="300"
+            height="300"
+            viewBox="0 0 300 300"
             className="absolute transition-transform duration-[16ms] ease-linear"
             style={{ transform: `rotate(${arrowRotation}deg)` }}
           >
-            <polygon points="100,30 95,100 105,100" fill="black" />
-            <circle cx="100" cy="100" r="6" fill="black" />
+            <polygon points="150,45 142,150 158,150" fill="black" />
+            <circle cx="150" cy="150" r="8" fill="black" />
           </svg>
           {/* Traffic value display */}
           <div className="absolute top-[160px] bg-background/80 rounded-lg px-4 py-2 backdrop-blur-sm">
