@@ -104,6 +104,7 @@ const InteractiveGraph = ({
         <Card className="px-4 min-h-[432px]">
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
+              <div><p>Bandwidth per second</p></div>
               <FormModule
                 myParent="record"
                 form={form}
@@ -156,6 +157,7 @@ const InteractiveGraph = ({
         <Card className="px-4">
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
+              <div><p>Juphet</p></div>
               <FormModule
                 myParent="record"
                 form={form}
