@@ -47,7 +47,7 @@ export default function SideDrawer() {
             <Button
               variant="default"
               className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={actions.handleUpdateFilter}
+              onClick={actions.saveUpdatedFilter}
               loading={createFilterLoading}
             >
               ✓ Update Filter

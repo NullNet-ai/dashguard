@@ -193,21 +193,6 @@ export const notificationsRouter = createTRPCRouter({
       )
     }
 
-    for(const userRole of mockUserRoles) {
-      await ctx.dnaClient
-      .create({
-        entity: 'user_role',
-        token: ctx.token.value,
-        mutation: {
-          params: {
-            ...userRole
-          },
-        },
-      })
-      .execute();
-
-    }
-
     return {
       success: true,
     }

@@ -192,6 +192,7 @@ export default function FilterContent() {
                           placeholder: 'Enter values',
                           multiSelectEnableCreate: true,
                           multiSelectShowCreatableItem: false,
+                          multiSelectUseStringValues: true
                         },
                       ]}
                       subConfig={{

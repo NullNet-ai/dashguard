@@ -33,7 +33,7 @@ const columnSchema = z.object({
   label: z.string(),
   isShow: z.boolean(),
   order: z.number(),
-  id: z.string().uuid(),
+  id: z.string().ulid().optional(),
 });
 
 const gridFilterSchema = z.object({
@@ -43,6 +43,7 @@ const gridFilterSchema = z.object({
   groups: z.array(groupSchema).optional(),
   columns: z.array(columnSchema),
   default_sorts: z.array(sortSchema),
+  id: z.string().ulid().optional(),
 });
 
 export const gridFilterRouter = createTRPCRouter({
@@ -107,6 +108,48 @@ export const gridFilterRouter = createTRPCRouter({
       return data;
     }),
 
+  updateGridFilter: privateProcedure
+    .input(gridFilterSchema)
+    .mutation(async ({ ctx, input }) => {
+      const token = ctx?.token.value;
+
+      const { data, message, success, errors } = await ctx.dnaClient
+        .update(input.id!, {
+          entity: ENTITY,
+          token,
+          mutation: {
+            params: {
+              name: input.name,
+              columns: input.columns,
+              groups: input.groups,
+              sorts: input.sorts,
+              advance_filters: input.default_filter,
+              default_sorts: input.default_sorts,
+            },
+            pluck: [
+              'id',
+              'name',
+              'grid_id',
+              'link',
+              'is_current',
+              'is_default',
+              'entity',
+              'columns',
+              'groups',
+              'sorts',
+              'advance_filters',
+            ],
+          },
+        })
+        .execute();
+
+      if (!success) {
+        throw new Error(message);
+      }
+
+      return data;
+    }),
+
   removeGridFilter: privateProcedure
     .input(
       z.object({
@@ -122,8 +165,9 @@ export const gridFilterRouter = createTRPCRouter({
       const token = ctx?.token.value;
 
       // drop by
-      await ctx.dnaClient.delete(input.id, {
-        is_permanent: false,
+      await ctx.dnaClient
+        .delete(input.id, {
+          is_permanent: false,
           entity: ENTITY,
           token,
           mutation: {
@@ -159,47 +203,47 @@ export const gridFilterRouter = createTRPCRouter({
       await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
       // return the href the tab that is current
       const currentHref = updatedTab.find((tab) => tab.current)?.href;
-      return currentHref
+      return currentHref;
     }),
 
-  duplicateGridFilter : privateProcedure
-   .input(
+  duplicateGridFilter: privateProcedure
+    .input(
       z.object({
         id: z.string(),
       }),
     )
-   .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
-      const [,, mainEntity, application] = pathName.split('/');
+      const [, , mainEntity, application] = pathName.split('/');
 
       const filter_id = ulid();
 
       // fetch and copy the data from the grid_filter
       const { data } = await ctx.dnaClient
-      .findOne(input.id, {
-        entity: ENTITY,
-        token: ctx.token.value,
-        query: {
-          pluck: [
-            'id',
-            'name',
-            'grid_id',
-            'link',
-            'is_current',
-            'is_default',
-            'entity',
-            'columns',
-            'groups',
-            'sorts',
-            'advance_filters',
-            'default_sorts'
-          ],
-        },
-      })
-      .execute();
+        .findOne(input.id, {
+          entity: ENTITY,
+          token: ctx.token.value,
+          query: {
+            pluck: [
+              'id',
+              'name',
+              'grid_id',
+              'link',
+              'is_current',
+              'is_default',
+              'entity',
+              'columns',
+              'groups',
+              'sorts',
+              'advance_filters',
+              'default_sorts',
+            ],
+          },
+        })
+        .execute();
 
       if (!data.length) {
         throw new Error('Grid filter not found');
@@ -207,8 +251,13 @@ export const gridFilterRouter = createTRPCRouter({
 
       const filter = data[0] ?? {};
       // create a new grid_filter
-      const { data: newData, message, success, errors } = await ctx.dnaClient
-       .create({
+      const {
+        data: newData,
+        message,
+        success,
+        errors,
+      } = await ctx.dnaClient
+        .create({
           entity: ENTITY,
           token,
           mutation: {
@@ -237,13 +286,13 @@ export const gridFilterRouter = createTRPCRouter({
               'entity',
               'columns',
               'groups',
-             'sorts',
+              'sorts',
               'advance_filters',
-              'default_sorts'
+              'default_sorts',
             ],
           },
         })
-       .execute();
+        .execute();
       console.error('RESPONSE', {
         data,
         message,
@@ -255,7 +304,7 @@ export const gridFilterRouter = createTRPCRouter({
       }
 
       // insert to redis
-      if (application!== 'grid' ||!mainEntity) return [];
+      if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
