@@ -57,10 +57,10 @@ export const SideDrawerView: React.FC = () => {
       {/* Drawer Content */}
       <Card
         className={cn(
-          `fixed  z-[102] transition-none h-[90dvh] md:h-[90vh]  w-full md:w-[var(--drawer-width)] transform-gpu duration-800 ease-out
+          `fixed  z-[102] transition-none h-[calc(100dvh-48px)]   w-full md:w-[var(--drawer-width)] transform-gpu duration-800 ease-out
           bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto
           ${isOpen ? 'translate-y-0 md:translate-x-0 pointer-events-auto' : 'pointer-events-none translate-y-full md:translate-y-0 md:translate-x-full'}`,
-          isBannerPresent ? 'md:h-[calc(100dvh-75px)]' : 'md:h-[calc(100dvh-43px)]'
+          isBannerPresent ? 'md:h-[calc(100dvh-75px)]' : 'md:h-[calc(100dvh-48px)] lg:h-[calc(100dvh-43px)]'
         )}
         style={{ '--drawer-width': sideDrawerWidth } as React.CSSProperties}
       >

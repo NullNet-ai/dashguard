@@ -1,6 +1,6 @@
 'use server'
 
-import LoginSubmit from '~/app/login/actions/loginSubmit'
+import LoginSubmit from '~/app/login/_actions/loginSubmit'
 import { api } from '~/trpc/server'
 
 export const setNewPassword = async ({

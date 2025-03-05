@@ -4,20 +4,7 @@ import { headers } from 'next/headers';
 import SignInLabel from '~/app/sign-up/_components/SignInLabel';
 import SignUpForm from '~/app/sign-up/_components/SignUpForm';
 import { redirect, RedirectType } from 'next/navigation';
-import { formatDate } from '~/server/utils/formatDate';
-
-const INVITATION_LINK_EXPIRED = parseInt(
-  process.env.INVITATION_LINK_EXPIRED || '1',
-  10,
-);
-
-const isInvitationLinkExpired = (createdDate: string): boolean => {
-  const created = new Date(createdDate);
-  const expirationDate = new Date(created);
-  expirationDate.setDate(created.getDate() + INVITATION_LINK_EXPIRED);
-  const currentDate = formatDate(new Date()).date;
-  return new Date(currentDate) > expirationDate;
-};
+import { isInvitationLinkExpired } from './_actions/isInvitationLinkExpired';
 
 export default async function Invite({ searchParams }: any) {
   if (!searchParams.token) {
@@ -32,9 +19,15 @@ export default async function Invite({ searchParams }: any) {
   });
 
   if (
-    !record || !record?.invitation?.id ||
-    isInvitationLinkExpired(record?.invitation?.created_date) ||
-    record.invitation?.status === 'Archived'
+    !record ||
+    !record?.invitation?.id ||
+    isInvitationLinkExpired(
+      record?.invitation?.updated_date,
+      record?.invitation?.updated_time,
+    ) ||
+    !['Pending Setup', 'Invited'].includes(record?.account_status) ||
+    record.invitation?.status === 'Archived' ||
+    record?.status === 'Archived'
   ) {
     Promise.all([
       api.record.updateDynamicRecord({
@@ -94,7 +87,9 @@ export default async function Invite({ searchParams }: any) {
                   record?.categories?.includes('External User') ? record : {}
                 }
                 account_id={
-                  record?.categories?.includes('External User') ? record?.id : ''
+                  record?.categories?.includes('External User')
+                    ? record?.id
+                    : ''
                 }
                 invitation_id={record?.invitation?.id}
               />
