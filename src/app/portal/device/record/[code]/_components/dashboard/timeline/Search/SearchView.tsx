@@ -12,11 +12,26 @@ const SearchView = () => {
   const { filters, query } = state ?? {};
   const { addFilter } = actions ?? {};
 
-
-
+  // grid filters = kung mag click kag grid filters mo change ang URL para maka rerender para mo update ang data,
   return (
     <div className="p-4 border rounded-lg shadow-md flex flex-col gap-4">
-      <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 self-end rounded-md border px-2 ps-3 focus-within:border-primary w-full max-w-[400px]">
+     
+      <div className="flex mb-2">
+        <div className="h-[36px] justify-between flex gap-x-2">
+          {["All Data"]?.map((filter, index) => (
+            <span key={index} className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm">
+              {filter}
+            </span>
+          ))}
+          <div className="h-[36px] justify-between flex gap-x-2">
+          
+            <button className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm">
+              +
+            </button>
+         </div>
+        </div>
+      </div>
+ <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 self-end rounded-md border px-2 ps-3 focus-within:border-primary w-full max-w-[400px]">
         {/* <input
           type="text"
           value="Hellow"
@@ -76,16 +91,6 @@ const SearchView = () => {
             </Combobox>
            
       </div>
-      <div className="flex mb-2">
-        <div className="h-[36px] justify-between flex gap-x-2">
-          {["All Data"]?.map((filter, index) => (
-            <span key={index} className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm">
-              {filter}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* <Card> */}
           <NetworkFlow/>
       {/* </Card> */}

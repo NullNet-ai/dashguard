@@ -1,4 +1,3 @@
-import React from "react";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
@@ -12,6 +11,7 @@ const Layout = async ({
   record_summary: React.ReactNode;
   children: React.ReactNode;
 }) => {
+
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
@@ -40,6 +40,7 @@ const Layout = async ({
       "updated_time",
     ],
   });
+
 
   if (record_details?.errors?.length) {
     throw new Error(record_details.message as string);
