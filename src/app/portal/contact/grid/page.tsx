@@ -66,6 +66,14 @@ export default async function Page({
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
+        infiniteConfig:{
+          router: "grid",
+          resolver: "getInfiniteData",
+          query_params: {
+            entity: "contact",
+            pluck: _pluck,
+          },
+        },
         searchConfig: {
           router: "contact",
           resolver: "mainGrid",
