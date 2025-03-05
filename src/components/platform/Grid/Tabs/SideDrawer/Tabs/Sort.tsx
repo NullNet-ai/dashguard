@@ -23,7 +23,7 @@ import { z } from 'zod';
 interface SortItem {
   id?: string;
   value: string;
-  desc: boolean;
+  desc: boolean | undefined;
 }
 
 const ZodSchema = z.object({
@@ -49,9 +49,9 @@ export default function SortContent() {
         desc: sort.desc,
       })) ?? [
         {
-          id: 'created_date',
-          value: 'created_date',
-          desc: true,
+          id: '',
+          value: '',
+          desc: undefined
         },
       ],
     },
@@ -63,7 +63,7 @@ export default function SortContent() {
   });
 
   const handleAddSort = () => {
-    const newSort = { id: '', value: '', desc: true };
+    const newSort = { id: '', value: '', desc: undefined };
     append(newSort);
     handleUpdateFilter({
       sorts: [...fields, newSort],
@@ -134,7 +134,7 @@ export default function SortContent() {
                   }
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select Field" />
+                    <SelectValue placeholder="Select a Field" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
                     {columns?.map((column: any, columnIndex: number) => (
@@ -146,13 +146,19 @@ export default function SortContent() {
                 </Select>
 
                 <Select
-                  value={sort.desc ? 'desc' : 'asc'}
+                // if undefined it must be the placeholder
+                  value={sort.desc === undefined
+                    ? ''
+                    : sort.desc
+                    ? 'desc'
+                    : 'asc'}
+
                   onValueChange={(value) =>
                     handleSortChange(index, 'desc', value)
                   }
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select Order" />
+                    <SelectValue placeholder="Select a Sort Order" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
                     <SelectItem value="asc">Ascending</SelectItem>

@@ -92,7 +92,7 @@ const getSessionTabs = async () => {
     application: application || '',
     entity: mainEntity || '',
   })
-  return newTabs
+  return newTabs.filter(Boolean)
 }
 
 const InnerTabs = async () => {

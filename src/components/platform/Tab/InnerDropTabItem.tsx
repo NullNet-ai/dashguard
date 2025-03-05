@@ -60,14 +60,12 @@ const InnerDropTabItem = ({
     })
   }, [active]);
 
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false;
+  const tabNameRole = tab.name === 'user_role' ? 'role' : tab.name.split(' ').join('-').toLowerCase();
   return (
     <>
       <Link
         data-test-id={
-          'apptab-' + checkIfUserRole(tab.name)
-            ? 'role'
-            : tab.name.split(' ').join('-').toLowerCase()
+          'apptab-' + tabNameRole
         }
         onClick={() => {
           const getCurrent = getActiveName() || ''
@@ -82,14 +80,14 @@ const InnerDropTabItem = ({
           isActive ? 'text-primary' : 'text-gray-500', 'whitespace-nowrap px-4 pr-1 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',
         )}
       >
-        {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
+        {formatTabName(tabNameRole)}
       </Link>
       <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
       <TabMenu
         current={!!tab.href.match(pathname)}
         href={tab.href}
         tabs={dropItems}
-        name={checkIfUserRole(tab.name) ? 'role' : tab.name}
+        name={tabNameRole}
       />
     </>
   );

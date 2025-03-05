@@ -53,12 +53,13 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       const activeIndex = tabs.findIndex(a => a.name === code)
       const activeItem = tabs.find(a => a.name === code)
       const prevCurrent = Cookies.get('prevCurrent')
-      const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
+      // const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
+      const copiedItem: any[] = []
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
       const prevActiveItem = tabs.find(a => a.name === prevCurrent)
       if (copiedItem?.length) {
         const result = reorderItems(copiedItem, prevActiveItem, activeItem?.name)
-        return result
+        return result.filter(Boolean)
       }
 
       if (activeIndex !== -1) {
@@ -73,15 +74,13 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
           result.splice(1, 0, activeTab)
         }
 
-        return result
+        return result.filter(Boolean)
       }
 
-      return tabs
+      return tabs.filter(Boolean)
     }
-    return tabs
+    return tabs.filter(Boolean)
   }, [tabs, code, isClient])
-
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
 
   return (
     <nav
@@ -92,7 +91,6 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       <InnerTabsContent
         par_items={sortTabsActiveWillSecond}
         pathname={pathname}
-        checkIfUserRole={checkIfUserRole}
         isWindowLoaded={isWindowLoaded}
         application={application}
         code={code}

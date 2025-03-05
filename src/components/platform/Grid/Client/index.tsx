@@ -14,6 +14,7 @@ import { type IPropsGrid } from '../types'
 import { GridDesktop, GridMobile } from './views'
 import GridCardLists from './views/GridCardLists'
 import GridMobileForm from './views/GridMobileForm'
+import { cn } from '~/lib/utils'
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
@@ -58,7 +59,7 @@ function MainClient({
   defaultAdvanceFilter,
   pagination,
   isLoading,
-  gridLevel,
+  gridLevel = 1,
   gridType = 'table',
   isError = false,
   parentExpanded,
@@ -128,12 +129,13 @@ function MainClient({
                 />
               </div>
 
-              <div className="flex h-[300px] overflow-y-auto px-2 py-4 lg:hidden lg:h-[500px]">
+              <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`)}>
                 {parentType === 'grid'
                   ? (
                       <GridMobile
                         parentType={parentType}
                         shownPagination={showPagination ?? true}
+                        gridLevel={gridLevel}
                       />
                     )
                   : (

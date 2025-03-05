@@ -43,6 +43,7 @@ import {
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
 import { TooltipProvider } from '~/components/ui/tooltip';
+import { FetchInfiniteData } from './Action/FetchInfiniteData';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -66,8 +67,8 @@ export default function GridProvider({
   initialSelectedRecords = {},
   sorting: initialSorting = [],
   defaultSorting,
-  advanceFilter= [],
-  defaultAdvanceFilter= [],
+  advanceFilter = [], 
+  defaultAdvanceFilter = [],
   pagination,
   parentType,
   gridLevel = 1,
@@ -120,6 +121,24 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
 
+  const [infiniteData, setInfiniteData] = useState<any[]>(data);
+  const [hasMore, setHasMore] = useState(true);
+
+  const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
+    ...filter,
+    default: true,
+  })) as ISearchItem[];
+
+  const resolvedAdvanceFilter = advanceFilter?.reduce(
+    (acc, curr) => {
+      if (curr?.default) return acc;
+      return [...acc, curr];
+    },
+    [...resolvedDefaultFilter],
+  );
+  const infiniteConfig = _propsConfig.infiniteConfig
+
+  
   // use effects
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -163,6 +182,7 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
+
   };
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
@@ -475,9 +495,11 @@ export default function GridProvider({
     }
   };
 
+  const newData = infiniteConfig?.router ? infiniteData : data;
+
   /** @HOOKS */
   const table = useReactTable({
-    data,
+    data: newData,
     getRowId: (row) => row.id,
     columns: actionTypeColumnCondition(
       viewMode,
@@ -507,6 +529,38 @@ export default function GridProvider({
     onSortingChange: handleAddSorting,
   });
   /** @ACTIONS */
+
+
+  const handleGetInfiniteData = async (
+    params?: any,
+  ) => {
+
+    if(!infiniteConfig?.router) return null
+
+    try {
+      const res = await FetchInfiniteData(
+        {
+          ...infiniteConfig,
+          entity: config?.entity || "",
+          resolver: infiniteConfig?.resolver || "",
+          query_params: infiniteConfig?.query_params || {}
+        }
+      );
+
+      setInfiniteData(prev=> {
+        return [...prev, 
+          ...res.data
+        ]
+      })
+
+      setHasMore(false)
+
+    } catch (error) {
+        console.error('fetching error', error)
+    }
+    
+  } 
+
   const handleCreate = async () => {
     try {
       setCreateLoading(true);
@@ -560,7 +614,7 @@ export default function GridProvider({
       ],
     },
     parentType,
-    data,
+    data: newData,
     table,
     selectTableRow,
     totalCount,
@@ -577,6 +631,8 @@ export default function GridProvider({
     showBulkActionConfirmationModal,
     bulkActionType,
     pagination,
+    hasMore,
+    gridLevel,
   } as IState;
   const actions = {
     handleCreate,
@@ -591,6 +647,8 @@ export default function GridProvider({
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
+    handleGetInfiniteData,
+    setHasMore,
   } as IAction;
 
   return (

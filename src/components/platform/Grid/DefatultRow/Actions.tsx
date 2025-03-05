@@ -89,7 +89,7 @@ export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
           <PencilIcon className="h-3 w-3 text-primary" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="z-[9999]">
+      <TooltipContent side="bottom" className="z-[9999]">
         <p>{'Edit'}</p>
       </TooltipContent>
     </Tooltip>
@@ -163,7 +163,7 @@ export function DeleteComponent({ row, config, viewMode }: DefaultRowActions) {
           <Trash2 className="h-3 w-3 text-destructive" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="z-[9999]">
+      <TooltipContent side="bottom" className="z-[9999]">
         <p>{'Delete'}</p>
       </TooltipContent>
     </Tooltip>
@@ -248,7 +248,7 @@ export function ArchiveComponent({
           />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="z-[9999]">
+      <TooltipContent side="bottom" className="z-[9999]">
         <p>{'Archive'}</p>
       </TooltipContent>
     </Tooltip>
@@ -320,7 +320,7 @@ export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
           <RotateCcw className="h-3 w-3 text-primary" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="z-[9999]">
+      <TooltipContent side="bottom" className="z-[9999]">
         <p>{'Restore'}</p>
       </TooltipContent>
     </Tooltip>
