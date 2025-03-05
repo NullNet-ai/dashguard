@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/solid'
 import { flexRender } from '@tanstack/react-table'
 import { FilterIcon } from 'lucide-react'
 import { useContext } from 'react'
@@ -69,30 +69,6 @@ export default function MyTableHead() {
               >
                 <div className="flex flex-row items-center gap-1 whitespace-nowrap text-default">
                   {cellValue}
-                  {/* {!!cellValue &&
-                <div
-                  className={cn(
-                    'flex flex-row items-center',
-                    header.column.id === 'action'
-                      ? 'justify-center'
-                      : 'justify-between',
-                  )}
-                >
-                  <div className="flex flex-row items-center gap-1 whitespace-nowrap">
-                    {cellValue}
-                    {/* {!!cellValue &&
-                      header.column.id !== "action" &&
-                      typeof cellValue === "string" &&
-                      cellValue !== "Actions" && (
-                        <Button
-                          onClick={() => {
-                            // header.column.toggleSort();
-                          }}
-                          data-test-id={state.config.entity + "_grid_header_" + header.column.id + "_sort_button"}
-                        >
-                          <ChevronsUpDown className="h-3 w-3" />
-                        </Button>
-                      )} */}
                   {sortingState && !sortingState.desc && (
                     <ArrowUpIcon className="h-4 w-4" />
                   )}
@@ -105,41 +81,6 @@ export default function MyTableHead() {
                 </div>
                 <HeaderMenu header={header} defaultFilter={defaultFilter} />
               </div>
-
-              {/* {!header.isPlaceholder && header.column.getCanPin() && (
-                  <div className="flex justify-center gap-1">
-                    {header.column.getIsPinned() !== "left" ? (
-                      <button
-                        className="rounded border px-2"
-                        onClick={() => {
-                          header.column.pin("left");
-                        }}
-                      >
-                        {"<="}
-                      </button>
-                    ) : null}
-                    {header.column.getIsPinned() ? (
-                      <button
-                        className="rounded border px-2"
-                        onClick={() => {
-                          header.column.pin(false);
-                        }}
-                      >
-                        X
-                      </button>
-                    ) : null}
-                    {header.column.getIsPinned() !== "right" ? (
-                      <button
-                        className="rounded border px-2"
-                        onClick={() => {
-                          header.column.pin("right");
-                        }}
-                      >
-                        {"=>"}
-                      </button>
-                    ) : null}
-                  </div>
-                )} */}
               <ColumnResizer header={header} />
             </TableHead>
           )

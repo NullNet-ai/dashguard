@@ -28,10 +28,12 @@ export interface Option {
 type GroupOption = Record<string, Option[]>;
 
 interface MultipleSelectorProps {
-  value?: Option[];
+  value?: Option[] | string[];
   defaultOptions?: Option[];
   /** manually controlled options */
   options?: Option[];
+  /** Use string values instead of Option objects */
+  useStringValues?: boolean;
   placeholder?: string;
   /** Loading component. */
   loadingIndicator?: React.ReactNode;
@@ -52,7 +54,7 @@ interface MultipleSelectorProps {
    * i.e.: creatable, groupBy, delay.
    **/
   onSearchSync?: (value: string) => Option[];
-  onChange?: (options: Option[]) => void;
+  onChange?: (options: Option[] | string[]) => void;
   /** Limit the maximum number of selected options. */
   maxSelected?: number;
   /** When the number of selected options exceeds the limit, the onMaxSelected will be called. */
@@ -217,6 +219,7 @@ const MultipleSelector = React.forwardRef<
       hideClearAllButton = false,
       showCreatableItem = true,
       onCreateRecord,
+      useStringValues = false,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -224,9 +227,28 @@ const MultipleSelector = React.forwardRef<
     const [open, setOpen] = React.useState(false);
     const [onScrollbar, setOnScrollbar] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
-    const dropdownRef = React.useRef<HTMLDivElement>(null); // Added this
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-    const [selected, setSelected] = React.useState<Option[]>(value || []);
+    // Convert string array to Option array if useStringValues is true
+    const convertToOptions = React.useCallback((stringArray: string[]): Option[] => {
+      return stringArray.map(str => ({ value: str, label: str }));
+    }, []);
+
+    // Convert Option array to string array if useStringValues is true
+    const convertToStrings = React.useCallback((optionArray: Option[]): string[] => {
+      return optionArray.map(opt => opt.value);
+    }, []);
+
+    // Initialize selected state based on value type
+    const initialSelected = React.useMemo(() => {
+      if (!value) return [];
+      if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
+        return convertToOptions(value as string[]);
+      }
+      return value as Option[];
+    }, []);
+
+    const [selected, setSelected] = React.useState<Option[]>(initialSelected);
     const [options, setOptions] = React.useState<GroupOption>(
       transToGroupOption(arrayDefaultOptions, groupBy),
     );
@@ -256,13 +278,18 @@ const MultipleSelector = React.forwardRef<
       }
     };
 
+    // Update handleUnselect to handle string values
     const handleUnselect = React.useCallback(
       (option: Option) => {
         const newOptions = selected.filter((s) => s.value !== option.value);
         setSelected(newOptions);
-        onChange?.(newOptions);
+        if (useStringValues) {
+          onChange?.(convertToStrings(newOptions));
+        } else {
+          onChange?.(newOptions);
+        }
       },
-      [onChange, selected],
+      [onChange, selected, useStringValues, convertToStrings],
     );
 
     const handleKeyDown = React.useCallback(
@@ -304,9 +331,13 @@ const MultipleSelector = React.forwardRef<
 
     useEffect(() => {
       if (value) {
-        setSelected(value);
+        if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
+          setSelected(convertToOptions(value as string[]));
+        } else {
+          setSelected(value as Option[]);
+        }
       }
-    }, [value]);
+    }, [value, useStringValues, convertToOptions]);
 
     useEffect(() => {
       /** If `onSearch` is provided, do not trigger options updated. */
@@ -655,7 +686,11 @@ const MultipleSelector = React.forwardRef<
                                 setInputValue("");
                                 const newOptions = [...selected, option];
                                 setSelected(newOptions);
-                                onChange?.(newOptions);
+                                if (useStringValues) {
+                                  onChange?.(convertToStrings(newOptions));
+                                } else {
+                                  onChange?.(newOptions);
+                                }
                               }}
                               className={cn(
                                 "cursor-pointer !text-md",

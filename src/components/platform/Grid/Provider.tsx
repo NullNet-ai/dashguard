@@ -5,17 +5,16 @@ import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import {
   type ColumnDef,
   type ColumnSizingState,
-  ExpandedState,
   // eslint-disable-next-line import/named
   getCoreRowModel,
   type Row,
   type RowSelectionState,
   type SortingState,
   type Updater,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table';
 import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
 import { Button } from '~/components/ui/button';
@@ -42,7 +41,9 @@ import {
   type TActionType,
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
+import { sortColumns } from './utils/sortColumns';
 import { TooltipProvider } from '~/components/ui/tooltip';
+import { FetchInfiniteData } from './Action/FetchInfiniteData';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -66,12 +67,13 @@ export default function GridProvider({
   initialSelectedRecords = {},
   sorting: initialSorting = [],
   defaultSorting,
-  advanceFilter = [],
+  advanceFilter = [], 
   defaultAdvanceFilter = [],
   pagination,
   parentType,
   gridLevel = 1,
 }: IProps) {
+
   const _defaultSorting = defaultSorting
     ? defaultSorting
     : [
@@ -80,6 +82,10 @@ export default function GridProvider({
           desc: true,
         },
       ];
+
+  if(!!_propsConfig?.columnsOrder?.length) {
+    _propsConfig.columns = sortColumns(_propsConfig?.columnsOrder, _propsConfig?.columns);
+  }
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
@@ -92,6 +98,7 @@ export default function GridProvider({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
   );
+
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
@@ -114,6 +121,9 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
 
+  const [infiniteData, setInfiniteData] = useState<any[]>(data);
+  const [hasMore, setHasMore] = useState(true);
+
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
     ...filter,
     default: true,
@@ -126,7 +136,9 @@ export default function GridProvider({
     },
     [...resolvedDefaultFilter],
   );
+  const infiniteConfig = _propsConfig.infiniteConfig
 
+  
   // use effects
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -141,6 +153,13 @@ export default function GridProvider({
       setPlaygroundGridIsShowRowAction(rowAction);
     }
   }, []);
+  
+  // use effect for sorting if there is a change in props sorting it should set the sorting
+  useEffect(() => {
+    if (initialSorting?.length) {
+      setSorting(initialSorting);
+    }
+  }, [initialSorting]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -163,6 +182,7 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
+
   };
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
@@ -214,23 +234,44 @@ export default function GridProvider({
     const updatedSorting =
       typeof updater === 'function' ? updater(sorting) : updater;
 
-    const resolvedSorting = updatedSorting?.reduce(
-      (acc: SortingState, sort) => {
-        const sortFields = config?.columns?.find(
-          (column: any) => column?.accessorKey === sort.id,
-        );
-
-        const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-          ? sortFields.sortKey.map((sortKey) => ({
-              ...sort,
-              sort_key: sortKey,
-            }))
-          : [{ ...sort, sort_key: sortFields?.sortKey || sort.id }];
-
-        return [...acc, ...resolvedSortFields];
-      },
-      [],
-    );
+      const processedSortKeys = new Map();
+    
+      const resolvedSorting = updatedSorting?.reduce(
+        (acc: SortingState, sort) => {
+          const sortFields = config?.columns?.find(
+            (column: any) => column?.accessorKey === sort.id,
+          );
+  
+          const resolvedSortFields = Array.isArray(sortFields?.sortKey)
+            ? sortFields.sortKey.map((sortKey) => {
+                const key = `${sort.id}_${sortKey}`;
+                // If we've already processed this combination, skip it
+                if (processedSortKeys.has(key)) {
+                  return null;
+                }
+                processedSortKeys.set(key, true);
+                return {
+                  ...sort,
+                  sort_key: sortKey,
+                };
+              })
+            : (() => {
+                const key = `${sort.id}_${sortFields?.sortKey || sort.id}`;
+                if (processedSortKeys.has(key)) {
+                  return null;
+                }
+                processedSortKeys.set(key, true);
+                return [{
+                  ...sort,
+                  sort_key: sortFields?.sortKey || sort.id,
+                }];
+              })();
+  
+          return [...acc, ...(resolvedSortFields?.filter(Boolean) as SortingState)];
+        },
+        [],
+      );
+  
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       return config?.onFetchRecords?.({
         sorting: resolvedSorting,
@@ -454,9 +495,11 @@ export default function GridProvider({
     }
   };
 
+  const newData = infiniteConfig?.router ? infiniteData : data;
+
   /** @HOOKS */
   const table = useReactTable({
-    data,
+    data: newData,
     getRowId: (row) => row.id,
     columns: actionTypeColumnCondition(
       viewMode,
@@ -486,6 +529,38 @@ export default function GridProvider({
     onSortingChange: handleAddSorting,
   });
   /** @ACTIONS */
+
+
+  const handleGetInfiniteData = async (
+    params?: any,
+  ) => {
+
+    if(!infiniteConfig?.router) return null
+
+    try {
+      const res = await FetchInfiniteData(
+        {
+          ...infiniteConfig,
+          entity: config?.entity || "",
+          resolver: infiniteConfig?.resolver || "",
+          query_params: infiniteConfig?.query_params || {}
+        }
+      );
+
+      setInfiniteData(prev=> {
+        return [...prev, 
+          ...res.data
+        ]
+      })
+
+      setHasMore(false)
+
+    } catch (error) {
+        console.error('fetching error', error)
+    }
+    
+  } 
+
   const handleCreate = async () => {
     try {
       setCreateLoading(true);
@@ -539,7 +614,7 @@ export default function GridProvider({
       ],
     },
     parentType,
-    data,
+    data: newData,
     table,
     selectTableRow,
     totalCount,
@@ -550,12 +625,14 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
-    advanceFilter: resolvedAdvanceFilter,
-    defaultAdvanceFilter: resolvedDefaultFilter,
+    advanceFilter,
+    defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
     pagination,
+    hasMore,
+    gridLevel,
   } as IState;
   const actions = {
     handleCreate,
@@ -570,6 +647,8 @@ export default function GridProvider({
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
+    handleGetInfiniteData,
+    setHasMore,
   } as IAction;
 
   return (
@@ -582,4 +661,12 @@ export default function GridProvider({
       {children}
     </GridContext.Provider>
   );
+}
+
+export function useGrid() {
+  const context = useContext(GridContext)
+  if (!context) {
+    throw new Error('useGrid must be used within a GridProvider')
+  }
+  return context
 }

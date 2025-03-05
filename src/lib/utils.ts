@@ -19,10 +19,17 @@ export function formatTabName(tab_name: string): string {
   if(menu_tab_name[tab_name]) return menu_tab_name[tab_name];
   if (!tab_name) return "";
   if (tab_name.startsWith(tab_name.charAt(0).toUpperCase())) return tab_name;
-  return tab_name
+  const result = tab_name
     .split(/[_-]/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+
+  if (/\d/.exec(result)) {
+    return result.toUpperCase()
+  }
+
+
+  return result
 }
 export function formatFormTestID(id: string) {
   return id.replace(/[\s,]+/g, "-").toLowerCase();

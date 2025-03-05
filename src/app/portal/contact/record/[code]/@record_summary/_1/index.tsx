@@ -14,7 +14,7 @@ const fields = {
   "Full Name": "full_name",
   "Date of Birth": "date_of_birth",
   Address: "address",
-  Organization: "organization",
+  Department: "organization",
   Role: "role",
 };
 
@@ -86,7 +86,7 @@ const RecordShellSummary = ({
     code: identifier!,
   });
 
-  const { organizations, user_roles } = org_record?.data || {};
+  const { organizations } = org_record?.data || {};
 
   const categories = data?.categories || [];
 
@@ -112,12 +112,6 @@ const RecordShellSummary = ({
             },
           ) => a.label.localeCompare(b.label),
         )
-        .map(({ label }: { label: string }) => label)
-        .join(", ")
-      : "None",
-    role: user_roles?.length
-      ? user_roles
-        .sort((a, b) => a.label.localeCompare(b.label))
         .map(({ label }: { label: string }) => label)
         .join(", ")
       : "None",

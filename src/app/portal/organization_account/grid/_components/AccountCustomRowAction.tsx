@@ -80,11 +80,13 @@ export function AccountCustomRowAction({
   const toast = useToast();
   const pathName = usePathname();
   const router = useRouter();
-  
-  const { code, account_status, categories = [] } = row?.original ?? {};
+
+  const { code, account_status, categories = [], id } = row?.original ?? {};
 
   const updateRecordStatus = api.record.updateRecordStatus.useMutation();
   const resendInvite = api.account.createInvitationRecord.useMutation();
+  const archiveAccountInvitation =
+    api.account.archiveAccountInvitation.useMutation();
 
   const handleChangeStatus = async (record_status: string) => {
     try {
@@ -94,6 +96,11 @@ export function AccountCustomRowAction({
         entity: 'organization_account',
         field_key: 'account_status',
       });
+      if (record_status === 'Invitation Canceled') {
+        await archiveAccountInvitation.mutateAsync({
+          id,
+        });
+      }
       pathName && router.push(`${pathName}?${code}=${record_status}`);
     } catch {
       toast.error('Failed to update account status');
@@ -102,7 +109,10 @@ export function AccountCustomRowAction({
 
   const handleResendInvite = async () => {
     try {
-      await resendInvite.mutateAsync({ account_code: code, manual_trigger: true });
+      await resendInvite.mutateAsync({
+        account_code: code,
+        manual_trigger: true,
+      });
       pathName && router.push(pathName);
     } catch {
       toast.error('Failed to resend invitation');
@@ -110,7 +120,12 @@ export function AccountCustomRowAction({
   };
 
   if (viewMode === 'card') {
-    const renderDropdownItem = (icon: JSX.Element, label: string, onClick: () => void, color: string) => (
+    const renderDropdownItem = (
+      icon: JSX.Element,
+      label: string,
+      onClick: () => void,
+      color: string,
+    ) => (
       <DropdownMenuItem
         key={label}
         className={`relative flex cursor-pointer items-center gap-2 ${color}`}
@@ -120,18 +135,29 @@ export function AccountCustomRowAction({
         <span>{label}</span>
       </DropdownMenuItem>
     );
-  
+
     return [
-      ...ACTIONS.filter(({ condition }) => condition(account_status, categories[0] ?? '')).map(
-        ({ action, icon: Icon, color, tooltip }) =>
-          renderDropdownItem(<Icon className="h-3 w-3" />, tooltip, () => handleChangeStatus(action), color)
+      ...ACTIONS.filter(({ condition }) =>
+        condition(account_status, categories[0] ?? ''),
+      ).map(({ action, icon: Icon, color, tooltip }) =>
+        renderDropdownItem(
+          <Icon className="h-3 w-3" />,
+          tooltip,
+          () => handleChangeStatus(action),
+          color,
+        ),
       ),
-      ['Invited', 'Invitation Canceled', 'Invitation Expired', 'Pending Setup'].some((status) => status === account_status) &&
+      [
+        'Invited',
+        'Invitation Canceled',
+        'Invitation Expired',
+        'Pending Setup',
+      ].some((status) => status === account_status) &&
         renderDropdownItem(
           <Send className="h-3 w-3 text-yellow-500" />,
           'Re-send Invite',
           handleResendInvite,
-          'text-yellow-500'
+          'text-yellow-500',
         ),
     ].filter(Boolean); // Removes false/null items
   }

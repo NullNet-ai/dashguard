@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/FormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 
 const FormSchema = z.object({
   "smart-date": z
@@ -14,7 +14,11 @@ const FormSchema = z.object({
       today.setHours(0, 0, 0, 0); // Set to start of the day
       return selectedDate >= today;
     }, { message: "Date cannot be in the past" }),
+  "smart-date-with-custom-time": z
+    .string({ message: "Date is required" })
+    .min(1, { message: "Date is required" })
 });
+
 const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
   return new Promise<void>((resolve, reject) => {
     try {
@@ -34,16 +38,18 @@ const handleSave = async (values: { data: z.infer<typeof FormSchema> }) => {
     }
   });
 };
-export default function SmartDateDetails({}) {
-  
 
+export default function SmartDateDetails({ }) {
   return (
     <>
       {/* FormBuilder 6: Date */}
       <FormBuilder
-      // defaultValues={{
-      //   "smart-date":"11/20/2024"
-      // }}
+        defaultValues={{
+          "smart-date": new Date().toISOString(),
+          "smart-date-24h": new Date().toISOString(),
+          "smart-date-yyyy-mm-dd": new Date().toISOString(),
+          "smart-date-yyyy-mm-dd-12h": new Date().toISOString()
+        }}
         enableFormRegisterToParent
         formLabel="Date Form Builder"
         formKey="FormBuilderDate"
@@ -54,13 +60,59 @@ export default function SmartDateDetails({}) {
             id: "smart-date",
             formType: "smart-date",
             name: "smart-date",
-            label: "Smart Date",
+            label: "Smart Date with External Time Picker (12-hour)",
             required: true,
             placeholder: "Smart Date",
-            dateTimePickerProps:{
+            dateTimePickerProps: {
               disablePastDates: true,
+              includeTime: true,
+              useTimePicker: true,
+              is24Hour: false // Explicitly set to 12-hour format
             }
           },
+          {
+            id: "smart-date-24h",
+            formType: "smart-date",
+            name: "smart-date-24h",
+            label: "Smart Date with External Time Picker (24-hour)",
+            required: true,
+            placeholder: "Smart Date",
+            dateTimePickerProps: {
+              disablePastDates: true,
+              includeTime: true,
+              useTimePicker: true,
+              is24Hour: true // Explicitly set to 24-hour format
+            }
+          },
+          {
+            id: "smart-date-yyyy-mm-dd",
+            formType: "smart-date",
+            name: "smart-date-yyyy-mm-dd",
+            label: "Smart Date with YYYY-MM-DD Format (defaults to 24-hour)",
+            required: true,
+            placeholder: "Smart Date",
+            dateTimePickerProps: {
+              disablePastDates: true,
+              includeTime: true,
+              useTimePicker: true,
+              displayFormat: "YYYY-MM-DD" // Will default to 24-hour format
+            }
+          },
+          {
+            id: "smart-date-yyyy-mm-dd-12h",
+            formType: "smart-date",
+            name: "smart-date-yyyy-mm-dd-12h",
+            label: "Smart Date with YYYY-MM-DD Format (12-hour)",
+            required: true,
+            placeholder: "Smart Date",
+            dateTimePickerProps: {
+              disablePastDates: true,
+              includeTime: true,
+              useTimePicker: true,
+              displayFormat: "YYYY-MM-DD",
+              is24Hour: false
+            }
+          }
         ]}
       />
     </>

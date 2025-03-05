@@ -17,7 +17,7 @@ import {
 } from 'react-hook-form';
 
 import {
-  AppRouterKeys,
+  type AppRouterKeys,
   type TActionType,
 } from '~/components/platform/Grid/types';
 import {
@@ -105,46 +105,61 @@ interface IField {
   dateMaxDate?: Date;
   timePickerProps?: TimePickerProps;
   dateTimePickerProps?: DateTimeLocalInputProps & {
-    granularity?: DateGranularity;
-    minDate?: Date;
-    maxDate?: Date;
-    disablePastDates?: boolean;
-    disableFutureDates?: boolean;
-    includeTime?: boolean;
-  };
-  dateInputProps?: NaturalLanguageInputProps;
-  description?: string;
-  switchConfig?: SwitchProps;
-  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
-  multiFieldConfig?: MultiFieldConfig;
-  comboboxConfig?: ComboBoxProps;
-  required?: boolean;
-  type?: HTMLInputTypeAttribute | undefined;
-  customRender?: React.JSX.Element;
-  min?: number;
-  max?: number;
-  step?: number;
-  hasFormMessage?: boolean;
-  render?: (props: CustomFieldProps) => React.ReactNode;
-  checkboxOrientation?: 'horizontal' | 'vertical';
-  radioOrientation?: 'horizontal' | 'vertical';
-  sliderLabel?: (value: number | undefined) => ReactNode;
-  sliderLabelPosition?: 'top' | 'bottom';
-  fileDropzoneOptions?: DropzoneOptions;
-  selectIcon?: ElementType;
+    granularity?: DateGranularity
+    minDate?: Date
+    maxDate?: Date
+    disablePastDates?: boolean
+    disableFutureDates?: boolean
+    includeTime?: boolean
+    useTimePicker?:boolean
+    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
+    is24Hour?:boolean
+  }
+  dateInputProps?: NaturalLanguageInputProps
+  description?: string
+  switchConfig?: SwitchProps
+  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?]
+  multiFieldConfig?: MultiFieldConfig
+  comboboxConfig?: ComboBoxProps
+  required?: boolean
+  type?: HTMLInputTypeAttribute | undefined
+  customRender?: React.JSX.Element
+  min?: number
+  max?: number
+  step?: number
+  hasFormMessage?: boolean
+  render?: (props: CustomFieldProps) => React.ReactNode
+  checkboxOrientation?: 'horizontal' | 'vertical'
+  radioOrientation?: 'horizontal' | 'vertical'
+  sliderLabel?: (value: number | undefined) => ReactNode
+  sliderLabelPosition?: 'top' | 'bottom'
+  fileDropzoneOptions?: DropzoneOptions
+  selectIcon?: ElementType
+  // InfiniteScroll configuration for select options
+  selectInfiniteScroll?: {
+    enabled?: boolean;
+    initialLimit?: number;
+    loadMoreStep?: number;
+    scrollThreshold?: number;
+    hasMore?: boolean;
+    loadingIndicator?: ReactNode;
+    endMessage?: ReactNode;
+    scrollableTarget?: string;
+  }
   multiSelectMaxSelected?: number;
   multiSelectDelay?: number;
-  multiSelectHidePlaceholderWhenSelected?: boolean;
-  multiSelectTriggerSearchOnFocus?: boolean;
-  multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined;
-  multiSelectLoadingIndicator?: ReactNode;
-  multiSelectEmptyIndicator?: ReactNode;
-  multiSelectHideClearAllButton?: boolean;
-  multiSelectShowCreatableItem?: boolean;
-  richTextOutput?: 'html' | 'json' | 'text';
-  inputRightAddOns?: ReactNode | string;
-  inputLeftAddOns?: ReactNode | string;
-  isMultiSelectAlphabetical?: boolean;
+  multiSelectHidePlaceholderWhenSelected?: boolean
+  multiSelectTriggerSearchOnFocus?: boolean
+  multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined
+  multiSelectLoadingIndicator?: ReactNode
+  multiSelectEmptyIndicator?: ReactNode
+  multiSelectHideClearAllButton?: boolean
+  multiSelectShowCreatableItem?: boolean
+  multiSelectUseStringValues?: boolean
+  richTextOutput?: 'html' | 'json' | 'text'
+  inputRightAddOns?: ReactNode | string
+  inputLeftAddOns?: ReactNode | string
+  isMultiSelectAlphabetical?: boolean
   options?: {
     phoneNumberType?: TSelectionType;
     phoneEmailType?: TSelectionType;
@@ -371,6 +386,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  customConfig?:Record<string, any>;
   fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;

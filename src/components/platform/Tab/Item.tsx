@@ -17,7 +17,7 @@ type ItemProps = {
 
 const Item = ({ tab, actions }: ItemProps) => {
   const padding = tab.name === 'dashboard' ? 'pr-2' : 'pr-0'
-  const checkIfUserRole = (entity: string) => entity === 'user_role' ? true : false
+  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
   const updateTabs = api.tab.updateMainTabs.useMutation()
   const pathname = usePathname()
   // eslint-disable-next-line no-unsafe-optional-chaining
@@ -36,15 +36,12 @@ const Item = ({ tab, actions }: ItemProps) => {
   }, [isActive])
 
   return (
-    <Fragment key={checkIfUserRole(tab.name) ? 'role' : tab.name}>
+    <Fragment key={tab.name}>
       <div className="group relative flex items-center">
         <Link
           data-test-id={
             'mntab-'
-            + (checkIfUserRole(tab.name) ? 'role' : tab.name)
-              .split(' ')
-              .join('-')
-              .toLowerCase()
+            + tabNameRole
           }
           href={tab.href}
           aria-current={isActive ? 'page' : undefined}
@@ -54,7 +51,7 @@ const Item = ({ tab, actions }: ItemProps) => {
               : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding
           )}
         >
-          {formatTabName(checkIfUserRole(tab.name) ? 'role' : tab.name)}
+          {formatTabName(tabNameRole)}
           <CloseTab actions={actions} {...tab} />
           {isActive && (
             <span className={cn(`absolute bottom-[-2px] md:bottom-[-6px] lg:bottom-[-4px] z-10 h-1 w-full bg-white`, 

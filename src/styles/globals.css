@@ -250,6 +250,11 @@ body {
   overscroll-behavior: none !important;
 }
 
+.writing-mode-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
 @keyframes slide {
   0% {
     left: -100%;

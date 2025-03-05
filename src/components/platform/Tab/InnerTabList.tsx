@@ -88,7 +88,11 @@ const getSessionTabs = async () => {
     entity: mainEntity || '',
   })
 
-  return newTabs
+  const customTabs = await api.grid.getCustomGridTabs({
+    application: application || '',
+    entity: mainEntity || '',
+  })
+  return newTabs.filter(Boolean)
 }
 
 const InnerTabs = async () => {

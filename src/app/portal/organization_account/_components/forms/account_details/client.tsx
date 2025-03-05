@@ -51,9 +51,9 @@ export default function BasicDetails({
           id: 'username',
           formType: 'input',
           name: 'username',
-          label: 'Username',
+          label: 'Email',
           required: true,
-          placeholder: 'Enter your username',
+          placeholder: 'Enter your email',
         },
         {
           id: 'role',

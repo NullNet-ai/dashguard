@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { ulid } from 'ulid';
 
 import { WizardContext } from '~/components/platform/Wizard/Provider';
@@ -60,12 +60,9 @@ export default function FormFilterGrid({
   }, [versionNumber]);
   const { state } = useContext(dynamicWizardContext ?? WizardContext);
   const { open } = useSidebar();
-
-  const fetchData = () => {
-    const router = searchConfig?.router || 'grid';
-    const resolver = searchConfig?.resolver || 'items';
-    const query_params = searchConfig?.query_params;
-    const updateSearchItems = (query_params?.default_advance_filters ?? [])
+ const updateSearchItem = useMemo(() => {
+  const query_params = searchConfig?.query_params;
+  const updateSearchItems = (query_params?.default_advance_filters ?? [])
       .length
       ? [
           ...(query_params?.default_advance_filters ?? []),
@@ -76,6 +73,13 @@ export default function FormFilterGrid({
           ...[],
         ]
       : [];
+  return updateSearchItems;
+ } , [searchConfig?.query_params])
+
+  const fetchData = () => {
+    const router = searchConfig?.router || 'grid';
+    const resolver = searchConfig?.resolver || 'items';
+  
 
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     return api[router][resolver].useQuery({
@@ -83,7 +87,7 @@ export default function FormFilterGrid({
       current,
       limit: limit || 100,
       pluck,
-      advance_filters: updateSearchItems,
+      advance_filters: updateSearchItem,
       sorting: [],
     });
   };

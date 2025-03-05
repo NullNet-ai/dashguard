@@ -15,6 +15,7 @@ function MainServer({
   defaultAdvanceFilter,
   advanceFilter,
   pagination,
+  parentType = 'grid',
 }: IPropsGrid) {
   return (
     <GridProvider
@@ -28,7 +29,7 @@ function MainServer({
       pagination={pagination}
     >
       <GridScrollView className="hidden lg:block">
-        <GridDesktop />
+        <GridDesktop parentType={parentType} />
       </GridScrollView>
       <div className="my-0 lg:my-8 h-full md:my-8 md:mt-0 md:mb-12 lg:mb-0 lg:hidden">
         <GridMobile />

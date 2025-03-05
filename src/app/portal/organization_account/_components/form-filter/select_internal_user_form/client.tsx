@@ -227,6 +227,12 @@ export default function BasicDetails({
           label: 'First Name',
           required: true,
           placeholder: 'Example: John',
+          withGridFilter: true,
+          gridPosition: 'right',
+          filterFieldConfig: {
+            entity: 'contact',
+            field: 'first_name',
+          },
         },
         {
           id: 'last_name',
@@ -235,6 +241,12 @@ export default function BasicDetails({
           label: 'Last Name',
           required: true,
           placeholder: 'Example: Smith',
+          withGridFilter: true,
+          gridPosition: 'right',
+          filterFieldConfig: {
+            entity: 'contact',
+            field: 'last_name',
+          },
         },
         {
           id: 'middle_name',

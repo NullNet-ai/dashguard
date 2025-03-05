@@ -12,7 +12,7 @@ import gridColumns from "./_config/columns";
 import defaultSorting from "./_config/sorting";
 
 export default async function Page() {
-  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
 
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
@@ -25,7 +25,7 @@ export default async function Page() {
     pluck: _pluck,
     current: +(pagination?.current_page ?? "0"),
     limit: +(pagination?.limit_per_page ?? "100"),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts.defaultSorting?.length ? sorts.defaultSorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
@@ -36,7 +36,7 @@ export default async function Page() {
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
+      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       config={{
         entity: main_entity!,
         title: "New Grid",

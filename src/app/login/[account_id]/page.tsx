@@ -30,7 +30,7 @@ export default async function Login({ params, searchParams }: any) {
 
           <div className="mt-11">
             <div>
-              <LoginForm defaultValues={ { username: response?.data?.account_id ?? '' } } />
+              <LoginForm defaultValues={ { username: response?.data?.account_id ?? '' } } invitation_id={searchParams.invitation_id} />
             </div>
           </div>
         </div>

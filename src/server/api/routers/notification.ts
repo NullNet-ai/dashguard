@@ -6,6 +6,7 @@ import Notifications from '~/module/notification/notifications.class'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { mockNotifications } from '../mock-data/notification'
+import { mockUserRoles } from '../mock-data/user-roles'
 
 const ENTITY = 'notification'
 
@@ -191,6 +192,7 @@ export const notificationsRouter = createTRPCRouter({
         }, token,
       )
     }
+
     return {
       success: true,
     }
