@@ -183,7 +183,15 @@ export default function ProfileImage({ details, entity, token }: any) {
         <div className='relative group'>
           <div
             title="Record summary image"
-            className="bg-muted w-full md:w-[277px] h-[150px] flex items-center justify-center"
+            className="bg-muted w-full md:w-[277px] h-[150px] flex items-center justify-center cursor-pointer"
+            onClick={() => {
+              if(imageUrl)  {
+                setIsPreviewModalOpen(true)
+              }
+              else {
+                actions?.openSideDrawer(config)
+              }
+            }}
           >
 
             {imageUrl
