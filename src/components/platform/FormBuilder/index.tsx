@@ -41,6 +41,7 @@ export const FormBuilder = (props: IPropsForms) => {
     create_mode = true,
     myParent,
     fieldConfig,
+    customConfig,
   } = props
 
   const { actions } = useWizard()
@@ -178,6 +179,14 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   }, [formHostInitialView, myParent, enableFormRegisterToParent])
 
+  useEffect(() => {
+     if(customConfig?.defaultState === 'unlock') {
+      setTimeout(() => {
+        form.control._disableForm(false)
+      }, (100));
+     }
+  }, [])
+
   //* HANDLERS
 
   //* handler to disable form
@@ -278,6 +287,7 @@ export const FormBuilder = (props: IPropsForms) => {
   const handleLock = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     disableForm()
+
   };
 
   const handleAccordionExpand = (e: React.MouseEvent<HTMLButtonElement>) => {
