@@ -52,8 +52,8 @@ export default async function Page({
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter || []}
-      advanceFilter={filters?.reportFilters || []}
+      defaultAdvanceFilter={filters?.defaultFilters || []}
+      advanceFilter={filters?.advanceFilter || []}
       sorting={sorts?.sorting || []}
       pagination={pagination}
       config={{
@@ -66,14 +66,14 @@ export default async function Page({
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
-        infiniteConfig:{
-          router: "grid",
-          resolver: "getInfiniteData",
-          query_params: {
-            entity: "contact",
-            pluck: _pluck,
-          },
-        },
+        // infiniteConfig:{
+        //   router: "grid",
+        //   resolver: "getInfiniteData",
+        //   query_params: {
+        //     entity: "contact",
+        //     pluck: _pluck,
+        //   },
+        // },
         searchConfig: {
           router: "contact",
           resolver: "mainGrid",
