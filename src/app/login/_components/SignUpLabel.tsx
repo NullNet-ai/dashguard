@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import redirectToSignUp from '../actions/redirectToSignUp'
+import redirectToSignUp from '../_actions/redirectToSignUp'
 
 const SignUpLabel = () => {
   return (

@@ -4,6 +4,7 @@ import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
 import { TRPCError } from '@trpc/server';
 import Entities from '~/auto-generated/entities';
 import { headers } from 'next/headers';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -192,14 +193,11 @@ export const recordRouter = createTRPCRouter({
         entity: 'organization_accounts',
         token: rootAccountToken,
         query: {
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'account_id',
-              operator: EOperator.EQUAL,
-              values: [response?.email],
-            },
-          ],
+          advance_filters: createAdvancedFilter({
+            account_id: response?.email,
+            status: 'Active',
+            // account_status: 'Active',
+          }),
           pluck_object: {
             organization_accounts: [
               'id',

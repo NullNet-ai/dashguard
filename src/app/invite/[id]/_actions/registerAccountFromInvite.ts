@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 
 import { api } from '~/trpc/server';
 import { handleLoginError } from '~/utils/login-validator';
-import argon2 from 'argon2';
 
 interface LoginSubmitArgs {
   first_name: string;
@@ -96,26 +95,6 @@ export default async function registerAccountFromInvite({
      * Verify session
      */
     await verifySession();
-
-    // /**
-    //  * create contact
-    //  */
-    // const contact_id = registrationDetails.data?.[0]?.contact_id
-    // const contactDetailsResponse = await api.form.updateDynamicRecord({
-    //   entity: 'contact',
-    //   id: contact_id,
-    //   data: {
-    //     first_name,
-    //     last_name,
-    //     status: 'Draft',
-    //     categories: ['Contact'],
-    //   },
-    // })
-
-    // const contactDetailsError = handleLoginError(contactDetailsResponse)
-    // if (contactDetailsError) {
-    //   return contactDetailsResponse
-    // }
 
     return registrationDetails;
   } catch (err) {

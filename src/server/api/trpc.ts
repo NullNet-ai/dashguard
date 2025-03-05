@@ -209,6 +209,7 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
     `[${new Date().toISOString()}]-` + '[TOKEN-CACHE-MISS]: ',
     legend(timing),
   );
+
   if (!session) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',

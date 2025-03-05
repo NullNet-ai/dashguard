@@ -1,7 +1,7 @@
 'use server'
 import { redirect } from 'next/navigation'
 
-import { verifySession } from '~/app/login/actions/loginSubmit'
+import { verifySession } from '~/app/login/_actions/loginSubmit'
 import { api } from '~/trpc/server'
 import { handleLoginError } from '~/utils/login-validator'
 interface RegisterAccountArgs {
