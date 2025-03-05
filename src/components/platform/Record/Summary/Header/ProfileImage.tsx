@@ -68,16 +68,24 @@ function UploadComponent(props: any) {
       customDesign={{
         formClassName: '!grid-cols-1',
       }}
-      {...(metadata?.imageId || details?.data?.image_url
-        ? {
-            defaultValues: {
-              upload: [
-                metadata?.imageId || details?.data?.image_url || '',
-              ],
-              edited_files: [],
-            },
-          }
-        : {})}
+      defaultValues= {
+        {
+          upload: [
+            metadata?.imageId || details?.data?.image_url || '',
+          ],
+          edited_files: [],
+        }
+      } 
+      // {...(metadata?.imageId || details?.data?.image_url
+      //   ? {
+      //       defaultValues: {
+      //         upload: [
+      //           metadata?.imageId || details?.data?.image_url || '',
+      //         ],
+      //         edited_files: [],
+      //       },
+      //     }
+      //   : {})}
       fields={[
         {
           id: 'upload',
