@@ -254,3 +254,15 @@ body {
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
+
+@keyframes slide {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+.animate-slide {
+  animation: slide 1.5s infinite linear;
+}
