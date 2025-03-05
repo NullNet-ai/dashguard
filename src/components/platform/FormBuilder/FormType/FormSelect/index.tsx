@@ -14,6 +14,7 @@ import {
   type ControllerRenderProps,
 } from "react-hook-form";
 import { usePopper } from "react-popper";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 import { Badge } from "~/components/ui/badge";
 import {
@@ -27,6 +28,7 @@ import { cn, formatFormTestID } from "~/lib/utils";
 
 import { createRecord } from "../../Actions/CreateRecord";
 import { type IField, type ISelectOptions } from "../../types";
+import Skeleton from "~/components/platform/Grid/Skeleton";
 
 interface IProps {
   fieldConfig: IField;
@@ -54,7 +56,14 @@ export default function FormSelect({
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-
+  
+  // InfiniteScroll state
+  const infiniteScrollConfig = fieldConfig.selectInfiniteScroll || {};
+  const initialLimit = infiniteScrollConfig.initialLimit || 50;
+  const loadMoreStep = infiniteScrollConfig.loadMoreStep || 50;
+  const [displayLimit, setDisplayLimit] = useState(initialLimit);
+  const [hasMore,] = useState(infiniteScrollConfig.hasMore !== false);
+  
   const isDisabled = fieldConfig.disabled ?? false;
   const isReadOnly = fieldConfig.isCustomFormField
     ? fieldConfig.readonly
@@ -131,12 +140,11 @@ export default function FormSelect({
   const filteredOptions = useMemo(() => {
     const filtered =
       query === ""
-        ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
+        ? options?.filter((opt) => !!opt?.label)
         : options
           ?.filter((opt) => {
             return opt.label.toLowerCase().includes(query.toLowerCase()?.trim());
           })
-          ?.slice(0, 5)
           ?.filter((opt) => !!opt?.label);
 
     return sortOptions(filtered ?? []);
@@ -242,7 +250,7 @@ export default function FormSelect({
           {SelectIcon && (
             <SelectIcon
               className={cn(
-                "absolute left-2 top-2.5 size-5 text-muted-foreground",
+                "absolute left-2 top-2 size-5 text-muted-foreground",
                 {
                   "opacity-50": isDisabled,
                 },
@@ -256,7 +264,7 @@ export default function FormSelect({
             disabled={isDisabled}
             ref={setReferenceElement}
             className={cn(
-              "block w-full rounded-md border-border py-[5px] text-md pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
+              "block w-full rounded-md border-border py-[5px] text-md pl-9 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
               {
                 "outline-destructive": error,
                 "border-destructive": error,
@@ -308,33 +316,93 @@ export default function FormSelect({
               data-test-id={`${formKey}-opts-${fieldConfig.name}`}
               portal={true}
             >
-              {filteredOptions?.slice(0, 700).map((opt) => (
-                <ComboboxOption
-                  key={opt?.value}
-                  value={opt}
-                  disabled={isDisabled || isReadOnly}
-                  className={cn(
-                    "group relative cursor-default select-none py-2 pr-12 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
-                    SelectIcon ? "pl-8" : "pl-2",
-                    {
-                      "cursor-not-allowed": isDisabled,
-                      "cursor-default": isReadOnly,
-                    },
-                  )}
-                  data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+              {infiniteScrollConfig.enabled ? (
+                <div 
+                  id={infiniteScrollConfig.scrollableTarget || "select-scrollable-div"}
+                  className="max-h-60 overflow-auto"
                 >
-                  <span
-                    className="block truncate"
-                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                  <InfiniteScroll
+                    dataLength={Math.min(filteredOptions.length, displayLimit)}
+                    next={() => setDisplayLimit(prev => prev + loadMoreStep)}
+                    hasMore={hasMore && filteredOptions.length > displayLimit}
+                    loader={infiniteScrollConfig.loadingIndicator || <div className="p-2"><Skeleton /></div>}
+                    scrollableTarget={infiniteScrollConfig.scrollableTarget || "select-scrollable-div"}
+                    scrollThreshold={infiniteScrollConfig.scrollThreshold || 0.8}
+                    endMessage={
+                      infiniteScrollConfig.endMessage || (
+                        filteredOptions.length > 0 ? (
+                          <div className="flex justify-center py-2">
+                            <p className="text-center text-sm text-gray-500">
+                              No more options
+                            </p>
+                          </div>
+                        ) : null
+                      )
+                    }
                   >
-                    {opt.label}
-                  </span>
+                    {filteredOptions.slice(0, displayLimit).map((opt) => (
+                      <ComboboxOption
+                        key={opt?.value}
+                        value={opt}
+                        disabled={isDisabled || isReadOnly}
+                        className={cn(
+                          "group relative cursor-default select-none py-2 pr-12 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                          SelectIcon ? "pl-8" : "pl-2",
+                          {
+                            "cursor-not-allowed": isDisabled,
+                            "cursor-default": isReadOnly,
+                          },
+                        )}
+                        data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+                      >
+                        <span
+                          className="block truncate"
+                          data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                        >
+                          {opt.label}
+                        </span>
 
-                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
-                    <CheckIcon className="size-5" aria-hidden="true" />
-                  </span>
-                </ComboboxOption>
-              ))}
+                        <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
+                          <CheckIcon className="size-5" aria-hidden="true" />
+                        </span>
+                      </ComboboxOption>
+                    ))}
+                  </InfiniteScroll>
+                </div>
+              ) : (
+                // Original non-infinite scroll implementation
+                <>
+                  {filteredOptions?.slice(0, 700).map((opt) => (
+                    <ComboboxOption
+                      key={opt?.value}
+                      value={opt}
+                      disabled={isDisabled || isReadOnly}
+                      className={cn(
+                        "group relative cursor-default select-none py-2 pr-12 text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
+                        SelectIcon ? "pl-8" : "pl-2",
+                        {
+                          "cursor-not-allowed": isDisabled,
+                          "cursor-default": isReadOnly,
+                        },
+                      )}
+                      data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
+                    >
+                      <span
+                        className="block truncate"
+                        data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
+                      >
+                        {opt.label}
+                      </span>
+
+                      <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
+                        <CheckIcon className="size-5" aria-hidden="true" />
+                      </span>
+                    </ComboboxOption>
+                  ))}
+                </>
+              )}
+              
+              {/* Create new option button */}
               {fieldConfig?.selectEnableCreate
                 ? !isOptionsExist &&
                 query && (
