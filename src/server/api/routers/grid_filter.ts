@@ -113,6 +113,11 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
 
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const [,, mainEntity, application] = pathName.split('/');
+      
+
       const { data, message, success, errors } = await ctx.dnaClient
         .update(input.id!, {
           entity: ENTITY,
@@ -147,6 +152,34 @@ export const gridFilterRouter = createTRPCRouter({
         throw new Error(message);
       }
 
+
+      // update data on redis
+      if (application!== 'grid' ||!mainEntity) return [];
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+      });
+      const tabs = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+      
+      const updatedTab = tabs.map((tab) => {
+        if (tab.id === input.id) {
+          return {
+            ...tab,
+            name: input.name,
+            columns: input.columns,
+            groups: input.groups,
+            sorts: input.sorts,
+            advance_filters: input.default_filter,
+            default_sorts: input.default_sorts,
+            default_filter : input.default_filter,
+          };
+        }
+        return tab;
+      });
+      await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
       return data;
     }),
 
