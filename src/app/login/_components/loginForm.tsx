@@ -11,7 +11,8 @@ import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Form, FormField, FormMessage } from '~/components/ui/form';
 
-import LoginSubmit from '../actions/loginSubmit';
+import LoginSubmit from '../_actions/loginSubmit';
+import { Alert, AlertContent } from '~/components/ui/alert';
 
 const formSchema = z.object({
   username: z
@@ -22,7 +23,6 @@ const formSchema = z.object({
 
 export default function LoginForm(props: any) {
   const { defaultValues, invitation_id } = props;
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -30,12 +30,16 @@ export default function LoginForm(props: any) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
       const response = await LoginSubmit({ ...data, invitation_id });
-      if (response && response.statusCode !== 200) {
+      if (response && (response.statusCode !== 200 || !response.valid)) {
+        if (response.errorMessage) {
+          setErrorMessage(response.errorMessage);
+        }
         throw response;
       }
     } catch (error: any) {
@@ -51,83 +55,90 @@ export default function LoginForm(props: any) {
   };
 
   return (
-    <Form {...form}>
-      <form
-        className="space-y-6"
-        onSubmit={(event) => {
-          form.handleSubmit(onSubmit)(event);
-        }}
-      >
-        <FormField
-          control={form.control}
-          name="username"
-          render={(formProps) => {
-            return (
-              <FormInput
-                fieldConfig={{
-                  id: 'username',
-                  name: 'username',
-                  label: 'Email',
-                  required: true,
-                  placeholder: 'Enter your email',
-                  type: 'text',
-                }}
-                form={form}
-                formKey="Login"
-                formRenderProps={formProps}
-              />
-            );
+    <>
+      {errorMessage && (
+        <Alert variant="error" className="mb-3">
+          <AlertContent>{errorMessage}</AlertContent>
+        </Alert>
+      )}
+      <Form {...form}>
+        <form
+          className="space-y-6"
+          onSubmit={(event) => {
+            form.handleSubmit(onSubmit)(event);
           }}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={(formProps) => {
-            return (
-              <FormPassword
-                fieldConfig={{
-                  id: 'password',
-                  name: 'password',
-                  label: 'Password',
-                  required: true,
-                  placeholder: 'Enter at least 5 characters',
-                }}
-                form={form}
-                formKey="Login"
-                formRenderProps={formProps}
-              />
-            );
-          }}
-        />
-        {error && <FormMessage>{error}</FormMessage>}
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center">
-            <Checkbox id="rememberMe" name="rememberMe" />
-            <label
-              className="ml-2 block text-md font-semibold text-foreground"
-              htmlFor="rememberMe"
-            >
-              Remember me
-            </label>
-          </div>
-          <div className="text-md">
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="font-semibold text-primary" href="#">
-              Forgot Password?
-            </a>
-          </div>
-        </div>
-        <Button
-          className={
-            'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
-          }
-          data-test-id="login-submit-btn"
-          loading={isSubmitting}
-          type="submit"
         >
-          Sign in
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="username"
+            render={(formProps) => {
+              return (
+                <FormInput
+                  fieldConfig={{
+                    id: 'username',
+                    name: 'username',
+                    label: 'Email',
+                    required: true,
+                    placeholder: 'Enter your email',
+                    type: 'text',
+                  }}
+                  form={form}
+                  formKey="Login"
+                  formRenderProps={formProps}
+                />
+              );
+            }}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={(formProps) => {
+              return (
+                <FormPassword
+                  fieldConfig={{
+                    id: 'password',
+                    name: 'password',
+                    label: 'Password',
+                    required: true,
+                    placeholder: 'Enter at least 5 characters',
+                  }}
+                  form={form}
+                  formKey="Login"
+                  formRenderProps={formProps}
+                />
+              );
+            }}
+          />
+          {error && <FormMessage>{error}</FormMessage>}
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center">
+              <Checkbox id="rememberMe" name="rememberMe" />
+              <label
+                className="ml-2 block text-md font-semibold text-foreground"
+                htmlFor="rememberMe"
+              >
+                Remember me
+              </label>
+            </div>
+            <div className="text-md">
+              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+              <a className="font-semibold text-primary" href="#">
+                Forgot Password?
+              </a>
+            </div>
+          </div>
+          <Button
+            className={
+              'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
+            }
+            data-test-id="login-submit-btn"
+            loading={isSubmitting}
+            type="submit"
+          >
+            Sign in
+          </Button>
+        </form>
+      </Form>
+    </>
   );
 }

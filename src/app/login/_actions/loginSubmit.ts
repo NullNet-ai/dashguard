@@ -35,7 +35,19 @@ export default async function LoginSubmit({
   }
 
   const accountDataResponse = await api.auth.getAccountData({ username });
-  const { id, is_new_user } = accountDataResponse ?? {};
+  const { id, is_new_user, status, account_status } = accountDataResponse ?? {};
+
+  if (
+    status !== 'Active' ||
+    (account_status &&
+      !['Active', 'Pending Setup', 'Invited'].includes(account_status ?? ''))
+  ) {
+    return {
+      valid: false,
+      errorMessage:
+        'Your account has been deactivated. Please contact support for assistance.',
+    };
+  }
 
   // archive invitation
   if (invitation_id) {

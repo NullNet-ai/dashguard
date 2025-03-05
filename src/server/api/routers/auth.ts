@@ -79,12 +79,12 @@ export const authRouter = createTRPCRouter({
     }),
 
   getToken: privateProcedure
-   .input(
+    .input(
       z.object({
         username: z.string().min(1),
       }),
     )
-   .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       const token = await ctx.redisClient.getCachedData(
         `account_token:${input.username}`,
       );
@@ -94,29 +94,23 @@ export const authRouter = createTRPCRouter({
   getAccountData: privateProcedure
     .input(
       z.object({
-        username: z.string().min(1),
+          username: z.string().min(1),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({  ctx }) => {
       try {
+        const account = ctx.session.account;
+        const accountId = account?.organization_account_id;
+
         const response = await ctx.dnaClient
-          .findAll({
+          .findOne(accountId, {
             entity: 'organization_accounts',
             token: ctx.token.value,
             query: {
-              advance_filters: [
-                {
-                  type: 'criteria',
-                  field: 'account_id',
-                  operator: EOperator.EQUAL,
-                  values: [input.username],
-                },
-              ],
-              pluck: ['id', 'is_new_user', 'contact_id'],
+            pluck: ['id', 'is_new_user', 'contact_id', 'account_status', 'status'],
             },
           })
           .execute();
-
         if (!response.success) {
           return null;
         }
@@ -139,36 +133,36 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const currentToken = ctx.token.value;
-      const rootAccount = await ctx.dnaClient
-        .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
-        .execute();
-      const rootAccountToken = rootAccount?.data?.[0]?.token;
-      const newOrganization = await ctx.dnaClient
-        .rootSwitchAccount(currentToken, input.organization_id, {
-          token: rootAccountToken,
-        })
-        .execute();
+        const rootAccount = await ctx.dnaClient
+          .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+          .execute();
+        const rootAccountToken = rootAccount?.data?.[0]?.token;
+        const newOrganization = await ctx.dnaClient
+          .rootSwitchAccount(currentToken, input.organization_id, {
+            token: rootAccountToken,
+          })
+          .execute();
 
-      const session = await ctx.dnaClient
-        .verifyToken(newOrganization?.data?.[0]?.token)
-        .execute()
-        .then((res) => {
-          return res.data?.[0] as TokenData;
-        })
-        .catch(() => {
-          throw new Error('Invalid Token');
-        });
+        const session = await ctx.dnaClient
+          .verifyToken(newOrganization?.data?.[0]?.token)
+          .execute()
+          .then((res) => {
+            return res.data?.[0] as TokenData;
+          })
+          .catch(() => {
+            throw new Error('Invalid Token');
+          });
 
-      if (session) {
-        ctx.storeCookies.set(
-          session.account.organization_account_id,
-          newOrganization?.data?.[0]?.token,
-        );
-        return {
-          session,
-          token: newOrganization?.data?.[0]?.token,
-        };
-      }
+        if (session) {
+          ctx.storeCookies.set(
+            session.account.organization_account_id,
+            newOrganization?.data?.[0]?.token,
+          );
+          return {
+            session,
+            token: newOrganization?.data?.[0]?.token,
+          };
+        }
       } catch (error: any) {
         return {
           message: error?.message ??  'Something went wrong please try again',
