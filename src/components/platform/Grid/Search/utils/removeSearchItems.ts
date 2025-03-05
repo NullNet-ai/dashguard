@@ -4,16 +4,24 @@ export const removeSearchItems = (
   searchItems: ISearchItem[],
   filterItem: ISearchItem,
 ) => {
-  const data = [...searchItems];
-  const index = data.findIndex((item) => item?.id === filterItem?.id);
-  if (index === -1) return data;
-  if (index === 0) {
-    // If removing `a`, also remove `b` (even + adjacent odd)
-    data.splice(0, 2); // Remove items from index 0 to 1
-  } else if (index % 2 === 0) {
-    // If removing an even-positioned item (like `c` or `e`)
-    data.splice(index - 1, 2); // Remove the item and its preceding odd-positioned item
+  const index = searchItems.findIndex(
+    (item) =>
+      item.entity === filterItem.entity &&
+      item.operator === filterItem.operator &&
+      item.type === filterItem.type &&
+      item.field === filterItem.field &&
+      JSON.stringify(item.values) === JSON.stringify(filterItem.values) &&
+      item.default === filterItem.default
+  );
+  
+  // Remove filterItem and its preceding "and" operator
+  if (index !== -1) {
+    if (index > 0 && searchItems?.[index - 1]?.operator === "and" && searchItems?.[index - 1]?.type === "operator") {
+      searchItems.splice(index - 1, 2); // Remove the "and" operator and filterItem
+    } else {
+      searchItems.splice(index, 1); // Just remove the filterItem
+    }
   }
 
-  return data;
+  return searchItems;
 };

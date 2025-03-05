@@ -189,6 +189,9 @@ export const contactRouter = createTRPCRouter({
           pluck_group_object: {
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
+            organization_contacts: ['id', 'contact_organization_id'],
+            organizations: ['id', 'name'],
+
           },
           pluck_object: {
             contact_emails: ['email', 'is_primary'],
@@ -199,6 +202,8 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
+            organization_contacts: ['id', 'contact_organization_id'],
+            organizations: ['id', 'name'],
           },
           track_total_records: true,
           advance_filters: [
@@ -281,95 +286,35 @@ export const contactRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organization_contacts',
+            field: 'contact_id',
+          },
+          from: {
+            entity: 'contacts',
+            field: 'id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_contacts',
+            field: 'contact_organization_id',
+          },
+        },
+      })
       .execute()
-
-    const fetchOrganizations = async (contact_id: string) => {
-      const org_contacts: any = await ctx.dnaClient
-        .findAll({
-          entity: 'organization_contacts',
-          token: ctx.token.value,
-          query: {
-            pluck_object: {
-              organizations: ['id', 'name'],
-              organization_contacts: [
-                'id',
-                'contact_organization_id',
-                'is_primary',
-              ],
-            },
-            advance_filters: createAdvancedFilter({
-              contact_id,
-            }),
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'organizations',
-              field: 'id',
-            },
-            from: {
-              entity: 'organization_contacts',
-              field: 'contact_organization_id',
-            },
-          },
-        })
-        .execute()
-
-      const primary_org = org_contacts.data.find(
-        (org: Record<string, any>) => !!org.organization_contacts.is_primary,
-      )
-
-      const org_contact_user_roles = await ctx.dnaClient
-        .findAll({
-          entity: 'organization_contact_user_roles',
-          token: ctx.token.value,
-          query: {
-            pluck_object: {
-              user_roles: ['id', 'role'],
-              organization_contact_user_roles: ['id'],
-            },
-            advance_filters: createAdvancedFilter({
-              organization_contact_id: primary_org?.organization_contacts?.id,
-            }),
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'user_roles',
-              field: 'id',
-            },
-            from: {
-              entity: 'organization_contact_user_roles',
-              field: 'user_role_id',
-            },
-          },
-        })
-        .execute()
-
-      return {
-        organization: primary_org?.organizations?.name ?? '',
-        roles: org_contact_user_roles?.data
-          ? org_contact_user_roles.data.map(item => item?.user_roles?.role)
-          : [],
-      }
-    }
-
-    let formatted_items = await Bluebird.map(items, async (item: any) => {
-      const { organization, roles } = await fetchOrganizations(
-        item?.contacts?.id,
-      )
-      return {
-        organization,
-        roles,
-        ...item,
-      }
-    })
-
-    formatted_items = formatted_items.reduce(
+  
+    const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
         const {
           contacts,
@@ -378,7 +323,7 @@ export const contactRouter = createTRPCRouter({
           created_by,
           updated_by,
           roles,
-          organization,
+          organizations,
         } = item
 
         const emails = pick(contact_emails, ['emails', 'is_primaries'])
@@ -421,7 +366,7 @@ export const contactRouter = createTRPCRouter({
           ...acc,
           {
             roles,
-            organization,
+            organization: organizations?.names,
             ...contacts,
             ...emails,
             ...phones,

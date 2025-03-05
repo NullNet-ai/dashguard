@@ -19,7 +19,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     code: identifier!,
   });
 
-  const { organizations, user_roles } = record?.data || {};
+  const { organizations } = record?.data || {};
 
   useRefetchRecord({
     refetch,
@@ -32,19 +32,12 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div>
       <p>
-        <strong> Organization: </strong>
+        <strong> Department: </strong>
         &nbsp;{" "}
         {organizations?.length
           ? organizations
               ?.map(({ label }: { label: string }) => label)
               .join(", ")
-          : "None"}
-      </p>
-      <p>
-        <strong> Role: </strong>
-        &nbsp;{" "}
-        {user_roles?.length
-          ? user_roles?.map(({ label }: { label: string }) => label).join(", ")
           : "None"}
       </p>
     </div>
@@ -57,7 +50,7 @@ const SummaryConfig = {
   show_summary: true,
   components: [
     {
-      label: "Organization",
+      label: "Department Details",
       component: <Summary form_key={"organization_details"} />,
     },
   ],

@@ -23,7 +23,6 @@ export default async function Invite({ searchParams }: any) {
   if (!searchParams.token) {
     return redirect('/login');
   }
-
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
@@ -32,13 +31,21 @@ export default async function Invite({ searchParams }: any) {
     token: searchParams.token,
   });
 
-  if (isInvitationLinkExpired(record?.invitation?.created_date)) {
+  if (
+    !record || !record?.invitation?.id ||
+    isInvitationLinkExpired(record?.invitation?.created_date) ||
+    record.invitation?.status === 'Archived'
+  ) {
     Promise.all([
       api.record.updateDynamicRecord({
         entity: 'organization_account',
         id: record?.id,
         data: {
-          account_status: 'Invitation Expired',
+          account_status: ['Pending Setup', 'Invited'].includes(
+            record?.account_status,
+          )
+            ? 'Invitation Expired'
+            : record?.account_status,
         },
       }),
       api.record.updateDynamicRecord({
@@ -53,9 +60,9 @@ export default async function Invite({ searchParams }: any) {
     return redirect('/expired-link', RedirectType.push);
   }
 
-  if (record?.categories.includes('Internal User')) {
+  if (record?.categories?.includes('Internal User')) {
     return redirect(
-      `/login/${record.id}?token=${searchParams.token}`,
+      `/login/${record.id}?token=${searchParams.token}&invitation_id=${record.invitation?.id}`,
       RedirectType.push,
     );
   }
@@ -84,11 +91,12 @@ export default async function Invite({ searchParams }: any) {
             <div>
               <SignUpForm
                 recordData={
-                  record?.categories.includes('External User') ? record : {}
+                  record?.categories?.includes('External User') ? record : {}
                 }
                 account_id={
-                  record?.categories.includes('External User') ? record?.id : ''
+                  record?.categories?.includes('External User') ? record?.id : ''
                 }
+                invitation_id={record?.invitation?.id}
               />
             </div>
             <SignInLabel />

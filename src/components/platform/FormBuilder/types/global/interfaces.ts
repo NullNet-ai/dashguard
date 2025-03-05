@@ -111,6 +111,9 @@ interface IField {
     disablePastDates?: boolean
     disableFutureDates?: boolean
     includeTime?: boolean
+    useTimePicker?:boolean
+    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
+    is24Hour?:boolean
   }
   dateInputProps?: NaturalLanguageInputProps
   description?: string
@@ -372,6 +375,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
+  customConfig?:Record<string, any>;
   fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;

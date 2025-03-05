@@ -23,7 +23,6 @@ const FormServerFetch = async () => {
       <AccountDetails
         defaultValues={{ ...accounts }}
         selectOptions={{
-          organization_id: options?.organization,
           role_id: options?.user_role,
         }}
         params={{

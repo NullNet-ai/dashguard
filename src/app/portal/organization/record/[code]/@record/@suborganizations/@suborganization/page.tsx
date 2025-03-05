@@ -32,7 +32,7 @@ export default async function RecordTabContainer({
     "updated_by",
   ];
 
-  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
   const response = await api.organization.getByCode({
     code: identifier!,
     pluck_fields: ["id", "name"],
@@ -54,7 +54,7 @@ export default async function RecordTabContainer({
     limit: +(searchParams.perPage ?? "100"),
     entity: "organization",
     pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : defaultAdvanceFilter,
@@ -67,7 +67,7 @@ export default async function RecordTabContainer({
       defaultSorting={defaultSorting}
       defaultAdvanceFilter={defaultAdvanceFilter}
       advanceFilter={filters?.reportFilters || []}
-      sorting={sorting || []}
+      sorting={sorts?.sorting || []}
       pagination={pagination}
       config={{
         entity: "organization",
