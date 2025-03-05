@@ -11,15 +11,16 @@ function GridMobile() {
       <CardHeader>
         <MobileHeader />
       </CardHeader>
-      <ScrollArea
-        style={{ height: "calc(100vh - 23rem)" }}
-        className="rounded-md text-card-foreground"
-      >
-        <section className="px-2 lg:px-0">
-          <InfiniteScrollContainer />
+        <section className="px-2 lg:px-0"
+        >
+          <div
+             id='scrollable-div-grid'
+             className='w-full overflow-y-auto h-[calc(100vh-23rem)]'
+          >
+            <InfiniteScrollContainer />
+          </div>
           <CreateButton className="fixed right-4 bottom-[5rem] md:bottom-[9rem]  size-10 rounded-full" />
         </section>
-      </ScrollArea>
     </Card>
   )
 }
