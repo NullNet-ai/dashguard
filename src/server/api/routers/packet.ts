@@ -105,12 +105,14 @@ export const packetRouter = createTRPCRouter({
   .input(z.object({})).query(async ({input, ctx }) => {
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+const formattedDate = moment(oneDayAgo).format('YYYY-MM-DD HH:mm:ss.SSSZ');
+console.log("%c Line:109 🍕 formattedDate", "color:#42b983", formattedDate);
     const res = await ctx.dnaClient
       .findAll({
         entity: 'packets',
         token: ctx.token.value,
         query: {
-          pluck: ['source_ip', 'destination_ip', 'timestamp'],
+          pluck: ['source_ip', 'timestamp'],
           advance_filters: [
             {
               type: 'criteria',
@@ -128,7 +130,7 @@ export const packetRouter = createTRPCRouter({
               field: 'timestamp',
               entity: 'packets',
               operator: EOperator.GREATER_THAN_OR_EQUAL,
-              values: ["2025-02-15 04:26:26.386+00"],
+              values: [formattedDate],
             },
           ],
           order: {
@@ -419,7 +421,6 @@ export const packetRouter = createTRPCRouter({
 
   }).execute()
 
-  console.log('%c Line:420 🍰 res?.data?.[0]', 'color:#fca650', res?.data?.[0]);
  return res?.data?.[0]?.bandwidth || 0
 }),
 getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
@@ -427,7 +428,7 @@ getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet
   return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
     const { source_ip, destination_ip } = item
     const res = await ctx.dnaClient.aggregate({
-      // @ts-expect-error - TS is not able to infer the type of the object
+      //@ts-expect-error - entity is not defined in the type
       query: {
         entity: 'packets',
         aggregations: [
@@ -474,7 +475,45 @@ getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet
     console.log("%c Line:474 🍋 res", "color:#ed9ec7", res);
     return {source_ip, destination_ip, result:res?.data}
   },{concurrency: 10} )
+}),
+getBandwidthOfSourceIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
+  const { packet_data } = input
+  return await Bluebird.map(packet_data, async (item: { source_ip: string }) => {
+    const { source_ip } = item
+    const res = await ctx.dnaClient.aggregate({
+      // @ts-expect-error - entity is not defined in the type
+      query: {
+        entity: 'packets',
+        aggregations: [
+          {
+            aggregation: 'SUM',
+            aggregate_on: 'total_length',
+            bucket_name: 'bandwidth',
+          },
+        ],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'source_ip',
+            entity: 'packets',
+            operator: EOperator.EQUAL,
+            values: [
+              source_ip,
+            ],
+          },
+        ],
+        joins: [],
+        limit: 20,
+        order: {
+          order_by: 'bucket',
+          order_direction: EOrderDirection.DESC,
+        },
+      },
+      token: ctx.token.value,
+    }).execute()
 
-  
+    console.log("%c Line:515 🍣 res?.data", "color:#33a5ff", res?.data);
+    return { source_ip, result:res?.data }
+  },{concurrency: 10} )
 }),
 })

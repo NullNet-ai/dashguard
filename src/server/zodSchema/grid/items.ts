@@ -35,6 +35,7 @@ const ZodItems = z.object({
       }),
     )
     .optional(), // Optional sorting
+    is_case_sensitive_sorting: z.string().optional(), // Optional sorting
 });
 
 export default ZodItems;

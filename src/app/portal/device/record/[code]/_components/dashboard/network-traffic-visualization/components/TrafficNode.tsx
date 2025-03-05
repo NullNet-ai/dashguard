@@ -5,11 +5,9 @@ import { generateTicks } from '../functions/generateTicks'
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
   const [showTooltip, setShowTooltip] = useState(false)
-
+  
   const value = data._maxBandwidth
   const tooltipData = [{ name: '1', value }]
-
-  
 
   const minOpacity = 0.2
   const maxOpacity = 1.0
@@ -21,10 +19,18 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
 
   return (
     <div
-      className="relative group cursor-grab"
+      className="relative group cursor-grab flex justify-center"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
+      style={{
+        minHeight: '50px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))',
+        gap: '12px',
+        alignItems: 'center',
+      }}
     >
+
       {showTooltip && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50">
           <div className="flex flex-col items-center">
@@ -54,11 +60,10 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
           <div className="absolute w-3 h-3 bg-white border-b border-r border-gray-200 -bottom-1.5 left-1/2 -translate-x-1/2 transform rotate-45" />
         </div>
       )}
-
       <div
         className="relative transition-all duration-300 ease-in-out"
         style={{
-          width: `${Math.max(50, data.width || 100)}px`,
+          width: `${data.width || 80}px`,
           height: '36px',
           backgroundColor: `rgba(239, 68, 68, ${opacity})`,
           borderRadius: '6px',
@@ -71,5 +76,4 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
     </div>
   )
 }
-
 export default TrafficNode

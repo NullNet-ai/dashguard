@@ -1,4 +1,6 @@
-import NetworkFlow from "../../../_components/dashboard/network-traffic-visualization/page";
+import TimelineComponent from "../../../_components/dashboard/timeline";
 
-const FormContainer = async () =><NetworkFlow />;
-export default FormContainer;
+// const FormContainer = async () =><TimelineComponent />;
+// export default FormContainer;
+
+export {}

@@ -40,6 +40,7 @@ export default async function Page({
     limit: +(pagination?.limit_per_page ?? "100"),
     entity: "contact",
     pluck: _pluck,
+    is_case_sensitive_sorting: "false",
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter

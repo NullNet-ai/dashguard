@@ -52,6 +52,7 @@ export default async function ConfigurationRuleGrid() {
     pluck: _pluck,
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
+    is_case_sensitive_sorting: "false",
     sorting: sorting?.length ? sorting : defaultSorting,
     device_id: record_id,
     advance_filters: filters?.advanceFilter?.length

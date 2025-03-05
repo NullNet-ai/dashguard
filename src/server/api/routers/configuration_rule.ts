@@ -26,6 +26,7 @@ export const deviceRuleRouter = createTRPCRouter({
         pluck,
         device_id,
         sorting,
+        is_case_sensitive_sorting = "false"
       } = input
       const _sorting = sorting?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
@@ -99,8 +100,9 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
+          // @ts-expect-error - multiple_sort is not defined in the type
           multiple_sort: _sorting?.length
-            ? formatSorting(_sorting, 'device_rules')
+            ? formatSorting(_sorting, 'device_rules', is_case_sensitive_sorting)
             : [],
         },
       })

@@ -1,6 +1,6 @@
-import { Edge, IBandwidth, Element } from '../types'
 import { formatBandwidth } from './formatBandwidth'
 import { normalizeTraffic } from './normalizeTraffic'
+import { type Element, type Edge, type IBandwidth } from '../types'
 
 export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: Element[], edges: Edge[] } => {
   const nodes: Element[] = []
@@ -8,19 +8,12 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
   let maxBandwidth = 0
 
   const uniqueSourceIPsSet = new Set()
-  const uniqueDestIPsSet = new Set()
   const sourceIPMap = new Map()
-  const destIPToFlowMap = new Map()
 
-  bandwidthData.forEach(({ source_ip, destination_ip, result }: IBandwidth, flowIndex: number) => {
+  bandwidthData.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     if (!sourceIPMap.has(source_ip)) {
       sourceIPMap.set(source_ip, uniqueSourceIPsSet.size)
       uniqueSourceIPsSet.add(source_ip)
-    }
-
-    if (!destIPToFlowMap.has(destination_ip)) {
-      destIPToFlowMap.set(destination_ip, flowIndex)
-      uniqueDestIPsSet.add(destination_ip)
     }
 
     result.forEach(({ bandwidth }: { bandwidth: string }) => {
@@ -40,13 +33,12 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
     })
   })
 
-  bandwidthData.forEach(({ source_ip, destination_ip, result }: IBandwidth, flowIndex: number) => {
-    const destY = destIPToFlowMap.get(destination_ip) * spacing
+  bandwidthData.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     let xPosition = spacing
 
     const trafficNodes = result.map(({ bandwidth }: { bandwidth: string }, timeIndex: number) => {
       const bwValue = parseInt(bandwidth, 10) as number
-      const trafficNodeId = `traffic-${source_ip}-${destination_ip}-${timeIndex}-${flowIndex}`
+      const trafficNodeId = `traffic-${source_ip}-${timeIndex}-${flowIndex}`
       const normalizedValue = normalizeTraffic(bwValue, maxBandwidth)
       const _maxBandwidth = formatBandwidth(bwValue.toString())
 
@@ -57,7 +49,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
       nodes.push({
         id: trafficNodeId,
         type: 'trafficNode',
-        position: { x: xPosition, y: destY },
+        position: { x: xPosition, y: sourceIPMap.get(source_ip) * spacing },
         data: {
           normalizedValue,
           width,
@@ -68,15 +60,6 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
       xPosition += spacing
       return trafficNodeId
     })
-
-    if (destIPToFlowMap.get(destination_ip) === flowIndex) {
-      nodes.push({
-        id: `dest-${destination_ip}`,
-        type: 'ipNode',
-        position: { x: xPosition, y: destY },
-        data: { label: destination_ip, type: 'destination' },
-      })
-    }
 
     if (trafficNodes.length > 0) {
       edges.push({
@@ -98,15 +81,6 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
           type: 'smoothstep',
         })
       }
-
-      edges.push({
-        id: `edge-${trafficNodes[trafficNodes.length - 1]}-${destination_ip}-${flowIndex}`,
-        source: trafficNodes[trafficNodes.length - 1],
-        target: `dest-${destination_ip}`,
-        animated: true,
-        style: { strokeWidth: 1 },
-        type: 'smoothstep',
-      })
     }
   })
 
