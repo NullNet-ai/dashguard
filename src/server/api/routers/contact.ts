@@ -168,19 +168,20 @@ export const contactRouter = createTRPCRouter({
         .execute();
     }),
   mainGrid: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
-    const hasAdvanceFilters = input?.advance_filters?.length
+    const { limit = 50, current = 1,entity, advance_filters = [], pluck, sorting = [], is_case_sensitive_sorting= "false" } = input
+    const hasAdvanceFilters = advance_filters?.length
       ? [
           // {
           //   type: "operator",
           //   operator: EOperator.AND,
           // },
-          ...(input?.advance_filters ?? []),
+          ...(advance_filters ?? []),
         ]
-      : [...(input?.advance_filters ?? [])];
+      : [...(advance_filters ?? [])];
 
     const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
       .findAll({
-        entity: input?.entity,
+        entity: entity,
         token: ctx.token.value,
         query: {
           pluck_group_object: {
@@ -195,7 +196,7 @@ export const contactRouter = createTRPCRouter({
               "country_code",
               "is_primary",
             ],
-            contacts: [...input.pluck, "previous_status"],
+            contacts: [...pluck, "previous_status"],
           },
           track_total_records: true,
           advance_filters: [
@@ -211,16 +212,17 @@ export const contactRouter = createTRPCRouter({
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
+              (current || 0) === 0
                 ? 0
-                : (input.current || 1) * (input.limit || 100) -
-                  (input.limit || 100),
-            limit: input.limit || 1,
+                : (current || 1) * (limit || 100) -
+                  (limit || 100),
+            limit: limit || 1,
             // by_field: "created_date",
             // by_direction: EOrderDirection.ASC,
           },
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, ENTITY)
+          // @ts-expect-error - multiple_sort is not defined in the type
+          multiple_sort: sorting?.length
+            ? formatSorting(sorting, ENTITY, is_case_sensitive_sorting)
             : [],
         },
       })
@@ -445,6 +447,7 @@ export const contactRouter = createTRPCRouter({
   formFilterGrid: privateProcedure
     .input(ZodItems)
     .query(async ({ ctx, input }) => {
+      const {is_case_sensitive_sorting = "false"} = input
       const hasAdvanceFilters = input?.advance_filters?.length
         ? [
             {
@@ -490,8 +493,9 @@ export const contactRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
+            // @ts-expect-error - multiple_sort is not defined in the type
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input?.entity)
+              ? formatSorting(input.sorting, input?.entity, is_case_sensitive_sorting)
               : [],
           },
         })

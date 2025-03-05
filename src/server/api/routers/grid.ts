@@ -181,6 +181,7 @@ export const gridRouter = createTRPCRouter({
         [pluralize(input?.entity)]: input.pluck,
       };
 
+      const is_case_sensitive_sorting = "false";
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
@@ -199,8 +200,9 @@ export const gridRouter = createTRPCRouter({
             by_field: "code",
             by_direction: EOrderDirection.DESC,
           },
+          //@ts-expect-error - multiple_sort is not defined in the type
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input?.entity)
+            ? formatSorting(input.sorting, input?.entity, is_case_sensitive_sorting)
             : [],
         },
       });

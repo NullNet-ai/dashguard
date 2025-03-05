@@ -37,6 +37,7 @@ export default async function Page() {
     entity: main_entity!,
     pluck: _pluck,
     current: +(pagination?.current_page ?? '0'),
+    is_case_sensitive_sorting: "false",
     limit: +(pagination?.limit_per_page ?? '100'),
     sorting: sorting?.length ? sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length

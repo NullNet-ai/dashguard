@@ -50,6 +50,7 @@ export default async function ConfigurationAliasGrid({
     current: +(pagination?.current_page ?? "0"),
     limit: +(pagination?.limit_per_page ?? "100"),
     sorting: sorting?.length ? sorting : defaultSorting,
+    is_case_sensitive_sorting: "false",
     device_id: record_id,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter

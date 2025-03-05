@@ -14,12 +14,10 @@ export default function NetworkFlow() {
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
 
   const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
-  console.log("%c Line:17 🍖 packetsIP", "color:#33a5ff", packetsIP);
-  const { data: bandwidth } = api.packet.getBandwidthOfSourceIPandDestinationIP.useQuery(
+  const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
     { packet_data: packetsIP }, { enabled: !!packetsIP }
   )
   
-  console.log("%c Line:18 🥟 bandwidth", "color:#e41a6a", bandwidth);
   useEffect(() => {
     const fetchData = async () => {
       if (packetsIP) {
@@ -40,9 +38,8 @@ export default function NetworkFlow() {
   )
 
   return (
-    <div className="h-screen w-screen p-4">
-      <h1 className="mb-4 text-2xl font-bold">Network Traffic Visualization</h1>
-      <div className="h-[calc(100vh-100px)] w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+    <div className="p-4">
+      <div className="h-[calc(100vh-100px)] rounded-lg border border-gray-200 bg-white shadow-lg">
         <ReactFlow
           defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
           edges={elements.edges}

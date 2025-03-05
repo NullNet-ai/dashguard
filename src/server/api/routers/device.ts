@@ -170,7 +170,8 @@ export const deviceRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck,
         pluck_object: _pluck_object,
-        sorting,
+        sorting = [],
+        is_case_sensitive_sorting = "false"
       } = input
       const pluck_object = {
         contacts: ['first_name', 'last_name', 'id'],
@@ -182,6 +183,7 @@ export const deviceRouter = createTRPCRouter({
         device_interface_addresses: ['id', 'device_interface_id', 'address'],
         device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
       }
+
 
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
@@ -202,8 +204,9 @@ export const deviceRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
+          //@ts-expect-error - multiple_sort is not defined in the type
           multiple_sort: sorting?.length
-            ? formatSorting(sorting, entity)
+            ? formatSorting(sorting, entity, is_case_sensitive_sorting)
             : [],
           date_format: 'YYYY/MM/DD',
           concatenate_fields: [
