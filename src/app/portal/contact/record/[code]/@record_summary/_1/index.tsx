@@ -1,21 +1,21 @@
-"use client";
-import { useMemo } from "react";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { api } from "~/trpc/react";
-import { formatPhoneNumber } from "~/utils/formatter";
-import { cn } from "~/lib/utils";
+'use client';
+import { useMemo } from 'react';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { api } from '~/trpc/react';
+import { formatPhoneNumber } from '~/utils/formatter';
+import { cn } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
 
 const fields = {
-  Category: "categories",
-  "Primary Phone Number": "phone",
-  "Primary Email": "email",
-  "Full Name": "full_name",
-  "Date of Birth": "date_of_birth",
-  Address: "address",
-  Department: "organization",
-  Role: "role",
+  Category: 'categories',
+  'Primary Phone Number': 'phone',
+  'Primary Email': 'email',
+  'Full Name': 'full_name',
+  'Date of Birth': 'date_of_birth',
+  Address: 'address',
+  Department: 'organization',
+  Role: 'role',
 };
 
 const RecordShellSummary = ({
@@ -32,17 +32,18 @@ const RecordShellSummary = ({
     error: _error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: ["id"],
+    pluck_fields: ['id'],
   });
-  const { emails: _email, phones: _phone } = record as unknown as Record<
-    string,
-    any
-  >;
+  const {
+    emails: _email,
+    phones: _phone,
+    account,
+  } = record as unknown as Record<string, any>;
   const email = useMemo(() => {
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,
     );
-    return primary_email?.email || "None";
+    return primary_email?.email || 'None';
   }, [_email]);
 
   const phone = useMemo(() => {
@@ -54,7 +55,7 @@ const RecordShellSummary = ({
       raw_phone_number,
       iso_code,
     });
-    return format_phone || "None";
+    return format_phone || 'None';
   }, [_phone]);
 
   const {
@@ -64,13 +65,13 @@ const RecordShellSummary = ({
   } = api.contact.getContactWithAddress.useQuery({
     code: identifier!,
     pluck_fields: [
-      "id",
-      "categories",
-      "first_name",
-      "last_name",
-      "middle_name",
-      "date_of_birth",
-      "address_id",
+      'id',
+      'categories',
+      'first_name',
+      'last_name',
+      'middle_name',
+      'date_of_birth',
+      'address_id',
     ],
   });
 
@@ -92,29 +93,27 @@ const RecordShellSummary = ({
 
   const record_details = {
     ...data,
-    categories: categories.length
-      ? categories
-      : null,
+    categories: categories.length ? categories : null,
     full_name:
-      `${data?.first_name || ""} ${data?.middle_name || ""} ${data?.last_name || ""}`.trim() ||
-      "None",
+      `${data?.first_name || ''} ${data?.middle_name || ''} ${data?.last_name || ''}`.trim() ||
+      'None',
     phone,
     email,
     organization: organizations?.length
       ? organizations
-        .sort(
-          (
-            a: {
-              label: string;
-            },
-            b: {
-              label: string;
-            },
-          ) => a.label.localeCompare(b.label),
-        )
-        .map(({ label }: { label: string }) => label)
-        .join(", ")
-      : "None",
+          .sort(
+            (
+              a: {
+                label: string;
+              },
+              b: {
+                label: string;
+              },
+            ) => a.label.localeCompare(b.label),
+          )
+          .map(({ label }: { label: string }) => label)
+          .join(', ')
+      : 'None',
   };
 
   const refetchAll = async () => {
@@ -129,7 +128,7 @@ const RecordShellSummary = ({
 
   useRefetchRecord({
     refetch: refetchOrg,
-    form_key: "organization_details",
+    form_key: 'organization_details',
   });
   if (_error) {
     return <div>Error: {_error.message}</div>;
@@ -142,7 +141,7 @@ const RecordShellSummary = ({
     <div>
       {Object.entries(fields).map(([key, value], index) => {
         const fieldValue = (record_details as { [key: string]: any })?.[value];
-        if (value === "categories" && !fieldValue) {
+        if (value === 'categories' && !fieldValue) {
           return null;
         }
         return (
@@ -151,20 +150,48 @@ const RecordShellSummary = ({
               <div className="p-1 text-sm">
                 <div>
                   <span className="text-slate-400">{key}: </span>
-                  {value === "categories" ? (
-                    <div className='inline-flex gap-2 p-1'>{fieldValue.map((category: string) => (
-                      <Badge variant={"primary"} className='' key={category}>{category}</Badge>
-                    ))}</div>
+                  {value === 'categories' ? (
+                    <div className="inline-flex gap-2 p-1">
+                      {fieldValue.map((category: string) => (
+                        <Badge variant={'primary'} className="" key={category}>
+                          {category}
+                        </Badge>
+                      ))}
+                    </div>
                   ) : (
-                    <span>{fieldValue || "None"}</span>
+                    <span>{fieldValue || 'None'}</span>
                   )}
                 </div>
               </div>
             </div>
-            {value === "categories" && fieldValue && <Separator />}
+            {value === 'categories' && fieldValue && <Separator />}
           </div>
         );
       })}
+      {account && account.account_id && (
+        <div className='mt-2'>
+          <Separator />
+          <div className="p-1 px-5">
+            <span className="text-sm font-semibold text-foreground">
+              Account Details
+            </span>
+          </div>
+          <div className="p-1 px-5 text-sm">
+            <div>
+              <span className="text-slate-400">{'Role: '}</span>
+              <span>{account?.role || 'None'}</span>
+            </div>
+          </div>
+          <div className="p-1 px-5 text-sm">
+            <div>
+              <span className="text-slate-400">{'Email: '}</span>
+              <span>
+                {account?.account_id || 'None'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
