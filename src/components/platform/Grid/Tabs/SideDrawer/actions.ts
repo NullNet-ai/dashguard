@@ -20,9 +20,9 @@ export const removeGridFilter = async (id : string)  => {
     return url
 }
 
-export const duplicateFilterTab = async (id : string)  => {
+export const duplicateFilterTab = async (tab : Record<string,any>)  => {
     const url = await api.gridFilter.duplicateGridFilter({
-        id
+        tab
     })
 
     return url

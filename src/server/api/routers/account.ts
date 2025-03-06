@@ -485,6 +485,9 @@ export const accountRouter = createTRPCRouter({
   fetchGridData: privateProcedure
     .input(ZodItems)
     .query(async ({ ctx, input }) => {
+      const account = ctx.session.account;
+      const accountEmail = account?.email;
+
       const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
         .findAll({
           entity: input?.entity,
@@ -613,6 +616,7 @@ export const accountRouter = createTRPCRouter({
         items: formatted_items,
         currentPage: input.current || 1,
         totalPages,
+        accountEmail,
       };
     }),
   updateDraftAccount: privateProcedure

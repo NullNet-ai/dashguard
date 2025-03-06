@@ -28,9 +28,11 @@ interface AccountCustomRowActionProps {
       code: string;
       account_status: string;
       categories: string[]; // Added category for logic (External/Internal User)
+      account_id: string;
     };
   };
   viewMode?: 'table' | 'card';
+  config?: Record<string, any>;
 }
 
 const ACTIONS = [
@@ -76,12 +78,19 @@ const ACTIONS = [
 export function AccountCustomRowAction({
   row,
   viewMode,
+  config,
 }: AccountCustomRowActionProps) {
   const toast = useToast();
   const pathName = usePathname();
   const router = useRouter();
 
-  const { code, account_status, categories = [], id } = row?.original ?? {};
+  const {
+    code,
+    account_status,
+    categories = [],
+    id,
+    account_id,
+  } = row?.original ?? {};
 
   const updateRecordStatus = api.record.updateRecordStatus.useMutation();
   const resendInvite = api.account.createInvitationRecord.useMutation();
@@ -162,6 +171,10 @@ export function AccountCustomRowAction({
     ].filter(Boolean); // Removes false/null items
   }
 
+  const isDisable =
+    config?.additionalData?.accountEmail?.toLowerCase() ===
+    account_id?.toLowerCase();
+
   return (
     <TooltipProvider>
       {ACTIONS.filter(({ condition }) =>
@@ -169,7 +182,11 @@ export function AccountCustomRowAction({
       ).map(({ action, icon: Icon, color, tooltip }) => (
         <Tooltip key={action}>
           <TooltipTrigger asChild>
-            <Button onClick={() => handleChangeStatus(action)}>
+            <Button
+              onClick={() => handleChangeStatus(action)}
+              disabled={isDisable}
+              className={isDisable ? 'disabled:opacity-50' : ''}
+            >
               <Icon className={`h-3 w-3 ${color}`} />
             </Button>
           </TooltipTrigger>
