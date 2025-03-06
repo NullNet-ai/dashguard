@@ -770,6 +770,7 @@ export const gridRouter = createTRPCRouter({
           return {
             ...tab,
             advance_filters: filters,
+            default_filter : filters
           };
         }
         return tab;
@@ -788,6 +789,7 @@ export const gridRouter = createTRPCRouter({
           })
           .execute();
       }
+      console.log("🚀 ~ .mutation ~ newTabs:", JSON.stringify(newTabs, null, 2))
       await ctx.redisClient.cacheData(_tabMenuId, newTabs);
     }),
   updateReportPagination: privateProcedure
