@@ -27,32 +27,16 @@ const FilterProvider = ({ children }: IProps) => {
   const [filters, setFilters] = useState(
     [
       {
+        id: 'all_data',
+        label: 'All Data',
+      },
+      {
         id: 'Between',
         label: 'Between',
       },
       {
         id: 'Source Port',
         label: 'Source Port',
-      },
-      {
-        id: 'Source Port',
-        label: 'Source Port',
-      },
-      {
-        id: 'Source Port Less than',
-        label: 'Source Port Less than',
-      },
-      {
-        id: 'New Filter',
-        label: 'New Filter',
-      },
-      {
-        id: 'New Filtersss',
-        label: 'New Filtersss',
-      },
-      {
-        id: 'New Filter',
-        label: 'New Filter',
       },
     ]
   )
