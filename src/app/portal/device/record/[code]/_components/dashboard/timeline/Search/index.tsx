@@ -1,4 +1,5 @@
 import React from 'react'
+
 import SearchProvider from './SearchProvider'
 import SearchView from './SearchView'
 
