@@ -50,5 +50,6 @@ export const transformSearchData = (
     }
   });
   const searchResults = Object.values(consolidated) || null;
+  console.log('%c Line:53 🍯 searchResults', 'color:#f5ce50', searchResults);
   return searchResults;
 };

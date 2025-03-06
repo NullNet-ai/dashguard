@@ -40,6 +40,7 @@ export default function SearchDialog() {
 
   const debouncedSearchInput = useDebounce(query, 500);
 
+
   const data = handleSearchQuery!(
     {
       entity,

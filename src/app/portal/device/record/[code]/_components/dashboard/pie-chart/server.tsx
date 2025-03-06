@@ -1,18 +1,19 @@
 import { headers } from 'next/headers'
 
 import { api } from '~/trpc/server'
+
 import PieChartComponent from './client'
 
 const FormServerFetch = async () => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
-  const fetched_device =  await api.record.getByCode({
+  const fetched_device = await api.record.getByCode({
     id: identifier!,
-    pluck_fields: ["id", "code", "status", "device_status"],
+    pluck_fields: ['id', 'code', 'status', 'device_status'],
     main_entity: main_entity!,
   })
-  
+
   const defaultValues = fetched_device?.data
 
   return (
