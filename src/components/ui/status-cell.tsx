@@ -3,9 +3,8 @@ import { cn } from '~/lib/utils';
 interface StatusCellProps {
   value: string;
   additionalStatuses?: Record<string, string>;
-  key?: string | number;
 }
-const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {}, key }) => {
+const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {} }) => {
   const statuses = {
     active: 'text-green-600 bg-green-400/10',
     draft: 'text-yellow-500 bg-yellow-400/10',
@@ -17,7 +16,7 @@ const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {},
   };
 
   return (
-    <div className="my-0 flex flex-row items-start">
+    <div className="m-1 my-0 flex flex-row items-start">
       <div
         className={cn(
           'bg-primary/10 text-primary',
