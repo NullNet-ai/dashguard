@@ -47,6 +47,7 @@ const Wrapper = async ({
     code: entity_code,
     categories: record_details?.categories,
     status: record_details?.account_status,
+    account_email: record_details?.account_id,
   })
 
   return (

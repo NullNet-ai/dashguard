@@ -458,9 +458,14 @@ export const recordRouter = createTRPCRouter({
         code: z.string(),
         status: z.string(),
         categories: z.array(z.string()),
+        account_email: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
+
+      const account = ctx.session.account;
+      const accountEmail = account?.email;
+
       const menuOptions = {
         Active: [
           ...(input.categories.includes('External User')
@@ -468,12 +473,14 @@ export const recordRouter = createTRPCRouter({
                 {
                   label: 'Disable Access',
                   status: 'Access Disabled',
+                  disabled: accountEmail?.toLowerCase() === input.account_email?.toLowerCase(),
                 },
               ]
             : [
                 {
                   label: 'Deactivate Account',
                   status: 'Deactivated',
+                  disabled: accountEmail?.toLowerCase() === input.account_email?.toLowerCase(),
                 },
               ]),
         ],

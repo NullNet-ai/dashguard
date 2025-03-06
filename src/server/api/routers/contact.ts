@@ -190,7 +190,7 @@ export const contactRouter = createTRPCRouter({
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
             organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name'],
+            organizations: ['id', 'name', 'categories'],
 
           },
           pluck_object: {
@@ -361,12 +361,27 @@ export const contactRouter = createTRPCRouter({
           raw_phone_number: _primary_phone_number as string,
           iso_code,
         })
+        // Filter out department names
+        const filterDepartmentNames = (names: string[], categories: string[]) => {
+          if (!names || !categories) return [];
+          return names.filter((_, index) => {
+            try {
+              const category = JSON.parse(categories[index] || '[]');
+              return category.includes('Department');
+            } catch {
+              return true;
+            }
+          });
+        };
+        const organizationNames = organizations?.names 
+        ? filterDepartmentNames(organizations.names, organizations.categories ?? [])
+        : [];
 
         return [
           ...acc,
           {
             roles,
-            organization: organizations?.names,
+            organization: organizationNames,
             ...contacts,
             ...emails,
             ...phones,
@@ -765,6 +780,18 @@ export const contactRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: pluck_fields,
+            pluck_object: {
+              contacts: pluck_fields,
+              organization_accounts: [
+                'id',
+                'role_id',
+                'account_id',
+              ],
+              user_roles: [
+                'id',
+                'role',
+              ],
+            },
             advance_filters: [
               {
                 field: 'code',
@@ -772,6 +799,32 @@ export const contactRouter = createTRPCRouter({
                 values: [contact_code],
               },
             ] as IAdvanceFilters[],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contact',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'role_id',
+            },
           },
         })
         .execute()
@@ -804,7 +857,7 @@ export const contactRouter = createTRPCRouter({
         code = '',
         address_id,
         ...rest
-      } = contact || {}
+      } = contact?.contacts || {}
 
       const phones = await getRecordByContactId(
         'contact_phone_number', contact_id!, ['id', 'raw_phone_number', 'iso_code', 'country_code', 'is_primary'],
@@ -823,6 +876,10 @@ export const contactRouter = createTRPCRouter({
         emails,
         phones,
         address_id,
+        account: {
+          role: contact?.user_roles?.role,
+          account_id: contact?.organization_accounts?.account_id,
+        }
       }
     }),
   getBasicDetails: privateProcedure

@@ -33,19 +33,38 @@ export default async function LoginSubmit({
   if (loginDetailsError) {
     return loginDetailsError;
   }
-
+  /**
+   * fetch organizations from contact_id
+   */
+  const fetchedOrganizations = await api.auth.fetchAccountDetailsThruEmail();
+  // get account data
   const accountDataResponse = await api.auth.getAccountData({ username });
+
   const { id, is_new_user, status, account_status } = accountDataResponse ?? {};
 
   if (
-    status !== 'Active' ||
-    (account_status &&
-      !['Active', 'Pending Setup', 'Invited'].includes(account_status ?? ''))
+    (status !== 'Active' ||
+      (account_status &&
+        !['Active', 'Pending Setup', 'Invited'].includes(
+          account_status ?? '',
+        ))) &&
+    fetchedOrganizations?.data?.length < 2
   ) {
+    const errorMessages = {
+      Deactivated:
+        'Your account has been deactivated. Contact your administrator for assistance.',
+      'Access Disabled':
+        'Your account has been disabled. Contact your administrator for assistance.',
+      Archived:
+        'Your account is no longer active. Contact your administrator for assistance.',
+    };
     return {
       valid: false,
       errorMessage:
-        'Your account has been deactivated. Please contact support for assistance.',
+        status === 'Archived'
+          ? errorMessages.Archived
+          : (errorMessages[account_status as keyof typeof errorMessages] ??
+            'Your account is no longer active. Contact your administrator for assistance.'),
     };
   }
 
@@ -63,11 +82,6 @@ export default async function LoginSubmit({
   if (is_new_user) {
     return redirect(`/setup-password?filter_id=${id ?? ''}`);
   }
-
-  /**
-   * fetch organizations from contact_id
-   */
-  const fetchedOrganizations = await api.auth.fetchAccountDetailsThruEmail();
 
   if (fetchedOrganizations?.data?.length > 1) {
     return redirect('/login-organization');

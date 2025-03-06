@@ -1,16 +1,14 @@
-'use client'
+'use client';
 import {
-
-
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { IMenuOptionConfig } from "../../types";
-import { Fragment, useContext, useState } from "react";
-import MenuItem from "./MenuItem";
-import { formatFormTestID } from "~/lib/utils";
-import { ChevronRight } from "lucide-react";
+} from '~/components/ui/dropdown-menu';
+import { IMenuOptionConfig } from '../../types';
+import { Fragment, useContext, useState } from 'react';
+import MenuItem from './MenuItem';
+import { formatFormTestID } from '~/lib/utils';
+import { ChevronRight } from 'lucide-react';
 import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 
 interface IRecursiveMenuItemProps {
@@ -42,7 +40,7 @@ export default function RecursiveMenuItem({
       {(option.children && option.children.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2  text-left text-sm">
+            <div className="flex items-center gap-2 text-left text-sm">
               <MenuItem
                 onClick={option.onClick.bind(
                   null,
@@ -52,16 +50,21 @@ export default function RecursiveMenuItem({
                 )}
                 data-test-id={
                   entityName +
-                  "-rcrd-ddn-menu-" +
+                  '-rcrd-ddn-menu-' +
                   formatFormTestID(option.label ?? '')
                 }
+                disabled={option.disabled ?? false}
               >
-                <ChevronRight className="size-5 text-default/40" />{" "}
+                <ChevronRight className="size-5 text-default/40" />{' '}
                 {option.label}
               </MenuItem>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side={isMobile ? 'left' : 'right'} className='z-[1000]'>
+          <DropdownMenuContent
+            align="start"
+            side={isMobile ? 'left' : 'right'}
+            className="z-[1000]"
+          >
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}
@@ -79,8 +82,9 @@ export default function RecursiveMenuItem({
               handleLoadingStateChange,
             )}
             data-test-id={
-              entityName + "-rcrd-menu-" + formatFormTestID(option.label ?? '')
+              entityName + '-rcrd-menu-' + formatFormTestID(option.label ?? '')
             }
+            disabled={option.disabled ?? false}
           >
             {option.label}
           </MenuItem>
