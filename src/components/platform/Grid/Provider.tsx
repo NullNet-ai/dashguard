@@ -99,6 +99,8 @@ export default function GridProvider({
     initialSelectedRecords,
   );
 
+
+
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
@@ -121,8 +123,16 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
 
+    // infinite data options
   const [infiniteData, setInfiniteData] = useState<any[]>(data);
-  const [hasMore, setHasMore] = useState(true);
+  const [bufferData, setBufferData] = useState<any[]>([]);
+  const [current, setCurrent] = useState(1);
+  const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 1000);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [infiniteCount, setInfiniteCount] = useState(
+    totalCount ?? 0,
+  );
 
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
     ...filter,
@@ -136,7 +146,6 @@ export default function GridProvider({
     },
     [...resolvedDefaultFilter],
   );
-  const infiniteConfig = _propsConfig.infiniteConfig
 
   
   // use effects
@@ -184,6 +193,11 @@ export default function GridProvider({
     ..._propsConfig,
 
   };
+
+
+  //actions of infinite grid
+
+
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -495,7 +509,7 @@ export default function GridProvider({
     }
   };
 
-  const newData = infiniteConfig?.router ? infiniteData : data;
+  const newData = config.isInfinite ? infiniteData : data;
 
   /** @HOOKS */
   const table = useReactTable({
@@ -530,36 +544,6 @@ export default function GridProvider({
   });
   /** @ACTIONS */
 
-
-  const handleGetInfiniteData = async (
-    params?: any,
-  ) => {
-
-    if(!infiniteConfig?.router) return null
-
-    try {
-      const res = await FetchInfiniteData(
-        {
-          ...infiniteConfig,
-          entity: config?.entity || "",
-          resolver: infiniteConfig?.resolver || "",
-          query_params: infiniteConfig?.query_params || {}
-        }
-      );
-
-      setInfiniteData(prev=> {
-        return [...prev, 
-          ...res.data
-        ]
-      })
-
-      setHasMore(false)
-
-    } catch (error) {
-        console.error('fetching error', error)
-    }
-    
-  } 
 
   const handleCreate = async () => {
     try {
@@ -604,6 +588,46 @@ export default function GridProvider({
     }
   };
 
+  const handleUpdateInfiniteData = async ({items, totalCount }: 
+    {
+      items: any[];
+      totalCount: number;
+    },
+  ) => {
+    
+    setInfiniteData((prev) => {
+      if(current === 1) {
+        return items;
+      }
+      return [...prev,...items];
+    });
+    setCurrent((prev) => {
+      return prev === 1 ? 3 : prev + 1;
+    });
+    setInfiniteCount(totalCount);
+  };
+
+  const infinite_state = {
+    current,
+    limit,
+    page,
+    hasMore,
+    infiniteData,
+    bufferData,
+    infiniteCount,
+  }
+
+  const infinite_actions = {
+    setCurrent,
+    setLimit,
+    setPage,
+    setHasMore,
+    setInfiniteData,
+    setBufferData,
+    setInfiniteCount,
+    handleUpdateInfiniteData,
+  }
+
   const state_context = {
     config: {
       ...config,
@@ -633,6 +657,7 @@ export default function GridProvider({
     pagination,
     hasMore,
     gridLevel,
+    infinite_options: infinite_state
   } as IState;
   const actions = {
     handleCreate,
@@ -647,8 +672,10 @@ export default function GridProvider({
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
-    handleGetInfiniteData,
     setHasMore,
+    infiniteActions: {
+      ...infinite_actions
+    }
   } as IAction;
 
   return (
