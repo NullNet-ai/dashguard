@@ -23,5 +23,9 @@ export interface ISideDrawerConfig {
   onCloseSideDrawer?: () => void
   overlayEnabled?: boolean
   closeOnOutsideClick?: boolean
+  resizable?: boolean
+  showResizeHandle?: boolean
+  minResizeWidth?: string 
+  maxResizeWidth?: string 
   metaData?: any
 }
