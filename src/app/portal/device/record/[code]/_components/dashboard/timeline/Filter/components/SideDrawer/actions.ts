@@ -33,3 +33,22 @@ export const duplicateFilterTab = async (tab: Record<string, any>) => {
 
   return url
 }
+
+export const fetchTabFilter = async () => {
+  try {
+    const cacheData = await api.gridFilter.fetchGridFilter({})
+    console.log('%c Line:39 🥑 cacheData', 'color:#7f2b82', cacheData)
+
+    const transformCachedData = cacheData.map((data: any) => {
+      return {
+        id: data.name,
+        label: data.name,
+      }
+    }
+    )
+    return transformCachedData
+  }
+  catch (error) {
+    console.log('%c Line:41 🧀 error', 'color:#7f2b82', error)
+  }
+}

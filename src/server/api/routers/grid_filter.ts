@@ -132,11 +132,11 @@ export const gridFilterRouter = createTRPCRouter({
     }
     ),
   fetchGridFilter: privateProcedure
-    .input(z.record(z.unknown()))
+    .input(z.any())
     .mutation(async ({ input, ctx }) => {
       const { account } = ctx.session
       const { contact } = account
-      console.log('%c Line:84 🥖 account', 'color:#f5ce50', account)
+      console.log('%c Line:84 🥖 accountinput', 'color:#f5ce50', account)
       const a = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
       return a
     }
