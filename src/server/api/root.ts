@@ -15,16 +15,17 @@ import { filesRouter } from './routers/files'
 import { formRouter } from './routers/form'
 import { googleRouter } from './routers/google'
 import { gridRouter } from './routers/grid'
+import { gridFilterRouter } from './routers/grid_filter'
 import { menuRouter } from './routers/menu'
 import { notificationsRouter } from './routers/notification'
 import { organizationRouter } from './routers/organization'
 import { organizationContactsRouter } from './routers/organization_contact'
+import { packetRouter } from './routers/packet'
 import { recordRouter } from './routers/record'
 import { tabRouter } from './routers/tab'
 import { userRolesRouter } from './routers/user_role'
 import { validatorRouter } from './routers/validator'
 import { wizardRouter } from './routers/wizard'
-import { packetRouter } from './routers/packet';
 
 /**
  * This is the primary router for your server.
@@ -56,7 +57,8 @@ export const appRouter = createTRPCRouter({
   deviceAlias: deviceAliasRouter,
   deviceConfiguration: deviceConfigurationRouter,
   deviceHeartbeats: deviceHeartbeatsRouter,
-  packet:packetRouter
+  packet: packetRouter,
+  gridFilter: gridFilterRouter,
 })
 
 // export type definition of API

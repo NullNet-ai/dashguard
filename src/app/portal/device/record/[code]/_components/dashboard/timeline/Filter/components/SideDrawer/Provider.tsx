@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation'
 import React, { createContext, useContext, useState } from 'react'
 
-import { useSideDrawer } from '~/components/platform/SideDrawer'
-
 import { saveGridFilter, updateGridFilter } from './actions'
+
+import { useSideDrawer } from '~/components/platform/SideDrawer'
 
 interface ManageFilterContextType {
   state: {
@@ -28,10 +28,12 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   const { actions } = useSideDrawer()
   const router = useRouter()
   const { closeSideDrawer } = actions ?? {}
+  console.log('%c Line:34 🌰 columns', 'color:#fca650', { tab, columns })
   const [filterDetails, setFilterDetails] = useState<any>({
     ...tab,
     columns,
   })
+  console.log('%c Line:33 🍇 filterDetails', 'color:#b03734', filterDetails)
   const [createFilterLoading, setCreateFilterLoading] = useState(false)
 
   const handleUpdateFilter = (data: any) => {
@@ -121,6 +123,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
       default_sorts: sorting,
     }
     setCreateFilterLoading(true)
+    console.log('%c Line:126 🌮 modifyFilterDetails', 'color:#42b983', modifyFilterDetails)
     await saveGridFilter(modifyFilterDetails)
     setCreateFilterLoading(false)
     closeSideDrawer()

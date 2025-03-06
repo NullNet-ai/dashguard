@@ -4,6 +4,8 @@ import { CircleMinus, Plus } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { useManageFilter } from '../Provider'
+
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
 import { Button } from '~/components/ui/button'
 import { Form } from '~/components/ui/form'
@@ -14,8 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-
-import { useManageFilter } from '../Provider'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -59,6 +59,7 @@ export default function FilterContent() {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails, columns } = state ?? {}
+  console.log('%c Line:62 🍞 columns', 'color:#93c0a4', columns)
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),

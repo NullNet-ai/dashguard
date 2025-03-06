@@ -1,6 +1,7 @@
 'use client'
 import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { head } from 'lodash'
 import { useContext } from 'react'
 
 import NetworkFlow from '../../network-traffic-visualization'
@@ -29,14 +30,46 @@ const FilterView = () => {
           <ManageFilterProvider
             columns = { [
               {
-                Header: 'Name',
-                accessor: 'name',
+                header: 'Source IP Address',
+                label: 'Source IP Address',
+                accessorKey: 'source_ip_address',
               },
               {
-                Header: 'Age',
-                accessor: 'age',
+                header: 'Source Port',
+                label: 'Source Port',
+                accessorKey: 'source_port',
               },
-            ] }
+              {
+                header: 'Destination IP Address',
+                label: 'Destination IP Address',
+                accessorKey: 'destination_ip_address',
+              },
+              {
+                header: 'Destination Port',
+                label: 'Destination Port',
+                accessorKey: 'destination_port',
+              },
+              {
+                header: 'TCP Protocol',
+                label: 'TCP',
+                accessorKey: 'tcp',
+              },
+              {
+                header: 'UDP Protocol',
+                label: 'UDP',
+                accessorKey: 'udp',
+              },
+              {
+                header: 'IP Version',
+                label: 'IP Version',
+                accessorKey: 'ip_version',
+              },
+              {
+                header: 'Interfaces',
+                label: 'Interfaces',
+                accessorKey: 'interfaces',
+              },
+            ]}
             tab = { {
               name: 'New Filter',
             } }
@@ -62,13 +95,13 @@ const FilterView = () => {
           {/* <span className = "flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm">{filter}</span> */}
           <div className="flex-1 overflow-y-auto">
             <StateTab
-              defaultValue = "filter"
-              persistKey = "side-drawer-tabs"
-              size = "sm"
-              tabs = { filters }
-              variant = "default"
+              defaultValue="filter"
+              persistKey="side-drawer-tabs"
+              size="sm"
+              tabs={filters ?? []}
+              variant="default"
             />
-            <FilterProperty />
+            {/* <FilterProperty /> */}
           </div>
 
           {/* </Card> */}
