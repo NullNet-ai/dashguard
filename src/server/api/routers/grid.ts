@@ -770,6 +770,7 @@ export const gridRouter = createTRPCRouter({
           return {
             ...tab,
             advance_filters: filters,
+            default_filter : filters
           };
         }
         return tab;

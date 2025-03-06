@@ -84,7 +84,7 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
           {error && <FormMessage>{error}</FormMessage>}
           <div className="flex justify-between gap-4">
             <Button
-              className="flex h-auto w-full items-center justify-center gap-3 rounded border border-foreground py-1.5 text-md font-semibold text-foreground shadow-sm"
+              className="flex h-auto w-full items-center justify-center gap-3 rounded py-1.5 text-md font-semibold text-foreground"
               type="button"
               onClick={handleRedirectToSignIn}
               variant={'outline'}
