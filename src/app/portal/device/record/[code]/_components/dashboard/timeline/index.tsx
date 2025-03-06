@@ -1,10 +1,11 @@
 import React from 'react'
-import Search from './Search'
+
+import Filter from './Filter'
 
 function TimelineComponent() {
   return (
     <div className="container mx-auto mt-10">
-    <Search />
+      <Filter />
     </div>
   )
 }

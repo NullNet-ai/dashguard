@@ -3,19 +3,19 @@ import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { useContext } from 'react'
 
-import { useSideDrawer } from '~/components/platform/SideDrawer'
-import StateTab from '~/components/platform/StateTab'
-import { Card } from '~/components/ui/card'
-
 import NetworkFlow from '../../network-traffic-visualization'
 
 import FilterProperty from './components/SideDrawer/FilterProperty'
 import { ManageFilterProvider } from './components/SideDrawer/Provider'
 import GridManageFilter from './components/SideDrawer/View'
-import { SearchContext } from './SearchProvider'
+import { FilterContext } from './FilterProvider'
 
-const SearchView = () => {
-  const { state, actions } = useContext(SearchContext)
+import { useSideDrawer } from '~/components/platform/SideDrawer'
+import StateTab from '~/components/platform/StateTab'
+import { Card } from '~/components/ui/card'
+
+const FilterView = () => {
+  const { state, actions } = useContext(FilterContext)
   const { filters, query } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
@@ -27,7 +27,16 @@ const SearchView = () => {
       body: {
         component: () => (
           <ManageFilterProvider
-            columns = { [] }
+            columns = { [
+              {
+                Header: 'Name',
+                accessor: 'name',
+              },
+              {
+                Header: 'Age',
+                accessor: 'age',
+              },
+            ] }
             tab = { {
               name: 'New Filter',
             } }
@@ -140,4 +149,4 @@ const SearchView = () => {
   )
 }
 
-export default SearchView
+export default FilterView

@@ -1,21 +1,21 @@
 'use client'
 import { createContext, useContext, useState } from 'react'
 
-import { type IAction, type IProps, type ISearchContext, type IState } from '../types'
+import { type IAction, type IProps, type IFilterContext, type IState } from '../types'
 
-export const SearchContext = createContext<ISearchContext>({})
+export const FilterContext = createContext<IFilterContext>({})
 
-export const useSearch = (): ISearchContext => {
-  const context = useContext(SearchContext)
+export const useFilter = (): IFilterContext => {
+  const context = useContext(FilterContext)
   if (!context) {
     // throw new Error("use Wizard must be used within a WizardProvider");
-    console.warn('use Search must be used within a SearchProvider')
+    console.warn('use Filter must be used within a FilterProvider')
   }
 
   return context
 }
 
-const SearchProvider = ({ children }: IProps) => {
+const FilterProvider = ({ children }: IProps) => {
   const [filters, setFilters] = useState([
     {
       id: 'all_data',
@@ -54,10 +54,10 @@ const SearchProvider = ({ children }: IProps) => {
   } as IAction
 
   return (
-    <SearchContext.Provider value={{ state, actions }}>
+    <FilterContext.Provider value={{ state, actions }}>
       {children}
-    </SearchContext.Provider>
+    </FilterContext.Provider>
   )
 }
 
-export default SearchProvider
+export default FilterProvider
