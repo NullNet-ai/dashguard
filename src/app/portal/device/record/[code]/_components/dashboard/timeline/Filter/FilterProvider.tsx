@@ -1,7 +1,10 @@
 'use client'
 import { createContext, useContext, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { type IAction, type IProps, type IFilterContext, type IState } from '../types'
+
+import { useManageFilter } from './components/SideDrawer/Provider'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -16,6 +19,8 @@ export const useFilter = (): IFilterContext => {
 }
 
 const FilterProvider = ({ children }: IProps) => {
+  const form = useForm()
+  console.log('%c Line:21 🍺 form', 'color:#2eafb0', { form, name })
   const [filters, setFilters] = useState([
     {
       id: 'all_data',

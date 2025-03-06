@@ -2,9 +2,15 @@
 import { api } from '~/trpc/server'
 
 export const saveGridFilter = async (data: any) => {
-  const saveGridFilter = await api.gridFilter.createGridFilter(data)
+  try {
+    console.log('%c Line:5 🥔 data', 'color:#465975', data)
+    const saveGridFilter = await api.gridFilter.createGridFilter(data)
 
-  return saveGridFilter
+    return saveGridFilter
+  }
+  catch (error) {
+    console.log('%c Line:8 🥤 error', 'color:#b03734', error)
+  }
 }
 
 export const updateGridFilter = async (data: any) => {
