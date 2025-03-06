@@ -4,16 +4,16 @@ import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { head } from 'lodash'
 import { useContext } from 'react'
 
+import { useSideDrawer } from '~/components/platform/SideDrawer'
+import StateTab from '~/components/platform/StateTab'
+import { Card } from '~/components/ui/card'
+
 import NetworkFlow from '../../network-traffic-visualization'
 
 import FilterProperty from './components/SideDrawer/FilterProperty'
 import { ManageFilterProvider } from './components/SideDrawer/Provider'
 import GridManageFilter from './components/SideDrawer/View'
 import { FilterContext } from './FilterProvider'
-
-import { useSideDrawer } from '~/components/platform/SideDrawer'
-import StateTab from '~/components/platform/StateTab'
-import { Card } from '~/components/ui/card'
 
 const FilterView = () => {
   const { state, actions } = useContext(FilterContext)
@@ -115,68 +115,8 @@ const FilterView = () => {
           </div>
         </div>
       </div>
-      <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 self-end rounded-md border px-2 ps-3 focus-within:border-primary w-full max-w-[400px]">
-        {/* <input
-          type="text"
-          value="Hellow"
-          className="flex-grow border-none px-1.5 md:px-3 h-[35px] bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
-          placeholder="Search"
-          onChange={() => { console.log("Hello I'm Here!!!") }}
-        />
-        <button
-          className='my-auto'
-          >
-          <SearchIcon className="size-4"/>
-        </button> */}
-        <Combobox>
-          <div className="relative">
-            <MagnifyingGlassIcon
-              aria-hidden = "true"
-              className = "pointer-events-none absolute left-2 top-2.5 size-5 text-gray-400"
-            />
-            <ComboboxInput
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus = { true }
-              className="h-10 w-full border-0 bg-transparent pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-              placeholder="Search..."
-              value={query}
-              onChange={(event) => {
-                actions?.handleOnChange(event.target.value)
-              } }
-              // onBlur={() => {
-              //   actions?.handleOpen(false);
-              // }}
-              // onFocus={() => {
-              //   actions?.handleOpen(true);
-              // }}
-            />
-          </div>
 
-          {/* {state?.open && !!debouncedSearchInput && ( */}
-          <ComboboxOptions
-            as = "ul"
-            className = "max-h-80 scroll-py-2 divide-y divide-gray-100 overflow-y-auto"
-            static={true}
-          >
-            {/* <li className="p-2">
-                    <h2 className="mb-2 mt-1 px-3 text-xs font-semibold text-gray-500">
-                      <SearchResult
-                        results={
-                          (transformSearchData(
-                            items, debouncedSearchInput, searchableFields,
-                          ) as ISearchItemResult[]) || null
-                        }
-                        closeDialog={handleCloseDialog}
-                      />
-                    </h2>
-                  </li> */}
-          </ComboboxOptions>
-          {/* )} */}
-        </Combobox>
-
-      </div>
       {/* <Card> */}
-      <NetworkFlow />
       {/* </Card> */}
     </div>
   )

@@ -20,7 +20,7 @@ export default function NetworkFlow() {
   
   useEffect(() => {
     const fetchData = async () => {
-      if (packetsIP) {
+      if (!packetsIP) {
         await refetch()
       }
     }

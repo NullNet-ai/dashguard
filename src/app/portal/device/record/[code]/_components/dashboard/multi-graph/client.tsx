@@ -211,9 +211,9 @@ const InteractiveGraph = ({
                       gridRow: '2 / span 1',
                     },
                     render: ({ form }) => {
-                      const interfacesData = form?.watch('interfaces')
+                      // const interfacesData = form?.watch('interfaces')
 
-                      setInterfaces(interfacesData)
+                      // setInterfaces(interfacesData)
                       const graphType = form?.watch('graph_type')
                       return (
                         <div className = "max-h-[340px]">
@@ -224,7 +224,8 @@ const InteractiveGraph = ({
                             {renderChart({
                               filteredData,
                               graphType,
-                              interfaces: interfacesData,
+                              // interfaces: interfacesData,
+                              interfaces: [],
                             })}
                           </ChartContainer>
                         </div>
