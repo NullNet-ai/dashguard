@@ -12,7 +12,13 @@ export interface ITabGrid {
   current: boolean;
   href: string;
   default?: boolean;
+  columns?: any[]
   sorting?: SortingState;
+  groups?: any[];
+  sorts?: any[];
+  advance_filters?: IGridFilterBy[];
+  default_sorts? : any[];
+  default_filter?: IGridFilterBy[];
 }
 
 export interface IGridFilterBy {

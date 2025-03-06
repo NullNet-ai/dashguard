@@ -242,7 +242,7 @@ export const gridFilterRouter = createTRPCRouter({
   duplicateGridFilter: privateProcedure
     .input(
       z.object({
-        id: z.string(),
+        tab: z.any(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -254,86 +254,133 @@ export const gridFilterRouter = createTRPCRouter({
 
       const filter_id = ulid();
 
-      // fetch and copy the data from the grid_filter
-      const { data } = await ctx.dnaClient
-        .findOne(input.id, {
-          entity: ENTITY,
-          token: ctx.token.value,
-          query: {
-            pluck: [
-              'id',
-              'name',
-              'grid_id',
-              'link',
-              'is_current',
-              'is_default',
-              'entity',
-              'columns',
-              'groups',
-              'sorts',
-              'advance_filters',
-              'default_sorts',
-            ],
-          },
-        })
-        .execute();
+      let filter : any = {}
+      // if the tab duplicated is default it should not fetch from database and create
+      // new record
+      if(input.tab.default) {
 
-      if (!data.length) {
-        throw new Error('Grid filter not found');
-      }
-
-      const filter = data[0] ?? {};
-      // create a new grid_filter
-      const {
-        data: newData,
-        message,
-        success,
-        errors,
-      } = await ctx.dnaClient
-        .create({
-          entity: ENTITY,
-          token,
-          mutation: {
-            params: {
-              id: filter_id,
-              name: `${filter.name} (Copy)`,
-              grid_id: '',
-              contact_id: id,
-              link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
-              is_current: false,
-              is_default: false,
-              entity: mainEntity,
-              columns: filter.columns,
-              groups: filter.groups,
-              sorts: filter.sorts,
-              advance_filters: filter.advance_filters,
-              default_sorts: filter.default_sorts,
+        const { data, message, success, errors } = await ctx.dnaClient
+         .create({
+            entity: ENTITY,
+            token,
+            mutation: {
+              params: {
+                id: filter_id,
+                name: `${input.tab.name} (Copy)`,
+                grid_id: '',
+                contact_id: id,
+                link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
+                is_current: false,
+                is_default: false,
+                entity: mainEntity,
+                columns: input.tab.columns || [],
+                groups: input.tab.groups || [],
+                sorts: input.tab.sorts || [],
+                advance_filters: input.tab.default_filter || [],
+                default_sorts: input.tab.default_sorts  || [],
+              },
+              pluck: [
+                'id',
+                'name',
+                'grid_id',
+                'link',
+                'is_current',
+                'is_default',
+                'entity',
+                'columns',
+                'groups',
+                'sorts',
+                'advance_filters',
+                'default_sorts',
+              ],
             },
-            pluck: [
-              'id',
-              'name',
-              'grid_id',
-              'link',
-              'is_current',
-              'is_default',
-              'entity',
-              'columns',
-              'groups',
-              'sorts',
-              'advance_filters',
-              'default_sorts',
-            ],
-          },
-        })
-        .execute();
-      console.error('RESPONSE', {
-        data,
-        message,
-        success,
-        errors,
-      });
-      if (!success) {
-        throw new Error(message);
+          })
+         .execute();
+
+        if (!success) {
+          throw new Error(message);
+        }
+
+        filter = data[0] || {};
+      }else{
+        // fetch and copy the data from the grid_filter
+        const { data : grid_filter_data } = await ctx.dnaClient
+          .findOne(input.tab.id, {
+            entity: ENTITY,
+            token: ctx.token.value,
+            query: {
+              pluck: [
+                'id',
+                'name',
+                'grid_id',
+                'link',
+                'is_current',
+                'is_default',
+                'entity',
+                'columns',
+                'groups',
+                'sorts',
+                'advance_filters',
+                'default_sorts',
+              ],
+            },
+          })
+          .execute();
+  
+        if (!grid_filter_data.length) {
+          throw new Error('Grid filter not found');
+        }
+
+        const grid_filter = grid_filter_data[0] || {};
+        // create a new grid_filter
+        const {
+          data: newData,
+          message,
+          success,
+          errors,
+        } = await ctx.dnaClient
+          .create({
+            entity: ENTITY,
+            token,
+            mutation: {
+              params: {
+                id: filter_id,
+                name: `${grid_filter.name} (Copy)`,
+                grid_id: '',
+                contact_id: id,
+                link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
+                is_current: false,
+                is_default: false,
+                entity: mainEntity,
+                columns: grid_filter.columns,
+                groups: grid_filter.groups,
+                sorts: grid_filter.sorts,
+                advance_filters: grid_filter.advance_filters,
+                default_sorts: grid_filter.default_sorts,
+              },
+              pluck: [
+                'id',
+                'name',
+                'grid_id',
+                'link',
+                'is_current',
+                'is_default',
+                'entity',
+                'columns',
+                'groups',
+                'sorts',
+                'advance_filters',
+                'default_sorts',
+              ],
+            },
+          })
+          .execute();
+  
+        if (!success) {
+          throw new Error(message);
+        }
+
+        filter = newData[0] || {};
       }
 
       // insert to redis
@@ -347,15 +394,20 @@ export const gridFilterRouter = createTRPCRouter({
         _tabMenuId,
       )) as ITabGrid[];
       tabs.push({
-        id: newData?.[0]?.id,
-        name: newData?.[0]?.name,
-        current: false,
-        href: newData?.[0]?.link,
+        id: filter?.id,
+        name: filter?.name,
+        current: true,
+        href: filter?.link,
         default: false,
-        sorting: [],
+        columns: filter?.columns,
+        groups: filter?.groups,
+        sorts: filter?.sorts,
+        advance_filters: filter?.advance_filters,
+        default_sorts: filter?.default_sorts,
+        default_filter : filter?.advance_filters,
       });
       await ctx.redisClient.cacheData(_tabMenuId, tabs);
 
-      return newData?.[0]?.link;
+      return filter?.link;
     }),
 });
