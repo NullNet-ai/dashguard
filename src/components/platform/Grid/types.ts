@@ -128,6 +128,7 @@ export interface IConfigGrid {
     };
   };
   customRowAction?: React.FC<any>;
+  additionalData?: Record<string, any>;
 }
 
 interface IRowToArchive extends Row<any> {

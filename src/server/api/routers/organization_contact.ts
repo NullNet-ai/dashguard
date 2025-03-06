@@ -1,7 +1,7 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
-import { EOrderDirection } from '@dna-platform/common-orm';
+import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { EStatus } from '../types';
 
@@ -136,16 +136,33 @@ export const organizationContactsRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck_object: {
-              organizations: ['id', 'name'],
+              organizations: ['id', 'name', 'categories'],
               organization_contacts: [
                 'id',
                 'contact_organization_id',
                 'is_primary',
               ],
             },
-            advance_filters: createAdvancedFilter({
-              contact_id,
-            }),
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'contact_id',
+                operator: EOperator.EQUAL,
+                values: [contact_id],
+                entity: 'organization_contacts',
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'categories',
+                operator: EOperator.CONTAINS,
+                values: ['Department'],
+                entity: 'organizations',
+              },
+            ],
           },
         })
         .join({

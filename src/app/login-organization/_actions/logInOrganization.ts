@@ -15,6 +15,32 @@ const loginOrganization = async (login_organization_id: string) => {
     };
   }
 
+  const accountDataResponse = await api.auth.getAccountData();
+  const { status, account_status, organization } = accountDataResponse ?? {};
+
+  if (
+    status !== 'Active' ||
+    (account_status &&
+      !['Active', 'Pending Setup', 'Invited'].includes(account_status ?? ''))
+  ) {
+    const errorMessages = {
+      Deactived:
+        'Your account has been deactivated. Contact your administrator for assistance.',
+      'Access Disabled':
+        'Your account has been disabled. Contact your administrator for assistance.',
+      Archived:
+        'Your account is no longer active. Contact your administrator for assistance.',
+    };
+    return {
+      valid: false,
+      errorMessage:
+        status === 'Archived'
+          ? errorMessages.Archived
+          : (errorMessages[account_status as keyof typeof errorMessages] ??
+            'Your account is no longer active. Contact your administrator for assistance.'),
+    };
+  }
+
   await verifySession();
 
   return redirect('/portal/dashboard');

@@ -93,11 +93,13 @@ export const authRouter = createTRPCRouter({
 
   getAccountData: privateProcedure
     .input(
-      z.object({
+      z
+        .object({
           username: z.string().min(1),
-      }),
+        })
+        .optional(),
     )
-    .mutation(async ({  ctx }) => {
+    .mutation(async ({ ctx }) => {
       try {
         const account = ctx.session.account;
         const accountId = account?.organization_account_id;
@@ -107,7 +109,13 @@ export const authRouter = createTRPCRouter({
             entity: 'organization_accounts',
             token: ctx.token.value,
             query: {
-            pluck: ['id', 'is_new_user', 'contact_id', 'account_status', 'status'],
+              pluck: [
+                'id',
+                'is_new_user',
+                'contact_id',
+                'account_status',
+                'status',
+              ],
             },
           })
           .execute();
@@ -115,7 +123,10 @@ export const authRouter = createTRPCRouter({
           return null;
         }
 
-        return response?.data?.[0];
+        return {
+          ...(response?.data?.[0] ?? {}),
+          organization: account.organization,
+        } as Record<string, any>;
       } catch (error: any) {
         return {
           message: 'Something went wrong please try again',
@@ -165,7 +176,7 @@ export const authRouter = createTRPCRouter({
         }
       } catch (error: any) {
         return {
-          message: error?.message ??  'Something went wrong please try again',
+          message: error?.message ?? 'Something went wrong please try again',
           statusCode: 500,
           error,
         };
@@ -187,7 +198,7 @@ export const authRouter = createTRPCRouter({
             params: {
               is_new_user: false,
               account_secret: await argon2.hash(input.account_secret),
-              account_status: 'Active'
+              account_status: 'Active',
             },
             pluck: ['id', 'account_secret', 'is_new_user'],
           },
@@ -325,7 +336,7 @@ export const authRouter = createTRPCRouter({
         );
 
         return {
-          token: newOrganization?.data?.[0]?.token
+          token: newOrganization?.data?.[0]?.token,
         };
       } catch (error) {
         throw error;

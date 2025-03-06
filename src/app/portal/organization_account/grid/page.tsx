@@ -15,7 +15,7 @@ import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
 export default async function Page() {
   const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
 
-  const { items = [], totalCount } = await api.account.fetchGridData({
+  const { items = [], totalCount, accountEmail } = await api.account.fetchGridData({
     entity: 'organization_account',
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
@@ -36,6 +36,9 @@ export default async function Page() {
         searchConfig: {
           router: 'account',
           resolver: 'fetchGridData',
+        },
+        additionalData: {
+          accountEmail,
         },
         rowActions: {
           archive: {
