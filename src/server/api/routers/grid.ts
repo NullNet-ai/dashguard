@@ -789,7 +789,6 @@ export const gridRouter = createTRPCRouter({
           })
           .execute();
       }
-      console.log("🚀 ~ .mutation ~ newTabs:", JSON.stringify(newTabs, null, 2))
       await ctx.redisClient.cacheData(_tabMenuId, newTabs);
     }),
   updateReportPagination: privateProcedure
