@@ -155,7 +155,7 @@ export default function GraphSearchProvider({ children }: IProps) {
     //   return [...acc, ...data?.filters]
     // }, [])
     // 
-    setSearchItems(cached_search_items)
+    setSearchItems(cached_search_items || [])
   }, [cached_search_items?.length])
 
   const state_context = {
