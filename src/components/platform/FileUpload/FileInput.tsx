@@ -12,7 +12,7 @@ interface FileInputProps extends React.HTMLAttributes<HTMLDivElement> {
 export const FileInput = forwardRef<HTMLDivElement, FileInputProps>(
   ({ className, children, disabled, ...props }, ref) => {
     const { dropzoneState, isFileTooBig, isLOF } = useFileUpload();
-    const rootProps = isLOF ? {} : dropzoneState.getRootProps();
+    const rootProps = isLOF || disabled ? {} : dropzoneState.getRootProps();
     return (
       <div
         ref={ref}

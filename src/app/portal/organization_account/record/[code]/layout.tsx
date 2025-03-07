@@ -41,6 +41,7 @@ const Layout = async ({
       'updated_date',
       'updated_time',
       'account_status',
+      'account_id'
     ],
   })
 

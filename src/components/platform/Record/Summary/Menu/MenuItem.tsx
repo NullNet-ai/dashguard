@@ -6,6 +6,7 @@ import { DropdownMenuItem, DropdownMenuSeparator } from "~/components/ui/dropdow
 interface IMenuItemProps {
   children: React.ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 export default function MenuItem({ children, onClick,...props  }: IMenuItemProps) {

@@ -1,7 +1,7 @@
 {
   "app_name": "platform__StateTab",
-  "tag": "1.0.1-rc.1<unreleased>",
-  "branch": "unreleased/feat3058/1.0.1-rc.1<unreleased>",
-  "message": "Add props for rotateText and improve ui for vertical orientation",
+  "tag": "1.0.2",
+  "branch": "released/1.0.2",
+  "message": "revert changes",
   "publish_name": "Rob Caldosa"
 }

@@ -71,17 +71,6 @@ const gridColumns = [
     },
   },
   {
-    header: "Roles",
-    accessorKey: "roles",
-    isSearchable: false,
-    cell: ({ row }) => {
-      const roles = row?.original?.roles || [];
-      return roles?.map((role: string, index: number) => {
-        return <StatusCell key={index} value={role} />;
-      });
-    },
-  },
-  {
     header: "Updated Date",
     accessorKey: "updated_date",
     sortKey: ["updated_date", "updated_time"],
