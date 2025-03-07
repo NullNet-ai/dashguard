@@ -7,31 +7,31 @@ import { api } from '~/trpc/react'
 
 import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
-import { type Edge, type FlowElement } from './types'
 import { generateFlowData } from './functions/generateFlowData'
+import { type Edge, type FlowElement } from './types'
 
 export default function NetworkFlow() {
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
 
-  const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
-  const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
-    { packet_data: packetsIP }, { enabled: !!packetsIP }
-  )
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!packetsIP) {
-        await refetch()
-      }
-    }
-    fetchData().catch(error => console.error('Error fetching data:', error))
-  }, [packetsIP, refetch])
+  // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
+  // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
+  //   { packet_data: packetsIP }, { enabled: !!packetsIP }
+  // )
 
-  useEffect(() => {
-    if (bandwidth) {
-      setElements(generateFlowData(bandwidth))
-    }
-  }, [bandwidth])
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!packetsIP) {
+  //       await refetch()
+  //     }
+  //   }
+  //   fetchData().catch(error => console.error('Error fetching data:', error))
+  // }, [packetsIP, refetch])
+
+  // useEffect(() => {
+  //   if (bandwidth) {
+  //     setElements(generateFlowData(bandwidth))
+  //   }
+  // }, [bandwidth])
 
   const nodeTypes = useMemo(
     () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []
