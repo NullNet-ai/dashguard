@@ -13,6 +13,8 @@ export interface IState {
 export interface IAction {
   addFilter: (filter: string) => void
   handleOnChange: (e: any) => void
+  handleDelete: ({ id }: { id: string }) => void
+  handleDuplicateTab: (tab: Record<string, any>) => void
 }
 
 export interface IFilterContext {

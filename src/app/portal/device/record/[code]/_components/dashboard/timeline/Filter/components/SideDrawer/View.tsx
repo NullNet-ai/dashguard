@@ -10,8 +10,7 @@ import SortContent from './Tabs/Sort'
 
 export default function SideDrawer() {
   const { state, actions } = useManageFilter()
-  const { tab_props, filterDetails, createFilterLoading } = state ?? {}
-  console.log('%c Line:14 🥟 tab_props', 'color:#465975', tab_props)
+  const { tab_props, filterDetails, updateFilterLoading, createFilterLoading } = state ?? {}
   const tabs = [
     {
       id: 'filter',
@@ -43,7 +42,7 @@ export default function SideDrawer() {
               <>
               <Button
                   className = "bg-blue-600 text-white hover:bg-blue-700"
-                  loading = { createFilterLoading }
+                  loading = { updateFilterLoading }
                   variant = "default"
                   onClick = { actions.saveUpdatedFilter }
                 >

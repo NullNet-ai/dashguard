@@ -1,36 +1,19 @@
 'use client'
 import { Copy, Grid, MoreVertical, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React from 'react'
 
-
-import { removeFilter } from './components/SideDrawer/actions'
-import { ManageFilterProvider } from './components/SideDrawer/Provider'
-import GridManageFilter from './components/SideDrawer/View'
 import { useSideDrawer } from '~/components/platform/SideDrawer'
-
 import { Button } from '~/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
-import useScreenType from '~/hooks/use-screen-type'
+
+import { ManageFilterProvider } from './components/SideDrawer/Provider'
+import GridManageFilter from './components/SideDrawer/View'
+import { useFilter } from './FilterProvider'
 
 export default function FilterProperty({ filter }: { filter: any }) {
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState<boolean>(false)
-  const screenType = useScreenType()
-  const isMobile = screenType === 'sm' || screenType === 'xs'
-  const closeSubmenu = () => {
-    setIsSubmenuOpen(false)
-  }
-
-  const router = useRouter()
-
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
-
-  const handleDelete = async ({ id }: { id: string }) => {
-    console.log('Delete Filter')
-    router.refresh()
-    await removeFilter(id)
-  }
+  const { actions } = useFilter()
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
@@ -103,11 +86,11 @@ export default function FilterProperty({ filter }: { filter: any }) {
           <Grid className="mr-2 h-4 w-4" />
           {"Manage Filter"}
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({ name: `${filter.name} copy` })}>
           <Copy className="mr-2 h-4 w-4" />
           {"Duplicate Filter"}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleDelete({ id: filter.id })}>
+        <DropdownMenuItem onClick={() => actions?.handleDelete({ id: filter.id })}>
           <Trash2 className="mr-2 h-4 w-4 text-red-500" />
           {"Delete Filter"}
         </DropdownMenuItem>

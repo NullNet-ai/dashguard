@@ -104,15 +104,15 @@ export const gridFilterRouter = createTRPCRouter({
   duplicateGridFilter: privateProcedure
     .input(z.record(z.unknown()))
     .mutation(async ({ input, ctx }) => {
-      const res = await ctx.dnaClient
-        .create({
-          entity: 'country',
-          token: ctx.token.value,
-          data: input,
-        })
-        .execute()
+      console.log('%c Line:107 🌭 input', 'color:#93c0a4', input)
+      const { account } = ctx.session
+      const { contact } = account
+      console.log('%c Line:84 🥖 account', 'color:#f5ce50', account)
+      const a = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
 
-      return res
+      const cachedData = !a?.length ? [] : a
+      console.log('%c Line:83 🍇 input', 'color:#ed9ec7', input)
+      return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, [...cachedData, { ...input, id: ulid() }])
     }
     ),
   updateGridFilter: privateProcedure

@@ -1,14 +1,12 @@
 'use client'
+import { usePathname } from 'next/navigation'
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { ulid } from 'ulid'
 
-import { api } from '~/trpc/server'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 import { type IAction, type IProps, type IFilterContext, type IState } from '../types'
 
-import { fetchTabFilter } from './components/SideDrawer/actions'
-import { useManageFilter } from './components/SideDrawer/Provider'
+import { duplicateFilterTab, fetchTabFilter, removeFilter } from './components/SideDrawer/actions'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -23,8 +21,10 @@ export const useFilter = (): IFilterContext => {
 }
 
 const FilterProvider = ({ children }: IProps) => {
-  const form = useForm()
-  console.log('%c Line:21 🍺 form', 'color:#2eafb0', { form, name })
+  const pathName = usePathname()
+  const baseUrl = `${pathName}?current_tab=dashboard&sub_tab=timeline`
+
+  const eventEmitter = useEventEmitter()
   const [filters, setFilters] = useState(
     [
       {
@@ -34,6 +34,18 @@ const FilterProvider = ({ children }: IProps) => {
       },
     ]
   )
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
+  const fetchDetails = async (data: any) => {
+    setRefetchTrigger(prev => prev + 1)
+  }
+
+  useEffect(() => {
+    if (!eventEmitter) return
+    eventEmitter.on(`manage_filter`, fetchDetails)
+    return () => {
+      eventEmitter.off(`manage_filter`, fetchDetails)
+    }
+  }, [eventEmitter])
 
   const [query, setQuery] = useState('')
 
@@ -42,27 +54,54 @@ const FilterProvider = ({ children }: IProps) => {
   }
 
   useEffect(() => {
-    console.log('%c Line:39 🍺 filters', 'color:#2eafb0', filters)
     const fetchFilter = async () => {
       const result = await fetchTabFilter() ?? []
-      console.log('%c Line:44 🍫 result', 'color:#3f7cff', result)
-      setFilters(prev => [...prev, ...result])
+
+      setFilters((prev) => {
+        const updatedFilters = new Map(prev.map(item => [item.id, item])) // Convert previous filters to a Map
+
+        result.forEach((item: any) => {
+          if (updatedFilters.has(item.id)) {
+            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item }) // Merge updates
+          }
+          else {
+            updatedFilters.set(item.id, item) // Add new item
+          }
+        })
+
+        return Array.from(updatedFilters.values()) // Convert Map back to an array
+      })
     }
+
     fetchFilter()
-  }, [])
+  }, [refetchTrigger])
 
   const handleOnChange = (e: any) => {
     setQuery(e)
   }
-  console.log('%c Line:70 🥐 filters', 'color:#4fff4B', filters)
+
+  const handleDelete = async ({ id }: { id: string }) => {
+    setRefetchTrigger(prev => prev + 1)
+    setFilters(prev => prev.filter(item => item.id !== id))
+    await removeFilter(id)
+  }
+
+  const handleDuplicateTab = async (tab: Record<string, any>) => {
+    await duplicateFilterTab(tab)
+    setRefetchTrigger(prev => prev + 1)
+  }
+
   const state = {
     filters,
     query,
+
   } as IState
 
   const actions = {
     addFilter,
     handleOnChange,
+    handleDelete,
+    handleDuplicateTab,
   } as IAction
 
   return (

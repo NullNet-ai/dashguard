@@ -11,6 +11,7 @@ import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
+
   const { filters = [] } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions

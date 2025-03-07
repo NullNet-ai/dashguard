@@ -1,11 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import React, { createContext, useContext, useState } from 'react'
 
-import { saveGridFilter, updateGridFilter } from './actions'
-
 import { useSideDrawer } from '~/components/platform/SideDrawer'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
+
+import { saveGridFilter, updateGridFilter } from './actions'
 
 interface ManageFilterContextType {
   state: {
@@ -13,6 +13,7 @@ interface ManageFilterContextType {
     filterDetails: any
     columns: Record<string, any>[]
     createFilterLoading: boolean
+    updateFilterLoading: boolean
   }
   actions: {
     handleUpdateFilter: (data: any) => void
@@ -22,19 +23,20 @@ interface ManageFilterContextType {
   }
 }
 
-const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined)
+export const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined)
 
 export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode, tab: any, columns: Record<string, any>[] }) {
   const { actions } = useSideDrawer()
-  const router = useRouter()
+  const eventEmitter = useEventEmitter()
   const { closeSideDrawer } = actions ?? {}
-  console.log('%c Line:34 🌰 columns', 'color:#fca650', { tab, columns })
+
   const [filterDetails, setFilterDetails] = useState<any>({
     ...tab,
     columns,
   })
-  console.log('%c Line:33 🍇 filterDetails', 'color:#b03734', filterDetails)
+
   const [createFilterLoading, setCreateFilterLoading] = useState(false)
+  const [updateFilterLoading, setUpdateFilterLoading] = useState(false)
 
   const handleUpdateFilter = (data: any) => {
     setFilterDetails({
@@ -83,11 +85,11 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
       sorts: sorting,
       default_sorts: sorting,
     }
-    setCreateFilterLoading(true)
+    setUpdateFilterLoading(true)
+    eventEmitter.emit(`manage_filter`, { modifyFilterDetails })
     await updateGridFilter(modifyFilterDetails)
-    setCreateFilterLoading(false)
+    setUpdateFilterLoading(false)
     closeSideDrawer()
-    router.refresh()
   }
 
   const handleCreateNewFilter = async () => {
@@ -123,11 +125,10 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
       default_sorts: sorting,
     }
     setCreateFilterLoading(true)
-    console.log('%c Line:126 🌮 modifyFilterDetails', 'color:#42b983', modifyFilterDetails)
+    eventEmitter.emit(`manage_filter`, { modifyFilterDetails })
     await saveGridFilter(modifyFilterDetails)
     setCreateFilterLoading(false)
     closeSideDrawer()
-    router.refresh()
   }
 
   return (
@@ -138,6 +139,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
           filterDetails,
           columns,
           createFilterLoading,
+          updateFilterLoading,
         },
         actions: {
           handleUpdateFilter,
