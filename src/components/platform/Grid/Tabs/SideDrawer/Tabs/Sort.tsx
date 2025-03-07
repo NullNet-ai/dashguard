@@ -45,7 +45,7 @@ export default function SortContent() {
     defaultValues: {
       sorts: state?.filterDetails?.sorts?.map((sort: any) => ({
         id: sort.id,
-        value: sort.id, // Use the same value as id
+        value: sort.value || sort.id,
         desc: sort.desc,
       })) ?? [
         {
@@ -137,8 +137,8 @@ export default function SortContent() {
                     <SelectValue placeholder="Select a Field" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
-                    {columns?.map((column: any, columnIndex: number) => (
-                      <SelectItem key={columnIndex} value={column.accessorKey}>
+                    {columns?.map((column: any) => (
+                      <SelectItem value={column.accessorKey} >
                         {column.header}
                       </SelectItem>
                     ))}
