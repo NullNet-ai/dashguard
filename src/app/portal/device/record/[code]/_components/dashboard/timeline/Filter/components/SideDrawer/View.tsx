@@ -11,6 +11,7 @@ import SortContent from './Tabs/Sort'
 export default function SideDrawer() {
   const { state, actions } = useManageFilter()
   const { tab_props, filterDetails, createFilterLoading } = state ?? {}
+  console.log('%c Line:14 🥟 tab_props', 'color:#465975', tab_props)
   const tabs = [
     {
       id: 'filter',

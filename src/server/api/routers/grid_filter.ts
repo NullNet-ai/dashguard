@@ -6,10 +6,10 @@ import {
 import { ulid } from 'ulid'
 import { z } from 'zod'
 
-import { createDefineRoutes } from '../baseCrud'
-
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
+
+import { createDefineRoutes } from '../baseCrud'
 
 export const gridFilterRouter = createTRPCRouter({
   ...createDefineRoutes('grid_filters'),
@@ -88,17 +88,17 @@ export const gridFilterRouter = createTRPCRouter({
       return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, [...cachedData, { ...input, id: ulid() }])
     }
     ),
-  removeGridFilter: privateProcedure
+  removeFilter: privateProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const res = await ctx.dnaClient
-        .delete(input.id, {
-          entity: 'country',
-          token: ctx.token.value,
-        })
-        .execute()
+      const { account } = ctx.session
+      const { contact } = account
+      const cachedData = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
 
-      return res
+      const updatedData = cachedData?.filter((data: any) => data.id !== input.id)
+      console.log('%c Line:99 🍩 updatedData', 'color:#6ec1c2', updatedData)
+
+      return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, updatedData)
     }
     ),
   duplicateGridFilter: privateProcedure
@@ -118,25 +118,33 @@ export const gridFilterRouter = createTRPCRouter({
   updateGridFilter: privateProcedure
     .input(z.record(z.unknown()))
     .mutation(async ({ input, ctx }) => {
-      const res = await ctx.dnaClient
-        .update(input.id, {
-          entity: 'country',
-          token: ctx.token.value,
-          mutation: {
-            params: input,
-          },
-        })
-        .execute()
-
-      return res
-    }
-    ),
-  fetchGridFilter: privateProcedure
-    .input(z.any())
-    .mutation(async ({ input, ctx }) => {
       const { account } = ctx.session
       const { contact } = account
-      console.log('%c Line:84 🥖 accountinput', 'color:#f5ce50', account)
+      const cachedData = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
+
+      if (cachedData) {
+        const updatedData = cachedData.map((data: any) => {
+          if (data.id === input.id) {
+            // Update the data here
+            return {
+              ...data,
+              ...input, // Assuming input contains the updated fields
+            }
+          }
+          return data
+        })
+
+        console.log('%c Line:99 🍩 updatedData', 'color:#6ec1c2', updatedData)
+
+        // Update the cache with the new array
+        return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, updatedData)
+      }
+    }),
+  fetchGridFilter: privateProcedure
+    .query(async ({ ctx }) => {
+      const { account } = ctx.session
+      const { contact } = account
+      console.log('%c Line:136 🌮 contact', 'color:#e41a6a', contact)
       const a = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
       return a
     }

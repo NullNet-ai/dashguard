@@ -19,8 +19,9 @@ export const updateGridFilter = async (data: any) => {
   return updateGridFilter
 }
 
-export const removeGridFilter = async (id: string) => {
-  const url = await api.gridFilter.removeGridFilter({
+export const removeFilter = async (id: string) => {
+  console.log('%c Line:23 🥚 id', 'color:#ed9ec7', id)
+  const url = await api.gridFilter.removeFilter({
     id,
   })
   return url
@@ -36,12 +37,13 @@ export const duplicateFilterTab = async (tab: Record<string, any>) => {
 
 export const fetchTabFilter = async () => {
   try {
-    const cacheData = await api.gridFilter.fetchGridFilter({})
+    const cacheData = await api.gridFilter.fetchGridFilter()
     console.log('%c Line:39 🥑 cacheData', 'color:#7f2b82', cacheData)
 
     const transformCachedData = cacheData.map((data: any) => {
       return {
-        id: data.name,
+        ...data,
+        id: data.id,
         label: data.name,
       }
     }

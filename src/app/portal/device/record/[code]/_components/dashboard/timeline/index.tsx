@@ -10,7 +10,7 @@ function TimelineComponent() {
     <div className="container mx-auto mt-10">
       <Filter />
       <Main />
-      <NetworkFlow />
+      {/* <NetworkFlow /> */}
 
     </div>
   )

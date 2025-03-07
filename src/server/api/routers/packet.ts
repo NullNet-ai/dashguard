@@ -544,7 +544,7 @@ export const packetRouter = createTRPCRouter({
         },
       })
       .execute()
-    console.log('%c Line:534 🍊 res?.data', 'color:#7f2b82', JSON.stringify(res, null, 2))
+
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {
       totalCount: res?.total_count || 0,
