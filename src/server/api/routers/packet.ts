@@ -97,7 +97,6 @@ export const packetRouter = createTRPCRouter({
     }).execute()
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
 
-    console.log('%c Line:99 🍩 transformedData', 'color:#42b983', { transformedData: transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket)) })
     return transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
   }),
 
@@ -106,7 +105,7 @@ export const packetRouter = createTRPCRouter({
       const oneDayAgo = new Date()
       oneDayAgo.setDate(oneDayAgo.getDate() - 1)
       const formattedDate = moment(oneDayAgo).format('YYYY-MM-DD HH:mm:ss.SSSZ')
-      console.log('%c Line:109 🍕 formattedDate', 'color:#42b983', formattedDate)
+
       const res = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -318,7 +317,6 @@ export const packetRouter = createTRPCRouter({
         }
       })
 
-      console.log('%c Line:319 🍣 transform_data', 'color:#ea7e5c', transform_data)
       return transform_data
     }
 
@@ -470,7 +468,6 @@ export const packetRouter = createTRPCRouter({
         token: ctx.token.value,
       }).execute()
 
-      console.log('%c Line:474 🍋 res', 'color:#ed9ec7', res)
       return { source_ip, destination_ip, result: res?.data }
     }, { concurrency: 10 })
   }),
@@ -510,12 +507,10 @@ export const packetRouter = createTRPCRouter({
         token: ctx.token.value,
       }).execute()
 
-      console.log('%c Line:515 🍣 res?.data', 'color:#33a5ff', res?.data)
       return { source_ip, result: res?.data }
     }, { concurrency: 10 })
   }),
-  filterPackets: privateProcedure.input(ZodItems).query(async ({ input, ctx }) => {
-    console.log('%c Line:518 🍬', 'color:#465975')
+  filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
     const {
       limit = 50,
       current = 1,
@@ -524,8 +519,10 @@ export const packetRouter = createTRPCRouter({
       pluck_object: _pluck_object,
       sorting = [],
       is_case_sensitive_sorting = 'false',
+      time_range,
     } = input || {}
-    console.log('%c Line:523 🍻 advance_filters', 'color:#e41a6a', { pluck, advance_filters: JSON.stringify(advance_filters, null, 2) })
+
+    
     const res = await ctx.dnaClient
       .findAll({
         entity: 'packets',
@@ -535,7 +532,32 @@ export const packetRouter = createTRPCRouter({
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
-          advance_filters,
+          // advance_filters: [
+          //   ...advance_filters as any,
+          //   // {
+          //   //   type: 'operator',
+          //   //   operator: EOperator.AND,
+          //   // },
+          //   // {
+          //   //   type: 'criteria',
+          //   //   field: 'timestamp',
+          //   //   entity: 'packets',
+          //   //   operator: EOperator.IS_BETWEEN,
+          //   //   values: time_range,
+          //   // },
+          // ],
+
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'source_ip',
+              entity: 'packets',
+              operator: 'like',
+              values: [
+                '10.1.10.49',
+              ],
+            },
+          ],
           order: {
             limit,
             by_field: 'code',
@@ -545,6 +567,7 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
+    
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {
       totalCount: res?.total_count || 0,

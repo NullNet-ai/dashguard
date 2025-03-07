@@ -2,6 +2,7 @@
 import React, {
   type PropsWithChildren,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -44,6 +45,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     gridState?.advanceFilter || [],
   );
+  
   const [open, setOpen] = useState(false);
 
   const advanceFilterItems = useMemo(() => {
@@ -99,11 +101,11 @@ export default function GridSearchProvider({ children }: IProps) {
     options: Record<string, any>,
   ) => {
     const { router = 'grid', resolver = 'items' } = searchConfig ?? {};
-    console.log('%c Line:102 🍻 searchConfig', 'color:#7f2b82', searchConfig, {search_params, options}, );
+    
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
-    console.log('%c Line:107 🥃 data', 'color:#b03734', data);
+    
     return data;
   };
 
@@ -175,6 +177,8 @@ export default function GridSearchProvider({ children }: IProps) {
       filters: gridState?.defaultAdvanceFilter || [],
     });
   };
+
+
 
   const state_context = {
     open,

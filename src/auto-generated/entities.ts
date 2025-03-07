@@ -9,4 +9,5 @@ export default [
   'device_aliases',
   'device_group',
   'device_group_settings',
+  'packets',
 ]

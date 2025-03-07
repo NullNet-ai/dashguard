@@ -5,31 +5,41 @@ import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { useContext } from 'react'
 
-import { GridContext } from '~/components/platform/Grid/Provider'
 import { useDebounce } from '~/components/ui/multi-select'
 import useWindowSize from '~/hooks/use-resize'
 import useScreenType from '~/hooks/use-screen-type'
 import { cn } from '~/lib/utils'
 
-import { YYYSearchGridContext } from './Provider'
+import { SearchGraphContext } from './Provider'
 import SearchResult from './SearchResult'
-import { type ISearchItemResult } from './types'
+import { type ISearchableField, type ISearchItemResult } from './types'
 import { transformSearchData } from './utils/transformSearchData'
 
+const pluckFields = [
+  'id',
+  'code',
+  'interface_name',
+  'source_mac',
+  'destination_mac',
+  'ether_type',
+  'protocol',
+  'source_ip',
+  'destination_ip',
+  'source_port',
+  'destination_port',
+]
+
 export default function Search({ parentType }: any) {
-  const { state, actions } = useContext(YYYSearchGridContext)
-  console.log('%c Line:21 🌮 state', 'color:#6ec1c2', state)
-  const { state: gridState } = useContext(GridContext)
+  const { state, actions } = useContext(SearchGraphContext)
 
   const { width } = useWindowSize()
   const screenSize = useScreenType()
   const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg'
 
-  const { advanceFilterItems = [], config: { searchableFields } } = state ?? {}
-  console.log('%c Line:34 🍌 advanceFilterItems', 'color:#fca650', advanceFilterItems)
+  const { advanceFilterItems = [], config } = state ?? {}
+  const { searchableFields } = config ?? {}
   const { query = 'test' } = state ?? {}
   const { handleSearchQuery } = actions ?? {}
-  console.log('%c Line:35 🍤 handleSearchQuery', 'color:#4fff4B', handleSearchQuery)
 
   const debouncedSearchInput = useDebounce(query, 500)
 
@@ -38,19 +48,7 @@ export default function Search({ parentType }: any) {
       entity: 'packets',
       current: 0,
       limit: 100,
-      pluck: [
-        'id',
-        'code',
-        'interface_name',
-        'source_mac',
-        'destination_mac',
-        'ether_type',
-        'protocol',
-        'source_ip',
-        'destination_ip',
-        'source_port',
-        'destination_port',
-      ],
+      pluck: pluckFields,
       advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
     }, {
       refetchOnWindowFocus: false,
@@ -59,8 +57,8 @@ export default function Search({ parentType }: any) {
     },
   )
 
-  console.log('%c Line:305 🌭 data', 'color:#465975', data)
-  const { items } = data || { items: [] }
+  const { items } = data || { items: undefined }
+  
 
   return (
     <Combobox>
@@ -99,7 +97,7 @@ export default function Search({ parentType }: any) {
               <SearchResult
                 results={
                   (transformSearchData(
-                    items, debouncedSearchInput, searchableFields,
+                    items, debouncedSearchInput, searchableFields as ISearchableField[],
                   ) as ISearchItemResult[]) || null
                 }
               />
