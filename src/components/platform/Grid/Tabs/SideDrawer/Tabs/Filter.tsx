@@ -179,15 +179,39 @@ export default function FilterContent() {
     form.trigger(`filterGroups.${groupIndex}.filters`);
   };
 
-  // Remove Filter function - moved from FilterGroup
   const handleRemoveFilter = (groupIndex: number, index: number) => {
-    const updatedFilters = [...(form.getValues().filterGroups[groupIndex]?.filters || [])];
-    
-    // Remove the filter
-    updatedFilters.splice(index, 1);
-    
-    form.setValue(`filterGroups.${groupIndex}.filters`, updatedFilters);
+    const groupFilters = [...form.getValues().filterGroups[groupIndex]?.filters || []];
+  
+    // Find the actual index of the criteria filter
+    let criteriaCount = 0;
+    let actualIndex = -1;
+  
+    for (let i = 0; i < groupFilters.length; i++) {
+      if (groupFilters[i]!.type === 'criteria') {
+        if (criteriaCount === index) {
+          actualIndex = i;
+          break;
+        }
+        criteriaCount++;
+      }
+    }
+  
+    if (actualIndex !== -1) {
+      // Handle operator removal logic
+      if (groupFilters[actualIndex + 1]?.type === 'operator') {
+        groupFilters.splice(actualIndex, 2); // Remove filter + next operator
+      } else if (groupFilters[actualIndex - 1]?.type === 'operator') {
+        groupFilters.splice(actualIndex - 1, 2); // Remove previous operator + filter
+      } else {
+        groupFilters.splice(actualIndex, 1); // Remove only the filter
+      }
+  
+      // Update filters properly using form's update method
+      form.setValue(`filterGroups.${groupIndex}.filters`, groupFilters);
+      form.trigger(`filterGroups.${groupIndex}.filters`);
+    }
   };
+  
 
   // Update Junction Operator function - moved from FilterGroup
   const handleUpdateJunctionOperator = (groupIndex: number, index: number, operator: string) => {

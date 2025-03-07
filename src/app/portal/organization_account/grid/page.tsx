@@ -26,7 +26,7 @@ export default async function Page() {
   })
   return (
     <Grid
-      advanceFilter={filters?.reportFilters || []}
+      advanceFilter={filters?.advanceFilter || []}
       config={{
         entity: 'organization_account',
         title: 'Accounts',
@@ -55,8 +55,8 @@ export default async function Page() {
         customRowAction: AccountCustomRowAction
       }}
       data={items}
-      defaultAdvanceFilter={defaultAdvanceFilter}
-      defaultSorting={defaultSorting}
+      defaultAdvanceFilter={filters?.defaultFilters || []}
+      defaultSorting={sorts?.defaultSorting || defaultSorting}
       pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
