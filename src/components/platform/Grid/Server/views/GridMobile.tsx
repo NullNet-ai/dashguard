@@ -1,13 +1,10 @@
 import React from "react";
-import { Card, CardFooter, CardHeader } from "~/components/ui/card";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { Card, CardHeader } from "~/components/ui/card";
 import CreateButton from "../../Header/ButtonHeader";
 import MobileHeader from "../../Header/MobileHeader";
 import InfiniteScrollContainer from "./InfiniteScroll";
-import TestScroller from './TestScroller';
 
 function GridMobile() {
-  // return <TestScroller />
   return (
     <Card className="col-span-full border-0 shadow-none py-2 pt-0">
       <CardHeader>
