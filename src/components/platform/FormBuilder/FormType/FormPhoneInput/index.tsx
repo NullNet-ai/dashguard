@@ -211,8 +211,9 @@ export default function FormPhoneInput({
                     }
                   }}
                   className={cn(
-                    "mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
+                    "mr-[1px]  rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
                     `${isDisabled && " border-transparent opacity-100"}`,
+                    `${field.is_primary && isMultiple ? 'w-[90%]' : 'w-full'} `
                   )}
                   inputStyle={{
                     width: "100%",

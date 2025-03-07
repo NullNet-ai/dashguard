@@ -50,7 +50,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
         <Input
           readOnly={true}
           className={`${true && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
-          disabled={true}
+          disabled={false}
           placeholder={"Primary Email"}
           value={email_data?.email}
           Icon={EnvelopeIcon}

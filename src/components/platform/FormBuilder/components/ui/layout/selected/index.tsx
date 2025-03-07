@@ -15,6 +15,9 @@ const SelectedViewLayout = (props: ISelectedViewLayoutProps) => {
     handleRemovedSelectedRecords,
     handleUpdateDisplayType
   } = props;
+
+  const entity = filterGridConfig?.filter_entity
+
   return (
     <CardContent className="w-full">
         <SelectedView
@@ -26,6 +29,7 @@ const SelectedViewLayout = (props: ISelectedViewLayoutProps) => {
           }
           handleUpdateDisplayType={handleUpdateDisplayType}
           records={formGridSelected}
+          entity={entity}
         />
     </CardContent>
   )
