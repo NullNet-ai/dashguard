@@ -106,6 +106,30 @@ export const packetRouter = createTRPCRouter({
       oneDayAgo.setDate(oneDayAgo.getDate() - 1)
       const formattedDate = moment(oneDayAgo).format('YYYY-MM-DD HH:mm:ss.SSSZ')
 
+      const { account } = ctx.session
+      const { contact } = account
+
+      const { filter, search }: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+
+      console.log('%c Line:483 🥔 filter', 'color:#ed9ec7', JSON.stringify(filter, null, 2))
+
+      const filter_id = '01JNQTACVP5MR3TBZVZGMY6QCH'
+      const findFilter = filter?.find((item: any) => item?.id === filter_id)
+      const _filter = findFilter?.default_filter
+      const custom_adv = [
+        ..._filter,
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        },
+        ...search,
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        },
+      ]
+
+      console.log('%c Line:121 🍒 custom_adv', 'color:#ed9ec7', custom_adv)
       const res = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -113,6 +137,7 @@ export const packetRouter = createTRPCRouter({
           query: {
             pluck: ['source_ip', 'timestamp'],
             advance_filters: [
+              ...custom_adv,
               {
                 type: 'criteria',
                 field: 'status',
@@ -476,13 +501,6 @@ export const packetRouter = createTRPCRouter({
     return await Bluebird.map(packet_data, async (item: { source_ip: string }) => {
       const { source_ip } = item
 
-      const { account } = ctx.session
-      const { contact } = account
-
-    const filter = await Promise.all(['filter', 'search'].map(async (type) => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
-    
-    console.log('%c Line:483 🥔 filter', 'color:#ed9ec7', JSON.stringify(filter, null, 2));
-
       const res = await ctx.dnaClient.aggregate({
       // @ts-expect-error - entity is not defined in the type
         query: {
@@ -529,15 +547,14 @@ export const packetRouter = createTRPCRouter({
       is_case_sensitive_sorting = 'false',
       time_range,
     } = input || {}
-    console.log('%c Line:524 🍕 input', 'color:#b03734', input);
+    console.log('%c Line:524 🍕 input', 'color:#b03734', input)
 
-    
     const res = await ctx.dnaClient
-    .findAll({
-      entity: 'packets',
-      token: ctx.token.value,
-      query: {
-        track_total_records: true,
+      .findAll({
+        entity: 'packets',
+        token: ctx.token.value,
+        query: {
+          track_total_records: true,
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
@@ -554,7 +571,7 @@ export const packetRouter = createTRPCRouter({
               operator: EOperator.AND,
             },
             ...advance_filters as any,
-           
+
           ],
 
           // advance_filters: [
@@ -577,8 +594,8 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
-      console.log('%c Line:528 🍌 res', 'color:#ea7e5c', res?.data);
-    
+    console.log('%c Line:528 🍌 res', 'color:#ea7e5c', res?.data)
+
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {
       totalCount: res?.total_count || 0,
