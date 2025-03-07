@@ -137,8 +137,8 @@ export default function SortContent() {
                     <SelectValue placeholder="Select a Field" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
-                    {columns?.map((column: any) => (
-                      <SelectItem value={column.accessorKey} >
+                    {columns?.map((column: any, index) => (
+                      <SelectItem value={column.accessorKey} key={index}>
                         {column.header}
                       </SelectItem>
                     ))}
