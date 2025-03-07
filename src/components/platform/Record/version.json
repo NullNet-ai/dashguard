@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Record",
-  "tag": "1.9.0",
-  "branch": "released/fix/1.9.0",
-  "message": "Record Application > Record Summary - UI issues",
+  "tag": "1.10.0",
+  "branch": "released/fix/PLATFORM7-2507/1.10.0",
+  "message": "Record > Record Summary > Image Upload",
   "publish_name": "Juphet Vitualla"
 }
