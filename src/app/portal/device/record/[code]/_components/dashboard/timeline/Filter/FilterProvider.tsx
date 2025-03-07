@@ -30,7 +30,7 @@ const FilterProvider = ({ children }: IProps) => {
       {
         id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
         label: 'All Data',
-        href: `http://localhost:3000/portal/device/record/DV100013?current_tab=dashboard&sub_tab=timeline&sub_tab=all_data`,
+        href: `${baseUrl}&sub_tab=all_data`,
       },
     ]
   )
@@ -61,11 +61,14 @@ const FilterProvider = ({ children }: IProps) => {
         const updatedFilters = new Map(prev.map(item => [item.id, item])) // Convert previous filters to a Map
 
         result.forEach((item: any) => {
-          if (updatedFilters.has(item.id)) {
-            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item }) // Merge updates
+            const formattedName = item.label.toLowerCase().replace(/\s+/g, '_')
+            // const href = `${baseUrl}&sub_tab=${formattedName}`
+            if (updatedFilters.has(item.id)) {
+            
+            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item  }) // Merge updates
           }
           else {
-            updatedFilters.set(item.id, item) // Add new item
+            updatedFilters.set(item.id, {...item}) // Add new item
           }
         })
 

@@ -77,6 +77,7 @@ const FilterView = () => {
     })
   }
 
+  
   // grid filters = kung mag click kag grid filters mo change ang URL para maka rerender para mo update ang data,
   return (
     <div className="p-4 border rounded-lg shadow-md flex flex-col gap-4">
@@ -85,28 +86,38 @@ const FilterView = () => {
         <div className="h-[36px] justify-between flex gap-x-2">
 
           {filters?.map((filter, index) => (
-            <span className = "flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm" key = { index }>
-              {/* <Card className="flex items-center justify-between p-2 w-32 bg-muted rounded-lg"> */}
-              <span
-                className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
-                onClick = { () => {
-                  window.history.replaceState({}, '', filter?.href)
-                } }
-              >
-                {filter?.label}
-              </span>
-              {/* <div className="flex-1 overflow-y-auto">
-            <StateTab
-              defaultValue="filter"
-              persistKey="side-drawer-tabs"
-              size="sm"
-              tabs={filters ?? []}
-              variant="default"
-            /></div> */}
-              {filter?.label !== 'All Data' && <FilterProperty filter={filter} />}
+            <span
+            className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
+            onClick = { () => {
+              // window.history.replaceState({}, '', filter?.href)
+            } }
+            key={index}
+          >
+            {filter?.label}
+          {filter?.label !== 'All Data' && <FilterProperty filter={filter} />}
+          </span>
+            // <span className = "flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm" key = { index }>
+            //   {/* <Card className="flex items-center justify-between p-2 w-32 bg-muted rounded-lg"> */}
+            //   <span
+            //     className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
+            //     onClick = { () => {
+            //       window.history.replaceState({}, '', filter?.href)
+            //     } }
+            //   >
+            //     {filter?.label}
+            //   {filter?.label !== 'All Data' && <FilterProperty filter={filter} />}
+            //   </span>
+            //   {/* <div className="flex-1 overflow-y-auto">
+            // <StateTab
+            //   defaultValue="filter"
+            //   persistKey="side-drawer-tabs"
+            //   size="sm"
+            //   tabs={filters ?? []}
+            //   variant="default"
+            // /></div> */}
 
-              {/* </Card> */}
-            </span>
+            //   {/* </Card> */}
+            // </span>
           ))}
           <div className="h-[36px] justify-between flex gap-x-2">
 
