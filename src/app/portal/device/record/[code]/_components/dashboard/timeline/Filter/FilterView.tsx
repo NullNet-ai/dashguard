@@ -1,46 +1,19 @@
 'use client'
-import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
-import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { head } from 'lodash'
-import { useContext, useEffect, useState } from 'react'
+import { PlusCircleIcon } from '@heroicons/react/20/solid'
+import { useContext } from 'react'
 
 import { useSideDrawer } from '~/components/platform/SideDrawer'
-import StateTab from '~/components/platform/StateTab'
-import { Card } from '~/components/ui/card'
 
-import NetworkFlow from '../../network-traffic-visualization'
-
-import { fetchTabFilter } from './components/SideDrawer/actions'
-import FilterProperty from './components/SideDrawer/FilterProperty'
 import { ManageFilterProvider } from './components/SideDrawer/Provider'
 import GridManageFilter from './components/SideDrawer/View'
+import FilterProperty from './FilterProperty'
 import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
-  const { state, actions } = useContext(FilterContext)
-  const { filters = [], query } = state ?? {}
+  const { state } = useContext(FilterContext)
+  const { filters = [] } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
-
-  const [filter, setFilter] = useState([])
-
-  const fetchFilter = async () => {
-    const result = await fetchTabFilter()
-    console.log('%c Line:53 🍯 result', 'color:#ea7e5c', result)
-
-    setFilter(prev => [...prev, result])
-  }
-
-  useEffect(() => {
-    console.log('🍯 result @@')
-    fetchFilter().then((data) => {
-      console.log('🍯 resultdata', data)
-    })
-      .catch((error) => {
-        console.log('ERRORRRRRRRRRRRR', error)
-      })
-  }, [])
-  console.log('%c Line:26 🍑 filter', 'color:#93c0a4', filter)
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
@@ -113,7 +86,14 @@ const FilterView = () => {
           {filters?.map((filter, index) => (
             <span className = "flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm" key = { index }>
               {/* <Card className="flex items-center justify-between p-2 w-32 bg-muted rounded-lg"> */}
-              <span className = "flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm">{filter?.label}</span>
+              <span
+                className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm"
+                onClick = { () => {
+                  window.history.replaceState({}, '', filter?.href)
+                } }
+              >
+                {filter?.label}
+              </span>
               {/* <div className="flex-1 overflow-y-auto">
             <StateTab
               defaultValue="filter"
@@ -122,15 +102,15 @@ const FilterView = () => {
               tabs={filters ?? []}
               variant="default"
             /></div> */}
-              <FilterProperty />
+              {filter?.label !== 'All Data' && <FilterProperty filter={filter} />}
 
               {/* </Card> */}
             </span>
           ))}
           <div className="h-[36px] justify-between flex gap-x-2">
 
-            <button className="flex min-w-24 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm" onClick={handleOpenSideDrawer}>
-              +
+            <button className="flex min-w-8 items-center justify-between rounded-md bg-tertiary px-3 py-0 pr-1 text-sm" onClick={handleOpenSideDrawer}>
+              <PlusCircleIcon className="h-5 w-5 mr-2 text-primary" />
             </button>
           </div>
         </div>

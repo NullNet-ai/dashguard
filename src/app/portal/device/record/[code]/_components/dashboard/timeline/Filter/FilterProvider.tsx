@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { ulid } from 'ulid'
 
 import { api } from '~/trpc/server'
 
@@ -27,16 +28,9 @@ const FilterProvider = ({ children }: IProps) => {
   const [filters, setFilters] = useState(
     [
       {
-        id: 'all_data',
+        id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
         label: 'All Data',
-      },
-      {
-        id: 'Between',
-        label: 'Between',
-      },
-      {
-        id: 'Source Port',
-        label: 'Source Port',
+        href: `http://localhost:3000/portal/device/record/DV100013?current_tab=dashboard&sub_tab=timeline&sub_tab=all_data`,
       },
     ]
   )
@@ -46,6 +40,16 @@ const FilterProvider = ({ children }: IProps) => {
   const addFilter = (filter: string) => {
     setFilters(prev => [...prev, filter])
   }
+
+  useEffect(() => {
+    console.log('%c Line:39 🍺 filters', 'color:#2eafb0', filters)
+    const fetchFilter = async () => {
+      const result = await fetchTabFilter() ?? []
+      console.log('%c Line:44 🍫 result', 'color:#3f7cff', result)
+      setFilters(prev => [...prev, ...result])
+    }
+    fetchFilter()
+  }, [])
 
   const handleOnChange = (e: any) => {
     setQuery(e)
