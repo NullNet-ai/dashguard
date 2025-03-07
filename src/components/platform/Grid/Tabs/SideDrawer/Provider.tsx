@@ -61,22 +61,46 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
      desc : true
     }]
     
+
+    const rawFilterGroup = JSON.parse(JSON.stringify(filterDetails?.filter_groups)); // Deep copy to prevent modifications
+
+    const resolveDefaultFilter = filterDetails?.filter_groups?.reduce((acc: any, curr: any) => {
+        if (acc.length) {
+            curr.filters = [
+                {
+                    "operator": curr.groupOperator,
+                    "type": "operator",
+                    "default": true
+                },
+                ...curr.filters
+            ];
+        }
+        
+        const mergeRecords = [
+            ...acc,
+            ...curr.filters
+        ].map((item: any) => {
+            if (item.type === 'criteria') {
+                return {
+                    ...item,
+                    values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
+                        ? item.values.map((obj: any) => obj.value)
+                        : item.values
+                };
+            }
+            return item;
+        });
+    
+        return mergeRecords;
+    }, []);    
+
+
     const modifyFilterDetails = {
       ...filterDetails,
-      default_filter : filterDetails.default_filter.map((item: any) => {
-        if (item.type === 'criteria') {
-          return {
-            ...item,
-            // Convert array of objects back to array of strings for database
-            values: Array.isArray(item.values)  && item.values.length > 0 && typeof item.values[0] === 'object'
-              ? item.values.map((obj: any) => obj.value)
-              : item.values
-          }
-        }
-        return item;
-      }),
+      default_filter : resolveDefaultFilter,
       sorts : sorting,
-      default_sorts : sorting
+      default_sorts : sorting,
+      filter_groups : rawFilterGroup,
     }
     setCreateFilterLoading(true);
     await updateGridFilter(modifyFilterDetails);
@@ -97,23 +121,45 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
      id: 'created_date',
      desc : true
     }]
+
+    const rawFilterGroup = JSON.parse(JSON.stringify(filterDetails?.filter_groups)); // Deep copy to prevent modifications
+
+    const resolveDefaultFilter = filterDetails?.filter_groups?.reduce((acc: any, curr: any) => {
+        if (acc.length) {
+            curr.filters = [
+                {
+                    "operator": curr.groupOperator,
+                    "type": "operator",
+                    "default": true
+                },
+                ...curr.filters
+            ];
+        }
+        
+        const mergeRecords = [
+            ...acc,
+            ...curr.filters
+        ].map((item: any) => {
+            if (item.type === 'criteria') {
+                return {
+                    ...item,
+                    values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
+                        ? item.values.map((obj: any) => obj.value)
+                        : item.values
+                };
+            }
+            return item;
+        });
+    
+        return mergeRecords;
+    }, []);    
     
     const modifyFilterDetails = {
       ...filterDetails,
-      default_filter : filterDetails.default_filter.map((item: any) => {
-        if (item.type === 'criteria') {
-          return {
-            ...item,
-            // Convert array of objects back to array of strings for database
-            values: Array.isArray(item.values)  && item.values.length > 0 && typeof item.values[0] === 'object'
-              ? item.values.map((obj: any) => obj.value)
-              : item.values
-          }
-        }
-        return item;
-      }),
+      default_filter : resolveDefaultFilter,
       sorts : sorting,
-      default_sorts : sorting
+      default_sorts : sorting,
+      filter_groups : rawFilterGroup,
     }
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails);
