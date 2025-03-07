@@ -10,7 +10,7 @@ export const timelineFilterRouter = createTRPCRouter({
       data: z.unknown(),
     }))
     .mutation(async ({ input, ctx }) => {
-      const { type, data } = input
+      const { type, data =[] } = input
       
       const { account } = ctx.session
       const { contact } = account
@@ -21,7 +21,7 @@ export const timelineFilterRouter = createTRPCRouter({
       cached_data = !cached_data?.length ? [] : cached_data
 
       return await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [
-        ...(data || [])
+        ...(data as Record<string,any>[] || [])
       ])
     }
     ),
