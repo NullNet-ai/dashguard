@@ -475,6 +475,14 @@ export const packetRouter = createTRPCRouter({
     const { packet_data } = input
     return await Bluebird.map(packet_data, async (item: { source_ip: string }) => {
       const { source_ip } = item
+
+      const { account } = ctx.session
+      const { contact } = account
+
+    const filter = await Promise.all(['filter', 'search'].map(async (type) => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+    
+    console.log('%c Line:483 🥔 filter', 'color:#ed9ec7', JSON.stringify(filter, null, 2));
+
       const res = await ctx.dnaClient.aggregate({
       // @ts-expect-error - entity is not defined in the type
         query: {
@@ -521,43 +529,45 @@ export const packetRouter = createTRPCRouter({
       is_case_sensitive_sorting = 'false',
       time_range,
     } = input || {}
+    console.log('%c Line:524 🍕 input', 'color:#b03734', input);
 
     
     const res = await ctx.dnaClient
-      .findAll({
-        entity: 'packets',
-        token: ctx.token.value,
-        query: {
-          track_total_records: true,
+    .findAll({
+      entity: 'packets',
+      token: ctx.token.value,
+      query: {
+        track_total_records: true,
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
-          // advance_filters: [
-          //   ...advance_filters as any,
-          //   // {
-          //   //   type: 'operator',
-          //   //   operator: EOperator.AND,
-          //   // },
-          //   // {
-          //   //   type: 'criteria',
-          //   //   field: 'timestamp',
-          //   //   entity: 'packets',
-          //   //   operator: EOperator.IS_BETWEEN,
-          //   //   values: time_range,
-          //   // },
-          // ],
-
           advance_filters: [
             {
               type: 'criteria',
-              field: 'source_ip',
+              field: 'timestamp',
               entity: 'packets',
-              operator: 'like',
-              values: [
-                '10.1.10.49',
-              ],
+              operator: EOperator.IS_BETWEEN,
+              values: time_range,
             },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            ...advance_filters as any,
+           
           ],
+
+          // advance_filters: [
+          //   {
+          //     type: 'criteria',
+          //     field: 'source_ip',
+          //     entity: 'packets',
+          //     operator: 'like',
+          //     values: [
+          //       '10.1.10.49',
+          //     ],
+          //   },
+          // ],
           order: {
             limit,
             by_field: 'code',
@@ -567,6 +577,7 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
+      console.log('%c Line:528 🍌 res', 'color:#ea7e5c', res?.data);
     
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {

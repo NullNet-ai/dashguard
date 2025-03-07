@@ -29,7 +29,7 @@ const pluckFields = [
   'destination_port',
 ]
 
-export default function Search({ parentType }: any) {
+export default function Search() {
   const { state, actions } = useContext(SearchGraphContext)
 
   const { width } = useWindowSize()
@@ -64,7 +64,7 @@ export default function Search({ parentType }: any) {
     <Combobox>
       <div
         className={cn(`relative`)}
-        style={{ width: isMobile ? parentType === 'record' ? '100%' : width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
+        style={{ width: isMobile ? width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
       >
         <div className="flex md:flex-wrap lg:flex-nowrap items-center md:gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
           <MagnifyingGlassIcon

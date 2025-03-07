@@ -87,3 +87,10 @@ export interface IAdvanceFilter {
   entity?: string
   values?: string[]
 }
+
+export interface ISearchProps  {
+  time_duration: {
+    time_count: number,
+    time_unit: string,
+  }
+}

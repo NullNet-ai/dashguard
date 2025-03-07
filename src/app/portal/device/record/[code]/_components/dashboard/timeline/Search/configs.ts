@@ -41,3 +41,8 @@ export const searchConfig = {
   resolver: 'filterPackets',
   defaultEntity: 'packets',
 }
+
+export const timeDuration = {
+  time_count: 23,
+  time_unit: 'hour',
+}
