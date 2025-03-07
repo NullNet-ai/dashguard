@@ -128,6 +128,7 @@ export interface IConfigGrid {
     };
   };
   customRowAction?: React.FC<any>;
+  isInfinite?: boolean
   additionalData?: Record<string, any>;
 }
 
@@ -157,6 +158,15 @@ export interface IState {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   hasMore?: boolean;
   gridLevel?: number;
+  infinite_options?: {
+    page: number;
+    limit: number;
+    current: number;
+    hasMore ?: boolean;
+    infiniteData ?: any[];
+    infiniteCount?: number;
+    bufferData?: any[];
+  }
 }
 
 export interface IAction {
@@ -172,8 +182,16 @@ export interface IAction {
   setRowToArchive: React.Dispatch<any>;
   setBulkActionType: (type: string | null) => void;
   setShowBulkActionConfirmationModal: (show: boolean) => void;
-  handleGetInfiniteData: (params?: any) => Promise<void>
   setHasMore: React.Dispatch<any>;
+  infiniteActions ?: {
+    setCurrent: React.Dispatch<any>;
+    setLimit: React.Dispatch<any>;
+    setPage: React.Dispatch<any>;
+    setHasMore: React.Dispatch<any>;
+    setInfiniteData: React.Dispatch<any>;
+    handleUpdateInfiniteData : (args?: any) => Promise<void>;
+    handleMergeBufferInfinite?: () => void;
+  }
 }
 
 export interface ICreateContext {

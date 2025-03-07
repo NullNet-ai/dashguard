@@ -36,9 +36,14 @@ export default async function Page({
 
   const { sorts, pagination, filters, columns : columnOrder } = (await getGridCacheData()) ?? {};
 
+  const defaultPagination = pagination?.limit_per_page ? pagination : {
+    current_page: +(searchParams?.page?? "0"),
+    limit_per_page: +(searchParams?.perPage?? "50"),
+  };
+
   const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(pagination?.current_page ?? "0"),
-    limit: +(pagination?.limit_per_page ?? "100"),
+    current: +(defaultPagination?.current_page ?? "0"),
+    limit: +(defaultPagination?.limit_per_page ?? "50"),
     entity: "contact",
     pluck: _pluck,
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
@@ -52,11 +57,12 @@ export default async function Page({
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
+      defaultAdvanceFilter={defaultAdvanceFilter || []}
       advanceFilter={filters?.advanceFilter || []}
       sorting={sorts?.sorting || []}
-      pagination={pagination}
+      pagination={defaultPagination}
       config={{
+        isInfinite: true,
         entity: "contact",
         title: "Contacts",
         columnsOrder: columnOrder,
@@ -66,14 +72,6 @@ export default async function Page({
         },
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
-        // infiniteConfig:{
-        //   router: "grid",
-        //   resolver: "getInfiniteData",
-        //   query_params: {
-        //     entity: "contact",
-        //     pluck: _pluck,
-        //   },
-        // },
         searchConfig: {
           router: "contact",
           resolver: "mainGrid",
