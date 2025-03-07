@@ -14,12 +14,12 @@ export default function NetworkFlow() {
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
 
   const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
-  console.log("%c Line:17 🍖 packetsIP", "color:#33a5ff", packetsIP);
+  
   const { data: bandwidth } = api.packet.getBandwidthOfSourceIPandDestinationIP.useQuery(
     { packet_data: packetsIP }, { enabled: !!packetsIP }
   )
   
-  console.log("%c Line:18 🥟 bandwidth", "color:#e41a6a", bandwidth);
+  
   useEffect(() => {
     const fetchData = async () => {
       if (packetsIP) {

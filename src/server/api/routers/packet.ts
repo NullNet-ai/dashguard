@@ -510,7 +510,7 @@ export const packetRouter = createTRPCRouter({
       return { source_ip, result: res?.data }
     }, { concurrency: 10 })
   }),
-  filterPackets: privateProcedure.input(ZodItems).query(async ({ input, ctx }) => {
+  filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
     const {
       limit = 50,
       current = 1,
@@ -522,6 +522,7 @@ export const packetRouter = createTRPCRouter({
       time_range,
     } = input || {}
 
+    
     const res = await ctx.dnaClient
       .findAll({
         entity: 'packets',
@@ -531,19 +532,31 @@ export const packetRouter = createTRPCRouter({
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
+          // advance_filters: [
+          //   ...advance_filters as any,
+          //   // {
+          //   //   type: 'operator',
+          //   //   operator: EOperator.AND,
+          //   // },
+          //   // {
+          //   //   type: 'criteria',
+          //   //   field: 'timestamp',
+          //   //   entity: 'packets',
+          //   //   operator: EOperator.IS_BETWEEN,
+          //   //   values: time_range,
+          //   // },
+          // ],
+
           advance_filters: [
-            ...advance_filters as any,
-            // {
-            //   type: 'operator',
-            //   operator: EOperator.AND,
-            // },
-            // {
-            //   type: 'criteria',
-            //   field: 'timestamp',
-            //   entity: 'packets',
-            //   operator: EOperator.IS_BETWEEN,
-            //   values: time_range,
-            // },
+            {
+              type: 'criteria',
+              field: 'source_ip',
+              entity: 'packets',
+              operator: 'like',
+              values: [
+                '10.1.10.49',
+              ],
+            },
           ],
           order: {
             limit,
@@ -554,6 +567,7 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
+    
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {
       totalCount: res?.total_count || 0,

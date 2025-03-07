@@ -58,6 +58,7 @@ export default function Search({ parentType }: any) {
   )
 
   const { items } = data || { items: undefined }
+  
 
   return (
     <Combobox>

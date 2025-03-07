@@ -1,15 +1,19 @@
 'use client'
 import React, {
   type PropsWithChildren,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
 import { ulid } from 'ulid'
 
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
-import { UpdateReportFilter } from '~/components/platform/Grid/Action/UpdateReportFilter'
 import { api } from '~/trpc/react'
 
+import { fetchTabFilter } from '../Filter/components/SideDrawer/actions'
+
+import { fetchSearchFilter } from './Actions/FetchSearchFilter'
+import { UpdateSearchFilter } from './Actions/UpdateSearchFilter'
 import { searchableFields, searchConfig } from './configs'
 import {
   type IAction,
@@ -49,7 +53,7 @@ export default function GraphSearchProvider({ children }: IProps) {
     ) as ISearchItem[]
 
     return searchableFields.reduce(
-      (acc: any, { accessorKey, ...item }: any, index: any) => {
+      (acc: any, { accessorKey: _, ...item }: any, index: any) => {
         return [
           {
             type: 'criteria',
@@ -87,6 +91,7 @@ export default function GraphSearchProvider({ children }: IProps) {
     const { router, resolver } = searchConfig ?? {}
 
     const time_range = getLastTimeStamp(1, 'day', new Date())
+    
     const { data } = api?.[router]?.[resolver].useQuery({ ...search_params, time_range }, options)
 
     return data
@@ -116,7 +121,8 @@ export default function GraphSearchProvider({ children }: IProps) {
     ] as ISearchItem[]
     setSearchItems(updateSearchItems)
 
-    await UpdateReportFilter({
+    
+    await UpdateSearchFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
     })
@@ -127,7 +133,7 @@ export default function GraphSearchProvider({ children }: IProps) {
     const updatedSearchItems = removeSearchItems(searchItems, filterItem)
     setSearchItems(updatedSearchItems)
 
-    await UpdateReportFilter({
+    await UpdateSearchFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
     })
@@ -136,6 +142,21 @@ export default function GraphSearchProvider({ children }: IProps) {
   const handleClearSearchItems = async () => {
     setQuery('')
   }
+
+  const {
+    data: cached_search_items = [],
+  } = api.timelineFilter.fetchTimelineFilter.useQuery({
+    type: 'search',
+  })
+
+  
+  useEffect(() => {
+    // const _cached_search_items = (cached_search_items || [])?.reduce((acc, data: any,) => {
+    //   return [...acc, ...data?.filters]
+    // }, [])
+    // 
+    setSearchItems(cached_search_items)
+  }, [cached_search_items?.length])
 
   const state_context = {
     open,
