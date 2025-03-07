@@ -14,7 +14,7 @@ import { fetchTabFilter } from '../Filter/components/SideDrawer/actions'
 
 import { fetchSearchFilter } from './Actions/FetchSearchFilter'
 import { UpdateSearchFilter } from './Actions/UpdateSearchFilter'
-import { searchableFields, searchConfig } from './configs'
+import { searchableFields, searchConfig, timeDuration } from './configs'
 import {
   type IAction,
   type ICreateContext,
@@ -29,7 +29,8 @@ export const SearchGraphContext = React.createContext<ICreateContext>({
 })
 
 interface IProps extends PropsWithChildren {
-  test?: any
+  test?: any,
+
 }
 
 export default function GraphSearchProvider({ children }: IProps) {
@@ -90,7 +91,9 @@ export default function GraphSearchProvider({ children }: IProps) {
   ) => {
     const { router, resolver } = searchConfig ?? {}
 
-    const time_range = getLastTimeStamp(1, 'day', new Date())
+    const { time_count, time_unit } = timeDuration 
+
+    const time_range = getLastTimeStamp(time_count, time_unit as 'hour', new Date())
     
     const { data } = api?.[router]?.[resolver].useQuery({ ...search_params, time_range }, options)
 
@@ -151,10 +154,6 @@ export default function GraphSearchProvider({ children }: IProps) {
 
   
   useEffect(() => {
-    // const _cached_search_items = (cached_search_items || [])?.reduce((acc, data: any,) => {
-    //   return [...acc, ...data?.filters]
-    // }, [])
-    // 
     setSearchItems(cached_search_items || [])
   }, [cached_search_items?.length])
 

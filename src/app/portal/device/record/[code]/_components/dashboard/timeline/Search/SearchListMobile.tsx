@@ -16,7 +16,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGraphContext } from './Provider'
 
-const SearchListMobile = ({parentType}: any) => {
+const SearchListMobile = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGraphContext)
@@ -87,7 +87,7 @@ const SearchListMobile = ({parentType}: any) => {
     <div
       className="mobile-container-ref flex  flex-col  gap-2 md:flex-row overflow-hidden relative"
       ref={conref}
-      style={{ width: isMobile ? parentType==='record' ? '100%' :  width - (screenSize === 'md' ? 120 : 16) : 'auto' }}
+      style={{ width: isMobile ? width - (screenSize === 'md' ? 120 : 16) : 'auto' }}
     >
       <div className="flex flex-row items-center">
         <span
