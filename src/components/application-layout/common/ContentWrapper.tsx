@@ -2,8 +2,10 @@
 import { usePathname } from 'next/navigation'
 import React from 'react'
 import { useSidebar } from '~/components/ui/sidebar'
+import { SideDrawerView } from '~/components/platform/SideDrawer';
 
 import { cn } from '~/lib/utils'
+import { PINNED_STATE_KEY as sideDrawerIsPinned } from '~/components/platform/SideDrawer/SideDrawerProvider';
 
 interface ContentWraperProps {
   children: React.ReactNode
@@ -29,6 +31,7 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
       )}
     >
       {children}
+      {/* <SideDrawerView /> */}
     </div>
   );
 };
