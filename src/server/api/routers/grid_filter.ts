@@ -1,15 +1,13 @@
 import {
-  EOperator,
   EOrderDirection,
-  type IAdvanceFilters,
 } from '@dna-platform/common-orm'
 import { ulid } from 'ulid'
 import { z } from 'zod'
 
-import { createDefineRoutes } from '../baseCrud'
-
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
+
+import { createDefineRoutes } from '../baseCrud'
 
 export const gridFilterRouter = createTRPCRouter({
   ...createDefineRoutes('grid_filters'),
@@ -80,11 +78,11 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { account } = ctx.session
       const { contact } = account
-      console.log('%c Line:84 🥖 account', 'color:#f5ce50', account)
+
       const a = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
 
       const cachedData = !a?.length ? [] : a
-      console.log('%c Line:83 🍇 input', 'color:#ed9ec7', input)
+
       return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, [...cachedData, { ...input, id: ulid() }])
     }
     ),
@@ -136,7 +134,7 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { account } = ctx.session
       const { contact } = account
-      console.log('%c Line:84 🥖 accountinput', 'color:#f5ce50', account)
+
       const a = await ctx.redisClient.getCachedData(`timeline_filter_${contact.id}`)
       return a
     }

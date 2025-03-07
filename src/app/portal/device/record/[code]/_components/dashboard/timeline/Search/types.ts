@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
-import { EOrderDirection, IAdvanceFilters } from '@dna-platform/common-orm';
+import { type EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
 
 export interface IState {
   open: boolean
   searchItems: ISearchItem[]
   query: string
   advanceFilterItems: ISearchItem[]
+  config: {
+    searchableFields: ISearchableField[]
+  }
 }
 
 export interface IAction {

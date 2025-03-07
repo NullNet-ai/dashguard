@@ -14,12 +14,12 @@ import useWindowSize from '~/hooks/use-resize'
 import useScreenType from '~/hooks/use-screen-type'
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
-import { YYYSearchGridContext } from './Provider'
+import { SearchGraphContext } from './Provider'
 
 const SearchListMobile = ({parentType}: any) => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
-  const { state, actions } = useContext(YYYSearchGridContext)
+  const { state, actions } = useContext(SearchGraphContext)
 
   const { width } = useWindowSize()
   const screenSize = useScreenType()

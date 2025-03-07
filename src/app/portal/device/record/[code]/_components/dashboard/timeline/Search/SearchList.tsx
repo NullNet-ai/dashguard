@@ -12,12 +12,12 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
-import { YYYSearchGridContext } from './Provider'
+import { SearchGraphContext } from './Provider'
 
 const SearchList = () => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
-  const { state, actions } = useContext(YYYSearchGridContext)
+  const { state, actions } = useContext(SearchGraphContext)
 
   const { searchItems = [] } = state ?? {}
   const selectedSearchItems = searchItems?.filter(item => !item?.default)
@@ -93,7 +93,7 @@ const SearchList = () => {
         {defaultSearchItems.length
           ? (
               <div className="flex flex-nowrap py-1 ">
-                {defaultSearchItems?.map((item, index) => {
+              {defaultSearchItems?.map((item, index) => {
                   const isHidden = data?.[index]?.hidden
                   return (
                     <Badge
@@ -127,26 +127,26 @@ const SearchList = () => {
                     </Badge>
                   )
                 })}
-                {!!data?.length && data.some(item => item.hidden) && (
+              {!!data?.length && data.some(item => item.hidden) && (
                   <div
-                    className="py-1 absolute max-w-[63px]"
-                    style={{
+                  className="py-1 absolute max-w-[63px]"
+                  style={{
                       left: lastHiddenIndexLeftPos,
                     }}
-                  >
-                    <DropdownMenu
+                >
+                  <DropdownMenu
                       open={open}
                       onOpenChange={(isOpen) => {
                         setOpen(isOpen)
                       }}
                     >
                       <DropdownMenuTrigger
-                        asChild={true}
-                        onClick={() => {
+                      asChild={true}
+                      onClick={() => {
                           setOpen(!open)
                         }}
-                      >
-                        <Button
+                    >
+                      <Button
                           className="h-[24px] w-auto text-nowrap bg-muted px-2 text-default/70 hover:bg-transparent focus:outline-none"
                           name="removeSortingButton"
                           size="xs"
@@ -159,9 +159,9 @@ const SearchList = () => {
                           {data.filter(d => d.hidden)?.length}
                           )
                         </Button>
-                      </DropdownMenuTrigger>
+                    </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" side="bottom">
-                        <div className="flex flex-col gap-1 gap-y-2 py-1">
+                      <div className="flex flex-col gap-1 gap-y-2 py-1">
                           {data?.map((item, index) => {
                             if (!item.hidden || item.type === 'operator' || index === 0) {
                               return null
@@ -195,12 +195,12 @@ const SearchList = () => {
                             )
                           })}
                         </div>
-                      </DropdownMenuContent>
+                    </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
+                </div>
                 ) }
 
-                <Button
+              <Button
                   className={cn(`h-[30px] text-default/60 underline hover:no-underline`, `${data?.length && data.some(item => item.hidden) ? 'absolute mt-[2px]' : ''}`
                   )}
                   name="resetSortButton"
@@ -214,7 +214,7 @@ const SearchList = () => {
                 >
                   Clear All
                 </Button>
-              </div>
+            </div>
             ) : null}
       </div>
     </div>
