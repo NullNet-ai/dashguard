@@ -127,7 +127,7 @@ export default function GridProvider({
   const [infiniteData, setInfiniteData] = useState<any[]>(data);
   const [bufferData, setBufferData] = useState<any[]>([]);
   const [current, setCurrent] = useState(1);
-  const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 1000);
+  const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 100);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(
@@ -509,7 +509,7 @@ export default function GridProvider({
     }
   };
 
-  const newData = config.isInfinite ? infiniteData : data;
+  const newData = (isMobileOrTablet && config.isInfinite) ? infiniteData : data;
 
   /** @HOOKS */
   const table = useReactTable({
