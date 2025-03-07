@@ -57,9 +57,9 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
         archiveDialogCustomComponent: ArchiveDialog,
       }}
       data={items}
-      defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter || []}
-      advanceFilter={filters?.reportFilters || []}
+      defaultSorting={sorts?.defaultSorting || defaultSorting}
+      defaultAdvanceFilter={filters?.defaultFilters || []}
+      advanceFilter={filters?.advanceFilter || []}
       sorting={sorts?.sorting || []}
       pagination={pagination}
       totalCount={totalCount || 0}
