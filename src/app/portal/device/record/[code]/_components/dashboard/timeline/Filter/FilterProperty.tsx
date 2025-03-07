@@ -86,7 +86,7 @@ export default function FilterProperty({ filter }: { filter: any }) {
           <Grid className="mr-2 h-4 w-4" />
           {"Manage Filter"}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({ name: `${filter.name} copy` })}>
+        <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({...filter, name: `${filter.name} copy`,  })}>
           <Copy className="mr-2 h-4 w-4" />
           {"Duplicate Filter"}
         </DropdownMenuItem>
