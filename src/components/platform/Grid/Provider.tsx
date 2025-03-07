@@ -588,13 +588,33 @@ export default function GridProvider({
     }
   };
 
-  const handleUpdateInfiniteData = async ({items, totalCount }: 
+  const handleMergeBufferInfinite = React.useMemo(() => () => {
+    if(!bufferData?.length) {
+      return;
+    }
+    setInfiniteData((prev) => {
+      return [...prev,...bufferData];
+    });
+    setBufferData([]);
+  }, [bufferData]);
+
+  const handleUpdateInfiniteData = async ({items, totalCount, storageType, curr }: 
     {
       items: any[];
       totalCount: number;
+      storageType: 'buffer' | 'items';
+      curr?: number;
     },
   ) => {
-    
+
+    if(storageType === 'buffer') {
+      setBufferData(items);
+      setCurrent((prev) => {
+        return curr ? curr : prev + 1;
+      });
+
+      return 
+    }
     setInfiniteData((prev) => {
       if(current === 1) {
         return items;
@@ -602,7 +622,7 @@ export default function GridProvider({
       return [...prev,...items];
     });
     setCurrent((prev) => {
-      return prev === 1 ? 3 : prev + 1;
+      return curr ? curr : prev + 1;
     });
     setInfiniteCount(totalCount);
   };
@@ -626,6 +646,7 @@ export default function GridProvider({
     setBufferData,
     setInfiniteCount,
     handleUpdateInfiniteData,
+    handleMergeBufferInfinite
   }
 
   const state_context = {

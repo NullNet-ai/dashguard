@@ -18,18 +18,20 @@ const InfiniteScrollContainer = () => {
   const { infiniteActions } = actions ?? {};
   const { limit, current = 0, infiniteCount } =
     infinite_options ?? {};
-  const {  handleUpdateInfiniteData } = infiniteActions ?? {};
+  const {  handleUpdateInfiniteData, handleMergeBufferInfinite } = infiniteActions ?? {};
 
   const { entity = '', searchConfig } = gridState?.config ?? {};
 
   const { resolver, query_params, router } = searchConfig ?? {};
   const { pluck } = query_params ?? {};
 
-  const handleFetch = async (curr?: number) => {
+  const handleFetch = async (storageType:'buffer' | 'items', curr?: number, resultLimit?: number) => {
     if(!ismobile) {
       return;
     }
-    
+    const newLimit = resultLimit ? resultLimit : curr ? (curr * (limit ?? 1)) : limit
+    const newCurr = storageType === 'buffer'  ? curr : current
+
     try {
       const result = await getData({
         config: {
@@ -39,11 +41,11 @@ const InfiniteScrollContainer = () => {
         params:{
           advance_filters: advanceFilter,
           entity,
-          limit: curr ? (curr * (limit ?? 1)) : limit,
+          limit: newLimit,
           pluck,
           resolver,
           sorting,  
-          current: curr ? 1 : current + 1,
+          current: newCurr,
         }
       });      
 
@@ -53,7 +55,8 @@ const InfiniteScrollContainer = () => {
         handleUpdateInfiniteData({
           items,
           totalCount, 
-          current: curr ? curr : current
+          curr: newCurr ? newCurr + 1 : current + 1,
+          storageType
         });
       }
     
@@ -61,12 +64,18 @@ const InfiniteScrollContainer = () => {
       console.error('Error fetching data:', error);
     }
   };
+  
 
   useEffect(() => {
-    if(current === 1 && ismobile) {
-      //times 3 in first load
-      handleFetch(3);
+    const fetchdata = async () => {
+      await   handleFetch('items', 3,);
+      //get buffer data
+      await   handleFetch('buffer', 4, limit );
     }
+    if(ismobile && current === 1) {
+      fetchdata();
+    } 
+
   }, [current, ismobile])
   
   return (
@@ -82,7 +91,10 @@ const InfiniteScrollContainer = () => {
         hasMore={(infinite_options?.infiniteData || [])?.length < (infiniteCount ?? 0)} 
         next={() => {
           if(current !== 1) {
-            handleFetch();
+            handleMergeBufferInfinite?.();
+            handleFetch('buffer', current,  limit);
+          } else {
+            
           }
         }}
         endMessage={

@@ -165,6 +165,7 @@ export interface IState {
     hasMore ?: boolean;
     infiniteData ?: any[];
     infiniteCount?: number;
+    bufferData?: any[];
   }
 }
 
@@ -189,6 +190,7 @@ export interface IAction {
     setHasMore: React.Dispatch<any>;
     setInfiniteData: React.Dispatch<any>;
     handleUpdateInfiniteData : (args?: any) => Promise<void>;
+    handleMergeBufferInfinite?: () => void;
   }
 }
 
