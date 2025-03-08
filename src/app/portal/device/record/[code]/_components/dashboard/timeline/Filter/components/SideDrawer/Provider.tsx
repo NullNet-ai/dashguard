@@ -54,6 +54,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   }
 
   const saveUpdatedFilter = async () => {
+    console.log("%c Line:58 🥟 filterDetails", "color:#fca650", filterDetails);
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map(
           (item: any) => {

@@ -1,8 +1,7 @@
 import React from 'react'
 
-import NetworkTrafficFlow from '../network-traffic-visualization'
-
 import Filter from './Filter'
+import NetworkTrafficFlow from './network-traffic-visualization'
 import Main from './Search'
 
 function TimelineComponent({ params, defaultValues }: any) {

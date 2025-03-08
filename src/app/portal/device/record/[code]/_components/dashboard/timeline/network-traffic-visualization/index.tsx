@@ -1,6 +1,6 @@
 import React from 'react'
 
-import FilterProvider from '../timeline/Filter/FilterProvider'
+import FilterProvider from '../Filter/FilterProvider'
 
 import NetworkFlowProvider from './Provider'
 import NetworkFlowView from './View'
