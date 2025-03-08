@@ -14,7 +14,7 @@ import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
-  const { filters = [], filterQuery, setFilterQuery } = state ?? {}
+  const { filters = [], _setRefetchTrigger, setFilterQuery } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
@@ -72,6 +72,7 @@ const FilterView = () => {
                     e.preventDefault()
                     handleTabClick(tab.href)
                     setFilterQuery?.(tab?.id ?? {})
+                    _setRefetchTrigger(prev => prev + 1)
                   } }
                 >
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>

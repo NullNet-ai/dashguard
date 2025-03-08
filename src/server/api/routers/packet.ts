@@ -111,7 +111,7 @@ export const packetRouter = createTRPCRouter({
 
       const { filter, search }: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
-      console.log('%c Line:483 🥔 filter', 'color:#ed9ec7', JSON.stringify(filter, null, 2))
+      
 
       const filter_id = '01JNQTACVP5MR3TBZVZGMY6QCH'
       const findFilter = filter?.find((item: any) => item?.id === filter_id)
@@ -129,7 +129,7 @@ export const packetRouter = createTRPCRouter({
         },
       ]
 
-      console.log('%c Line:121 🍒 custom_adv', 'color:#ed9ec7', custom_adv)
+      
       const res = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -547,7 +547,7 @@ export const packetRouter = createTRPCRouter({
       is_case_sensitive_sorting = 'false',
       time_range,
     } = input || {}
-    console.log('%c Line:524 🍕 input', 'color:#b03734', input)
+    
 
     const res = await ctx.dnaClient
       .findAll({
@@ -594,7 +594,7 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
-    console.log('%c Line:528 🍌 res', 'color:#ea7e5c', res?.data)
+    
 
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
     return {
@@ -604,117 +604,122 @@ export const packetRouter = createTRPCRouter({
       totalPages,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string()})).query(async ({ input, ctx }) => {
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).query(async ({ input, ctx }) => {
+    const { device_id, time_range, filter_id } = input
+    let source_ips: string[] = []
 
-    
-   const { device_id, time_range } = input
-   let source_ips: string[] = []
-   
-   const filterPackets = async(starts_at: number) => {
-     const limit = 1000
-     
-     console.log('%c Line:612 🥖 source_ips', 'color:#ffdd4d', source_ips);
+    const filterPackets = async (starts_at: number) => {
+      const limit = 1000
+
+      
 
       const { account } = ctx.session
       const { contact } = account
 
-      const { filter = [], search =[] }: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+      const [ __filter = [], search = []] : any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
+      console.log("%c Line:621234 🍉", "color:#465975", {
+        filter_id,
+        filter: __filter,
+        search,
+      });
       // const filter_id = '01JNQTACVP5MR3TBZVZGMY6QCH'
-      // const findFilter = filter?.find((item: any) => item?.id === filter_id)
-      // const _filter = findFilter?.default_filter || []
-      // const custom_adv = [
-      //   ..._filter,
-      //   {
-      //     type: 'operator',
-      //     operator: EOperator.AND,
-      //   },
-      //   ...search,
-      //   {
-      //     type: 'operator',
-      //     operator: EOperator.AND,
-      //   },
-      // ]
+      const findFilter = Array.isArray(__filter) ?  __filter?.find((item: any) => item?.id === filter_id): undefined
+      console.log("%c Line:628 🍰 findFilter", "color:#7f2b82", findFilter);
 
-   
-      const packets =  await ctx.dnaClient
-      .findAll({
-        entity: 'packets',
-        token: ctx.token.value,
-        query: {
-          track_total_records: true,
-          pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
-          advance_filters: [
+      
+      const _filter = findFilter?.default_filter || []
+      const custom_adv = [
+      // ...(_filter?.length ? [  ..._filter,
+      //   {
+      //     type: 'operator',
+      //     operator: EOperator.AND,
+      //   }]: []),
+        ...(search?.length? [...search || [],
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        },] : [])
+      ]
+
+      
+
+      console.log("%c Line:655 🍤 custom_adv", "color:#ed9ec7", custom_adv);
+      const packets = await ctx.dnaClient
+        .findAll({
+          entity: 'packets',
+          token: ctx.token.value,
+          query: {
+            track_total_records: true,
+            pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
+            advance_filters: [
             // ...custom_adv,
-            {
-              type: 'criteria',
-              field: 'timestamp',
-              entity: 'packets',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'packets',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'device_id',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: [device_id],
+              },
+              ...(source_ips?.length
+                ? [{
+                    type: 'operator',
+                    operator: EOperator.AND,
+                  },
+                  {
+                    type: 'criteria',
+                    field: 'source_ip',
+                    entity: 'packets',
+                    operator: EOperator.NOT_CONTAINS,
+                    values: source_ips,
+                  }]
+                : []),
+            ],
+            order: {
+              starts_at,
+              limit,
+              by_field: 'code',
+              by_direction: EOrderDirection.DESC,
             },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'device_id',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [device_id],
-            },
-            ...( source_ips?.length ? [{
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'source_ip',
-              entity: 'packets',
-              operator: EOperator.NOT_CONTAINS,
-              values: source_ips,
-            }] : [])
-          ],
-          order: {
-            starts_at,
-            limit,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
           },
-        },
-  
-      })
-      .execute()
+
+        })
+        .execute()
 
       const _packets = packets?.data || []
       const _packets_length = _packets.length
 
-      const sourceIPs = new Set();
+      const sourceIPs = new Set()
       for (let i = 0; i < _packets_length; i++) {
-        sourceIPs.add(_packets[i].source_ip);
-    }
-    
+        sourceIPs.add(_packets[i].source_ip)
+      }
 
-    source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]      
-    console.log('%c Line:697 🍋 source_ips', 'color:#4fff4B', source_ips);
+      source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
+      
 
-      if(_packets_length == limit){
+      if (_packets_length == limit) {
         const new_start = starts_at + limit
         await filterPackets(new_start)
       }
     }
-  
 
+    await filterPackets(0)
 
-   await filterPackets(0)
-
-    console.log('%c Line:715 🍧', 'color:#ffdd4d', JSON.stringify(source_ips));
-
-
-
-    const ab =  await Bluebird.map(source_ips, async (source_ip: string) => {
-      console.log('%c Line:721 🍔 source_ip', 'color:#fca650', source_ip); 
+    
+const oo = [ '10.1.10.49' ]
+    const ab = await Bluebird.map(oo, async (source_ip: string) => {
+      
 
       const res = await ctx.dnaClient.aggregate({
         query: {
@@ -757,15 +762,15 @@ export const packetRouter = createTRPCRouter({
           // timezone,
         },
         token: ctx.token.value,
-  
+
       }).execute()
 
-      console.log('%c Line:811 🍅', 'color:#b03734', JSON.stringify({ source_ip, result: res?.data },null,2));
+      
 
       return { source_ip, result: res?.data }
     }, { concurrency: 10 })
 
-    console.log('%c Line:804 🍓 ab', 'color:#7f2b82', JSON.stringify(ab,null,2 ));
+    
     return ab
   }),
 

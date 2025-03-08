@@ -3,6 +3,7 @@ import { usePathname } from 'next/navigation'
 import { createContext, useContext, useState, useEffect } from 'react'
 
 import { useEventEmitter } from '~/context/EventEmitterProvider'
+import { api } from '~/trpc/react'
 
 import { type IAction, type IProps, type IFilterContext, type IState } from '../types'
 
@@ -25,6 +26,7 @@ const FilterProvider = ({ children }: IProps) => {
   const baseUrl = `${pathName}?current_tab=dashboard&sub_tab=timeline`
 
   const eventEmitter = useEventEmitter()
+  // const queryFilters = api.gridFilter.fetchGridFilter.useQuery()
   const [filters, setFilters] = useState(
     [
       {
@@ -36,10 +38,16 @@ const FilterProvider = ({ children }: IProps) => {
     ]
   )
   const [refetchTrigger, setRefetchTrigger] = useState(0)
-  const [filterQuery, setFilterQuery] = useState({})
+  const [_refetchTrigger, _setRefetchTrigger] = useState(0)
+  const [filterQuery, setFilterQuery] = useState()
+  const [_filterQuery, _setFilterQuery] = useState()
   const fetchDetails = async (data: any) => {
     setRefetchTrigger(prev => prev + 1)
   }
+
+  useEffect(() => {
+    eventEmitter.emit(`filter_id`, filterQuery)
+  }, [_refetchTrigger, filterQuery])
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -95,11 +103,15 @@ const FilterProvider = ({ children }: IProps) => {
     setRefetchTrigger(prev => prev + 1)
   }
 
+  console.log('%c Line:104 🍏 filterQuery', 'color:#42b983', filterQuery)
   const state = {
     filters,
     query,
     filterQuery,
     setFilterQuery,
+    _filterQuery,
+    _setRefetchTrigger,
+    _refetchTrigger,
   } as IState
 
   const actions = {
@@ -110,7 +122,7 @@ const FilterProvider = ({ children }: IProps) => {
   } as IAction
 
   return (
-    <FilterContext.Provider value={{ state, actions }}>
+    <FilterContext.Provider value={{ state, filterQuery, actions }}>
       {children}
     </FilterContext.Provider>
   )
