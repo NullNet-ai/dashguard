@@ -5,6 +5,7 @@ export interface ISideDrawerContextProps {
     isOpen: boolean
     config: ISideDrawerConfig | null
     isPinned: boolean // Add isPinned to state
+    width: string | null // Add width to state
   }
   actions: IActions
 }
@@ -15,6 +16,7 @@ export interface IActions {
   closeSideDrawer: () => void;
   togglePinSideDrawer: () => void;
   saveCurrentState: (config: ISideDrawerConfig) => void; // Add this line
+  setwidth: (width: any) => void;
 }
 
 export interface ISideDrawerConfig {

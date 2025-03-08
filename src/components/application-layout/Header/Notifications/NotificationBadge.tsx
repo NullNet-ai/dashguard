@@ -16,6 +16,7 @@ registerDrawerType('notification', {
     sideDrawerWidth: '500px',
     resizable: true,
     isPinnable: true,
+    maxResizeWidth: '500px'
   }
 });
 

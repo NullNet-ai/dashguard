@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 
 export const SideDrawerView: React.FC = () => {
   const { state, actions } = useSideDrawer()
-  const { closeSideDrawer, togglePinSideDrawer, saveCurrentState } = actions
+  const { closeSideDrawer, togglePinSideDrawer, saveCurrentState, setwidth } = actions
   const { config, isOpen, isPinned } = state
   const { isBannerPresent } = useSidebar()
   
@@ -48,6 +48,7 @@ export const SideDrawerView: React.FC = () => {
     const storedWidth = localStorage.getItem(DRAWER_WIDTH_KEY);
     if (storedWidth) {
       setCurrentWidth(storedWidth);
+      setwidth(storedWidth);
       lastSavedWidth.current = storedWidth;
       return;
     }
@@ -55,6 +56,7 @@ export const SideDrawerView: React.FC = () => {
     // Fallback to config width
     if (sideDrawerWidth) {
       setCurrentWidth(sideDrawerWidth);
+      setwidth(sideDrawerWidth);
       lastSavedWidth.current = sideDrawerWidth;
     }
   }, [sideDrawerWidth]); 
@@ -102,8 +104,10 @@ export const SideDrawerView: React.FC = () => {
     const constrainedWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
     const newWidthStr = `${constrainedWidth}px`;
 
+    setwidth(newWidthStr)
     // Update ref immediately and state asynchronously
     lastSavedWidth.current = newWidthStr;  // Track latest width synchronously
+
     setCurrentWidth(newWidthStr);  // Update visual state
 };
 

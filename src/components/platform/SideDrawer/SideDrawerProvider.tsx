@@ -25,6 +25,8 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
   const [isPinned, setIsPinned] = useState(false)
   const [drawerType, setDrawerType] = useState<string | null>(null)
   const [, setComponentProps] = useState<Record<string, any> | null>(null)
+  const [width, setwidth] = useState<any>(null)
+
 
   useEffect(() => {
     const storedPinnedState = localStorage.getItem(PINNED_STATE_KEY);
@@ -338,6 +340,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
     closeSideDrawer,
     togglePinSideDrawer,
     saveCurrentState, 
+    setwidth,
   };
 
   return (
@@ -346,6 +349,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
         isOpen,
         config,
         isPinned,
+        width,
       },
       actions,
     }}
