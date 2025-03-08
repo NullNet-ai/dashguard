@@ -1,7 +1,7 @@
 export const formatDate = (date: Date) => {
   const givenDate = date || new Date()
   const locale = 'en-CA'
-  const timezone = process.env.TIMEZONE || 'America/Los_Angeles'
+  const timezone = process.env.TIMEZONE || 'Asia/Manila'
   const options: any = {
     year: 'numeric',
     month: '2-digit',
