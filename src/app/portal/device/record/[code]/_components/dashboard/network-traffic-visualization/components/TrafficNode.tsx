@@ -6,7 +6,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { generateTicks } from '../functions/generateTicks'
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
-  const value = data._maxBandwidth
+  const { bandwidth } = data
+  const value = bandwidth || data._maxBandwidth
+  console.log('%c Line:10 🍪 value', 'color:#e41a6a', value)
   const tooltipData = [{ name: '1', value }]
 
   const getColorForValue = (value: number) => {
