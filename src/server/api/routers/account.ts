@@ -991,14 +991,14 @@ export const accountRouter = createTRPCRouter({
         console.error('Error sending email:', error);
         throw error;
       }
-      const cron = dateToCron(new Date(formatDate(expirationDate).dataTime));
-
-      const expirationtestDate = new Date();
-      expirationDate.setMinutes(expirationtestDate.getMinutes() + 3);
-      const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
+      const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
+      // for testing purpose
+      // const expirationtestDate = new Date();
+      // expirationtestDate.setMinutes(expirationtestDate.getMinutes() + 1);
+      // const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
       const scheduleConfig = {
         enabled: true,
-        cron: forTestingCron,
+        cron: cronTime,
         callback_url: `http://10.1.10.252:3000/api/account/invitation-expire`,
         method: 'POST' as TMethod,
         parameters: {
@@ -1007,7 +1007,7 @@ export const accountRouter = createTRPCRouter({
         },
         wait_for_completion: true,
       };
-      // createSchedule(scheduleConfig);
+      createSchedule(scheduleConfig)
 
       // login using root account
       // const asRoot = true;
