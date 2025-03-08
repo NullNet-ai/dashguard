@@ -130,6 +130,7 @@ export interface IConfigGrid {
   customRowAction?: React.FC<any>;
   isInfinite?: boolean
   additionalData?: Record<string, any>;
+  gridColumns? : Record<string,any>[];
 }
 
 interface IRowToArchive extends Row<any> {
