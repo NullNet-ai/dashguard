@@ -32,12 +32,13 @@ export const authRouter = createTRPCRouter({
         }
 
         const token = response?.data?.[0]?.token;
-        ctx.redisClient.cacheData(
-          `account_token:${input.username}`,
-          token,
-          60 * 60 * 24,
-        );
+        // ctx.redisClient.cacheData(
+        //   `account_token:${input.username}`,
+        //   token,
+        //   60 * 60 * 24,
+        // );
         ctx.storeCookies.set('username', input.username);
+        ctx.storeCookies.set('token', token);
 
         return response;
       } catch (error: any) {
@@ -84,10 +85,11 @@ export const authRouter = createTRPCRouter({
         username: z.string().min(1),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
-      const token = await ctx.redisClient.getCachedData(
-        `account_token:${input.username}`,
-      );
+    .mutation(async ({ ctx }) => {
+      // const token = await ctx.redisClient.getCachedData(
+      //   `account_token:${input.username}`,
+      // );
+      const token = ctx.storeCookies.get('token')?.value;
       return token;
     }),
 
@@ -143,9 +145,10 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        const asRoot = true
         const currentToken = ctx.token.value;
         const rootAccount = await ctx.dnaClient
-          .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+          .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
           .execute();
         const rootAccountToken = rootAccount?.data?.[0]?.token;
         const newOrganization = await ctx.dnaClient
@@ -212,15 +215,17 @@ export const authRouter = createTRPCRouter({
       return response?.data?.[0];
     }),
   fetchAccountDetailsThruEmail: privateProcedure.query(async ({ ctx }) => {
+    const asRoot = true;
     const response = ctx.session.account;
     const rootAccount = await ctx.dnaClient
-      .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+      .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
       .execute();
     const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accountDetails = await ctx.dnaClient
-      .rootFindAll({
+      .findAll({
         entity: 'organization_accounts',
         token: rootAccountToken,
+        as_root: asRoot,
         query: {
           advance_filters: [
             {
@@ -301,9 +306,7 @@ export const authRouter = createTRPCRouter({
     }),
   logout: privateProcedure.mutation(async ({ ctx }) => {
     ctx.storeCookies.delete('username');
-    ctx.redisClient.deleteCachedData(
-      `account_token:${ctx.session.account?.email}`,
-    );
+    ctx.storeCookies.delete('token');
     return { message: 'User logged out' };
   }),
   verify: privateProcedure.mutation(async () => {
@@ -317,9 +320,10 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        const asRoot = true;
         const currentToken = ctx.token.value;
         const rootAccount = await ctx.dnaClient
-          .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+          .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
           .execute();
         const rootAccountToken = rootAccount?.data?.[0]?.token;
         const newOrganization = await ctx.dnaClient
@@ -327,13 +331,7 @@ export const authRouter = createTRPCRouter({
             token: rootAccountToken,
           })
           .execute();
-        const username = ctx.storeCookies.get('username')?.value;
-
-        await ctx.redisClient.cacheData(
-          `account_token:${username}`,
-          newOrganization?.data?.[0]?.token,
-          60 * 60 * 24,
-        );
+        ctx.storeCookies.set('token', newOrganization?.data?.[0]?.token);
 
         return {
           token: newOrganization?.data?.[0]?.token,
