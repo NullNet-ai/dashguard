@@ -5,13 +5,11 @@ import SearchList from './SearchList'
 import SearchListMobile from './SearchListMobile'
 import Search from './View'
 
-
-
 // eslint-disable-next-line react/destructuring-assignment
 export default function Main() {
   return (
     <GraphSearchProvider>
-      <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">
+      <div className="ml-auto flex w-full max-w-[50%] flex-col justify-end  gap-x-2">
         <div className="relative flex flex-1 flex-row gap-x-2">
           <div className="my-2 h-[40px] w-full md:my-0">
             <Search />

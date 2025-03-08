@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 
 import { generateFlowData } from './functions/generateFlowData'
+import { mock_bandwidth } from './functions/mock_bandwidth'
 import { type INetworkFlowContext, type Edge, type FlowElement } from './types'
 
 import { api } from '~/trpc/react'
@@ -26,6 +27,7 @@ export default function NetworkFlowProvider({ children }: IProps) {
   // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
   //   { packet_data: packetsIP }, { enabled: !!packetsIP }
   // )
+  // console.log('%c Line:26 🍧 packetsIP', 'color:#b03734', packetsIP)
 
   // useEffect(() => {
   //   const fetchData = async () => {

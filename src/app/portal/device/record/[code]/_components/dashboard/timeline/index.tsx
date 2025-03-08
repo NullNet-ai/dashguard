@@ -8,7 +8,7 @@ import NetworkTrafficFlow from '../network-traffic-visualization'
 function TimelineComponent() {
 
   return (
-    <div className="container mx-auto mt-10">
+    <div className=" mx-auto">
       <Filter />
   
       <Main />
