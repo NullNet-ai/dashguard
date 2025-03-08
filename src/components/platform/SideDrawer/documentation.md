@@ -1,7 +1,7 @@
 # SideDrawer Component Documentation
 
 ## Overview
-The **SideDrawer** is a reusable, dynamic, and customizable drawer component that slides in from the right side of the screen. It supports customizable content, animations, and accessibility features.
+The **SideDrawer** is a reusable, dynamic, and customizable drawer component that slides in from the right side of the screen. It supports customizable content, animations, accessibility features, and resizing capabilities.
 
 ---
 
@@ -15,20 +15,29 @@ The **SideDrawer** is a reusable, dynamic, and customizable drawer component tha
 - **Callback on Close**: Trigger a callback when the drawer closes.
 - **Reusable API**: Open the drawer from anywhere using `openSideDrawer`.
 - **Card Style Integration**: Uses a `Card` component for consistent styling.
+- **Resizable Drawer**: Dynamically resize the drawer with a draggable handle.
+- **Configurable Resize Constraints**: Set minimum and maximum resize widths.
 
 ---
 
 ## Props and Configuration
 
 ### `openSideDrawer` Function
-| Prop               | Type                     | Description                                                                 |
-|--------------------|--------------------------|-----------------------------------------------------------------------------|
-| `title`            | `string`                 | Title displayed in the header.                                              |
-| `sideDrawerWidth`  | `string` (optional)      | Width of the SideDrawer (e.g., `"25dvw"`, `"400px"`). Default: `"982px"`.   |
-| `body`             | `object`                 | Configuration for the body content.                                         |
-| `body.component`   | `React.ComponentType`    | React component to render as the body content.                              |
-| `body.componentProps` | `object` (optional)   | Props to pass to the body component.                                        |
-| `onCloseCallback`  | `function` (optional)    | Callback function triggered when the SideDrawer closes.                     |
+| Prop | Type | Description |
+|--|--|--|
+| `header` | `ReactNode` | Content displayed in the header. |
+| `sideDrawerWidth` | `string` (optional) | Width of the SideDrawer (e.g., `"25dvw"`, `"400px"`). Default: `"982px"`. |
+| `body` | `object` | Configuration for the body content. |
+| `body.component` | `React.ComponentType` | React component to render as the body content. |
+| `body.componentProps` | `object` (optional) | Props to pass to the body component. |
+| `onCloseSideDrawer` | `function` (optional) | Callback function triggered when the SideDrawer closes. |
+| `overlayEnabled` | `boolean` (optional) | Whether to show a semi-transparent overlay behind the drawer. Default: `false`. |
+| `closeOnOutsideClick` | `boolean` (optional) | Whether to close the drawer when clicking outside. Default: `true`. |
+| `resizable` | `boolean` (optional) | Enable drawer resizing. Default: `false`. |
+| `showResizeHandle` | `boolean` (optional) | Show the resize handle grip icon. Default: `true`. |
+| `minResizeWidth` | `string` (optional) | Minimum width when resizing. Default: Same as `sideDrawerWidth`. |
+| `maxResizeWidth` | `string` (optional) | Maximum width when resizing. Default: Window width minus sidebar. |
+| `metaData` | `any` (optional) | Additional data to store with the drawer configuration. |
 
 ---
 
@@ -54,75 +63,62 @@ function SomeComponent() {
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
-      title: "Assign > Permission",
-      width: "30dvw",
+      header: <h2>Assign Permission</h2>,
+      sideDrawerWidth: "30dvw",
       body: {
         component: PermissionForm,
         componentProps: {
           userId: "123",
-          onSave: (data) => // console.log("Saved data:", data),
+          onSave: (data) => console.log("Saved data:", data),
         },
       },
-      onCloseCallback: () => // console.log("SideDrawer closed!"),
+      onCloseSideDrawer: () => console.log("SideDrawer closed!"),
+      resizable: true,
+      minResizeWidth: "300px",
+      maxResizeWidth: "600px",
     });
   };
 
   return <button onClick={handleOpenSideDrawer}>Open SideDrawer</button>;
 }
+```
 
-***************************************************************************************************************************
+### Resizable Drawer Example
+```tsx
+// Example with resizable drawer configuration
+openSideDrawer({
+  header: <h2>Resizable Panel</h2>,
+  sideDrawerWidth: "400px", // Initial width
+  body: {
+    component: DetailPanel,
+    componentProps: { id: "123" },
+  },
+  resizable: true, // Enable resizing
+  showResizeHandle: true, // Show the grip handle (can be set to false for invisible handle)
+  minResizeWidth: "300px", // Minimum width constraint
+  maxResizeWidth: "800px", // Maximum width constraint
+  overlayEnabled: true,
+});
+```
 
-Accessibility
-ARIA Attributes: Includes role="dialog", aria-labelledby, and aria-modal="true".
+## Accessibility
+- **ARIA Attributes**: Includes `role="dialog"`, `aria-labelledby`, and `aria-modal="true"`.
+- **Keyboard Navigation**: Close with clicking outside the sidedrawer or by focusing the close button.
 
-Keyboard Navigation: Close with clicking outside the sidedrawer or by focusing the close button.
-
-Styling
+## Styling
 The SideDrawer uses a Card component for styling. Customize it by modifying the Card component or adding custom CSS classes.
 
-Example Use Cases
-Forms: Edit user permissions or contact details.
+## Example Use Cases
+- **Forms**: Edit user permissions or contact details.
+- **Notifications**: Show a list of notifications.
+- **Settings**: Configure application preferences.
+- **Details Panel**: Display additional item details with resizable width.
+- **Document Preview**: View documents with adjustable width for better reading.
 
-Notifications: Show a list of notifications.
+## Limitations
+- Slides in from the right side only.
+- Overlay covers the entire screen.
 
-Settings: Configure application preferences.
-
-Details Panel: Display additional item details.
-
-Limitations
-Slides in from the right side only.
-
-Overlay covers the entire screen.
-
-Future Enhancements
-Left-Side Support: Add support for sliding in from the left.
-
-Custom Overlay: Allow customization of overlay opacity and color.
-
-Resizable Drawer: Add support for resizing the drawer dynamically.
-
-
----
-
-### **How to Add This to Your Repository**
-1. Create a new file in your repository, e.g., `SideDrawer.md`.
-2. Copy and paste the above Markdown content into the file.
-3. Save the file and push it to your repository.
-
----
-
-### **Why Use Markdown?**
-- **Lightweight**: Easy to write and read.
-- **Supports Tables**: Perfect for documenting props and configurations.
-- **Rendered by GitHub**: GitHub automatically renders `.md` files with proper formatting.
-- **Widely Supported**: Most code editors (e.g., VSCode) have built-in Markdown preview.
-
----
-
-### **Alternative Formats**
-If you need more advanced features (e.g., interactive documentation), you can consider:
-1. **HTML**: For richer formatting but harder to maintain.
-2. **PDF**: For printable documentation.
-3. **JSON/YAML**: For structured data, but not human-readable.
-
-For most cases, **Markdown** is the best choice for documentation in a repository. Let me know if you need further assistance!
+## Future Enhancements
+- **Left-Side Support**: Add support for sliding in from the left.
+- **Custom Overlay**: Allow customization of overlay opacity and color.

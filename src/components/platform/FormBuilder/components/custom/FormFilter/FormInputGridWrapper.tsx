@@ -123,7 +123,7 @@ export default function FormInputGridWrapper({
           className={
             cn(`absolute z-[100] w-[96%] md:w-full mx-auto lg:w-full
               right-0 overflow-y-auto rounded-md border border-gray-200
-              bg-white shadow-lg mt-4 lg:mt-8 `, fieldConfig?.gridPosition
+              bg-white shadow-lg mt-4 lg:mt-3 `, fieldConfig?.gridPosition
               ? `${fieldConfig?.gridPosition}-0`
               : 'left-0')
           }

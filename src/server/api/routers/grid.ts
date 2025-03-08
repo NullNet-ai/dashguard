@@ -132,6 +132,7 @@ export const gridRouter = createTRPCRouter({
             'sorts',
             'advance_filters',
             'default_sorts',
+            'filter_groups'
           ],
           advance_filters: [
             {

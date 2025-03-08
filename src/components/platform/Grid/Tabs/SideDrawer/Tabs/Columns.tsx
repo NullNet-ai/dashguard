@@ -104,7 +104,7 @@ export default function ColumnContent() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="max-h-[calc(100vh-250px)] overflow-y-auto space-y-2">
+      <div className="max-h-[59dvh] overflow-y-auto space-y-2">
 
       <Sortable
         value={filteredColumns}

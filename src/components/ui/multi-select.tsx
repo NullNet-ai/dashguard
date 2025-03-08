@@ -452,7 +452,14 @@ const MultipleSelector = React.forwardRef<
             setInputValue("");
             const newOptions = [...selected, newRecord];
             setSelected(newOptions);
-            onChange?.(newOptions);
+
+            
+            // Handle useStringValues when creatable is true
+            if (useStringValues) {
+              onChange?.(convertToStrings(newOptions));
+            } else {
+              onChange?.(newOptions);
+            }
             setIsCreateLoading(false);
           }}
         >

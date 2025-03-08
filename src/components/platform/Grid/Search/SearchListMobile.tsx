@@ -136,7 +136,7 @@ const SearchListMobile = ({gridType} : any) => {
                     </Badge>
                   )
                 })}
-                {data?.length && data.some(item => item.hidden) && (
+                {(data?.length && data.some(item => item.hidden) ) ? (
                   <div
                     className="py-1 absolute max-w-[63px]"
                     style={{
@@ -206,7 +206,7 @@ const SearchListMobile = ({gridType} : any) => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                ) }
+                ) : null }
 
                 <Button
                   className={cn(

@@ -79,10 +79,12 @@ const SideUserInfo = ({
       </DropdownMenuTrigger>
       {!!other_organizations?.length && (
         <DropdownMenuContent
-          className="w-52"
-          side="right"
-          align="end"
-          sideOffset={95}
+          className="lg:w-[300px] w-full z-[100]"
+          side={mobile ? 'top' : 'right'}
+          align={mobile ? 'start' : 'end'}
+          sideOffset={mobile ? 0 : 74}
+          // offset={-10}
+          alignOffset={mobile ? 10 : 0}
         >
           <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
           <DropdownMenuSeparator />

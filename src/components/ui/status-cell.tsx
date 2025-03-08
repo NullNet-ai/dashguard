@@ -17,7 +17,7 @@ const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {},
   };
 
   return (
-    <div className="my-0 flex flex-row items-start">
+    <div className="lg:my-[2px] lg:mr-[3px] my-0 flex flex-row items-start">
       <div
         className={cn(
           'bg-primary/10 text-primary',

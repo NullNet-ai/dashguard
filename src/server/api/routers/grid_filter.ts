@@ -36,6 +36,12 @@ const columnSchema = z.object({
   id: z.string().optional(),
 });
 
+const filterGroupSchema = z.object({
+  id: z.string(),
+  groupOperator: z.enum(['and', 'or']).default('and'),
+  filters: z.array(filterCriteriaSchema),
+});
+
 const gridFilterSchema = z.object({
   name: z.string().min(1),
   default_filter: z.array(filterCriteriaSchema),
@@ -44,6 +50,7 @@ const gridFilterSchema = z.object({
   columns: z.array(columnSchema),
   default_sorts: z.array(sortSchema),
   id: z.string().optional(),
+  filter_groups: z.array(filterGroupSchema),
 });
 
 export const gridFilterRouter = createTRPCRouter({
@@ -77,6 +84,7 @@ export const gridFilterRouter = createTRPCRouter({
               sorts: input.sorts,
               advance_filters: input.default_filter,
               default_sorts: input.default_sorts,
+              filter_groups : input.filter_groups
             },
             pluck: [
               'id',
@@ -90,6 +98,7 @@ export const gridFilterRouter = createTRPCRouter({
               'groups',
               'sorts',
               'advance_filters',
+              'filter_groups'
             ],
           },
         })
@@ -130,6 +139,7 @@ export const gridFilterRouter = createTRPCRouter({
               sorts: input.sorts,
               advance_filters: input.default_filter,
               default_sorts: input.default_sorts,
+              filter_groups : input.filter_groups
             },
             pluck: [
               'id',
@@ -143,6 +153,7 @@ export const gridFilterRouter = createTRPCRouter({
               'groups',
               'sorts',
               'advance_filters',
+              'filter_groups'
             ],
           },
         })
@@ -175,6 +186,7 @@ export const gridFilterRouter = createTRPCRouter({
             advance_filters: input.default_filter,
             default_sorts: input.default_sorts,
             default_filter : input.default_filter,
+            filter_groups : input.filter_groups
           };
         }
         return tab;
@@ -278,6 +290,7 @@ export const gridFilterRouter = createTRPCRouter({
                 sorts: input.tab.sorts || [],
                 advance_filters: input.tab.default_filter || [],
                 default_sorts: input.tab.default_sorts  || [],
+                filter_groups : input.tab.filter_groups || [],
               },
               pluck: [
                 'id',
@@ -292,6 +305,7 @@ export const gridFilterRouter = createTRPCRouter({
                 'sorts',
                 'advance_filters',
                 'default_sorts',
+                'filter_groups'
               ],
             },
           })
@@ -322,6 +336,7 @@ export const gridFilterRouter = createTRPCRouter({
                 'sorts',
                 'advance_filters',
                 'default_sorts',
+                'filter_groups'
               ],
             },
           })
@@ -357,6 +372,7 @@ export const gridFilterRouter = createTRPCRouter({
                 sorts: grid_filter.sorts,
                 advance_filters: grid_filter.advance_filters,
                 default_sorts: grid_filter.default_sorts,
+                filter_groups : grid_filter.filter_groups
               },
               pluck: [
                 'id',
@@ -405,6 +421,7 @@ export const gridFilterRouter = createTRPCRouter({
         advance_filters: filter?.advance_filters,
         default_sorts: filter?.default_sorts,
         default_filter : filter?.advance_filters,
+        filter_groups : filter?.filter_groups
       });
       await ctx.redisClient.cacheData(_tabMenuId, tabs);
 
