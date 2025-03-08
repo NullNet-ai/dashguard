@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
       .execute()
     const rootAccountToken = rootAccount?.data?.[0]?.token
-    const { account_id, invitation_id } = body.parameters || {}
+    const { account_id, invitation_id } = body ?? {}
     if (rootAccountToken && invitation_id && account_id) {
       await Promise.all([
         orm
@@ -47,6 +47,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      data: {
+        account_id,
+        invitation_id,
+      },
       message: 'Account Invitation expired successfully',
     })
   }

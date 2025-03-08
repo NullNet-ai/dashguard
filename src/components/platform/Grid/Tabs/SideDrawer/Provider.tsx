@@ -76,6 +76,10 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
             ];
         }
         
+        if(!acc.length && curr.filters.length && (!curr.filters[0]?.field && !curr.filters[0]?.operator && !curr.filters[0]?.values.length)){
+          return acc;
+        }        
+
         const mergeRecords = [
             ...acc,
             ...curr.filters
@@ -135,7 +139,9 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
                 ...curr.filters
             ];
         }
-        
+        if(!acc.length && curr.filters.length && (!curr.filters[0]?.field && !curr.filters[0]?.operator && !curr.filters[0]?.values.length)){
+            return acc;
+        }        
         const mergeRecords = [
             ...acc,
             ...curr.filters
@@ -153,7 +159,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     
         return mergeRecords;
     }, []);    
-    
+
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter : resolveDefaultFilter,

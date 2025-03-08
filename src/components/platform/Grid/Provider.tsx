@@ -11,7 +11,7 @@ import {
   type RowSelectionState,
   type SortingState,
   type Updater,
-  useReactTable
+  useReactTable,
 } from '@tanstack/react-table';
 import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
@@ -67,7 +67,7 @@ export default function GridProvider({
   initialSelectedRecords = {},
   sorting: initialSorting = [],
   defaultSorting,
-  advanceFilter = [], 
+  advanceFilter = [],
   defaultAdvanceFilter = [],
   pagination,
   parentType,
@@ -83,9 +83,6 @@ export default function GridProvider({
         },
       ];
 
-  if(!!_propsConfig?.columnsOrder?.length) {
-    _propsConfig.columns = sortColumns(_propsConfig?.columnsOrder, _propsConfig?.columns);
-  }
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
@@ -98,8 +95,6 @@ export default function GridProvider({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
   );
-
-
 
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
@@ -123,21 +118,32 @@ export default function GridProvider({
   const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
     useState<string | null>(null);
 
-    // infinite data options
+  // infinite data options
   const [infiniteData, setInfiniteData] = useState<any[]>(data);
   const [bufferData, setBufferData] = useState<any[]>([]);
   const [current, setCurrent] = useState(1);
   const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 100);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [infiniteCount, setInfiniteCount] = useState(
-    totalCount ?? 0,
-  );
+  const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
 
+  const [gridColumns, setGridColumns] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
+    return {
+      header: item.header,
+      accessorKey: item.accessorKey,
+    }
+  }));
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
     ...filter,
     default: true,
   })) as ISearchItem[];
+
+  if (!!_propsConfig?.columnsOrder?.length) {
+    _propsConfig.columns = sortColumns(
+      _propsConfig?.columnsOrder,
+      _propsConfig?.columns,
+    );
+  }
 
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
@@ -147,7 +153,6 @@ export default function GridProvider({
     [...resolvedDefaultFilter],
   );
 
-  
   // use effects
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -162,7 +167,7 @@ export default function GridProvider({
       setPlaygroundGridIsShowRowAction(rowAction);
     }
   }, []);
-  
+
   // use effect for sorting if there is a change in props sorting it should set the sorting
   useEffect(() => {
     if (initialSorting?.length) {
@@ -191,13 +196,9 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
-
   };
 
-
   //actions of infinite grid
-
-
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -248,44 +249,49 @@ export default function GridProvider({
     const updatedSorting =
       typeof updater === 'function' ? updater(sorting) : updater;
 
-      const processedSortKeys = new Map();
-    
-      const resolvedSorting = updatedSorting?.reduce(
-        (acc: SortingState, sort) => {
-          const sortFields = config?.columns?.find(
-            (column: any) => column?.accessorKey === sort.id,
-          );
-  
-          const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-            ? sortFields.sortKey.map((sortKey) => {
-                const key = `${sort.id}_${sortKey}`;
-                // If we've already processed this combination, skip it
-                if (processedSortKeys.has(key)) {
-                  return null;
-                }
-                processedSortKeys.set(key, true);
-                return {
-                  ...sort,
-                  sort_key: sortKey,
-                };
-              })
-            : (() => {
-                const key = `${sort.id}_${sortFields?.sortKey || sort.id}`;
-                if (processedSortKeys.has(key)) {
-                  return null;
-                }
-                processedSortKeys.set(key, true);
-                return [{
+    const processedSortKeys = new Map();
+
+    const resolvedSorting = updatedSorting?.reduce(
+      (acc: SortingState, sort) => {
+        const sortFields = config?.columns?.find(
+          (column: any) => column?.accessorKey === sort.id,
+        );
+
+        const resolvedSortFields = Array.isArray(sortFields?.sortKey)
+          ? sortFields.sortKey.map((sortKey) => {
+              const key = `${sort.id}_${sortKey}`;
+              // If we've already processed this combination, skip it
+              if (processedSortKeys.has(key)) {
+                return null;
+              }
+              processedSortKeys.set(key, true);
+              return {
+                ...sort,
+                sort_key: sortKey,
+              };
+            })
+          : (() => {
+              const key = `${sort.id}_${sortFields?.sortKey || sort.id}`;
+              if (processedSortKeys.has(key)) {
+                return null;
+              }
+              processedSortKeys.set(key, true);
+              return [
+                {
                   ...sort,
                   sort_key: sortFields?.sortKey || sort.id,
-                }];
-              })();
-  
-          return [...acc, ...(resolvedSortFields?.filter(Boolean) as SortingState)];
-        },
-        [],
-      );
-  
+                },
+              ];
+            })();
+
+        return [
+          ...acc,
+          ...(resolvedSortFields?.filter(Boolean) as SortingState),
+        ];
+      },
+      [],
+    );
+
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       return config?.onFetchRecords?.({
         sorting: resolvedSorting,
@@ -509,7 +515,7 @@ export default function GridProvider({
     }
   };
 
-  const newData = (isMobileOrTablet && config.isInfinite) ? infiniteData : data;
+  const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
 
   /** @HOOKS */
   const table = useReactTable({
@@ -543,7 +549,6 @@ export default function GridProvider({
     onSortingChange: handleAddSorting,
   });
   /** @ACTIONS */
-
 
   const handleCreate = async () => {
     try {
@@ -588,38 +593,43 @@ export default function GridProvider({
     }
   };
 
-  const handleMergeBufferInfinite = React.useMemo(() => () => {
-    if(!bufferData?.length) {
-      return;
-    }
-    setInfiniteData((prev) => {
-      return [...prev,...bufferData];
-    });
-    setBufferData([]);
-  }, [bufferData]);
-
-  const handleUpdateInfiniteData = async ({items, totalCount, storageType, curr }: 
-    {
-      items: any[];
-      totalCount: number;
-      storageType: 'buffer' | 'items';
-      curr?: number;
+  const handleMergeBufferInfinite = React.useMemo(
+    () => () => {
+      if (!bufferData?.length) {
+        return;
+      }
+      setInfiniteData((prev) => {
+        return [...prev, ...bufferData];
+      });
+      setBufferData([]);
     },
-  ) => {
+    [bufferData],
+  );
 
-    if(storageType === 'buffer') {
+  const handleUpdateInfiniteData = async ({
+    items,
+    totalCount,
+    storageType,
+    curr,
+  }: {
+    items: any[];
+    totalCount: number;
+    storageType: 'buffer' | 'items';
+    curr?: number;
+  }) => {
+    if (storageType === 'buffer') {
       setBufferData(items);
       setCurrent((prev) => {
         return curr ? curr : prev + 1;
       });
 
-      return 
+      return;
     }
     setInfiniteData((prev) => {
-      if(current === 1) {
+      if (current === 1) {
         return items;
       }
-      return [...prev,...items];
+      return [...prev, ...items];
     });
     setCurrent((prev) => {
       return curr ? curr : prev + 1;
@@ -635,7 +645,7 @@ export default function GridProvider({
     infiniteData,
     bufferData,
     infiniteCount,
-  }
+  };
 
   const infinite_actions = {
     setCurrent,
@@ -646,8 +656,8 @@ export default function GridProvider({
     setBufferData,
     setInfiniteCount,
     handleUpdateInfiniteData,
-    handleMergeBufferInfinite
-  }
+    handleMergeBufferInfinite,
+  };
 
   const state_context = {
     config: {
@@ -657,6 +667,7 @@ export default function GridProvider({
         actionRow?.current,
         ...(config?.columns ?? []),
       ],
+      gridColumns,
     },
     parentType,
     data: newData,
@@ -678,7 +689,7 @@ export default function GridProvider({
     pagination,
     hasMore,
     gridLevel,
-    infinite_options: infinite_state
+    infinite_options: infinite_state,
   } as IState;
   const actions = {
     handleCreate,
@@ -695,8 +706,8 @@ export default function GridProvider({
     setBulkActionType,
     setHasMore,
     infiniteActions: {
-      ...infinite_actions
-    }
+      ...infinite_actions,
+    },
   } as IAction;
 
   return (
@@ -712,9 +723,9 @@ export default function GridProvider({
 }
 
 export function useGrid() {
-  const context = useContext(GridContext)
+  const context = useContext(GridContext);
   if (!context) {
-    throw new Error('useGrid must be used within a GridProvider')
+    throw new Error('useGrid must be used within a GridProvider');
   }
-  return context
+  return context;
 }
