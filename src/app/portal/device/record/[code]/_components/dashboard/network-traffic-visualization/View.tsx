@@ -8,9 +8,11 @@ import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
 import { generateFlowData } from './functions/generateFlowData'
 import { mock_bandwidth } from './functions/mock_bandwidth'
+import { useFetchNetworkFlow } from './Provider'
 
 export default function NetworkFlowView() {
-  const elements = generateFlowData(mock_bandwidth)
+  const { state } = useFetchNetworkFlow()
+  const { elements } = state
 
   const nodeTypes = useMemo(
     () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []

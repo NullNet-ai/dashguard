@@ -34,7 +34,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
   const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
-      device_id: '6cb6c156-e8df-461b-83ec-23aee142a664',
+      device_id: params?.id,
       time_range: getLastTimeStamp(1, 'minute'),
     }
   )
@@ -60,7 +60,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   //   }
   // }, [bandwidth])
   const state = {
-    elements,
+    elements: generateFlowData(bandwidth),
   }
   const actions = {}
 
