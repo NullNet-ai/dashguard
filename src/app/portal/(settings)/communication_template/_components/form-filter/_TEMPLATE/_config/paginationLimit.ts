@@ -1,0 +1,6 @@
+const PAGINATION_LIMIT = {
+  CURRENT: 1, 
+  LIMIT: 1000,
+};
+
+export default PAGINATION_LIMIT;
