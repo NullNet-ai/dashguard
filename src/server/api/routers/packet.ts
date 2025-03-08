@@ -604,7 +604,7 @@ export const packetRouter = createTRPCRouter({
       totalPages,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({device_id: z.string(), time_range: z.array(z.string())})).query(async ({ input, ctx }) => {
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string()})).query(async ({ input, ctx }) => {
 
     
    const { device_id, time_range } = input
@@ -703,10 +703,6 @@ export const packetRouter = createTRPCRouter({
         const new_start = starts_at + limit
         await filterPackets(new_start)
       }
-      
-
-
-      
     }
   
 
