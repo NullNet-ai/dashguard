@@ -11,7 +11,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
   const uniqueSourceIPsSet = new Set()
   const sourceIPMap = new Map()
 
-  bandwidthData.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
+  bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     if (!sourceIPMap.has(source_ip)) {
       sourceIPMap.set(source_ip, uniqueSourceIPsSet.size)
       uniqueSourceIPsSet.add(source_ip)
@@ -34,7 +34,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
     })
   })
 
-  bandwidthData.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
+  bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     let xPosition = spacing
 
     const trafficNodes = result.map(({ bandwidth }: { bandwidth: string }, timeIndex: number) => {
