@@ -230,6 +230,22 @@ export const contactRouter = createTRPCRouter({
           multiple_sort: input.sorting?.length
             ? formatSorting(input.sorting)
             : [],
+          concatenate_fields: [
+            {
+              fields: ['first_name', 'last_name'],
+              field_name: 'full_name',
+              separator: ' ',
+              entity: 'contacts',
+              aliased_entity: 'created_by'
+            },
+            {
+              fields: ['first_name', 'last_name'],
+              field_name: 'full_name',
+              separator: ' ',
+              entity: 'contacts',
+              aliased_entity: 'updated_by'
+            },
+          ]
         },
       })
       .join({

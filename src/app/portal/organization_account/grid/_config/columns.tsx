@@ -82,10 +82,10 @@ const gridColumns = [
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
-    sortKey: 'updated_by.first_name',
+    sortKey: 'updated_by.full_name',
     search_config: {
       entity: 'updated_by',
-      field: 'first_name',
+      field: 'full_name',
       operator: 'like',
     },
   },
@@ -106,10 +106,10 @@ const gridColumns = [
   {
     header: 'Created By',
     accessorKey: 'created_by',
-    sortKey: 'created_by.first_name',
+    sortKey: 'created_by.full_name',
     search_config: {
       entity: 'created_by',
-      field: 'first_name',
+      field: 'full_name',
       operator: 'like',
     },
   },
