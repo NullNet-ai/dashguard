@@ -8,6 +8,7 @@ export interface SearchItem {
 export interface IState {
   filters: string[]
   query: string
+  fetchFilterLoading: boolean
 }
 
 export interface IAction {

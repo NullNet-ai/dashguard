@@ -29,6 +29,7 @@ const FilterProvider = ({ children }: IProps) => {
     [
       {
         id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
+        name: 'All Data',
         label: 'All Data',
         href: `${baseUrl}&sub_tab=all_data`,
       },
@@ -62,13 +63,13 @@ const FilterProvider = ({ children }: IProps) => {
 
         result.forEach((item: any) => {
             const formattedName = item.label.toLowerCase().replace(/\s+/g, '_')
-            // const href = `${baseUrl}&sub_tab=${formattedName}`
+            const href = `${baseUrl}&sub_tab=${formattedName}`
             if (updatedFilters.has(item.id)) {
             
-            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item  }) // Merge updates
+            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item, href  }) // Merge updates
           }
           else {
-            updatedFilters.set(item.id, {...item}) // Add new item
+            updatedFilters.set(item.id, {...item, href }) // Add new item
           }
         })
 

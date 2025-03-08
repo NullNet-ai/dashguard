@@ -36,13 +36,25 @@ export const fetchTabFilter = async () => {
     const cacheData = await api.gridFilter.fetchGridFilter()
 
     const transformCachedData = cacheData.map((data: any) => {
+      console.log("%c Line:39 🍌 data", "color:#ed9ec7", data);
       return {
         ...data,
         id: data.id,
         label: data.name,
-      }
-    }
-    )
+        default_filter: data.default_filter.map((filter: any) => {
+          if (filter.type === 'criteria') {
+            return {
+              ...filter,
+              values: filter.values.map((value: string) => ({
+                label: value,
+                value: value,
+              })),
+            };
+          }
+          return filter;
+        }),
+      };
+  })
     return transformCachedData
   }
   catch (error) {

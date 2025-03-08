@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react'
-
-import NetworkFlow from '../network-traffic-visualization'
+import React from 'react'
 
 import Filter from './Filter'
 import Main from './Search'
+import NetworkTrafficFlow from '../network-traffic-visualization'
 
 
 function TimelineComponent() {
@@ -13,7 +12,7 @@ function TimelineComponent() {
       <Filter />
   
       <Main />
-      <NetworkFlow />
+      <NetworkTrafficFlow />
 
     </div>
   )

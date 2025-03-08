@@ -109,7 +109,18 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
 
     const modifyFilterDetails = {
       ...filterDetails,
-      default_filter: filterDetails.default_filter,
+      default_filter: filterDetails.default_filter.map((item: any) => {
+        if (item.type === 'criteria') {
+          return {
+            ...item,
+            // Convert array of objects back to array of strings for database
+            values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
+              ? item.values.map((obj: any) => obj.value)
+              : item.values,
+          }
+        }
+        return item
+      }),
       sorts: sorting,
       default_sorts: sorting,
     }
