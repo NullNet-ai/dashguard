@@ -1,7 +1,7 @@
-import { headers } from 'next/headers'
-import { z } from 'zod'
+import { headers } from 'next/headers';
+import { z } from 'zod';
 
-import { type ISortBy } from '~/components/platform/Grid/Category/type'
+import { type ISortBy } from '~/components/platform/Grid/Category/type';
 import {
   EOperator,
   type IAdvanceFilters,
@@ -11,7 +11,7 @@ import { EOrderDirection } from '@dna-platform/common-orm/build/enums/model';
 
 import {
   type IPagination,
-  type ISearchItem
+  type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
 import { gridCacheId, type TReportDataType } from '~/lib/grid-cache-id';
 import { SetIdTab, SetTab } from '~/lib/grid-default-tab';
@@ -131,7 +131,7 @@ export const gridRouter = createTRPCRouter({
             'groups',
             'sorts',
             'advance_filters',
-            'default_sorts'
+            'default_sorts',
           ],
           advance_filters: [
             {
@@ -302,10 +302,30 @@ export const gridRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
-          multiple_sort:
-            input.sorting?.length && input?.sorting.length > 1
-              ? formatSorting(input.sorting)
-              : [],
+          ...(pluck_object
+            ? {
+                multiple_sort:
+                  input.sorting?.length && input?.sorting.length > 1
+                    ? formatSorting(input.sorting)
+                    : [],
+                concatenate_fields: [
+                  {
+                    fields: ['first_name', 'last_name'],
+                    field_name: 'full_name',
+                    separator: ' ',
+                    entity: 'contacts',
+                    aliased_entity: 'created_by',
+                  },
+                  {
+                    fields: ['first_name', 'last_name'],
+                    field_name: 'full_name',
+                    separator: ' ',
+                    entity: 'contacts',
+                    aliased_entity: 'updated_by',
+                  },
+                ],
+              }
+            : {}),
         },
       });
       if (pluck_object) {
@@ -770,7 +790,7 @@ export const gridRouter = createTRPCRouter({
           return {
             ...tab,
             advance_filters: filters,
-            default_filter : filters
+            default_filter: filters,
           };
         }
         return tab;
@@ -828,16 +848,16 @@ export const gridRouter = createTRPCRouter({
       'sorting',
       'pagination',
       'grid_tabs',
-    ]
+    ];
     const cacheIds = await Promise.all(
       cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
     );
 
     const [pagination, gridTabs, filters, sorting] = await Promise.all(
       cacheIds
-        .map(id => (id ? ctx.redisClient.getCachedData(id) : null))
+        .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
         .filter(Boolean),
-    )
+    );
     const tabDetails = Array.isArray(sorting) ? sorting : [];
 
     const reportPagination: IPagination =
@@ -852,8 +872,8 @@ export const gridRouter = createTRPCRouter({
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
       : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
     const defaultSorts: ISortBy = filter_id
-    ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
-    : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
+      ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
+      : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
 
     const gridColumns = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
@@ -877,8 +897,8 @@ export const gridRouter = createTRPCRouter({
         defaultFilters,
       },
       sorts: {
-        sorting : sorts,
-        defaultSorting : defaultSorts,
+        sorting: sorts,
+        defaultSorting: defaultSorts,
       },
       pagination: reportPagination,
       columns: gridColumns,
@@ -888,27 +908,25 @@ export const gridRouter = createTRPCRouter({
     .input(
       z.object({
         entity: z.string(),
-        query_params: z.any()
+        query_params: z.any(),
       }),
     )
     .query(async ({ input, ctx }) => {
-
-      const { entity, query_params } = input
+      const { entity, query_params } = input;
       const query = ctx.dnaClient.findAll({
         entity: entity,
         token: ctx.token.value,
-        query:{
+        query: {
           pluck: query_params.pluck,
-        }
-      })
+        },
+      });
 
-      const result = await query.execute()
-      const { data, total_count } = result
+      const result = await query.execute();
+      const { data, total_count } = result;
       return {
         data,
         total_count,
-      }
-     
+      };
     }),
   updateGridTabs: privateProcedure
     .input(

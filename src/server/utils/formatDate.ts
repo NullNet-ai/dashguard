@@ -8,14 +8,17 @@ export const formatDate = (date: Date) => {
     day: '2-digit',
     timeZone: timezone,
   }
-
-  return {
-    date: givenDate.toLocaleDateString(locale, options),
-    time: convertTime12to24(
+  const resolvedDate = givenDate.toLocaleDateString(locale, options)
+  const resolvedTime = convertTime12to24(
       givenDate.toLocaleTimeString(locale, {
         timeZone: timezone,
       }),
-    ),
+    )
+
+  return {
+    date: resolvedDate,
+    time: resolvedTime,
+    dataTime: `${resolvedDate} ${resolvedTime}`,
   }
 }
 

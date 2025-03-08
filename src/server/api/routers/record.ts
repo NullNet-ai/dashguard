@@ -183,15 +183,17 @@ export const recordRouter = createTRPCRouter({
       return formatted_data;
     }),
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
+    const asRoot = true;
     const response = ctx.session.account;
     const rootAccount = await ctx.dnaClient
-      .rootLogin('root', ROOT_ACCOUNT_PASSWORD)
+      .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
       .execute();
     const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accounts = await ctx.dnaClient
-      .rootFindAll({
+      .findAll({
         entity: 'organization_accounts',
         token: rootAccountToken,
+        as_root: asRoot,
         query: {
           advance_filters: createAdvancedFilter({
             account_id: response?.email,

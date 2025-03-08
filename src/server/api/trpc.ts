@@ -153,9 +153,11 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   });
 });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
-  const token = {
-    value: ctx.token!,
-  };
+  // const token = {
+  //   value: ctx.token!,
+  // };
+  const cookiesStore = cookies();
+  const token = cookiesStore.get('token');
 
   if (!token) {
     throw new TRPCError({
@@ -248,6 +250,5 @@ const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
  * that a user querying is authorized and authenticated.
  */
 export const privateProcedure = t.procedure
-  .use(tokenIdMiddleware)
   .use(timingMiddleware)
   .use(verificationMiddleware);
