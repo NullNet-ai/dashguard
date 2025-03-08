@@ -1,4 +1,4 @@
-import TimelineComponent from '../../../_components/dashboard/timeline'
+import Timeline from '../../../_components/dashboard/timeline/server'
 
-const FormContainer = async () => <TimelineComponent />
+const FormContainer = async () => <Timeline />
 export default FormContainer

@@ -1,13 +1,17 @@
 import React from 'react'
 
+import FilterProvider from '../timeline/Filter/FilterProvider'
+
 import NetworkFlowProvider from './Provider'
 import NetworkFlowView from './View'
 
-function NetworkTrafficFlow() {
+function NetworkTrafficFlow(props: any) {
   return (
-    <NetworkFlowProvider>
-      <NetworkFlowView />
-    </NetworkFlowProvider>
+    <FilterProvider>
+      <NetworkFlowProvider {...props}>
+        <NetworkFlowView />
+      </NetworkFlowProvider>
+    </FilterProvider>
   )
 }
 

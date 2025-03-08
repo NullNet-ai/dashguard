@@ -14,7 +14,7 @@ import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
-  const { filters = [] } = state ?? {}
+  const { filters = [], filterQuery, setFilterQuery } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
@@ -59,6 +59,7 @@ const FilterView = () => {
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
             const isActive = activeLabel === tab.href
+            console.log('%c Line:74 🍆 tab', 'color:#b03734', tab)
 
             return (
               <Fragment key={tab.id}>
@@ -70,6 +71,7 @@ const FilterView = () => {
                   onClick = { (e) => {
                     e.preventDefault()
                     handleTabClick(tab.href)
+                    setFilterQuery?.(tab?.id ?? {})
                   } }
                 >
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>

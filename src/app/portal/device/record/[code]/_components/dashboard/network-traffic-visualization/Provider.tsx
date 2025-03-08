@@ -6,10 +6,13 @@ import React, {
   type PropsWithChildren,
 } from 'react'
 
+import { useFilter } from '../timeline/Filter/FilterProvider'
+
 import { generateFlowData } from './functions/generateFlowData'
 import { mock_bandwidth } from './functions/mock_bandwidth'
 import { type INetworkFlowContext, type Edge, type FlowElement } from './types'
 
+import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { api } from '~/trpc/react'
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
@@ -17,12 +20,25 @@ const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 
 interface IProps extends PropsWithChildren {
   test?: any
-
+  params?: {
+    id: string
+    shell_type: 'record' | 'wizard'
+    entity: string
+  }
 }
 
-export default function NetworkFlowProvider({ children }: IProps) {
+export default function NetworkFlowProvider({ children, params }: IProps) {
+  const { state: filterState } = useFilter()
+  console.log('%c Line:27 🍧 filterState', 'color:#6ec1c2', { filterState, params })
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
-
+  // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
+  const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
+    {
+      device_id: '6cb6c156-e8df-461b-83ec-23aee142a664',
+      time_range: getLastTimeStamp(1, 'minute'),
+    }
+  )
+  console.log('%c Line:36 🥛 bandwidth', 'color:#3f7cff', bandwidth)
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
   // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
   //   { packet_data: packetsIP }, { enabled: !!packetsIP }

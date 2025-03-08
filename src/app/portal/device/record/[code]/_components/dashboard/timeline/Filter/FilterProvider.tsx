@@ -36,6 +36,7 @@ const FilterProvider = ({ children }: IProps) => {
     ]
   )
   const [refetchTrigger, setRefetchTrigger] = useState(0)
+  const [filterQuery, setFilterQuery] = useState({})
   const fetchDetails = async (data: any) => {
     setRefetchTrigger(prev => prev + 1)
   }
@@ -62,14 +63,13 @@ const FilterProvider = ({ children }: IProps) => {
         const updatedFilters = new Map(prev.map(item => [item.id, item])) // Convert previous filters to a Map
 
         result.forEach((item: any) => {
-            const formattedName = item.label.toLowerCase().replace(/\s+/g, '_')
-            const href = `${baseUrl}&sub_tab=${formattedName}`
-            if (updatedFilters.has(item.id)) {
-            
-            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item, href  }) // Merge updates
+          const formattedName = item.label.toLowerCase().replace(/\s+/g, '_')
+          const href = `${baseUrl}&sub_tab=${formattedName}`
+          if (updatedFilters.has(item.id)) {
+            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item, href }) // Merge updates
           }
           else {
-            updatedFilters.set(item.id, {...item, href }) // Add new item
+            updatedFilters.set(item.id, { ...item, href }) // Add new item
           }
         })
 
@@ -98,7 +98,8 @@ const FilterProvider = ({ children }: IProps) => {
   const state = {
     filters,
     query,
-
+    filterQuery,
+    setFilterQuery,
   } as IState
 
   const actions = {

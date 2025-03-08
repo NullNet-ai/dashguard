@@ -9,6 +9,8 @@ export interface IState {
   filters: string[]
   query: string
   fetchFilterLoading: boolean
+  filterQuery: Record<string, any>
+  setFilterQuery: (filter: Record<string, any>) => void
 }
 
 export interface IAction {
