@@ -3,9 +3,10 @@ jsx-a11y/no-static-element-interactions */
 'use client'
 
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { PinIcon, PinOffIcon } from 'lucide-react' // Add pin icons
+import { PinIcon, PinOffIcon } from 'lucide-react'
 import { Separator } from '@radix-ui/react-select'
 import React, { useState, useRef, useEffect, createElement } from 'react'
+import { useMediaQuery } from 'react-responsive'
 
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
 
@@ -22,6 +23,9 @@ export const SideDrawerView: React.FC = () => {
   const { closeSideDrawer, togglePinSideDrawer, saveCurrentState, setwidth } = actions
   const { config, isOpen, isPinned } = state
   const { isBannerPresent } = useSidebar()
+  
+  // Check if it's mobile
+  const isMobile = useMediaQuery({ maxWidth: 768 })
   
   // State for resizable drawer
   const [currentWidth, setCurrentWidth] = useState<string>('982px')
@@ -43,7 +47,17 @@ export const SideDrawerView: React.FC = () => {
     isPinnable = false,
   } = config || {}
 
+  // For mobile, we'll use a fixed width that takes up most of the screen
+  const mobileWidth = '100%'
+
   useEffect(() => {
+    // Skip localStorage for mobile
+    if (isMobile) {
+      setCurrentWidth(mobileWidth);
+      setwidth(mobileWidth);
+      return;
+    }
+    
     // Always check localStorage first, then config
     const storedWidth = localStorage.getItem(DRAWER_WIDTH_KEY);
     if (storedWidth) {
@@ -59,20 +73,20 @@ export const SideDrawerView: React.FC = () => {
       setwidth(sideDrawerWidth);
       lastSavedWidth.current = sideDrawerWidth;
     }
-  }, [sideDrawerWidth]); 
+  }, [sideDrawerWidth, isMobile]); 
 
   const { component: BodyComponent, componentProps } = body || {}
 
   const handleOutsideClick = () => {
-    // Allow closing even when pinned if overlay is enabled and closeOnOutsideClick is true
-    if (closeOnOutsideClick && overlayEnabled) {
+    // For mobile, always close on outside click
+    if (isMobile || (closeOnOutsideClick && overlayEnabled)) {
       closeSideDrawer()
     }
   }
 
-  // Unified resize handler
+  // Unified resize handler - disabled for mobile
   const handleResizeStart = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!resizable) return;
+    if (!resizable || isMobile) return;
     e.preventDefault();
     setIsResizing(true);
 
@@ -88,7 +102,7 @@ export const SideDrawerView: React.FC = () => {
 
   // Unified resize function
   const handleResize = (e: MouseEvent | TouchEvent) => {
-    if (!isResizing || !drawerRef.current) return;
+    if (!isResizing || !drawerRef.current || isMobile) return;
 
     // Get clientX from either mouse or touch event
     const clientX = 'touches' in e && e.touches[0] ? e.touches[0].clientX : (e as MouseEvent).clientX;
@@ -114,16 +128,19 @@ export const SideDrawerView: React.FC = () => {
 const handleResizeEnd = () => {
     setIsResizing(false);
     
-    // Always save the last known width from the ref
-    localStorage.setItem(DRAWER_WIDTH_KEY, lastSavedWidth.current);
-    
-    // Update provider state
-    if (config) {
-        const configWithCurrentWidth = {
-            ...config,
-            sideDrawerWidth: lastSavedWidth.current
-        };
-        saveCurrentState(configWithCurrentWidth);
+    // Skip saving for mobile
+    if (!isMobile) {
+      // Always save the last known width from the ref
+      localStorage.setItem(DRAWER_WIDTH_KEY, lastSavedWidth.current);
+      
+      // Update provider state
+      if (config) {
+          const configWithCurrentWidth = {
+              ...config,
+              sideDrawerWidth: lastSavedWidth.current
+          };
+          saveCurrentState(configWithCurrentWidth);
+      }
     }
     
     document.removeEventListener('mousemove', handleResize);
@@ -131,20 +148,6 @@ const handleResizeEnd = () => {
     document.removeEventListener('touchmove', handleResize);
     document.removeEventListener('touchend', handleResizeEnd);
 };
-
-// Update initialization useEffect to always load from localStorage first
-useEffect(() => {
-    const storedWidth = localStorage.getItem(DRAWER_WIDTH_KEY);
-    if (storedWidth) {
-        setCurrentWidth(storedWidth);
-        lastSavedWidth.current = storedWidth;
-        return;
-    }
-    if (sideDrawerWidth) {
-        setCurrentWidth(sideDrawerWidth);
-        lastSavedWidth.current = sideDrawerWidth;
-    }
-}, [sideDrawerWidth]);
 
   // Clean up event listeners on unmount
   useEffect(() => {
@@ -154,25 +157,43 @@ useEffect(() => {
     }
   }, [isResizing])
 
+  // Determine if we should show the resize handle
+  const showResizeHandleComputed = !isMobile && resizable && showResizeHandle;
+  
+  // For mobile, we'll force some settings
+  const effectiveIsPinned = isMobile ? false : isPinned;
+  const effectiveOverlayEnabled = overlayEnabled;
+
+  // Split transitions for X and Y to control them separately
+  const getTransitionClasses = () => {
+    if (isMobile) {
+      // For mobile, keep transition on Y-axis
+      return 'transition-transform duration-500 ease-out';
+    } else {
+      // For desktop, only transition on X-axis
+      return isResizing ? 'transition-none' : 'transition-[transform-x] duration-500 ease-out';
+    }
+  };
+
   // Update the Card component to use a ref and directly set the width
   return (
     <div
       aria-labelledby='side-drawer-title'
       aria-modal='true'
-      className={`${isPinned ? '' : 'fixed'} inset-0 z-[101] overflow-hidden transition-all ease-in-out duration-500 
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        ${overlayEnabled && !isPinned ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`${effectiveIsPinned ? '' : 'fixed'} inset-0 z-[101] transition-all ease-in-out duration-500 
+        ${isOpen ? (isMobile ? 'translate-y-0' : 'translate-x-0') : (isMobile ? 'translate-y-full' : 'translate-x-full')}
+        ${effectiveOverlayEnabled && !effectiveIsPinned ? 'pointer-events-auto' : 'pointer-events-none'}`}
       role='dialog'
       style={{
         // Define CSS variable at the root level
-        '--drawer-width': currentWidth
+        '--drawer-width': isMobile ? mobileWidth : currentWidth
       } as React.CSSProperties}
     >
       {/* Overlay - only show when not pinned */}
       <div
         className={`absolute inset-0 transition-opacity duration-500 
-          ${overlayEnabled && !isPinned ? 'bg-black bg-opacity-50' : 'bg-transparent'}
-          ${isOpen && !isPinned ? 'opacity-100' : 'opacity-0'}`}
+          ${effectiveOverlayEnabled && !effectiveIsPinned ? 'bg-black bg-opacity-50' : 'bg-transparent'}
+          ${isOpen && !effectiveIsPinned ? 'opacity-100' : 'opacity-0'}`}
         onClick={handleOutsideClick}
       />
 
@@ -180,15 +201,28 @@ useEffect(() => {
       <Card
         ref={drawerRef}
         className={cn(
-          `${isPinned ? 'relative' : 'fixed'} z-[102] transition-none h-[calc(100dvh-48px)] transform-gpu duration-800 ease-out
-          ${!isPinned ? 'bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto' : ''}
-          ${isOpen ? 'translate-y-0 md:translate-x-0 pointer-events-auto' : 'pointer-events-none translate-y-full md:translate-y-0 md:translate-x-full'}`,
-          isBannerPresent ? 'md:h-[calc(100dvh-75px)]' : 'md:h-[calc(100dvh-48px)] lg:h-[calc(100dvh-43px)]',
-          isResizing ? 'transition-none' : '',
+          `${effectiveIsPinned ? 'relative' : 'fixed'} z-[102] transform-gpu
+          ${!effectiveIsPinned ? 'bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto' : ''}`,
+          // Apply custom transition classes
+          getTransitionClasses(),
+          isMobile ? (
+            isOpen ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'
+          ) : (
+            isOpen ? 'md:translate-x-0 pointer-events-auto' : 'md:translate-x-full pointer-events-none'
+          ),
+          // Apply Y positioning for pinned state (no transition)
+          !isMobile && `${effectiveIsPinned ? "-translate-y-9 lg:-translate-y-3" : "translate-y-2 lg:translate-y-0"}`,
+          isBannerPresent ? 'md:h-[calc(100dvh-75px)]' : 'md:h-[calc(100dvh-39px)]',
+          effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
+          isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]'
         )}
-        style={{ width: 'var(--drawer-width)' }} 
+        style={{ 
+          width: isMobile ? mobileWidth : 'var(--drawer-width)',
+          // Use CSS to disable Y-axis transitions for non-mobile
+          ...(isMobile ? {} : { transitionProperty: 'transform-x' })
+        }} 
       >
-        {resizable && (
+        {showResizeHandleComputed && (
           <div
             ref={resizeHandleRef}
             className={cn(
@@ -203,12 +237,10 @@ useEffect(() => {
               'flex items-center justify-center h-fit rounded-sm transition-colors bg-secondary py-1',
               isResizing ? 'bg-primary' : 'hover:bg-primary/10'
             )}>
-              {showResizeHandle && (
-                <GripVertical className={cn(
-                  'h-5 w-5 transition-all text-foreground',
-                  isResizing ? 'text-primary-foreground opacity-100' : 'opacity-50 group-hover:opacity-100'
-                )} />
-              )}
+              <GripVertical className={cn(
+                'h-5 w-5 transition-all text-foreground',
+                isResizing ? 'text-primary-foreground opacity-100' : 'opacity-50 group-hover:opacity-100'
+              )} />
             </div>
           </div>
         )}
@@ -219,16 +251,16 @@ useEffect(() => {
               {header}
               <div className="flex items-center gap-2">
                 <TooltipProvider>
-                  {isPinnable && (
+                  {isPinnable && !isMobile && (
                     <Tooltip delayDuration={0} >
                       <TooltipTrigger asChild>
                         <button
-                          aria-label={isPinned ? 'Unpin side drawer' : 'Pin side drawer'}
-                          data-test-id={isPinned ? 'side-drawer-unpin' : 'side-drawer-pin'}
+                          aria-label={effectiveIsPinned ? 'Unpin side drawer' : 'Pin side drawer'}
+                          data-test-id={effectiveIsPinned ? 'side-drawer-unpin' : 'side-drawer-pin'}
                           onClick={togglePinSideDrawer}
                           className="z-[103]"
                         >
-                          {isPinned ? (
+                          {effectiveIsPinned ? (
                             <PinOffIcon className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <PinIcon className="h-5 w-5 text-muted-foreground" />
@@ -236,7 +268,7 @@ useEffect(() => {
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side='bottom'>
-                        {isPinned ? 'Unpin side drawer' : 'Pin side drawer'}
+                        {effectiveIsPinned ? 'Unpin side drawer' : 'Pin side drawer'}
                       </TooltipContent>
                     </Tooltip>
                   )}
