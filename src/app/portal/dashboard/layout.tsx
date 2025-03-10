@@ -1,7 +1,6 @@
 
 import { cn } from '~/lib/utils';
 
-import { SideDrawerView } from '~/components/platform/SideDrawer';
 export default function Layout(props: { children: React.ReactNode, params: any }) {
 
     const { params, children, ...rest } = props

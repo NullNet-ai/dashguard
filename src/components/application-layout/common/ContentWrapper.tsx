@@ -16,7 +16,7 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
   const [, , firstSegment, application, ,] = pathname.split('/')
 
   const {state} = useSideDrawer()
-  const { isBannerPresent, open } = useSidebar()
+  const { isBannerPresent, } = useSidebar()
   const mtop: string =
     application === 'record'
       ? 'lg:mt-[0px] md:mt-[53px] mt-[126px]'

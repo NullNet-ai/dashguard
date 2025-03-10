@@ -220,7 +220,7 @@ useEffect(() => {
               <div className="flex items-center gap-2">
                 <TooltipProvider>
                   {isPinnable && (
-                    <Tooltip delayDuration={0}>
+                    <Tooltip delayDuration={0} >
                       <TooltipTrigger asChild>
                         <button
                           aria-label={isPinned ? 'Unpin side drawer' : 'Pin side drawer'}
@@ -235,7 +235,7 @@ useEffect(() => {
                           )}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side='bottom'>
                         {isPinned ? 'Unpin side drawer' : 'Pin side drawer'}
                       </TooltipContent>
                     </Tooltip>
@@ -251,7 +251,7 @@ useEffect(() => {
                         <XMarkIcon className="h-5 w-5 text-muted-foreground" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side='bottom'>
                       Close side drawer
                     </TooltipContent>
                   </Tooltip>
