@@ -11,7 +11,7 @@ function TimelineComponent({ params, defaultValues }: any) {
     <div className=" mx-auto">
       <Filter />
 
-      <Main />
+      <Main  params={params} />
       <NetworkTrafficFlow params={params} />
 
     </div>

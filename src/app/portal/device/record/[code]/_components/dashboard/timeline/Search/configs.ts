@@ -1,19 +1,5 @@
 export const searchableFields = [
   {
-    accessorKey: 'status',
-    field: 'status',
-    label: 'State',
-    entity: 'packets',
-    operator: 'like',
-  },
-  {
-    accessorKey: 'code',
-    field: 'code',
-    label: 'ID',
-    entity: 'packets',
-    operator: 'like',
-  },
-  {
     accessorKey: 'interface_name',
     field: 'interface_name',
     label: 'Instance Name',

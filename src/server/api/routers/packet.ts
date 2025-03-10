@@ -538,18 +538,24 @@ export const packetRouter = createTRPCRouter({
   //     return { source_ip, result: res?.data }
   //   }, { concurrency: 10 })
   // }),
-  filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
+  filterPackets: privateProcedure.input(z.unknown()).query(async ({ input, ctx }) => {
     const {
       limit = 50,
       current = 1,
-      advance_filters,
+      advance_filters = [],
       pluck,
       pluck_object: _pluck_object,
       sorting = [],
       is_case_sensitive_sorting = 'false',
       time_range,
+      device_id
     } = input || {}
     
+    console.log('%c Line:553 🍏', 'color:#7f2b82', advance_filters, time_range, device_id);
+    // return
+    if(advance_filters?.length && !advance_filters?.[0]?.values?.[0]){
+      return []
+    }
 
     const res = await ctx.dnaClient
       .findAll({
@@ -561,12 +567,24 @@ export const packetRouter = createTRPCRouter({
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
           advance_filters: [
+            
             {
               type: 'criteria',
               field: 'timestamp',
               entity: 'packets',
               operator: EOperator.IS_BETWEEN,
               values: time_range,
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [device_id],
             },
             {
               type: 'operator',
@@ -614,7 +632,7 @@ export const packetRouter = createTRPCRouter({
     const filterPackets = async (starts_at: number) => {
       const limit = 1000
 
-      
+      return []
 
       const { account } = ctx.session
       const { contact } = account

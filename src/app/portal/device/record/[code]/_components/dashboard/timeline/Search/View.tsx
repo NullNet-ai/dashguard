@@ -3,7 +3,7 @@
 import { type IAdvanceFilters } from '@dna-platform/common-orm'
 import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 
 import { useDebounce } from '~/components/ui/multi-select'
 import useWindowSize from '~/hooks/use-resize'
@@ -43,19 +43,17 @@ export default function Search() {
 
   const debouncedSearchInput = useDebounce(query, 500)
 
-  const data = handleSearchQuery?.(
-    {
-      entity: 'packets',
-      current: 0,
-      limit: 100,
-      pluck: pluckFields,
-      advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
-    }, {
-      refetchOnWindowFocus: false,
-      gcTime: 0,
-      enabled: true,
-    },
-  )
+  const data = useMemo(() => 
+    handleSearchQuery?.(
+      {
+        entity: 'packets',
+        current: 0,
+        limit: 100,
+        pluck: pluckFields,
+        advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
+      }
+    )
+  , [JSON.stringify(advanceFilterItems)])
 
   const { items } = data || { items: undefined }
   

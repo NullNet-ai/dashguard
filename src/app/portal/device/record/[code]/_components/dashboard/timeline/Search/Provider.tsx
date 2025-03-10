@@ -30,10 +30,11 @@ export const SearchGraphContext = React.createContext<ICreateContext>({
 
 interface IProps extends PropsWithChildren {
   test?: any,
-
+  params?:any
 }
 
-export default function GraphSearchProvider({ children }: IProps) {
+export default function GraphSearchProvider({ children, params }: IProps) {
+  console.log('%c Line:37 🍩 params', 'color:#33a5ff', params);
   const { defaultEntity } = searchConfig ?? {}
 
   const [_query, setQuery] = useState<string>('')
@@ -41,6 +42,8 @@ export default function GraphSearchProvider({ children }: IProps) {
     [],
   )
   const [open, setOpen] = useState(false)
+  const [search_params, setSearchParams] = useState({})
+  console.log('%c Line:45 🍌 search_params', 'color:#fca650', search_params);
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
@@ -85,19 +88,24 @@ export default function GraphSearchProvider({ children }: IProps) {
     setOpen(open)
   }
 
-  const handleSearchQuery = (
+  const {time_count,time_unit } = timeDuration
+
+  const { data , refetch: refetchSearch} = api?.packet?.filterPackets.useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id: params?.id },{
+    refetchOnWindowFocus: false,
+    gcTime: 0,
+    enabled: true,
+  })
+  
+  console.log('%c Line:92 🌮 data', 'color:#fca650', data);
+  const handleSearchQuery = async(
     search_params: ISearchParams,
-    options: Record<string, any>,
   ) => {
-    const { router, resolver } = searchConfig ?? {}
+    setSearchParams(
+      search_params
+    )
 
-    const { time_count, time_unit } = timeDuration 
-
-    const time_range = getLastTimeStamp(time_count, time_unit as 'hour', new Date())
-    
-    const { data } = api?.[router]?.[resolver].useQuery({ ...search_params, time_range }, options)
-
-    return data
+   const _data =  await refetchSearch()
+   console.log('%c Line:95 🍌 _data', 'color:#ea7e5c', _data);
   }
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
