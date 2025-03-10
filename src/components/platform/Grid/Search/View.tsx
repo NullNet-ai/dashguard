@@ -32,9 +32,10 @@ export default function Search({parentType} : any) {
   } = gridState?.config ?? {}
   const { advanceFilterItems = [] } = state ?? {}
   const { query = '' } = state ?? {}
+  
   const { handleSearchQuery } = actions ?? {}
 
-  const debouncedSearchInput = useDebounce(query, 500)
+  const debouncedSearchInput = useDebounce(query, 1000)
 
   const data = handleSearchQuery!(
     {
@@ -60,6 +61,7 @@ export default function Search({parentType} : any) {
     },
   )
 
+
   const { items } = data ?? {}
 
   return (
@@ -80,7 +82,10 @@ export default function Search({parentType} : any) {
             onBlur={() => {
               actions?.handleOpen(false)
             }}
+
             onChange={(event) => {
+
+              
               actions?.handleQuery(event.target.value)
             }}
             onFocus={() => {

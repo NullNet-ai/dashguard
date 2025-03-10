@@ -3,7 +3,7 @@
 import { type IAdvanceFilters } from '@dna-platform/common-orm'
 import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { useContext, useMemo } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 
 import { useDebounce } from '~/components/ui/multi-select'
 import useWindowSize from '~/hooks/use-resize'
@@ -36,26 +36,57 @@ export default function Search() {
   const screenSize = useScreenType()
   const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg'
 
-  const { advanceFilterItems = [], config } = state ?? {}
+  const { advanceFilterItems = [], config , rawItems: items} = state ?? {}
+  console.log('%c Line:40 🍤 items', 'color:#465975', items);
   const { searchableFields } = config ?? {}
   const { query = 'test' } = state ?? {}
-  const { handleSearchQuery } = actions ?? {}
+  const { handleSearchQuery, setSearchParams } = actions ?? {}
+  // const [items, setItems] = useState()
 
   const debouncedSearchInput = useDebounce(query, 500)
+  
 
-  const data = useMemo(() => 
-    handleSearchQuery?.(
-      {
-        entity: 'packets',
-        current: 0,
-        limit: 100,
-        pluck: pluckFields,
-        advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
-      }
-    )
-  , [JSON.stringify(advanceFilterItems)])
+  // const data = useMemo(() => 
+    // handleSearchQuery?.(
+    //   {
+    //     entity: 'packets',
+    //     current: 0,
+    //     limit: 100,
+    //     pluck: pluckFields,
+    //     advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
+    //   }
+    // )
+  // , [JSON.stringify(advanceFilterItems)])
 
-  const { items } = data || { items: undefined }
+  useEffect(() => {
+
+    const b = async () => {
+
+     
+      setSearchParams(
+        {
+          entity: 'packets',
+          current: 0,
+          limit: 100,
+          pluck: pluckFields,
+          advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
+        }
+      )
+
+      // 
+    // const a = await refetchSearch()
+    // 
+    // }
+    // if (debouncedSearchInput) {
+      // actions?.handleQuery(debouncedSearchInput)
+      //  const a = b()
+      //  
+    }
+    b()
+    console.log('%c Line:93 🌰 debouncedSearchInput', 'color:#ed9ec7', debouncedSearchInput);
+  }, [debouncedSearchInput])
+
+  // const { items } = data || { items: undefined }
   
 
   return (
@@ -77,6 +108,7 @@ export default function Search() {
               actions?.handleOpen(false)
             }}
             onChange={(event) => {
+              
               actions?.handleQuery(event.target.value)
             }}
             onFocus={() => {

@@ -4,21 +4,21 @@ export const searchableFields = [
     field: 'interface_name',
     label: 'Instance Name',
     entity: 'packets',
-    operator: 'like',
+    operator: 'equal',
   },
   {
     accessorKey: 'source_ip',
     field: 'source_ip',
     label: 'Source IP',
     entity: 'packets',
-    operator: 'like',
+    operator: 'equal',
   },
   {
     accessorKey: 'destination_ip',
     field: 'destination_ip',
     label: 'Destination IP',
     entity: 'packets',
-    operator: 'like',
+    operator: 'equal',
   },
 ]
 

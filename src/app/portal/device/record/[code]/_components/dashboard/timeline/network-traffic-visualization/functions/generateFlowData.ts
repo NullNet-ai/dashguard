@@ -37,7 +37,6 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
   bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     let xPosition = spacing
 
-    console.log('%c Line:41 🍪 result', 'color:#f5ce50', result)
     const trafficNodes = result.map(({ bandwidth }: { bandwidth: string }, timeIndex: number) => {
       const bwValue = parseInt(bandwidth, 10) as number
       const trafficNodeId = `traffic-${source_ip}-${timeIndex}-${flowIndex}`

@@ -538,7 +538,9 @@ export const packetRouter = createTRPCRouter({
   //     return { source_ip, result: res?.data }
   //   }, { concurrency: 10 })
   // }),
-  filterPackets: privateProcedure.input(z.unknown()).query(async ({ input, ctx }) => {
+  filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
+
+    console.log('%c Line:543 🥒', 'color:#4fff4B');
     const {
       limit = 50,
       current = 1,
@@ -617,6 +619,8 @@ export const packetRouter = createTRPCRouter({
     
 
     const totalPages = Math.ceil((res?.total_count || 0) / limit)
+
+    console.log('%c Line:621 🌰', 'color:#3f7cff', res?.data);
     return {
       totalCount: res?.total_count || 0,
       items: res?.data,
@@ -632,7 +636,7 @@ export const packetRouter = createTRPCRouter({
     const filterPackets = async (starts_at: number) => {
       const limit = 1000
 
-      return []
+      // return []
 
       const { account } = ctx.session
       const { contact } = account

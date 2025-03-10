@@ -34,16 +34,21 @@ interface IProps extends PropsWithChildren {
 }
 
 export default function GraphSearchProvider({ children, params }: IProps) {
-  console.log('%c Line:37 🍩 params', 'color:#33a5ff', params);
+  
   const { defaultEntity } = searchConfig ?? {}
 
   const [_query, setQuery] = useState<string>('')
+  
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     [],
   )
+  const [rawItems, setRawItems] = useState<ISearchItem[]>( )
+  console.log('%c Line:46 🌶 rawItems', 'color:#4fff4B', rawItems);
   const [open, setOpen] = useState(false)
   const [search_params, setSearchParams] = useState({})
-  console.log('%c Line:45 🍌 search_params', 'color:#fca650', search_params);
+  // const [searchItems, setItems] = useState()
+
+  
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
@@ -89,24 +94,46 @@ export default function GraphSearchProvider({ children, params }: IProps) {
   }
 
   const {time_count,time_unit } = timeDuration
+  console.log('%c Line:98 🥖 search_params', 'color:#33a5ff', search_params);
 
   const { data , refetch: refetchSearch} = api?.packet?.filterPackets.useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id: params?.id },{
     refetchOnWindowFocus: false,
     gcTime: 0,
-    enabled: true,
+    enabled: false,
   })
   
-  console.log('%c Line:92 🌮 data', 'color:#fca650', data);
+  
   const handleSearchQuery = async(
     search_params: ISearchParams,
   ) => {
+
+    
+    
+    console.log('%c Line:113 🍓 search_params', 'color:#e41a6a', search_params);
     setSearchParams(
       search_params
     )
 
-   const _data =  await refetchSearch()
-   console.log('%c Line:95 🍌 _data', 'color:#ea7e5c', _data);
+  //  const _data =  await refetchSearch()
+  //  
   }
+
+  
+  useEffect(() => {
+
+    
+    const b = async () => {
+     
+     const {data}:any = await refetchSearch()
+     console.log('%c Line:125 🍬 data', 'color:#7f2b82', data);
+     
+     setRawItems(data?.items)
+     }
+
+       b()
+  },[
+    JSON.stringify(search_params),
+  ])
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
@@ -173,6 +200,7 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     config: {
       searchableFields,
     },
+    rawItems
   } as IState
   const actions = {
     handleQuery,
@@ -181,6 +209,8 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
+    refetchSearch,
+    setSearchParams
   } as IAction
 
   return (

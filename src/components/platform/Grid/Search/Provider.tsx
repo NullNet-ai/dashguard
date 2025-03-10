@@ -42,6 +42,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const { parentType } = gridState ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
+  
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     gridState?.advanceFilter || [],
   );
@@ -89,6 +90,7 @@ export default function GridSearchProvider({ children }: IProps) {
   }, [_query, columns.length]);
 
   const handleQuery = (data: React.SetStateAction<string>) => {
+    
     setQuery(data);
   };
 
