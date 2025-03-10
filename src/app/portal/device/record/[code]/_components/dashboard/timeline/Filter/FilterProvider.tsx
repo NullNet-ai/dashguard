@@ -110,7 +110,8 @@ const FilterProvider = ({ children }: IProps) => {
             href, 
             label,
             default_filter: item.default_filter.map((filter: any) => {
-              if (filter.type === 'criteria') {
+              console.log("%c Line:113 🥐 filter", "color:#e41a6a", filter);
+              // if (filter.type === 'criteria') {
                 return {
                   ...filter,
                   values: filter.values.map((value: string) => ({
@@ -118,8 +119,9 @@ const FilterProvider = ({ children }: IProps) => {
                     value: value,
                   })),
                 };
-              }
-              return filter;
+              // }
+              // console.log("%c Line:124 🍣 filter", "color:#ffdd4d", filter);
+              // return filter;
             }), 
           });
         });
