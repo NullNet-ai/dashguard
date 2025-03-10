@@ -1,6 +1,5 @@
 'use client'
 import { PlusCircleIcon } from '@heroicons/react/20/solid'
-import { usePathname } from 'next/navigation'
 import { Fragment, useContext, useState, useEffect } from 'react'
 
 import { useSideDrawer } from '~/components/platform/SideDrawer'
@@ -18,14 +17,8 @@ const FilterView = () => {
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
-  const pathName = usePathname()
-  const baseUrl = `${pathName}?current_tab=dashboard&sub_tab=timeline`
-  const fullPath = `${baseUrl}&sub_tab=timeline`
-
-  // Find "All Data" tab
   const defaultTab = filters.find(tab => tab.label === 'All Data')?.id || ''
 
-  // State for active label, defaulting to "All Data"
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
 
   useEffect(() => {
@@ -40,6 +33,7 @@ const FilterView = () => {
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
+      title: 'Manage Filter',
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {
@@ -59,21 +53,20 @@ const FilterView = () => {
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
             const isActive = activeLabel === tab.id
-            console.log('%c Line:74 🍆 tab', 'color:#b03734', tab)
 
             return (
               <Fragment key={tab.id}>
                 <Button
-                  aria-selected = { isActive }
-                  className = "flex items-center justify-between rounded-md px-2 py-0 pr-2 text-sm"
-                  role = "tab"
-                  variant = "secondary"
-                  onClick = { (e) => {
+                  aria-selected={isActive}
+                  className="flex items-center justify-between rounded-md px-2 py-0 pr-2 text-sm"
+                  role="tab"
+                  variant="secondary"
+                  onClick={(e) => {
                     e.preventDefault()
                     handleTabClick(tab.id)
                     setFilterQuery?.(tab?.id ?? {})
-                    _setRefetchTrigger(prev => prev + 1)
-                  } }
+                    _setRefetchTrigger?.((prev: number) => prev + 1)
+                  }}
                 >
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
                     {tab.label}

@@ -15,7 +15,6 @@ import { filesRouter } from './routers/files'
 import { formRouter } from './routers/form'
 import { googleRouter } from './routers/google'
 import { gridRouter } from './routers/grid'
-import { gridFilterRouter } from './routers/grid_filter'
 import { menuRouter } from './routers/menu'
 import { notificationsRouter } from './routers/notification'
 import { organizationRouter } from './routers/organization'
@@ -59,7 +58,6 @@ export const appRouter = createTRPCRouter({
   deviceConfiguration: deviceConfigurationRouter,
   deviceHeartbeats: deviceHeartbeatsRouter,
   packet: packetRouter,
-  gridFilter: gridFilterRouter,
   timelineFilter: timelineFilterRouter,
 })
 

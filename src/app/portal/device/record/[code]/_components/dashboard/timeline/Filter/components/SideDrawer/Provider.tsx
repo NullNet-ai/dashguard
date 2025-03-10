@@ -6,7 +6,6 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 import { saveGridFilter, updateGridFilter } from './actions'
-import { valHooks } from 'node_modules/cypress/types/jquery';
 
 interface ManageFilterContextType {
   state: {
@@ -35,31 +34,19 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     ...tab,
     columns,
   })
-  console.log('%c Line:35 🥓 filterDetails', 'color:#ffdd4d', filterDetails);
-
   const [createFilterLoading, setCreateFilterLoading] = useState(false)
   const [updateFilterLoading, setUpdateFilterLoading] = useState(false)
 
+  const convertArrayToString = (data: Record<string, any>[]) => {
+    return Array.isArray(data) && data.length > 0 && typeof data[0] === 'object'
+      ? data.map((obj: any) => obj.value)
+      : data
+  }
+
   const handleUpdateFilter = (data: any) => {
-    console.log('%c Line:42 🍭 data', 'color:#ea7e5c', data, filterDetails);
     setFilterDetails({
       ...filterDetails,
       ...data,
-  //  default_filter:(
-  //   data.default_filter || filterDetails.default_filter
-  //  )?.map((item: any) => {
-  //   if (item.type === 'criteria') {
-  //     return {
-  //       ...item,
-  //       // Convert array of strings back to array of objects for display
-  //       values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'string'
-  //         ? item.values.map((value: string) =>{
-  //           return ({ value , label: value })})
-  //         : item.values,
-  //     }
-  //   }
-  //   return item
-  //  })
     })
   }
 
@@ -72,7 +59,6 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   }
 
   const saveUpdatedFilter = async () => {
-    console.log("%c Line:58 🥟 filterDetails", "color:#fca650", filterDetails);
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map(
           (item: any) => {
@@ -93,10 +79,8 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
         if (item.type === 'criteria') {
           return {
             ...item,
-            // Convert array of objects back to array of strings for database
-            values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
-              ? item.values.map((obj: any) => obj.value)
-              : item.values,
+            values: convertArrayToString(item.values),
+
           }
         }
         return item
@@ -106,7 +90,6 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     }
     setUpdateFilterLoading(true)
     eventEmitter.emit(`manage_filter`, { modifyFilterDetails })
-    console.log('%c Line:92 🍋 modifyFilterDetails', 'color:#f5ce50', modifyFilterDetails);
     await updateGridFilter(modifyFilterDetails)
     setUpdateFilterLoading(false)
     closeSideDrawer()
@@ -133,10 +116,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
         if (item.type === 'criteria') {
           return {
             ...item,
-            // Convert array of objects back to array of strings for database
-            values: Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
-              ? item.values.map((obj: any) => obj.value)
-              : item.values,
+            values: convertArrayToString(item.values),
           }
         }
         return item
@@ -146,9 +126,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     }
     setCreateFilterLoading(true)
 
-    console.log('%c Line:149 🍿', 'color:#6ec1c2',modifyFilterDetails );
-   const filter_id =  await saveGridFilter(modifyFilterDetails)
-   console.log('%c Line:151 🥝 filter_id', 'color:#6ec1c2', filter_id);
+    const filter_id = await saveGridFilter(modifyFilterDetails)
     eventEmitter.emit(`manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
     setCreateFilterLoading(false)
     closeSideDrawer()

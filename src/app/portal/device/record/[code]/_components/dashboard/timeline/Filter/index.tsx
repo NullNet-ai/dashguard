@@ -1,13 +1,11 @@
 import React from 'react'
 
+import { columns } from './components/SideDrawer/config'
 import { ManageFilterProvider } from './components/SideDrawer/Provider'
 import FilterProvider from './FilterProvider'
 import FilterView from './FilterView'
-import { columns } from './components/SideDrawer/config'
 
 function Filter() {
-  
-
   const tab = {
     name: 'New Filter',
   }

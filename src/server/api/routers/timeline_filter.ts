@@ -4,6 +4,26 @@ import { z } from 'zod'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 export const timelineFilterRouter = createTRPCRouter({
+  createTimelineFilter: privateProcedure
+    .input(z.object({
+      type: z.string(),
+      data: z.unknown()
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { type, data } = input
+      const { account } = ctx.session
+      const { contact } = account
+
+      let cached_data = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
+
+      cached_data = !cached_data?.length ? [] : cached_data
+
+      const id = ulid()
+
+       await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id }])
+       return id
+    }
+    ),
   updateTimelineFilter: privateProcedure
     .input(z.object({
       type: z.string(),
@@ -46,9 +66,19 @@ export const timelineFilterRouter = createTRPCRouter({
       const { contact } = account
       const cached_data = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
 
-      
-      console.log('%c Line:51 🍐 cached_data', 'color:#f5ce50', cached_data, `timeline_${type}_${contact.id}`);
       return cached_data
+    }
+    ),
+    duplicateTimelineFilter: privateProcedure
+    .input(z.object({type: z.string(), data: z.unknown()}))
+    .mutation(async ({ input, ctx }) => {
+      const { type, data } = input
+      const { account } = ctx.session
+      const { contact } = account
+      let cached_data = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
+
+      cached_data = !cached_data?.length ? [] : cached_data
+      return await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id: ulid() }])
     }
     ),
 })

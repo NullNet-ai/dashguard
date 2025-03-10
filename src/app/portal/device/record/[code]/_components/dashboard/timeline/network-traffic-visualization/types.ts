@@ -19,13 +19,9 @@ export interface Edge {
 }
 
 export interface FlowElement {
-
   id: string
-
   type: string
-
   data: any
-
   position: { x: number, y: number }
 
 }

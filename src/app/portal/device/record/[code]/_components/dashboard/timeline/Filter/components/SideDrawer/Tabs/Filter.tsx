@@ -4,8 +4,6 @@ import { CircleMinus, Plus } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useManageFilter } from '../Provider'
-
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
 import { Button } from '~/components/ui/button'
 import { Form } from '~/components/ui/form'
@@ -16,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+
+import { useManageFilter } from '../Provider'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -59,7 +59,6 @@ export default function FilterContent() {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails, columns } = state ?? {}
-  console.log('%c Line:62 🍞 columns', 'color:#93c0a4', columns)
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
@@ -83,10 +82,7 @@ export default function FilterContent() {
     name: 'filters',
   })
 
-  console.log('%c Line:110 🍋', 'color:#e41a6a', form.getValues(), fields, form);
   form.watch((fields) => {
-    console.log('%c Line:87 🍋 fields', 'color:#ffdd4d', fields);
-    // values must be an array
     handleUpdateFilter({ default_filter: fields.filters })
   })
 
@@ -107,9 +103,6 @@ export default function FilterContent() {
     })
     append(newFilter as any)
     const updatedFilters = form.getValues().filters
-
-    console.log('%c Line:110 🍋', 'color:#e41a6a', form.getValues());
-    console.log('%c Line:109 🥒 updatedFilters', 'color:#fca650', updatedFilters);
     handleUpdateFilter({ default_filter: updatedFilters })
   }
 
@@ -124,15 +117,15 @@ export default function FilterContent() {
     form.setValue('filters', updatedFilters)
     handleUpdateFilter({ default_filter: updatedFilters })
   }
-  
+
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="flex justify-end">
         <Button
-          className = "flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-          size = "sm"
-          variant = "ghost"
-          onClick = { handleAppend }
+          className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+          size="sm"
+          variant="ghost"
+          onClick={handleAppend}
         >
           <Plus className="h-4 w-4" />
           Add Filter
@@ -145,8 +138,8 @@ export default function FilterContent() {
             const prefix = `filters.${index}.`
             return (
               <div
-                className = "grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
-                key = { field.id }
+                className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
+                key={field.id}
               >
                 {index > 0 && field.type === 'operator' && (
                   <div className="col-span-4 mb-2">
@@ -168,7 +161,7 @@ export default function FilterContent() {
                 {field.type === 'criteria' && (
                   <>
                     <FormModule
-                      fields = { [
+                      fields={[
                         {
                           id: `${prefix}.field`,
                           formType: 'select',
@@ -190,13 +183,13 @@ export default function FilterContent() {
                           placeholder: 'Enter the value',
                           multiSelectEnableCreate: true,
                           multiSelectShowCreatableItem: false,
-                          multiSelectUseStringValues: true,
+                          // multiSelectUseStringValues: true,
                         },
-                      ] }
-                      form = { form }
-                      formKey = "filters"
-                      formSchema = { ZodSchema }
-                      subConfig = { {
+                      ]}
+                      form={form}
+                      formKey="filters"
+                      formSchema={ZodSchema}
+                      subConfig={{
                         selectOptions: {
                           [`${prefix}.field`]:
                             columns?.map(column => ({
@@ -205,15 +198,15 @@ export default function FilterContent() {
                             })) || [],
                           [`${prefix}.operator`]: OPERATORS,
                         },
-                      } }
+                      }}
                     />
                     {fields.length > 1 && (
                       <Button
-                        Icon = { CircleMinus }
-                        iconClassName = "text-red-600 h-4 w-4"
-                        iconPlacement = "left"
-                        variant = "ghost"
-                        onClick = { () => handleRemoveFilter(index) }
+                        Icon={CircleMinus}
+                        iconClassName="text-red-600 h-4 w-4"
+                        iconPlacement="left"
+                        variant="ghost"
+                        onClick={() => handleRemoveFilter(index)}
                       />
                     )}
                   </>

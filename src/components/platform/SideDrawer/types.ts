@@ -14,6 +14,7 @@ export interface IActions {
 
 export interface ISideDrawerConfig {
   title: string
+  header: React.ReactNode
   sideDrawerWidth?: string
   body: {
     component: React.ComponentType<any>

@@ -41,21 +41,20 @@ export default function SideDrawer() {
           ? (
               <>
               <Button
-                  className = "bg-blue-600 text-white hover:bg-blue-700"
-                  loading = { updateFilterLoading }
-                  variant = "default"
-                  onClick = {(data) => {
-                    console.log('%c Line:48 🍊 data', 'color:#4fff4B', data);
-                    
-                    return actions.saveUpdatedFilter()} }
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  loading={ updateFilterLoading }
+                  variant="default"
+                  onClick={() => {
+                    return actions.saveUpdatedFilter()
+                  } }
                 >
                   ✓ Update Filter
                 </Button>
               <Button
-                  className = "bg-blue-600 text-white hover:bg-blue-700"
-                  loading = { createFilterLoading }
-                  variant = "default"
-                  onClick = { actions.handleCreateNewFilter }
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  loading={ createFilterLoading }
+                  variant="default"
+                  onClick={ actions.handleCreateNewFilter }
                 >
                   {'✓ Create as New Filter'}
                 </Button>
@@ -63,40 +62,39 @@ export default function SideDrawer() {
             )
           : (
               <Button
-              className = "bg-blue-600 text-white hover:bg-blue-700"
-              loading = { createFilterLoading }
-              variant = "default"
-              onClick = { actions.handleCreateNewFilter }
+              className="bg-blue-600 text-white hover:bg-blue-700"
+              loading={createFilterLoading}
+              variant="default"
+              onClick={actions.handleCreateNewFilter}
             >
                 ✓ Create New Filter
             </Button>
             )}
       </div>
       <div className="space-y-2">
-        <label className = "text-sm font-bold text-gray-700" htmlFor = "filterName">
+        <label className="text-sm font-bold text-gray-700" htmlFor = "filterName">
           Name
         </label>
         <div className="flex items-center justify-between">
           <Input
-            className = "max-w-full"
-            id = "filterName"
-            placeholder = "Filter Name"
-            value = { filterDetails.name }
-            onChange = { (e) => actions.handleUpdateFilter({
+            className="max-w-full"
+            id="filterName"
+            placeholder="Filter Name"
+            value={filterDetails.name}
+            onChange={(e) => actions.handleUpdateFilter({
               name: e.target.value,
-            }) }
+            })}
           />
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex-1 overflow-y-auto">
         <StateTab
-          defaultValue = "filter"
-          persistKey = "side-drawer-tabs"
-          size = "sm"
-          tabs = { tabs }
-          variant = "default"
+          defaultValue="filter"
+          persistKey="side-drawer-tabs"
+          size="sm"
+          tabs={tabs}
+          variant="default"
         />
       </div>
     </div>

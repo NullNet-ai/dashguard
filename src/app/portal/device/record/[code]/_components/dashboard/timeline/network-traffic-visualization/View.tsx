@@ -1,18 +1,16 @@
 'use client'
-import { ReactFlow, Background, Controls } from '@xyflow/react'
-import React, { useState, useMemo } from 'react'
+import { ReactFlow, Background } from '@xyflow/react'
+import React, { useMemo } from 'react'
 
 import '@xyflow/react/dist/style.css'
 
 import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
-import { generateFlowData } from './functions/generateFlowData'
-import { mock_bandwidth } from './functions/mock_bandwidth'
 import { useFetchNetworkFlow } from './Provider'
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
-  const { elements } = state
+  const { elements } = state ?? {}
 
   const nodeTypes = useMemo(
     () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []
@@ -28,11 +26,11 @@ export default function NetworkFlowView() {
             <ReactFlow
               className="mt-0"
               draggable={true}
-              edges={elements.edges}
+              edges={elements?.edges}
               fitView={true}
               maxZoom={1.5}
               minZoom={0.1}
-              nodes={elements.nodes}
+              nodes={elements?.nodes}
               nodesDraggable={true}
               nodeTypes={nodeTypes}
               viewport={{
@@ -43,7 +41,6 @@ export default function NetworkFlowView() {
               zoomOnScroll={false}
             >
               <Background color="#f1f5f9" />
-              {/* <Controls /> */}
             </ReactFlow>
           </div>
         </div>
