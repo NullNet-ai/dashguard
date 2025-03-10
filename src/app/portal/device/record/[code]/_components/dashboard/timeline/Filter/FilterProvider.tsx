@@ -58,7 +58,18 @@ const FilterProvider = ({ children }: IProps) => {
     const {modifyFilterDetails: filter} = data || {}
     setFilters((prev) => {
       const updatedFilters = new Map(prev.map(item => [item.id, item]));
-      updatedFilters.set(filter.id, { ...updatedFilters.get(filter.id), ...filter , label: filter.name });
+      updatedFilters.set(filter.id, { ...updatedFilters.get(filter.id), ...filter , label: filter.name, default_filter: filter.default_filter.map((_filter: any) => {
+        if (_filter.type === 'criteria') {
+          return {
+            ..._filter,
+            values: _filter.values.map((value: string) => ({
+              label: value,
+              value: value,
+            })),
+          };
+        }
+        return _filter;
+      }) });
       return [...updatedFilters.values()];
     });
   };
@@ -111,7 +122,7 @@ const FilterProvider = ({ children }: IProps) => {
             label,
             default_filter: item.default_filter.map((filter: any) => {
               console.log("%c Line:113 🥐 filter", "color:#e41a6a", filter);
-              // if (filter.type === 'criteria') {
+              if (filter.type === 'criteria') {
                 return {
                   ...filter,
                   values: filter.values.map((value: string) => ({
@@ -119,7 +130,7 @@ const FilterProvider = ({ children }: IProps) => {
                     value: value,
                   })),
                 };
-              // }
+              }
               // console.log("%c Line:124 🍣 filter", "color:#ffdd4d", filter);
               // return filter;
             }), 
