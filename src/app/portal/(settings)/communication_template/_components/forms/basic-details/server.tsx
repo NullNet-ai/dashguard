@@ -1,7 +1,6 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
-import FormBuilderPage from "./builder";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -10,7 +9,7 @@ const FormServerFetch = async () => {
   const record = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "code"],
+    pluck_fields: ["id", "name"],
   });
   const defaultValues = record?.data;
   return (
@@ -28,7 +27,6 @@ const FormServerFetch = async () => {
         // You remove the component by deleting the following line and the import statement at the top of the file
         // You can delete the file after removing the component
       }
-      <FormBuilderPage />
     </div>
   );
 };

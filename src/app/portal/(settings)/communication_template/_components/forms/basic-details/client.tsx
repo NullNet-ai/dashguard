@@ -1,22 +1,56 @@
-"use client";
+'use client';
 
-import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { api } from "~/trpc/react";
+import { z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { UpdateCommunicationTemplate } from './actions/updateCommunication';
 
-// Remove this guideline
-import FormGuideLine from "../../form_guideline";
+const FormSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, { message: 'Name is required' }),
+});
 
-const FormSchema = z.object({});
-// Paste the code snippet here
-// Double check the code snippet to ensure that it is correct
-// 1. FormSchema is defined as a z.object
-// 2. FormBuilder is imported from "~/components/platform/FormBuilder"
-// 3. IHandleSubmit is imported from "~/components/platform/FormBuilder/types"
-// 4. Fields are defined in the FormBuilder component
-export default function BasicDetails({ params, defaultValues }: IFormProps) {
-  return <FormGuideLine />;
+export default function FormLabel({ params, defaultValues }: IFormProps) {
+  const toast = useToast();
+
+  const handleSave = async ({
+    data,
+  }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
+    try {
+      await UpdateCommunicationTemplate({
+        id: params.id,
+        name: data.name,
+      });
+      toast.success('Basic Details submitted successfully.');
+    } catch {
+      toast.error('Failed to submit Basic Details');
+    }
+  };
+
+  return (
+    <FormBuilder
+      customDesign={{
+        formClassName: 'grid !grid-cols-2 gap-4',
+      }}
+      myParent={params.shell_type}
+      formProps={params}
+      formLabel="Basic Details"
+      handleSubmit={handleSave}
+      formKey="BasicDetails"
+      formSchema={FormSchema}
+      defaultValues={defaultValues}
+      fields={[
+        {
+          id: 'name',
+          formType: 'input',
+          name: 'name',
+          label: 'Name',
+          placeholder: 'Example: Account Invitation',
+          required: true,
+        },
+      ]}
+    />
+  );
 }

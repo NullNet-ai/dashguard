@@ -23,6 +23,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           entityName: mainEntity,
           totalSteps: totalSteps,
           stepLabels: stepLabels,
+          title: 'New Communication Template'
         }}
         summary={wizard_summary}
         stepsNavigation={stepsNavigation}

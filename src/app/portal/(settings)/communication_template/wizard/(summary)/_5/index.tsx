@@ -5,14 +5,14 @@ import { api } from '~/trpc/react';
 
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , entity, _, identifier] = pathName.split('/');
+  const [, , entity, , identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.record.getByCode.useQuery({
     id: identifier!,
-    pluck_fields: ['id', 'code', 'name'],
+    pluck_fields: ['id', 'code', 'status'],
     main_entity: entity!,
   });
 
@@ -24,24 +24,17 @@ const Summary = ({ form_key }: { form_key: string }) => {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  return (
-    <div>
-      <p className="mb-[8px] no-underline">
-        <strong>{' Name: '}</strong>
-        &nbsp;
-        {record?.data?.name ? record?.data?.name : 'None'}
-      </p>
-    </div>
-  );
+  // TODO: Implement Summary component UI manually
+  return <pre>{JSON.stringify(record, null, 2)}</pre>;
 };
 
 const SummaryConfig = {
-  label: 'Step 1',
+  label: 'Step 5',
   required: true,
   components: [
     {
-      label: 'Basic Details',
-      component: <Summary form_key={'BasicDetails'} />,
+      label: 'Record Details',
+      component: <Summary form_key='BasicDetails' />,
     },
   ],
 };
