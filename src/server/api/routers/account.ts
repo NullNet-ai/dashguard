@@ -992,14 +992,15 @@ export const accountRouter = createTRPCRouter({
         throw error;
       }
       const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
-      // for testing purpose
+      // for testing purpose (will delete this after)
       // const expirationtestDate = new Date();
       // expirationtestDate.setMinutes(expirationtestDate.getMinutes() + 1);
       // const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
+      // const testingBaseUrl = http://10.1.10.252:3000
       const scheduleConfig = {
         enabled: true,
         cron: cronTime,
-        callback_url: `http://10.1.10.252:3000/api/account/invitation-expire`,
+        callback_url: `${baseURL}/api/account/invitation-expire`,
         method: 'POST' as TMethod,
         parameters: {
           account_id: accountRecord?.id,
