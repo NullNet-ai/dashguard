@@ -44,7 +44,10 @@ export default function SideDrawer() {
                   className = "bg-blue-600 text-white hover:bg-blue-700"
                   loading = { updateFilterLoading }
                   variant = "default"
-                  onClick = { actions.saveUpdatedFilter }
+                  onClick = {(data) => {
+                    console.log('%c Line:48 🍊 data', 'color:#4fff4B', data);
+                    
+                    return actions.saveUpdatedFilter()} }
                 >
                   ✓ Update Filter
                 </Button>

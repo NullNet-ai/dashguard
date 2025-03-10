@@ -37,15 +37,35 @@ const FilterProvider = ({ children }: IProps) => {
       },
     ]
   )
+  
+
+  const {
+    data: cached_filter_items = [],
+    refetch: refetchFilters,
+  } = api.timelineFilter.fetchTimelineFilter.useQuery({
+    type: 'filter',
+  })
+  
+
   const [refetchTrigger, setRefetchTrigger] = useState(0)
+  
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
   const [filterQuery, setFilterQuery] = useState()
   const [_filterQuery, _setFilterQuery] = useState()
+
+
   const fetchDetails = async (data: any) => {
-    setRefetchTrigger(prev => prev + 1)
-  }
+    const {modifyFilterDetails: filter} = data || {}
+    setFilters((prev) => {
+      const updatedFilters = new Map(prev.map(item => [item.id, item]));
+      updatedFilters.set(filter.id, { ...updatedFilters.get(filter.id), ...filter , label: filter.name });
+      return [...updatedFilters.values()];
+    });
+  };
+  
 
   useEffect(() => {
+    console.log('%c Line:69 🍭 filterQuery', 'color:#42b983', filterQuery);
     eventEmitter.emit(`filter_id`, filterQuery)
   }, [_refetchTrigger, filterQuery])
 
@@ -55,7 +75,11 @@ const FilterProvider = ({ children }: IProps) => {
     return () => {
       eventEmitter.off(`manage_filter`, fetchDetails)
     }
-  }, [eventEmitter])
+  }, [eventEmitter, JSON.stringify(filters)])
+
+  useEffect(() => {
+    // refetchFilters()
+  }, [refetchTrigger])
 
   const [query, setQuery] = useState('')
 
@@ -63,30 +87,38 @@ const FilterProvider = ({ children }: IProps) => {
     setFilters(prev => [...prev, filter])
   }
 
+
+  
+  
   useEffect(() => {
-    const fetchFilter = async () => {
-      const result = await fetchTabFilter() ?? []
-
+    if(!cached_filter_items?.length) return
+    console.log('%c Line:94 🍎 cached_filter_items', 'color:#f5ce50', cached_filter_items);
+    const fetchFilter = async () => { //Refactor this function
       setFilters((prev) => {
-        const updatedFilters = new Map(prev.map(item => [item.id, item])) // Convert previous filters to a Map
-
-        result.forEach((item: any) => {
-          const formattedName = item.label.toLowerCase().replace(/\s+/g, '_')
-          const href = `${baseUrl}&sub_tab=${formattedName}`
-          if (updatedFilters.has(item.id)) {
-            updatedFilters.set(item.id, { ...updatedFilters.get(item.id), ...item, href }) // Merge updates
-          }
-          else {
-            updatedFilters.set(item.id, { ...item, href }) // Add new item
-          }
-        })
-
-        return Array.from(updatedFilters.values()) // Convert Map back to an array
-      })
+        // Convert previous filters to a Map
+        const updatedFilters = new Map(prev.map(item => [item.id, item]));
+      
+        (cached_filter_items || []).forEach((item: any) => {
+          const label = item?.name || item?.label;
+          const formattedName = label?.toLowerCase().replace(/\s+/g, '_');
+          const href = `${baseUrl}&sub_tab=${formattedName}`;
+      
+          // Merge with existing item or add new one
+          updatedFilters.set(item.id, { 
+            ...updatedFilters.get(item.id), 
+            ...item, 
+            href, 
+            label 
+          });
+        });
+      
+        return [...updatedFilters.values()]; // Convert Map back to an array
+      });
+      
     }
 
     fetchFilter()
-  }, [refetchTrigger])
+  }, [cached_filter_items?.length])
 
   const handleOnChange = (e: any) => {
     setQuery(e)
@@ -103,7 +135,7 @@ const FilterProvider = ({ children }: IProps) => {
     setRefetchTrigger(prev => prev + 1)
   }
 
-  console.log('%c Line:104 🍏 filterQuery', 'color:#42b983', filterQuery)
+  
   const state = {
     filters,
     query,

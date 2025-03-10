@@ -83,7 +83,9 @@ export default function FilterContent() {
     name: 'filters',
   })
 
+  console.log('%c Line:110 🍋', 'color:#e41a6a', form.getValues(), fields, form);
   form.watch((fields) => {
+    console.log('%c Line:87 🍋 fields', 'color:#ffdd4d', fields);
     // values must be an array
     handleUpdateFilter({ default_filter: fields.filters })
   })
@@ -105,6 +107,9 @@ export default function FilterContent() {
     })
     append(newFilter as any)
     const updatedFilters = form.getValues().filters
+
+    console.log('%c Line:110 🍋', 'color:#e41a6a', form.getValues());
+    console.log('%c Line:109 🥒 updatedFilters', 'color:#fca650', updatedFilters);
     handleUpdateFilter({ default_filter: updatedFilters })
   }
 
@@ -119,6 +124,7 @@ export default function FilterContent() {
     form.setValue('filters', updatedFilters)
     handleUpdateFilter({ default_filter: updatedFilters })
   }
+  
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="flex justify-end">

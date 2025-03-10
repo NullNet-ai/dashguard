@@ -13,6 +13,7 @@ import {
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGraphContext } from './Provider'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 const SearchList = () => {
   const conref = useRef<any>(null)
@@ -25,6 +26,9 @@ const SearchList = () => {
 
   const [data, setData] = useState<any[]>([])
   const [open, setOpen] = useState(false)
+
+
+  const eventEmitter = useEventEmitter()
 
   useEffect(() => {
     const calc = (items?: any[]) => {
@@ -63,6 +67,8 @@ const SearchList = () => {
     }
     handleResize()
     window.addEventListener('resize', handleResize)
+
+    eventEmitter.emit(`timeline_search`, defaultSearchItems)
 
     return () => {
       window.removeEventListener('resize', handleResize)

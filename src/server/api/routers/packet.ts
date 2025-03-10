@@ -22,6 +22,8 @@ interface OutputData {
   bandwidth: number
 }
 
+let filters = []
+
 function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
   const start_moment = new Date(startDate)
   const end_moment = new Date(endDate)
@@ -606,6 +608,7 @@ export const packetRouter = createTRPCRouter({
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).query(async ({ input, ctx }) => {
     const { device_id, time_range, filter_id } = input
+    console.log('%c Line:611 🍧 input', 'color:#fca650', input);
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
@@ -630,17 +633,20 @@ export const packetRouter = createTRPCRouter({
       
       const _filter = findFilter?.default_filter || []
       const custom_adv = [
-      // ...(_filter?.length ? [  ..._filter,
-      //   {
-      //     type: 'operator',
-      //     operator: EOperator.AND,
-      //   }]: []),
+      ...(_filter?.length ? [  ..._filter,
+        {
+          type: 'operator',
+          operator: EOperator.AND,
+        }]: []),
         ...(search?.length? [...search || [],
         {
           type: 'operator',
           operator: EOperator.AND,
         },] : [])
-      ]
+      ]?.map((item: any) => ({
+        ...item,
+        entity: 'packets',
+      }))
 
       
 
@@ -653,18 +659,18 @@ export const packetRouter = createTRPCRouter({
             track_total_records: true,
             pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
             advance_filters: [
-            // ...custom_adv,
-              {
-                type: 'criteria',
-                field: 'timestamp',
-                entity: 'packets',
-                operator: EOperator.IS_BETWEEN,
-                values: time_range,
-              },
-              {
-                type: 'operator',
-                operator: EOperator.AND,
-              },
+            ...custom_adv,
+              // {
+              //   type: 'criteria',
+              //   field: 'timestamp',
+              //   entity: 'packets',
+              //   operator: EOperator.IS_BETWEEN,
+              //   values: time_range,
+              // },
+              // {
+              //   type: 'operator',
+              //   operator: EOperator.AND,
+              // },
               {
                 type: 'criteria',
                 field: 'device_id',
@@ -718,7 +724,8 @@ export const packetRouter = createTRPCRouter({
 
     
 const oo = [ '10.1.10.49' ]
-    const ab = await Bluebird.map(oo, async (source_ip: string) => {
+console.log('%c Line:722 🍐 source_ips', 'color:#ffdd4d', source_ips);
+    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
       
 
       const res = await ctx.dnaClient.aggregate({

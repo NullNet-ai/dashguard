@@ -3,6 +3,7 @@ import { api } from '~/trpc/server'
 
 export const saveGridFilter = async (data: any) => {
   try {
+    console.log('%c Line:5 🍒 data', 'color:#33a5ff', data);
     const saveGridFilter = await api.gridFilter.createGridFilter(data)
 
     return saveGridFilter
@@ -33,7 +34,10 @@ export const duplicateFilterTab = async (tab: Record<string, any>) => {
 
 export const fetchTabFilter = async () => {
   try {
+
+    console.log('%c Line:37 🥝', 'color:#ea7e5c');
     const cacheData = await api.gridFilter.fetchGridFilter()
+    console.log('%c Line:37 🍣 cacheData', 'color:#93c0a4', cacheData);
 
     const transformCachedData = cacheData.map((data: any) => {
       console.log("%c Line:39 🍌 data", "color:#ed9ec7", data);

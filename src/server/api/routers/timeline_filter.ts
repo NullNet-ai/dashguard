@@ -47,6 +47,7 @@ export const timelineFilterRouter = createTRPCRouter({
       const cached_data = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
 
       
+      console.log('%c Line:51 🍐 cached_data', 'color:#f5ce50', cached_data, `timeline_${type}_${contact.id}`);
       return cached_data
     }
     ),

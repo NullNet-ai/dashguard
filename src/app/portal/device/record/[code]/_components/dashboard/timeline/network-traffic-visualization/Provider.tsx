@@ -35,8 +35,16 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   console.log('%c Line:27 🍧 filterState', 'color:#6ec1c2', { _context, params })
   const [elements, setElements] = useState<{ nodes: FlowElement[], edges: Edge[] }>({ nodes: [], edges: [] })
   const [filterId, setFilterID] = useState()
+  const [searchBy, setSearchBy] = useState()
+  console.log('%c Line:39 🍧 searchBy', 'color:#ed9ec7', searchBy);
   console.log('%c Line:38 🍌 filterId', 'color:#42b983', filterId)
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
+
+  console.log('%c Line:41 🥑', 'color:#6ec1c2',  {
+    device_id: params?.id,
+    time_range: getLastTimeStamp(1, 'minute'),
+    filter_id: filterId || '1',
+  });
   const { data: bandwidth, refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id,
@@ -47,22 +55,30 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
   useEffect(() => {
     if (!eventEmitter) return
-    eventEmitter.on(`filter_id`, (data) => {
-      console.log("%c Line:51 🌭 data", "color:#e41a6a", data);
-      setFilterID(data)
-    })
-    // return () => {
-    //   eventEmitter.off(`filter_id`)
-    // }
+    const setFID =  (data:any ) => {
+        console.log("%c Line:51 🌭 data", "color:#e41a6a", data);
+        setFilterID(data)
+      }
+    const setSBy = (data:any) => {
+      console.log('%c Line:62 🥖 data', 'color:#b03734', data);
+      setSearchBy(data)
+    }
+    
+    eventEmitter.on(`filter_id`, (data) => setFID(data))
+    eventEmitter.on('timeline_search', setSBy)
+    return () => {
+      eventEmitter.off(`filter_id`, setFID)
+      eventEmitter.off(`filter_id`, setSBy)
+    }
   }, [eventEmitter])
   console.log('%c Line:36 🥛 bandwidth', 'color:#3f7cff', bandwidth)
 
   useEffect(() => {
     if (filterId) {
       console.log("%c Line:62 🥔 filterId", "color:#2eafb0", filterId);
-      refetch()
+     setTimeout(() => refetch() ,500)
     }
-  }, [filterId])
+  }, [filterId, searchBy?.length])
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
   // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
   //   { packet_data: packetsIP }, { enabled: !!packetsIP }

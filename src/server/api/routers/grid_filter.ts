@@ -83,7 +83,10 @@ export const gridFilterRouter = createTRPCRouter({
 
       const cachedData = !a?.length ? [] : a
 
-      return await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, [...cachedData, { ...input, id: ulid() }])
+      const id = ulid()
+
+       await ctx.redisClient.cacheData(`timeline_filter_${contact.id}`, [...cachedData, { ...input, id }])
+       return id
     }
     ),
   removeFilter: privateProcedure
