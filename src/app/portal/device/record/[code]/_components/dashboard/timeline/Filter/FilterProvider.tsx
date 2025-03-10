@@ -108,7 +108,19 @@ const FilterProvider = ({ children }: IProps) => {
             ...updatedFilters.get(item.id), 
             ...item, 
             href, 
-            label 
+            label,
+            default_filter: item.default_filter.map((filter: any) => {
+              if (filter.type === 'criteria') {
+                return {
+                  ...filter,
+                  values: filter.values.map((value: string) => ({
+                    label: value,
+                    value: value,
+                  })),
+                };
+              }
+              return filter;
+            }), 
           });
         });
       
