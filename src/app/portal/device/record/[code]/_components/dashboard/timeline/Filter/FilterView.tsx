@@ -23,7 +23,7 @@ const FilterView = () => {
   const fullPath = `${baseUrl}&sub_tab=timeline`
 
   // Find "All Data" tab
-  const defaultTab = filters.find(tab => tab.label === 'All Data')?.href || ''
+  const defaultTab = filters.find(tab => tab.label === 'All Data')?.id || ''
 
   // State for active label, defaulting to "All Data"
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
@@ -58,7 +58,7 @@ const FilterView = () => {
       <div className="flex">
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
-            const isActive = activeLabel === tab.href
+            const isActive = activeLabel === tab.id
             console.log('%c Line:74 🍆 tab', 'color:#b03734', tab)
 
             return (
@@ -70,7 +70,7 @@ const FilterView = () => {
                   variant = "secondary"
                   onClick = { (e) => {
                     e.preventDefault()
-                    handleTabClick(tab.href)
+                    handleTabClick(tab.id)
                     setFilterQuery?.(tab?.id ?? {})
                     _setRefetchTrigger(prev => prev + 1)
                   } }
