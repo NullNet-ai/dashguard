@@ -660,17 +660,17 @@ export const packetRouter = createTRPCRouter({
             pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
             advance_filters: [
             ...custom_adv,
-              // {
-              //   type: 'criteria',
-              //   field: 'timestamp',
-              //   entity: 'packets',
-              //   operator: EOperator.IS_BETWEEN,
-              //   values: time_range,
-              // },
-              // {
-              //   type: 'operator',
-              //   operator: EOperator.AND,
-              // },
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'packets',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
               {
                 type: 'criteria',
                 field: 'device_id',
