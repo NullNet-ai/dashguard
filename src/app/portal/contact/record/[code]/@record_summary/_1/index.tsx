@@ -15,7 +15,6 @@ const fields = {
   'Date of Birth': 'date_of_birth',
   Address: 'address',
   Department: 'organization',
-  Role: 'role',
 };
 
 const RecordShellSummary = ({

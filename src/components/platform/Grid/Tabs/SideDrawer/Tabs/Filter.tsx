@@ -85,7 +85,7 @@ export default function FilterContent() {
       groupOperator: 'and',
       filters: [{
         field: '', 
-        operator: 'equal',
+        operator: '',
         label: '',
         values: [],
         type: 'criteria',

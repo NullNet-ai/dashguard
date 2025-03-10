@@ -21,9 +21,14 @@ import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 import { pick } from 'lodash';
 import { formatDate } from '~/server/utils/formatDate';
+import { TMethod, createSchedule, dateToCron } from '~/server/utils/createSchedule';
 
-const { MAILER_AUTH_USER, MAILER_AUTH_PASS, MAILER_HOST, MAILER_PORT } =
-  process.env;
+const {
+  MAILER_AUTH_USER,
+  MAILER_AUTH_PASS,
+  MAILER_HOST,
+  MAILER_PORT,
+} = process.env;
 
 const INVITATION_LINK_EXPIRED = parseInt(
   process.env.INVITATION_LINK_EXPIRED || '1',
@@ -527,6 +532,22 @@ export const accountRouter = createTRPCRouter({
             multiple_sort: input.sorting?.length
               ? formatSorting(input.sorting)
               : [],
+            concatenate_fields: [
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'created_by',
+              },
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'updated_by',
+              },
+            ],
           },
         })
         .join({
@@ -970,6 +991,68 @@ export const accountRouter = createTRPCRouter({
         console.error('Error sending email:', error);
         throw error;
       }
+      const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
+      // for testing purpose
+      // const expirationtestDate = new Date();
+      // expirationtestDate.setMinutes(expirationtestDate.getMinutes() + 1);
+      // const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
+      const scheduleConfig = {
+        enabled: true,
+        cron: cronTime,
+        callback_url: `http://10.1.10.252:3000/api/account/invitation-expire`,
+        method: 'POST' as TMethod,
+        parameters: {
+          account_id: accountRecord?.id,
+          invitation_id: invitationRecord?.id,
+        },
+        wait_for_completion: true,
+      };
+      createSchedule(scheduleConfig)
+
+      // login using root account
+      // const asRoot = true;
+      // const rootAccount = await ctx.dnaClient
+      //   .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+      //   .execute();
+      // const rootAccountToken = rootAccount?.data?.[0]?.token;
+      // const accounts = await ctx.dnaClient
+      //   .findAll({
+      //     entity: 'organization_accounts',
+      //     token: rootAccountToken,
+      //     as_root: asRoot,
+      //     query: {
+      //       advance_filters: [
+      //         ...createAdvancedFilter({
+      //           account_id: accountRecord?.account_id,
+      //           status: 'Active',
+      //         }),
+      //         {
+      //           type: 'operator',
+      //           operator: EOperator.AND,
+      //         },
+      //         {
+      //           type: 'criteria',
+      //           field: 'id',
+      //           operator: EOperator.NOT_EQUAL,
+      //           values: [accountRecord?.id],
+      //         },
+      //       ],
+      //       pluck: [
+      //         'id',
+      //         'organization_id',
+      //         'account_id',
+      //         'contact_id',
+      //         'status',
+      //       ],
+      //       order: {
+      //         limit: 1,
+      //       },
+      //     },
+      //   })
+      //   .execute();
+
+      // const existingAccount = accounts?.data?.[0];
+
       await ctx.dnaClient
         .update(accountRecord?.id, {
           entity: 'organization_accounts',
@@ -1297,9 +1380,7 @@ export const accountRouter = createTRPCRouter({
       return {
         isValid,
         message: {
-          username: existingUsername.data.length
-            ? 'Email already exists'
-            : '',
+          username: existingUsername.data.length ? 'Email already exists' : '',
         },
         record: existingUsername.data?.[0],
       };
@@ -1327,7 +1408,7 @@ export const accountRouter = createTRPCRouter({
                 'status',
                 'updated_date',
                 'expiration_date',
-                'updated_time'
+                'updated_time',
               ],
               organization_accounts: [
                 'id',
