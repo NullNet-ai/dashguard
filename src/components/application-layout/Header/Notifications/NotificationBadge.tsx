@@ -7,8 +7,6 @@ import { registerDrawerType, useSideDrawer } from '~/components/platform/SideDra
 import NotificationDrawer, { HeaderSection } from './components/NotificationDrawer'
 import { useNotifications } from './NotificationProvider'
 
-// Register the drawer type once outside of the component
-// This ensures it only happens once during module initialization
 registerDrawerType('notification', {
   component: NotificationDrawer,
   header: <HeaderSection />,
@@ -33,7 +31,6 @@ function NotificationBadge() {
     }
   }
 
-  // Rest of the component remains the same
   return (
     <Menu as='div' className='relative inline-block text-left mx-4 '>
       <div>
