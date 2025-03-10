@@ -3,7 +3,7 @@ import { type Element, type Edge, type IBandwidth } from '../types'
 import { formatBandwidth } from './formatBandwidth'
 import { normalizeTraffic } from './normalizeTraffic'
 
-export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: Element[], edges: Edge[] } => {
+export const generateFlowData = (bandwidthData: Record<string, any>[]): { nodes: Element[], edges: Edge[] } => {
   const nodes: Element[] = []
   const edges: Edge[] = []
   let maxBandwidth = 0

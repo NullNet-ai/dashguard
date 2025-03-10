@@ -92,7 +92,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   // }, [packetsIP, refetch])
 
   const state = {
-    elements: generateFlowData(bandwidth ?? {}),
+    elements: generateFlowData(bandwidth ?? []),
   }
 
   return (
