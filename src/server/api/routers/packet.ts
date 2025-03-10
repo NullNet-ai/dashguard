@@ -759,6 +759,17 @@ console.log('%c Line:722 🍐 source_ips', 'color:#ffdd4d', source_ips);
                 source_ip,
               ],
             },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
           ],
           joins: [],
           bucket_size: '5s',
@@ -778,6 +789,7 @@ console.log('%c Line:722 🍐 source_ips', 'color:#ffdd4d', source_ips);
     }, { concurrency: 10 })
 
     
+    console.log('%c Line:793 🌭 ab', 'color:#b03734', JSON.stringify(ab,null,2));
     return ab
   }),
 
