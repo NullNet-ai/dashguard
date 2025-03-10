@@ -3,7 +3,7 @@ import { type Element, type Edge, type IBandwidth } from '../types'
 import { formatBandwidth } from './formatBandwidth'
 import { normalizeTraffic } from './normalizeTraffic'
 
-export const generateFlowData = (bandwidthData: Record<string, any>[]): { nodes: Element[], edges: Edge[] } => {
+export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[], edges: Edge[] } => {
   const nodes: Element[] = []
   const edges: Edge[] = []
   let maxBandwidth = 0
@@ -11,7 +11,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>[]): { nodes:
   const uniqueSourceIPsSet = new Set()
   const sourceIPMap = new Map()
 
-  bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
+  bandwidthData?.forEach(({ source_ip, result }: IBandwidth) => {
     if (!sourceIPMap.has(source_ip)) {
       sourceIPMap.set(source_ip, uniqueSourceIPsSet.size)
       uniqueSourceIPsSet.add(source_ip)
