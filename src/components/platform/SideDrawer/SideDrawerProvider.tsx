@@ -14,6 +14,8 @@ const SideDrawerContext = createContext<ISideDrawerContextProps | undefined>(und
 // Storage keys
 export const DRAWER_WIDTH_KEY = 'sideDrawer_width'
 export const PINNED_STATE_KEY = 'sideDrawer_isPinned'
+// Add a new key format for type-specific pinned state
+const TYPE_PINNED_KEY_PREFIX = 'sideDrawer_isPinned_'
 const CONFIG_KEY = 'sideDrawer_config'
 const OPEN_STATE_KEY = 'sideDrawer_isOpen'
 const DRAWER_TYPE_KEY = 'sideDrawer_type'
@@ -27,87 +29,115 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
   const [, setComponentProps] = useState<Record<string, any> | null>(null)
   const [width, setwidth] = useState<any>(null)
 
+  // Helper function to get the type-specific pinned state key
+  const getPinnedKeyForType = (type: string) => `${TYPE_PINNED_KEY_PREFIX}${type}`
 
   useEffect(() => {
-    const storedPinnedState = localStorage.getItem(PINNED_STATE_KEY);
     const storedOpenState = localStorage.getItem(OPEN_STATE_KEY);
     const storedConfig = localStorage.getItem(CONFIG_KEY);
     const storedWidth = localStorage.getItem(DRAWER_WIDTH_KEY);
     const storedDrawerType = localStorage.getItem(DRAWER_TYPE_KEY);
     const storedProps = localStorage.getItem(DRAWER_PROPS_KEY);
 
-    if (storedPinnedState === 'true') {
-      setIsPinned(true);
+    // Check for type-specific pinned state if we have a drawer type
+    if (storedDrawerType) {
+      const typePinnedKey = getPinnedKeyForType(storedDrawerType);
+      const isTypePinned = localStorage.getItem(typePinnedKey) === 'true';
+      
+      if (isTypePinned) {
+        setIsPinned(true);
 
-      if (storedOpenState === 'true' && storedDrawerType) {
-        try {
-          let parsedProps = {};
-          if (storedProps) {
-            try {
-              parsedProps = JSON.parse(storedProps);
-              setComponentProps(parsedProps);
-            } catch (e) {
-              console.error('Failed to parse stored component props:', e);
+        if (storedOpenState === 'true') {
+          try {
+            let parsedProps = {};
+            if (storedProps) {
+              try {
+                parsedProps = JSON.parse(storedProps);
+                setComponentProps(parsedProps);
+              } catch (e) {
+                console.error('Failed to parse stored component props:', e);
+              }
             }
+
+            // Set the drawer type
+            setDrawerType(storedDrawerType);
+
+            // Get the component and header based on drawer type
+            const component = getComponentByType(storedDrawerType);
+            const header = getHeaderByType(storedDrawerType);
+            const registeredConfig = getConfigByType(storedDrawerType);
+
+            // Parse the stored config for additional options
+            let parsedConfigOptions = {};
+            if (storedConfig) {
+              try {
+                parsedConfigOptions = JSON.parse(storedConfig);
+              } catch (e) {
+                console.error('Failed to parse stored config:', e);
+              }
+            }
+
+            // Create a config with the actual component
+            const restoredConfig: ISideDrawerConfig = {
+              sideDrawerWidth: storedWidth || registeredConfig.sideDrawerWidth || '982px',
+              ...registeredConfig,
+              ...parsedConfigOptions,
+              drawerType: storedDrawerType,
+              header,
+              body: {
+                component: component as React.ComponentType<any>,
+                componentProps: parsedProps
+              }
+            };
+
+            setConfig(restoredConfig);
+            setIsOpen(storedOpenState === 'true');
+          } catch (e) {
+            console.error('Failed to restore SideDrawer:', e);
+            // Clear invalid storage data
+            clearStorageData(storedDrawerType);
           }
-
-          // Set the drawer type
-          setDrawerType(storedDrawerType);
-
-          // Get the component and header based on drawer type
-          const component = getComponentByType(storedDrawerType);
-          const header = getHeaderByType(storedDrawerType);
-          const registeredConfig = getConfigByType(storedDrawerType);
-
-          // Parse the stored config for additional options
-          let parsedConfigOptions = {};
-          if (storedConfig) {
-            try {
-              parsedConfigOptions = JSON.parse(storedConfig);
-            } catch (e) {
-              console.error('Failed to parse stored config:', e);
-            }
-          }
-
-          // Create a config with the actual component
-          const restoredConfig: ISideDrawerConfig = {
-            sideDrawerWidth: storedWidth || registeredConfig.sideDrawerWidth || '982px',
-            ...registeredConfig,
-            ...parsedConfigOptions,
-            drawerType: storedDrawerType,
-            header,
-            body: {
-              component: component as React.ComponentType<any>,
-              componentProps: parsedProps
-            }
-          };
-
-          setConfig(restoredConfig);
-          setIsOpen(storedOpenState === 'true');
-        } catch (e) {
-          console.error('Failed to restore SideDrawer:', e);
-          // Clear invalid storage data
-          clearStorageData();
         }
       }
     }
   }, [])
 
-  const clearStorageData = () => {
-    localStorage.removeItem(PINNED_STATE_KEY)
-    localStorage.removeItem(OPEN_STATE_KEY)
-    localStorage.removeItem(CONFIG_KEY)
-    localStorage.removeItem(DRAWER_TYPE_KEY)
-    localStorage.removeItem(DRAWER_PROPS_KEY)
+  // Update clearStorageData to accept an optional drawer type
+  const clearStorageData = (specificType?: string) => {
+    if (specificType) {
+      // Clear only type-specific data
+      localStorage.removeItem(getPinnedKeyForType(specificType))
+      localStorage.removeItem(OPEN_STATE_KEY)
+      localStorage.removeItem(CONFIG_KEY)
+      localStorage.removeItem(DRAWER_TYPE_KEY)
+      localStorage.removeItem(DRAWER_PROPS_KEY)
+    } else {
+      // Clear all drawer data
+      localStorage.removeItem(PINNED_STATE_KEY)
+      localStorage.removeItem(OPEN_STATE_KEY)
+      localStorage.removeItem(CONFIG_KEY)
+      localStorage.removeItem(DRAWER_TYPE_KEY)
+      localStorage.removeItem(DRAWER_PROPS_KEY)
+      
+      // Also clear any type-specific pinned states
+      // This is a bit brute force but ensures we don't leave orphaned data
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(TYPE_PINNED_KEY_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
   }
 
   // When saving to localStorage, store only serializable properties
   useEffect(() => {
-    if (isPinned) {
-      localStorage.setItem(PINNED_STATE_KEY, 'true')
+    if (isPinned && drawerType) {
+      // Store type-specific pinned state
+      localStorage.setItem(getPinnedKeyForType(drawerType), 'true')
       localStorage.setItem(OPEN_STATE_KEY, isOpen ? 'true' : 'false')
 
-      if (config && drawerType) {
+      if (config) {
         try {
           // Store the drawer type
           localStorage.setItem(DRAWER_TYPE_KEY, drawerType)
@@ -136,27 +166,32 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
           console.error('Failed to stringify SideDrawer config:', e)
         }
       }
-    } else {
-      // Clear storage when unpinned
-      clearStorageData()
+    } else if (drawerType) {
+      // Clear storage for this specific drawer type when unpinned
+      clearStorageData(drawerType)
     }
   }, [isPinned, isOpen, config, drawerType])
 
   const openSideDrawer = (configOrType: ISideDrawerConfig | string) => {
     let config: ISideDrawerConfig;
+    let newDrawerType: string;
 
     // If configOrType is a string, look up the registered drawer
     if (typeof configOrType === 'string') {
-      const drawerType = configOrType;
-      setDrawerType(drawerType);
+      newDrawerType = configOrType;
+      setDrawerType(newDrawerType);
+
+      // Check if this drawer type is pinned
+      const isTypePinned = localStorage.getItem(getPinnedKeyForType(newDrawerType)) === 'true';
+      setIsPinned(isTypePinned);
 
       // Get the component and header from registry
-      const component = getComponentByType(drawerType);
-      const header = getHeaderByType(drawerType);
-      const registeredConfig = getConfigByType(drawerType);
+      const component = getComponentByType(newDrawerType);
+      const header = getHeaderByType(newDrawerType);
+      const registeredConfig = getConfigByType(newDrawerType);
 
       if (!component) {
-        console.error(`No drawer component registered for type: ${drawerType}`);
+        console.error(`No drawer component registered for type: ${newDrawerType}`);
         return;
       }
 
@@ -174,7 +209,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
         // Use stored width if available, otherwise use registered width
         sideDrawerWidth: storedWidth || registeredConfig.sideDrawerWidth,
         // Always include the drawer type for persistence
-        drawerType
+        drawerType: newDrawerType
       };
     } else {
       // Use the provided config
@@ -182,7 +217,12 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
 
       // Store the drawer type if provided
       if (config.drawerType) {
-        setDrawerType(config.drawerType);
+        newDrawerType = config.drawerType;
+        setDrawerType(newDrawerType);
+        
+        // Check if this drawer type is pinned
+        const isTypePinned = localStorage.getItem(getPinnedKeyForType(newDrawerType)) === 'true';
+        setIsPinned(isTypePinned);
       } else {
         // Generate a drawer type based on the component name
         const component = config.body?.component;
@@ -197,6 +237,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
         const generatedType = `drawer_${componentName}_${Date.now()}`;
         setDrawerType(generatedType);
         config.drawerType = generatedType;
+        newDrawerType = generatedType;
       }
     }
 
@@ -285,12 +326,14 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
 
   // Update the togglePinSideDrawer function to properly capture the current width
   const togglePinSideDrawer = () => {
+    if (!drawerType) return;
+    
     const newPinnedState = !isPinned
     setIsPinned(newPinnedState)
 
     if (newPinnedState) {
-      // Save state when pinning
-      localStorage.setItem(PINNED_STATE_KEY, 'true')
+      // Save type-specific pinned state
+      localStorage.setItem(getPinnedKeyForType(drawerType), 'true')
 
       if (isOpen && config) {
         // Get the current width from the DOM
@@ -325,8 +368,8 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ 
         saveCurrentState(configWithCurrentWidth)
       }
     } else {
-      // Clear when unpinning
-      clearStorageData()
+      // Clear when unpinning this specific drawer type
+      clearStorageData(drawerType)
     }
 
     // Call the onPinStateChange callback if provided
