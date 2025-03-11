@@ -24,7 +24,6 @@ export const SideDrawerView: React.FC = () => {
   const { config, isOpen, isPinned } = state
   const { isBannerPresent } = useSidebar()
   
-  // Check if it's mobile
   const isMobile = useMediaQuery({ maxWidth: 768 })
   
   // State for resizable drawer
@@ -33,7 +32,7 @@ export const SideDrawerView: React.FC = () => {
   const resizeHandleRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const lastSavedWidth = useRef<string>('982px') 
-
+  
   const {
     header,
     body,
@@ -45,7 +44,11 @@ export const SideDrawerView: React.FC = () => {
     minResizeWidth,
     maxResizeWidth,
     isPinnable = false,
+    drawerType = 'default', 
   } = config || {}
+
+  // Create a unique localStorage key based on drawer type
+  const uniqueDrawerWidthKey = `${DRAWER_WIDTH_KEY}_${drawerType}`;
 
   // For mobile, we'll use a fixed width that takes up most of the screen
   const mobileWidth = '100%'
@@ -58,8 +61,8 @@ export const SideDrawerView: React.FC = () => {
       return;
     }
     
-    // Always check localStorage first, then config
-    const storedWidth = localStorage.getItem(DRAWER_WIDTH_KEY);
+    // Always check localStorage first with the unique key, then config
+    const storedWidth = localStorage.getItem(uniqueDrawerWidthKey);
     if (storedWidth) {
       setCurrentWidth(storedWidth);
       setwidth(storedWidth);
@@ -73,7 +76,7 @@ export const SideDrawerView: React.FC = () => {
       setwidth(sideDrawerWidth);
       lastSavedWidth.current = sideDrawerWidth;
     }
-  }, [sideDrawerWidth, isMobile]); 
+  }, [sideDrawerWidth, isMobile, drawerType]); // Add drawerType to dependencies
 
   const { component: BodyComponent, componentProps } = body || {}
 
@@ -130,8 +133,8 @@ const handleResizeEnd = () => {
     
     // Skip saving for mobile
     if (!isMobile) {
-      // Always save the last known width from the ref
-      localStorage.setItem(DRAWER_WIDTH_KEY, lastSavedWidth.current);
+      // Always save the last known width from the ref with the unique key
+      localStorage.setItem(uniqueDrawerWidthKey, lastSavedWidth.current);
       
       // Update provider state
       if (config) {
@@ -212,9 +215,10 @@ const handleResizeEnd = () => {
           ),
           // Apply Y positioning for pinned state (no transition)
           !isMobile && `${effectiveIsPinned ? "-translate-y-9 lg:-translate-y-3" : "translate-y-2 lg:translate-y-0"}`,
-          isBannerPresent ? 'md:h-[calc(100dvh-75px)]' : 'md:h-[calc(100dvh-39px)]',
+          isBannerPresent ? 'md:h-[calc(100dvh-50px)]' : 'md:h-[calc(100dvh-39px)]',
           effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
-          isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]'
+          isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]',
+          isBannerPresent && effectiveIsPinned && 'lg:translate-y-4'
         )}
         style={{ 
           width: isMobile ? mobileWidth : 'var(--drawer-width)',
