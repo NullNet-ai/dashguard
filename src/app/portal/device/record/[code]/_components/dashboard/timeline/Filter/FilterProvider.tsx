@@ -42,7 +42,6 @@ const FilterProvider = ({ children }: IProps) => {
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
-  const [refetchTrigger, setRefetchTrigger] = useState(0)
   const [filterQuery, setFilterQuery] = useState<Record<string, any>>({})
 
   const fetchDetails = async (data: IData) => {
@@ -126,10 +125,11 @@ const FilterProvider = ({ children }: IProps) => {
   }
   
   
-  const { mutate: duplicateFilter } = api.timelineFilter.duplicateTimelineFilter.useMutation()
-  const handleDuplicateTab = (tab: Record<string, any>) => {
-    duplicateFilter({ type: 'filter', data: tab })
-    // setRefetchTrigger((prev) => prev + 1)
+  const duplicateFilter= api.timelineFilter.duplicateTimelineFilter.useMutation()
+  const handleDuplicateTab = async (tab: Record<string, any>) => {
+    const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: 'filter', data: tab })
+    setFilters(prev => {
+      return [...prev, response]})
   }
 
   const state = {

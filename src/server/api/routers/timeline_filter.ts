@@ -103,8 +103,22 @@ export const timelineFilterRouter = createTRPCRouter({
       let cached_data = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
 
       cached_data = !cached_data?.length ? [] : cached_data
-      return await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id: ulid() }])
+      const id = ulid()
+      const default_filter = (data as Record<string,any>)?.default_filter.map((filter: any) => {
+        if (filter.type === 'criteria') {
+          return {
+            ...filter,
+            values: filter.values.map((value: Record<string,any>) => value?.value),
+          }
+        }
+      })
+      await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id, default_filter}])
 
+      return {
+        ...(data as Record<string,any>),
+        id,
+        label: (data as Record<string,any>)?.name
+      }
 
     }
     ),
