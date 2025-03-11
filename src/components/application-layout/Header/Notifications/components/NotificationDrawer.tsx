@@ -10,6 +10,7 @@ import NotificationItem from './NotificationItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Separator } from '~/components/ui/separator';
 import Skeleton from '~/components/platform/Grid/Skeleton';
+import { Fragment } from 'react';
 
 const sortOptions = [
   { id: 'timestamp', label: 'Date' },
@@ -205,7 +206,7 @@ export  function NotificationSkeleton() {
       {/* List skeleton items */}
       <div className="space-y-3 mt-2 p-2">
         {Array.from({ length: 20 }).map((_, index) => (
-          <>
+          <Fragment key={index}>
             <div className="flex-row gap-2 ml-0 flex">
               <div className="h-6 w-8 rounded-full ml-0 mt-0 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
               <div className="flex-col gap-1 mt-2 w-full ml-0 flex">
@@ -222,10 +223,8 @@ export  function NotificationSkeleton() {
                 <div className="h-4 w-11 rounded-full ml-2 animate-pulse bg-primary/25 dark:bg-neutral-700"></div>
               </div>
             </div>
-
-
             <Separator dashed />
-          </>
+          </Fragment>
         ))}
       </div>
     </div>

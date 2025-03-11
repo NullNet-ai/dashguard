@@ -1,10 +1,6 @@
 import React, { useContext } from "react";
 import GridTabs from "../Tabs/Tabs";
 import Search from "../Search";
-import CreateButton from "./ButtonHeader";
-import TableViewButton from "./TableViewButton";
-import CardViewButton from "./CardViewButton";
-import FilterButton from "./FilterButton";
 import BulkActionButton from "./BulkActionButton";
 import Sorting from "../Sorting";
 

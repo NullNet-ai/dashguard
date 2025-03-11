@@ -15,6 +15,7 @@ import { cn } from '~/lib/utils'
 
 import InnerDropTabItem from './InnerDropTabItem'
 import InnerTabitem from './InnerTabitem'
+import { useSideDrawer} from '~/components/platform/SideDrawer/SideDrawerProvider'; 
 
 const InnerTabsContent = ({
   par_items = [],
@@ -28,8 +29,16 @@ const InnerTabsContent = ({
   const [data, setData] = useState<any[]>([])
   const { open } = useSidebar()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const  {state: drawerState,  } = useSideDrawer ()
 
-  const conWidth = open ? 'w-[calc(100vw-320px)]' : 'w-[calc(100vw-140px)]'
+  const {width, isOpen, isPinned} = drawerState
+
+  //remove px and parse to interger and add 20 then add px
+
+
+  const conWidth = useMemo(() => ({
+    width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
+  }), [open, width]);
 
   useEffect(() => {
     const calc = (items?: any[]) => {
@@ -73,7 +82,7 @@ const InnerTabsContent = ({
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [par_items, parentRef?.current?.offsetWidth])
+  }, [par_items, parentRef?.current?.offsetWidth, drawerState])
 
   useEffect(() => {
     let resizeTimeout: ReturnType<typeof setTimeout>
@@ -113,8 +122,9 @@ const InnerTabsContent = ({
       <div
         ref={parentRef}
         className={cn(
-          `flex items-cente`, `overflow-hidden`, conWidth,
+          `flex items-center`, `overflow-hidden`,
         )}
+        style={conWidth}
       >
         {par_items.map((tab: any, index: number) => {
           const isHidden = data?.[index]?.hidden
@@ -150,7 +160,11 @@ const InnerTabsContent = ({
               aria-hidden="true"
             />
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="">
+          <DropdownMenuContent className=""
+            align='end'
+            alignOffset={10}
+            side='bottom'
+          >
             {data?.filter(dta => dta.hidden).map((itm) => {
               const isGrid = itm.name === 'Grid' || itm.name === 'grid'
               const isGridActive

@@ -2,36 +2,40 @@
 import { Menu, MenuButton } from '@headlessui/react'
 import { BellIcon } from '@heroicons/react/24/outline'
 
-import { useSideDrawer } from '~/components/platform/SideDrawer'
+import { registerDrawerType, useSideDrawer } from '~/components/platform/SideDrawer'
 
 import NotificationDrawer, { HeaderSection } from './components/NotificationDrawer'
 import { useNotifications } from './NotificationProvider'
 
+registerDrawerType('notification', {
+  component: NotificationDrawer,
+  header: <HeaderSection />,
+  options: {
+    sideDrawerWidth: '500px',
+    resizable: true,
+    isPinnable: true,
+    maxResizeWidth: '500px'
+  }
+});
+
 function NotificationBadge() {
   const { state } = useNotifications()
-  const { actions,state:drawerState } = useSideDrawer()
-
+  const { actions, state: drawerState } = useSideDrawer()
   const { totalUnreadNotificationCount } = state
 
   const handleToggleSideDrawer = () => {
-    if (drawerState.isOpen) {
+    if (drawerState.isOpen && drawerState.config?.drawerType === 'notification') {
       actions?.closeSideDrawer()
     } else {
-      actions?.openSideDrawer({
-        header: <HeaderSection />,
-        sideDrawerWidth: '500px',
-        body: {
-          component: NotificationDrawer,
-        },
-      })
+      actions?.openSideDrawer('notification')
     }
   }
 
   return (
-    <Menu as='div' className='relative inline-block text-left mx-4'>
+    <Menu as='div' className='relative inline-block text-left mx-4 '>
       <div>
         <MenuButton
-          className='flex items-center rounded-full'
+          className='flex items-center rounded-full '
           onClick={handleToggleSideDrawer}
         >
           <span className='sr-only'>Open Notifications</span>

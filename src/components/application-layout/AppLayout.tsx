@@ -1,7 +1,6 @@
 import { headers } from 'next/headers'
 import { type PropsWithChildren } from 'react'
 
-import { SideDrawerView } from '../platform/SideDrawer'
 import { SidebarInset } from '../ui/sidebar'
 
 import AppContent from './common/AppContent'
@@ -19,7 +18,8 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
         <HeaderContainer>
           <Header />
         </HeaderContainer>
-        <AppContent>{children} </AppContent>
+        <AppContent>{children}
+        </AppContent>
         <SmartComponent />
         <SmartMobileComponent />
       </SidebarInset>
