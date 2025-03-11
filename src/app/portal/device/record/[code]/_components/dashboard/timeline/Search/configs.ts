@@ -30,5 +30,5 @@ export const searchConfig = {
 
 export const timeDuration = {
   time_count: 1,
-  time_unit: 'minute',
+  time_unit: 'minute' as 'minute',
 }

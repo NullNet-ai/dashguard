@@ -612,6 +612,7 @@ export const packetRouter = createTRPCRouter({
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).query(async ({ input, ctx }) => {
     const { device_id, time_range, filter_id } = input
     
+    
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
@@ -630,8 +631,8 @@ export const packetRouter = createTRPCRouter({
       
       const _filter = findFilter?.default_filter || []
       const custom_adv = [
-      ...(_filter?.length ? [  ..._filter,
-        {
+        ...(_filter?.length ? [  ..._filter,
+          {
           type: 'operator',
           operator: EOperator.AND,
         }]: []),
@@ -644,9 +645,6 @@ export const packetRouter = createTRPCRouter({
         ...item,
         entity: 'packets',
       }))
-
-      
-
       
       const packets = await ctx.dnaClient
         .findAll({
@@ -784,6 +782,7 @@ export const packetRouter = createTRPCRouter({
       return { source_ip, result: res?.data }
     }, { concurrency: 10 })
 
+    
     
     
     return ab

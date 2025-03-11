@@ -12,6 +12,7 @@ import { api } from '~/trpc/react'
 
 import { generateFlowData } from './functions/generateFlowData'
 import { type INetworkFlowContext } from './types'
+import { timeDuration } from '../Search/configs';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -26,15 +27,17 @@ interface IProps extends PropsWithChildren {
 
 export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
-  const [filterId, setFilterID] = useState()
+  const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
+
+  const {time_count, time_unit} = timeDuration
 
   const { refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id || '',
-      time_range: getLastTimeStamp(1, 'minute'),
-      filter_id: filterId || '1',
+      time_range: getLastTimeStamp(time_count, time_unit ),
+      filter_id: filterId,
     },
     {
       enabled: false, // Disable automatic query execution
@@ -45,6 +48,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!eventEmitter) return
     const setFID =  (data:any ) => {
+      
+      if(typeof data !== 'string')return
         
       
         setFilterID(data)
@@ -65,19 +70,28 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
 
   useEffect(() => {
-
-    
     if (filterId) {
-      
      setTimeout(async() =>{
       const { data } =  await refetch() 
-      
       setBandwidth(data)
     },500
-  
     )
     }
   }, [filterId, (searchBy ?? [])?.length])
+
+  useEffect(() => {
+    if(!params?.id || !refetch) return 
+
+    const fetchBandwidth = async() => {
+      const a =  await refetch() 
+      
+      const { data }  = a
+      if(!data) return
+      setBandwidth(data)
+    }
+    
+    fetchBandwidth()
+  }, [params?.id])
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
   // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
   //   { packet_data: packetsIP }, { enabled: !!packetsIP }
