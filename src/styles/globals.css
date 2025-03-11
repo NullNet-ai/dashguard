@@ -194,6 +194,12 @@ footer {
     opacity 0.3s ease,
     transform 0.3s ease;
 }
+/* add this data-testid="rf__wrapper" in the selector below next in container-react-flow
+ */
+
+.container-react-flow [data-testid="rf__wrapper"] {
+  overflow: unset !important;
+}
 
 .accordion-content-enter-active {
   opacity: 1;

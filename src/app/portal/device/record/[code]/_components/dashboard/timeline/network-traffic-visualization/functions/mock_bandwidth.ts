@@ -1,5 +1,5 @@
 export const mock_bandwidth = [{
-  source_ip: '172.25.0.1 fgfgfgfgf',
+  source_ip: '172.25.0.1',
   destination_ip: '172.25.0.2',
   result: [
     { bucket: '2025-02-14 01:55:37+00', bandwidth: '0' },

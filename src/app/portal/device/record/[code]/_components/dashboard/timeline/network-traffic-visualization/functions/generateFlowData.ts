@@ -3,7 +3,7 @@ import { type Element, type Edge, type IBandwidth } from '../types'
 import { formatBandwidth } from './formatBandwidth'
 import { normalizeTraffic } from './normalizeTraffic'
 
-export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: Element[], edges: Edge[] } => {
+export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[], edges: Edge[] } => {
   const nodes: Element[] = []
   const edges: Edge[] = []
   let maxBandwidth = 0
@@ -11,7 +11,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
   const uniqueSourceIPsSet = new Set()
   const sourceIPMap = new Map()
 
-  bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
+  bandwidthData?.forEach(({ source_ip, result }: IBandwidth) => {
     if (!sourceIPMap.has(source_ip)) {
       sourceIPMap.set(source_ip, uniqueSourceIPsSet.size)
       uniqueSourceIPsSet.add(source_ip)
@@ -23,7 +23,7 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
     })
   })
 
-  const spacing = 300
+  const spacing = 200
   uniqueSourceIPsSet.forEach((sourceIP) => {
     const yPos = sourceIPMap.get(sourceIP) * spacing
     nodes.push({
@@ -33,6 +33,8 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
       data: { label: sourceIP, type: 'source' },
     })
   })
+
+  console.log("bandwidthData", bandwidthData)
 
   bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     let xPosition = spacing
@@ -46,10 +48,12 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
       const maxWidth = 150
       const width = minWidth + (maxWidth - minWidth) * normalizedValue
 
+      const xPos = timeIndex === 0 ? xPosition + 200 : xPosition
+
       nodes.push({
         id: trafficNodeId,
         type: 'trafficNode',
-        position: { x: xPosition, y: sourceIPMap.get(source_ip) * spacing },
+        position: { x: xPos, y: sourceIPMap.get(source_ip) * spacing },
         data: {
           bandwidth,
           normalizedValue,
@@ -59,6 +63,9 @@ export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: E
       })
 
       xPosition += spacing
+      if(timeIndex === 0) {
+        xPosition += 200
+      }
       return trafficNodeId
     })
 
