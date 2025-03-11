@@ -9,15 +9,17 @@ const FormServerFetch = async () => {
   const record = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "name"],
+    pluck_fields: ["id", "categories"],
   });
-  const defaultValues = record?.data;
+  const defaultValues = {
+    category: record?.data?.categories?.[0]
+  }
   return (
     <div className="space-y-2">
       <BasicDetails
-        defaultValues={defaultValues ?? {}}
+        defaultValues={record?.data?.categories?.[0] ? defaultValues : {}}
         params={{
-          id: defaultValues?.id!,
+          id: record?.data?.id!,
           shell_type: application! as "record" | "wizard",
           entity: main_entity,
         }}

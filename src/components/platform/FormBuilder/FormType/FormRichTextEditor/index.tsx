@@ -36,6 +36,9 @@ export default function FormRichTextEditor({
   // Initialize content state from form value
   const [content, setContent] = useState<Content>(() => {
     const fieldValue = formRenderProps.field.value;
+    console.log("🚀 ~ fieldValue:", fieldValue)
+    
+
     if (!fieldValue) return "";
     
     const stringValue = Array.isArray(fieldValue) 

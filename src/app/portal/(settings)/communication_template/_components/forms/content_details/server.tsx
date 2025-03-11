@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
+import FormBuilderPage from "./builder";
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -9,7 +10,7 @@ const FormServerFetch = async () => {
   const record = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "name"],
+    pluck_fields: ["id", "code"],
   });
   const defaultValues = record?.data;
   return (

@@ -1,8 +1,8 @@
 const stepLabels = {
   1: "Basic Details",
-  2: "Basic Details",
-  3: "Basic Details",
-  4: "Basic Details",
-  5: "Basic Details",
+  2: "Event",
+  3: "Category Details",
+  4: "Content",
+  5: "Confirmation",
 };
 export default stepLabels;

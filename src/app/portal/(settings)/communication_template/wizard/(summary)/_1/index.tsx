@@ -5,7 +5,7 @@ import { api } from '~/trpc/react';
 
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , entity, _, identifier] = pathName.split('/');
+  const [, , entity, , identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,

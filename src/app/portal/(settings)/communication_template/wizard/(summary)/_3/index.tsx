@@ -12,7 +12,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     error,
   } = api.record.getByCode.useQuery({
     id: identifier!,
-    pluck_fields: ['id', 'code', 'status'],
+    pluck_fields: ['id', 'categories'],
     main_entity: entity!,
   });
 
@@ -24,8 +24,15 @@ const Summary = ({ form_key }: { form_key: string }) => {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>;
+  return (
+    <div>
+      <p className="mb-[8px] no-underline">
+        <strong>{' Category: '}</strong>
+        &nbsp;
+        {record?.data?.categories?.[0] ? record?.data?.categories?.[0]  : 'None'}
+      </p>
+    </div>
+  );
 };
 
 const SummaryConfig = {
@@ -33,8 +40,8 @@ const SummaryConfig = {
   required: true,
   components: [
     {
-      label: 'Record Details',
-      component: <Summary form_key="BasicDetails" />,
+      label: 'Category Details',
+      component: <Summary form_key="CategoryDetails" />,
     },
   ],
 };

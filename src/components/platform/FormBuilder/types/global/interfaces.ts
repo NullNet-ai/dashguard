@@ -65,12 +65,13 @@ interface DraggableConfig {
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
 };
-interface CustomFieldProps {
+export interface CustomFieldProps {
   field: ControllerRenderProps<Record<string, any>, string>;
   fieldState: ControllerFieldState;
   form: UseFormReturn<Record<string, any>>;
   formKey: string;
   fieldConfig: IField;
+  selectOptions?: Record<string, ISelectOptions[]>;
 }
 interface MultiFieldOption {
   label: string;

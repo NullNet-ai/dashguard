@@ -24,8 +24,16 @@ const Summary = ({ form_key }: { form_key: string }) => {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>;
+  return (
+    <div>
+      <p className="mb-[8px] no-underline">
+        {/* <strong>{' Category: '}</strong>
+        &nbsp; */}
+        {/* {record?.data?.categories?.[0] ? record?.data?.categories?.[0]  : 'None'} */}
+        You can review and adjust the content.
+      </p>
+    </div>
+  );
 };
 
 const SummaryConfig = {
@@ -33,8 +41,8 @@ const SummaryConfig = {
   required: true,
   components: [
     {
-      label: 'Record Details',
-      component: <Summary form_key='BasicDetails' />,
+      label: 'Content',
+      component: <Summary form_key="ContentDetails" />,
     },
   ],
 };

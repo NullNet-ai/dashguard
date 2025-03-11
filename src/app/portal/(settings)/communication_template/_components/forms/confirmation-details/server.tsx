@@ -24,14 +24,6 @@ const FormServerFetch = async () => {
   return (
     <div className="space-y-2">
       <ConfirmationSummary />
-      <ConfirmationDetails
-        defaultValues={default_values}
-        params={{
-          id: contact_id!,
-          shell_type: application! as "record" | "wizard",
-          entity: main_entity,
-        }}
-      />
     </div>
   );
 };

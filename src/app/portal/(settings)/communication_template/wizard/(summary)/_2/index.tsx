@@ -1,18 +1,18 @@
-"use client";
-import { usePathname } from "next/navigation";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { api } from "~/trpc/react";
+'use client';
+import { usePathname } from 'next/navigation';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { api } from '~/trpc/react';
 
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , entity, _, identifier] = pathName.split("/");
+  const [, , entity, , identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.record.getByCode.useQuery({
     id: identifier!,
-    pluck_fields: ["id", "code", "status"],
+    pluck_fields: ['id', 'event'],
     main_entity: entity!,
   });
 
@@ -24,17 +24,24 @@ const Summary = ({ form_key }: { form_key: string }) => {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>;
+  return (
+    <div>
+      <p className="mb-[8px] no-underline">
+        <strong>{' Event: '}</strong>
+        &nbsp;
+        {record?.data?.event ? record?.data?.event : 'None'}
+      </p>
+    </div>
+  );
 };
 
 const SummaryConfig = {
-  label: "Step 2",
+  label: 'Step 2',
   required: true,
   components: [
     {
-      label: "Record Details",
-      component: <Summary form_key={"BasicDetails"} />,
+      label: 'Event',
+      component: <Summary form_key="EventDetails" />,
     },
   ],
 };
