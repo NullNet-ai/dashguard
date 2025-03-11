@@ -23,7 +23,7 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
     })
   })
 
-  const spacing = 300
+  const spacing = 400
   uniqueSourceIPsSet.forEach((sourceIP) => {
     const yPos = sourceIPMap.get(sourceIP) * spacing
     nodes.push({

@@ -20,9 +20,9 @@ export default function NetworkFlowView() {
     <div className="py-4 h-[calc(100vh-100px)]">
       <div className="h-full rounded-lg border border-gray-200 bg-white shadow-lg relative">
         {/* Scrollable Wrapper */}
-        <div className="h-[810px] overflow-auto">
+        <div className="h-[840px] overflow-auto">
           {/* ReactFlow with larger canvas to allow scrolling */}
-          <div className="w-[3500px] h-[4500px]">
+          <div className="w-[3800px] h-[4500px]">
             <ReactFlow
               className="mt-0"
               draggable={true}

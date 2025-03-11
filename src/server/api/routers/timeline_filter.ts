@@ -25,6 +25,31 @@ export const timelineFilterRouter = createTRPCRouter({
     }
     ),
   updateTimelineFilter: privateProcedure
+  .input(z.object({
+    type: z.string(),
+    data: z.unknown(),
+  }))
+  .mutation(async ({ input, ctx }) => {
+    const { type, data: input_data } = input as any
+    const { account } = ctx.session
+    const { contact } = account
+    const cachedData = await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)
+
+
+    if (cachedData) {
+      const updatedData = cachedData.map((data: any) => {
+        if (data.id === input_data?.id) {
+          return {
+            ...data,
+            ...input_data, 
+          }
+        }
+        return data
+      })
+      return await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, updatedData)
+    }
+  }),
+    updateSearchFilter: privateProcedure
     .input(z.object({
       type: z.string(),
       data: z.unknown(),
@@ -79,6 +104,8 @@ export const timelineFilterRouter = createTRPCRouter({
 
       cached_data = !cached_data?.length ? [] : cached_data
       return await ctx.redisClient.cacheData(`timeline_${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id: ulid() }])
+
+
     }
     ),
 })

@@ -6,7 +6,8 @@ import { api } from '~/trpc/react'
 
 import { type IAction, type IProps, type IFilterContext, type IState, type IData, IFilter, type SearchItem } from '../types'
 
-import { duplicateFilterTab, removeFilter } from './components/SideDrawer/actions'
+import {  removeFilter } from './components/SideDrawer/actions'
+import { ulid } from 'ulid'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -41,6 +42,7 @@ const FilterProvider = ({ children }: IProps) => {
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
   const [filterQuery, setFilterQuery] = useState<Record<string, any>>({})
 
   const fetchDetails = async (data: IData) => {
@@ -52,8 +54,8 @@ const FilterProvider = ({ children }: IProps) => {
           return {
             ..._filter,
             values: _filter?.values?.map((value: SearchItem) => ({
-              label: value.label,
-              value: value.value,
+              label: value,
+              value: value,
             })),
           }
         }
@@ -112,7 +114,7 @@ const FilterProvider = ({ children }: IProps) => {
     }
 
     fetchFilter()
-  }, [cached_filter_items?.length])
+  }, [cached_filter_items?.length, refetchTrigger])
 
   const handleOnChange = (e: any) => {
     setQuery(e)
@@ -122,9 +124,12 @@ const FilterProvider = ({ children }: IProps) => {
     setFilters(prev => prev.filter(item => item.id !== id))
     await removeFilter(id)
   }
-
-  const handleDuplicateTab = async (tab: Record<string, any>) => {
-    await duplicateFilterTab(tab)
+  
+  
+  const { mutate: duplicateFilter } = api.timelineFilter.duplicateTimelineFilter.useMutation()
+  const handleDuplicateTab = (tab: Record<string, any>) => {
+    duplicateFilter({ type: 'filter', data: tab })
+    setRefetchTrigger((prev) => prev + 1)
   }
 
   const state = {

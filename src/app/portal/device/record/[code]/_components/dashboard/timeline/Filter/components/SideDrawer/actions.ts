@@ -13,7 +13,7 @@ export const saveGridFilter = async (data: any) => {
 }
 
 export const updateGridFilter = async (data: any) => {
-  const updateGridFilter = await api.timelineFilter.updateTimelineFilter({type: 'filter', data})
+  const updateGridFilter = await api.timelineFilter.updateTimelineFilter({ type: 'filter', data})
 
   return updateGridFilter
 }
