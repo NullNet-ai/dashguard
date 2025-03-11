@@ -22,7 +22,6 @@ interface OutputData {
   bandwidth: number
 }
 
-let filters = []
 
 function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
   const start_moment = new Date(startDate)
@@ -540,23 +539,21 @@ export const packetRouter = createTRPCRouter({
   // }),
   filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
 
-    console.log('%c Line:543 🥒', 'color:#4fff4B');
+    
     const {
       limit = 50,
-      current = 1,
       advance_filters = [],
-      pluck,
       pluck_object: _pluck_object,
-      sorting = [],
-      is_case_sensitive_sorting = 'false',
       time_range,
-      device_id
+      device_id,
+      _query
     } = input || {}
     
-    console.log('%c Line:553 🍏', 'color:#7f2b82', advance_filters, time_range, device_id);
-    // return
-    if(advance_filters?.length && !advance_filters?.[0]?.values?.[0]){
-      return []
+    
+    if((advance_filters?.length && !advance_filters?.[0]?.values?.[0] )|| !advance_filters?.length){
+      return {
+        items: []
+      }
     }
 
     const res = await ctx.dnaClient
@@ -595,18 +592,6 @@ export const packetRouter = createTRPCRouter({
             ...advance_filters as any,
 
           ],
-
-          // advance_filters: [
-          //   {
-          //     type: 'criteria',
-          //     field: 'source_ip',
-          //     entity: 'packets',
-          //     operator: 'like',
-          //     values: [
-          //       '10.1.10.49',
-          //     ],
-          //   },
-          // ],
           order: {
             limit,
             by_field: 'code',
@@ -618,19 +603,15 @@ export const packetRouter = createTRPCRouter({
 
     
 
-    const totalPages = Math.ceil((res?.total_count || 0) / limit)
 
-    console.log('%c Line:621 🌰', 'color:#3f7cff', res?.data);
     return {
-      totalCount: res?.total_count || 0,
       items: res?.data,
-      currentPage: current,
-      totalPages,
+      _query
     }
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).query(async ({ input, ctx }) => {
     const { device_id, time_range, filter_id } = input
-    console.log('%c Line:611 🍧 input', 'color:#fca650', input);
+    
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
@@ -643,14 +624,8 @@ export const packetRouter = createTRPCRouter({
 
       const [ __filter = [], search = []] : any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
-      console.log("%c Line:621234 🍉", "color:#465975", {
-        filter_id,
-        filter: __filter,
-        search,
-      });
-      // const filter_id = '01JNQTACVP5MR3TBZVZGMY6QCH'
       const findFilter = Array.isArray(__filter) ?  __filter?.find((item: any) => item?.id === filter_id): undefined
-      console.log("%c Line:628 🍰 findFilter", "color:#7f2b82", findFilter);
+      
 
       
       const _filter = findFilter?.default_filter || []
@@ -672,7 +647,7 @@ export const packetRouter = createTRPCRouter({
 
       
 
-      console.log("%c Line:655 🍤 custom_adv", "color:#ed9ec7", custom_adv);
+      
       const packets = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -745,8 +720,7 @@ export const packetRouter = createTRPCRouter({
     await filterPackets(0)
 
     
-const oo = [ '10.1.10.49' ]
-console.log('%c Line:722 🍐 source_ips', 'color:#ffdd4d', source_ips);
+
     const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
       
 
@@ -811,7 +785,7 @@ console.log('%c Line:722 🍐 source_ips', 'color:#ffdd4d', source_ips);
     }, { concurrency: 10 })
 
     
-    console.log('%c Line:793 🌭 ab', 'color:#b03734', JSON.stringify(ab,null,2));
+    
     return ab
   }),
 

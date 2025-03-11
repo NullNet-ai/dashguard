@@ -9,10 +9,6 @@ import { ulid } from 'ulid'
 
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { api } from '~/trpc/react'
-
-import { fetchTabFilter } from '../Filter/components/SideDrawer/actions'
-
-import { fetchSearchFilter } from './Actions/FetchSearchFilter'
 import { UpdateSearchFilter } from './Actions/UpdateSearchFilter'
 import { searchableFields, searchConfig, timeDuration } from './configs'
 import {
@@ -35,6 +31,8 @@ interface IProps extends PropsWithChildren {
 
 export default function GraphSearchProvider({ children, params }: IProps) {
   
+  
+
   const { defaultEntity } = searchConfig ?? {}
 
   const [_query, setQuery] = useState<string>('')
@@ -43,7 +41,7 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     [],
   )
   const [rawItems, setRawItems] = useState<ISearchItem[]>( )
-  console.log('%c Line:46 🌶 rawItems', 'color:#4fff4B', rawItems);
+  
   const [open, setOpen] = useState(false)
   const [search_params, setSearchParams] = useState({})
   // const [searchItems, setItems] = useState()
@@ -93,47 +91,35 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     setOpen(open)
   }
 
-  const {time_count,time_unit } = timeDuration
-  console.log('%c Line:98 🥖 search_params', 'color:#33a5ff', search_params);
+  const {time_count,time_unit = 'minute' } = timeDuration
+  
 
-  const { data , refetch: refetchSearch} = api?.packet?.filterPackets.useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id: params?.id },{
+  const { data, refetch } = api?.packet.filterPackets.useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id: params?.id, _query }, {
     refetchOnWindowFocus: false,
     gcTime: 0,
     enabled: false,
-  })
-  
-  
+  });
+
   const handleSearchQuery = async(
     search_params: ISearchParams,
   ) => {
-
-    
-    
-    console.log('%c Line:113 🍓 search_params', 'color:#e41a6a', search_params);
     setSearchParams(
       search_params
     )
+   
+    return data
+  };
 
-  //  const _data =  await refetchSearch()
-  //  
-  }
-
-  
   useEffect(() => {
-
-    
-    const b = async () => {
-     
-     const {data}:any = await refetchSearch()
-     console.log('%c Line:125 🍬 data', 'color:#7f2b82', data);
-     
-     setRawItems(data?.items)
-     }
-
-       b()
-  },[
-    JSON.stringify(search_params),
-  ])
+    const refetchSearchOption =async () => {
+      const {data}: any = await refetch()
+      if(data?._query == _query){
+        setRawItems(data?.items)
+      }
+    }
+refetchSearchOption()
+  },[JSON.stringify(search_params)])
+  
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
@@ -200,7 +186,7 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     config: {
       searchableFields,
     },
-    rawItems
+    rawItems,
   } as IState
   const actions = {
     handleQuery,
@@ -209,8 +195,8 @@ export default function GraphSearchProvider({ children, params }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
-    refetchSearch,
     setSearchParams
+    
   } as IAction
 
   return (

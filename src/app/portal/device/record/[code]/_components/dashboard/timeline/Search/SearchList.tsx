@@ -70,10 +70,12 @@ const SearchList = () => {
 
     eventEmitter.emit(`timeline_search`, defaultSearchItems)
 
+
     return () => {
       window.removeEventListener('resize', handleResize)
+      eventEmitter.off(`timeline_search`, () => defaultSearchItems)
     }
-  }, [defaultSearchItems, open])
+  }, [defaultSearchItems?.length, open])
 
   const lastHiddenIndexLeftPos = useMemo(() => {
     const lastIndex = data?.findIndex(item => item.hidden)

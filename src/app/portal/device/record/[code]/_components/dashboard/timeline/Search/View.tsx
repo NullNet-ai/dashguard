@@ -15,19 +15,6 @@ import SearchResult from './SearchResult'
 import { type ISearchableField, type ISearchItemResult } from './types'
 import { transformSearchData } from './utils/transformSearchData'
 
-const pluckFields = [
-  'id',
-  'code',
-  'interface_name',
-  'source_mac',
-  'destination_mac',
-  'ether_type',
-  'protocol',
-  'source_ip',
-  'destination_ip',
-  'source_port',
-  'destination_port',
-]
 
 export default function Search() {
   const { state, actions } = useContext(SearchGraphContext)
@@ -36,59 +23,40 @@ export default function Search() {
   const screenSize = useScreenType()
   const isMobile = screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg'
 
-  const { advanceFilterItems = [], config , rawItems: items} = state ?? {}
-  console.log('%c Line:40 🍤 items', 'color:#465975', items);
+  const { advanceFilterItems = [], config , rawItems: items = undefined  } = state ?? {}
   const { searchableFields } = config ?? {}
   const { query = 'test' } = state ?? {}
-  const { handleSearchQuery, setSearchParams } = actions ?? {}
-  // const [items, setItems] = useState()
+  const { handleSearchQuery } = actions ?? {}
 
-  const debouncedSearchInput = useDebounce(query, 500)
+  const debouncedSearchInput = useDebounce(query, 1000)
+
+
+ useMemo(() => {
+    if(!debouncedSearchInput)return
+   return handleSearchQuery!(
+      {
+        entity: 'packets',
+        current: 0,
+        limit: 100,
+        pluck: [
+          'id',
+          'code',
+          'categories',
+          'status',
+          'created_date',
+          'updated_date',
+          'created_time',
+          'updated_time',
+        ],
+        advance_filters: advanceFilterItems as IAdvanceFilters[],
+      }, {
+        refetchOnWindowFocus: false,
+        gcTime: 0,
+        enabled: !!debouncedSearchInput,
+      })
+
+  },[debouncedSearchInput])
   
-
-  // const data = useMemo(() => 
-    // handleSearchQuery?.(
-    //   {
-    //     entity: 'packets',
-    //     current: 0,
-    //     limit: 100,
-    //     pluck: pluckFields,
-    //     advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
-    //   }
-    // )
-  // , [JSON.stringify(advanceFilterItems)])
-
-  useEffect(() => {
-
-    const b = async () => {
-
-     
-      setSearchParams(
-        {
-          entity: 'packets',
-          current: 0,
-          limit: 100,
-          pluck: pluckFields,
-          advance_filters: advanceFilterItems as IAdvanceFilters<string>[],
-        }
-      )
-
-      // 
-    // const a = await refetchSearch()
-    // 
-    // }
-    // if (debouncedSearchInput) {
-      // actions?.handleQuery(debouncedSearchInput)
-      //  const a = b()
-      //  
-    }
-    b()
-    console.log('%c Line:93 🌰 debouncedSearchInput', 'color:#ed9ec7', debouncedSearchInput);
-  }, [debouncedSearchInput])
-
-  // const { items } = data || { items: undefined }
-  
-
   return (
     <Combobox>
       <div

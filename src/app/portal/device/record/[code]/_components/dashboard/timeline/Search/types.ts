@@ -10,6 +10,7 @@ export interface IState {
   config: {
     searchableFields: ISearchableField[]
   }
+  rawItems: Record<string,any>[]
 }
 
 export interface IAction {
@@ -18,6 +19,7 @@ export interface IAction {
   handleOpen: (open: boolean) => void
   handleSearchQuery: (
     search_params: ISearchParams,
+    options: Record<string, any>,
   ) => ISearchResult | undefined
   handleAddSearchItem: (filterItem: ISearchItemResult) => Promise<void>
   handleRemoveSearchItem: (filterItem: ISearchItem) => Promise<void>

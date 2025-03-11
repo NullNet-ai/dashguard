@@ -46,9 +46,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!eventEmitter) return
     const setFID =  (data:any ) => {
         
+      
         setFilterID(data)
       }
     const setSBy = (data:any) => {
+      
       
       setSearchBy(data)
     }
@@ -57,7 +59,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     eventEmitter.on('timeline_search', setSBy)
     return () => {
       eventEmitter.off(`filter_id`, setFID)
-      eventEmitter.off(`filter_id`, setSBy)
+      eventEmitter.off(`timeline_search`, setSBy)
     }
   }, [eventEmitter])
   
@@ -92,7 +94,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   // }, [packetsIP, refetch])
 
   const state = {
-    elements: generateFlowData(bandwidth ?? {}),
+    elements: generateFlowData(bandwidth ?? []),
   }
 
   return (
