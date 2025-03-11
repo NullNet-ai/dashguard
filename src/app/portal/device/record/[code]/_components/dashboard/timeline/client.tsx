@@ -4,8 +4,7 @@ import Filter from './Filter'
 import NetworkTrafficFlow from './network-traffic-visualization'
 import Main from './Search'
 
-function TimelineComponent({ params, defaultValues }: any) {
-  console.log('%c Line:9 🥟 params', 'color:#4fff4B', { defaultValues, params })
+function TimelineComponent({ params }: any) {
 
   return (
     <div className=" mx-auto">

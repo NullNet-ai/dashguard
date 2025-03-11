@@ -7,7 +7,6 @@ import '@xyflow/react/dist/style.css'
 import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
 import { useFetchNetworkFlow } from './Provider'
-import { mock_bandwidth } from './functions/mock_bandwidth'
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
@@ -18,7 +17,8 @@ export default function NetworkFlowView() {
   )
 
   return (
-    <div className="py-4">
+    // <Card className="h-[90vh] w-full p-2 shadow-lg rounded-xl border border-gray-200">
+    <div className="py-4 h-full flex flex-col">
       <div className="h-full  bg-white relative">
         {/* Scrollable Wrapper */}
         <div className="h-[840px]">
@@ -47,5 +47,6 @@ export default function NetworkFlowView() {
         </div>
       </div>
     </div>
+    // </Card>
   )
 }

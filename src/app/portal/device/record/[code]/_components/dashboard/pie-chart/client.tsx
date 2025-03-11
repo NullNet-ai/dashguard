@@ -58,8 +58,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    // const interval = setInterval(fetchChartData, 3000)
-    // return () => clearInterval(interval)
+    const interval = setInterval(fetchChartData, 3000)
+    return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Smooth animation effect - update more frequently with smaller steps

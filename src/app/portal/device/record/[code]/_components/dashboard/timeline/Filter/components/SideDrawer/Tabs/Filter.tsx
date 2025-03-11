@@ -24,15 +24,15 @@ const OPERATORS = [
   { value: 'greater_than_or_equal', label: 'Greater Than Or Equal' },
   { value: 'less_than', label: 'Less Than' },
   { value: 'less_than_or_equal', label: 'Less Than Or Equal' },
-  { value: 'contains', label: 'Contains' },
-  { value: 'not_contains', label: 'Not Contains' },
+  // { value: 'contains', label: 'Contains' },
+  // { value: 'not_contains', label: 'Not Contains' },
   { value: 'is_empty', label: 'Is Empty' },
   { value: 'is_not_empty', label: 'Is Not Empty' },
   { value: 'is_null', label: 'Is Null' },
   { value: 'is_not_null', label: 'Is Not Null' },
   { value: 'is_between', label: 'Is Between' },
   { value: 'is_not_between', label: 'Is Not Between' },
-  { value: 'like', label: 'Like' },
+  // { value: 'like', label: 'Like' },
 ]
 const ZodSchema = z.object({
   filters: z.array(

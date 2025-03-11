@@ -15,7 +15,6 @@ const Timeline = async () => {
   })
 
   const defaultValues = fetched_device?.data
-  console.log('%c Line:18 🥝 defaultValues', 'color:#6ec1c2', defaultValues)
 
   return (
     <TimelineComponent
