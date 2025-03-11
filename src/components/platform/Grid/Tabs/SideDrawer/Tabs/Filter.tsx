@@ -45,7 +45,7 @@ const OPERATORS = [
 // Update the schema to better handle the filter values
 const FilterCriteriaSchema = z.object({
   field: z.string(),
-  operator: z.string().min(1, "Operator is required"),
+  operator: z.string(),
   label: z.string(),
   values: z.union([z.string(), z.array(z.string()), z.undefined()]),
   type: z.literal('criteria'),
