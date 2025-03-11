@@ -16,7 +16,8 @@ export default function SessionChecker() {
   const pathname = usePathname()
   const [isSessionExpired, setIsSessionExpired] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const shouldShowBanner = timeLeft !== null && timeLeft <= 3600
+  const shouldShowBanner = timeLeft !== null 
+  && timeLeft <= 3600
 
   const formatTimeLeft = (seconds: number | null) => {
     if (seconds === null) return ''
