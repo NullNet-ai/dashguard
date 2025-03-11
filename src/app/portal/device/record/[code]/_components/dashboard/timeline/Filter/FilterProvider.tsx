@@ -114,7 +114,7 @@ const FilterProvider = ({ children }: IProps) => {
     }
 
     fetchFilter()
-  }, [cached_filter_items?.length, refetchTrigger])
+  }, [cached_filter_items?.length])
 
   const handleOnChange = (e: any) => {
     setQuery(e)
@@ -129,7 +129,7 @@ const FilterProvider = ({ children }: IProps) => {
   const { mutate: duplicateFilter } = api.timelineFilter.duplicateTimelineFilter.useMutation()
   const handleDuplicateTab = (tab: Record<string, any>) => {
     duplicateFilter({ type: 'filter', data: tab })
-    setRefetchTrigger((prev) => prev + 1)
+    // setRefetchTrigger((prev) => prev + 1)
   }
 
   const state = {

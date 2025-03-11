@@ -7,6 +7,7 @@ import '@xyflow/react/dist/style.css'
 import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
 import { useFetchNetworkFlow } from './Provider'
+import { mock_bandwidth } from './functions/mock_bandwidth'
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
@@ -17,12 +18,12 @@ export default function NetworkFlowView() {
   )
 
   return (
-    <div className="py-4 h-[calc(100vh-100px)]">
-      <div className="h-full rounded-lg border border-gray-200 bg-white shadow-lg relative">
+    <div className="py-4">
+      <div className="h-full  bg-white relative">
         {/* Scrollable Wrapper */}
-        <div className="h-[840px] overflow-auto">
+        <div className="h-[840px]">
           {/* ReactFlow with larger canvas to allow scrolling */}
-          <div className="w-[3800px] h-[4500px]">
+          <div className="h-full container-react-flow">
             <ReactFlow
               className="mt-0"
               draggable={true}

@@ -23,7 +23,7 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
     })
   })
 
-  const spacing = 400
+  const spacing = 200
   uniqueSourceIPsSet.forEach((sourceIP) => {
     const yPos = sourceIPMap.get(sourceIP) * spacing
     nodes.push({
@@ -33,6 +33,8 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
       data: { label: sourceIP, type: 'source' },
     })
   })
+
+  console.log("bandwidthData", bandwidthData)
 
   bandwidthData?.forEach(({ source_ip, result }: IBandwidth, flowIndex: number) => {
     let xPosition = spacing
@@ -46,10 +48,12 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
       const maxWidth = 150
       const width = minWidth + (maxWidth - minWidth) * normalizedValue
 
+      const xPos = timeIndex === 0 ? xPosition + 200 : xPosition
+
       nodes.push({
         id: trafficNodeId,
         type: 'trafficNode',
-        position: { x: xPosition, y: sourceIPMap.get(source_ip) * spacing },
+        position: { x: xPos, y: sourceIPMap.get(source_ip) * spacing },
         data: {
           bandwidth,
           normalizedValue,
@@ -59,6 +63,9 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
       })
 
       xPosition += spacing
+      if(timeIndex === 0) {
+        xPosition += 200
+      }
       return trafficNodeId
     })
 
