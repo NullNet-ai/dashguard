@@ -46,7 +46,6 @@ export default function SearchResult({
             key={result.id}
             value={result}
             onClick={() => {
-              // @ts-expect-error - no need to wait for the promise
               actions?.handleAddSearchItem(result)
               closeDialog && closeDialog()
             }}
