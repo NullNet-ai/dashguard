@@ -90,6 +90,7 @@ const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
           },
         },
       },
+      header: undefined
     })
   }
 
