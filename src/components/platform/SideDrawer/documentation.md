@@ -1,124 +1,188 @@
-# SideDrawer Component Documentation
+
+# SideDrawer Component
 
 ## Overview
-The **SideDrawer** is a reusable, dynamic, and customizable drawer component that slides in from the right side of the screen. It supports customizable content, animations, accessibility features, and resizing capabilities.
 
----
+The SideDrawer is a flexible, configurable drawer component that can be opened from the side of the screen. It supports:
 
-## Features
-- **Customizable Width**: Adjust width via the `sideDrawerWidth` prop.
-- **Dynamic Content**: Render any React component as body content.
-- **Header with Title and Close Button**: Includes a customizable title and close button.
-- **Smooth Animations**: Slides in/out with CSS transitions.
-- **Overlay Mode**: Floats over main content with a semi-transparent overlay.
-- **Accessibility**: ARIA attributes and keyboard navigation included.
-- **Callback on Close**: Trigger a callback when the drawer closes.
-- **Reusable API**: Open the drawer from anywhere using `openSideDrawer`.
-- **Card Style Integration**: Uses a `Card` component for consistent styling.
-- **Resizable Drawer**: Dynamically resize the drawer with a draggable handle.
-- **Configurable Resize Constraints**: Set minimum and maximum resize widths.
-
----
-
-## Props and Configuration
-
-### `openSideDrawer` Function
-| Prop | Type | Description |
-|--|--|--|
-| `header` | `ReactNode` | Content displayed in the header. |
-| `sideDrawerWidth` | `string` (optional) | Width of the SideDrawer (e.g., `"25dvw"`, `"400px"`). Default: `"982px"`. |
-| `body` | `object` | Configuration for the body content. |
-| `body.component` | `React.ComponentType` | React component to render as the body content. |
-| `body.componentProps` | `object` (optional) | Props to pass to the body component. |
-| `onCloseSideDrawer` | `function` (optional) | Callback function triggered when the SideDrawer closes. |
-| `overlayEnabled` | `boolean` (optional) | Whether to show a semi-transparent overlay behind the drawer. Default: `false`. |
-| `closeOnOutsideClick` | `boolean` (optional) | Whether to close the drawer when clicking outside. Default: `true`. |
-| `resizable` | `boolean` (optional) | Enable drawer resizing. Default: `false`. |
-| `showResizeHandle` | `boolean` (optional) | Show the resize handle grip icon. Default: `true`. |
-| `minResizeWidth` | `string` (optional) | Minimum width when resizing. Default: Same as `sideDrawerWidth`. |
-| `maxResizeWidth` | `string` (optional) | Maximum width when resizing. Default: Window width minus sidebar. |
-| `metaData` | `any` (optional) | Additional data to store with the drawer configuration. |
-
----
+- Pinning to keep the drawer persistent across page navigation
+- Resizing with configurable min/max widths
+- Type-specific configurations and persistence
+- Component registry for easy reuse
+- Customizable headers and content
 
 ## Usage
 
-### Step 1: Wrap Your Application with `SideDrawerProvider`
+### Basic Usage
+
 ```tsx
-import { SideDrawerProvider } from "~/components/platform/SideDrawer";
+import { useSideDrawer, registerDrawerType } from './SideDrawerProvider';
+
+// Register a drawer type (typically done once during app initialization)
+registerDrawerType('my-drawer', {
+  component: MyDrawerContent,
+  header: <h2>My Drawer</h2>,
+  options: {
+    sideDrawerWidth: '500px',
+    resizable: true,
+    isPinnable: true
+  },
+  componentProps: { initialData: 'some-value' }
+});
+
+// Using the drawer in a component
+function MyComponent() {
+  const { actions } = useSideDrawer();
+  
+  const handleOpenDrawer = () => {
+    // Open by type (simplest approach)
+    actions.openSideDrawer('my-drawer');
+    
+    // Or open with custom config
+    actions.openSideDrawer({
+      header: <h2>Custom Header</h2>,
+      body: {
+        component: MyDrawerContent,
+        componentProps: { customData: 'value' }
+      },
+      sideDrawerWidth: '600px',
+      drawerType: 'my-custom-drawer'
+    });
+  };
+  
+  return (
+    <button onClick={handleOpenDrawer}>Open Drawer</button>
+  );
+}
+```
+
+### Setup
+
+Wrap your application with the SideDrawerProvider:
+
+```tsx
+import { SideDrawerProvider } from './SideDrawerProvider';
 
 function App() {
   return (
     <SideDrawerProvider>
-      {/* Your application components */}
+      {/* Your app content */}
     </SideDrawerProvider>
   );
 }
-
-import { useSideDrawer } from "~/components/platform/SideDrawer";
-import PermissionForm from "~/components/PermissionForm";
-
-function SomeComponent() {
-  const { openSideDrawer } = useSideDrawer();
-
-  const handleOpenSideDrawer = () => {
-    openSideDrawer({
-      header: <h2>Assign Permission</h2>,
-      sideDrawerWidth: "30dvw",
-      body: {
-        component: PermissionForm,
-        componentProps: {
-          userId: "123",
-          onSave: (data) => console.log("Saved data:", data),
-        },
-      },
-      onCloseSideDrawer: () => console.log("SideDrawer closed!"),
-      resizable: true,
-      minResizeWidth: "300px",
-      maxResizeWidth: "600px",
-    });
-  };
-
-  return <button onClick={handleOpenSideDrawer}>Open SideDrawer</button>;
-}
 ```
 
-### Resizable Drawer Example
+## API Reference
+
+### SideDrawerProvider
+
+The main provider component that manages the drawer state and provides the context.
+
 ```tsx
-// Example with resizable drawer configuration
-openSideDrawer({
-  header: <h2>Resizable Panel</h2>,
-  sideDrawerWidth: "400px", // Initial width
-  body: {
-    component: DetailPanel,
-    componentProps: { id: "123" },
-  },
-  resizable: true, // Enable resizing
-  showResizeHandle: true, // Show the grip handle (can be set to false for invisible handle)
-  minResizeWidth: "300px", // Minimum width constraint
-  maxResizeWidth: "800px", // Maximum width constraint
-  overlayEnabled: true,
+<SideDrawerProvider>
+  {children}
+</SideDrawerProvider>
+```
+
+### useSideDrawer Hook
+
+```tsx
+const { state, actions } = useSideDrawer();
+```
+
+#### State Properties
+
+- `isOpen`: Boolean indicating if the drawer is currently open
+- `config`: The current drawer configuration or null if closed
+- `isPinned`: Boolean indicating if the drawer is pinned
+- `width`: The current width of the drawer
+
+#### Actions
+
+- `openSideDrawer(configOrType)`: Opens the drawer with the specified config or type
+- `closeSideDrawer()`: Closes the drawer
+- `togglePinSideDrawer()`: Toggles the pinned state of the drawer
+- `saveCurrentState(config)`: Saves the current drawer state
+- `setwidth(width)`: Sets the drawer width
+
+### registerDrawerType
+
+Registers a drawer type for later use.
+
+```tsx
+registerDrawerType(drawerType, {
+  component: React.ComponentType<any>,
+  header: React.ReactNode | (() => React.ReactNode),
+  options?: Partial<Omit<ISideDrawerConfig, 'body' | 'header'>>,
+  componentProps?: Record<string, any>
 });
 ```
 
-## Accessibility
-- **ARIA Attributes**: Includes `role="dialog"`, `aria-labelledby`, and `aria-modal="true"`.
-- **Keyboard Navigation**: Close with clicking outside the sidedrawer or by focusing the close button.
+### ISideDrawerConfig Interface
 
-## Styling
-The SideDrawer uses a Card component for styling. Customize it by modifying the Card component or adding custom CSS classes.
+```tsx
+interface ISideDrawerConfig {
+  header: ReactNode;
+  sideDrawerWidth?: string;
+  body: {
+    component: React.ComponentType<any> | Promise<() => Element>;
+    componentProps?: Record<string, any>;
+  };
+  onCloseSideDrawer?: () => void;
+  onPinStateChange?: (isPinned: boolean) => void;
+  overlayEnabled?: boolean;
+  closeOnOutsideClick?: boolean;
+  resizable?: boolean;
+  showResizeHandle?: boolean;
+  minResizeWidth?: string;
+  maxResizeWidth?: string;
+  isPinnable?: boolean;
+  drawerType?: string;
+}
+```
 
-## Example Use Cases
-- **Forms**: Edit user permissions or contact details.
-- **Notifications**: Show a list of notifications.
-- **Settings**: Configure application preferences.
-- **Details Panel**: Display additional item details with resizable width.
-- **Document Preview**: View documents with adjustable width for better reading.
+## Persistence
 
-## Limitations
-- Slides in from the right side only.
-- Overlay covers the entire screen.
+The SideDrawer component persists its state in localStorage with the following keys:
 
-## Future Enhancements
-- **Left-Side Support**: Add support for sliding in from the left.
-- **Custom Overlay**: Allow customization of overlay opacity and color.
+- Type-specific width: `sideDrawer_width_[type]`
+- Type-specific pinned state: `sideDrawer_isPinned_[type]`
+- General drawer state: `sideDrawer_isOpen`, `sideDrawer_config`, etc.
+
+When a drawer is pinned, its configuration, width, and content are preserved across page reloads.
+
+## Advanced Features
+
+### Resizable Drawers
+
+Set `resizable: true` in the drawer config to allow users to resize the drawer. You can also set:
+
+- `minResizeWidth`: Minimum allowed width (e.g., "300px")
+- `maxResizeWidth`: Maximum allowed width (e.g., "800px")
+- `showResizeHandle`: Whether to show a resize handle
+
+### Async Components
+
+The drawer supports async components:
+
+```tsx
+actions.openSideDrawer({
+  header: <h2>Async Drawer</h2>,
+  body: {
+    component: import('./LazyComponent').then(module => module.default),
+    componentProps: { /* props */ }
+  }
+});
+```
+
+### Callbacks
+
+You can provide callbacks for drawer events:
+
+```tsx
+actions.openSideDrawer({
+  // ...other config
+  onCloseSideDrawer: () => console.log('Drawer closed'),
+  onPinStateChange: (isPinned) => console.log('Pin state changed:', isPinned)
+});
+```

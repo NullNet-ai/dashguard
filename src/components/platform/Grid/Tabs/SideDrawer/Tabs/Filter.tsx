@@ -45,7 +45,7 @@ const OPERATORS = [
 // Update the schema to better handle the filter values
 const FilterCriteriaSchema = z.object({
   field: z.string(),
-  operator: z.string().min(1, "Operator is required"),
+  operator: z.string(),
   label: z.string(),
   values: z.union([z.string(), z.array(z.string()), z.undefined()]),
   type: z.literal('criteria'),
@@ -85,7 +85,7 @@ export default function FilterContent() {
       groupOperator: 'and',
       filters: [{
         field: '', 
-        operator: 'equal',
+        operator: '',
         label: '',
         values: [],
         type: 'criteria',
@@ -179,36 +179,34 @@ export default function FilterContent() {
     form.trigger(`filterGroups.${groupIndex}.filters`);
   };
 
-  const handleRemoveFilter = (groupIndex: number, index: number) => {
+  const handleRemoveFilter = (groupIndex: number, filterIndex: number) => {
+    // Get all filters in the group
     const groupFilters = [...form.getValues().filterGroups[groupIndex]?.filters || []];
-  
-    // Find the actual index of the criteria filter
-    let criteriaCount = 0;
-    let actualIndex = -1;
-  
-    for (let i = 0; i < groupFilters.length; i++) {
-      if (groupFilters[i]!.type === 'criteria') {
-        if (criteriaCount === index) {
-          actualIndex = i;
-          break;
+    
+    // Get all criteria filters (non-operator filters)
+    const criteriaFilters = groupFilters.filter(filter => filter.type === 'criteria');
+    
+    // Get the criteria filter we want to remove
+    const targetFilter = criteriaFilters[filterIndex];
+    
+    if (targetFilter) {
+      // Find the actual index of this filter in the full array (including operators)
+      const actualIndex = groupFilters.findIndex(filter => filter === targetFilter);
+      
+      if (actualIndex !== -1) {
+        // Handle operator removal logic
+        if (groupFilters[actualIndex + 1]?.type === 'operator') {
+          groupFilters.splice(actualIndex, 2); // Remove filter + next operator
+        } else if (actualIndex > 0 && groupFilters[actualIndex - 1]?.type === 'operator') {
+          groupFilters.splice(actualIndex - 1, 2); // Remove previous operator + filter
+        } else {
+          groupFilters.splice(actualIndex, 1); // Remove only the filter
         }
-        criteriaCount++;
+        
+        // Update filters properly using form's update method
+        form.setValue(`filterGroups.${groupIndex}.filters`, groupFilters);
+        form.trigger(`filterGroups.${groupIndex}.filters`);
       }
-    }
-  
-    if (actualIndex !== -1) {
-      // Handle operator removal logic
-      if (groupFilters[actualIndex + 1]?.type === 'operator') {
-        groupFilters.splice(actualIndex, 2); // Remove filter + next operator
-      } else if (groupFilters[actualIndex - 1]?.type === 'operator') {
-        groupFilters.splice(actualIndex - 1, 2); // Remove previous operator + filter
-      } else {
-        groupFilters.splice(actualIndex, 1); // Remove only the filter
-      }
-  
-      // Update filters properly using form's update method
-      form.setValue(`filterGroups.${groupIndex}.filters`, groupFilters);
-      form.trigger(`filterGroups.${groupIndex}.filters`);
     }
   };
   
@@ -251,7 +249,7 @@ export default function FilterContent() {
                     )}
 
                     {/* Main content area */}
-                    <div className="flex-1 p-4 space-y-4">
+                    <div className="flex-1 p-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {groupIndex > 0 && (
@@ -356,6 +354,10 @@ function FilterGroup({
   onRemoveFilter: (index: number) => void;
   onUpdateJunctionOperator: (index: number, operator: string) => void;
 }) {
+  // Calculate the number of criteria filters to determine when to show delete button
+  const criteriaFilters = fields.filter(filter => filter.type === 'criteria');
+  const hasManyFilters = criteriaFilters.length > 1;
+  
   return (
     <div className="space-y-1">
       <div>
@@ -364,6 +366,12 @@ function FilterGroup({
           const filterData = form.getValues().filterGroups[groupIndex]?.filters[index];
 
           if (!filterData) return null;
+
+          // Calculate the criteria index for this filter (for delete operation)
+          const criteriaIndex = fields
+            .slice(0, index + 1)
+            .filter(f => f.type === 'criteria')
+            .length - 1;
 
           return (
             <div key={field.id || index} className="">
@@ -430,9 +438,10 @@ function FilterGroup({
                       },
                     }}
                   />
-                  {fields.length > 1 && (
+                  {/* Show delete button if there's more than one criteria filter */}
+                  {hasManyFilters && (
                     <Button
-                      onClick={() => onRemoveFilter(index)}
+                      onClick={() => onRemoveFilter(criteriaIndex)}
                       variant="ghost"
                     >
                       <MinusCircle className="h-4 w-4 text-red-600" />

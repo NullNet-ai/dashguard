@@ -26,9 +26,9 @@ export async function middleware(request: NextRequest) {
     'x-record-current-tab', request.nextUrl.searchParams.get('current_tab') || '',
   )
 
-  const hasLoggedId = request.cookies.get('username')
+  const token = request.cookies.get('token')
   if (
-    !hasLoggedId
+    !token
     && !request.nextUrl.pathname.startsWith('/setup')
     && !request.nextUrl.pathname.startsWith('/login')
     && !request.nextUrl.pathname.startsWith('/auth')

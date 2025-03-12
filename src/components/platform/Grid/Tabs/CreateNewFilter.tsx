@@ -17,8 +17,9 @@ export default function CreateNewFilter() {
   const { state } = useGrid();
   const { config } = state ?? {};
 
-  const { columns = [] } = config ?? {};
-  const gridColumns = columns?.slice(2).map((column: any, index: number) => ({
+  const { gridColumns : _columns = [] } = config ?? {};
+  
+  const gridColumns = _columns.map((column: any, index: number) => ({
     header: column.header,
     accessorKey: column.accessorKey,
     label: column.header,
@@ -28,6 +29,7 @@ export default function CreateNewFilter() {
 
   const handleManageFilter = () => {
     actions?.openSideDrawer({
+      drawerType: 'manageFilter',
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {
@@ -36,7 +38,7 @@ export default function CreateNewFilter() {
             tab={{
               name: 'New Filter',
             }}
-            columns={gridColumns}
+            columns={gridColumns as Record<string, any>[]}
           >
             <GridManageFilter />
           </ManageFilterProvider>

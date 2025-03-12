@@ -991,15 +991,11 @@ export const accountRouter = createTRPCRouter({
         console.error('Error sending email:', error);
         throw error;
       }
-      const cron = dateToCron(new Date(formatDate(expirationDate).dataTime));
-
-      const expirationtestDate = new Date();
-      expirationDate.setMinutes(expirationtestDate.getMinutes() + 3);
-      const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
+      const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
       const scheduleConfig = {
         enabled: true,
-        cron: forTestingCron,
-        callback_url: `http://10.1.10.252:3000/api/account/invitation-expire`,
+        cron: cronTime,
+        callback_url: `${baseURL}/api/account/invitation-expire`,
         method: 'POST' as TMethod,
         parameters: {
           account_id: accountRecord?.id,
@@ -1007,51 +1003,7 @@ export const accountRouter = createTRPCRouter({
         },
         wait_for_completion: true,
       };
-      // createSchedule(scheduleConfig);
-
-      // login using root account
-      // const asRoot = true;
-      // const rootAccount = await ctx.dnaClient
-      //   .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
-      //   .execute();
-      // const rootAccountToken = rootAccount?.data?.[0]?.token;
-      // const accounts = await ctx.dnaClient
-      //   .findAll({
-      //     entity: 'organization_accounts',
-      //     token: rootAccountToken,
-      //     as_root: asRoot,
-      //     query: {
-      //       advance_filters: [
-      //         ...createAdvancedFilter({
-      //           account_id: accountRecord?.account_id,
-      //           status: 'Active',
-      //         }),
-      //         {
-      //           type: 'operator',
-      //           operator: EOperator.AND,
-      //         },
-      //         {
-      //           type: 'criteria',
-      //           field: 'id',
-      //           operator: EOperator.NOT_EQUAL,
-      //           values: [accountRecord?.id],
-      //         },
-      //       ],
-      //       pluck: [
-      //         'id',
-      //         'organization_id',
-      //         'account_id',
-      //         'contact_id',
-      //         'status',
-      //       ],
-      //       order: {
-      //         limit: 1,
-      //       },
-      //     },
-      //   })
-      //   .execute();
-
-      // const existingAccount = accounts?.data?.[0];
+      createSchedule(scheduleConfig)
 
       await ctx.dnaClient
         .update(accountRecord?.id, {

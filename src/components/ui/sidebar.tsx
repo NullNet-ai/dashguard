@@ -20,9 +20,9 @@ import { useIsMobile } from '~/hooks/use-mobile'
 import useScreenType from '~/hooks/use-screen-type'
 import { cn } from '~/lib/utils'
 
-const SIDEBAR_WIDTH = '255px'
-const SIDEBAR_WIDTH_MOBILE = '18rem'
-const SIDEBAR_WIDTH_ICON = '80px'
+export const SIDEBAR_WIDTH = '255px'
+export const SIDEBAR_WIDTH_MOBILE = '18rem'
+export const SIDEBAR_WIDTH_ICON = '80px'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'd'
 interface SidebarContext {
   state: 'expanded' | 'collapsed'

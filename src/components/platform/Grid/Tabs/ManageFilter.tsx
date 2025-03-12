@@ -31,13 +31,13 @@ export default function ManageFilter({ tab }: { tab: any }) {
   const { state } = useGrid();
   const { config } = state ?? {}; 
 
-  const { columns = [] } = config ?? {};
+  const { columns = [], gridColumns : _gridColumns = [] } = config ?? {};
 
-  const gridColumns = columns?.slice(2).map((column: any, index : number) => ({
+  const gridColumns = _gridColumns?.map((column: any, index : number) => ({
     header: column.header,
     accessorKey: column.accessorKey,
     label: column.header,
-    isShow: column.isShow || true,
+    isShow: columns.some((col: any) => col.accessorKey === column.accessorKey) || false,
     order: column.order || index,
   }));
 
@@ -75,6 +75,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
       const url = await duplicateFilterTab(tab);
       if (url && typeof url === 'string') {
         router.push(url);
+        router.refresh(); 
       } else {
         router.refresh();
       }
