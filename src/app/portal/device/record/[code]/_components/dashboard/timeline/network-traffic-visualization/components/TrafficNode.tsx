@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { generateTicks } from '../functions/generateTicks'
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
+
   const { bandwidth } = data
   const value = bandwidth || data._maxBandwidth
   const tooltipData = [{ name: '1', value }]
@@ -17,8 +18,12 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
     else if (value > 1500) {
       return 'orange'
     }
+    
     else if (value > 1000) {
       return 'blue'
+    }
+    else if (value > 500) {
+      return 'gray'
     }
     else {
       return '#16a34a'
@@ -41,27 +46,31 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
             }}
           >
             <TooltipContent side='bottom'>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[450px] bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
                 <div className="flex flex-col items-center">
 
-                  <ResponsiveContainer height={70} width="100%">
-                    <BarChart data={tooltipData} layout="vertical" margin={{ top: 5, right: 30, left: 5, bottom: 5 }}>
+                  <ResponsiveContainer height={150} width={400}>
+                    <BarChart 
+                      data={tooltipData} 
+                      layout="vertical" 
+                      margin={{ top: 15, right: 60, left: 15, bottom: 15 }}
+                    >
                       <XAxis
-                        axisLine={{ stroke: '#333' }}
+                        axisLine={{ stroke: '#333', strokeWidth: 2 }}
                         domain={[0, Math.ceil(value * 1.2)]}
-                        tick={{ fontSize: 10, fill: '#333' }}
+                        tick={{ fontSize: 14, fill: '#333' }}
                         tickFormatter={(val: any) => val}
-                        tickLine={{ stroke: '#333' }}
+                        tickLine={{ stroke: '#333', strokeWidth: 1 }}
                         ticks={generateTicks(value)}
                         type="number"
                       />
                       <YAxis dataKey="name" hide={true} type="category" />
-                      <Bar barSize={20} dataKey="value" fill="#60a5fa" radius={[4, 4, 4, 4]}>
+                      <Bar barSize={40} dataKey="value" fill="#60a5fa" radius={[8, 8, 8, 8]}>
                         <LabelList
                           dataKey="value"
                           formatter={(val: any) => val}
                           position="right"
-                          style={{ fontSize: '12px', fill: '#333' }}
+                          style={{ fontSize: '16px', fill: '#333', fontWeight: 500 }}
                         />
                       </Bar>
                     </BarChart>
@@ -73,7 +82,7 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
             <div
               className="relative transition-all duration-300 ease-in-out rounded-full "
               style={{
-                width: `${data.width}px`,
+                width: `${data.widthPixels}px`,
                 height: '36px',
                 backgroundColor,
                 border: `2px solid ${backgroundColor}`,
