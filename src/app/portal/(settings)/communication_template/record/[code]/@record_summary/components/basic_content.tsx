@@ -3,9 +3,12 @@ import { api } from '~/trpc/react';
 import ContentLoading from './loader';
 import { Alert, AlertContent, AlertTitle } from '~/components/ui/alert';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { Badge } from '~/components/ui/badge';
+import { Separator } from '~/components/ui/separator';
 
 const fields = {
-  ID: 'code',
+  Name: 'name',
+  Event: 'event',
 };
 
 export default function BasicRecordContent({
@@ -26,7 +29,7 @@ export default function BasicRecordContent({
   } = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ['id', 'code'],
+    pluck_fields: ['id', 'categories', 'name', 'event'],
   });
 
   useRefetchRecord({
@@ -49,17 +52,24 @@ export default function BasicRecordContent({
 
   return (
     <div>
+      <div className="p-1 px-5 text-sm">
+        <div>
+          <span className="text-slate-400">Category:</span>
+          <div className="inline-flex gap-2 p-1">
+            <Badge className="" variant={'primary'}>
+              {record?.data?.categories?.[0]}
+            </Badge>
+          </div>
+        </div>
+      </div>
+      <Separator />
       {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {(record?.data as { [key: string]: any })?.[value] || 'None'}
-                </span>
-              </div>
-            </div>
+        <div className="px-6 pt-2 text-sm" key={index}>
+          <div>
+            <span className="text-slate-400">{key}: </span>
+            <span>
+              {(record?.data as { [key: string]: any })?.[value] || 'None'}
+            </span>
           </div>
         </div>
       ))}

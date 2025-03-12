@@ -9,7 +9,7 @@ const FormServerFetch = async () => {
   const record = await api.record.getByCode({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ['id', 'subject', 'content'],
+    pluck_fields: ['id', 'subject', 'content', 'categories'],
   });
   const defaultValues = record?.data;
   return (

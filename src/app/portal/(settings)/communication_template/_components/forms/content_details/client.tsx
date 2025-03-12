@@ -1,22 +1,21 @@
 'use client';
 
 import { z } from 'zod';
-import { FormBuilder } from '~/components/platform/FormBuilder';
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
-import { useToast } from '~/context/ToastProvider';
-import { type IFormProps } from '../types';
-import { api } from '~/trpc/react';
 import Entities from '~/auto-generated/entities';
-import FormSelect from '~/components/platform/FormBuilder/FormType/FormSelect';
-import FormInput from '~/components/platform/FormBuilder/FormType/FormInput';
-import FormRichTextEditor from '~/components/platform/FormBuilder/FormType/FormRichTextEditor';
-import { useEffect } from 'react';
-import SubjectField from './custom/SubjectField';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import {
+  IField,
+  type IHandleSubmit,
+} from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { api } from '~/trpc/react';
+import { type IFormProps } from '../types';
 import ContentField from './custom/ContentField';
+import SubjectField from './custom/SubjectField';
 import VariableField from './custom/VariableField';
 
 const FormSchema = z.object({
-  subject: z.string({required_error: 'Subject is required'}),
+  subject: z.string({ required_error: 'Subject is required' }),
   content: z.string({ required_error: 'Content is required' }),
 });
 
@@ -32,7 +31,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
         id: params?.id,
         data: {
           subject: data.subject,
-          content: data.content
+          content: data.content,
         },
         entity: params?.entity!,
       });
@@ -71,6 +70,104 @@ export default function Content({ params, defaultValues }: IFormProps) {
     })),
   }));
 
+  const fields = [
+    ...(defaultValues.categories?.[0] !== 'SMS'
+      ? [
+          {
+            id: 'subject_data_source',
+            formType: 'select',
+            name: 'subject_data_source',
+            label: 'Data Source',
+          },
+          {
+            id: 'subject_variables',
+            formType: 'custom-field',
+            name: 'subject_variables',
+            label: 'Variables',
+            render: VariableField,
+          },
+          {
+            id: 'field_1741658522049',
+            formType: 'space',
+            name: 'field_1741658522049',
+            label: 'New Field 3',
+            description: 'Field Description',
+          },
+          {
+            id: 'field_1741658523708',
+            formType: 'space',
+            name: 'field_1741658523708',
+            label: 'New Field 4',
+          },
+          {
+            id: 'subject',
+            formType: 'custom-field',
+            name: 'subject',
+            label: 'Subject',
+            required: true,
+            fieldStyle: {
+              gridColumn: '1 / span 4',
+              gridRow: '2 / span 1',
+            },
+            render: SubjectField,
+          },
+          {
+            id: 'field_1741724185290',
+            formType: 'separator',
+            name: 'field_1741724185290',
+            label: 'New Field 9',
+            description: 'Field Description',
+            placeholder: 'Enter value...',
+            fieldClassName: '',
+            fieldStyle: {
+              gridColumn: '1 / span 4',
+              gridRow: '3 / span 1',
+            },
+          },
+        ]
+      : []),
+    {
+      id: 'content_data_source',
+      formType: 'select',
+      name: 'content_data_source',
+      label: 'Data Source',
+    },
+    {
+      id: 'content_variables',
+      formType: 'custom-field',
+      name: 'content_variables',
+      label: 'Variables',
+      render: VariableField,
+    },
+    {
+      id: 'field_1741658522043',
+      formType: 'space',
+      name: 'field_1741658522043',
+      label: 'New Field 3',
+      description: 'Field Description',
+    },
+    {
+      id: 'field_1741658523704',
+      formType: 'space',
+      name: 'field_1741658523704',
+      label: 'New Field 4',
+    },
+    {
+      id: 'content',
+      formType: 'custom-field',
+      name: 'content',
+      label: 'Content',
+      fieldClassName: '',
+      required: true,
+      fieldStyle: {
+        gridColumn: '1 / span 4',
+        gridRow:
+          defaultValues.categories?.[0] !== 'SMS' ? '5 / span 1' : '2 / span 1',
+      },
+      render: ContentField,
+    },
+  ] as IField[];
+
   return (
     <FormBuilder
       customDesign={{
@@ -83,98 +180,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
       formKey="content"
       formSchema={FormSchema}
       defaultValues={defaultValues}
-      fields={[
-        {
-          id: 'subject_data_source',
-          formType: 'select',
-          name: 'subject_data_source',
-          label: 'Data Source',
-        },
-        {
-          id: 'subject_variables',
-          formType: 'custom-field',
-          name: 'subject_variables',
-          label: 'Variables',
-          render: VariableField
-        },
-        {
-          id: 'field_1741658522049',
-          formType: 'space',
-          name: 'field_1741658522049',
-          label: 'New Field 3',
-          description: 'Field Description',
-        },
-        {
-          id: 'field_1741658523708',
-          formType: 'space',
-          name: 'field_1741658523708',
-          label: 'New Field 4',
-        },
-        {
-          id: 'subject',
-          formType: 'custom-field',
-          name: 'subject',
-          label: 'Subject',
-          required: true,
-          fieldStyle: {
-            gridColumn: '1 / span 4',
-            gridRow: '2 / span 1',
-          },
-          render: SubjectField
-        },
-        {
-          id: 'field_1741724185290',
-          formType: 'separator',
-          name: 'field_1741724185290',
-          label: 'New Field 9',
-          description: 'Field Description',
-          placeholder: 'Enter value...',
-          fieldClassName: '',
-          fieldStyle: {
-            gridColumn: '1 / span 4',
-            gridRow: '3 / span 1',
-          },
-        },
-        {
-          id: 'content_data_source',
-          formType: 'select',
-          name: 'content_data_source',
-          label: 'Data Source',
-        },
-        {
-          id: 'content_variables',
-          formType: 'custom-field',
-          name: 'content_variables',
-          label: 'Variables',
-          render: VariableField
-        },
-        {
-          id: 'field_1741658522043',
-          formType: 'space',
-          name: 'field_1741658522043',
-          label: 'New Field 3',
-          description: 'Field Description',
-        },
-        {
-          id: 'field_1741658523704',
-          formType: 'space',
-          name: 'field_1741658523704',
-          label: 'New Field 4',
-        },
-        {
-          id: 'content',
-          formType: 'custom-field',
-          name: 'content',
-          label: 'Content',
-          fieldClassName: '',
-          required: true,
-          fieldStyle: {
-            gridColumn: '1 / span 4',
-            gridRow: '5 / span 1',
-          },
-          render: ContentField
-        },
-      ]}
+      fields={fields}
       selectOptions={{
         subject_data_source: data_source,
         content_data_source: data_source,

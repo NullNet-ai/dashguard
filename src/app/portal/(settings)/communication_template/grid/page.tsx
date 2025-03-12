@@ -23,6 +23,8 @@ export default async function Page() {
     'code',
     'status',
     'name',
+    'event',
+    'communication_template_status',
     'created_date',
     'created_time',
     'created_by',

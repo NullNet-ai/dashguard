@@ -1,40 +1,15 @@
-import { TMethod } from '../utils/createSchedule'
-import { EEventType } from './types'
-
-// Event Configuration Interface
-export interface IEventConfig {
-  type: EEventType
-  callback_url: string
-  method: TMethod
-  description: string
-}
+import type { EEventType, IEventConfig } from './types'
+import INVITATION_EXPIRE from './list/LICENSE_EXPIRE'
+import LICENSE_EXPIRE from './list/LICENSE_EXPIRE'
+import ACCOUNT_DEACTIVATE from './list/ACCOUNT_DEACTIVATE'
+import ACCOUNT_INVITE from './list/ACCOUNT_INVITE'
 
 // Event Configurations
 export const events: IEventConfig[] = [
-  {
-    type: EEventType.INVITATION_EXPIRE,
-    callback_url: '/api/account/invitation-expire',
-    method: 'POST',
-    description: 'Handles invitation expiration and account status updates',
-  },
-  {
-    type: EEventType.ACCOUNT_DEACTIVATE,
-    callback_url: '/api/account/deactivate',
-    method: 'POST',
-    description: 'Handles account deactivation after specified period',
-  },
-  {
-    type: EEventType.LICENSE_EXPIRE,
-    callback_url: '/api/license/expire',
-    method: 'POST',
-    description: 'Handles license expiration and related actions',
-  },
-  {
-    type: EEventType.ACCOUNT_INVITE,
-    callback_url: '/api/account/invite',
-    method: 'POST',
-    description: 'Handles account invitation and related actions',
-  },
+  INVITATION_EXPIRE,
+  ACCOUNT_DEACTIVATE,
+  LICENSE_EXPIRE,
+  ACCOUNT_INVITE
 ]
 
 // Helper function to get event configuration
