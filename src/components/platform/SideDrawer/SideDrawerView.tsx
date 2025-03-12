@@ -10,8 +10,8 @@ import { useMediaQuery } from 'react-responsive'
 
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
 
-import { DRAWER_WIDTH_KEY, useSideDrawer } from './SideDrawerProvider'
-import { useSidebar } from '~/components/ui/sidebar'
+import {  TYPE_WIDTH_KEY_PREFIX, useSideDrawer } from './SideDrawerProvider'
+import { useSidebar, SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON } from '~/components/ui/sidebar'
 import { cn } from '~/lib/utils'
 
 import { GripVertical } from 'lucide-react'
@@ -22,7 +22,7 @@ export const SideDrawerView: React.FC = () => {
   const { state, actions } = useSideDrawer()
   const { closeSideDrawer, togglePinSideDrawer, saveCurrentState, setwidth } = actions
   const { config, isOpen, isPinned } = state
-  const { isBannerPresent } = useSidebar()
+  const { isBannerPresent, state: sidebarState } = useSidebar()
   
   const isMobile = useMediaQuery({ maxWidth: 768 })
   
@@ -48,7 +48,7 @@ export const SideDrawerView: React.FC = () => {
   } = config || {}
 
   // Create a unique localStorage key based on drawer type
-  const uniqueDrawerWidthKey = `${DRAWER_WIDTH_KEY}_${drawerType}`;
+  const uniqueDrawerWidthKey = `${TYPE_WIDTH_KEY_PREFIX}${drawerType}`;
 
   // For mobile, we'll use a fixed width that takes up most of the screen
   const mobileWidth = '100%'
@@ -70,13 +70,20 @@ export const SideDrawerView: React.FC = () => {
       return;
     }
     
-    // Fallback to config width
+    // Fallback to config width - handle viewport units properly
     if (sideDrawerWidth) {
-      setCurrentWidth(sideDrawerWidth);
-      setwidth(sideDrawerWidth);
-      lastSavedWidth.current = sideDrawerWidth;
+      // For 100dvw, use the actual value without parsing
+      if (sideDrawerWidth.includes('dvw') || sideDrawerWidth.includes('vw')) {
+        setCurrentWidth(sideDrawerWidth);
+        setwidth(sideDrawerWidth);
+        lastSavedWidth.current = sideDrawerWidth;
+      } else {
+        setCurrentWidth(sideDrawerWidth);
+        setwidth(sideDrawerWidth);
+        lastSavedWidth.current = sideDrawerWidth;
+      }
     }
-  }, [sideDrawerWidth, isMobile, drawerType]); // Add drawerType to dependencies
+  }, [sideDrawerWidth, isMobile, drawerType, setwidth, uniqueDrawerWidthKey]);
 
   const { component: BodyComponent, componentProps } = body || {}
 
@@ -113,10 +120,41 @@ export const SideDrawerView: React.FC = () => {
 
     // Parse the sideDrawerWidth to use as default min width if minResizeWidth is not provided
     const defaultMinWidth = 300;
-    const minWidth = minResizeWidth ? parseInt(minResizeWidth.replace(/[^0-9]/g, ''), 10) : defaultMinWidth;
-    const maxWidth = maxResizeWidth ?
-        parseInt(maxResizeWidth.replace(/[^0-9]/g, ''), 10) :
-        window.innerWidth - 255;
+    
+    // Improved parsing to handle viewport units
+    const parseSize = (size: string | undefined, defaultValue: number): number => {
+      if (!size) return defaultValue;
+      
+      // Handle viewport width units
+      if (size.includes('dvw') || size.includes('vw')) {
+        const percentage = parseFloat(size);
+        return (percentage / 100) * window.innerWidth;
+      }
+      
+      // Handle pixel values
+      return parseInt(size.replace(/[^0-9]/g, ''), 10) || defaultValue;
+    };
+    
+    const minWidth = parseSize(minResizeWidth, defaultMinWidth);
+    
+    // Calculate max width based on sidebar state and whether maxResizeWidth is specified
+    let maxWidth;
+    
+    if (maxResizeWidth) {
+      // If maxResizeWidth is specified, use it
+      maxWidth = maxResizeWidth && (maxResizeWidth.includes('100dvw') || maxResizeWidth.includes('100vw')) 
+        ? window.innerWidth
+        : parseSize(maxResizeWidth, window.innerWidth - 255);
+    } else if (resizable && !isPinned) {
+      // If resizable and not pinned, calculate max width based on sidebar state
+      const sidebarWidthValue = sidebarState === 'expanded' 
+        ? parseInt(SIDEBAR_WIDTH, 10) 
+        : parseInt(SIDEBAR_WIDTH_ICON, 10);
+      maxWidth = window.innerWidth - sidebarWidthValue;
+    } else {
+      // Default fallback
+      maxWidth = window.innerWidth - 255;
+    }
 
     const constrainedWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
     const newWidthStr = `${constrainedWidth}px`;
@@ -129,27 +167,27 @@ export const SideDrawerView: React.FC = () => {
 };
 
 const handleResizeEnd = () => {
-    setIsResizing(false);
+  setIsResizing(false);
+  
+  // Skip saving for mobile
+  if (!isMobile && drawerType) {
+    // Always save the last known width from the ref with the unique key
+    localStorage.setItem(uniqueDrawerWidthKey, lastSavedWidth.current);
     
-    // Skip saving for mobile
-    if (!isMobile) {
-      // Always save the last known width from the ref with the unique key
-      localStorage.setItem(uniqueDrawerWidthKey, lastSavedWidth.current);
-      
-      // Update provider state
-      if (config) {
-          const configWithCurrentWidth = {
-              ...config,
-              sideDrawerWidth: lastSavedWidth.current
-          };
-          saveCurrentState(configWithCurrentWidth);
-      }
+    // Update provider state
+    if (config) {
+      const configWithCurrentWidth = {
+        ...config,
+        sideDrawerWidth: lastSavedWidth.current
+      };
+      saveCurrentState(configWithCurrentWidth);
     }
-    
-    document.removeEventListener('mousemove', handleResize);
-    document.removeEventListener('mouseup', handleResizeEnd);
-    document.removeEventListener('touchmove', handleResize);
-    document.removeEventListener('touchend', handleResizeEnd);
+  }
+  
+  document.removeEventListener('mousemove', handleResize);
+  document.removeEventListener('mouseup', handleResizeEnd);
+  document.removeEventListener('touchmove', handleResize);
+  document.removeEventListener('touchend', handleResizeEnd);
 };
 
   // Clean up event listeners on unmount
@@ -173,40 +211,39 @@ const handleResizeEnd = () => {
       // For mobile, keep transition on Y-axis
       return 'transition-transform duration-500 ease-out';
     } else {
-      // For desktop, only transition on X-axis
-      return isResizing ? 'transition-none' : 'transition-[transform-x] duration-500 ease-out';
+      // For desktop, use transform transition with duration
+      return isResizing ? 'transition-none' : 'transition-transform duration-500 ease-out';
     }
   };
 
   // Update the Card component to use a ref and directly set the width
+  // Update the Card component to properly handle pinned but closed drawers
   return (
     <div
       aria-labelledby='side-drawer-title'
       aria-modal='true'
-      className={`${effectiveIsPinned ? '' : 'fixed'} inset-0 z-[101] transition-all ease-in-out duration-500 
+      className={`${effectiveIsPinned && isOpen ? '' : 'fixed'} inset-0 z-[101] 
         ${isOpen ? (isMobile ? 'translate-y-0' : 'translate-x-0') : (isMobile ? 'translate-y-full' : 'translate-x-full')}
         ${effectiveOverlayEnabled && !effectiveIsPinned ? 'pointer-events-auto' : 'pointer-events-none'}`}
       role='dialog'
       style={{
-        // Define CSS variable at the root level
         '--drawer-width': isMobile ? mobileWidth : currentWidth
       } as React.CSSProperties}
     >
-      {/* Overlay - only show when not pinned */}
+      {/* Overlay - instant appearance */}
       <div
-        className={`absolute inset-0 transition-opacity duration-500 
+        className={`absolute inset-0 
           ${effectiveOverlayEnabled && !effectiveIsPinned ? 'bg-black bg-opacity-50' : 'bg-transparent'}
           ${isOpen && !effectiveIsPinned ? 'opacity-100' : 'opacity-0'}`}
         onClick={handleOutsideClick}
       />
-
-      {/* Drawer Content */}
+  
+      {/* Drawer Content - with controlled transitions */}
       <Card
         ref={drawerRef}
         className={cn(
-          `${effectiveIsPinned ? 'relative' : 'fixed'} z-[102] transform-gpu
-          ${!effectiveIsPinned ? 'bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto' : ''}`,
-          // Apply custom transition classes
+          `${effectiveIsPinned && isOpen ? 'relative' : 'fixed'} z-[102] transform-gpu
+          ${!(effectiveIsPinned && isOpen) ? 'bottom-0 left-0 right-0 md:top-auto md:right-0 md:bottom-0 md:left-auto' : ''}`,
           getTransitionClasses(),
           isMobile ? (
             isOpen ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'
@@ -214,16 +251,15 @@ const handleResizeEnd = () => {
             isOpen ? 'md:translate-x-0 pointer-events-auto' : 'md:translate-x-full pointer-events-none'
           ),
           // Apply Y positioning for pinned state (no transition)
-          !isMobile && `${effectiveIsPinned ? "-translate-y-9 lg:-translate-y-3" : "translate-y-2 lg:translate-y-0"}`,
+          !isMobile && `${effectiveIsPinned && isOpen ? "-translate-y-9 lg:-translate-y-5" : "translate-y-2 lg:translate-y-[5px]"}`,
           isBannerPresent ? 'md:h-[calc(100dvh-50px)]' : 'md:h-[calc(100dvh-39px)]',
           effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
           isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]',
-          isBannerPresent && effectiveIsPinned && 'lg:translate-y-4'
+          isBannerPresent && effectiveIsPinned && isOpen && 'lg:translate-y-4'
         )}
         style={{ 
           width: isMobile ? mobileWidth : 'var(--drawer-width)',
-          // Use CSS to disable Y-axis transitions for non-mobile
-          ...(isMobile ? {} : { transitionProperty: 'transform-x' })
+          // Width is being set here but might be constrained by the resize handler
         }} 
       >
         {showResizeHandleComputed && (
