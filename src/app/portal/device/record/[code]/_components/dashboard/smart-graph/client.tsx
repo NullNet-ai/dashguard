@@ -25,6 +25,7 @@ import { api } from '~/trpc/react'
 import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
 import { IFormProps } from '../types'
+import { ResponsiveContainer } from 'recharts'
 
 const time_range_options = {
   '30d': '30 days',
@@ -213,12 +214,13 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
+      <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6 h-[500px]">
         <ChartContainer
           className="aspect-auto h-full w-full p-5 overflow-x-auto"
           config={chartConfig}
         >
-          {renderChart({ filteredData, graphType })}
+
+            {renderChart({ filteredData, graphType })}
 
         </ChartContainer>
       </CardContent>

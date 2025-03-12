@@ -8,12 +8,14 @@ import {
 } from '~/components/ui/chart'
 
 const LineChartComponent = ({ filteredData }: any) => {
+
+  console.log("filteredData", filteredData)
   return (
     <LineChart
       accessibilityLayer={true}
       data={filteredData}
+      width={1920}
       height={300}
-      width={1870}
     >
       <CartesianGrid vertical={false} />
       <XAxis
