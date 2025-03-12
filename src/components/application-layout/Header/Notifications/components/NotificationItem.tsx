@@ -6,13 +6,13 @@ import {
   DropdownMenuTrigger,
 } from '@radix-ui/react-dropdown-menu'
 import { EllipsisVertical, Mail, MailOpen, Pin } from 'lucide-react'
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import * as Lucide from 'lucide-react';
 import capitalize from 'lodash/capitalize';
 import { Button } from '~/components/ui/button'
 
 import { useNotifications } from '../NotificationProvider'
-import { TNotificationType, type INotificationSchema } from '../types'
+import { type TNotificationType, type INotificationSchema } from '../types'
 
 import EmptyNotification from './EmptyNotification'
 import { Separator } from '~/components/ui/separator'
@@ -20,7 +20,6 @@ import { Badge } from '~/components/ui/badge'
 import TextTruncate from '~/components/ui/text-truncate';
 import EmptyUnreadNotification from './EmptyUnreadNotification';
 import { cn } from '~/lib/utils';
-import Skeleton from '~/components/platform/Grid/Skeleton';
 import { NotificationSkeleton } from './NotificationDrawer';
 interface DynamicIconProps extends Lucide.LucideProps {
   name: keyof typeof Lucide;
@@ -113,8 +112,8 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
 
   return (
     <div className='mt-2'>
-      {notifications.map((notification: INotificationSchema) => (
-        <>
+      {notifications.map((notification: INotificationSchema,index) => (
+        <Fragment key={index}>
           <div
             className={`relative flex flex-col group cursor-pointer ${notification.notification_status === 'read'
               ? ''
@@ -283,7 +282,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
             </div>
           </div>
           <Separator dashed />
-        </>
+        </Fragment>
       ))}
     </div>
   )

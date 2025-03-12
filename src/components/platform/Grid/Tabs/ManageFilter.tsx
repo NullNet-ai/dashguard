@@ -75,6 +75,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
       const url = await duplicateFilterTab(tab);
       if (url && typeof url === 'string') {
         router.push(url);
+        router.refresh(); 
       } else {
         router.refresh();
       }

@@ -10,7 +10,7 @@ import { MobileTriggerComponent } from './TriggerComponent';
 const Header: React.FC = () => {
   return (
     <div>
-      <header className="col-span-full flex items-center justify-center gap-4 bg-background lg:h-[3rem]">
+      <header className="col-span-full flex items-center justify-center gap-4 bg-background ">
         {/* <SidebarTrigger Icon={TriggerComponent} className="hidden lg:block" /> */}
 
         <div className="relative flex w-full items-center border-b pb-1 pt-[11px] lg:pb-0 lg:pt-[7px]">
