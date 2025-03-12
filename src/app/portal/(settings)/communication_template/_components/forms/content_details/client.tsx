@@ -16,10 +16,8 @@ import ContentField from './custom/ContentField';
 import VariableField from './custom/VariableField';
 
 const FormSchema = z.object({
-  data_source: z.string(),
-  variables: z.string(),
-  subject: z.string(),
-  content: z.string({ message: 'RichTextEditor is required' }),
+  subject: z.string({required_error: 'Subject is required'}),
+  content: z.string({ required_error: 'Content is required' }),
 });
 
 export default function Content({ params, defaultValues }: IFormProps) {
@@ -30,9 +28,17 @@ export default function Content({ params, defaultValues }: IFormProps) {
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      alert(JSON.stringify(data, null, 2));
+      await update.mutateAsync({
+        id: params?.id,
+        data: {
+          subject: data.subject,
+          content: data.content
+        },
+        entity: params?.entity!,
+      });
+      toast.success('Content Details submitted successfully.');
     } catch (error) {
-      toast.error('Failed to submit Content');
+      toast.error('Failed to submit Content Details');
     }
   };
 

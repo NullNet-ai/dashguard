@@ -10,7 +10,6 @@ const VariableField = (props: CustomFieldProps) => {
     selectOptions = {},
     ...formRenderProps
   } = props;
-  console.log('🚀 ~ VariableField ~ props:', props);
   const data_source = form.watch(
     fieldConfig.id === 'subject_variables'
       ? 'subject_data_source'

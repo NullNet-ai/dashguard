@@ -74,7 +74,6 @@ export default function FormSelect({
   const [options, setOptions] = useState<ISelectOptions[]>(
     selectOptions?.[fieldConfig?.name] ?? [],
   );
-  console.log("🚀 ~ selectOptions:", selectOptions)
   const [isCreateLoading, setIsCreateLoading] = useState(false);
   const { styles, attributes, update } = usePopper(referenceElement, popperElement, {
     placement: "bottom-start",

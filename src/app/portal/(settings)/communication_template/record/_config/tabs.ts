@@ -4,5 +4,10 @@ const tabs = [
     name: "Dashboard",
     tabName: "dashboard?categories=",
   },
+  {
+    id: "communication_template",
+    name: "Communication Template",
+    tabName: "communication_template?categories=",
+  },
 ];
 export default tabs;

@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { type Content } from "@tiptap/react";
 import { type IField } from "../../types";
 import { cn } from "~/lib/utils";
@@ -33,12 +33,9 @@ export default function FormRichTextEditor({
   form,
   formKey,
 }: IProps) {
-  // Initialize content state from form value
-  const [content, setContent] = useState<Content>(() => {
-    const fieldValue = formRenderProps.field.value;
-    console.log("🚀 ~ fieldValue:", fieldValue)
-    
 
+  const fieldValue = useMemo(() => {
+    const fieldValue = formRenderProps.field.value;
     if (!fieldValue) return "";
     
     const stringValue = Array.isArray(fieldValue) 
@@ -49,7 +46,9 @@ export default function FormRichTextEditor({
     return !stringValue.includes('<') 
       ? `<p class="text-node">${stringValue}</p>`
       : stringValue;
-  });
+  }, [formRenderProps.field.value] )
+  // Initialize content state from form value
+  const [content, setContent] = useState<Content>(fieldValue);
 
   const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
   
@@ -58,8 +57,8 @@ export default function FormRichTextEditor({
 
   // Sync content state with form value changes
   useEffect(() => {
-    const fieldValue = formRenderProps.field.value;
     if (fieldValue !== content) {
+    const fieldValue = formRenderProps.field.value;
       setContent(fieldValue || "");
     }
   }, [formRenderProps.field.value]);
