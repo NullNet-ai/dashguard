@@ -170,8 +170,8 @@ export const packetRouter = createTRPCRouter({
       return res?.data
     }),
 
-  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string() })).query(async ({ input, ctx }) => {
-    const { bucket_size, time_range, timezone } = input
+  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string(), device_id: z.string() })).query(async ({ input, ctx }) => {
+    const { bucket_size, time_range, timezone, device_id } = input
     if (
       !bucket_size
     ) {
@@ -195,19 +195,19 @@ export const packetRouter = createTRPCRouter({
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
-          // {
-          //   type: 'operator',
-          //   operator: EOperator.AND,
-          // },
-          // {
-          //   type: 'criteria',
-          //   field: 'device_id',
-          //   entity: 'dummy_packets',
-          //   operator: EOperator.EQUAL,
-          //   values: [
-          //     device_id,
-          //   ],
-          // },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'dummy_packets',
+            operator: EOperator.EQUAL,
+            values: [
+              device_id,
+            ],
+          },
         ],
         joins: [],
         bucket_size,

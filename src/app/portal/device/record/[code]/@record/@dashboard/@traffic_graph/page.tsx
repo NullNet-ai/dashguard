@@ -1,4 +1,5 @@
-import ComingSoon from "../../../../_components/coming_soon";
+import InteractiveGraph from "../../../_components/dashboard/smart-graph/server";
 
-const FormContainer = async () => <ComingSoon />;
+
+const FormContainer = async () => <InteractiveGraph />;
 export default FormContainer;
