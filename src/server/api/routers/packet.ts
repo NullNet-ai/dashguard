@@ -550,7 +550,7 @@ export const packetRouter = createTRPCRouter({
     } = input || {}
     
     
-    if((advance_filters?.length && !advance_filters?.[0]?.values?.[0] )|| !advance_filters?.length){
+    if((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length){
       return {
         items: []
       }
@@ -593,7 +593,7 @@ export const packetRouter = createTRPCRouter({
 
           ],
           order: {
-            limit,
+            limit: limit as number,
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
@@ -703,7 +703,9 @@ export const packetRouter = createTRPCRouter({
 
       const sourceIPs = new Set()
       for (let i = 0; i < _packets_length; i++) {
-        sourceIPs.add(_packets[i].source_ip)
+        if (_packets?.[i]) {
+          sourceIPs.add((_packets[i] as any).source_ip)
+        }
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
