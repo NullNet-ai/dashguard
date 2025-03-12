@@ -1,6 +1,6 @@
 import { formatBandwidth } from './formatBandwidth'
 import { normalizeTraffic } from './normalizeTraffic'
-import { type Element, type Edge, type IBandwidth } from './types'
+import { type Element, type Edge, type IBandwidth } from '../types'
 
 export const generateFlowData = (bandwidthData: Record<string, any>): { nodes: Element[], edges: Edge[] } => {
   const nodes: Element[] = []
