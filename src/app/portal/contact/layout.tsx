@@ -8,7 +8,7 @@ type Props = {
 const Layout = (props: Props) => {
   return (
     <Fragment>
-      <InnerTabs />
+      <InnerTabs variant='dropdown'/>
       {props.children}
     </Fragment>
   );

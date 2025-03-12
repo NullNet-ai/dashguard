@@ -77,7 +77,7 @@ const InnerDropTabItem = ({
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
         aria-current={isActive ? 'page' : undefined}
         className={cn(
-          isActive ? 'text-primary' : 'text-gray-500', 'whitespace-nowrap px-4 pr-1 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',
+          isActive ? 'text-primary' : 'text-default/70', 'whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
         )}
       >
         {formatTabName(tabNameRole)}

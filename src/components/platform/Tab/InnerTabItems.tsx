@@ -9,18 +9,22 @@ import { cn } from '~/lib/utils'
 import { reorderItems } from '~/utils/sort-tab-items'
 
 import InnerTabsContent from './InnerTabsContent'
+import { api } from '~/trpc/react'
 
 type InnerTabItemsProps = {
   tabs: any[]
   pathname?: string
-}
+  variant?: 'drawer' | 'dropdown'
+} 
 
-const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
+const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const { isBannerPresent } = useSidebar()
   const newPathname = usePathname()
-
-  const [application, code] = (newPathname || '').split('/').slice(3)
+  const [cachedItem, setCachedItem] = useState<any>({})
+  
+  const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
@@ -39,22 +43,36 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     };
   }, [])
 
-  // Add this state to handle client-side rendering
-  const [isClient, setIsClient] = useState(false)
-
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    if(!isClient) {
+      setCachedItem(tabs)
+    }
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+    setCachedItem(cachedItems?.[`inner_tab_data_${entity}`])
+  }, [code, isClient, tabs])
+  
 
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) return tabs
 
     if (tabs.length) {
+
       const activeIndex = tabs.findIndex(a => a.name === code)
       const activeItem = tabs.find(a => a.name === code)
-      const prevCurrent = Cookies.get('prevCurrent')
+      console.log("tabxxs", activeItem)
+
+      const prevCurrent = cachedItem?.prevCurrent
+      console.log("prevCurrent", prevCurrent)
       // const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
-      const copiedItem: any[] = []
+
+      
+      const copiedItem: any[] = cachedItem?.tabs || []
+      console.log("copiedItem", copiedItem)
+      // const copiedItem: any[] = []
       const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
       const prevActiveItem = tabs.find(a => a.name === prevCurrent)
       if (copiedItem?.length) {
@@ -80,7 +98,9 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
       return tabs.filter(Boolean)
     }
     return tabs.filter(Boolean)
-  }, [tabs, code, isClient])
+  }, [tabs, code, isClient, cachedItem])
+
+  
 
   return (
     <nav
@@ -94,6 +114,8 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
         isWindowLoaded={isWindowLoaded}
         application={application}
         code={code}
+        cachedItems={cachedItem}
+        variant={variant}
       />
 
     </nav>

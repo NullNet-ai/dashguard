@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { api } from '~/trpc/server'
 
 import InnerTabItems from './InnerTabItems'
-import { type IPropsTabList } from './type'
+import { type IPropsTabList, type InnerTabsProps } from './type'
 
 const getSessionTabs = async () => {
   const headerList = headers()
@@ -95,11 +95,13 @@ const getSessionTabs = async () => {
   return newTabs.filter(Boolean)
 }
 
-const InnerTabs = async () => {
+const InnerTabs = async ({
+  variant = 'dropdown'
+} : InnerTabsProps ) => {
   const newTabs = await getSessionTabs()
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
-  return <InnerTabItems pathname={pathname} tabs={newTabs} />
+  return <InnerTabItems pathname={pathname} tabs={newTabs} variant={variant}/>
 }
 
 export default InnerTabs

@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.17.2",
-  "branch": "released/1.17.2",
-  "message": "added metadata key in parentprop in grid",
+  "tag": "1.17.3-rc.2<unreleased>",
+  "branch": "unreleased/fix/PLATFORM7-2900/1.17.3-rc.2<unreleased>",
+  "message": "Add infinite scroll feature of grid",
   "publish_name": "Juphet Vitualla"
 }
