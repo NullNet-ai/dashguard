@@ -196,8 +196,7 @@ refetchSearchOption()
     handleRemoveSearchItem,
     handleClearSearchItems,
     setSearchParams
-    
-  } as IAction
+  } as unknown as IAction
 
   return (
     <SearchGraphContext.Provider
