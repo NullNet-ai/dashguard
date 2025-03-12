@@ -37,7 +37,7 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
 
   normalizedData?.forEach(({ source_ip, result }: any, flowIndex: number) => {
     let xPosition = spacing
-    const trafficNodes = result.map(({ bandwidth, widthPercentage, widthPixels }: { bandwidth: string, widthPercentage: number, widthPixels: number }, timeIndex: number) => {
+    const trafficNodes = result.map(({ bandwidth, widthPercentage, widthPixels,bucket }: { bandwidth: string, widthPercentage: number, widthPixels: number, bucket: string }, timeIndex: number) => {
       const bwValue = parseInt(bandwidth, 10) as number
       const trafficNodeId = `traffic-${source_ip}-${timeIndex}-${flowIndex}`
       const normalizedValue = normalizeTraffic(bwValue, maxBandwidth)
@@ -62,6 +62,7 @@ export const generateFlowData = (bandwidthData: IBandwidth[]): { nodes: Element[
           widthPixels:  widthPixels,
           width,
           _maxBandwidth: parseInt(_maxBandwidth),
+          bucket
         },
       })
 
