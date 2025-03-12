@@ -28,7 +28,7 @@ const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
   const router = useRouter()
   const { currentPath } = useTabPersistence({
     code: params.code,
-    prefix: 'dashboard-tab',
+    prefix: 'configuration-tab',
   })
 
   const baseUrl = `${pathName}?current_tab=configuration`
@@ -90,6 +90,7 @@ const RecordLayout: React.FC<RecordLayoutProps> = (props) => {
           },
         },
       },
+      header: undefined
     })
   }
 

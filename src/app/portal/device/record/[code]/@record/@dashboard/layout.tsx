@@ -47,7 +47,7 @@ const RecordLayout: React.FC<any> = (props) => {
           case 'map':
             return <div style={{ display: 'block' }}>{map}</div>
           default:
-            router.push(`${baseUrl}&sub_tab=rules`)
+            router.push(`${baseUrl}&sub_tab=timeline`)
             return null
         }
       }
@@ -58,16 +58,18 @@ const RecordLayout: React.FC<any> = (props) => {
     }, [searchParams, timeline, traffic_graph, map, baseUrl])
   
 
-  return <div className="grid grid-cols-1 gap-2">
-    {RenderComponents}<LinkTab
-        defaultHref={`${baseUrl}?current_tab=dashboard&tab=timeline`}
+  return( <div className="grid grid-cols-1 gap-2">
+    {RenderComponents}
+    <LinkTab
+        defaultHref={`${baseUrl}?current_tab=dashboard&tab=users`}
         orientation="horizontal"
         persistKey={currentPath}
         size="sm"
         tabs={tabs}
         variant="default"
-      /> {Content}
-      </div>;
+      /> 
+      {Content}
+      </div>);
 };
 
 export default RecordLayout;
