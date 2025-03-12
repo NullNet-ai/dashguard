@@ -5,7 +5,7 @@ export const removeSearchItems = (
   filterItem: ISearchItem,
 ) => {
   const data = [...searchItems]
-  const index = data.findIndex((item: { id: string }) => item?.id === filterItem?.id)
+  const index = data.findIndex((item: ISearchItem) => item.id !== undefined && item.id === filterItem.id)
   if (index === -1) return data
   if (index === 0) {
     // If removing `a`, also remove `b` (even + adjacent odd)

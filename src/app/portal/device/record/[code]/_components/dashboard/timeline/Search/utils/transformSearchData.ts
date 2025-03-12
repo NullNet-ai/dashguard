@@ -5,7 +5,6 @@ import { formatAndCapitalize } from '~/lib/utils'
 import { type ISearchableField } from '../types'
 
 const findTextInValue = (value: unknown, searchText: string, operator: string) => {
-  console.log('%c Line:8 🥑 value', 'color:#6ec1c2', value, searchText);
   // if (['contains', 'like', 'equal'].includes(operator)) {
     if (typeof value === 'string') {
       return value.toLowerCase() == searchText.toLowerCase() ? value : null
@@ -23,7 +22,6 @@ export const transformSearchData = (
   searchableFields: ISearchableField[],
 ) => {
   if (!items) return null
-  console.log('%c Line:23 🍯 items', 'color:#ea7e5c', items)
 
   const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
@@ -31,7 +29,7 @@ export const transformSearchData = (
         field => field.accessorKey === key,
       )
       const foundValue = findTextInValue(value, searchText, searchableField?.operator ?? 'like')
-      console.log('%c Line:33 🥑 foundValue', 'color:#3f7cff',{ foundValue, key, value});
+   
       if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
