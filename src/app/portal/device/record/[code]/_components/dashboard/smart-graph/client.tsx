@@ -213,9 +213,9 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+      <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
         <ChartContainer
-          className="aspect-auto h-full w-full p-5"
+          className="aspect-auto h-full w-full p-5 overflow-x-auto"
           config={chartConfig}
         >
           {renderChart({ filteredData, graphType })}
