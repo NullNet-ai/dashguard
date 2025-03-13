@@ -93,8 +93,6 @@ export default function FormRichTextEditor({
     customDropdowns,
   } = fieldConfig.richTextConfig || {};
 
-  // Get the form's disabled state
-  const isFormDisabled = form.formState.isSubmitting || fieldConfig.disabled;
 
   return (
     <FormItem>
