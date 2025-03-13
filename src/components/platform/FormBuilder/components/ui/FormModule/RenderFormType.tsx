@@ -50,6 +50,7 @@ import {
 import FormGroupTab from '../../../FormType/FormGroupTab'
 import FormCustom from '../../../FormType/FormCustom'
 import FormComboBox from '../../../FormType/FormCombobox'
+import FormCodeEditor from '../../../FormType/FormCodeEditor'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -70,6 +71,15 @@ export default function RenderFormType(
   },
 ): ReactElement {
   switch (fieldConfig?.formType) {
+    case 'code-editor':
+      return (
+        <FormCodeEditor
+          fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
+        />
+      )
     case 'input':
       return (
         <FormInput

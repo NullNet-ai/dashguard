@@ -10,11 +10,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
-import { useState, useEffect, useMemo } from "react";
-import { type Content } from "@tiptap/react";
-import { type IField } from "../../types";
 import { cn } from "~/lib/utils";
-
+import { type IField } from '../../types/global/interfaces';
+import { useState, useEffect } from "react";
+import { type Content } from "@tiptap/react";
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -34,31 +33,30 @@ export default function FormRichTextEditor({
   formKey,
 }: IProps) {
 
-  const fieldValue = useMemo(() => {
+  // Initialize content state from form value
+  const [content, setContent] = useState<Content>(() => {
     const fieldValue = formRenderProps.field.value;
     if (!fieldValue) return "";
-    
-    const stringValue = Array.isArray(fieldValue) 
-      ? fieldValue.join("") 
+
+    const stringValue = Array.isArray(fieldValue)
+      ? fieldValue.join("")
       : (fieldValue as string).toString();
-      
+
     // Only wrap in p tag if it doesn't already contain HTML
-    return !stringValue.includes('<') 
+    return !stringValue.includes('<')
       ? `<p class="text-node">${stringValue}</p>`
       : stringValue;
-  }, [formRenderProps.field.value] )
-  // Initialize content state from form value
-  const [content, setContent] = useState<Content>(fieldValue);
+  });
 
   const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
-  
+
   // Track editor instance key to force re-render
   const [editorKey, setEditorKey] = useState(0);
 
   // Sync content state with form value changes
   useEffect(() => {
-    if (fieldValue !== content) {
     const fieldValue = formRenderProps.field.value;
+    if (fieldValue !== content) {
       setContent(fieldValue || "");
     }
   }, [formRenderProps.field.value]);
@@ -84,6 +82,17 @@ export default function FormRichTextEditor({
       shouldTouch: true,
     });
   };
+  const {
+    entityOptions,
+    variableOptions,
+    plainTextMode: isPlainTextMode,
+    entitySelectorConfig,
+    variableSelectorConfig,
+    onEntitySelect,
+    onVariableSelect,
+    customDropdowns,
+  } = fieldConfig.richTextConfig || {};
+
 
   return (
     <FormItem>
@@ -102,24 +111,46 @@ export default function FormRichTextEditor({
               "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
             },
           }}
+          disabled={isDisabled} // Add this prop
+          readOnly={fieldConfig.readonly || isDisabled} // Update readOnly to include disabled state
           throttleDelay={0}
           immediatelyRender={false}
           value={content}
           onChange={handleChange}
+          onBlur={formRenderProps.field.onBlur}
+
+          editorClassName="focus:outline-none"
+          placeholder={fieldConfig?.placeholder ?? "Type your description here..."}
+          autofocus={true}
           className={cn(
             "w-full",
-            form.formState.errors[fieldConfig?.name] && 
+            form.formState.errors[fieldConfig?.name] &&
             "ring-1 ring-destructive ring-offset-0",
+            fieldConfig.className,
           )}
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
-          placeholder={fieldConfig?.placeholder ?? "Type your description here..."}
-          autofocus={true}
-          editorClassName="focus:outline-none"
-          onBlur={formRenderProps.field.onBlur}
+          plainTextMode={isPlainTextMode}
+          entityOptions={entityOptions}
+          variableOptions={variableOptions}
+          entitySelectorConfig={{
+            ...entitySelectorConfig,
+            disabled: isDisabled,
+          }}
+          variableSelectorConfig={{
+            ...variableSelectorConfig,
+            disabled: isDisabled,
+          }}
+          onEntitySelect={onEntitySelect}
+          onVariableSelect={onVariableSelect}
+          customDropdowns={customDropdowns?.map(dropdown => ({
+            ...dropdown,
+            disabled: isDisabled,
+          }))}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-error-msg-${fieldConfig.name}`} />
+
     </FormItem>
   );
 }

@@ -4,7 +4,7 @@ import { type z } from 'zod'
 
 import { FormField } from '~/components/ui/form'
 import { type Option } from '~/components/ui/multi-select'
-import { formatFormTestID } from '~/lib/utils'
+import { cn, formatFormTestID } from '~/lib/utils'
 
 import { WizardContext } from '../../../../Wizard/Provider'
 import FormAddress from '../../../FormType/FormAddress'
@@ -35,7 +35,7 @@ export default function FormModule({
   fields: IField[]
   form: UseFormReturn<Record<string, any>, any, undefined>
   subConfig?: {
-    selectOptions?: Record<string, ISelectOptions[]>
+    selectOptions?: Record<string, ISelectOptions[]> | any
     multiSelectOptions?: Record<string, Option[]>
     radioOptions?: Record<string, IRadioOptions[]>
     checkboxOptions?: Record<string, ICheckboxOptions[]>
@@ -79,7 +79,7 @@ export default function FormModule({
           default:
             return (
               <div
-                className={_field?.fieldClassName}
+                className={cn(`${_field?.fieldClassName} ${_field.formType === 'rich-text-editor' ? 'col-span-full' : ''}`)}
                 key={_field.id}
                 style={_field?.fieldStyle}
               >

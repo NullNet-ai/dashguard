@@ -1,0 +1,21 @@
+.entity-variable-reference {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.875em;
+  white-space: nowrap;
+}
+
+.entity-reference {
+  background-color: rgba(var(--mt-accent-blue-rgb), 0.2);
+  color: hsl(var(--primary));
+  border: 1px solid rgba(var(--mt-accent-blue-rgb), 0.4);
+}
+
+.variable-reference {
+  background-color: rgba(var(--mt-accent-green-rgb), 0.2);
+  color: hsl(var(--success));
+  border: 1px solid rgba(var(--mt-accent-green-rgb), 0.4);
+}

@@ -88,6 +88,10 @@ interface MultipleSelectorProps {
   onCreateRecord?: (value: string) => Promise<Option | undefined>;
   /** Show/hide the creatable item in the dropdown */
   showCreatableItem?: boolean;
+  /** Custom render function for the selected option badges */
+  renderBadge?: (option: Option, handleUnselect: (option: Option) => void) => React.ReactNode;
+  /** Custom render function for dropdown options */
+  renderOption?: (option: Option) => React.ReactNode;
 }
 
 export interface MultipleSelectorRef {
@@ -220,6 +224,8 @@ const MultipleSelector = React.forwardRef<
       showCreatableItem = true,
       onCreateRecord,
       useStringValues = false,
+      renderBadge,
+      renderOption,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -546,7 +552,11 @@ const MultipleSelector = React.forwardRef<
         >
           <div className={"flex flex-wrap items-center gap-1 py-[5px]"}>
             {selected.map((option) => {
-              return (
+              return renderBadge ? (
+                <React.Fragment key={option.value}>
+                  {renderBadge(option, handleUnselect)}
+                </React.Fragment>
+              ) : (
                 <Badge
                   key={option.value}
                   className={cn(
@@ -705,7 +715,7 @@ const MultipleSelector = React.forwardRef<
                                 "cursor-default text-sidebar-foreground ",
                               )}
                             >
-                              {option.label}
+                              {renderOption ? renderOption(option) : option.label}
                             </CommandItem>
                           );
                         })}

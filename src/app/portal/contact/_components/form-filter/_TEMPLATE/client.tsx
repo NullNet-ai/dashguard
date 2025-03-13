@@ -1,95 +1,62 @@
-"use client";
+'use client';
 
-import { z } from "zod";
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { z } from 'zod';
+import MultipleForm from './components/MultipleForm';
+import GridFilterConfig from './_config/gridConfig';
+import type { IFormProps } from '../types';
+import { GLOBAL_PARENT_VARIABLE_KEY } from './constants';
 
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { useToast } from "~/context/ToastProvider";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/template/contactPhoneEmail";
-import { type IFormProps } from "../types";
-import GRID_COLUMNS, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
-
-import ACTION_TYPE from "./_config/actionType";
-import FORM_FILTER_LABEL from "./_config/label";
-import PAGINATION_LIMIT from "./_config/paginationLimit";
-import STATUS_INCLUDED from "./_config/statusIncluded";
-import handleSelectFieldFilterGrid from "./actions/handleSelectFieldFilterGrid";
-import onFilterFieldChange from "./actions/onFilterFieldChange";
-import onRemoveSelectedRecords from "./actions/onRemoveSelectedRecords";
-import onSelectRecords from "./actions/onSelectRecords";
-import SelectedView from "./components/SelectedView";
-import renderComponentSelected from "./components/renderComponentSelected";
-
-const { CURRENT, LIMIT } = PAGINATION_LIMIT;
-const form_filter_entity = "";
-
-const FormSchema = z.object({
-  name: z.string(),
+// Be back later
+const FieldsSchema = z.object({
+  id: z.string(),
+  // ! Your schema goes here
 });
 
-export default function ContactDetails({
-  params,
-  defaultValues,
-  selectedRecords,
-}: IFormProps) {
-  const toast = useToast();
+// Be back later
+export const FormSchema = z.object({
+  [GLOBAL_PARENT_VARIABLE_KEY]: z.array(FieldsSchema),
+});
 
-  const handleSave = async ({
-    data,
-  }: IHandleSubmit<z.infer<typeof FormSchema>>): Promise<any[]> => {
-    try {
-      alert(JSON.stringify(data, null, 2));
-      return await Promise.resolve([]);
-    } catch (error) {
-      toast.error("Failed to submit Basic Details");
-      return [];
-    }
-  };
-
+export default function RecordDetails(props: IFormProps) {
+  const { params, defaultValues } = props;
   return (
     <FormBuilder
-      filterGridConfig={{
-        selectedRecords,
-        main_entity_id: params.id,
-        pluck: params?.pluck_fields,
-        filter_entity: form_filter_entity,
-        current: CURRENT,
-        limit: LIMIT,
-        label: FORM_FILTER_LABEL,
-        actionType: ACTION_TYPE,
-        gridColumns: GRID_COLUMNS,
-        statusesIncluded: STATUS_INCLUDED,
-        fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
-        onSelectRecords,
-        onRemoveSelectedRecords,
-        onFilterFieldChange,
-        handleSelectFieldFilterGrid,
-        renderComponentSelected: renderComponentSelected(SelectedView),
+      customDesign={{
+        formClassName: 'lg:grid-cols-1 sm:grid-cols-1 ',
       }}
-      myParent={params.shell_type}
-      enableFormRegisterToParent
-      formProps={params}
-      formLabel="Basic Details"
-      handleSubmitFormGrid={handleSave}
-      formKey="basicDetails"
-      formSchema={ContactPhoneEmailSchema}
+      customRender={(form, options, displayType, handleUpdateDisplayType) => {
+        return (
+          <MultipleForm
+            appendFormKey={options?.appendButtonKey}
+            defaultValues={defaultValues}
+            displayType={displayType}
+            filterGridConfig={GridFilterConfig(props)}
+            form={form}
+            formSchema={FormSchema}
+            handleUpdateDisplayType={handleUpdateDisplayType}
+          />
+        );
+      }}
       defaultValues={defaultValues}
-      fields={[
-        {
-          id: "name",
-          formType: "input",
-          name: "name",
-          label: "Name",
-          required: true,
-          placeholder: "Name",
-          withGridFilter: true,
-          gridPosition: "right",
-          filterFieldConfig: {
-            entity: form_filter_entity,
-            field: "name",
-          },
-        },
-      ]}
+      // ! Add button event handler
+      appendFormKey={GLOBAL_PARENT_VARIABLE_KEY}
+      // ! Add Button will display on the top of the form
+      enableAppendForm={true}
+      // ! Registration to wizard application
+      enableFormRegisterToParent={true}
+      features={{
+        enableFormFilterCreate: false,
+      }}
+      fields={[]}
+      filterGridConfig={GridFilterConfig(props)}
+      // ! Change form key
+      formKey="formFilterMultipleForms"
+       // ! Change Form Title
+      formLabel="Form Filter with Multiple Forms"
+      formProps={params}
+      formSchema={FormSchema}
+      myParent={params.shell_type}
     />
   );
 }
