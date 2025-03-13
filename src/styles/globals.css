@@ -266,3 +266,17 @@ body {
 .animate-slide {
   animation: slide 1.5s infinite linear;
 }
+
+
+/* Remove focus styles from rich text editor */
+.ProseMirror-focused {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
+}
+
+.minimal-tiptap-editor:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
+}
