@@ -117,7 +117,7 @@ export const FormBuilder = (props: IPropsForms) => {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       parsingResult.then((result) => {
         if (result.success) {
-          form.control._disableForm(result.success)
+          // form.control._disableForm(result.success)
           setDisplayType('form')
         }
       })

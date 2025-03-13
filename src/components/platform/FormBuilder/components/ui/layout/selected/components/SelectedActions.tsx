@@ -1,16 +1,16 @@
-import { Copy, EllipsisVertical, Eye, MinusCircleIcon } from "lucide-react";
-import { redirect } from "next/navigation";
-import React from "react";
-import {
+import { Copy, EllipsisVertical, Eye } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import React from 'react';
+import type {
   ICustomActions,
   IFeatures,
-} from "~/components/platform/FormBuilder/types";
+} from '~/components/platform/FormBuilder/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
 export default function SelectedActions({
   form,
@@ -37,7 +37,7 @@ export default function SelectedActions({
         <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {form?.getValues()?.status === "Active" && enableLockFormView && (
+        {form?.getValues()?.status === 'Active' && enableLockFormView && (
           <DropdownMenuItem
             onClick={() => {
               const currentValues = form.getValues();

@@ -154,7 +154,7 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                         ) : (
                           React.cloneElement(
                             state?.config?.rowExpansionBuilder,
-                            { rowData: row.original, parentExpanded: allExpandedRows },
+                            { rowData: row.original, parentExpanded: allExpandedRows, key:`expanded:${row.id ?? index}` },
                           )
                         )
                       ) : (
