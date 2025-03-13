@@ -23,7 +23,7 @@ const MainContent = ({
   return (
     <section
       className={cn(
-        "main-content max-h-full space-y-2 overflow-auto",
+        "main-content max-h-full overflow-auto",
         width,
         height,
         className,

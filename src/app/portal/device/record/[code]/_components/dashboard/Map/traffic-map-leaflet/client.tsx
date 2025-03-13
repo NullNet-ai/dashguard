@@ -20,6 +20,9 @@
 // }
 'use client';
 
+import Filter from '../../timeline/Filter';
+import Main from '../../timeline/Search';
+import { IFormProps } from '../../types';
 // import { useEffect } from 'react';
 // import L from 'leaflet';
 // import 'leaflet/dist/leaflet.css';
@@ -80,9 +83,11 @@ import MapComponent from './components/MapOption2NoCountry';
 import MapOption3 from './components/MapOption3';
 import Map from './components/MapOption3';
 
-export default function TrafficMaps() {
+export default function TrafficMaps({defaultValues, params}: IFormProps) {
   return (
     <div>
+      <Filter />
+      <Main  params={params} />
       <h1>Traffic Flow to Philippines Server</h1>
       {/* <Map /> */}
       {/* <MapOption3 /> */}

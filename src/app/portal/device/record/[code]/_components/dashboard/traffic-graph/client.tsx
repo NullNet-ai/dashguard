@@ -25,6 +25,8 @@ import { api } from '~/trpc/react'
 import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
 import { IFormProps } from '../types'
+import Filter from '../timeline/Filter'
+import Main from '../timeline/Search'
 
 const time_range_options = {
   '30d': '30 days',
@@ -68,7 +70,7 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const TrafficGraph = ({defaultValues}: IFormProps) => {
+const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const [timeRange, setTimeRange] = React.useState('30d')
   const [resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
@@ -152,6 +154,9 @@ const TrafficGraph = ({defaultValues}: IFormProps) => {
   , [resolution])
 
   return (
+    <>
+    <Filter />
+    <Main  params={params} />
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
@@ -224,6 +229,7 @@ const TrafficGraph = ({defaultValues}: IFormProps) => {
         </ChartContainer>
       </CardContent>
     </Card>
+    </>
   )
 }
 

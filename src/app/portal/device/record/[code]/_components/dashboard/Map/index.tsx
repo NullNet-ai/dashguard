@@ -1,4 +1,4 @@
-import TrafficMaps from "./traffic-map-leaflet/page";
+import TrafficMaps from "./traffic-map-leaflet/client";
 
 const Map = () => <TrafficMaps/>;
 
