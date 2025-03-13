@@ -127,10 +127,12 @@ export default function GridProvider({
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
 
-  const [gridColumns, setGridColumns] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
+  const [gridColumns, ] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
     return {
       header: item.header,
       accessorKey: item.accessorKey,
+      search_config: item.search_config,
+      data_type: item.data_type
     }
   }));
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({

@@ -17,7 +17,7 @@ export default function CreateNewFilter() {
   const { state } = useGrid();
   const { config } = state ?? {};
 
-  const { gridColumns : _columns = [] } = config ?? {};
+  const { gridColumns : _columns = [], searchConfig } = config ?? {};
   
   const gridColumns = _columns.map((column: any, index: number) => ({
     header: column.header,
@@ -25,6 +25,8 @@ export default function CreateNewFilter() {
     label: column.header,
     isShow: column.isShow || true,
     order: column.order || index,
+    search_config : column.search_config,
+    data_type: column.data_type,
   }));
 
   const handleManageFilter = () => {
@@ -39,6 +41,7 @@ export default function CreateNewFilter() {
               name: 'New Filter',
             }}
             columns={gridColumns as Record<string, any>[]}
+            searchConfig={searchConfig}
           >
             <GridManageFilter />
           </ManageFilterProvider>
