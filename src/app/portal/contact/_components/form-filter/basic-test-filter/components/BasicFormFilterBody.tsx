@@ -1,5 +1,5 @@
-import { Lock, Repeat,  X } from 'lucide-react';
-import React, { Fragment,  useState } from 'react';
+import { Lock, Repeat, X } from 'lucide-react';
+import React, { Fragment, useState } from 'react';
 import FormFilterGridLayout from '~/components/platform/FormBuilder/components/ui/FormFilterGridLayout';
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
 import FormFilterOpenedActions from '~/components/platform/FormBuilder/components/ui/layout/opened/components/FormFilterOpenedActions';
@@ -13,7 +13,6 @@ import { Label } from '~/components/ui/label';
 import { Button } from '~/components/ui/button';
 import CancelButton from './buttons/Cancel';
 import { IBasicFormFilterBodyProps } from './types';
-
 
 const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
   const {
@@ -88,7 +87,7 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
             </Button>
           ) : (
             <Fragment>
-              {field?.code && (
+              {field?.code && !isSearchOpen && (
                 <CancelButton
                   field={field}
                   handleResetForm={() => {
@@ -127,7 +126,7 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
                 {
                   icon: <X className="h-4 w-4 text-foreground" />,
                   label: 'Remove Selection',
-                  onClick: () => handleRemovedSelectedRecords(field, index)
+                  onClick: () => handleRemovedSelectedRecords(field, index),
                 },
               ]}
               features={{
@@ -202,7 +201,7 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
       )}
 
       {/* SELECTED VIEW LAYOUT */}
-      {(!isEditMode) && (
+      {!isEditMode && (
         <CardContent>
           <Fragment key={prefix}>
             <Card className="border-none shadow-none">
