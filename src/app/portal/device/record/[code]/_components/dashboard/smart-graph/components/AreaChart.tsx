@@ -4,7 +4,9 @@ import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } fr
 
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
   return (
-    <AreaChart data={filteredData}>
+    <AreaChart data={filteredData}
+    height={300} width={1870}
+    >
       <defs>
         <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
           <stop
