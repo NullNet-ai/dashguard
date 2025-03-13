@@ -87,7 +87,7 @@ export default function TrafficMaps({defaultValues, params}: IFormProps) {
   return (
     <div>
       <Filter />
-      <Search  params={params} />
+      <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
       <h1>Traffic Flow to Philippines Server</h1>
       {/* <Map /> */}
       {/* <MapOption3 /> */}
