@@ -35,7 +35,7 @@ const FormServerFetch = async () => {
               // ! This is needed to have an initial form field
               id: ulid(),
               // ! Code is indicator for record been created or not
-              code: "",
+              code: "TEST",
             },
           ],
         }}
