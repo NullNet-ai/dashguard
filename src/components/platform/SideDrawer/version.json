@@ -1,7 +1,7 @@
 {
   "app_name": "platform__SideDrawer",
-  "tag": "1.2.0-rc.1<unreleased>",
-  "branch": "unreleased/fix2864/1.2.0-rc.1<unreleased>",
-  "message": "remove padding to side drawer content and adjust size of close button to make it smaller",
+  "tag": "1.2.1-rc.2<unreleased>",
+  "branch": "unreleased/feat3256-3257/1.2.1-rc.2<unreleased>",
+  "message": "add SideDrawer,component that handles layout when sidedrawer is being pinned ",
   "publish_name": "Rob Caldosa"
 }
