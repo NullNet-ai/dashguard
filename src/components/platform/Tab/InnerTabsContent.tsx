@@ -27,8 +27,6 @@ import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, toLower } from 'lodash';  // Add this import at the top
-import { boolean } from 'zod';
-
 const InnerTabsContent = ({
   par_items = [],
   pathname,
@@ -43,18 +41,21 @@ const InnerTabsContent = ({
   const { open } = useSidebar();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const  {state: drawerState,  } = useSideDrawer ()
-
   const {width, isOpen, isPinned} = drawerState
-
   const [searchValue, setSearchValue] = useState<string>('')
-
   const [entity] = pathname.split('/').slice(2);
+  const [datas, setDatas] = useState(par_items)
 
-  const conWidth = useMemo(() => ({
+  const conWidth = useMemo(() =>   ({
     width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
 
   useEffect(() => {
+
+    if(JSON.stringify(par_items) !== JSON.stringify(datas)) {
+      setDatas(par_items)
+    }
+    
     const calc = (items?: any[]) => {
       const allItems: any[] = [];
       const newData = items || par_items;
@@ -129,6 +130,13 @@ const InnerTabsContent = ({
     };
   }, []);
 
+  useEffect(() => {
+    if(!isDropdownOpen) {
+      setSearchValue('')
+    }
+  }, [isDropdownOpen])
+  
+
   const lastShownItem = useMemo(() => {
     if (data?.length > 0) {
       const removeHidden = data.filter((item: any) => !item.hidden);
@@ -155,22 +163,21 @@ const InnerTabsContent = ({
       >
         <Sortable
           orientation="horizontal"
-          value={par_items}
+          value={datas}
           onMove={({ activeIndex, overIndex }) => {
-            // setItems((items) => {
-            //   const newItems = [...items];
-            //   const [removed] = newItems.splice(activeIndex, 1);
-            //   newItems.splice(overIndex, 0, removed);
-            //   return newItems;
-            // });
+            setDatas((items) => {
+              const newItems = [...items];
+              const [removed] = newItems.splice(activeIndex, 1);
+              newItems.splice(overIndex, 0, removed);
+              return newItems;
+            });
           }}
         >
-          {par_items.map((tab: any, index: number) => {
+          {datas.map((tab: any, index: number) => {
             const isHidden = data?.[index]?.hidden;
             return (
-              <SortableItem key={tab.name} value={tab.name} className="relative">
-                <SortableDragHandleRawItem className="">
-                  <InnerTabitem
+              <SortableItem key={tab.id} value={tab.id} className="relative">
+                <InnerTabitem
                     className={cn({ 'opacity-0': isHidden })}
                     isHidden={isHidden}
                     ref={(el) => {
@@ -186,8 +193,7 @@ const InnerTabsContent = ({
                     newItems={data}
                     pathname={pathname}
                     key={index}
-                  />
-                </SortableDragHandleRawItem>
+                  /> 
               </SortableItem>
             );
           })}

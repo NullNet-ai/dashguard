@@ -1,9 +1,12 @@
 import Cookies from 'js-cookie';
+import { toLower } from 'lodash';
+import { GripVerticalIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { forwardRef, useEffect, useMemo } from 'react';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
+import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 
@@ -54,7 +57,6 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     }
     const getCurrent = getActiveName() || ''
 
-    console.log("getCurrentgetCurrent", getCurrent)
     const cachedData = {
       tabs: newItems,
       lastShownItem: lastShownItem?.name,
@@ -87,25 +89,35 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       ref={ref}
       key={tabNameRole}
       className={cn(
-        `group relative whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
+        `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
-      <Link
-        data-test-id={
-          entityName + '-apptab-' + tabNameRole
-        }
-        onClick={() => {
-          handleClickLink()
-        }}
-        href={isHidden ? `${newPathname}#` : tab.href}
-        aria-current={isActive ? 'page' : undefined}
-        className={cn(
-          isActive ? 'text-primary xx' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
-        )}
-      >
-        {formatTabName(tabNameRole)}
-        <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-      </Link>
+      {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
+        <SortableDragHandleRawItem className='cursor-grab opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto group-hover:transition-all group-hover:duration-100 group-hover:ease-in mr-1'>
+          <GripVerticalIcon
+            className="w-3.5 h-3.5 text-default-foreground/60"
+            aria-hidden="true"
+          />
+        </SortableDragHandleRawItem>
+      ) : null}
+      
+        <Link
+          data-test-id={
+            entityName + '-apptab-' + tabNameRole
+          }
+          onClick={() => {
+            handleClickLink()
+          }}
+          href={isHidden ? `${newPathname}#` : tab.href}
+          aria-current={isActive ? 'page' : undefined}
+          className={cn(
+            isActive ? 'text-primary xx' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+          )}
+        >
+          {formatTabName(tabNameRole)}
+          <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
+        </Link>
+  
       {!isHidden
         ? (
             <TabMenu

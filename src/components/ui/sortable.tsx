@@ -341,6 +341,7 @@ const SortableDragHandleRawItem = React.forwardRef<
 
   return (
     <button
+      type='button'
       ref={composeRefs(ref)}
       data-state={isDragging ? "dragging" : undefined}
       className={cn(

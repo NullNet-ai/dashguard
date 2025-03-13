@@ -52,6 +52,27 @@ const InnerDropTabItem = ({
     }
   }, [shownItems]);
 
+
+  const handleClickLink = () => {
+
+    const getCurrent = getActiveName() || ''
+    const cachedData = {
+      tabs: shownItems,
+      lastShownItem: lastShownItem?.name,
+      prevCurrent: getCurrent,
+      key:  'inner_tab_data_' + entityName,
+    }
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+
+    localStorage.setItem('cachedPortalItems', JSON.stringify({
+      ...cachedItems,
+      [`inner_tab_data_${entityName}`]: cachedData,
+    }))
+
+    // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
+    // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
+  }
+
   useEffect(() => {
     void updateSubtabs.mutateAsync({
       current_context: '/portal/' + entityName,
@@ -68,10 +89,7 @@ const InnerDropTabItem = ({
           'apptab-' + tabNameRole
         }
         onClick={() => {
-          const getCurrent = getActiveName() || ''
-          Cookies.set('prevCurrent', getCurrent)
-          Cookies.set('innerCopiedLastItems', JSON.stringify(shownItems))
-          Cookies.set('innerLastShownItem', lastShownItem?.name)
+          handleClickLink()
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
