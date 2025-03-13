@@ -1,18 +1,18 @@
-import { Lock, Repeat, X } from 'lucide-react';
-import React, { Fragment, useState } from 'react';
-import FormFilterGridLayout from '~/components/platform/FormBuilder/components/ui/FormFilterGridLayout';
-import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
-import FormFilterOpenedActions from '~/components/platform/FormBuilder/components/ui/layout/opened/components/FormFilterOpenedActions';
-import SelectedActions from '~/components/platform/FormBuilder/components/ui/layout/selected/components/SelectedActions';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { cn } from '~/lib/utils';
-import { GLOBAL_PARENT_VARIABLE_KEY } from '../constants';
-import CreateUpdateButton from './buttons/CreateUpdate';
-import ShowGridButton from './buttons/ShowGrid';
-import { Label } from '~/components/ui/label';
-import { Button } from '~/components/ui/button';
-import CancelButton from './buttons/Cancel';
-import { IBasicFormFilterBodyProps } from './types';
+import { Lock, Repeat, X } from "lucide-react";
+import React, { Fragment, useState } from "react";
+import FormFilterGridLayout from "~/components/platform/FormBuilder/components/ui/FormFilterGridLayout";
+import FormModule from "~/components/platform/FormBuilder/components/ui/FormModule/FormModule";
+import FormFilterOpenedActions from "~/components/platform/FormBuilder/components/ui/layout/opened/components/FormFilterOpenedActions";
+import SelectedActions from "~/components/platform/FormBuilder/components/ui/layout/selected/components/SelectedActions";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
+import { GLOBAL_PARENT_VARIABLE_KEY } from "../constants";
+import CreateUpdateButton from "./buttons/CreateUpdate";
+import ShowGridButton from "./buttons/ShowGrid";
+import { Label } from "~/components/ui/label";
+import { Button } from "~/components/ui/button";
+import CancelButton from "./buttons/Cancel";
+import { IBasicFormFilterBodyProps } from "./types";
 
 const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
   const {
@@ -77,12 +77,12 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
 
         <div
           className={cn(
-            `me-4 ms-auto mt-4 flex justify-end gap-2`,
-            `${isSearchOpen ? 'flex-col' : ''}`,
+            `me-4 mt-4 flex justify-end gap-2`,
+            `${isSearchOpen ? "w-full flex-col" : ""}`,
           )}
         >
           {!isEditMode ? (
-            <Button onClick={handleUnLock} variant={'ghost'}>
+            <Button onClick={handleUnLock} variant={"ghost"}>
               <Lock className="h-4 w-4" />
             </Button>
           ) : (
@@ -120,12 +120,12 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
               customFormFilterLockFormActions={[
                 {
                   icon: <Repeat className="h-4 w-4 text-foreground" />,
-                  label: 'Change Selection',
+                  label: "Change Selection",
                   onClick: handleChangeSelection,
                 },
                 {
                   icon: <X className="h-4 w-4 text-foreground" />,
-                  label: 'Remove Selection',
+                  label: "Remove Selection",
                   onClick: () => handleRemovedSelectedRecords(field, index),
                 },
               ]}
@@ -138,14 +138,14 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
               form={form}
             />
           )}
-          {!form?.formState?.disabled && isEditMode && !isSearchOpen && (
+          {isEditMode && !isSearchOpen && (
             <FormFilterOpenedActions
               customFormFilterViewFormActions={
                 index !== 0
                   ? [
                       {
                         icon: <X className="h-4 w-4 text-foreground" />,
-                        label: 'Remove',
+                        label: "Remove",
                         onClick: handleResetForm,
                       },
                     ]
@@ -163,7 +163,7 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
               selectedRecords={field.code ? [field] : []}
               onSubmitFormGrid={handleSubmitFieldValues}
               handleRemovedSelectedRecords={() => {
-                console.info('[Work if single filter grid]');
+                console.info("[Work if single filter grid]");
               }}
             />
           )}
@@ -172,7 +172,7 @@ const BasicFormFilterBody: React.FC<IBasicFormFilterBodyProps> = (props) => {
               className="w-full"
               filterGridConfig={filterGridConfig}
               handleCloseGrid={() => {
-                console.info('Closing Grid...');
+                console.info("Closing Grid...");
               }}
               handleListLoading={handleListLoading}
               handleSelectedGridRecords={(record) => {

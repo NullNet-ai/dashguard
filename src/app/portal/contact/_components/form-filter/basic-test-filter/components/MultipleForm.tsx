@@ -115,6 +115,7 @@ const MultipleForm: React.FC<IMultipleFormProps> = (props) => {
      */
 
     handleToggleEditMode(index, false);
+    handleUpdateDefaultValue(index);
     // setIsFormOpened(false);
   };
 
