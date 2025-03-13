@@ -21,7 +21,7 @@
 'use client';
 
 import Filter from '../../timeline/Filter';
-import Main from '../../timeline/Search';
+import Search from '../../timeline/Search';
 import { IFormProps } from '../../types';
 // import { useEffect } from 'react';
 // import L from 'leaflet';
@@ -87,7 +87,7 @@ export default function TrafficMaps({defaultValues, params}: IFormProps) {
   return (
     <div>
       <Filter />
-      <Main  params={params} />
+      <Search  params={params} />
       <h1>Traffic Flow to Philippines Server</h1>
       {/* <Map /> */}
       {/* <MapOption3 /> */}

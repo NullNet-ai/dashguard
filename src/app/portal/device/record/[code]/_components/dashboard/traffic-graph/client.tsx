@@ -26,7 +26,7 @@ import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
 import { IFormProps } from '../types'
 import Filter from '../timeline/Filter'
-import Main from '../timeline/Search'
+import Search from '../timeline/Search'
 
 const time_range_options = {
   '30d': '30 days',
@@ -156,7 +156,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   return (
     <>
     <Filter />
-    <Main  params={params} />
+    <Search  params={params} />
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
