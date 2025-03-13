@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.3",
-  "branch": "released/1.14.3",
-  "message": "revert changes",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.15.0",
+  "branch": "released/fix/platform-2849/1.15.0",
+  "message": "Select > Creatable - Able to create new option though the field is case insensitive",
+  "publish_name": "Mary Grace Tiburillo-Tan"
 }

@@ -13,15 +13,26 @@ import { type IFormProps } from '../types';
 import ContentField from './custom/ContentField';
 import SubjectField from './custom/SubjectField';
 import VariableField from './custom/VariableField';
-
-const FormSchema = z.object({
-  subject: z.string({ required_error: 'Subject is required' }),
-  content: z.string({ required_error: 'Content is required' }),
-});
+import { useSearchParams } from 'next/navigation';
 
 export default function Content({ params, defaultValues }: IFormProps) {
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category');
   const update = api.record.updateDynamicRecord.useMutation();
+
+  const FormSchema = z.object({
+    ...(category !== 'SMS'
+      ? {
+          subject: z
+            .string({ required_error: 'Subject is required' })
+            .min(1, { message: 'Subject is required' }),
+        }
+      : {}),
+    content: z
+      .string({ required_error: 'Content is required' })
+      .min(1, { message: 'Content is required' }),
+  });
 
   const handleSave = async ({
     data,
@@ -84,6 +95,8 @@ export default function Content({ params, defaultValues }: IFormProps) {
             formType: 'custom-field',
             name: 'subject_variables',
             label: 'Variables',
+            hasFormMessage: false,
+            selectSearchable: true,
             render: VariableField,
           },
           {
@@ -109,6 +122,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
               gridColumn: '1 / span 4',
               gridRow: '2 / span 1',
             },
+            hasFormMessage: false,
             render: SubjectField,
           },
           {
@@ -137,6 +151,8 @@ export default function Content({ params, defaultValues }: IFormProps) {
       formType: 'custom-field',
       name: 'content_variables',
       label: 'Variables',
+      hasFormMessage: false,
+      selectSearchable: true,
       render: VariableField,
     },
     {
@@ -164,6 +180,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
         gridRow:
           defaultValues.categories?.[0] !== 'SMS' ? '5 / span 1' : '2 / span 1',
       },
+      hasFormMessage: false,
       render: ContentField,
     },
   ] as IField[];
@@ -173,6 +190,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
       customDesign={{
         formClassName: 'grid !grid-cols-4 gap-4',
       }}
+      enableFormRegisterToParent
       myParent={params.shell_type}
       formProps={params}
       formLabel="Content"

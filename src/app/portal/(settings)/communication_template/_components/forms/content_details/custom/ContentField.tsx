@@ -1,3 +1,4 @@
+import { useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 import FormRichTextEditor from '~/components/platform/FormBuilder/FormType/FormRichTextEditor';
 import FormTextArea from '~/components/platform/FormBuilder/FormType/FormTextArea';
@@ -5,10 +6,11 @@ import { type CustomFieldProps } from '~/components/platform/FormBuilder/types';
 
 const ContentField = (props: CustomFieldProps) => {
   const { form, formKey, fieldConfig, ...formRenderProps } = props;
+  console.log("🚀 ~ ContentField ~ fieldConfig:", fieldConfig)
+  const searchParams = useSearchParams();
   const variable = form.watch('content_variables');
   const content = form.getValues('content') ?? '';
-  const category = props?.formState?.defaultValues?.categories?.[0];
-  console.log('🚀 ~ ContentField ~ category:', category);
+  const category = searchParams.get('category') || form.formState.defaultValues?.categories?.[0];
 
   useEffect(() => {
     if (variable) {
@@ -51,7 +53,7 @@ const ContentField = (props: CustomFieldProps) => {
     />
   ) : (
     <FormRichTextEditor
-      fieldConfig={fieldConfig}
+      fieldConfig={{...fieldConfig}}
       form={form}
       formKey={formKey}
       formRenderProps={formRenderProps}

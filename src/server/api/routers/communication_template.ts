@@ -1,10 +1,14 @@
-import { createTRPCRouter, privateProcedure , publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { pluralize } from '~/server/utils/pluralize';
 
-
-const ENTITY = 'communication_template'
+const ENTITY = 'communication_template';
 
 export const communicationTemplateRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
@@ -64,6 +68,28 @@ export const communicationTemplateRouter = createTRPCRouter({
       return {
         ...record,
         data: record?.data?.[0],
+      };
+    }),
+  fetchVariables: privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const variables = (await ctx.redisClient.getHashValue(
+        `schema:${pluralize(input?.entity)}`,
+        'formatted_with_related_fields',
+      )) as any;
+      if (!variables) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Variables not found',
+        });
+      }
+      console.info('[Fetch Variables]', variables);
+      return {
+        data: variables,
       };
     }),
 });

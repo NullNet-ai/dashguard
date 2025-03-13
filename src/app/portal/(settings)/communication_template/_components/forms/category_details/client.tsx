@@ -6,6 +6,7 @@ import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { api } from '~/trpc/react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const FormSchema = z.object({
   category: z
@@ -15,6 +16,8 @@ const FormSchema = z.object({
 
 export default function CategoryDetails({ params, defaultValues }: IFormProps) {
   const toast = useToast();
+  const router = useRouter()
+  const pathName = usePathname();
   const update = api.record.updateDynamicRecord.useMutation();
 
   const handleSave = async ({
@@ -28,6 +31,7 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
         },
         entity: params?.entity!,
       });
+      pathName && router.push(`${pathName}?category=${data.category}`)
       toast.success('Category submitted successfully.');
     } catch {
       toast.error('Failed to submit Category Details');

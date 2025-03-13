@@ -6,7 +6,7 @@ const menu = {
   url: getGridLink({
     mainEntity: "communication_template",
   }),
-  icon: "QuestionMarkCircle",
+  icon: "EnvelopeIcon",
 } as ISidebarMenu;
 
 export default menu;

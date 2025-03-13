@@ -9,7 +9,9 @@ import { api } from '~/trpc/react';
 import { getEventTypes } from '~/server/events';
 
 const FormSchema = z.object({
-  event: z.string({ required_error: 'Event is required' }),
+  event: z.string({ required_error: 'Event is required' }).min(1, {
+    message: 'Event is required',
+  }),
 });
 
 export default function FormLabel({ params, defaultValues }: IFormProps) {
@@ -36,7 +38,7 @@ export default function FormLabel({ params, defaultValues }: IFormProps) {
   const eventOptions = getEventTypes().map((event) => ({
     label: event,
     value: event,
-  }))
+  }));
 
   return (
     <FormBuilder

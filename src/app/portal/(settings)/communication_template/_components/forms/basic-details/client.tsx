@@ -9,7 +9,7 @@ import { UpdateCommunicationTemplate } from './actions/updateCommunication';
 
 const FormSchema = z.object({
   id: z.string().optional(),
-  name: z.string( {required_error: 'Name is required'}),
+  name: z.string( {required_error: 'Name is required'}).min(1, { message: 'Name is required'}),
 });
 
 export default function FormLabel({ params, defaultValues }: IFormProps) {

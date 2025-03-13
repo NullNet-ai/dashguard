@@ -24,6 +24,7 @@ export default async function Page() {
     'status',
     'name',
     'event',
+    'categories',
     'communication_template_status',
     'created_date',
     'created_time',
