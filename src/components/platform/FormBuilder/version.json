@@ -1,7 +1,7 @@
 {
   "app_name": "platform__FormBuilder",
-  "tag": "1.11.0",
-  "branch": "released/fix/1.11.0",
-  "message": "Form Filter Grid enchancement",
-  "publish_name": "Kit Mikhael Bagares"
+  "tag": "1.12.0<unreleased>",
+  "branch": "unreleased/feat/PLATFORM7-3170/1.12.0<unreleased>",
+  "message": "Update Form Filter Grid multiple",
+  "publish_name": "Shem Alexis Chavez"
 }
