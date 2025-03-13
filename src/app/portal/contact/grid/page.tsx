@@ -37,13 +37,15 @@ export default async function Page({
   const { sorts, pagination, filters, columns : columnOrder } = (await getGridCacheData()) ?? {};
 
   const defaultPagination = pagination?.limit_per_page ? pagination : {
-    current_page: +(searchParams?.page?? "0"),
-    limit_per_page: +(searchParams?.perPage?? "50"),
+    current_page: +(pagination?.current_page ?? "1"),
+    limit_per_page: +(pagination?.limit_per_page?? "100"),
   };
 
+  
+
   const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(defaultPagination?.current_page ?? "0"),
-    limit: +(defaultPagination?.limit_per_page ?? "50"),
+    current: +(defaultPagination?.current_page ?? "1"),
+    limit: +(defaultPagination?.limit_per_page ?? "100"),
     entity: "contact",
     pluck: _pluck,
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
