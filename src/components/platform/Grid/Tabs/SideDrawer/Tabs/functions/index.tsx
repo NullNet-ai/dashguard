@@ -14,7 +14,7 @@ import FormModule from '~/components/platform/FormBuilder/components/ui/FormModu
 import { ZodSchema } from '../schemas/filter';
 import { api } from '~/trpc/server';
 import { searchRecords } from './search';
-import { ISelectOptions } from '~/components/platform/FormBuilder/types';
+import { type ISelectOptions } from '~/components/platform/FormBuilder/types';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({

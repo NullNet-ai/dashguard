@@ -17,7 +17,7 @@ import SectionFive from "./components/section/five";
 import SectionSix from "./components/section/six";
 import SectionTwo from "./components/section/two";
 import SectionSeven from "./components/section/seven";
-
+import EntityVariableSection from "./components/section/entity-variable-section";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
@@ -26,8 +26,24 @@ import ExtendedTextStyle from "./components/extended-text-style";
 import { Image } from "./extensions/image/image";
 import { CodeBlockLowlight, FileHandler } from "./extensions";
 import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { type EntityVariableOption } from "./components/entity-variable/entity-variable-selector";
+// Add the PreventNewlines extension
+import { Extension } from "@tiptap/core";
+import CustomDropdownsSection from './components/section/custom-dropdowns-section';
+import { CustomDropdownConfig } from './components/entity-variable/custom-dropdown-selector';
 
+// Create a custom extension to prevent new lines
+const PreventNewlines = Extension.create({
+  name: 'preventNewlines',
+  addKeyboardShortcuts() {
+    return {
+      'Enter': () => true, // Prevent Enter key from creating new lines
+    }
+  },
+});
+
+// Update the MinimalTiptapProps interface to include the new configuration options
 export interface MinimalTiptapProps
   extends Omit<UseMinimalTiptapEditorProps, "onUpdate"> {
   value?: Content;
@@ -35,19 +51,128 @@ export interface MinimalTiptapProps
   className?: string;
   editorContentClassName?: string;
   readOnly?: boolean;
+  entityOptions?: EntityVariableOption[];
+  variableOptions?: EntityVariableOption[];
+  plainTextMode?: boolean;
+  disabled?: boolean;
+  // New configuration options
+  entitySelectorConfig?: {
+    buttonLabel?: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    formatInsertedValue?: (option: EntityVariableOption) => string;
+    insertInEditor?: boolean;
+    show?: boolean;
+    disabled?:boolean;
+  };
+  variableSelectorConfig?: {
+    buttonLabel?: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    formatInsertedValue?: (option: EntityVariableOption) => string;
+    insertInEditor?: boolean;
+    show?: boolean;
+    disabled?:boolean;
+  };
+  onEntitySelect?: (option: EntityVariableOption) => void;
+  onVariableSelect?: (option: EntityVariableOption) => void;
+  // Add customDropdowns property
+  customDropdowns?: Array<{
+    id: string;
+    buttonLabel: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    options: Array<{
+      label: string;
+      value: string;
+    }>;
+    formatInsertedValue?: (option: { label: string; value: string }) => string;
+    onSelect?: (option: { label: string; value: string }) => void;
+  }>;
 }
 
+// Update the Toolbar component to pass the new configuration options
 const Toolbar = ({
   editor,
   disabled = false,
   readOnly = false,
+  entityOptions,
+  variableOptions,
+  plainTextMode = false,
+  entitySelectorConfig,
+  variableSelectorConfig,
+  onEntitySelect,
+  onVariableSelect,
+  customDropdowns
 }: {
   editor: Editor;
   disabled: boolean;
   readOnly: boolean;
+  entityOptions?: EntityVariableOption[];
+  variableOptions?: EntityVariableOption[];
+  plainTextMode?: boolean;
+  entitySelectorConfig?: MinimalTiptapProps['entitySelectorConfig'];
+  variableSelectorConfig?: MinimalTiptapProps['variableSelectorConfig'];
+  onEntitySelect?: (option: EntityVariableOption) => void;
+  onVariableSelect?: (option: EntityVariableOption) => void;
+  customDropdowns?: MinimalTiptapProps['customDropdowns'];
 }) => {
+  // If in plain text mode, only show entity/variable section
+  if (plainTextMode) {
+    return (
+      <div className="shrink-0 overflow-x-auto border-b border-border bg-background px-2 py-1">
+        <div className="flex w-max items-center gap-px">
+          {/* Add custom dropdowns section */}
+          {customDropdowns && customDropdowns.length > 0 && (
+            <CustomDropdownsSection
+              editor={editor}
+              customDropdowns={customDropdowns}
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+            />
+          )}
+  
+          {/* Add separator if we have both custom dropdowns and entity/variable selectors */}
+          {customDropdowns && customDropdowns.length > 0 && 
+           ((entityOptions?.length && entitySelectorConfig?.show !== false) || 
+            (variableOptions?.length && variableSelectorConfig?.show !== false)) && (
+            <Separator orientation="vertical" className="mx-2 h-7" />
+          )}
+  
+          {/* Only show Entity/Variable Section in plain text mode */}
+          {((entityOptions?.length && entitySelectorConfig?.show !== false) || 
+             (variableOptions?.length && variableSelectorConfig?.show !== false)) && (
+            <EntityVariableSection
+              editor={editor}
+              size="sm"
+              variant="outline"
+              disabled={disabled} // Make sure disabled is passed here
+              entityOptions={entityOptions}
+              variableOptions={variableOptions}
+              entityButtonLabel={entitySelectorConfig?.buttonLabel}
+              entitySearchPlaceholder={entitySelectorConfig?.searchPlaceholder}
+              entityEmptyMessage={entitySelectorConfig?.emptyMessage}
+              entityFormatInsertedValue={entitySelectorConfig?.formatInsertedValue}
+              variableButtonLabel={variableSelectorConfig?.buttonLabel}
+              variableSearchPlaceholder={variableSelectorConfig?.searchPlaceholder}
+              variableEmptyMessage={variableSelectorConfig?.emptyMessage}
+              variableFormatInsertedValue={variableSelectorConfig?.formatInsertedValue}
+              insertInEditor={true}
+              showEntitySelector={entitySelectorConfig?.show !== false}
+              showVariableSelector={variableSelectorConfig?.show !== false}
+              onEntitySelect={onEntitySelect}
+              onVariableSelect={onVariableSelect}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Regular toolbar for rich text mode
   return (
-    <div className="shrink-0 overflow-x-auto border-b border-border bg-background p-2">
+    <div className="shrink-0 overflow-x-auto border-b border-border bg-background px-2">
       <div className="flex w-max items-center gap-px">
         <FontSizeControl
           className="disabled:cursor-auto disabled:opacity-100 hover:disabled:bg-transparent"
@@ -109,11 +234,57 @@ const Toolbar = ({
           mainActionCount={0}
           disabled={disabled}
         />
+        
+        {/* Add custom dropdowns section to rich text mode */}
+        {customDropdowns && customDropdowns.length > 0 && (
+          <>
+            <Separator orientation="vertical" className="mx-2 h-7" />
+            <CustomDropdownsSection
+              editor={editor}
+              customDropdowns={customDropdowns}
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+            />
+          </>
+        )}
+        
+        {/* Add Entity/Variable Section */}
+        {((entityOptions?.length && entitySelectorConfig?.show !== false) || 
+          (variableOptions?.length && variableSelectorConfig?.show !== false)) && (
+          <>
+            <Separator orientation="vertical" className="mx-2 h-7" />
+            <EntityVariableSection
+              editor={editor}
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+              entityOptions={entityOptions}
+              variableOptions={variableOptions}
+              // Pass configuration options
+              entityButtonLabel={entitySelectorConfig?.buttonLabel}
+              entitySearchPlaceholder={entitySelectorConfig?.searchPlaceholder}
+              entityEmptyMessage={entitySelectorConfig?.emptyMessage}
+              entityFormatInsertedValue={entitySelectorConfig?.formatInsertedValue}
+              insertInEditor={entitySelectorConfig?.insertInEditor ?? variableSelectorConfig?.insertInEditor ?? true}
+              variableButtonLabel={variableSelectorConfig?.buttonLabel}
+              variableSearchPlaceholder={variableSelectorConfig?.searchPlaceholder}
+              variableEmptyMessage={variableSelectorConfig?.emptyMessage}
+              variableFormatInsertedValue={variableSelectorConfig?.formatInsertedValue}
+              onEntitySelect={onEntitySelect}
+              onVariableSelect={onVariableSelect}
+              showEntitySelector={entitySelectorConfig?.show !== false}
+              showVariableSelector={variableSelectorConfig?.show !== false}
+            />
+          </>
+        )}
       </div>
     </div>
   );
 };
 
+
+// Keep only one MinimalTiptapEditor implementation - the forwardRef version
 export const MinimalTiptapEditor = React.forwardRef<
   HTMLDivElement,
   MinimalTiptapProps
@@ -126,15 +297,36 @@ export const MinimalTiptapEditor = React.forwardRef<
       readOnly = false,
       editorContentClassName,
       editable = false,
+      disabled = false, // Add this prop explicitly
+      entityOptions,
+      variableOptions,
+      plainTextMode = false,
+      entitySelectorConfig,
+      variableSelectorConfig,
+      onEntitySelect,
+      onVariableSelect,
+      customDropdowns,
+      output = "html",
+      placeholder = "",
+      onBlur,
       ...props
     },
     ref,
   ) => {
-    const editor = useMinimalTiptapEditor({
-      value,
-      onUpdate: onChange,
-      extensions: [
-        StarterKit,
+    // Configure extensions based on mode
+    const extensions = [
+      // Always include StarterKit for basic functionality
+      StarterKit.configure({
+        // Disable certain features in plain text mode
+        heading: plainTextMode ? false : undefined,
+        bulletList: plainTextMode ? false : undefined,
+        orderedList: plainTextMode ? false : undefined,
+        blockquote: plainTextMode ? false : undefined,
+        codeBlock: plainTextMode ? false : undefined,
+        horizontalRule: plainTextMode ? false : undefined,
+      }),
+      // Only include formatting extensions in rich text mode
+      ...(!plainTextMode ? [
         TextAlign.configure({
           types: ["heading", "paragraph"],
         }),
@@ -146,16 +338,50 @@ export const MinimalTiptapEditor = React.forwardRef<
         FileHandler,
         CodeBlockLowlight,
         HorizontalRule,
-      ],
+      ] : []),
+      // Add the PreventNewlines extension in plain text mode
+      ...(plainTextMode ? [PreventNewlines] : []),
+    ];
+
+    
+    const editor = useMinimalTiptapEditor({
+      value,
+      onUpdate: onChange,
+      extensions,
+      placeholder,
+      output,
+      onBlur,
       ...props,
     });
-    //!!TO BE RECHECKED
 
-    // useEffect(() => {
-    //   if (editor) {
-    //     editor.setEditable(!readOnly);
-    //   }
-    // }, [readOnly, editor]);
+    // Rest of the component remains unchanged
+    // Apply plain text mode styling and behavior
+    useEffect(() => {
+      if (editor && plainTextMode) {
+        // Add a class to the editor for plain text styling
+        const editorElement = document.querySelector('.ProseMirror');
+        if (editorElement) {
+          editorElement.classList.add('plain-text-mode');
+        }
+        
+        // Force all content to be in a single paragraph
+        const handlePaste = (event: ClipboardEvent) => {
+          if (plainTextMode) {
+            event.preventDefault();
+            const text = event.clipboardData?.getData('text/plain') || '';
+            // Insert as plain text without line breaks
+            editor.commands.insertContent(text.replace(/[\r\n]+/g, ' '));
+          }
+        };
+        
+        // Add paste event listener
+        editorElement?.addEventListener('paste', handlePaste as EventListener);
+        
+        return () => {
+          editorElement?.removeEventListener('paste', handlePaste as EventListener);
+        };
+      }
+    }, [editor, plainTextMode]);
 
     if (!editor) {
       return null;
@@ -167,15 +393,38 @@ export const MinimalTiptapEditor = React.forwardRef<
         name="editor"
         ref={ref}
         className={cn(
-          "flex h-auto min-h-72 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary",
+          "flex h-auto w-full flex-col rounded-md border border-input shadow-sm",
+          plainTextMode ? "min-h-12" : "min-h-72",
+          disabled && "opacity-50 cursor-not-allowed", // Add disabled styling
           className,
         )}
       >
-        <Toolbar editor={editor} disabled={editable} readOnly={readOnly} />
+        {(!plainTextMode || 
+          (entityOptions?.length && entitySelectorConfig?.show !== false) || 
+          (variableOptions?.length && variableSelectorConfig?.show !== false)) && (
+          <Toolbar
+            editor={editor}
+            disabled={disabled || readOnly} // Fix: Use the disabled prop correctly
+            readOnly={readOnly}
+            entityOptions={entityOptions}
+            variableOptions={variableOptions}
+            plainTextMode={plainTextMode}
+            entitySelectorConfig={entitySelectorConfig}
+            variableSelectorConfig={variableSelectorConfig}
+            customDropdowns={customDropdowns}
+            onEntitySelect={onEntitySelect}
+            onVariableSelect={onVariableSelect}
+          />
+        )}
         <EditorContent
           editor={editor}
           readOnly={readOnly}
-          className={cn("minimal-tiptap-editor", editorContentClassName)}
+          className={cn(
+            "minimal-tiptap-editor",
+            "flex-1 overflow-auto",
+            plainTextMode ? "py-2" : "py-4",
+            editorContentClassName,
+          )}
         />
         <LinkBubbleMenu editor={editor} />
       </MeasuredContainer>
@@ -184,5 +433,3 @@ export const MinimalTiptapEditor = React.forwardRef<
 );
 
 MinimalTiptapEditor.displayName = "MinimalTiptapEditor";
-
-export default MinimalTiptapEditor;
