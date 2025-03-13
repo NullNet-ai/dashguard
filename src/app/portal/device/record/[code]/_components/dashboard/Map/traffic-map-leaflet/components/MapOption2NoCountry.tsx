@@ -47,28 +47,39 @@ const trafficData = {
   'India': { city: 'Mumbai, India', trafficLevel: 70 },
   'Brazil': { city: 'São Paulo, Brazil', trafficLevel: 55 },
   'South Korea': { city: 'Seoul, South Korea', trafficLevel: 35 },
-  'Australia': { city: 'Sydney, Australia', trafficLevel: 25 },
-  'Italy': { city: 'Rome, Italy', trafficLevel: 50 },
-  'South Africa': { city: 'Johannesburg, South Africa', trafficLevel: 20 },
-  'Mexico': { city: 'Mexico City, Mexico', trafficLevel: 65 },
-  'Spain': { city: 'Madrid, Spain', trafficLevel: 40 },
-  'Turkey': { city: 'Istanbul, Turkey', trafficLevel: 75 },
-  'Netherlands': { city: 'Amsterdam, Netherlands', trafficLevel: 30 },
-  'Indonesia': { city: 'Jakarta, Indonesia', trafficLevel: 80 },
-  'Saudi Arabia': { city: 'Riyadh, Saudi Arabia', trafficLevel: 50 },
-  'Argentina': { city: 'Buenos Aires, Argentina', trafficLevel: 45 },
-  'Thailand': { city: 'Bangkok, Thailand', trafficLevel: 35 },
-  'Sweden': { city: 'Stockholm, Sweden', trafficLevel: 25 },
+  // 'Australia': { city: 'Sydney, Australia', trafficLevel: 25 },
+  // 'Italy': { city: 'Rome, Italy', trafficLevel: 50 },
+  // 'South Africa': { city: 'Johannesburg, South Africa', trafficLevel: 20 },
+  // 'Mexico': { city: 'Mexico City, Mexico', trafficLevel: 65 },
+  // 'Spain': { city: 'Madrid, Spain', trafficLevel: 40 },
+  // 'Turkey': { city: 'Istanbul, Turkey', trafficLevel: 75 },
+  // 'Netherlands': { city: 'Amsterdam, Netherlands', trafficLevel: 30 },
+  // 'Indonesia': { city: 'Jakarta, Indonesia', trafficLevel: 80 },
+  // 'Saudi Arabia': { city: 'Riyadh, Saudi Arabia', trafficLevel: 50 },
+  // 'Argentina': { city: 'Buenos Aires, Argentina', trafficLevel: 45 },
+  // 'Thailand': { city: 'Bangkok, Thailand', trafficLevel: 35 },
+  // 'Sweden': { city: 'Stockholm, Sweden', trafficLevel: 25 },
   // 'Russia': { city: 'Moscow, Russia', trafficLevel: 45 },
 };
 
+// Additional city connections that don't correspond to countries in trafficData
+const additionalCityConnections = [
+  { city: 'Singapore, Singapore', trafficLevel: 60 },
+  { city: 'Dublin, Ireland', trafficLevel: 45 },
+  { city: 'Dubai, UAE', trafficLevel: 70 },
+  { city: 'Wellington, New Zealand', trafficLevel: 15 },
+  { city: 'Vienna, Austria', trafficLevel: 40 },
+  { city: 'Helsinki, Finland', trafficLevel: 30 },
+  { city: 'Prague, Czech Republic', trafficLevel: 35 },
+  { city: 'Kuala Lumpur, Malaysia', trafficLevel: 55 },
+];
 
 // Function to determine traffic color
 const getTrafficColor = (trafficLevel) => {
   if (trafficLevel > 80) return "rgba(255, 0, 0, 0.7)"; // 🔴 Very High
   if (trafficLevel >= 50) return "rgba(255, 165, 0, 0.7)"; // 🟠 High
   if (trafficLevel >= 30) return "rgba(255, 255, 0, 0.7)"; // 🟡 Medium
- return "rgba(0, 128, 0, 0.7)"; // 🟢 Low
+  return "rgba(0, 128, 0, 0.7)"; // 🟢 Low
 };
 
 // Function to create a **curved** traffic flow line using Bezier curves
@@ -95,7 +106,6 @@ const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
   });
 };
 
-
 const MapComponent = () => {
   const fn = async () => {
     const map = L.map('map', {
@@ -108,10 +118,20 @@ const MapComponent = () => {
       maxBoundsViscosity: 1.0,
     });
     
+    // Get coordinates for countries in trafficData
     const cityCoordinates = {};
     for (const country in trafficData) {
       cityCoordinates[country] = await geocodeAddress(trafficData[country].city);
+      console.log("%c Coordinates for:", "color:#4fff4B", trafficData[country].city, cityCoordinates[country]);
     }
+    
+    // Get coordinates for additional cities
+    const additionalCityCoordinates = {};
+    for (const cityData of additionalCityConnections) {
+      additionalCityCoordinates[cityData.city] = await geocodeAddress(cityData.city);
+      console.log("%c Additional city coordinates:", "color:#4fff4B", cityData.city, additionalCityCoordinates[cityData.city]);
+    }
+    
     const philippinesCoordinates = await geocodeAddress('Manila, Philippines');
 
     L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png', {
@@ -142,10 +162,11 @@ const MapComponent = () => {
     
         if (trafficLevel) {
           // Add country label
+          // Add country label
           const center = layer.getBounds().getCenter();
           const label = L.divIcon({
             className: 'country-label',
-            html: `<div style="color: gray; font-family: geist; font-weight: bold; font-size: .8em ">${countryName.toUpperCase()}</div>`,
+            html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .8em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${countryName.toUpperCase()}</div>`,
           });
           L.marker(center, { icon: label }).addTo(map);
 
@@ -165,46 +186,100 @@ const MapComponent = () => {
       },
     }).addTo(map);
 
-    // Function to create a twinkling dot with tooltip
-    const createTwinklingDot = (coordinates, country, trafficLevel) => {
+    // Function to create a city marker with circle and label
+    const createCityMarker = (coordinates, name, trafficLevel, cityName = null) => {
+      console.log("%c Line:190 🍉 cityName", "color:#7f2b82", {cityName, name});
+      if (!coordinates) return null;
+      
+      // Create the twinkling dot
+      const dotColor = getTrafficColor(trafficLevel);
       const divIcon = L.divIcon({
         className: 'twinkling-dot',
-        html: `<div class="dot" style="background:${getTrafficColor(trafficLevel)};"></div>`,
+        html: `<div class="dot" style="background:${dotColor};"></div>`,
         iconSize: [12, 12],
         iconAnchor: [6, 6],
       });
 
       const marker = L.marker(coordinates, { icon: divIcon }).addTo(map);
       
-      // Add tooltip to the dot
-      // marker.bindTooltip(
-      //   `<div style="text-align: center;">
-      //     <strong>${country}</strong><br/>
-      //     Traffic Level: ${trafficLevel}%<br/>
-      //     City: ${trafficData[country]?.city || 'Philippines Server'}
-      //   </div>`,
-      //   { 
-      //     permanent: false,
-      //     direction: 'top',
-      //     className: 'custom-tooltip'
-      //   }
-      // );
+      // Add colored circle around the dot
+      const circle = L.circle(coordinates, {
+        color: dotColor,
+        fillColor: dotColor,
+        fillOpacity: 0.2,
+        radius: 100000, // Adjust radius as needed (in meters)
+        weight: 1
+      }).addTo(map);
+      
+      // Add city label - with black color and all uppercase
+      const displayCityName = cityName || name;
+      const cityLabel = displayCityName.split(',')[0].toUpperCase(); // Extract just the city name before the comma and convert to uppercase
+      
+      const cityLabelIcon = L.divIcon({
+        className: 'city-label',
+        html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${cityLabel}</div>`,
+        iconSize: [80, 20],
+        iconAnchor: [40, -10], // Position label above the dot
+      });
+      L.marker(coordinates, { icon: cityLabelIcon }).addTo(map);
+      
+      // Add tooltip to the marker
+      marker.bindTooltip(
+        `<div style="text-align: center;">
+          <strong>${cityName || name}</strong><br/>
+          Traffic Level: ${trafficLevel}%
+        </div>`,
+        { 
+          permanent: false,
+          direction: 'top',
+          className: 'custom-tooltip'
+        }
+      );
 
       return marker;
     };
 
-    // Add twinkling dots & curved lines for each traffic location
+    // Add city markers & curved lines for each country traffic location
     Object.keys(trafficData).forEach((country) => {
-      const { trafficLevel } = trafficData[country];
+      const { trafficLevel, city } = trafficData[country];
       const coordinates = cityCoordinates[country];
+      
+      if (!coordinates) return;
 
-      createTwinklingDot(coordinates, country, trafficLevel);
+      // Create city marker with colored circle
+      createCityMarker(coordinates, country, trafficLevel, city);
 
-      // Create and add curved line using Bezier interpolation
-      const curvedLine = createCurvedFlowLine(coordinates, philippinesCoordinates, trafficLevel);
+      // Create and add curved line (Philippines to city)
+      const curvedLine = createCurvedFlowLine(philippinesCoordinates, coordinates, trafficLevel, city);
       curvedLine.bindTooltip(
         `<div style="text-align: center;">
-          <strong>${country} to Philippines</strong><br/>
+          <strong>Philippines to ${city}</strong><br/>
+          Traffic Level: ${trafficLevel}%
+        </div>`,
+        { 
+          permanent: false,
+          direction: 'center',
+          className: 'custom-tooltip'
+        }
+      );
+      curvedLine.addTo(map);
+    });
+    
+    // Add additional city markers and connections
+    additionalCityConnections.forEach((cityData) => {
+      const { city, trafficLevel } = cityData;
+      const coordinates = additionalCityCoordinates[city];
+      
+      if (!coordinates) return;
+      
+      // Create city marker with colored circle
+      createCityMarker(coordinates, city, trafficLevel);
+      
+      // Create and add curved line (Philippines to city)
+      const curvedLine = createCurvedFlowLine(philippinesCoordinates, coordinates, trafficLevel, city);
+      curvedLine.bindTooltip(
+        `<div style="text-align: center;">
+          <strong>Philippines to ${city}</strong><br/>
           Traffic Level: ${trafficLevel}%
         </div>`,
         { 
@@ -216,8 +291,63 @@ const MapComponent = () => {
       curvedLine.addTo(map);
     });
 
-    // Add a twinkling dot for the Philippines Server
-    createTwinklingDot(philippinesCoordinates, 'Philippines Server', 100);
+    // Add a marker for the Philippines Server with a special style
+    const philippinesIcon = L.divIcon({
+      className: 'philippines-dot',
+      html: `<div class="dot" style="background: #0000FF; width: 16px; height: 16px;"></div>`,
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+    });
+    
+    const philippinesMarker = L.marker(philippinesCoordinates, { icon: philippinesIcon }).addTo(map);
+    
+    // Add Philippines label - also black and uppercase now
+    const philippinesLabelIcon = L.divIcon({
+      className: 'city-label',
+      html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">MANILA</div>`,
+      iconSize: [80, 20],
+      iconAnchor: [40, -15],
+    });
+    L.marker(philippinesCoordinates, { icon: philippinesLabelIcon }).addTo(map);
+    
+    // Add a highlighted circle for the Philippines
+    L.circle(philippinesCoordinates, {
+      color: '#0000FF',
+      fillColor: '#0000FF',
+      fillOpacity: 0.2,
+      radius: 200000, // Larger radius for the central hub
+      weight: 2
+    }).addTo(map);
+    
+    philippinesMarker.bindTooltip(
+      `<div style="text-align: center;">
+        <strong>Philippines Server</strong><br/>
+        Central Hub
+      </div>`,
+      { 
+        permanent: false,
+        direction: 'top',
+        className: 'custom-tooltip'
+      }
+    );
+
+    // Add legend
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function() {
+      const div = L.DomUtil.create('div', 'info legend');
+      div.innerHTML = `
+        <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);">
+          <strong>Traffic Level</strong><br>
+          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 0, 0, 0.7); border-radius:50%;"></span> Very High (>80%)</div>
+          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%;"></span> High (50-80%)</div>
+          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 255, 0, 0.7); border-radius:50%;"></span> Medium (30-50%)</div>
+          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%;"></span> Low (<30%)</div>
+          <div><span style="display:inline-block; width:15px; height:15px; background:#0000FF; border-radius:50%;"></span> Philippines Server</div>
+        </div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
 
     return () => {
       map.remove();
@@ -256,6 +386,12 @@ const MapComponent = () => {
             font-family: geist, sans-serif;
             font-size: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          
+          /* City Label Styles */
+          .city-label {
+            pointer-events: none;
+            z-index: 450;
           }
         `}
       </style>
