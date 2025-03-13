@@ -208,6 +208,13 @@ interface IField {
     components?: ComponentType<any>[] | JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
+	codeEditorProps?: ICodeEditor & {
+		enable_editor_tools?: boolean;
+		enable_auto_height?: boolean; 
+		defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
+		minHeight: string;
+		maxHeight?: string;
+	};
 }
 
 interface ISelectOptions {
@@ -457,6 +464,14 @@ interface IGridData {
   sorting?: any[];
 }
 
+interface ICodeEditor {
+	enable_editor_tools?: boolean;
+	enable_auto_height?: boolean; 
+	defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
+	minHeight: string;
+	maxHeight?: string;
+}
+
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -472,4 +487,5 @@ export type {
   OptionType,
   IFieldFilterActions,
   IGridData,
+	ICodeEditor
 };

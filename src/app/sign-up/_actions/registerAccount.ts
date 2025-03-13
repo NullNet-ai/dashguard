@@ -31,9 +31,9 @@ export default async function registerAccount({
     const account = {
       first_name,
       last_name,
-      email,
+      email: email.toLowerCase(),
       password,
-      account_id: email,
+      account_id: email.toLowerCase(),
       account_secret: password,
       is_new_user: false,
       contact_categories: ['Contact', 'User'],
