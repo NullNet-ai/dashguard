@@ -992,11 +992,6 @@ export const accountRouter = createTRPCRouter({
         throw error;
       }
       const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
-      // for testing purpose (will delete this after)
-      // const expirationtestDate = new Date();
-      // expirationtestDate.setMinutes(expirationtestDate.getMinutes() + 1);
-      // const forTestingCron = dateToCron(new Date(formatDate(expirationtestDate).dataTime));
-      // const testingBaseUrl = http://10.1.10.252:3000
       const scheduleConfig = {
         enabled: true,
         cron: cronTime,
@@ -1009,50 +1004,6 @@ export const accountRouter = createTRPCRouter({
         wait_for_completion: true,
       };
       createSchedule(scheduleConfig)
-
-      // login using root account
-      // const asRoot = true;
-      // const rootAccount = await ctx.dnaClient
-      //   .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
-      //   .execute();
-      // const rootAccountToken = rootAccount?.data?.[0]?.token;
-      // const accounts = await ctx.dnaClient
-      //   .findAll({
-      //     entity: 'organization_accounts',
-      //     token: rootAccountToken,
-      //     as_root: asRoot,
-      //     query: {
-      //       advance_filters: [
-      //         ...createAdvancedFilter({
-      //           account_id: accountRecord?.account_id,
-      //           status: 'Active',
-      //         }),
-      //         {
-      //           type: 'operator',
-      //           operator: EOperator.AND,
-      //         },
-      //         {
-      //           type: 'criteria',
-      //           field: 'id',
-      //           operator: EOperator.NOT_EQUAL,
-      //           values: [accountRecord?.id],
-      //         },
-      //       ],
-      //       pluck: [
-      //         'id',
-      //         'organization_id',
-      //         'account_id',
-      //         'contact_id',
-      //         'status',
-      //       ],
-      //       order: {
-      //         limit: 1,
-      //       },
-      //     },
-      //   })
-      //   .execute();
-
-      // const existingAccount = accounts?.data?.[0];
 
       await ctx.dnaClient
         .update(accountRecord?.id, {
