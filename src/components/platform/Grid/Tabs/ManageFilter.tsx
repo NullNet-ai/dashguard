@@ -31,7 +31,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
   const { state } = useGrid();
   const { config } = state ?? {}; 
 
-  const { columns = [], gridColumns : _gridColumns = [] } = config ?? {};
+  const { columns = [], gridColumns : _gridColumns = [], searchConfig } = config ?? {};
 
   const gridColumns = _gridColumns?.map((column: any, index : number) => ({
     header: column.header,
@@ -39,6 +39,8 @@ export default function ManageFilter({ tab }: { tab: any }) {
     label: column.header,
     isShow: columns.some((col: any) => col.accessorKey === column.accessorKey) || false,
     order: column.order || index,
+    data_type: column.data_type,
+    search_config: column.search_config,
   }));
 
   const handleManageFilter = () => {
@@ -47,7 +49,11 @@ export default function ManageFilter({ tab }: { tab: any }) {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider tab={tab} columns={gridColumns}>
+          <ManageFilterProvider 
+            tab={tab}
+            columns={gridColumns}
+            searchConfig={searchConfig}
+          >
             <GridManageFilter />
           </ManageFilterProvider>
         ),

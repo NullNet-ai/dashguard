@@ -9,6 +9,7 @@ const gridColumns = [
   {
     header: "State",
     accessorKey: "status",
+    data_type: "string",
     cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
@@ -17,10 +18,12 @@ const gridColumns = [
   {
     header: "ID",
     accessorKey: "code",
+    data_type: "string",
   },
   {
     header: "Category",
     accessorKey: "categories",
+    data_type: "array",
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
       return categories?.map((category: string, index: number) => {
@@ -73,6 +76,7 @@ const gridColumns = [
   {
     header: "Updated Date",
     accessorKey: "updated_date",
+    data_type: "datetime",
     sortKey: ["updated_date", "updated_time"],
     cell: ({ row }) => {
       const date = row?.original?.updated_date;
@@ -88,6 +92,7 @@ const gridColumns = [
   {
     header: "Updated By",
     accessorKey: "updated_by",
+    data_type: "string",
     sortKey: "updated_by.full_name",
     search_config: {
       entity: "updated_by",
@@ -98,6 +103,7 @@ const gridColumns = [
   {
     header: "Created Date",
     accessorKey: "created_date",
+    data_type: "datetime",
     sortKey: ["created_date", "created_time"],
     cell: ({ row }) => {
       const date = row?.original?.created_date;
@@ -113,6 +119,7 @@ const gridColumns = [
   {
     header: "Created By",
     accessorKey: "created_by",
+    data_type: "string",
     sortKey: "created_by.full_name",
     search_config: {
       entity: "created_by",
