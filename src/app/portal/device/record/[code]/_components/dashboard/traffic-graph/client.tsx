@@ -25,7 +25,6 @@ import { api } from '~/trpc/react'
 import { renderChart } from './function/renderChart'
 import moment from 'moment-timezone'
 import { IFormProps } from '../types'
-import { ResponsiveContainer } from 'recharts'
 
 const time_range_options = {
   '30d': '30 days',
@@ -69,7 +68,7 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-const InteractiveGraph = ({defaultValues}: IFormProps) => {
+const TrafficGraph = ({defaultValues}: IFormProps) => {
   const [timeRange, setTimeRange] = React.useState('30d')
   const [resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
@@ -228,4 +227,4 @@ const InteractiveGraph = ({defaultValues}: IFormProps) => {
   )
 }
 
-export default InteractiveGraph
+export default TrafficGraph

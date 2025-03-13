@@ -179,7 +179,7 @@ export const packetRouter = createTRPCRouter({
     }
     const res = await ctx.dnaClient.aggregate({
       query: {
-        entity: 'dummy_packets',
+        entity: 'packets',
         aggregations: [
           {
             aggregation: 'SUM',
@@ -191,7 +191,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'timestamp',
-            entity: 'dummy_packets',
+            entity: 'packets',
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
@@ -202,7 +202,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'device_id',
-            entity: 'dummy_packets',
+            entity: 'packets',
             operator: EOperator.EQUAL,
             values: [
               device_id,

@@ -2,7 +2,7 @@ import { headers } from 'next/headers'
 
 import { api } from '~/trpc/server'
 
-import InteractiveGraph from './client'
+import TrafficGraph from './client'
 
 const FormServerFetch = async () => {
   const headerList = headers()
@@ -17,7 +17,7 @@ const FormServerFetch = async () => {
   const defaultValues = fetched_device?.data
 
   return (
-    <InteractiveGraph
+    <TrafficGraph
       defaultValues={defaultValues ?? {}}
       params={{
         id: defaultValues?.id! ?? '',
