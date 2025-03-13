@@ -38,12 +38,57 @@ import {
 
 import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
+import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 
 interface OptionType {
   label: string;
   value: string;
 }
-
+interface RichTextConfig {
+  output?:'html' | 'json' | 'text'
+  entityOptions?:Array<{
+    label: string;
+    value: string;
+  }>
+  variableOptions?: Array<{
+    label: string;
+    value: string;
+  }>;
+  plainTextMode?:boolean
+  entitySelectorConfig?: {
+    buttonLabel?: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    formatInsertedValue?: (option: EntityVariableOption) => string;
+    insertInEditor?: boolean;
+    show?: boolean;
+  };
+  variableSelectorConfig?: {
+    buttonLabel?: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    formatInsertedValue?: (option: EntityVariableOption) => string;
+    insertInEditor?: boolean;
+    show?: boolean;
+  };
+  onEntitySelect?: (option: EntityVariableOption) => void;
+  onVariableSelect?: (option: EntityVariableOption) => void;
+  // Add customDropdowns property
+  customDropdowns?: Array<{
+    id: string;
+    buttonLabel: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    options: Array<{
+      label: string;
+      value: string;
+    }>;
+    isFilterMode?: boolean;
+    formatInsertedValue?: (option: { label: string; value: string }) => string;
+    onSelect?: (option: { label: string; value: string }) => void;
+    disabled?:boolean;
+  }>;
+}
 interface DraggableConfig {
   parentProps?: any;
   fields: IField & {
@@ -156,7 +201,16 @@ interface IField {
   multiSelectHideClearAllButton?: boolean
   multiSelectShowCreatableItem?: boolean
   multiSelectUseStringValues?: boolean
+  richTextConfig?: RichTextConfig
   richTextOutput?: 'html' | 'json' | 'text'
+  richTextEntityOptions?: Array<{
+    label: string;
+    value: string;
+  }>;
+  richTextVariableOptions?: Array<{
+    label: string;
+    value: string;
+  }>;
   inputRightAddOns?: ReactNode | string
   inputLeftAddOns?: ReactNode | string
   isMultiSelectAlphabetical?: boolean
