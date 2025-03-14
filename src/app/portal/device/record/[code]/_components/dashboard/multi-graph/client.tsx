@@ -94,8 +94,8 @@ const InteractiveGraph = ({
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   useEffect(() => {
-    const interfacesData = form.watch('interfaces') || [] 
-    setInterfaces(interfacesData as IDropdown[])
+    const interfacesData = form.watch('interfaces') || []
+    setInterfaces(interfacesData as any)
   }, [form.watch('interfaces')])
 
   return (
