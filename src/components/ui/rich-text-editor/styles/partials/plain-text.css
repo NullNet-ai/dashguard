@@ -1,10 +1,7 @@
-/* Plain text mode styling */
-.plain-text-editor .ProseMirror {
-  min-height: 2.5rem;
-  max-height: 2.5rem;
-  overflow-y: hidden;
-  white-space: nowrap;
-  overflow-x: auto;
+
+.plain-text-editor.multiline .ProseMirror {
+  --plain-text-overflow-y: auto;
+  --plain-text-white-space: pre-wrap;
 }
 
 .plain-text-mode {

@@ -33,6 +33,7 @@ export const ToolbarButton = React.forwardRef<
     },
     ref
   ) => {
+    
     // Create a handler that prevents default and stops propagation
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {

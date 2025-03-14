@@ -61,7 +61,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
       return (
         <ToolbarButton
           key={action.label}
-          className="pointer-events-auto" // Ensure buttons are clickable
+          className="pointer-events-auto"
           onClick={handleClick}
           disabled={disabled}
           isActive={action.isActive(editor)}

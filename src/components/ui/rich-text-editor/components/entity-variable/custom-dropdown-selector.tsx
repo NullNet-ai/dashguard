@@ -104,7 +104,7 @@ export const CustomDropdownSelector: React.FC<CustomDropdownSelectorProps> = ({
           aria-expanded={open}
           className={cn(
             "w-auto justify-between",
-            disabled && "cursor-not-allowed opacity-100"
+            disabled && "cursor-not-allowed disabled:opacity-100"
           )}
           disabled={disabled}
           size={size === "sm" ? "sm" : "default"}
@@ -113,7 +113,7 @@ export const CustomDropdownSelector: React.FC<CustomDropdownSelectorProps> = ({
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent className="w-[250px]  p-0" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} className='border-0  px-0 focus:border-0 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0' />
           <CommandList>
@@ -124,6 +124,7 @@ export const CustomDropdownSelector: React.FC<CustomDropdownSelectorProps> = ({
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option)}
+                  className='overflow-auto'
                 >
                   <Check
                     className={cn(

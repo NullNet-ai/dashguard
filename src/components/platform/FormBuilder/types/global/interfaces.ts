@@ -47,6 +47,10 @@ interface OptionType {
 interface RichTextConfig {
   output?:'html' | 'json' | 'text'
   plainTextMode?:boolean
+  plainTextConfig?: {
+    multiline?: boolean;
+    maxHeight?: string;
+  };
   customDropdowns?: Array<{
     id: string;
     buttonLabel: string;
