@@ -124,14 +124,7 @@ export const CustomDropdownSelector: React.FC<CustomDropdownSelectorProps> = ({
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option)}
-                  className='overflow-auto'
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedOption === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
                   {option.label}
                 </CommandItem>
               ))}
