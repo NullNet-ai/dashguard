@@ -6,8 +6,8 @@ export const fetchSearchFilter = async () => {
   // const urlSearchParams = new URLSearchParams(searchParams)
 
   
-  const cached_filter = await api.timelineFilter.fetchTimelineFilter({
-    type: 'search',
+  const cached_filter = await api.cachedFilter.fetchCachedFilter({
+    type: 'timeline_search',
   })
 
   

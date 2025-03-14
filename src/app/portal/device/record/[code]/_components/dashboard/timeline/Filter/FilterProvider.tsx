@@ -38,9 +38,8 @@ const FilterProvider = ({ children, params }: any) => {
 
   const {
     data: cached_filter_items = [],
-    refetch: refetchFilters,
-  } = api?.[router as "packet"]?.[resolver as "fetchTimelineFilter"]?.useQuery({
-    type: 'filter',
+  } = api.cachedFilter.fetchCachedFilter.useQuery({
+    type: 'timeline_filter',
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
@@ -127,7 +126,7 @@ const FilterProvider = ({ children, params }: any) => {
   }
   
   
-  const duplicateFilter= api.timelineFilter.duplicateTimelineFilter.useMutation()
+  const duplicateFilter= api.cachedFilter.duplicateFilter.useMutation()
   const handleDuplicateTab = async (tab: Record<string, any>) => {
     const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: 'filter', data: tab })
     setFilters(prev => {

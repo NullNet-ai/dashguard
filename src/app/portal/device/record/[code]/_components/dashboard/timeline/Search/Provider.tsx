@@ -174,8 +174,8 @@ refetchSearchOption()
 
   const {
     data: cached_search_items = [],
-  } = api.timelineFilter.fetchTimelineFilter.useQuery({
-    type: 'search',
+  } = api.cachedFilter.fetchCachedFilter.useQuery({
+    type: 'timeline_search',
   })
 
   

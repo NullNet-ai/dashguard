@@ -233,15 +233,18 @@ export const packetRouter = createTRPCRouter({
     const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
     const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
+    console.log('%c Line:236 🥒 timestamps', 'color:#ea7e5c', timestamps);
 
+    console.log('%c Line:237 🍤', 'color:#42b983', res?.data);
     const result = timestamps.map((item) => {
-      const data = res?.data.find((element: any) => element.bucket === item)
+      const data = res?.data.find((element: any) =>  element.bucket?.includes(item))
       if (data) {
         return { bucket: item, bandwidth: data.bandwidth }
       }
       return { bucket: item, bandwidth: 0 }
     })
 
+    console.log('%c Line:246 🌶 result', 'color:#42b983', result);
     return result
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),

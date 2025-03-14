@@ -40,7 +40,7 @@ const resolution_options = {
   '30d':
     {
       '1d': '1 Day',
-      '7d': 'Last 7 days',
+      // '7d': 'Last 7 days',
     },
   '7d':
     {
@@ -104,6 +104,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
       timezone,
       device_id: defaultValues?.id,
     })
+    
 
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket)
