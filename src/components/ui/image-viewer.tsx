@@ -13,7 +13,7 @@ export default function ImageViewer({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="group relative overflow-hidden rounded-md" title='View Image'>
+        <div className="group relative overflow-hidden rounded-md cursor-pointer" title='View Image'>
           <img
             src={src}
             alt={alt || ''}
