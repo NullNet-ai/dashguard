@@ -9,7 +9,7 @@ const HeatMapLayer = ({ points }: Record<string,any>) => {
 
   useEffect(() => {
     if (typeof window !== "undefined" && map && points.length) {
-      import("leaflet.heat").then(({ default: heat }) => {
+      import("leaflet.heat").then(({ default: heat }: any) => {
         const heatLayer = heat.heatLayer(points, {
           radius: 20,
           blur: 25,
