@@ -39,15 +39,10 @@ const languages = [
 	{ value: 'css', label: 'CSS' },
 ];
 
-const fontSizes = [
-	{ value: '12', label: '12' },
-	{ value: '14', label: '14' },
-	{ value: '16', label: '16' },
-	{ value: '18', label: '18' },
-	{ value: '20', label: '20' },
-	{ value: '22', label: '22' },
-	{ value: '24', label: '24' },
-];
+const fontSizes = Array.from({ length: 13 }, (_, i) => {
+	const size = i + 12;
+	return { value: size.toString(), label: size.toString() };
+});
 
 type Theme = 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
 type Language = 'javascript' | 'typescript' | 'python' | 'sql';
@@ -343,7 +338,6 @@ export default function CodeEditor({
 						<Editor
 							aria-label="Code Editor"
 							className={cn(
-								readOnly || isReadOnly ? 'pointer-events-none' : '',
 								maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`,
 								themeClass
 							)}
@@ -386,8 +380,7 @@ export default function CodeEditor({
 							<Editor
 								className={cn(
 									maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`,
-									themeClass,
-									'pointer-events-none'
+									themeClass
 								)}
 								height={contentHeight}
 								language={language}
