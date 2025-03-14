@@ -20,14 +20,14 @@ import { headers } from 'next/headers';
 // import { useSearchParams } from "next/navigation";
 
 const required_fields = [
-  'time_range',
-  'resolution',
-  'graph_type',
+  'Time Range',
+  'Resolution',
+  'Graph Type',
 ]
 
 const _def_filters = [
   {
-    field: 'time_range',
+    field: 'Time Range',
     operator: 'equal',
     label: 'Time Range',
     values: [],
@@ -47,7 +47,7 @@ const _def_filters = [
     default: true,
   },
   {
-    field: 'resolution',
+    field: 'Resolution',
     operator: 'equal',
     label: 'Resolution',
     values: [],
@@ -69,12 +69,12 @@ const _def_filters = [
 ]
 
 const default_filters = (type: string) =>{
-  if(type === 'timeline') return _def_filters
+  if(type === 'timeline_filter') return _def_filters
   
   return [
 ..._def_filters,
   {
-    field: 'graph_type',
+    field: 'Graph Type',
     operator: 'equal',
     label: 'Graph Type',
     values: [],
@@ -168,6 +168,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     name: 'filters',
   })
   
+  console.log('%c Line:167 🍇 fields', 'color:#3f7cff', fields);
   
   form.watch((fields) => {
     handleUpdateFilter({ default_filter: fields.filters })
@@ -289,18 +290,18 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                             value: column.accessorKey,
                           })) || [],
                         [`${prefix}.operator`]: OPERATORS,
-                        [`${prefix}.time_range`]: [
+                        [`${prefix}.Time Range`]: [
                           // { label: '30 Days', value: '30d' },
                           { label: '7 Days', value: '7d' },
                           { label: '1 Day', value: '1d' },
                           { label: '12 Hours', value: '12h' },
                         ],
-                        [`${prefix}.resolution`]: [
+                        [`${prefix}.Resolution`]: [
                           // { label: '1 Day', value: '1d' },
                           { label: '1 Hour', value: '1h' },
                           { label: '30 Minutes', value: '30m' },
                         ],
-                        [`${prefix}.graph_type`]: [
+                        [`${prefix}.Graph Type`]: [
                           { label: 'Line Chart', value: 'line' },
                           { label: 'Bar Chart', value: 'bar' },
                           { label: 'Area Chart', value: 'area' },

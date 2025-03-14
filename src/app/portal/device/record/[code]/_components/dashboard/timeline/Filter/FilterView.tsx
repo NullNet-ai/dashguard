@@ -38,7 +38,7 @@ const FilterView = () => {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider columns={columns} tab={{ name: 'New Filter' }}>
+          <ManageFilterProvider columns={columns} tab={{ name: 'New Filter' }} filter_type= {filter_type as string}>
             <GridManageFilter filter_type={filter_type as string}/>
           </ManageFilterProvider>
         ),
@@ -47,6 +47,7 @@ const FilterView = () => {
     })
   }
 
+  console.log('%c Line:55 🍏 filters', 'color:#2eafb0', filters);
   return (
     <div className="p-4 ps-0 pb-0 flex flex-col gap-4">
       <div className="flex">
@@ -71,7 +72,7 @@ const FilterView = () => {
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
                     {tab.label}
                   </span>
-                  {tab?.label !== 'All Data' && <FilterProperty filter={tab} />}
+                  {tab?.label !== 'All Data' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
                 </Button>
               </Fragment>
             )

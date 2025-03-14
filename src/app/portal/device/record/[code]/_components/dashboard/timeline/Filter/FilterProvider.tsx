@@ -22,6 +22,7 @@ export const useFilter = (): IFilterContext => {
 }
 
 const FilterProvider = ({ children, params, type }: any) => {
+  console.log('%c Line:25 🥒 type', 'color:#465975', type);
   const eventEmitter = useEventEmitter()
   const {router, resolver} = params || {}
 
@@ -29,45 +30,55 @@ const FilterProvider = ({ children, params, type }: any) => {
     [
       {
         id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
-        name: 'All Data',
-        label: 'All Data',
+        name: '1 Day',
+        label: '1 Day',
         default_filter: [],
       },
     ]
   )
 
+  console.log('%c Line:44 🍒 type', 'color:#ed9ec7', type);
   const {
     data: cached_filter_items = [],
   } = api.cachedFilter.fetchCachedFilter.useQuery({
-    type: 'timeline_filter',
+    type: type,
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
   const [filterQuery, setFilterQuery] = useState<Record<string, any>>({})
 
   const fetchDetails = async (data: IData) => {
-    const { modifyFilterDetails: filter } = data || {}
+    console.log('%c Line:50 🌮 data', 'color:#ffdd4d', data);
+    if (!data?.modifyFilterDetails || !data?.modifyFilterDetails?.id) return;
+    console.log('%c Line:50 🌽 data', 'color:#6ec1c2', data);
+    
     setFilters((prev) => {
-      const updatedFilters = new Map(prev.map(item => [item.id, item]))
-      updatedFilters.set(filter?.id, { ...updatedFilters.get(filter?.id), ...filter, label: filter?.name || '', default_filter: (filter?.default_filter?.map((_filter: Record<string, any>) => {
-        if (_filter?.type === 'criteria') {
-          return {
-            ..._filter,
-            values: _filter?.values?.map((value: SearchItem) => ({
-              label: value,
-              value: value,
-            })),
-          }
-        }
-        return _filter
-      })) as Record<string, any>[],
-      })
-      return [...updatedFilters.values()]
-    })
-  }
+      const updatedFilters = new Map(prev.map(item => [item.id, item]));
+      const { id, name, default_filter, ...rest } = data.modifyFilterDetails;
+  
+      updatedFilters.set(id, {
+        ...updatedFilters.get(id),
+        ...rest,
+        id,
+        label: name || '',
+        default_filter: default_filter?.map((f) =>
+          f.type === 'criteria'
+            ? { ...f, values: f.values?.map((v: SearchItem) => ({ label: v, value: v })) }
+            : f
+        ),
+      });
+      console.log('%c Line:69 🎂 updatedFilters.values()', 'color:#7f2b82', updatedFilters.values());
+  
+      return [...updatedFilters.values()];
+    });
+  };
+  
 
+  console.log('%c Line:71 🌰', 'color:#e41a6a', filterQuery);
   useEffect(() => {
-    eventEmitter.emit(`${type}_filter_id`, filterQuery)
+
+    eventEmitter.emit(`${type}_id`, filterQuery)
+    console.log('%c Line:81 🎂 filterQuery', 'color:#7f2b82', filterQuery);
   }, [_refetchTrigger, filterQuery])
 
   useEffect(() => {
@@ -122,13 +133,13 @@ const FilterProvider = ({ children, params, type }: any) => {
 
   const handleDelete = async ({ id }: { id: string }) => {
     setFilters(prev => prev.filter(item => item.id !== id))
-    await removeFilter(id)
+    await removeFilter(id, type)
   }
   
   
   const duplicateFilter= api.cachedFilter.duplicateFilter.useMutation()
   const handleDuplicateTab = async (tab: Record<string, any>) => {
-    const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: 'filter', data: tab })
+    const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: type, data: tab })
     setFilters(prev => {
       return [...prev, response]})
   }

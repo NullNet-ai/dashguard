@@ -11,6 +11,7 @@ import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import { IAdvanceFilter } from '~/components/platform/Grid/Search/types';
 
 interface InputData {
   bucket: string
@@ -22,31 +23,45 @@ interface OutputData {
   bandwidth: number
 }
 
+export function cleanFilter(filters: any) {
+  let extracted = {
+    "Time Range": null,
+    "Resolution": null,
+    "Graph Type": null
+  };
 
+  let newFilters = [];
+  let skipNext = false;
 
-function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
-  const start_moment = new Date(startDate)
-  const end_moment = new Date(endDate)
-  const per_seconds = second_count * 1000
+  for (let i = 0; i < filters.length; i++) {
+    let filter = filters[i];
 
-  if (isNaN(start_moment.getTime()) || isNaN(end_moment.getTime())) {
-    throw new Error('Invalid date(s) provided')
+    if (skipNext) {
+      skipNext = false; // Skip the next operator
+      continue;
+    }
+
+    if (filter.field === "Time Range") {
+      extracted["Time Range"] = filter["Time Range"];
+      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
+    } else if (filter.field === "Resolution") {
+      extracted["Resolution"] = filter["Resolution"];
+      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
+    } else if (filter.field === "Graph Type") {
+      extracted["Graph Type"] = filter["Graph Type"];
+      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
+    } else {
+      newFilters.push(filter);
+    }
   }
 
-  const seconds_array = []
-
-
-  for (let current_time = start_moment.getTime(); current_time <= end_moment.getTime(); current_time += per_seconds) {
-    const current_moment = new Date(current_time)
-
-    const formatted_date = current_moment.toISOString().replace('T', ' ')
-      .split('.')[0] + '+00'
-
-    seconds_array.push(formatted_date)
-  }
-
-  return seconds_array
+  return {
+    extracted,
+    newFilters
+  };
 }
+
+
 
 function transformData(data: InputData[]): OutputData[] {
   const result = data.map((item) => {
@@ -614,8 +629,9 @@ export const packetRouter = createTRPCRouter({
       _query
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).query(async ({ input, ctx }) => {
-    const { device_id, time_range, filter_id } = input
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
+    const { device_id, time_range, filter_id, bucket_size } = input
+    console.log('%c Line:634 🍫 input', 'color:#6ec1c2', input);
     
     
     let source_ips: string[] = []
@@ -635,10 +651,10 @@ export const packetRouter = createTRPCRouter({
 
       
       const _filter = findFilter?.default_filter || []
-      const custom_adv = [
+      const  filtered_cached = [
         ...(_filter?.length ? [  ..._filter,
           {
-          type: 'operator',
+            type: 'operator',
           operator: EOperator.AND,
         }]: []),
         ...(search?.length? [...search || [],
@@ -650,7 +666,10 @@ export const packetRouter = createTRPCRouter({
         ...item,
         entity: 'packets',
       }))
+      console.log('%c Line:639 🍷 custom_adv', 'color:#ffdd4d', filtered_cached);
 
+      const { newFilters:custom_adv  = [] } = cleanFilter(filtered_cached)
+      console.log('%c Line:672 🍷 custom_adv', 'color:#ffdd4d', custom_adv);
       
       const packets = await ctx.dnaClient
         .findAll({
@@ -774,7 +793,7 @@ export const packetRouter = createTRPCRouter({
             },
           ],
           joins: [],
-          bucket_size: '1h',
+          bucket_size,
           order: {
             order_by: 'bucket',
             order_direction: EOrderDirection.DESC,

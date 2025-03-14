@@ -30,33 +30,49 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
+  const [{
+    time_count,
+    time_unit,
+    resolution
+  }, setTime] = useState(timeDuration)
 
-  const {time_count, time_unit} = timeDuration
+  // const {time_count, time_unit} = timeDuration
 
   const { refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id || '',
       time_range: getLastTimeStamp(time_count, time_unit ),
       filter_id: filterId,
+      bucket_size: resolution,
     },
     {
       enabled: false, // Disable automatic query execution
+    }
+  )
+
+  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
+    {
+      type: 'timeline_filter',
+      filter_id: filterId,
+    },
+    {
+      enabled: false, 
     }
   )
   
 
   useEffect(() => {
     if (!eventEmitter) return
-    const setFID =  (data:any ) => {
+    const setFID =  async(data:any ) => {
+      console.log('%c Line:51 🥪 data', 'color:#b03734', data);
       
       if(typeof data !== 'string')return
-        
-      
-        setFilterID(data)
+
+      setFilterID(data)
+
+  
       }
     const setSBy = (data:any) => {
-      
-      
       setSearchBy(data)
     }
 
@@ -69,30 +85,53 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [eventEmitter])
   
 
-  // useEffect(() => {
-  //   if (filterId) {
-  //    setTimeout(async() =>{
-  //     const { data } =  await refetch() 
-  //     setBandwidth(data)
-  //   },500
-  //   )
-  //   }
-  // }, [filterId, (searchBy ?? [])?.length])
-  //uncomment later
-
-  // useEffect(() => {
-  //   if(!params?.id || !refetch) return 
-
-  //   const fetchBandwidth = async() => {
-  //     const a =  await refetch() 
-      
-  //     const { data }  = a
-  //     if(!data) return
-  //     setBandwidth(data)
-  //   }
+  useEffect(() => {
+    if (filterId) {
+      console.log('%c Line:90 🍆 filterId', 'color:#f5ce50', filterId);
+      const fetchTimeUnitandResolution = async() => {
+        const {
+          data:  time_unit_resolution
+        } = await refetchTimeUnitandResolution()
     
-  //   fetchBandwidth()
-  // }, [params?.id])
+        console.log('%c Line:71 🍧 time_unit_resolution', 'color:#3f7cff', time_unit_resolution);
+          const {time, resolution = '1h'} = time_unit_resolution || {}
+          const {time_count = 12, time_unit = 'hour' } = time || {}
+          setTime({
+            time_count,
+            time_unit: time_unit  as 'hour',
+            resolution: resolution as '1h'
+          })
+      }
+      fetchTimeUnitandResolution()
+    }
+  }, [filterId, (searchBy ?? [])?.length])
+
+  useEffect(() => {
+    console.log('%c Line:110 🥒 filterId', 'color:#2eafb0', filterId, {time_count, time_unit, resolution});
+    if (filterId) {
+     setTimeout(async() =>{
+      const { data } =  await refetch() 
+      setBandwidth(data)
+
+      console.log('%c Line:79 🍔', 'color:#93c0a4');
+    },500
+    )
+    }
+  }, [JSON.stringify({time_count, time_unit, resolution}), (searchBy ?? [])?.length])
+
+  useEffect(() => {
+    if(!params?.id || !refetch) return 
+
+    const fetchBandwidth = async() => {
+      const a =  await refetch() 
+      
+      const { data }  = a
+      if(!data) return
+      setBandwidth(data)
+    }
+    
+    fetchBandwidth()
+  }, [params?.id])
 
 
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})

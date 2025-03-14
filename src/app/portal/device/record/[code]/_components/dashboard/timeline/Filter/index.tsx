@@ -13,9 +13,10 @@ function Filter({params, type}: {
   const tab = {
     name: 'New Filter',
   }
-
+  
+  console.log('%c Line:19 🥥 type', 'color:#33a5ff', type);
   return (
-    <ManageFilterProvider columns={columns} tab={tab}>
+    <ManageFilterProvider columns={columns} tab={tab}  filter_type={type}>
       <FilterProvider params={params} type={type}>
         <FilterView />
       </FilterProvider>

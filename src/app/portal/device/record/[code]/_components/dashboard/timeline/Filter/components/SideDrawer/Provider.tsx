@@ -26,7 +26,8 @@ interface ManageFilterContextType {
 
 export const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined)
 
-export function ManageFilterProvider({ children, tab, columns }: { children: React.ReactNode, tab: any, columns: Record<string, any>[] }) {
+export function ManageFilterProvider({ children, tab, columns, filter_type }: { children: React.ReactNode, tab: any, columns: Record<string, any>[], filter_type: string }) {
+  console.log('%c Line:30 🎂 filter_type', 'color:#42b983', filter_type);
   const { actions } = useSideDrawer()
   const eventEmitter = useEventEmitter()
   const { closeSideDrawer } = actions ?? {}
@@ -61,7 +62,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
 
   const handleSaveFilter = async () => {
     setCreateFilterLoading(true)
-    const saveFilter = await saveGridFilter(filterDetails)
+    const saveFilter = await saveGridFilter(filterDetails, filter_type)
 
     setCreateFilterLoading(false)
     return saveFilter
@@ -81,6 +82,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
           id: 'created_date',
           desc: true,
         }]
+        console.log('%c Line:102 🥥 filter_type', 'color:#465975', filter_type);
 
     const modifyFilterDetails = {
       ...filterDetails,
@@ -98,12 +100,13 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
       default_sorts: sorting,
     }
     setUpdateFilterLoading(true)
-    eventEmitter.emit(`timeline_manage_filter`, { modifyFilterDetails })
-    await updateGridFilter(modifyFilterDetails)
+    eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
+    await updateGridFilter(modifyFilterDetails, filter_type)
     setUpdateFilterLoading(false)
     closeSideDrawer()
   }
 
+  console.log('%c Line:141 🍌 filter_type', 'color:#ffdd4d', filter_type);
   const handleCreateNewFilter = async () => {
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map(
@@ -135,8 +138,10 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     }
     setCreateFilterLoading(true)
 
-    const filter_id = await saveGridFilter(modifyFilterDetails)
-    eventEmitter.emit(`timeline_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
+    const filter_id = await saveGridFilter(modifyFilterDetails,  filter_type)
+    eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
+
+    console.log('%c Line:142 🍤', 'color:#ed9ec7');
     setCreateFilterLoading(false)
     closeSideDrawer()
   }

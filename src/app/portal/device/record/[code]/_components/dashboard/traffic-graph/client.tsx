@@ -156,7 +156,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
 
   return (
     <>
-    <Filter params={params} type='traffic_graph'  />
+    <Filter params={params} type='traffic_graph_filter'  />
     <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
