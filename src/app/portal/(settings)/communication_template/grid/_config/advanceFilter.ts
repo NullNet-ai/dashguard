@@ -25,21 +25,7 @@ const defaultAdvanceFilter = [
     label: "Status",
     values: ["Draft"],
     default: true,
-  },
-  {
-    operator: "or",
-    type: "operator",
-    default: true,
-  },
-  {
-    operator: "equal",
-    type: "criteria",
-    field: "status",
-    id: ulid(),
-    label: "Status",
-    values: ["Archived"],
-    default: true,
-  },
+  }
 ] as ISearchItem[];
 
 export default defaultAdvanceFilter;

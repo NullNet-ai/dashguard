@@ -6,6 +6,7 @@ import WizardSummaryComponent from "../_config/wizardSummaryConfig";
 import stepsNavigation from "../_config/stepsNavigation";
 import totalSteps from "../_config/totalSteps";
 import stepLabels from "../_config/stepLabels";
+import wizardCallbacks from './_actions/wizardCallbacks';
 
 const WizardLayout = (props: IWizardLayoutProps) => {
   const { children } = props;
@@ -23,7 +24,8 @@ const WizardLayout = (props: IWizardLayoutProps) => {
           entityName: mainEntity,
           totalSteps: totalSteps,
           stepLabels: stepLabels,
-          title: 'New Communication Template'
+          title: 'New Communication Template',
+          callbackHandlers: wizardCallbacks,
         }}
         summary={wizard_summary}
         stepsNavigation={stepsNavigation}

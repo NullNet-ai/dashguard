@@ -11,6 +11,7 @@ import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
 import { type IFormProps } from '../types';
 import ContentField from './custom/ContentSubjectField';
+import { formatTabName } from '~/lib/utils';
 
 export default function Content({ params, defaultValues }: IFormProps) {
   const toast = useToast();
@@ -51,31 +52,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
 
   const data_source = Entities.map((entity) => ({
     value: entity,
-    label: entity,
-  }));
-
-  const entityFields = {
-    contact: [
-      'contact.first_name',
-      'contact.last_name',
-      'contact.status',
-      'contact.code',
-    ],
-    organization_account: [
-      'organization_account.account_id',
-      'organization_account.status',
-      'organization_account.code',
-      'organization_account.account_status',
-    ],
-  };
-
-  const variables = Object.entries(entityFields).map(([entity, fields]) => ({
-    value: entity,
-    label: entity,
-    options: fields.map((field) => ({
-      value: field,
-      label: field,
-    })),
+    label: formatTabName(entity),
   }));
 
   return (
@@ -114,7 +91,6 @@ export default function Content({ params, defaultValues }: IFormProps) {
       ]}
       selectOptions={{
         data_source: data_source,
-        variables,
       }}
     />
   );

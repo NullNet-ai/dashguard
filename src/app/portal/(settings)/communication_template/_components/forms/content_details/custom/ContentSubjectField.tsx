@@ -1,4 +1,4 @@
-// import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react'
 
 import FormRichTextEditor from '~/components/platform/FormBuilder/FormType/FormRichTextEditor'
@@ -9,10 +9,10 @@ import { GetVariables } from '../actions/getVariables'
 const ContentSubjectField = (props: CustomFieldProps) => {
   const { form, formKey, fieldConfig, selectOptions, ...formRenderProps }
     = props
-  // const searchParams = useSearchParams();
-  // const category =
-  //   searchParams.get('category') ||
-  //   form.formState.defaultValues?.categories?.[0];
+  const searchParams = useSearchParams();
+  const category =
+    searchParams.get('category') ||
+    form.formState.defaultValues?.categories?.[0];
   const [selectedEntity, setSelectedEntity] = useState<string>('')
   const [variableOptions, setVariableOptions] = React.useState<any>([])
 
@@ -22,18 +22,23 @@ const ContentSubjectField = (props: CustomFieldProps) => {
     setSelectedEntity(entity)
   }
 
+  if (fieldConfig.id === 'subject' && category === 'SMS') return null;
+
   return (
     <FormRichTextEditor
       fieldConfig={{
         ...fieldConfig,
         richTextConfig: {
-          plainTextMode: fieldConfig.id === 'subject',
+          plainTextMode: fieldConfig.id === 'subject' || category === 'SMS',
+          plainTextConfig: {
+            multiline: fieldConfig.id === 'content' && category === 'SMS',
+          },
           customDropdowns: [
             {
               id: 'entity_selector',
               buttonLabel: selectedEntity
                 ? `Entity: ${selectedEntity}`
-                : 'Select Entity',
+                : 'Select Data Source',
               searchPlaceholder: 'Find an entity type...',
               emptyMessage: 'No entity types available',
               options: selectOptions?.data_source ?? [],
@@ -50,7 +55,7 @@ const ContentSubjectField = (props: CustomFieldProps) => {
                 ? 'No fields available for this entity'
                 : 'Please select an entity type first',
               options: variableOptions ?? [],
-              formatInsertedValue: option => `{${selectedEntity}.${option.value}}`,
+              formatInsertedValue: option => `{${option.value}}`,
               disabled: !selectedEntity,
             },
           ],

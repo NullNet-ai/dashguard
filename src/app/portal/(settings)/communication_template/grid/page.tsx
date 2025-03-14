@@ -61,6 +61,14 @@ export default async function Page() {
         title: 'Communication Templates',
         columns: gridColumns,
         enableAutoCreate: false,
+        searchConfig: {
+          router: 'grid',
+          resolver: 'items',
+          query_params: {
+            entity: main_entity!,
+            pluck: _pluck,
+          }
+        },
       }}
     />
   );

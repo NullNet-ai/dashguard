@@ -1,5 +1,5 @@
 import type { EEventType, IEventConfig } from './types'
-import INVITATION_EXPIRE from './list/LICENSE_EXPIRE'
+import INVITATION_EXPIRE from './list/INVITATION_EXPIRE'
 import LICENSE_EXPIRE from './list/LICENSE_EXPIRE'
 import ACCOUNT_DEACTIVATE from './list/ACCOUNT_DEACTIVATE'
 import ACCOUNT_INVITE from './list/ACCOUNT_INVITE'

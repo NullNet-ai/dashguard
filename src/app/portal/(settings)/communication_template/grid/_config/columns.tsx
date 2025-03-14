@@ -37,14 +37,13 @@ const gridColumns = [
   {
     header: "Event",
     accessorKey: "event",
-    isSearchable: false,
   },
   {
     header: 'Status',
     accessorKey: 'communication_template_status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.account_status
+      const value = row?.original?.communication_template_status
       if (!value) return null
       return <StatusCell key={value} value={ value } />
     },
