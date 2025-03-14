@@ -154,7 +154,6 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement> & { detail?: string, isMultiple?: boolean }
 >(({ className, children, isMultiple, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  console.log("🚀 ~ error:", error)
   
   let errorMessages: string[] = [];
   if (error) {
@@ -171,7 +170,6 @@ const FormMessage = React.forwardRef<
   if (!errorMessages.length && !children) {
     return null;
   }
-  console.log("🚀 ~ errorMessages:", errorMessages)
 
   return (
     <div ref={ref} id={formMessageId} className={cn("text-sm font-medium text-destructive !mt-[6px]", className)} {...props}>
