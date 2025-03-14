@@ -21,4 +21,5 @@ export interface IFormProps<T = Record<string, any>> {
     items: Record<string, any>[];
     totalCount: number;
   }
+  children?: React.ReactNode;
 }

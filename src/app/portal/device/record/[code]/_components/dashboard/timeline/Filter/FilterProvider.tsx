@@ -8,6 +8,7 @@ import { type IAction, type IProps, type IFilterContext, type IState, type IData
 
 import {  removeFilter } from './components/SideDrawer/actions'
 import { ulid } from 'ulid'
+import { IFormProps } from '../../types'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -20,8 +21,9 @@ export const useFilter = (): IFilterContext => {
   return context
 }
 
-const FilterProvider = ({ children }: IProps) => {
+const FilterProvider = ({ children, params }: any) => {
   const eventEmitter = useEventEmitter()
+  const {router, resolver} = params || {}
 
   const [filters, setFilters] = useState<Record<string, any>[]>(
     [
@@ -36,9 +38,8 @@ const FilterProvider = ({ children }: IProps) => {
 
   const {
     data: cached_filter_items = [],
-    refetch: refetchFilters,
-  } = api.timelineFilter.fetchTimelineFilter.useQuery({
-    type: 'filter',
+  } = api.cachedFilter.fetchCachedFilter.useQuery({
+    type: 'timeline_filter',
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
@@ -125,7 +126,7 @@ const FilterProvider = ({ children }: IProps) => {
   }
   
   
-  const duplicateFilter= api.timelineFilter.duplicateTimelineFilter.useMutation()
+  const duplicateFilter= api.cachedFilter.duplicateFilter.useMutation()
   const handleDuplicateTab = async (tab: Record<string, any>) => {
     const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: 'filter', data: tab })
     setFilters(prev => {

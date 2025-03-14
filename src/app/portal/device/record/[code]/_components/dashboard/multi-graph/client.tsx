@@ -86,12 +86,17 @@ const InteractiveGraph = ({
   }
 
   useEffect(() => {
-    fetchChartData()
-    const interval = setInterval(() => {
-      fetchChartData()
-    }, 2000)
-    return () => clearInterval(interval)
+    // fetchChartData()
+    // const interval = setInterval(() => {
+    //   fetchChartData()
+    // }, 2000)
+    // return () => clearInterval(interval)
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
+
+  useEffect(() => {
+    const interfacesData = form.watch('interfaces') || []
+    setInterfaces(interfacesData)
+  }, [form.watch('interfaces')])
 
   return (
     <div className="flex flex-row gap-4 px-4">
@@ -212,8 +217,6 @@ const InteractiveGraph = ({
                     },
                     render: ({ form }) => {
                       const interfacesData = form?.watch('interfaces') || []
-
-                      setInterfaces?.(interfacesData)
                       const graphType = form?.watch('graph_type')
                       return (
                         <div className = "max-h-[340px]">

@@ -22,7 +22,7 @@ import { organizationContactsRouter } from './routers/organization_contact'
 import { packetRouter } from './routers/packet'
 import { recordRouter } from './routers/record'
 import { tabRouter } from './routers/tab'
-import { timelineFilterRouter } from './routers/timeline_filter'
+import { cachedFilterRouter } from './routers/timeline_filter'
 import { userRolesRouter } from './routers/user_role'
 import { validatorRouter } from './routers/validator'
 import { wizardRouter } from './routers/wizard'
@@ -58,7 +58,7 @@ export const appRouter = createTRPCRouter({
   deviceConfiguration: deviceConfigurationRouter,
   deviceHeartbeats: deviceHeartbeatsRouter,
   packet: packetRouter,
-  timelineFilter: timelineFilterRouter,
+  cachedFilter: cachedFilterRouter,
 })
 
 // export type definition of API

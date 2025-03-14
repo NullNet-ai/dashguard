@@ -22,6 +22,9 @@ interface OutputData {
   bandwidth: number
 }
 
+// !!TO REFACTOR
+let current_search_details = ''
+let searc_res: any[] =[]
 
 function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
   const start_moment = new Date(startDate)
@@ -33,6 +36,7 @@ function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count:
   }
 
   const seconds_array = []
+
 
   for (let current_time = start_moment.getTime(); current_time <= end_moment.getTime(); current_time += per_seconds) {
     const current_moment = new Date(current_time)
@@ -170,8 +174,8 @@ export const packetRouter = createTRPCRouter({
       return res?.data
     }),
 
-  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string() })).query(async ({ input, ctx }) => {
-    const { bucket_size, time_range, timezone } = input
+  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string(), device_id: z.string() })).query(async ({ input, ctx }) => {
+    const { bucket_size, time_range, timezone, device_id } = input
     if (
       !bucket_size
     ) {
@@ -195,19 +199,19 @@ export const packetRouter = createTRPCRouter({
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
-          // {
-          //   type: 'operator',
-          //   operator: EOperator.AND,
-          // },
-          // {
-          //   type: 'criteria',
-          //   field: 'device_id',
-          //   entity: 'packets',
-          //   operator: EOperator.EQUAL,
-          //   values: [
-          //     device_id,
-          //   ],
-          // },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'packets',
+            operator: EOperator.EQUAL,
+            values: [
+              device_id,
+            ],
+          },
         ],
         joins: [],
         bucket_size,
@@ -233,15 +237,18 @@ export const packetRouter = createTRPCRouter({
     const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
     const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
+    console.log('%c Line:236 🥒 timestamps', 'color:#ea7e5c', timestamps);
 
+    console.log('%c Line:237 🍤', 'color:#42b983', res?.data);
     const result = timestamps.map((item) => {
-      const data = res?.data.find((element: any) => element.bucket === item)
+      const data = res?.data.find((element: any) =>  element.bucket?.includes(item))
       if (data) {
         return { bucket: item, bandwidth: data.bandwidth }
       }
       return { bucket: item, bandwidth: 0 }
     })
 
+    console.log('%c Line:246 🌶 result', 'color:#42b983', result);
     return result
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
@@ -538,8 +545,6 @@ export const packetRouter = createTRPCRouter({
   //   }, { concurrency: 10 })
   // }),
   filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
-
-    
     const {
       limit = 50,
       advance_filters = [],
@@ -601,9 +606,11 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
-    
-
-
+      console.log('%c Line:604 🍉 res?.data', 'color:#ffdd4d', {
+        items: res?.data,
+        _query
+      });
+      
     return {
       items: res?.data,
       _query
@@ -616,7 +623,7 @@ export const packetRouter = createTRPCRouter({
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
-      const limit = 1000
+      const limit = 100000
 
       // return []
 
@@ -645,6 +652,9 @@ export const packetRouter = createTRPCRouter({
         ...item,
         entity: 'packets',
       }))
+
+      if(current_search_details === JSON.stringify(custom_adv))return  searc_res 
+      current_search_details = JSON.stringify(custom_adv)
       
       const packets = await ctx.dnaClient
         .findAll({
@@ -768,7 +778,7 @@ export const packetRouter = createTRPCRouter({
             },
           ],
           joins: [],
-          bucket_size: '5s',
+          bucket_size: '1h',
           order: {
             order_by: 'bucket',
             order_direction: EOrderDirection.DESC,
@@ -786,6 +796,8 @@ export const packetRouter = createTRPCRouter({
 
     
     
+    console.log('%c Line:725 🍻 ab', 'color:#b03734', ab);
+    searc_res = ab
     
     return ab
   }),

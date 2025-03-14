@@ -24,15 +24,20 @@ import { removeSearchItems } from './utils/removeSearchItems'
 export const SearchGraphContext = React.createContext<ICreateContext>({
 })
 
+interface IParams {
+  id: string
+  router: string
+  resolver: string
+}
+
 interface IProps extends PropsWithChildren {
   test?: any,
-  params?:any
+  params: IParams
 }
 
 export default function GraphSearchProvider({ children, params }: IProps) {
+  const {id: device_id, router = 'packet', resolver = 'filterPackets'} = params || {}
   
-  
-
   const { defaultEntity } = searchConfig ?? {}
 
   const [_query, setQuery] = useState<string>('')
@@ -94,7 +99,7 @@ export default function GraphSearchProvider({ children, params }: IProps) {
   const {time_count,time_unit = 'minute' } = timeDuration
   
 
-  const { data, refetch } = api?.packet.filterPackets.useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id: params?.id, _query }, {
+  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id, _query }, {
     refetchOnWindowFocus: false,
     gcTime: 0,
     enabled: false,
@@ -169,8 +174,8 @@ refetchSearchOption()
 
   const {
     data: cached_search_items = [],
-  } = api.timelineFilter.fetchTimelineFilter.useQuery({
-    type: 'search',
+  } = api.cachedFilter.fetchCachedFilter.useQuery({
+    type: 'timeline_search',
   })
 
   

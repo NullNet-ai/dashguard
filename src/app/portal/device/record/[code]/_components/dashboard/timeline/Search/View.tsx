@@ -16,7 +16,7 @@ import { type ISearchableField, type ISearchItemResult } from './types'
 import { transformSearchData } from './utils/transformSearchData'
 
 
-export default function Search() {
+export default function View() {
   const { state, actions } = useContext(SearchGraphContext)
 
   const { width } = useWindowSize()

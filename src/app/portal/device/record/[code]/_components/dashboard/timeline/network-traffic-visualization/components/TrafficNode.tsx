@@ -4,25 +4,26 @@ import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis, YAxis } from 'rec
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 
 import { generateTicks } from '../functions/generateTicks'
+import moment from 'moment-timezone';
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
 
-  const { bandwidth } = data
+  const { bandwidth , bucket} = data
   const value = bandwidth || data._maxBandwidth
   const tooltipData = [{ name: '1', value }]
 
   const getColorForValue = (value: number) => {
-    if (value > 2000) {
+    if (value > 100000) {
       return 'red'
     }
-    else if (value > 1500) {
+    else if (value > 50000) {
       return 'orange'
     }
     
-    else if (value > 1000) {
+    else if (value > 10000) {
       return 'blue'
     }
-    else if (value > 500) {
+    else if (value > 1000) {
       return 'gray'
     }
     else {
@@ -46,38 +47,15 @@ const TrafficNode = ({ data }: { data: Record<string, any> }) => {
             }}
           >
             <TooltipContent side='bottom'>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[450px] bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
-                <div className="flex flex-col items-center">
+              <div className='text-lg'>
+            {moment(bucket).format("HH:00:00")}
 
-                  <ResponsiveContainer height={150} width={400}>
-                    <BarChart 
-                      data={tooltipData} 
-                      layout="vertical" 
-                      margin={{ top: 15, right: 60, left: 15, bottom: 15 }}
-                    >
-                      <XAxis
-                        axisLine={{ stroke: '#333', strokeWidth: 2 }}
-                        domain={[0, Math.ceil(value * 1.2)]}
-                        tick={{ fontSize: 14, fill: '#333' }}
-                        tickFormatter={(val: any) => val}
-                        tickLine={{ stroke: '#333', strokeWidth: 1 }}
-                        ticks={generateTicks(value)}
-                        type="number"
-                      />
-                      <YAxis dataKey="name" hide={true} type="category" />
-                      <Bar barSize={40} dataKey="value" fill="#60a5fa" radius={[8, 8, 8, 8]}>
-                        <LabelList
-                          dataKey="value"
-                          formatter={(val: any) => val}
-                          position="right"
-                          style={{ fontSize: '16px', fill: '#333', fontWeight: 500 }}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="absolute w-3 h-3 bg-white border-b border-r border-gray-200 -bottom-1.5 left-1/2 -translate-x-1/2 transform rotate-45" />
               </div>
+              <div className='text-lg'>
+
+              Total Bandwidth: {value}
+              </div>
+                    
             </TooltipContent>
             <div
               className="relative transition-all duration-300 ease-in-out rounded-full "
