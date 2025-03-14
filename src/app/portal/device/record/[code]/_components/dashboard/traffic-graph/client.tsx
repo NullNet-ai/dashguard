@@ -159,66 +159,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
     <Filter params={params} type='traffic_graph_filter'  />
     <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>{`${cardTitle} - Interactive`}</CardTitle>
-        </div>
-        Time Range
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Time Range" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {
-              Object.entries(time_range_options).map(([key, label]) => (
-                <SelectItem className = "rounded-lg" key = { key } value = { key }>
-                  {label as string}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
-        Resolution
-        <Select value={resolution || ''} onValueChange={setResolution}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Resolution" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {resolutionOpt.map((options: any) => Object.entries(options).map(([key, label]) => (
-              <SelectItem className = "rounded-lg" key = { key } value = { key }>
-                {label as string}
-              </SelectItem>
-            ))
-            )}
-          </SelectContent>
-        </Select>
-        Graph Type
-        <Select value={graphType} onValueChange={setGraphType}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem className="rounded-lg" value="default">
-              Area Chart
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="bar">
-              Bar Chart
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="line">
-              Line Chart
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </CardHeader>
+      
       <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
         <ChartContainer
           className="aspect-auto h-full w-full p-5 overflow-x-auto"
