@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import L from 'leaflet';
+import L, {  LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 import 'leaflet-arc';
@@ -18,7 +18,7 @@ const fetchUSStatesBorders = async () => {
 };
 
 // Function to get coordinates of a city
-const geocodeAddress = async (address) => {
+const geocodeAddress = async (address: any) => {
   const url = `https://nominatim.openstreetmap.org/search?q=${address}&format=json`;
   try {
     const response = await fetch(url);
@@ -41,26 +41,11 @@ const trafficData = {
   'United States of America': { city: 'New York, USA', trafficLevel: 85 },
   'Japan': { city: 'Tokyo, Japan', trafficLevel: 30 },
   'Germany': { city: 'Berlin, Germany', trafficLevel: 50 },
-  'France': { city: 'Paris, France', trafficLevel: 60 },
   'Canada': { city: 'Toronto, Canada', trafficLevel: 40 },
   'China': { city: 'Beijing, China', trafficLevel: 95 },
-  // 'India': { city: 'Mumbai, India', trafficLevel: 70 },
   'Brazil': { city: 'São Paulo, Brazil', trafficLevel: 55 },
   'South Korea': { city: 'Seoul, South Korea', trafficLevel: 35 },
-  // 'Australia': { city: 'Sydney, Australia', trafficLevel: 25 },
-  // 'Italy': { city: 'Rome, Italy', trafficLevel: 50 },
-  // 'South Africa': { city: 'Johannesburg, South Africa', trafficLevel: 20 },
-  // 'Mexico': { city: 'Mexico City, Mexico', trafficLevel: 65 },
-  // 'Spain': { city: 'Madrid, Spain', trafficLevel: 40 },
-  // 'Turkey': { city: 'Istanbul, Turkey', trafficLevel: 75 },
-  // 'Netherlands': { city: 'Amsterdam, Netherlands', trafficLevel: 30 },
-  // 'Indonesia': { city: 'Jakarta, Indonesia', trafficLevel: 80 },
-  // 'Saudi Arabia': { city: 'Riyadh, Saudi Arabia', trafficLevel: 50 },
-  // 'Argentina': { city: 'Buenos Aires, Argentina', trafficLevel: 45 },
-  // 'Thailand': { city: 'Bangkok, Thailand', trafficLevel: 35 },
-  // 'Sweden': { city: 'Stockholm, Sweden', trafficLevel: 25 },
-  // 'Russia': { city: 'Moscow, Russia', trafficLevel: 45 },
-};
+} as any;
 
 // Additional city connections that don't correspond to countries in trafficData
 const additionalCityConnections = [
@@ -89,7 +74,6 @@ const regionToCityConnections = [
   { fromRegion: 'United Kingdom', toCity: 'Dubai, UAE', trafficLevel: 50, condition: 'Stable' },
   { fromRegion: 'United States of America', toCity: 'Singapore, Singapore', trafficLevel: 75, condition: 'Congested' },
   { fromRegion: 'Japan', toCity: 'Kuala Lumpur, Malaysia', trafficLevel: 45, condition: 'Normal' },
-  { fromRegion: 'France', toCity: 'Wellington, New Zealand', trafficLevel: 20, condition: 'Optimized' },
   { fromRegion: 'Germany', toCity: 'Prague, Czech Republic', trafficLevel: 35, condition: 'Low Bandwidth' },
 ];
 
@@ -101,7 +85,7 @@ const cityToCityConnections = [
 ];
 
 // Function to determine traffic color
-const getTrafficColor = (trafficLevel) => {
+const getTrafficColor = (trafficLevel: number) => {
   if (trafficLevel > 80) return "rgba(255, 0, 0, 0.7)"; // 🔴 Very High
   if (trafficLevel >= 50) return "rgba(255, 165, 0, 0.7)"; // 🟠 High
   if (trafficLevel >= 30) return "rgba(255, 255, 0, 0.7)"; // 🟡 Medium
@@ -109,7 +93,7 @@ const getTrafficColor = (trafficLevel) => {
 };
 
 // Function to get color for connection condition
-const getConditionColor = (condition) => {
+const getConditionColor = (condition: string) => {
   switch (condition) {
     case 'Congested': return "rgba(255, 0, 0, 0.7)";      // Red
     case 'High Latency': return "rgba(255, 0, 255, 0.7)"; // Purple
@@ -122,13 +106,13 @@ const getConditionColor = (condition) => {
 };
 
 // Function to create a **curved** traffic flow line using Bezier curves
-const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel, name, condition = null) => {
+const createCurvedFlowLine = (fromCoord: Record<string,any>, toCoord: Record<string,any>, trafficLevel: number, name: string, condition = null) => {
   if (!fromCoord || !toCoord) {
     console.error(`Missing coordinates for connection: ${name}`);
     return null;
   }
 
-  const curvePoints = [];
+  const curvePoints: any = [];
   const segments = 50; // Higher = smoother curve
 
   for (let i = 0; i <= segments; i++) {
@@ -166,8 +150,8 @@ const MapComponent = () => {
     });
     
     // Get coordinates for countries in trafficData
-    const cityCoordinates = {};
-    const countryCoordinates = {};
+    const cityCoordinates: any = {};
+    const countryCoordinates: any = {};
     
     
     for (const country in trafficData) {
@@ -180,14 +164,14 @@ const MapComponent = () => {
     }
     
     // Get coordinates for additional cities
-    const additionalCityCoordinates = {};
+    const additionalCityCoordinates: any = {};
     for (const cityData of additionalCityConnections) {
       additionalCityCoordinates[cityData.city] = await geocodeAddress(cityData.city);
       console.log("%c Additional city coordinates:", "color:#4fff4B", cityData.city, additionalCityCoordinates[cityData.city]);
     }
     
     // Get coordinates for region to region connection
-    const regionCoordinates = {};
+    const regionCoordinates: any = {};
     for (const regionData of regionToRegionConnections) {
       // Fix: Fetch coordinates for each region and ensure we have valid data
       const coords = await geocodeAddress(regionData.toRegion);
@@ -199,7 +183,7 @@ const MapComponent = () => {
       }
     }
     
-    const philippinesCoordinates = await geocodeAddress('Manila, Philippines');
+    const philippinesCoordinates: any = await geocodeAddress('Manila, Philippines');
 
     L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://stamen.com/">Stamen Maps</a>',
@@ -210,10 +194,10 @@ const MapComponent = () => {
     const geojson = { ...countries, features: [...countries.features, ...states.features] };
 
     // Add tooltips to regions
-    const countryLayers = {};
+    const countryLayers: Record<string,any> = {};
     L.geoJSON(geojson, {
       style: (feature) => {
-        const countryName = feature.properties.name;
+        const countryName = feature?.properties.name;
         const trafficLevel = trafficData[countryName]?.trafficLevel;
 
         return {
@@ -233,7 +217,7 @@ const MapComponent = () => {
     
         if (trafficLevel) {
           // Add country label
-          const center = layer.getBounds().getCenter();
+          const center = (layer as any)?.getBounds().getCenter();
           const label = L.divIcon({
             className: 'country-label',
             html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .8em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${countryName.toUpperCase()}</div>`,
@@ -257,7 +241,7 @@ const MapComponent = () => {
     }).addTo(map);
 
     // Function to create a city marker with circle and label
-    const createCityMarker = (coordinates, name, trafficLevel, cityName = null) => {
+    const createCityMarker = (coordinates: LatLngExpression, name: string, trafficLevel: number, cityName = null) => {
       if (!coordinates) {
         console.error(`Missing coordinates for city/region: ${cityName || name}`);
         return null;
@@ -284,8 +268,8 @@ const MapComponent = () => {
       }).addTo(map);
       
       // Add city label - with black color and all uppercase
-      const displayCityName = cityName || name;
-      const cityLabel = displayCityName.split(',')[0].toUpperCase(); // Extract just the city name before the comma and convert to uppercase
+      const displayCityName: any = cityName || name;
+      const cityLabel = displayCityName?.split(',')[0].toUpperCase(); // Extract just the city name before the comma and convert to uppercase
       
       const cityLabelIcon = L.divIcon({
         className: 'city-label',
@@ -369,7 +353,7 @@ const MapComponent = () => {
     
     // Fix: Add region-to-region connections
     regionToRegionConnections.forEach((connection) => {
-      const { toRegion, trafficLevel, condition } = connection;
+      const { toRegion, trafficLevel, condition } = connection as Record<string, any>;
       const toCoordinates = regionCoordinates[toRegion];
       
       if (!toCoordinates) {
@@ -406,7 +390,7 @@ const MapComponent = () => {
     
     // Fix: Add region-to-city connections
     regionToCityConnections.forEach((connection) => {
-      const { fromRegion, toCity, trafficLevel, condition } = connection;
+      const { fromRegion, toCity, trafficLevel, condition } = connection as Record<string, any>;
       const fromCoordinates = countryCoordinates[fromRegion];
       const toCityCoordinates = additionalCityCoordinates[toCity];
       
@@ -436,7 +420,7 @@ const MapComponent = () => {
     
     // Add city-to-city connections
     cityToCityConnections.forEach((connection) => {
-      const { fromCity, toCity, trafficLevel, condition } = connection;
+      const { fromCity, toCity, trafficLevel, condition } = connection as Record<string,any>;
       const fromCityCoordinates = additionalCityCoordinates[fromCity];
       const toCityCoordinates = additionalCityCoordinates[toCity];
       
@@ -505,7 +489,7 @@ const MapComponent = () => {
     );
 
     // Enhanced legend with connection conditions
-    const legend = L.control({ position: 'bottomright' });
+    const legend = (L as any).control({ position: 'bottomright' });
     legend.onAdd = function() {
       const div = L.DomUtil.create('div', 'info legend');
       div.innerHTML = `

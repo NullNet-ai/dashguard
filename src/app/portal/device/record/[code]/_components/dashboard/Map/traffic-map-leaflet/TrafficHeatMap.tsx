@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-const HeatMapLayer = ({ points }) => {
+const HeatMapLayer = ({ points }: Record<string,any>) => {
   const map = useMap();
 
   useEffect(() => {
@@ -48,13 +48,13 @@ const TrafficHeatMap = () => {
       <HeatMapLayer points={heatmapPoints} />
 
       {/* Traffic Flow Lines */}
-      {trafficRoutes.map((route, idx) => (
-        <Polyline key={idx} positions={[route.from, route.to]} color="orange" weight={2} dashArray="5,10" />
+      {trafficRoutes.map((route: Record<string,any>, idx) => (
+        <Polyline key={idx} positions={[route?.from, route?.to]} color="orange" weight={2} dashArray="5,10" />
       ))}
 
       {/* City Markers */}
-      {heatmapPoints.map((point, idx) => (
-        <CircleMarker key={idx} center={[point[0], point[1]]} radius={5} fillOpacity={0.7} color="red" />
+      {heatmapPoints.map((point: number[] | any, idx) => (
+        <CircleMarker key={idx} center={[point?.[0], point?.[1]]} radius={5} fillOpacity={0.7} color="red" />
       ))}
     </MapContainer>
   );
