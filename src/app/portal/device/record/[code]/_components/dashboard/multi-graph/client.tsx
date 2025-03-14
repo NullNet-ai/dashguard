@@ -86,11 +86,11 @@ const InteractiveGraph = ({
   }
 
   useEffect(() => {
-    // fetchChartData()
-    // const interval = setInterval(() => {
-    //   fetchChartData()
-    // }, 2000)
-    // return () => clearInterval(interval)
+    fetchChartData()
+    const interval = setInterval(() => {
+      fetchChartData()
+    }, 2000)
+    return () => clearInterval(interval)
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   useEffect(() => {
