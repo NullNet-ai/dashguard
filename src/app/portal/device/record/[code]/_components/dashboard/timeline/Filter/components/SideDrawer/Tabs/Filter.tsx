@@ -16,8 +16,16 @@ import {
 } from '~/components/ui/select'
 
 import { useManageFilter } from '../Provider'
+import { headers } from 'next/headers';
+// import { useSearchParams } from "next/navigation";
 
-const default_filters = [
+const required_fields = [
+  'time_range',
+  'resolution',
+  'graph_type',
+]
+
+const _def_filters = [
   {
     field: 'time_range',
     operator: 'equal',
@@ -27,42 +35,65 @@ const default_filters = [
     default: true,
     input_type: 'select',
     options: [
-      { label: '30 Days', value: '30d' },
+      // { label: '30 Days', value: '30d' },
       { label: '7 Days', value: '7d' },
       { label: '1 Day', value: '1d' },
-    ]
+      { label: '12 Hours', value: '12h' },
+    ],
+    static: true,
   },  {
     operator: 'and',
     type: 'operator',
     default: true,
   },
   {
-    field: '',
-    operator: '',
-    label: '',
+    field: 'resolution',
+    operator: 'equal',
+    label: 'Resolution',
     values: [],
     type: 'criteria',
     default: true,
+    input_type: 'select',
+    options: [
+      // { label: '1 Day', value: '1d' },
+      { label: '1 Hour', value: '1h' },
+      { label: '30 Minutes', value: '30m' },
+    ],
+    static: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  }
+]
+
+const default_filters = (type: string) =>{
+  if(type === 'timeline') return _def_filters
+  
+  return [
+..._def_filters,
+  {
+    field: 'graph_type',
+    operator: 'equal',
+    label: 'Graph Type',
+    values: [],
+    type: 'criteria',
+    default: true,
+    input_type: 'select',
+    options: [
+      { label: 'Line Chart', value: 'line' },
+      { label: 'Bar Chart', value: 'bar' },
+      { label: 'Area Chart', value: 'area' },
+    ],
+    static: true,
   },
   {
     operator: 'and',
     type: 'operator',
     default: true,
   },
-  {
-    field: '',
-    operator: '',
-    label: '',
-    values: [],
-    type: 'criteria',
-    default: true,
-  },
-  {
-    operator: 'and',
-    type: 'operator',
-    default: true,
-  },
-] 
+] }
 
 
 const OPERATORS = [
@@ -103,16 +134,21 @@ const ZodSchema = z.object({
   ),
 })
 
-export default function FilterContent() {
+export default function FilterContent({filter_type}: {filter_type: string}) {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails, columns } = state ?? {}
-  console.log('%c Line:58 🍬', 'color:#7f2b82', filterDetails?.default_filter);
+
+  // const router = useRouter()
+  // console.log('%c Line:136 🍌 router', 'color:#ffdd4d', router);
+
+  
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
       filters: filterDetails?.default_filter ?? [
+        ...default_filters(filter_type),
         {
           field: '',
           operator: '',
@@ -132,7 +168,7 @@ export default function FilterContent() {
     name: 'filters',
   })
   
-  console.log('%c Line:81 🌶 fields', 'color:#ffdd4d', fields);
+  
   form.watch((fields) => {
     handleUpdateFilter({ default_filter: fields.filters })
   })
@@ -186,6 +222,7 @@ export default function FilterContent() {
       <Form {...form}>
         <div className="space-y-4">
           {fields.map((field: any, index) => {
+            
             const prefix = `filters.${index}.`
             return (
               <div
@@ -209,7 +246,71 @@ export default function FilterContent() {
                     </Select>
                   </div>
                 )}
-                {field.type === 'criteria' && (
+
+                {required_fields?.includes(field?.field) && (
+                  <FormModule
+                    fields={[
+                      {
+                        id: `${prefix}.field`,
+                        formType: 'input',
+                        name: `${prefix}.field`,
+                        // placeholder: 'Select a Field',
+                        // selectSearchable: true,
+                        value: field?.label,
+                        disabled: true,
+                      },
+                      {
+                        id: `${prefix}.operator`,
+                        formType: 'select',
+                        name: `${prefix}.operator`,
+                        placeholder: 'Select an operator',
+                        selectSearchable: true,
+                        disabled: true,
+                      },
+                      {
+                        id: `${prefix}.${field.field}`,
+                        formType: 'select',
+                        name: `${prefix}.${field.field}`,
+                        placeholder: 'Select a value',
+                        selectSearchable: true,
+                        // multiSelectEnableCreate: true,
+                        // multiSelectShowCreatableItem: false,
+                        // multiSelectUseStringValues: true,
+                      },
+                    ]}
+                    form={form}
+                    formKey="filters"
+                    formSchema={ZodSchema}
+                    subConfig={{
+                      selectOptions: {
+                        [`${prefix}.field`]:
+                          columns?.map(column => ({
+                            label: column.label,
+                            value: column.accessorKey,
+                          })) || [],
+                        [`${prefix}.operator`]: OPERATORS,
+                        [`${prefix}.time_range`]: [
+                          // { label: '30 Days', value: '30d' },
+                          { label: '7 Days', value: '7d' },
+                          { label: '1 Day', value: '1d' },
+                          { label: '12 Hours', value: '12h' },
+                        ],
+                        [`${prefix}.resolution`]: [
+                          // { label: '1 Day', value: '1d' },
+                          { label: '1 Hour', value: '1h' },
+                          { label: '30 Minutes', value: '30m' },
+                        ],
+                        [`${prefix}.graph_type`]: [
+                          { label: 'Line Chart', value: 'line' },
+                          { label: 'Bar Chart', value: 'bar' },
+                          { label: 'Area Chart', value: 'area' },
+                        ],
+                      },
+                    }}
+                  />
+                )}
+
+                {field.type === 'criteria' && !required_fields?.includes(field?.field) && (
                   <>
                     <FormModule
                       fields={[
@@ -251,7 +352,7 @@ export default function FilterContent() {
                         },
                       }}
                     />
-                    {fields.length > 1 && (
+                    {fields.length > 7 && !required_fields?.includes(field?.field) && (
                       <Button
                         Icon={CircleMinus}
                         iconClassName="text-red-600 h-4 w-4"

@@ -6,6 +6,7 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 import { saveGridFilter, updateGridFilter } from './actions'
+import { usePathname } from 'next/navigation';
 
 interface ManageFilterContextType {
   state: {
@@ -29,6 +30,9 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
   const { actions } = useSideDrawer()
   const eventEmitter = useEventEmitter()
   const { closeSideDrawer } = actions ?? {}
+
+  const pathname = usePathname();
+  console.log('%c Line:35 🌽 pathname', 'color:#f5ce50', pathname);
 
   const [filterDetails, setFilterDetails] = useState<any>({
     ...tab,
@@ -94,7 +98,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
       default_sorts: sorting,
     }
     setUpdateFilterLoading(true)
-    eventEmitter.emit(`manage_filter`, { modifyFilterDetails })
+    eventEmitter.emit(`timeline_manage_filter`, { modifyFilterDetails })
     await updateGridFilter(modifyFilterDetails)
     setUpdateFilterLoading(false)
     closeSideDrawer()
@@ -132,7 +136,7 @@ export function ManageFilterProvider({ children, tab, columns }: { children: Rea
     setCreateFilterLoading(true)
 
     const filter_id = await saveGridFilter(modifyFilterDetails)
-    eventEmitter.emit(`manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
+    eventEmitter.emit(`timeline_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
     setCreateFilterLoading(false)
     closeSideDrawer()
   }

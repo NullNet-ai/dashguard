@@ -13,7 +13,7 @@ import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
-  const { filters = [], _setRefetchTrigger, setFilterQuery } = state ?? {}
+  const { filters = [], _setRefetchTrigger, setFilterQuery, filter_type } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
@@ -39,7 +39,7 @@ const FilterView = () => {
       body: {
         component: () => (
           <ManageFilterProvider columns={columns} tab={{ name: 'New Filter' }}>
-            <GridManageFilter />
+            <GridManageFilter filter_type={filter_type as string}/>
           </ManageFilterProvider>
         ),
         componentProps: {},

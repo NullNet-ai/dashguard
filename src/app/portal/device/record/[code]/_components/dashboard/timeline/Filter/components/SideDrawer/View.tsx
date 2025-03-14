@@ -8,14 +8,14 @@ import FilterContent from './Tabs/Filter'
 import GroupContent from './Tabs/Group'
 import SortContent from './Tabs/Sort'
 
-export default function SideDrawer() {
+export default function SideDrawer({filter_type}: {filter_type: string}) {
   const { state, actions } = useManageFilter()
   const { tab_props, filterDetails, updateFilterLoading, createFilterLoading } = state ?? {}
   const tabs = [
     {
       id: 'filter',
       label: 'Filter',
-      content: <FilterContent />,
+      content: <FilterContent filter_type={filter_type}/>,
     },
     {
       id: 'sort',

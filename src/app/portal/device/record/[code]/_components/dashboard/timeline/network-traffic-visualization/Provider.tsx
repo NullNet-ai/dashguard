@@ -60,38 +60,41 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setSearchBy(data)
     }
 
-    eventEmitter.on(`filter_id`, data => setFID(data))
+    eventEmitter.on(`timeline_filter_id`, data => setFID(data))
     eventEmitter.on('timeline_search', setSBy)
     return () => {
-      eventEmitter.off(`filter_id`, setFID)
+      eventEmitter.off(`timeline_filter_id`, setFID)
       eventEmitter.off(`timeline_search`, setSBy)
     }
   }, [eventEmitter])
   
 
-  useEffect(() => {
-    if (filterId) {
-     setTimeout(async() =>{
-      const { data } =  await refetch() 
-      setBandwidth(data)
-    },500
-    )
-    }
-  }, [filterId, (searchBy ?? [])?.length])
+  // useEffect(() => {
+  //   if (filterId) {
+  //    setTimeout(async() =>{
+  //     const { data } =  await refetch() 
+  //     setBandwidth(data)
+  //   },500
+  //   )
+  //   }
+  // }, [filterId, (searchBy ?? [])?.length])
+  //uncomment later
 
-  useEffect(() => {
-    if(!params?.id || !refetch) return 
+  // useEffect(() => {
+  //   if(!params?.id || !refetch) return 
 
-    const fetchBandwidth = async() => {
-      const a =  await refetch() 
+  //   const fetchBandwidth = async() => {
+  //     const a =  await refetch() 
       
-      const { data }  = a
-      if(!data) return
-      setBandwidth(data)
-    }
+  //     const { data }  = a
+  //     if(!data) return
+  //     setBandwidth(data)
+  //   }
     
-    fetchBandwidth()
-  }, [params?.id])
+  //   fetchBandwidth()
+  // }, [params?.id])
+
+
   // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
   // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
   //   { packet_data: packetsIP }, { enabled: !!packetsIP }

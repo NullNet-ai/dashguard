@@ -21,7 +21,7 @@ export const useFilter = (): IFilterContext => {
   return context
 }
 
-const FilterProvider = ({ children, params }: any) => {
+const FilterProvider = ({ children, params, type }: any) => {
   const eventEmitter = useEventEmitter()
   const {router, resolver} = params || {}
 
@@ -67,14 +67,14 @@ const FilterProvider = ({ children, params }: any) => {
   }
 
   useEffect(() => {
-    eventEmitter.emit(`filter_id`, filterQuery)
+    eventEmitter.emit(`${type}_filter_id`, filterQuery)
   }, [_refetchTrigger, filterQuery])
 
   useEffect(() => {
     if (!eventEmitter) return
-    eventEmitter.on(`manage_filter`, fetchDetails)
+    eventEmitter.on(`${type}_manage_filter`, fetchDetails)
     return () => {
-      eventEmitter.off(`manage_filter`, fetchDetails)
+      eventEmitter.off(`${type}_manage_filter`, fetchDetails)
     }
   }, [eventEmitter, JSON.stringify(filters)])
 
@@ -140,6 +140,7 @@ const FilterProvider = ({ children, params }: any) => {
     setFilterQuery,
     _refetchTrigger,
     _setRefetchTrigger,
+    filter_type: type,
   } as IState
 
   const actions = {

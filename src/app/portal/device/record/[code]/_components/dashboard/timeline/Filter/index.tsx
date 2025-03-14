@@ -6,14 +6,17 @@ import FilterProvider from './FilterProvider'
 import FilterView from './FilterView'
 import { IFormProps } from '../../types'
 
-function Filter({params}: any) {
+function Filter({params, type}: {
+  params:any,
+  type: string
+}) {
   const tab = {
     name: 'New Filter',
   }
 
   return (
     <ManageFilterProvider columns={columns} tab={tab}>
-      <FilterProvider params={params}>
+      <FilterProvider params={params} type={type}>
         <FilterView />
       </FilterProvider>
     </ManageFilterProvider>
