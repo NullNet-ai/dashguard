@@ -6,10 +6,11 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useSidebar } from '~/components/ui/sidebar'
 import { cn } from '~/lib/utils'
-import { reorderItems } from '~/utils/sort-tab-items'
+import { reorderItems, reorderShowActiveItem } from '~/utils/sort-tab-items'
 
 import InnerTabsContent from './InnerTabsContent'
 import { api } from '~/trpc/react'
+import useWindowSize from '~/hooks/use-resize'
 
 type InnerTabItemsProps = {
   tabs: any[]
@@ -25,6 +26,8 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const {width} = useWindowSize();
+  const [newtabs, setNewtabs] = useState<any>([])
 
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
@@ -57,6 +60,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   
 
   const sortTabsActiveWillSecond = useMemo(() => {
+    console.log("resssss")
     if (!isClient) {
       return tabs?.map(tab => ({...tab, id: tab?.name}))
     }
@@ -64,46 +68,15 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
     if (tabs.length) {
 
       const newTabs = tabs?.map(tab => ({...tab, id: tab?.name}))
-
-      const activeIndex = newTabs.findIndex(a => a.name === code)
       const activeItem = newTabs.find(a => a.name === code)
-      console.log("tabxxs", activeItem)
-
-      const prevCurrent = cachedItem?.prevCurrent
-      console.log("prevCurrent", cachedItem)
-      // const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
-
+      const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
+      const result =  reorderShowActiveItem(copiedItem, code ?? '', application ?? '')
+      console.log("result", result)
+      return result
       
-      const copiedItem: any[] = cachedItem?.tabs || []
-      console.log("copiedItem", copiedItem)
-      // const copiedItem: any[] = []
-      const prevActiveIndex = newTabs.findIndex(a => a.name === prevCurrent)
-      const prevActiveItem = newTabs.find(a => a.name === prevCurrent)
-      if (copiedItem?.length) {
-        const result = reorderItems(copiedItem, prevActiveItem, activeItem?.name)
-        return result.filter(Boolean)
-      }
-
-      if (activeIndex !== -1) {
-        const result = [...newTabs]
-        const activeTab = result.splice(activeIndex, 1)[0]
-        if (prevActiveIndex !== -1 && prevCurrent !== code) {
-          const prevActiveTab = result.splice(prevActiveIndex > activeIndex ? prevActiveIndex - 1 : prevActiveIndex, 1)[0]
-          result.splice(1, 0, activeTab)
-          result.splice(2, 0, prevActiveTab)
-        }
-        else {
-          result.splice(1, 0, activeTab)
-        }
-
-        return result.filter(Boolean)
-      }
-
-      return newTabs.filter(Boolean)
     }
     return tabs?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
-  }, [tabs, code, isClient, cachedItem])
-
+  }, [tabs, code, isClient, cachedItem, width])
   
 
   return (

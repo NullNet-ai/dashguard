@@ -39,8 +39,6 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       return true
     }
 
-    console.log("code === tab?.name", code === tab?.name, code , tab?.name)
-
     return code === tab?.name
   }, [code, application])
 
@@ -111,7 +109,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary xx' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pr-0' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}

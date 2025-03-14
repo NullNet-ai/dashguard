@@ -27,6 +27,8 @@ import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, toLower } from 'lodash';  // Add this import at the top
+import { reorderShowActiveItem } from '~/utils/sort-tab-items';
+import { all } from 'bluebird';
 const InnerTabsContent = ({
   par_items = [],
   pathname,
@@ -49,6 +51,37 @@ const InnerTabsContent = ({
   const conWidth = useMemo(() =>   ({
     width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
+
+
+  const updateCache = (items?: any[]) => {
+
+    const newItems = items || par_items;
+    if (newItems?.length) {
+      const getCurrent = getActiveName() || ''
+      const neworderData = reorderShowActiveItem(newItems, code, application)
+      const cachedData = {
+        tabs: neworderData,
+        lastShownItem: lastShownItem?.name,
+        prevCurrent: getCurrent,
+        key:  'inner_tab_data_' + entity,
+      }
+      const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+  
+      localStorage.setItem('cachedPortalItems', JSON.stringify({
+        ...cachedItems,
+        [`inner_tab_data_${entity}`]: cachedData,
+      }))
+    }
+  }
+
+  const getActiveName = useMemo(() => {
+      return () => {
+        if (application === 'grid') {
+          return 'grid'
+        }
+        return code
+      }
+    }, [application, code]);
 
   useEffect(() => {
 
@@ -80,12 +113,14 @@ const InnerTabsContent = ({
           }
         }
       }
-      return allItems;
+
+      return allItems
+
     };
+
 
     const handleResize = () => {
       const items = calc();
-
       if (JSON.stringify(items) !== JSON.stringify(data)) {
         setData(items);
       }
@@ -107,26 +142,25 @@ const InnerTabsContent = ({
 
   useEffect(() => {
     let resizeTimeout: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
+    const handleResized = () => {
+      
       // Clear any existing timeout to prevent multiple executions
       if (resizeTimeout) {
         clearTimeout(resizeTimeout);
       }
 
       resizeTimeout = setTimeout(() => {
-        if (data?.length) {
-          Cookies.set(`${entity}-innerCopiedLastItems`, JSON.stringify(data));
-        }
+        updateCache()
       }, 1000);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResized);
 
     return () => {
       if (resizeTimeout) {
         clearTimeout(resizeTimeout);
       }
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleResized);
     };
   }, []);
 
@@ -171,6 +205,11 @@ const InnerTabsContent = ({
               newItems.splice(overIndex, 0, removed);
               return newItems;
             });
+
+            setTimeout(() => {
+              updateCache()
+            }, 1000);
+            
           }}
         >
           {datas.map((tab: any, index: number) => {
