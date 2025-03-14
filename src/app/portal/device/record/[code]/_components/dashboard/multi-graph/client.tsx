@@ -60,10 +60,12 @@ const InteractiveGraph = ({
 
   const { refetch: fetchBandWidth }
     = api.packet.getBandwithInterfacePerSecond.useQuery({
-      bucket_size: '1s',
+      // bucket_size: '1s',
+      bucket_size: '1m',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp(20, 'second', new Date()),
+      time_range: getLastTimeStamp(20, 'minute', new Date()),
+      // time_range: getLastTimeStamp(20, 'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
     })
 
