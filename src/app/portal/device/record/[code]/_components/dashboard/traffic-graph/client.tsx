@@ -125,8 +125,8 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
       const match = /^(\d+)([smhd])$/.exec(resolution)
       if (!match) return
 
-      const value = parseInt(match[1], 10)
-      const unit = match[2]
+      const value = parseInt(match?.[1] as string, 10)
+      const unit = match?.[2] as string
 
       // Convert to milliseconds
       const unitToMs = {
@@ -136,7 +136,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
         d: 24 * 60 * 60 * 1000,
       }
 
-      const intervalMs = value * (unitToMs[unit] || 1000)
+      const intervalMs = value * (unitToMs[unit as 's' | 'm' | 'h' | 'd'] || 1000)
       return intervalMs
     }
 
@@ -156,7 +156,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
 
   return (
     <>
-    <Filter params={{...params, router: 'packet', resolver: 'filterPackets' }}/>
+    <Filter/>
     <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">

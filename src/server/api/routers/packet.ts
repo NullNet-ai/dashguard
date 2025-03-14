@@ -791,10 +791,7 @@ export const packetRouter = createTRPCRouter({
     }, { concurrency: 10 })
 
     
-    
-    console.log('%c Line:725 🍻 ab', 'color:#b03734', ab);
-    searc_res = ab
-    
+    console.log('%c Line:795 🍩 ab', 'color:#2eafb0', ab);
     return ab
   }),
 
