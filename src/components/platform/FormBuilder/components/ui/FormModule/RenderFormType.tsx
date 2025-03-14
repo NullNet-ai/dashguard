@@ -341,7 +341,7 @@ export default function RenderFormType(
       return <FormComboBox fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
     case 'custom-field':
       return (
-        <FormCustom fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
+        <FormCustom fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} selectOptions={subConfig?.selectOptions} />
       )
     default:
       return <Input />

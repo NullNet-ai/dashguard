@@ -3,7 +3,7 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../../types";
+import { ISelectOptions, type IField } from "../../types";
 import {
   FormControl,
   FormItem,
@@ -22,6 +22,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>>;
   value?: string;
   formKey: string;
+  selectOptions?: Record<string, ISelectOptions[]> | undefined;
 }
 
 export default function FormCustom({
@@ -29,6 +30,7 @@ export default function FormCustom({
   form,
   formKey,
   formRenderProps,
+  selectOptions
 }: IProps) {
   const hasFormMessage = fieldConfig.hasFormMessage ?? true;
 
@@ -40,6 +42,7 @@ export default function FormCustom({
           form,
           formKey,
           fieldConfig,
+          selectOptions,
         })}
       </FormControl>
       {hasFormMessage && (
