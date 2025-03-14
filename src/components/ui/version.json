@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.3",
-  "branch": "released/1.14.3",
-  "message": "revert changes",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.16.0<unreleased>",
+  "branch": "unreleased/feat/2278/1.16.0<unreleased>",
+  "message": "add new smart component - Code Editor",
+  "publish_name": "Save Ducto"
 }
