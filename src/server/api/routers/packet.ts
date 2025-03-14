@@ -22,9 +22,7 @@ interface OutputData {
   bandwidth: number
 }
 
-// !!TO REFACTOR
-let current_search_details = ''
-let searc_res: any[] =[]
+
 
 function getAllSecondsBetweenDates(startDate: Date, endDate: Date, second_count: number): string[] {
   const start_moment = new Date(startDate)
@@ -653,8 +651,6 @@ export const packetRouter = createTRPCRouter({
         entity: 'packets',
       }))
 
-      if(current_search_details === JSON.stringify(custom_adv))return  searc_res 
-      current_search_details = JSON.stringify(custom_adv)
       
       const packets = await ctx.dnaClient
         .findAll({
