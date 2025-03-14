@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.15.0",
-  "branch": "released/fix/platform-2849/1.15.0",
-  "message": "Select > Creatable - Able to create new option though the field is case insensitive",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "1.16.0<unreleased>",
+  "branch": "unreleased/feat/2278/1.16.0<unreleased>",
+  "message": "add new smart component - Code Editor",
+  "publish_name": "Save Ducto"
 }
