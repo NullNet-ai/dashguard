@@ -46,34 +46,7 @@ interface OptionType {
 }
 interface RichTextConfig {
   output?:'html' | 'json' | 'text'
-  entityOptions?:Array<{
-    label: string;
-    value: string;
-  }>
-  variableOptions?: Array<{
-    label: string;
-    value: string;
-  }>;
   plainTextMode?:boolean
-  entitySelectorConfig?: {
-    buttonLabel?: string;
-    searchPlaceholder?: string;
-    emptyMessage?: string;
-    formatInsertedValue?: (option: EntityVariableOption) => string;
-    insertInEditor?: boolean;
-    show?: boolean;
-  };
-  variableSelectorConfig?: {
-    buttonLabel?: string;
-    searchPlaceholder?: string;
-    emptyMessage?: string;
-    formatInsertedValue?: (option: EntityVariableOption) => string;
-    insertInEditor?: boolean;
-    show?: boolean;
-  };
-  onEntitySelect?: (option: EntityVariableOption) => void;
-  onVariableSelect?: (option: EntityVariableOption) => void;
-  // Add customDropdowns property
   customDropdowns?: Array<{
     id: string;
     buttonLabel: string;
@@ -83,7 +56,6 @@ interface RichTextConfig {
       label: string;
       value: string;
     }>;
-    isFilterMode?: boolean;
     formatInsertedValue?: (option: { label: string; value: string }) => string;
     onSelect?: (option: { label: string; value: string }) => void;
     disabled?:boolean;
