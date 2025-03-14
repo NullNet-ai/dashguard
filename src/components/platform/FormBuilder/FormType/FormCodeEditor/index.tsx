@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import CodeEditor from '~/components/ui/code-editor';
+import { DevTool } from '@hookform/devtools';
 
 interface IProps {
   fieldConfig: IField;
@@ -28,8 +29,12 @@ export default function FormCodeEditor({
   fieldConfig,
 	formRenderProps,
   formKey,
+	form
 }: IProps) {
-
+	const handleCodeChange = (value: string) => {
+		formRenderProps.field.onChange(value);
+		formRenderProps.field.onBlur();
+	};
   return (
     <FormItem>
       <FormLabel
@@ -46,14 +51,17 @@ export default function FormCodeEditor({
 					maxHeight={fieldConfig.codeEditorProps?.enable_auto_height ? fieldConfig.codeEditorProps?.maxHeight : undefined}
 					minHeight={fieldConfig.codeEditorProps?.minHeight || ""}
 					editorCode={formRenderProps.field.value}
+					onCodeChange={handleCodeChange}
+					disabled={fieldConfig?.disabled || formRenderProps.field.disabled}
 					readOnly={fieldConfig?.readonly}
+					{...formRenderProps.field}
 				/>
       </FormControl>
       <FormMessage
         data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
         detail={fieldConfig.detail}
       />
-      {/* <DevTool  control={form.control} /> */}
+      <DevTool  control={form.control} />
     </FormItem>
   );
 }
