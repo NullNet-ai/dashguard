@@ -44,7 +44,7 @@ const trafficData = {
   'France': { city: 'Paris, France', trafficLevel: 60 },
   'Canada': { city: 'Toronto, Canada', trafficLevel: 40 },
   'China': { city: 'Beijing, China', trafficLevel: 95 },
-  'India': { city: 'Mumbai, India', trafficLevel: 70 },
+  // 'India': { city: 'Mumbai, India', trafficLevel: 70 },
   'Brazil': { city: 'São Paulo, Brazil', trafficLevel: 55 },
   'South Korea': { city: 'Seoul, South Korea', trafficLevel: 35 },
   // 'Australia': { city: 'Sydney, Australia', trafficLevel: 25 },
@@ -74,6 +74,32 @@ const additionalCityConnections = [
   { city: 'Kuala Lumpur, Malaysia', trafficLevel: 55 },
 ];
 
+// Region to region connections
+const regionToRegionConnections = [
+  { toRegion: 'Ontario, Canada', trafficLevel: 65, condition: 'High Latency' },
+  { toRegion: 'Bavaria, Germany', trafficLevel: 55, condition: 'Low Bandwidth' },
+  { toRegion: 'Seoul, South Korea', trafficLevel: 40, condition: 'Normal' },
+  { toRegion: 'Mumbai, India', trafficLevel: 85, condition: 'Congested' },
+  { toRegion: 'Île-de-France, France', trafficLevel: 30, condition: 'Optimized' },
+];
+
+
+// Region to city connections
+const regionToCityConnections = [
+  { fromRegion: 'United Kingdom', toCity: 'Dubai, UAE', trafficLevel: 50, condition: 'Stable' },
+  { fromRegion: 'United States of America', toCity: 'Singapore, Singapore', trafficLevel: 75, condition: 'Congested' },
+  { fromRegion: 'Japan', toCity: 'Kuala Lumpur, Malaysia', trafficLevel: 45, condition: 'Normal' },
+  { fromRegion: 'France', toCity: 'Wellington, New Zealand', trafficLevel: 20, condition: 'Optimized' },
+  { fromRegion: 'Germany', toCity: 'Prague, Czech Republic', trafficLevel: 35, condition: 'Low Bandwidth' },
+];
+
+// City to city connections
+const cityToCityConnections = [
+  { fromCity: 'Singapore, Singapore', toCity: 'Dubai, UAE', trafficLevel: 55, condition: 'High Latency' },
+  { fromCity: 'Dublin, Ireland', toCity: 'Helsinki, Finland', trafficLevel: 30, condition: 'Normal' },
+  { fromCity: 'Vienna, Austria', toCity: 'Prague, Czech Republic', trafficLevel: 25, condition: 'Optimized' },
+];
+
 // Function to determine traffic color
 const getTrafficColor = (trafficLevel) => {
   if (trafficLevel > 80) return "rgba(255, 0, 0, 0.7)"; // 🔴 Very High
@@ -82,8 +108,26 @@ const getTrafficColor = (trafficLevel) => {
   return "rgba(0, 128, 0, 0.7)"; // 🟢 Low
 };
 
+// Function to get color for connection condition
+const getConditionColor = (condition) => {
+  switch (condition) {
+    case 'Congested': return "rgba(255, 0, 0, 0.7)";      // Red
+    case 'High Latency': return "rgba(255, 0, 255, 0.7)"; // Purple
+    case 'Low Bandwidth': return "rgba(255, 165, 0, 0.7)"; // Orange
+    case 'Normal': return "rgba(255, 255, 0, 0.7)";       // Yellow
+    case 'Stable': return "rgba(0, 191, 255, 0.7)";       // Light Blue
+    case 'Optimized': return "rgba(0, 128, 0, 0.7)";      // Green
+    default: return "rgba(128, 128, 128, 0.7)";           // Gray
+  }
+};
+
 // Function to create a **curved** traffic flow line using Bezier curves
-const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
+const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel, name, condition = null) => {
+  if (!fromCoord || !toCoord) {
+    console.error(`Missing coordinates for connection: ${name}`);
+    return null;
+  }
+
   const curvePoints = [];
   const segments = 50; // Higher = smoother curve
 
@@ -98,8 +142,11 @@ const createCurvedFlowLine = (fromCoord, toCoord, trafficLevel) => {
     curvePoints.push([y, x]);
   }
 
+  // Use condition color if provided, otherwise use traffic level color
+  const lineColor = condition ? getConditionColor(condition) : getTrafficColor(trafficLevel);
+
   return L.polyline(curvePoints, {
-    color: getTrafficColor(trafficLevel),
+    color: lineColor,
     weight: Math.max(3, trafficLevel / 20),
     opacity: 0.8,
     dashArray: '5, 5', // Dotted curve
@@ -120,9 +167,16 @@ const MapComponent = () => {
     
     // Get coordinates for countries in trafficData
     const cityCoordinates = {};
+    const countryCoordinates = {};
+    
+    
     for (const country in trafficData) {
       cityCoordinates[country] = await geocodeAddress(trafficData[country].city);
       console.log("%c Coordinates for:", "color:#4fff4B", trafficData[country].city, cityCoordinates[country]);
+      
+      // Also get coordinates for the country center (for region-to-region connections)
+      countryCoordinates[country] = await geocodeAddress(country);
+      console.log("%c Country coordinates:", "color:#4fff4B", country, countryCoordinates[country]);
     }
     
     // Get coordinates for additional cities
@@ -130,6 +184,19 @@ const MapComponent = () => {
     for (const cityData of additionalCityConnections) {
       additionalCityCoordinates[cityData.city] = await geocodeAddress(cityData.city);
       console.log("%c Additional city coordinates:", "color:#4fff4B", cityData.city, additionalCityCoordinates[cityData.city]);
+    }
+    
+    // Get coordinates for region to region connection
+    const regionCoordinates = {};
+    for (const regionData of regionToRegionConnections) {
+      // Fix: Fetch coordinates for each region and ensure we have valid data
+      const coords = await geocodeAddress(regionData.toRegion);
+      if (coords) {
+        regionCoordinates[regionData.toRegion] = coords;
+        console.log("%c Region coordinates:", "color:#4fff4B", regionData.toRegion, coords);
+      } else {
+        console.error(`Failed to get coordinates for region: ${regionData.toRegion}`);
+      }
     }
     
     const philippinesCoordinates = await geocodeAddress('Manila, Philippines');
@@ -143,6 +210,7 @@ const MapComponent = () => {
     const geojson = { ...countries, features: [...countries.features, ...states.features] };
 
     // Add tooltips to regions
+    const countryLayers = {};
     L.geoJSON(geojson, {
       style: (feature) => {
         const countryName = feature.properties.name;
@@ -159,9 +227,11 @@ const MapComponent = () => {
       onEachFeature: (feature, layer) => {
         const countryName = feature.properties.name;
         const trafficLevel = trafficData[countryName]?.trafficLevel;
+        
+        // Store the layer for later reference
+        countryLayers[countryName] = layer;
     
         if (trafficLevel) {
-          // Add country label
           // Add country label
           const center = layer.getBounds().getCenter();
           const label = L.divIcon({
@@ -188,8 +258,10 @@ const MapComponent = () => {
 
     // Function to create a city marker with circle and label
     const createCityMarker = (coordinates, name, trafficLevel, cityName = null) => {
-      console.log("%c Line:190 🍉 cityName", "color:#7f2b82", {cityName, name});
-      if (!coordinates) return null;
+      if (!coordinates) {
+        console.error(`Missing coordinates for city/region: ${cityName || name}`);
+        return null;
+      }
       
       // Create the twinkling dot
       const dotColor = getTrafficColor(trafficLevel);
@@ -251,18 +323,20 @@ const MapComponent = () => {
 
       // Create and add curved line (Philippines to city)
       const curvedLine = createCurvedFlowLine(philippinesCoordinates, coordinates, trafficLevel, city);
-      curvedLine.bindTooltip(
-        `<div style="text-align: center;">
-          <strong>Philippines to ${city}</strong><br/>
-          Traffic Level: ${trafficLevel}%
-        </div>`,
-        { 
-          permanent: false,
-          direction: 'center',
-          className: 'custom-tooltip'
-        }
-      );
-      curvedLine.addTo(map);
+      if (curvedLine) {
+        curvedLine.bindTooltip(
+          `<div style="text-align: center;">
+            <strong>Philippines to ${city}</strong><br/>
+            Traffic Level: ${trafficLevel}%
+          </div>`,
+          { 
+            permanent: false,
+            direction: 'center',
+            className: 'custom-tooltip'
+          }
+        );
+        curvedLine.addTo(map);
+      }
     });
     
     // Add additional city markers and connections
@@ -277,18 +351,117 @@ const MapComponent = () => {
       
       // Create and add curved line (Philippines to city)
       const curvedLine = createCurvedFlowLine(philippinesCoordinates, coordinates, trafficLevel, city);
-      curvedLine.bindTooltip(
-        `<div style="text-align: center;">
-          <strong>Philippines to ${city}</strong><br/>
-          Traffic Level: ${trafficLevel}%
-        </div>`,
-        { 
-          permanent: false,
-          direction: 'center',
-          className: 'custom-tooltip'
-        }
-      );
-      curvedLine.addTo(map);
+      if (curvedLine) {
+        curvedLine.bindTooltip(
+          `<div style="text-align: center;">
+            <strong>Philippines to ${city}</strong><br/>
+            Traffic Level: ${trafficLevel}%
+          </div>`,
+          { 
+            permanent: false,
+            direction: 'center',
+            className: 'custom-tooltip'
+          }
+        );
+        curvedLine.addTo(map);
+      }
+    });
+    
+    // Fix: Add region-to-region connections
+    regionToRegionConnections.forEach((connection) => {
+      const { toRegion, trafficLevel, condition } = connection;
+      const toCoordinates = regionCoordinates[toRegion];
+      
+      if (!toCoordinates) {
+        console.error(`Missing coordinates for region: ${toRegion}`);
+        return;
+      }
+      
+      console.log(`Creating marker for region: ${toRegion} at ${toCoordinates}`);
+      
+      // Add a marker for the destination region if not already displayed
+      createCityMarker(toCoordinates, toRegion, trafficLevel);
+      
+      // Create and add curved line between Philippines and the region
+      const curvedLine = createCurvedFlowLine(philippinesCoordinates, toCoordinates, trafficLevel, `Philippines to ${toRegion}`, condition);
+      
+      if (curvedLine) {
+        curvedLine.bindTooltip(
+          `<div style="text-align: center;">
+            <strong>NCR Region to ${toRegion}</strong><br/>
+            Traffic Level: ${trafficLevel}%<br/>
+            Condition: ${condition}
+          </div>`,
+          { 
+            permanent: false,
+            direction: 'center',
+            className: 'custom-tooltip'
+          }
+        );
+        curvedLine.addTo(map);
+      } else {
+        console.error(`Failed to create curved line for: Philippines to ${toRegion}`);
+      }
+    });
+    
+    // Fix: Add region-to-city connections
+    regionToCityConnections.forEach((connection) => {
+      const { fromRegion, toCity, trafficLevel, condition } = connection;
+      const fromCoordinates = countryCoordinates[fromRegion];
+      const toCityCoordinates = additionalCityCoordinates[toCity];
+      
+      if (!fromCoordinates || !toCityCoordinates) {
+        console.error(`Missing coordinates for connection: ${fromRegion} to ${toCity}`);
+        return;
+      }
+      
+      // Create and add curved line between region and city
+      const curvedLine = createCurvedFlowLine(fromCoordinates, toCityCoordinates, trafficLevel, `${fromRegion} to ${toCity}`, condition);
+      if (curvedLine) {
+        curvedLine.bindTooltip(
+          `<div style="text-align: center;">
+            <strong>${fromRegion} to ${toCity}</strong><br/>
+            Traffic Level: ${trafficLevel}%<br/>
+            Condition: ${condition}
+          </div>`,
+          { 
+            permanent: false,
+            direction: 'center',
+            className: 'custom-tooltip'
+          }
+        );
+        curvedLine.addTo(map);
+      }
+    });
+    
+    // Add city-to-city connections
+    cityToCityConnections.forEach((connection) => {
+      const { fromCity, toCity, trafficLevel, condition } = connection;
+      const fromCityCoordinates = additionalCityCoordinates[fromCity];
+      const toCityCoordinates = additionalCityCoordinates[toCity];
+      
+      if (!fromCityCoordinates || !toCityCoordinates) {
+        console.error(`Missing coordinates for connection: ${fromCity} to ${toCity}`);
+        return;
+      }
+      
+      // Create and add curved line between cities
+      const curvedLine = createCurvedFlowLine(fromCityCoordinates, toCityCoordinates, trafficLevel, `${fromCity} to ${toCity}`, condition);
+      if (curvedLine) {
+        curvedLine.bindTooltip(
+          `<div style="text-align: center;">
+            <strong>${fromCity} to ${toCity}</strong><br/>
+            Traffic Level: ${trafficLevel}%<br/>
+            Condition: ${condition}
+          </div>`,
+          { 
+            permanent: false,
+            direction: 'center',
+            className: 'custom-tooltip'
+          }
+        );
+        curvedLine.addTo(map);
+      }
     });
 
     // Add a marker for the Philippines Server with a special style
@@ -331,7 +504,7 @@ const MapComponent = () => {
       }
     );
 
-    // Add legend
+    // Enhanced legend with connection conditions
     const legend = L.control({ position: 'bottomright' });
     legend.onAdd = function() {
       const div = L.DomUtil.create('div', 'info legend');
@@ -343,6 +516,14 @@ const MapComponent = () => {
           <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 255, 0, 0.7); border-radius:50%;"></span> Medium (30-50%)</div>
           <div><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%;"></span> Low (<30%)</div>
           <div><span style="display:inline-block; width:15px; height:15px; background:#0000FF; border-radius:50%;"></span> Philippines Server</div>
+          
+          <strong style="margin-top: 10px; display: block;">Connection Conditions</strong>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 0, 0, 0.7);"></span> Congested</div>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 0, 255, 0.7);"></span> High Latency</div>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 165, 0, 0.7);"></span> Low Bandwidth</div>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 255, 0, 0.7);"></span> Normal</div>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(0, 191, 255, 0.7);"></span> Stable</div>
+          <div><span style="display:inline-block; width:15px; height:3px; background:rgba(0, 128, 0, 0.7);"></span> Optimized</div>
         </div>
       `;
       return div;
