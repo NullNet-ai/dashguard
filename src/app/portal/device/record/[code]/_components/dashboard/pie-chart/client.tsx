@@ -51,6 +51,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
         // Ensure maxTraffic is always above currentTraffic for proper gauge display
         const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
         setTrafficData({ traffic: currentTraffic, maxTraffic })
+        
       }
       catch (error) {
         console.error('Error fetching bandwidth data:', error)
@@ -58,8 +59,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    const interval = setInterval(fetchChartData, 3000)
-    return () => clearInterval(interval)
+    // const interval = setInterval(fetchChartData, 3000)
+    // return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Smooth animation effect - update more frequently with smaller steps

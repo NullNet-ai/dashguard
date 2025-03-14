@@ -17,6 +17,54 @@ import {
 
 import { useManageFilter } from '../Provider'
 
+const default_filters = [
+  {
+    field: 'time_range',
+    operator: 'equal',
+    label: 'Time Range',
+    values: [],
+    type: 'criteria',
+    default: true,
+    input_type: 'select',
+    options: [
+      { label: '30 Days', value: '30d' },
+      { label: '7 Days', value: '7d' },
+      { label: '1 Day', value: '1d' },
+    ]
+  },  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+  {
+    field: '',
+    operator: '',
+    label: '',
+    values: [],
+    type: 'criteria',
+    default: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+  {
+    field: '',
+    operator: '',
+    label: '',
+    values: [],
+    type: 'criteria',
+    default: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+] 
+
+
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
   { value: 'not_equal', label: 'Not Equal' },
@@ -59,6 +107,7 @@ export default function FilterContent() {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails, columns } = state ?? {}
+  console.log('%c Line:58 🍬', 'color:#7f2b82', filterDetails?.default_filter);
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
@@ -71,7 +120,8 @@ export default function FilterContent() {
           values: [],
           type: 'criteria',
           default: true,
-        },
+        }
+        
       ],
     },
     shouldFocusError: false,
@@ -81,7 +131,8 @@ export default function FilterContent() {
     control: form.control,
     name: 'filters',
   })
-
+  
+  console.log('%c Line:81 🌶 fields', 'color:#ffdd4d', fields);
   form.watch((fields) => {
     handleUpdateFilter({ default_filter: fields.filters })
   })
