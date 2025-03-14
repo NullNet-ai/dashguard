@@ -71,6 +71,6 @@ export const searchConfig = {
 }
 
 export const timeDuration = {
-  time_count: 1,
-  time_unit: 'day' as 'day',
+  time_count: 12,
+  time_unit: 'hour' as 'hour',
 }
