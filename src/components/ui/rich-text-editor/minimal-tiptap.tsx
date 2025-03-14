@@ -64,6 +64,7 @@ export interface MinimalTiptapProps
     }>;
     formatInsertedValue?: (option: { label: string; value: string }) => string;
     onSelect?: (option: { label: string; value: string }) => void;
+    isFilterMode?:boolean
   }>;
 }
 
