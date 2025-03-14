@@ -8,6 +8,7 @@ import { type IAction, type IProps, type IFilterContext, type IState, type IData
 
 import {  removeFilter } from './components/SideDrawer/actions'
 import { ulid } from 'ulid'
+import { IFormProps } from '../../types'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -20,8 +21,9 @@ export const useFilter = (): IFilterContext => {
   return context
 }
 
-const FilterProvider = ({ children }: IProps) => {
+const FilterProvider = ({ children, params }: any) => {
   const eventEmitter = useEventEmitter()
+  const {router, resolver} = params || {}
 
   const [filters, setFilters] = useState<Record<string, any>[]>(
     [
@@ -37,7 +39,7 @@ const FilterProvider = ({ children }: IProps) => {
   const {
     data: cached_filter_items = [],
     refetch: refetchFilters,
-  } = api.timelineFilter.fetchTimelineFilter.useQuery({
+  } = api?.[router as "packet"]?.[resolver as "fetchTimelineFilter"]?.useQuery({
     type: 'filter',
   })
 
