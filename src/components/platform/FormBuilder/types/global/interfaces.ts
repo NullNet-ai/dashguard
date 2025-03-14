@@ -47,6 +47,10 @@ interface OptionType {
 interface RichTextConfig {
   output?:'html' | 'json' | 'text'
   plainTextMode?:boolean
+  plainTextConfig?: {
+    multiline?: boolean;
+    maxHeight?: string;
+  };
   customDropdowns?: Array<{
     id: string;
     buttonLabel: string;
@@ -59,6 +63,7 @@ interface RichTextConfig {
     formatInsertedValue?: (option: { label: string; value: string }) => string;
     onSelect?: (option: { label: string; value: string }) => void;
     disabled?:boolean;
+    isFilterMode?:boolean;
   }>;
 }
 interface DraggableConfig {
@@ -82,12 +87,13 @@ interface DraggableConfig {
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
 };
-interface CustomFieldProps {
+export interface CustomFieldProps {
   field: ControllerRenderProps<Record<string, any>, string>;
   fieldState: ControllerFieldState;
   form: UseFormReturn<Record<string, any>>;
   formKey: string;
   fieldConfig: IField;
+  selectOptions?: Record<string, ISelectOptions[]>;
 }
 interface MultiFieldOption {
   label: string;

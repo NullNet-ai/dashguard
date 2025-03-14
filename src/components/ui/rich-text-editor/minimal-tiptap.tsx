@@ -48,6 +48,10 @@ export interface MinimalTiptapProps
   editorContentClassName?: string;
   readOnly?: boolean;
   plainTextMode?: boolean;
+  plainTextConfig?: {
+    multiline?: boolean;
+    maxHeight?: string;
+  };
   disabled?: boolean;
   customDropdowns?: Array<{
     id: string;
@@ -60,6 +64,7 @@ export interface MinimalTiptapProps
     }>;
     formatInsertedValue?: (option: { label: string; value: string }) => string;
     onSelect?: (option: { label: string; value: string }) => void;
+    isFilterMode?:boolean
   }>;
 }
 
@@ -161,7 +166,7 @@ const Toolbar = ({
           mainActionCount={0}
           disabled={disabled}
         />
-        
+
         {/* Add custom dropdowns section to rich text mode */}
         {customDropdowns && customDropdowns.length > 0 && (
           <>
@@ -196,6 +201,10 @@ export const MinimalTiptapEditor = React.forwardRef<
       editable = false,
       disabled = false, // Add this prop explicitly
       plainTextMode = false,
+      plainTextConfig = {
+        multiline: false,
+        maxHeight: undefined  // This is already correct, but let's ensure it's used properly
+      },
       customDropdowns,
       output = "html",
       placeholder = "",
@@ -230,11 +239,11 @@ export const MinimalTiptapEditor = React.forwardRef<
         CodeBlockLowlight,
         HorizontalRule,
       ] : []),
-      // Add the PreventNewlines extension in plain text mode
-      ...(plainTextMode ? [PreventNewlines] : []),
+      // Add the PreventNewlines extension in plain text mode when multiline is false
+      ...(plainTextMode && !plainTextConfig?.multiline ? [PreventNewlines] : []),
     ];
 
-    
+
     const editor = useMinimalTiptapEditor({
       value,
       onUpdate: onChange,
@@ -254,7 +263,7 @@ export const MinimalTiptapEditor = React.forwardRef<
         if (editorElement) {
           editorElement.classList.add('plain-text-mode');
         }
-        
+
         // Force all content to be in a single paragraph
         const handlePaste = (event: ClipboardEvent) => {
           if (plainTextMode) {
@@ -264,10 +273,10 @@ export const MinimalTiptapEditor = React.forwardRef<
             editor.commands.insertContent(text.replace(/[\r\n]+/g, ' '));
           }
         };
-        
+
         // Add paste event listener
         editorElement?.addEventListener('paste', handlePaste as EventListener);
-        
+
         return () => {
           editorElement?.removeEventListener('paste', handlePaste as EventListener);
         };
@@ -286,9 +295,17 @@ export const MinimalTiptapEditor = React.forwardRef<
         className={cn(
           "flex h-auto w-full flex-col rounded-md border border-input shadow-sm",
           plainTextMode ? "min-h-12" : "min-h-72",
-          disabled && "opacity-50 cursor-not-allowed",
+          plainTextMode && "plain-text-editor",
+          plainTextMode && plainTextConfig?.multiline && "multiline",
+          disabled && "opacity-100 cursor-not-allowed",
           className,
         )}
+        style={{
+          // Only add the CSS variable if maxHeight is defined
+          ...(plainTextConfig?.maxHeight ? {
+            '--plain-text-max-height': plainTextConfig.maxHeight
+          } : {}) as React.CSSProperties
+        }}
       >
         {((!plainTextMode) || (plainTextMode && customDropdowns && customDropdowns.length > 0)) && (
           <Toolbar

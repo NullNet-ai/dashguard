@@ -206,7 +206,7 @@ export default function FormSelect({
     setTimeout(() => setOpen(false), 100);
   };
 
-  const isOptionsExist = options?.find(p => p.label === query?.trim());
+  const isOptionsExist = options?.find(p => p.label?.toLowerCase() === query?.trim().toLowerCase());
 
   return (
     <FormItem>

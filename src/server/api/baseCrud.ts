@@ -1,35 +1,44 @@
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { privateProcedure } from "~/server/api/trpc";
-import type Entities from "~/auto-generated/entities";
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { privateProcedure } from '~/server/api/trpc';
+import type Entities from '~/auto-generated/entities';
 type Entity = (typeof Entities)[number];
 
 export const createDefineRoutes = (entity: Entity) => ({
-  createDraftRecord: privateProcedure.mutation(async ({ ctx }) => {
-    const record = await ctx.dnaClient
-      .create({
-        entity,
-        token: ctx.token.value,
-        mutation: {
-          params: {
-            status: "draft",
+  createDraftRecord: privateProcedure
+    .input(
+      z
+        .object({
+          data: z.any(),
+        })
+        .optional(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const record = await ctx.dnaClient
+        .create({
+          entity,
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              status: 'Draft',
+              ...input?.data ?? {}
+            },
+            pluck: ['id', 'code'],
           },
-          pluck: ["id", "code"],
-        },
-      })
-      .execute();
-    if (!record) {
-      throw new TRPCError({
-        code: "CONFLICT",
-        message: `${entity} creation failed`,
-      });
-    }
-    console.info("[Create Draft]", record);
-    return {
-      ...record,
-      data: record?.data?.[0],
-    };
-  }),
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `${entity} creation failed`,
+        });
+      }
+      console.info('[Create Draft]', record);
+      return {
+        ...record,
+        data: record?.data?.[0],
+      };
+    }),
   getById: privateProcedure
     .input(
       z.object({
@@ -68,15 +77,15 @@ export const createDefineRoutes = (entity: Entity) => ({
           mutation: {
             params: {
               tombstone: 1,
-              status: "Archived",
+              status: 'Archived',
             },
-            pluck: ["id"],
+            pluck: ['id'],
           },
         })
         .execute();
       if (!record) {
         throw new TRPCError({
-          code: "CONFLICT",
+          code: 'CONFLICT',
           message: `${entity} deletion failed`,
         });
       }
@@ -98,24 +107,24 @@ export const createDefineRoutes = (entity: Entity) => ({
       // Note: Temporary fix. Real code commented
       try {
         const record = await ctx.dnaClient
-        .findByCode(input.code, {
-          entity,
-          token: ctx.token.value,
-          query: {
-            pluck: input.pluck_fields,
-          },
-        })
-        .execute();
+          .findByCode(input.code, {
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: input.pluck_fields,
+            },
+          })
+          .execute();
 
-      return {
-        ...record,
-        data: record?.data?.[0],
-      };
+        return {
+          ...record,
+          data: record?.data?.[0],
+        };
       } catch (error) {
         return {
           data: undefined,
           status_code: 404,
-          message: "Record not found",
+          message: 'Record not found',
           success: false,
           error,
         } as Record<string, any>;
@@ -135,20 +144,20 @@ export const createDefineRoutes = (entity: Entity) => ({
           token: ctx.token.value,
           mutation: {
             params: {
-              status: "Archived",
+              status: 'Archived',
             },
-            pluck: ["id"],
+            pluck: ['id'],
           },
         })
         .execute();
 
       if (!record) {
         throw new TRPCError({
-          code: "CONFLICT",
+          code: 'CONFLICT',
           message: `${entity} archived failed`,
         });
       }
-      console.info("[Archived data]", record);
+      console.info('[Archived data]', record);
       return {
         ...record,
         data: record?.data?.[0],

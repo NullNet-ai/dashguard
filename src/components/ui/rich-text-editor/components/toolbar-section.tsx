@@ -52,22 +52,16 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
     };
   }, [actions, activeActions, mainActionCount]);
 
-  // Add debugging for disabled state
-  React.useEffect(() => {
-    console.log('ToolbarSection - disabled:', disabled);
-  }, [disabled]);
-
   const renderToolbarButton = React.useCallback(
     (action: FormatAction) => {
       const handleClick = () => {
-        console.log('Button clicked:', action.label);
         action.action(editor);
       };
       
       return (
         <ToolbarButton
           key={action.label}
-          className="pointer-events-auto" // Ensure buttons are clickable
+          className="pointer-events-auto"
           onClick={handleClick}
           disabled={disabled}
           isActive={action.isActive(editor)}
@@ -86,7 +80,6 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
   const renderDropdownMenuItem = React.useCallback(
     (action: FormatAction) => {
       const handleClick = () => {
-        console.log('Dropdown item clicked:', action.label);
         action.action(editor);
       };
       

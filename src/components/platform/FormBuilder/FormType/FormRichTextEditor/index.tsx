@@ -124,6 +124,9 @@ export default function FormRichTextEditor({
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
           plainTextMode={isPlainTextMode}
+          plainTextConfig={{
+            ...fieldConfig?.richTextConfig?.plainTextConfig,
+          }}
           customDropdowns={customDropdowns?.map(dropdown => ({
             ...dropdown,
             disabled: isDisabled,
