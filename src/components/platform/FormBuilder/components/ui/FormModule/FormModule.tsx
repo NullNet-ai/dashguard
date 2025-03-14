@@ -35,7 +35,7 @@ export default function FormModule({
   fields: IField[]
   form: UseFormReturn<Record<string, any>, any, undefined>
   subConfig?: {
-    selectOptions?: Record<string, ISelectOptions[]> | any
+    selectOptions?: any
     multiSelectOptions?: Record<string, Option[]>
     radioOptions?: Record<string, IRadioOptions[]>
     checkboxOptions?: Record<string, ICheckboxOptions[]>

@@ -33,14 +33,11 @@ export const ToolbarButton = React.forwardRef<
     },
     ref
   ) => {
-    // Log the disabled state for debugging
-    console.log('ToolbarButton - disabled prop:', disabled, 'for button:', tooltip || props['aria-label']);
     
     // Create a handler that prevents default and stops propagation
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
         if (disabled) {
-          console.log('Button click prevented due to disabled state');
           return;
         }
         e.preventDefault();

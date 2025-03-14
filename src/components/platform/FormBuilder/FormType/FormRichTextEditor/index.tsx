@@ -83,13 +83,7 @@ export default function FormRichTextEditor({
     });
   };
   const {
-    entityOptions,
-    variableOptions,
     plainTextMode: isPlainTextMode,
-    entitySelectorConfig,
-    variableSelectorConfig,
-    onEntitySelect,
-    onVariableSelect,
     customDropdowns,
   } = fieldConfig.richTextConfig || {};
 
@@ -118,7 +112,6 @@ export default function FormRichTextEditor({
           value={content}
           onChange={handleChange}
           onBlur={formRenderProps.field.onBlur}
-
           editorClassName="focus:outline-none"
           placeholder={fieldConfig?.placeholder ?? "Type your description here..."}
           autofocus={true}
@@ -131,18 +124,9 @@ export default function FormRichTextEditor({
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
           plainTextMode={isPlainTextMode}
-          entityOptions={entityOptions}
-          variableOptions={variableOptions}
-          entitySelectorConfig={{
-            ...entitySelectorConfig,
-            disabled: isDisabled,
+          plainTextConfig={{
+            ...fieldConfig?.richTextConfig?.plainTextConfig,
           }}
-          variableSelectorConfig={{
-            ...variableSelectorConfig,
-            disabled: isDisabled,
-          }}
-          onEntitySelect={onEntitySelect}
-          onVariableSelect={onVariableSelect}
           customDropdowns={customDropdowns?.map(dropdown => ({
             ...dropdown,
             disabled: isDisabled,
