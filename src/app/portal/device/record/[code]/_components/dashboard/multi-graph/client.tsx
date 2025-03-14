@@ -95,7 +95,7 @@ const InteractiveGraph = ({
 
   useEffect(() => {
     const interfacesData = form.watch('interfaces') || []
-    setInterfaces(interfacesData)
+    setInterfaces(interfacesData as any)
   }, [form.watch('interfaces')])
 
   return (
