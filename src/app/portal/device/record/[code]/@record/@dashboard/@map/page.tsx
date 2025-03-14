@@ -1,4 +1,3 @@
-import Map from "../../../_components/dashboard/Map";
 
-const FormContainer = async () => <Map />;
+const FormContainer = async () =><></>;
 export default FormContainer;
