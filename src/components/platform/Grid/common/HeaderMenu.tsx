@@ -5,7 +5,8 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ListFilter,
 } from 'lucide-react';
 import { useContext, useState } from 'react';
 
@@ -14,7 +15,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { Separator } from '~/components/ui/separator';
 import { cn } from '~/lib/utils';
@@ -82,7 +84,7 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
                 </Badge>
               </div>
             </DropdownMenuItem>
-            <Separator />
+            <DropdownMenuSeparator />
           </>
         )}
         {(!sortingState || sortingState.desc) && (
@@ -103,11 +105,14 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
             <span>Sort by Descending</span>
           </DropdownMenuItem>
         )}
-        {/* <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-2">
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="flex gap-2"
+          onClick={() => header.column.getToggleGroupingHandler()()}
+        >
           <ListFilter className="h-4 w-4" />
           <span>Group by this field</span>
-        </DropdownMenuItem> */}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

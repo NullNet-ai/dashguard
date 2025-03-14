@@ -12,8 +12,9 @@ import {
   type SortingState,
   type Updater,
   useReactTable,
+  getGroupedRowModel,
 } from '@tanstack/react-table';
-import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { ChevronRight, ChevronUp, FileIcon, X } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -44,6 +45,7 @@ import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
 import { TooltipProvider } from '~/components/ui/tooltip';
 import { FetchInfiniteData } from './Action/FetchInfiniteData';
+import { Badge } from '~/components/ui/badge';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -73,7 +75,6 @@ export default function GridProvider({
   parentType,
   gridLevel = 1,
 }: IProps) {
-
   const _defaultSorting = defaultSorting
     ? defaultSorting
     : [
@@ -82,7 +83,6 @@ export default function GridProvider({
           desc: true,
         },
       ];
-
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
@@ -108,6 +108,9 @@ export default function GridProvider({
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
+  const [grouping, setGrouping] = React.useState<string[]>([]);
+  console.log("🚀 ~ grouping:", grouping)
+
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
@@ -127,14 +130,16 @@ export default function GridProvider({
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
 
-  const [gridColumns, ] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
-    return {
-      header: item.header,
-      accessorKey: item.accessorKey,
-      search_config: item.search_config,
-      data_type: item.data_type
-    }
-  }));
+  const [gridColumns] = useState<any[]>(
+    _propsConfig?.columns?.map((item: any) => {
+      return {
+        header: item.header,
+        accessorKey: item.accessorKey,
+        search_config: item.search_config,
+        data_type: item.data_type,
+      };
+    }),
+  );
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
     ...filter,
     default: true,
@@ -455,6 +460,35 @@ export default function GridProvider({
     enableHiding: true,
   });
 
+  const groupHeaderColumn = useRef<ColumnDef<any>>({
+    id: 'grouping',
+    header: 'Group By',
+    size: 200,
+    enableResizing: false,
+    cell: ({ table }) => {
+      return (
+        <div className="flex gap-2">
+          {table.getState().grouping.map((columnId) => {
+            const column = table.getColumn(columnId);
+            return (
+              <Badge
+                key={columnId}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                {column?.columnDef?.header as string}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => column?.toggleGrouping()}
+                />
+              </Badge>
+            );
+          })}
+        </div>
+      );
+    },
+  });
+
   const actionTypeColumnCondition = (
     viewMode: string,
     defaultAdvanceFilter: ISearchItem[],
@@ -512,6 +546,9 @@ export default function GridProvider({
         if (!config?.disableDefaultAction) {
           columns = [...columns, actionRow?.current];
         }
+        if (grouping.length > 0) {
+          columns = [groupHeaderColumn.current, ...columns];
+        }
 
         return columns;
     }
@@ -538,6 +575,7 @@ export default function GridProvider({
     enableHiding: true,
     state: {
       sorting,
+      // grouping,
       columnSizing: colSizing,
       rowSelection,
       columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
@@ -549,6 +587,7 @@ export default function GridProvider({
     enableMultiSort: true,
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
+    onGroupingChange: setGrouping,
   });
   /** @ACTIONS */
 

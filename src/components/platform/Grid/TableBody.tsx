@@ -1,34 +1,47 @@
-import { flexRender, Row } from '@tanstack/react-table'
-import React, { useContext } from 'react'
+import { flexRender, Row } from '@tanstack/react-table';
+import React, { useContext } from 'react';
 
 import { TableBody, TableCell, TableRow } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import { getCommonPinningStyles } from './ColumnPining'
-import { GridContext } from './Provider'
-import { ScrollContainerContext } from './Server/views/common/GridScrollContainer'
-import ArchiveConfirmationModal from './views/ArchiveConfirmationModal'
-import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal'
-import { type IExpandedRow } from './types'
+import { getCommonPinningStyles } from './ColumnPining';
+import { GridContext } from './Provider';
+import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
+import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
+import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
+import { type IExpandedRow } from './types';
+import { Button } from '~/components/ui/button';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 type MyTableBodyProps = {
-  showAction?: boolean
-  gridLevel?: number
-  isLoading?: boolean
-  showPagination?: boolean
-  parentExpanded?: IExpandedRow[]
-  reachEnd?: boolean
-}
+  showAction?: boolean;
+  gridLevel?: number;
+  isLoading?: boolean;
+  showPagination?: boolean;
+  parentExpanded?: IExpandedRow[];
+  reachEnd?: boolean;
+};
 
-export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded, reachEnd }: MyTableBodyProps) {
-  const { state, actions } = useContext(GridContext)
+export default function MyTableBody({
+  showAction,
+  gridLevel = 1,
+  parentExpanded,
+  reachEnd,
+}: MyTableBodyProps) {
+  const { state, actions } = useContext(GridContext);
 
-  const context = useContext(ScrollContainerContext)
-  const { isEndReached = false } = context ?? {}
-  const expandedState = state?.table.getState().expanded as Record<string, boolean> | undefined;
+  const context = useContext(ScrollContainerContext);
+  const { isEndReached = false } = context ?? {};
+  const expandedState = state?.table.getState().expanded as
+    | Record<string, boolean>
+    | undefined;
 
-  const getExpandedRows = (rows: Row<any>[], expandedState: Record<string, boolean> | undefined, level: number) => {
+  const getExpandedRows = (
+    rows: Row<any>[],
+    expandedState: Record<string, boolean> | undefined,
+    level: number,
+  ) => {
     const expandedRows: IExpandedRow[] = [];
 
     rows.forEach((row) => {
@@ -40,8 +53,12 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
     return expandedRows;
   };
 
-  const expandedRows = getExpandedRows(state?.table.getExpandedRowModel().rows ?? [], expandedState, gridLevel);
-  const allExpandedRows = [...parentExpanded ?? [], ...expandedRows];
+  const expandedRows = getExpandedRows(
+    state?.table.getExpandedRowModel().rows ?? [],
+    expandedState,
+    gridLevel,
+  );
+  const allExpandedRows = [...(parentExpanded ?? []), ...expandedRows];
   return (
     <>
       <TableBody
@@ -63,11 +80,36 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
+                  // Add grouping expand/collapse for grouped cells
+                  if (cell.getIsGrouped()) {
+                    return (
+                      <TableCell key={cell.id}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={row.getToggleExpandedHandler()}
+                          className="flex items-center gap-2"
+                        >
+                          {row.getIsExpanded() ? 
+                            <ChevronDown className="h-4 w-4" /> : 
+                            <ChevronRight className="h-4 w-4" />
+                          }
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          <span className="text-muted-foreground">
+                            ({row.subRows.length})
+                          </span>
+                        </Button>
+                      </TableCell>
+                    );
+                  }
                   if (cell.column.id === 'action') {
                     return (
                       <td
                         key={cell.id + index}
-                        className={cn('right-0', (isEndReached || reachEnd) ? '' : 'sticky')}
+                        className={cn(
+                          'right-0',
+                          isEndReached || reachEnd ? '' : 'sticky',
+                        )}
                       >
                         <div className="px-3">
                           <div
@@ -154,7 +196,11 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                         ) : (
                           React.cloneElement(
                             state?.config?.rowExpansionBuilder,
-                            { rowData: row.original, parentExpanded: allExpandedRows, key:`expanded:${row.id ?? index}` },
+                            {
+                              rowData: row.original,
+                              parentExpanded: allExpandedRows,
+                              key: `expanded:${row.id ?? index}`,
+                            },
                           )
                         )
                       ) : (

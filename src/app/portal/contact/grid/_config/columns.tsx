@@ -14,6 +14,7 @@ const gridColumns = [
       const value = row?.original?.status;
       return <StatusCell value={value} />;
     },
+    enableGrouping: true
   },
   {
     header: "ID",
