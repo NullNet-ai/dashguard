@@ -72,7 +72,7 @@ const FilterView = () => {
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
                     {tab.label}
                   </span>
-                  {tab?.label !== 'All Data' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
+                  {tab?.label !== '1 Day' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
                 </Button>
               </Fragment>
             )
