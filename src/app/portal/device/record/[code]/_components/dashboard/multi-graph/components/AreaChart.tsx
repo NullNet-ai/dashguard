@@ -3,6 +3,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } fro
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
+import { graphColors } from './graph-color';
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
@@ -55,20 +56,15 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         tickLine={false}
         tickMargin={8}
       />
-        <YAxis
+     <YAxis
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={4}
+          tickCount={10}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={[
-            yAxisMin,
-            yAxisMin + (yAxisMax - yAxisMin) / 3,
-            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
-            yAxisMax,
-          ]}
+          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
         />
       <ChartTooltip
         content={(
@@ -91,7 +87,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         dataKey={item?.value}
         fill={`url(#fill${item?.value})`}
         stackId="a"
-        stroke={`var(--color-${item.value})`}
+        stroke={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}
         type="natural"
         isAnimationActive={false}
       />)}

@@ -10,11 +10,14 @@ import {
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
 import { useMemo } from 'react';
+import { graphColors } from './graph-color';
 
 const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
   
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
   
+
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <BarChart data={filteredData}>
@@ -36,20 +39,15 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         tickLine={false}
         tickMargin={8}
       />
-        <YAxis
+       <YAxis
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={4}
+          tickCount={10}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={[
-            yAxisMin,
-            yAxisMin + (yAxisMax - yAxisMin) / 3,
-            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
-            yAxisMax,
-          ]}
+          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
         />
       <ChartTooltip
         content={
@@ -71,7 +69,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         cursor={false}
       />
       {interfaces?.map((item: any) => {
-        return <Bar dataKey={item.value} fill={`var(--color-${item?.value})`}  isAnimationActive={false}/>})}
+        return <Bar dataKey={item.value}      fill={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}  isAnimationActive={false}/>})}
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
     </ResponsiveContainer>

@@ -4,9 +4,13 @@ import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
+  ChartConfig,
+  ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
+import { graphColors } from './graph-color';
+
 
 export const modifyAxis = (chartData:any) => {
   const maxBandwidth = Math.max(
@@ -30,12 +34,15 @@ export const formatNumber = (num: number) => {
   if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
   return num.toString()
 }
+
+
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
 
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData])
 
   return (
     <ResponsiveContainer width="100%" height={300}>
+
     <LineChart
       accessibilityLayer={true}
       data={filteredData}
@@ -59,28 +66,24 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
         tickLine={false}
         tickMargin={8}
       />
-        <YAxis
+       <YAxis
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={4}
+          tickCount={10}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={[
-            yAxisMin,
-            yAxisMin + (yAxisMax - yAxisMin) / 3,
-            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
-            yAxisMax,
-          ]}
+          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
         />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       {interfaces?.map((item: any) => {
+
+        console.log(`color var(--color-${item?.value})`)
         return <Line
         dataKey={item?.value}
         dot={false}
-        stroke={`var(--color-${item?.value})`}
-        strokeWidth={2}
+        stroke={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}
         type="monotone"
         isAnimationActive={false} // disable animation for smooth effect
       />
