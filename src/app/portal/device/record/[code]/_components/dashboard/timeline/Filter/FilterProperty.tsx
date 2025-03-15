@@ -12,6 +12,7 @@ import { useFilter } from './FilterProvider'
 import { columns } from './components/SideDrawer/config'
 
 export default function FilterProperty({ filter , filter_type}: { filter: any,filter_type: string }) {
+  
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
   const { actions } = useFilter()

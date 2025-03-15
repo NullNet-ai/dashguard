@@ -158,6 +158,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     control: form.control,
     name: 'filters',
   })
+  console.log('%c Line:158 🌮 fields', 'color:#b03734', fields);
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
     const resolutionOptions: { [key: string]: string[] } = time_resolution_options;

@@ -22,7 +22,7 @@ export const useFilter = (): IFilterContext => {
 }
 
 const FilterProvider = ({ children, params, type }: any) => {
-  console.log('%c Line:25 🥒 type', 'color:#465975', type);
+  
   const eventEmitter = useEventEmitter()
   const {router, resolver} = params || {}
 
@@ -36,8 +36,9 @@ const FilterProvider = ({ children, params, type }: any) => {
       },
     ]
   )
+  
 
-  console.log('%c Line:44 🍒 type', 'color:#ed9ec7', type);
+  
   const {
     data: cached_filter_items = [],
   } = api.cachedFilter.fetchCachedFilter.useQuery({
@@ -48,10 +49,8 @@ const FilterProvider = ({ children, params, type }: any) => {
   const [filterQuery, setFilterQuery] = useState<Record<string, any>>({})
 
   const fetchDetails = async (data: IData) => {
-    console.log('%c Line:50 🌮 data', 'color:#ffdd4d', data);
     if (!data?.modifyFilterDetails || !data?.modifyFilterDetails?.id) return;
-    console.log('%c Line:50 🌽 data', 'color:#6ec1c2', data);
-    
+
     setFilters((prev) => {
       const updatedFilters = new Map(prev.map(item => [item.id, item]));
       const { id, name, default_filter, ...rest } = data.modifyFilterDetails;
@@ -67,18 +66,17 @@ const FilterProvider = ({ children, params, type }: any) => {
             : f
         ),
       });
-      console.log('%c Line:69 🎂 updatedFilters.values()', 'color:#7f2b82', updatedFilters.values());
   
       return [...updatedFilters.values()];
     });
   };
   
 
-  console.log('%c Line:71 🌰', 'color:#e41a6a', filterQuery);
+  
   useEffect(() => {
 
     eventEmitter.emit(`${type}_id`, filterQuery)
-    console.log('%c Line:81 🎂 filterQuery', 'color:#7f2b82', filterQuery);
+    
   }, [_refetchTrigger, filterQuery])
 
   useEffect(() => {
@@ -93,6 +91,7 @@ const FilterProvider = ({ children, params, type }: any) => {
 
   useEffect(() => {
     if (!cached_filter_items?.length) return
+    
     const fetchFilter = async () => { // Refactor this function
       setFilters((prev) => {
         // Convert previous filters to a Map
@@ -116,10 +115,12 @@ const FilterProvider = ({ children, params, type }: any) => {
                   })),
                 }
               }
+              return filter
             }),
           })
         })
 
+        
         return [...updatedFilters.values()]
       })
     }
