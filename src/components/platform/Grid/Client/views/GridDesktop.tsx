@@ -74,7 +74,7 @@ function GridDesktop({
     } else {
       return undefined;
     }
-  }, [isExpandedTable]);
+  }, [isExpandedTable, _width]);
 
   return (
     <>

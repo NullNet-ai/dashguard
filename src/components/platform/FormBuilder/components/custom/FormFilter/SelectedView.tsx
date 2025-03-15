@@ -36,7 +36,7 @@ export default function SelectedView({
             <CardHeader
               className={"flex flex-row items-center justify-between"}
             >
-              <CardTitle className="text-sm"><span>{entity ? `${capitalize(entity ?? '')} ID:` : '' }</span> {record.code}</CardTitle>
+              <CardTitle className="text-sm"><span className='text-primary'>{entity ? `${capitalize(entity ?? '')} ID:` : '' }</span> {record.code}</CardTitle>
               
             </CardHeader>
             <CardContent>

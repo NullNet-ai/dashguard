@@ -7,6 +7,7 @@ import { FormBuilder } from "~/components/platform/FormBuilder";
 const FormSchema = z.object({
   "code-editor": z
     .string({ message: "Code Editor is required" })
+		.min(1, { message: "Code Editor is required" }),
 });
 
 export default function CodeEditorForm() {
@@ -46,11 +47,10 @@ export default function CodeEditorForm() {
 					name: "code-editor",
 					label: "Code Editor",
 					required: true,
-					readonly: false,
 					codeEditorProps: {
 						enable_editor_tools: true,
 						enable_auto_height : true,
-						defaultTheme: 'vs-dark',
+						defaultTheme: 'vs-light',
 						minHeight: '10vh',
 						maxHeight: '50vh',
 					}

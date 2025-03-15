@@ -13,7 +13,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -345,7 +345,7 @@ export default function GridProvider({
     cell: ({ row }: any) => (
       <HeadlessBtn onClick={() => row.toggleExpanded()}>
         {row.getIsExpanded() ? (
-          <ChevronUp className="h-6 w-6 text-primary" />
+          <ChevronDown className="h-6 w-6 text-primary" />
         ) : (
           <ChevronRight className="h-6 w-6 text-default/40" />
         )}

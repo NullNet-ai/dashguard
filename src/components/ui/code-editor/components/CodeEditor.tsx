@@ -19,6 +19,8 @@ interface CodeEditorProps {
 	minHeight: string;
 	maxHeight?: string;
 	editorCode?: string;
+	disabled?: boolean;
+	onCodeChange?: (value: string) => void;
 }
 
 const themes = [
@@ -37,29 +39,25 @@ const languages = [
 	{ value: 'css', label: 'CSS' },
 ];
 
-const fontSizes = [
-	{ value: '12', label: '12' },
-	{ value: '14', label: '14' },
-	{ value: '16', label: '16' },
-	{ value: '18', label: '18' },
-	{ value: '20', label: '20' },
-	{ value: '22', label: '22' },
-	{ value: '24', label: '24' },
-];
+const fontSizes = Array.from({ length: 13 }, (_, i) => {
+	const size = i + 12;
+	return { value: size.toString(), label: size.toString() };
+});
 
 type Theme = 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
 type Language = 'javascript' | 'typescript' | 'python' | 'sql';
 
 export default function CodeEditor({
+	onCodeChange,
 	enable_editor_tools = true,
 	enable_auto_height = false,
 	readOnly = false,
+	disabled = false,
 	defaultTheme = 'vs-light',
 	minHeight = '10vh',
 	maxHeight = '50vh',
-	editorCode,
+	editorCode = ''
 }: CodeEditorProps) {
-	const [code, setCode] = useState<string>(editorCode || '');
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
 	const [language, setLanguage] = useState<Language>('javascript');
 	const [fontSize, setFontSize] = useState<number>(14);
@@ -87,17 +85,9 @@ export default function CodeEditor({
 		}
 	}, [displayTools]);
 
-	const handleThemeChange = useCallback((value: string) => {
-		setTheme(value as Theme);
-	}, []);
-
-	const handleLanguageChange = useCallback((value: string) => {
-		setLanguage(value as Language);
-	}, []);
-
 	const handleCodeChange = useCallback((value: string | undefined) => {
-		setCode(value || '');
-	}, []);
+    onCodeChange?.(value || '');
+}, [onCodeChange]);
 
 	const handleEditorDidMount: OnMount = useCallback((editor, monaco) => {
 			editorRef.current = editor;
@@ -142,6 +132,15 @@ export default function CodeEditor({
 			setContentHeight(heightInVh);
 	};
 
+
+	const handleThemeChange = useCallback((value: string) => {
+		setTheme(value as Theme);
+	}, []);
+
+	const handleLanguageChange = useCallback((value: string) => {
+		setLanguage(value as Language);
+	}, []);
+	
 	const handleFontSizeChange = useCallback((value: string) => {
 		setFontSize(parseInt(value, 10));
 	}, []);
@@ -171,14 +170,16 @@ export default function CodeEditor({
 	}, []);
 
 	const handleCopy = useCallback(async () => {
+		if (!editorCode) return;
 		try {
-			await navigator.clipboard.writeText(code);
+			await navigator.clipboard.writeText(editorCode);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		} catch (err) {
 			console.error('Failed to copy:', err);
 		}
-	}, [code]);
+	}, [editorCode]);
+	
 
 	const editorOptions = useMemo(() => {
 		const readonly = readOnly;
@@ -199,16 +200,23 @@ export default function CodeEditor({
 	}, [readOnly, fontSize, showMiniMap, isReadOnly]);
 
 	return (
-		<div role="region" aria-label="Code Editor" className="relative border border-gray-600 rounded-lg w-full overflow-hidden">
+		<div 
+			role="region" 
+			aria-label="Code Editor" 
+			className={cn(
+				themeClass, 
+				disabled ? "opacity-90 pointer-events-none cursor-not-allowed" : "",
+				"relative border border-gray-600 rounded-lg w-full overflow-hidden"
+			)}>
 			<div className={cn(
-				'flex gap-2 justify-between px-2 pt-2',
+				themeClass,
 				readOnly || isReadOnly ? 'absolute z-10 right-0' : '',
-				themeClass
+				'flex gap-2 justify-between px-2 pt-2'
 			)}>
 				{!readOnly && !isReadOnly &&
 					<div className={cn(
-						'flex flex-wrap gap-2',
-						themeClass
+						themeClass,
+						'flex flex-wrap gap-2'
 					)}>
 						<SelectComponent
 							options={languages}
@@ -334,7 +342,7 @@ export default function CodeEditor({
 								themeClass
 							)}
 							height={contentHeight}
-							value={code}
+							value={editorCode}
 							theme={theme}
 							language={language}
 							onChange={handleCodeChange}
@@ -376,7 +384,7 @@ export default function CodeEditor({
 								)}
 								height={contentHeight}
 								language={language}
-								value={code}
+								value={editorCode}
 								theme={theme}
 								options={{
 									fontSize: fontSize,
