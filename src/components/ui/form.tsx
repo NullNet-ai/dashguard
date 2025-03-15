@@ -170,6 +170,7 @@ const FormMessage = React.forwardRef<
   if (!errorMessages.length && !children) {
     return null;
   }
+
   return (
     <div ref={ref} id={formMessageId} className={cn("text-sm font-medium text-destructive !mt-[6px]", className)} {...props}>
       {isMultiple && errorMessages?.length > 1 ? (

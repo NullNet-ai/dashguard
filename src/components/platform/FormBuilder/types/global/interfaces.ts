@@ -38,12 +38,34 @@ import {
 
 import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
+import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 
 interface OptionType {
   label: string;
   value: string;
 }
-
+interface RichTextConfig {
+  output?:'html' | 'json' | 'text'
+  plainTextMode?:boolean
+  plainTextConfig?: {
+    multiline?: boolean;
+    maxHeight?: string;
+  };
+  customDropdowns?: Array<{
+    id: string;
+    buttonLabel: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+    options: Array<{
+      label: string;
+      value: string;
+    }>;
+    formatInsertedValue?: (option: { label: string; value: string }) => string;
+    onSelect?: (option: { label: string; value: string }) => void;
+    disabled?:boolean;
+    isFilterMode?:boolean;
+  }>;
+}
 interface DraggableConfig {
   parentProps?: any;
   fields: IField & {
@@ -51,26 +73,27 @@ interface DraggableConfig {
     radioOptions?: IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
     formType?:
-      | 'input'
-      | 'select'
-      | 'radio'
-      | 'checkbox'
-      | 'textarea'
-      | 'number-input'
-      | 'smart-date'
-      | 'time-picker';
+    | 'input'
+    | 'select'
+    | 'radio'
+    | 'checkbox'
+    | 'textarea'
+    | 'number-input'
+    | 'smart-date'
+    | 'time-picker';
   };
 }
 
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
 };
-interface CustomFieldProps {
+export interface CustomFieldProps {
   field: ControllerRenderProps<Record<string, any>, string>;
   fieldState: ControllerFieldState;
   form: UseFormReturn<Record<string, any>>;
   formKey: string;
   fieldConfig: IField;
+  selectOptions?: Record<string, ISelectOptions[]>;
 }
 interface MultiFieldOption {
   label: string;
@@ -111,9 +134,9 @@ interface IField {
     disablePastDates?: boolean
     disableFutureDates?: boolean
     includeTime?: boolean
-    useTimePicker?:boolean
+    useTimePicker?: boolean
     displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
-    is24Hour?:boolean
+    is24Hour?: boolean
   }
   dateInputProps?: NaturalLanguageInputProps
   description?: string
@@ -156,7 +179,19 @@ interface IField {
   multiSelectHideClearAllButton?: boolean
   multiSelectShowCreatableItem?: boolean
   multiSelectUseStringValues?: boolean
+  richTextConfig?: RichTextConfig
+  multiSelectRenderOption?: (option: OptionType) => React.ReactNode;
+  multiSelectRenderBadge?: (option: OptionType, handleUnselect: (option: OptionType) => void) => React.ReactNode;
+  multiSelectOnSearch?: Record<string, (search: string) => Promise<OptionType[]>>;
   richTextOutput?: 'html' | 'json' | 'text'
+  richTextEntityOptions?: Array<{
+    label: string;
+    value: string;
+  }>;
+  richTextVariableOptions?: Array<{
+    label: string;
+    value: string;
+  }>;
   inputRightAddOns?: ReactNode | string
   inputLeftAddOns?: ReactNode | string
   isMultiSelectAlphabetical?: boolean
@@ -188,12 +223,12 @@ interface IField {
   selectEnableCreate?: boolean;
   multiSelectEnableCreate?: boolean;
   selectOnCreateRecord?:
-    | {
-        fieldIdentifier: string;
-        entity: string;
-        customParams?: Record<string, any>;
-      }
-    | ((text: string) => Promise<ISelectOptions>);
+  | {
+    fieldIdentifier: string;
+    entity: string;
+    customParams?: Record<string, any>;
+  }
+  | ((text: string) => Promise<ISelectOptions>);
   selectOnCreateValidate?: (
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
@@ -361,11 +396,11 @@ interface IFilterGridConfig {
     options: Record<string, any>,
   ) =>
     | {
-        totalCount: number;
-        items: any[];
-        currentPage: number;
-        totalPages: number;
-      }
+      totalCount: number;
+      items: any[];
+      currentPage: number;
+      totalPages: number;
+    }
     | undefined;
   handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
   fieldFilterGridColumns?: string[];
@@ -393,7 +428,7 @@ interface IPropsForms {
     formClassName?: string;
     headerClassName?: string;
   };
-  customConfig?:Record<string, any>;
+  customConfig?: Record<string, any>;
   fieldConfig?: Field;
   formProps?: any;
   showCreateFormGrid?: boolean;

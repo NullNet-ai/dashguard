@@ -60,7 +60,7 @@ export default function Main({
             <SearchList />
           </div>
           <div className="min-h-[40px] lg:hidden">
-            <SearchListMobile />
+            <SearchListMobile gridType={gridType} parentType={parentType}/>
           </div>
           <SearchDialog />
         </div>

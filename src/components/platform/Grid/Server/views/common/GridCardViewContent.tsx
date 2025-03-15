@@ -7,7 +7,7 @@ import { testIDFormatter } from '~/utils/formatter'
 
 import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
 
-const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells }: any) => {
+const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells, codecell, categoryCell }: any) => {
   const [showMore, setShowMore] = React.useState(false)
   return (
     <div
@@ -19,11 +19,43 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
       key={row.id}
     >
       <div className={cn(`flex items-start justify-between gap-2 mb-2`)}>
-        {statusCell
-        && flexRender(statusCell.column.columnDef.cell, {
-          ...statusCell.getContext(),
-          view_mode: 'card',
-        })}
+
+        <div className='flex flex-col'>
+          <div className='flex items-center gap-2'>
+            {codecell ? (
+              <div
+              className={cn(
+                'bg-primary/10 text-primary',
+                'inline-flex items-center rounded-md px-2 py-1 text-xs font-normal',
+              )}
+            >
+                {flexRender(codecell.column.columnDef.cell, {
+                    ...codecell.getContext(),
+                    view_mode: 'card',
+                  })}
+              </div>
+            ) : null}
+              {statusCell
+              && flexRender(statusCell.column.columnDef.cell, {
+                ...statusCell.getContext(),
+                view_mode: 'card',
+              })}
+          </div>
+
+          {categoryCell ?  <div className='flex mt-2'>
+            <span className='mr-2 text-slate-500 text-xs'>Category: </span>
+            <div className='flex gap-x-1 flex-wrap'>
+            {flexRender(categoryCell.column.columnDef.cell, {
+              ...categoryCell.getContext(),
+              view_mode: 'card',
+            }) }
+            </div>
+          </div> : null}
+
+          
+       
+        </div>
+     
         {parent === 'grid' || parent === 'form'
           ? (
               <div>
@@ -80,13 +112,15 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
           : null}
       </div>
 
-      <div className='grid grid-cols-2 gap-4 gap-y-2 text-sm'>
+      {showMore ? (
+        <div className='grid grid-cols-2 gap-4 gap-y-2 text-sm mt-1'>
         {visibleCells.map((cell: any, cellIndex: any) => {
           // Skip id and status as they're already shown above
           if (
             cell.column.id === 'id'
             || cell.column.id === 'status'
-            || cell.column.id === 'select'
+            || cell.column.id === 'categories'
+            || cell.column.id === 'code'
             || cell.column.id === 'expand'
           ) return null
 
@@ -117,6 +151,7 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
           )
         })}
       </div>
+      ) : null}
       {visibleCells?.length > 6 && (
         <button
             className='mt-2 text-sm text-primary'

@@ -37,7 +37,7 @@ export default function CategoryDetails(props: IFormProps) {
   return (
     <FormBuilder
       defaultValues={defaultValues}
-      enableFormRegisterToParent={false}
+      enableFormRegisterToParent={true}
       fields={[
         {
           id: 'entity',

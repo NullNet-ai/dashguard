@@ -20,35 +20,77 @@ export const ToolbarButton = React.forwardRef<
   ToolbarButtonProps
 >(
   (
-    { isActive, children, tooltip, className, tooltipOptions, ...props },
-    ref,
+    {
+      children,
+      tooltip,
+      isActive,
+      size,
+      variant,
+      disabled,
+      className,
+      onClick,
+      ...props
+    },
+    ref
   ) => {
-    const toggleButton = (
+    
+    // Create a handler that prevents default and stops propagation
+    const handleClick = React.useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (disabled) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        onClick?.(e);
+      },
+      [onClick, disabled]
+    );
+
+    return tooltip ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Toggle
+            ref={ref}
+            size={size}
+            variant={variant}
+            pressed={isActive}
+            disabled={disabled}
+            className={cn(
+              "data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+              "pointer-events-auto", // Ensure clicks are registered
+              className
+            )}
+            onClick={handleClick}
+            {...props}
+          >
+            {children}
+            <span className="sr-only">{tooltip}</span>
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent {...props.tooltipOptions}>
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    ) : (
       <Toggle
-        size="sm"
         ref={ref}
-        className={cn("size-8 p-0", { "bg-accent": isActive }, className)}
+        size={size}
+        variant={variant}
+        pressed={isActive}
+        disabled={disabled}
+        className={cn(
+          "data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+          "pointer-events-auto", // Ensure clicks are registered
+          className
+        )}
+        onClick={handleClick}
         {...props}
       >
         {children}
       </Toggle>
     );
-
-    if (!tooltip) {
-      return toggleButton;
-    }
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
-        <TooltipContent {...tooltipOptions}>
-          <div className="flex flex-col items-center text-center">
-            {tooltip}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    );
-  },
+  }
 );
 
 ToolbarButton.displayName = "ToolbarButton";

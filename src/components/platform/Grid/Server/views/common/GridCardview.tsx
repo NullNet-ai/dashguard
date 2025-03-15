@@ -61,6 +61,14 @@ export default function GridCardView({parentType} : any) {
           const statusCell = row
             .getVisibleCells()
             .find((cell) => cell.column.id === 'status');
+            const codecell = row
+            .getVisibleCells()
+            .find((cell) => cell.column.id === 'code');
+
+            const categoryCell = row
+            .getVisibleCells()
+            .find((cell) => cell.column.id === 'categories');
+
 
             return <GridCardViewContent
                 row={row}
@@ -68,6 +76,8 @@ export default function GridCardView({parentType} : any) {
                 rowIndex={rowIndex}
                 state={state}
                 statusCell={statusCell}
+                codecell={codecell}
+                categoryCell={categoryCell}
                 flexRender={flexRender}
                 parent={parentType}
                 config={config}

@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.3",
-  "branch": "released/1.14.3",
-  "message": "revert changes",
-  "publish_name": "Juphet Vitualla"
+  "tag": "1.18.0<unreleased>",
+  "branch": "unreleased/feat/3309/1.18.0<unreleased>",
+  "message": "update tiptap to support variables for richtext ",
+  "publish_name": "Rob Caldosa"
 }

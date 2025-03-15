@@ -15,6 +15,7 @@ import { GridDesktop, GridMobile } from './views'
 import GridCardLists from './views/GridCardLists'
 import GridMobileForm from './views/GridMobileForm'
 import { cn } from '~/lib/utils'
+import { useIsMobile } from '~/hooks/use-mobile'
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
@@ -69,12 +70,13 @@ function MainClient({
   const { width } = useWindowSize()
   const newWidth = width <= 0 ? 1920 : width
   const _width = open ? newWidth - remToPx(17) : newWidth - remToPx(6)
+  const isMobile = useIsMobile()
 
   if (isLoading && !data?.length) {
     return (
       <div
         className="flex h-full items-center justify-center"
-        style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
+        style={{ width: isMobile ? '100%' : gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <Loader
           className="bg-primary text-primary"
@@ -130,9 +132,10 @@ function MainClient({
               </div>
 
               <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`)}>
-                {parentType === 'grid'
+                {parentType === 'grid' || parentType === 'grid_expansion'
                   ? (
                       <GridMobile
+                        hideSearch={hideSearch}
                         parentType={parentType}
                         shownPagination={showPagination ?? true}
                         gridLevel={gridLevel}

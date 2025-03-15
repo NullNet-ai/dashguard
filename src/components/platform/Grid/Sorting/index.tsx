@@ -14,6 +14,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
 import { GridContext } from '../Provider';
+import { useIsMobile } from '~/hooks/use-mobile';
 
 const Sorting = ({ className }: { className?: string }) => {
   const conref = useRef<any>(null);
@@ -22,6 +23,7 @@ const Sorting = ({ className }: { className?: string }) => {
   const entity = state?.config?.entity;
   const [data, setData] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const ismobile = useIsMobile()
 
   const sortingFields = state?.sorting?.filter(
     (item, index, self) => index === self.findIndex((i) => i.id === item.id),
@@ -39,7 +41,7 @@ const Sorting = ({ className }: { className?: string }) => {
       const allItems: any[] = [];
       const newData = items || sortingFields || [];
       // clear width, more width, and sort by
-      const clearWidth = 65 + 63 + 42;
+      const clearWidth = 65 + (ismobile ? 36 : 63) + 42;
       let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth;
       const containerWidth = conref.current?.offsetWidth || 0;
 
@@ -221,7 +223,7 @@ const Sorting = ({ className }: { className?: string }) => {
         }}
       >
         {/* <Trash2 className="size-4 block lg:hidden"/> */}
-        <span>Reset Sort</span>
+        <span>Reset <span className='sm:inline hidden'>Sort</span></span>
       </Button>
     </div>
   );

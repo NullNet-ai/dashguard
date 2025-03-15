@@ -8,12 +8,14 @@ import { GridContext } from '../../Provider';
 import GridMobileRow from './common/GridMobileRow';
 import getData from './actions/getData';
 import useScreenType from '~/hooks/use-screen-type';
+import { cn } from '~/lib/utils';
 
-const InfiniteScrollContainer = () => {
+const InfiniteScrollContainer = ({gridlevel}: any) => {
   const screen = useScreenType();
   const ismobile = screen=== 'md' || screen === 'sm' || screen==='xs';
 
   const { state: gridState, actions } = useContext(GridContext);
+
   const { infinite_options, advanceFilter, sorting } = gridState ?? {};
   const { infiniteActions } = actions ?? {};
   const { limit, current = 0, infiniteCount } =
@@ -82,7 +84,7 @@ const InfiniteScrollContainer = () => {
     <div>
       <div
       id="scrollable-div-mobile-grid"
-      className="h-[calc(100vh-380px)] w-full overflow-y-auto"
+      className={cn(`${gridlevel === 1 ? 'h-[calc(100vh-380px)] w-full overflow-y-auto' : ''}`)}
     >
       <InfiniteScroll
         scrollableTarget="scrollable-div-mobile-grid"
@@ -97,17 +99,17 @@ const InfiniteScrollContainer = () => {
             
           }
         }}
-        endMessage={
+        endMessage={ gridState?.data?.length && gridlevel  === 1 ? (
           <p className="text-center py-4 text-sm">
             <span className="text-gray-400">
                 No more data...
             </span>
           </p>
+        ) : null    
         }
-        loader={
-          <div className="flex justify-center p-4">
-            <Loader size="md" variant="circularShadow" label="" />
-          </div>
+        loader={ gridlevel === 1 ?    <div className="flex justify-center p-4">
+          <Loader size="md" variant="circularShadow" label="" />
+        </div> : null
         }
       >
         <GridMobileRow gridLevel={gridState?.gridLevel} />
