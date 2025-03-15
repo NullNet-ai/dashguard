@@ -84,8 +84,10 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
         }]
         console.log('%c Line:102 🥥 filter_type', 'color:#465975', filter_type);
 
+        console.log('%c Line:89 🍧 filterDetails', 'color:#ed9ec7', filterDetails);
     const modifyFilterDetails = {
       ...filterDetails,
+      label: filterDetails?.name || '',
       default_filter: filterDetails.default_filter.map((item: any) => {
         if (item.type === 'criteria') {
           return {
