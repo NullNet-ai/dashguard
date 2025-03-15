@@ -10,6 +10,7 @@ interface IGridCacheDataResponse {
     advanceFilter: ISearchItem[];
     reportFilters: [];
     defaultFilters: ISearchItem[];
+    groupAdvanceFilters: ISearchItem[];
   };
   sorts: {
     sorting: SortingState;
@@ -37,6 +38,7 @@ export const getGridCacheData =
             advanceFilter: [],
             reportFilters: [],
             defaultFilters: [],
+            groupAdvanceFilters: [],
           },
           columns : []
         } as IGridCacheDataResponse);

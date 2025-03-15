@@ -44,13 +44,14 @@ const filterGroupSchema = z.object({
 
 const gridFilterSchema = z.object({
   name: z.string().min(1),
-  default_filter: z.array(filterCriteriaSchema),
+  default_filter: z.array(filterCriteriaSchema).or(z.array(z.any())),
   sorts: z.array(sortSchema),
   groups: z.array(groupSchema).optional(),
   columns: z.array(columnSchema),
   default_sorts: z.array(sortSchema),
   id: z.string().optional(),
   filter_groups: z.array(filterGroupSchema),
+  group_advance_filters : z.array(filterCriteriaSchema).or(z.array(z.any())),
 });
 
 export const gridFilterRouter = createTRPCRouter({
@@ -84,7 +85,8 @@ export const gridFilterRouter = createTRPCRouter({
               sorts: input.sorts,
               advance_filters: input.default_filter,
               default_sorts: input.default_sorts,
-              filter_groups : input.filter_groups
+              filter_groups : input.filter_groups,
+              group_advance_filters : input.group_advance_filters,
             },
             pluck: [
               'id',
@@ -98,18 +100,12 @@ export const gridFilterRouter = createTRPCRouter({
               'groups',
               'sorts',
               'advance_filters',
-              'filter_groups'
+              'filter_groups',
+              'group_advance_filters'
             ],
           },
         })
         .execute();
-
-      console.error('RESPONSE', {
-        data,
-        message,
-        success,
-        errors,
-      });
 
       if (!success) {
         throw new Error(message);
@@ -139,7 +135,8 @@ export const gridFilterRouter = createTRPCRouter({
               sorts: input.sorts,
               advance_filters: input.default_filter,
               default_sorts: input.default_sorts,
-              filter_groups : input.filter_groups
+              filter_groups : input.filter_groups,
+              group_advance_filters : input.group_advance_filters
             },
             pluck: [
               'id',
@@ -153,7 +150,8 @@ export const gridFilterRouter = createTRPCRouter({
               'groups',
               'sorts',
               'advance_filters',
-              'filter_groups'
+              'filter_groups',
+              'group_advance_filters'
             ],
           },
         })
@@ -186,7 +184,8 @@ export const gridFilterRouter = createTRPCRouter({
             advance_filters: input.default_filter,
             default_sorts: input.default_sorts,
             default_filter : input.default_filter,
-            filter_groups : input.filter_groups
+            filter_groups : input.filter_groups,
+            group_advance_filters : input.group_advance_filters
           };
         }
         return tab;
@@ -291,6 +290,7 @@ export const gridFilterRouter = createTRPCRouter({
                 advance_filters: input.tab.default_filter || [],
                 default_sorts: input.tab.default_sorts  || [],
                 filter_groups : input.tab.filter_groups || [],
+                group_advance_filters: input.tab.group_advance_filters || [],
               },
               pluck: [
                 'id',
@@ -336,7 +336,8 @@ export const gridFilterRouter = createTRPCRouter({
                 'sorts',
                 'advance_filters',
                 'default_sorts',
-                'filter_groups'
+                'filter_groups',
+                'group_advance_filters',
               ],
             },
           })
@@ -372,7 +373,8 @@ export const gridFilterRouter = createTRPCRouter({
                 sorts: grid_filter.sorts,
                 advance_filters: grid_filter.advance_filters,
                 default_sorts: grid_filter.default_sorts,
-                filter_groups : grid_filter.filter_groups
+                filter_groups : grid_filter.filter_groups,
+                group_advance_filters: grid_filter.group_advance_filters,
               },
               pluck: [
                 'id',
@@ -421,7 +423,8 @@ export const gridFilterRouter = createTRPCRouter({
         advance_filters: filter?.advance_filters,
         default_sorts: filter?.default_sorts,
         default_filter : filter?.advance_filters,
-        filter_groups : filter?.filter_groups
+        filter_groups : filter?.filter_groups,
+        group_advance_filters: filter?.group_advance_filters,
       });
       await ctx.redisClient.cacheData(_tabMenuId, tabs);
 

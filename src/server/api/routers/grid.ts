@@ -132,7 +132,8 @@ export const gridRouter = createTRPCRouter({
             'sorts',
             'advance_filters',
             'default_sorts',
-            'filter_groups'
+            'filter_groups',
+            'group_advance_filters',
           ],
           advance_filters: [
             {
@@ -752,12 +753,13 @@ export const gridRouter = createTRPCRouter({
             type: z.string(),
             field: z.string().optional(),
             entity: z.string().optional(),
-            operator: z.string(),
+            operator: z.string().optional(),
             values: z.array(z.string()).optional(),
             id: z.string().optional(),
             label: z.string().optional(),
             default: z.boolean().optional(),
             display_value: z.string().optional(),
+            filters: z.array(z.any()).optional()
           }),
         ),
       }),
@@ -790,12 +792,18 @@ export const gridRouter = createTRPCRouter({
         if (tab.id === defaultFilter.id) {
           return {
             ...tab,
-            advance_filters: filters,
-            default_filter: filters,
+            group_advance_filters:
+              tab?.group_advance_filters?.length > 0
+                ? filters
+                : [],
+            advance_filters:
+              tab?.group_advance_filters?.length > 0 ? [] : filters,
+            default_filter: [],
           };
         }
         return tab;
       });
+
       if (!defaultFilter.is_default) {
         // update the grid filter entity on database
         await ctx.dnaClient
@@ -804,7 +812,14 @@ export const gridRouter = createTRPCRouter({
             token: ctx.token.value,
             mutation: {
               params: {
-                advance_filters: filters,
+                advance_filters:
+                  defaultFilter.group_advance_filters?.length > 0
+                    ? []
+                    : filters,
+                group_advance_filters:
+                  defaultFilter.group_advance_filters?.length > 0
+                    ? filters
+                    : [],
               },
             },
           })
@@ -868,6 +883,11 @@ export const gridRouter = createTRPCRouter({
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_filter ?? [])
       : (tabDetails?.find((tab) => tab.current)?.default_filter ?? []);
 
+    const groupAdvanceFilters: ISearchItem[] = filter_id
+      ? (tabDetails?.find((tab) => tab.id === filter_id)
+          ?.group_advance_filters ?? [])
+      : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
+
     const defaultFilters = filter.filter((item) => item.default === true);
     const sorts: ISortBy = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
@@ -896,6 +916,7 @@ export const gridRouter = createTRPCRouter({
         reportFilter: defaultFilters,
         advanceFilter,
         defaultFilters,
+        groupAdvanceFilters,
       },
       sorts: {
         sorting: sorts,

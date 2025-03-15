@@ -74,7 +74,7 @@ export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
   }
 
   return (
-    <Tooltip key={'edit'}>
+    <Tooltip key={'edit'} delayDuration={0}>
       <TooltipTrigger asChild>
         <Button
           disabled={isDisabled}
@@ -89,7 +89,7 @@ export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
           <PencilIcon className="h-3 w-3 text-primary" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="z-[9999]">
+      <TooltipContent  align='center' side='left' sideOffset={15} className="z-[9999]">
         <p>{'Edit'}</p>
       </TooltipContent>
     </Tooltip>
@@ -234,7 +234,7 @@ export function ArchiveComponent({
   }
 
   return (
-    <Tooltip key={'archive'}>
+    <Tooltip key={'archive'} delayDuration={0}>
       <TooltipTrigger asChild>
         <Button
           {...((row.original.disabled || isDisabled) && { disabled: true })}
@@ -248,7 +248,7 @@ export function ArchiveComponent({
           />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="z-[9999]">
+      <TooltipContent align='center' side='left' sideOffset={45} className="z-[9999]">
         <p>{'Archive'}</p>
       </TooltipContent>
     </Tooltip>
@@ -305,7 +305,7 @@ export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
     );
   }
   return (
-    <Tooltip key={'restore'}>
+    <Tooltip key={'restore'} delayDuration={0}>
       <TooltipTrigger asChild>
         <Button
           disabled={isDisabled}
@@ -320,7 +320,7 @@ export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
           <RotateCcw className="h-3 w-3 text-primary" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="z-[9999]">
+      <TooltipContent align='center' side='left' sideOffset={45} className="z-[9999]">
         <p>{'Restore'}</p>
       </TooltipContent>
     </Tooltip>

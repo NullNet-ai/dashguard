@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
-import { saveGridFilter, updateGridFilter } from './actions';
+import { saveGridFilter, transformFilterGroups, updateGridFilter } from './actions';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { useRouter } from 'next/navigation';
 import { AppRouterKeys } from '../../types';
@@ -84,57 +84,16 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups),
     ); // Deep copy to prevent modifications
-
-    const resolveDefaultFilter = filterDetails?.filter_groups?.reduce(
-      (acc: any, curr: any) => {
-        if (acc.length) {
-          curr.filters = [
-            {
-              operator: curr.groupOperator,
-              type: 'operator',
-              default: true,
-            },
-            ...curr.filters,
-          ];
-        }
-
-        if (
-          !acc.length &&
-          curr.filters.length &&
-          !curr.filters[0]?.field &&
-          !curr.filters[0]?.operator &&
-          !curr.filters[0]?.values.length
-        ) {
-          return acc;
-        }
-
-        const mergeRecords = [...acc, ...curr.filters].map((item: any) => {
-          if (item.type === 'criteria') {
-            return {
-              ...item,
-              values:
-                Array.isArray(item.values) &&
-                item.values.length > 0 &&
-                typeof item.values[0] === 'object'
-                  ? item.values.map((obj: any) => obj.value)
-                  : item.values,
-            };
-          }
-          return item;
-        });
-
-        return mergeRecords;
-      },
-      [],
-    );
-
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
       sorts: sorting,
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
+      group_advance_filters: resolveGroupFilter,
     };
+
     setCreateFilterLoading(true);
     await updateGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false);
@@ -161,46 +120,7 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups),
     ); // Deep copy to prevent modifications
 
-    const resolveDefaultFilter = filterDetails?.filter_groups?.reduce(
-      (acc: any, curr: any) => {
-        if (acc.length) {
-          curr.filters = [
-            {
-              operator: curr.groupOperator,
-              type: 'operator',
-              default: true,
-            },
-            ...curr.filters,
-          ];
-        }
-        if (
-          !acc.length &&
-          curr.filters.length &&
-          !curr.filters[0]?.field &&
-          !curr.filters[0]?.operator &&
-          !curr.filters[0]?.values.length
-        ) {
-          return acc;
-        }
-        const mergeRecords = [...acc, ...curr.filters].map((item: any) => {
-          if (item.type === 'criteria') {
-            return {
-              ...item,
-              values:
-                Array.isArray(item.values) &&
-                item.values.length > 0 &&
-                typeof item.values[0] === 'object'
-                  ? item.values.map((obj: any) => obj.value)
-                  : item.values,
-            };
-          }
-          return item;
-        });
-
-        return mergeRecords;
-      },
-      [],
-    );
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails);
 
     const modifyFilterDetails = {
       ...filterDetails,
@@ -208,6 +128,7 @@ export function ManageFilterProvider({
       sorts: sorting,
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
+      group_advance_filters: resolveGroupFilter,
     };
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails);

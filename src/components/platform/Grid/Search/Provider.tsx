@@ -22,6 +22,7 @@ import {
   type IState,
 } from './types';
 import { removeSearchItems } from './utils/removeSearchItems';
+import { resolveSearchItem } from './utils/resolveSearchItem';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
 
@@ -39,12 +40,15 @@ export default function GridSearchProvider({ children }: IProps) {
     onFetchRecords,
   } = gridState?.config ?? {};
 
-  const { parentType } = gridState ?? {};
+  const { parentType, advanceFilter } = gridState ?? {};
+
+  const { query_params } = searchConfig ?? {};
+  const { group_advance_filters } = query_params ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     gridState?.advanceFilter || [],
-  );
+  ); 
   const [open, setOpen] = useState(false);
 
   const advanceFilterItems = useMemo(() => {
@@ -57,7 +61,7 @@ export default function GridSearchProvider({ children }: IProps) {
         values,
       }),
     ) as ISearchItem[];
-    return searchableFields.reduce(
+    const searchResolver =  searchableFields.reduce(
       // eslint-disable-next-line no-unused-vars
       (acc: any, { accessorKey: _, ...item }: any, index) => {
         return [
@@ -85,6 +89,7 @@ export default function GridSearchProvider({ children }: IProps) {
         ...advanceFilter,
       ],
     );
+    return searchResolver;
   }, [_query, columns.length]);
 
   const handleQuery = (data: React.SetStateAction<string>) => {
@@ -114,24 +119,13 @@ export default function GridSearchProvider({ children }: IProps) {
       ...rest,
     })) as ISearchItem[];
     setQuery('');
-    const updateSearchItems = [
-      ...advanceFilter,
-      ...(advanceFilter.length
-        ? [{ id: ulid(), type: 'operator', operator: 'and' }]
-        : []),
-      {
-        ...rest,
-        id: ulid(),
-        values:
-          rest?.field === 'raw_phone_number'
-            ? [rest?.values?.[0]?.replace(/[^\d]/g, '')]
-            : [rest?.values?.[0]],
-        display_value: rest?.values?.[0],
-        operator: rest?.operator === 'like' ? 'equal' : rest?.operator,
-        default : false
-      },
-    ] as ISearchItem[];
+ 
+    const updateSearchItems = resolveSearchItem({
+      advanceFilter,
+      rest
+    })
     setSearchItems(updateSearchItems);
+
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       onFetchRecords?.({
         advance_filters: updateSearchItems,
