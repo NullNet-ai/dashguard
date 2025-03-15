@@ -59,6 +59,7 @@ const FilterProvider = ({ children, params, type }: any) => {
         ...updatedFilters.get(id),
         ...rest,
         id,
+        name: name || '',
         label: name || '',
         default_filter: default_filter?.map((f) =>
           f.type === 'criteria'
