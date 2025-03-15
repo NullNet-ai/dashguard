@@ -17,6 +17,7 @@ export async function UpdateReportFilter({
   const pathName = headerList.get("x-pathname") || "";
   const searchParams = headerList.get("x-full-search-query-params") || "";
   const urlSearchParams = new URLSearchParams(searchParams);
+  console.log("🚀 ~ filters:", filters)
   await api.grid.updateReportFilter({
     filters,
   });

@@ -20,6 +20,7 @@ export interface ITabGrid {
   default_sorts? : any[];
   default_filter?: IGridFilterBy[];
   filter_groups?: any[];
+  group_advance_filters?: any[];
 }
 
 export interface IGridFilterBy {

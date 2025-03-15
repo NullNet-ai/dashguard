@@ -50,5 +50,6 @@ export const transformSearchData = (
     }
   });
   const searchResults = Object.values(consolidated) || null;
+  
   return searchResults;
 };
