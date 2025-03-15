@@ -66,7 +66,7 @@ const InteractiveGraph = ({
       time_range: getLastTimeStamp(20, 'minute', new Date()),
       // time_range: getLastTimeStamp(20, 'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
-    })
+    }, { enabled: false })
 
   useEffect(() => {
     if (!packetsIP) return

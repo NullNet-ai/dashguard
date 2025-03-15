@@ -15,13 +15,13 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
     id: identifier!,
     pluck_fields: ["id", "code", "status", "device_status"],
     main_entity: main_entity!,
-  })
+  }, { enabled: false })
   const {
     data
   } = fetched_device?.data ?? {}
   const fetched_interfaces = api.deviceConfiguration.fetchInterfaceOptions.useQuery({
     code: identifier!,
-})
+}, { enabled: false })
   return (
     <PieChartComponent
     defaultValues={data ?? {}}
