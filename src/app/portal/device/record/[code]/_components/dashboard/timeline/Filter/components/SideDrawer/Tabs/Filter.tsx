@@ -16,7 +16,8 @@ import {
 } from '~/components/ui/select'
 
 import { useManageFilter } from '../Provider'
-import { headers } from 'next/headers';
+import { useMemo } from 'react';
+import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
 // import { useSearchParams } from "next/navigation";
 
 const required_fields = [
@@ -24,6 +25,12 @@ const required_fields = [
   'Resolution',
   'Graph Type',
 ]
+
+const time_resolution_options: { [key: string]: string[] } = {
+  '1d': ['1h', '30m'],
+  '12h': ['1h', '30m'],
+  '7d': ['12h', '1d'],
+}
 
 const _def_filters = [
   {
@@ -34,12 +41,6 @@ const _def_filters = [
     type: 'criteria',
     default: true,
     input_type: 'select',
-    options: [
-      // { label: '30 Days', value: '30d' },
-      { label: '7 Days', value: '7d' },
-      { label: '1 Day', value: '1d' },
-      { label: '12 Hours', value: '12h' },
-    ],
     static: true,
   },  {
     operator: 'and',
@@ -54,11 +55,6 @@ const _def_filters = [
     type: 'criteria',
     default: true,
     input_type: 'select',
-    options: [
-      // { label: '1 Day', value: '1d' },
-      { label: '1 Hour', value: '1h' },
-      { label: '30 Minutes', value: '30m' },
-    ],
     static: true,
   },
   {
@@ -139,11 +135,6 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
   const { handleUpdateFilter } = actions
   const { filterDetails, columns } = state ?? {}
 
-  // const router = useRouter()
-  // console.log('%c Line:136 🍌 router', 'color:#ffdd4d', router);
-
-  
-
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
@@ -167,12 +158,25 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     control: form.control,
     name: 'filters',
   })
+
+  const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
+    const resolutionOptions: { [key: string]: string[] } = time_resolution_options;
+   
+    const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || [];
+    return options;
+  };
   
-  console.log('%c Line:167 🍇 fields', 'color:#3f7cff', fields);
+  const selectedTimeRange = form.watch(`filters.[0].Time Range`); // Get selected value
+  const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
+  
+  console.log('%c Line:181 🍆 resolutionOptions', 'color:#2eafb0', resolutionOptions);
+  
+  
   
   form.watch((fields) => {
     handleUpdateFilter({ default_filter: fields.filters })
   })
+
 
   const handleAppend = () => {
     const newFilter = {
@@ -195,7 +199,8 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
   }
 
   const handleRemoveFilter = (index: number) => {
-    remove(index)
+    console.log('%c Line:202 🍧 index', 'color:#2eafb0', index);
+    remove([index - 1, index])
     handleUpdateFilter({ default_filter: form.getValues().filters })
   }
 
@@ -222,9 +227,9 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
 
       <Form {...form}>
         <div className="space-y-4">
-          {fields.map((field: any, index) => {
-            
+          {fields.map((field: any, index) => {    
             const prefix = `filters.${index}.`
+
             return (
               <div
                 className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
@@ -274,6 +279,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         name: `${prefix}.${field.field}`,
                         placeholder: 'Select a value',
                         selectSearchable: true,
+                        isAlphabetical: false,
                         // multiSelectEnableCreate: true,
                         // multiSelectShowCreatableItem: false,
                         // multiSelectUseStringValues: true,
@@ -292,15 +298,12 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         [`${prefix}.operator`]: OPERATORS,
                         [`${prefix}.Time Range`]: [
                           // { label: '30 Days', value: '30d' },
-                          { label: '7 Days', value: '7d' },
-                          { label: '1 Day', value: '1d' },
                           { label: '12 Hours', value: '12h' },
+                          { label: '1 Day', value: '1d' },
+                          { label: '7 Days', value: '7d' },
                         ],
-                        [`${prefix}.Resolution`]: [
-                          // { label: '1 Day', value: '1d' },
-                          { label: '1 Hour', value: '1h' },
-                          { label: '30 Minutes', value: '30m' },
-                        ],
+                        // [`${prefix}.Resolution`]:  resolution_options,
+                        [`${prefix}.Resolution`]:  resolutionOptions,
                         [`${prefix}.Graph Type`]: [
                           { label: 'Line Chart', value: 'line' },
                           { label: 'Bar Chart', value: 'bar' },
@@ -353,7 +356,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         },
                       }}
                     />
-                    {fields.length > 7 && !required_fields?.includes(field?.field) && (
+                    {(filter_type === 'timeline_filter' ? fields.length > 6 : fields.length > 7) && !required_fields?.includes(field?.field) && (
                       <Button
                         Icon={CircleMinus}
                         iconClassName="text-red-600 h-4 w-4"

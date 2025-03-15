@@ -633,7 +633,7 @@ export const packetRouter = createTRPCRouter({
     const { device_id, time_range, filter_id, bucket_size } = input
     console.log('%c Line:634 🍫 input', 'color:#6ec1c2', input);
     
-    
+    return []
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {

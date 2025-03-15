@@ -105,6 +105,7 @@ export default function RenderFormType(
           formKey={formKey}
           formRenderProps={formRenderProps}
           selectOptions={subConfig?.selectOptions}
+          isAlphabetical={fieldConfig?.isAlphabetical}
         />
       )
     case 'multi-select':

@@ -192,6 +192,8 @@ interface IField {
     components?: ComponentType<any>[] | JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
+
+  isAlphabetical?: boolean;
 }
 
 interface ISelectOptions {
