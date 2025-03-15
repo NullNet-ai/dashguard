@@ -38,7 +38,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       device_id: defaultValues?.id,
       time_range: getLastTimeStamp(20, 'second', new Date()),
       interface_names: interfaces?.map((item: any) => item?.value),
-    })
+    }, {enabled: false})
 
   // Fetch traffic data every second
   useEffect(() => {
