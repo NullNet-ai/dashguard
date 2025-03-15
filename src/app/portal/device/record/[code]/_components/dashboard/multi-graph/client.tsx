@@ -38,7 +38,6 @@ const InteractiveGraph = ({
   const [filteredData, setFilteredData] = React.useState<any[]>([])
 
   const _pie_chart_interfaces = form.watch('pie_chart_interfaces') ?? []
-
   const chartConfig = useMemo(() => {
     if (!interfaces?.length) return null
 
@@ -91,7 +90,7 @@ const InteractiveGraph = ({
     fetchChartData()
     const interval = setInterval(() => {
       fetchChartData()
-    }, 60000)
+    }, 2000)
     return () => clearInterval(interval)
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 

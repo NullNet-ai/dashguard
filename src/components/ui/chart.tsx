@@ -351,6 +351,10 @@ function getPayloadConfigFromPayload(
     ] as string;
   }
 
+  if (!config) {
+    return undefined; // or a default value
+  }
+  
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config];
