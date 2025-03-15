@@ -56,9 +56,12 @@ export default function GridMobileRow({
                 .getVisibleCells()
                 .filter(cell => cell.column.id !== 'action')
 
-              const statusCell = row
-                .getVisibleCells()
-                .find(cell => cell.column.id === 'status')
+                const getCell = (name: string) => {
+                  return row
+                  .getVisibleCells()
+                  .find(cell => cell.column.id === name)
+                }
+      
 
               return (
                 <GridMobileRowContent
@@ -66,7 +69,9 @@ export default function GridMobileRow({
                   key={row.id}
                   rowIndex={rowIndex}
                   state={state}
-                  statusCell={statusCell}
+                  statusCell={getCell('status')}
+                  codecell={getCell('code')}
+                  categoryCell={getCell('categories')}
                   flexRender={flexRender}
                   parent={parent}
                   config={config}
@@ -80,8 +85,8 @@ export default function GridMobileRow({
             })
           )
         : (
-            <div className="p-4 lg:p-0">
-              <div className="h-24 text-center text-foreground">No results.</div>
+            <div className="p-4 lg:p-0 ">
+              <div className="lg:h-24 text-center text-foreground text-sm lg:text-base">No results.</div>
             </div>
           )}
       {state?.showArchiveConfirmationModal && (

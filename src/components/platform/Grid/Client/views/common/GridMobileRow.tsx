@@ -55,17 +55,21 @@ export default function GridMobileRow({
                 .getVisibleCells()
                 .filter(cell => cell.column.id !== 'action')
 
-              const statusCell = row
+              const getCell = (name: string) => {
+                return row
                 .getVisibleCells()
-                .find(cell => cell.column.id === 'status')
-
+                .find(cell => cell.column.id === name)
+              }
+    
               return (
                 <GridMobileRowContent
                   row={row}
                   key={row.id}
                   rowIndex={rowIndex}
                   state={state}
-                  statusCell={statusCell}
+                  statusCell={getCell('status')}
+                  codecell={getCell('code')}
+                  categoryCell={getCell('categories')}
                   flexRender={flexRender}
                   parent={parent}
                   config={config}

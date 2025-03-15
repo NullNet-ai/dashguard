@@ -59,7 +59,7 @@ export default function GridMobileRow() {
         })
       ) : (
         <div>
-          <div className="h-24 text-center text-foreground">No results.</div>
+          <div className="h-24 text-center text-foreground text-sm lg:text-base">No results.</div>
         </div>
       )}
     </div>
