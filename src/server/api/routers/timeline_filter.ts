@@ -138,6 +138,15 @@ export const cachedFilterRouter = createTRPCRouter({
       
 
       const filter = cached_data?.find((data: any) => data.id === filter_id)
+      if(!filter) {
+        return {
+          time: {
+            time_count: 1,
+            time_unit: 'day'
+          },
+          resolution: '1h'
+        }
+      }
       
 
       const {

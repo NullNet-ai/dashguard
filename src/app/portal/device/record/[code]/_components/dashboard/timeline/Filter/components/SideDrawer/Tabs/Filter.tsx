@@ -16,7 +16,7 @@ import {
 } from '~/components/ui/select'
 
 import { useManageFilter } from '../Provider'
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
 // import { useSearchParams } from "next/navigation";
 
@@ -133,7 +133,8 @@ const ZodSchema = z.object({
 export default function FilterContent({filter_type}: {filter_type: string}) {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
-  const { filterDetails, columns } = state ?? {}
+  const { filterDetails, columns, errors} = state ?? {}
+  
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
@@ -158,7 +159,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     control: form.control,
     name: 'filters',
   })
-  console.log('%c Line:158 🌮 fields', 'color:#b03734', fields);
+  
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
     const resolutionOptions: { [key: string]: string[] } = time_resolution_options;
@@ -170,7 +171,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
   const selectedTimeRange = form.watch(`filters.[0].Time Range`); // Get selected value
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
   
-  console.log('%c Line:181 🍆 resolutionOptions', 'color:#2eafb0', resolutionOptions);
+  
   
   
   
@@ -178,6 +179,37 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     handleUpdateFilter({ default_filter: fields.filters })
   })
 
+  useEffect(() => {
+    if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
+      for (let key in errors) {
+        form.setError(key, {
+          type: 'required',
+          message: errors[key],
+        });
+      }
+    }
+  }, [errors]);
+
+  
+  
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      values.filters.forEach((filter: any, index: number) => {
+        if (required_fields.includes(filter.field) && filter?.[filter.field]) {
+          form.clearErrors(`filters.${index}.${filter.field}`);
+        } else {
+          if (filter.field) form.clearErrors(`filters.${index}.field`);
+          if (filter.operator) form.clearErrors(`filters.${index}.operator`);
+          if (filter.values && filter.values.length > 0) form.clearErrors(`filters.${index}.values`);
+        }
+      });
+    });
+  
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+  
+  
+  
 
   const handleAppend = () => {
     const newFilter = {
@@ -200,7 +232,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
   }
 
   const handleRemoveFilter = (index: number) => {
-    console.log('%c Line:202 🍧 index', 'color:#2eafb0', index);
+    
     remove([index - 1, index])
     handleUpdateFilter({ default_filter: form.getValues().filters })
   }
@@ -229,7 +261,9 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
       <Form {...form}>
         <div className="space-y-4">
           {fields.map((field: any, index) => {    
-            const prefix = `filters.${index}.`
+            const prefix = `filters.${index}`
+
+            
 
             return (
               <div
@@ -281,6 +315,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         isAlphabetical: false,
+
                         // multiSelectEnableCreate: true,
                         // multiSelectShowCreatableItem: false,
                         // multiSelectUseStringValues: true,

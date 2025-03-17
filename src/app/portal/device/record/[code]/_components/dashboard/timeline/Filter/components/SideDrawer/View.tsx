@@ -17,21 +17,21 @@ export default function SideDrawer({filter_type}: {filter_type: string}) {
       label: 'Filter',
       content: <FilterContent filter_type={filter_type}/>,
     },
-    {
-      id: 'sort',
-      label: 'Sort',
-      content: <SortContent />,
-    },
-    {
-      id: 'group',
-      label: 'Group',
-      content: <GroupContent />,
-    },
-    {
-      id: 'columns',
-      label: 'Columns',
-      content: <ColumnContent />,
-    },
+    // {
+    //   id: 'sort',
+    //   label: 'Sort',
+    //   content: <SortContent />,
+    // },
+    // {
+    //   id: 'group',
+    //   label: 'Group',
+    //   content: <GroupContent />,
+    // },
+    // {
+    //   id: 'columns',
+    //   label: 'Columns',
+    //   content: <ColumnContent />,
+    // },
   ]
 
   return (

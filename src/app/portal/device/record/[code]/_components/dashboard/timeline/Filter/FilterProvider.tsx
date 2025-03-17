@@ -100,6 +100,7 @@ const FilterProvider = ({ children, params, type }: any) => {
 
         (cached_filter_items || []).forEach((item: any) => {
           const label = item?.name || item?.label
+          console.log('%c Line:103 🍉 item', 'color:#ea7e5c', item);
 
           // Merge with existing item or add new one
           updatedFilters.set(item.id, {
@@ -107,7 +108,7 @@ const FilterProvider = ({ children, params, type }: any) => {
             ...item,
             label,
             default_filter: item.default_filter.map((filter: any) => {
-              if (filter.type === 'criteria') {
+              if (filter?.type === 'criteria') {
                 return {
                   ...filter,
                   values: filter.values.map((value: string) => ({

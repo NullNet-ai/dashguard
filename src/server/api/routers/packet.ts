@@ -630,7 +630,7 @@ export const packetRouter = createTRPCRouter({
     }
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
-    const { device_id, time_range, filter_id, bucket_size } = input
+    const { device_id, time_range, filter_id, bucket_size = '12' } = input
     console.log('%c Line:634 🍫 input', 'color:#6ec1c2', input);
     
     return []

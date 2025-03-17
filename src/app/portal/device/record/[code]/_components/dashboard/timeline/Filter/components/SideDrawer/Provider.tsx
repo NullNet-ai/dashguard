@@ -15,6 +15,7 @@ interface ManageFilterContextType {
     columns: Record<string, any>[]
     createFilterLoading: boolean
     updateFilterLoading: boolean
+    errors: Record<string, any>
   }
   actions: {
     handleUpdateFilter: (data: any) => void
@@ -27,13 +28,13 @@ interface ManageFilterContextType {
 export const ManageFilterContext = createContext<ManageFilterContextType | undefined>(undefined)
 
 export function ManageFilterProvider({ children, tab, columns, filter_type }: { children: React.ReactNode, tab: any, columns: Record<string, any>[], filter_type: string }) {
-  console.log('%c Line:30 🎂 filter_type', 'color:#42b983', filter_type);
+  
   const { actions } = useSideDrawer()
   const eventEmitter = useEventEmitter()
   const { closeSideDrawer } = actions ?? {}
 
   const pathname = usePathname();
-  console.log('%c Line:35 🌽 pathname', 'color:#f5ce50', pathname);
+  
 
   const [filterDetails, setFilterDetails] = useState<any>({
     ...tab,
@@ -46,6 +47,8 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
   });
   const [createFilterLoading, setCreateFilterLoading] = useState(false)
   const [updateFilterLoading, setUpdateFilterLoading] = useState(false)
+  const [errors, setErrors] = useState({})
+  
 
   const convertArrayToString = (data: Record<string, any>[]) => {
     return Array.isArray(data) && data.length > 0 && typeof data[0] === 'object'
@@ -60,6 +63,30 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
     })
   }
 
+
+  function validateCriteria(data: any) {
+    const required_fields = ["Time Range", "Resolution", "Graph Type"];
+    let errors: any = {};
+
+    data.forEach((item: any, index: number) => {
+        if (item.hasOwnProperty("field") && !item.field) {
+            errors[`filters.${index}.field`] = "This field is required.";
+        }
+        if (item.hasOwnProperty("operator") && !item.operator) {
+            errors[`filters.${index}.operator`] = "This field is required.";
+        }
+        if( required_fields.includes(item.field)){
+          if (item.hasOwnProperty("values") && !item?.[item.field]) {
+            errors[`filters.${index}.${item.field}`] = "This field is required.";
+          }
+        }else if (item.hasOwnProperty("values") && Array.isArray(item.values) && item.values.length === 0) {
+            errors[`filters.${index}.values`] = "This field is required.";
+        }
+    });
+
+    return Object.keys(errors).length > 0 ? errors : null;
+}
+
   const handleSaveFilter = async () => {
     setCreateFilterLoading(true)
     const saveFilter = await saveGridFilter(filterDetails, filter_type)
@@ -69,6 +96,12 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
   }
 
   const saveUpdatedFilter = async () => {
+    
+    const validateCriteriaErrors = validateCriteria(filterDetails.default_filter)
+      if(validateCriteriaErrors) {
+        setErrors(validateCriteriaErrors)
+        return
+      }
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map(
           (item: any) => {
@@ -82,9 +115,9 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
           id: 'created_date',
           desc: true,
         }]
-        console.log('%c Line:102 🥥 filter_type', 'color:#465975', filter_type);
+        
 
-        console.log('%c Line:89 🍧 filterDetails', 'color:#ed9ec7', filterDetails);
+        
     const modifyFilterDetails = {
       ...filterDetails,
       label: filterDetails?.name || '',
@@ -108,8 +141,13 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
     closeSideDrawer()
   }
 
-  console.log('%c Line:141 🍌 filter_type', 'color:#ffdd4d', filter_type);
+  
   const handleCreateNewFilter = async () => {
+    const validateCriteriaErrors = validateCriteria(filterDetails.default_filter)
+    if(validateCriteriaErrors) {
+      setErrors(validateCriteriaErrors)
+      return
+    }
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map(
           (item: any) => {
@@ -143,7 +181,7 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
     const filter_id = await saveGridFilter(modifyFilterDetails,  filter_type)
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
 
-    console.log('%c Line:142 🍤', 'color:#ed9ec7');
+    
     setCreateFilterLoading(false)
     closeSideDrawer()
   }
@@ -157,6 +195,7 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
           columns,
           createFilterLoading,
           updateFilterLoading,
+          errors
         },
         actions: {
           handleUpdateFilter,

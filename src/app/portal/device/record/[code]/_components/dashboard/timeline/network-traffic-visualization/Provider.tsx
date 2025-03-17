@@ -64,13 +64,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!eventEmitter) return
     const setFID =  async(data:any ) => {
-      console.log('%c Line:51 🥪 data', 'color:#b03734', data);
-      
+ 
       if(typeof data !== 'string')return
 
       setFilterID(data)
-
-  
       }
     const setSBy = (data:any) => {
       setSearchBy(data)
@@ -86,14 +83,14 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
 
   useEffect(() => {
+    console.log('%c Line:87 🍢 filterId', 'color:#33a5ff', filterId);
     if (filterId) {
-      console.log('%c Line:90 🍆 filterId', 'color:#f5ce50', filterId);
+      
       const fetchTimeUnitandResolution = async() => {
         const {
           data:  time_unit_resolution
         } = await refetchTimeUnitandResolution()
     
-        console.log('%c Line:71 🍧 time_unit_resolution', 'color:#3f7cff', time_unit_resolution);
           const {time, resolution = '1h'} = time_unit_resolution || {}
           const {time_count = 12, time_unit = 'hour' } = time || {}
           setTime({
@@ -107,13 +104,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [filterId, (searchBy ?? [])?.length])
 
   useEffect(() => {
-    console.log('%c Line:110 🥒 filterId', 'color:#2eafb0', filterId, {time_count, time_unit, resolution});
+    
     if (filterId) {
      setTimeout(async() =>{
       const { data } =  await refetch() 
       setBandwidth(data)
 
-      console.log('%c Line:79 🍔', 'color:#93c0a4');
+      
     },500
     )
     }
@@ -133,21 +130,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     fetchBandwidth()
   }, [params?.id])
 
-
-  // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
-  // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
-  //   { packet_data: packetsIP }, { enabled: !!packetsIP }
-  // )
-  // 
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!packetsIP) {
-  //       await refetch()
-  //     }
-  //   }
-  //   fetchData().catch(error => console.error('Error fetching data:', error))
-  // }, [packetsIP, refetch])
 
   const state = {
     elements: generateFlowData(bandwidth ?? []),
