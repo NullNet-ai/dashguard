@@ -82,7 +82,7 @@ export default async function registerAccountFromInvite({
      * Login
      */
     const loginDetailsResponse = await api.auth.login({
-      username: email,
+      username: email.toLowerCase(),
       password,
     });
 

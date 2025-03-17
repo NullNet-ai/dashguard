@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCombobox",
-  "tag": "1.0.0",
-  "branch": "released/feat/3060/1.0.0",
-  "message": "release version 1 combobox",
+  "tag": "1.1.0",
+  "branch": "released/feat/3060/1.1.0",
+  "message": "release combobox",
   "publish_name": "Rob Caldosa"
 }

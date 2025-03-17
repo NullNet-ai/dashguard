@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.18.0<unreleased>",
-  "branch": "unreleased/feat/3309/1.18.0<unreleased>",
-  "message": "update tiptap to support variables for richtext ",
+  "tag": "1.19.1<unreleased>",
+  "branch": "unreleased/feat/3117/1.19.1<unreleased>",
+  "message": "Improve Adaptive Badge Display",
   "publish_name": "Rob Caldosa"
 }
