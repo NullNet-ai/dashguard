@@ -12,7 +12,6 @@ import { api } from '~/trpc/react'
 
 import { generateFlowData } from './functions/generateFlowData'
 import { type INetworkFlowContext } from './types'
-import { timeDuration } from '../Search/configs';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -27,21 +26,23 @@ interface IProps extends PropsWithChildren {
 
 export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
-  const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
+  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
-  const [{
-    time_count,
-    time_unit,
-    resolution
-  }, setTime] = useState(timeDuration)
+  const [loading, setLoading] = useState<boolean>(false)
 
-  // const {time_count, time_unit} = timeDuration
+  const [ time , setTime] = useState<Record<string,any> | null>(null)
+
+  const {
+    time_count = null,
+    time_unit  = null,
+    resolution  = null
+  } = time || {}
 
   const { refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id || '',
-      time_range: getLastTimeStamp(time_count, time_unit ),
+      time_range: getLastTimeStamp(time_count, time_unit ) as any,
       filter_id: filterId,
       bucket_size: resolution,
     },
@@ -83,8 +84,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
 
   useEffect(() => {
-    console.log('%c Line:87 🍢 filterId', 'color:#33a5ff', filterId);
+    
     if (filterId) {
+      setLoading(true)
      const fetchTimeUnitandResolution = async() => {
         const {
           data:  time_unit_resolution
@@ -103,14 +105,19 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [filterId, (searchBy ?? [])?.length])
 
   useEffect(() => {
+    if(!time_count || !time_unit || !resolution) return 
     if (filterId) {
      setTimeout(async() =>{
+
+      
       const { data } =  await refetch() 
+      
       setBandwidth(data)
+      setLoading(false)
     },500
     )
     }
-  }, [JSON.stringify({time_count, time_unit, resolution}), (searchBy ?? [])?.length])
+  }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
     if(!params?.id || !refetch) return 
@@ -129,6 +136,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
   const state = {
     elements: generateFlowData(bandwidth ?? []),
+    loading
   }
 
   return (
