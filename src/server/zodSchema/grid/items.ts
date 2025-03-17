@@ -34,6 +34,17 @@ const ZodItems = z.object({
       }),
     )
     .optional(), // Optional sorting
+    group_advance_filters: z
+    .array(
+      z.object({
+        type: z.string(),
+        filters: z.array(z.any()).optional(),
+        field: z.string().optional(),
+        entity: z.string().optional(),
+        operator: z.string().or(z.any()).optional(),
+        values: z.array(z.string()).optional(),
+      }),
+    ).optional(), // Optional group advance filters
 });
 
 export default ZodItems;

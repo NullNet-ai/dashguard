@@ -28,6 +28,7 @@ const {
   MAILER_AUTH_PASS,
   MAILER_HOST,
   MAILER_PORT,
+  ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!'
 } = process.env;
 
 const INVITATION_LINK_EXPIRED = parseInt(
@@ -964,7 +965,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}?token=${ctx.token.value}`;
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -1120,7 +1121,7 @@ export const accountRouter = createTRPCRouter({
 
       const baseURL = `${protocol}://${host}`; // Construct base URL
 
-      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}?token=${ctx.token.value}`;
+      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}`;
       const loggedInUser = ctx.session.account;
 
       try {
@@ -1338,12 +1339,18 @@ export const accountRouter = createTRPCRouter({
       };
     }),
   getInvitationAccountDetailsPublicly: publicProcedure
-    .input(z.object({ id: z.string(), token: z.string() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
+      const asRoot = true
+      const rootAccount = await ctx.dnaClient
+      .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+      .execute();
+    const rootAccountToken = rootAccount?.data?.[0]?.token;
       const invitation = await ctx.dnaClient
         .findAll({
           entity: 'invitations',
-          token: input.token,
+          token: rootAccountToken,
+          as_root: asRoot,
           query: {
             advance_filters: [
               {

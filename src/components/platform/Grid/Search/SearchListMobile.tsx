@@ -16,7 +16,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGridContext } from './Provider'
 
-const SearchListMobile = ({gridType} : any) => {
+const SearchListMobile = ({gridType, parentType} : any) => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGridContext)
@@ -87,9 +87,8 @@ const SearchListMobile = ({gridType} : any) => {
     <div
       className="mobile-container-ref flex  flex-col  gap-2 md:flex-row overflow-hidden relative"
       ref={conref}
-      style={{ width: isMobile ? gridType === 'card-list' ? '100%' :  width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
+      style={{ width: isMobile ? gridType==='card-list' || parentType === 'grid_expansion' ? '100%' :  width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
     >
-
       <div className="flex flex-row items-center">
         <span
           className={cn(

@@ -146,7 +146,7 @@ export default function FilterContent() {
       label: '',
       values: [],
       type: 'criteria',
-      default: false,
+      default: true,
     });
 
     form.setValue(`filterGroups.${groupIndex}.filters`, updatedFilters);

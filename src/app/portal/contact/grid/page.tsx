@@ -41,8 +41,6 @@ export default async function Page({
     limit_per_page: +(pagination?.limit_per_page?? "100"),
   };
 
-  
-
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: +(defaultPagination?.current_page ?? "1"),
     limit: +(defaultPagination?.limit_per_page ?? "100"),
@@ -52,15 +50,28 @@ export default async function Page({
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
+    group_advance_filters: filters?.groupAdvanceFilters?.length
+     ? filters?.groupAdvanceFilters
+      : [],
   });
+
+  const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
+  ? filters?.groupAdvanceFilters
+   :  filters?.advanceFilter?.length
+   ? filters?.advanceFilter
+   : []
+
+  const gridDefaultAdvanceFilter =  filters?.groupAdvanceFilters?.length
+  ? filters?.groupAdvanceFilters
+   : gridAdvanceFilter;
 
   return (
     <Grid
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter || []}
-      advanceFilter={filters?.advanceFilter || []}
+      defaultAdvanceFilter={gridDefaultAdvanceFilter}
+      advanceFilter={gridAdvanceFilter}
       sorting={sorts?.sorting || []}
       pagination={defaultPagination}
       config={{
@@ -80,6 +91,7 @@ export default async function Page({
           query_params: {
             entity: "contact",
             pluck: _pluck,
+            group_advance_filters : filters?.groupAdvanceFilters,
           },
         },
         enableRowExpansion: true,

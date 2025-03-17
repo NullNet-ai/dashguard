@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, EllipsisVertical } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronUp, EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
@@ -8,7 +8,7 @@ import { testIDFormatter } from '~/utils/formatter'
 import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
 import {Button as HeadlessBtn} from '@headlessui/react'
 
-const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells, gridLevel }: any) => {
+const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells, gridLevel, categoryCell, codecell }: any) => {
   const [showMore, setShowMore] = React.useState(false)
 
   const hasExpandButton = visibleCells.some((cell: any) => cell.column.id === 'expand')
@@ -29,15 +29,43 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
         }}
         
       className={cn(`h-full left-0 absolute w-5  top-0 flex items-center justify-center`, `${row.getIsExpanded() ? 'bg-primary/15' : 'border-r border-gray-200'}`)}>
-        {row.getIsExpanded() ?  <ChevronUp className='size-5 text-primary' /> : <ChevronDown className='size-5 text-default/40' />}
+        {row.getIsExpanded() ?  <ChevronDown className='size-5 text-primary' /> : <ChevronRight className='size-5 text-default/40' />}
      </HeadlessBtn> : null}
      
       <div className={cn(`b-4 flex items-start justify-between gap-2`)}>
-        {statusCell
-        && flexRender(statusCell.column.columnDef.cell, {
-          ...statusCell.getContext(),
-          view_mode: 'card',
-        })}
+      <div className='flex flex-col'>
+          <div className='flex items-center gap-2'>
+            {codecell ? (
+              <div
+              className={cn(
+                'bg-primary/10 text-primary',
+                'inline-flex items-center rounded-md px-2 py-1 text-xs font-normal',
+              )}
+            >
+                {flexRender(codecell.column.columnDef.cell, {
+                    ...codecell.getContext(),
+                    view_mode: 'card',
+                  })}
+              </div>
+            ) : null}
+              {statusCell
+              && flexRender(statusCell.column.columnDef.cell, {
+                ...statusCell.getContext(),
+                view_mode: 'card',
+              })}
+          </div>
+
+          {categoryCell ?  <div className='flex mt-2'>
+            <span className='mr-2 text-slate-500 text-xs'>Category: </span>
+            <div className='flex gap-x-1 flex-wrap'>
+            {flexRender(categoryCell.column.columnDef.cell, {
+              ...categoryCell.getContext(),
+              view_mode: 'card',
+            }) }
+            </div>
+          </div> : null}
+
+        </div>
         {parent === 'grid' || parent === 'form'
           ? (
               <div>
@@ -94,7 +122,7 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
           : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 gap-y-2 text-sm">
+    {showMore ? <div className="grid grid-cols-1 gap-4 gap-y-2 text-sm mt-2">
         {visibleCells.map((cell: any, cellIndex: any) => {
           // Skip id and status as they're already shown above
           if (
@@ -102,6 +130,9 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
             || cell.column.id === 'status'
             || cell.column.id === 'select'
             || cell.column.id === 'expand'
+            || cell.column.id === 'code'
+            || cell.column.id === 'categories'
+
           )
             return null
 
@@ -131,10 +162,9 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
             </div>
           )
         })}
-      </div>
-      {visibleCells?.length > 5 && (
-        <button
-            className='mt-2 text-sm text-primary'
+      </div> : null}
+      <button
+            className='mt-4 text-sm text-primary'
             onClick={() => {
                 setShowMore(!showMore)
             }}
@@ -142,11 +172,10 @@ const GridMobileRowContent = ({ row, rowIndex, state, statusCell, flexRender, pa
             {'Show '}
             {!showMore ? 'more' : 'less'}
         </button>
-      )}
     </div>
       {row.getIsExpanded()  ? (
         <div className='relative'>
-          <div className={cn(`absolute left-1 w-[1px]  bg-primary/65`, `${gridLevel > 1 ? 'h-[50%]' : 'h-[90%]'} `)}>
+          <div className={cn(`absolute left-1 w-[1px]  bg-primary/65`, `${gridLevel > 1 ? 'h-[50%]' : 'h-[60%]'} `)}>
             <div className='absolute w-2 h-[1px] bg-primary/65 left-0 bottom-0'>
               <div className='absolute w-[6px] h-[6px] rounded-full bg-primary right-[-3px] bottom-[-2px]' />
             </div>
