@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormRichTextEditor",
-  "tag": "1.7.0-rc.1<unreleased>",
-  "branch": "unreleased/feat3309/1.7.0-rc.1<unreleased>",
-  "message": "add variables and custom toolbar",
+  "tag": "1.8.0",
+  "branch": "released/feat/3309/1.8.0",
+  "message": "release - ability to select variables",
   "publish_name": "Rob Caldosa"
 }
