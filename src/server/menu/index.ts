@@ -3,8 +3,8 @@
   import dashboard from "./dashboard";
   import favorite from "./favorite";
   import organization from "./organization";
-  import settings from "./settings";
   import organization_account from "./organization_account";
+  import settings from "./settings";
 
 const menu = [
   activity_log,
@@ -12,8 +12,8 @@ const menu = [
   dashboard,
   favorite,
   organization,
-  settings,
   organization_account,
+  settings,
 ];
 
 export default menu;

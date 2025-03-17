@@ -13,7 +13,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -127,10 +127,12 @@ export default function GridProvider({
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
 
-  const [gridColumns, setGridColumns] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
+  const [gridColumns, ] = useState<any[]>(_propsConfig?.columns?.map((item : any) => {
     return {
       header: item.header,
       accessorKey: item.accessorKey,
+      search_config: item.search_config,
+      data_type: item.data_type
     }
   }));
   const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
@@ -343,7 +345,7 @@ export default function GridProvider({
     cell: ({ row }: any) => (
       <HeadlessBtn onClick={() => row.toggleExpanded()}>
         {row.getIsExpanded() ? (
-          <ChevronUp className="h-6 w-6 text-primary" />
+          <ChevronDown className="h-6 w-6 text-primary" />
         ) : (
           <ChevronRight className="h-6 w-6 text-default/40" />
         )}

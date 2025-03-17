@@ -30,6 +30,8 @@ export default function Search({gridType}: any) {
     entity = '',
     searchConfig,
   } = gridState?.config ?? {}
+
+  const { group_advance_filters = [] } = searchConfig?.query_params ??  {}
   const { advanceFilterItems = [] } = state ?? {}
   const { query = '' } = state ?? {}
   const { handleSearchQuery } = actions ?? {}
@@ -51,7 +53,18 @@ export default function Search({gridType}: any) {
         'created_time',
         'updated_time',
       ],
-      advance_filters: advanceFilterItems as IAdvanceFilters[],
+      advance_filters: group_advance_filters?.length ? [] : advanceFilterItems as IAdvanceFilters[],
+      group_advance_filters: group_advance_filters?.length ? [] : [
+        ...group_advance_filters,
+        {
+            type: 'operator',
+            operator: 'and',
+        },
+        {
+          type : 'criteria',
+          filters: advanceFilterItems
+        }
+      ],
       ...(searchConfig?.query_params ?? {}),
     }, {
       refetchOnWindowFocus: false,

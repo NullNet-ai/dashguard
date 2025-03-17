@@ -61,7 +61,7 @@ export default async function registerAccount({
      * Login using username and password
      */
     await api.auth.login({
-      username: email,
+      username: email.toLowerCase(),
       password,
     })
 

@@ -1,6 +1,7 @@
 import {
   EOperator,
   EOrderDirection,
+  IGroupAdvanceFilters,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm'
 import Bluebird from 'bluebird'
@@ -179,9 +180,9 @@ export const contactRouter = createTRPCRouter({
           // },
           ...(input?.advance_filters ?? []),
         ]
-      : [...(input?.advance_filters ?? [])]
+      : []
 
-    const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+    const query = ctx.dnaClient
       .findAll({
         entity: input?.entity,
         token: ctx.token.value,
@@ -216,6 +217,7 @@ export const contactRouter = createTRPCRouter({
             // },
             ...hasAdvanceFilters,
           ] as IAdvanceFilters[],
+          group_advance_filters: (input.group_advance_filters || []) as IGroupAdvanceFilters<string | number>[],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -328,8 +330,8 @@ export const contactRouter = createTRPCRouter({
           },
         },
       })
-      .execute()
-  
+      
+    const { total_count: totalCount = 1, data: items } = await query.execute();  
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
         const {

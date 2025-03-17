@@ -158,33 +158,34 @@ footer {
 
 /* Aesthetic minimalist scrollbar styles */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px; /* Smaller height for horizontal scrollbar */
 }
 
 /* Apply to specific elements */
 .main-grid-scroll-container::-webkit-scrollbar {
-  width: 10px; /* Adjust thickness */
-  height: 10px; /* For horizontal scrollbars */
+  width: 8px;
+  height: 8px; /* Smaller height for horizontal scrollbar */
 }
 
 .main-grid-scroll-container::-webkit-scrollbar-thumb {
-  background-color: #c5c5c5; /* Changed to a medium grey color */
+  background-color: #c5c5c5;
   border-radius: 10px;
-  border: 2px solid #f0f0f0; /* Changed to match the track color */
-  border-radius: 10px; /* Rounded edges */
+  border: 2px solid #f0f0f0;
 }
 
 .main-grid-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Background track */
+  background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
-  background-color: #888888; /* Changed to a medium grey color */
+  background-color: #888888;
   border-radius: 10px;
-  border: 2px solid #f0f0f0; /* Changed to match the track color */
+  border: 2px solid #f0f0f0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #555555; /* Changed to a darker grey color */
+  background-color: #555555;
 }
 
 .accordion-content-enter {
@@ -265,4 +266,18 @@ body {
 }
 .animate-slide {
   animation: slide 1.5s infinite linear;
+}
+
+
+/* Remove focus styles from rich text editor */
+.ProseMirror-focused {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
+}
+
+.minimal-tiptap-editor:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
 }

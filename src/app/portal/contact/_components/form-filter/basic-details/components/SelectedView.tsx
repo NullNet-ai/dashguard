@@ -26,13 +26,15 @@ const SelectedView = ({ record }: Record<string, any>) => {
             },
           }}
           defaultCountry={phone_data?.iso_code || "us"}
-          disabled={true}
           required={true}
           value={`+${phone_data?.raw_phone_number}`}
           className={cn(
             "mr-[1px] w-[90%] rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
             "border-transparent opacity-100 disabled:pointer-events-none",
           )}
+          inputProps={{
+            readOnly: true
+          }}
           inputStyle={{
             width: "100%",
             backgroundColor: "transparent",
