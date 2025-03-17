@@ -128,7 +128,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   useEffect(() => {
     refetch()
   }
-  , [resolution, time_unit,time_count, graphType])
+  , [resolution, time_unit,time_count, graphType, filterId, searchBy])
 
   return (
     <>

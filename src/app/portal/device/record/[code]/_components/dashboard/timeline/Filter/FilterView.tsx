@@ -17,7 +17,7 @@ const FilterView = () => {
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
-  const defaultTab = filters.find(tab => tab.label === 'All Data')?.id || ''
+  const defaultTab = filters.find(tab => tab.label === '1 Day')?.id || ''
 
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
 
@@ -47,7 +47,6 @@ const FilterView = () => {
     })
   }
 
-  console.log('%c Line:55 🍏 filters', 'color:#2eafb0', filters);
   return (
     <div className="p-4 ps-0 pb-0 flex flex-col gap-4">
       <div className="flex">
