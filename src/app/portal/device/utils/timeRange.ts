@@ -59,6 +59,7 @@ export const getLastTimeStamp = (
   unit: "second" | "minute" | "hour" | "day" | "month",
   _now?: Date
 ) => {
+  if(!amount || !unit) return null
   const now = _now || new Date();
   
   const past = new Date(now);
