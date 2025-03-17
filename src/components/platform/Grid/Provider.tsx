@@ -13,8 +13,16 @@ import {
   type Updater,
   useReactTable,
   getGroupedRowModel,
+  GroupingState,
+  getExpandedRowModel,
 } from '@tanstack/react-table';
-import { ChevronRight, ChevronUp, FileIcon, X } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  FileIcon,
+  X,
+} from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -108,8 +116,8 @@ export default function GridProvider({
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
-  const [grouping, setGrouping] = React.useState<string[]>([]);
-  console.log("🚀 ~ grouping:", grouping)
+  const [grouping, setGrouping] = React.useState<GroupingState>([]);
+  console.log('🚀 ~ grouping:', grouping);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -144,6 +152,25 @@ export default function GridProvider({
     ...filter,
     default: true,
   })) as ISearchItem[];
+
+  const sampleDistinctData = [
+    {
+      id: '1',
+      grouping: 'Active',
+      contacts: {
+        status: 'Active',
+        count: 2,
+      },
+    },
+    {
+      id: '2',
+      grouping: 'Draft',
+      contacts: {
+        status: 'Draft',
+        count: 1,
+      },
+    },
+  ];
 
   if (!!_propsConfig?.columnsOrder?.length) {
     _propsConfig.columns = sortColumns(
@@ -204,8 +231,6 @@ export default function GridProvider({
       }) ?? [],
     ..._propsConfig,
   };
-
-  //actions of infinite grid
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -310,6 +335,26 @@ export default function GridProvider({
   const handleAddSorting = (updater: Updater<SortingState>) => {
     setSorting(updater);
     handleUpdateReportSorting(updater);
+  };
+
+  const handleUpdateGrouping = (updater: Updater<GroupingState>) => {
+    const newGrouping =
+      typeof updater === 'function' ? updater(grouping) : updater;
+
+    // Update column visibility to hide grouped columns
+    setColumnVisibility((prev) => {
+      const visibility: any = { ...prev };
+      // Show all previously grouped columns
+      grouping.forEach((columnId) => {
+        visibility[columnId] = true;
+      });
+      // Hide newly grouped columns
+      newGrouping.forEach((columnId) => {
+        visibility[columnId] = false;
+      });
+      return visibility;
+    });
+    setGrouping(newGrouping);
   };
 
   /** @REFS */
@@ -460,30 +505,47 @@ export default function GridProvider({
     enableHiding: true,
   });
 
-  const groupHeaderColumn = useRef<ColumnDef<any>>({
+  const groupByColumn = useRef<ColumnDef<any>>({
     id: 'grouping',
     header: 'Group By',
     size: 200,
     enableResizing: false,
-    cell: ({ table }) => {
+    accessorKey: 'grouping',
+    cell: ({ row }) => {
+      console.log('🚀 ~ row:', row);
+      if (row.getIsGrouped()) {
+        const groupedColumn = table.getColumn(row.groupingColumnId!);
+        const columnName = groupedColumn?.columnDef?.header as string;
+        const value = row.getValue(row.groupingColumnId!);
+
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={row.getToggleExpandedHandler()}
+              className="flex items-center gap-2"
+            >
+              {row.getIsExpanded() ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              <span className="font-medium">
+                {columnName}: {value}
+              </span>
+              <span className="ml-2 text-muted-foreground">
+                ({row.subRows?.length})
+              </span>
+            </Button>
+          </div>
+        );
+      }
+
+      // For non-grouped rows (subrows)
       return (
-        <div className="flex gap-2">
-          {table.getState().grouping.map((columnId) => {
-            const column = table.getColumn(columnId);
-            return (
-              <Badge
-                key={columnId}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {column?.columnDef?.header as string}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => column?.toggleGrouping()}
-                />
-              </Badge>
-            );
-          })}
+        <div className="pl-8">
+          {row.original?.label || row.getValue('label')}
         </div>
       );
     },
@@ -537,6 +599,9 @@ export default function GridProvider({
 
         return [...columns, actionRow?.current];
       default:
+        if (grouping.length > 0) {
+          columns = [groupByColumn.current, ...columns];
+        }
         if (config?.enableRowExpansion) {
           columns = [expandTableRow?.current, ...columns];
         }
@@ -545,9 +610,6 @@ export default function GridProvider({
         }
         if (!config?.disableDefaultAction) {
           columns = [...columns, actionRow?.current];
-        }
-        if (grouping.length > 0) {
-          columns = [groupHeaderColumn.current, ...columns];
         }
 
         return columns;
@@ -575,7 +637,7 @@ export default function GridProvider({
     enableHiding: true,
     state: {
       sorting,
-      // grouping,
+      grouping,
       columnSizing: colSizing,
       rowSelection,
       columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
@@ -587,7 +649,10 @@ export default function GridProvider({
     enableMultiSort: true,
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
-    onGroupingChange: setGrouping,
+    onGroupingChange: handleUpdateGrouping,
+    // getGroupedRowModel: getGroupedRowModel(),
+    // getExpandedRowModel: getExpandedRowModel(),
+    // enableGrouping: true,
   });
   /** @ACTIONS */
 

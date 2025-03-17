@@ -59,6 +59,35 @@ export default function MyTableBody({
     gridLevel,
   );
   const allExpandedRows = [...(parentExpanded ?? []), ...expandedRows];
+
+  const grouping = state?.table.getState().grouping ?? [];
+
+  const sampleDistinctData = [
+    {
+      contacts: {
+        status: 'Active',
+        count: 2,
+      },
+    },
+    {
+      contacts: {
+        status: 'Draft',
+        count: 1,
+      },
+    },
+  ];
+
+  console.log("🚀 ~ rows ~ state?.table.getRowModel().rows:", state?.table.getRowModel().rows)
+  const rows = state?.table.getRowModel().rows?.filter((row) => {
+    const rowGrouping = grouping.map((columnId) => {
+      const column = state?.table.getColumn(columnId);
+      return {
+        id: columnId,
+        value: row.getValue(columnId),
+      };
+    });
+  });
+
   return (
     <>
       <TableBody
@@ -80,7 +109,8 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-                  // Add grouping expand/collapse for grouped cells
+                  console.log('🚀 ~ {row.getVisibleCells ~ cell:', cell);
+                  // // Add grouping expand/collapse for grouped cells
                   if (cell.getIsGrouped()) {
                     return (
                       <TableCell key={cell.id}>
@@ -90,11 +120,15 @@ export default function MyTableBody({
                           onClick={row.getToggleExpandedHandler()}
                           className="flex items-center gap-2"
                         >
-                          {row.getIsExpanded() ? 
-                            <ChevronDown className="h-4 w-4" /> : 
+                          {row.getIsExpanded() ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
                             <ChevronRight className="h-4 w-4" />
-                          }
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          )}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                           <span className="text-muted-foreground">
                             ({row.subRows.length})
                           </span>
