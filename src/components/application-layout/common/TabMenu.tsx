@@ -1,5 +1,6 @@
 'use client'
 
+import { lowerCase } from 'lodash';
 import { EllipsisVertical, FileX, FileX2, StarIcon } from 'lucide-react'
 
 import {
@@ -20,11 +21,13 @@ const TabMenu = ({
   href,
   tabs,
   name,
+  entity
 }: {
   current: boolean
   href: string
   tabs: any
   name: string
+  entity: string
 }) => {
   if (name === 'Grid') return null
   return (
@@ -42,6 +45,19 @@ const TabMenu = ({
           className="relative flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
+            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+            const newItems = tabs.filter((tab: any) => {
+              return lowerCase(tab.name) !== lowerCase(name)
+            })
+
+            localStorage.setItem('cachedPortalItems', JSON.stringify({
+              ...cachedItems,
+              [`inner_tab_data_${entity}`]: {
+                ...cachedItems[`inner_tab_data_${entity}`],
+                tabs: newItems,
+              }
+            }))
+         
             void closeInnerClassTab({
               pathname: href,
               current,
@@ -56,6 +72,20 @@ const TabMenu = ({
           className="flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
+
+            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+            const newItems = tabs.filter((tab: any) => {
+              return   lowerCase(tab.name) === lowerCase(name) || lowerCase(tab.name) === 'grid'
+            })
+
+            localStorage.setItem('cachedPortalItems', JSON.stringify({
+              ...cachedItems,
+              [`inner_tab_data_${entity}`]: {
+                ...cachedItems[`inner_tab_data_${entity}`],
+                tabs: newItems,
+              }
+            }))
+
             void closeOtherInnerClassTabs({
               pathname: href,
               current,
@@ -70,6 +100,20 @@ const TabMenu = ({
           className="flex gap-2"
           onSelect={(event) => {
             event.preventDefault()
+
+            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+            const newItems = tabs.filter((tab: any) => {
+              return  lowerCase(tab.name) === 'grid'
+            })
+
+            localStorage.setItem('cachedPortalItems', JSON.stringify({
+              ...cachedItems,
+              [`inner_tab_data_${entity}`]: {
+                ...cachedItems[`inner_tab_data_${entity}`],
+                tabs: newItems,
+              }
+            }))
+
             void closeAllInnerClassTabs({
               pathname: href,
               current,

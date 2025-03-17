@@ -123,6 +123,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
               href={tab.href}
               tabs={newItems}
               name={tabNameRole}
+              entity={entityName || ''}
             />
           )
         : (

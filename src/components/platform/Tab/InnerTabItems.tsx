@@ -60,7 +60,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   
 
   const sortTabsActiveWillSecond = useMemo(() => {
-    console.log("resssss")
     if (!isClient) {
       return tabs?.map(tab => ({...tab, id: tab?.name}))
     }
@@ -71,7 +70,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
       const activeItem = newTabs.find(a => a.name === code)
       const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
       const result =  reorderShowActiveItem(copiedItem, code ?? '', application ?? '')
-      console.log("result", result)
       return result
       
     }
