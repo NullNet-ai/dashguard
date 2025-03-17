@@ -199,7 +199,7 @@ const InnerTabsContent = ({
           orientation="horizontal"
           value={datas}
           onMove={({ activeIndex, overIndex }) => {
-            setDatas((items) => {
+            setDatas((items: any) => {
               const newItems = [...items];
               const [removed] = newItems.splice(activeIndex, 1);
               newItems.splice(overIndex, 0, removed);

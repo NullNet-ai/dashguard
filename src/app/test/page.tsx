@@ -40,7 +40,7 @@ const Page = () => {
         orientation="horizontal"
         value={items}
         onMove={({ activeIndex, overIndex }) => {
-          setItems((items) => {
+          setItems((items: any) => {
             const newItems = [...items];
             const [removed] = newItems.splice(activeIndex, 1);
             newItems.splice(overIndex, 0, removed);
@@ -49,7 +49,7 @@ const Page = () => {
         }}
       >
         <div className="flex w-full flex-row gap-2">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <SortableItem key={item.id} value={item.id}
               className='relative'
             >

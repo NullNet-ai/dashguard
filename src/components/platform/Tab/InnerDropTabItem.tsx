@@ -106,6 +106,7 @@ const InnerDropTabItem = ({
         href={tab.href}
         tabs={dropItems}
         name={tabNameRole}
+        entity={entityName ?? ''}
       />
     </>
   );
