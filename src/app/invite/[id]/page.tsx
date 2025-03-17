@@ -7,40 +7,36 @@ import { redirect, RedirectType } from 'next/navigation';
 import { isInvitationLinkExpired } from './_actions/isInvitationLinkExpired';
 
 export default async function Invite({ searchParams }: any) {
-  if (!searchParams.token) {
-    return redirect('/login');
-  }
+  // if (!searchParams.token) {
+  //   return redirect('/login');
+  // }
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
   const record = await api.account.getInvitationAccountDetailsPublicly({
     id: id!,
-    token: searchParams.token,
+    // token: searchParams.token,
   });
 
   if (
     !record ||
     !record?.invitation?.id ||
-    isInvitationLinkExpired(
-      record?.invitation?.updated_date,
-      record?.invitation?.updated_time,
-    ) ||
     !['Pending Setup', 'Invited'].includes(record?.account_status) ||
     record.invitation?.status === 'Archived' ||
     record?.status === 'Archived'
   ) {
     Promise.all([
-      api.record.updateDynamicRecord({
-        entity: 'organization_account',
-        id: record?.id,
-        data: {
-          account_status: ['Pending Setup', 'Invited'].includes(
-            record?.account_status,
-          )
-            ? 'Invitation Expired'
-            : record?.account_status,
-        },
-      }),
+      // api.record.updateDynamicRecord({
+      //   entity: 'organization_account',
+      //   id: record?.id,
+      //   data: {
+      //     account_status: ['Pending Setup', 'Invited'].includes(
+      //       record?.account_status,
+      //     )
+      //       ? 'Invitation Expired'
+      //       : record?.account_status,
+      //   },
+      // }),
       api.record.updateDynamicRecord({
         entity: 'invitation',
         id: record.invitation?.id,
