@@ -135,6 +135,7 @@ export const cachedFilterRouter = createTRPCRouter({
       const { account } = ctx.session
       const { contact } = account
       const cached_data = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
+      console.log("%c Line:138 🥒 cached_data", "color:#f5ce50", cached_data);
       
 
       const filter = cached_data?.find((data: any) => data.id === filter_id)
@@ -153,8 +154,9 @@ export const cachedFilterRouter = createTRPCRouter({
         extracted
       } = cleanFilter(filter?.default_filter)
       
+      console.log("%c Line:146 🥑 extracted", "color:#6ec1c2", extracted);
 
-      const {'Time Range': time_unit = '1d', Resolution: resolution = '1h'} = extracted
+      const {'Time Range': time_unit = '1d', Resolution: resolution = '1h', 'Graph Type': graph_type = 'area' } = extracted
 
       const time_string = parseTimeString(time_unit as string)
       
@@ -163,7 +165,8 @@ export const cachedFilterRouter = createTRPCRouter({
           time_count: time_string?.value,
           time_unit: time_string?.unit
         },
-        resolution
+        resolution,
+        graph_type
       }
     }
     ),

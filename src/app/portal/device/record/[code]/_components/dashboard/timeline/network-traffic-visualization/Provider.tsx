@@ -64,7 +64,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!eventEmitter) return
     const setFID =  async(data:any ) => {
- 
+      
       if(typeof data !== 'string')return
 
       setFilterID(data)
@@ -85,8 +85,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     console.log('%c Line:87 🍢 filterId', 'color:#33a5ff', filterId);
     if (filterId) {
-      
-      const fetchTimeUnitandResolution = async() => {
+     const fetchTimeUnitandResolution = async() => {
         const {
           data:  time_unit_resolution
         } = await refetchTimeUnitandResolution()
@@ -104,13 +103,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [filterId, (searchBy ?? [])?.length])
 
   useEffect(() => {
-    
     if (filterId) {
      setTimeout(async() =>{
       const { data } =  await refetch() 
       setBandwidth(data)
-
-      
     },500
     )
     }

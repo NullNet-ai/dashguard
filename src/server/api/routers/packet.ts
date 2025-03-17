@@ -48,6 +48,7 @@ export function cleanFilter(filters: any) {
       extracted["Resolution"] = filter["Resolution"];
       skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
     } else if (filter.field === "Graph Type") {
+      console.log("%c Line:51 🍔 filter", "color:#f5ce50", filter);
       extracted["Graph Type"] = filter["Graph Type"];
       skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
     } else {
