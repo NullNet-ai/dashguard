@@ -267,12 +267,14 @@ export const packetRouter = createTRPCRouter({
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
   })).query(async ({ input, ctx }) => {
+    
+    
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
 
     if (
       interface_names?.length
     ) {
-      const res = await Promise.all(interface_names.map(async (interface_name) => {
+      const res = await Promise.all(interface_names.map(async (interface_name: string) => {
         const res = await ctx.dnaClient.aggregate({
           query: {
             entity: 'packets',
@@ -343,6 +345,7 @@ export const packetRouter = createTRPCRouter({
       // const unit = bucket_size.slice(-1)
       // const unitFull = getUnit(unit)
       //
+      console.log('%c Line:352 🍺 res', 'color:#93c0a4', JSON.stringify(res,null, 2));
       const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
       const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
@@ -356,7 +359,6 @@ export const packetRouter = createTRPCRouter({
             [key]: same_val?.bandwidth || 0,
           }
         }, {})
-        // []
 
         return {
           bucket: item,
@@ -364,6 +366,7 @@ export const packetRouter = createTRPCRouter({
         }
       })
 
+      // console.log('%c Line:367 🍭 transform_data', 'color:#42b983', transform_data);
       return transform_data
     }
 
@@ -390,7 +393,7 @@ export const packetRouter = createTRPCRouter({
         ],
         joins: [],
         bucket_size,
-        limit: 20,
+        limit: 21,
         order: {
           order_by: 'bucket',
           order_direction: EOrderDirection.DESC,
@@ -400,8 +403,11 @@ export const packetRouter = createTRPCRouter({
       token: ctx.token.value,
 
     }).execute()
+ 
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
+ 
 
+    
     return transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
   }),
   getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
@@ -627,6 +633,7 @@ export const packetRouter = createTRPCRouter({
     }
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
+    return []
     const { device_id, time_range, filter_id, bucket_size = '12' } = input
     
     

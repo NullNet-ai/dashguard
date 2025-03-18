@@ -4,8 +4,6 @@ import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
-  ChartConfig,
-  ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
@@ -13,6 +11,7 @@ import { graphColors } from './graph-color';
 
 
 export const modifyAxis = (chartData:any) => {
+  console.log('%c Line:14 🍞 chartData', 'color:#3f7cff', chartData);
   const maxBandwidth = Math.max(
     ...(chartData ?? [])?.map((item: any) => item?.vtnet1 ?? 0),
     ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? 0)
@@ -26,19 +25,37 @@ export const modifyAxis = (chartData:any) => {
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
 
+  console.log('%c Line:38 🥐', 'color:#42b983', {yAxisMax, yAxisMin} );
   return { yAxisMax, yAxisMin }
 }
+
 export const formatNumber = (num: number) => {
+  
   if(!num) return ''
+  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}B`
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
   if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
-  return num.toString()
+
+  return (Math.round(num)).toString()
 }
 
 
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
 
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData])
+
+  const number_of_ticks = useMemo(() => {
+     return yAxisMax >= 100000 ? 10 : 5
+    },[yAxisMax])
+
+
+  const yticks = useMemo(() => {
+    if(!yAxisMax)return [0]
+    return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+    
+  },[yAxisMax, yAxisMin])
+  
+  console.log('%c Line:47 🍰 yticks', 'color:#3f7cff', {yAxisMax, yticks,yAxisMin});
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -70,11 +87,11 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={10}
+          tickCount={number_of_ticks}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
+          ticks={yticks}
         />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       {interfaces?.map((item: any) => {
