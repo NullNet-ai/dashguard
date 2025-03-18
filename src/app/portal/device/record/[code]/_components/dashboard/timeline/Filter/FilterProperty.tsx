@@ -6,8 +6,8 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 
-import { ManageFilterProvider } from './components/SideDrawer/Provider'
-import GridManageFilter from './components/SideDrawer/View'
+import { ManageFilterProvider } from './SideDrawer/SideDrawer/Provider'
+import GridManageFilter from './SideDrawer/SideDrawer/View'
 import { useFilter } from './FilterProvider'
 import { columns } from './components/SideDrawer/config'
 
