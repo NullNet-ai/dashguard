@@ -102,7 +102,7 @@ function StateTabList({
                 orientation === 'vertical' && 'justify-start w-full',
                 orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl',
                 // Improved centering for collapsed sidebar (desktop only)
-                shouldCollapse && 'justify-center items-center mx-auto flex-1'
+                shouldCollapse && 'justify-center items-center mx-auto flex-1 flex'
               )}
             >
               {tab.icon && (
@@ -110,7 +110,7 @@ function StateTabList({
                   orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
                   orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform',
                   // Center icon when sidebar is collapsed (desktop only)
-                  shouldCollapse && 'mx-auto flex'
+                  shouldCollapse && 'mx-auto flex justify-center items-center'
                 )}>
                   {tab.icon}
                 </span>
