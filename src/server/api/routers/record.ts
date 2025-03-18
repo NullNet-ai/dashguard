@@ -198,7 +198,7 @@ export const recordRouter = createTRPCRouter({
           advance_filters: createAdvancedFilter({
             account_id: response?.email,
             status: 'Active',
-            // account_status: 'Active',
+            account_status: 'Active',
           }),
           pluck_object: {
             organization_accounts: [
