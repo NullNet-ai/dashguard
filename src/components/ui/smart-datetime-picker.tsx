@@ -79,7 +79,7 @@ export const getDateTimeLocal = (timestamp?: Date): string => {
  * @param datetime - {Date | string}
  * @returns A string representation of the date and time
  */
-export const formatDateTime = (datetime: Date | string, includeTime = true) => {
+export const formatDateTime = (datetime: Date | string, includeTime = true, use24Hour = false) => {
   const options: Intl.DateTimeFormatOptions = {
     month: '2-digit',
     day: '2-digit',
@@ -89,7 +89,7 @@ export const formatDateTime = (datetime: Date | string, includeTime = true) => {
   if (includeTime) {
     options.hour = 'numeric'
     options.minute = 'numeric'
-    options.hour12 = true
+    options.hour12 = !use24Hour  // Use 24-hour format if use24Hour is true
   }
 
   return new Date(datetime).toLocaleString('en-US', options)
@@ -474,6 +474,7 @@ export interface NaturalLanguageInputProps {
   displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
   onDateChange?: (date: Date) => void
   onTimeChange?: (time: string) => void
+  is24Hour?:boolean
 }
 
 const NaturalLanguageInput = React.forwardRef<
@@ -507,12 +508,16 @@ const NaturalLanguageInput = React.forwardRef<
 
     // Use the format from props or context
     const format = displayFormat || dateTimePickerProps?.displayFormat
-
     React.useEffect(() => {
       if (!value) {
         setInputValue('')
         return
       }
+
+      // Get is24Hour from context or props
+      const is24Hour = props.is24Hour !== undefined 
+        ? props.is24Hour 
+        : dateTimePickerProps?.is24Hour || false;
 
       let formatted_date: string | Date;
 
@@ -521,19 +526,33 @@ const NaturalLanguageInput = React.forwardRef<
         const dateObj = value instanceof Date ? value : new Date(value);
 
         if (format === 'YYYY-MM-DD') {
-          formatted_date = includeTime
-            ? `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}, ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`
-            : `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+          if (includeTime) {
+            // Format time based on is24Hour setting
+            const hours = dateObj.getHours();
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            
+            if (is24Hour) {
+              // 24-hour format: YYYY-MM-DD, HH:MM
+              formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}, ${String(hours).padStart(2, '0')}:${minutes}`;
+            } else {
+              // 12-hour format: YYYY-MM-DD, h:MM AM/PM
+              const period = hours >= 12 ? 'PM' : 'AM';
+              const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+              formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}, ${hours12}:${minutes} ${period}`;
+            }
+          } else {
+            formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+          }
         } else {
-          // Default to standard format
-          const formatted_date_time = formatDateTime(value, includeTime);
+          // Default to standard format with proper time format
+          const formatted_date_time = formatDateTime(value, includeTime, is24Hour);
           formatted_date = formatted_date_time?.includes('Invalid Date')
             ? value
             : formatted_date_time;
         }
       } else {
-        // Use default formatting
-        const formatted_date_time = formatDateTime(value, includeTime);
+        // Use default formatting with proper time format
+        const formatted_date_time = formatDateTime(value, includeTime, is24Hour);
         formatted_date = formatted_date_time?.includes('Invalid Date')
           ? value
           : formatted_date_time;
@@ -542,23 +561,33 @@ const NaturalLanguageInput = React.forwardRef<
       setInputValue(formatted_date as string);
 
       if (includeTime) {
-        const hour = value.getHours()
-        const timeVal = `${hour >= 12 ? hour % 12 : hour === 0 ? 12 : hour
-          }:${value.getMinutes().toString()
-            .padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
+        // Format the time string based on is24Hour setting
+        let timeVal;
+        const hour = value.getHours();
+        const minutes = value.getMinutes().toString().padStart(2, '0');
+        
+        if (is24Hour) {
+          // 24-hour format
+          timeVal = `${hour.toString().padStart(2, '0')}:${minutes}`;
+        } else {
+          // 12-hour format
+          const period = hour >= 12 ? 'PM' : 'AM';
+          const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+          timeVal = `${hour12}:${minutes} ${period}`;
+        }
 
         if (onTimeChange) {
-          onTimeChange(timeVal)
+          onTimeChange(timeVal);
         }
         else {
-          contextOnTimeChange(timeVal)
+          contextOnTimeChange(timeVal);
         }
       }
 
       if (onDateChange) {
-        onDateChange(value)
+        onDateChange(value);
       }
-    }, [value, includeTime, format])
+    }, [value, includeTime, format, props.is24Hour, dateTimePickerProps?.is24Hour]);
 
     const handleParse = (
       e:
@@ -575,7 +604,12 @@ const NaturalLanguageInput = React.forwardRef<
 
       const parsedDateTime = parseDateTime(currentValue)
       if (parsedDateTime) {
-        const formatted = formatDateTime(parsedDateTime, includeTime)
+        // Get is24Hour from context or props
+        const is24Hour = props.is24Hour !== undefined 
+          ? props.is24Hour 
+          : dateTimePickerProps?.is24Hour || false;
+          
+        const formatted = formatDateTime(parsedDateTime, includeTime, is24Hour)
         const formatted_date = formatted?.includes('Invalid Date')
           ? parsedDateTime
           : formatted
@@ -584,18 +618,20 @@ const NaturalLanguageInput = React.forwardRef<
         setInputValue(formatted_date as string)
 
         if (includeTime) {
-          const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? 'PM' : 'AM'
-          const PM_AM_hour = (parsedDateTime as Date).getHours()
-
-          const hour
-            = PM_AM_hour > 12
-              ? PM_AM_hour % 12
-              : PM_AM_hour === 0 || PM_AM_hour === 12
-                ? 12
-                : PM_AM_hour
-
-          const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString()
-            .padStart(2, '0')} ${PM_AM}`
+          // Format the time string based on is24Hour setting
+          let formattedTime;
+          const hour = (parsedDateTime as Date).getHours();
+          const minutes = (parsedDateTime as Date).getMinutes().toString().padStart(2, '0');
+          
+          if (is24Hour) {
+            // 24-hour format
+            formattedTime = `${hour.toString().padStart(2, '0')}:${minutes}`;
+          } else {
+            // 12-hour format
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+            formattedTime = `${hour12}:${minutes} ${period}`;
+          }
 
           if (onTimeChange) {
             onTimeChange(formattedTime)
@@ -1021,7 +1057,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
                 onSelect={formatSelectedDate}
               />
             </div>
-            
+
             {/* Show built-in TimePicker beside the calendar */}
             {props.includeTime && !props.useTimePicker && (
               <div className="flex justify-center">
@@ -1029,7 +1065,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
               </div>
             )}
           </div>
-          
+
           {/* Show external TimePicker below the calendar */}
           {props.includeTime && props.useTimePicker && (
             <>

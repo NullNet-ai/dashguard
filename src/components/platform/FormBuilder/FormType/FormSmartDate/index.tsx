@@ -40,7 +40,7 @@ export default function FormSmartDate({
   const includeTime = fieldConfig.dateTimePickerProps?.includeTime;
   const useTimePicker = fieldConfig.dateTimePickerProps?.useTimePicker;
   const displayFormat = fieldConfig.dateTimePickerProps?.displayFormat;
-  const is24Hour = fieldConfig.dateTimePickerProps?.is24Hour;
+  const is24Hour = fieldConfig.dateTimePickerProps?.is24Hour ?? true;
 
   const handleChange = (date: Date | null | string) => {
     if (date) {
@@ -55,14 +55,33 @@ export default function FormSmartDate({
         formattedDate = dateObj.format("YYYY-MM");
       } else if (displayFormat) {
         // Use the specified display format
-        formattedDate = includeTime 
-          ? dateObj.format(displayFormat + (displayFormat.includes("HH:mm") ? "" : " HH:mm"))
-          : dateObj.format(displayFormat);
+        if (includeTime) {
+          // Apply time format based on is24Hour setting
+          const timeFormat = is24Hour ? "HH:mm" : "h:mm A";
+          
+          // Check if display format already includes time format
+          if (displayFormat.includes("HH:mm") || displayFormat.includes("h:mm")) {
+            // If display format already has time, use it but respect is24Hour setting
+            const dateOnlyFormat = displayFormat
+              .replace(/HH:mm|h:mm A/g, "")
+              .trim();
+            formattedDate = dateObj.format(`${dateOnlyFormat} ${timeFormat}`);
+          } else {
+            // If no time in display format, append the appropriate time format
+            formattedDate = dateObj.format(`${displayFormat} ${timeFormat}`);
+          }
+        } else {
+          formattedDate = dateObj.format(displayFormat);
+        }
       } else {
         // Use default format
-        formattedDate = includeTime 
-          ? dateObj.format("MM/DD/YYYY h:mm A") 
-          : dateObj.format("MM/DD/YYYY");
+        if (includeTime) {
+          formattedDate = is24Hour 
+            ? dateObj.format("MM/DD/YYYY HH:mm") 
+            : dateObj.format("MM/DD/YYYY h:mm A");
+        } else {
+          formattedDate = dateObj.format("MM/DD/YYYY");
+        }
       }
 
       const formatted_date = formattedDate?.includes("Invalid date")
@@ -83,9 +102,18 @@ export default function FormSmartDate({
         shouldTouch: true,
       });
 
-      // Set the time in HH:mm format if time is included
+      // Set the time in HH:mm format if time is included (always store in 24h format internally)
       if (includeTime) {
+        // Store time in 24h format internally for consistency
         form.setValue(`${name}_time`, dateObj.format("HH:mm"), {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true,
+        });
+        
+        // Also store a display time format that respects is24Hour setting
+        const displayTimeFormat = is24Hour ? "HH:mm" : "h:mm A";
+        form.setValue(`${name}_display_time`, dateObj.format(displayTimeFormat), {
           shouldValidate: true,
           shouldDirty: true,
           shouldTouch: true,
@@ -98,39 +126,24 @@ export default function FormSmartDate({
     }
   };
 
-  const handleTimeChange = (time: string) => {
-    const currentDate = form.getValues(`${name}_date`);
-    if (currentDate) {
-      const dateTime = moment(`${currentDate} ${time}`, "YYYY-MM-DD HH:mm");
-      handleChange(dateTime.toDate());
-    }
-  };
-
-  // Add a new handler for the TimePicker component
-  const handleTimePickerChange = (date: Date | undefined) => {
-    if (date) {
-      const currentDate = form.getValues(`${name}_date`);
-      if (currentDate) {
-        // Extract hours and minutes from the date
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        
-        // Format as HH:mm for the time field
-        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        
-        // Create a new date with the current date and the selected time
-        const dateTime = moment(`${currentDate} ${timeString}`, "YYYY-MM-DD HH:mm");
-        handleChange(dateTime.toDate());
-      }
-    }
-  };
 
   const getValue = () => {
     // Try to get the date from the combined value first
     const combinedValue = form.getValues(name);
     if (combinedValue) {
-      const parsedDate = moment(combinedValue, ["MM/DD/YYYY h:mm A", "MM/DD/YYYY", "YYYY-MM-DD HH:mm"]);
-      if (parsedDate.isValid()) return parsedDate.toDate();
+      // Add more format patterns to support both 12h and 24h formats
+      const formatPatterns = [
+        "MM/DD/YYYY h:mm A", 
+        "MM/DD/YYYY HH:mm", 
+        "MM/DD/YYYY",
+        "YYYY-MM-DD HH:mm",
+        "YYYY-MM-DD h:mm A"
+      ];
+      const parsedDate = moment(combinedValue, formatPatterns);
+      if (parsedDate.isValid()) {
+        // Return the parsed date directly
+        return parsedDate.toDate();
+      }
     }
     
     // If that fails, try to construct from separate date and time fields
@@ -139,8 +152,14 @@ export default function FormSmartDate({
     
     if (dateValue) {
       if (timeValue) {
+        // Parse the time value which is stored in 24-hour format
         const dateTime = moment(`${dateValue} ${timeValue}`, "YYYY-MM-DD HH:mm");
-        return dateTime.isValid() ? dateTime.toDate() : undefined;
+        
+        if (dateTime.isValid()) {
+          // Return the date object directly
+          return dateTime.toDate();
+        }
+        return undefined;
       } else {
         const dateOnly = moment(dateValue, "YYYY-MM-DD");
         return dateOnly.isValid() ? dateOnly.toDate() : undefined;
@@ -174,7 +193,8 @@ export default function FormSmartDate({
             inputProps={{
               ...fieldConfig.dateInputProps,
               includeTime: includeTime,
-              displayFormat: displayFormat
+              displayFormat: displayFormat,
+              is24Hour: is24Hour, // Explicitly pass is24Hour to inputProps as well
             }}
             disabled={isFieldDisable}
             readOnly={
