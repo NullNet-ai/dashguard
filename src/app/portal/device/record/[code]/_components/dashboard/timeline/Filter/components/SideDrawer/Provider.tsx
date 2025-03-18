@@ -41,10 +41,7 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
     columns,
   })
 
-  console.log('%c Line:38 🍑', 'color:#f5ce50', {
-    ...tab,
-    columns,
-  });
+
   const [createFilterLoading, setCreateFilterLoading] = useState(false)
   const [updateFilterLoading, setUpdateFilterLoading] = useState(false)
   const [errors, setErrors] = useState({})

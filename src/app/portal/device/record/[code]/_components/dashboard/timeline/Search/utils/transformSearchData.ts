@@ -54,6 +54,5 @@ export const transformSearchData = (
     }
   })
   const searchResults = Object.values(consolidated) || null
-  console.log('%c Line:58 🥝 searchResults', 'color:#3f7cff', searchResults)
   return searchResults
 }

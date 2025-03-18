@@ -184,7 +184,6 @@ export const deviceRouter = createTRPCRouter({
         device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
       }
 
-      console.log('%c Line:187 🌽', 'color:#ea7e5c', input)
 
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,

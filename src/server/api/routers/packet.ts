@@ -345,7 +345,6 @@ export const packetRouter = createTRPCRouter({
       // const unit = bucket_size.slice(-1)
       // const unitFull = getUnit(unit)
       //
-      console.log('%c Line:352 🍺 res', 'color:#93c0a4', JSON.stringify(res,null, 2));
       const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
       const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
@@ -366,7 +365,6 @@ export const packetRouter = createTRPCRouter({
         }
       })
 
-      // console.log('%c Line:367 🍭 transform_data', 'color:#42b983', transform_data);
       return transform_data
     }
 

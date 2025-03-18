@@ -11,7 +11,7 @@ import { graphColors } from './graph-color';
 
 
 export const modifyAxis = (chartData:any) => {
-  console.log('%c Line:14 🍞 chartData', 'color:#3f7cff', chartData);
+  
   const maxBandwidth = Math.max(
     ...(chartData ?? [])?.map((item: any) => item?.vtnet1 ?? 0),
     ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? 0)
@@ -25,7 +25,7 @@ export const modifyAxis = (chartData:any) => {
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
 
-  console.log('%c Line:38 🥐', 'color:#42b983', {yAxisMax, yAxisMin} );
+  
   return { yAxisMax, yAxisMin }
 }
 
@@ -55,7 +55,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
     
   },[yAxisMax, yAxisMin])
   
-  console.log('%c Line:47 🍰 yticks', 'color:#3f7cff', {yAxisMax, yticks,yAxisMin});
+  
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -96,7 +96,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       {interfaces?.map((item: any) => {
 
-        console.log(`color var(--color-${item?.value})`)
+        
         return <Line
         dataKey={item?.value}
         dot={false}
