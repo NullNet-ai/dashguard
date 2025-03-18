@@ -1,6 +1,6 @@
 import MENU from "../../menu";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { ISidebarMenu } from "~/components/platform/SideBar/type";
+import { type ISidebarMenu } from "~/components/platform/SideBar/type";
 import { headers } from "next/headers";
 import arrangement from "../../menu/arrangement.json";
 export const menuRouter = createTRPCRouter({
