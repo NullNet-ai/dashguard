@@ -25,6 +25,7 @@ const TabsList = React.forwardRef<
         orientation === 'vertical' ? 'flex-col' : 'flex-row',
         {
           ' border-gray-200': !['pills', 'shadow'].includes(variant) && !(variant === 'underline' && orientation === 'vertical'),
+          'border-b border-gray-200': variant === 'underline' && orientation === 'horizontal',
           'border-r border-gray-200': variant === 'underline' && orientation === 'vertical' && position === 'right',
           'border-l border-gray-200': variant === 'underline' && orientation === 'vertical' && position === 'left',
           'rounded-lg bg-gray-50 p-1': variant === 'pills',
@@ -63,7 +64,8 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all',
+        'inline-flex items-center whitespace-nowrap transition-all',
+        // Remove the default gap-2 and let it be controlled by the className
         {
           // Size variants - swap padding x and y when rotateText is true
           'px-3 py-1 text-xs': size === 'sm' && !rotateText,
@@ -85,26 +87,27 @@ const TabsTrigger = React.forwardRef<
           'border-l-[3px] border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
             ['default', 'shadow'].includes(variant) && rotateText && position === 'left',
 
-          // Pills variant
-          'rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 data-[state=active]:bg-[#6366F1] data-[state=active]:text-white':
+          // Pills variant - added box-border to maintain consistent sizing
+          'rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 data-[state=active]:bg-[#6366F1] data-[state=active]:text-white box-border':
             variant === 'pills',
 
-          // Underline variant for horizontal or non-rotated
-          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full data-[state=active]:after:bg-blue-500':
+          // Underline variant for horizontal or non-rotated - added box-border and border-b-2 with transparent default
+          'box-border border-b-2 border-transparent text-gray-500 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full data-[state=active]:after:bg-blue-500':
             variant === 'underline' && (!rotateText || (rotateText && !position)),
 
-          // Underline variant for rotated text
-          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
+          // Underline variant for rotated text - added box-border and appropriate transparent borders
+          'box-border border-r-2 border-transparent text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
             variant === 'underline' && rotateText && position === 'right',
-          'text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
+          'box-border border-l-2 border-transparent text-gray-500 hover:text-gray-700 data-[state=active]:text-blue-600 data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:top-0 data-[state=active]:after:h-full data-[state=active]:after:w-0.5 data-[state=active]:after:bg-blue-500':
             variant === 'underline' && rotateText && position === 'left',
 
-          // Shadow variant
-          'border-transparent  hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500  data-[state=active]:text-blue-600':
+          // Shadow variant - added box-border
+          'box-border border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
             variant === 'shadow',
 
-          // Icon positioning
+          // Icon positioning - add gap only when there's both icon and text
           'flex-row-reverse': iconPosition === 'right',
+          'justify-center': true, // Always center content
         },
 
         className
