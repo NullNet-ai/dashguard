@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs'
 import { StateTabProvider, useStateTab } from './Provider'
 import { type StateTabProps } from './types'
 import { cn } from '~/lib/utils'
+import { useSidebar } from '~/components/ui/sidebar'
 
 function StateTabList({
   className,
@@ -22,28 +23,45 @@ function StateTabList({
     position = 'right',
     rotateText = false,
   } = useStateTab()
+  
+  // Get sidebar state if this is being used in the sidebar
+  const sidebarState = useSidebar();
+  const isSidebarTab = persistKey === 'sidebar-tabs';
+  // Only collapse tabs on desktop when sidebar is closed, not on mobile
+  const shouldCollapse = isSidebarTab && !sidebarState.open && !sidebarState.openMobile;
+  // const open = isSidebarTab ? sidebarState.open : true;
 
   const [activeTab, setActiveTab] = useState<string>(() => {
-    // Only run on client side
-    if (defaultValue) {
-      return defaultValue;
-    }
-
+    // Check for saved tab first, regardless of defaultValue
     if (typeof window !== 'undefined' && persistKey) {
       const savedTab = localStorage.getItem(`tab-${persistKey}`)
       if (savedTab && tabs.some((tab) => tab.id === savedTab)) {
         return savedTab
       }
     }
+    
+    // Fall back to defaultValue or first tab
+    if (defaultValue) {
+      return defaultValue;
+    }
+    
     return tabs[0]?.id || '';
   })
 
   // Persist active tab
   useEffect(() => {
-    if (persistKey && activeTab && !defaultValue) {
+    if (persistKey && activeTab) {
       localStorage.setItem(`tab-${persistKey}`, activeTab)
     }
-  }, [activeTab, persistKey, defaultValue])
+  }, [activeTab, persistKey])
+
+  // Filter tabs when sidebar is collapsed (only on desktop)
+  const visibleTabs = React.useMemo(() => {
+    if (shouldCollapse) {
+      return tabs.filter(tab => tab.id === activeTab);
+    }
+    return tabs;
+  }, [tabs, activeTab, shouldCollapse]);
 
   return (
     <Tabs
@@ -53,53 +71,63 @@ function StateTabList({
       onValueChange={setActiveTab}
     >
       <div className={cn(
-        'flex',
+        'flex flex-1',
         orientation === 'vertical' ? 'flex-row gap-2' : 'flex-col',
-        orientation === 'vertical' && position === 'left' && 'flex-row-reverse'
+        orientation === 'vertical' && position === 'left' && 'flex-row-reverse',
+        shouldCollapse && 'px-1 flex-1'
       )}>
         <TabsList 
           variant={variant} 
           orientation={orientation}
           position={position}
           className={cn(
-            orientation === 'vertical' && 'flex-col h-auto min-w-fit '
+            orientation === "horizontal" && "mb-4",
+            orientation === 'vertical' && 'flex-col h-auto min-w-fit',
+            // Improved centering for collapsed sidebar (desktop only)
+            shouldCollapse && 'justify-center items-center w-full'
           )}
         >
-          {tabs.map((tab) => {
-            return (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                disabled={tab.disabled}
-                size={size}
-                variant={variant}
-                iconPosition={tab.iconPosition}
-                rotateText={rotateText}
-                position={position}
-                className={cn(
-                  orientation === 'vertical' && 'justify-start w-full',
-                  orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl'
-                )}
-              >
-                
-                {tab.icon && (
-                  <span className={cn(
-                    orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
-                    orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform'
-                  )}>
-                    {tab.icon}
-                  </span>
-                )}
+          {visibleTabs.map((tab) => (
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              disabled={tab.disabled}
+              size={size}
+              variant={variant}
+              iconPosition={tab.iconPosition}
+              rotateText={rotateText}
+              position={position}
+              className={cn(
+                "w-full",
+                orientation === 'vertical' && 'justify-start w-full',
+                orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl',
+                // Improved centering for collapsed sidebar (desktop only)
+                shouldCollapse && 'justify-center items-center mx-auto flex-1'
+              )}
+            >
+              {tab.icon && (
                 <span className={cn(
-                  orientation === 'vertical' && rotateText && position === 'right' && 'rotate-180 transform',
-                  orientation === 'vertical' && rotateText && position === 'left' && 'rotate-0 transform'
+                  orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
+                  orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform',
+                  // Center icon when sidebar is collapsed (desktop only)
+                  shouldCollapse && 'mx-auto flex'
                 )}>
-                  {tab.label}
+                  {tab.icon}
                 </span>
-              </TabsTrigger>
-            )
-          })}
+              )}
+              <span className={cn(
+                orientation === 'vertical' && rotateText && position === 'right' && 'rotate-180 transform',
+                orientation === 'vertical' && rotateText && position === 'left' && 'rotate-0 transform',
+                // Center text when sidebar is collapsed (desktop only)
+                shouldCollapse && 'mx-auto text-center'
+              )}>
+                {tab.label}
+              </span>
+            </TabsTrigger>
+          ))}
         </TabsList>
+        
+        {/* Content section remains the same */}
         <div className={cn(
           orientation === 'vertical' ? 'flex-1' : 'w-full',
           orientation === 'vertical' && position === 'left' && 'mr-2',
