@@ -208,8 +208,10 @@ export default function GridProvider({
   }, [initialSorting]);
 
   useEffect(() => {
-    setStoredData(data);
-  }, [data]);
+    if (!grouping.length) {
+      setStoredData(data);
+    }
+  }, [data, grouping.length]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {

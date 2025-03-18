@@ -115,7 +115,7 @@ const GridGroupingExpansion = (props: IExpansionComponentProps) => {
         entity: 'contact',
         enableRowExpansion: true,
       }}
-      data={sampleDistinctData}
+      data={items}
       // defaultAdvanceFilter={defaultAdvanceFilter}
       defaultSorting={defaultSorting}
       // initialSelectedRecords={initialSelectedRecords}
