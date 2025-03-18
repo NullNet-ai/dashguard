@@ -21,7 +21,7 @@ import {
   type ISearchParams,
   type IState,
 } from './types';
-import { removeSearchItems } from './utils/removeSearchItems';
+import { clearAllSearchItems, removeSearchItems } from './utils/removeSearchItems';
 import { resolveSearchItem } from './utils/resolveSearchItem';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
@@ -159,16 +159,20 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleClearSearchItems = async () => {
     setQuery('');
-    setSearchItems(gridState?.defaultAdvanceFilter || []);
+    
+    const defaultFilters = gridState?.defaultAdvanceFilter || [];
+    const updatedSearchItems = clearAllSearchItems(defaultFilters);
+    setSearchItems(updatedSearchItems);
+    
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
       onFetchRecords?.({
-        advance_filters: gridState?.defaultAdvanceFilter || [],
+        advance_filters: updatedSearchItems,
       });
       return;
     }
 
     const url = await UpdateReportFilter({
-      filters: gridState?.defaultAdvanceFilter || [],
+      filters: updatedSearchItems,
     });
 
     window.location.href = url;

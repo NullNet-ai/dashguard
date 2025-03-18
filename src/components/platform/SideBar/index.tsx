@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftStartOnRectangleIcon, Bars3Icon, StarIcon, ChevronUpDownIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 import * as _ICON from '@heroicons/react/24/outline'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/navigation'
@@ -33,9 +33,21 @@ import { cn } from '~/lib/utils'
 import { api } from '~/trpc/react'
 import { testIDFormatter } from '~/utils/formatter'
 
+// Import StateTab instead of Tabs
+import StateTab from '~/components/platform/StateTab'
+import { type TabItem } from '~/components/platform/StateTab/types'
+
 import GroupMenu from './GroupMenu'
 import Menu from './Menu'
 import { type ISideBarProps } from './type'
+
+// First, add the import for Tooltip components
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
 
 export default function AppSideBar(config: ISideBarProps) {
   const {
@@ -45,8 +57,10 @@ export default function AppSideBar(config: ISideBarProps) {
     className,
     mainMenuConfig,
     screenType,
+    tabsDisplayVariant = 'label-only',
+    favoritesMenuConfig, // New prop for favorites menu
+    historyMenuConfig,   // New prop for history menu
   } = config
-  const { ChevronUpDownIcon } = _ICON
   const apiAuth = api.auth.logout.useMutation()
   const navigate = useRouter()
   const currentYear = new Date().getFullYear()
@@ -64,6 +78,115 @@ export default function AppSideBar(config: ISideBarProps) {
   if (screenType !== screen && screen) {
     Cookies.set('screen-type', `${screen}`, { expires: 7 })
   }
+
+  // Generate static menu items for Favorites and History tabs
+  const generateStaticMenuItems = (prefix: string) => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      title: `${prefix} Item ${i + 1}`,
+      icon: 'DocumentTextIcon',
+      path: `/${prefix.toLowerCase()}/item-${i + 1}`,
+    }));
+  };
+
+  // Use provided configs or fall back to static items
+  const favoriteItems = favoritesMenuConfig || generateStaticMenuItems('Favorite');
+  const historyItems = historyMenuConfig || generateStaticMenuItems('History');
+
+  // Then modify the tabItems array to include tooltips
+  
+    // Create tab items for StateTab
+    const tabItems: TabItem[] = [
+      {
+        id: 'menu',
+        label: tabsDisplayVariant === 'label-only' ? "Menu" : "",
+        icon: tabsDisplayVariant === 'icon-only' ? (
+          <TooltipProvider >
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Bars3Icon className="h-5 w-5" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Menu</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : undefined,
+        content: (
+          <>
+            {mainMenuConfig?.map((item, index) => {
+              return (
+                <Fragment key={index}>
+                  {!item?.groups?.length
+                    ? (
+                      <Menu item={item} screenType={screen || screenType} />
+                    )
+                    : (
+                      <GroupMenu
+                        title={item?.groupTitle || ''}
+                        groups={item.groups}
+                        screenType={screen || screenType || ''}
+                      />
+                    )}
+                  {item?.separator && <Separator className="my-2" />}
+                </Fragment>
+              )
+            })}
+          </>
+        )
+      },
+      {
+        id: 'favorites',
+        label: tabsDisplayVariant === 'label-only' ? "Favorites" : "",
+        icon: tabsDisplayVariant === 'icon-only' ? (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <StarIcon className="h-5 w-5" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Favorites</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : undefined,
+        content: (
+          <>
+            {favoriteItems.map((item, index) => (
+              <Fragment key={index}>
+                <Menu item={item} screenType={screen || screenType} />
+                {index % 5 === 4 && <Separator className="my-2" />}
+              </Fragment>
+            ))}
+          </>
+        )
+      },
+      {
+        id: 'history',
+        label: tabsDisplayVariant === 'label-only' ? "History" : "",
+        icon: tabsDisplayVariant === 'icon-only' ? (
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <ClipboardDocumentListIcon className="h-5 w-5" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>History</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : undefined,
+        content: (
+          <>
+            {historyItems.map((item, index) => (
+              <Fragment key={index}>
+                <Menu item={item} screenType={screen || screenType} />
+                {index % 5 === 4 && <Separator className="my-2" />}
+              </Fragment>
+            ))}
+          </>
+        )
+      }
+    ];
 
   return (
     <Sidebar
@@ -84,24 +207,19 @@ export default function AppSideBar(config: ISideBarProps) {
         </SidebarHeader>
       )}
       <SidebarContent>
-        {mainMenuConfig?.map((item, index) => {
-          return (
-            <Fragment key={index}>
-              {!item?.groups?.length
-                ? (
-                  <Menu item={item} screenType={screen || screenType} />
-                )
-                : (
-                  <GroupMenu
-                    title={item?.groupTitle || ''}
-                    groups={item.groups}
-                    screenType={screen || screenType || ''}
-                  />
-                )}
-              {item?.separator && <Separator className="my-2" />}
-            </Fragment>
-          )
-        })}
+        <div className="px-1">
+          <StateTab
+            tabs={tabItems}
+            variant='underline'
+            size="md"
+            className={cn(
+              "w-full",
+              !open && "flex"
+            )}
+            defaultValue="menu"
+            persistKey="sidebar-tabs" // Changed to match the expected key in StateTab component
+          />
+        </div>
       </SidebarContent>
       {footerComponent && (
         <SidebarFooter className="p-0">

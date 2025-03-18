@@ -95,7 +95,7 @@ export default function SideDrawer() {
           defaultValue="filter"
           persistKey="side-drawer-tabs"
           tabs={tabs}
-          variant="default"
+          variant="underline"
           size="sm"
         />
       </div>

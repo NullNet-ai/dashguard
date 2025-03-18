@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.17.2",
-  "branch": "released/1.17.2",
-  "message": "added metadata key in parentprop in grid",
+  "tag": "1.18.0",
+  "branch": "released/fix/PLATFORM7-2866PLATFORM7-2900/1.18.0",
+  "message": "added infinite scrolling and nested grid mobile and cardlist",
   "publish_name": "Juphet Vitualla"
 }

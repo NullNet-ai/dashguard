@@ -4,6 +4,7 @@ import { Command as CommandPrimitive, useCommandState } from "cmdk";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import * as React from "react";
 import { forwardRef, useEffect } from "react";
+import { createPortal } from "react-dom"; // Add this import
 
 import { Badge } from "~/components/ui/badge";
 import {
@@ -262,6 +263,65 @@ const MultipleSelector = React.forwardRef<
     const [isCreateLoading, setIsCreateLoading] = React.useState(false);
 
     const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
+
+    // Update portal container state
+    const [portalElement, setPortalElement] = React.useState<HTMLElement | null>(null);
+    
+    // Create portal container once on component mount
+    useEffect(() => {
+      if (typeof document !== 'undefined') {
+        // Check if container already exists
+        let container = document.getElementById('multi-select-portal-container');
+        
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'multi-select-portal-container';
+          document.body.appendChild(container);
+        }
+        
+        setPortalElement(container);
+        
+        // Clean up on unmount
+        return () => {
+          // We don't remove the container as other instances might be using it
+          // Just ensure we clean up our references
+          setPortalElement(null);
+        };
+      }
+    }, []);
+    
+    // Position calculation effect
+    const [position, setPosition] = React.useState({ top: 0, left: 0, width: 0, direction: 'bottom' });
+    
+    useEffect(() => {
+      if (open && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        // Get the actual width of the Command element
+        const commandWidth = dropdownRef.current.offsetWidth;
+        
+        // Calculate available space below and above
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Estimated height of dropdown (can be adjusted)
+        const estimatedDropdownHeight = 300;
+        
+        // Determine if dropdown should appear above or below
+        const direction = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow 
+          ? 'top' 
+          : 'bottom';
+        
+        setPosition({
+          // If direction is 'top', position above the input, otherwise below
+          top: direction === 'top' 
+            ? rect.top + window.scrollY - 5 // 5px gap when above
+            : rect.bottom + window.scrollY + 5, // 5px gap when below
+          left: rect.left + window.scrollX,
+          width: commandWidth,
+          direction
+        });
+      }
+    }, [open]);
 
     React.useImperativeHandle(
       ref,
@@ -647,9 +707,11 @@ const MultipleSelector = React.forwardRef<
           </div>
         </div>
         <div className={`relative`}>
-          {open && (
+        {open && portalElement && createPortal(
             <CommandList
-              className={cn("absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",)}
+              className={cn(
+                "fixed z-[9999] w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",
+              )}
               onMouseLeave={() => {
                 setOnScrollbar(false);
               }}
@@ -658,6 +720,20 @@ const MultipleSelector = React.forwardRef<
               }}
               onMouseUp={() => {
                 inputRef.current?.focus();
+              }}
+              style={{
+                width: `${position.width}px`, // Ensure exact width match
+                minWidth: `${position.width}px`, // Add minWidth to prevent shrinking
+                top: position.direction === 'top' 
+                  ? 'auto' // Use auto when positioned above
+                  : `${position.top}px`,
+                bottom: position.direction === 'top' 
+                  ? `${window.innerHeight - position.top}px` // Calculate from bottom when above
+                  : 'auto',
+                left: `${position.left}px`,
+                maxHeight: '240px',
+                overflowY: 'auto',
+                transformOrigin: position.direction === 'top' ? 'bottom' : 'top'
               }}
             >
               {isLoading ? (
@@ -724,7 +800,8 @@ const MultipleSelector = React.forwardRef<
                   ))}
                 </>
               )}
-            </CommandList>
+            </CommandList>,
+            portalElement
           )}
         </div>
       </Command>
