@@ -78,6 +78,7 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                     const modifyValue = {
                         ...item,
                         entity: column?.search_config?.entity || column?.entity,
+                        field: column?.search_config?.field || item.field,
                         default: item.default || true,
                         values: item.field === 'raw_phone_number'
                             ? item.values.map((obj: any) => obj?.replace(/[^\d]/g, ''))
@@ -107,7 +108,7 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                         type: 'criteria',
                         operator: filter.operator,
                         entity: column?.search_config?.entity || column?.entity,
-                        field: filter.field,
+                        field: column?.search_config?.field || filter.field,
                         values:  filter.field === 'raw_phone_number'
                         ? (filter.values ?? []).map((obj: any) => obj?.replace(/[^\d]/g, ''))
                         : Array.isArray(filter.values) && filter.values.length > 0 && typeof filter.values[0] === 'object'
