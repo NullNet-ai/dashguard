@@ -31,7 +31,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
   const { state } = useGrid();
   const { config } = state ?? {}; 
 
-  const { columns = [], gridColumns : _gridColumns = [], searchConfig } = config ?? {};
+  const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity } = config ?? {};
 
   const gridColumns = _gridColumns?.map((column: any, index : number) => ({
     header: column.header,
@@ -40,6 +40,7 @@ export default function ManageFilter({ tab }: { tab: any }) {
     isShow: columns.some((col: any) => col.accessorKey === column.accessorKey) || false,
     order: column.order || index,
     data_type: column.data_type,
+    entity: column.entity || defaultEntity,
     search_config: column.search_config,
   }));
 
