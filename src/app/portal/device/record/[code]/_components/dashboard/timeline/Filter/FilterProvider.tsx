@@ -7,8 +7,7 @@ import { api } from '~/trpc/react'
 import { type IAction, type IProps, type IFilterContext, type IState, type IData, IFilter, type SearchItem } from '../types'
 
 import {  removeFilter } from './components/SideDrawer/actions'
-import { ulid } from 'ulid'
-import { IFormProps } from '../../types'
+
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -75,7 +74,6 @@ const FilterProvider = ({ children, params, type }: any) => {
 
   
   useEffect(() => {
-
     eventEmitter.emit(`${type}_id`, filterQuery)
     
   }, [_refetchTrigger, filterQuery])
@@ -86,7 +84,7 @@ const FilterProvider = ({ children, params, type }: any) => {
     return () => {
       eventEmitter.off(`${type}_manage_filter`, fetchDetails)
     }
-  }, [eventEmitter, JSON.stringify(filters)])
+  }, [eventEmitter, JSON.stringify(filters), filterQuery])
 
   const [query, setQuery] = useState('')
 

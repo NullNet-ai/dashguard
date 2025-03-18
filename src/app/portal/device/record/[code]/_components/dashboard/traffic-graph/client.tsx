@@ -20,6 +20,7 @@ import Filter from '../timeline/Filter'
 import Search from '../timeline/Search'
 import { timeDuration } from '../timeline/Search/configs'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
+import { Loader } from '~/components/ui/loader';
 
 
 const chartConfig = {
@@ -38,7 +39,9 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const eventEmitter = useEventEmitter()
   const [_resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
+    const [loading, setLoading] = useState<boolean>(false)
     const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
+    const [filterUpdateId, setFilterUpdateId] = useState("01JP0WDHVNQAVZN14AA")
  const [{
     time_count,
     time_unit,
@@ -60,6 +63,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   )
     useEffect(() => {
       if (filterId) {
+        setLoading(true)
         const fetchTimeUnitandResolution = async() => {
           const {
             data:  time_unit_resolution
@@ -71,8 +75,8 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
               time_unit: time_unit  as 'hour',
               resolution: resolution as '1h'
             })
-
-            setGraphType(graph_type)
+            
+            setGraphType(graph_type ?? "area")
         }
         fetchTimeUnitandResolution()
       }
@@ -92,9 +96,14 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
         }
     
         eventEmitter.on(`traffic_graph_filter_id`, data => setFID(data))
+        eventEmitter.on('traffic_graph_filter_manage_filter', data => 
+          setFilterUpdateId(data?.modifyFilterDetails?.id)
+        )
+        
         eventEmitter.on('traffic_graph_search', setSBy)
         return () => {
           eventEmitter.off(`traffic_graph_filter_id`, setFID)
+          eventEmitter.off(`traffic_graph_filter_manage_filter`, setFID)
           eventEmitter.off(`traffic_graph_search`, setSBy)
         }
       }, [eventEmitter])
@@ -112,11 +121,11 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       time_range: timeRangeFormat,
       timezone,
       device_id: defaultValues?.id,
-    }, {enabled:false})
+    }, { enabled:false })
 
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket)
-    if((time_count === 12 && time_unit === 'hour')) {
+    if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
       return {
         ...item,
         bucket: date.format('HH:mm:ss')
@@ -127,14 +136,22 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
   useEffect(() => {
     refetch()
+    setLoading(false)
   }
-  , [resolution, time_unit,time_count, graphType, filterId, searchBy])
+  , [resolution, time_unit, time_count, graphType])
+
+
 
   return (
     <>
     <Filter params={params} type='traffic_graph_filter'  />
     <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
-    <Card>
+    {  loading ? <Loader
+      className="bg-primary text-primary"
+      label="Fetching data..."
+      size="md"
+      variant="circularShadow"
+    /> : <Card>
       
       <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
         <ChartContainer
@@ -146,7 +163,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
         </ChartContainer>
       </CardContent>
-    </Card>
+    </Card>}
     </>
   )
 }

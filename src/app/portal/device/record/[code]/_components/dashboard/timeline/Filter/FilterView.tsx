@@ -6,8 +6,8 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 
 import { columns } from './components/SideDrawer/config'
-import { ManageFilterProvider } from './components/SideDrawer/Provider'
-import GridManageFilter from './components/SideDrawer/View'
+import { ManageFilterProvider } from './SideDrawer/SideDrawer/Provider'
+import GridManageFilter from './SideDrawer/SideDrawer/View'
 import FilterProperty from './FilterProperty'
 import { FilterContext } from './FilterProvider'
 
