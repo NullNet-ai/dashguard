@@ -20,6 +20,7 @@ export const cachedFilterRouter = createTRPCRouter({
       let cached_data = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
 
       cached_data = !cached_data?.length ? [] : cached_data
+      console.log("%c Line:23 🥝 cached_data", "color:#3f7cff", {cached_data, type, data});
 
       const id = ulid()
 

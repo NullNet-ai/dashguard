@@ -50,11 +50,10 @@ export function ManageFilterProvider({
   const router = useRouter();
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>({
-   
+    
     ...tab,
     columns,
   }); 
-  console.log("%c Line:51 🌭 filterDetails", "color:#ed9ec7", filterDetails);
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
   const [errors, setErrors] = useState({})
   const handleUpdateFilter = (data: any) => {
@@ -63,6 +62,7 @@ export function ManageFilterProvider({
       ...data,
     });
   };
+  console.log("%c Line:53 🥃 filterDetails", "color:#4fff4B", filterDetails);
 
   function validateCriteria(data: any) {
     const required_fields = ["Time Range", "Resolution", "Graph Type"];
@@ -89,6 +89,7 @@ export function ManageFilterProvider({
 
   const handleSaveFilter = async () => {
     setCreateFilterLoading(true);
+    console.log("%c Line:93 🍏 filterDetails", "color:#fca650", filterDetails);
     const saveFilter = await saveGridFilter(filterDetails, filter_type);
 
     setCreateFilterLoading(false);
@@ -159,16 +160,19 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups),
     ); // Deep copy to prevent modifications
 
+    console.log("%c Line:164 🍿 filterDetails", "color:#33a5ff", filterDetails);
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
 
+    console.log("%c Line:168 🍏 resolveDefaultFilter", "color:#6ec1c2", resolveDefaultFilter);
     const modifyFilterDetails = {
       ...filterDetails,
-      default_filter: resolveDefaultFilter,
+      default_filter: !resolveDefaultFilter?.length ? filterDetails?.default_filter : resolveDefaultFilter,
       sorts: sorting,
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
     };
+    console.log("%c Line:175 🍓 modifyFilterDetails", "color:#b03734", modifyFilterDetails);
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails, filter_type);
     setCreateFilterLoading(false);
