@@ -20,6 +20,8 @@ import { remToPx } from '~/utils/fetcher';
 
 import Item from './Item';
 import { type IPropsTabList } from './type';
+import { reorderMainTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
+import MainTabContent from './MainTabContent';
 
 const ITEM_WIDTH = 100;
 
@@ -40,20 +42,72 @@ const TabItems = ({ items }: TabItemsProps) => {
   const contRef = React.useRef<HTMLDivElement>(null);
   const { open } = useSidebar();
   const screenSize = useScreenType();
+  const [isWindowLoaded, setIsWindowLoaded] = useState(false)
   const pathname = usePathname();
   const router = useRouter();
   // eslint-disable-next-line no-unsafe-optional-chaining
   const [, , entity] = pathname?.split('/');
   const insertTabs = api.tab.insertMainTabs.useMutation();
   const [newTabList, setNewTabList] = useState<IPropsTabList[]>(items);
-
+  const [cachedItem, setCachedItem] = useState<any>({})
+  const [isClient, setIsClient] = useState(false)
   const [application, code] = (pathname || '').split('/').slice(3)
+  const {width} = useWindowSize();
+  const { isBannerPresent } = useSidebar()
   // Adjust sidebar width based on whether it is open or closed.
   const sidebarWidth = useMemo(
     () => screenSize === 'xs' || screenSize === 'sm' || screenSize === 'md'
       ? 0
       : remToPx(open ? 16 : 5), [screenSize, open],
   );
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if(!isClient) {
+      setCachedItem(items)
+    }
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+    setCachedItem(cachedItems?.[`main_tab_data_${entity}`])
+  }, [code, isClient, items])
+  
+  useEffect(() => {
+    const handleLoad = () => setIsWindowLoaded(true)
+
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'complete') {
+        setIsWindowLoaded(true)
+      }
+      else {
+        window.addEventListener('load', handleLoad)
+      }
+    }
+
+    return () => {
+      window.removeEventListener('load', handleLoad)
+    };
+  }, [])
+
+  const sortTabsActiveWillSecond = useMemo(() => {
+    if (!isClient) {
+      return items?.map(tab => ({...tab, id: tab?.name}))
+    }
+
+    if (items.length) {
+
+      const newTabs = items?.map(tab => ({...tab, id: tab?.name}))
+      const activeItem = newTabs.find(a => a.name === entity)
+      const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
+      const result =  reorderMainTabActive(copiedItem, activeItem?.name || 'dashboard', entity ?? 'dashboard')
+      return result
+      
+    }
+    return items?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
+  }, [items, code, isClient, cachedItem, width])
+  
+
 
   const [visibleItems, dropdownItems] = useMemo(() => {
     if (!contRef.current?.offsetWidth) return [newTabList, []];
@@ -192,6 +246,25 @@ const TabItems = ({ items }: TabItemsProps) => {
       return;
     }
   }, [newTabList]);
+
+  return (
+    <nav
+      aria-label="Tabs"
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 md:min-h-[2.3rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
+      )}
+    >
+    <MainTabContent
+        par_items={sortTabsActiveWillSecond}
+        pathname={pathname}
+        isWindowLoaded={isWindowLoaded}
+        application={application}
+        code={code}
+        actions={actions}
+        cachedItems={cachedItem}
+      />
+    </nav>
+  )
+
 
   return (
     <div

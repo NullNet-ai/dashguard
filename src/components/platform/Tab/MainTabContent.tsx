@@ -26,13 +26,16 @@ import { Button } from '@headlessui/react';
 import { debounce, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { all } from 'bluebird';
-const InnerTabsContent = ({
+import MainTabitem from './MainTabItem';
+import MainDropTabItem from './MainDropTabItem';
+const MainTabContent = ({
   par_items = [],
   pathname,
   isWindowLoaded,
   application,
   code,
-  variant
+  variant,
+  actions,
 }: any) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -46,7 +49,7 @@ const InnerTabsContent = ({
   const [datas, setDatas] = useState(par_items)
 
   const conWidth = useMemo(() =>   ({
-    width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
+    width: `calc(100vw - ${open ? '397px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
 
 
@@ -60,13 +63,13 @@ const InnerTabsContent = ({
         tabs: neworderData,
         lastShownItem: lastShownItem?.name,
         prevCurrent: getCurrent,
-        key:  'inner_tab_data_' + entity,
+        key:  'main_tab_data_' + entity,
       }
       const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
   
       localStorage.setItem('cachedPortalItems', JSON.stringify({
         ...cachedItems,
-        [`inner_tab_data_${entity}`]: cachedData,
+        [`main_tab_data_${entity}`]: cachedData,
       }))
     }
   }
@@ -110,9 +113,7 @@ const InnerTabsContent = ({
           }
         }
       }
-
       return allItems
-
     };
 
 
@@ -213,7 +214,7 @@ const InnerTabsContent = ({
             const isHidden = data?.[index]?.hidden;
             return (
               <SortableItem key={tab.id} value={tab.id} className="relative">
-                <InnerTabitem
+                <MainTabitem
                     className={cn({ 'opacity-0': isHidden })}
                     isHidden={isHidden}
                     ref={(el) => {
@@ -237,8 +238,7 @@ const InnerTabsContent = ({
       </div>
       {!!data?.length && data.some((item) => item.hidden) && isWindowLoaded && (
         <>
-          {variant === 'dropdown' ? (
-            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
               data-test-id="apptab-ddn-btn"
@@ -286,13 +286,14 @@ const InnerTabsContent = ({
                       key={itm.name}
                       className="group relative flex items-center py-1 justify-between"
                     >
-                      <InnerDropTabItem
+                      <MainDropTabItem
                         tab={itm}
                         shownItems={data}
                         dropItems={data?.filter((dta) => dta.hidden)}
                         pathname={pathname}
                         onSelect={() => setIsDropdownOpen(false)}
                         isActive={isActive}
+                        actions={actions}
                       />
                     </DropdownMenuItem>
                   );
@@ -301,12 +302,10 @@ const InnerTabsContent = ({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
-          ) : ''
-          }
         </>
       )}
     </>
   );
 };
 
-export default InnerTabsContent;
+export default MainTabContent;
