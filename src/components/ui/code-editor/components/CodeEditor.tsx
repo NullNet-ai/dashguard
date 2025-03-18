@@ -14,13 +14,15 @@ import { ToggleGroup } from '../../toggle-group';
 interface CodeEditorProps {
 	enable_editor_tools?: boolean;
 	enable_auto_height?: boolean; 
-	defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
 	readOnly?: boolean;
+	disabled?: boolean;
+  hasError?: boolean;
 	minHeight: string;
 	maxHeight?: string;
 	editorCode?: string;
-	disabled?: boolean;
+	placeholder?: string;
 	onCodeChange?: (value: string) => void;
+	defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
 }
 
 const themes = [
@@ -45,7 +47,7 @@ const fontSizes = Array.from({ length: 13 }, (_, i) => {
 });
 
 type Theme = 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
-type Language = 'javascript' | 'typescript' | 'python' | 'sql';
+type Language = 'javascript' | 'typescript' | 'python' | 'sql' | 'html' | 'css';
 
 export default function CodeEditor({
 	onCodeChange,
@@ -53,9 +55,11 @@ export default function CodeEditor({
 	enable_auto_height = false,
 	readOnly = false,
 	disabled = false,
+	hasError = false,
 	defaultTheme = 'vs-light',
 	minHeight = '10vh',
 	maxHeight = '50vh',
+	placeholder = 'Type your code here...',
 	editorCode = ''
 }: CodeEditorProps) {
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
@@ -71,13 +75,14 @@ export default function CodeEditor({
 	const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 	const editorRef = useRef<any>(null);
 
-	const themeClass = useMemo(() => cn(
-		theme === 'vs-dark'
-			? 'bg-[#1e1e1e] text-neutral-300'
-			: theme === 'hc-black'
-				? 'bg-black text-white'
-				: 'bg-white text-black'
-	), [theme]);
+	const themeClass = useMemo(() => {
+		return cn(
+			theme === 'vs-dark' ? 'bg-[#1e1e1e] text-neutral-300' :
+			theme === 'hc-black' ? 'bg-black text-white' :
+			theme === 'hc-light' ? 'bg-white text-black' :
+			'bg-white text-black'
+		);
+	}, [theme]);
 
 	useEffect(() => {
 		if (!displayTools) {
@@ -90,25 +95,25 @@ export default function CodeEditor({
 }, [onCodeChange]);
 
 	const handleEditorDidMount: OnMount = useCallback((editor, monaco) => {
-			editorRef.current = editor;
-			setIsEditorReady(true);
-	
-			setTimeout(() => {
-					editor.getAction("editor.action.formatDocument")?.run();
-			}, 100);
-	
-			editor.onDidChangeModelContent(() => {
-					updateEditorHeight(editor, monaco);
-			});
-	
+		editorRef.current = editor;
+		setIsEditorReady(true);
+
+		setTimeout(() => {
+			editor.getAction("editor.action.formatDocument")?.run();
+		}, 100);
+
+		editor.onDidChangeModelContent(() => {
 			updateEditorHeight(editor, monaco);
+		});
+
+		updateEditorHeight(editor, monaco);
 	}, []);
 	
 	const parseHeight = (height: string) => {
 			if (height.endsWith('px')) {
-					return parseFloat(height);
+				return parseFloat(height);
 			} else if (height.endsWith('vh')) {
-					return (parseFloat(height) * window.innerHeight) / 100;
+				return (parseFloat(height) * window.innerHeight) / 100;
 			}
 			return parseFloat(height);
 	};
@@ -131,7 +136,6 @@ export default function CodeEditor({
 	
 			setContentHeight(heightInVh);
 	};
-
 
 	const handleThemeChange = useCallback((value: string) => {
 		setTheme(value as Theme);
@@ -190,28 +194,38 @@ export default function CodeEditor({
 			formatOnPaste: true,
 			formatOnType: true,
 			codeLens: true,
+			padding: { top: 16, bottom: 16 },
 			readOnly: readonly ? true : isReadOnly,
 			fontSize: fontSize,
+			suggest: {
+				showFields: false,
+				showFunctions: false
+			},
+			bracketPairColorization: {
+				enabled: true
+			},
 			minimap: {
 				enabled: !readonly && !isReadOnly && showMiniMap,
 				scale: 3,
-			},
+			}
 		};
 	}, [readOnly, fontSize, showMiniMap, isReadOnly]);
 
 	return (
 		<div 
+			tabIndex={0}
 			role="region" 
 			aria-label="Code Editor" 
 			className={cn(
-				themeClass, 
+				themeClass,
+				"relative border overflow-hidden rounded-lg w-full ring-offset-background focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
 				disabled ? "opacity-90 pointer-events-none cursor-not-allowed" : "",
-				"relative border border-gray-600 rounded-lg w-full overflow-hidden"
+				hasError ? "border-destructive": "border-input "
 			)}>
 			<div className={cn(
+				'flex gap-2 justify-between p-2',
 				themeClass,
-				readOnly || isReadOnly ? 'absolute z-10 right-0' : '',
-				'flex gap-2 justify-between px-2 pt-2'
+				readOnly || isReadOnly ? 'absolute z-10 right-0' : ''
 			)}>
 				{!readOnly && !isReadOnly &&
 					<div className={cn(
@@ -252,11 +266,8 @@ export default function CodeEditor({
 								ariaLabel={hideEditor ? 'Hide code editor' : 'Show code editor'}
 								ariaPressed={hideEditor}
 								onClick={handleHideEditor}
-								className={cn(
-									themeClass,
-									hideEditor ? '' : '!text-blue-500',
-									"flex items-center gap-1 !bg-transparent rounded transition-all hover:!bg-gray-600/20 hover:!text-blue-500",
-								)}>
+								themeClass={themeClass}
+								className={hideEditor ? '' : '!text-blue-500'}>
 								<Braces size={14} />
 							</ToggleItem>
 							<ToggleItem
@@ -265,11 +276,8 @@ export default function CodeEditor({
 								ariaLabel={showPreview ? 'Show code preview' : 'Hide code preview'}
 								ariaPressed={showPreview}
 								onClick={handleShowPreview}
-								className={cn(
-									themeClass,
-									showPreview ? '!text-blue-500' : '',
-									"flex items-center gap-1 !bg-transparent rounded transition-all hover:!bg-gray-600/20 hover:!text-blue-500",
-								)}>
+								themeClass={themeClass}
+								className={showPreview ? '!text-blue-500' : ''}>
 								{!showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
 							</ToggleItem>
 							<ToggleItem
@@ -278,11 +286,8 @@ export default function CodeEditor({
 								ariaLabel={showPreview ? 'Show editor minimap' : 'Hide editor minimap'}
 								ariaPressed={showMiniMap}
 								onClick={handleShowMiniMap}
-								className={cn(
-									themeClass,
-									showMiniMap ? '!text-blue-500' : '',
-									"flex items-center gap-1 !bg-transparent rounded transition-all",
-								)}>
+								themeClass={themeClass}
+								className={showMiniMap ? '!text-blue-500' : ''}>
 								<Map size={14} />
 							</ToggleItem>
 						</ToggleGroup>
@@ -296,11 +301,8 @@ export default function CodeEditor({
 							ariaLabel={displayTools ? 'Show developer mode view' : 'Show read-only mode view'}
 							ariaPressed={displayTools}
 							onClick={handleDevMode}
-							className={cn(
-								themeClass,
-								displayTools ? '!text-blue-500' : '',
-								"flex items-center gap-1 !bg-transparent rounded transition-all hover:!bg-gray-600/20 hover:!text-blue-500"
-							)}>
+							themeClass={themeClass}
+							className={displayTools ? '!text-blue-500' : ''}>
 							<CodeXml size={14} />
 						</ToggleItem>
 					}
@@ -311,11 +313,8 @@ export default function CodeEditor({
 						ariaPressed={copied}
 						ariaLive="polite"
 						onClick={handleCopy}
-						className={cn(
-							themeClass,
-							copied ? '!text-blue-500' : '',
-							"flex items-center ml-auto gap-1 !bg-transparent rounded transition-all hover:!bg-gray-600/20 hover:!text-blue-500"
-						)}>
+						themeClass={themeClass}
+						className={copied ? '!text-blue-500' : ''}>
 						{copied ? (
 								<span className="text-sm"><ClipboardCheck size={14} />{copied && 'Copied!'}</span>
 						) : (
@@ -328,19 +327,12 @@ export default function CodeEditor({
 				direction="horizontal"
 				aria-orientation="horizontal"
   			aria-label="Code editor and preview resizable panel"
-				className={cn(
-					hideEditor && !showPreview ? 'pb-2 pt-0' : 'py-4',
-					themeClass
-				)}
 			>
 				{!hideEditor && (
 					<ResizablePanel defaultSize={50}>
 						<Editor
 							aria-label="Code Editor"
-							className={cn(
-								maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`,
-								themeClass
-							)}
+							className={maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`}
 							height={contentHeight}
 							value={editorCode}
 							theme={theme}
@@ -356,17 +348,15 @@ export default function CodeEditor({
 								accessibilitySupport: 'on',
 								acceptSuggestionOnEnter: 'smart',
 								renderLineHighlight: readOnly ? "none" : isReadOnly ? "none" : "all",
-								placeholder: 'Type your code here...',
+								placeholder: isReadOnly || readOnly ? '' : placeholder,
+								tabSize: 2,
 								scrollbar: {
 									vertical: 'visible',
 									horizontal: 'visible',
 								}
 							}}
 							loading={
-								<div className={cn(
-									'flex w-full h-full items-center justify-center',
-									themeClass
-								)}>
+								<div className="flex w-full h-full items-center justify-center bg-transparent">
 									<Spinner />
 								</div>
 							}
@@ -378,10 +368,7 @@ export default function CodeEditor({
 					<ResizablePanel defaultSize={50}>
 						<div className="relative h-full w-full">
 							<Editor
-								className={cn(
-									maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`,
-									themeClass
-								)}
+								className={maxHeight ? `max-h-[${maxHeight}]` : `max-h-[${minHeight}]`}
 								height={contentHeight}
 								language={language}
 								value={editorCode}
@@ -390,21 +377,20 @@ export default function CodeEditor({
 									fontSize: fontSize,
 									readOnly: true,
 									minimap: { enabled: false },
-									wordWrap: 'on',
 									scrollBeyondLastLine: false,
+									padding: { top: 16, bottom: 16 },
+									tabSize: 2,
+									wordWrap: 'on',
 									lineNumbers: "off",
 									renderLineHighlight: "none",
 									autoIndent: 'advanced',
 									scrollbar: {
 										vertical: 'visible',
 										horizontal: 'visible',
-									},
+									}
 								}}
 								loading={
-									<div className={cn(
-										'flex w-full h-full items-center justify-center',
-										themeClass
-									)}>
+									<div className="flex w-full h-full items-center justify-center bg-transparent">
 										<Spinner />
 									</div>
 								}
