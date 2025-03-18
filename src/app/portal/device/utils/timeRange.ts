@@ -60,6 +60,7 @@ export const getLastTimeStamp = (
   _now?: Date
 ) => {
   if(!amount || !unit) return null
+  
   const now = _now || new Date();
   
   const past = new Date(now);
@@ -109,19 +110,59 @@ export const getLastTimeStamp = (
 
 
 
+// export function getAllTimestampsBetweenDates(
+//   startDate: string,
+//   endDate: string,
+//   unit: "hour" | "minute" | "second" | "day" | "month",
+//   interval: number
+// ): string[] {
+  
+
+//   const start = moment(startDate, "YYYY-MM-DD HH:mm:ss");
+//   const end = moment(endDate, "YYYY-MM-DD HH:mm:ss");
+//   const timestampsArray: string[] = [];
+
+  
+
+//   // Reset smaller units to 0 based on the selected unit
+//   switch (unit) {
+//     case "minute":
+//       start.seconds(0);
+//       break;
+//     case "hour":
+//       start.minutes(0).seconds(0);
+//       break;
+//     case "day":
+//       start.hours(0).minutes(0).seconds(0);
+//       break;
+//     case "month":
+//       start.date(1).hours(0).minutes(0).seconds(0);
+//       break;
+//   }
+
+//   while (start.isSameOrBefore(end)) {
+//     timestampsArray.push(
+//       unit === "day" || unit === "month"
+//         ? start.format("YYYY-MM-DD") // No time for days/months
+//         : start.format("YYYY-MM-DD HH:mm:ss") // Full timestamp for hours/minutes/seconds
+//     );
+//     start.add(interval, unit); // Increment by exactly 1 unit
+//   }
+
+  
+//   return timestampsArray;
+// }
+
+
 export function getAllTimestampsBetweenDates(
   startDate: string,
   endDate: string,
   unit: "hour" | "minute" | "second" | "day" | "month",
   interval: number
 ): string[] {
-  
-
   const start = moment(startDate, "YYYY-MM-DD HH:mm:ss");
   const end = moment(endDate, "YYYY-MM-DD HH:mm:ss");
   const timestampsArray: string[] = [];
-
-  
 
   // Reset smaller units to 0 based on the selected unit
   switch (unit) {
@@ -139,18 +180,21 @@ export function getAllTimestampsBetweenDates(
       break;
   }
 
-  while (start.isSameOrBefore(end)) {
+  // Move start to the first valid timestamp after startDate
+  start.add(interval, unit);
+
+  while (start.isBefore(end)) {
     timestampsArray.push(
       unit === "day" || unit === "month"
         ? start.format("YYYY-MM-DD") // No time for days/months
         : start.format("YYYY-MM-DD HH:mm:ss") // Full timestamp for hours/minutes/seconds
     );
-    start.add(interval, unit); // Increment by exactly 1 unit
+    start.add(interval, unit);
   }
 
-  
   return timestampsArray;
 }
+
 
 export const getUnit = (unit: string) => {
   let unitFull: "second" | "minute" | "hour" | "day" | "month";

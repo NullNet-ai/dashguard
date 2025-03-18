@@ -8,6 +8,17 @@ import { graphColors } from './graph-color';
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
 
+  const number_of_ticks = useMemo(() => {
+    return yAxisMax >= 100000 ? 10 : 5
+   },[yAxisMax])
+
+
+ const yticks = useMemo(() => {
+   if(!yAxisMax)return [0]
+   return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+   
+ },[yAxisMax, yAxisMin])
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData} height={300} width={1870}>
@@ -39,10 +50,26 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         </linearGradient> */}
       </defs>
       <CartesianGrid vertical={false} />
-      <XAxis
+      {/* <XAxis
         axisLine={false}
         dataKey="bucket"
-        minTickGap={32}
+        // minTickGap={32}
+        tickFormatter={(value) => {
+          const date = new Date(value)
+          if (value.includes(':')) {
+            return value; // Display time directly if it includes ':'
+          }
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })
+        }}
+        tickLine={false}
+        tickMargin={8}
+      /> */}
+         <XAxis
+        axisLine={false}
+        dataKey="bucket"
         tickFormatter={(value) => {
           const date = new Date(value)
           if (value.includes(':')) {
@@ -60,11 +87,11 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={10}
+          tickCount={number_of_ticks}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
+          ticks={yticks}
         />
       <ChartTooltip
         content={(

@@ -17,6 +17,17 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
   
 
+  const number_of_ticks = useMemo(() => {
+     return yAxisMax >= 100000 ? 10 : 5
+    },[yAxisMax])
+
+
+  const yticks = useMemo(() => {
+    if(!yAxisMax)return [0]
+    return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+    
+  },[yAxisMax, yAxisMin])
+
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -43,11 +54,11 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={10}
+          tickCount={number_of_ticks}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={Array.from({ length: 10 }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / 9))}
+          ticks={yticks}
         />
       <ChartTooltip
         content={
@@ -69,7 +80,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         cursor={false}
       />
       {interfaces?.map((item: any) => {
-        return <Bar dataKey={item.value}      fill={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}  isAnimationActive={false}/>})}
+        return <Bar dataKey={item.value} fill={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}  isAnimationActive={false}/>})}
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
     </ResponsiveContainer>

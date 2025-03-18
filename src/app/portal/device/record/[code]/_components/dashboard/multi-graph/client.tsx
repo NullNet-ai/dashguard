@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment-timezone'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -36,6 +36,10 @@ const InteractiveGraph = ({
     },
   })
   const [filteredData, setFilteredData] = React.useState<any[]>([])
+  const [_refetch, setRefetch] = React.useState(Math.random())
+  console.log('%c Line:39 🍌 filteredData', 'color:#42b983', filteredData);
+
+  const dateRef = useRef(new Date(Date.now() - 50 * 1000))
 
   const _pie_chart_interfaces = form.watch('pie_chart_interfaces') ?? []
   const chartConfig = useMemo(() => {
@@ -57,21 +61,29 @@ const InteractiveGraph = ({
     )
   }, [interfaces])
 
+
+  const a = () => {
+    const ab =   getLastTimeStamp(20, 'second',  dateRef.current)
+    console.log('%c Line:66 🍪 ab', 'color:#ffdd4d', ab);
+    return ab
+  }
+
   const { refetch: fetchBandWidth }
     = api.packet.getBandwithInterfacePerSecond.useQuery({
-      // bucket_size: '1s',
-      bucket_size: '1m',
+      bucket_size: '1s',
+      // bucket_size: '1m',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp(20, 'minute', new Date()),
-      // time_range: getLastTimeStamp(20, 'second', new Date()),
+      // time_range: getLastTimeStamp(20, 'minute', new Date()),
+      time_range: a(),
       interface_names: interfaces?.map((item: any) => item?.value),
     }, { enabled: false })
 
   useEffect(() => {
     if (!packetsIP) return
+    console.log('%c Line:74 🍡 packetsIP', 'color:#42b983', packetsIP);
     const _data = packetsIP?.map((item) => {
-      const date = moment(item.bucket).tz(timezone)
+      const date = moment(item.bucket)
       return {
         ...item,
         bucket: date.format('HH:mm:ss'),
@@ -81,18 +93,32 @@ const InteractiveGraph = ({
   }, [packetsIP])
 
   const fetchChartData = async () => {
-    const { data } = await fetchBandWidth()
+    dateRef.current = new Date(Date.now() - 50 * 1000)
+    console.log('%c Line:89 🍅 dateRef.current', 'color:#6ec1c2', dateRef.current);
+    const res = await fetchBandWidth()
+    console.log('%c Line:87 🍢 res', 'color:#7f2b82', res);
+    const { data } = res
+    console.log('%c Line:85 🥤 data', 'color:#42b983', data);
 
     setPacketsIP(data as any)
   }
 
   useEffect(() => {
     fetchChartData()
-    // const interval = setInterval(() => {
+    const interval = setInterval(() => {
     //   fetchChartData()
-    // }, 2000)
-    // return () => clearInterval(interval)
+    // console.log('%c Line:72 🥒', 'color:#4fff4B', getLastTimeStamp(20, 'second', new Date(Date.now() - 50 * 1000)));
+
+    // setRefetch(_refetch == true? false: true)
+    setRefetch(Math.random())
+    }, 2000)
+    return () => clearInterval(interval)
+
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
+
+  useEffect(() => {
+      fetchChartData()
+  }, [_refetch])
 
   useEffect(() => {
     const interfacesData = form.watch('interfaces') || []
@@ -108,7 +134,6 @@ const InteractiveGraph = ({
           </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">
-
               <FormModule
                 fields = { [
                   {
