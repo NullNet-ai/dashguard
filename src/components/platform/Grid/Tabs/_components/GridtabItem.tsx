@@ -4,7 +4,6 @@ import { GripVerticalIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { forwardRef, useEffect, useMemo } from 'react';
-import MainTabMenu from '~/components/application-layout/common/MainTabMenu';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
@@ -19,17 +18,15 @@ type InnerTabitemProps = {
   className?: string
   isHidden?: boolean
   lastShownItem: any
-  actions?: any
 }
 
-const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
+const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   tab,
   pathname,
   newItems,
   className,
   lastShownItem,
   isHidden,
-  actions,
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -42,8 +39,8 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       return true
     }
 
-    return entityName === tab?.name
-  }, [entityName, application])
+    return code === tab?.name
+  }, [code, application])
 
   const getActiveName = () => {
     if (isGrid && application === 'grid') {
@@ -62,14 +59,17 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       tabs: newItems,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'main_tab_data' ,
+      key:  'inner_tab_data_' + entityName,
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`main_tab_data`]: cachedData,
+      [`inner_tab_data_${entityName}`]: cachedData,
     }))
+
+    // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
+    // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
   }
 
   useEffect(() => {
@@ -87,8 +87,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       ref={ref}
       key={tabNameRole}
       className={cn(
-        `${isActive ? 'border-b-0 border-l border-r border-t-2 border-t-primary rounded-t-md' : ''}`,
-        `group relative group  whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
+        `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
       {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
@@ -114,20 +113,17 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           )}
         >
           {formatTabName(tabNameRole)}
+          <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
         </Link>
   
-          {isActive ? <div className='absolute z-[1000] bottom-[-4px] h-1 left-0 w-full bg-white' /> : null }
-
       {!isHidden
         ? (
-            <MainTabMenu
+            <TabMenu
               current={!!tab.href.match(pathname)}
               href={tab.href}
               tabs={newItems}
               name={tabNameRole}
               entity={entityName || ''}
-              actions={actions}
-              tab={tab}
             />
           )
         : (
@@ -137,6 +133,6 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   );
 });
 
-MainTabitem.displayName = 'MainTabitem';
+GridTabItem.displayName = 'GridTabItem';
 
-export default MainTabitem;
+export default GridTabItem;

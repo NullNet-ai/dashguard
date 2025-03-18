@@ -18,24 +18,18 @@ import {
 import { useSidebar } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 
-import InnerDropTabItem from './InnerDropTabItem';
-import InnerTabitem from './InnerTabitem';
-import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { all } from 'bluebird';
-import MainTabitem from './MainTabItem';
-import MainDropTabItem from './MainDropTabItem';
-const MainTabContent = ({
+const InnerTabsContent = ({
   par_items = [],
   pathname,
   isWindowLoaded,
   application,
   code,
-  variant,
-  actions,
+  variant
 }: any) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -49,7 +43,7 @@ const MainTabContent = ({
   const [datas, setDatas] = useState(par_items)
 
   const conWidth = useMemo(() =>   ({
-    width: `calc(100vw - ${open ? '397px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
+    width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
 
 
@@ -63,13 +57,13 @@ const MainTabContent = ({
         tabs: neworderData,
         lastShownItem: lastShownItem?.name,
         prevCurrent: getCurrent,
-        key:  'main_tab_data',
+        key:  'inner_tab_data_' + entity,
       }
       const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
   
       localStorage.setItem('cachedPortalItems', JSON.stringify({
         ...cachedItems,
-        [`main_tab_data`]: cachedData,
+        [`inner_tab_data_${entity}`]: cachedData,
       }))
     }
   }
@@ -113,7 +107,9 @@ const MainTabContent = ({
           }
         }
       }
+
       return allItems
+
     };
 
 
@@ -214,7 +210,7 @@ const MainTabContent = ({
             const isHidden = data?.[index]?.hidden;
             return (
               <SortableItem key={tab.id} value={tab.id} className="relative">
-                <MainTabitem
+                <InnerTabitem
                     className={cn({ 'opacity-0': isHidden })}
                     isHidden={isHidden}
                     ref={(el) => {
@@ -230,7 +226,6 @@ const MainTabContent = ({
                     newItems={data}
                     pathname={pathname}
                     key={index}
-                    actions={actions}
                   /> 
               </SortableItem>
             );
@@ -239,7 +234,8 @@ const MainTabContent = ({
       </div>
       {!!data?.length && data.some((item) => item.hidden) && isWindowLoaded && (
         <>
-              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          {variant === 'dropdown' ? (
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
               data-test-id="apptab-ddn-btn"
@@ -287,14 +283,13 @@ const MainTabContent = ({
                       key={itm.name}
                       className="group relative flex items-center py-1 justify-between"
                     >
-                      <MainDropTabItem
+                      <InnerDropTabItem
                         tab={itm}
                         shownItems={data}
                         dropItems={data?.filter((dta) => dta.hidden)}
                         pathname={pathname}
                         onSelect={() => setIsDropdownOpen(false)}
                         isActive={isActive}
-                        actions={actions}
                       />
                     </DropdownMenuItem>
                   );
@@ -303,10 +298,12 @@ const MainTabContent = ({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+          ) : ''
+          }
         </>
       )}
     </>
   );
 };
 
-export default MainTabContent;
+export default InnerTabsContent;

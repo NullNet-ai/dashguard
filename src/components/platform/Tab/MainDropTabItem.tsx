@@ -64,13 +64,13 @@ const MainDropTabItem = ({
       tabs: shownItems,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'main_tab_data_' + entityName,
+      key:  'main_tab_data',
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`main_tab_data_${entityName}`]: cachedData,
+      [`main_tab_data`]: cachedData,
     }))
 
     // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
@@ -108,6 +108,7 @@ const MainDropTabItem = ({
       <MainTabMenu
         current={!!tab.href.match(pathname)}
         href={tab.href}
+        tab={tab}
         tabs={dropItems}
         name={tabNameRole}
         entity={entityName ?? ''}

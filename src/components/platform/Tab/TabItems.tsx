@@ -1,29 +1,18 @@
 'use client';
 
-import { ChevronDownIcon } from 'lucide-react';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
 import { useSidebar } from '~/components/ui/sidebar';
 import useWindowSize from '~/hooks/use-resize';
 import useScreenType from '~/hooks/use-screen-type';
-import { cn, formatTabName } from '~/lib/utils';
+import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
-import { remToPx } from '~/utils/fetcher';
 
-import Item from './Item';
 import { type IPropsTabList } from './type';
 import { reorderMainTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
 import MainTabContent from './MainTabContent';
 
-const ITEM_WIDTH = 100;
 
 type TabItemsProps = {
   items: IPropsTabList[]
@@ -55,23 +44,46 @@ const TabItems = ({ items }: TabItemsProps) => {
   const {width} = useWindowSize();
   const { isBannerPresent } = useSidebar()
   // Adjust sidebar width based on whether it is open or closed.
-  const sidebarWidth = useMemo(
-    () => screenSize === 'xs' || screenSize === 'sm' || screenSize === 'md'
-      ? 0
-      : remToPx(open ? 16 : 5), [screenSize, open],
-  );
-
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const getActiveName = useMemo(() => {
+    return () => {
+      if (application === 'dashboard') {
+        return 'dashboard'
+      }
+      return entity
+    }
+  }, [application, entity]);
 
   useEffect(() => {
     if(!isClient) {
       setCachedItem(items)
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-    setCachedItem(cachedItems?.[`main_tab_data_${entity}`])
-  }, [code, isClient, items])
+
+    const selectedCached = cachedItems?.main_tab_data
+    const notEqual = selectedCached?.tabs?.length ? selectedCached?.tabs?.length < items?.length : false
+
+    if(!selectedCached?.tabs?.length || notEqual) {
+      const getCurrent = getActiveName() || ''
+
+      const cachedData = {
+        tabs:  items?.map(tab => ({...tab, id: tab?.name})),
+        prevCurrent: getCurrent,
+        key:  'main_tab_data',
+      }
+      const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+  
+      localStorage.setItem('cachedPortalItems', JSON.stringify({
+        ...cachedItems,
+        [`main_tab_data`]: cachedData,
+      }))
+    }
+
+    setCachedItem(selectedCached)
+  }, [code, isClient, items,])
   
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
@@ -92,37 +104,22 @@ const TabItems = ({ items }: TabItemsProps) => {
 
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) {
-      return items?.map(tab => ({...tab, id: tab?.name}))
+      return newTabList?.map(tab => ({...tab, id: tab?.name}))
     }
 
-    if (items.length) {
+    if (newTabList.length) {
 
-      const newTabs = items?.map(tab => ({...tab, id: tab?.name}))
+      const newTabs = newTabList?.map(tab => ({...tab, id: tab?.name}))
       const activeItem = newTabs.find(a => a.name === entity)
-      const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
+      const copiedItem = newTabs?.length > cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
       const result =  reorderMainTabActive(copiedItem, activeItem?.name || 'dashboard', entity ?? 'dashboard')
       return result
       
     }
-    return items?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
-  }, [items, code, isClient, cachedItem, width])
+    return newTabList?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
+  }, [newTabList, code, isClient, cachedItem, width, items])
   
 
-
-  const [visibleItems, dropdownItems] = useMemo(() => {
-    if (!contRef.current?.offsetWidth) return [newTabList, []];
-    const containerWidth = contRef.current?.offsetWidth || 0;
-
-    const maxAvailableWidth = containerWidth - 60;
-    const maxVisibleItems = Math.floor(maxAvailableWidth / ITEM_WIDTH);
-
-    return [
-      newTabList.slice(0, maxVisibleItems),
-      newTabList.slice(maxVisibleItems),
-    ];
-  }, [newTabList, winWidth, sidebarWidth]);
-
-  const isUserRole = (entity: string) => entity === 'user_role';
 
   // Insert new tabs into the tab list.
   const insertMainTabs = () => {
@@ -155,7 +152,7 @@ const TabItems = ({ items }: TabItemsProps) => {
   // Close Class Tab
   // Not the current tab
   const closeTab = (tab: IPropsTabList) => {
-    const newTab = newTabList.filter(item => item.href !== tab.href);
+    const newTab = newTabList.filter(item => item.href !== tab?.href);
     // make it current tab
     const activeTab = newTab[newTab.length - 1];
     if (activeTab) {
@@ -250,7 +247,7 @@ const TabItems = ({ items }: TabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 md:min-h-[2.3rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 md:min-h-[2.0rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
       )}
     >
     <MainTabContent
@@ -264,71 +261,6 @@ const TabItems = ({ items }: TabItemsProps) => {
       />
     </nav>
   )
-
-
-  return (
-    <div
-      className="main-tab-container flex flex-1 "
-      ref={contRef}
-    >
-      <div className="flex w-full flex-1">
-        {visibleItems.map(tab => (
-          <Item
-            actions={actions}
-            tab={tab}
-            key={isUserRole(tab.name) ? 'role' : tab.name}
-          />
-        ))}
-      </div>
-      {dropdownItems.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="ml-auto flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
-            aria-label="More tabs"
-            data-test-id="mainTabDropdownButton"
-          >
-            <ChevronDownIcon
-              className="h-6 w-6 text-muted-foreground group-hover:text-primary"
-              aria-hidden="true"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {dropdownItems.map((tab: any) => {
-              const isGrid = tab.name === 'Grid' || tab.name === 'grid'
-              const isGridActive
-                = application === 'Grid' || application === 'grid'
-              const isActive = isGridActive ? !!isGrid : code === tab?.name
-              return (
-                <DropdownMenuItem
-                  className="group relative flex items-center p-2 py-3"
-                  key={isUserRole(tab.name) ? 'role' : tab.name}
-                >
-                  <Link
-                    aria-current={tab.current ? 'page' : undefined}
-                    className={cn(
-                      isActive
-                        ? 'rounded-t-lg border-primary text-primary'
-                        : 'text-gray-500', 'whitespace-nowrap px-4 pt-2 text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary',
-                    )}
-                    data-test-id={`mntab-${
-                      isUserRole(tab.name)
-                        ? 'role'
-                        : tab.name.replace(/\s+/g, '')
-                    }`}
-                    href={tab.href}
-                  >
-                    {formatTabName(
-                      isUserRole(tab.name) ? 'role' : tab.name,
-                    )}
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </div>
-  );
 };
 
 export default TabItems;

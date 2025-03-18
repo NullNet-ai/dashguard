@@ -19,6 +19,7 @@ import {
 const MainTabMenu = ({
   current,
   href,
+  tab,
   tabs,
   name,
   entity,
@@ -30,6 +31,7 @@ const MainTabMenu = ({
   name: string
   entity: string
   actions?: any
+  tab: any
 }) => {
   if (name === 'Grid') return null
   return (
@@ -54,13 +56,12 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data_${entity}`]: {
-                ...cachedItems[`main_tab_data_${entity}`],
+              [`main_tab_data`]: {
+                ...cachedItems[`main_tab_data`],
                 tabs: newItems,
               }
             }))
-         
-            actions?.closeTab()
+            actions?.closeTab(tab)
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
@@ -78,13 +79,13 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data_${entity}`]: {
-                ...cachedItems[`main_tab_data_${entity}`],
+              [`main_tab_data`]: {
+                ...cachedItems[`main_tab_data`],
                 tabs: newItems,
               }
             }))
 
-            actions?.closeOtherTabs()
+            actions?.closeOtherTabs(tab)
 
           }}
         >
@@ -103,13 +104,13 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data_${entity}`]: {
-                ...cachedItems[`main_tab_data_${entity}`],
+              [`main_tab_data`]: {
+                ...cachedItems[`main_tab_data`],
                 tabs: newItems,
               }
             }))
 
-            actions?.closeAllTabs()
+            actions?.closeAllTabs(tab)
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
