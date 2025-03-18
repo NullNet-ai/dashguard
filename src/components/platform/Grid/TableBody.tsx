@@ -13,6 +13,7 @@ import BulkActionConfirmationModal from './views/common/BulkActionConfirmationMo
 import { type IExpandedRow } from './types';
 import { Button } from '~/components/ui/button';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import GridGroupingExpansion from './common/GridGroupingExpansion';
 
 type MyTableBodyProps = {
   showAction?: boolean;
@@ -77,16 +78,6 @@ export default function MyTableBody({
     },
   ];
 
-  console.log("🚀 ~ rows ~ state?.table.getRowModel().rows:", state?.table.getRowModel().rows)
-  const rows = state?.table.getRowModel().rows?.filter((row) => {
-    const rowGrouping = grouping.map((columnId) => {
-      const column = state?.table.getColumn(columnId);
-      return {
-        id: columnId,
-        value: row.getValue(columnId),
-      };
-    });
-  });
 
   return (
     <>
@@ -109,33 +100,7 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-                  console.log('🚀 ~ {row.getVisibleCells ~ cell:', cell);
-                  // // Add grouping expand/collapse for grouped cells
-                  if (cell.getIsGrouped()) {
-                    return (
-                      <TableCell key={cell.id}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={row.getToggleExpandedHandler()}
-                          className="flex items-center gap-2"
-                        >
-                          {row.getIsExpanded() ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                          <span className="text-muted-foreground">
-                            ({row.subRows.length})
-                          </span>
-                        </Button>
-                      </TableCell>
-                    );
-                  }
+
                   if (cell.column.id === 'action') {
                     return (
                       <td
@@ -169,7 +134,8 @@ export default function MyTableBody({
                   return (
                     <TableCell
                       className={cn(
-                        'relative text-sm text-foreground hover:bg-border',
+                        'relative text-sm text-foreground',
+                        !row.original.is_group_by ? 'hover:bg-border' : '',
                         getCommonPinningStyles(cell.column).className,
                       )}
                       key={cell.id + index}
@@ -193,7 +159,9 @@ export default function MyTableBody({
                       </div>
                       <div
                         {...{
-                          className: `absolute  border-l border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
+                          className: !row.original.is_group_by
+                            ? `absolute  border-l border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`
+                            : '',
                           style: {},
                         }}
                       />
@@ -201,49 +169,64 @@ export default function MyTableBody({
                   );
                 })}
               </TableRow>
-              {row.getIsExpanded() && (
-                <TableRow className="group relative border-b hover:bg-border/50">
-                  <td
-                    colSpan={state?.table.getVisibleLeafColumns().length}
-                    className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
-                  >
-                    <div
-                      style={{
-                        height:
-                          gridLevel === 2
-                            ? 'calc(100% - 30px) '
-                            : 'calc(100% - 85px)',
-                      }}
-                      className="absolute left-4 top-1 w-[1px] bg-primary"
+              {row.getIsExpanded() &&
+                (row.original.is_group_by ? (
+                  <TableRow className="group relative border-b hover:bg-border/50">
+                    <td
+                      colSpan={state?.table.getVisibleLeafColumns().length}
+                      className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
                     >
-                      <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
-                        <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
+                      <GridGroupingExpansion rowData={row.original} />
+                        {/* {React.cloneElement(<GridGroupingExpansion />, {
+                          rowData: row.original,
+                          parentExpanded: allExpandedRows,
+                          key: `expanded:${row.id ?? index}`,
+                        })} */}
+                    </td>
+                  </TableRow>
+                ) : (
+                  <TableRow className="group relative border-b hover:bg-border/50">
+                    <td
+                      colSpan={state?.table.getVisibleLeafColumns().length}
+                      className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
+                    >
+                      <div
+                        style={{
+                          height:
+                            gridLevel === 2
+                              ? 'calc(100% - 30px) '
+                              : 'calc(100% - 85px)',
+                        }}
+                        className="absolute left-4 top-1 w-[1px] bg-primary"
+                      >
+                        <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
+                          <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      {state?.config?.rowExpansionBuilder ? (
-                        typeof state?.config?.rowExpansionBuilder ===
-                        'function' ? (
-                          state?.config?.rowExpansionBuilder({
-                            rowData: row.original,
-                          })
-                        ) : (
-                          React.cloneElement(
-                            state?.config?.rowExpansionBuilder,
-                            {
+                      <div>
+                        {state?.config?.rowExpansionBuilder ? (
+                          typeof state?.config?.rowExpansionBuilder ===
+                          'function' ? (
+                            state?.config?.rowExpansionBuilder({
                               rowData: row.original,
-                              parentExpanded: allExpandedRows,
-                              key: `expanded:${row.id ?? index}`,
-                            },
+                            })
+                          ) : (
+                            React.cloneElement(
+                              state?.config?.rowExpansionBuilder,
+                              {
+                                rowData: row.original,
+                                parentExpanded: allExpandedRows,
+                                key: `expanded:${row.id ?? index}`,
+                              },
+                            )
                           )
-                        )
-                      ) : (
-                        <span>Provide your expand component</span>
-                      )}
-                    </div>
-                  </td>
-                </TableRow>
-              )}
+                        ) : (
+                          <span>Provide your expand component</span>
+                        )}
+                      </div>
+                    </td>
+                  </TableRow>
+                ))}
             </>
           ))
         ) : (

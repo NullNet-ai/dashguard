@@ -987,4 +987,22 @@ export const gridRouter = createTRPCRouter({
     const reportTabs = Array.isArray(cachedReportTabs) ? cachedReportTabs : [];
     return reportTabs;
   }),
+  getDistinctValues: privateProcedure
+   .input(
+      z.object({
+        entity: z.string(),
+        field: z.string(),
+      }),
+    )
+   .query(async ({ ctx, input }) => {
+      const { entity, field } = input;
+      // const query = ctx.dnaClient.distinctValues({
+      //   entity,
+      //   token: ctx.token.value,
+      //   field,
+      // });
+      // const result = await query.execute();
+      // const { data } = result;
+      // return data;
+    }),
 });

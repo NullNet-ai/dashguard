@@ -18,7 +18,6 @@ import { Badge } from '~/components/ui/badge';
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
   const grouping = state?.table.getState().grouping ?? [];
-  console.log('🚀 ~ MyTableHead ~ grouping:', grouping);
   return state?.table.getHeaderGroups().map((headerGroup, index) => (
     <TableRow
       className="backdrop-blur-lg"
@@ -26,7 +25,6 @@ export default function MyTableHead() {
       data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row`)}
     >
       {headerGroup.headers.map((header, index) => {
-        console.log('🚀 ~ {headerGroup.headers.map ~ header:', header);
         const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
         const sortingKey = Array.isArray(columnSortKey)
           ? columnSortKey[0]

@@ -65,6 +65,28 @@ export default async function Page({
   ? filters?.groupAdvanceFilters
    : gridAdvanceFilter;
 
+   const sampleDistinctData = [
+    {
+      id: '1',
+      is_group_by: true,
+      grouping: 'Active',
+      contacts: {
+        status: 'Active',
+        count: 2,
+      },
+    },
+    {
+      id: '2',
+      is_group_by: true,
+      grouping: 'Draft',
+      contacts: {
+        status: 'Draft',
+        count: 1,
+      },
+    },
+  ];
+
+
   return (
     <Grid
       totalCount={totalCount || 0}

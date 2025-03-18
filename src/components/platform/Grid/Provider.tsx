@@ -17,7 +17,7 @@ import {
   getExpandedRowModel,
 } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
 import { Button } from '~/components/ui/button';
@@ -111,7 +111,6 @@ export default function GridProvider({
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
   const [grouping, setGrouping] = React.useState<GroupingState>([]);
-  console.log('🚀 ~ grouping:', grouping);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -131,6 +130,7 @@ export default function GridProvider({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
+  const [storedData, setStoredData] = useState<any[]>(data);
 
   const [gridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
@@ -150,7 +150,9 @@ export default function GridProvider({
   const sampleDistinctData = [
     {
       id: '1',
-      grouping: 'Active',
+      is_group_by: true,
+      value: 'Active',
+      field: 'status',
       contacts: {
         status: 'Active',
         count: 2,
@@ -158,7 +160,9 @@ export default function GridProvider({
     },
     {
       id: '2',
-      grouping: 'Draft',
+      is_group_by: true,
+      value: 'Draft',
+      field: 'status',
       contacts: {
         status: 'Draft',
         count: 1,
@@ -202,6 +206,10 @@ export default function GridProvider({
       setSorting(initialSorting);
     }
   }, [initialSorting]);
+
+  useEffect(() => {
+    setStoredData(data);
+  }, [data]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -349,6 +357,7 @@ export default function GridProvider({
       return visibility;
     });
     setGrouping(newGrouping);
+    setStoredData(sampleDistinctData);
   };
 
   /** @REFS */
@@ -504,44 +513,10 @@ export default function GridProvider({
     header: 'Group By',
     size: 200,
     enableResizing: false,
-    accessorKey: 'grouping',
+    accessorKey: 'value',
     cell: ({ row }) => {
-      console.log('🚀 ~ row:', row);
-      if (row.getIsGrouped()) {
-        const groupedColumn = table.getColumn(row.groupingColumnId!);
-        const columnName = groupedColumn?.columnDef?.header as string;
-        const value = row.getValue(row.groupingColumnId!);
-
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={row.getToggleExpandedHandler()}
-              className="flex items-center gap-2"
-            >
-              {row.getIsExpanded() ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              <span className="font-medium">
-                {columnName}: {value}
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                ({row.subRows?.length})
-              </span>
-            </Button>
-          </div>
-        );
-      }
-
-      // For non-grouped rows (subrows)
-      return (
-        <div className="pl-8">
-          {row.original?.label || row.getValue('label')}
-        </div>
-      );
+      const value = row?.original?.value;
+      return <StatusCell value={value} />;
     },
   });
 
@@ -611,10 +586,13 @@ export default function GridProvider({
   };
 
   const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  const new_data = useMemo(() => {
+    return isMobileOrTablet && config.isInfinite ? infiniteData : storedData;
+  }, [config.isInfinite, storedData, infiniteData, isMobileOrTablet]);
 
   /** @HOOKS */
   const table = useReactTable({
-    data: newData,
+    data: new_data,
     getRowId: (row) => row.id,
     columns: actionTypeColumnCondition(
       viewMode,
