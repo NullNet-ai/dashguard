@@ -15,6 +15,7 @@ const filterCriteriaSchema = z.object({
   label: z.string().optional(),
   values: z.array(z.string()).optional(),
   default: z.boolean().optional(),
+  entity: z.string().optional(),
 });
 
 const sortSchema = z.object({
@@ -123,7 +124,7 @@ export const gridFilterRouter = createTRPCRouter({
       const [,, mainEntity, application] = pathName.split('/');
       
 
-      const { data, message, success, errors } = await ctx.dnaClient
+      const { data, message, success } = await ctx.dnaClient
         .update(input.id!, {
           entity: ENTITY,
           token,

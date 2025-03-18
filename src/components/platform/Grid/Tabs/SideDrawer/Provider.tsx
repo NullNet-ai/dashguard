@@ -84,7 +84,7 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups),
     ); // Deep copy to prevent modifications
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -120,7 +120,7 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups),
     ); // Deep copy to prevent modifications
 
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
 
     const modifyFilterDetails = {
       ...filterDetails,

@@ -29,8 +29,13 @@ const SearchList = () => {
     return acc;
 }, [])
   const selectedSearchItems = displaySearchItemResolver?.filter((item : any) => !item?.default)
-  const defaultSearchItems = selectedSearchItems?.map((item : any) => ({ ...item, hidden: false })).filter((itm : any) => itm.type !== 'operator')
-
+  const defaultSearchItems = selectedSearchItems?.map((item : any) => ({ ...item, hidden: false }))
+  .filter((itm : any) => itm.type !== 'operator')
+  // remove duplicates
+  .filter((item : any, index : number , self : any) =>
+    index === self.findIndex((t : any) => t.id === item.id)
+  )
+  
   const [data, setData] = useState<any[]>([])
   const [open, setOpen] = useState(false)
 
