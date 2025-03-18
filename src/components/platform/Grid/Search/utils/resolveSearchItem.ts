@@ -25,31 +25,31 @@ export const resolveSearchItem = ({
     default: false,
   }
   if (hasFilters) {
-    return [
-      ...advanceFilter,
-      ...(advanceFilter.length
-        ? [
-            {
-              entity: rest?.entity,
-              type: 'operator',
-              operator: 'and',
-            },
-          ]
-        : []),
-      {
-        entity: rest?.entity,
-        type: 'criteria',
-        filters: [resolveRest],
-      },
-    ] as ISearchItem[]
+    const searchItemResolver = advanceFilter.map((item : any) => {
+      if (item.filters) {
+        return {
+          ...item,
+          filters: [
+            ...item.filters,
+            { type: "operator", operator: "and", entity: rest?.entity, default: false },
+            resolveRest, // Corrected this part
+          ],
+        };
+      }
+      return item; // Keep "operator" objects unchanged    
+    }) as ISearchItem[]
+    return searchItemResolver
   }
 
+  
   // If `filters` key exists, preserve nested structure
-  return [
+  const searchItemResolver =  [
     ...advanceFilter,
-    ...(advanceFilter.length ? [{ type: 'operator', operator: 'and' }] : []),
+    ...(advanceFilter.length ? [{ type: 'operator', operator: 'and', default : false }] : []),
     {
       ...resolveRest,
     },
   ] as ISearchItem[]
+
+  return searchItemResolver
 }
