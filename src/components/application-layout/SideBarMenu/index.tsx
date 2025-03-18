@@ -48,6 +48,7 @@ export default async function SideBarMenu() {
       }
       mainMenuConfig={mainConfig}
       screenType={screenType?.value}
+      tabsDisplayVariant="icon-only" 
     />
   );
 }
