@@ -144,7 +144,7 @@ const SidebarProvider = React.forwardRef<
 
         return (
           <SidebarContext.Provider value={contextValue}>
-            <TooltipProvider delayDuration={0}>
+            <TooltipProvider delayDuration={100}>
               <div
                 className={cn(
                   'group/sidebar-wrapper flex min-h-dvh w-full overflow-hidden text-sidebar-foreground has-[[data-variant=inset]]:bg-sidebar', className,
