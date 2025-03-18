@@ -32,6 +32,10 @@ export const SideDrawerView: React.FC = () => {
   const resizeHandleRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const lastSavedWidth = useRef<string>('982px') 
+  // Add a ref to track the previous pinned state
+  const prevPinnedStateRef = useRef<boolean | null>(null)
+  // Add state to track pin toggle action
+  const [isPinToggling, setIsPinToggling] = useState(false)
   
   const {
     header,
@@ -205,14 +209,30 @@ const handleResizeEnd = () => {
   const effectiveIsPinned = isMobile ? false : isPinned;
   const effectiveOverlayEnabled = overlayEnabled;
 
+  // Update useEffect to track pin state changes
+  useEffect(() => {
+    // If this is not the first render and the pin state has changed
+    if (prevPinnedStateRef.current !== null && prevPinnedStateRef.current !== isPinned) {
+      setIsPinToggling(true);
+      // Reset the flag after a short delay to allow the DOM to update without transition
+      const timer = setTimeout(() => {
+        setIsPinToggling(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    prevPinnedStateRef.current = isPinned;
+  }, [isPinned]);
+
   // Split transitions for X and Y to control them separately
   const getTransitionClasses = () => {
     if (isMobile) {
       // For mobile, keep transition on Y-axis
       return 'transition-transform duration-500 ease-out';
     } else {
-      // For desktop, use transform transition with duration
-      return isResizing ? 'transition-none' : 'transition-transform duration-500 ease-out';
+      // For desktop, disable transitions during resizing or pin toggling
+      return isResizing || isPinToggling
+        ? 'transition-none' 
+        : 'transition-transform duration-500 ease-out';
     }
   };
 
@@ -251,8 +271,8 @@ const handleResizeEnd = () => {
             isOpen ? 'md:translate-x-0 pointer-events-auto' : 'md:translate-x-full pointer-events-none'
           ),
           // Apply Y positioning for pinned state (no transition)
-          !isMobile && `${effectiveIsPinned && isOpen ? "-translate-y-9 lg:-translate-y-5" : "translate-y-2 lg:translate-y-[5px]"}`,
-          isBannerPresent ? 'md:h-[calc(100dvh-50px)]' : 'md:h-[calc(100dvh-39px)]',
+          !isMobile && `${effectiveIsPinned && isOpen ? "-translate-y-9 lg:-translate-y-4" : "translate-y-2 lg:translate-y-[5px]"}`,
+          isBannerPresent ? 'md:h-[calc(100dvh-50px)]' : 'md:h-[calc(100dvh-34px)]',
           effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
           isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]',
           isBannerPresent && effectiveIsPinned && isOpen && 'lg:translate-y-4'
