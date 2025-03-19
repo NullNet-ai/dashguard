@@ -5,11 +5,71 @@ import { z } from 'zod';
 import { useManageFilter } from '../../../Provider';
 import { ZodSchema } from './../../schemas/filter';
 
-const useFilterContentActions = () => {
+const useFilterContentActions = (filter_type: string) => {
 
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
   const { filterDetails } = state ?? {};
+
+
+  const _def_filters = [
+    {
+      field: 'Time Range',
+      operator: 'equal',
+      label: 'Time Range',
+      values: [],
+      type: 'criteria',
+      default: true,
+      input_type: 'select',
+      static: true,
+    },  {
+      operator: 'and',
+      type: 'operator',
+      default: true,
+    },
+    {
+      field: 'Resolution',
+      operator: 'equal',
+      label: 'Resolution',
+      values: [],
+      type: 'criteria',
+      default: true,
+      input_type: 'select',
+      static: true,
+    },
+    {
+      operator: 'and',
+      type: 'operator',
+      default: true,
+    }
+  ]
+  
+  const default_filters = (type: string) =>{
+    if(type === 'timeline_filter') return _def_filters
+    
+    return [
+  ..._def_filters,
+    {
+      field: 'Graph Type',
+      operator: 'equal',
+      label: 'Graph Type',
+      values: [],
+      type: 'criteria',
+      default: true,
+      input_type: 'select',
+      options: [
+        { label: 'Line Chart', value: 'line' },
+        { label: 'Bar Chart', value: 'bar' },
+        { label: 'Area Chart', value: 'area' },
+      ],
+      static: true,
+    },
+    {
+      operator: 'and',
+      type: 'operator',
+      default: true,
+    },
+  ] }
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
@@ -18,16 +78,17 @@ const useFilterContentActions = () => {
         {
           id: '1',
           groupOperator: 'and',
-          filters: [
-            {
-              field: '',
-              operator: '',
-              label: '',
-              values: [],
-              type: 'criteria',
-              default: true,
-            },
-          ],
+          filters: default_filters(filter_type)
+          // filters: [
+          //   {
+          //     field: '',
+          //     operator: '',
+          //     label: '',
+          //     values: [],
+          //     type: 'criteria',
+          //     default: true,
+          //   },
+          // ],
         },
       ]
     );

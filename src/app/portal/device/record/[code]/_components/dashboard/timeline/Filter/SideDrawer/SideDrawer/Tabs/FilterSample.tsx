@@ -111,7 +111,7 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
     );
   }, [filterDetails]);
 
-  console.log("%c Line:118 🍰 initialFilterGroups", "color:#93c0a4", initialFilterGroups);
+  
   const form = useForm<z.infer<typeof ZodSchema>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
@@ -120,7 +120,7 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
       >['filterGroups'],
     },
   });
-  console.log("%c Line:53 🍪 form", "color:#33a5ff", {form, initialFilterGroups});
+  
 
   const {
     fields: filterGroups,
@@ -131,16 +131,16 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
     control: form.control,
     name: 'filterGroups',
   });
-  console.log("%c Line:127 🍞 filterGroups", "color:#93c0a4", filterGroups);
+  
 
   // Watch for changes and update filter
   form.watch((data, { name }) => {
-    console.log("%c Line:138 🧀 data", "color:#b03734", data);
+    
     if (data?.filterGroups?.length) {
       // Check if the changed field is either 'field' or 'operator'
       if (name?.includes('.field') || name?.includes('.operator')) {
         const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
-        console.log("%c Line:143 🧀 groupIndex", "color:#ffdd4d", {groupIndex, name});
+        
         
         // Reset the values field for the corresponding filter
         if (groupIndex && filterIndex) {
@@ -148,7 +148,7 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
         }
       }
       
-      console.log("%c Line:152 🥕 data.filterGroups", "color:#33a5ff", data.filterGroups);
+      
       handleUpdateFilter({ filter_groups: data.filterGroups });
     }
   });
@@ -194,7 +194,7 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
 
   // Add Filter function - moved from FilterGroupActions
   const handleAppendFilter = (groupIndex: number) => {
-    console.log("%c Line:129 🌶 groupIndex", "color:#ed9ec7", groupIndex);
+    
     const currentFilters = form.getValues(`filterGroups.${groupIndex}.filters`);
     const updatedFilters = [...(currentFilters || [])];
 
@@ -288,7 +288,7 @@ export default function SampleFilterContent({filter_type}: {filter_type: string}
           }}
         >
           {filterGroups.map((group, groupIndex) => {
-            console.log("%c Line:287 🥔 groupIndex", "color:#e41a6a", groupIndex);
+            
             return (
               <SortableItem
                 value={group.id}

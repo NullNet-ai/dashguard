@@ -22,7 +22,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
     handleAppendFilter,
     handleRemoveFilter,
     handleUpdateJunctionOperator,
-  } = useFilterContentActions()
+  } = useFilterContentActions(filter_type)
 
   const { default_group_item,  rest_group_items } = useMemo(() => {
     if (!filterGroups || filterGroups.length === 0) {
