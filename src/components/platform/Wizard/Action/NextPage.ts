@@ -22,7 +22,7 @@ export async function NextPage() {
     currentStep = playgroundCurrentStep
     mainEntity = 'contact'
   }
-  if (application !== 'wizard' || !identifier) return
+  if (application !== 'wizard' || !identifier || identifier === 'new') return
 
   const step = Number(currentStep) + 1
   await api.wizard.wizardCreateStep({

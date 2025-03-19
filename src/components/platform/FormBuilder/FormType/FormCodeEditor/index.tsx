@@ -45,15 +45,18 @@ export default function FormCodeEditor({
       </FormLabel>
       <FormControl>
 				<CodeEditor 
+          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
 					enable_editor_tools={fieldConfig.codeEditorProps?.enable_editor_tools}
 					enable_auto_height={fieldConfig.codeEditorProps?.enable_auto_height}
 					defaultTheme={fieldConfig.codeEditorProps?.defaultTheme}
 					maxHeight={fieldConfig.codeEditorProps?.enable_auto_height ? fieldConfig.codeEditorProps?.maxHeight : undefined}
 					minHeight={fieldConfig.codeEditorProps?.minHeight || ""}
 					editorCode={formRenderProps.field.value}
-					onCodeChange={handleCodeChange}
+          placeholder={fieldConfig?.placeholder}
 					disabled={fieldConfig?.disabled || formRenderProps.field.disabled}
 					readOnly={fieldConfig?.readonly}
+          hasError={!!formRenderProps.fieldState.error}
+					onCodeChange={handleCodeChange}
 					{...formRenderProps.field}
 				/>
       </FormControl>
