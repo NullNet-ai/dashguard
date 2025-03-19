@@ -48,6 +48,8 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
               filterGroupLength={filterGroups?.length}
               form={form}
               filter_type={filter_type}
+              handleAppendFilter={handleAppendFilter}
+
             />
         <Sortable
           value={rest_group_items.map((group) => ({ ...group, id: group.id }))}
@@ -73,6 +75,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                 filterGroupLength={filterGroups?.length}
                 form={form}
                 filter_type={filter_type}
+                handleAppendFilter={handleAppendFilter}
 
               />
               </SortableItem>

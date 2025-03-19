@@ -2,7 +2,7 @@ import StateTab from '~/components/platform/StateTab';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { useManageFilter } from './Provider';
-import FilterContent  from './Tabs/Filter';
+import {FilterContent}  from './Tabs/Filter';
 
 
 export default function SideDrawer({filter_type}: {filter_type: string}) {

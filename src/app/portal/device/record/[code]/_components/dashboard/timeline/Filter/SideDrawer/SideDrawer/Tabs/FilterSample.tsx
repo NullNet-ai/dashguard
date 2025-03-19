@@ -23,7 +23,7 @@ import { FilterGroup } from './functions';
 import { ZodSchema } from './schemas/filter';
 import FilterGroupActions from './functions/FilterGroupActions';
 
-export default function FilterContent({filter_type}: {filter_type: string}) {
+export default function SampleFilterContent({filter_type}: {filter_type: string}) {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
   const { filterDetails, columns, searchConfig } = state ?? {};

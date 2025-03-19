@@ -6,6 +6,7 @@ import {
 } from '~/components/ui/sortable'
 import GroupAdvOperator from './Operator';
 import { FilterGroup } from '../functions';
+import FilterGroupActions from '../functions/FilterGroupActions';
 
 interface IProps {
   group: {
@@ -19,9 +20,10 @@ interface IProps {
   filterGroupLength: number
   form: any
   filter_type: string
+  handleAppendFilter: (groupIndex: number) => void
 }
 
-export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, filterGroupLength, handleRemoveFilterGroup, handleUpdateJunctionOperator, form, filter_type}: IProps) {
+export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, filterGroupLength, handleRemoveFilterGroup, handleUpdateJunctionOperator, form, filter_type, handleAppendFilter}: IProps) {
 
   return (
     <div className="mb-1 overflow-hidden rounded-lg border border-gray-100 bg-[#F8FAFC]">
@@ -50,7 +52,14 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
             </div>
 
             <div className="flex items-center gap-2">
+            
               {groupIndex > 0 && (
+                <>
+                   <FilterGroupActions
+                   onAppendFilter={() =>
+                     handleAppendFilter(groupIndex)
+                   }
+                 />
                 <Button
                   size = "sm"
                   variant = "ghost"
@@ -58,6 +67,7 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
                 >
                   <Trash2 className="h-4 w-4 text-red-600" />
                 </Button>
+                </>
               )}
             </div>
           </div>
