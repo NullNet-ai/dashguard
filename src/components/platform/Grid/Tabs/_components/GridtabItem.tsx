@@ -48,13 +48,13 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       return
     }
 
-    const getCurrent = getActiveName() || ''
-
+    const getCurrent = newItems?.find((item: any) => item.current)?.id;
     const cachedData = {
       tabs: [...newItems].map(item => {
             return { ...item, current: item.id === tab.id }
       }),
       lastShownItem: lastShownItem?.name,
+      lastShownItemID: lastShownItem?.id,
       prevCurrent: getCurrent,
       key:  'grid_tab_' + entityName,
     }

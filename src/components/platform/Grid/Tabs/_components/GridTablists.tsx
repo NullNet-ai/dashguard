@@ -76,9 +76,9 @@ const GridTabLists = ({tabs}: {
         if (tabs?.length) {
     
           const newTabs = tabs
-          const activeItem = newTabs.find(a => a.name === code)
+          const activeItem = newTabs.find(a =>  a.current)
           const copiedItem = newTabs?.length !== cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
-          const result =  reorderGridTabActive(copiedItem, code ?? '', application ?? '')
+          const result =  reorderGridTabActive(copiedItem, activeItem?.id ?? '', application ?? '')
           return result
           
         }

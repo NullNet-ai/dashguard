@@ -32,13 +32,6 @@ const GridtabDropItem = ({
   const [, , , , code] = (newPathname || '').split('/')
 
 
-  const getActiveName = () => {
-    if (isGrid && application === 'grid') {
-      return 'grid'
-    }
-    return code
-  }
-
   const lastShownItem = useMemo(() => {
     if (shownItems?.length > 0) {
       const removeHidden = shownItems.filter((item: any) => !item.hidden);
@@ -50,12 +43,13 @@ const GridtabDropItem = ({
 
   const handleClickLink = () => {
 
-    const getCurrent = getActiveName() || ''
+    const getCurrent = shownItems?.find((item: any) => item.current)?.id;
     const cachedData = {
       tabs: [...shownItems].map(item => {
             return { ...item, current: item.id === tab.id }
       }),
       lastShownItem: lastShownItem?.name,
+      lastShownItemID: lastShownItem?.id,
       prevCurrent: getCurrent,
       key:  'grid_tab_' + entityName,
     }
