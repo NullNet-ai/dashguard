@@ -69,13 +69,13 @@ const GridTabContent = ({
         const allItems: any[] = [];
         const newData = items || par_items;
         // clear width, more width, and search by
-        let totalWidth = 32;
+        let totalWidth = 0;
         const containerWidth = parentRef.current?.offsetWidth || 0;
 
         for (let index = 0; index < newData?.length; index++) {
             if (itemsRef.current[index]?.offsetWidth) {
             totalWidth += itemsRef.current[index].offsetWidth || 0;
-            totalWidth += 8;
+            totalWidth += 6;
             if (totalWidth > containerWidth) {
                 allItems?.push({
                 ...newData[index],
@@ -237,9 +237,6 @@ const GridTabContent = ({
                         key={itm.name}
                         className="group relative flex items-center py-1 justify-between"
                       >
-
-                     
-
                         <GridtabDropItem
                           tab={itm}
                           shownItems={data}
