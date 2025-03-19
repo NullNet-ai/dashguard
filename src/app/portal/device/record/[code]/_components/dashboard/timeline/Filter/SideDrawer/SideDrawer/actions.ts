@@ -2,7 +2,8 @@
 import { api } from '~/trpc/server'
 
 export const saveGridFilter = async (data: any, filter_type: string) => {
-  try {
+    try {
+      console.log("%c Line:5 🍒 data", "color:#42b983", data);
     const saveGridFilter = await api.cachedFilter.createFilter({type: filter_type, data})
 
     return saveGridFilter
@@ -57,17 +58,20 @@ interface TransformedFilters {
 }
 
 export const transformFilterGroups = async(filterDetails : FilterDetails, columns : any[]) : Promise<TransformedFilters> => {
+    console.log("%c Line:61 🍧 filterDetails", "color:#b03734", filterDetails);
 
     if (!filterDetails?.filter_groups?.length) return { resolveDefaultFilter: [], resolveGroupFilter: [] };
 
     if (filterDetails.filter_groups.length === 1) {
         const resolveDefaultFilter = filterDetails.filter_groups.reduce((acc : any, curr) => {
+            console.log("%c Line:67 🌭 curr", "color:#42b983", curr);
             if (acc.length) {
                 curr.filters = [
                     { operator: curr.groupOperator, type: 'operator', default: true },
                     ...curr.filters,
                 ];
             }
+
             if (
                 !acc.length &&
                 curr.filters.length &&
@@ -77,6 +81,7 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
             ) {
                 return acc;
             }
+
             return [...acc, ...curr.filters].map((item) => {
                 if (item.type === 'criteria') {
                     const column = columns.find((col) => col.accessorKey === item.field);
@@ -90,12 +95,14 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                                 ? item.values.map((obj: any) => obj.value)
                                 : item.values
                     };
+                    console.log("%c Line:98 🌽 modifyValue", "color:#7f2b82", modifyValue);
                     return modifyValue;
                 }
                 return item;
             }
         );
         }, []);
+        console.log("%c Line:102 🥝 resolveDefaultFilter", "color:#ffdd4d", resolveDefaultFilter);
         return { resolveDefaultFilter, resolveGroupFilter: [] };
     }
 

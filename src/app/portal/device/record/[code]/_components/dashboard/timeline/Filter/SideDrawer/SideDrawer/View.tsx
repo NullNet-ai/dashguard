@@ -8,11 +8,12 @@ import { useManageFilter } from './Provider';
 export default function SideDrawer({filter_type}: {filter_type: string}) {
   const { state, actions } = useManageFilter();
   const { tab_props, filterDetails, createFilterLoading } = state ?? {};
+  console.log("%c Line:11 🍇 createFilterLoading", "color:#7f2b82", createFilterLoading);
   const tabs = [
     {
       id: 'filter',
       label: 'Filter',
-      content: <FilterContent />,
+      content: <FilterContent filter_type={filter_type}/>,
     },
   ];
 
