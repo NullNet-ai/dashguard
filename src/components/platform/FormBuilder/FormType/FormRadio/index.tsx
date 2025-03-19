@@ -46,22 +46,19 @@ export default function FormRadio({
           rules={fieldConfig.required ? { required: true } : {}}
           render={({ field }) => (
             <RadioGroup
-              {...field}
               data-test-id={`${formKey}-rdio-${fieldConfig.name}`}
               disabled={formRenderProps.field.disabled}
               onValueChange={(value) => {
-                formRenderProps.field.onChange(value === 'true' ? true : value === 'false' ? false : value);
+                // Handle boolean conversions and pass the value to the form
+                const processedValue = value === 'true' ? true : value === 'false' ? false : value === '' ? null : value;
+                field.onChange(processedValue);
+                formRenderProps.field.onChange(processedValue);
               }}
-              value={field.value ?? undefined}
+              value={field.value === null || field.value === undefined ? '' : String(field.value)}
               className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
             >
-              {/* Hidden null option */}
-              <RadioGroupItem 
-                value="" 
-                className="hidden" 
-                checked={!field.value} 
-              />
-
+              {/* We don't need the hidden null option anymore */}
+              
               {radioOptions?.[fieldConfig?.id]?.map((option, index) => (
                 <FormItem
                   key={index}
@@ -71,7 +68,7 @@ export default function FormRadio({
                     <RadioGroupItem
                       value={option.value != null ? String(option.value) : ""}
                       data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
-                      checked={field.value === option.value}
+                      checked={String(field.value) === String(option.value)}
                     />
                   </FormControl>
                   <FormLabel

@@ -11,9 +11,10 @@ interface ToggleGroupItemProps {
 	className?: string;
 	tooltip: string;
 	children: React.ReactNode;
+	themeClass?: string;
 }
 
-export default function ToggleItem({ value, onClick, className, ariaLabel, ariaLive, ariaPressed, tooltip, children, }: ToggleGroupItemProps) {
+export default function ToggleItem({ value, onClick, className, themeClass, ariaLabel, ariaLive, ariaPressed, tooltip, children, }: ToggleGroupItemProps) {
 	return (
 		<TooltipProvider>
 			<Tooltip>
@@ -26,7 +27,8 @@ export default function ToggleItem({ value, onClick, className, ariaLabel, ariaL
 						onClick={onClick}
 						className={cn(
 							className,
-							'cursor-pointer'
+							themeClass,
+							'flex items-center gap-1 !bg-transparent rounded transition-all cursor-pointer ring-offset-background focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 hover:!bg-gray-600/20 hover:!text-blue-500 '
 						)}
 						asChild
 					>
