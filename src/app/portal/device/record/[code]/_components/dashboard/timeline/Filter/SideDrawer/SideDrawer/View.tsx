@@ -1,5 +1,5 @@
 import StateTab from '~/components/platform/StateTab';
-import FilterContent from './Tabs/Filter';
+import {FilterContent} from './Tabs/Filter';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { useManageFilter } from './Provider';

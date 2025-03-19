@@ -1,10 +1,8 @@
 'use client'
 import { PlusCircleIcon } from '@heroicons/react/20/solid'
 import { Fragment, useContext, useState, useEffect } from 'react'
-
 import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
-
 import { columns } from './components/SideDrawer/config'
 import { ManageFilterProvider } from './SideDrawer/SideDrawer/Provider'
 import GridManageFilter from './SideDrawer/SideDrawer/View'
