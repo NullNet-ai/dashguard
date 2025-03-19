@@ -394,7 +394,67 @@ const ButtonGroupSection = () => {
   );
 };
 
-// Main Component
+// Add these imports at the top of the file
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { Switch } from "~/components/ui/switch";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+
+// Add this new section component for CustomItem examples
+const CustomItemsSection = () => {
+  const [radioValue, setRadioValue] = useState("option1");
+  const [switchValue, setSwitchValue] = useState(false);
+  
+  return (
+    <Section title="Custom Button Group Items" columns={3}>
+      <div className="flex flex-col space-y-4">
+        <Label>With Radio Group</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            Filter By
+          </ButtonGroupItem>
+          <CustomItem>
+            <RadioGroup 
+              value={radioValue} 
+              onValueChange={setRadioValue}
+              className="flex flex-row gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option1" id="option1" />
+                <label htmlFor="option1" className="text-sm">Option 1</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option2" id="option2" />
+                <label htmlFor="option2" className="text-sm">Option 2</label>
+              </div>
+            </RadioGroup>
+          </CustomItem>
+        </ButtonGroup>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>With Toggle Switch</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            Theme
+          </ButtonGroupItem>
+          <CustomItem className="p-2 flex items-center">
+            <Switch
+              checked={switchValue}
+              onCheckedChange={setSwitchValue}
+              leftIcon={<SunIcon className="h-3 w-3" />}
+              rightIcon={<MoonIcon className="h-3 w-3" />}
+              size="sm"
+            />
+          </CustomItem>
+        </ButtonGroup>
+      </div>
+      
+      
+    </Section>
+  );
+};
+
+// Main Component - update to include the new section
 const ButtonPlayground = () => (
   <div className="min-h-screen p-8">
     <div className="flex flex-col">
@@ -403,6 +463,7 @@ const ButtonPlayground = () => (
       </h1>
       
       <ButtonGroupSection />
+      <CustomItemsSection />
       <VariantsSection />
       <SizesSection />
       <IconButtonsSection />
