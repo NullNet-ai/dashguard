@@ -6,14 +6,20 @@ import { type IFilterBy } from '../Category/type';
 import ManageFilter from './ManageFilter';
 interface IProps extends IFilterBy {
   tab?: ITabGrid;
+  tabs?: any[]
+  entity?: any
 }
 
 export default function TabGridMenu({
   tab,
+  filter_by,
+  filter_id,
+  entity,
+  tabs
 }: IProps) {
   return (
     <DropdownMenuContent align="end">
-      <ManageFilter tab={tab} />
+      <ManageFilter tab={tab} tabs={tabs || []} entity={entity}/>
     </DropdownMenuContent>
   );
 }

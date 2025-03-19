@@ -4,7 +4,7 @@ import GridTabLists from './_components/GridTablists';
 const GridTabs = async () => {
   const gridTabsData = await api.grid.getSessionGridTabs();
   return (
-      <GridTabLists items={gridTabsData}/>
+      <GridTabLists tabs={gridTabsData}/>
   );
 };
 
