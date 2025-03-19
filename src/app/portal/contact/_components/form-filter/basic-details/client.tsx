@@ -19,6 +19,7 @@ import {
   selectRecord,
 } from './actions';
 import SelectedView from './components/SelectedView';
+import { useRouter } from 'next/navigation';
 
 const defaultAdvanceFilter = [
   {
@@ -55,7 +56,7 @@ export default function ContactDetails({
   grid_data,
 }: IFormProps) {
   const toast = useToast();
-
+  const router = useRouter();
   const handleSave = async ({
     data,
     action_type,
@@ -77,11 +78,18 @@ export default function ContactDetails({
         return [];
       }
 
-      if (action_type === 'Create') {
+      if(action_type === "Next") {
+        router.replace(`/portal/contact/wizard/${response.code}/1`);
+      }
+
+      if (action_type === 'Create' || action_type === 'Next') {
         await closeCurrentInnerClassTab({
+          customPathname : `/portal/contact/wizard/${response.code}/1`,
           code: response.code!,
+          action_type,
         });
       }
+      
       return [response];
     } catch (error) {
       toast.error('Failed to submit Basic Details');

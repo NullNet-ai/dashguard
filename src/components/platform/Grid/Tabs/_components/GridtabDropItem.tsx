@@ -6,6 +6,7 @@ import { useEffect, useMemo } from 'react';
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import GridMenuDropClient from './GridMenuDropClient';
 
 type InnerTabitemProps = {
   tab: any
@@ -16,7 +17,7 @@ type InnerTabitemProps = {
   shownItems: any[]
 };
 
-const InnerDropTabItem = ({
+const GridtabDropItem = ({
   tab,
   pathname,
   dropItems,
@@ -29,13 +30,7 @@ const InnerDropTabItem = ({
   const newPathname = usePathname()
   const [, , entityName, application] = (pathname || '').split('/');
   const [, , , , code] = (newPathname || '').split('/')
-  const active = useMemo(() => {
-    if (isGrid && application === 'grid') {
-      return true;
-    }
 
-    return code === tab?.name;
-  }, [code, application]);
 
   const getActiveName = () => {
     if (isGrid && application === 'grid') {
@@ -57,29 +52,22 @@ const InnerDropTabItem = ({
 
     const getCurrent = getActiveName() || ''
     const cachedData = {
-      tabs: shownItems,
+      tabs: [...shownItems].map(item => {
+            return { ...item, current: item.id === tab.id }
+      }),
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'inner_tab_data_' + entityName,
+      key:  'grid_tab_' + entityName,
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`inner_tab_data_${entityName}`]: cachedData,
+      [`grid_tab_${entityName}`]: cachedData,
     }))
 
-    // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
-    // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
   }
 
-  useEffect(() => {
-    void updateSubtabs.mutateAsync({
-      current_context: '/portal/' + entityName,
-      is_active: active,
-      tab_name: tab.name,
-    })
-  }, [active]);
 
   const tabNameRole = tab.name === 'user_role' ? 'role' : tab.name.split(' ').join('-').toLowerCase();
   return (
@@ -93,23 +81,23 @@ const InnerDropTabItem = ({
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
-        aria-current={isActive ? 'page' : undefined}
+        aria-current={tab?.current ? 'page' : undefined}
         className={cn(
-          isActive ? 'text-primary' : 'text-default/70', 'whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
+          tab?.current ? 'text-primary' : 'text-default/70', 'whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
         )}
       >
         {formatTabName(tabNameRole)}
       </Link>
       <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
-      <TabMenu
-        current={!!tab.href.match(pathname)}
-        href={tab.href}
-        tabs={dropItems}
-        name={tabNameRole}
-        entity={entityName ?? ''}
-      />
+      <GridMenuDropClient 
+          tab={tab} 
+          filter_id={tab?.id} 
+          current={!!tab.href.match(pathname)}
+          tabs={shownItems}
+          entity={entityName || ''}
+          />
     </>
   );
 };
 
-export default InnerDropTabItem;
+export default GridtabDropItem;

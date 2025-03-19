@@ -25,7 +25,7 @@ const ACTIONS = [
     icon: Trash,
   },
 ];
-export default function ManageFilter({ tab }: { tab: any }) {
+export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: any, tabs : any[] }) {
   const router = useRouter();
   const { actions } = useSideDrawer();
   const { state } = useGrid();
@@ -64,13 +64,30 @@ export default function ManageFilter({ tab }: { tab: any }) {
   };
 
   const handleDeleteFilter = async() => {
+
+    const filteritems = tabs.filter((t: any) => t.id !== tab?.id);
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+      
+    localStorage.setItem('cachedPortalItems', JSON.stringify({
+      ...cachedItems,
+      [`grid_tab_${entity}`]: {
+        ...cachedItems[`grid_tab_${entity}`],
+        tabs: filteritems,
+      },
+    }))
+
     try {
       const url = await removeGridFilter(tab.id);
-      if (url && typeof url === 'string') {
-        router.replace(url);
-      } else {
-        router.refresh(); // Fallback: refresh the current page if no URL is returned
-      }
+
+      //@temp fix
+      router.refresh()
+      
+
+      // if (url && typeof url === 'string') {
+      //   router.replace(url);
+      // } else {
+      //   router.refresh(); // Fallback: refresh the current page if no URL is returned
+      // }
     } catch (error) {
       console.error('Error deleting filter:', error);
       router.refresh(); // Fallback: refresh the current page on error

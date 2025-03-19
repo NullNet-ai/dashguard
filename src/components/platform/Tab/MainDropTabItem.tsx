@@ -2,28 +2,32 @@ import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
+import MainTabMenu from '~/components/application-layout/common/MainTabMenu';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 
-type InnerTabitemProps = {
+type MainDropdTabitemProps = {
   tab: any
   pathname?: string
   dropItems: any
   isActive: boolean
   onSelect?: () => void
   shownItems: any[]
+  actions ?: any
 };
 
-const InnerDropTabItem = ({
+const MainDropTabItem = ({
   tab,
   pathname,
   dropItems,
   isActive,
   onSelect,
   shownItems,
-}: InnerTabitemProps) => {
+  actions
+}: MainDropdTabitemProps) => {
+
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -60,13 +64,13 @@ const InnerDropTabItem = ({
       tabs: shownItems,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'inner_tab_data_' + entityName,
+      key:  'main_tab_data',
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`inner_tab_data_${entityName}`]: cachedData,
+      [`main_tab_data`]: cachedData,
     }))
 
     // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
@@ -101,15 +105,17 @@ const InnerDropTabItem = ({
         {formatTabName(tabNameRole)}
       </Link>
       <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
-      <TabMenu
+      <MainTabMenu
         current={!!tab.href.match(pathname)}
         href={tab.href}
+        tab={tab}
         tabs={dropItems}
         name={tabNameRole}
         entity={entityName ?? ''}
+        actions={actions}
       />
     </>
   );
 };
 
-export default InnerDropTabItem;
+export default MainDropTabItem;

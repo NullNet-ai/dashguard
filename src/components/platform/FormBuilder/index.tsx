@@ -359,6 +359,13 @@ export const FormBuilder = (props: IPropsForms) => {
         return;
       }
 
+      if(handleSubmitFormGrid) {
+        await onSubmitFormGrid(data, {
+          action_type : 'Next'
+        })
+        return;
+      }
+
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
         const res = (await handleSubmit({ data, form })) as any
