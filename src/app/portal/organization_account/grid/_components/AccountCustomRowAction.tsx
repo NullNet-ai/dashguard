@@ -176,7 +176,7 @@ export function AccountCustomRowAction({
     account_id?.toLowerCase();
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       {ACTIONS.filter(({ condition }) =>
         condition(account_status, categories[0] ?? ''),
       ).map(({ action, icon: Icon, color, tooltip }) => (
@@ -190,7 +190,7 @@ export function AccountCustomRowAction({
               <Icon className={`h-3 w-3 ${color}`} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="z-[9999]">
+          <TooltipContent  align='center' side='left' sideOffset={15} className="z-[9999]">
             <p>{tooltip}</p>
           </TooltipContent>
         </Tooltip>
@@ -207,7 +207,7 @@ export function AccountCustomRowAction({
               <Send className="h-3 w-3 text-yellow-500" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="z-[9999]">
+          <TooltipContent  align='center' side='left' sideOffset={15} className="z-[9999]">
             <p>Re-send Invite</p>
           </TooltipContent>
         </Tooltip>
