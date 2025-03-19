@@ -13,7 +13,7 @@ const usePrefetchWizardTraverse = (
     if (!key) return;
 
     const [, , step] = key.split(":");
-    if (!step) return;
+    if (!step || step === 'new') return;
     traverseSet.mutateAsync(key).then((data) => {
       if (!data?.traverse) return;
       setTraverseStep(data?.traverse);
