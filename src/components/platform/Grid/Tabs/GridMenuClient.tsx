@@ -41,7 +41,7 @@ const GridMenu = ({ filter_id, tab, entity, tabs }: IProps) => {
         setFilter_by(filterResult);
         setSort_by(sortResult);
       } catch (error) {
-        console.log('error fetching data', error);
+        console.error('error fetching data', error);
       }
     };
 

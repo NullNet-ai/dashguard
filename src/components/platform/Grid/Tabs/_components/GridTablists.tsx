@@ -55,8 +55,6 @@ const GridTabLists = ({tabs}: {
         const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
         const selectedCached = cachedItems?.[`grid_tab_${entity}`]
 
-        console.log("tabs?.length !== selectedCached?.tabs?.length", tabs?.length , selectedCached?.tabs?.length)
-
         if(tabs?.length !== selectedCached?.tabs?.length) {
             //save to localstorage
             localStorage.setItem('cachedPortalItems', JSON.stringify({

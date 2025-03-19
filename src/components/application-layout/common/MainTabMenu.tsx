@@ -4,11 +4,6 @@ import { lowerCase } from 'lodash';
 import { EllipsisVertical, FileX, FileX2, StarIcon } from 'lucide-react'
 
 import {
-  closeAllInnerClassTabs,
-  closeInnerClassTab,
-  closeOtherInnerClassTabs,
-} from '~/components/platform/Tab/Actions/InnerTabActions'
-import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -56,8 +51,8 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data`]: {
-                ...cachedItems[`main_tab_data`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
@@ -79,8 +74,8 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data`]: {
-                ...cachedItems[`main_tab_data`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
@@ -104,8 +99,8 @@ const MainTabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`main_tab_data`]: {
-                ...cachedItems[`main_tab_data`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
