@@ -1,13 +1,22 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { 
+  ButtonGroup, 
+  ButtonGroupItem, 
+  CheckboxItem,
+  DropdownItem,
+  CustomItem
+} from "~/components/ui/button-group";
 import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
 import { ButtonWithDropdown } from '~/components/platform/ButtonWithDropdown';
 import { formatAndCapitalize } from '~/lib/utils';
 import { 
   HomeIcon, TrashIcon, PlusIcon, EnvelopeIcon, 
-  DocumentPlusIcon, CogIcon, StarIcon 
+  DocumentPlusIcon, CogIcon, StarIcon,
+  ChevronLeftIcon, ChevronRightIcon, BookmarkIcon,
+  ChevronDownIcon
 } from "@heroicons/react/24/outline";
 
 // Configuration arrays
@@ -236,6 +245,155 @@ const DisabledSection = () => (
   </>
 );
 
+// Add new configuration for button groups
+const BUTTON_GROUP_EXAMPLES = [
+  {
+    title: "Basic",
+    items: [
+      { label: "Years", active: true },
+      { label: "Months", active: false },
+      { label: "Days", active: false },
+    ]
+  },
+  {
+    title: "Icon Only",
+    items: [
+      { Icon: ChevronLeftIcon, "aria-label": "Previous" },
+      { Icon: ChevronRightIcon, "aria-label": "Next" },
+    ]
+  },
+  {
+    title: "With Stat",
+    items: [
+      { Icon: BookmarkIcon, label: "Bookmark", stat: "2k" }
+    ]
+  },
+  {
+    title: "With Dropdown",
+    items: [
+      { label: "Save Changes", dropdown: true }
+    ]
+  },
+  {
+    title: "With Checkmark",
+    items: [
+      { label: "Selected option", checkbox: true }
+    ]
+  },
+  {
+    title: "With Checkmark & Dropdown",
+    items: [
+      { label: "Unread messages", checkbox: true, dropdown: true }
+    ]
+  }
+];
+
+// Button Group Section Component
+const ButtonGroupSection = () => {
+  const [activeTab, setActiveTab] = useState("Years");
+  const [isChecked, setIsChecked] = useState(false);
+  const [isComboChecked, setIsComboChecked] = useState(false);
+  
+  return (
+    <Section title="Button Group" columns={5}>
+      <div className="flex flex-col space-y-4">
+        <Label>Basic</Label>
+        <ButtonGroup>
+          <ButtonGroupItem 
+            active={activeTab === "Years"} 
+            onClick={() => setActiveTab("Years")}
+            variant={activeTab === "Years"? "default" : "secondary"}
+          >
+            Years
+          </ButtonGroupItem>
+          <ButtonGroupItem 
+            active={activeTab === "Months"} 
+            onClick={() => setActiveTab("Months")}
+            variant={activeTab === "Months"? "default" : "secondary"}
+          >
+            Months
+          </ButtonGroupItem>
+          <ButtonGroupItem 
+            active={activeTab === "Days"} 
+            onClick={() => setActiveTab("Days")}
+            variant={activeTab === "Days"? "default" : "secondary"}
+          >
+            Days
+          </ButtonGroupItem>
+        </ButtonGroup>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>Icon Only</Label>
+        <ButtonGroup>
+          <ButtonGroupItem Icon={ChevronLeftIcon} aria-label="Previous" />
+          <ButtonGroupItem Icon={ChevronRightIcon} aria-label="Next" />
+        </ButtonGroup>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>With Stat</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            <BookmarkIcon className="h-4 w-4 mr-2" />
+            Bookmark
+          </ButtonGroupItem>
+          <CustomItem>
+            <span className="rounded-full  px-1.5 py-0.5 text-xs">
+              2k
+            </span>
+          </CustomItem>
+        </ButtonGroup>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>With Dropdown</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            Save Changes
+          </ButtonGroupItem>
+          <DropdownItem
+            dropdownOptions={[
+              { label: "Option 1", onClick: () => alert("Option 1") },
+              { label: "Option 2", onClick: () => alert("Option 2") },
+            ]}
+          >
+          </DropdownItem>
+        </ButtonGroup>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>With Checkmark</Label>
+        <CheckboxItem
+          isChecked={isChecked}
+          onCheckChange={setIsChecked}
+        >
+          Click to select
+        </CheckboxItem>
+      </div>
+      
+      <div className="flex flex-col space-y-4">
+        <Label>With Checkmark & Dropdown</Label>
+        <ButtonGroup>
+          <CheckboxItem
+            isChecked={isComboChecked}
+            onCheckChange={setIsComboChecked}
+          >
+          </CheckboxItem>
+          <DropdownItem
+            dropdownOptions={[
+              { label: "Option 1", onClick: () => alert("Option 1") },
+              { label: "Option 2", onClick: () => alert("Option 2") },
+            ]}
+          >
+            Unread messages
+          </DropdownItem>
+        </ButtonGroup>
+      </div>
+    </Section>
+  );
+};
+
 // Main Component
 const ButtonPlayground = () => (
   <div className="min-h-screen p-8">
@@ -244,6 +402,7 @@ const ButtonPlayground = () => (
         Button Playground
       </h1>
       
+      <ButtonGroupSection />
       <VariantsSection />
       <SizesSection />
       <IconButtonsSection />
