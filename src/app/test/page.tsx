@@ -4,4 +4,6 @@ export default function Page() {
   return (
     <ButtonPlayground/>
   );
-}
+};
+
+

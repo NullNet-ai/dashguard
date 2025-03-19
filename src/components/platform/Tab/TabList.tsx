@@ -52,8 +52,6 @@ export default async function TabList({ className }: { className?: string }) {
 
   if (!newTabs?.length) return null;
   return (
-    <nav aria-label="Tabs" className={cn('flex w-full flex-1', className)}>
-      <TabItems items={newTabs} />
-    </nav>
+    <TabItems items={newTabs} />
   );
 }

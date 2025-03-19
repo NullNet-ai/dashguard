@@ -60,7 +60,7 @@ export default function CreateNewFilter() {
             variant="ghost"
             size="icon"
             onClick={handleManageFilter}
-            className="text-primary"
+            className="text-primary h-full w-8 mr-2"
           >
             <PlusCircle className="h-5 w-5 text-white fill-blue-700" />
           </Button>

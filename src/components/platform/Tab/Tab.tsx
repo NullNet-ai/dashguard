@@ -12,10 +12,8 @@ export default function Tab() {
           className="ml-4 hidden h-10"
         />
       </div>
-      <div className="flex flex-1">
-        <div className="flex flex-1">
-          <TabList />
-        </div>
+      <div className="flex flex-1 mr-1">
+        <TabList />
       </div>
     </Fragment>
   );
