@@ -16,7 +16,11 @@ export const OpenReplayProvider = ({ children }: OpenReplayProviderProps) => {
         __DISABLE_SECURE_MODE: true,
       });
       tracker.start();
-      console.info('@@@ OpenReplay started');
+      console.info('@@@ OpenReplay started', {
+        projectKey: process.env.NEXT_PUBLIC_OPEN_REPLAY_PROJECT_KEY,
+        ingestPoint: process.env.NEXT_PUBLIC_OPEN_REPLAY_INGEST_POINT,
+        __DISABLE_SECURE_MODE: true,
+      });
     } catch (e) {
       console.error('@@@ error starting OpenReplay', e);
     }
