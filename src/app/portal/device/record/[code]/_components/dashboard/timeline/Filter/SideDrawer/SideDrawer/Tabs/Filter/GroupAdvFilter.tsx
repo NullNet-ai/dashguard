@@ -18,9 +18,10 @@ interface IProps {
   handleUpdateJunctionOperator: (groupIndex: number, filterIndex: number, operator: 'and' | 'or') => void
   filterGroupLength: number
   form: any
+  filter_type: string
 }
 
-export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, filterGroupLength, handleRemoveFilterGroup}: IProps) {
+export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, filterGroupLength, handleRemoveFilterGroup, handleUpdateJunctionOperator, form, filter_type}: IProps) {
 
   return (
     <div className="mb-1 overflow-hidden rounded-lg border border-gray-100 bg-[#F8FAFC]">
@@ -49,7 +50,7 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
             </div>
 
             <div className="flex items-center gap-2">
-              {filterGroupLength > 1 && (
+              {groupIndex > 0 && (
                 <Button
                   size = "sm"
                   variant = "ghost"
@@ -61,7 +62,15 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
             </div>
           </div>
 
-          <FilterGroup />
+          <FilterGroup 
+          form = {form}
+          groupIndex = {groupIndex}
+          onUpdateJunctionOperator ={
+            handleUpdateJunctionOperator as any
+          }
+          filter_type = {filter_type}
+
+          />
         </div>
       </div>
     </div>

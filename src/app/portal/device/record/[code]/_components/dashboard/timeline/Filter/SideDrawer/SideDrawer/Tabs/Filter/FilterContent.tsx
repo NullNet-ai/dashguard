@@ -10,7 +10,7 @@ import GroupAdvFilter from './GroupAdvFilter';
 import useFilterContentActions from './customHooks/useFIlterContent';
 import { useMemo } from 'react';
 
-export default function FilterContent() {
+export default function FilterContent({filter_type}: {filter_type: string}) {
 
   const  {
     form,
@@ -24,13 +24,13 @@ export default function FilterContent() {
     handleUpdateJunctionOperator,
   } = useFilterContentActions()
 
-  const { first_group_item,  rest_group_items } = useMemo(() => {
+  const { default_group_item,  rest_group_items } = useMemo(() => {
     if (!filterGroups || filterGroups.length === 0) {
-      return { first_group_item: null, rest_group_items: [] };
+      return { default_group_item: null, rest_group_items: [] };
     }
   
     return {
-      first_group_item: filterGroups[0],
+      default_group_item: filterGroups[0],
       rest_group_items: filterGroups.slice(1),
     };
   }, [filterGroups]);
@@ -40,13 +40,14 @@ export default function FilterContent() {
       <Form {...form}>
            <GroupAdvFilter 
               groupIndex={0}
-              group={first_group_item as { groupOperator: "and" | "or" }}
+              group={default_group_item as { groupOperator: "and" | "or" }}
               handleUpdateGroupOperator={handleUpdateGroupOperator}
               handleRemoveFilterGroup={handleRemoveFilterGroup}
               handleRemoveFilter={handleRemoveFilter}
               handleUpdateJunctionOperator={handleUpdateJunctionOperator}
               filterGroupLength={filterGroups?.length}
               form={form}
+              filter_type={filter_type}
             />
         <Sortable
           value={rest_group_items.map((group) => ({ ...group, id: group.id }))}
@@ -71,6 +72,8 @@ export default function FilterContent() {
                 handleUpdateJunctionOperator={handleUpdateJunctionOperator}
                 filterGroupLength={filterGroups?.length}
                 form={form}
+                filter_type={filter_type}
+
               />
               </SortableItem>
             );
