@@ -1,38 +1,38 @@
-"use server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { ulid } from "ulid";
-import { z } from "zod";
-import { ISearchItem } from "~/components/platform/Grid/Search/types";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
-import { api } from "~/trpc/server";
-import { defaultSorting } from "../../../grid/_config/sorting";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+'use server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { ulid } from 'ulid';
+import { z } from 'zod';
+import { ISearchItem } from '~/components/platform/Grid/Search/types';
+import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
+import { api } from '~/trpc/server';
+import { defaultSorting } from '../../../grid/_config/sorting';
+import { getGridCacheData } from '~/lib/grid-get-cache-data';
 
 const defaultAdvanceFilter = [
   {
-    entity: "contacts",
-    operator: "equal",
-    type: "criteria",
-    field: "status",
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
     id: ulid(),
-    label: "Status",
-    values: ["Active"],
+    label: 'Status',
+    values: ['Active'],
     default: true,
   },
   {
-    operator: "or",
-    type: "operator",
+    operator: 'or',
+    type: 'operator',
     default: true,
   },
   {
-    entity: "contacts",
-    operator: "equal",
-    type: "criteria",
-    field: "status",
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
     id: ulid(),
-    label: "Status",
-    values: ["Draft"],
+    label: 'Status',
+    values: ['Draft'],
     default: true,
   },
 ] as ISearchItem[];
@@ -50,9 +50,9 @@ export const saveContactDetails = async (
 
 export const selectRecord = async (rows: any[]) => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
   await api.tab.closeCurrentInnerClassTab({
     href: pathname,
     current_context: currentContext,
@@ -62,9 +62,9 @@ export const selectRecord = async (rows: any[]) => {
 
 export const removeRecord = async () => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
   await api.tab.closeCurrentInnerClassTab({
     href: pathname,
     current_context: currentContext,
@@ -72,17 +72,42 @@ export const removeRecord = async () => {
   redirect(`/portal/${mainEntity}/wizard/new/1`);
 };
 
-export const closeCurrentInnerClassTab = async ({ code }: { code: string }) => {
+export const closeCurrentInnerClassTab = async ({
+  code,
+  action_type,
+  customPathname,
+}: {
+  code: string;
+  action_type: string;
+  customPathname: string;
+}) => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = customPathname || headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
 
   await api.tab.closeCurrentInnerClassTab({
     href: pathname,
     current_context: currentContext,
   });
 
+  if (action_type === 'Next') {
+    await api.wizard.saveTraverseStepped({
+      key: `contact:wizard:${code}`,
+      pathname: `/portal/contact/wizard/${code}/1`,
+      currentStep: 2,
+      traverse: {
+        one: "Stepped"
+      }
+    })
+
+    await api.wizard.wizardCreateStep({
+      entity: mainEntity!,
+      identifier: code,
+      step: '2'
+    })
+    return redirect(`/portal/contact/wizard/${code}/2`);
+  }
   redirect(`/portal/contact/wizard/${code}/1`);
 };
 
@@ -103,7 +128,7 @@ export const fetchRecords = async ({
   const { items = [], totalCount } = await api.contact.mainGrid({
     current: 0,
     limit: 100,
-    entity: "contact",
+    entity: 'contact',
     pluck: pluck_fields,
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: advance_filters?.length
