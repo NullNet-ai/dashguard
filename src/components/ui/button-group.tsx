@@ -2,6 +2,9 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import { Button, type ButtonProps, type ButtonIconProps } from "./button";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Checkbox } from "./checkbox";
+import { RadioGroup, RadioGroupItem } from "./radio-group";
+import { Switch, type SwitchProps } from "./switch";
 
 interface ButtonGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: ButtonProps["variant"];
@@ -108,12 +111,11 @@ const CheckboxItem = React.forwardRef<HTMLButtonElement, CheckboxItemProps>(
         ref={ref}
         className={cn(className)}
         onClick={handleClick}
+        variant={'secondary'}
         {...props}
       >
         <div className="flex items-center gap-2">
-          <div className="flex h-4 w-4 items-center justify-center rounded border border-input bg-white">
-            {checked && <div className="h-2 w-2 rounded-sm bg-primary"></div>}
-          </div>
+          <Checkbox checked={checked}  className="pointer-events-none" />
           {children}
         </div>
       </Button>
@@ -121,6 +123,9 @@ const CheckboxItem = React.forwardRef<HTMLButtonElement, CheckboxItemProps>(
   }
 );
 CheckboxItem.displayName = "CheckboxItem";
+
+
+
 
 // Dropdown button item
 const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
@@ -199,10 +204,150 @@ const CustomItem = React.forwardRef<HTMLDivElement, CustomItemProps>(
 );
 CustomItem.displayName = "CustomItem";
 
+// Radio button item
+interface RadioItemProps extends ButtonProps {
+  value: string;
+}
+
+// Radio group for button group
+interface RadioGroupButtonProps extends React.ComponentPropsWithoutRef<typeof RadioGroup> {
+  children: React.ReactNode;
+}
+
+// Radio button item
+const RadioItem = React.forwardRef<HTMLButtonElement, RadioItemProps>(
+  ({ className, value, children, ...props }, ref) => {
+    // Create a unique ID for this radio item
+    const id = React.useId();
+    
+    return (
+      <Button
+        ref={ref}
+        type="button"
+        variant={'secondary'}
+        className={cn("rounded-none",className)}
+        {...props}
+      >
+        <label htmlFor={id}>
+          <div className="flex items-center gap-2">
+            <RadioGroupItem 
+              id={id}
+              value={value} 
+              className="pointer-events-none"
+            />
+            {children}
+          </div>
+        </label>
+      </Button>
+    );
+  }
+);
+RadioItem.displayName = "RadioItem";
+
+// Radio group for button group
+const RadioGroupButton = React.forwardRef<
+  React.ElementRef<typeof RadioGroup>,
+  RadioGroupButtonProps
+>(({ className, children, ...props }, ref) => {
+  return (
+    <RadioGroup
+      ref={ref}
+      className={cn("gap-0 flex", className)}
+      {...props}
+    >
+      {children}
+    </RadioGroup>
+  );
+});
+RadioGroupButton.displayName = "RadioGroupButton";
+
+// Make sure these are included in the export
+// Switch item
+interface SwitchItemProps extends Omit<ButtonProps, 'checked' | 'onCheckedChange' | 'size'>,
+  Pick<SwitchProps, 'leftIcon' | 'rightIcon' | 'size'> {
+  isChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  switchClassName?: string;
+}
+
+// Switch item
+const SwitchItem = React.forwardRef<HTMLButtonElement, SwitchItemProps>(
+  ({ 
+    className, 
+    children, 
+    isChecked = false, 
+    onCheckedChange,
+    leftIcon,
+    rightIcon,
+    size,
+    switchClassName,
+    onClick,
+    ...props 
+  }, ref) => {
+    const [checked, setChecked] = React.useState(isChecked);
+    
+    // Update checked state when isChecked prop changes
+    React.useEffect(() => {
+      setChecked(isChecked);
+    }, [isChecked]);
+    
+    const handleCheckedChange = (newChecked: boolean) => {
+      setChecked(newChecked);
+      if (onCheckedChange) {
+        onCheckedChange(newChecked);
+      }
+    };
+    
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Toggle the switch when the button is clicked
+      const newChecked = !checked;
+      setChecked(newChecked);
+      if (onCheckedChange) {
+        onCheckedChange(newChecked);
+      }
+      
+      // Call the original onClick if provided
+      if (onClick) {
+        onClick(e);
+      }
+    };
+    
+    return (
+      <Button
+        ref={ref}
+        className={cn("flex justify-between", className)}
+        onClick={handleClick}
+        variant={"secondary"}
+        {...props}
+      >
+        <div className="flex items-center gap-2">
+          {children}
+        </div>
+        <Switch 
+          checked={checked}
+          onCheckedChange={handleCheckedChange}
+          leftIcon={leftIcon}
+          rightIcon={rightIcon}
+          size={size}
+          className={cn("ml-2 pointer-events-none", switchClassName)}
+        />
+      </Button>
+    );
+  }
+);
+SwitchItem.displayName = "SwitchItem";
+
+
+
+
+// Make sure these are included in the export
 export { 
   ButtonGroup, 
   ButtonGroupItem, 
   CheckboxItem, 
+  RadioItem,
+  RadioGroupButton,
+  SwitchItem,
   DropdownItem, 
   CustomItem 
 };
