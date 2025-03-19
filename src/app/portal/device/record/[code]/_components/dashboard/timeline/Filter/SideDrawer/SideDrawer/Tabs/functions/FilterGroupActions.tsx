@@ -2,11 +2,11 @@ import React from "react";
 import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
-export function FilterGroupActions({
+const FilterGroupActions = ({
   onAppendFilter,
 }: {
   onAppendFilter: () => void;
-}) {
+}) => {
   return (
     <Button
       variant="ghost"
@@ -19,3 +19,5 @@ export function FilterGroupActions({
     </Button>
   );
 }
+
+export default FilterGroupActions;

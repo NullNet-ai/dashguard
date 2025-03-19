@@ -177,7 +177,6 @@ const useFilterContentActions = () => {
     }
   };
 
-  // Update Junction Operator function - moved from FilterGroup
   const handleUpdateJunctionOperator = (
     groupIndex: number,
     index: number,
