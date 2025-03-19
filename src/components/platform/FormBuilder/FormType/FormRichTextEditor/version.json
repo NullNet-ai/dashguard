@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormRichTextEditor",
-  "tag": "1.8.0",
-  "branch": "released/feat/3309/1.8.0",
-  "message": "release - ability to select variables",
+  "tag": "1.8.1<unreleased>",
+  "branch": "unreleased/fix/3514/1.8.1<unreleased>",
+  "message": "fix when form is reset it would also clear the value or the content in the richtext",
   "publish_name": "Rob Caldosa"
 }
