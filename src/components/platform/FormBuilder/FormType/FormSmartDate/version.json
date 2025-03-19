@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSmartDate",
-  "tag": "1.7.0-rc.1<unreleased>",
-  "branch": "unreleased/feat3059/1.7.0-rc.1<unreleased>",
-  "message": "add configuration to include time and to render timepicker or default timepicker inside datetimepicker component. Additionally to more configurations on the format used and integrating it to formbuilder",
+  "tag": "1.7.1<unreleased>",
+  "branch": "unreleased/fix/3452/1.7.1<unreleased>",
+  "message": "add handle 24 hour format display format",
   "publish_name": "Rob Caldosa"
 }
