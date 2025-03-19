@@ -6,6 +6,7 @@ import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { useRouter } from 'next/navigation';
 import { AppRouterKeys } from '~/components/platform/Grid/types';
 import { ISearchParams } from '../../../Search/types';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
 interface ManageFilterContextType {
   state: {
@@ -58,6 +59,7 @@ export function ManageFilterProvider({
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
   const [updateFilterLoading, setUpdateFilterLoading] = useState(false);
   const [errors, setErrors] = useState({})
+    const eventEmitter = useEventEmitter()
   const handleUpdateFilter = (data: any) => {
     setFilterDetails({
       ...filterDetails,
@@ -130,6 +132,7 @@ export function ManageFilterProvider({
     };
 
     setUpdateFilterLoading(true);
+    eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
     await updateGridFilter(modifyFilterDetails, filter_type);
     setUpdateFilterLoading(false);
     closeSideDrawer();
@@ -171,7 +174,10 @@ export function ManageFilterProvider({
       group_advance_filters: resolveGroupFilter,
     };
     setCreateFilterLoading(true);
-    await saveGridFilter(modifyFilterDetails, filter_type);
+    const filter_id = await saveGridFilter(modifyFilterDetails,  filter_type)
+        eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
+    
+        
     setCreateFilterLoading(false);
     closeSideDrawer();
     router.refresh();
