@@ -294,18 +294,14 @@ const FormMultiField = ({
                   draggable={isDisabled ? false : true}
                 >
                   <div className="border-default-100 flex flex-row items-center gap-2 border-b py-2">
-                    {!isDisabled
-                      ? (
-                          <SortableDragHandle
-                            variant="link"
-                            size="icon"
-                            className="size-8 shrink-0 text-default/40"
-                            disabled={isDisabled}
-                          >
-                            <GripVerticalIcon />
-                          </SortableDragHandle>
-                        )
-                      : null}
+                    <SortableDragHandle
+                      variant="link"
+                      size="icon"
+                      className={cn(`size-8 shrink-0 text-default/40`, `${isDisabled ? 'opacity-60' : ''}`)}
+                      disabled={isDisabled}
+                    >
+                      <GripVerticalIcon />
+                    </SortableDragHandle>
                     <div className="min-w-[150px]">
                       <FormLabel className="font-normal">
                         { parentProps
