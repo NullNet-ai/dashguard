@@ -20,76 +20,7 @@ import { useManageFilter } from '../../Provider'
 import { searchRecords } from './search'
 // import { useSearchParams } from "next/navigation";
 
-const required_fields = [
-  'Time Range',
-  'Resolution',
-  'Graph Type',
-]
 
-const time_resolution_options: { [key: string]: string[] } = {
-  '1d': ['1h', '30m'],
-  '12h': ['1h', '30m'],
-  '7d': ['12h', '1d'],
-}
-
-const _def_filters = [
-  {
-    field: 'Time Range',
-    operator: 'equal',
-    label: 'Time Range',
-    values: [],
-    type: 'criteria',
-    default: true,
-    input_type: 'select',
-    static: true,
-  },  {
-    operator: 'and',
-    type: 'operator',
-    default: true,
-  },
-  {
-    field: 'Resolution',
-    operator: 'equal',
-    label: 'Resolution',
-    values: [],
-    type: 'criteria',
-    default: true,
-    input_type: 'select',
-    static: true,
-  },
-  {
-    operator: 'and',
-    type: 'operator',
-    default: true,
-  }
-]
-
-const default_filters = (type: string) =>{
-  if(type === 'timeline_filter') return _def_filters
-  
-  return [
-..._def_filters,
-  {
-    field: 'Graph Type',
-    operator: 'equal',
-    label: 'Graph Type',
-    values: [],
-    type: 'criteria',
-    default: true,
-    input_type: 'select',
-    options: [
-      { label: 'Line Chart', value: 'line' },
-      { label: 'Bar Chart', value: 'bar' },
-      { label: 'Area Chart', value: 'area' },
-    ],
-    static: true,
-  },
-  {
-    operator: 'and',
-    type: 'operator',
-    default: true,
-  },
-] }
 
 
 const OPERATORS = [
@@ -147,36 +78,46 @@ const ZodSchema = z.object({
 //     </Button>
 //   );
 // }
+const required_fields = [
+  'Time Range',
+  'Resolution',
+  'Graph Type',
+]
+
+const time_resolution_options: { [key: string]: string[] } = {
+  '1d': ['1h', '30m'],
+  '12h': ['1h', '30m'],
+  '7d': ['12h', '1d'],
+}
+
+export function FilterGroupActions({
+  onAppendFilter,
+}: {
+  onAppendFilter: () => void;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onAppendFilter}
+      className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+    >
+      <Plus className="h-4 w-4" />
+      Add Filter
+    </Button>
+  );
+}
 
 
-export const FilterGroup = ({filter_type}: {filter_type: string}) => {
+export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOperator}: {form: any, filter_type: string, groupIndex: number, 
+  onUpdateJunctionOperator: (index: number, operator: string) => void;}) => {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails, columns, errors} = state ?? {}
   
-
-  const form = useForm<z.infer<any>>({
-    resolver: zodResolver(ZodSchema),
-    defaultValues: {
-      filters: filterDetails?.default_filter ?? [
-        ...default_filters(filter_type),
-        {
-          field: '',
-          operator: '',
-          label: '',
-          values: [],
-          type: 'criteria',
-          default: true,
-        }
-        
-      ],
-    },
-    shouldFocusError: false,
-  })
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: 'filters',
+    name: 'filterGroups',
   })
   
 
@@ -187,7 +128,7 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
     return options;
   };
   
-  const selectedTimeRange = form.watch(`filters.[0].Time Range`); // Get selected value
+  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`); // Get selected value
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
   
   
@@ -195,7 +136,7 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
   
   
   form.watch((fields) => {
-    handleUpdateFilter({ default_filter: fields.filters })
+    handleUpdateFilter({ default_filter: fields.filterGroups })
   })
 
   useEffect(() => {
@@ -213,13 +154,13 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
   
   useEffect(() => {
     const subscription = form.watch((values) => {
-      values.filters.forEach((filter: any, index: number) => {
+      values.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
         if (required_fields.includes(filter.field) && filter?.[filter.field]) {
-          form.clearErrors(`filters.${index}.${filter.field}`);
+          form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`);
         } else {
-          if (filter.field) form.clearErrors(`filters.${index}.field`);
-          if (filter.operator) form.clearErrors(`filters.${index}.operator`);
-          if (filter.values && filter.values.length > 0) form.clearErrors(`filters.${index}.values`);
+          if (filter.field) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.field`);
+          if (filter.operator) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.operator`);
+          if (filter.values && filter.values.length > 0) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.values`);
         }
       });
     });
@@ -257,15 +198,19 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
   }
 
   const handleUpdateJunctionOperator = (index: number, operator: string) => {
-    const updatedFilters = [...form.getValues().filters]
-    updatedFilters[index]!.operator = operator
-    form.setValue('filters', updatedFilters)
-    handleUpdateFilter({ default_filter: updatedFilters })
+    const updatedFilters = [...form.getValues().filterGroups[groupIndex]?.filters]
+    // updatedFilters[index]!.operator = operator
+    // form.setValue('filters', updatedFilters)
+    // handleUpdateFilter({ default_filter: updatedFilters })
+    if (updatedFilters[index] && updatedFilters[index].type === 'operator') {
+      updatedFilters[index].operator = operator as 'and' | 'or';
+      form.setValue(`filterGroups.${groupIndex}.filters`, updatedFilters);
+    }
   }
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <Button
           className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
           size="sm"
@@ -275,15 +220,18 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
           <Plus className="h-4 w-4" />
           Add Filter
         </Button>
-      </div>
+      </div> */}
 
       <Form {...form}>
         <div className="space-y-4">
           {fields.map((field: any, index) => {    
-            const prefix = `filters.${index}`
-
+            const prefix = `filterGroups.${groupIndex}.filters.${index}`
             
-
+            const filterData =
+            form.getValues().filterGroups?.[groupIndex]?.filters[index];
+            
+            if(!filterData) return null
+            
             return (
               <div
                 className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
@@ -292,9 +240,14 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
                 {index > 0 && field.type === 'operator' && (
                   <div className="col-span-4 mb-2">
                     <Select
-                      defaultValue="and"
-                      value={field.operator}
-                      onValueChange={(operator) => handleUpdateJunctionOperator(index, operator) }
+                      value={
+                        fields[index - 1]?.type === 'operator'
+                          ? fields?.[index - 1]?.operator
+                          : 'and'
+                      }
+                      onValueChange={(operator) =>
+                        onUpdateJunctionOperator(index - 1, operator)
+                      }
                     >
                       <SelectTrigger className="w-[100px] border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
@@ -307,7 +260,8 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
                   </div>
                 )}
 
-                {required_fields?.includes(field?.field) && (
+                {//required_fields?.includes(field?.field) && 
+                (
                   <FormModule
                     fields={[
                       {
@@ -341,7 +295,7 @@ export const FilterGroup = ({filter_type}: {filter_type: string}) => {
                       },
                     ]}
                     form={form}
-                    formKey="filters"
+                    formKey={`filterGroups.${groupIndex}.filters`}
                     formSchema={ZodSchema}
                     subConfig={{
                       selectOptions: {

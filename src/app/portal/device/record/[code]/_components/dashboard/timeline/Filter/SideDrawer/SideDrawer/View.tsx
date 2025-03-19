@@ -13,7 +13,7 @@ export default function SideDrawer({filter_type}: {filter_type: string}) {
     {
       id: 'filter',
       label: 'Filter',
-      content: <FilterContent />,
+      content: <FilterContent filter_type={filter_type}/>,
     },
   ];
 
