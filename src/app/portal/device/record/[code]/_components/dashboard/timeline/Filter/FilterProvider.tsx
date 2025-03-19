@@ -104,7 +104,7 @@ const FilterProvider = ({ children, params, type }: any) => {
             ...updatedFilters.get(item.id),
             ...item,
             label,
-            default_filter: item.default_filter.map((filter: any) => {
+            default_filter: item?.filterGroups?.map((filter: any) => {
               if (filter?.type === 'criteria') {
                 return {
                   ...filter,

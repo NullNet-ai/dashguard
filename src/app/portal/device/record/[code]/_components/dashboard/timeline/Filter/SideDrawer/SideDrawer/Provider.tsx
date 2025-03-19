@@ -13,6 +13,7 @@ interface ManageFilterContextType {
     filterDetails: any;
     columns: Record<string, any>[];
     createFilterLoading: boolean;
+    updateFilterLoading: boolean;
     searchConfig: any;
     errors: Record<string, any>;
   };
@@ -55,21 +56,20 @@ export function ManageFilterProvider({
     columns,
   }); 
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
+  const [updateFilterLoading, setUpdateFilterLoading] = useState(false);
   const [errors, setErrors] = useState({})
   const handleUpdateFilter = (data: any) => {
-    console.log("%c Line:60 🌭 data", "color:#f5ce50", data);
     setFilterDetails({
       ...filterDetails,
       ...data,
     });
   };
-  console.log("%c Line:53 🥃 filterDetails", "color:#4fff4B", filterDetails);
 
   function validateCriteria(data: any) {
     const required_fields = ["Time Range", "Resolution", "Graph Type"];
     let errors: any = {};
 
-    data.forEach((item: any, index: number) => {
+    data?.forEach((item: any, index: number) => {
         if (item.hasOwnProperty("field") && !item.field) {
             errors[`filters.${index}.field`] = "This field is required.";
         }
@@ -90,7 +90,6 @@ export function ManageFilterProvider({
 
   const handleSaveFilter = async () => {
     setCreateFilterLoading(true);
-    console.log("%c Line:93 🍏 filterDetails", "color:#fca650", filterDetails);
     const saveFilter = await saveGridFilter(filterDetails, filter_type);
 
     setCreateFilterLoading(false);
@@ -118,21 +117,21 @@ export function ManageFilterProvider({
         ];
 
     const rawFilterGroup = JSON.parse(
-      JSON.stringify(filterDetails?.filter_groups),
+      JSON.stringify(filterDetails?.filterGroups),
     ); // Deep copy to prevent modifications
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
       sorts: sorting,
+      filterGroups: rawFilterGroup,
       default_sorts: sorting,
-      filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
     };
 
-    setCreateFilterLoading(true);
+    setUpdateFilterLoading(true);
     await updateGridFilter(modifyFilterDetails, filter_type);
-    setCreateFilterLoading(false);
+    setUpdateFilterLoading(false);
     closeSideDrawer();
     router.refresh();
   };
@@ -157,23 +156,20 @@ export function ManageFilterProvider({
           },
         ];
 
-    const rawFilterGroup = JSON.parse(
-      JSON.stringify(filterDetails?.filter_groups),
+    const rawFilterGroup = JSON?.parse(
+      JSON.stringify(filterDetails?.filterGroups),
     ); // Deep copy to prevent modifications
 
-    console.log("%c Line:164 🍿 filterDetails", "color:#33a5ff", filterDetails);
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
 
-    console.log("%c Line:168 🍏 resolveDefaultFilter", "color:#6ec1c2", resolveDefaultFilter);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: !resolveDefaultFilter?.length ? filterDetails?.default_filter : resolveDefaultFilter,
       sorts: sorting,
       default_sorts: sorting,
-      filter_groups: rawFilterGroup,
+      filterGroups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
     };
-    console.log("%c Line:175 🍓 modifyFilterDetails", "color:#b03734", modifyFilterDetails);
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails, filter_type);
     setCreateFilterLoading(false);
@@ -189,6 +185,7 @@ export function ManageFilterProvider({
           filterDetails,
           columns,
           createFilterLoading,
+          updateFilterLoading,
           searchConfig,
           errors: errors || {}
         },

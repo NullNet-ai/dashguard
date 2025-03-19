@@ -265,7 +265,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                           placeholder: 'Enter the value',
                           multiSelectEnableCreate: true,
                           multiSelectShowCreatableItem: false,
-                          // multiSelectUseStringValues: true,
+                          multiSelectUseStringValues: true,
                         },
                       ]}
                       form={form}

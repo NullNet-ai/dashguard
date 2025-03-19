@@ -4,6 +4,7 @@ import { Command as CommandPrimitive, useCommandState } from "cmdk";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import * as React from "react";
 import { forwardRef, useEffect } from "react";
+import { createPortal } from "react-dom"; // Add this import
 
 import { Badge } from "~/components/ui/badge";
 import {
@@ -28,10 +29,12 @@ export interface Option {
 type GroupOption = Record<string, Option[]>;
 
 interface MultipleSelectorProps {
-  value?: Option[];
+  value?: Option[] | string[];
   defaultOptions?: Option[];
   /** manually controlled options */
   options?: Option[];
+  /** Use string values instead of Option objects */
+  useStringValues?: boolean;
   placeholder?: string;
   /** Loading component. */
   loadingIndicator?: React.ReactNode;
@@ -52,7 +55,7 @@ interface MultipleSelectorProps {
    * i.e.: creatable, groupBy, delay.
    **/
   onSearchSync?: (value: string) => Option[];
-  onChange?: (options: Option[]) => void;
+  onChange?: (options: Option[] | string[]) => void;
   /** Limit the maximum number of selected options. */
   maxSelected?: number;
   /** When the number of selected options exceeds the limit, the onMaxSelected will be called. */
@@ -86,6 +89,10 @@ interface MultipleSelectorProps {
   onCreateRecord?: (value: string) => Promise<Option | undefined>;
   /** Show/hide the creatable item in the dropdown */
   showCreatableItem?: boolean;
+  /** Custom render function for the selected option badges */
+  renderBadge?: (option: Option, handleUnselect: (option: Option) => void) => React.ReactNode;
+  /** Custom render function for dropdown options */
+  renderOption?: (option: Option) => React.ReactNode;
 }
 
 export interface MultipleSelectorRef {
@@ -150,7 +157,7 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
 function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   for (const [, value] of Object.entries(groupOption)) {
     if (
-      value.some((option) => targetOption.find((p) => p?.label === option?.label))
+      value.some((option) => targetOption.find((p) => p?.label?.toLowerCase() === option?.label?.toLowerCase()))
     ) {
       return true;
     }
@@ -217,6 +224,9 @@ const MultipleSelector = React.forwardRef<
       hideClearAllButton = false,
       showCreatableItem = true,
       onCreateRecord,
+      useStringValues = false,
+      renderBadge,
+      renderOption,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -224,9 +234,28 @@ const MultipleSelector = React.forwardRef<
     const [open, setOpen] = React.useState(false);
     const [onScrollbar, setOnScrollbar] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
-    const dropdownRef = React.useRef<HTMLDivElement>(null); // Added this
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-    const [selected, setSelected] = React.useState<Option[]>(value || []);
+    // Convert string array to Option array if useStringValues is true
+    const convertToOptions = React.useCallback((stringArray: string[]): Option[] => {
+      return stringArray.map(str => ({ value: str, label: str }));
+    }, []);
+
+    // Convert Option array to string array if useStringValues is true
+    const convertToStrings = React.useCallback((optionArray: Option[]): string[] => {
+      return optionArray.map(opt => opt.value);
+    }, []);
+
+    // Initialize selected state based on value type
+    const initialSelected = React.useMemo(() => {
+      if (!value) return [];
+      if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
+        return convertToOptions(value as string[]);
+      }
+      return value as Option[];
+    }, []);
+
+    const [selected, setSelected] = React.useState<Option[]>(initialSelected);
     const [options, setOptions] = React.useState<GroupOption>(
       transToGroupOption(arrayDefaultOptions, groupBy),
     );
@@ -234,6 +263,65 @@ const MultipleSelector = React.forwardRef<
     const [isCreateLoading, setIsCreateLoading] = React.useState(false);
 
     const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
+
+    // Update portal container state
+    const [portalElement, setPortalElement] = React.useState<HTMLElement | null>(null);
+    
+    // Create portal container once on component mount
+    useEffect(() => {
+      if (typeof document !== 'undefined') {
+        // Check if container already exists
+        let container = document.getElementById('multi-select-portal-container');
+        
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'multi-select-portal-container';
+          document.body.appendChild(container);
+        }
+        
+        setPortalElement(container);
+        
+        // Clean up on unmount
+        return () => {
+          // We don't remove the container as other instances might be using it
+          // Just ensure we clean up our references
+          setPortalElement(null);
+        };
+      }
+    }, []);
+    
+    // Position calculation effect
+    const [position, setPosition] = React.useState({ top: 0, left: 0, width: 0, direction: 'bottom' });
+    
+    useEffect(() => {
+      if (open && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        // Get the actual width of the Command element
+        const commandWidth = dropdownRef.current.offsetWidth;
+        
+        // Calculate available space below and above
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Estimated height of dropdown (can be adjusted)
+        const estimatedDropdownHeight = 300;
+        
+        // Determine if dropdown should appear above or below
+        const direction = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow 
+          ? 'top' 
+          : 'bottom';
+        
+        setPosition({
+          // If direction is 'top', position above the input, otherwise below
+          top: direction === 'top' 
+            ? rect.top + window.scrollY - 5 // 5px gap when above
+            : rect.bottom + window.scrollY + 5, // 5px gap when below
+          left: rect.left + window.scrollX,
+          width: commandWidth,
+          direction
+        });
+      }
+    }, [open]);
 
     React.useImperativeHandle(
       ref,
@@ -256,13 +344,18 @@ const MultipleSelector = React.forwardRef<
       }
     };
 
+    // Update handleUnselect to handle string values
     const handleUnselect = React.useCallback(
       (option: Option) => {
         const newOptions = selected.filter((s) => s.value !== option.value);
         setSelected(newOptions);
-        onChange?.(newOptions);
+        if (useStringValues) {
+          onChange?.(convertToStrings(newOptions));
+        } else {
+          onChange?.(newOptions);
+        }
       },
-      [onChange, selected],
+      [onChange, selected, useStringValues, convertToStrings],
     );
 
     const handleKeyDown = React.useCallback(
@@ -304,9 +397,13 @@ const MultipleSelector = React.forwardRef<
 
     useEffect(() => {
       if (value) {
-        setSelected(value);
+        if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
+          setSelected(convertToOptions(value as string[]));
+        } else {
+          setSelected(value as Option[]);
+        }
       }
-    }, [value]);
+    }, [value, useStringValues, convertToOptions]);
 
     useEffect(() => {
       /** If `onSearch` is provided, do not trigger options updated. */
@@ -421,7 +518,14 @@ const MultipleSelector = React.forwardRef<
             setInputValue("");
             const newOptions = [...selected, newRecord];
             setSelected(newOptions);
-            onChange?.(newOptions);
+
+            
+            // Handle useStringValues when creatable is true
+            if (useStringValues) {
+              onChange?.(convertToStrings(newOptions));
+            } else {
+              onChange?.(newOptions);
+            }
             setIsCreateLoading(false);
           }}
         >
@@ -508,7 +612,11 @@ const MultipleSelector = React.forwardRef<
         >
           <div className={"flex flex-wrap items-center gap-1 py-[5px]"}>
             {selected.map((option) => {
-              return (
+              return renderBadge ? (
+                <React.Fragment key={option.value}>
+                  {renderBadge(option, handleUnselect)}
+                </React.Fragment>
+              ) : (
                 <Badge
                   key={option.value}
                   className={cn(
@@ -599,9 +707,11 @@ const MultipleSelector = React.forwardRef<
           </div>
         </div>
         <div className={`relative`}>
-          {open && (
+        {open && portalElement && createPortal(
             <CommandList
-              className={cn("absolute top-1 z-10 w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",)}
+              className={cn(
+                "fixed z-[9999] w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",
+              )}
               onMouseLeave={() => {
                 setOnScrollbar(false);
               }}
@@ -610,6 +720,20 @@ const MultipleSelector = React.forwardRef<
               }}
               onMouseUp={() => {
                 inputRef.current?.focus();
+              }}
+              style={{
+                width: `${position.width}px`, // Ensure exact width match
+                minWidth: `${position.width}px`, // Add minWidth to prevent shrinking
+                top: position.direction === 'top' 
+                  ? 'auto' // Use auto when positioned above
+                  : `${position.top}px`,
+                bottom: position.direction === 'top' 
+                  ? `${window.innerHeight - position.top}px` // Calculate from bottom when above
+                  : 'auto',
+                left: `${position.left}px`,
+                maxHeight: '240px',
+                overflowY: 'auto',
+                transformOrigin: position.direction === 'top' ? 'bottom' : 'top'
               }}
             >
               {isLoading ? (
@@ -655,7 +779,11 @@ const MultipleSelector = React.forwardRef<
                                 setInputValue("");
                                 const newOptions = [...selected, option];
                                 setSelected(newOptions);
-                                onChange?.(newOptions);
+                                if (useStringValues) {
+                                  onChange?.(convertToStrings(newOptions));
+                                } else {
+                                  onChange?.(newOptions);
+                                }
                               }}
                               className={cn(
                                 "cursor-pointer !text-md",
@@ -663,7 +791,7 @@ const MultipleSelector = React.forwardRef<
                                 "cursor-default text-sidebar-foreground ",
                               )}
                             >
-                              {option.label}
+                              {renderOption ? renderOption(option) : option.label}
                             </CommandItem>
                           );
                         })}
@@ -672,7 +800,8 @@ const MultipleSelector = React.forwardRef<
                   ))}
                 </>
               )}
-            </CommandList>
+            </CommandList>,
+            portalElement
           )}
         </div>
       </Command>
