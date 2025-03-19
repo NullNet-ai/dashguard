@@ -57,6 +57,7 @@ export function ManageFilterProvider({
   const [createFilterLoading, setCreateFilterLoading] = useState(false);
   const [errors, setErrors] = useState({})
   const handleUpdateFilter = (data: any) => {
+    console.log("%c Line:60 🌭 data", "color:#f5ce50", data);
     setFilterDetails({
       ...filterDetails,
       ...data,
