@@ -29,6 +29,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const {width} = useWindowSize();
   const [newtabs, setNewtabs] = useState<any>([])
 
+
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
 
@@ -55,7 +56,21 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
       setCachedItem(tabs)
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+
+    const selectedCached = cachedItems?.[`inner_tab_data_${entity}`]
+
+    if(tabs?.length !== selectedCached?.tabs?.length) {
+        //save to localstorage
+        localStorage.setItem('cachedPortalItems', JSON.stringify({
+            ...cachedItems,
+            [`inner_tab_data_${entity}`]: {
+                tabs: tabs?.map(tab => ({...tab, id: tab?.name}))
+            }
+        }))
+    }
     setCachedItem(cachedItems?.[`inner_tab_data_${entity}`])
+
+
   }, [code, isClient, tabs])
   
 
@@ -68,7 +83,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
 
       const newTabs = tabs?.map(tab => ({...tab, id: tab?.name}))
       const activeItem = newTabs.find(a => a.name === code)
-      const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
+      const copiedItem = newTabs?.length !== cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
       const result =  reorderShowActiveItem(copiedItem, code ?? '', application ?? '')
       return result
       
