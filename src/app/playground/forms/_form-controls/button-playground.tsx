@@ -1,10 +1,13 @@
 'use client'
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { 
-  ButtonGroup, 
-  ButtonGroupItem, 
+import {
+  ButtonGroup,
+  ButtonGroupItem,
   CheckboxItem,
+  RadioItem,
+  RadioGroupButton,
+  SwitchItem,
   DropdownItem,
   CustomItem
 } from "~/components/ui/button-group";
@@ -12,11 +15,13 @@ import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
 import { ButtonWithDropdown } from '~/components/platform/ButtonWithDropdown';
 import { formatAndCapitalize } from '~/lib/utils';
-import { 
-  HomeIcon, TrashIcon, PlusIcon, EnvelopeIcon, 
+import {
+  HomeIcon, TrashIcon, PlusIcon, EnvelopeIcon,
   DocumentPlusIcon, CogIcon, StarIcon,
   ChevronLeftIcon, ChevronRightIcon, BookmarkIcon,
-  ChevronDownIcon
+  CalendarIcon, CalendarDaysIcon,
+  BellIcon,
+  BellSlashIcon,
 } from "@heroicons/react/24/outline";
 
 // Configuration arrays
@@ -83,8 +88,8 @@ const BADGE_VARIANTS = [
 ];
 
 // Reusable Section Component
-const Section = ({ title, children, columns = 7 }: { 
-  title: string; 
+const Section = ({ title, children, columns = 7 }: {
+  title: string;
   children: React.ReactNode;
   columns?: number;
 }) => (
@@ -147,9 +152,9 @@ const DropdownSection = () => (
         <Label>{formatAndCapitalize(variant)} Dropdown Button</Label>
         <ButtonWithDropdown
           dropdownOptions={[
-            { label: "Option 1", onClick: () => alert("Option 1") },
-            { label: "Option 2", onClick: () => alert("Option 2") },
-            { label: "Option 3", onClick: () => alert("Option 3") },
+            { label: "Option 1", onClick: () => null },
+            { label: "Option 2", onClick: () => null },
+            { label: "Option 3", onClick: () => null },
           ]}
           buttonVariant={variant as any}
           buttonClassName="justify-center w-fit"
@@ -231,8 +236,8 @@ const DisabledSection = () => (
       {BADGE_VARIANTS.map(({ variant, label }) => (
         <div key={variant} className="flex flex-col space-y-2 items-center">
           <Label>{label}</Label>
-          <Badge 
-            variant={variant as any} 
+          <Badge
+            variant={variant as any}
             className="opacity-50 cursor-not-allowed"
           >
             {variant === "success" && <StarIcon className="mr-1 h-3 w-3" />}
@@ -245,84 +250,42 @@ const DisabledSection = () => (
   </>
 );
 
-// Add new configuration for button groups
-const BUTTON_GROUP_EXAMPLES = [
-  {
-    title: "Basic",
-    items: [
-      { label: "Years", active: true },
-      { label: "Months", active: false },
-      { label: "Days", active: false },
-    ]
-  },
-  {
-    title: "Icon Only",
-    items: [
-      { Icon: ChevronLeftIcon, "aria-label": "Previous" },
-      { Icon: ChevronRightIcon, "aria-label": "Next" },
-    ]
-  },
-  {
-    title: "With Stat",
-    items: [
-      { Icon: BookmarkIcon, label: "Bookmark", stat: "2k" }
-    ]
-  },
-  {
-    title: "With Dropdown",
-    items: [
-      { label: "Save Changes", dropdown: true }
-    ]
-  },
-  {
-    title: "With Checkmark",
-    items: [
-      { label: "Selected option", checkbox: true }
-    ]
-  },
-  {
-    title: "With Checkmark & Dropdown",
-    items: [
-      { label: "Unread messages", checkbox: true, dropdown: true }
-    ]
-  }
-];
 
 // Button Group Section Component
 const ButtonGroupSection = () => {
   const [activeTab, setActiveTab] = useState("Years");
   const [isChecked, setIsChecked] = useState(false);
   const [isComboChecked, setIsComboChecked] = useState(false);
-  
+
   return (
     <Section title="Button Group" columns={5}>
       <div className="flex flex-col space-y-4">
         <Label>Basic</Label>
         <ButtonGroup>
-          <ButtonGroupItem 
-            active={activeTab === "Years"} 
+          <ButtonGroupItem
+            active={activeTab === "Years"}
             onClick={() => setActiveTab("Years")}
-            variant={activeTab === "Years"? "default" : "secondary"}
+            variant={activeTab === "Years" ? "default" : "secondary"}
           >
             Years
           </ButtonGroupItem>
-          <ButtonGroupItem 
-            active={activeTab === "Months"} 
+          <ButtonGroupItem
+            active={activeTab === "Months"}
             onClick={() => setActiveTab("Months")}
-            variant={activeTab === "Months"? "default" : "secondary"}
+            variant={activeTab === "Months" ? "default" : "secondary"}
           >
             Months
           </ButtonGroupItem>
-          <ButtonGroupItem 
-            active={activeTab === "Days"} 
+          <ButtonGroupItem
+            active={activeTab === "Days"}
             onClick={() => setActiveTab("Days")}
-            variant={activeTab === "Days"? "default" : "secondary"}
+            variant={activeTab === "Days" ? "default" : "secondary"}
           >
             Days
           </ButtonGroupItem>
         </ButtonGroup>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
         <Label>Icon Only</Label>
         <ButtonGroup>
@@ -330,12 +293,12 @@ const ButtonGroupSection = () => {
           <ButtonGroupItem Icon={ChevronRightIcon} aria-label="Next" />
         </ButtonGroup>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
         <Label>With Stat</Label>
         <ButtonGroup>
           <ButtonGroupItem>
-            <BookmarkIcon className="h-4 w-4 mr-2" />
+            <BookmarkIcon className="h-4 w-4 " />
             Bookmark
           </ButtonGroupItem>
           <CustomItem>
@@ -345,7 +308,7 @@ const ButtonGroupSection = () => {
           </CustomItem>
         </ButtonGroup>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
         <Label>With Dropdown</Label>
         <ButtonGroup>
@@ -354,14 +317,14 @@ const ButtonGroupSection = () => {
           </ButtonGroupItem>
           <DropdownItem
             dropdownOptions={[
-              { label: "Option 1", onClick: () => alert("Option 1") },
-              { label: "Option 2", onClick: () => alert("Option 2") },
+              { label: "Option 1", onClick: () => null },
+              { label: "Option 2", onClick: () => null },
             ]}
           >
           </DropdownItem>
         </ButtonGroup>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
         <Label>With Checkmark</Label>
         <CheckboxItem
@@ -371,7 +334,7 @@ const ButtonGroupSection = () => {
           Click to select
         </CheckboxItem>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
         <Label>With Checkmark & Dropdown</Label>
         <ButtonGroup>
@@ -382,8 +345,8 @@ const ButtonGroupSection = () => {
           </CheckboxItem>
           <DropdownItem
             dropdownOptions={[
-              { label: "Option 1", onClick: () => alert("Option 1") },
-              { label: "Option 2", onClick: () => alert("Option 2") },
+              { label: "Option 1", onClick: () => null },
+              { label: "Option 2", onClick: () => null },
             ]}
           >
             Unread messages
@@ -394,76 +357,207 @@ const ButtonGroupSection = () => {
   );
 };
 
-// Add these imports at the top of the file
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Switch } from "~/components/ui/switch";
-import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
-// Add this new section component for CustomItem examples
-const CustomItemsSection = () => {
-  const [radioValue, setRadioValue] = useState("option1");
-  const [switchValue, setSwitchValue] = useState(false);
-  
+// Add this new section component for RadioItem examples
+const RadioButtonsSection = () => {
+  const [selectedOption, setSelectedOption] = useState("option1");
+
   return (
-    <Section title="Custom Button Group Items" columns={3}>
+    <Section title="Radio Button Groups" columns={3}>
       <div className="flex flex-col space-y-4">
-        <Label>With Radio Group</Label>
-        <ButtonGroup>
-          <ButtonGroupItem>
-            Filter By
-          </ButtonGroupItem>
-          <CustomItem>
-            <RadioGroup 
-              value={radioValue} 
-              onValueChange={setRadioValue}
-              className="flex flex-row gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="option1" id="option1" />
-                <label htmlFor="option1" className="text-sm">Option 1</label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="option2" id="option2" />
-                <label htmlFor="option2" className="text-sm">Option 2</label>
-              </div>
-            </RadioGroup>
-          </CustomItem>
-        </ButtonGroup>
+        <Label>Radio Button Group</Label>
+        <RadioGroupButton value={selectedOption} onValueChange={setSelectedOption}>
+          <RadioItem value="option1">
+            Option 1
+          </RadioItem>
+          <RadioItem value="option2">
+            Option 2
+          </RadioItem>
+          <RadioItem value="option3">
+            Option 3
+          </RadioItem>
+        </RadioGroupButton>
       </div>
-      
+
       <div className="flex flex-col space-y-4">
-        <Label>With Toggle Switch</Label>
-        <ButtonGroup>
-          <ButtonGroupItem>
-            Theme
-          </ButtonGroupItem>
-          <CustomItem className="p-2 flex items-center">
-            <Switch
-              checked={switchValue}
-              onCheckedChange={setSwitchValue}
-              leftIcon={<SunIcon className="h-3 w-3" />}
-              rightIcon={<MoonIcon className="h-3 w-3" />}
-              size="sm"
-            />
-          </CustomItem>
-        </ButtonGroup>
+        <Label>Radio with Icons</Label>
+        <RadioGroupButton defaultValue="daily">
+          <RadioItem value="daily">
+            <CalendarDaysIcon className="h-4 w-4 " />
+            Daily
+          </RadioItem>
+          <RadioItem value="weekly">
+            <CalendarIcon className="h-4 w-4 " />
+            Weekly
+          </RadioItem>
+          <RadioItem value="monthly">
+            <CalendarDaysIcon className="h-4 w-4 " />
+            Monthly
+          </RadioItem>
+        </RadioGroupButton>
       </div>
-      
-      
+
     </Section>
   );
 };
 
-// Main Component - update to include the new section
+// Add this new section component for SwitchItem examples
+const SwitchButtonsSection = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [notifications, setNotifications] = useState(true);
+  const [autoSave, setAutoSave] = useState(false);
+
+  return (
+    <Section title="Switch Button Groups" columns={3}>
+      <div className="flex flex-col space-y-4">
+        <Label>Basic Switch</Label>
+        <SwitchItem
+          isChecked={darkMode}
+          onCheckedChange={setDarkMode}
+        >
+          Dark Mode
+        </SwitchItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Switch with Icons</Label>
+        <SwitchItem
+          isChecked={notifications}
+          onCheckedChange={setNotifications}
+          leftIcon={<BellIcon className="h-3 w-3" />}
+          rightIcon={<BellSlashIcon className="h-3 w-3" />}
+        >
+          Notifications
+        </SwitchItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Switch in Button Group</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            Auto Save
+          </ButtonGroupItem>
+          <SwitchItem
+            isChecked={autoSave}
+            onCheckedChange={setAutoSave}
+            size="sm"
+          />
+        </ButtonGroup>
+      </div>
+    </Section>
+  );
+};
+
+// Add this new section component for CheckboxItem examples
+const CheckboxButtonsSection = () => {
+  const [option1, setOption1] = useState(false);
+  const [option2, setOption2] = useState(true);
+  const [option3, setOption3] = useState(false);
+
+  return (
+    <Section title="Checkbox Button Groups" columns={3}>
+      <div className="flex flex-col space-y-4">
+        <Label>Basic Checkbox</Label>
+        <CheckboxItem
+          isChecked={option1}
+          onCheckChange={setOption1}
+        >
+          Select Option
+        </CheckboxItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Checkbox with Icon</Label>
+        <CheckboxItem
+          isChecked={option2}
+          onCheckChange={setOption2}
+        >
+          <StarIcon className="h-4 w-4" />
+          Featured Item
+        </CheckboxItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Checkbox in Button Group</Label>
+        <ButtonGroup>
+          <CheckboxItem
+            isChecked={option3}
+            onCheckChange={setOption3}
+          >
+            Select
+          </CheckboxItem>
+          <ButtonGroupItem>
+            View Details
+          </ButtonGroupItem>
+        </ButtonGroup>
+      </div>
+    </Section>
+  );
+};
+
+// Add this new section component for DropdownItem examples
+const DropdownButtonsSection = () => {
+  return (
+    <Section title="Dropdown Button Groups" columns={3}>
+      <div className="flex flex-col space-y-4">
+        <Label>Basic Dropdown</Label>
+        <DropdownItem
+          dropdownOptions={[
+            { label: "Edit", onClick: () => null },
+            { label: "Duplicate", onClick: () => null },
+            { label: "Delete", onClick: () => null },
+          ]}
+        >
+          Actions
+        </DropdownItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Dropdown with Icon</Label>
+        <DropdownItem
+          dropdownOptions={[
+            { label: "Last 7 days", onClick: () => null },
+            { label: "Last 30 days", onClick: () => null },
+            { label: "Last 90 days", onClick: () => null },
+          ]}
+        >
+          <CalendarIcon className="h-4 w-4 " />
+          Time Period
+        </DropdownItem>
+      </div>
+
+      <div className="flex flex-col space-y-4">
+        <Label>Dropdown in Button Group</Label>
+        <ButtonGroup>
+          <ButtonGroupItem>
+            Filter Results
+          </ButtonGroupItem>
+          <DropdownItem
+            dropdownOptions={[
+              { label: "Name (A-Z)", onClick: () => null },
+              { label: "Date (Newest)", onClick: () => null },
+              { label: "Price (Low-High)", onClick: () => null },
+            ]}
+          />
+        </ButtonGroup>
+      </div>
+    </Section>
+  );
+};
+
+// Main Component - update to include the new sections
 const ButtonPlayground = () => (
   <div className="min-h-screen p-8">
     <div className="flex flex-col">
       <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
         Button Playground
       </h1>
-      
+
       <ButtonGroupSection />
-      <CustomItemsSection />
+      <CheckboxButtonsSection />
+      <DropdownButtonsSection />
+      <RadioButtonsSection />
+      <SwitchButtonsSection />
       <VariantsSection />
       <SizesSection />
       <IconButtonsSection />
