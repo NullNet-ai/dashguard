@@ -6,21 +6,28 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useSidebar } from '~/components/ui/sidebar'
 import { cn } from '~/lib/utils'
-import { reorderItems } from '~/utils/sort-tab-items'
+import { reorderItems, reorderShowActiveItem } from '~/utils/sort-tab-items'
 
 import InnerTabsContent from './InnerTabsContent'
+import { api } from '~/trpc/react'
+import useWindowSize from '~/hooks/use-resize'
 
 type InnerTabItemsProps = {
   tabs: any[]
   pathname?: string
-}
+  variant?: 'drawer' | 'dropdown'
+} 
 
-const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
+const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const { isBannerPresent } = useSidebar()
   const newPathname = usePathname()
-
-  const [application, code] = (newPathname || '').split('/').slice(3)
+  const [cachedItem, setCachedItem] = useState<any>({})
+  
+  const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  const {width} = useWindowSize();
+  const [newtabs, setNewtabs] = useState<any>([])
 
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
@@ -39,48 +46,36 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
     };
   }, [])
 
-  // Add this state to handle client-side rendering
-  const [isClient, setIsClient] = useState(false)
-
   useEffect(() => {
     setIsClient(true)
   }, [])
 
+  useEffect(() => {
+    if(!isClient) {
+      setCachedItem(tabs)
+    }
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+    setCachedItem(cachedItems?.[`inner_tab_data_${entity}`])
+  }, [code, isClient, tabs])
+  
+
   const sortTabsActiveWillSecond = useMemo(() => {
-    if (!isClient) return tabs
+    if (!isClient) {
+      return tabs?.map(tab => ({...tab, id: tab?.name}))
+    }
 
     if (tabs.length) {
-      const activeIndex = tabs.findIndex(a => a.name === code)
-      const activeItem = tabs.find(a => a.name === code)
-      const prevCurrent = Cookies.get('prevCurrent')
-      // const copiedItem = JSON.parse(Cookies.get('innerCopiedLastItems') || '[]')
-      const copiedItem: any[] = []
-      const prevActiveIndex = tabs.findIndex(a => a.name === prevCurrent)
-      const prevActiveItem = tabs.find(a => a.name === prevCurrent)
-      if (copiedItem?.length) {
-        const result = reorderItems(copiedItem, prevActiveItem, activeItem?.name)
-        return result.filter(Boolean)
-      }
 
-      if (activeIndex !== -1) {
-        const result = [...tabs]
-        const activeTab = result.splice(activeIndex, 1)[0]
-        if (prevActiveIndex !== -1 && prevCurrent !== code) {
-          const prevActiveTab = result.splice(prevActiveIndex > activeIndex ? prevActiveIndex - 1 : prevActiveIndex, 1)[0]
-          result.splice(1, 0, activeTab)
-          result.splice(2, 0, prevActiveTab)
-        }
-        else {
-          result.splice(1, 0, activeTab)
-        }
-
-        return result.filter(Boolean)
-      }
-
-      return tabs.filter(Boolean)
+      const newTabs = tabs?.map(tab => ({...tab, id: tab?.name}))
+      const activeItem = newTabs.find(a => a.name === code)
+      const copiedItem: any[] = cachedItem?.tabs?.length  ? cachedItem?.tabs :  newTabs || []
+      const result =  reorderShowActiveItem(copiedItem, code ?? '', application ?? '')
+      return result
+      
     }
-    return tabs.filter(Boolean)
-  }, [tabs, code, isClient])
+    return tabs?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
+  }, [tabs, code, isClient, cachedItem, width])
+  
 
   return (
     <nav
@@ -94,6 +89,8 @@ const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
         isWindowLoaded={isWindowLoaded}
         application={application}
         code={code}
+        cachedItems={cachedItem}
+        variant={variant}
       />
 
     </nav>

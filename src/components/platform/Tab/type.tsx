@@ -3,3 +3,7 @@ export interface IPropsTabList {
   href: string;
   current: boolean;
 }
+
+export interface InnerTabsProps  {
+  variant?: 'dropdown' | 'drawer'
+}

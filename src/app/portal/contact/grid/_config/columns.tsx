@@ -72,6 +72,11 @@ const gridColumns = [
         return <StatusCell key={index} value={organization} />;
       });
     },
+    search_config : {
+      entity: "organization",
+      field: "name",
+      operator: 'like'
+    }
   },
   {
     header: "Updated Date",

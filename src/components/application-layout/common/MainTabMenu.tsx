@@ -4,11 +4,6 @@ import { lowerCase } from 'lodash';
 import { EllipsisVertical, FileX, FileX2, StarIcon } from 'lucide-react'
 
 import {
-  closeAllInnerClassTabs,
-  closeInnerClassTab,
-  closeOtherInnerClassTabs,
-} from '~/components/platform/Tab/Actions/InnerTabActions'
-import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -16,18 +11,22 @@ import {
   DropdownMenuItem,
 } from '~/components/ui/dropdown-menu'
 
-const TabMenu = ({
+const MainTabMenu = ({
   current,
   href,
+  tab,
   tabs,
   name,
-  entity
+  entity,
+  actions,
 }: {
   current: boolean
   href: string
   tabs: any
   name: string
   entity: string
+  actions?: any
+  tab: any
 }) => {
   if (name === 'Grid') return null
   return (
@@ -52,17 +51,12 @@ const TabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
-         
-            void closeInnerClassTab({
-              pathname: href,
-              current,
-              tabs,
-            })
+            actions?.closeTab(tab)
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
@@ -80,17 +74,14 @@ const TabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
 
-            void closeOtherInnerClassTabs({
-              pathname: href,
-              current,
-              tabs,
-            })
+            actions?.closeOtherTabs(tab)
+
           }}
         >
           <FileX2 className="h-4 w-4 text-default/60" aria-hidden="true" />
@@ -108,17 +99,13 @@ const TabMenu = ({
 
             localStorage.setItem('cachedPortalItems', JSON.stringify({
               ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
+              main_tab_data: {
+                ...cachedItems?.main_tab_data,
                 tabs: newItems,
               }
             }))
 
-            void closeAllInnerClassTabs({
-              pathname: href,
-              current,
-              tabs,
-            })
+            actions?.closeAllTabs(tab)
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
@@ -134,4 +121,4 @@ const TabMenu = ({
   )
 };
 
-export default TabMenu
+export default MainTabMenu

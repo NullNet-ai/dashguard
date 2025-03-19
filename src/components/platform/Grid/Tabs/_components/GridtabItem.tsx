@@ -9,6 +9,8 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import GridMenu from '../GridMenu';
+import GridMenuClient from '../GridMenuClient';
 
 type InnerTabitemProps = {
   tab: any
@@ -20,7 +22,7 @@ type InnerTabitemProps = {
   lastShownItem: any
 }
 
-const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
+const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   tab,
   pathname,
   newItems,
@@ -34,14 +36,6 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   const [, , entityName, application, code] = (newPathname || '').split('/')
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
 
-  const isActive = useMemo(() => {
-    if (isGrid && application === 'grid') {
-      return true
-    }
-
-    return code === tab?.name
-  }, [code, application])
-
   const getActiveName = () => {
     if (isGrid && application === 'grid') {
       return 'grid'
@@ -49,36 +43,31 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     return code
   }
 
-  const handleClickLink = () => {
+  const handleClickLink = (tab : any) => {
     if (isHidden) {
       return
     }
+
     const getCurrent = getActiveName() || ''
 
     const cachedData = {
-      tabs: newItems,
+      tabs: [...newItems].map(item => {
+            return { ...item, current: item.id === tab.id }
+      }),
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'inner_tab_data_' + entityName,
+      key:  'grid_tab_' + entityName,
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`inner_tab_data_${entityName}`]: cachedData,
+      [`grid_tab_${entityName}`]: cachedData,
     }))
 
     // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
     // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
   }
-
-  useEffect(() => {
-    void updateSubtabs.mutateAsync({
-      current_context: '/portal/' + entityName,
-      is_active: isActive,
-      tab_name: tab.name,
-    })
-  }, [isActive])
 
 
   const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
@@ -87,7 +76,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       ref={ref}
       key={tabNameRole}
       className={cn(
-        `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
+        `group relative group bg-tertiary rounded-md whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
       {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
@@ -104,27 +93,34 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             entityName + '-apptab-' + tabNameRole
           }
           onClick={() => {
-            handleClickLink()
+            handleClickLink(tab)
           }}
           href={isHidden ? `${newPathname}#` : tab.href}
-          aria-current={isActive ? 'page' : undefined}
+          aria-current={tab.current ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pr-0' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            tab.current ? 'text-primary ' : 'text-default/70', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pr-0' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}
-          <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
         </Link>
   
       {!isHidden
         ? (
-            <TabMenu
-              current={!!tab.href.match(pathname)}
-              href={tab.href}
-              tabs={newItems}
-              name={tabNameRole}
-              entity={entityName || ''}
+
+            <GridMenuClient 
+                tab={tab} 
+                filter_id={tab?.id} 
+                current={!!tab.href.match(pathname)}
+                tabs={newItems}
+                entity={entityName || ''}
             />
+            // <TabMenu
+            //   current={!!tab.href.match(pathname)}
+            //   href={tab.href}
+            //   tabs={newItems}
+            //   name={tabNameRole}
+            //   entity={entityName || ''}
+            // />
           )
         : (
             null
@@ -133,6 +129,6 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   );
 });
 
-InnerTabitem.displayName = 'InnerTabitem';
+GridTabItem.displayName = 'GridTabItem';
 
-export default InnerTabitem;
+export default GridTabItem;
