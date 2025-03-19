@@ -47,7 +47,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
           }}
           inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
         />
-        <div className='top-[24px] w-[57px] h-[65%] absolute left-[-3px] z-[100]' />
+        <div className='top-[24px] w-[59px] h-[65%] absolute left-[-3px] z-[100]' />
       </div>
 
       <div className="w-full md:w-1/2">
