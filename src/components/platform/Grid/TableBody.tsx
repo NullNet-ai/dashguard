@@ -176,7 +176,7 @@ export default function MyTableBody({
                       colSpan={state?.table.getVisibleLeafColumns().length}
                       className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
                     >
-                      <GridGroupingExpansion rowData={row.original} />
+                      <GridGroupingExpansion rowData={row.original} config={state.config} initial_columns={state?.initial_columns} grouping={['categories']} />
                         {/* {React.cloneElement(<GridGroupingExpansion />, {
                           rowData: row.original,
                           parentExpanded: allExpandedRows,

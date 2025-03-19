@@ -8,6 +8,7 @@ import {
   type ColumnDef,
   type Row,
   type Table,
+  GroupingState,
 } from '@tanstack/react-table';
 import { type ReactElement } from 'react';
 
@@ -167,7 +168,9 @@ export interface IState {
     infiniteData ?: any[];
     infiniteCount?: number;
     bufferData?: any[];
-  }
+  },
+  initial_columns: CustomColumnDef<any>[];
+  grouping?: GroupingState;
 }
 
 export interface IAction {
@@ -218,6 +221,7 @@ export interface IPropsGrid {
   advanceFilter?: ISearchItem[];
   parentExpanded?: IExpandedRow[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
+  grouping?: GroupingState
 }
 
 export interface IExpandedRow {
@@ -228,4 +232,11 @@ export interface IExpandedRow {
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
   parentExpanded?: IExpandedRow[];
+}
+
+export interface IGridGroupingExpansionProps {
+  config: IConfigGrid;
+  rowData: Record<string, any>;
+  initial_columns: CustomColumnDef<any>[];
+  grouping?: GroupingState;
 }

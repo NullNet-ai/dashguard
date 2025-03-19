@@ -76,6 +76,7 @@ export default function GridProvider({
   pagination,
   parentType,
   gridLevel = 1,
+  grouping: initialGrouping = []
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -110,7 +111,7 @@ export default function GridProvider({
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
-  const [grouping, setGrouping] = React.useState<GroupingState>([]);
+  const [grouping, setGrouping] = React.useState<GroupingState>(initialGrouping?.length ? initialGrouping : []);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -518,7 +519,7 @@ export default function GridProvider({
     accessorKey: 'value',
     cell: ({ row }) => {
       const value = row?.original?.value;
-      return <StatusCell value={value} />;
+      return <StatusCell key={value} value={value} />;
     },
   });
 
@@ -583,6 +584,7 @@ export default function GridProvider({
           columns = [...columns, actionRow?.current];
         }
 
+        console.log("🚀 ~ columns:", columns)
         return columns;
     }
   };
@@ -770,6 +772,8 @@ export default function GridProvider({
     hasMore,
     gridLevel,
     infinite_options: infinite_state,
+    initial_columns: config?.columns,
+    grouping
   } as IState;
   const actions = {
     handleCreate,

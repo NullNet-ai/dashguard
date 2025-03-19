@@ -2,15 +2,16 @@
 import Grid from '~/components/platform/Grid/Client';
 import StatusCell from '~/components/ui/status-cell';
 
-import { type IExpansionComponentProps } from '~/components/platform/Grid/types';
+import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import GridProvider from '../Provider';
 import MyTableBody from '../TableBody';
 import gridColumns from '~/app/portal/contact/grid/_config/columns';
 import { defaultAdvanceFilter } from '~/app/portal/contact/grid/_config/advanceFilter';
+import { Table } from 'lucide-react';
 
-const GridGroupingExpansion = (props: IExpansionComponentProps) => {
-  const { rowData } = props ?? {};
+const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
+  const { rowData, config, initial_columns, grouping } = props ?? {};
   const { field, value } = rowData ?? {};
   const _pluck = [
     'id',
@@ -98,7 +99,7 @@ const GridGroupingExpansion = (props: IExpansionComponentProps) => {
     {
       id: '1',
       is_group_by: true,
-      value: ['Contact'],
+      value: 'Contact',
       field: 'categories',
       contacts: {
         status: 'Active',
@@ -110,12 +111,8 @@ const GridGroupingExpansion = (props: IExpansionComponentProps) => {
   return (
     <GridProvider
       // advanceFilter={advanceFilter}
-      config={{
-        columns: gridColumns,
-        entity: 'contact',
-        enableRowExpansion: true,
-      }}
-      data={items}
+      config={{ ...config, columns: initial_columns }}
+      data={sampleDistinctData}
       // defaultAdvanceFilter={defaultAdvanceFilter}
       defaultSorting={defaultSorting}
       // initialSelectedRecords={initialSelectedRecords}
@@ -123,11 +120,13 @@ const GridGroupingExpansion = (props: IExpansionComponentProps) => {
       // parentType={parentType}
       sorting={defaultSorting}
       totalCount={totalCount}
+      grouping={grouping}
       // onSelectRecords={onSelectRecords}
       // gridLevel={gridLevel}
       // gridType={gridType}
     >
       <div className="hidden lg:grid">
+        {/* <Table> */}
         <MyTableBody
           // reachEnd={isEndReached}
           // showAction={showAction}
@@ -136,6 +135,7 @@ const GridGroupingExpansion = (props: IExpansionComponentProps) => {
           showPagination={false}
           // parentExpanded={parentExpanded}
         />
+        {/* </Table> */}
       </div>
     </GridProvider>
   );
