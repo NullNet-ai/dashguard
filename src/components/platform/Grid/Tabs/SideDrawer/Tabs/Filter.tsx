@@ -69,15 +69,20 @@ export default function FilterContent() {
   });
 
   // Watch for changes and update filter
-  form.watch((data, { name }) => {
+  form.watch((data, { name, type }) => {
     if (data.filterGroups) {
-      // Check if the changed field is either 'field' or 'operator'
-      if (name?.includes('.field') || name?.includes('.operator')) {
-        const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
+      // Only reset values when field or operator changes for the specific filter
+      if (type === 'change' && (name?.includes('.field') || name?.includes('.operator'))) {
+        const [_, groupIndex, __, filterIndex, fieldType] = name?.split('.') || [];
         
-        // Reset the values field for the corresponding filter
-        if (groupIndex && filterIndex) {
-          form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
+        // Only clear values if it's a field or operator change for a criteria type filter
+        if (groupIndex && filterIndex && (fieldType === 'field' || fieldType === 'operator')) {
+          const currentFilter = data.filterGroups[Number(groupIndex)]?.filters?.[Number(filterIndex)];
+          
+          // Skip clearing values for junction operator changes
+          if (currentFilter?.type === 'criteria' && !name?.includes('groupOperator')) {
+            form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
+          }
         }
       }
       
