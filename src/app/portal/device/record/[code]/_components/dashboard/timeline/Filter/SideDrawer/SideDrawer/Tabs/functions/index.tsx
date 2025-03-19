@@ -87,7 +87,6 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
     const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || [];
     return options;
   };
-  
   const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`); // Get selected value
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
   
@@ -96,7 +95,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   
   
   form.watch((fields) => {
-    handleUpdateFilter({ default_filter: fields.filterGroups })
+    handleUpdateFilter({ filterGroups: fields.filterGroups })
   })
 
   useEffect(() => {
@@ -134,18 +133,19 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   const handleRemoveFilter = (index: number) => {
     
     remove([index - 1, index])
-    handleUpdateFilter({ default_filter: form.getValues().filters })
+    handleUpdateFilter({ filterGroups: form.getValues().filters })
   }
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <Form {...form}>
         <div className="space-y-4">
-          {fields.map((field: any, index) => {    
+          {fields?.[groupIndex]?.filters?.map((field: any, index) => {    
             const prefix = `filterGroups.${groupIndex}.filters.${index}`
-            
+          
             const filterData =
             form.getValues().filterGroups?.[groupIndex]?.filters[index];
+          
             
             if(!filterData) return null
             
@@ -177,7 +177,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                   </div>
                 )}
 
-                {//required_fields?.includes(field?.field) && 
+                {required_fields?.includes(field?.field) && 
                 (
                   <FormModule
                     fields={[
