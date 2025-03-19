@@ -62,7 +62,7 @@ const FormMultiField = ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const fieldhook = !parentProps ? useFieldArray({
     control: form.control,
-    name: 'example_field_only',
+    name: formRenderProps.field.name,
     shouldUnregister: true,
   }) : null
 
@@ -70,7 +70,7 @@ const FormMultiField = ({
 
   const register = parentProps ? parentProps?.customMeta?.register : form.register
 
-  const { fields, append, move, remove, update } = parentProps?.customMeta || fieldhook
+  const { fields, append, move, remove, update, replace } = parentProps?.customMeta || fieldhook
 
   const { form: newForm } = parentProps ?? {}
 
@@ -78,8 +78,24 @@ const FormMultiField = ({
   const isHidden = fieldConfig.hidden
 
   const defValue = fieldConfig.multiFieldConfig?.fields?.name
-    ? { [fieldConfig.multiFieldConfig.fields.name]: '', fieldType: 'input' }
-    : { name: '', fieldType: 'input' }
+    ? { [fieldConfig.multiFieldConfig.fields.name]: '', fieldType: 'input', order: 1 }
+    : { name: '', fieldType: 'input', order: 1 }
+
+    useEffect(() => {
+     if(!parentProps) {
+      if (fields.some((field: any, index: number) => field.order !== index + 1)) {
+        const newFields = fields.map((field: any, index: number) => {
+          const { id, ...rest } = field;
+          return {
+            ...rest,
+            order: index + 1,
+          };
+        });
+        replace(newFields);
+      }
+     }
+    }, [fields, parentProps]);
+  
 
   useEffect(() => {
     if (!parentProps && !fields?.length) {
@@ -123,7 +139,7 @@ const FormMultiField = ({
     }
 
     const handleChange = (e: string) => {
-      form.setValue(`${customname ? customname : `${fieldConfig.name} {index}.${field.name}`}`, e, {
+      form.setValue(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`, e, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
@@ -136,7 +152,7 @@ const FormMultiField = ({
           <FormItem>
             <FormControl>
               <Input
-                {...register(`${customname ? customname : `${fieldConfig.name} {index}.${field.name}`}`)}
+                {...register(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`)}
                 {...commonProps}
                 placeholder={field.placeholder}
               />
@@ -148,9 +164,9 @@ const FormMultiField = ({
           <FormItem>
             <FormControl>
               <Select
-                {...register(`${customname ? customname : `${fieldConfig.name} {index}.${field.name}`}`)}
+                {...register(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`)}
                 defaultValue={form.getValues(
-                  `${customname ? customname : `${fieldConfig.name} {index}.${field.name}`}`,
+                  `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`,
                 )}
                 onValueChange={handleChange}
               >
@@ -184,6 +200,7 @@ const FormMultiField = ({
             name: option.label,
             fieldType: option.fieldType,
             optionId: index,
+            order: fields.length + 1,
           })
         }
         else {
@@ -193,8 +210,9 @@ const FormMultiField = ({
           const newFields: any = [...parentFields, {
             name: option.label,
             fieldType: option.fieldType,
-            id: crypto.randomUUID(),
+            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             value: '',
+            order: customFields.length + 1,
             optionId: index,
           }]
           setCustomFields(newFields)
@@ -203,8 +221,7 @@ const FormMultiField = ({
             metadata: {
               fields: newFields,
             },
-            optionId: index,
-            order: newFields.length - 1,
+            order: newFields.length,
             tabName: parentProps.tabName,
             component: parentProps.component,
             tabChildren: parentProps.tabChildren,
@@ -213,6 +230,7 @@ const FormMultiField = ({
       },
     }
   }) ?? []
+
 
   return (
     <FormItem>
@@ -242,16 +260,23 @@ const FormMultiField = ({
             }
             else {
               const parentFields = parentProps.metadata.fields
+
+          
               const parentIndex = parentProps.index
               const newFields: any = [...parentFields]
               newFields.splice(overIndex, 0, newFields.splice(activeIndex, 1)[0])
-              setCustomFields(newFields)
+
+              const withOrder = newFields.map((f: any, i: number) => ({
+                ...f,
+                order: i + 1,
+              }))
+              setCustomFields(withOrder)
               update(parentIndex, {
                 id: parentProps.id,
                 metadata: {
-                  fields: newFields,
+                  fields: withOrder,
                 },
-                order: newFields.length - 1,
+                order: withOrder.length - 1,
                 tabName: parentProps.tabName,
                 component: parentProps.component,
                 tabChildren: parentProps.tabChildren,
