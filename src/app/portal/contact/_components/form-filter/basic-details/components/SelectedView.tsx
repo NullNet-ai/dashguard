@@ -10,7 +10,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
   const [email_data] = emails || [];
   return (
     <div className="flex flex-col gap-y-4 md:gap-y-0 md:flex-row">
-      <div className="w-full md:w-1/2">
+      <div className="w-full md:w-1/2 relative">
         <Label className={cn("text-md font-semibold")}>
           Primary Phone Number: *
         </Label>
@@ -25,6 +25,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
               colorScheme: "normal",
             },
           }}
+          
           defaultCountry={phone_data?.iso_code || "us"}
           required={true}
           value={`+${phone_data?.raw_phone_number}`}
@@ -35,6 +36,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
           inputProps={{
             readOnly: true
           }}
+          disableCountryGuess
           inputStyle={{
             width: "100%",
             backgroundColor: "transparent",
@@ -45,6 +47,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
           }}
           inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
         />
+        <div className='top-[24px] w-[57px] h-[65%] absolute left-[-3px] z-[100]' />
       </div>
 
       <div className="w-full md:w-1/2">
