@@ -996,13 +996,21 @@ export const gridRouter = createTRPCRouter({
     )
    .query(async ({ ctx, input }) => {
       const { entity, field } = input;
-      // const query = ctx.dnaClient.distinctValues({
-      //   entity,
-      //   token: ctx.token.value,
-      //   field,
-      // });
-      // const result = await query.execute();
-      // const { data } = result;
-      // return data;
+      const query = ctx.dnaClient.findAll({
+        entity: entity,
+        token: ctx.token.value,
+        query: {
+          pluck: [field],
+        },
+      }).groupBy({
+        query: {
+          fields: [field],
+          has_count: true,
+        }
+      });
+      const result = await query.execute();
+      const { data } = result;
+      console.log("🚀 ~ .query ~ result:", result)
+      return data;
     }),
 });

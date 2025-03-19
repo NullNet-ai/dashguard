@@ -2,7 +2,10 @@
 import Grid from '~/components/platform/Grid/Client';
 import StatusCell from '~/components/ui/status-cell';
 
-import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
+import {
+  IConfigGrid,
+  type IGridGroupingExpansionProps,
+} from '~/components/platform/Grid/types';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import GridProvider from '../Provider';
 import MyTableBody from '../TableBody';
@@ -13,6 +16,7 @@ import { Table } from 'lucide-react';
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const { rowData, config, initial_columns, grouping } = props ?? {};
   const { field, value } = rowData ?? {};
+  console.log('🚀 ~ GridGroupingExpansion ~ rowData:', rowData);
   const _pluck = [
     'id',
     'code',
@@ -108,11 +112,23 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     },
   ];
 
+  const hasGroupItem = grouping?.length;
+
+  const gridGroupByConfig = {
+    disableDefaultAction: true,
+    enableRowClick: false,
+    enableRowExpansion: true
+  };
+
   return (
     <GridProvider
       // advanceFilter={advanceFilter}
-      config={{ ...config, columns: initial_columns }}
-      data={sampleDistinctData}
+      config={{
+        ...config,
+        columns: initial_columns,
+        ...(hasGroupItem ? gridGroupByConfig : {}),
+      }}
+      data={grouping?.length ? sampleDistinctData : items}
       // defaultAdvanceFilter={defaultAdvanceFilter}
       defaultSorting={defaultSorting}
       // initialSelectedRecords={initialSelectedRecords}
@@ -132,7 +148,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
           // showAction={showAction}
           // gridLevel={gridLevel}
           // isLoading={isLoading}
-          showPagination={false}
+          showPagination={!grouping?.length}
           // parentExpanded={parentExpanded}
         />
         {/* </Table> */}
