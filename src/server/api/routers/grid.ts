@@ -874,20 +874,21 @@ export const gridRouter = createTRPCRouter({
         .filter(Boolean),
     );
     const tabDetails = Array.isArray(sorting) ? sorting : [];
-
     const reportPagination: IPagination =
       typeof pagination === 'object' ? pagination : {};
 
-    const filter: ISearchItem[] = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_filter ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.default_filter ?? []);
+    const filterDetails = filter_id
+      ? (tabDetails?.find((tab) => tab.id === filter_id))
+      : (tabDetails?.find((tab) => tab.current));
+
+    const filter: ISearchItem[] = filterDetails.default ? filterDetails?.advance_filters : filterDetails?.default_filter;
 
     const groupAdvanceFilters: ISearchItem[] = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)
           ?.group_advance_filters ?? [])
       : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
 
-    const defaultFilters = filter.filter((item) => item.default === true);
+    const defaultFilters = (filter ?? []).filter((item) => item.default === true);
     const sorts: ISortBy = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
       : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
