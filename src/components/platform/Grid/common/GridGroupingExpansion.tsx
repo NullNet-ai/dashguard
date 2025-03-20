@@ -144,12 +144,6 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
 
   const { items = [], totalCount = 0 } = data ?? {};
 
-  const gridGroupByConfig = {
-    disableDefaultAction: true,
-    enableRowClick: false,
-    enableRowExpansion: true,
-  };
-
   if (isLoading && !items?.length) {
     return (
       <div

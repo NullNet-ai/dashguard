@@ -3,21 +3,19 @@
 import { Button as Button2, Button as HeadlessBtn } from '@headlessui/react';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import {
-  type ColumnDef,
-  type ColumnSizingState,
+  type GroupingState,
+  flexRender,
   // eslint-disable-next-line import/named
   getCoreRowModel,
+  useReactTable,
+  type ColumnDef,
+  type ColumnSizingState,
   type Row,
   type RowSelectionState,
   type SortingState,
-  type Updater,
-  useReactTable,
-  getGroupedRowModel,
-  GroupingState,
-  getExpandedRowModel,
-  flexRender,
+  type Updater
 } from '@tanstack/react-table';
-import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -26,9 +24,13 @@ import { Checkbox } from '~/components/ui/checkbox';
 import StatusCell from '~/components/ui/status-cell';
 import { useToast } from '~/context/ToastProvider';
 
+import { TooltipProvider } from '~/components/ui/tooltip';
+import { formatGroupByResult } from '~/server/utils/formatGroupByResult';
 import { BulkArchive } from './Action/BulkArchive';
 import { Create } from './Action/Create';
+import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
 import { UpdateReportSorting } from './Action/UpdateReportSorting';
+import type { IGroupBy } from './Category/type';
 import {
   ArchiveComponent,
   DeleteComponent,
@@ -46,13 +48,6 @@ import {
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
-import { TooltipProvider } from '~/components/ui/tooltip';
-import { FetchInfiniteData } from './Action/FetchInfiniteData';
-import { Badge } from '~/components/ui/badge';
-import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
-import { use } from 'chai';
-import { formatGroupByResult } from '~/server/utils/formatGroupByResult';
-import { initial } from 'lodash';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -94,10 +89,10 @@ export default function GridProvider({
   const resolvedGroupings = useMemo(() => {
     if (!initialGrouping?.length) return [];
     if (typeof initialGrouping[0] === 'string') return initialGrouping;
-    return initialGrouping?.reduce((acc: GroupingState, curr) => {
+    return (initialGrouping as IGroupBy[])?.reduce((acc: GroupingState, curr) => {
       return [...acc, curr.value];
     }, []);
-  }, [initialGrouping]);
+  }, [initialGrouping]) as GroupingState;
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
@@ -119,10 +114,10 @@ export default function GridProvider({
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {
-      ...initialGrouping?.reduce((acc: any, curr) => {
+      ...resolvedGroupings?.reduce((acc: any, curr) => {
         return {
           ...acc,
-          [curr.value]: false,
+          [curr]: false,
         };
       }, {}),
     };
@@ -169,29 +164,6 @@ export default function GridProvider({
     default: true,
   })) as ISearchItem[];
 
-  const sampleDistinctData = [
-    {
-      id: '1',
-      is_group_by: true,
-      value: 'Active',
-      field: 'status',
-      contacts: {
-        status: 'Active',
-        count: 2,
-      },
-    },
-    {
-      id: '2',
-      is_group_by: true,
-      value: 'Draft',
-      field: 'status',
-      contacts: {
-        status: 'Draft',
-        count: 1,
-      },
-    },
-  ];
-
   if (!!_propsConfig?.columnsOrder?.length) {
     _propsConfig.columns = sortColumns(
       _propsConfig?.columnsOrder,
@@ -229,15 +201,6 @@ export default function GridProvider({
     }
   }, [initialSorting]);
 
-  const gridGroupByConfig = useMemo(
-    () => ({
-      disableDefaultAction: true,
-      enableRowClick: false,
-      enableRowExpansion: true,
-    }),
-    [grouping.length],
-  );
-
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
@@ -259,7 +222,6 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
-    ...(grouping.length ? gridGroupByConfig : {}),
   };
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
@@ -621,7 +583,7 @@ export default function GridProvider({
                 return (
                   <>
                     {columnConfig.cell({
-                      row: { original: { [groupColumn]: value } },
+                      row: { original: { [groupColumn as string]: value } },
                     })}
                     <span>{`(${row?.original.count})`}</span>
                   </>
@@ -645,7 +607,7 @@ export default function GridProvider({
           };
           columns = [column, ...columns];
         }
-        if (config?.enableRowExpansion) {
+        if (config?.enableRowExpansion || grouping.length) {
           columns = [expandTableRow?.current, ...columns];
         }
         if (config?.enableRowSelection) {

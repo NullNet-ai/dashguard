@@ -40,12 +40,11 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
   const enableSorting = header.column.getCanSort();
   const [open, setOpen] = useState(false);
 
-  if (!enableSorting) {
-    return <></>;
-  }
   const formattedFilter = defaultFilter?.reduce((acc, filter, index) => {
     return `${acc} "${filter?.display_value || filter?.values?.[0]}" ${index < defaultFilter.length - 1 ? 'or' : ''}`;
   }, `${header?.column?.columnDef.header} is`);
+
+  if (header.id === 'grouping') return null;
 
   return (
     <DropdownMenu
@@ -87,28 +86,32 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
             <DropdownMenuSeparator />
           </>
         )}
-        {(!sortingState || sortingState.desc) && (
-          <DropdownMenuItem
-            className="flex gap-2"
-            onClick={() => header.column.toggleSorting(false, true)}
-          >
-            <ArrowUp className="h-4 w-4" />
-            <span>Sort by Ascending</span>
-          </DropdownMenuItem>
-        )}
-        {(!sortingState || !sortingState.desc) && (
-          <DropdownMenuItem
-            className="flex gap-2"
-            onClick={() => header.column.toggleSorting(true, true)}
-          >
-            <ArrowDown className="h-4 w-4" />
-            <span>Sort by Descending</span>
-          </DropdownMenuItem>
+        {enableSorting && (
+          <>
+            {(!sortingState || sortingState.desc) && (
+              <DropdownMenuItem
+                className="flex gap-2"
+                onClick={() => header.column.toggleSorting(false, true)}
+              >
+                <ArrowUp className="h-4 w-4" />
+                <span>Sort by Ascending</span>
+              </DropdownMenuItem>
+            )}
+            {(!sortingState || !sortingState.desc) && (
+              <DropdownMenuItem
+                className="flex gap-2"
+                onClick={() => header.column.toggleSorting(true, true)}
+              >
+                <ArrowDown className="h-4 w-4" />
+                <span>Sort by Descending</span>
+              </DropdownMenuItem>
+            )}
+          </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="flex gap-2"
-          onClick={() => header.column.getToggleGroupingHandler()()}
+          onClick={() => header.column.toggleGrouping()}
         >
           <ListFilter className="h-4 w-4" />
           <span>Group by this field</span>
