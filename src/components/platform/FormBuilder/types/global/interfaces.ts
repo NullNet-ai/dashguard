@@ -141,6 +141,14 @@ interface IField {
   multiSelectEmptyIndicator?: ReactNode;
   multiSelectHideClearAllButton?: boolean;
   multiSelectShowCreatableItem?: boolean;
+  multiSelectUseStringValues?: boolean;
+  multiSelectRenderOption?: (option: OptionType) => ReactNode;
+  multiSelectRenderBadge?: (
+    option: OptionType,
+    handleUnselect: (option: OptionType) => void,
+  ) => ReactNode;
+  multiSelectOptions?: OptionType[];
+  multiSelectOnSearch?: (search: string) => Promise<OptionType[]>;
   selectContainerClassName?: string
   multiSelectContainerClassName?: string
   richTextOutput?: 'html' | 'json' | 'text';

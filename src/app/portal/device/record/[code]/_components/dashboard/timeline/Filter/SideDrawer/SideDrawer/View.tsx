@@ -2,13 +2,12 @@ import StateTab from '~/components/platform/StateTab';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { useManageFilter } from './Provider';
-import {FilterContent}  from './Tabs/Filter';
+import FilterContent from './Tabs/Filter/FilterContent';
 
 
 export default function SideDrawer({filter_type}: {filter_type: string}) {
   const { state, actions } = useManageFilter();
-  const { tab_props, filterDetails, createFilterLoading } = state ?? {};
-  console.log("%c Line:11 🍇 createFilterLoading", "color:#7f2b82", createFilterLoading);
+  const { tab_props, filterDetails, createFilterLoading, updateFilterLoading } = state ?? {};
   const tabs = [
     {
       id: 'filter',
@@ -26,7 +25,7 @@ export default function SideDrawer({filter_type}: {filter_type: string}) {
               variant="default"
               className="bg-blue-600 text-white hover:bg-blue-700"
               onClick={actions.saveUpdatedFilter}
-              loading={createFilterLoading}
+              loading={updateFilterLoading}
             >
               ✓ Update Filter
             </Button>

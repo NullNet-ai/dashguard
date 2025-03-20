@@ -14,7 +14,6 @@ import MultipleSelector, { type Option } from "~/components/ui/multi-select";
 import { useToast } from "~/context/ToastProvider";
 import { createRecord } from "../../Actions/CreateRecord";
 import { type IField } from "../../types";
-import { cn } from "~/lib/utils";
 
 interface IProps {
   fieldConfig: IField;
@@ -32,6 +31,8 @@ interface IProps {
     undefined
   >;
   formKey: string;
+  renderOption?: (option: Option) => React.ReactNode;
+  renderBadge?: (option: Option, handleUnselect: (option: Option) => void) => React.ReactNode;
 }
 
 export default function FormMultiSelect({
@@ -41,11 +42,15 @@ export default function FormMultiSelect({
   multiSelectOnSearch,
   form,
   formKey,
+  renderOption,
+  renderBadge,
 }: IProps) {
   const { register } = form;
   const toast = useToast();
   const isDisabled = formRenderProps.field.disabled;
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
+  const useStringValues = fieldConfig.multiSelectUseStringValues ?? false;
+
 
   const createNewRecord = async (query: string) => {
     if (!fieldConfig?.selectOnCreateRecord) {
@@ -78,7 +83,7 @@ export default function FormMultiSelect({
   };
 
   return (
-    <FormItem className={cn("overflow-visible", fieldConfig?.multiSelectContainerClassName)}>
+    <FormItem className="overflow-visible">
       <FormLabel
         required={fieldConfig.required}
         data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
@@ -94,6 +99,7 @@ export default function FormMultiSelect({
           }
           data-test-id={`${formKey}-msel-${fieldConfig.name}`}
           disabled={fieldConfig.disabled || isDisabled}
+
           className={
             !!formRenderProps?.fieldState.error
               ? "border-destructive"
@@ -102,9 +108,14 @@ export default function FormMultiSelect({
           inputProps={{
             // @ts-expect-error - Not able to pass data-test-id on types
             "data-test-id": `${formKey}-inp-${fieldConfig.name}`,
-            "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string }) => item.value).join(",")}`,
+            "data-selected-value": `${formKey}-${formRenderProps?.field?.value?.map((item: { value: string } | string) => 
+              typeof item === 'string' ? item : item.value
+            ).join(",")}`,
             className: `flex w-full rounded-md border bg-background px-2 py-0 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent ${isDisabled && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 "}`,
           }}
+          renderOption={renderOption || fieldConfig.multiSelectRenderOption}
+          renderBadge={renderBadge as ((option: Option, handleUnselect: (option: Option) => void) => React.ReactNode) || fieldConfig.multiSelectRenderBadge}
+          useStringValues={useStringValues}
           onSearch={multiSelectOnSearch?.[fieldConfig.name]}
           loadingIndicator={
             fieldConfig.multiSelectLoadingIndicator ?? (

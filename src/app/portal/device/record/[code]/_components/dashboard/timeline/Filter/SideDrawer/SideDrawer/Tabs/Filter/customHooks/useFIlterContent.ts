@@ -74,7 +74,7 @@ const useFilterContentActions = (filter_type: string) => {
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
     return (
-      filterDetails.filter_groups || [
+      filterDetails.filterGroups || [
         {
           id: '1',
           groupOperator: 'and',
@@ -126,7 +126,7 @@ const useFilterContentActions = (filter_type: string) => {
         }
       }
       
-      handleUpdateFilter({ filter_groups: data.filterGroups });
+      handleUpdateFilter({ filterGroups: data.filterGroups });
     }
   });
 
