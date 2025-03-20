@@ -168,7 +168,7 @@ const InteractiveGraph = ({
       <div className="w-[70%]">
         <Card className="px-4">
           <div className='text-base py-2 pt-4'>
-            <h3>Chart Label</h3>
+            {/* <h3>Chart Label</h3> */}
           </div>
           <Form {...form}>
             <div className="grid !grid-cols-4 gap-4 pt-2">

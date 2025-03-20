@@ -6,10 +6,10 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 
-import { ManageFilterProvider } from './SideDrawer/SideDrawer/Provider'
-import GridManageFilter from './SideDrawer/SideDrawer/View'
+import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provider'
+import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import { useFilter } from './FilterProvider'
-import { columns } from './components/SideDrawer/config'
+import { columns } from './components/FilterSideDrawer/config'
 
 export default function FilterProperty({ filter , filter_type}: { filter: any,filter_type: string }) {
   

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useManageFilter } from '../../../Provider';
-import { ZodSchema } from './../../schemas/filter';
+import { ZodSchema } from '../../schemas/filter';
 
 const useFilterContentActions = (filter_type: string) => {
 
@@ -114,21 +114,21 @@ const useFilterContentActions = (filter_type: string) => {
   });
 
   // Watch for changes and update filter
-  form.watch((data, { name }) => {
-    if (data.filterGroups) {
-      // Check if the changed field is either 'field' or 'operator'
-      if (name?.includes('.field') || name?.includes('.operator')) {
-        const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
+  // form.watch((data, { name }) => {
+  //   if (data.filterGroups) {
+  //     // Check if the changed field is either 'field' or 'operator'
+  //     if (name?.includes('.field') || name?.includes('.operator')) {
+  //       const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
         
-        // Reset the values field for the corresponding filter
-        if (groupIndex && filterIndex) {
-          form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
-        }
-      }
+  //       // Reset the values field for the corresponding filter
+  //       if (groupIndex && filterIndex) {
+  //         form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
+  //       }
+  //     }
       
-      handleUpdateFilter({ filterGroups: data.filterGroups });
-    }
-  });
+  //     handleUpdateFilter({ filterGroups: data.filterGroups });
+  //   }
+  // });
 
   // Add Filter Group function
   const handleAddFilterGroup = () => {

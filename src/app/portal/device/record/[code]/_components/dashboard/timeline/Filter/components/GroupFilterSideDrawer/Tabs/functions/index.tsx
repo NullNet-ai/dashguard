@@ -63,9 +63,6 @@ const time_resolution_options: { [key: string]: string[] } = {
   '7d': ['12h', '1d'],
 }
 
-
-
-
 export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionOperator}: {
   onRemoveFilter: (index: number) => void,form: any, filter_type: string, groupIndex: number, 
   onUpdateJunctionOperator: (index: number, operator: string) => void;}) => {
@@ -87,13 +84,9 @@ export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionO
   const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`); // Get selected value
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
   
-  
-  
-  
-  
-  form.watch((fields: Record<string,any>) => {
-    handleUpdateFilter({ filterGroups: fields.filterGroups })
-  })
+  // form.watch((fields: Record<string,any>) => {
+  //   handleUpdateFilter({ filterGroups: fields.filterGroups })
+  // })
 
   useEffect(() => {
     if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders

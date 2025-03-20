@@ -6,7 +6,7 @@ import { api } from '~/trpc/react'
 
 import { type IAction, type IProps, type IFilterContext, type IState, type IData, IFilter, type SearchItem } from '../types'
 
-import {  removeFilter } from './components/SideDrawer/actions'
+import {  removeFilter } from './components/FilterSideDrawer/actions'
 
 
 export const FilterContext = createContext<IFilterContext>({})
