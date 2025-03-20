@@ -16,6 +16,10 @@ const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {},
     ...additionalStatuses,
   };
 
+  if (!value) {
+    return null;
+  }
+
   return (
     <div className="lg:my-[2px] lg:mr-[3px] my-0 flex flex-row items-start">
       <div

@@ -5,16 +5,10 @@ import { defaultSorting } from "./_config/sorting";
 import { defaultAdvanceFilter } from "./_config/advanceFilter";
 import { getGridCacheData } from "~/lib/grid-get-cache-data";
 import AccountGridExpansion from "../_components/grids/AccountGridExpansion";
+import { IGroupBy } from '~/components/platform/Grid/Category/type';
 
 // import EditComponent from "./customDefaultActions/Edit";
-export default async function Page({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-}) {
+export default async function Page() {
   const _pluck = [
     "id",
     "code",
@@ -34,7 +28,7 @@ export default async function Page({
     "updated_by",
   ];
 
-  const { sorts, pagination, filters, columns : columnOrder } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters, columns : columnOrder, groups } = (await getGridCacheData()) ?? {};
 
   const defaultPagination = pagination?.limit_per_page ? pagination : {
     current_page: +(pagination?.current_page ?? "1"),
@@ -53,6 +47,7 @@ export default async function Page({
     group_advance_filters: filters?.groupAdvanceFilters?.length
      ? filters?.groupAdvanceFilters
       : [],
+    grouping: groups?.length ? [groups[0] as IGroupBy]: [],
   });
 
   const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
@@ -65,27 +60,6 @@ export default async function Page({
   ? filters?.groupAdvanceFilters
    : gridAdvanceFilter;
 
-   const sampleDistinctData = [
-    {
-      id: '1',
-      is_group_by: true,
-      grouping: 'Active',
-      contacts: {
-        status: 'Active',
-        count: 2,
-      },
-    },
-    {
-      id: '2',
-      is_group_by: true,
-      grouping: 'Draft',
-      contacts: {
-        status: 'Draft',
-        count: 1,
-      },
-    },
-  ];
-
 
   return (
     <Grid
@@ -96,6 +70,7 @@ export default async function Page({
       advanceFilter={gridAdvanceFilter}
       sorting={sorts?.sorting || []}
       pagination={defaultPagination}
+      grouping={groups || []}
       config={{
         isInfinite: true,
         entity: "contact",

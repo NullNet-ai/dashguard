@@ -32,6 +32,10 @@ export interface ISortBy {
   sort_by_field: string;
   sort_by_direction: EOrderDirection;
 }
+export interface IGroupBy {
+  label: string;
+  value: string;
+}
 
 export interface IStoreUnSaveSorts {
   entity: string;

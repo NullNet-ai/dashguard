@@ -16,6 +16,7 @@ function MainServer({
   advanceFilter,
   pagination,
   parentType = 'grid',
+  grouping
 }: IPropsGrid) {
   return (
     <GridProvider
@@ -27,6 +28,7 @@ function MainServer({
       defaultAdvanceFilter={defaultAdvanceFilter}
       advanceFilter={advanceFilter}
       pagination={pagination}
+      grouping={grouping}
     >
       <GridScrollView className="hidden lg:block">
         <GridDesktop parentType={parentType} />

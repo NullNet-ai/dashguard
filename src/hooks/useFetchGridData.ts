@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { IGroupBy } from '~/components/platform/Grid/Category/type'
 
-import { type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
+import { ISearchItem, type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { api } from '~/trpc/react'
 
 export interface IFetchDataParams {
@@ -10,7 +11,9 @@ export interface IFetchDataParams {
   current?: number
   limit?: number
   advance_filters?: IAdvanceFilter[]
+  group_advance_filters?: ISearchItem[];
   sorting?: any[]
+  grouping?: IGroupBy[]
 }
 
 interface IData {

@@ -77,7 +77,10 @@ export default function MyTableBody({
       },
     },
   ];
-
+  const visibleLeafColumns = state?.table.getVisibleLeafColumns();
+  const visibleColumns = state?.initial_columns.filter((column) =>
+    visibleLeafColumns?.some((leafColumn) => leafColumn.columnDef.header === column.header),
+  );
 
   return (
     <>
@@ -100,7 +103,6 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-
                   if (cell.column.id === 'action') {
                     return (
                       <td
@@ -176,8 +178,16 @@ export default function MyTableBody({
                       colSpan={state?.table.getVisibleLeafColumns().length}
                       className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
                     >
-                      <GridGroupingExpansion rowData={row.original} config={state.config} initial_columns={state?.initial_columns} grouping={state.grouping?.slice(1)} />
-                        {/* {React.cloneElement(<GridGroupingExpansion />, {
+                      <GridGroupingExpansion
+                        rowData={row.original}
+                        config={state.config}
+                        initialColumns={state?.config?.group_by_initial_columns || state?.initial_columns}
+                        grouping={state.grouping?.slice(1)}
+                        visibleColumns={visibleColumns ?? []}
+                        parentGroupData={state?.config?.parentGroupData || []}
+                        gridState={state}
+                      />
+                      {/* {React.cloneElement(<GridGroupingExpansion />, {
                           rowData: row.original,
                           parentExpanded: allExpandedRows,
                           key: `expanded:${row.id ?? index}`,

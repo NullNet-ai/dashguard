@@ -26,6 +26,7 @@ import ZodSaveFilters from '~/server/zodSchema/grid/saveFilters';
 
 import { pluralize } from '../../utils/pluralize';
 import { EStatus, type IGridFilterBy, type ITabGrid } from '../types';
+import { ulid } from 'ulid';
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -759,7 +760,7 @@ export const gridRouter = createTRPCRouter({
             label: z.string().optional(),
             default: z.boolean().optional(),
             display_value: z.string().optional(),
-            filters: z.array(z.any()).optional()
+            filters: z.array(z.any()).optional(),
           }),
         ),
       }),
@@ -793,9 +794,7 @@ export const gridRouter = createTRPCRouter({
           return {
             ...tab,
             group_advance_filters:
-              tab?.group_advance_filters?.length > 0
-                ? filters
-                : [],
+              tab?.group_advance_filters?.length > 0 ? filters : [],
             advance_filters:
               tab?.group_advance_filters?.length > 0 ? [] : filters,
             default_filter: [],
@@ -899,7 +898,10 @@ export const gridRouter = createTRPCRouter({
     const gridColumns = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
       : (tabDetails?.find((tab) => tab.current)?.columns ?? []);
-
+    const groups = filter_id
+      ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
+      : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
+    
     const advanceFilter = filter?.map((item) => {
       return {
         entity: item.entity,
@@ -924,6 +926,7 @@ export const gridRouter = createTRPCRouter({
       },
       pagination: reportPagination,
       columns: gridColumns,
+      groups,
     };
   }),
   getInfiniteData: privateProcedure
@@ -987,30 +990,64 @@ export const gridRouter = createTRPCRouter({
     const reportTabs = Array.isArray(cachedReportTabs) ? cachedReportTabs : [];
     return reportTabs;
   }),
-  getDistinctValues: privateProcedure
-   .input(
+  updateReportGrouping: privateProcedure
+    .input(
       z.object({
-        entity: z.string(),
-        field: z.string(),
+        grouping: z.array(
+          z.object({
+            label: z.string(),
+            value: z.string(),
+          }),
+        ),
       }),
     )
-   .query(async ({ ctx, input }) => {
-      const { entity, field } = input;
-      const query = ctx.dnaClient.findAll({
-        entity: entity,
-        token: ctx.token.value,
-        query: {
-          pluck: [field],
-        },
-      }).groupBy({
-        query: {
-          fields: [field],
-          has_count: true,
-        }
+    .mutation(async ({ ctx, input }) => {
+      const { grouping } = input;
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const searchQueryParams =
+        headerList.get('x-full-search-query-params') || '';
+      const searchParams = new URLSearchParams(searchQueryParams);
+      const filter_id = searchParams.get('filter_id');
+      const [, , mainEntity, application] = pathName.split('/');
+      if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
+        return [];
+
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
       });
-      const result = await query.execute();
-      const { data } = result;
-      console.log("🚀 ~ .query ~ result:", result)
-      return data;
+      const menus = await ctx.redisClient.getCachedData(_tabMenuId);
+      const tabDetails = Array.isArray(menus) ? menus : [];
+      const defaultSort = filter_id
+        ? tabDetails?.find((tab) => tab.id === filter_id)
+        : tabDetails?.find((tab) => tab.current);
+
+      const newTabs = tabDetails?.map((tab) => {
+        if (tab.id === defaultSort.id) {
+          return {
+            ...tab,
+            groups: grouping,
+          };
+        }
+        return tab;
+      });
+      // if (!defaultSort.is_default) {
+      //   // update the grid filter entity on database
+      //   await ctx.dnaClient
+      //     .update(defaultSort.id, {
+      //       entity: 'grid_filter',
+      //       token: ctx.token.value,
+      //       mutation: {
+      //         params: {
+      //           sorts: sorting,
+      //           groupings:
+      //         },
+      //       },
+      //     })
+      //     .execute();
+      // }
+      await ctx.redisClient.cacheData(_tabMenuId, newTabs);
     }),
 });

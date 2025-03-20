@@ -15,6 +15,7 @@ import {
   getGroupedRowModel,
   GroupingState,
   getExpandedRowModel,
+  flexRender,
 } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -48,6 +49,10 @@ import { sortColumns } from './utils/sortColumns';
 import { TooltipProvider } from '~/components/ui/tooltip';
 import { FetchInfiniteData } from './Action/FetchInfiniteData';
 import { Badge } from '~/components/ui/badge';
+import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
+import { use } from 'chai';
+import { formatGroupByResult } from '~/server/utils/formatGroupByResult';
+import { initial } from 'lodash';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -76,7 +81,7 @@ export default function GridProvider({
   pagination,
   parentType,
   gridLevel = 1,
-  grouping: initialGrouping = []
+  grouping: initialGrouping = [],
 }: IProps) {
   const _defaultSorting = defaultSorting
     ? defaultSorting
@@ -86,6 +91,13 @@ export default function GridProvider({
           desc: true,
         },
       ];
+  const resolvedGroupings = useMemo(() => {
+    if (!initialGrouping?.length) return [];
+    if (typeof initialGrouping[0] === 'string') return initialGrouping;
+    return initialGrouping?.reduce((acc: GroupingState, curr) => {
+      return [...acc, curr.value];
+    }, []);
+  }, [initialGrouping]);
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
@@ -106,12 +118,22 @@ export default function GridProvider({
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {};
+    return {
+      ...initialGrouping?.reduce((acc: any, curr) => {
+        return {
+          ...acc,
+          [curr.value]: false,
+        };
+      }, {}),
+    };
   });
+
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
-  const [grouping, setGrouping] = React.useState<GroupingState>(initialGrouping?.length ? initialGrouping : []);
+  const [grouping, setGrouping] = React.useState<GroupingState>(
+    resolvedGroupings?.length ? resolvedGroupings : [],
+  );
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -131,7 +153,6 @@ export default function GridProvider({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
-  const [storedData, setStoredData] = useState<any[]>(data);
 
   const [gridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
@@ -208,11 +229,14 @@ export default function GridProvider({
     }
   }, [initialSorting]);
 
-  useEffect(() => {
-    if (!grouping.length) {
-      setStoredData(data);
-    }
-  }, [data, grouping.length]);
+  const gridGroupByConfig = useMemo(
+    () => ({
+      disableDefaultAction: true,
+      enableRowClick: false,
+      enableRowExpansion: true,
+    }),
+    [grouping.length],
+  );
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -235,6 +259,7 @@ export default function GridProvider({
         entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
+    ...(grouping.length ? gridGroupByConfig : {}),
   };
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
@@ -342,7 +367,7 @@ export default function GridProvider({
     handleUpdateReportSorting(updater);
   };
 
-  const handleUpdateGrouping = (updater: Updater<GroupingState>) => {
+  const handleUpdateGrouping = async (updater: Updater<GroupingState>) => {
     const newGrouping =
       typeof updater === 'function' ? updater(grouping) : updater;
 
@@ -360,7 +385,17 @@ export default function GridProvider({
       return visibility;
     });
     setGrouping(newGrouping);
-    setStoredData(sampleDistinctData);
+    const groupings = newGrouping?.map((item) => {
+      const label = config?.columns?.find(
+        (column: any) => column?.accessorKey === item,
+      )?.header as string;
+      return {
+        value: item,
+        label,
+      };
+    });
+
+    UpdateReportGrouping({ grouping: groupings });
   };
 
   /** @REFS */
@@ -517,10 +552,6 @@ export default function GridProvider({
     size: 200,
     enableResizing: false,
     accessorKey: 'value',
-    cell: ({ row }) => {
-      const value = row?.original?.value;
-      return <StatusCell key={value} value={value} />;
-    },
   });
 
   const actionTypeColumnCondition = (
@@ -572,7 +603,47 @@ export default function GridProvider({
         return [...columns, actionRow?.current];
       default:
         if (grouping.length > 0) {
-          columns = [groupByColumn.current, ...columns];
+          const groupColumn = grouping[0];
+          const configColumns =
+            config?.group_by_initial_columns || config?.columns;
+          const columnConfig = configColumns?.find(
+            (col: any) => col.accessorKey === groupColumn,
+          );
+          const column = {
+            ...groupByColumn.current,
+            cell: ({ row }) => {
+              const value = row?.original?.value;
+              if (!value) {
+                return null;
+              }
+
+              if (columnConfig?.cell) {
+                return (
+                  <>
+                    {columnConfig.cell({
+                      row: { original: { [groupColumn]: value } },
+                    })}
+                    <span>{`(${row?.original.count})`}</span>
+                  </>
+                );
+              }
+
+              return (
+                <>
+                  {flexRender(
+                    columnConfig?.cell ??
+                      ((props) => <div>{String(props.getValue())}</div>),
+                    {
+                      row: { original: { [groupColumn]: value } },
+                      getValue: () => value,
+                    },
+                  )}
+                  <span>{`(${row?.original.count})`}</span>
+                </>
+              );
+            },
+          };
+          columns = [column, ...columns];
         }
         if (config?.enableRowExpansion) {
           columns = [expandTableRow?.current, ...columns];
@@ -584,19 +655,32 @@ export default function GridProvider({
           columns = [...columns, actionRow?.current];
         }
 
-        console.log("🚀 ~ columns:", columns)
         return columns;
     }
   };
 
-  const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
-  const new_data = useMemo(() => {
-    return isMobileOrTablet && config.isInfinite ? infiniteData : storedData;
-  }, [config.isInfinite, storedData, infiniteData, isMobileOrTablet]);
+  // const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  const newData = useMemo(() => {
+    if (grouping.length) {
+      return formatGroupByResult({
+        data: data,
+        field: grouping[0] ?? '',
+        entity: config?.entity,
+      });
+    }
+    return isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  }, [
+    grouping,
+    isMobileOrTablet,
+    config.isInfinite,
+    config?.entity,
+    infiniteData,
+    data,
+  ]);
 
   /** @HOOKS */
   const table = useReactTable({
-    data: new_data,
+    data: newData,
     getRowId: (row) => row.id,
     columns: actionTypeColumnCondition(
       viewMode,
@@ -773,7 +857,7 @@ export default function GridProvider({
     gridLevel,
     infinite_options: infinite_state,
     initial_columns: config?.columns,
-    grouping
+    grouping,
   } as IState;
   const actions = {
     handleCreate,

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import Entities from "~/auto-generated/entities";
+import { z } from 'zod';
+import Entities from '~/auto-generated/entities';
 
 const ZodItems = z.object({
   entity: z.string().refine(
@@ -7,7 +7,7 @@ const ZodItems = z.object({
       return Entities.includes(value);
     },
     {
-      message: "Invalid entity name. It must be one of the DnaOrm models.",
+      message: 'Invalid entity name. It must be one of the DnaOrm models.',
     },
   ), // Optional entity filter if needed
   limit: z.number().min(1).optional(), // Limit of items per page
@@ -34,7 +34,7 @@ const ZodItems = z.object({
       }),
     )
     .optional(), // Optional sorting
-    group_advance_filters: z
+  group_advance_filters: z
     .array(
       z.object({
         type: z.string(),
@@ -44,7 +44,16 @@ const ZodItems = z.object({
         operator: z.string().or(z.any()).optional(),
         values: z.array(z.string()).optional(),
       }),
-    ).optional(), // Optional group advance filters
+    )
+    .optional(), // Optional group advance filters
+  grouping: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional(), // Optional groupings
 });
 
 export default ZodItems;
