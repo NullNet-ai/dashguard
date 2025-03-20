@@ -34,6 +34,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
       rest_group_items: filterGroups.slice(1),
     };
   }, [filterGroups]);
+  
 
   return (
     <div className="mt-3 max-h-[70vh] space-y-1 overflow-y-auto rounded-lg">
@@ -54,7 +55,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
         <Sortable
           value={rest_group_items.map((group) => ({ ...group, id: group.id }))}
           onMove={({ activeIndex, overIndex }) => {
-            handleFilterGroupMove(activeIndex, overIndex);
+            handleFilterGroupMove(activeIndex + 1, overIndex+ 1);
           }}
         >
           {rest_group_items.map((group, idx) => {

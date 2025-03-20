@@ -71,6 +71,7 @@ const time_resolution_options: { [key: string]: string[] } = {
 
 export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOperator}: {form: any, filter_type: string, groupIndex: number, 
   onUpdateJunctionOperator: (index: number, operator: string) => void;}) => {
+    
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { columns, errors} = state ?? {}
@@ -79,6 +80,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
     control: form.control,
     name: 'filterGroups',
   })
+  
   
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
@@ -140,9 +142,13 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <Form {...form}>
         <div className="space-y-4">
-          {fields?.[groupIndex]?.filters?.map((field: any, index) => {    
-            const prefix = `filterGroups.${groupIndex}.filters.${index}`
-          
+          {fields?.[groupIndex]?.filters?.map((field: any, index) => {  
+            const no_group_filter = form.getValues()?.filterGroups?.length == 1
+            
+            const default_filter_last_operation = (groupIndex == 0 && fields?.[groupIndex]?.filters?.length -1 == index && no_group_filter) 
+
+            
+            const prefix = `filterGroups.${groupIndex}.filters.${index}`          
             const filterData =
             form.getValues().filterGroups?.[groupIndex]?.filters[index];
           
@@ -154,7 +160,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                 className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
                 key={field.id}
               >
-                {index > 0 && field.type === 'operator' && (
+                {((( groupIndex == 1 && index == 0)) || (index > 0 && (!default_filter_last_operation) )) && field.type === 'operator' && (
                   <div className="col-span-4 mb-2">
                     <Select
                       value={
