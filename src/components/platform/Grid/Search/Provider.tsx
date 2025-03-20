@@ -6,7 +6,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { ulid } from 'ulid';
 
 import { api } from '~/trpc/react';
 
@@ -23,6 +22,7 @@ import {
 } from './types';
 import { clearAllSearchItems, removeSearchItems } from './utils/removeSearchItems';
 import { resolveSearchItem } from './utils/resolveSearchItem';
+import { useRouter } from 'next/navigation';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
 
@@ -31,6 +31,7 @@ interface IProps extends PropsWithChildren {
 }
 
 export default function GridSearchProvider({ children }: IProps) {
+  const router = useRouter();
   const { state: gridState } = useContext(GridContext);
   const {
     columns = [],
@@ -132,13 +133,11 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    const url = await UpdateReportFilter({
+    await UpdateReportFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
     });
-
-    window.location.href = url;
-
+    router.refresh()
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery('');
@@ -150,11 +149,11 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    const url = await UpdateReportFilter({
+    await UpdateReportFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
     });
-    window.location.href = url;
+    router.refresh()
   };
 
   const handleClearSearchItems = async () => {
@@ -171,11 +170,11 @@ export default function GridSearchProvider({ children }: IProps) {
       return;
     }
 
-    const url = await UpdateReportFilter({
+    await UpdateReportFilter({
       filters: updatedSearchItems,
     });
 
-    window.location.href = url;
+    router.refresh()
   };
 
   // @use effects
