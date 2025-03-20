@@ -15,6 +15,7 @@ const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {},
     Archived: 'text-gray-600 bg-gray-400/10',
     ...additionalStatuses,
   };
+  if(!value) return null
 
   if (!value) {
     return null;

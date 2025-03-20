@@ -103,7 +103,7 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-                  if (cell.column.id === 'action') {
+                  if (cell.column.id === 'action' && !row?.original?.is_group_by ) {
                     return (
                       <td
                         key={cell.id + index}
@@ -154,7 +154,8 @@ export default function MyTableBody({
                       }}
                     >
                       <div className="flex flex-row flex-wrap gap-y-1">
-                        {flexRender(
+                        {                                   
+                        flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
                         )}
