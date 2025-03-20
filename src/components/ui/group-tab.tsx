@@ -6,6 +6,7 @@ import {
   Sortable,
 } from '~/components/ui/sortable';
 import { Button } from '~/components/ui/button';
+import { PlusIcon } from 'lucide-react';
 
 
 export type GroupTabType = {
@@ -73,12 +74,13 @@ const GroupTab = React.forwardRef<HTMLDivElement, GroupTabProps>(
             <div className="mt-2 flex justify-center">
               <Button
                 disabled={disabled}
-                className="w-[80%] border-2 border-dashed border-primary text-md text-primary"
+                className="w-[80%] border-2 border-dashed border-primary text-md text-primary flex items-center justify-center gap-x-2"
                 variant={'ghost'}
                 onClick={() => {
                   onClickAddTab?.();
                 }}
               >
+                <PlusIcon className='size-4'/>
                 Add new Attribute
               </Button>
             </div>

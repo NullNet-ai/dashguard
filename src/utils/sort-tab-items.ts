@@ -118,7 +118,8 @@ export const reorderGridTabActive = (items: any[], activeName: string, entity: s
   const result = [...items];
   
   // Find active item
-  const activeIndex = result.findIndex(item => item.name === activeName);
+  const activeIndex = result.findIndex(item => item.id === activeName);
+
   if (activeIndex === -1) return result;
   
   const activeItem = result[activeIndex];

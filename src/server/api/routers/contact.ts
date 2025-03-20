@@ -565,7 +565,7 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, emails, phones } = input;
+      const { id, emails, phones, code } = input
 
       const email_pluck = ['email', 'id', 'contact_id', 'is_primary'];
       const phone_pluck = [
@@ -580,8 +580,8 @@ export const contactRouter = createTRPCRouter({
 
       const phone_data = phones?.find((phone) => phone.is_primary);
 
-      let contact_id = id;
-      let contact_code = '';
+      let contact_id = id
+      let contact_code = code
 
       // Validate phone and email exists
       const fetchRecordData = async (

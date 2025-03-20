@@ -51,6 +51,7 @@ import FormGroupTab from '../../../FormType/FormGroupTab'
 import FormCustom from '../../../FormType/FormCustom'
 import FormComboBox from '../../../FormType/FormCombobox'
 import FormCodeEditor from '../../../FormType/FormCodeEditor'
+import FormBanner from '../../../FormType/FormBanner'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -71,6 +72,15 @@ export default function RenderFormType(
   },
 ): ReactElement {
   switch (fieldConfig?.formType) {
+    case 'banner':
+      return (
+        <FormBanner
+          fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
+        />
+      )
     case 'code-editor':
       return (
         <FormCodeEditor

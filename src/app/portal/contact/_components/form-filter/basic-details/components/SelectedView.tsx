@@ -3,18 +3,17 @@ import { EnvelopeIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/lib/utils";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+import SelectedPhoneNumber from './SelectedPhoneNumber';
 
 const SelectedView = ({ record }: Record<string, any>) => {
   const { phones, emails } = record || {};
   const [phone_data] = phones || [];
   const [email_data] = emails || [];
   return (
-    <div className="flex flex-col gap-y-4 md:gap-y-0 md:flex-row">
+    <div className="flex flex-col gap-y-4 gap-x-4 md:gap-y-0 md:flex-row">
       <div className="w-full md:w-1/2 relative">
-        <Label className={cn("text-md font-semibold")}>
-          Primary Phone Number: *
-        </Label>
-        <PhoneInput
+
+        {/* <PhoneInput
           countrySelectorStyleProps={{
             buttonStyle: {
               padding: "1.2rem",
@@ -46,6 +45,24 @@ const SelectedView = ({ record }: Record<string, any>) => {
             opacity: "inherit",
           }}
           inputClassName="ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:border-transparent text-foreground disabled:opacity-100"
+        /> */}
+
+        <SelectedPhoneNumber
+            options={{
+              type: "default",
+            }}
+            value={phone_data?.raw_phone_number}
+            fields={[
+              {
+                id: "phone_number",
+                name: "phone_number",
+                type: "phone_number",
+                formType: "phone-input",
+                label: "Primary Phone Number: *",
+                placeholder: "Phone Number",
+                readonly: true,
+              }
+            ]}
         />
         <div className='top-[24px] w-[59px] h-[65%] absolute left-[-3px] z-[100]' />
       </div>
@@ -54,7 +71,7 @@ const SelectedView = ({ record }: Record<string, any>) => {
         <Label className={cn("text-md font-semibold")}>Primary Email: *</Label>
         <Input
           readOnly={true}
-          className={`${true && "border-transparent placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100"}`}
+          className={`${true && "placeholder:text-muted-foreground disabled:text-foreground disabled:opacity-100 mt-2"}`}
           disabled={false}
           placeholder={"Primary Email"}
           value={email_data?.email}

@@ -55,9 +55,9 @@ const FormGroupTab = ({
     if (!fields?.length) {
       append([
         {
-          id: crypto.randomUUID(),
+          id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           tabName: `${fieldConfig.groupConfig?.prefix} 1`,
-          component: 'NewComingSoon',
+          component: 'Guidelines',
           order: 1,
           metadata: {},
           tabChildren: [],
@@ -84,11 +84,12 @@ const FormGroupTab = ({
             value={field.id}
             asChild
             onClick={() => {
-              if (!isDisabled) {
-                setSelected({
-                  id: field.tabName,
-                })
-              }
+              // if (!isDisabled) {
+              
+              // }
+              setSelected({
+                id: field.tabName,
+              })
             }}
           >
             <div
@@ -112,7 +113,7 @@ const FormGroupTab = ({
               <div className="min-w-[150px]">
                 <span
                   className={cn(
-                    `${isDisabled ? '!text-gray-500' : ''}`, `${field.tabName === selected?.id ? 'font-semibold text-primary' : ''}`,
+                    `${field.tabName === selected?.id ? 'font-semibold text-primary' : ''}`,
                   )}
                 >
                   {capitalize(field.tabName)}
@@ -129,23 +130,22 @@ const FormGroupTab = ({
         if (item.tabName !== selected?.id) {
           return null
         }
-        const SelectedComponent
-        = components?.find((Component: any) => {
-          // If it's a ComponentType, check its name
-          if (typeof Component === 'function' && Component.name === component) {
-            return true;
+
+        const SelectedComponent = components?.find((Component: any) => {
+          if (typeof Component === 'function') {
+            // Check both displayName and name, also allow for dynamic component property
+            return (Component.displayName || Component.name || Component._component) === component;
           }
-          // If it's a JSX.Element, check its type name
-          if (React.isValidElement(Component)
-            && typeof Component.type === 'function'
-            && Component.type.name === component) {
-            return true;
+          if (React.isValidElement(Component)) {
+            const type = Component.type;
+            return typeof type === 'function' && 
+            //@ts-expect-error temp fix
+              (type.displayName || type.name || type._component) === component;
           }
           return false;
         });
 
         if (SelectedComponent) {
-          // If it's a ComponentType, render it as a component
           if (typeof SelectedComponent === 'function') {
             return (
               <SelectedComponent
@@ -160,7 +160,6 @@ const FormGroupTab = ({
               />
             )
           }
-          // If it's a JSX.Element, return it directly
           return SelectedComponent;
         }
 
@@ -173,7 +172,7 @@ const FormGroupTab = ({
       }}
       onClickAddTab={() => {
         append({
-          id: crypto.randomUUID(),
+          id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           tabName: `${fieldConfig.groupConfig?.prefix} ${fields?.length + 1}`,
           component: DefaultComponent?.name,
           order: fields?.length + 1,

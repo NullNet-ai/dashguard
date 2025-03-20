@@ -14,12 +14,11 @@ export async function UpdateReportFilter({
   filterItemId?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get("x-pathname") || "";
   const searchParams = headerList.get("x-full-search-query-params") || "";
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
   await api.grid.updateReportFilter({
     filters,
   });
-  revalidatePath(pathName);
-  return `${pathName}?${urlSearchParams.toString()}`;
+  revalidatePath(fullUrl)
+  return fullUrl
 }
