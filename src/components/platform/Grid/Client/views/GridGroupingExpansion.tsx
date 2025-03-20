@@ -7,8 +7,8 @@ import {
   type IGridGroupingExpansionProps,
 } from '~/components/platform/Grid/types';
 import useFetchGridData from '~/hooks/useFetchGridData';
-import GridProvider from '../Provider';
-import MyTableBody from '../TableBody';
+import GridProvider from '../../Provider';
+import MyTableBody from '../../TableBody';
 import gridColumns from '~/app/portal/contact/grid/_config/columns';
 import { defaultAdvanceFilter } from '~/app/portal/contact/grid/_config/advanceFilter';
 import { Table } from 'lucide-react';
@@ -17,9 +17,11 @@ import {
   getGridCacheData,
 } from '~/lib/grid-get-cache-data';
 import { api } from '~/trpc/react';
-import { IGroupBy } from '../Category/type';
+import { IGroupBy } from '../../Category/type';
 import { Loader } from '~/components/ui/loader';
-import ErrorPage from './ErrorPage';
+import ErrorPage from '../../common/ErrorPage';
+import { CardFooter } from '~/components/ui/card';
+import Pagination from '../../Pagination';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -54,14 +56,17 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
           columns: [],
           groups: [],
         };
-  const { pagination, filters } =
-    (cachedData as unknown as IGridCacheDataResponse) ?? {};
+  const { filters } = (cachedData as unknown as IGridCacheDataResponse) ?? {};
+  const pagination = {
+    current_page: 1,
+    limit_per_page: 10,
+  };
   const gridQueryConfigs = {
     defaultSorting: gridState?.sorting,
     defaultAdvanceFilter: gridState?.defaultAdvanceFilter,
     advanceFilter: gridState?.advanceFilter,
     sorting: gridState?.sorting,
-    pagination: gridState?.pagination,
+    pagination: pagination
   };
 
   const defaultSorting = [
@@ -109,20 +114,16 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     };
   });
 
-  const defaultPagination = pagination?.limit_per_page
-    ? pagination
-    : {
-        current_page: +(pagination?.current_page ?? '1'),
-        limit_per_page: +(pagination?.limit_per_page ?? '100'),
-      };
-
-  const { data, error, isLoading } = useFetchGridData(
+  
+  const { fetchData, data, error, isLoading } = useFetchGridData(
     {
-      current: +(defaultPagination?.current_page ?? '1'),
-      limit: +(defaultPagination?.limit_per_page ?? '100'),
+      current: pagination?.current_page,
+      limit: pagination?.limit_per_page,
       entity: config.entity,
       pluck: config.searchConfig?.query_params?.pluck,
-      sorting: gridQueryConfigs?.sorting?.length ? gridQueryConfigs?.sorting : defaultSorting,
+      sorting: gridQueryConfigs?.sorting?.length
+        ? gridQueryConfigs?.sorting
+        : defaultSorting,
       advance_filters: [...(filters?.advanceFilter ?? []), ...gridFilter],
       grouping: groupFields?.length ? [groupFields[0] as IGroupBy] : [],
     },
@@ -132,23 +133,12 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     },
   );
 
-  console.log('search parsmsss', {
-    current: +(defaultPagination?.current_page ?? '1'),
-    limit: +(defaultPagination?.limit_per_page ?? '100'),
-    entity: config.entity,
-    pluck: config.searchConfig?.query_params?.pluck,
-    sorting: gridQueryConfigs?.sorting?.length ? gridQueryConfigs?.sorting : defaultSorting,
-    advance_filters: [...(filters?.advanceFilter ?? []), ...gridFilter],
-    grouping: groupFields?.length ? [groupFields[0] as IGroupBy] : [],
-  })
-
   const { items = [], totalCount = 0 } = data ?? {};
 
   if (isLoading && !items?.length) {
     return (
       <div
         className="flex h-full items-center justify-center"
-        // style={{ width: isMobile ? '100%' : gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <Loader
           className="bg-primary text-primary"
@@ -163,7 +153,6 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     return (
       <div
         className="flex h-full items-center justify-center"
-        // style={{ width: gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <ErrorPage refetch={() => config?.onFetchRecords?.({})} />
       </div>
@@ -178,13 +167,20 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         columns: visibleColumns,
         group_by_initial_columns: initialColumns,
         parentGroupData: [...(parentGroupData ?? []), { ...rowData }],
+        onFetchRecords: fetchData,
       }}
+      parentType="grid_expansion"
       data={items}
       totalCount={totalCount}
       grouping={grouping}
     >
       <div className="hidden lg:grid">
-        <MyTableBody showPagination={!grouping?.length} />
+        <MyTableBody />
+        {!grouping?.length && (
+          <CardFooter>
+            <Pagination />
+          </CardFooter>
+        )}
       </div>
     </GridProvider>
   );

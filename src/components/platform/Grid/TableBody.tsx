@@ -5,15 +5,13 @@ import { TableBody, TableCell, TableRow } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
+import GridGroupingExpansion from './Client/views/GridGroupingExpansion';
 import { getCommonPinningStyles } from './ColumnPining';
 import { GridContext } from './Provider';
 import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
+import { type IExpandedRow } from './types';
 import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
-import { type IExpandedRow } from './types';
-import { Button } from '~/components/ui/button';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import GridGroupingExpansion from './common/GridGroupingExpansion';
 
 type MyTableBodyProps = {
   showAction?: boolean;
@@ -79,7 +77,9 @@ export default function MyTableBody({
   ];
   const visibleLeafColumns = state?.table.getVisibleLeafColumns();
   const visibleColumns = state?.initial_columns.filter((column) =>
-    visibleLeafColumns?.some((leafColumn) => leafColumn.columnDef.header === column.header),
+    visibleLeafColumns?.some(
+      (leafColumn) => leafColumn.columnDef.header === column.header,
+    ),
   );
 
   return (
@@ -103,7 +103,10 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-                  if (cell.column.id === 'action' && !row?.original?.is_group_by ) {
+                  if (
+                    cell.column.id === 'action' &&
+                    !row?.original?.is_group_by
+                  ) {
                     return (
                       <td
                         key={cell.id + index}
@@ -154,8 +157,7 @@ export default function MyTableBody({
                       }}
                     >
                       <div className="flex flex-row flex-wrap gap-y-1">
-                        {                                   
-                        flexRender(
+                        {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
                         )}
@@ -182,7 +184,10 @@ export default function MyTableBody({
                       <GridGroupingExpansion
                         rowData={row.original}
                         config={state.config}
-                        initialColumns={state?.config?.group_by_initial_columns || state?.initial_columns}
+                        initialColumns={
+                          state?.config?.group_by_initial_columns ||
+                          state?.initial_columns
+                        }
                         grouping={state.grouping?.slice(1)}
                         visibleColumns={visibleColumns ?? []}
                         parentGroupData={state?.config?.parentGroupData || []}
