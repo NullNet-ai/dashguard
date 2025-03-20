@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "1.14.0",
-  "branch": "released/feat/3115/1.14.0",
-  "message": "release fix select options cut off",
+  "tag": "1.14.2<unreleased>",
+  "branch": "unreleased/fix/3499/1.14.2<unreleased>",
+  "message": "add acceptance of other properties or values in the pasesed options ",
   "publish_name": "Rob Caldosa"
 }

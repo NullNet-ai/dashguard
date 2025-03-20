@@ -145,7 +145,7 @@ interface IField {
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?]
   multiFieldConfig?: MultiFieldConfig
   comboboxConfig?: ComboBoxProps
-  selectConfig?:ComboSelectProps
+  selectConfig?:Partial<ComboSelectProps>
   required?: boolean
   type?: HTMLInputTypeAttribute | undefined
   customRender?: React.JSX.Element
