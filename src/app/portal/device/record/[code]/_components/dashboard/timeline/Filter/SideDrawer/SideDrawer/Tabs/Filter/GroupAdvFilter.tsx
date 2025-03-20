@@ -46,7 +46,7 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
         <div className="flex-1 p-1.5 pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {groupIndex > 0 && (
+              {(groupIndex > 1) && (
                 <GroupAdvOperator group={group} groupIndex={groupIndex} handleUpdateGroupOperator={handleUpdateGroupOperator}/>
               )}
             </div>

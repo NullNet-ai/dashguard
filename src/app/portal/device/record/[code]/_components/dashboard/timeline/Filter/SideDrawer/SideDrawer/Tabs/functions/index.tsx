@@ -76,11 +76,13 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   const { handleUpdateFilter } = actions
   const { columns, errors} = state ?? {}
   
-  const { fields, remove } = useFieldArray({
+  const { 
+    remove } = useFieldArray({
     control: form.control,
     name: 'filterGroups',
   })
   
+  const fields = form.getValues().filterGroups
   
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
@@ -138,11 +140,13 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
     handleUpdateFilter({ filterGroups: form.getValues().filters })
   }
 
+  
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <Form {...form}>
         <div className="space-y-4">
-          {fields?.[groupIndex]?.filters?.map((field: any, index) => {  
+          {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {  
+            
             const no_group_filter = form.getValues()?.filterGroups?.length == 1
             
             const default_filter_last_operation = (groupIndex == 0 && fields?.[groupIndex]?.filters?.length -1 == index && no_group_filter) 
@@ -171,6 +175,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                       onValueChange={(operator) =>
                         onUpdateJunctionOperator(index - 1, operator)
                       }
+                      disabled={true}
                     >
                       <SelectTrigger className="w-[100px] border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
