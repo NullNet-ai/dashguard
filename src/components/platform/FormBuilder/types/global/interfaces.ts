@@ -91,6 +91,7 @@ interface IField {
   label?: string;
   detail?: string;
   placeholder?: string;
+  value?: string | number | boolean | null;
   disabled?: boolean;
   hidden?: boolean;
   readonly?: boolean;
