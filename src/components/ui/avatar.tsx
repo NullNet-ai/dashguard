@@ -7,63 +7,64 @@ import { createPortal } from "react-dom"
 import { cn } from "~/lib/utils"
 
 // Status indicator component for online/offline/etc states
-const AvatarStatus = React.forwardRef<
-  HTMLSpanElement,
-  React.HTMLAttributes<HTMLSpanElement> & {
-    status?: "online" | "offline" | "busy" | "away";
-    position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
-    containerRef?: React.RefObject<HTMLElement>;
-    size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-  }
->(({ className, status = "offline", position = "bottom-right", containerRef, size = "md", ...props }, ref) => {
-  const statusColors = {
-    online: "bg-success", // Green for online status
-    offline: "bg-muted", // Gray for offline status
-    busy: "bg-danger", // Red for busy status
-    away: "bg-warning" // Yellow/Orange for away status
-  }
-  
-  const positionClasses = {
-    "top-right": "top-0 right-0",
-    "bottom-right": "bottom-0 right-0",
-    "top-left": "top-0 left-0",
-    "bottom-left": "bottom-0 left-0"
-  }
-  
-  const statusSizes = {
-    "2xs": "h-1.5 w-1.5",
-    xs: "h-2 w-2",
-    sm: "h-2.5 w-2.5",
-    md: "h-3 w-3",
-    lg: "h-3.5 w-3.5",
-    xl: "h-4 w-4",
-    "2xl": "h-5 w-5"
-  }
-  
-  const [mounted, setMounted] = React.useState(false)
-  
-  React.useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-  
-  if (!mounted || !containerRef?.current) return null
-  
-  return createPortal(
-    <span
-      ref={ref}
-      className={cn(
-        "absolute block rounded-full border-2 border-background z-[9999]",
-        statusColors[status],
-        positionClasses[position],
-        statusSizes[size],
-        className
-      )}
-      {...props}
-    />,
-    containerRef.current
-  )
-})
+  const AvatarStatus = React.forwardRef<
+    HTMLSpanElement,
+    React.HTMLAttributes<HTMLSpanElement> & {
+      status?: "online" | "offline" | "busy" | "away";
+      position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
+      containerRef?: React.RefObject<HTMLElement>;
+      size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+    }
+  >(({ className, status = "offline", position = "bottom-right", containerRef, size = "md", ...props }, ref) => {
+    const statusColors = {
+      online: "bg-success", // Green for online status
+      offline: "bg-gray-300", // Gray for offline status
+      busy: "bg-danger", // Red for busy status
+      away: "bg-warning" // Yellow/Orange for away status
+    }
+    
+    const positionClasses = {
+      "top-right": "top-0 right-0",
+      "bottom-right": "bottom-0 right-0",
+      "top-left": "top-0 left-0",
+      "bottom-left": "bottom-0 left-0"
+    }
+    
+    // Increased size values for better visibility
+    const statusSizes = {
+      "2xs": "h-2 w-2",     // Increased from h-1.5 w-1.5
+      xs: "h-2.5 w-2.5",    // Increased from h-2 w-2
+      sm: "h-3 w-3",        // Increased from h-2.5 w-2.5
+      md: "h-3.5 w-3.5",    // Increased from h-3 w-3
+      lg: "h-4 w-4",        // Increased from h-3.5 w-3.5
+      xl: "h-4.5 w-4.5",    // Increased from h-4 w-4
+      "2xl": "h-5.5 w-5.5"  // Increased from h-5 w-5
+    }
+    
+    const [mounted, setMounted] = React.useState(false)
+    
+    React.useEffect(() => {
+      setMounted(true)
+      return () => setMounted(false)
+    }, [])
+    
+    if (!mounted || !containerRef?.current) return null
+    
+    return createPortal(
+      <span
+        ref={ref}
+        className={cn(
+          "absolute block rounded-full border-2 border-background z-[9999]",
+          statusColors[status],
+          positionClasses[position],
+          statusSizes[size],
+          className
+        )}
+        {...props}
+      />,
+      containerRef.current
+    )
+  })
 AvatarStatus.displayName = "AvatarStatus"
 
 const Avatar = React.forwardRef<

@@ -39,6 +39,7 @@ import {
 import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
+import { ComboSelectProps } from '~/components/ui/combo-select';
 
 interface OptionType {
   label: string;
@@ -144,6 +145,7 @@ interface IField {
   draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?]
   multiFieldConfig?: MultiFieldConfig
   comboboxConfig?: ComboBoxProps
+  selectConfig?:ComboSelectProps
   required?: boolean
   type?: HTMLInputTypeAttribute | undefined
   customRender?: React.JSX.Element
