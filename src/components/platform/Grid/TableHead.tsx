@@ -14,6 +14,7 @@ import { getCommonPinningStyles } from './ColumnPining';
 import HeaderMenu from './common/HeaderMenu';
 import { GridContext } from './Provider';
 import { Badge } from '~/components/ui/badge';
+import { HeaderGroupWrapper } from './common/HeaderGroupWrapper';
 
 export default function MyTableHead() {
   const { state } = useContext(GridContext);
@@ -80,23 +81,8 @@ export default function MyTableHead() {
                   <FilterIcon className="h-3 w-3 text-primary" />
                 )}
                 {/* <div className="flex flex-wrap gap-2"> */}
-                {header.id === 'grouping' &&
-                  grouping.map((columnId) => {
-                    const column = state?.table.getColumn(columnId);
-                    return (
-                      <Badge
-                        key={columnId}
-                        variant="primary"
-                        className="flex items-center gap-1 px-2 py-1"
-                      >
-                        {column?.columnDef?.header as string}
-                        <X
-                          className="h-3 w-3 cursor-pointer hover:text-destructive"
-                          onClick={() => column?.toggleGrouping()}
-                        />
-                      </Badge>
-                    );
-                  })}
+                {header.id === 'grouping' && <HeaderGroupWrapper items={grouping} state={state}/> }
+                  
                 {/* </div> */}
               </div>
               <HeaderMenu header={header} defaultFilter={defaultFilter} />
