@@ -57,7 +57,8 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
                 <>
                    <FilterGroupActions
                    onAppendFilter={() =>
-                     handleAppendFilter(groupIndex)
+                     
+                      handleAppendFilter(groupIndex)
                    }
                  />
                 <Button

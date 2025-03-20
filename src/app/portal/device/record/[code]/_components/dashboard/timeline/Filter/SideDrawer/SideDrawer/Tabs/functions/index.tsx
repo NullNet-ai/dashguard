@@ -137,9 +137,8 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   const handleRemoveFilter = (index: number) => {
     
     remove([index - 1, index])
-    handleUpdateFilter({ filterGroups: form.getValues().filters })
+    handleUpdateFilter({ filterGroups: form.getValues().filterGroups?.[groupIndex].filters })
   }
-
   
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
@@ -293,7 +292,8 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                         },
                       }}
                     />
-                    {(filter_type === 'timeline_filter' ? fields.length > 6 : fields.length > 7) && !required_fields?.includes(field?.field) && (
+                   
+                    { (filter_type === 'timeline_filter' ? fields?.[groupIndex]?.filters?.length > 6 : fields?.[groupIndex]?.filters?.length > 7) &&!required_fields?.includes(field?.field) && (
                       <Button
                         Icon={CircleMinus}
                         iconClassName="text-red-600 h-4 w-4"
@@ -301,7 +301,7 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                         variant="ghost"
                         onClick={() => handleRemoveFilter(index)}
                       />
-                    )}
+                    )} 
                   </>
                 )}
               </div>

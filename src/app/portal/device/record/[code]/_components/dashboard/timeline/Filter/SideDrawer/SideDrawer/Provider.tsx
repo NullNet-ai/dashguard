@@ -71,20 +71,22 @@ export function ManageFilterProvider({
     const required_fields = ["Time Range", "Resolution", "Graph Type"];
     let errors: any = {};
 
-    data?.forEach((item: any, index: number) => {
+    data?.forEach((item: any, groupIndex: number) => {
+      item?.filters?.forEach((item: any, index: number) => { 
         if (item.hasOwnProperty("field") && !item.field) {
-            errors[`filters.${index}.field`] = "This field is required.";
+            errors[`filterGroups.${groupIndex}.filters.${index}.field`] = "This field is required.";
         }
         if (item.hasOwnProperty("operator") && !item.operator) {
-            errors[`filters.${index}.operator`] = "This field is required.";
+            errors[`filterGroups.${groupIndex}.filters.${index}.field`] = "This field is required.";
         }
         if( required_fields.includes(item.field)){
           if (item.hasOwnProperty("values") && !item?.[item.field]) {
-            errors[`filters.${index}.${item.field}`] = "This field is required.";
+            errors[`filterGroups.${groupIndex}.filters.${index}.${item.field}`] = "This field is required.";
           }
         }else if (item.hasOwnProperty("values") && Array.isArray(item.values) && item.values.length === 0) {
-            errors[`filters.${index}.values`] = "This field is required.";
+            errors[`filterGroups.${groupIndex}.filters.${index}.values`] = "This field is required.";
         }
+      });
     });
 
     return Object.keys(errors).length > 0 ? errors : null;
@@ -99,7 +101,7 @@ export function ManageFilterProvider({
   };
 
   const saveUpdatedFilter = async () => {
-    const validateCriteriaErrors = validateCriteria(filterDetails.default_filter)
+    const validateCriteriaErrors = validateCriteria(filterDetails.filterGroups)
       if(validateCriteriaErrors) {
         setErrors(validateCriteriaErrors)
         return
@@ -140,7 +142,7 @@ export function ManageFilterProvider({
   };
 
   const handleCreateNewFilter = async () => {
-    const validateCriteriaErrors = validateCriteria(filterDetails.default_filter)
+    const validateCriteriaErrors = validateCriteria(filterDetails.filterGroups)
     if(validateCriteriaErrors) {
       setErrors(validateCriteriaErrors)
       return
