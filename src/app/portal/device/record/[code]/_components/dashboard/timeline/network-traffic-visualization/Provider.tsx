@@ -42,6 +42,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const { refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id || '',
+      // time_range: getLastTimeStamp(20, 'second' ) as any,
       time_range: getLastTimeStamp(time_count, time_unit ) as any,
       filter_id: filterId,
       bucket_size: resolution,

@@ -689,12 +689,13 @@ export const packetRouter = createTRPCRouter({
               operator: EOperator.NOT_CONTAINS,
               values: source_ips,
             }]
-          : []),
-      ]?.map((item: any) => ({
-        ...item,
-        entity: 'packets',
-      }))
-
+            : []),
+          ]?.map((item: any) => ({
+            ...item,
+            entity: 'packets',
+          }))
+          
+      console.log('%c Line:691 🥚 source_ips', 'color:#42b983', source_ips);
       default_filters = {
         type: "criteria",
         filters: default_filters
@@ -718,10 +719,25 @@ export const packetRouter = createTRPCRouter({
             group_advance_filters: [
               default_filters,
               {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: "criteria",
+                filters: [{
+                  type: 'criteria',
+                  field: 'device_id',
+                  entity: 'packets',
+                  operator: EOperator.EQUAL,
+                  values: [device_id],
+                }]
+              }
+              ,
+            ... (rest_group_filter?.length? [ {
                 "type": "operator",
                 "operator": "and"
             },
-            ...rest_group_filter
+            ...rest_group_filter] : [])
             ],
             order: {
               starts_at,
@@ -824,6 +840,7 @@ export const packetRouter = createTRPCRouter({
 
     
     
+    console.log('%c Line:828 🥟 ab', 'color:#7f2b82', ab);
     return ab
   }),
 
