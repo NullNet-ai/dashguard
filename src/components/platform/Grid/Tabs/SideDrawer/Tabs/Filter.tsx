@@ -37,7 +37,7 @@ export default function FilterContent() {
           filters: [
             {
               field: '',
-              operator: '',
+              operator: 'equal',
               label: '',
               values: [],
               type: 'criteria',

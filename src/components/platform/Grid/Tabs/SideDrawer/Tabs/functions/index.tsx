@@ -14,7 +14,7 @@ import FormModule from '~/components/platform/FormBuilder/components/ui/FormModu
 import { ZodSchema } from '../schemas/filter';
 import { api } from '~/trpc/server';
 import { searchRecords } from './search';
-import { type ISelectOptions } from '~/components/platform/FormBuilder/types';
+import { IField, type ISelectOptions } from '~/components/platform/FormBuilder/types';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({
@@ -145,67 +145,87 @@ export function FilterGroup({
                         placeholder: 'Select an operator',
                         selectSearchable: true,
                       },
-                      {
-                        id: `${prefix}.values`,
-                        formType: 'multi-select',
-                        name: `${prefix}.values`,
-                        placeholder: 'Enter the value',
-                        multiSelectUseStringValues: true,
-                        multiSelectDelay: 300,
-                        multiSelectLoadingIndicator: isValuesLoading ? (
-                          <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
-                            Loading options...
-                          </p>
-                        ) : undefined,
-                        multiSelectEmptyIndicator: (
-                          <p className="w-full text-center text-sm leading-6 text-muted-foreground">
-                            No matching options found
-                          </p>
-                        ),
-                        multiSelectRenderOption: USE_CUSTOM_RENDER
-                          ? renderOption
-                          : undefined,
-                        multiSelectRenderBadge: USE_CUSTOM_RENDER
-                          ? renderBadge
-                          : undefined,
-                      },
-                    ]}
-                    subConfig={{
+                      ...(filterData.operator &&
+                        !['is_empty', 'is_not_empty'].includes(filterData.operator)
+                          ? [
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'multi-select',
+                                name: `${prefix}.values`,
+                                placeholder: 'Enter the value',
+                                multiSelectUseStringValues: true,
+                                multiSelectShowCreatableItem : false,
+                                multiSelectDelay: 300,
+                                multiSelectEnableCreate: ['contains', 'not_contains'].includes(
+                                  filterData.operator || '',
+                                ),
+                                multiSelectLoadingIndicator: isValuesLoading ? (
+                                  <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
+                                    Loading options...
+                                  </p>
+                                ) : undefined,
+                                multiSelectEmptyIndicator: (
+                                  <p className="w-full text-center text-sm leading-6 text-muted-foreground">
+                                    No matching options found
+                                  </p>
+                                ),
+                                multiSelectRenderOption: USE_CUSTOM_RENDER
+                                  ? renderOption
+                                  : undefined,
+                                multiSelectRenderBadge: USE_CUSTOM_RENDER
+                                  ? renderBadge
+                                  : undefined,
+                              },
+                            ]
+                          : []),
+                      ] as IField[]}
+                      subConfig={{
                       selectOptions: {
-                        [`${prefix}.field`]: columns?.map((column) => ({
-                          label: column.label,
-                          value: column.accessorKey,
-                        } as ISelectOptions)) || [],
+                        [`${prefix}.field`]:
+                          columns?.map(
+                            (column) =>
+                              ({
+                                label: column.label,
+                                value: column.accessorKey,
+                              }) as ISelectOptions,
+                          ) || [],
                         [`${prefix}.operator`]: (): ISelectOptions[] => {
                           const fieldValue = form.getValues(`${prefix}.field`);
 
-                          if(fieldValue)  {
-                            const field_data_type = columns?.find(
-                              (column) => column.accessorKey === fieldValue,
-                            )?.data_type || "string";
-                            switch(field_data_type) {
-                              case "string":
-                                return OPERATORS.filter(
-                                  (operator) =>
-                                    operator.type.includes('string')
+                          if (fieldValue) {
+                            const field_data_type =
+                              columns?.find(
+                                (column) => column.accessorKey === fieldValue,
+                              )?.data_type || 'string';
+                            switch (field_data_type) {
+                              case 'string':
+                                return OPERATORS.filter((operator) =>
+                                  operator.type.includes('string'),
                                 ) as ISelectOptions[];
-                              case "array":
-                                return OPERATORS.filter(
-                                  (operator) => operator.type.includes('array'),
+                              case 'array':
+                                return OPERATORS.filter((operator) =>
+                                  operator.type.includes('array'),
                                 ) as ISelectOptions[];
-                              case "number":
-                                return OPERATORS.filter(
-                                  (operator) => operator.type.includes('number'),
+                              case 'number':
+                                return OPERATORS.filter((operator) =>
+                                  operator.type.includes('number'),
+                                ) as ISelectOptions[];
+                              case 'datetime' :
+                                return OPERATORS.filter((operator) =>
+                                  operator.type.includes('datetime'),
                                 ) as ISelectOptions[];
                               default:
-                                return OPERATORS.filter(
-                                  (operator) =>
-                                    operator.type.includes('string')) as ISelectOptions[];
+                                return OPERATORS.filter((operator) =>
+                                  operator.type.includes('string'),
+                                ) as ISelectOptions[];
                             }
                           }
-                          return []
-                        }
-                      } as Record<string, ISelectOptions[] | (() => ISelectOptions[])>,
+                          return [];
+                        },
+                      } as Record<
+                        string,
+                        ISelectOptions[] | (() => ISelectOptions[])
+                      >,
                       multiSelectOnSearch: {
                         [`${prefix}.values`]: async (searchTerm: string) => {
                           // Track loading state
@@ -213,7 +233,7 @@ export function FilterGroup({
 
                           const formValues = form.getValues(`${prefix}.field`);
 
-                          if(!formValues) return [];
+                          if (!formValues) return [];
                           try {
                             // Use the unified search function
                             const results = await searchFilterValues({
@@ -318,21 +338,20 @@ export const searchFilterValues = async ({
   searchTerm,
   searchConfig,
   fieldConfig,
-  field_name
+  field_name,
 }: {
   searchTerm: string;
   searchConfig: any;
   fieldConfig: any;
-  field_name : string
+  field_name: string;
 }): Promise<Array<{ value: string; label: string }>> => {
-
   try {
     const response = await searchRecords({
       value: searchTerm,
       field: field_name,
       entity: 'contact',
       searchConfig,
-      fieldConfig
+      fieldConfig,
     });
 
     return response;
