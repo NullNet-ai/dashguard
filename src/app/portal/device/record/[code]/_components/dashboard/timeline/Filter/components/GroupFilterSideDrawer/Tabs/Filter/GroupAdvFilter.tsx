@@ -23,7 +23,7 @@ interface IProps {
   handleAppendFilter: (groupIndex: number) => void
 }
 
-export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, filterGroupLength, handleRemoveFilterGroup, handleUpdateJunctionOperator, form, filter_type, handleAppendFilter}: IProps) {
+export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOperator, handleRemoveFilter, handleRemoveFilterGroup, handleUpdateJunctionOperator, form, filter_type, handleAppendFilter}: IProps) {
 
   return (
     <div className="mb-1 overflow-hidden rounded-lg border border-gray-100 bg-[#F8FAFC]">
@@ -79,6 +79,9 @@ export default function GroupAdvFilter({group, groupIndex, handleUpdateGroupOper
           onUpdateJunctionOperator ={
             handleUpdateJunctionOperator as any
           }
+          onRemoveFilter={(index) =>
+            handleRemoveFilter(groupIndex, index)}
+          
           filter_type = {filter_type}
 
           />

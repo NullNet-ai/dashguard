@@ -1,6 +1,5 @@
 'use client'
-import { CircleMinus } from 'lucide-react'
-import { useFieldArray } from 'react-hook-form'
+import {  MinusCircle } from 'lucide-react'
 import { z } from 'zod'
 
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
@@ -16,9 +15,7 @@ import {
 import { useEffect, useMemo } from 'react';
 import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
 import { useManageFilter } from '../../Provider'
-
-
-
+import { IFilter } from '../../../../../types'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -66,21 +63,14 @@ const time_resolution_options: { [key: string]: string[] } = {
   '7d': ['12h', '1d'],
 }
 
-
-
-
-export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOperator}: {form: any, filter_type: string, groupIndex: number, 
+export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionOperator}: {
+  onRemoveFilter: (index: number) => void,form: any, filter_type: string, groupIndex: number, 
   onUpdateJunctionOperator: (index: number, operator: string) => void;}) => {
     
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { columns, errors} = state ?? {}
   
-  const { 
-    remove } = useFieldArray({
-    control: form.control,
-    name: 'filterGroups',
-  })
   
   const fields = form.getValues().filterGroups
   
@@ -94,13 +84,9 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`); // Get selected value
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
   
-  
-  
-  
-  
-  form.watch((fields) => {
-    handleUpdateFilter({ filterGroups: fields.filterGroups })
-  })
+  // form.watch((fields: Record<string,any>) => {
+  //   handleUpdateFilter({ filterGroups: fields.filterGroups })
+  // })
 
   useEffect(() => {
     if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
@@ -116,8 +102,8 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   
   
   useEffect(() => {
-    const subscription = form.watch((values) => {
-      values.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
+    const subscription = form.watch((values: Record<string,any>) => {
+      values?.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
         if (required_fields.includes(filter.field) && filter?.[filter.field]) {
           form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`);
         } else {
@@ -134,18 +120,18 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
   
 
 
-  const handleRemoveFilter = (index: number) => {
-    
-    remove([index - 1, index])
-    handleUpdateFilter({ filterGroups: form.getValues().filterGroups?.[groupIndex].filters })
-  }
-  
+  const criteriaFilters = fields?.[groupIndex]?.filters?.filter((_filter: IFilter) => _filter.type === 'criteria');
+  const hasManyFilters = criteriaFilters.length > 1;
+
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <Form {...form}>
         <div className="space-y-4">
           {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {  
             
+          const criteriaIndex =
+          fields?.[groupIndex]?.filters?.slice(0, index + 1).filter((f: Record<string, any>) => f.type === 'criteria')
+            .length - 1;
             const no_group_filter = form.getValues()?.filterGroups?.length == 1
             
             const default_filter_last_operation = (groupIndex == 0 && fields?.[groupIndex]?.filters?.length -1 == index && no_group_filter) 
@@ -293,15 +279,14 @@ export const FilterGroup = ({form, groupIndex, filter_type, onUpdateJunctionOper
                       }}
                     />
                    
-                    { (filter_type === 'timeline_filter' ? fields?.[groupIndex]?.filters?.length > 6 : fields?.[groupIndex]?.filters?.length > 7) &&!required_fields?.includes(field?.field) && (
-                      <Button
-                        Icon={CircleMinus}
-                        iconClassName="text-red-600 h-4 w-4"
-                        iconPlacement="left"
-                        variant="ghost"
-                        onClick={() => handleRemoveFilter(index)}
-                      />
-                    )} 
+                   {hasManyFilters && (
+                    <Button
+                      onClick={() => onRemoveFilter(criteriaIndex)}
+                      variant="ghost"
+                    >
+                      <MinusCircle className="h-4 w-4 text-red-600" />
+                    </Button>
+                  )}
                   </>
                 )}
               </div>
