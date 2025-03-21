@@ -13,6 +13,7 @@ export interface IState {
   setFilterQuery: (filter: Record<string, any>) => void
   _refetchTrigger: number
   _setRefetchTrigger: any
+  filter_type: string
 }
 
 export interface IAction {

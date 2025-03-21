@@ -4,21 +4,21 @@ export const columns = [
     label: 'Source IP Address',
     accessorKey: 'source_ip',
   },
-  {
-    header: 'Source Port',
-    label: 'Source Port',
-    accessorKey: 'source_port',
-  },
+  // {
+  //   header: 'Source Port',
+  //   label: 'Source Port',
+  //   accessorKey: 'source_port',
+  // },
   {
     header: 'Destination IP Address',
     label: 'Destination IP Address',
     accessorKey: 'destination_ip',
   },
-  {
-    header: 'Destination Port',
-    label: 'Destination Port',
-    accessorKey: 'destination_port',
-  },
+  // {
+  //   header: 'Destination Port',
+  //   label: 'Destination Port',
+  //   accessorKey: 'destination_port',
+  // },
   {
     header: 'Protocol',
     label: 'Protocol',

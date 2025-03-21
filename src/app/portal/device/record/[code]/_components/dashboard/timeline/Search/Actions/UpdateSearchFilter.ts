@@ -19,8 +19,8 @@ export async function UpdateSearchFilter({
   const searchParams = headerList.get('x-full-search-query-params') || ''
   // const urlSearchParams = new URLSearchParams(searchParams)
   
-  await api.timelineFilter.updateSearchFilter({
-    type: 'search',
+  await api.cachedFilter.updateSearchFilter({
+    type: 'timeline_search',
     data: filters,
   })
 

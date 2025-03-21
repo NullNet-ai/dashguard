@@ -1,23 +1,21 @@
 'use client'
 import { PlusCircleIcon } from '@heroicons/react/20/solid'
 import { Fragment, useContext, useState, useEffect } from 'react'
-
 import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
-
-import { columns } from './components/SideDrawer/config'
-import { ManageFilterProvider } from './components/SideDrawer/Provider'
-import GridManageFilter from './components/SideDrawer/View'
+import { columns } from './components/FilterSideDrawer/config'
+import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provider'
+import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import FilterProperty from './FilterProperty'
 import { FilterContext } from './FilterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
-  const { filters = [], _setRefetchTrigger, setFilterQuery } = state ?? {}
+  const { filters = [], _setRefetchTrigger, setFilterQuery, filter_type } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
 
-  const defaultTab = filters.find(tab => tab.label === 'All Data')?.id || ''
+  const defaultTab = filters.find(tab => tab.label === '1 Day')?.id || ''
 
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
 
@@ -38,8 +36,8 @@ const FilterView = () => {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider columns={columns} tab={{ name: 'New Filter' }}>
-            <GridManageFilter />
+          <ManageFilterProvider columns={columns} tab={{ name: 'New Filter' }} filter_type= {filter_type as string}>
+            <GridManageFilter filter_type={filter_type as string}/>
           </ManageFilterProvider>
         ),
         componentProps: {},
@@ -71,7 +69,7 @@ const FilterView = () => {
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
                     {tab.label}
                   </span>
-                  {tab?.label !== 'All Data' && <FilterProperty filter={tab} />}
+                  {tab?.label !== '1 Day' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
                 </Button>
               </Fragment>
             )

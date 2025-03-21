@@ -1,4 +1,4 @@
-import ComingSoon from "../../../../_components/coming_soon";
+import MapComponent from "../../../_components/dashboard/Map/traffic-map-leaflet/components/MapComponent";
 
-const FormContainer = async () => <ComingSoon />;
+const FormContainer = async () => <MapComponent />;
 export default FormContainer;

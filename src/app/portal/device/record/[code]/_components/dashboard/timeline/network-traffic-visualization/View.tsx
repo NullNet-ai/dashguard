@@ -7,13 +7,23 @@ import '@xyflow/react/dist/style.css'
 import IPNode from './components/IPNode'
 import TrafficNode from './components/TrafficNode'
 import { useFetchNetworkFlow } from './Provider'
+import { Loader } from '~/components/ui/loader';
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
-  const { elements } = state ?? {}
+  const { elements, loading } = state ?? {}
 
   const nodeTypes = useMemo(
     () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []
+  )
+
+  if (loading) return (
+    <Loader
+      className="bg-primary text-primary"
+      label="Fetching data..."
+      size="md"
+      variant="circularShadow"
+    />
   )
 
   return (

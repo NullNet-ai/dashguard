@@ -38,6 +38,7 @@ interface IProps {
   form: UseFormReturn<Record<string, any>, any, undefined>;
   pillOptions?: any[];
   formKey: string;
+  isAlphabetical?: boolean;
 }
 
 export default function FormSelect({
@@ -47,7 +48,9 @@ export default function FormSelect({
   pillOptions,
   formKey,
   form,
+  isAlphabetical = true,
 }: IProps) {
+  
   form.watch(fieldConfig?.name);
   const toast = useToast();
   const { error } = useFormField();
@@ -129,7 +132,7 @@ export default function FormSelect({
   }, []);
 
   const filteredOptions = useMemo(() => {
-    const filtered =
+    let filtered =
       query === ""
         ? options?.filter((opt) => !!opt?.label)?.slice(0, 250)
         : options
@@ -138,8 +141,10 @@ export default function FormSelect({
           })
           ?.slice(0, 5)
           ?.filter((opt) => !!opt?.label);
+    
+    filtered = isAlphabetical ? sortOptions(filtered ?? []) : filtered;
 
-    return sortOptions(filtered ?? []);
+    return filtered;
   }, [query, options, sortOptions]);
 
   React.useEffect(() => {

@@ -53,7 +53,7 @@ export function LinkTabList({
   const tabStyles = getTabStyles(orientation, className);
 
   return (
-    <div className={cn(tabStyles.container,"sticky top-0 z-[49] bg-white")}>
+    <div className={cn(tabStyles.container,"sticky top-0 z-[1] bg-white")}>
       <div
         role="tablist"
         aria-orientation={orientation}

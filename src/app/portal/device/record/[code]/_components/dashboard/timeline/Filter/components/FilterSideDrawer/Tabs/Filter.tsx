@@ -16,6 +16,81 @@ import {
 } from '~/components/ui/select'
 
 import { useManageFilter } from '../Provider'
+import { useEffect, useMemo } from 'react';
+import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
+// import { useSearchParams } from "next/navigation";
+
+const required_fields = [
+  'Time Range',
+  'Resolution',
+  'Graph Type',
+]
+
+const time_resolution_options: { [key: string]: string[] } = {
+  '1d': ['1h', '30m'],
+  '12h': ['1h', '30m'],
+  '7d': ['12h', '1d'],
+}
+
+const _def_filters = [
+  {
+    field: 'Time Range',
+    operator: 'equal',
+    label: 'Time Range',
+    values: [],
+    type: 'criteria',
+    default: true,
+    input_type: 'select',
+    static: true,
+  },  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+  {
+    field: 'Resolution',
+    operator: 'equal',
+    label: 'Resolution',
+    values: [],
+    type: 'criteria',
+    default: true,
+    input_type: 'select',
+    static: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  }
+]
+
+const default_filters = (type: string) =>{
+  if(type === 'timeline_filter') return _def_filters
+  
+  return [
+..._def_filters,
+  {
+    field: 'Graph Type',
+    operator: 'equal',
+    label: 'Graph Type',
+    values: [],
+    type: 'criteria',
+    default: true,
+    input_type: 'select',
+    options: [
+      { label: 'Line Chart', value: 'line' },
+      { label: 'Bar Chart', value: 'bar' },
+      { label: 'Area Chart', value: 'area' },
+    ],
+    static: true,
+  },
+  {
+    operator: 'and',
+    type: 'operator',
+    default: true,
+  },
+] }
+
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -55,15 +130,17 @@ const ZodSchema = z.object({
   ),
 })
 
-export default function FilterContent() {
+export default function FilterContent({filter_type}: {filter_type: string}) {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
-  const { filterDetails, columns } = state ?? {}
+  const { filterDetails, columns, errors} = state ?? {}
+  
 
   const form = useForm<z.infer<any>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
       filters: filterDetails?.default_filter ?? [
+        ...default_filters(filter_type),
         {
           field: '',
           operator: '',
@@ -71,7 +148,8 @@ export default function FilterContent() {
           values: [],
           type: 'criteria',
           default: true,
-        },
+        }
+        
       ],
     },
     shouldFocusError: false,
@@ -81,10 +159,57 @@ export default function FilterContent() {
     control: form.control,
     name: 'filters',
   })
+  
 
+  const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
+    const resolutionOptions: { [key: string]: string[] } = time_resolution_options;
+   
+    const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || [];
+    return options;
+  };
+  
+  const selectedTimeRange = form.watch(`filters.[0].Time Range`); // Get selected value
+  const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
+  
+  
+  
+  
+  
   form.watch((fields) => {
     handleUpdateFilter({ default_filter: fields.filters })
   })
+
+  useEffect(() => {
+    if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
+      for (let key in errors) {
+        form.setError(key, {
+          type: 'required',
+          message: errors[key],
+        });
+      }
+    }
+  }, [errors]);
+
+  
+  
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      values.filters.forEach((filter: any, index: number) => {
+        if (required_fields.includes(filter.field) && filter?.[filter.field]) {
+          form.clearErrors(`filters.${index}.${filter.field}`);
+        } else {
+          if (filter.field) form.clearErrors(`filters.${index}.field`);
+          if (filter.operator) form.clearErrors(`filters.${index}.operator`);
+          if (filter.values && filter.values.length > 0) form.clearErrors(`filters.${index}.values`);
+        }
+      });
+    });
+  
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+  
+  
+  
 
   const handleAppend = () => {
     const newFilter = {
@@ -107,7 +232,8 @@ export default function FilterContent() {
   }
 
   const handleRemoveFilter = (index: number) => {
-    remove(index)
+    
+    remove([index - 1, index])
     handleUpdateFilter({ default_filter: form.getValues().filters })
   }
 
@@ -134,8 +260,11 @@ export default function FilterContent() {
 
       <Form {...form}>
         <div className="space-y-4">
-          {fields.map((field: any, index) => {
-            const prefix = `filters.${index}.`
+          {fields.map((field: any, index) => {    
+            const prefix = `filters.${index}`
+
+            
+
             return (
               <div
                 className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
@@ -158,7 +287,70 @@ export default function FilterContent() {
                     </Select>
                   </div>
                 )}
-                {field.type === 'criteria' && (
+
+                {required_fields?.includes(field?.field) && (
+                  <FormModule
+                    fields={[
+                      {
+                        id: `${prefix}.field`,
+                        formType: 'input',
+                        name: `${prefix}.field`,
+                        // placeholder: 'Select a Field',
+                        // selectSearchable: true,
+                        value: field?.label,
+                        disabled: true,
+                      },
+                      {
+                        id: `${prefix}.operator`,
+                        formType: 'select',
+                        name: `${prefix}.operator`,
+                        placeholder: 'Select an operator',
+                        selectSearchable: true,
+                        disabled: true,
+                      },
+                      {
+                        id: `${prefix}.${field.field}`,
+                        formType: 'select',
+                        name: `${prefix}.${field.field}`,
+                        placeholder: 'Select a value',
+                        selectSearchable: true,
+                        isAlphabetical: false,
+
+                        // multiSelectEnableCreate: true,
+                        // multiSelectShowCreatableItem: false,
+                        // multiSelectUseStringValues: true,
+                      },
+                    ]}
+                    form={form}
+                    formKey="filters"
+                    formSchema={ZodSchema}
+                    subConfig={{
+                      selectOptions: {
+                        [`${prefix}.field`]:
+                          columns?.map(column => ({
+                            label: column.label,
+                            value: column.accessorKey,
+                          })) || [],
+                        [`${prefix}.operator`]: OPERATORS,
+                        [`${prefix}.Time Range`]: [
+                          // { label: '30 Days', value: '30d' },
+                          { label: '12 Hours', value: '12h' },
+                          { label: '1 Day', value: '1d' },
+                          { label: '7 Days', value: '7d' },
+                        ],
+                        // [`${prefix}.Resolution`]:  resolution_options,
+                        [`${prefix}.Resolution`]:  resolutionOptions,
+                        [`${prefix}.Graph Type`]: [
+                          { label: 'Line Chart', value: 'line' },
+                          { label: 'Bar Chart', value: 'bar' },
+                          { label: 'Area Chart', value: 'area' },
+                        ],
+                      },
+                    }}
+                  />
+                )}
+
+                {field.type === 'criteria' && !required_fields?.includes(field?.field) && (
                   <>
                     <FormModule
                       fields={[
@@ -200,7 +392,7 @@ export default function FilterContent() {
                         },
                       }}
                     />
-                    {fields.length > 1 && (
+                    {(filter_type === 'timeline_filter' ? fields.length > 6 : fields.length > 7) && !required_fields?.includes(field?.field) && (
                       <Button
                         Icon={CircleMinus}
                         iconClassName="text-red-600 h-4 w-4"

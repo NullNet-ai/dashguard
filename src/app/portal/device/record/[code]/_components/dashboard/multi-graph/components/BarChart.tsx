@@ -10,11 +10,25 @@ import {
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
 import { useMemo } from 'react';
+import { graphColors } from './graph-color';
 
 const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
   
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
   
+
+  const number_of_ticks = useMemo(() => {
+     return yAxisMax >= 100000 ? 10 : 5
+    },[yAxisMax])
+
+
+  const yticks = useMemo(() => {
+    if(!yAxisMax)return [0]
+    return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+    
+  },[yAxisMax, yAxisMin])
+
+
   return (
     <ResponsiveContainer width="100%" height={300}>
     <BarChart data={filteredData}>
@@ -36,20 +50,15 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         tickLine={false}
         tickMargin={8}
       />
-        <YAxis
+       <YAxis
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={4}
+          tickCount={number_of_ticks}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={[
-            yAxisMin,
-            yAxisMin + (yAxisMax - yAxisMin) / 3,
-            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
-            yAxisMax,
-          ]}
+          ticks={yticks}
         />
       <ChartTooltip
         content={
@@ -71,7 +80,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         cursor={false}
       />
       {interfaces?.map((item: any) => {
-        return <Bar dataKey={item.value} fill={`var(--color-${item?.value})`}  isAnimationActive={false}/>})}
+        return <Bar dataKey={item.value} fill={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}  isAnimationActive={false}/>})}
       <ChartLegend content={<ChartLegendContent />} />
     </BarChart>
     </ResponsiveContainer>

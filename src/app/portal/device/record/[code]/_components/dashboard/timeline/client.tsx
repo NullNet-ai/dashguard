@@ -2,15 +2,15 @@ import React from 'react'
 
 import Filter from './Filter'
 import NetworkTrafficFlow from './network-traffic-visualization'
-import Main from './Search'
+import Search from './Search'
 
 function TimelineComponent({ params }: any) {
 
   return (
     <div className=" mx-auto">
-      <Filter />
+      <Filter params={params} type='timeline_filter'  />
 
-      <Main  params={params} />
+      <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
       <NetworkTrafficFlow params={params} />
 
     </div>

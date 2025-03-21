@@ -58,7 +58,8 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>
+        <RechartsPrimitive.ResponsiveContainer 
+        >
           {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
@@ -350,6 +351,10 @@ function getPayloadConfigFromPayload(
     ] as string;
   }
 
+  if (!config) {
+    return undefined; // or a default value
+  }
+  
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config];
