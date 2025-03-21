@@ -9,7 +9,7 @@ import MapComponent from './components/MapComponent';
 export default function TrafficMaps({ params}: IFormProps) {
   return (
     <div>
-      <Filter />
+      <Filter params={params} type='map_filter' />
       <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
       <h1>Traffic Flow to Philippines Server</h1>
       <MapComponent />
