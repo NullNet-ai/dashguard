@@ -99,7 +99,7 @@ export default function GraphSearchProvider({ children, params }: IProps) {
   const {time_count,time_unit = 'minute' } = timeDuration
   
 
-  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp(time_count, time_unit as 'minute', new Date()), device_id, _query }, {
+  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
     refetchOnWindowFocus: false,
     gcTime: 0,
     enabled: false,

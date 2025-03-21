@@ -91,6 +91,7 @@ interface IField {
   label?: string;
   detail?: string;
   placeholder?: string;
+  value?: string | number | boolean | null;
   disabled?: boolean;
   hidden?: boolean;
   readonly?: boolean;
@@ -141,6 +142,14 @@ interface IField {
   multiSelectEmptyIndicator?: ReactNode;
   multiSelectHideClearAllButton?: boolean;
   multiSelectShowCreatableItem?: boolean;
+  multiSelectUseStringValues?: boolean;
+  multiSelectRenderOption?: (option: OptionType) => ReactNode;
+  multiSelectRenderBadge?: (
+    option: OptionType,
+    handleUnselect: (option: OptionType) => void,
+  ) => ReactNode;
+  multiSelectOptions?: OptionType[];
+  multiSelectOnSearch?: (search: string) => Promise<OptionType[]>;
   selectContainerClassName?: string
   multiSelectContainerClassName?: string
   richTextOutput?: 'html' | 'json' | 'text';
@@ -192,6 +201,8 @@ interface IField {
     components?: ComponentType<any>[] | JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
+
+  isAlphabetical?: boolean;
 }
 
 interface ISelectOptions {

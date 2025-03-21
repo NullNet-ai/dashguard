@@ -55,50 +55,62 @@ export const getLastTwentyFourHoursTimeStamp = () => {
 
 
 export const getLastTimeStamp = (
-  amount: number,
+  {
+    count,
+    unit,
+    _now,
+    add_remaining_time
+  }: {
+  count: number,
   unit: "second" | "minute" | "hour" | "day" | "month",
-  _now?: Date
+  add_remaining_time?: boolean,
+  _now?: Date,
+  }
 ) => {
+  if(!count || !unit) return null
+  
   const now = _now || new Date();
   
   const past = new Date(now);
 
   switch (unit) {
     case "second":
-      past.setSeconds(now.getSeconds() - amount);
+      past.setSeconds(now.getSeconds() - count);
 
       
       break;
     case "minute":
       past.setSeconds(0);
-      past.setMinutes(now.getMinutes() - amount);
+      past.setMinutes(now.getMinutes() - count);
       break;
     case "hour":
       past.setSeconds(0);
       past.setMinutes(0);
-      past.setHours(now.getHours() - amount);
+      past.setHours(now.getHours() - count);
       break;
     case "day":
       past.setSeconds(0);
       past.setMinutes(0);
       past.setHours(0);
-      past.setDate(now.getDate() - amount);
+      past.setDate(now.getDate() - count);
       break;
     case "month":
       past.setSeconds(0);
       past.setMinutes(0);
       past.setHours(0);
       past.setDate(1);
-      past.setMonth(now.getMonth() - amount);
+      past.setMonth(now.getMonth() - count);
       break;
   }
 
+
   const formatDate = (date: Date) => {
-    if (unit === "day" || unit === "month") {
+    if ((unit === "day" || unit === "month") && !add_remaining_time) {
       return date.toISOString().substring(0, 10); // YYYY-MM-DD (No time)
     }
     return date.toISOString().replace("T", " ").substring(0, 19) + "+00"; // Full timestamp
   };
+
 
   return [formatDate(past), formatDate(now)];
 };
@@ -108,19 +120,59 @@ export const getLastTimeStamp = (
 
 
 
+// export function getAllTimestampsBetweenDates(
+//   startDate: string,
+//   endDate: string,
+//   unit: "hour" | "minute" | "second" | "day" | "month",
+//   interval: number
+// ): string[] {
+  
+
+//   const start = moment(startDate, "YYYY-MM-DD HH:mm:ss");
+//   const end = moment(endDate, "YYYY-MM-DD HH:mm:ss");
+//   const timestampsArray: string[] = [];
+
+  
+
+//   // Reset smaller units to 0 based on the selected unit
+//   switch (unit) {
+//     case "minute":
+//       start.seconds(0);
+//       break;
+//     case "hour":
+//       start.minutes(0).seconds(0);
+//       break;
+//     case "day":
+//       start.hours(0).minutes(0).seconds(0);
+//       break;
+//     case "month":
+//       start.date(1).hours(0).minutes(0).seconds(0);
+//       break;
+//   }
+
+//   while (start.isSameOrBefore(end)) {
+//     timestampsArray.push(
+//       unit === "day" || unit === "month"
+//         ? start.format("YYYY-MM-DD") // No time for days/months
+//         : start.format("YYYY-MM-DD HH:mm:ss") // Full timestamp for hours/minutes/seconds
+//     );
+//     start.add(interval, unit); // Increment by exactly 1 unit
+//   }
+
+  
+//   return timestampsArray;
+// }
+
+
 export function getAllTimestampsBetweenDates(
   startDate: string,
   endDate: string,
   unit: "hour" | "minute" | "second" | "day" | "month",
   interval: number
 ): string[] {
-  
-
   const start = moment(startDate, "YYYY-MM-DD HH:mm:ss");
   const end = moment(endDate, "YYYY-MM-DD HH:mm:ss");
   const timestampsArray: string[] = [];
-
-  
 
   // Reset smaller units to 0 based on the selected unit
   switch (unit) {
@@ -138,18 +190,21 @@ export function getAllTimestampsBetweenDates(
       break;
   }
 
-  while (start.isSameOrBefore(end)) {
+  // Move start to the first valid timestamp after startDate
+  start.add(interval, unit);
+
+  while (start.isBefore(end)) {
     timestampsArray.push(
       unit === "day" || unit === "month"
         ? start.format("YYYY-MM-DD") // No time for days/months
         : start.format("YYYY-MM-DD HH:mm:ss") // Full timestamp for hours/minutes/seconds
     );
-    start.add(interval, unit); // Increment by exactly 1 unit
+    start.add(interval, unit);
   }
 
-  
   return timestampsArray;
 }
+
 
 export const getUnit = (unit: string) => {
   let unitFull: "second" | "minute" | "hour" | "day" | "month";

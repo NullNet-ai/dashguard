@@ -7,8 +7,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
+import { graphColors } from './graph-color';
+
 
 export const modifyAxis = (chartData:any) => {
+  
   const maxBandwidth = Math.max(
     ...(chartData ?? [])?.map((item: any) => item?.vtnet1 ?? 0),
     ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? 0)
@@ -22,20 +25,41 @@ export const modifyAxis = (chartData:any) => {
   const yAxisMax = Math.ceil(maxBandwidth * 1.1)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
 
+  
   return { yAxisMax, yAxisMin }
 }
+
 export const formatNumber = (num: number) => {
+  
   if(!num) return ''
+  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}B`
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
   if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
-  return num.toString()
+
+  return (Math.round(num)).toString()
 }
+
+
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
 
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData])
 
+  const number_of_ticks = useMemo(() => {
+     return yAxisMax >= 100000 ? 10 : 5
+    },[yAxisMax])
+
+
+  const yticks = useMemo(() => {
+    if(!yAxisMax)return [0]
+    return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+    
+  },[yAxisMax, yAxisMin])
+  
+  
+
   return (
     <ResponsiveContainer width="100%" height={300}>
+
     <LineChart
       accessibilityLayer={true}
       data={filteredData}
@@ -59,28 +83,24 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
         tickLine={false}
         tickMargin={8}
       />
-        <YAxis
+       <YAxis
           allowDataOverflow={true}
           axisLine={false}
           domain={[yAxisMin, yAxisMax]}
-          tickCount={4}
+          tickCount={number_of_ticks}
           tickFormatter={formatNumber}
           tickLine={false}
           tickMargin={8}
-          ticks={[
-            yAxisMin,
-            yAxisMin + (yAxisMax - yAxisMin) / 3,
-            yAxisMin + (yAxisMax - yAxisMin) * 2 / 3,
-            yAxisMax,
-          ]}
+          ticks={yticks}
         />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       {interfaces?.map((item: any) => {
+
+        
         return <Line
         dataKey={item?.value}
         dot={false}
-        stroke={`var(--color-${item?.value})`}
-        strokeWidth={2}
+        stroke={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}
         type="monotone"
         isAnimationActive={false} // disable animation for smooth effect
       />

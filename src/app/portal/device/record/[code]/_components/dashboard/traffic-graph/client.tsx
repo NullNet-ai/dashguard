@@ -1,25 +1,16 @@
 'use client'
 
-import * as React from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { getLastTimeStamp, getUnit } from '~/app/portal/device/utils/timeRange'
+import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '~/components/ui/card'
 import {
   type ChartConfig,
   ChartContainer,
 } from '~/components/ui/chart'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { api } from '~/trpc/react'
 
 import { renderChart } from './function/renderChart'
@@ -27,36 +18,10 @@ import moment from 'moment-timezone'
 import { IFormProps } from '../types'
 import Filter from '../timeline/Filter'
 import Search from '../timeline/Search'
+import { timeDuration } from '../timeline/Search/configs'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
+import { Loader } from '~/components/ui/loader';
 
-const time_range_options = {
-  '30d': '30 days',
-  '7d': '1 Week',
-  '1d': '1 Day',
-  'live': 'Live',
-
-}
-
-const resolution_options = {
-  '30d':
-    {
-      '1d': '1 Day',
-      // '7d': 'Last 7 days',
-    },
-  '7d':
-    {
-      '1d': '1 Day',
-    },
-  '1d':
-    {
-      '1h': '1 Hour',
-      '30m': '30 Minutes',
-    },
-  'live':
-    {
-      '1s': '1 Second',
-    },
-
-} as any
 
 const chartConfig = {
   visitors: {
@@ -71,44 +36,96 @@ const chartConfig = {
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const TrafficGraph = ({defaultValues, params}: IFormProps) => {
-  const [timeRange, setTimeRange] = React.useState('30d')
-  const [resolution, setResolution] = React.useState<null | string>(null)
+  const eventEmitter = useEventEmitter()
+  const [_resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
-
+    const [loading, setLoading] = useState<boolean>(false)
+    const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
+    const [filterUpdateId, setFilterUpdateId] = useState("01JP0WDHVNQAVZN14AA")
+ const [{
+    time_count,
+    time_unit,
+    resolution
+  }, setTime] = useState(timeDuration)
+   const [searchBy, setSearchBy] = useState()
   const cardTitle = React.useMemo(() => {
     return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
   }, [graphType])
 
+const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
+    {
+      type: 'traffic_graph_filter',
+      filter_id: filterId,
+    },
+    {
+      enabled: false, 
+    }
+  )
+    useEffect(() => {
+      if (filterId) {
+        setLoading(true)
+        const fetchTimeUnitandResolution = async() => {
+          const {
+            data:  time_unit_resolution
+          } = await refetchTimeUnitandResolution()
+            const {time, resolution = '1h', graph_type = "area"} = time_unit_resolution || {}
+            const {time_count = 12, time_unit = 'hour' } = time || {}
+            setTime({
+              time_count,
+              time_unit: time_unit  as 'day' | 'hour',
+              resolution: resolution as '1h'
+            })
+            
+            setGraphType(graph_type ?? "area")
+        }
+        fetchTimeUnitandResolution()
+      }
+    }, [filterId, (searchBy ?? [])?.length])
+
+     useEffect(() => {
+        if (!eventEmitter) return
+        const setFID =  async(data:any ) => {
+          if(typeof data !== 'string')return
+    
+          setFilterID(data)
+    
+      
+          }
+        const setSBy = (data:any) => {
+          setSearchBy(data)
+        }
+    
+        eventEmitter.on(`traffic_graph_filter_id`, data => setFID(data))
+        eventEmitter.on('traffic_graph_filter_manage_filter', data => 
+          setFilterUpdateId(data?.modifyFilterDetails?.id)
+        )
+        
+        eventEmitter.on('traffic_graph_search', setSBy)
+        return () => {
+          eventEmitter.off(`traffic_graph_filter_id`, setFID)
+          eventEmitter.off(`traffic_graph_filter_manage_filter`, setFID)
+          eventEmitter.off(`traffic_graph_search`, setSBy)
+        }
+      }, [eventEmitter])
+  
   const timeRangeFormat = React.useMemo(() => {
     setResolution(null)
-    if (
-      timeRange === 'live'
-    ) {
-      return getLastTimeStamp(3, 'minute')
-    }
+    return getLastTimeStamp({count: time_count, unit: time_unit})
+  }, [ time_count, time_unit])
+  
 
-    const amount = parseInt(timeRange.slice(0, -1), 10)
-    const unit = timeRange.slice(-1)
-    const unitFull = getUnit(unit)
-    return getLastTimeStamp(amount, unitFull)
-  }, [timeRange])
-
-  const resolutionOpt = React.useMemo(() => {
-    return [resolution_options?.[timeRange]] as any
-  }, [timeRange])
 
   const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
     {
-      bucket_size: resolution === 'live' ? '1s' : resolution,
+      bucket_size: resolution,
       time_range: timeRangeFormat,
       timezone,
       device_id: defaultValues?.id,
-    })
-    
+    }, { enabled:false })
 
   const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket)
-    if(timeRange === '1d') {
+    if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
       return {
         ...item,
         bucket: date.format('HH:mm:ss')
@@ -117,108 +134,25 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
     return {...item, bucket: date.format('MM/DD')}
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     refetch()
-
-    const structMs = () => {
-      if (!resolution) return
-      const match = /^(\d+)([smhd])$/.exec(resolution)
-      if (!match) return
-
-      const value = parseInt(match?.[1] as string, 10)
-      const unit = match?.[2] as string
-
-      // Convert to milliseconds
-      const unitToMs = {
-        s: 1000,
-        m: 60 * 1000,
-        h: 60 * 60 * 1000,
-        d: 24 * 60 * 60 * 1000,
-      }
-
-      const intervalMs = value * (unitToMs[unit as 's' | 'm' | 'h' | 'd'] || 1000)
-      return intervalMs
-    }
-
-    // Fetch immediately and start interval
-    refetch()
-
-    const intervalMs = structMs()
-
-    const interval = setInterval(() => {
-      if (!intervalMs) return
-      refetch()
-    }, intervalMs)
-    return () => clearInterval(interval)
-    // Cleanup on unmount or resolution change
+    setLoading(false)
   }
-  , [resolution])
+  , [resolution, time_unit, time_count, graphType])
+
+
 
   return (
     <>
-    <Filter/>
+    <Filter params={params} type='traffic_graph_filter'  />
     <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
-    <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>{`${cardTitle} - Interactive`}</CardTitle>
-        </div>
-        Time Range
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Time Range" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {
-              Object.entries(time_range_options).map(([key, label]) => (
-                <SelectItem className = "rounded-lg" key = { key } value = { key }>
-                  {label as string}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
-        Resolution
-        <Select value={resolution || ''} onValueChange={setResolution}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Select Resolution" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {resolutionOpt.map((options: any) => Object.entries(options).map(([key, label]) => (
-              <SelectItem className = "rounded-lg" key = { key } value = { key }>
-                {label as string}
-              </SelectItem>
-            ))
-            )}
-          </SelectContent>
-        </Select>
-        Graph Type
-        <Select value={graphType} onValueChange={setGraphType}>
-          <SelectTrigger
-            aria-label="Select a value"
-            className="w-[160px] rounded-lg sm:ml-auto"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem className="rounded-lg" value="default">
-              Area Chart
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="bar">
-              Bar Chart
-            </SelectItem>
-            <SelectItem className="rounded-lg" value="line">
-              Line Chart
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </CardHeader>
+    {  loading ? <Loader
+      className="bg-primary text-primary"
+      label="Fetching data..."
+      size="md"
+      variant="circularShadow"
+    /> : <Card>
+      
       <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
         <ChartContainer
           className="aspect-auto h-full w-full p-5 overflow-x-auto"
@@ -229,7 +163,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
 
         </ChartContainer>
       </CardContent>
-    </Card>
+    </Card>}
     </>
   )
 }

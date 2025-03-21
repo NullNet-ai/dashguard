@@ -12,7 +12,6 @@ import { api } from '~/trpc/react'
 
 import { generateFlowData } from './functions/generateFlowData'
 import { type INetworkFlowContext } from './types'
-import { timeDuration } from '../Search/configs';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -27,57 +26,99 @@ interface IProps extends PropsWithChildren {
 
 export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
-  const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
+  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
+  const [loading, setLoading] = useState<boolean>(false)
 
-  const {time_count, time_unit} = timeDuration
+  const [ time , setTime] = useState<Record<string,any> | null>(null)
+
+  const {
+    time_count = null,
+    time_unit  = null,
+    resolution  = null
+  } = time || {}
 
   const { refetch } = api.packet.getBandwidthOfSourceIP.useQuery(
     {
       device_id: params?.id || '',
-      time_range: getLastTimeStamp(time_count, time_unit ),
+      // time_range: getLastTimeStamp(20, 'second' ) as any,
+      time_range: getLastTimeStamp({count: time_count, unit: time_unit,add_remaining_time: true } ) as any,
       filter_id: filterId,
+      bucket_size: resolution,
     },
     {
       enabled: false, // Disable automatic query execution
+    }
+  )
+
+  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
+    {
+      type: 'timeline_filter',
+      filter_id: filterId,
+    },
+    {
+      enabled: false, 
     }
   )
   
 
   useEffect(() => {
     if (!eventEmitter) return
-    const setFID =  (data:any ) => {
+    const setFID =  async(data:any ) => {
       
       if(typeof data !== 'string')return
-        
-      
-        setFilterID(data)
+
+      setFilterID(data)
       }
     const setSBy = (data:any) => {
-      
-      
       setSearchBy(data)
     }
 
-    eventEmitter.on(`filter_id`, data => setFID(data))
+    eventEmitter.on(`timeline_filter_id`, data => setFID(data))
     eventEmitter.on('timeline_search', setSBy)
     return () => {
-      eventEmitter.off(`filter_id`, setFID)
+      eventEmitter.off(`timeline_filter_id`, setFID)
       eventEmitter.off(`timeline_search`, setSBy)
     }
   }, [eventEmitter])
   
 
   useEffect(() => {
+    
+    if (filterId) {
+      setLoading(true)
+     const fetchTimeUnitandResolution = async() => {
+        const {
+          data:  time_unit_resolution
+        } = await refetchTimeUnitandResolution()
+    
+          const {time, resolution = '1h'} = time_unit_resolution || {}
+          const {time_count = 12, time_unit = 'hour' } = time || {}
+          setTime({
+            time_count,
+            time_unit: time_unit  as 'hour',
+            resolution: resolution as '1h'
+          })
+      }
+      fetchTimeUnitandResolution()
+    }
+  }, [filterId, (searchBy ?? [])?.length])
+
+  useEffect(() => {
+    if(!time_count || !time_unit || !resolution) return 
     if (filterId) {
      setTimeout(async() =>{
+
+      
       const { data } =  await refetch() 
+      
       setBandwidth(data)
+      setLoading(false)
     },500
     )
     }
-  }, [filterId, (searchBy ?? [])?.length])
+  }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
     if(!params?.id || !refetch) return 
@@ -92,23 +133,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     
     fetchBandwidth()
   }, [params?.id])
-  // const { data: packetsIP, refetch } = api.packet.fetchPacketsIP.useQuery({})
-  // const { data: bandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
-  //   { packet_data: packetsIP }, { enabled: !!packetsIP }
-  // )
-  // 
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!packetsIP) {
-  //       await refetch()
-  //     }
-  //   }
-  //   fetchData().catch(error => console.error('Error fetching data:', error))
-  // }, [packetsIP, refetch])
 
   const state = {
     elements: generateFlowData(bandwidth ?? []),
+    loading
   }
 
   return (

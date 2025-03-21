@@ -2,6 +2,8 @@ import { ulid } from 'ulid'
 import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
+import { cleanFilter } from './packet';
+import { getUnit, parseTimeString } from '~/app/portal/device/utils/timeRange';
 
 export const cachedFilterRouter = createTRPCRouter({
   createFilter: privateProcedure
@@ -10,6 +12,7 @@ export const cachedFilterRouter = createTRPCRouter({
       data: z.unknown()
     }))
     .mutation(async ({ input, ctx }) => {
+      
       const { type, data } = input
       const { account } = ctx.session
       const { contact } = account
@@ -31,6 +34,7 @@ export const cachedFilterRouter = createTRPCRouter({
   }))
   .mutation(async ({ input, ctx }) => {
     const { type, data: input_data } = input as any
+    
     const { account } = ctx.session
     const { contact } = account
     const cachedData = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
@@ -56,6 +60,7 @@ export const cachedFilterRouter = createTRPCRouter({
     }))
     .mutation(async ({ input, ctx }) => {
       const { type, data =[] } = input
+      
       
       const { account } = ctx.session
       const { contact } = account
@@ -120,6 +125,52 @@ export const cachedFilterRouter = createTRPCRouter({
         label: (data as Record<string,any>)?.name
       }
 
+    }
+    ),
+    fetchCachedFilterTimeUnitandResolution: privateProcedure
+    .input(z.object({ type: z.string(), filter_id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { type, filter_id } = input
+      
+      const { account } = ctx.session
+      const { contact } = account
+      const cached_data = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
+      
+      
+
+      
+      const filter = cached_data?.find((data: any) => data.id === filter_id)
+      if(!filter) {
+        return {
+          time: {
+            time_count: 5,
+            time_unit: 'hour'
+          },
+          resolution: '30m'
+        }
+      }
+      
+      
+      
+
+      const {
+        extracted
+      } = cleanFilter(filter?.filterGroups?.[0]?.filters)
+      
+      
+
+      const {'Time Range': time_unit = '1d', Resolution: resolution = '1h', 'Graph Type': graph_type = 'area' } = extracted
+
+      const time_string = parseTimeString(time_unit as string)
+      
+      return {
+        time : {
+          time_count: time_string?.value,
+          time_unit: time_string?.unit
+        },
+        resolution,
+        graph_type
+      }
     }
     ),
 })
