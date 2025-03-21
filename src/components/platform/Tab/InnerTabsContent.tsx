@@ -23,7 +23,7 @@ import InnerTabitem from './InnerTabitem';
 import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
-import { debounce, toLower } from 'lodash';  // Add this import at the top
+import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { all } from 'bluebird';
 const InnerTabsContent = ({
@@ -211,6 +211,28 @@ const InnerTabsContent = ({
         >
           {datas.map((tab: any, index: number) => {
             const isHidden = data?.[index]?.hidden;
+
+            if(lowerCase(tab.name) === 'grid') {
+              return (
+                <InnerTabitem
+                  className={cn({ 'opacity-0': isHidden })}
+                  isHidden={isHidden}
+                  ref={(el) => {
+                    if (el) {
+                      if (itemsRef.current) {
+                        itemsRef.current[index] = el;
+                      }
+                    }
+                  }}
+                  lastShownItem={lastShownItem}
+                  index={index}
+                  tab={tab}
+                  newItems={data}
+                  pathname={pathname}
+                  key={index}
+                /> 
+              )
+            }
             return (
               <SortableItem key={tab.id} value={tab.id} className="relative">
                 <InnerTabitem

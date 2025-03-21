@@ -80,7 +80,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       )}
     >
       {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
-        <SortableDragHandleRawItem className='cursor-grab opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto group-hover:transition-all group-hover:duration-100 group-hover:ease-in mr-1'>
+        <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
             aria-hidden="true"
