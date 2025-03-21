@@ -51,7 +51,9 @@ const GridMenu = ({ filter_id, tab, entity, tabs }: IProps) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild
+        className='cursor-pointer'
+      >
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <EllipsisVertical
             className={`text-default/60 h-3.5 w-3.5 font-semibold`}
