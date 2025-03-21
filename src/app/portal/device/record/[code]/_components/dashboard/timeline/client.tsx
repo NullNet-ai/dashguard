@@ -10,7 +10,7 @@ function TimelineComponent({ params }: any) {
     <div className=" mx-auto">
       <Filter params={params} type='timeline_filter'  />
 
-      <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
+      <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='timeline_search' />
       <NetworkTrafficFlow params={params} />
 
     </div>

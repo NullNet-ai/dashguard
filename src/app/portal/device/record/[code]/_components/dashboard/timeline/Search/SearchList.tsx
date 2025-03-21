@@ -15,7 +15,7 @@ import { cn, formatAndCapitalize } from '~/lib/utils'
 import { SearchGraphContext } from './Provider'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 
-const SearchList = () => {
+const SearchList = ({filter_type}: {filter_type: string}) => {
   const conref = useRef<any>(null)
   const itemsRef = useRef<any[]>([])
   const { state, actions } = useContext(SearchGraphContext)
@@ -68,12 +68,12 @@ const SearchList = () => {
     handleResize()
     window.addEventListener('resize', handleResize)
 
-    eventEmitter.emit(`timeline_search`, defaultSearchItems)
+    eventEmitter.emit(filter_type, defaultSearchItems)
 
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      eventEmitter.off(`timeline_search`, () => defaultSearchItems)
+      eventEmitter.off(filter_type, () => defaultSearchItems)
     }
   }, [defaultSearchItems?.length, open])
 

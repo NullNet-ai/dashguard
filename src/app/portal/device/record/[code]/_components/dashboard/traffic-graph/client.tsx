@@ -145,7 +145,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   return (
     <>
     <Filter params={params} type='traffic_graph_filter'  />
-    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} />
+    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
     {  loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."

@@ -32,10 +32,11 @@ interface IParams {
 
 interface IProps extends PropsWithChildren {
   test?: any,
-  params: IParams
+  params: IParams,
+  filter_type: string
 }
 
-export default function GraphSearchProvider({ children, params }: IProps) {
+export default function GraphSearchProvider({ children, params, filter_type }: IProps) {
   const {id: device_id, router = 'packet', resolver = 'filterPackets'} = params || {}
   
   const { defaultEntity } = searchConfig ?? {}
@@ -154,6 +155,7 @@ refetchSearchOption()
     await UpdateSearchFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
+      filter_type,
     })
   }
 
@@ -165,6 +167,7 @@ refetchSearchOption()
     await UpdateSearchFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
+      filter_type,
     })
   }
 
@@ -175,7 +178,7 @@ refetchSearchOption()
   const {
     data: cached_search_items = [],
   } = api.cachedFilter.fetchCachedFilter.useQuery({
-    type: 'timeline_search',
+    type: filter_type,
   })
 
   

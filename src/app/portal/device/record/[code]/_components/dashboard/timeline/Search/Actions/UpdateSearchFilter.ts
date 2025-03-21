@@ -10,9 +10,11 @@ import { type ISearchItem } from '../types'
 export async function UpdateSearchFilter({
   filters,
   filterItemId,
+  filter_type
 }: {
   filters: ISearchItem[]
   filterItemId?: string
+  filter_type: string
 }) {
   const headerList = headers()
   const pathName = headerList.get('x-pathname') || ''
@@ -20,7 +22,7 @@ export async function UpdateSearchFilter({
   // const urlSearchParams = new URLSearchParams(searchParams)
   
   await api.cachedFilter.updateSearchFilter({
-    type: 'timeline_search',
+    type: filter_type,
     data: filters,
   })
 
