@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCodeEditor",
-  "tag": "0.3.0",
-  "branch": "released/2278/0.3.0",
-  "message": "test",
-  "publish_name": "Rob Caldosa"
+  "tag": "0.5.0<unreleased>",
+  "branch": "unreleased/fix/2278/0.5.0<unreleased>",
+  "message": "change border, field value handler, error state",
+  "publish_name": "Save Ducto"
 }

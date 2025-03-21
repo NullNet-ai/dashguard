@@ -20,7 +20,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 export interface ComboSelectOption {
     label: string;
     value: string;
-    status?: 'online' | 'offline' | 'busy' | 'away' | string;
+    status?: 'online' | 'offline' | 'busy' | 'away';
     avatar?: string; // URL for avatar image
     avatarFallback?: string; // Fallback text for avatar (initials, etc.)
     secondaryText?: string; // Secondary text like username/handle

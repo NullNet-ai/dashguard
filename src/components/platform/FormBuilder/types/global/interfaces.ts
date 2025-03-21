@@ -39,7 +39,7 @@ import {
 import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
-import { ComboSelectProps } from '~/components/ui/combo-select';
+import { type ComboSelectProps } from '~/components/ui/combo-select';
 
 interface OptionType {
   label: string;
@@ -249,26 +249,6 @@ interface IField {
 		minHeight: string;
 		maxHeight?: string;
 	};
-	bannerProps?: IBannerProps & {
-		contentAlign?: 'left' | 'center' | 'right';
-		position?: "top" | "bottom";
-		hideable?: boolean;
-		sticky?: boolean;
-		className?: string;
-		maxWidth?: string;
-		content?: React.ReactNode;
-		actions?: Array<{
-			type: 'button' | 'link' | 'icon';
-			icon_position?: 'left' | 'right';
-			position?: 'start' | 'end';
-			id?: string;
-			label?: string;
-			href?: string;
-			btnStyle?: string;
-			icon?: React.ElementType;
-			onClick?: () => void;
-		}>;
-	}
 }
 
 interface ISelectOptions {
@@ -526,27 +506,6 @@ interface ICodeEditor {
 	maxHeight?: string;
 }
 
-interface IBannerProps {
-  contentAlign?: 'left' | 'center' | 'right';
-  position?: "top" | "bottom";
-  hideable?: boolean;
-	sticky?: boolean;
-	className?: string;
-  maxWidth?: string;
-  content?: React.ReactNode;
-  actions?: Array<{
-		type: 'button' | 'link' | 'icon';
-		icon_position?: 'left' | 'right';
-		position?: 'start' | 'end';
-		id?: string;
-		label?: string;
-		href?: string;
-		btnStyle?: string;
-		icon?: React.ElementType;
-		onClick?: () => void;
-  }>;
-}
-
 export type {
   IButtonConfig,
   ICheckboxOptions,
@@ -562,6 +521,5 @@ export type {
   OptionType,
   IFieldFilterActions,
   IGridData,
-	ICodeEditor,
-	IBannerProps
+	ICodeEditor
 };
