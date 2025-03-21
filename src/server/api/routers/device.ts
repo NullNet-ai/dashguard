@@ -1225,8 +1225,14 @@ export const deviceRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({ device_id: item?.id }),
-            pluck: ['id', 'device_id', 'created_date', 'created_time', 'device_configuration_id', 'hostname'],
+            pluck: ['id', 'device_id', 'created_date', 'created_time', 'hostname'],
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            }
           },
+          
         }).execute()
 
         // Sort configurations by created_date and created_time to get the latest one
@@ -1247,6 +1253,7 @@ export const deviceRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({ device_configuration_id: item.id }),
+            pluck: ['id', 'device_configuration_id', 'name'],
             pluck_object: {
               device_interfaces: ['id', 'device_configuration_id', 'name'],
               device_interface_addresses: ['id', 'device_interface_id', 'address'],
@@ -1279,6 +1286,12 @@ export const deviceRouter = createTRPCRouter({
 
       const configuration: any = fetchDeviceInterfaces.find((config: any) => config.configuration.device_id === device?.data?.[0]?.id)
 
+      const transformed_device_interface_address = configuration?.interfaces?.map((iface: Record<string, any>) => ({
+        name: iface.name,
+        address: iface.device_interface_addresses.length
+        ? iface.device_interface_addresses[0].address
+        : null,
+      }));
       const { id: device_group_setting_id, name }
           = device_group.data[0]?.device_group_settings?.[0] || {}
       // const { hostname } = device_configuration.data[0] || {}
@@ -1291,7 +1304,7 @@ export const deviceRouter = createTRPCRouter({
           ...rest,
           ...rest_address,
           hostname: configuration?.configuration?.hostname,
-          interfaces: configuration?.interfaces,
+          interfaces: transformed_device_interface_address,
           grouping: device_group_setting_id,
           grouping_name: name,
         },
