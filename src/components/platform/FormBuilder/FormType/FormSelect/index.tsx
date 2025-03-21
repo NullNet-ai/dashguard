@@ -144,10 +144,10 @@ export default function FormSelect({
 
   const renderEmptyState = !fieldConfig?.selectEnableCreate ? (
     <span
-      className="ms-3 block truncate group-data-[selected]:font-semibold"
+      className="ms-3 p-2 ps-0 text-sm text-foreground block truncate group-data-[selected]:font-semibold"
       data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
     >
-      {"No "} {fieldConfig?.label} found.
+      {fieldConfig?.label ? `No ${fieldConfig.label} found.` : "No options found."}
     </span>
   ) : null;
 

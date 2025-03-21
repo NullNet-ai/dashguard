@@ -1,7 +1,11 @@
 import { MinusCircle, Plus } from 'lucide-react';
-import { OPERATORS, USE_CUSTOM_RENDER } from '../constants';
-import { Button } from '~/components/ui/button';
 import { useState } from 'react';
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
+import {
+  IField,
+  type ISelectOptions,
+} from '~/components/platform/FormBuilder/types';
+import { Button } from '~/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -10,14 +14,10 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { cn } from '~/lib/utils';
-import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
+import DateRangePicker from '../components/date-range-picker';
+import { OPERATORS, USE_CUSTOM_RENDER } from '../constants';
 import { ZodSchema } from '../schemas/filter';
-import { api } from '~/trpc/server';
 import { searchRecords } from './search';
-import {
-  IField,
-  type ISelectOptions,
-} from '~/components/platform/FormBuilder/types';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({
@@ -154,82 +154,79 @@ export function FilterGroup({
                           selectSearchable: true,
                         },
                         ...(filterData.operator &&
-                        !['is_empty', 'is_not_empty'].includes(
-                          filterData.operator,
-                        ) &&
-                        // adjust this based on future scenarios currently string, array uses multi select.
-                        field_data_type !== 'datetime'
+                          !['is_empty', 'is_not_empty'].includes(
+                            filterData.operator,
+                          ) &&
+                          // adjust this based on future scenarios currently string, array uses multi select.
+                          field_data_type !== 'datetime'
                           ? [
-                              {
-                                id: `${prefix}.values`,
-                                formType: 'multi-select',
-                                name: `${prefix}.values`,
-                                placeholder: 'Enter the value',
-                                multiSelectUseStringValues: true,
-                                multiSelectShowCreatableItem: false,
-                                multiSelectDelay: 300,
-                                multiSelectEnableCreate: [
-                                  'contains',
-                                  'not_contains',
-                                ].includes(filterData.operator || ''),
-                                multiSelectLoadingIndicator: isValuesLoading ? (
-                                  <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
-                                    Loading options...
-                                  </p>
-                                ) : undefined,
-                                multiSelectEmptyIndicator: (
-                                  <p className="w-full text-center text-sm leading-6 text-muted-foreground">
-                                    No matching options found
-                                  </p>
-                                ),
-                                multiSelectRenderOption: USE_CUSTOM_RENDER
-                                  ? renderOption
-                                  : undefined,
-                                multiSelectRenderBadge: USE_CUSTOM_RENDER
-                                  ? renderBadge
-                                  : undefined,
-                              },
-                            ]
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'multi-select',
+                              name: `${prefix}.values`,
+                              placeholder: 'Enter the value',
+                              multiSelectUseStringValues: true,
+                              multiSelectShowCreatableItem: false,
+                              multiSelectDelay: 300,
+                              multiSelectEnableCreate: [
+                                'contains',
+                                'not_contains',
+                              ].includes(filterData.operator || ''),
+                              multiSelectLoadingIndicator: isValuesLoading ? (
+                                <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
+                                  Loading options...
+                                </p>
+                              ) : undefined,
+                              multiSelectEmptyIndicator: (
+                                <p className="w-full text-center text-sm leading-6 text-muted-foreground">
+                                  No matching options found
+                                </p>
+                              ),
+                              multiSelectRenderOption: USE_CUSTOM_RENDER
+                                ? renderOption
+                                : undefined,
+                              multiSelectRenderBadge: USE_CUSTOM_RENDER
+                                ? renderBadge
+                                : undefined,
+                            },
+                          ]
                           : []),
                         ...(filterData.field &&
-                        field_data_type === 'datetime' &&
-                        filterData.operator !== 'is_between'
+                          field_data_type === 'datetime' &&
+                          filterData.operator !== 'is_between'
                           ? [
-                              {
-                                id: `${prefix}.values`,
-                                formType: 'smart-date',
-                                name: `${prefix}.values`,
-                                placeholder: 'Enter the value',
-                                dateTimePickerProps: {
-                                  // disablePastDates: true,
-                                },
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'smart-date',
+                              name: `${prefix}.values`,
+                              placeholder: 'Enter the value',
+                              dateTimePickerProps: {
+                                // disablePastDates: true,
+                                transformValuesToArray: true,
+                                enableFormattedDate: false,
                               },
-                            ]
+                            },
+                          ]
                           : []),
-                          ...(filterData.field &&
-                            field_data_type === 'datetime' &&
-                            filterData.operator === 'is_between'
-                              ? [
-                                  {
-                                    id: `${prefix}.values`,
-                                    formType: 'smart-date',
-                                    name: `${prefix}.values`,
-                                    placeholder: 'Enter the value',
-                                    dateTimePickerProps: {
-                                      // disablePastDates: true,
-                                    },
-                                  },
-                                  {
-                                    id: `${prefix}.values`,
-                                    formType: 'smart-date',
-                                    name: `${prefix}.values`,
-                                    placeholder: 'Enter the value',
-                                    dateTimePickerProps: {
-                                      // disablePastDates: true,
-                                    },
-                                  },
-                                ]
-                              : []),
+                        ...(filterData.field &&
+                          field_data_type === 'datetime' &&
+                          filterData.operator === 'is_between'
+                          ? [
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'custom-field',
+                              name: `${prefix}.values`,
+                              placeholder: 'Select date range',
+                              render: ({ field }:any) => (
+                                <DateRangePicker
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  defaultDisplayFormat="SHORT"
+                                />
+                              ),
+                            }
+                          ]
+                          : []),
                       ] as IField[]
                     }
                     subConfig={{

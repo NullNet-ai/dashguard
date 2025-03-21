@@ -138,6 +138,8 @@ interface IField {
     useTimePicker?: boolean
     displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
     is24Hour?: boolean
+    enableFormattedDate?:boolean
+    transformValuesToArray?:boolean
   }
   dateInputProps?: NaturalLanguageInputProps
   description?: string
