@@ -30,6 +30,7 @@ const buttonVariants = cva(
         info: "bg-info text-white hover:bg-info/90 active:bg-info/80 active:shadow-inner",
         success: "bg-success text-white hover:bg-success/90 active:bg-success/80 active:shadow-inner",
         warning: "bg-warning text-white hover:bg-warning/90 active:bg-warning/80 active:shadow-inner",
+        plain: "bg-transparent border-none cursor-pointer text-foreground hover:text-primary active:text-primary/80",
       },
       size: {
         default: "h-[34px] px-2",

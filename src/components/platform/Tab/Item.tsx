@@ -48,7 +48,7 @@ const Item = ({ tab, actions }: ItemProps) => {
           className={cn(
             isActive
               ? 'rounded-t-lg border-b-0 border-l border-r border-t-2 border-t-primary text-primary'
-              : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] xx py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[8px]', 'relative hover:border-t-primary hover:text-primary', padding
+              : 'text-gray-500', 'max-h-[32px] whitespace-nowrap px-[8px] xx py-1 text-sm font-medium', 'flex items-center space-x-2 pl-[4px]', 'relative hover:border-t-primary hover:text-primary', padding
           )}
         >
           {formatTabName(tabNameRole)}
