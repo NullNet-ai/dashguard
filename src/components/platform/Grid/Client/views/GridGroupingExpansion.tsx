@@ -139,6 +139,14 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     );
   }
 
+  
+
+  const _width = open ? {
+    width: 'calc(100vw - 330px)'
+  } : {
+    width: '100%'
+  }
+
   return (
     <GridProvider
       {...gridQueryConfigs}
@@ -154,10 +162,11 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       totalCount={totalCount}
       grouping={grouping}
     >
-      <div className="hidden lg:grid">
+      <div className={cn(`hidden lg:grid`)} 
+      >
         <MyTableBody />
         {!grouping?.length && (
-          <CardFooter>
+          <CardFooter  style={_width}>
             <Pagination />
           </CardFooter>
         )}

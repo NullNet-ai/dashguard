@@ -623,8 +623,8 @@ export default function GridProvider({
                     {columnConfig.cell({
                       row: { original: { [groupColumn as string]: value } },
                     })}
-                    <div className="ml-1 flex items-center">
-                      <span className="text-sm font-bold">{`(${row?.original.count})`}</span>
+                  <div className='flex items-center ml-1'>
+                      <span className='font-semibold text-sm'>{`(${row?.original.count})`}</span>
                     </div>
                   </>
                 );
@@ -640,8 +640,8 @@ export default function GridProvider({
                       getValue: () => value,
                     },
                   )}
-                  <div className="ml-1 flex items-center">
-                    <span className="text-sm font-bold">{`(${row?.original.count})`}</span>
+                  <div className='flex items-center ml-1'>
+                    <span className='font-semibold text-sm'>{`(${row?.original.count})`}</span>
                   </div>
                 </>
               );
