@@ -71,7 +71,7 @@ export default function FormTextInputs({
           <FormControl>
             <div className="w-full">
               <Input
-                {...register(`${formRenderProps.field.name}[${index}].value`)}
+                {...register(`${formRenderProps.field.name}[${index}].value`)  as any}
                  readOnly={(formRenderProps.field.disabled || fieldConfig?.readonly) ?? false}
                 placeholder={fieldConfig?.placeholder}
                 disabled={
