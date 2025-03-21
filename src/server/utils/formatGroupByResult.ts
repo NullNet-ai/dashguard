@@ -1,5 +1,5 @@
 import { ulid } from 'ulid';
-import { pluralize } from './pluralize';
+import pluralize from 'pluralize';
 
 export const formatGroupByResult = ({
   data,
@@ -17,6 +17,7 @@ export const formatGroupByResult = ({
       is_group_by: true,
       value: entity_data?.[field],
       field,
+      entity,
       ...item,
     };
   });

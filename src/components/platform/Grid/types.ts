@@ -135,6 +135,8 @@ export interface IConfigGrid {
   gridColumns? : Record<string,any>[];
   group_by_initial_columns?: CustomColumnDef<any>[];
   parentGroupData?: Record<string, any>[];
+  new_button_action?: () => void;
+  new_button_title?: string;
 }
 
 interface IRowToArchive extends Row<any> {

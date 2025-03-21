@@ -1,27 +1,15 @@
 'use client';
-import Grid from '~/components/platform/Grid/Client';
-import StatusCell from '~/components/ui/status-cell';
 
 import {
-  IConfigGrid,
-  type IGridGroupingExpansionProps,
+  type IGridGroupingExpansionProps
 } from '~/components/platform/Grid/types';
+import { CardFooter } from '~/components/ui/card';
+import { Loader } from '~/components/ui/loader';
 import useFetchGridData from '~/hooks/useFetchGridData';
+import Pagination from '../../Pagination';
 import GridProvider from '../../Provider';
 import MyTableBody from '../../TableBody';
-import gridColumns from '~/app/portal/contact/grid/_config/columns';
-import { defaultAdvanceFilter } from '~/app/portal/contact/grid/_config/advanceFilter';
-import { Table } from 'lucide-react';
-import {
-  IGridCacheDataResponse,
-  getGridCacheData,
-} from '~/lib/grid-get-cache-data';
-import { api } from '~/trpc/react';
-import { IGroupBy } from '../../Category/type';
-import { Loader } from '~/components/ui/loader';
 import ErrorPage from '../../common/ErrorPage';
-import { CardFooter } from '~/components/ui/card';
-import Pagination from '../../Pagination';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -34,55 +22,36 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     gridState,
   } = props ?? {};
 
-  const { data: gridData } = api.grid.getReportCachedData.useQuery();
-  const cachedData =
-    typeof gridData === 'object'
-      ? gridData
-      : {
-          sorts: {
-            sorting: [],
-            defaultSorting: [],
-          },
-          pagination: {
-            current_page: 1,
-            limit_per_page: 100,
-          },
-          filters: {
-            advanceFilter: [],
-            reportFilters: [],
-            defaultFilters: [],
-            groupAdvanceFilters: [],
-          },
-          columns: [],
-          groups: [],
-        };
-  const { filters } = (cachedData as unknown as IGridCacheDataResponse) ?? {};
   const pagination = {
     current_page: 1,
     limit_per_page: 10,
   };
-  const gridQueryConfigs = {
-    defaultSorting: gridState?.sorting,
-    defaultAdvanceFilter: gridState?.defaultAdvanceFilter,
-    advanceFilter: gridState?.advanceFilter,
-    sorting: gridState?.sorting,
-    pagination: pagination
-  };
-
   const defaultSorting = [
     {
       id: 'created_date',
       desc: true,
     },
   ];
+  const gridQueryConfigs = {
+    defaultSorting: gridState?.sorting,
+    defaultAdvanceFilter: gridState?.defaultAdvanceFilter,
+    advanceFilter: gridState?.advanceFilter,
+    sorting: gridState?.sorting,
+    pagination: pagination,
+  };
   const constructGridFilter = (data: Record<string, any>[]) => {
     const gridFilter = data?.reduce((acc, item, index) => {
-      const { field, value } = item ?? {};
+      const { field, value, entity } = item ?? {};
       const filterItem = {
         type: 'criteria',
         field,
-        operator: Array.isArray(value) ? 'like' : 'equal',
-        entity: config.entity,
+        operator:
+          value === null || value === undefined
+            ? 'is_null'
+            : Array.isArray(value)
+              ? 'like'
+              : 'equal',
+        entity: entity || config.entity,
         values: Array.isArray(value) ? [JSON.stringify(value)] : [value],
       };
       if (index > 0) {
@@ -94,7 +63,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     return gridFilter;
   };
   const gridFilter = [
-    ...(filters?.groupAdvanceFilters?.length
+    ...(gridState?.advanceFilter?.length
       ? [
           {
             type: 'operator',
@@ -105,16 +74,19 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     ...constructGridFilter([...(parentGroupData ?? []), rowData]),
   ];
   const groupFields = grouping?.map((item) => {
-    const label = initialColumns?.find(
+    const columnConfig = initialColumns?.find(
       (column: any) => column?.accessorKey === item,
-    )?.header as string;
+    ) as any;
+    const label = (columnConfig?.header as string) ?? '';
+    const entity = columnConfig?.search_config?.entity || config.entity;
+    const field = columnConfig?.search_config?.field || item;
     return {
       value: item,
+      field: `${entity}.${field}`,
       label,
     };
   });
 
-  
   const { fetchData, data, error, isLoading } = useFetchGridData(
     {
       current: pagination?.current_page,
@@ -124,8 +96,8 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       sorting: gridQueryConfigs?.sorting?.length
         ? gridQueryConfigs?.sorting
         : defaultSorting,
-      advance_filters: [...(filters?.advanceFilter ?? []), ...gridFilter],
-      grouping: groupFields?.length ? [groupFields[0] as IGroupBy] : [],
+      advance_filters: [...(gridState?.advanceFilter ?? []), ...gridFilter],
+      grouping: groupFields?.[0]?.field ? [groupFields[0].field as string] : [],
     },
     {
       resolver: config.searchConfig?.resolver ?? 'items',
@@ -133,13 +105,23 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     },
   );
 
+  console.log('gridFilter', {
+    current: pagination?.current_page,
+    limit: pagination?.limit_per_page,
+    entity: config.entity,
+    pluck: config.searchConfig?.query_params?.pluck,
+    sorting: gridQueryConfigs?.sorting?.length
+      ? gridQueryConfigs?.sorting
+      : defaultSorting,
+    advance_filters: [...(gridState?.advanceFilter ?? []), ...gridFilter],
+    grouping: groupFields?.[0]?.field ? [groupFields[0].field as string] : [],
+  });
+
   const { items = [], totalCount = 0 } = data ?? {};
 
   if (isLoading && !items?.length) {
     return (
-      <div
-        className="flex h-full items-center justify-center"
-      >
+      <div className="flex h-full items-center justify-center">
         <Loader
           className="bg-primary text-primary"
           label="Fetching data..."
@@ -151,9 +133,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   }
   if (error) {
     return (
-      <div
-        className="flex h-full items-center justify-center"
-      >
+      <div className="flex h-full items-center justify-center">
         <ErrorPage refetch={() => config?.onFetchRecords?.({})} />
       </div>
     );

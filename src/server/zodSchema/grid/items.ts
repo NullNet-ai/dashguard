@@ -21,7 +21,7 @@ const ZodItems = z.object({
         field: z.string().optional(),
         entity: z.string().optional(),
         operator: z.string(),
-        values: z.array(z.string()).optional(),
+        values: z.array(z.any()).optional(),
       }),
     )
     .optional(), // Optional advance filters
@@ -46,14 +46,7 @@ const ZodItems = z.object({
       }),
     )
     .optional(), // Optional group advance filters
-  grouping: z
-    .array(
-      z.object({
-        label: z.string(),
-        value: z.string(),
-      }),
-    )
-    .optional(), // Optional groupings
+  grouping: z.array(z.string()).optional(), // Optional groupings
 });
 
 export default ZodItems;

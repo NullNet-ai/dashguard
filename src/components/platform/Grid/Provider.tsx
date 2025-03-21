@@ -13,7 +13,7 @@ import {
   type Row,
   type RowSelectionState,
   type SortingState,
-  type Updater
+  type Updater,
 } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -78,7 +78,7 @@ export default function GridProvider({
   gridLevel = 1,
   grouping: initialGrouping = [],
 }: IProps) {
-  const _defaultSorting = defaultSorting
+  const _defaultSorting = defaultSorting?.length
     ? defaultSorting
     : [
         {
@@ -86,12 +86,16 @@ export default function GridProvider({
           desc: true,
         },
       ];
+
   const resolvedGroupings = useMemo(() => {
     if (!initialGrouping?.length) return [];
     if (typeof initialGrouping[0] === 'string') return initialGrouping;
-    return (initialGrouping as IGroupBy[])?.reduce((acc: GroupingState, curr) => {
-      return [...acc, curr.value];
-    }, []);
+    return (initialGrouping as IGroupBy[])?.reduce(
+      (acc: GroupingState, curr) => {
+        return [...acc, curr.value];
+      },
+      [],
+    );
   }, [initialGrouping]) as GroupingState;
 
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
@@ -201,6 +205,19 @@ export default function GridProvider({
     }
   }, [initialSorting]);
 
+  useEffect(() => {
+    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
+      setGrouping(resolvedGroupings);
+      setColumnVisibility((prev) => {
+        const newVisibility = { ...prev };
+        resolvedGroupings?.forEach((curr) => {
+          newVisibility[curr] = false;
+        });
+        return newVisibility;
+      });
+    }
+  }, [resolvedGroupings]);
+
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
@@ -223,6 +240,23 @@ export default function GridProvider({
       }) ?? [],
     ..._propsConfig,
   };
+
+  // const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  const newData = useMemo(() => {
+    if (grouping.length) {
+      const configColumns = config?.group_by_initial_columns || config?.columns;
+      const columnConfig = configColumns?.find(
+        (col: any) => col.accessorKey === grouping[0],
+      ) as any;
+      const entity = columnConfig?.search_config?.entity || config.entity;
+      return formatGroupByResult({
+        data: data,
+        field: grouping[0] ?? '',
+        entity,
+      });
+    }
+    return isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  }, [grouping, isMobileOrTablet, config.isInfinite, config?.group_by_initial_columns, config?.columns, config.entity, infiniteData, data]);
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -348,11 +382,15 @@ export default function GridProvider({
     });
     setGrouping(newGrouping);
     const groupings = newGrouping?.map((item) => {
-      const label = config?.columns?.find(
+      const columnConfig = config?.columns?.find(
         (column: any) => column?.accessorKey === item,
-      )?.header as string;
+      ) as any;
+      const label = (columnConfig?.header as string) ?? '';
+      const entity = columnConfig?.search_config?.entity || config.entity;
+      const field = columnConfig?.search_config?.field || item;
       return {
         value: item,
+        field: `${entity}.${field}`,
         label,
       };
     });
@@ -564,7 +602,7 @@ export default function GridProvider({
 
         return [...columns, actionRow?.current];
       default:
-        if (grouping.length > 0) {
+        if (grouping.length && newData.length) {
           const groupColumn = grouping[0];
           const configColumns =
             config?.group_by_initial_columns || config?.columns;
@@ -585,8 +623,8 @@ export default function GridProvider({
                     {columnConfig.cell({
                       row: { original: { [groupColumn as string]: value } },
                     })}
-                  <div className='flex items-center ml-1'>
-                      <span className='font-bold text-sm'>{`(${row?.original.count})`}</span>
+                    <div className="ml-1 flex items-center">
+                      <span className="text-sm font-bold">{`(${row?.original.count})`}</span>
                     </div>
                   </>
                 );
@@ -602,8 +640,8 @@ export default function GridProvider({
                       getValue: () => value,
                     },
                   )}
-                  <div className='flex items-center ml-1'>
-                    <span className='font-bold text-sm'>{`(${row?.original.count})`}</span>
+                  <div className="ml-1 flex items-center">
+                    <span className="text-sm font-bold">{`(${row?.original.count})`}</span>
                   </div>
                 </>
               );
@@ -624,25 +662,6 @@ export default function GridProvider({
         return columns;
     }
   };
-
-  // const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
-  const newData = useMemo(() => {
-    if (grouping.length) {
-      return formatGroupByResult({
-        data: data,
-        field: grouping[0] ?? '',
-        entity: config?.entity,
-      });
-    }
-    return isMobileOrTablet && config.isInfinite ? infiniteData : data;
-  }, [
-    grouping,
-    isMobileOrTablet,
-    config.isInfinite,
-    config?.entity,
-    infiniteData,
-    data,
-  ]);
 
   /** @HOOKS */
   const table = useReactTable({

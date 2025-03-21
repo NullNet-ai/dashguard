@@ -878,17 +878,21 @@ export const gridRouter = createTRPCRouter({
       typeof pagination === 'object' ? pagination : {};
 
     const filterDetails = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id))
-      : (tabDetails?.find((tab) => tab.current));
+      ? tabDetails?.find((tab) => tab.id === filter_id)
+      : tabDetails?.find((tab) => tab.current);
 
-    const filter: ISearchItem[] = filterDetails.default ? filterDetails?.advance_filters : filterDetails?.default_filter;
+    const filter: ISearchItem[] = filterDetails?.default
+      ? filterDetails?.advance_filters
+      : filterDetails?.default_filter;
 
     const groupAdvanceFilters: ISearchItem[] = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)
           ?.group_advance_filters ?? [])
       : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
 
-    const defaultFilters = (filter ?? []).filter((item) => item.default === true);
+    const defaultFilters = (filter ?? []).filter(
+      (item) => item.default === true,
+    );
     const sorts: ISortBy = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
       : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
@@ -902,7 +906,7 @@ export const gridRouter = createTRPCRouter({
     const groups = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
       : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
-    
+
     const advanceFilter = filter?.map((item) => {
       return {
         entity: item.entity,
@@ -998,6 +1002,7 @@ export const gridRouter = createTRPCRouter({
           z.object({
             label: z.string(),
             value: z.string(),
+            field: z.string(),
           }),
         ),
       }),
@@ -1034,21 +1039,20 @@ export const gridRouter = createTRPCRouter({
         }
         return tab;
       });
-      // if (!defaultSort.is_default) {
-      //   // update the grid filter entity on database
-      //   await ctx.dnaClient
-      //     .update(defaultSort.id, {
-      //       entity: 'grid_filter',
-      //       token: ctx.token.value,
-      //       mutation: {
-      //         params: {
-      //           sorts: sorting,
-      //           groupings:
-      //         },
-      //       },
-      //     })
-      //     .execute();
-      // }
+      if (!defaultSort.is_default) {
+        // update the grid filter entity on database
+        ctx.dnaClient
+          .update(defaultSort.id, {
+            entity: 'grid_filter',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                groups: grouping,
+              },
+            },
+          })
+          .execute();
+      }
       await ctx.redisClient.cacheData(_tabMenuId, newTabs);
     }),
 });

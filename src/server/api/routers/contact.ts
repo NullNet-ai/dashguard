@@ -313,7 +313,7 @@ export const contactRouter = createTRPCRouter({
     if (input.grouping?.length) {
       query.groupBy({
         query: {
-          fields: input.grouping.map((item) => item.value),
+          fields: input.grouping,
           has_count: true
         },
       });

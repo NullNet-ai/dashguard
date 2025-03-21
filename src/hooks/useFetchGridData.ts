@@ -13,7 +13,7 @@ export interface IFetchDataParams {
   advance_filters?: IAdvanceFilter[]
   group_advance_filters?: ISearchItem[];
   sorting?: any[]
-  grouping?: IGroupBy[]
+  grouping?: string[]
 }
 
 interface IData {
