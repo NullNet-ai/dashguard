@@ -84,7 +84,9 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                             ? item.values.map((obj: any) => obj?.replace(/[^\d]/g, ''))
                             : Array.isArray(item.values) && item.values.length > 0 && typeof item.values[0] === 'object'
                                 ? item.values.map((obj: any) => obj.value)
-                                : item.values
+                                : Array.isArray(item.values)
+                                   ? item.values
+                                    : [item.values],
                     };
                     return modifyValue;
                 }
@@ -113,7 +115,9 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                         ? (filter.values ?? []).map((obj: any) => obj?.replace(/[^\d]/g, ''))
                         : Array.isArray(filter.values) && filter.values.length > 0 && typeof filter.values[0] === 'object'
                             ? filter.values.map((obj: any) => obj.value)
-                            : filter.values,
+                            : Array.isArray(filter.values)
+                              ? filter.values
+                                : [filter.values],
                         default: filter.default || true,
                     });
                 } else if (filter.type === 'operator') {
