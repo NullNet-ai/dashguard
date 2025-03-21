@@ -23,7 +23,7 @@ import InnerTabitem from './InnerTabitem';
 import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
-import { debounce, toLower } from 'lodash';  // Add this import at the top
+import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { all } from 'bluebird';
 import MainTabitem from './MainTabItem';
@@ -212,8 +212,31 @@ const MainTabContent = ({
         >
           {datas.map((tab: any, index: number) => {
             const isHidden = data?.[index]?.hidden;
+
+            if(lowerCase(tab.name) === 'dashboard') {
+             return <MainTabitem
+                  className={cn({ 'opacity-0': isHidden })}
+                  isHidden={isHidden}
+                  ref={(el) => {
+                    if (el) {
+                      if (itemsRef.current) {
+                        itemsRef.current[index] = el;
+                      }
+                    }
+                  }}
+                  lastShownItem={lastShownItem}
+                  index={index}
+                  tab={tab}
+                  newItems={data}
+                  pathname={pathname}
+                  key={index}
+                  actions={actions}
+                /> 
+            }
+
             return (
-              <SortableItem key={tab.id} value={tab.id} className="relative">
+              <SortableItem key={tab.id} value={tab.id} className="relative"
+              >
                 <MainTabitem
                     className={cn({ 'opacity-0': isHidden })}
                     isHidden={isHidden}

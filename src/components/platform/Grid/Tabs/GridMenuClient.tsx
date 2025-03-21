@@ -27,7 +27,6 @@ const GridMenu = ({ filter_id, tab, entity, tabs }: IProps) => {
     const [sort_by, setSort_by] = useState<any>(null)
     const [filter_by, setFilter_by] = useState<any>(null)
 
-
   // if(tab?.name === `All ${main_entity?.toLowerCase()}`) return null
 
  useEffect(() => {
@@ -51,10 +50,12 @@ const GridMenu = ({ filter_id, tab, entity, tabs }: IProps) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild
+        className='cursor-pointer'
+      >
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <EllipsisVertical
-            className={`text-default/60 h-4 w-4 font-semibold`}
+            className={`text-default/60 h-3.5 w-3.5 font-semibold`}
             aria-hidden="true"
           />
         </div>

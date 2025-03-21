@@ -32,9 +32,9 @@ const MainTabMenu = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm opacity-1 lg:opacity-0 group-hover:opacity-100 cursor-pointer">
+        <div className="flex items-center gap-2  py-1.5 text-left text-sm opacity-1 lg:opacity-0 group-hover:opacity-100 cursor-pointer">
           <EllipsisVertical
-            className="h-4 w-4 font-semibold text-default/60 cursor-pointer"
+            className="h-3.5 w-3.5 font-semibold text-default/60 cursor-pointer"
             aria-hidden="true"
           />
         </div>

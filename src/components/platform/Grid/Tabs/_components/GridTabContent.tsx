@@ -24,6 +24,7 @@ const GridTabContent = ({
     application,
     code,
     variant}: any) => {
+
     const parentRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useState<any[]>([]);
     const [datas, setDatas] = useState(par_items)
@@ -159,6 +160,31 @@ const GridTabContent = ({
             {datas.map((tab: any, index: number) => {
 
               const isHidden = data?.[index]?.hidden;
+              const lastword = entity.split("_")?.[1] ? entity.split("_")?.[1] : entity;
+
+              if(lowerCase(tab.name).includes('all') && lowerCase(tab.name).includes(lastword)) {
+                return (
+                  <GridTabItem
+                    className={cn({ 'opacity-0': isHidden })}
+                    isHidden={isHidden}
+                    ref={(el) => {
+                      if (el) {
+                        if (itemsRef.current) {
+                          itemsRef.current[index] = el;
+                        }
+                      }
+                    }}
+                    lastShownItem={lastShownItem}
+                    index={index}
+                    tab={tab}
+                    newItems={data}
+                    pathname={pathname}
+                    key={index}
+                  /> 
+                )
+              }
+
+
               return (
                 <SortableItem key={tab.id} value={tab.id} className="relative">
                   <GridTabItem

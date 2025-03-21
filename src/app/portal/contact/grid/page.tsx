@@ -51,7 +51,7 @@ export default async function Page() {
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
-      : [],
+      : filters?.groupAdvanceFilters?.length ? [] : defaultAdvanceFilter,
     group_advance_filters: filters?.groupAdvanceFilters?.length
       ? filters?.groupAdvanceFilters
       : [],
@@ -59,10 +59,10 @@ export default async function Page() {
   });
 
   const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
-    ? filters?.groupAdvanceFilters
-    : filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [];
+  ? filters?.groupAdvanceFilters
+   :  filters?.advanceFilter?.length
+   ? filters?.advanceFilter
+   : defaultAdvanceFilter
 
   const gridDefaultAdvanceFilter = filters?.groupAdvanceFilters?.length
     ? filters?.groupAdvanceFilters
