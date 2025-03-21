@@ -72,7 +72,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
             const {time_count = 12, time_unit = 'hour' } = time || {}
             setTime({
               time_count,
-              time_unit: time_unit  as 'hour',
+              time_unit: time_unit  as 'day' | 'hour',
               resolution: resolution as '1h'
             })
             

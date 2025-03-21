@@ -10,6 +10,7 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
   // const [, , main_entity, application, identifier] = pathname.split('/')
   const pathname = usePathname()
   const [, , main_entity, application, identifier] = pathname.split('/')
+  
 
   const fetched_device = api.record.getByCode.useQuery({
     id: identifier!,
@@ -22,6 +23,7 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
   const fetched_interfaces = api.deviceConfiguration.fetchInterfaceOptions.useQuery({
     code: identifier!,
 }, { enabled: false })
+
   return (
     <PieChartComponent
     defaultValues={data ?? {}}
