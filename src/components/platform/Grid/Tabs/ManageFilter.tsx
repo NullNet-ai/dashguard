@@ -115,23 +115,19 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
       {ACTIONS.filter(action => 
         !(tab.default && action.id === 'delete_filter')
       ).map((action) => (
-        <Button
-          key={action.id}
-          Icon={action.icon}
-          variant="ghost"
-          iconPlacement="left"
-          iconClassName="text-gray-400"
-          className="ms-2"
-          onClick={
-            action.id === 'manage_filter'
-              ? handleManageFilter
-              : action.id === 'delete_filter'
-              ? handleDeleteFilter
-              : handleDuplicateFilter
-          }
-        >
-          {action.label}
-        </Button>
+        <button
+            onClick={
+              action.id === 'manage_filter'
+                ? handleManageFilter
+                : action.id === 'delete_filter'
+                ? handleDeleteFilter
+                : handleDuplicateFilter
+            }
+            className='text-sm flex items-center gap-2 gap-x-3 p-2 py-1.5 hover:bg-gray-100 rounded-md transition duration-100'
+          >
+            <action.icon className='size-4 text-gray-500'/>
+            {action.label}
+        </button>
       ))}
     </div>
   );
