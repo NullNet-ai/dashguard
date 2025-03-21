@@ -633,13 +633,14 @@ export const packetRouter = createTRPCRouter({
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
     
     // return []
-    const { device_id, time_range, filter_id, bucket_size = '12' } = input
+    const { device_id, time_range, filter_id, bucket_size = '1h' } = input
     
     
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
-      const limit = 100000
+      // const limit = 100000
+      const limit = 1000
 
       const { account } = ctx.session
       const { contact } = account
@@ -686,7 +687,7 @@ export const packetRouter = createTRPCRouter({
               type: 'criteria',
               field: 'source_ip',
               entity: 'packets',
-              operator: EOperator.NOT_CONTAINS,
+              operator: EOperator.NOT_EQUAL,
               values: source_ips,
             }]
             : []),
@@ -695,20 +696,22 @@ export const packetRouter = createTRPCRouter({
             entity: 'packets',
           }))
           
-      console.log('%c Line:691 🥚 source_ips', 'color:#42b983', source_ips);
+      
       default_filters = {
         type: "criteria",
         filters: default_filters
       }
 
-      
 
-      // const { newFilters:custom_adv  = [] } = cleanFilter(filtered_cached)
-      
+      const group_advance_filters = [
+        default_filters,
+        ... (rest_group_filter?.length? [ {
+          "type": "operator",
+          "operator": "and"
+        },
+        ...rest_group_filter] : [])
+      ]
 
-
-      
-      
       const packets = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -716,32 +719,10 @@ export const packetRouter = createTRPCRouter({
           query: {
             track_total_records: true,
             pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
-            group_advance_filters: [
-              default_filters,
-              {
-                type: 'operator',
-                operator: EOperator.AND,
-              },
-              {
-                type: "criteria",
-                filters: [{
-                  type: 'criteria',
-                  field: 'device_id',
-                  entity: 'packets',
-                  operator: EOperator.EQUAL,
-                  values: [device_id],
-                }]
-              }
-              ,
-            ... (rest_group_filter?.length? [ {
-                "type": "operator",
-                "operator": "and"
-            },
-            ...rest_group_filter] : [])
-            ],
+            ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
             order: {
               starts_at,
-              limit,
+              limit: group_advance_filters?.length > 1? limit : 100000,
               by_field: 'code',
               by_direction: EOrderDirection.DESC,
             },
@@ -752,6 +733,7 @@ export const packetRouter = createTRPCRouter({
 
 
       const _packets = packets?.data || []
+      
       const _packets_length = _packets.length
 
       
@@ -840,7 +822,7 @@ export const packetRouter = createTRPCRouter({
 
     
     
-    console.log('%c Line:828 🥟 ab', 'color:#7f2b82', ab);
+    
     return ab
   }),
 

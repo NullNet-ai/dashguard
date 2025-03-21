@@ -36,7 +36,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       bucket_size: '1s',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp(20, 'second', new Date()),
+      time_range: getLastTimeStamp({count: 20, unit: 'second', _now: new Date()}) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     }, {enabled: false})
 

@@ -55,11 +55,19 @@ export const getLastTwentyFourHoursTimeStamp = () => {
 
 
 export const getLastTimeStamp = (
-  amount: number,
+  {
+    count,
+    unit,
+    _now,
+    add_remaining_time
+  }: {
+  count: number,
   unit: "second" | "minute" | "hour" | "day" | "month",
-  _now?: Date
+  add_remaining_time?: boolean,
+  _now?: Date,
+  }
 ) => {
-  if(!amount || !unit) return null
+  if(!count || !unit) return null
   
   const now = _now || new Date();
   
@@ -67,40 +75,42 @@ export const getLastTimeStamp = (
 
   switch (unit) {
     case "second":
-      past.setSeconds(now.getSeconds() - amount);
+      past.setSeconds(now.getSeconds() - count);
 
       
       break;
     case "minute":
       past.setSeconds(0);
-      past.setMinutes(now.getMinutes() - amount);
+      past.setMinutes(now.getMinutes() - count);
       break;
     case "hour":
       past.setSeconds(0);
       past.setMinutes(0);
-      past.setHours(now.getHours() - amount);
+      past.setHours(now.getHours() - count);
       break;
     case "day":
       past.setSeconds(0);
       past.setMinutes(0);
       past.setHours(0);
-      past.setDate(now.getDate() - amount);
+      past.setDate(now.getDate() - count);
       break;
     case "month":
       past.setSeconds(0);
       past.setMinutes(0);
       past.setHours(0);
       past.setDate(1);
-      past.setMonth(now.getMonth() - amount);
+      past.setMonth(now.getMonth() - count);
       break;
   }
 
+
   const formatDate = (date: Date) => {
-    if (unit === "day" || unit === "month") {
+    if ((unit === "day" || unit === "month") && !add_remaining_time) {
       return date.toISOString().substring(0, 10); // YYYY-MM-DD (No time)
     }
     return date.toISOString().replace("T", " ").substring(0, 19) + "+00"; // Full timestamp
   };
+
 
   return [formatDate(past), formatDate(now)];
 };
