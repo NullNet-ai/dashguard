@@ -116,6 +116,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
         !(tab.default && action.id === 'delete_filter')
       ).map((action) => (
         <button
+          key={action.id}
             onClick={
               action.id === 'manage_filter'
                 ? handleManageFilter
