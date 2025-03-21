@@ -70,12 +70,26 @@ export const reorderShowActiveItem = (items: any[], activeName: string, applicat
 }
 
 export const reorderMainTabActive = (items: any[], activeName: string, entity: string) => {
-  // Return original items if application is grid
+  // Return original items if entity is dashboard
   if (toLower(entity) === 'dashboard') {
-    return [...items];
+    const result = [...items];
+    // Check for dashboard tab and ensure it's first
+    const dashboardIndex = result.findIndex(item => toLower(item.name) === 'dashboard');
+    if (dashboardIndex !== -1) {
+      const dashboardItem = result.splice(dashboardIndex, 1)[0];
+      result.unshift(dashboardItem); // Put dashboard at first position
+    }
+    return result;
   }
 
   const result = [...items];
+  
+  // Check for dashboard tab and ensure it's first
+  const dashboardIndex = result.findIndex(item => toLower(item.name) === 'dashboard');
+  if (dashboardIndex !== -1) {
+    const dashboardItem = result.splice(dashboardIndex, 1)[0];
+    result.unshift(dashboardItem); // Put dashboard at first position
+  }
   
   // Find active item
   const activeIndex = result.findIndex(item => item.name === activeName);
@@ -88,8 +102,8 @@ export const reorderMainTabActive = (items: any[], activeName: string, entity: s
     return result;
   }
 
-  // Get visible items (excluding Grid)
-  const visibleItems = result.filter(item => !item.hidden && item.name !== 'dashboard');
+  // Get visible items (excluding dashboard)
+  const visibleItems = result.filter(item => !item.hidden && toLower(item.name) !== 'dashboard');
   
   // Get last visible item position
   const lastVisibleIndex = result.findIndex(item => item === visibleItems[visibleItems.length - 1]);
@@ -103,8 +117,8 @@ export const reorderMainTabActive = (items: any[], activeName: string, entity: s
   // Remove active item from current position
   result.splice(activeIndex, 1);
   
-  // Insert after last visible item
-  result.splice(lastVisibleIndex, 0, activeItem);
+  // Insert after last visible item but after dashboard
+  result.splice(Math.max(1, lastVisibleIndex), 0, activeItem);
 
   return result;
 }

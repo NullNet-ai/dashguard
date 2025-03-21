@@ -44,7 +44,7 @@ export default function FormSelect({
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<ISelectOptions[]>(
+  const [options, setOptions] = useState<ComboSelectOption[]>(
     selectOptions?.[fieldConfig?.name] ?? [],
   );
   const [isCreateLoading, setIsCreateLoading] = useState(false);
@@ -83,6 +83,10 @@ export default function FormSelect({
       label: opt.label,
       value: opt.value,
       // Add any additional mappings needed
+      status: opt.status,
+      avatar: opt.avatar,
+      avatarFallback: opt.avatarFallback,
+      secondaryText: opt.secondaryText
     }));
   }, [options]);
 
@@ -93,6 +97,10 @@ export default function FormSelect({
       label: selectedOption.label,
       value: selectedOption.value,
       // Add any additional properties needed for ComboSelectOption
+      status: selectedOption.status,
+      avatar: selectedOption.avatar,
+      avatarFallback: selectedOption.avatarFallback,
+      secondaryText: selectedOption.secondaryText
     } : null;
   }, [formRenderProps?.field.value, options]);
 

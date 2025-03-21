@@ -55,7 +55,9 @@ const GridTabLists = ({tabs}: {
         const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
         const selectedCached = cachedItems?.[`grid_tab_${entity}`]
 
-        if(tabs?.length !== selectedCached?.tabs?.length) {
+        if(tabs?.length !== selectedCached?.tabs?.length || 
+          (selectedCached?.tabs?.length && JSON.stringify(selectedCached?.tabs) !== JSON.stringify(tabs))
+        ) {
             //save to localstorage
             localStorage.setItem('cachedPortalItems', JSON.stringify({
                 ...cachedItems,
@@ -72,12 +74,14 @@ const GridTabLists = ({tabs}: {
         if (!isClient) {
           return tabs
         }
-    
+
         if (tabs?.length) {
     
           const newTabs = tabs
           const activeItem = newTabs.find(a =>  a.current)
-          const copiedItem = newTabs?.length !== cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
+          const isSameItems = JSON.stringify(newTabs) === JSON.stringify(cachedItem?.tabs)
+
+          const copiedItem = (newTabs?.length !== cachedItem?.tabs?.length || !isSameItems) ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
           const result =  reorderGridTabActive(copiedItem, activeItem?.id ?? '', application ?? '')
           return result
           

@@ -87,11 +87,11 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       ref={ref}
       key={tabNameRole}
       className={cn(
-        `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
+        `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[3px]'} `, className,
       )}
     >
       {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
-        <SortableDragHandleRawItem className='cursor-grab opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto group-hover:transition-all group-hover:duration-100 group-hover:ease-in mr-1'>
+        <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
             aria-hidden="true"

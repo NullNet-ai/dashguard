@@ -76,7 +76,7 @@ export default function Banner({
 				: 'justify-center'
 			)}>
 				<div className={cn(
-					"flex",
+					"flex items-center gap-3",
 					!contentAlign && 'w-full'
 				)}>
 					{actions?.map((action, index) => 

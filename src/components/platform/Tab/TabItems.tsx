@@ -64,7 +64,8 @@ const TabItems = ({ items }: TabItemsProps) => {
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     const selectedCached = cachedItems?.main_tab_data
-    const notEqual = selectedCached?.tabs?.length ? selectedCached?.tabs?.length < items?.length : false
+    const notEqual = selectedCached?.tabs?.length ? selectedCached?.tabs?.length < newTabList?.length : false
+    
 
     if(!selectedCached?.tabs?.length || notEqual) {
       const getCurrent = getActiveName() || ''
@@ -83,7 +84,7 @@ const TabItems = ({ items }: TabItemsProps) => {
     }
 
     setCachedItem(selectedCached)
-  }, [code, isClient, items,])
+  }, [code, isClient, items, newTabList])
   
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
@@ -221,7 +222,7 @@ const TabItems = ({ items }: TabItemsProps) => {
         router.push(newTab[0]?.href);
         return;
       }
-      router.push(found?.href);
+      router.push(found?.href)
     }
     setNewTabList(newTab);
   };

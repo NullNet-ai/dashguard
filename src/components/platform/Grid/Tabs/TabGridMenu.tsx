@@ -17,8 +17,9 @@ export default function TabGridMenu({
   entity,
   tabs
 }: IProps) {
+
   return (
-    <DropdownMenuContent align="end">
+    <DropdownMenuContent align="start">
       <ManageFilter tab={tab} tabs={tabs || []} entity={entity}/>
     </DropdownMenuContent>
   );
