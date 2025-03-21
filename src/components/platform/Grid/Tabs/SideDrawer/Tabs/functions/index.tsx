@@ -14,7 +14,10 @@ import FormModule from '~/components/platform/FormBuilder/components/ui/FormModu
 import { ZodSchema } from '../schemas/filter';
 import { api } from '~/trpc/server';
 import { searchRecords } from './search';
-import { IField, type ISelectOptions } from '~/components/platform/FormBuilder/types';
+import {
+  IField,
+  type ISelectOptions,
+} from '~/components/platform/FormBuilder/types';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({
@@ -83,6 +86,10 @@ export function FilterGroup({
           const prefix = `filterGroups.${groupIndex}.filters.${index}`;
           const filterData =
             form.getValues().filterGroups[groupIndex]?.filters[index];
+          const field_data_type =
+            columns?.find((column) => column.accessorKey === filterData.field)
+              ?.data_type || 'string';
+
           const valuesFieldPath = `${prefix}.values`;
           const isValuesLoading = loadingStates[valuesFieldPath] || false;
 
@@ -130,23 +137,28 @@ export function FilterGroup({
                     form={form}
                     formKey={`filterGroups.${groupIndex}.filters`}
                     formSchema={ZodSchema}
-                    fields={[
-                      {
-                        id: `${prefix}.field`,
-                        formType: 'select',
-                        name: `${prefix}.field`,
-                        placeholder: 'Select a Field',
-                        selectSearchable: true,
-                      },
-                      {
-                        id: `${prefix}.operator`,
-                        formType: 'select',
-                        name: `${prefix}.operator`,
-                        placeholder: 'Select an operator',
-                        selectSearchable: true,
-                      },
-                      ...(filterData.operator &&
-                        !['is_empty', 'is_not_empty'].includes(filterData.operator)
+                    fields={
+                      [
+                        {
+                          id: `${prefix}.field`,
+                          formType: 'select',
+                          name: `${prefix}.field`,
+                          placeholder: 'Select a Field',
+                          selectSearchable: true,
+                        },
+                        {
+                          id: `${prefix}.operator`,
+                          formType: 'select',
+                          name: `${prefix}.operator`,
+                          placeholder: 'Select an operator',
+                          selectSearchable: true,
+                        },
+                        ...(filterData.operator &&
+                        !['is_empty', 'is_not_empty'].includes(
+                          filterData.operator,
+                        ) &&
+                        // adjust this based on future scenarios currently string, array uses multi select.
+                        field_data_type !== 'datetime'
                           ? [
                               {
                                 id: `${prefix}.values`,
@@ -154,11 +166,12 @@ export function FilterGroup({
                                 name: `${prefix}.values`,
                                 placeholder: 'Enter the value',
                                 multiSelectUseStringValues: true,
-                                multiSelectShowCreatableItem : false,
+                                multiSelectShowCreatableItem: false,
                                 multiSelectDelay: 300,
-                                multiSelectEnableCreate: ['contains', 'not_contains'].includes(
-                                  filterData.operator || '',
-                                ),
+                                multiSelectEnableCreate: [
+                                  'contains',
+                                  'not_contains',
+                                ].includes(filterData.operator || ''),
                                 multiSelectLoadingIndicator: isValuesLoading ? (
                                   <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
                                     Loading options...
@@ -178,8 +191,48 @@ export function FilterGroup({
                               },
                             ]
                           : []),
-                      ] as IField[]}
-                      subConfig={{
+                        ...(filterData.field &&
+                        field_data_type === 'datetime' &&
+                        filterData.operator !== 'is_between'
+                          ? [
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'smart-date',
+                                name: `${prefix}.values`,
+                                placeholder: 'Enter the value',
+                                dateTimePickerProps: {
+                                  // disablePastDates: true,
+                                },
+                              },
+                            ]
+                          : []),
+                          ...(filterData.field &&
+                            field_data_type === 'datetime' &&
+                            filterData.operator === 'is_between'
+                              ? [
+                                  {
+                                    id: `${prefix}.values`,
+                                    formType: 'smart-date',
+                                    name: `${prefix}.values`,
+                                    placeholder: 'Enter the value',
+                                    dateTimePickerProps: {
+                                      // disablePastDates: true,
+                                    },
+                                  },
+                                  {
+                                    id: `${prefix}.values`,
+                                    formType: 'smart-date',
+                                    name: `${prefix}.values`,
+                                    placeholder: 'Enter the value',
+                                    dateTimePickerProps: {
+                                      // disablePastDates: true,
+                                    },
+                                  },
+                                ]
+                              : []),
+                      ] as IField[]
+                    }
+                    subConfig={{
                       selectOptions: {
                         [`${prefix}.field`]:
                           columns?.map(
@@ -210,7 +263,7 @@ export function FilterGroup({
                                 return OPERATORS.filter((operator) =>
                                   operator.type.includes('number'),
                                 ) as ISelectOptions[];
-                              case 'datetime' :
+                              case 'datetime':
                                 return OPERATORS.filter((operator) =>
                                   operator.type.includes('datetime'),
                                 ) as ISelectOptions[];

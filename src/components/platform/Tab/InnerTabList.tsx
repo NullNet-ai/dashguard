@@ -88,10 +88,11 @@ const getSessionTabs = async () => {
     entity: mainEntity || '',
   })
 
-  const customTabs = await api.grid.getCustomGridTabs({
-    application: application || '',
-    entity: mainEntity || '',
-  })
+  // await api.grid.getCustomGridTabs({
+  //   application: application || '',
+  //   entity: mainEntity || '',
+  // })
+  // console.log("🚀 ~ getSessionTabs ~ customTabs:", JSON.stringify(customTabs, null, 2))
   return newTabs.filter(Boolean)
 }
 
