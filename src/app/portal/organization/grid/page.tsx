@@ -60,7 +60,7 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
       defaultSorting={sorts?.defaultSorting || defaultSorting}
       defaultAdvanceFilter={filters?.defaultFilters || []}
       advanceFilter={filters?.advanceFilter || []}
-      sorting={sorts?.sorting || []}
+      sorting={sorts?.sorting?.length ? sorts?.sorting : defaultSorting}
       pagination={pagination}
       totalCount={totalCount || 0}
     />

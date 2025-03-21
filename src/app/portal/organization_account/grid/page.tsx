@@ -59,7 +59,7 @@ export default async function Page() {
       }}
       data={items}
       defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={sorts?.defaultSorting || defaultSorting}
+      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
       pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}

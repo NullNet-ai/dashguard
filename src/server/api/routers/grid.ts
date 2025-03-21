@@ -882,7 +882,7 @@ export const gridRouter = createTRPCRouter({
       ? (tabDetails?.find((tab) => tab.id === filter_id))
       : (tabDetails?.find((tab) => tab.current));
 
-    const filter: ISearchItem[] = filterDetails.default ? filterDetails?.advance_filters : filterDetails?.default_filter;
+    const filter: ISearchItem[] = filterDetails?.default ? filterDetails?.advance_filters : filterDetails?.default_filter;
 
     const groupAdvanceFilters: ISearchItem[] = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)
