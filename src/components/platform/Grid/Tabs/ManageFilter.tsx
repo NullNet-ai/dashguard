@@ -33,6 +33,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
 
   const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity } = config ?? {};
 
+
   const gridColumns = _gridColumns?.map((column: any, index : number) => ({
     header: column.header,
     accessorKey: column.accessorKey,

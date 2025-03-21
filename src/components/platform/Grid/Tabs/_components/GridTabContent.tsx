@@ -24,6 +24,7 @@ const GridTabContent = ({
     application,
     code,
     variant}: any) => {
+
     const parentRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useState<any[]>([]);
     const [datas, setDatas] = useState(par_items)

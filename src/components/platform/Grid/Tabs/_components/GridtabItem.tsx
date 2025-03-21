@@ -33,6 +33,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
 
+
   const [, , entityName, application, code] = (newPathname || '').split('/')
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
 

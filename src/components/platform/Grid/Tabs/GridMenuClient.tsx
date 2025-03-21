@@ -27,7 +27,6 @@ const GridMenu = ({ filter_id, tab, entity, tabs }: IProps) => {
     const [sort_by, setSort_by] = useState<any>(null)
     const [filter_by, setFilter_by] = useState<any>(null)
 
-
   // if(tab?.name === `All ${main_entity?.toLowerCase()}`) return null
 
  useEffect(() => {
