@@ -1,8 +1,6 @@
 'use client';
 
-import {
-  type IGridGroupingExpansionProps
-} from '~/components/platform/Grid/types';
+import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
 import { CardFooter } from '~/components/ui/card';
 import { Loader } from '~/components/ui/loader';
 import useFetchGridData from '~/hooks/useFetchGridData';
@@ -10,6 +8,8 @@ import Pagination from '../../Pagination';
 import GridProvider from '../../Provider';
 import MyTableBody from '../../TableBody';
 import ErrorPage from '../../common/ErrorPage';
+import { useSidebar } from '~/components/ui/sidebar';
+import { cn } from '~/lib/utils';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -21,6 +21,8 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     parentGroupData,
     gridState,
   } = props ?? {};
+
+  const { open } = useSidebar();
 
   const pagination = {
     current_page: 1,
@@ -105,18 +107,6 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     },
   );
 
-  console.log('gridFilter', {
-    current: pagination?.current_page,
-    limit: pagination?.limit_per_page,
-    entity: config.entity,
-    pluck: config.searchConfig?.query_params?.pluck,
-    sorting: gridQueryConfigs?.sorting?.length
-      ? gridQueryConfigs?.sorting
-      : defaultSorting,
-    advance_filters: [...(gridState?.advanceFilter ?? []), ...gridFilter],
-    grouping: groupFields?.[0]?.field ? [groupFields[0].field as string] : [],
-  });
-
   const { items = [], totalCount = 0 } = data ?? {};
 
   if (isLoading && !items?.length) {
@@ -139,13 +129,13 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     );
   }
 
-  
-
-  const _width = open ? {
-    width: 'calc(100vw - 330px)'
-  } : {
-    width: '100%'
-  }
+  const _width = open
+    ? {
+        width: 'calc(100vw - 330px)',
+      }
+    : {
+        width: '100%',
+      };
 
   return (
     <GridProvider
@@ -162,11 +152,10 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       totalCount={totalCount}
       grouping={grouping}
     >
-      <div className={cn(`hidden lg:grid`)} 
-      >
+      <div className={cn(`hidden lg:grid`)}>
         <MyTableBody />
         {!grouping?.length && (
-          <CardFooter  style={_width}>
+          <CardFooter style={_width}>
             <Pagination />
           </CardFooter>
         )}

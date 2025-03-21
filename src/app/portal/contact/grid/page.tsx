@@ -55,7 +55,7 @@ export default async function Page() {
     group_advance_filters: filters?.groupAdvanceFilters?.length
       ? filters?.groupAdvanceFilters
       : [],
-    grouping: groups[0]?.field ? [groups[0].field] : [],
+    grouping: groups?.[0]?.field ? [groups[0].field] : [],
   });
 
   const gridAdvanceFilter = filters?.groupAdvanceFilters?.length

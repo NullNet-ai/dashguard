@@ -25,7 +25,7 @@ import StatusCell from '~/components/ui/status-cell';
 import { useToast } from '~/context/ToastProvider';
 
 import { TooltipProvider } from '~/components/ui/tooltip';
-import { formatGroupByResult } from '~/server/utils/formatGroupByResult';
+import { formatGroupByResult } from '~/components/platform/Grid/utils/formatGroupByResult';
 import { BulkArchive } from './Action/BulkArchive';
 import { Create } from './Action/Create';
 import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
@@ -368,7 +368,7 @@ export default function GridProvider({
       typeof updater === 'function' ? updater(grouping) : updater;
 
     // Update column visibility to hide grouped columns
-    setColumnVisibility((prev) => {
+    setColumnVisibility((prev: any) => {
       const visibility: any = { ...prev };
       // Show all previously grouped columns
       grouping.forEach((columnId) => {
@@ -603,7 +603,7 @@ export default function GridProvider({
         return [...columns, actionRow?.current];
       default:
         if (grouping.length && newData.length) {
-          const groupColumn = grouping[0];
+          const groupColumn = grouping[0] as string;
           const configColumns =
             config?.group_by_initial_columns || config?.columns;
           const columnConfig = configColumns?.find(
@@ -612,7 +612,7 @@ export default function GridProvider({
           const column = {
             ...groupByColumn.current,
             cell: ({ row }) => {
-              const value = row?.original?.value;
+              const value = row?.original?.formatted_value;
               if (!value) {
                 return null;
               }
@@ -621,7 +621,7 @@ export default function GridProvider({
                 return (
                   <>
                     {columnConfig.cell({
-                      row: { original: { [groupColumn as string]: value } },
+                      row: { original: { [groupColumn]: value } },
                     })}
                   <div className='flex items-center ml-1'>
                       <span className='font-semibold text-sm'>{`(${row?.original.count})`}</span>
@@ -686,7 +686,6 @@ export default function GridProvider({
       columnSizing: colSizing,
       rowSelection,
       columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
-        // @ts-expect-error - No need to check for acc
         acc[curr] = !isMobileOrTablet;
         return acc;
       }, columnVisibility),

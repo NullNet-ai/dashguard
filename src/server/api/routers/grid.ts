@@ -334,8 +334,28 @@ export const gridRouter = createTRPCRouter({
       if (pluck_object) {
         query.join(created_by_join).join(updated_by_join);
       }
+      if (input.grouping?.length) {
+        query.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
       const { total_count: totalCount = 1, data: items } =
         await query.execute();
+
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / limit);
+
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -356,8 +376,6 @@ export const gridRouter = createTRPCRouter({
         };
       });
 
-      // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / limit);
       return {
         totalCount,
         items: formatted_items,
