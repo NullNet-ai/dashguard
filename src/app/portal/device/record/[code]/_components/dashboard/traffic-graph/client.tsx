@@ -46,7 +46,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
     time_count,
     time_unit,
     resolution
-  }, setTime] = useState(timeDuration)
+  }, setTime] = useState<any>(timeDuration)
    const [searchBy, setSearchBy] = useState()
   const cardTitle = React.useMemo(() => {
     return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
@@ -118,7 +118,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
     {
       bucket_size: resolution,
-      time_range: timeRangeFormat,
+      time_range: timeRangeFormat as any,
       timezone,
       device_id: defaultValues?.id,
     }, { enabled:false })
