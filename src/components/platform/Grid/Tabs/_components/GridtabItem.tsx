@@ -79,7 +79,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         `group relative group bg-tertiary rounded-md whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
-      {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
+      {toLower(tab.name) !== 'all contact' ? (
         <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
