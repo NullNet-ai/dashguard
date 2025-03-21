@@ -24,6 +24,7 @@ const GridTabContent = ({
     application,
     code,
     variant}: any) => {
+
     const parentRef = useRef<HTMLDivElement>(null);
     const [data, setData] = useState<any[]>([]);
     const [datas, setDatas] = useState(par_items)
@@ -159,8 +160,9 @@ const GridTabContent = ({
             {datas.map((tab: any, index: number) => {
 
               const isHidden = data?.[index]?.hidden;
+              const lastword = entity.split("_")?.[1] ? entity.split("_")?.[1] : entity;
 
-              if(lowerCase(tab.name)  === 'all contact') {
+              if(lowerCase(tab.name).includes('all') && lowerCase(tab.name).includes(lastword)) {
                 return (
                   <GridTabItem
                     className={cn({ 'opacity-0': isHidden })}

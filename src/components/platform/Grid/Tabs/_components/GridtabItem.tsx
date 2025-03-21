@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import { toLower } from 'lodash';
+import { lowerCase, toLower } from 'lodash';
 import { GripVerticalIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,6 +32,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
+
 
   const [, , entityName, application, code] = (newPathname || '').split('/')
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
@@ -79,7 +80,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         `group relative group bg-tertiary rounded-md whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `, className,
       )}
     >
-      {toLower(tab.name) !== 'all contact' ? (
+      {(!lowerCase(tab.name)?.includes('all') &&  !lowerCase(tab.name)?.includes(lowerCase(entityName || '')))  ? (
         <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
