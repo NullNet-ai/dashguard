@@ -92,22 +92,13 @@ export const closeCurrentInnerClassTab = async ({
   });
 
   if (action_type === 'Next') {
-    await api.wizard.saveTraverseStepped({
-      key: `contact:wizard:${code}`,
-      pathname: `/portal/contact/wizard/${code}/1`,
-      currentStep: 2,
-      traverse: {
-        one: "Stepped"
-      }
-    })
-
-    await api.wizard.wizardCreateStep({
+    await api.wizard.createRedisRecordsForFormFilter({
       entity: mainEntity!,
-      identifier: code,
-      step: '2'
+      code: code,
     })
-    return redirect(`/portal/contact/wizard/${code}/2`);
+    redirect(`/portal/contact/wizard/${code}/2`);
   }
+
   redirect(`/portal/contact/wizard/${code}/1`);
 };
 
