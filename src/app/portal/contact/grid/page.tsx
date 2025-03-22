@@ -69,7 +69,7 @@ export default async function Page({
     <Grid
       totalCount={totalCount || 0}
       data={items}
-      defaultSorting={defaultSorting}
+      defaultSorting={sorts?.defaultSorting.length ? sorts?.defaultSorting : defaultSorting}
       defaultAdvanceFilter={gridDefaultAdvanceFilter}
       advanceFilter={gridAdvanceFilter}
       sorting={sorts?.sorting || []}
