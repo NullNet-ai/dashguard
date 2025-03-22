@@ -82,7 +82,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const arrowRotation = Math.min(90, Math.max(-90, (animatedTraffic / trafficData.maxTraffic) * 180 - 90))
 
   return (
-    <ResponsiveContainer height = { 300 } width = "100%">
+    <ResponsiveContainer height = { 280 } width = "100%">
       <div className="flex-1 pb-0 relative">
         <ChartContainer
           className = "mx-auto aspect-square max-h-[300px]"

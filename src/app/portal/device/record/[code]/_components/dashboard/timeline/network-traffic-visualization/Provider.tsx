@@ -133,12 +133,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     };
   
     // Set up a 1-second interval
-    const interval = setInterval(() => {
+    // const interval = setInterval(() => {
       fetchBandwidth();
-    }, 1000);
+    // }, 1000);
   
     // Clear the interval when the component unmounts
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [params?.id, refetch]);
 
   useEffect(() => {

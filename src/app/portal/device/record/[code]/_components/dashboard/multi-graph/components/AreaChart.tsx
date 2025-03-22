@@ -26,8 +26,6 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
     return ticks;
   },[yAxisMax, number_of_ticks])
 
-  console.log("yticks", yticks)
-
   return (
     <ResponsiveContainer width="100%" height={300}>
     <AreaChart accessibilityLayer data={filteredData} height={300} width={1870}>
@@ -84,8 +82,8 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           tickLine={false}
           tickMargin={3}
           tickCount={4}
-          interval="preserveEnd"
-          minTickGap={200}
+          interval="preserveStartEnd"
+          minTickGap={150}
           // padding={{ left: 10, right: 10 }}
       />
    <YAxis

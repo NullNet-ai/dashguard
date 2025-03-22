@@ -42,8 +42,8 @@ const IPNode = ({ data }: { data: Record<string, any> }) => {
               >
                 {data.label}
               </span>
-              <Handle position={Position.Right} type="source" />
-              <Handle position={Position.Left} type="target" />
+              {/* <Handle position={Position.Right} type="source" />
+              <Handle position={Position.Left} type="target" /> */}
             </div>
           </div>
         </TooltipTrigger>
