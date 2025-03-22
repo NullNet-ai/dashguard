@@ -48,7 +48,7 @@ export default function FormSelect({
     selectOptions?.[fieldConfig?.name] ?? [],
   );
   const [isCreateLoading, setIsCreateLoading] = useState(false);
-  
+
   const isDisabled = fieldConfig.disabled ?? false;
   const isReadOnly = fieldConfig.isCustomFormField
     ? fieldConfig.readonly
@@ -142,7 +142,7 @@ export default function FormSelect({
   // Create custom render functions for ComboSelect
   const renderCreateOption = fieldConfig?.selectEnableCreate && query && !isOptionsExist ? (
     <button
-      className="block cursor-pointer truncate bg-primary/10 px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground"
+      className="block text-md w-full cursor-pointer truncate bg-primary text-white px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground text-start"
       data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
       onClick={createNewRecord}
     >
@@ -150,12 +150,14 @@ export default function FormSelect({
     </button>
   ) : null;
 
-  const renderEmptyState = !fieldConfig?.selectEnableCreate ? (
+  // Only show empty state when not creatable or when there's no query
+  const renderEmptyState = !fieldConfig?.selectEnableCreate || (fieldConfig?.selectEnableCreate && !query) ? (
     <span
-      className="ms-3 p-2 ps-0 text-sm text-foreground block truncate group-data-[selected]:font-semibold"
+      className="ms-3 text-md block truncate group-data-[selected]:font-semibold"
       data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
     >
-      {fieldConfig?.label ? `No ${fieldConfig.label} found.` : "No options found."}
+      {fieldConfig?.label ? `No ${fieldConfig?.label} found.`
+: "No more options."}
     </span>
   ) : null;
 
@@ -182,7 +184,7 @@ export default function FormSelect({
           </>
         ) : null}
       </div>
-      
+
       <ComboSelect
         options={comboOptions}
         value={selectedValue}
@@ -211,7 +213,7 @@ export default function FormSelect({
           loadMoreStep: fieldConfig.selectConfig?.infiniteScroll.loadMoreStep || 50,
           hasMore: fieldConfig.selectConfig?.infiniteScroll.hasMore !== false,
           loadingIndicator: fieldConfig.selectConfig?.infiniteScroll.loadingIndicator || (
-            <div className="p-2 text-center text-sm text-muted-foreground">
+            <div className="p-2 text-center sm:text-sm md:text-md text-muted-foreground">
               Loading more options...
             </div>
           )
