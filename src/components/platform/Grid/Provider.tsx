@@ -15,7 +15,13 @@ import {
   type SortingState,
   type Updater,
 } from '@tanstack/react-table';
-import { ChevronDown, ChevronRight, FileIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  FileIcon,
+} from 'lucide-react';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -48,6 +54,8 @@ import {
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
+import { FetchInfiniteData } from './Action/FetchInfiniteData';
+import { isEmpty } from 'lodash';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -451,9 +459,24 @@ export default function GridProvider({
     cell: ({ row }: any) => (
       <HeadlessBtn onClick={() => row.toggleExpanded()}>
         {row.getIsExpanded() ? (
-          <ChevronDown className="h-6 w-6 text-primary" />
+          <>
+            {config?.rowExpansionOptions?.icons?.expandIcon ? (
+              config?.rowExpansionOptions?.icons?.expandIcon
+            ) : (
+              <ChevronDown className="h-6 w-6 text-primary" />
+            )}
+          </>
         ) : (
-          <ChevronRight className="h-6 w-6 text-default/40" />
+          <>
+            {config?.rowExpansionOptions?.icons?.collapseIcon ? (
+              config?.rowExpansionOptions?.icons?.collapseIcon
+            ) : config?.rowExpansionOptions?.expandPosition === 'left' ||
+              !config?.rowExpansionOptions?.expandPosition ? (
+              <ChevronRight className="h-6 w-6 text-default/40" />
+            ) : (
+              <ChevronLeft className="h-6 w-6 text-default/40" />
+            )}
+          </>
         )}
       </HeadlessBtn>
     ),
@@ -669,7 +692,14 @@ export default function GridProvider({
           config?.enableRowExpansion ||
           grouping.length
         ) {
-          columns = [expandTableRow?.current, ...columns];
+          if (
+            isEmpty(config?.rowExpansionOptions) ||
+            config?.rowExpansionOptions?.expandPosition === 'left'
+          ) {
+            columns = [expandTableRow?.current, ...columns];
+          } else {
+            columns = [...columns, expandTableRow?.current];
+          }
         }
         if (config?.enableRowSelection) {
           columns = [selectTableRow?.current, ...columns];
@@ -681,7 +711,7 @@ export default function GridProvider({
         return columns;
     }
   };
-  
+
   /** @HOOKS */
   const table = useReactTable({
     data: newData,

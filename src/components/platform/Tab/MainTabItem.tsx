@@ -88,7 +88,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       key={tabNameRole}
       className={cn(
         `${isActive ? 'border-b-0 border-l border-r border-t-2 border-t-primary rounded-t-md' : ''}`,
-        `group relative group  whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${lowerCase(tab?.name)==='dashboard' ? 'pl-[6px]' : 'pl-[3px]'} `, className,
+        `group relative group  whitespace-nowrap flex h-[30px] items-center md:h-[32px]`, `${lowerCase(tab?.name)==='dashboard' ? 'pl-[6px]' : 'pl-[3px]'} `, className,
       )}
     >
         {tab.name !== 'dashboard' ? <SortableDragHandleRawItem className='cursor-grab mr-1'>

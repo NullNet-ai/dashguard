@@ -177,4 +177,30 @@ export const wizardRouter = createTRPCRouter({
         traverse: Record<string, 'Stepped'>
       }
     }),
+  createRedisRecordsForFormFilter : privateProcedure
+   .input(
+    z.object({
+    entity: z.string(),
+    code : z.string(),
+  }))
+   .mutation(async ({ input, ctx }) => {
+
+      const { code, entity} = input ?? {}
+
+      const generatedWizardConfig = {
+        key : `${entity}:wizard:${code}`,
+        pathname : `/portal/${entity}/wizard/${code}/1`,
+        currentStep : 2,
+        traverse : {
+          one : 'Stepped'
+        }
+      }
+
+      await ctx?.redisClient.cacheData(`step_${generatedWizardConfig.key}`, generatedWizardConfig, 1209600)
+      
+      const step = '2'
+      await ctx?.redisClient.cacheData(
+        `wizard_${entity}:${code}`, step,
+      )
+    }),
 })

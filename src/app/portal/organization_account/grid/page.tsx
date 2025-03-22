@@ -1,25 +1,13 @@
 import Grid from '~/components/platform/Grid/Server';
 import { getGridCacheData } from '~/lib/grid-get-cache-data';
 import { api } from '~/trpc/server';
-
-/**
- *
- * @Default Grid Features
- *
- */
-import defaultAdvanceFilter from './_config/advanceFilter';
+import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow';
+import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
-import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
 
 export default async function Page() {
-  const {
-    sorts,
-    filters,
-    pagination,
-    columns: columnOrder,
-    groups,
-  } = (await getGridCacheData()) ?? {};
+  const { sorts, filters, pagination, columns : columnOrder,   groups } = (await getGridCacheData()) ?? {}
 
   const {
     items = [],
@@ -41,6 +29,15 @@ export default async function Page() {
       config={{
         entity: 'organization_account',
         title: 'Accounts',
+        enableRowExpansion: true,
+        rowExpansionOptions:{
+          expandPosition: 'left',
+          rowExpansionComponent: ExpandedDefaultRow,
+          // icons: {
+          //   expandIcon: <ArrowBigDown className='h-6 w-6 text-default/40'/>,
+          //   collapseIcon: <ArrowBigDownDash className='h-6 w-6 text-default/40'/>,
+          // }
+        },
         columns: gridColumns,
         columnsOrder: columnOrder,
         enableAutoCreate: false,

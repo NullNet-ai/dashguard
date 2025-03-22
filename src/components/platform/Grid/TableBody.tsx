@@ -59,22 +59,6 @@ export default function MyTableBody({
   );
   const allExpandedRows = [...(parentExpanded ?? []), ...expandedRows];
 
-  const grouping = state?.table.getState().grouping ?? [];
-
-  const sampleDistinctData = [
-    {
-      contacts: {
-        status: 'Active',
-        count: 2,
-      },
-    },
-    {
-      contacts: {
-        status: 'Draft',
-        count: 1,
-      },
-    },
-  ];
   const visibleLeafColumns = state?.table.getVisibleLeafColumns();
   const visibleColumns = state?.initial_columns.filter((column) =>
     visibleLeafColumns?.some(

@@ -60,6 +60,15 @@ interface IActionConditionItem {
   value: Array<null | string | number | boolean>;
 }
 
+export interface IRowExpansionOptions{
+  expandPosition?: 'left' | 'right';
+  rowExpansionComponent?: ReactElement | ((rowData: any) => JSX.Element);
+  icons ?: {
+    expandIcon?: ReactElement | React.ComponentType<any> | ((rowData: any) => JSX.Element);
+    collapseIcon?: ReactElement | React.ComponentType<any> | ((rowData: any) => JSX.Element);
+  } 
+}
+
 export interface IActionCondition {
   match_condition: 'match_all' | 'match_any';
   conditions: IActionConditionItem[];
@@ -84,7 +93,7 @@ export interface IConfigGrid {
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
   archiveCustomAction?: (
-    args: Record<string, any>,
+    args: Record<string, any>, 
   ) => void | Promise<string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
@@ -96,6 +105,7 @@ export interface IConfigGrid {
   rowClickCustomAction?: (args: DefaultRowActions) => void;
   onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
+  rowExpansionOptions?: IRowExpansionOptions
   is_warning_archive?: boolean;
   infiniteConfig?: {
     router: AppRouterKeys,

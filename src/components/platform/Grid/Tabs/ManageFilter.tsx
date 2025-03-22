@@ -78,7 +78,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
     }))
 
     try {
-      const url = await removeGridFilter(tab.id);
+      await removeGridFilter(tab.id);
 
       //@temp fix
       router.refresh()
