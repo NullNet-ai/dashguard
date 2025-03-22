@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
-import { cn, formatTabName } from '~/lib/utils';
+import { cn, formatGridTabName, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import GridMenuDropClient from './GridMenuDropClient';
 
@@ -80,7 +80,7 @@ const GridtabDropItem = ({
           tab?.current ? 'text-primary' : 'text-default/70', 'whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
         )}
       >
-        {formatTabName(tabNameRole)}
+        {formatGridTabName(tabNameRole)}
       </Link>
       <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
       <GridMenuDropClient 
