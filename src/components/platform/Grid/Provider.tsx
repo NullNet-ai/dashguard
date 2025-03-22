@@ -355,7 +355,7 @@ export default function GridProvider({
           <>
             {config?.rowExpansionOptions?.icons?.collapseIcon 
               ? config?.rowExpansionOptions?.icons?.collapseIcon 
-              : config?.rowExpansionOptions?.expandPosition === 'left' 
+              : config?.rowExpansionOptions?.expandPosition === 'left'  || !config?.rowExpansionOptions?.expandPosition
                 ? <ChevronRight className="h-6 w-6 text-default/40" /> 
                 : <ChevronLeft className="h-6 w-6 text-default/40" />
             }
