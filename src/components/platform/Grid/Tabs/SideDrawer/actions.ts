@@ -52,7 +52,6 @@ interface TransformedFilters {
 }
 
 export const transformFilterGroups = async(filterDetails : FilterDetails, columns : any[]) : Promise<TransformedFilters> => {
-
     if (!filterDetails?.filter_groups?.length) return { resolveDefaultFilter: [], resolveGroupFilter: [] };
 
     if (filterDetails.filter_groups.length === 1) {
@@ -67,7 +66,6 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
                 !acc.length &&
                 curr.filters.length &&
                 !curr.filters[0]?.field &&
-                !curr.filters[0]?.operator &&
                 !curr.filters[0]?.values?.length
             ) {
                 return acc;
