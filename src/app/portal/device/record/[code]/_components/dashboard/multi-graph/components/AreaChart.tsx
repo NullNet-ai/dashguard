@@ -84,7 +84,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           tickLine={false}
           tickMargin={3}
           tickCount={4}
-          interval="preserveStartEnd"
+          interval="preserveEnd"
           minTickGap={200}
           // padding={{ left: 10, right: 10 }}
       />
