@@ -54,7 +54,7 @@ export default async function Page() {
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       defaultAdvanceFilter={filters?.defaultFilters || []}
       advanceFilter={filters?.advanceFilter || []}
-      defaultSorting={sorts?.defaultSorting || defaultSorting}
+      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
       pagination={pagination}
       config={{
         entity: main_entity!,

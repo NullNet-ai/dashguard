@@ -41,6 +41,8 @@ export default function FormSmartDate({
   const useTimePicker = fieldConfig.dateTimePickerProps?.useTimePicker;
   const displayFormat = fieldConfig.dateTimePickerProps?.displayFormat;
   const is24Hour = fieldConfig.dateTimePickerProps?.is24Hour ?? true;
+  const transformValuesToArray = fieldConfig.dateTimePickerProps?.transformValuesToArray ?? false
+  const enableFormattedDate = fieldConfig.dateTimePickerProps?.enableFormattedDate ?? true
 
   const handleChange = (date: Date | null | string) => {
     if (date) {
@@ -84,10 +86,13 @@ export default function FormSmartDate({
         }
       }
 
-      const formatted_date = formattedDate?.includes("Invalid date")
+      let formatted_date = formattedDate?.includes("Invalid date")
         ? date
         : formattedDate;
 
+      if (transformValuesToArray) {
+        formatted_date = [formattedDate] as any
+      }
       // Set the display format value
       form.setValue(`${name}`, formatted_date, {
         shouldValidate: true,
@@ -95,8 +100,9 @@ export default function FormSmartDate({
         shouldTouch: true,
       });
 
+      
       // Always store the date in YYYY-MM-DD format for consistency
-      form.setValue(`${name}_date`, dateObj.format("YYYY-MM-DD"), {
+      enableFormattedDate && form.setValue(`${name}_date`, dateObj.format("YYYY-MM-DD"), {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,

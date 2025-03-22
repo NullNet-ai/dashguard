@@ -11,9 +11,12 @@ import defaultAdvanceFilter from './_config/advanceFilter'
 import gridColumns from './_config/columns'
 import defaultSorting from './_config/sorting'
 import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
+import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow'
+import { ArrowBigDown, ArrowBigDownDash } from 'lucide-react'
 
 export default async function Page() {
   const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
+  
 
   const { items = [], totalCount, accountEmail } = await api.account.fetchGridData({
     entity: 'organization_account',
@@ -30,6 +33,15 @@ export default async function Page() {
       config={{
         entity: 'organization_account',
         title: 'Accounts',
+        enableRowExpansion: true,
+        rowExpansionOptions:{
+          expandPosition: 'left',
+          rowExpansionComponent: ExpandedDefaultRow,
+          // icons: {
+          //   expandIcon: <ArrowBigDown className='h-6 w-6 text-default/40'/>,
+          //   collapseIcon: <ArrowBigDownDash className='h-6 w-6 text-default/40'/>,
+          // }
+        },
         columns: gridColumns,
         columnsOrder: columnOrder,
         enableAutoCreate: false,
@@ -59,10 +71,11 @@ export default async function Page() {
       }}
       data={items}
       defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={sorts?.defaultSorting || defaultSorting}
+      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
       pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
+      
     />
   )
 }

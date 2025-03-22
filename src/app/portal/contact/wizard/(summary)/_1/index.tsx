@@ -1,20 +1,20 @@
-"use client";
-import { useMemo } from "react";
-import { usePathname } from "next/navigation";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { api } from "~/trpc/react";
-import { formatPhoneNumber } from "~/utils/formatter";
+'use client';
+import { useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { api } from '~/trpc/react';
+import { formatPhoneNumber } from '~/utils/formatter';
 
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , , _, identifier] = pathName.split("/");
+  const [, , , _, identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: [],
+    pluck_fields: ['id', 'code', 'role', 'status'],
   });
   const { emails: _email, phones: _phone } = record as unknown as Record<
     string,
@@ -25,7 +25,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,
     );
-    return primary_email?.email || "None";
+    return primary_email?.email || 'None';
   }, [_email]);
 
   const phone = useMemo(() => {
@@ -37,7 +37,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
       raw_phone_number,
       iso_code,
     });
-    return format_phone || "None";
+    return format_phone || 'None';
   }, [_phone]);
 
   useRefetchRecord({
@@ -64,12 +64,12 @@ const Summary = ({ form_key }: { form_key: string }) => {
 };
 
 const SummaryConfig = {
-  label: "Step 1",
+  label: 'Step 1',
   required: true,
   components: [
     {
-      label: "Basic Details",
-      component: <Summary form_key={"basicDetails"} />,
+      label: 'Basic Details',
+      component: <Summary form_key={'basicDetails'} />,
     },
   ],
 };
