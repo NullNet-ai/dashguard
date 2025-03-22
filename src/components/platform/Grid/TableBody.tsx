@@ -11,6 +11,8 @@ import { ScrollContainerContext } from './Server/views/common/GridScrollContaine
 import ArchiveConfirmationModal from './views/ArchiveConfirmationModal'
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal'
 import { type IExpandedRow } from './types'
+import { isEmpty } from 'lodash';
+import ExpandedDefaultRow from './common/ExpandedDefaultRow';
 
 type MyTableBodyProps = {
   showAction?: boolean
@@ -131,19 +133,22 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                     colSpan={state?.table.getVisibleLeafColumns().length}
                     className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
                   >
-                    <div
-                      style={{
-                        height:
-                          gridLevel === 2
-                            ? 'calc(100% - 30px) '
-                            : 'calc(100% - 85px)',
-                      }}
-                      className="absolute left-4 top-1 w-[1px] bg-primary"
-                    >
-                      <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
-                        <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
+                    {isEmpty(state?.config?.rowExpansionOptions) ? (
+                        <div
+                        style={{
+                          height:
+                            gridLevel === 2
+                              ? 'calc(100% - 30px) '
+                              : 'calc(100% - 85px)',
+                        }}
+                        className="absolute left-4 top-1 w-[1px] bg-primary"
+                      >
+                        <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
+                          <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
+                  
                     <div>
                       {state?.config?.rowExpansionBuilder ? (
                         typeof state?.config?.rowExpansionBuilder ===
@@ -158,7 +163,25 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                           )
                         )
                       ) : (
-                        <span>Provide your expand component</span>
+                        <>
+                          {
+                            state?.config?.rowExpansionOptions?.rowExpansionComponent ? 
+                            (typeof state?.config?.rowExpansionOptions?.rowExpansionComponent === 'function' ? 
+                              state?.config?.rowExpansionOptions?.rowExpansionComponent({
+                                row: row,
+                                expandOptions: state?.config?.rowExpansionOptions
+                              }) : 
+                              React.cloneElement(
+                                state?.config?.rowExpansionOptions?.rowExpansionComponent as React.ReactElement,
+                                { row: row, expandOptions: state?.config?.rowExpansionOptions},
+                              )
+                            )
+                            :
+                            <div>
+                               Add your custom row expansion component here...
+                            </div>
+                          }
+                        </>
                       )}
                     </div>
                   </td>

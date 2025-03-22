@@ -1,7 +1,11 @@
 import { MinusCircle, Plus } from 'lucide-react';
-import { OPERATORS, USE_CUSTOM_RENDER } from '../constants';
-import { Button } from '~/components/ui/button';
 import { useState } from 'react';
+import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
+import {
+  IField,
+  type ISelectOptions,
+} from '~/components/platform/FormBuilder/types';
+import { Button } from '~/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -10,11 +14,10 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { cn } from '~/lib/utils';
-import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule';
+import DateRangePicker from '../components/date-range-picker';
+import { OPERATORS, USE_CUSTOM_RENDER } from '../constants';
 import { ZodSchema } from '../schemas/filter';
-import { api } from '~/trpc/server';
 import { searchRecords } from './search';
-import { IField, type ISelectOptions } from '~/components/platform/FormBuilder/types';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({
@@ -83,6 +86,10 @@ export function FilterGroup({
           const prefix = `filterGroups.${groupIndex}.filters.${index}`;
           const filterData =
             form.getValues().filterGroups[groupIndex]?.filters[index];
+          const field_data_type =
+            columns?.find((column) => column.accessorKey === filterData.field)
+              ?.data_type || 'string';
+
           const valuesFieldPath = `${prefix}.values`;
           const isValuesLoading = loadingStates[valuesFieldPath] || false;
 
@@ -130,56 +137,98 @@ export function FilterGroup({
                     form={form}
                     formKey={`filterGroups.${groupIndex}.filters`}
                     formSchema={ZodSchema}
-                    fields={[
-                      {
-                        id: `${prefix}.field`,
-                        formType: 'select',
-                        name: `${prefix}.field`,
-                        placeholder: 'Select a Field',
-                        selectSearchable: true,
-                      },
-                      {
-                        id: `${prefix}.operator`,
-                        formType: 'select',
-                        name: `${prefix}.operator`,
-                        placeholder: 'Select an operator',
-                        selectSearchable: true,
-                      },
-                      ...(filterData.operator &&
-                        !['is_empty', 'is_not_empty'].includes(filterData.operator)
+                    fields={
+                      [
+                        {
+                          id: `${prefix}.field`,
+                          formType: 'select',
+                          name: `${prefix}.field`,
+                          placeholder: 'Select a Field',
+                          selectSearchable: true,
+                        },
+                        {
+                          id: `${prefix}.operator`,
+                          formType: 'select',
+                          name: `${prefix}.operator`,
+                          placeholder: 'Select an operator',
+                          selectSearchable: true,
+                        },
+                        ...(filterData.operator &&
+                          !['is_empty', 'is_not_empty'].includes(
+                            filterData.operator,
+                          ) &&
+                          // adjust this based on future scenarios currently string, array uses multi select.
+                          field_data_type !== 'datetime'
                           ? [
-                              {
-                                id: `${prefix}.values`,
-                                formType: 'multi-select',
-                                name: `${prefix}.values`,
-                                placeholder: 'Enter the value',
-                                multiSelectUseStringValues: true,
-                                multiSelectShowCreatableItem : false,
-                                multiSelectDelay: 300,
-                                multiSelectEnableCreate: ['contains', 'not_contains'].includes(
-                                  filterData.operator || '',
-                                ),
-                                multiSelectLoadingIndicator: isValuesLoading ? (
-                                  <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
-                                    Loading options...
-                                  </p>
-                                ) : undefined,
-                                multiSelectEmptyIndicator: (
-                                  <p className="w-full text-center text-sm leading-6 text-muted-foreground">
-                                    No matching options found
-                                  </p>
-                                ),
-                                multiSelectRenderOption: USE_CUSTOM_RENDER
-                                  ? renderOption
-                                  : undefined,
-                                multiSelectRenderBadge: USE_CUSTOM_RENDER
-                                  ? renderBadge
-                                  : undefined,
-                              },
-                            ]
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'multi-select',
+                              name: `${prefix}.values`,
+                              placeholder: 'Enter the value',
+                              multiSelectUseStringValues: true,
+                              multiSelectShowCreatableItem: false,
+                              multiSelectDelay: 300,
+                              multiSelectEnableCreate: [
+                                'contains',
+                                'not_contains',
+                              ].includes(filterData.operator || ''),
+                              multiSelectLoadingIndicator: isValuesLoading ? (
+                                <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
+                                  Loading options...
+                                </p>
+                              ) : undefined,
+                              multiSelectEmptyIndicator: (
+                                <p className="w-full text-center text-sm leading-6 text-muted-foreground">
+                                  No matching options found
+                                </p>
+                              ),
+                              multiSelectRenderOption: USE_CUSTOM_RENDER
+                                ? renderOption
+                                : undefined,
+                              multiSelectRenderBadge: USE_CUSTOM_RENDER
+                                ? renderBadge
+                                : undefined,
+                            },
+                          ]
                           : []),
-                      ] as IField[]}
-                      subConfig={{
+                        ...(filterData.field &&
+                          field_data_type === 'datetime' &&
+                          !['is_between', 'is_empty', 'is_not_empty'].includes(filterData.operator)
+                          ? [
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'smart-date',
+                              name: `${prefix}.values`,
+                              placeholder: 'Enter the value',
+                              dateTimePickerProps: {
+                                transformValuesToArray: true,
+                                enableFormattedDate: false,
+                              },
+                            },
+                          ]
+                          : []),
+                        ...(filterData.field &&
+                          field_data_type === 'datetime' &&
+                          filterData.operator === 'is_between'
+                          ? [
+                            {
+                              id: `${prefix}.values`,
+                              formType: 'custom-field',
+                              name: `${prefix}.values`,
+                              placeholder: 'Select date range',
+                              render: ({ field }:any) => (
+                                <DateRangePicker
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  defaultDisplayFormat="SHORT"
+                                />
+                              ),
+                            }
+                          ]
+                          : []),
+                      ] as IField[]
+                    }
+                    subConfig={{
                       selectOptions: {
                         [`${prefix}.field`]:
                           columns?.map(
@@ -210,7 +259,7 @@ export function FilterGroup({
                                 return OPERATORS.filter((operator) =>
                                   operator.type.includes('number'),
                                 ) as ISelectOptions[];
-                              case 'datetime' :
+                              case 'datetime':
                                 return OPERATORS.filter((operator) =>
                                   operator.type.includes('datetime'),
                                 ) as ISelectOptions[];
@@ -272,35 +321,6 @@ export function FilterGroup({
     </div>
   );
 }
-
-// Simplified mock search function that doesn't use field parameter
-export const mockFilterValueSearch = async (
-  searchTerm: string,
-): Promise<Array<{ value: string; label: string }>> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Simple mock data array
-  const mockData = [
-    { value: 'john', label: 'John Doe' },
-    { value: 'jane', label: 'Jane Smith' },
-    { value: 'bob', label: 'Bob Johnson' },
-    { value: 'alice', label: 'Alice Williams' },
-    { value: 'charlie', label: 'Charlie Brown' },
-    { value: 'david', label: 'David Miller' },
-    { value: 'emma', label: 'Emma Wilson' },
-    { value: 'frank', label: 'Frank Thomas' },
-    { value: 'grace', label: 'Grace Lee' },
-    { value: 'henry', label: 'Henry Garcia' },
-  ];
-
-  // Filter based on search term
-  return mockData.filter(
-    (item) =>
-      item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.value.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-};
 
 // Custom render functions for the multi-select component
 export const renderOption = (option: { value: string; label: string }) => {
