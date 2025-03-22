@@ -104,11 +104,12 @@ const DATE_FORMAT = {
             </Button>
           </PopoverTrigger>
           <PopoverContent 
-            className="w-auto p-0 z-[9999] border bg-background shadow" 
+            className="w-auto p-0 z-[9999] border bg-background shadow mr-7" 
             align="start"
+            side='bottom'
             sideOffset={2}
-            side="bottom"
             avoidCollisions={true}
+
           >
             {showFormatSelector && (
               <div className="p-2 border-b">
