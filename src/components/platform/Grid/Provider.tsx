@@ -13,7 +13,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronDown, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, FileIcon } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
@@ -44,6 +44,7 @@ import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
 import { TooltipProvider } from '~/components/ui/tooltip';
 import { FetchInfiniteData } from './Action/FetchInfiniteData';
+import { isEmpty } from 'lodash';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -345,9 +346,20 @@ export default function GridProvider({
     cell: ({ row }: any) => (
       <HeadlessBtn onClick={() => row.toggleExpanded()}>
         {row.getIsExpanded() ? (
-          <ChevronDown className="h-6 w-6 text-primary" />
+          <>
+            {config?.rowExpansionOptions?.icons?.expandIcon 
+              ? config?.rowExpansionOptions?.icons?.expandIcon 
+              : <ChevronDown className="h-6 w-6 text-primary" />}
+          </>
         ) : (
-          <ChevronRight className="h-6 w-6 text-default/40" />
+          <>
+            {config?.rowExpansionOptions?.icons?.collapseIcon 
+              ? config?.rowExpansionOptions?.icons?.collapseIcon 
+              : config?.rowExpansionOptions?.expandPosition === 'left'  || !config?.rowExpansionOptions?.expandPosition
+                ? <ChevronRight className="h-6 w-6 text-default/40" /> 
+                : <ChevronLeft className="h-6 w-6 text-default/40" />
+            }
+          </>
         )}
       </HeadlessBtn>
     ),
@@ -503,9 +515,14 @@ export default function GridProvider({
 
         return [...columns, actionRow?.current];
       default:
-        if (config?.enableRowExpansion) {
-          columns = [expandTableRow?.current, ...columns];
-        }
+        if (config?.enableRowExpansion  ) {
+            if(isEmpty(config?.rowExpansionOptions) || config?.rowExpansionOptions?.expandPosition === 'left') {
+              columns = [expandTableRow?.current, ...columns];
+            }
+            else {
+              columns = [...columns, expandTableRow?.current];
+            }
+        } 
         if (config?.enableRowSelection) {
           columns = [selectTableRow?.current, ...columns];
         }

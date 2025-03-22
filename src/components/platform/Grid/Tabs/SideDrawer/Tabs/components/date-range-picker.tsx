@@ -88,7 +88,7 @@ const DATE_FORMAT = {
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className='mr-2 size-4' />
+              <CalendarIcon className='mr-2 size-5' />
               {date?.from ? (
                 date.to && date.from.getTime() !== date.to.getTime() ? (
                   <>
@@ -103,7 +103,14 @@ const DATE_FORMAT = {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+          <PopoverContent 
+            className="w-auto p-0 z-[9999] border bg-background shadow mr-7" 
+            align="start"
+            side='bottom'
+            sideOffset={2}
+            avoidCollisions={true}
+
+          >
             {showFormatSelector && (
               <div className="p-2 border-b">
                 <select
