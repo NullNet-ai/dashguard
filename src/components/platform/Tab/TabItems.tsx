@@ -248,7 +248,7 @@ const TabItems = ({ items }: TabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 md:min-h-[2.0rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[59px] flex justify-between gap-x-2 md:min-h-[2.0rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
       )}
     >
     <MainTabContent
