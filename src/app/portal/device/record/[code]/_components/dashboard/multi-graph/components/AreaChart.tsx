@@ -77,7 +77,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           })
         }}
         tickLine={false}
-        tickMargin={8}
+        tickMargin={3}
       />
      <YAxis
           allowDataOverflow={true}

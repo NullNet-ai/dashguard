@@ -36,17 +36,14 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       bucket_size: '1s',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp({count: 20, unit: 'second', _now: new Date()}) as string[],
+      time_range: getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()}) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
-    }, {enabled: false})
+    }, { enabled: false })
 
   // Fetch traffic data every second
   useEffect(() => {
-
-    
     if (!defaultValues?.id || defaultValues?.device_status.toLowerCase() === 'offline' || !interfaces?.length) return
 
-    
     const fetchChartData = async () => {
       try {
         const { data } = await fetchBandWidth()
@@ -54,7 +51,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
         // Ensure maxTraffic is always above currentTraffic for proper gauge display
         const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
         setTrafficData({ traffic: currentTraffic, maxTraffic })
-        
       }
       catch (error) {
         console.error('Error fetching bandwidth data:', error)
@@ -62,7 +58,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    const interval = setInterval(fetchChartData, 3000)
+    const interval = setInterval(fetchChartData, 1000)
     return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 

@@ -1,16 +1,13 @@
 import { Handle, Position } from '@xyflow/react'
-import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 
-import { generateTicks } from '../functions/generateTicks'
 import moment from 'moment-timezone';
 
 const TrafficNode = ({ data }: { data: Record<string, any> }) => {
 
   const { bandwidth , bucket} = data
   const value = bandwidth || data._maxBandwidth
-  const tooltipData = [{ name: '1', value }]
 
   const getColorForValue = (value: number) => {
     if (value > 100000) {
