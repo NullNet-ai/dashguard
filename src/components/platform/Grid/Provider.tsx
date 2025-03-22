@@ -225,6 +225,7 @@ export default function GridProvider({
     enableRowClick: true,
     enableRowExpansion: false,
     enableRowSelection: true,
+    enableGridGrouping: true,
     hideCreateButton:
       playgroundGridIsShowCreateButton != null
         ? !(playgroundGridIsShowCreateButton == 'true')
@@ -249,14 +250,24 @@ export default function GridProvider({
         (col: any) => col.accessorKey === grouping[0],
       ) as any;
       const entity = columnConfig?.search_config?.entity || config.entity;
+      const field = columnConfig?.search_config?.field || grouping[0];
       return formatGroupByResult({
         data: data,
-        field: grouping[0] ?? '',
+        field,
         entity,
       });
     }
     return isMobileOrTablet && config.isInfinite ? infiniteData : data;
-  }, [grouping, isMobileOrTablet, config.isInfinite, config?.group_by_initial_columns, config?.columns, config.entity, infiniteData, data]);
+  }, [
+    grouping,
+    isMobileOrTablet,
+    config.isInfinite,
+    config?.group_by_initial_columns,
+    config?.columns,
+    config.entity,
+    infiniteData,
+    data,
+  ]);
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -394,7 +405,11 @@ export default function GridProvider({
         label,
       };
     });
-
+    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+      return config?.onFetchRecords?.({
+        grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
+      });
+    }
     UpdateReportGrouping({ grouping: groupings });
   };
 
@@ -602,7 +617,7 @@ export default function GridProvider({
 
         return [...columns, actionRow?.current];
       default:
-        if (grouping.length && newData.length) {
+        if (config?.enableGridGrouping && grouping.length && newData.length) {
           const groupColumn = grouping[0] as string;
           const configColumns =
             config?.group_by_initial_columns || config?.columns;
@@ -623,8 +638,8 @@ export default function GridProvider({
                     {columnConfig.cell({
                       row: { original: { [groupColumn]: value } },
                     })}
-                  <div className='flex items-center ml-1'>
-                      <span className='font-semibold text-sm'>{`(${row?.original.count})`}</span>
+                    <div className="ml-1 flex items-center">
+                      <span className="text-sm font-semibold">{`(${row?.original.count})`}</span>
                     </div>
                   </>
                 );
@@ -640,8 +655,8 @@ export default function GridProvider({
                       getValue: () => value,
                     },
                   )}
-                  <div className='flex items-center ml-1'>
-                    <span className='font-semibold text-sm'>{`(${row?.original.count})`}</span>
+                  <div className="ml-1 flex items-center">
+                    <span className="text-sm font-semibold">{`(${row?.original.count})`}</span>
                   </div>
                 </>
               );
@@ -649,7 +664,11 @@ export default function GridProvider({
           };
           columns = [column, ...columns];
         }
-        if (config?.enableRowExpansion || grouping.length) {
+        if (
+          (config?.enableGridGrouping && grouping.length) ||
+          config?.enableRowExpansion ||
+          grouping.length
+        ) {
           columns = [expandTableRow?.current, ...columns];
         }
         if (config?.enableRowSelection) {
@@ -662,7 +681,7 @@ export default function GridProvider({
         return columns;
     }
   };
-
+  
   /** @HOOKS */
   const table = useReactTable({
     data: newData,
@@ -685,10 +704,13 @@ export default function GridProvider({
       grouping,
       columnSizing: colSizing,
       rowSelection,
-      columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
-        acc[curr] = !isMobileOrTablet;
-        return acc;
-      }, columnVisibility),
+      columnVisibility: (config?.hideColumnsOnMobile ?? []).reduce(
+        (acc, curr) => {
+          acc[curr] = !isMobileOrTablet;
+          return acc;
+        },
+        columnVisibility,
+      ),
     },
     enableMultiSort: true,
     onColumnVisibilityChange: setColumnVisibility,

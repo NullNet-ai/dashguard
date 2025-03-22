@@ -30,17 +30,24 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     'updated_by',
   ];
 
-  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
+  const {
+    sorts,
+    filters,
+    pagination,
+    columns: columnOrder,
+    groups,
+  } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
-    current: +(pagination?.current_page ?? "0"),
-    limit: +(pagination?.limit_per_page ?? "100"),
+    current: +(pagination?.current_page ?? '0'),
+    limit: +(pagination?.limit_per_page ?? '100'),
     entity: 'organization',
     pluck: _pluck,
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
+    grouping: groups?.[0]?.field ? [groups[0].field] : [],
   });
 
   return (
@@ -63,6 +70,7 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
       sorting={sorts?.sorting?.length ? sorts?.sorting : defaultSorting}
       pagination={pagination}
       totalCount={totalCount || 0}
+      grouping={groups || []}
     />
   );
 }

@@ -137,6 +137,7 @@ export interface IConfigGrid {
   parentGroupData?: Record<string, any>[];
   new_button_action?: () => void;
   new_button_title?: string;
+  enableGridGrouping?: boolean;
 }
 
 interface IRowToArchive extends Row<any> {

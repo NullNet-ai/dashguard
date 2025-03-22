@@ -38,13 +38,16 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
     (item) => item.id === header?.id || item.id === sortingKey,
   );
   const enableSorting = header.column.getCanSort();
+  const enableGrouping =
+    state?.config?.enableGridGrouping && header.column.getCanGroup();
   const [open, setOpen] = useState(false);
 
   const formattedFilter = defaultFilter?.reduce((acc, filter, index) => {
     return `${acc} "${filter?.display_value || filter?.values?.[0]}" ${index < defaultFilter.length - 1 ? 'or' : ''}`;
   }, `${header?.column?.columnDef.header} is`);
 
-  if (header.id === 'grouping') return null;
+  if (['grouping', 'action', 'select', 'expand'].includes(header.id))
+    return null;
 
   return (
     <DropdownMenu
@@ -108,14 +111,18 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
             )}
           </>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="flex gap-2"
-          onClick={() => header.column.toggleGrouping()}
-        >
-          <ListFilter className="h-4 w-4" />
-          <span>Group by this field</span>
-        </DropdownMenuItem>
+        {enableGrouping && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex gap-2"
+              onClick={() => header.column.toggleGrouping()}
+            >
+              <ListFilter className="h-4 w-4" />
+              <span>{`Group by "${header.column.columnDef.header}"`} </span>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

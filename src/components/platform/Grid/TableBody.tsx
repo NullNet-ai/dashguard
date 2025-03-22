@@ -193,11 +193,6 @@ export default function MyTableBody({
                         parentGroupData={state?.config?.parentGroupData || []}
                         gridState={state}
                       />
-                      {/* {React.cloneElement(<GridGroupingExpansion />, {
-                          rowData: row.original,
-                          parentExpanded: allExpandedRows,
-                          key: `expanded:${row.id ?? index}`,
-                        })} */}
                     </td>
                   </TableRow>
                 ) : (
@@ -233,6 +228,7 @@ export default function MyTableBody({
                                 rowData: row.original,
                                 parentExpanded: allExpandedRows,
                                 key: `expanded:${row.id ?? index}`,
+                                grouping: state.grouping
                               },
                             )
                           )

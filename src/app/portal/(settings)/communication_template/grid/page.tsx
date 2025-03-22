@@ -12,7 +12,8 @@ import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
 
 export default async function Page() {
-  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters, groups } =
+    (await getGridCacheData()) ?? {};
 
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
@@ -45,6 +46,7 @@ export default async function Page() {
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
+    grouping: groups?.[0]?.field ? [groups[0].field] : [],
   });
 
   return (
@@ -54,8 +56,11 @@ export default async function Page() {
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       defaultAdvanceFilter={filters?.defaultFilters || []}
       advanceFilter={filters?.advanceFilter || []}
-      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
+      defaultSorting={
+        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
+      }
       pagination={pagination}
+      grouping={groups || []}
       config={{
         entity: main_entity!,
         title: 'Communication Templates',
@@ -67,7 +72,7 @@ export default async function Page() {
           query_params: {
             entity: main_entity!,
             pluck: _pluck,
-          }
+          },
         },
       }}
     />

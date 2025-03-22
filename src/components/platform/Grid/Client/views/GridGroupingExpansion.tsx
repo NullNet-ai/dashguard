@@ -65,15 +65,15 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     return gridFilter;
   };
   const gridFilter = [
-    ...(gridState?.advanceFilter?.length
-      ? [
-          {
-            type: 'operator',
-            operator: 'and',
-          },
-        ]
-      : []),
     ...constructGridFilter([...(parentGroupData ?? []), rowData]),
+    // ...(gridState?.advanceFilter?.length
+    //   ? [
+    //       {
+    //         type: 'operator',
+    //         operator: 'and',
+    //       },
+    //     ]
+    //   : []),
   ];
   const groupFields = grouping?.map((item) => {
     const columnConfig = initialColumns?.find(
@@ -98,7 +98,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       sorting: gridQueryConfigs?.sorting?.length
         ? gridQueryConfigs?.sorting
         : defaultSorting,
-      advance_filters: [...(gridState?.advanceFilter ?? []), ...gridFilter],
+      advance_filters: [...gridFilter],
       grouping: groupFields?.[0]?.field ? [groupFields[0].field as string] : [],
     },
     {

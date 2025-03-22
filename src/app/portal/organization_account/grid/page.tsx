@@ -1,21 +1,31 @@
-import Grid from '~/components/platform/Grid/Server'
-import { getGridCacheData } from '~/lib/grid-get-cache-data'
-import { api } from '~/trpc/server'
+import Grid from '~/components/platform/Grid/Server';
+import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import { api } from '~/trpc/server';
 
 /**
  *
  * @Default Grid Features
  *
  */
-import defaultAdvanceFilter from './_config/advanceFilter'
-import gridColumns from './_config/columns'
-import defaultSorting from './_config/sorting'
-import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
+import defaultAdvanceFilter from './_config/advanceFilter';
+import gridColumns from './_config/columns';
+import defaultSorting from './_config/sorting';
+import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
 
 export default async function Page() {
-  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
+  const {
+    sorts,
+    filters,
+    pagination,
+    columns: columnOrder,
+    groups,
+  } = (await getGridCacheData()) ?? {};
 
-  const { items = [], totalCount, accountEmail } = await api.account.fetchGridData({
+  const {
+    items = [],
+    totalCount,
+    accountEmail,
+  } = await api.account.fetchGridData({
     entity: 'organization_account',
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
@@ -23,7 +33,8 @@ export default async function Page() {
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
-  })
+    grouping: groups?.[0]?.field ? [groups[0].field] : [],
+  });
   return (
     <Grid
       advanceFilter={filters?.advanceFilter || []}
@@ -55,14 +66,17 @@ export default async function Page() {
             },
           },
         },
-        customRowAction: AccountCustomRowAction
+        customRowAction: AccountCustomRowAction,
       }}
       data={items}
       defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
+      defaultSorting={
+        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
+      }
       pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
+      grouping={groups || []}
     />
-  )
+  );
 }
