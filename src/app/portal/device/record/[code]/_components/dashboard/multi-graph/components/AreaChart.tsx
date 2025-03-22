@@ -7,7 +7,6 @@ import { graphColors, sortInterface } from './graph-color';
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
 
-
   const sorted = sortInterface(interfaces)
 
   const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData])
@@ -17,11 +16,17 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
    },[yAxisMax])
 
 
- const yticks = useMemo(() => {
-   if(!yAxisMax)return [0]
-   return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
-   
- },[yAxisMax, yAxisMin])
+   const yticks = useMemo(() => {
+    if(!yAxisMax) return [0]
+    // Create an array with 0 as first tick and evenly distribute the rest
+    const ticks = [0];
+    for (let i = 1; i < number_of_ticks; i++) {
+      ticks.push(Math.round(i * (yAxisMax / (number_of_ticks - 1))));
+    }
+    return ticks;
+  },[yAxisMax, number_of_ticks])
+
+  console.log("yticks", yticks)
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -64,31 +69,41 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         tickMargin={8}
       /> */}
          <XAxis
-        axisLine={false}
-        dataKey="bucket"
-        tickFormatter={(value) => {
-          const date = new Date(value)
-          if (value.includes(':')) {
-            return value; // Display time directly if it includes ':'
-          }
-          return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
-        }}
-        tickLine={false}
-        tickMargin={3}
-      />
-     <YAxis
-          allowDataOverflow={true}
           axisLine={false}
-          domain={[yAxisMin, yAxisMax]}
-          tickCount={number_of_ticks}
-          tickFormatter={formatNumber}
+          dataKey="bucket"
+          tickFormatter={(value) => {
+            const date = new Date(value)
+            if (value.includes(':')) {
+              return value; // Display time directly if it includes ':'
+            }
+            return date.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })
+          }}
           tickLine={false}
-          tickMargin={8}
-          ticks={yticks}
-        />
+          tickMargin={3}
+          tickCount={4}
+          interval="preserveStartEnd"
+          minTickGap={200}
+          // padding={{ left: 10, right: 10 }}
+      />
+   <YAxis
+    allowDataOverflow={true}
+    axisLine={false}
+    domain={[0, yAxisMax]} // Force starting from 0
+    tickCount={number_of_ticks}
+    tickFormatter={(value) => value === 0 ? '0' : formatNumber(value)} // Explicitly format 0
+    tickLine={false}
+    tickMargin={8}
+    ticks={yticks}
+    includeHidden={true}
+    minTickGap={0}
+    allowDecimals={false}
+    scale="linear"
+    padding={{ bottom: 10 }} // Add padding to ensure 0 is visible
+    // label={{ value: '0', position: 'insideBottom', offset: -5, fill: '#666' }} // Add explicit 0 label
+  />
       <ChartTooltip
         content={(
           <ChartTooltipContent

@@ -22,7 +22,7 @@ export const modifyAxis = (chartData:any) => {
     ...(chartData ?? [])?.map((item: any) => item?.vtnet0 ?? Infinity)
   )
 
-  const yAxisMax = Math.ceil(maxBandwidth * 1.1)
+  const yAxisMax = Math.ceil(maxBandwidth * 1.25)
   const yAxisMin = Math.floor(minBandwidth * 0.9)
 
   
