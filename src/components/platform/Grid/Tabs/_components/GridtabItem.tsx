@@ -7,7 +7,7 @@ import { forwardRef, useEffect, useMemo } from 'react';
 
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
-import { cn, formatTabName } from '~/lib/utils';
+import { cn, formatGridTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import GridMenu from '../GridMenu';
 import GridMenuClient from '../GridMenuClient';
@@ -102,7 +102,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             tab.current ? 'text-primary ' : 'text-default/70', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pr-0' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
-          {formatTabName(tabNameRole)}
+          {formatGridTabName(tabNameRole)}
         </Link>
   
       {!isHidden
