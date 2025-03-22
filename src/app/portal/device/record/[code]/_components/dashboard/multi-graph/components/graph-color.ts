@@ -1,5 +1,5 @@
 export  const graphColors: any = {
-    'vtnet0': '#47ada3',
+    'vtnet0': '#8EBAD9',
     'vtnet1': '#f97316',
   }
 
