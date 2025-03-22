@@ -200,7 +200,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className='flex items-center justify-center'>
         <div
           className={cn(
-            'flex w-full items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
+            'flex w-full bg-background items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
           )}
         >
           <DateTimeLocalInput
@@ -992,7 +992,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
           <span className='sr-only'>calendar</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align='start' className='w-auto p-0' sideOffset={10}>
+      <PopoverContent align='start' className='w-auto p-0 z-[103]' sideOffset={10}>
         <div className='p-3'>
           <div className='flex items-center justify-center gap-1'>
             {!(props.disablePastDates && new Date(year, month) < new Date()) && (
