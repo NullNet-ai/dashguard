@@ -722,7 +722,7 @@ export const packetRouter = createTRPCRouter({
             ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
             order: {
               starts_at,
-              limit: group_advance_filters?.length > 1? limit : 100000,
+              limit: group_advance_filters?.length > 1? limit : 5,
               by_field: 'code',
               by_direction: EOrderDirection.DESC,
             },

@@ -11,7 +11,7 @@ import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
 
 import { generateFlowData } from './functions/generateFlowData'
-import { type INetworkFlowContext } from './types'
+import { Edge, type INetworkFlowContext } from './types'
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -29,6 +29,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
+  const [flowData, setFlowData] = useState<{ nodes: Element[]; edges: Edge[] }>({ nodes: [], edges: [] })
+
   const [loading, setLoading] = useState<boolean>(false)
 
   const [ time , setTime] = useState<Record<string,any> | null>(null)
@@ -121,24 +123,36 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
-    if(!params?.id || !refetch) return 
+    if (!params?.id || !refetch) return;
+  
+    const fetchBandwidth = async () => {
+      const a = await refetch();
+      const { data } = a;
+      if (!data) return;
+      setBandwidth(data);
+    };
+  
+    // Set up a 1-second interval
+    // const interval = setInterval(() => {
+      fetchBandwidth();
+    // }, 1000);
+  
+    // Clear the interval when the component unmounts
+    // return () => clearInterval(interval);
+  }, [params?.id, refetch]);
 
-    const fetchBandwidth = async() => {
-      const a =  await refetch() 
-      
-      const { data }  = a
-      if(!data) return
-      setBandwidth(data)
-    }
-    
-    fetchBandwidth()
-  }, [params?.id])
+  useEffect(() => {
+    if (!bandwidth || bandwidth.length === 0) return
 
+    // Generate flow data whenever bandwidth is updated
+    const updatedFlowData = generateFlowData(bandwidth)
+    setFlowData(updatedFlowData as any)
+  }, [bandwidth]) // Dependency array ensures this runs when bandwidth changes
 
   const state = {
-    elements: generateFlowData(bandwidth ?? []),
+    elements: flowData,
     loading
-  }
+  } as any
 
   return (
     <NetworkFlowContext.Provider
