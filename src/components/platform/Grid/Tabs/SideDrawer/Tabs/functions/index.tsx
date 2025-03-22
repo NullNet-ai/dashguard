@@ -193,7 +193,7 @@ export function FilterGroup({
                           : []),
                         ...(filterData.field &&
                           field_data_type === 'datetime' &&
-                          filterData.operator !== 'is_between'
+                          !['is_between', 'is_empty', 'is_not_empty'].includes(filterData.operator)
                           ? [
                             {
                               id: `${prefix}.values`,
@@ -201,7 +201,6 @@ export function FilterGroup({
                               name: `${prefix}.values`,
                               placeholder: 'Enter the value',
                               dateTimePickerProps: {
-                                // disablePastDates: true,
                                 transformValuesToArray: true,
                                 enableFormattedDate: false,
                               },
@@ -322,35 +321,6 @@ export function FilterGroup({
     </div>
   );
 }
-
-// Simplified mock search function that doesn't use field parameter
-export const mockFilterValueSearch = async (
-  searchTerm: string,
-): Promise<Array<{ value: string; label: string }>> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Simple mock data array
-  const mockData = [
-    { value: 'john', label: 'John Doe' },
-    { value: 'jane', label: 'Jane Smith' },
-    { value: 'bob', label: 'Bob Johnson' },
-    { value: 'alice', label: 'Alice Williams' },
-    { value: 'charlie', label: 'Charlie Brown' },
-    { value: 'david', label: 'David Miller' },
-    { value: 'emma', label: 'Emma Wilson' },
-    { value: 'frank', label: 'Frank Thomas' },
-    { value: 'grace', label: 'Grace Lee' },
-    { value: 'henry', label: 'Henry Garcia' },
-  ];
-
-  // Filter based on search term
-  return mockData.filter(
-    (item) =>
-      item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.value.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-};
 
 // Custom render functions for the multi-select component
 export const renderOption = (option: { value: string; label: string }) => {
