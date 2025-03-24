@@ -64,7 +64,7 @@ const TabItems = ({ items }: TabItemsProps) => {
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     const selectedCached = cachedItems?.main_tab_data
-    const notEqual = selectedCached?.tabs?.length ? selectedCached?.tabs?.length < newTabList?.length : false
+    const notEqual = JSON.stringify(selectedCached?.tabs || [] ) !== JSON.stringify(newTabList)
     
 
     if(!selectedCached?.tabs?.length || notEqual) {
