@@ -13,6 +13,11 @@ export const updateGridFilter = async (data : any)  => {
     return updateGridFilter
 }
 
+export const updateAllFilterdata = async (tabs : any[])  => {
+   await api.gridFilter.updateGridAllFilter(tabs)
+
+}
+
 export const removeGridFilter = async (id : string)  => {
     const url = await api.gridFilter.removeGridFilter({
         id

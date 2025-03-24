@@ -114,6 +114,24 @@ export const gridFilterRouter = createTRPCRouter({
       return data;
     }),
 
+
+  updateGridAllFilter: privateProcedure
+    .input(z.any())
+   .mutation(async ({ ctx, input }) => {
+      const token = ctx?.token.value;
+      const id = ctx?.session?.account?.contact?.id;
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const [,, mainEntity, application] = pathName.split('/');
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+      });
+
+      await ctx.redisClient.cacheData(_tabMenuId, input);
+
+   }),
   updateGridFilter: privateProcedure
     .input(gridFilterSchema)
     .mutation(async ({ ctx, input }) => {
