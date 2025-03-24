@@ -1,7 +1,7 @@
 {
   "app_name": "platform__FormBuilder",
-  "tag": "1.14.0",
-  "branch": "released/fix/PLATFORM7-3456/1.14.0",
-  "message": "fixed disabled ui in group tab",
-  "publish_name": "Juphet Vitualla"
+  "tag": "2.0.0",
+  "branch": "released/2.0.0",
+  "message": "Update packages",
+  "publish_name": "Bryan Jay Mabuan"
 }
