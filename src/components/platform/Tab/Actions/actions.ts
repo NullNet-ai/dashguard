@@ -7,3 +7,9 @@ export const updateAllInnerdata = async (tabs: any[], context: string) => {
     tabs,
   })
 }
+
+export const updateAllMaindata = async (tabs: any[]) => {
+  await api.tab.updateAllMainTabs({
+    tabs,
+  })
+}

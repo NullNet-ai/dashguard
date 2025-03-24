@@ -94,6 +94,28 @@ export const tabRouter = createTRPCRouter({
 
     return response
   }),
+  updateAllMainTabs: privateProcedure
+  .input(
+    z.object({
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.contact?.id}`
+
+    const response = await tabs
+      .cacheData(key, input.tabs, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
   updateSubTabs: privateProcedure
     .input(
       z.object({
