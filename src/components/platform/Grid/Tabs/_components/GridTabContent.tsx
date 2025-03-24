@@ -3,7 +3,7 @@
 import { cn } from '~/lib/utils';
 import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Sortable, SortableItem } from '~/components/ui/sortable';
 import GridTabItem from './GridtabItem';
 import { usePathname } from 'next/navigation';
@@ -12,10 +12,11 @@ import { ChevronDownIcon, Search, X } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { debounce, lowerCase, toLower } from 'lodash';
 import GridtabDropItem from './GridtabDropItem';
-import { reorderShowActiveItem } from '~/utils/sort-tab-items';
+import { reorderGridTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import GridMenuClient from '../GridMenuClient';
 import GridMenuDropClient from './GridMenuDropClient';
+import { updateAllFilterdata } from '../SideDrawer/actions';
 
 const GridTabContent = ({  
     par_items = [],
@@ -33,32 +34,35 @@ const GridTabContent = ({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('')
     const  {state: drawerState,  } = useSideDrawer ()
-    const {width, isOpen, isPinned} = drawerState
-    const updateCache = (items?: any[]) => {
 
-        const newItems = items || par_items;
-        if (newItems?.length) {
-          const getCurrent = getActiveName() || ''
-          const neworderData = reorderShowActiveItem(newItems, code, application)
-          const cachedData = {
-            tabs: neworderData,
-            lastShownItem: lastShownItem?.name,
-            prevCurrent: getCurrent,
-            key:  'grid_tab_' + entity,
-          }
-          const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-      
-          localStorage.setItem('cachedPortalItems', JSON.stringify({
-            ...cachedItems,
-            [`grid_tab_${entity}`]: cachedData,
-          }))
+      const updatecachedItems =  async (items: any) => {
+        // const getCurrent = getActiveName() || ''
+        // const neworderData = reorderGridTabActive(copiedItem, activeItem?.id ?? '', application ?? '')
+         const removeHidden = items.filter((item: any) => !item.hidden);
+          const lastItem = removeHidden[removeHidden.length - 1];
+   
+        const cachedData = {
+          tabs: items,
+          lastShownItem: lastItem?.name,
+          prevCurrent: 'test',
+          key:  'grid_tab_' + entity,
         }
-      }
+
+        try {
+          await updateAllFilterdata(items)
+        } catch (error) {
+            console.error(error)
+        }
+
+
+        const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
     
-      const getActiveName = useMemo(() => {
-            return par_items?.find((item: any) => item.current)?.name;
-      }, [par_items]);
-  
+        localStorage.setItem('cachedPortalItems', JSON.stringify({
+          ...cachedItems,
+          [`grid_tab_${entity}`]: cachedData,
+        }))
+      }
+
 
     useEffect(() => {
 
@@ -131,6 +135,7 @@ const GridTabContent = ({
         return false
     }, [data, searchValue])
 
+  
 
     return (
         <>
@@ -148,12 +153,13 @@ const GridTabContent = ({
                 const newItems = [...items];
                 const [removed] = newItems.splice(activeIndex, 1);
                 newItems.splice(overIndex, 0, removed);
+
+                //update the cached in localstorage
+                updatecachedItems(newItems)
+
                 return newItems;
               });
-  
-              setTimeout(() => {
-                updateCache()
-              }, 1000);
+
               
             }}
           >
