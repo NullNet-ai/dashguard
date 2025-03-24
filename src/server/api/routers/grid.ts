@@ -860,8 +860,6 @@ export const gridRouter = createTRPCRouter({
     if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
       return [];
     const cacheTypes: TReportDataType[] = [
-      'filter',
-      'sorting',
       'pagination',
       'grid_tabs',
     ];
@@ -869,12 +867,12 @@ export const gridRouter = createTRPCRouter({
       cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
     );
 
-    const [pagination, gridTabs, filters, sorting] = await Promise.all(
+    const [pagination, grid_tabs] = await Promise.all(
       cacheIds
         .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
         .filter(Boolean),
     );
-    const tabDetails = Array.isArray(sorting) ? sorting : [];
+    const tabDetails = Array.isArray(grid_tabs) ? grid_tabs : [];
     const reportPagination: IPagination =
       typeof pagination === 'object' ? pagination : {};
 
@@ -927,6 +925,7 @@ export const gridRouter = createTRPCRouter({
       columns: gridColumns,
     };
   }),
+
   getInfiniteData: privateProcedure
     .input(
       z.object({
