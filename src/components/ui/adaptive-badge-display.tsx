@@ -63,7 +63,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
       useOverflowDetection = true, // Changed to true by default
       moreButtonClassName = "",
       moreButtonLabel,
-      lessButtonLabel = "Show less",
+      lessButtonLabel = "See less",
       emptyStateContent = null,
       customRenderBadge,
       onMoreButtonClick,
@@ -479,7 +479,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-6 px-2.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary-foreground transition-all duration-200 focus:ring-1 focus:ring-primary focus:ring-offset-0",
+                        "h-6 px-2.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary transition-all duration-200 focus:ring-1 focus:ring-primary focus:ring-offset-0",
                         moreButtonClassName
                       )}
                       onClick={handleToggleExpand}
@@ -505,7 +505,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
                         variant="outline"
                         size="sm"
                         className={cn(
-                          "h-6 px-2.5 text-xs font-medium bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 animate-in fade-in focus:ring-1 focus:ring-primary focus:ring-offset-0",
+                          "h-6 px-2.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary transition-all duration-200 animate-in fade-in focus:ring-1 focus:ring-primary focus:ring-offset-0",
                           moreButtonClassName
                         )}
                         onClick={handleToggleExpand}
@@ -532,7 +532,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "h-6 rounded-full px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary-foreground transition-all duration-200 focus:ring-1 focus:ring-primary focus:ring-offset-0",
+                        "h-6  px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary transition-all duration-200 focus:ring-1 focus:ring-primary focus:ring-offset-0",
                         moreButtonClassName
                       )}
                       onClick={handleTogglePopover}
@@ -546,11 +546,11 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
                       aria-haspopup="true"
                       aria-expanded={isPopoverOpen}
                     >
-                      {moreButtonLabel || `+${hiddenBadges.length} more`}
+                      {moreButtonLabel || `More (${hiddenBadges.length})`}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className={cn("p-3 w-auto shadow-md border border-border bg-popover animate-in fade-in zoom-in-95 duration-200", 
+                    className={cn("p-0 w-auto shadow-md border border-border bg-popover animate-in fade-in zoom-in-95 duration-200", 
                     dropdownProps.className
                     )}
                     align={dropdownProps.align || "center"}
@@ -568,21 +568,22 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
                       }
                     }}
                   >
-                    <div className="text-xs font-medium text-muted-foreground mb-1.5 px-1">
-                      {hiddenBadges.length} more {hiddenBadges.length === 1 ? 'badge' : 'badges'}
-                    </div>
                     <div 
-                      className="max-h-[var(--radix-popover-content-available-height)] overflow-auto py-1"
+                      className="max-h-[var(--radix-popover-content-available-height)] overflow-auto"
                       style={{ maxHeight }}
-                      role="listbox"
-                      aria-label="Hidden badges"
                     >
-                      <div className="flex flex-col gap-1.5">
-                        {hiddenBadges.map((badge) => (
-                          <div key={badge.id} className="w-full">
-                            {renderBadge(badge, "w-auto justify-start hover:bg-muted/50")}
-                          </div>
-                        ))}
+                      <div 
+                        className="p-2"
+                        role="listbox"
+                        aria-label="Hidden badges"
+                      >
+                        <div className="flex flex-col gap-1">
+                          {hiddenBadges.map((badge) => (
+                            <div key={badge.id} className="w-full">
+                              {renderBadge(badge, "w-auto justify-start hover:bg-muted/50")}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </PopoverContent>

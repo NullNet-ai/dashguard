@@ -1003,7 +1003,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
                 <SelectTrigger className='w-[140px]'>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='z-[105]'>
                   {validMonths.map((monthName, index) => (
                     <SelectItem key={monthName} value={index.toString()}>
                       {monthName}
@@ -1016,7 +1016,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
               <SelectTrigger className='w-[100px]'>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className='z-[105]'>
                 {years.map(year => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}

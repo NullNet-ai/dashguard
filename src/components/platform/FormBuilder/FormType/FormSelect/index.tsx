@@ -44,10 +44,15 @@ export default function FormSelect({
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<ComboSelectOption[]>(
+  // Initialize options with useMemo to avoid unnecessary re-renders
+  const initialOptions = useMemo(() => 
     selectOptions?.[fieldConfig?.name] ?? [],
-  );
+  [selectOptions, fieldConfig?.name]);
+  
+  const [options, setOptions] = useState<ComboSelectOption[]>(initialOptions);
   const [isCreateLoading, setIsCreateLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [updateCounter, setUpdateCounter] = useState(0); // Counter to force re-render
 
   const isDisabled = fieldConfig.disabled ?? false;
   const isReadOnly = fieldConfig.isCustomFormField
@@ -74,8 +79,8 @@ export default function FormSelect({
   }, []);
 
   useEffect(() => {
-    setOptions(selectOptions?.[fieldConfig?.name] ?? []);
-  }, [selectOptions, fieldConfig?.name]);
+    setOptions(initialOptions);
+  }, [initialOptions]);
 
   // Convert ISelectOptions to ComboSelectOption
   const comboOptions: ComboSelectOption[] = useMemo(() => {
@@ -109,6 +114,12 @@ export default function FormSelect({
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
       return;
     }
+    
+    // Check if already creating to prevent multiple calls
+    if (isCreateLoading) {
+      return;
+    }
+    
     if (fieldConfig?.selectOnCreateValidate) {
       const validation = await fieldConfig?.selectOnCreateValidate(query);
       if (!validation?.valid) {
@@ -116,25 +127,40 @@ export default function FormSelect({
         return;
       }
     }
+    
     setIsCreateLoading(true);
-    let createdData = null;
-    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
-      createdData = await fieldConfig?.selectOnCreateRecord(query);
-    } else {
-      const { entity, fieldIdentifier, customParams } =
-        fieldConfig?.selectOnCreateRecord ?? {};
-      createdData = (await createRecord({
-        entity,
-        fieldIdentifier,
-        data: {
-          ...(customParams ?? {}),
-          [fieldIdentifier]: query,
-        },
-      })) as ISelectOptions;
+    try {
+      let createdData = null;
+      if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+        createdData = await fieldConfig?.selectOnCreateRecord(query);
+      } else {
+        const { entity, fieldIdentifier, customParams } =
+          fieldConfig?.selectOnCreateRecord ?? {};
+        createdData = (await createRecord({
+          entity,
+          fieldIdentifier,
+          data: {
+            ...(customParams ?? {}),
+            [fieldIdentifier]: query,
+          },
+        })) as ISelectOptions;
+      }
+      
+      // Check if the option already exists in the options array to prevent duplicates
+      const alreadyExists = options.some(opt => opt.value === createdData?.value);
+      if (!alreadyExists && createdData) {
+        const newOptions = sortOptions([...options, createdData]);
+        setOptions(newOptions);
+        formRenderProps?.field.onChange(createdData?.value || "");
+        setQuery(""); // Clear the query
+        setUpdateCounter(prev => prev + 1); // Force re-render of ComboSelect
+      }
+    } catch (error) {
+      toast.error("Failed to create new record");
+      console.error("Error creating record:", error);
+    } finally {
+      setIsCreateLoading(false);
     }
-    setOptions(sortOptions([...(options ?? []), createdData]));
-    formRenderProps?.field.onChange(createdData?.value || "");
-    setIsCreateLoading(false);
   };
 
   const isOptionsExist = options?.find(p => p.label?.toLowerCase() === query?.trim().toLowerCase());
@@ -207,6 +233,12 @@ export default function FormSelect({
         renderEmptyState={renderEmptyState}
         onQueryChange={setQuery}
         testId={formatFormTestID(`${formKey}-select-${fieldConfig.name}`)}
+        // Pass external state control props
+        externalQuery={query}
+        setExternalQuery={setQuery}
+        externalOpen={isOpen}
+        setExternalOpen={setIsOpen}
+        forceUpdate={updateCounter}
         infiniteScroll={fieldConfig.selectConfig?.infiniteScroll ? {
           enabled: true,
           initialLimit: fieldConfig.selectConfig?.infiniteScroll.initialLimit || 50,
