@@ -37,7 +37,6 @@ export default function Banner({
 	hideable = true,
 	sticky = false,
   maxWidth,
-  actions,
 }: BannerProps) {
 	const [isVisible, setIsVisible] = useState(() => {
     if (!hideable) {
@@ -63,40 +62,19 @@ export default function Banner({
       tabIndex={-1} 
       style={{ maxWidth: maxWidth }}
       className={cn(
-        "start-0 z-50 flex w-full justify-between items-center p-4 border-b border-gray-200",
+        "start-0 z-50 flex w-full justify-between items-center p-4 border-b border-gray-200 overflow-clip",
 				sticky ? 'fixed' : 'rounded-[8px]',
         position === 'bottom' ? 'bottom-0' : 'top-0',
 				className
       )}
     >
       <div className={cn(
-				"flex w-full",
+				"flex flex-grow",
 				contentAlign === 'left' ? 'justify-start' 
 				: contentAlign === 'right' ? 'justify-end' 
 				: 'justify-center'
 			)}>
-				<div className={cn(
-					"flex items-center gap-3",
-					!contentAlign && 'w-full'
-				)}>
-					{actions?.map((action, index) => 
-						action.position === 'start' && (
-							<div key={index} className="flex items-center text-base font-normal">
-								{ButtonComponent(action)}
-							</div>
-						)
-					)}
-
-					{content}
-
-					{actions?.map((action, index) => 
-						(!action.position || action.position === 'end') && (
-							<div key={index} className="flex items-center text-base font-normal">
-								{ButtonComponent(action)}
-							</div>
-						)
-					)}
-				</div>
+				{content}
       </div>
       <button
         onClick={handleClose} 
@@ -107,38 +85,4 @@ export default function Banner({
       </button>
     </div>
   );
-}
-
-const ButtonComponent = (action: BtnAction) => {
-	return (
-		<Button 
-			onClick={action.onClick}
-			className={cn(
-				"flex text-sm",
-				action.btnStyle ? action.btnStyle : 'text-slate-800',
-				action.type === 'button' ? 'px-4' : 'px-0',
-			)}
-			size="xs"
-			borderRadius={action.type === 'button' ? 'rounded' : undefined}
-			variant={action.type === 'link' ? 'link' : 'default'}
-			Icon={action.type === 'button' ? action.icon : undefined}      
-			iconPlacement={action.icon_position}
-		>
-			{action.type && action.type === 'link' ? (
-				action.href && (
-				<Link 
-					href={action.href} 
-					className={cn(
-						action.btnStyle,
-						action.icon_position === "left" && "flex items-center"
-					)}
-				>
-					{action.label}
-					{action.icon && <action.icon className="size-5" />}
-				</Link>)
-			) : (
-				action.label
-			)}
-		</Button>
-	)
 }
