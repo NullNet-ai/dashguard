@@ -81,7 +81,7 @@ export default function Banner({
         className="px-2"
         aria-label="Close banner"
       >
-        <XMarkIcon width={30} height={30} />
+        <XMarkIcon width={24} height={24} />
       </button>
     </div>
   );
