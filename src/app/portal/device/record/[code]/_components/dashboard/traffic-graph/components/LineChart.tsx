@@ -1,18 +1,28 @@
 'use client'
 
+import { useMemo } from 'react'
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
 import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
+import { formatNumber, modifyAxis } from './AreaChart'
 
 const LineChartComponent = ({ filteredData }: any) => {
   // Add this to calculate max value
-  const maxValue = Math.max(...filteredData.map((item: any) => 
-    parseInt(item.bandwidth, 10) || 0
-  ));
-
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData])
+  
+    const number_of_ticks = useMemo(() => {
+       return yAxisMax >= 100000 ? 10 : 5
+      },[yAxisMax])
+  
+  
+    const yticks = useMemo(() => {
+      if(!yAxisMax)return [0]
+      return Array.from({ length: number_of_ticks }, (_, i) => yAxisMin + (i * (yAxisMax - yAxisMin) / (number_of_ticks - 1)))
+      
+    },[yAxisMax, yAxisMin])
   return (
     <LineChart
       accessibilityLayer={true}
@@ -36,21 +46,15 @@ const LineChartComponent = ({ filteredData }: any) => {
         tickLine={false}
         tickMargin={8}
       />
-      <YAxis 
+      <YAxis
         allowDataOverflow={true}
         axisLine={false}
+        domain={[yAxisMin, yAxisMax]}
+        tickCount={number_of_ticks}
+        tickFormatter={formatNumber}
         tickLine={false}
-        tickMargin={12}
-        tickFormatter={(value) => {
-          if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
-          if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`
-          return value.toString()
-        }}
-        domain={[0, maxValue + (maxValue/ 10)]} // Use the calculated maxValue
-        tickCount={6}
-        width={60}
-        scale="linear"
-        hide={true}
+        tickMargin={8}
+        ticks={yticks}
       />
       <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
       <Line

@@ -30,6 +30,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
   const [flowData, setFlowData] = useState<{ nodes: Element[]; edges: Edge[] }>({ nodes: [], edges: [] })
+    const [_refetch, setRefetch] = React.useState(Math.random())
 
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -121,7 +122,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     )
     }
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
-
+ 
   useEffect(() => {
     if (!params?.id || !refetch) return;
   
@@ -135,11 +136,22 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     // Set up a 1-second interval
     // const interval = setInterval(() => {
       fetchBandwidth();
-    // }, 1000);
+    //   setRefetch(Math.random())
+    // }, 5000);
   
     // Clear the interval when the component unmounts
     // return () => clearInterval(interval);
   }, [params?.id, refetch]);
+
+    useEffect(() => {
+    const fetchBandwidth = async () => {
+      const a = await refetch();
+      const { data } = a;
+      if (!data) return;
+      setBandwidth(data);
+    };
+      fetchBandwidth()
+    }, [_refetch])
 
   useEffect(() => {
     if (!bandwidth || bandwidth.length === 0) return
