@@ -38,6 +38,11 @@ export default async function Page() {
           //   collapseIcon: <ArrowBigDownDash className='h-6 w-6 text-default/40'/>,
           // }
         },
+        defaultShownColumns: [
+          "first_name",
+          "last_name",
+        ],
+        statusColumn: 'account_status',
         columns: gridColumns,
         columnsOrder: columnOrder,
         enableAutoCreate: false,

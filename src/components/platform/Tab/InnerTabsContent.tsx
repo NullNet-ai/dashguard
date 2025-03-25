@@ -25,7 +25,7 @@ import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
-import { all } from 'bluebird';
+import { updateAllInnerdata } from './Actions/actions';
 const InnerTabsContent = ({
   par_items = [],
   pathname,
@@ -42,7 +42,7 @@ const InnerTabsContent = ({
   const  {state: drawerState,  } = useSideDrawer ()
   const {width, isOpen, isPinned} = drawerState
   const [searchValue, setSearchValue] = useState<string>('')
-  const [entity] = pathname.split('/').slice(2);
+  const [, portal, entity] = pathname?.split('/') || [];
   const [datas, setDatas] = useState(par_items)
 
   const conWidth = useMemo(() =>   ({
@@ -70,6 +70,33 @@ const InnerTabsContent = ({
       }))
     }
   }
+
+  const updatecachedItems =  async (items: any) => {
+    // const getCurrent = getActiveName() || ''
+    // const neworderData = reorderGridTabActive(copiedItem, activeItem?.id ?? '', application ?? '')
+     const removeHidden = items.filter((item: any) => !item.hidden);
+      const lastItem = removeHidden[removeHidden.length - 1];
+
+    const cachedData = {
+      tabs: items,
+      lastShownItem: lastItem?.name,
+      key:  'inner_tab_' + entity,
+    }
+
+    try {
+      await updateAllInnerdata(items, `/${portal}/${entity}`)
+    } catch (error) {
+        console.error(error)
+    }
+
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+
+    localStorage.setItem('cachedPortalItems', JSON.stringify({
+      ...cachedItems,
+      [`inner_tab_${entity}`]: cachedData,
+    }))
+  }
+
 
   const getActiveName = useMemo(() => {
       return () => {
@@ -200,8 +227,10 @@ const InnerTabsContent = ({
               const newItems = [...items];
               const [removed] = newItems.splice(activeIndex, 1);
               newItems.splice(overIndex, 0, removed);
+              updatecachedItems(newItems)
               return newItems;
             });
+
 
             setTimeout(() => {
               updateCache()

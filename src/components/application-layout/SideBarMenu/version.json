@@ -1,7 +1,7 @@
 {
   "app_name": "application-layout__SideBarMenu",
-  "tag": "1.7.1<unreleased>",
-  "branch": "unreleased/fix/FixedUIissues/1.7.1<unreleased>",
-  "message": "Fixed UI issues",
-  "publish_name": "Juphet Vitualla"
+  "tag": "2.0.0",
+  "branch": "released/2.0.0",
+  "message": "Update packages",
+  "publish_name": "Bryan Jay Mabuan"
 }

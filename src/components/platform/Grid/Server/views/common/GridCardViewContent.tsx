@@ -6,9 +6,28 @@ import { cn } from '~/lib/utils'
 import { testIDFormatter } from '~/utils/formatter'
 
 import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
+import StatusCell from '~/components/ui/status-cell'
 
-const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, parent, config, showArchiveConfirmationModal, setShowArchiveConfirmationModal, setRowToArchive, visibleCells, codecell, categoryCell }: any) => {
+const GridCardViewContent = ({ 
+    row, 
+    rowIndex, 
+    state, 
+    statusCell, 
+    flexRender, 
+    parent, 
+    config, 
+    showArchiveConfirmationModal, 
+    setShowArchiveConfirmationModal, 
+    setRowToArchive, 
+    visibleCells, 
+    codecell, 
+    categoryCell, 
+    statColumn,
+    selectedDefaultCells = [] }: any) => {
   const [showMore, setShowMore] = React.useState(false)
+
+  
+
   return (
     <div
       className={cn(`flex flex-col justify-start rounded-md border border-b border-l-2 border-l-primary p-4 h-full`, `${!showMore ? 'max-h-[152px]' : ''}`)}
@@ -22,43 +41,50 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
 
         <div className='flex flex-col'>
           <div className='flex items-center gap-2'>
-            {codecell ? (
-              <div
-              className={cn(
-                'bg-primary/10 text-primary',
-                'inline-flex items-center rounded-md px-2 py-1 text-xs font-normal',
-              )}
-            >
-                {flexRender(codecell.column.columnDef.cell, {
-                    ...codecell.getContext(),
-                    view_mode: 'card',
-                  })}
+              <div className='flex items-center gap-2'>
+                {statusCell
+                  && 
+                  <StatusCell 
+                    value={statusCell.getValue() as string}
+                    renderType='rounded'
+                  />  
+                }
+                {codecell ?   (
+                  <span className='text-sm font-semibold'>
+                    {
+                      flexRender(codecell.column.columnDef.cell, {
+                        ...codecell.getContext(),
+                        view_mode: 'card',
+                      })
+                    }
+                  </span>
+                ) : null }
               </div>
-            ) : null}
-              {statusCell
-              && flexRender(statusCell.column.columnDef.cell, {
-                ...statusCell.getContext(),
-                view_mode: 'card',
-              })}
+
           </div>
-
+              
           {categoryCell ?  <div className='flex mt-2'>
-            <span className='mr-2 text-slate-500 text-xs'>Category: </span>
-            <div className='flex gap-x-1 flex-wrap'>
-            {flexRender(categoryCell.column.columnDef.cell, {
-              ...categoryCell.getContext(),
-              view_mode: 'card',
-            }) }
-            </div>
-          </div> : null}
+              <div className='flex gap-x-1 flex-wrap'>
+              {flexRender(categoryCell.column.columnDef.cell, {
+                ...categoryCell.getContext(),
+                view_mode: 'card',
+              }) }
+              </div>
+            </div> : null}
 
-          
        
+          
         </div>
+     
      
         {parent === 'grid' || parent === 'form'
           ? (
-              <div>
+              <div className='flex items-center'>
+                {statColumn ? flexRender(statColumn.column.columnDef.cell, {
+                ...statColumn.getContext(),
+                view_mode: 'card',
+              }) : null}
+                  <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild={true}>
                     <div className='flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm'>
@@ -108,12 +134,46 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+              </div>
             )
           : null}
+
+        
       </div>
 
+
+      {selectedDefaultCells?.length ? (
+              <div className='flex gap-x-1 flex-wrap flex-col'>
+              {selectedDefaultCells?.map((cell: any) => {
+                 return <div key={cell.column.id} className='flex justify-between text-sm'>
+                    <span className='mr-2 text-slate-500 text-xs'>
+                      {flexRender(
+                        cell.column.columnDef.header, cell.getContext(),
+                      )}
+                    </span>
+                   <span className='flex-1 text-right '>
+                    {
+                        flexRender(cell.column.columnDef.cell, {
+                          ...cell.getContext(),
+                          view_mode: 'card',
+                        }) 
+                      }
+                   </span>
+                 </div>
+              })}
+              </div>
+          ) : null
+          }
+      
+      {/* add dash line */}
+      {showMore ? <div 
+        className='mt-2 border-dashed border-t border-gray-200  '
+     /> : null}
+      
+
+
       {showMore ? (
-        <div className='grid grid-cols-2 gap-4 gap-y-2 text-sm mt-1'>
+        <div className='grid grid-cols-1 gap-4 gap-y-2 text-sm mt-2'>
         {visibleCells.map((cell: any, cellIndex: any) => {
           // Skip id and status as they're already shown above
           if (
@@ -124,10 +184,13 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
             || cell.column.id === 'expand'
           ) return null
 
+          //selectedDefaultCells must hidden
+          if (selectedDefaultCells?.length && selectedDefaultCells?.map((cell: any) => cell.column.id).includes(cell.column.id)) return null
+
           if (!showMore && cellIndex >= 5) return null
           return (
             <div
-              className='flex flex-row text-xs text-foreground'
+              className='flex flex-row text-xs text-foreground items-center justify-between'
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-crd-item-cell-${cell.column.id}-${cellIndex + 1}`,
               )}
@@ -154,7 +217,7 @@ const GridCardViewContent = ({ row, rowIndex, state, statusCell, flexRender, par
       ) : null}
       {visibleCells?.length > 6 && (
         <button
-            className='mt-2 text-sm text-primary'
+            className='mt-3 text-sm text-primary'
             onClick={() => {
                 setShowMore(!showMore)
             }}

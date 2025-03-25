@@ -90,6 +90,8 @@ export interface IConfigGrid {
   restoreCustomComponent?: React.FC<any>;
   archiveDialogCustomComponent?: React.FC<any>;
   defaultValues?: Record<string, any>;
+  defaultShownColumns?: string[];
+  statusColumn?: string;
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
   archiveCustomAction?: (
@@ -164,6 +166,8 @@ export interface IState {
   totalCountSelected?: number;
   archiveBulkLoading?: boolean;
   showArchiveConfirmationModal: boolean;
+  statusColumn?: string;
+  defaultShownColumns?: string[];
   rowToArchive: IRowToArchive;
   viewMode?: 'table' | 'card';
   sorting?: SortingState;

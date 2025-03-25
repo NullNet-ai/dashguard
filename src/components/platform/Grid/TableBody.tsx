@@ -12,6 +12,7 @@ import { ScrollContainerContext } from './Server/views/common/GridScrollContaine
 import { type IExpandedRow } from './types';
 import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
+import StatusCell from '~/components/ui/status-cell';
 
 type MyTableBodyProps = {
   showAction?: boolean;
@@ -140,12 +141,21 @@ export default function MyTableBody({
                         ...getCommonPinningStyles(cell.column).style,
                       }}
                     >
-                      <div className="flex flex-row flex-wrap gap-y-1">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
+                      {cell.column.id === 'status'  ? (
+                        <>
+                        {/* get the string value of the cell */}
+                        <StatusCell value={cell.getValue() as string}  renderType='value' />
+                        </>
+                      ) : (
+                        <div className="flex flex-row flex-wrap gap-y-1">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      )}
+
+                    
                       <div
                         {...{
                           className: !row.original.is_group_by

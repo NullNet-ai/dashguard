@@ -25,9 +25,10 @@ import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
 import { reorderShowActiveItem } from '~/utils/sort-tab-items';
-import { all } from 'bluebird';
+
 import MainTabitem from './MainTabItem';
 import MainDropTabItem from './MainDropTabItem';
+import { updateAllMaindata } from './Actions/actions';
 const MainTabContent = ({
   par_items = [],
   pathname,
@@ -52,6 +53,30 @@ const MainTabContent = ({
     width: `calc(100vw - ${open ? '397px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
 
+
+  const updatecachedItems =  async (items: any) => {
+     const removeHidden = items.filter((item: any) => !item.hidden);
+      const lastItem = removeHidden[removeHidden.length - 1];
+
+    const cachedData = {
+      tabs: items,
+      lastShownItem: lastItem?.name,
+      key:  'main_tab_data',
+    }
+
+    try {
+      await updateAllMaindata(items)
+    } catch (error) {
+        console.error(error)
+    }
+
+    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+
+    localStorage.setItem('cachedPortalItems', JSON.stringify({
+      ...cachedItems,
+      [`main_tab_data`]: cachedData,
+    }))
+  }
 
   const updateCache = (items?: any[]) => {
 
@@ -201,6 +226,9 @@ const MainTabContent = ({
               const newItems = [...items];
               const [removed] = newItems.splice(activeIndex, 1);
               newItems.splice(overIndex, 0, removed);
+
+              updatecachedItems(newItems)
+
               return newItems;
             });
 
