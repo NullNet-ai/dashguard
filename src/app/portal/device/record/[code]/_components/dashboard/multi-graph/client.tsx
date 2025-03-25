@@ -69,24 +69,39 @@ const InteractiveGraph = ({
       interface_names: interfaces?.map((item: any) => item?.value),
     }, { enabled: false })
 
-  useEffect(() => {
-    if (!packetsIP) return
+    useEffect(() => {
+      if (!packetsIP) return
     
-    const _data = packetsIP?.map((item) => {
-      const date = moment(item.bucket)
-      return {
-        ...item,
-        bucket: date.format('HH:mm:ss'),
-      }
-    })
-    setFilteredData(_data)
-  }, [packetsIP])
+      const _data = packetsIP.map((item) => {
+        const date = moment(item.bucket)
+        return {
+          ...item,
+          bucket: date.format('HH:mm:ss'),
+        }
+      })
+    
+      // Eviction: Keep only the last 100 records
+      setFilteredData((prev) => [..._data].slice(-100))
+    }, [packetsIP])
+    
 
-  const fetchChartData = async () => {
-    const res = await fetchBandWidth()
-    const { data } = res
-    setPacketsIP(data as any)
-  }
+    const fetchChartData = async () => {
+      const res = await fetchBandWidth()
+      const { data = [] } = res ?? {}
+    
+      setPacketsIP((prev) => {
+        const updatedData = [...prev, ...data].slice(-100) // Keep only last 100 records
+        return updatedData
+      })
+    }
+    
+    useEffect(() => {
+      return () => {
+        setPacketsIP([])
+        setFilteredData([])
+      }
+    }, [])
+    
 
   useEffect(() => {
     fetchChartData()

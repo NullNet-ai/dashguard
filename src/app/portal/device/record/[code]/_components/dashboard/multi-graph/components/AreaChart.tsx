@@ -74,9 +74,8 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
             if (value.includes(':')) {
               return value; // Display time directly if it includes ':'
             }
-            return date.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
+            return date.toLocaleTimeString('en-US', {
+              minute: '2-digit', // Display only the minutes
             })
           }}
           tickLine={false}
