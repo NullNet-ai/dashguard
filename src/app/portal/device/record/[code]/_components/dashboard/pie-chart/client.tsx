@@ -84,13 +84,15 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     return () => clearInterval(animationInterval)
   }, [trafficData.traffic])
 
-  // Calculate angles with proper constraints
-  const pieEndAngle = Math.max(0, 180 - (animatedTraffic / trafficData.maxTraffic) * 180)
+  // Ensure a minimum fill color (1% of maxTraffic)
+  const minTrafficFill = Math.max(trafficData.traffic, trafficData.maxTraffic * 0.01);
 
-  // Constrain arrow rotation between -90° and 90°
-  const arrowRotation = Math.min(90, Math.max(-90, (animatedTraffic / trafficData.maxTraffic) * 180 - 90))
+  // Adjusted pie end angle calculation
+  const pieEndAngle = Math.max(5, 180 - (minTrafficFill / trafficData.maxTraffic) * 180);
 
-  // Get the previous traffic value from the ref
+  // Adjusted arrow rotation (no more stuck needle)
+  const arrowRotation = Math.min(90, Math.max(-90, (minTrafficFill / trafficData.maxTraffic) * 180 - 90));
+
   const previousTraffic = previousTrafficRef.current
 
   return (
