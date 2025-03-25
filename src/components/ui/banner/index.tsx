@@ -62,7 +62,7 @@ export default function Banner({
       tabIndex={-1} 
       style={{ maxWidth: maxWidth }}
       className={cn(
-        "start-0 z-50 flex w-full justify-between items-center p-4 border-b border-gray-200 overflow-clip",
+        "start-0 z-50 flex w-full justify-between items-center p-2 border-b border-gray-200 overflow-clip",
 				sticky ? 'fixed' : 'rounded-[8px]',
         position === 'bottom' ? 'bottom-0' : 'top-0',
 				className
@@ -78,7 +78,7 @@ export default function Banner({
       </div>
       <button
         onClick={handleClose} 
-        className="ml-4"
+        className="px-2"
         aria-label="Close banner"
       >
         <XMarkIcon width={30} height={30} />
