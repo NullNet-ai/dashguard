@@ -9,11 +9,11 @@ const gridColumns = [
   {
     header: "State",
     accessorKey: "status",
-    data_type: "string",
-    cell: ({ row }) => {
-      const value = row?.original?.status;
-      return <StatusCell value={value} />;
-    },
+    // data_type: "string",
+    // cell: ({ row }) => {
+    //   const value = row?.original?.status;
+    //   return <StatusCell value={value}  renderType='rounded'/>;
+    // },    
   },
   {
     header: "ID",
@@ -26,8 +26,9 @@ const gridColumns = [
     data_type: "array",
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
+
       return categories?.map((category: string, index: number) => {
-        return <StatusCell key={index} value={category} />;
+        return <StatusCell key={index} value={category} renderType='value'/>;
       });
     },
     search_config: {

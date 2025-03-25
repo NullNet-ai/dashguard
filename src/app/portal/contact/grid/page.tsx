@@ -54,7 +54,7 @@ export default async function Page({
      ? filters?.groupAdvanceFilters
       : [],
   });
-
+  
   const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
   ? filters?.groupAdvanceFilters
    :  filters?.advanceFilter?.length
@@ -83,6 +83,10 @@ export default async function Page({
         defaultValues: {
           categories: ["Contact", "Employee"],
         },
+        defaultShownColumns: [
+          "raw_phone_number",
+          "email",
+        ],
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {

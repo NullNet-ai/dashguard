@@ -13,6 +13,7 @@ import BulkActionConfirmationModal from './views/common/BulkActionConfirmationMo
 import { type IExpandedRow } from './types'
 import { isEmpty } from 'lodash';
 import ExpandedDefaultRow from './common/ExpandedDefaultRow';
+import StatusCell from '~/components/ui/status-cell';
 
 type MyTableBodyProps = {
   showAction?: boolean
@@ -65,6 +66,7 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
+
                   if (cell.column.id === 'action') {
                     return (
                       <td
@@ -111,12 +113,21 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                         ...getCommonPinningStyles(cell.column).style,
                       }}
                     >
-                      <div className="flex flex-row flex-wrap gap-y-1">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
+                      {cell.column.id === 'status'  ? (
+                        <>
+                        {/* get the string value of the cell */}
+                        <StatusCell value={cell.getValue() as string}  renderType='value' />
+                        </>
+                      ) : (
+                        <div className="flex flex-row flex-wrap gap-y-1">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      )}
+
+                    
                       <div
                         {...{
                           className: `absolute  border-l border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,

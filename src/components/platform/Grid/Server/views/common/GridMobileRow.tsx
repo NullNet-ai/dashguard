@@ -22,6 +22,7 @@ export default function GridMobileRow({
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
+  const { defaultShownColumns, statusColumn  } = state?.config ?? {}
 
   const level = state?.gridLevel
 
@@ -61,6 +62,14 @@ export default function GridMobileRow({
                   .getVisibleCells()
                   .find(cell => cell.column.id === name)
                 }
+
+                const statColumn = statusColumn ? row.getVisibleCells().find(
+                  (cell) => cell.column.id === statusColumn,
+                ) : null;
+
+                const selectedDefaultCells = row.getVisibleCells().filter((cell) =>
+                  defaultShownColumns?.includes(cell.column.id),
+                );
       
 
               return (
@@ -73,6 +82,7 @@ export default function GridMobileRow({
                   codecell={getCell('code')}
                   categoryCell={getCell('categories')}
                   flexRender={flexRender}
+                    selectedDefaultCells={selectedDefaultCells}
                   parent={parent}
                   config={config}
                   showArchiveConfirmationModal={showArchiveConfirmationModal}
@@ -80,6 +90,7 @@ export default function GridMobileRow({
                   setRowToArchive={setRowToArchive}
                   visibleCells={visibleCells}
                   gridLevel={level}
+                  statColumn={statColumn}
                 />
               )
             })

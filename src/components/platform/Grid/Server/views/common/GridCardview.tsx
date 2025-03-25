@@ -3,30 +3,23 @@ import { flexRender } from '@tanstack/react-table';
 import { EllipsisVertical } from 'lucide-react';
 import React, { useContext, useMemo } from 'react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
+
 import useScreenType from '~/hooks/use-screen-type';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import {
-  ArchiveComponent,
-  DeleteComponent,
-  EditComponent,
-  RestoreComponent,
-} from '../../../DefatultRow/Actions';
+
 import { GridContext } from '../../../Provider';
 import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
 import GridCardViewContent from './GridCardViewContent';
 
 export default function GridCardView({parentType} : any) {
   const { state, actions } = useContext(GridContext);
+
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
+  const { defaultShownColumns, statusColumn  } = state?.config ?? {}
 
   const getCols = useMemo(() => {
     switch (size) {
@@ -37,8 +30,9 @@ export default function GridCardView({parentType} : any) {
       case 'lg':
         return 'grid-cols-2';
       case 'xl':
+        return 'grid-cols-3';
       case '2xl':
-        return 'grid-cols-2';
+        return 'grid-cols-4';
       default:
         return 'grid-cols-1';
     }
@@ -69,6 +63,15 @@ export default function GridCardView({parentType} : any) {
             .getVisibleCells()
             .find((cell) => cell.column.id === 'categories');
 
+            const statColumn = statusColumn ? row.getVisibleCells().find(
+              (cell) => cell.column.id === statusColumn,
+            ) : null;
+
+            const selectedDefaultCells = row.getVisibleCells().filter((cell) =>
+              defaultShownColumns?.includes(cell.column.id),
+            );
+
+
 
             return <GridCardViewContent
                 row={row}
@@ -85,6 +88,8 @@ export default function GridCardView({parentType} : any) {
                 setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
                 setRowToArchive={setRowToArchive}
                 visibleCells={visibleCells}
+                selectedDefaultCells={selectedDefaultCells}
+                statColumn={statColumn}
               />
         })
       ) : (
