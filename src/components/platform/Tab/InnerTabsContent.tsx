@@ -80,7 +80,7 @@ const InnerTabsContent = ({
     const cachedData = {
       tabs: items,
       lastShownItem: lastItem?.name,
-      key:  'inner_tab_' + entity,
+      key:  'inner_tab_data' + entity,
     }
 
     try {
@@ -93,7 +93,7 @@ const InnerTabsContent = ({
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
       ...cachedItems,
-      [`inner_tab_${entity}`]: cachedData,
+      [`inner_tab_data${entity}`]: cachedData,
     }))
   }
 
