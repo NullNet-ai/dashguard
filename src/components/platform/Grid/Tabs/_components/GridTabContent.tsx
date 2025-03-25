@@ -142,7 +142,7 @@ const GridTabContent = ({
         <div
           ref={parentRef}
           className={cn(
-            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative`, `overflow-hidden`,
+            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative max-w-[70vw]`, `overflow-hidden`,
           )}
         >
           <Sortable
@@ -220,7 +220,11 @@ const GridTabContent = ({
        
         {!!data?.length && data.some((item) => item.hidden) && isWindowLoaded && (
           <>
-          {(!!data?.length && data.some((item) => item.hidden) && isWindowLoaded ) && <CreateNewFilter />}
+          {(!!data?.length && data.some((item) => item.hidden) && isWindowLoaded ) && (
+            <div>
+              <CreateNewFilter />
+            </div>
+          )}
                <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger
                 className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
