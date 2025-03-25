@@ -31,14 +31,14 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   isHidden,
   actions,
 }, ref) => {
-  const isGrid = tab.name === 'Grid' || tab.name === 'grid';
+  const isGrid = tab.name === 'Dashboard' || tab.name === 'dashboard';
   const newPathname = usePathname()
 
   const [, , entityName, application, code] = (newPathname || '').split('/')
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
 
   const isActive = useMemo(() => {
-    if (isGrid && application === 'grid') {
+    if (isGrid && application === 'dashboard') {
       return true
     }
 
@@ -46,8 +46,8 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   }, [entityName, application])
 
   const getActiveName = () => {
-    if (isGrid && application === 'grid') {
-      return 'grid'
+    if (isGrid && application === 'dashboard') {
+      return 'dashboard'
     }
     return code
   }
@@ -107,7 +107,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pr-0' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pl-[0px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}
@@ -115,7 +115,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   
           {isActive ? <div className='absolute z-[1000] bottom-[-4px] h-1 left-0 w-full bg-white' /> : null }
 
-      {!isHidden
+      {(!isHidden && !isGrid) 
         ? (
             <MainTabMenu
               current={!!tab.href.match(pathname)}
