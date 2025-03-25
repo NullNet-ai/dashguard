@@ -107,19 +107,13 @@ const gridColumns = [
   },
   {
     header: "Created Date",
-    accessorKey: "created_date",
+    accessorKey: "created_date_time",
     data_type: "datetime",
     sortKey: ["created_date", "created_time"],
-    cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    search: {
+      field: "created_date_time",
+      operator: 'like'
+    }
   },
   {
     header: "Created By",

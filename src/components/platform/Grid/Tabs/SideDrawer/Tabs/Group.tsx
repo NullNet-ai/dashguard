@@ -22,17 +22,19 @@ interface GroupItem {
   id: string;
   field: string;
   label: string;
+  value: string;
+  desc: boolean | undefined;
 }
 
 export default function GroupContent() {
-  const { actions, state } = useManageFilter()
-  const { columns } = state ?? {}
+  const { actions, state } = useManageFilter();
+  const { columns } = state ?? {};
   const { handleUpdateFilter } = actions;
-  
+
   const form = useForm<{ groups: GroupItem[] }>({
     defaultValues: {
       groups: state?.filterDetails?.groups ?? [
-        { id: '1', field: '', label: '' },
+        { id: '1', field: '', label: '', value: '', desc: undefined },
       ],
     },
   });
@@ -41,32 +43,75 @@ export default function GroupContent() {
     control: form.control,
     name: 'groups',
   });
-  
+  console.log('🚀 ~ GroupContent ~ fields:', fields);
+
   const handleAddGroup = () => {
-    const newGroup = { id: String(fields.length + 1), field: '', label: '' };
+    const newGroup = {
+      id: String(fields.length + 1),
+      field: '',
+      label: '',
+      value: '',
+      desc: undefined,
+    };
     append(newGroup);
-    handleUpdateFilter({ 
-      groups: [...fields, newGroup].map(({ field, label }) => ({ field, label }))
+    handleUpdateFilter({
+      groups: [...fields, newGroup].map(({ field, label, value, desc }) => ({
+        field,
+        label,
+        value,
+        desc,
+      })),
     });
   };
 
-  const handleGroupChange = (
-    index: number,
-    value: string,
-    header: string
-  ) => {
+  const handleGroupChange = (index: number, value: string) => {
+    const columnConfig = columns?.find(
+      (column: any) => column?.accessorKey === value,
+    ) as any;
+    const label = (columnConfig?.header as string) ?? '';
+    const entity = columnConfig?.search_config?.entity || columnConfig.entity;
+    const field = columnConfig?.search_config?.field || value;
+    const groupItem = {
+      field: `${entity}.${field}`,
+      label,
+      value,
+    };
     update(index, {
       ...fields[index]!,
-      field: value,
-      label: header,
+      ...groupItem,
     });
-    
-    handleUpdateFilter({ 
-      groups: fields.map((item, i) => 
-        i === index 
-          ? { field: value, label: header }
-          : { field: item.field, label: item.label }
-      )
+
+    handleUpdateFilter({
+      groups: fields.map((item, i) =>
+        i === index
+          ? { ...groupItem }
+          : {
+              field: item.field,
+              label: item.label,
+              value: item.value,
+              desc: item.desc,
+            },
+      ),
+    });
+  };
+
+  const handleGroupSortChange = (index: number, value: string) => {
+    update(index, {
+      ...fields[index]!,
+      desc: value === 'desc',
+    });
+
+    handleUpdateFilter({
+      groups: fields.map((item, i) =>
+        i === index
+          ? { ...item, desc: value === 'desc' }
+          : {
+              field: item.field,
+              label: item.label,
+              value: item.value,
+              desc: item.desc,
+            },
+      ),
     });
   };
 
@@ -75,21 +120,31 @@ export default function GroupContent() {
     const updatedGroups = [...fields];
     const [movedItem] = updatedGroups.splice(activeIndex, 1);
     updatedGroups.splice(overIndex, 0, movedItem!);
-    
-    handleUpdateFilter({ 
-      groups: updatedGroups.map(({ field, label }) => ({ field, label }))
+
+    handleUpdateFilter({
+      groups: updatedGroups.map(({ field, label, value, desc }) => ({
+        field,
+        label,
+        value,
+        desc,
+      })),
     });
   };
 
   const handleGroupRemove = (index: number) => {
     const updatedGroups = fields.filter((_, i) => i !== index);
     remove(index);
-    handleUpdateFilter({ 
-      groups: updatedGroups.map(({ field, label }) => ({ field, label }))
+    handleUpdateFilter({
+      groups: updatedGroups.map(({ field, label, value, desc }) => ({
+        field,
+        label,
+        value,
+        desc,
+      })),
     });
   };
 
-  return <ComingSoon />
+  // return <ComingSoon />
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="grid gap-3">
@@ -101,7 +156,7 @@ export default function GroupContent() {
         >
           {fields.map((group, index) => (
             <SortableItem value={group.id} key={group.id} id={group.id}>
-              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+              <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2">
                 <SortableDragHandle
                   variant="ghost"
                   size="icon"
@@ -111,23 +166,36 @@ export default function GroupContent() {
                 </SortableDragHandle>
 
                 <Select
-                  value={group.field}
+                  value={group.value}
                   onValueChange={(value) => {
-                    const header = columns?.find(
-                      (col: any) => col.accessorKey === value
-                    )?.header || value;
-                    handleGroupChange(index, value, header);
+                    handleGroupChange(index, value);
                   }}
                 >
                   <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select Field" />
+                    <SelectValue placeholder="Select a Field" />
                   </SelectTrigger>
-                  <SelectContent className='z-[9999]'>
-                    {columns?.map((column : any, index : any) => (
+                  <SelectContent className="z-[9999]">
+                    {columns?.map((column: any, index: any) => (
                       <SelectItem key={index} value={column.accessorKey}>
                         {column.header}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  // if undefined it must be the placeholder
+                  value={
+                    group.desc === undefined ? '' : group.desc ? 'desc' : 'asc'
+                  }
+                  onValueChange={(value) => handleGroupSortChange(index, value)}
+                >
+                  <SelectTrigger className="border-gray-200 bg-white">
+                    <SelectValue placeholder="Select a Sort Order" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="asc">Ascending</SelectItem>
+                    <SelectItem value="desc">Descending</SelectItem>
                   </SelectContent>
                 </Select>
 

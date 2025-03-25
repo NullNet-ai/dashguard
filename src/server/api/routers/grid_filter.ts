@@ -26,6 +26,8 @@ const sortSchema = z.object({
 const groupSchema = z.object({
   field: z.string(),
   label: z.string(),
+  value: z.string(),
+  desc: z.boolean(),
 });
 
 const columnSchema = z.object({

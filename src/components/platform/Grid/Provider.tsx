@@ -1,61 +1,39 @@
 'use client';
 
-import { Button as Button2, Button as HeadlessBtn } from '@headlessui/react';
-import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import {
-  type GroupingState,
-  flexRender,
   // eslint-disable-next-line import/named
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
   type ColumnSizingState,
+  type GroupingState,
   type Row,
   type RowSelectionState,
   type SortingState,
-  type Updater,
+  type Updater
 } from '@tanstack/react-table';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  FileIcon,
-} from 'lucide-react';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
-import { Button } from '~/components/ui/button';
-import { Checkbox } from '~/components/ui/checkbox';
-import StatusCell from '~/components/ui/status-cell';
 import { useToast } from '~/context/ToastProvider';
 
-import { TooltipProvider } from '~/components/ui/tooltip';
 import { formatGroupByResult } from '~/components/platform/Grid/utils/formatGroupByResult';
 import { BulkArchive } from './Action/BulkArchive';
 import { Create } from './Action/Create';
 import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
 import { UpdateReportSorting } from './Action/UpdateReportSorting';
 import type { IGroupBy } from './Category/type';
-import {
-  ArchiveComponent,
-  DeleteComponent,
-  EditComponent,
-  RestoreComponent,
-} from './DefatultRow/Actions';
 import { type ISearchItem } from './Search/types';
+import { useActionColumns } from './hooks/actionColumns';
+import { useColumnConditions } from './hooks/useColumnConditions';
 import {
   type IAction,
   type IConfigGrid,
   type ICreateContext,
   type IPropsGrid,
-  type IState,
-  type TActionType,
+  type IState
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
-import { FetchInfiniteData } from './Action/FetchInfiniteData';
-import { isEmpty } from 'lodash';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -216,7 +194,7 @@ export default function GridProvider({
   useEffect(() => {
     if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
       setGrouping(resolvedGroupings);
-      setColumnVisibility((prev) => {
+      setColumnVisibility((prev: any) => {
         const newVisibility = { ...prev };
         resolvedGroupings?.forEach((curr) => {
           newVisibility[curr] = false;
@@ -335,7 +313,7 @@ export default function GridProvider({
         );
 
         const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-          ? sortFields.sortKey.map((sortKey) => {
+          ? sortFields?.sortKey.map((sortKey) => {
               const key = `${sort.id}_${sortKey}`;
               // If we've already processed this combination, skip it
               if (processedSortKeys.has(key)) {
@@ -421,301 +399,31 @@ export default function GridProvider({
     UpdateReportGrouping({ grouping: groupings });
   };
 
-  /** @REFS */
-  const selectTableRow = useRef<ColumnDef<any>>({
-    id: 'select',
-    size: 50,
-    enableResizing: false,
-    header: ({ table }) => (
-      <Checkbox
-        aria-label="Select all"
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        className="ml-1 border-foreground"
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        aria-label="Select row"
-        checked={row.getIsSelected()}
-        className="ml-1 border-foreground"
-        onCheckedChange={(value) => {
-          row.toggleSelected(!!value);
-        }}
-      />
-    ),
-    enableSorting: false,
-    enableHiding: true,
-  });
-
-  const expandTableRow = useRef<ColumnDef<any>>({
-    id: 'expand',
-    size: 50,
-    enableResizing: false,
-    header: '',
-    cell: ({ row }: any) => (
-      <HeadlessBtn onClick={() => row.toggleExpanded()}>
-        {row.getIsExpanded() ? (
-          <>
-            {config?.rowExpansionOptions?.icons?.expandIcon ? (
-              config?.rowExpansionOptions?.icons?.expandIcon
-            ) : (
-              <ChevronDown className="h-6 w-6 text-primary" />
-            )}
-          </>
-        ) : (
-          <>
-            {config?.rowExpansionOptions?.icons?.collapseIcon ? (
-              config?.rowExpansionOptions?.icons?.collapseIcon
-            ) : config?.rowExpansionOptions?.expandPosition === 'left' ||
-              !config?.rowExpansionOptions?.expandPosition ? (
-              <ChevronRight className="h-6 w-6 text-default/40" />
-            ) : (
-              <ChevronLeft className="h-6 w-6 text-default/40" />
-            )}
-          </>
-        )}
-      </HeadlessBtn>
-    ),
-    enableSorting: false,
-    enableHiding: true,
-  });
-
-  const actionRow = useRef<ColumnDef<any>>({
-    id: 'action',
-    size: 1,
-    enableResizing: false,
-    header: 'Actions',
-    cell: ({ row }) => {
-      // Check if the row has either 'draft' or desired accessor
-      const showActions = [
-        'draft',
-        'active',
-        'Draft',
-        'Active',
-        'Archived',
-        'archived',
-      ].includes(row.original?.status);
-
-      if (!showActions) return null;
-
-      const statusesIncluded = config?.statusesIncluded || [];
-      const selectedRecords = Object.keys(rowSelection);
-      const disableActions =
-        selectedRecords.includes(row.original.id) ||
-        !statusesIncluded?.includes(row.original?.status);
-
-      const showCustomActionOnly =
-        config?.disableDefaultAction && config?.customRowAction;
-
-      if (config?.actionType === 'single-select') {
-        return (
-          <Button2
-            className="mx-auto flex cursor-pointer"
-            disabled={disableActions}
-            type="button"
-            onClick={() => handleSingleSelect(row.original)}
-          >
-            <PlusCircleIcon
-              className={`h-5 w-5 ${disableActions ? 'text-gray-400' : 'text-primary'}`}
-            />
-          </Button2>
-        );
-      }
-
-      if (config?.actionType === 'multi-select') {
-        return (
-          <Button
-            className="mx-auto flex"
-            disabled={disableActions}
-            type="button"
-            variant="ghost"
-            onClick={() => handleSingleSelect(row.original)}
-          >
-            <FileIcon className="h-5 w-5 text-primary" />
-          </Button>
-        );
-      }
-
-      if (showCustomActionOnly) {
-        return (
-          <>
-            {config?.customRowAction &&
-              config?.customRowAction({
-                row,
-                config,
-              })}
-          </>
-        );
-      }
-
-      return (
-        <TooltipProvider>
-          <EditComponent row={row} config={config!} />
-          {!['Archived', 'Delete'].includes(row.original?.status) && (
-            <ArchiveComponent
-              config={config!}
-              open={showArchiveConfirmationModal}
-              record={row}
-              row={row}
-              setOpen={setShowArchiveConfirmationModal}
-              setRecord={setRowToArchive}
-            />
-          )}
-          {row.original?.status === 'Archived' && (
-            <>
-              <RestoreComponent config={config!} row={row} />
-              <DeleteComponent config={config!} row={row} />
-            </>
-          )}
-          {config?.customRowAction &&
-            config?.customRowAction({
-              row,
-              config,
-              viewMode,
-            })}
-        </TooltipProvider>
-      );
-    },
-    enableSorting: false,
-    enableHiding: true,
-  });
-
-  const groupByColumn = useRef<ColumnDef<any>>({
-    id: 'grouping',
-    header: 'Group By',
-    size: 200,
-    enableResizing: false,
-    accessorKey: 'value',
-  });
-
-  const actionTypeColumnCondition = (
-    viewMode: string,
-    defaultAdvanceFilter: ISearchItem[],
-    actionsType?: TActionType,
-  ) => {
-    const isDefaultFilterArchived = defaultAdvanceFilter?.find(
-      (filter) =>
-        filter?.field === 'status' && filter?.values?.[0] === 'Archived',
-    );
-    const stateIndex = config?.columns?.findIndex(
-      (column) => column.header === 'State',
-    );
-    let columns = config?.columns || [];
-
-    if (isDefaultFilterArchived) {
-      const newColumn = {
-        header: 'Previous State',
-        accessorKey: 'previous_status',
-        cell: ({ row }) => {
-          const value = row?.original?.previous_status;
-          return <StatusCell value={value} />;
-        },
-      } as ColumnDef<any>;
-
-      if (stateIndex !== -1) {
-        columns = [
-          ...columns.slice(0, stateIndex + 1),
-          newColumn,
-          ...columns.slice(stateIndex + 1),
-        ];
-      } else {
-        columns = [...columns, newColumn];
-      }
-    }
-
-    // Exclude selectTableRow and actionRow if view mode is 'card'
-    if (viewMode === 'card') {
-      return [...columns];
-    }
-
-    switch (actionsType) {
-      case 'single-select':
-        if (config?.disableDefaultAction) {
-          return [...columns];
-        }
-
-        return [...columns, actionRow?.current];
-      default:
-        if (config?.enableGridGrouping && grouping.length && newData.length) {
-          const groupColumn = grouping[0] as string;
-          const configColumns =
-            config?.group_by_initial_columns || config?.columns;
-          const columnConfig = configColumns?.find(
-            (col: any) => col.accessorKey === groupColumn,
-          );
-          const column = {
-            ...groupByColumn.current,
-            cell: ({ row }) => {
-              const value = row?.original?.formatted_value;
-              if (!value) {
-                return null;
-              }
-
-              if (columnConfig?.cell) {
-                return (
-                  <>
-                    {columnConfig.cell({
-                      row: { original: { [groupColumn]: value } },
-                    })}
-                    <div className="ml-1 flex items-center">
-                      <span className="text-sm font-semibold">{`(${row?.original.count})`}</span>
-                    </div>
-                  </>
-                );
-              }
-
-              return (
-                <>
-                  {flexRender(
-                    columnConfig?.cell ??
-                      ((props) => <div>{String(props.getValue())}</div>),
-                    {
-                      row: { original: { [groupColumn]: value } },
-                      getValue: () => value,
-                    },
-                  )}
-                  <div className="ml-1 flex items-center">
-                    <span className="text-sm font-semibold">{`(${row?.original.count})`}</span>
-                  </div>
-                </>
-              );
-            },
-          };
-          columns = [column, ...columns];
-        }
-        if (
-          (config?.enableGridGrouping && grouping.length) ||
-          config?.enableRowExpansion ||
-          grouping.length
-        ) {
-          if (
-            isEmpty(config?.rowExpansionOptions) ||
-            config?.rowExpansionOptions?.expandPosition === 'left'
-          ) {
-            columns = [expandTableRow?.current, ...columns];
-          } else {
-            columns = [...columns, expandTableRow?.current];
-          }
-        }
-        if (config?.enableRowSelection) {
-          columns = [selectTableRow?.current, ...columns];
-        }
-        if (!config?.disableDefaultAction) {
-          columns = [...columns, actionRow?.current];
-        }
-
-        return columns;
-    }
-  };
-
   /** @HOOKS */
+  const { selectTableRow, expandTableRow, actionRow, groupByColumn } =
+    useActionColumns(
+      config,
+      rowSelection,
+      showArchiveConfirmationModal,
+      setShowArchiveConfirmationModal,
+      setRowToArchive,
+      handleSingleSelect,
+      viewMode,
+    );
+
+  const { actionTypeColumnCondition } = useColumnConditions(
+    config,
+    grouping,
+    newData,
+    selectTableRow,
+    expandTableRow,
+    actionRow,
+    groupByColumn,
+  );
+ 
   const table = useReactTable({
     data: newData,
-    getRowId: (row) => row.id,
+    getRowId: (row: any) => row.id,
     columns: actionTypeColumnCondition(
       viewMode,
       defaultAdvanceFilter,
@@ -724,7 +432,6 @@ export default function GridProvider({
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
     getCoreRowModel: getCoreRowModel(),
-    // getSortedRowModel: getSortedRowModel(),
     onColumnSizingChange: setColSizing,
     onRowSelectionChange: setRowSelection,
     enableMultiRowSelection: config?.enableMultiRowSelection,
@@ -746,9 +453,6 @@ export default function GridProvider({
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
     onGroupingChange: handleUpdateGrouping,
-    // getGroupedRowModel: getGroupedRowModel(),
-    // getExpandedRowModel: getExpandedRowModel(),
-    // enableGrouping: true,
   });
   /** @ACTIONS */
 
