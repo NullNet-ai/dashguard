@@ -30,7 +30,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [searchBy, setSearchBy] = useState()
   const [bandwidth, setBandwidth] = useState<any>(null)
   console.log('%c Line:32 🍞 bandwidth', 'color:#4fff4B', bandwidth);
-  const [flowData, setFlowData] = useState<{ nodes: Element[]; edges: Edge[] }>({ nodes: [], edges: [] })
+  const [flowData, setFlowData] = useState<any>([])
     const [_refetch, setRefetch] = React.useState(Math.random())
   const [loading, setLoading] = useState<boolean>(false)
   const [ time , setTime] = useState<Record<string,any> | null>(null)
@@ -223,8 +223,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!bandwidth || bandwidth.length === 0) return
 
     // Generate flow data whenever bandwidth is updated
-    const updatedFlowData = generateFlowData(bandwidth)
-    setFlowData(updatedFlowData as any)
+    // const updatedFlowData = generateFlowData(bandwidth)
+    setFlowData(bandwidth as any)
   }, [bandwidth]) // Dependency array ensures this runs when bandwidth changes
 
   const state = {
