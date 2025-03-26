@@ -83,7 +83,8 @@ export default function NetworkFlowView() {
                         <span className='font-bold text-justify'>Country: </span> {" Philippines"}
                       </div>
                       <div className="text-lg">
-                      <span className='font-bold text-justify'>Source IP: </span> { el?.source_ip}
+                        <span className='font-bold text-justify'>Source IP: </span> 
+                        { el?.source_ip}
                       </div>
                     </TooltipContent>
                   </div>
@@ -102,7 +103,7 @@ export default function NetworkFlowView() {
                           style={{
                             width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
                             maxWidth: `${maxWidth}px`,
-                            backgroundColor: getColorForValue(Number(res.bandwidth),  Number(maxdata))
+                            backgroundColor: getColorForValue(Number(res.bandwidth))
                           }}
                         />
                         <TooltipContent side="top">
