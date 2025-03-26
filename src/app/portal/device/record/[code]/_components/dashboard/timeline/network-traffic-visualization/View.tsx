@@ -79,10 +79,10 @@ export default function NetworkFlowView() {
                     </div>
                     <TooltipContent side="top">
                       <div className="text-lg">
-                        Country: {"Philippines"}
+                        <span className='font-bold text-justify'>Country: </span> {" Philippines"}
                       </div>
                       <div className="text-lg">
-                        Source IP: {el?.source_ip}
+                      <span className='font-bold text-justify'>Source IP: </span> { el?.source_ip}
                       </div>
                     </TooltipContent>
                   </div>
@@ -106,10 +106,10 @@ export default function NetworkFlowView() {
                         />
                         <TooltipContent side="top">
                           <div className="text-lg">
-                            Time: {formattedTime}
+                          <span className='font-bold text-justify'>Time: </span> {formattedTime}
                           </div>
                           <div className="text-lg">
-                            Total Bandwidth: {res.bandwidth}
+                          <span className='font-bold text-justify'>Total Bandwidth: </span>  {res.bandwidth}
                           </div>
                         </TooltipContent> 
                         </TooltipTrigger>
