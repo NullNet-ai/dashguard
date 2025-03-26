@@ -28,7 +28,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [bandwidth, setBandwidth] = useState<any>(null)
+  const [bandwidth, setBandwidth] = useState<any>([])
   console.log('%c Line:32 🍞 bandwidth', 'color:#4fff4B', bandwidth);
   const [flowData, setFlowData] = useState<any>([])
     const [_refetch, setRefetch] = React.useState(Math.random())
@@ -74,31 +74,31 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
 
   const { refetch: refetchBandwidth } = api.packet.getBandwidthOfSourceIP.useQuery(
-    // {
-    //   device_id: params?.id || '',
-    //   // time_range: getLastTimeStamp(20, 'second' ) as any,
-    //   time_range: getLastTimeStamp({count: time_count, unit: time_unit,add_remaining_time: true } ) as any,
-    //   bucket_size: resolution,
-    //   source_ips: unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []
-    // },
     {
-      device_id: '8f77d088-e9a7-41be-9072-154d9a6cd541',
-      time_range: [ '2025-03-24 16:00:00+00', '2025-03-26 05:15:32+00' ],
-      bucket_size: '12h',
-      source_ips: [
-        '10.100.0.77',
-        '10.100.0.78',
-        '10.100.0.79',
-        '10.100.0.80',
-        '10.100.0.81',
-        '10.100.0.83',
-        '10.100.0.86',
-        '10.100.0.90',
-        '10.100.0.91',
-        '10.100.0.92'
-      ]
-    }
-,    
+      device_id: params?.id || '',
+      // time_range: getLastTimeStamp(20, 'second' ) as any,
+      time_range: getLastTimeStamp({count: time_count, unit: time_unit,add_remaining_time: true } ) as any,
+      bucket_size: resolution,
+      source_ips: unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []
+    },
+    // {
+    //   device_id: '8f77d088-e9a7-41be-9072-154d9a6cd541',
+    //   time_range: [ '2025-03-24 16:00:00+00', '2025-03-26 05:15:32+00' ],
+    //   bucket_size: '12h',
+    //   source_ips: [
+    //     '10.100.0.77',
+    //     '10.100.0.78',
+    //     '10.100.0.79',
+    //     '10.100.0.80',
+    //     '10.100.0.81',
+    //     '10.100.0.83',
+    //     '10.100.0.86',
+    //     '10.100.0.90',
+    //     '10.100.0.91',
+    //     '10.100.0.92'
+    //   ]
+    // }
+  
     {
       enabled: false, // Disable automatic query execution
     }
@@ -197,7 +197,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     useEffect(() => {
 
-      console.log('%c Line:185 🍋', 'color:#6ec1c2', current_index + 10);
+      console.log('%c Line:185 🍋', 'color:#6ec1c2', current_index + 10, unique_source_ips);
       if (current_index + 10 == unique_source_ips.length) return
       setCurrentIndex(current_index + 10)
      
@@ -213,11 +213,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       });
      setBandwidth((prev: any) => ([
       ...(prev || []),
-      ...bandwidth || []
+      ...(bandwidth?.data || [])
      ]) );
     };
       fetchBandwidth()
-    }, [_refetch])
+    }, [_refetch, unique_source_ips, refetchBandwidth, time_count, time_unit, resolution])
 
   useEffect(() => {
     if (!bandwidth || bandwidth.length === 0) return

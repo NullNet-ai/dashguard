@@ -702,7 +702,7 @@ export const packetRouter = createTRPCRouter({
     
     
     console.log('%c Line:836 🥔 ab', 'color:#93c0a4', ab);
-    return ab
+    return{data: ab}
   }),
 
   getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
