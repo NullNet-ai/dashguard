@@ -108,7 +108,7 @@ const TableCell = React.forwardRef<
     onClick={() => {
       if (
         !['select', 'action', 'expand'].includes(column_id) &&
-        config?.enableRowClick
+        config?.enableRowClick && !row.original.is_group_by
       ) {
         if (config?.rowClickCustomAction) {
           config.rowClickCustomAction({ row, config });
@@ -119,7 +119,7 @@ const TableCell = React.forwardRef<
     }}
     className={cn(
       'whitespace-nowrap px-2 py-1 text-sm text-gray-500' +
-        (config?.enableRowClick ? ' cursor-pointer' : ''),
+        (config?.enableRowClick && !row.original.is_group_by ? ' cursor-pointer' : ''),
       className,
     )}
     {...props}

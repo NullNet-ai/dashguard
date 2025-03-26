@@ -1,32 +1,29 @@
-import Grid from '~/components/platform/Grid/Server'
-import { getGridCacheData } from '~/lib/grid-get-cache-data'
-import { api } from '~/trpc/server'
-
-/**
- *
- * @Default Grid Features
- *
- */
-import defaultAdvanceFilter from './_config/advanceFilter'
-import gridColumns from './_config/columns'
-import defaultSorting from './_config/sorting'
-import { AccountCustomRowAction } from './_components/AccountCustomRowAction'
-import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow'
-import { ArrowBigDown, ArrowBigDownDash } from 'lucide-react'
+import Grid from '~/components/platform/Grid/Server';
+import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import { api } from '~/trpc/server';
+import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow';
+import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
+import gridColumns from './_config/columns';
+import defaultSorting from './_config/sorting';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function Page() {
-  const { sorts, filters, pagination, columns : columnOrder } = (await getGridCacheData()) ?? {}
-  
-
-  const { items = [], totalCount, accountEmail } = await api.account.fetchGridData({
+  const { sorts, filters, pagination, columns : columnOrder,   groups } = (await getGridCacheData()) ?? {}
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+  resolveGridParams({
+    sorts,
+    filters,
+    groups,
+    pagination,
     entity: 'organization_account',
-    current: +(pagination?.current_page ?? '0'),
-    limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
-  })
+  });
+  const {
+    items = [],
+    totalCount,
+    accountEmail,
+  } = await api.account.fetchGridData({
+    ...gridParams,
+  });
   return (
     <Grid
       advanceFilter={filters?.advanceFilter || []}
@@ -53,6 +50,10 @@ export default async function Page() {
         searchConfig: {
           router: 'account',
           resolver: 'fetchGridData',
+          query_params: {
+            entity: 'organization_account',
+            group_advance_filters: filters?.groupAdvanceFilters,
+          },
         },
         additionalData: {
           accountEmail,
@@ -72,15 +73,17 @@ export default async function Page() {
             },
           },
         },
-        customRowAction: AccountCustomRowAction
+        customRowAction: AccountCustomRowAction,
       }}
       data={items}
       defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
+      defaultSorting={
+        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
+      }
       pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
-      
+      grouping={groups || []}
     />
-  )
+  );
 }

@@ -44,10 +44,14 @@ export default function FormSelect({
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<ComboSelectOption[]>(
+  // Initialize options with useMemo to avoid unnecessary re-renders
+  const initialOptions = useMemo(() =>
     selectOptions?.[fieldConfig?.name] ?? [],
-  );
+    [selectOptions, fieldConfig?.name]);
+
+  const [options, setOptions] = useState<ComboSelectOption[]>(initialOptions);
   const [isCreateLoading, setIsCreateLoading] = useState(false);
+  const [, setUpdateCounter] = useState(0); // Counter to force re-render
 
   const isDisabled = fieldConfig.disabled ?? false;
   const isReadOnly = fieldConfig.isCustomFormField
@@ -74,8 +78,8 @@ export default function FormSelect({
   }, []);
 
   useEffect(() => {
-    setOptions(selectOptions?.[fieldConfig?.name] ?? []);
-  }, [selectOptions, fieldConfig?.name]);
+    setOptions(initialOptions);
+  }, [initialOptions]);
 
   // Convert ISelectOptions to ComboSelectOption
   const comboOptions: ComboSelectOption[] = useMemo(() => {
@@ -109,6 +113,12 @@ export default function FormSelect({
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
       return;
     }
+
+    // Check if already creating to prevent multiple calls
+    if (isCreateLoading) {
+      return;
+    }
+
     if (fieldConfig?.selectOnCreateValidate) {
       const validation = await fieldConfig?.selectOnCreateValidate(query);
       if (!validation?.valid) {
@@ -116,25 +126,40 @@ export default function FormSelect({
         return;
       }
     }
+
     setIsCreateLoading(true);
-    let createdData = null;
-    if (typeof fieldConfig?.selectOnCreateRecord === "function") {
-      createdData = await fieldConfig?.selectOnCreateRecord(query);
-    } else {
-      const { entity, fieldIdentifier, customParams } =
-        fieldConfig?.selectOnCreateRecord ?? {};
-      createdData = (await createRecord({
-        entity,
-        fieldIdentifier,
-        data: {
-          ...(customParams ?? {}),
-          [fieldIdentifier]: query,
-        },
-      })) as ISelectOptions;
+    try {
+      let createdData = null;
+      if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+        createdData = await fieldConfig?.selectOnCreateRecord(query);
+      } else {
+        const { entity, fieldIdentifier, customParams } =
+          fieldConfig?.selectOnCreateRecord ?? {};
+        createdData = (await createRecord({
+          entity,
+          fieldIdentifier,
+          data: {
+            ...(customParams ?? {}),
+            [fieldIdentifier]: query,
+          },
+        })) as ISelectOptions;
+      }
+
+      // Check if the option already exists in the options array to prevent duplicates
+      const alreadyExists = options.some(opt => opt.value === createdData?.value);
+      if (!alreadyExists && createdData) {
+        const newOptions = sortOptions([...options, createdData]);
+        setOptions(newOptions);
+        formRenderProps?.field.onChange(createdData?.value || "");
+        setQuery(""); // Clear the query
+        setUpdateCounter(prev => prev + 1); // Force re-render of ComboSelect
+      }
+    } catch (error) {
+      toast.error("Failed to create new record");
+      console.error("Error creating record:", error);
+    } finally {
+      setIsCreateLoading(false);
     }
-    setOptions(sortOptions([...(options ?? []), createdData]));
-    formRenderProps?.field.onChange(createdData?.value || "");
-    setIsCreateLoading(false);
   };
 
   const isOptionsExist = options?.find(p => p.label?.toLowerCase() === query?.trim().toLowerCase());
@@ -142,13 +167,17 @@ export default function FormSelect({
   // Create custom render functions for ComboSelect
   const renderCreateOption = fieldConfig?.selectEnableCreate && query && !isOptionsExist ? (
     <button
+      value={query}
       className="block text-md w-full cursor-pointer truncate bg-primary text-white px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground text-start"
       data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
-      onClick={createNewRecord}
+      onClick={() => {
+        createNewRecord();
+      }}
     >
       {isCreateLoading ? "Creating..." : `Create "${query}"`}
     </button>
   ) : null;
+
 
   // Only show empty state when not creatable or when there's no query
   const renderEmptyState = !fieldConfig?.selectEnableCreate || (fieldConfig?.selectEnableCreate && !query) ? (
@@ -157,7 +186,7 @@ export default function FormSelect({
       data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
     >
       {fieldConfig?.label ? `No ${fieldConfig?.label} found.`
-: "No more options."}
+        : "No more options."}
     </span>
   ) : null;
 
@@ -218,6 +247,7 @@ export default function FormSelect({
             </div>
           )
         } : undefined}
+        onCreateRecord={fieldConfig?.selectEnableCreate ? createNewRecord : undefined}
       />
 
       <FormMessage className='text-md' data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />

@@ -1,11 +1,11 @@
-import { CardContent } from "~/components/ui/card"
-import SelectedView from "../../../custom/FormFilter/SelectedView"
+import { CardContent } from '~/components/ui/card';
+import SelectedView from '../../../custom/FormFilter/SelectedView';
 
 interface ISelectedViewLayoutProps {
-  filterGridConfig: any
-  formGridSelected: any[]
-  handleRemovedSelectedRecords: (records: any[]) => void
-  handleUpdateDisplayType: (type: any) => void
+  filterGridConfig: any;
+  formGridSelected: any[];
+  handleRemovedSelectedRecords: (records: any[]) => void;
+  handleUpdateDisplayType: (type: any) => void;
 }
 
 const SelectedViewLayout = (props: ISelectedViewLayoutProps) => {
@@ -13,26 +13,24 @@ const SelectedViewLayout = (props: ISelectedViewLayoutProps) => {
     filterGridConfig,
     formGridSelected,
     handleRemovedSelectedRecords,
-    handleUpdateDisplayType
+    handleUpdateDisplayType,
   } = props;
 
-  const entity = filterGridConfig?.filter_entity
+  const entity = filterGridConfig?.label
+    ? filterGridConfig?.label
+    : filterGridConfig?.filter_entity;
 
   return (
     <CardContent className="w-full">
-        <SelectedView
-          renderComponentSelected={
-            filterGridConfig?.renderComponentSelected
-          }
-          handleRemovedSelectedRecords={
-            handleRemovedSelectedRecords
-          }
-          handleUpdateDisplayType={handleUpdateDisplayType}
-          records={formGridSelected}
-          entity={entity}
-        />
+      <SelectedView
+        renderComponentSelected={filterGridConfig?.renderComponentSelected}
+        handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+        handleUpdateDisplayType={handleUpdateDisplayType}
+        records={formGridSelected}
+        entity={entity}
+      />
     </CardContent>
-  )
-}
+  );
+};
 
 export default SelectedViewLayout;

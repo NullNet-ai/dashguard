@@ -34,7 +34,7 @@ export default function FormLabel({ params, defaultValues }: IFormProps) {
       customDesign={{
         formClassName: 'grid !grid-cols-2 gap-4',
       }}
-      enableFormRegisterToParent
+      enableFormRegisterToParent={true}
       myParent={params.shell_type}
       formProps={params}
       formLabel="Basic Details"

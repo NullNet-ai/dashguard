@@ -82,6 +82,7 @@ const OrganizationGridExpansion = (props: IExpansionComponentProps) => {
         enableAutoCreate: false,
         enableRowSelection: false,
         enableRowExpansion: false,
+        enableGridGrouping: false,
         onFetchRecords: fetchData,
         searchConfig: {
           router: 'grid',

@@ -28,7 +28,7 @@ export const HorizontalPanelStep = ({
 
   return (
     <div className={cn(
-      "flex items-start w-full pt-2", // Changed from items-center to items-start and added padding top
+      "flex items-start w-full pt-2",
       "h-full",
       variant === "panelsBordered" && "border border-gray-200 p-2 px-4",
       variant === "panelsBordered" && !isLastStep && "border-r-0",
@@ -74,15 +74,12 @@ export const HorizontalPanelStep = ({
         )}
       </div>
 
-      {/* For panels variant, keep the existing rotated box */}
+      {/* For panels variant, keep the rotated box with consistent color */}
       {variant === "panels" && !isLastStep && (
         <div className="h-full flex items-center mx-2 flex-1 justify-end ms-auto me-6">
           <div className="h-full w-8 relative">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={cn(
-                "h-8 w-8 rotate-45 transform border-t border-r",
-                status === "complete" ? "border-primary" : "border-gray-300"
-              )}></div>
+              <div className="h-8 w-8 rotate-45 transform border-t border-r border-gray-300"></div>
             </div>
           </div>
         </div>

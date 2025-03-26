@@ -8,12 +8,14 @@ import {
   type ColumnDef,
   type Row,
   type Table,
+  GroupingState,
 } from '@tanstack/react-table';
 import { type ReactElement } from 'react';
 
 import { type appRouter } from '../../../server/api/root';
 
 import { type ISearchItem, type ISearchParams } from './Search/types';
+import { IGroupBy } from './Category/type';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -143,6 +145,12 @@ export interface IConfigGrid {
   isInfinite?: boolean
   additionalData?: Record<string, any>;
   gridColumns? : Record<string,any>[];
+  group_by_initial_columns?: CustomColumnDef<any>[];
+  parentGroupData?: Record<string, any>[];
+  new_button_action?: () => void;
+  new_button_title?: string;
+  enableGridGrouping?: boolean;
+  parentGroupFields?: IGroupBy[];
 }
 
 interface IRowToArchive extends Row<any> {
@@ -181,7 +189,10 @@ export interface IState {
     infiniteData ?: any[];
     infiniteCount?: number;
     bufferData?: any[];
-  }
+  },
+  initial_columns: CustomColumnDef<any>[];
+  grouping?: GroupingState;
+  groupConfigs?: IGroupBy[];
 }
 
 export interface IAction {
@@ -232,6 +243,7 @@ export interface IPropsGrid {
   advanceFilter?: ISearchItem[];
   parentExpanded?: IExpandedRow[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
+  grouping?: IGroupBy[] | GroupingState;
 }
 
 export interface IExpandedRow {
@@ -242,4 +254,16 @@ export interface IExpandedRow {
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
   parentExpanded?: IExpandedRow[];
+  grouping?: GroupingState;
+}
+
+export interface IGridGroupingExpansionProps {
+  config: IConfigGrid;
+  rowData: Record<string, any>;
+  initialColumns: CustomColumnDef<any>[];
+  grouping?: GroupingState;
+  visibleColumns: CustomColumnDef<any>[];
+  parentGroupData?: Record<string, any>[];
+  gridState?: IState;
+  parentGroupFields?: IGroupBy[];
 }

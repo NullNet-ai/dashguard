@@ -84,6 +84,6 @@ export interface IAdvanceFilter {
   operator: string
   field?: string
   entity?: string
-  values?: string[]
+  values?: any[]
   default?: boolean
 }

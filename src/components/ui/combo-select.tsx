@@ -1,7 +1,4 @@
 "use client"
-
-
-
 import {
     Combobox,
     ComboboxButton,
@@ -66,6 +63,8 @@ export interface ComboSelectProps {
         scrollThreshold?: number;
         endMessage?: React.ReactNode;
     };
+        // New prop to directly call the create record function
+        onCreateRecord?: (query?: string) => Promise<void>;
 }
 
 export function ComboSelect({
@@ -89,6 +88,7 @@ export function ComboSelect({
     onQueryChange,
     testId,
     infiniteScroll,
+    onCreateRecord,
 }: ComboSelectProps) {
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
@@ -159,12 +159,44 @@ export function ComboSelect({
 
     const inputReadOnly = !searchable || readOnly || disabled;
 
+          // Handle key down events in the input
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            if (!open) return !open;
+            
+            // If there are filtered options, select the first one
+            if (filteredOptions.length > 0) {
+                const firstOption = filteredOptions[0];
+                onChange(firstOption ?? null);
+                setQuery("");
+                return;
+            }
+            
+            // If no options match but we have a query and create is enabled
+            if (query && !filteredOptions.length) {
+                // If we have a direct create function, use it
+                if (onCreateRecord) {
+                    onCreateRecord(query).catch(err => {
+                        console.error("Error creating record:", err);
+                    });
+                    return;
+                }
+                
+                // Fallback to clicking the create button if it exists
+                if (renderCreateOption) {
+                    const createButton = document.querySelector('[data-test-id$="-opt-create-new-"]') as HTMLButtonElement;
+                    if (createButton) {
+                        createButton.click();
+                    }
+                }
+            }
+        }
+    };
     return (
         <Combobox
             as="div"
             value={value}
             onChange={(newValue) => {
-                setTimeout(() => setOpen(false), 100);
                 setQuery("");
                 onChange(newValue);
             }}
@@ -218,6 +250,7 @@ export function ComboSelect({
                     placeholder={placeholder}
                     readOnly={inputReadOnly}
                     disabled={disabled}
+                    autoComplete='off'
                     ref={setReferenceElement}
                     className={cn(
                         "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
@@ -246,6 +279,7 @@ export function ComboSelect({
                     onChange={(event) => {
                         setQuery(event.target.value);
                     }}
+                    onKeyDown={handleKeyDown}
                     onBlur={() => {
                         setTimeout(() => setOpen(false), 100);
                     }}
@@ -299,7 +333,7 @@ export function ComboSelect({
                     />
                 </ComboboxButton>
                 {!(disabled || readOnly) && (
-                    <ComboboxOptions
+                    <ComboboxOptions                    
                         static={open}
                         ref={setPopperElement}
                         style={{
