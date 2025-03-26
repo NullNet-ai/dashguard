@@ -7,7 +7,7 @@ import OrganizationGridExpansion from './OrganizationGridExpansion';
 import useFetchGridData from '~/hooks/useFetchGridData';
 
 const AccountGridExpansion = (props: IExpansionComponentProps ) => {
-  const { rowData } = props ?? {};
+  const { rowData, grouping } = props ?? {};
   const _pluck = [
     'id',
     'code',
@@ -70,6 +70,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
     pluck: _pluck,
     sorting: defaultSorting,
     advance_filters: defaultFilter,
+    grouping: grouping?.[0] ? [grouping?.[0]] : [],
   });
 
   const { items = [], totalCount = 0 } = data ?? {};
@@ -109,6 +110,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
       totalCount={totalCount || 0}
       hideSearch={false}
       showPagination={true}
+      grouping={grouping || []}
     />
   );
 };

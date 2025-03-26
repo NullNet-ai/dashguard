@@ -82,7 +82,7 @@ export function ManageFilterProvider({
         ];
 
     const rawFilterGroup = JSON.parse(
-      JSON.stringify(filterDetails?.filter_groups),
+      JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
     const modifyFilterDetails = {
@@ -117,7 +117,7 @@ export function ManageFilterProvider({
         ];
 
     const rawFilterGroup = JSON.parse(
-      JSON.stringify(filterDetails?.filter_groups),
+      JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
 
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);

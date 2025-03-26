@@ -57,16 +57,6 @@ const Step = ({
   showLabels?: boolean;
   showDescription?: boolean;
 }) => {
-  const isComplete = status === "complete";
-  const isCurrent = status === "current";
-
-  // Common status-based styling
-  const getStatusClasses = () => {
-    if (isComplete) return "bg-primary text-primary-foreground";
-    if (isCurrent) return "bg-primary text-primary-foreground";
-    return "bg-muted text-muted-foreground";
-  };
-
   // Format step label
   const getStepLabel = () => {
     if (stepLabel) return stepLabel;
@@ -305,7 +295,8 @@ export function Stepper({
                   ) : step.status === "current" ? (
                     <div className="h-2 w-2 rounded-full bg-primary"></div>
                   ) : (
-                    <div className="h-2 w-2 rounded-full bg-gray-300"></div>
+                    // Change from gray to transparent for inactive steps
+                    <div className="h-2 w-2 rounded-full bg-transparent"></div>
                   )}
                 </div>
 
@@ -392,7 +383,8 @@ export function Stepper({
                         ) : step.status === "current" ? (
                           <div className="h-2 w-2 rounded-full bg-primary"></div>
                         ) : (
-                          <div className="h-2 w-2 rounded-full bg-gray-300"></div>
+                          // Change from gray to transparent for inactive steps
+                          <div className="h-2 w-2 rounded-full bg-transparent"></div>
                         )}
                       </div>
                       <AccordionTrigger
@@ -507,10 +499,10 @@ export function Stepper({
                 {/* Add connecting line between steps that connects with the bullet points */}
                 {index < stepsWithStatus.length - 1 && (
                   <div
-                    className="absolute border-l-2 border-gray-200 left-2 -translate-x-1/2 z-0"
+                    className="absolute border-l-2 border-gray-200 left-[5.2px] z-0"
                     style={{
-                      top: "1rem", /* Position at the center of the bullet */
-                      bottom: "-1rem", /* Extend down to connect with the next bullet */
+                      top: "0.85rem", /* Position at the center of the bullet */
+                      bottom: "-1.2rem", /* Extend down to connect with the next bullet */
                       height: "auto" /* Let the height be determined by top and bottom */
                     }}
                   />
@@ -519,12 +511,12 @@ export function Stepper({
                 <div className="flex items-center mb-1">
                   <div
                     className={cn(
-                      "flex h-4 w-4 items-center justify-center rounded-full mr-3 flex-shrink-0 z-10 relative transition-all",
-                      step.status === "complete"
-                        ? "bg-primary hover:bg-primary/80"  // Enhanced hover
-                        : step.status === "current"
-                          ? "bg-primary hover:bg-primary/80"  // Enhanced hover
-                          : "bg-gray-200 hover:bg-gray-400",  // Enhanced hover
+                      "flex h-3 w-3 items-center justify-center rounded-full mr-3 flex-shrink-0 z-10 relative transition-all",
+                      step.status === "current"
+                        ? "border-[3px] border-primary bg-transparent hover:bg-primary/10"
+                        : step.status === "complete"
+                          ? "bg-indigo-100 hover:bg-indigo-300"
+                          : "bg-transparent border border-gray-300 hover:bg-muted/70",
                       step.disabled && "opacity-50",
                       !step.disabled && "cursor-pointer"
                     )}
@@ -535,10 +527,12 @@ export function Stepper({
                       }
                     }}
                   >
-                    {step.status === "complete" ? (
-                      <CheckIcon className="h-3 w-3 text-white" />
-                    ) : (
+                    {step.status === "current" ? (
                       <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+                    ) : (
+                      <div className={cn("h-1.5 w-1.5 rounded-full",
+                        step.status === "complete" ? "bg-primary" : "bg-transparent"
+                      )}></div>
                     )}
                   </div>
                   <div className="text-sm font-medium">Step {index + 1}</div>
@@ -546,6 +540,7 @@ export function Stepper({
 
                 <div className="pl-7">
                   <Accordion type="multiple" className="w-full">
+                    {/* Rest of the accordion content remains the same */}
                     <AccordionItem value={`item-${index}`} className="border-0">
                       <AccordionTrigger
                         className={cn(
@@ -563,8 +558,8 @@ export function Stepper({
                         {showLabels && (
                           <div className={cn(
                             "text-sm font-medium",
-                            step.status === "current" ? "text-primary" :
-                              step.status === "complete" ? "text-foreground" : "text-muted-foreground",
+                            step.status === "complete" ? "text-primary" :
+                              step.status === "current" ? "text-foreground" : "text-muted-foreground",
                             step.disabled && "opacity-50"
                           )}>
                             {step.label}

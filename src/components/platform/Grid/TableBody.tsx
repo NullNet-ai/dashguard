@@ -1,37 +1,47 @@
-import { flexRender, Row } from '@tanstack/react-table'
-import React, { useContext } from 'react'
+import { flexRender, Row } from '@tanstack/react-table';
+import React, { useContext } from 'react';
 
 import { TableBody, TableCell, TableRow } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import { getCommonPinningStyles } from './ColumnPining'
-import { GridContext } from './Provider'
-import { ScrollContainerContext } from './Server/views/common/GridScrollContainer'
-import ArchiveConfirmationModal from './views/ArchiveConfirmationModal'
-import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal'
-import { type IExpandedRow } from './types'
-import { isEmpty } from 'lodash';
-import ExpandedDefaultRow from './common/ExpandedDefaultRow';
+import GridGroupingExpansion from './Client/views/GridGroupingExpansion';
+import { getCommonPinningStyles } from './ColumnPining';
+import { GridContext } from './Provider';
+import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
+import { type IExpandedRow } from './types';
+import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
+import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
 import StatusCell from '~/components/ui/status-cell';
 
 type MyTableBodyProps = {
-  showAction?: boolean
-  gridLevel?: number
-  isLoading?: boolean
-  showPagination?: boolean
-  parentExpanded?: IExpandedRow[]
-  reachEnd?: boolean
-}
+  showAction?: boolean;
+  gridLevel?: number;
+  isLoading?: boolean;
+  showPagination?: boolean;
+  parentExpanded?: IExpandedRow[];
+  reachEnd?: boolean;
+};
 
-export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded, reachEnd }: MyTableBodyProps) {
-  const { state, actions } = useContext(GridContext)
+export default function MyTableBody({
+  showAction,
+  gridLevel = 1,
+  parentExpanded,
+  reachEnd,
+}: MyTableBodyProps) {
+  const { state, actions } = useContext(GridContext);
 
-  const context = useContext(ScrollContainerContext)
-  const { isEndReached = false } = context ?? {}
-  const expandedState = state?.table.getState().expanded as Record<string, boolean> | undefined;
+  const context = useContext(ScrollContainerContext);
+  const { isEndReached = false } = context ?? {};
+  const expandedState = state?.table.getState().expanded as
+    | Record<string, boolean>
+    | undefined;
 
-  const getExpandedRows = (rows: Row<any>[], expandedState: Record<string, boolean> | undefined, level: number) => {
+  const getExpandedRows = (
+    rows: Row<any>[],
+    expandedState: Record<string, boolean> | undefined,
+    level: number,
+  ) => {
     const expandedRows: IExpandedRow[] = [];
 
     rows.forEach((row) => {
@@ -43,8 +53,20 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
     return expandedRows;
   };
 
-  const expandedRows = getExpandedRows(state?.table.getExpandedRowModel().rows ?? [], expandedState, gridLevel);
-  const allExpandedRows = [...parentExpanded ?? [], ...expandedRows];
+  const expandedRows = getExpandedRows(
+    state?.table.getExpandedRowModel().rows ?? [],
+    expandedState,
+    gridLevel,
+  );
+  const allExpandedRows = [...(parentExpanded ?? []), ...expandedRows];
+
+  const visibleLeafColumns = state?.table.getVisibleLeafColumns();
+  const visibleColumns = state?.initial_columns.filter((column) =>
+    visibleLeafColumns?.some(
+      (leafColumn) => leafColumn.columnDef.header === column.header,
+    ),
+  );
+
   return (
     <>
       <TableBody
@@ -66,12 +88,17 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-
-                  if (cell.column.id === 'action') {
+                  if (
+                    cell.column.id === 'action' &&
+                    !row?.original?.is_group_by
+                  ) {
                     return (
                       <td
                         key={cell.id + index}
-                        className={cn('right-0', (isEndReached || reachEnd) ? '' : 'sticky')}
+                        className={cn(
+                          'right-0',
+                          isEndReached || reachEnd ? '' : 'sticky',
+                        )}
                       >
                         <div className="px-3">
                           <div
@@ -97,7 +124,8 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                   return (
                     <TableCell
                       className={cn(
-                        'relative text-sm text-foreground hover:bg-border',
+                        'relative text-sm text-foreground',
+                        !row.original.is_group_by ? 'hover:bg-border' : '',
                         getCommonPinningStyles(cell.column).className,
                       )}
                       key={cell.id + index}
@@ -130,7 +158,9 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                     
                       <div
                         {...{
-                          className: `absolute  border-l border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`,
+                          className: !row.original.is_group_by
+                            ? `absolute  border-l border-tertiary  top-[50%] translate-y-[-50%] right-0 cursor-col-resize w-px h-full bg-background  hover:bg-sky-700 hover:w-1 hover:h-10 hover:rounded-lg`
+                            : '',
                           style: {},
                         }}
                       />
@@ -138,14 +168,35 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                   );
                 })}
               </TableRow>
-              {row.getIsExpanded() && (
-                <TableRow className="group relative border-b hover:bg-border/50">
-                  <td
-                    colSpan={state?.table.getVisibleLeafColumns().length}
-                    className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
-                  >
-                    {isEmpty(state?.config?.rowExpansionOptions) ? (
-                        <div
+              {row.getIsExpanded() &&
+                (row.original.is_group_by ? (
+                  <TableRow className="group relative border-b hover:bg-border/50">
+                    <td
+                      colSpan={state?.table.getVisibleLeafColumns().length}
+                      className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
+                    >
+                      <GridGroupingExpansion
+                        rowData={row.original}
+                        config={state.config}
+                        initialColumns={
+                          state?.config?.group_by_initial_columns ||
+                          state?.initial_columns
+                        }
+                        grouping={state.grouping?.slice(1)}
+                        visibleColumns={visibleColumns ?? []}
+                        parentGroupData={state?.config?.parentGroupData || []}
+                        gridState={state}
+                        parentGroupFields={state?.config?.parentGroupFields || state?.groupConfigs}
+                      />
+                    </td>
+                  </TableRow>
+                ) : (
+                  <TableRow className="group relative border-b hover:bg-border/50">
+                    <td
+                      colSpan={state?.table.getVisibleLeafColumns().length}
+                      className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
+                    >
+                      <div
                         style={{
                           height:
                             gridLevel === 2
@@ -158,46 +209,31 @@ export default function MyTableBody({ showAction, gridLevel = 1, parentExpanded,
                           <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
                         </div>
                       </div>
-                    ) : null}
-                  
-                    <div>
-                      {state?.config?.rowExpansionBuilder ? (
-                        typeof state?.config?.rowExpansionBuilder ===
-                        'function' ? (
-                          state?.config?.rowExpansionBuilder({
-                            rowData: row.original,
-                          })
-                        ) : (
-                          React.cloneElement(
-                            state?.config?.rowExpansionBuilder,
-                            { rowData: row.original, parentExpanded: allExpandedRows, key:`expanded:${row.id ?? index}` },
-                          )
-                        )
-                      ) : (
-                        <>
-                          {
-                            state?.config?.rowExpansionOptions?.rowExpansionComponent ? 
-                            (typeof state?.config?.rowExpansionOptions?.rowExpansionComponent === 'function' ? 
-                              state?.config?.rowExpansionOptions?.rowExpansionComponent({
-                                row: row,
-                                expandOptions: state?.config?.rowExpansionOptions
-                              }) : 
-                              React.cloneElement(
-                                state?.config?.rowExpansionOptions?.rowExpansionComponent as React.ReactElement,
-                                { row: row, expandOptions: state?.config?.rowExpansionOptions},
-                              )
+                      <div>
+                        {state?.config?.rowExpansionBuilder ? (
+                          typeof state?.config?.rowExpansionBuilder ===
+                          'function' ? (
+                            state?.config?.rowExpansionBuilder({
+                              rowData: row.original,
+                            })
+                          ) : (
+                            React.cloneElement(
+                              state?.config?.rowExpansionBuilder,
+                              {
+                                rowData: row.original,
+                                parentExpanded: allExpandedRows,
+                                key: `expanded:${row.id ?? index}`,
+                                grouping: state.grouping
+                              },
                             )
-                            :
-                            <div>
-                               Add your custom row expansion component here...
-                            </div>
-                          }
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </TableRow>
-              )}
+                          )
+                        ) : (
+                          <span>Provide your expand component</span>
+                        )}
+                      </div>
+                    </td>
+                  </TableRow>
+                ))}
             </>
           ))
         ) : (

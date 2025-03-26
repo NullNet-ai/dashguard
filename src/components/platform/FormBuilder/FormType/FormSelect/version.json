@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "2.0.1-rc.1<unreleased>",
-  "branch": "unreleased/fix3605/2.0.1-rc.1<unreleased>",
-  "message": "fix he highlight on the \"Create\" did not extend to the right end of the dropdown options",
-  "publish_name": "Shem Alexis Chavez"
+  "tag": "2.0.1-rc.2<unreleased>",
+  "branch": "unreleased/fix/2.0.1-rc.2<unreleased>",
+  "message": "Fix Createable feature ",
+  "publish_name": "Rob Caldosa"
 }

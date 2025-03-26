@@ -110,7 +110,7 @@ export default function RoleDetails({
         // fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
-        label: 'Roles',
+        label: 'Role',
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,
