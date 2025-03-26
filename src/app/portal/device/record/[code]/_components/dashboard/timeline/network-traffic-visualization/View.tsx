@@ -1,19 +1,18 @@
 'use client'
-import { ReactFlow, Background } from '@xyflow/react'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import '@xyflow/react/dist/style.css'
 
-import IPNode from './components/IPNode'
-import TrafficNode from './components/TrafficNode'
 import { useFetchNetworkFlow } from './Provider'
 import { Loader } from '~/components/ui/loader';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
+import moment from 'moment'
 
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0;
-
-  data.forEach(entry => {
-      entry.result.forEach(record => {
+  if(!data) return ;
+  data?.forEach(entry => {
+      entry.result.forEach((record: Record<string, any>) => {
           const bandwidth = parseInt(record.bandwidth, 10);
           if (bandwidth > maxBandwidth) {
               maxBandwidth = bandwidth;
@@ -30,7 +29,6 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
 }
 
 const getColorForValue = (value: number, maxBandwidth: number) => {
-  console.log("value", value)
   if (value >= maxBandwidth) {
     return 'red'
   } else if (value > maxBandwidth / 2) {
@@ -48,17 +46,9 @@ const maxWidth = 300;
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
-  const { elements, loading } = state ?? {}
+  const { flowData, loading } = state ?? {}
 
-  const nodeTypes = useMemo(
-    () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []
-  )
-
-  
-  const maxdata = getMaxBandwidth(elements ?? [])
-  
-  console.log("elements?.edges", elements)
-  
+  const maxdata: number = getMaxBandwidth(flowData ?? []) ?? 0
 
   if (loading) return (
     <Loader
@@ -70,29 +60,62 @@ export default function NetworkFlowView() {
   )
 
   return (
-    // <Card className="h-[90vh] w-full p-2 shadow-lg rounded-xl border border-gray-200">
+   
     <div className="py-4 h-full flex flex-col">
       <div className="h-full  bg-white relative">
         {/* Scrollable Wrapper */}
         <div className=" ">
           {/* ReactFlow with larger canvas to allow scrolling */}
           <div className="h-full container-react-flow flex flex-col gap-y-2 overflow-x-scroll pb-12">
-              {elements?.map(el => {
+              {flowData?.map(el => {
                 return <div className='flex-row flex items-center'>
-                  <div className='min-w-[200px] flex'>
+                  <> 
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                    <TooltipTrigger>
+                    <div className='min-w-[200px] flex'>
                     <div className='bg-blue-100 border border-primary text-sm mr-4 font-semibold p-2 rounded-md self-start'>
                       {el?.source_ip}
                     </div>
+                    <TooltipContent side="top">
+                      <div className="text-lg">
+                        <span className='font-bold text-justify'>Country: </span> {" Philippines"}
+                      </div>
+                      <div className="text-lg">
+                      <span className='font-bold text-justify'>Source IP: </span> { el?.source_ip}
+                      </div>
+                    </TooltipContent>
                   </div>
-                  <div className='flex flex-row items-center gap-2'>
-                      {el?.result?.map(res => {
-                        return <div className='rounded-md h-[20px] flex-shrink-0' 
+                  </TooltipTrigger>
+                  </Tooltip>
+                </TooltipProvider>
+                  </>
+                  <div className='flex flex-row items-center gap-1'>
+                      {el?.result?.map((res: Record<string, any>) => {
+                        const formattedTime = res.bucket ? moment(res.bucket).tz('UTC').format('HH:mm:ss') : 'Invalid Time'
+                        return <>
+                        <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger>
+                        <div className='rounded-md h-[20px] flex-shrink-0' 
                           style={{
                             width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
                             maxWidth: `${maxWidth}px`,
                             backgroundColor: getColorForValue(Number(res.bandwidth),  Number(maxdata))
                           }}
                         />
+                        <TooltipContent side="top">
+                          <div className="text-lg">
+                          <span className='font-bold text-justify'>Time: </span> {formattedTime}
+                          </div>
+                          <div className="text-lg">
+                          <span className='font-bold text-justify'>Total Bandwidth: </span>  {res.bandwidth}
+                          </div>
+                        </TooltipContent> 
+                        </TooltipTrigger>
+                      </Tooltip>
+                    </TooltipProvider>
+                      </>
                       })}
                   </div>
                 </div>
@@ -101,6 +124,7 @@ export default function NetworkFlowView() {
         </div>
       </div>
     </div>
-    // </Card>
+    
+    
   )
 }
