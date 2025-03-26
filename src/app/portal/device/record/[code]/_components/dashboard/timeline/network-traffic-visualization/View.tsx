@@ -9,6 +9,43 @@ import TrafficNode from './components/TrafficNode'
 import { useFetchNetworkFlow } from './Provider'
 import { Loader } from '~/components/ui/loader';
 
+function getMaxBandwidth(data: any[]) {
+  let maxBandwidth = 0;
+
+  data.forEach(entry => {
+      entry.result.forEach(record => {
+          const bandwidth = parseInt(record.bandwidth, 10);
+          if (bandwidth > maxBandwidth) {
+              maxBandwidth = bandwidth;
+          }
+      });
+  });
+
+  return maxBandwidth;
+}
+
+function getPercentage(value: number, maxValue: number, maxPixels = 300) {
+  if (maxValue === 0) return 0; // Avoid division by zero
+  return (value / maxValue) * maxPixels;
+}
+
+const getColorForValue = (value: number) => {
+  console.log("value", value)
+  if (value > 100000) {
+    return 'red'
+  } else if (value > 50000) {
+    return 'orange'
+  } else if (value > 10000) {
+    return 'blue'
+  } else if (value > 1000) {
+    return 'gray'
+  } else {
+    return '#16a34a'
+  }
+}
+
+const maxWidth = 300;
+
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
   const { elements, loading } = state ?? {}
@@ -16,6 +53,12 @@ export default function NetworkFlowView() {
   const nodeTypes = useMemo(
     () => ({ ipNode: IPNode, trafficNode: TrafficNode }), []
   )
+
+  
+  const maxdata = getMaxBandwidth(elements ?? [])
+  
+  console.log("elements?.edges", elements)
+  
 
   if (loading) return (
     <Loader
@@ -31,10 +74,31 @@ export default function NetworkFlowView() {
     <div className="py-4 h-full flex flex-col">
       <div className="h-full  bg-white relative">
         {/* Scrollable Wrapper */}
-        <div className="h-[840px]">
+        <div className=" ">
           {/* ReactFlow with larger canvas to allow scrolling */}
-          <div className="h-full container-react-flow">
-            <ReactFlow
+          <div className="h-full container-react-flow flex flex-col gap-y-2 overflow-x-scroll pb-12">
+              {elements?.map(el => {
+                return <div className='flex-row flex items-center'>
+                  <div className='min-w-[200px] flex'>
+                    <div className='bg-blue-100 border border-primary text-sm mr-4 font-semibold p-2 rounded-md self-start'>
+                      {el?.source_ip}
+                    </div>
+                  </div>
+                  <div className='flex flex-row items-center gap-2'>
+                      {el?.result?.map(res => {
+                        return <div className='rounded-md h-[20px] flex-shrink-0' 
+                          style={{
+                            width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
+                            maxWidth: `${maxWidth}px`,
+                            backgroundColor: getColorForValue(Number(res.bandwidth))
+                          }}
+                        />
+                      })}
+                  </div>
+                </div>
+              })}
+            
+            {/* <ReactFlow
               className="mt-0"
               draggable={true}
               edges={elements?.edges}
@@ -52,7 +116,7 @@ export default function NetworkFlowView() {
               zoomOnScroll={false}
             >
               <Background color="#f1f5f9" />
-            </ReactFlow>
+            </ReactFlow> */}
           </div>
         </div>
       </div>
