@@ -29,15 +29,15 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
   return (value / maxValue) * maxPixels;
 }
 
-const getColorForValue = (value: number) => {
+const getColorForValue = (value: number, maxBandwidth: number) => {
   console.log("value", value)
-  if (value > 100000) {
+  if (value >= maxBandwidth) {
     return 'red'
-  } else if (value > 50000) {
+  } else if (value > maxBandwidth / 2) {
     return 'orange'
-  } else if (value > 10000) {
+  } else if (value > maxBandwidth / 5) {
     return 'blue'
-  } else if (value > 1000) {
+  } else if (value > maxBandwidth / 10) {
     return 'gray'
   } else {
     return '#16a34a'
@@ -90,33 +90,13 @@ export default function NetworkFlowView() {
                           style={{
                             width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
                             maxWidth: `${maxWidth}px`,
-                            backgroundColor: getColorForValue(Number(res.bandwidth))
+                            backgroundColor: getColorForValue(Number(res.bandwidth),  Number(maxdata))
                           }}
                         />
                       })}
                   </div>
                 </div>
               })}
-            
-            {/* <ReactFlow
-              className="mt-0"
-              draggable={true}
-              edges={elements?.edges}
-              fitView={true}
-              maxZoom={1.5}
-              minZoom={0.1}
-              nodes={elements?.nodes}
-              nodesDraggable={true}
-              nodeTypes={nodeTypes}
-              viewport={{
-                x: 30,
-                y: 30,
-                zoom: 0.5,
-              }}
-              zoomOnScroll={false}
-            >
-              <Background color="#f1f5f9" />
-            </ReactFlow> */}
           </div>
         </div>
       </div>
