@@ -50,7 +50,7 @@ export interface ComboSelectProps {
     showStatus?: boolean; // New prop to toggle status indicators
     showAvatars?: boolean; // New prop to toggle avatar display
     avatarSize?: "2xs" | "xs" | "sm"; // Size options for avatars
-    
+
     // New props for FormSelect integration
     renderCreateOption?: React.ReactNode; // Custom render for "Create New" option
     renderEmptyState?: React.ReactNode; // Custom render for empty state
@@ -66,6 +66,11 @@ export interface ComboSelectProps {
         scrollThreshold?: number;
         endMessage?: React.ReactNode;
     };
+    externalQuery?: string;
+    setExternalQuery?: (query: string) => void;
+    externalOpen?: boolean;
+    setExternalOpen?: (open: boolean) => void;
+    forceUpdate?: number; // A counter to force re-render when external data changes
 }
 
 export function ComboSelect({
@@ -89,9 +94,21 @@ export function ComboSelect({
     onQueryChange,
     testId,
     infiniteScroll,
+    externalQuery,
+    setExternalQuery,
+    externalOpen,
+    setExternalOpen,
+    forceUpdate,
 }: ComboSelectProps) {
-    const [query, setQuery] = useState("");
-    const [open, setOpen] = useState(false);
+    // Use external state if provided, otherwise use local state
+    const [localQuery, setLocalQuery] = useState("");
+    const [localOpen, setLocalOpen] = useState(false);
+
+    // Use either external or local state
+    const query = externalQuery !== undefined ? externalQuery : localQuery;
+    const setQuery = setExternalQuery || setLocalQuery;
+    const open = externalOpen !== undefined ? externalOpen : localOpen;
+    const setOpen = setExternalOpen || setLocalOpen;
 
     // InfiniteScroll state
     const initialLimit = infiniteScroll?.initialLimit || 50;
@@ -151,6 +168,11 @@ export function ComboSelect({
         }
     }, [query, onQueryChange]);
 
+    useEffect(() => {
+        if (forceUpdate !== undefined) {
+            setDisplayLimit(initialLimit);
+        }
+    }, [forceUpdate, initialLimit]);
     const filteredOptions = query === ""
         ? options
         : options.filter((option) =>
@@ -189,9 +211,9 @@ export function ComboSelect({
                         "absolute top-1/2 -translate-y-1/2 flex items-center",
                         SelectIcon ? "left-8" : "left-2"
                     )}>
-                        <Avatar 
-                            size={avatarSize} 
-                            statusProps={showStatus && value.status ? { 
+                        <Avatar
+                            size={avatarSize}
+                            statusProps={showStatus && value.status ? {
                                 status: value.status as "online" | "offline" | "busy" | "away",
                                 position: "bottom-right",
                                 size: avatarSize
@@ -219,8 +241,9 @@ export function ComboSelect({
                     readOnly={inputReadOnly}
                     disabled={disabled}
                     ref={setReferenceElement}
+                    autoComplete='off'
                     className={cn(
-                        "block w-full rounded-md border-border py-[5px] text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
+                        "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
                         {
                             "outline-destructive": error,
                             "border-destructive": error,
@@ -268,7 +291,7 @@ export function ComboSelect({
                         (showAvatars && value) ? (SelectIcon ? "pl-16" : "pl-10") : ""
                     )}>
                         <div className="flex flex-wrap items-center w-full">
-                            <span className="text-foreground text-sm ">
+                            <span className="text-foreground sm:text-sm  md:text-md">
                                 {value.label}
                             </span>
                             <span className="ml-1 text-muted-foreground text-xs">
@@ -307,12 +330,12 @@ export function ComboSelect({
                             width: referenceElement?.offsetWidth,
                         }}
                         {...attributes.popper}
-                        className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                        className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm md:text-md"
                         portal={true}
                         data-test-id={testId ? `${testId}-options` : undefined}
                     >
                         {infiniteScroll?.enabled ? (
-                            <div 
+                            <div
                                 id={infiniteScroll.scrollableTarget || "select-scrollable-div"}
                                 className="max-h-60 overflow-auto"
                             >
@@ -328,7 +351,7 @@ export function ComboSelect({
                                         infiniteScroll.endMessage || (
                                             filteredOptions.length > 0 ? (
                                                 <div className="flex justify-center py-2">
-                                                    <p className="text-center text-sm text-gray-500">
+                                                    <p className="text-center text-sm md:text-md text-gray-500">
                                                         No more options
                                                     </p>
                                                 </div>
@@ -351,9 +374,9 @@ export function ComboSelect({
                                                 {/* Avatar display with integrated status */}
                                                 {showAvatars && (
                                                     <div className="mr-2 flex-shrink-0 flex items-center">
-                                                        <Avatar 
-                                                            size={avatarSize} 
-                                                            statusProps={showStatus && option.status ? { 
+                                                        <Avatar
+                                                            size={avatarSize}
+                                                            statusProps={showStatus && option.status ? {
                                                                 status: option.status as "online" | "offline" | "busy" | "away",
                                                                 position: "bottom-right",
                                                                 size: avatarSize
@@ -374,7 +397,7 @@ export function ComboSelect({
                                                         )}
                                                     />
                                                 )}
-                                                
+
                                                 {/* Left positioned checkmark */}
                                                 {showCheckmarks && checkmarkPosition === 'left' && (
                                                     <CheckIcon
@@ -387,10 +410,10 @@ export function ComboSelect({
                                                         aria-hidden="true"
                                                     />
                                                 )}
-                                                
+
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex flex-wrap items-center gap-1">
-                                                        <span className=" text-sm">
+                                                        <span className="text-md">
                                                             {option.label}
                                                         </span>
                                                         {option.secondaryText && (
@@ -436,9 +459,9 @@ export function ComboSelect({
                                                 {/* Avatar display with integrated status */}
                                                 {showAvatars && (
                                                     <div className="mr-2 flex-shrink-0 flex items-center">
-                                                        <Avatar 
-                                                            size={avatarSize} 
-                                                            statusProps={showStatus && option.status ? { 
+                                                        <Avatar
+                                                            size={avatarSize}
+                                                            statusProps={showStatus && option.status ? {
                                                                 status: option.status as "online" | "offline" | "busy" | "away",
                                                                 position: "bottom-right",
                                                                 size: avatarSize
@@ -459,7 +482,7 @@ export function ComboSelect({
                                                         )}
                                                     />
                                                 )}
-                                                
+
                                                 {/* Left positioned checkmark */}
                                                 {showCheckmarks && checkmarkPosition === 'left' && (
                                                     <CheckIcon
@@ -472,10 +495,10 @@ export function ComboSelect({
                                                         aria-hidden="true"
                                                     />
                                                 )}
-                                                
+
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex flex-wrap items-center gap-1">
-                                                        <span className=" text-sm">
+                                                        <span className=" text-md">
                                                             {option.label}
                                                         </span>
                                                         {option.secondaryText && (
@@ -501,12 +524,8 @@ export function ComboSelect({
                                             )}
                                         </ComboboxOption>
                                     ))
-                                ) : renderEmptyState || (
-                                    <div className="px-4 py-2 text-sm text-gray-500">
-                                        No options found
-                                    </div>
-                                )}
-                                
+                                ) : renderEmptyState}
+
                                 {/* Render custom create option if provided */}
                                 {renderCreateOption}
                             </>
