@@ -21,14 +21,18 @@ import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 import { pick } from 'lodash';
 import { formatDate } from '~/server/utils/formatDate';
-import { TMethod, createSchedule, dateToCron } from '~/server/utils/createSchedule';
+import {
+  TMethod,
+  createSchedule,
+  dateToCron,
+} from '~/server/utils/createSchedule';
 
 const {
   MAILER_AUTH_USER,
   MAILER_AUTH_PASS,
   MAILER_HOST,
   MAILER_PORT,
-  ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!'
+  ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!',
 } = process.env;
 
 const INVITATION_LINK_EXPIRED = parseInt(
@@ -494,7 +498,7 @@ export const accountRouter = createTRPCRouter({
       const account = ctx.session.account;
       const accountEmail = account?.email;
 
-      const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+      const query = ctx.dnaClient
         .findAll({
           entity: input?.entity,
           token: ctx.token.value,
@@ -605,8 +609,27 @@ export const accountRouter = createTRPCRouter({
               field: 'external_contact_id',
             },
           },
-        })
-        .execute();
+        });
+      if (input.grouping?.length) {
+        query.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
+      const { total_count: totalCount = 1, data: items } =
+        await query.execute();
+
+      const totalPages = Math.ceil(totalCount / (input.limit || 100));
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -631,8 +654,6 @@ export const accountRouter = createTRPCRouter({
         };
       });
 
-      // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / (input.limit || 100));
       return {
         totalCount,
         items: formatted_items,
@@ -992,7 +1013,9 @@ export const accountRouter = createTRPCRouter({
         console.error('Error sending email:', error);
         throw error;
       }
-      const cronTime = dateToCron(new Date(formatDate(expirationDate).dataTime));
+      const cronTime = dateToCron(
+        new Date(formatDate(expirationDate).dataTime),
+      );
       const scheduleConfig = {
         enabled: true,
         cron: cronTime,
@@ -1004,7 +1027,7 @@ export const accountRouter = createTRPCRouter({
         },
         wait_for_completion: true,
       };
-      createSchedule(scheduleConfig)
+      createSchedule(scheduleConfig);
 
       await ctx.dnaClient
         .update(accountRecord?.id, {
@@ -1341,11 +1364,11 @@ export const accountRouter = createTRPCRouter({
   getInvitationAccountDetailsPublicly: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const asRoot = true
+      const asRoot = true;
       const rootAccount = await ctx.dnaClient
-      .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
-      .execute();
-    const rootAccountToken = rootAccount?.data?.[0]?.token;
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
       const invitation = await ctx.dnaClient
         .findAll({
           entity: 'invitations',

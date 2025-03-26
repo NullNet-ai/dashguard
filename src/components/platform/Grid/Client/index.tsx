@@ -65,6 +65,7 @@ function MainClient({
   isError = false,
   parentExpanded,
   cardListOption,
+  grouping
 }: IClientProps) {
   const { open } = useSidebar()
   const { width } = useWindowSize()
@@ -113,6 +114,7 @@ function MainClient({
       onSelectRecords={onSelectRecords}
       gridLevel={gridLevel}
       gridType={gridType}
+      grouping={grouping}
     >
       {gridType === 'table'
         ? (

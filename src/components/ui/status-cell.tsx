@@ -20,6 +20,11 @@ const StatusCell: React.FC<StatusCellProps> = ({ value, additionalStatuses = {},
     archived: 'text-gray-600 bg-gray-400/10',
     ...additionalStatuses,
   };
+  if(!value) return null
+
+  if (!value) {
+    return null;
+  }
 
   const statusesRounded = {
     active: 'text-green-600 bg-green-600',

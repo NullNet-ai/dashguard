@@ -10,9 +10,11 @@ import { getGridCacheData } from '~/lib/grid-get-cache-data';
  */
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function Page() {
-  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
+  const { sorts, pagination, filters, groups } =
+    (await getGridCacheData()) ?? {};
 
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
@@ -33,18 +35,17 @@ export default async function Page() {
     'updated_time',
     'updated_by',
   ];
-
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+    resolveGridParams({
+      sorts,
+      filters,
+      groups,
+      pagination,
+      pluck: _pluck,
+      entity: main_entity!,
+    });
   const { items = [], totalCount } = await api.grid.items({
-    entity: main_entity!,
-    pluck: _pluck,
-    current: +(pagination?.current_page ?? '0'),
-    limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorts.defaultSorting?.length
-      ? sorts.defaultSorting
-      : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
+    ...gridParams,
   });
 
   return (
@@ -54,8 +55,11 @@ export default async function Page() {
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       defaultAdvanceFilter={filters?.defaultFilters || []}
       advanceFilter={filters?.advanceFilter || []}
-      defaultSorting={sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting}
+      defaultSorting={
+        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
+      }
       pagination={pagination}
+      grouping={groups || []}
       config={{
         entity: main_entity!,
         title: 'Communication Templates',
@@ -67,7 +71,7 @@ export default async function Page() {
           query_params: {
             entity: main_entity!,
             pluck: _pluck,
-          }
+          },
         },
       }}
     />
