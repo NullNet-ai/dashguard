@@ -16,6 +16,7 @@ export interface IGridCacheDataResponse {
   sorts: {
     sorting: SortingState;
     defaultSorting: SortingState;
+    groupSorts: SortingState;
   };
   pagination: IPagination;
   columns: Record<string, any>[];
@@ -30,6 +31,7 @@ export const getGridCacheData = async (): Promise<IGridCacheDataResponse> => {
         sorts: {
           sorting: [],
           defaultSorting: [],
+          groupSorts: [],
         },
         pagination: {
           current_page: 1,

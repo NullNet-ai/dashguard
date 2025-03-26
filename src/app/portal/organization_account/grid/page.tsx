@@ -5,23 +5,24 @@ import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaul
 import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function Page() {
   const { sorts, filters, pagination, columns : columnOrder,   groups } = (await getGridCacheData()) ?? {}
-
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+  resolveGridParams({
+    sorts,
+    filters,
+    groups,
+    pagination,
+    entity: 'organization_account',
+  });
   const {
     items = [],
     totalCount,
     accountEmail,
   } = await api.account.fetchGridData({
-    entity: 'organization_account',
-    current: +(pagination?.current_page ?? '0'),
-    limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
-    grouping: groups?.[0]?.field ? [groups[0].field] : [],
+    ...gridParams,
   });
   return (
     <Grid
@@ -49,6 +50,10 @@ export default async function Page() {
         searchConfig: {
           router: 'account',
           resolver: 'fetchGridData',
+          query_params: {
+            entity: 'organization_account',
+            group_advance_filters: filters?.groupAdvanceFilters,
+          },
         },
         additionalData: {
           accountEmail,

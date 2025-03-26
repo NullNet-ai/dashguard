@@ -150,6 +150,7 @@ export interface IConfigGrid {
   new_button_action?: () => void;
   new_button_title?: string;
   enableGridGrouping?: boolean;
+  parentGroupFields?: IGroupBy[];
 }
 
 interface IRowToArchive extends Row<any> {
@@ -191,6 +192,7 @@ export interface IState {
   },
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
+  groupConfigs?: IGroupBy[];
 }
 
 export interface IAction {
@@ -262,4 +264,5 @@ export interface IGridGroupingExpansionProps {
   visibleColumns: CustomColumnDef<any>[];
   parentGroupData?: Record<string, any>[];
   gridState?: IState;
+  parentGroupFields?: IGroupBy[];
 }

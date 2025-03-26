@@ -16,7 +16,6 @@ import {
   SortableItem,
 } from '~/components/ui/sortable';
 import { useManageFilter } from '../Provider';
-import ComingSoon from '~/app/portal/coming-soon/_components/coming_soon';
 
 interface GroupItem {
   id: string;
@@ -33,9 +32,9 @@ export default function GroupContent() {
 
   const form = useForm<{ groups: GroupItem[] }>({
     defaultValues: {
-      groups: state?.filterDetails?.groups ?? [
-        { id: '1', field: '', label: '', value: '', desc: undefined },
-      ],
+      groups: state?.filterDetails?.groups?.length
+        ? state?.filterDetails?.groups
+        : [{ id: '1', field: '', label: '', value: '', desc: undefined }],
     },
   });
 
@@ -43,7 +42,6 @@ export default function GroupContent() {
     control: form.control,
     name: 'groups',
   });
-  console.log('🚀 ~ GroupContent ~ fields:', fields);
 
   const handleAddGroup = () => {
     const newGroup = {
@@ -144,7 +142,6 @@ export default function GroupContent() {
     });
   };
 
-  // return <ComingSoon />
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <div className="grid gap-3">
@@ -198,17 +195,14 @@ export default function GroupContent() {
                     <SelectItem value="desc">Descending</SelectItem>
                   </SelectContent>
                 </Select>
-
-                {fields.length > 1 && (
-                  <Button
-                    onClick={() => handleGroupRemove(index)}
-                    Icon={CircleMinus}
-                    iconPlacement="left"
-                    iconClassName="text-red-600 h-4 w-4"
-                    className="ms-2"
-                    variant={'ghost'}
-                  />
-                )}
+                <Button
+                  onClick={() => handleGroupRemove(index)}
+                  Icon={CircleMinus}
+                  iconPlacement="left"
+                  iconClassName="text-red-600 h-4 w-4"
+                  className="ms-2"
+                  variant={'ghost'}
+                />
               </div>
             </SortableItem>
           ))}

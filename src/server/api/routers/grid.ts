@@ -876,10 +876,7 @@ export const gridRouter = createTRPCRouter({
     const [, , mainEntity, application] = pathName.split('/');
     if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
       return [];
-    const cacheTypes: TReportDataType[] = [
-      'pagination',
-      'grid_tabs',
-    ];
+    const cacheTypes: TReportDataType[] = ['pagination', 'grid_tabs'];
     const cacheIds = await Promise.all(
       cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
     );
@@ -897,7 +894,9 @@ export const gridRouter = createTRPCRouter({
       ? tabDetails?.find((tab) => tab.id === filter_id)
       : tabDetails?.find((tab) => tab.current);
 
-    const filter: ISearchItem[] = filterDetails?.default ? filterDetails?.advance_filters : filterDetails?.default_filter;
+    const filter: ISearchItem[] = filterDetails?.default
+      ? filterDetails?.advance_filters
+      : filterDetails?.default_filter;
 
     const groupAdvanceFilters: ISearchItem[] = filter_id
       ? (tabDetails?.find((tab) => tab.id === filter_id)
@@ -931,7 +930,11 @@ export const gridRouter = createTRPCRouter({
         default: item.default,
       };
     });
-
+    const groupSorts = groups?.map((item: any) => ({
+      id: item.value,
+      desc: typeof item.desc === 'boolean' ? item.desc : false,
+      sort_key: item.field,
+    }));
     return {
       filters: {
         reportFilter: defaultFilters,
@@ -942,8 +945,12 @@ export const gridRouter = createTRPCRouter({
       sorts: {
         sorting: sorts,
         defaultSorting: defaultSorts,
+        groupSorts,
       },
-      pagination: reportPagination,
+      pagination: {
+        current_page: +(reportPagination?.current_page ?? '1'),
+        limit_per_page: +(reportPagination?.limit_per_page ?? '100'),
+      },
       columns: gridColumns,
       groups,
     };
@@ -1018,6 +1025,7 @@ export const gridRouter = createTRPCRouter({
             label: z.string(),
             value: z.string(),
             field: z.string(),
+            desc: z.boolean(),
           }),
         ),
       }),

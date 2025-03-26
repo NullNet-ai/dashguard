@@ -9,7 +9,7 @@ import {
   type Row,
   type RowSelectionState,
   type SortingState,
-  type Updater
+  type Updater,
 } from '@tanstack/react-table';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
@@ -30,7 +30,7 @@ import {
   type IConfigGrid,
   type ICreateContext,
   type IPropsGrid,
-  type IState
+  type IState,
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
@@ -194,8 +194,8 @@ export default function GridProvider({
   useEffect(() => {
     if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
       setGrouping(resolvedGroupings);
-      setColumnVisibility((prev: any) => {
-        const newVisibility = { ...prev };
+      setColumnVisibility(() => {
+        const newVisibility: any = {};
         resolvedGroupings?.forEach((curr) => {
           newVisibility[curr] = false;
         });
@@ -228,17 +228,21 @@ export default function GridProvider({
     ..._propsConfig,
   };
 
-  // const newData = isMobileOrTablet && config.isInfinite ? infiniteData : data;
+
+  const columnConfig = useMemo(() => {
+    if (!grouping.length) return null;
+    const configColumns = config?.group_by_initial_columns || config?.columns;
+    return configColumns?.find(
+      (col: any) => col.accessorKey === grouping[0],
+    ) as any;
+  }, [grouping, config?.group_by_initial_columns, config?.columns]);
+
   const newData = useMemo(() => {
-    if (grouping.length) {
-      const configColumns = config?.group_by_initial_columns || config?.columns;
-      const columnConfig = configColumns?.find(
-        (col: any) => col.accessorKey === grouping[0],
-      ) as any;
+    if (grouping.length && columnConfig) {
       const entity = columnConfig?.search_config?.entity || config.entity;
       const field = columnConfig?.search_config?.field || grouping[0];
       return formatGroupByResult({
-        data: data,
+        data,
         field,
         entity,
       });
@@ -246,13 +250,11 @@ export default function GridProvider({
     return isMobileOrTablet && config.isInfinite ? infiniteData : data;
   }, [
     grouping,
+    columnConfig,
+    data,
     isMobileOrTablet,
     config.isInfinite,
-    config?.group_by_initial_columns,
-    config?.columns,
-    config.entity,
     infiniteData,
-    data,
   ]);
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
@@ -385,10 +387,13 @@ export default function GridProvider({
       const label = (columnConfig?.header as string) ?? '';
       const entity = columnConfig?.search_config?.entity || config.entity;
       const field = columnConfig?.search_config?.field || item;
+      const sortBy = initialSorting?.find((sort) => sort.id === item)?.desc;
+
       return {
         value: item,
         field: `${entity}.${field}`,
         label,
+        desc: typeof sortBy === 'boolean' ? sortBy : false,
       };
     });
     if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
@@ -420,7 +425,7 @@ export default function GridProvider({
     actionRow,
     groupByColumn,
   );
- 
+
   const table = useReactTable({
     data: newData,
     getRowId: (row: any) => row.id,
@@ -453,6 +458,7 @@ export default function GridProvider({
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
     onGroupingChange: handleUpdateGrouping,
+    enableGrouping: true,
   });
   /** @ACTIONS */
 
@@ -598,6 +604,7 @@ export default function GridProvider({
     infinite_options: infinite_state,
     initial_columns: config?.columns,
     grouping,
+    groupConfigs: initialGrouping,
   } as IState;
   const actions = {
     handleCreate,

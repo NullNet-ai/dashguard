@@ -47,16 +47,16 @@ export const useColumnConditions = (
     const column = {
       ...groupByColumn.current,
       cell: ({ row }: any) => {
-        const value = row?.original?.formatted_value;
-        if (!value) {
-          return null;
+        const value = row?.original?.formatted_value || '';
+        if (!value && !row?.original.count) {
+         return null;
         }
 
         if (columnConfig?.cell) {
           return (
             <>
               {(columnConfig as any).cell({
-                row: { original: { [groupColumn]: value } },
+                row: { original: { [groupColumn]: value} },
               })}
               <div className="ml-1 flex items-center">
                 <span className="text-sm font-semibold">{`(${row?.original.count})`}</span>
@@ -68,8 +68,8 @@ export const useColumnConditions = (
         return (
           <>
             {flexRender(
-              columnConfig?.cell || 
-              ((props: any) => <div>{String(props.getValue())}</div>),
+              columnConfig?.cell ||
+                ((props: any) => <div>{String(props.getValue())}</div>),
               {
                 row: { original: { [groupColumn]: value } },
                 getValue: () => value,

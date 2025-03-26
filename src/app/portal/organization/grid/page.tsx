@@ -14,6 +14,7 @@ import { customArchive } from './customArchiveAction';
 import ArchiveComponent from './customDefaultActions/Archive';
 import DeleteComponent from './customDefaultActions/Delete';
 import { defaultAdvanceFilter } from './_config/advanceFilter';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function OrganizationGridPage(): Promise<React.ReactElement | null> {
   const _pluck = [
@@ -38,16 +39,18 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     groups,
   } = (await getGridCacheData()) ?? {};
 
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+    resolveGridParams({
+      sorts,
+      filters,
+      groups,
+      pagination,
+      pluck: _pluck,
+      entity: 'organization',
+    });
+
   const { items = [], totalCount } = await api.grid.items({
-    current: +(pagination?.current_page ?? '0'),
-    limit: +(pagination?.limit_per_page ?? '100'),
-    entity: 'organization',
-    pluck: _pluck,
-    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
-    grouping: groups?.[0]?.field ? [groups[0].field] : [],
+    ...gridParams,
   });
 
   return (

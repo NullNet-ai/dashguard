@@ -9,11 +9,11 @@ const gridColumns = [
   {
     header: "State",
     accessorKey: "status",
-    // data_type: "string",
-    // cell: ({ row }) => {
-    //   const value = row?.original?.status;
-    //   return <StatusCell value={value}  renderType='rounded'/>;
-    // },    
+    data_type: "string",
+    cell: ({ row }) => {
+      const value = row?.original?.status;
+      return <StatusCell value={value}  renderType='value'/>;
+    },    
   },
   {
     header: "ID",

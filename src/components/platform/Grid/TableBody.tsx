@@ -186,6 +186,7 @@ export default function MyTableBody({
                         visibleColumns={visibleColumns ?? []}
                         parentGroupData={state?.config?.parentGroupData || []}
                         gridState={state}
+                        parentGroupFields={state?.config?.parentGroupFields || state?.groupConfigs}
                       />
                     </td>
                   </TableRow>

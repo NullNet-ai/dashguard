@@ -10,6 +10,7 @@ import MyTableBody from '../../TableBody';
 import ErrorPage from '../../common/ErrorPage';
 import { useSidebar } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
+import { resolveAdvanceFilter } from '../../Search/utils/advanceFilterResolver';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -20,6 +21,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     visibleColumns,
     parentGroupData,
     gridState,
+    parentGroupFields,
   } = props ?? {};
 
   const { open } = useSidebar();
@@ -64,17 +66,17 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
 
     return gridFilter;
   };
-  const gridFilter = [
-    ...constructGridFilter([...(parentGroupData ?? []), rowData]),
-    // ...(gridState?.advanceFilter?.length
-    //   ? [
-    //       {
-    //         type: 'operator',
-    //         operator: 'and',
-    //       },
-    //     ]
-    //   : []),
-  ];
+  const groupAdvanceFilters =
+    gridState?.config?.searchConfig?.query_params?.group_advance_filters;
+  const gridFilters = resolveAdvanceFilter({
+    currentAdvanceFilter: groupAdvanceFilters?.length
+      ? groupAdvanceFilters
+      : (gridState?.advanceFilter ?? []),
+    additionalFilter: constructGridFilter([
+      ...(parentGroupData ?? []),
+      rowData,
+    ]),
+  });
   const groupFields = grouping?.map((item) => {
     const columnConfig = initialColumns?.find(
       (column: any) => column?.accessorKey === item,
@@ -82,12 +84,26 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     const label = (columnConfig?.header as string) ?? '';
     const entity = columnConfig?.search_config?.entity || config.entity;
     const field = columnConfig?.search_config?.field || item;
+    const groupSort = parentGroupFields?.find((item) => item?.field === field);
     return {
       value: item,
       field: `${entity}.${field}`,
       label,
+      desc: typeof groupSort?.desc === 'boolean' ? groupSort?.desc : false,
     };
   });
+  const groupSort = parentGroupFields?.find(
+    (item) => item?.field === groupFields?.[0]?.field,
+  );
+  const newSorting = groupSort
+    ? [
+        {
+          id: groupSort?.value,
+          desc: groupSort?.desc,
+          sort_key: groupSort?.field,
+        },
+      ]
+    : [];
 
   const { fetchData, data, error, isLoading } = useFetchGridData(
     {
@@ -95,11 +111,13 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       limit: pagination?.limit_per_page,
       entity: config.entity,
       pluck: config.searchConfig?.query_params?.pluck,
-      sorting: gridQueryConfigs?.sorting?.length
-        ? gridQueryConfigs?.sorting
-        : defaultSorting,
-      advance_filters: [...gridFilter],
+      sorting: newSorting?.length
+        ? newSorting
+        : gridQueryConfigs?.sorting?.length
+          ? gridQueryConfigs?.sorting
+          : defaultSorting,
       grouping: groupFields?.[0]?.field ? [groupFields[0].field as string] : [],
+      ...gridFilters,
     },
     {
       resolver: config.searchConfig?.resolver ?? 'items',
@@ -146,6 +164,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         group_by_initial_columns: initialColumns,
         parentGroupData: [...(parentGroupData ?? []), { ...rowData }],
         onFetchRecords: fetchData,
+        parentGroupFields: groupFields,
       }}
       parentType="grid_expansion"
       data={items}

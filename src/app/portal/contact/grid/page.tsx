@@ -1,11 +1,10 @@
-import { api } from '~/trpc/server';
-import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import Grid from '~/components/platform/Grid/Server';
-import { defaultSorting } from './_config/sorting';
-import { defaultAdvanceFilter } from './_config/advanceFilter';
 import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import { api } from '~/trpc/server';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 import AccountGridExpansion from '../_components/grids/AccountGridExpansion';
-import { IGroupBy } from '~/components/platform/Grid/Category/type';
+import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
+import { defaultSorting } from './_config/sorting';
 
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page() {
@@ -36,47 +35,31 @@ export default async function Page() {
     groups,
   } = (await getGridCacheData()) ?? {};
 
-  const defaultPagination = pagination?.limit_per_page
-    ? pagination
-    : {
-        current_page: +(pagination?.current_page ?? '1'),
-        limit_per_page: +(pagination?.limit_per_page ?? '100'),
-      };
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+    resolveGridParams({
+      sorts,
+      filters,
+      groups,
+      pagination,
+      pluck: _pluck,
+      entity: 'contact',
+    });
 
   const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(defaultPagination?.current_page ?? '1'),
-    limit: +(defaultPagination?.limit_per_page ?? '100'),
-    entity: 'contact',
-    pluck: _pluck,
-    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : filters?.groupAdvanceFilters?.length ? [] : defaultAdvanceFilter,
-    group_advance_filters: filters?.groupAdvanceFilters?.length
-      ? filters?.groupAdvanceFilters
-      : [],
-    grouping: groups?.[0]?.field ? [groups[0].field] : [],
+    ...gridParams,
   });
-  
-  const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
-  ? filters?.groupAdvanceFilters
-   :  filters?.advanceFilter?.length
-   ? filters?.advanceFilter
-   : defaultAdvanceFilter
-
-  const gridDefaultAdvanceFilter = filters?.groupAdvanceFilters?.length
-    ? filters?.groupAdvanceFilters
-    : gridAdvanceFilter;
 
   return (
     <Grid
       totalCount={totalCount || 0}
       data={items}
-      defaultSorting={sorts?.defaultSorting.length ? sorts?.defaultSorting : defaultSorting}
+      defaultSorting={
+        sorts?.defaultSorting.length ? sorts?.defaultSorting : defaultSorting
+      }
       defaultAdvanceFilter={gridDefaultAdvanceFilter}
       advanceFilter={gridAdvanceFilter}
       sorting={sorts?.sorting || []}
-      pagination={defaultPagination}
+      pagination={pagination}
       grouping={groups || []}
       config={{
         isInfinite: true,
@@ -87,10 +70,7 @@ export default async function Page() {
         defaultValues: {
           categories: ['Contact', 'Employee'],
         },
-        defaultShownColumns: [
-          "raw_phone_number",
-          "email",
-        ],
+        defaultShownColumns: ['raw_phone_number', 'email'],
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {

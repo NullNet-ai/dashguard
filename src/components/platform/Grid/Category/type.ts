@@ -36,6 +36,7 @@ export interface IGroupBy {
   label: string;
   value: string;
   field: string
+  desc: boolean;
 }
 
 export interface IStoreUnSaveSorts {

@@ -6,6 +6,7 @@ import { api } from '~/trpc/server';
 
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function UserRoleGridPage({
   searchParams = {},
@@ -41,16 +42,18 @@ export default async function UserRoleGridPage({
     groups,
   } = (await getGridCacheData()) ?? {};
 
+  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
+    resolveGridParams({
+      sorts,
+      filters,
+      groups,
+      pagination,
+      pluck: _pluck,
+      entity: main_entity!,
+    });
+
   const { items = [], totalCount } = await api.grid.items({
-    entity: main_entity!,
-    pluck: _pluck,
-    current: +(pagination?.current_page ?? '0'),
-    limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorts.sorting?.length ? sorts.sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
-    grouping: groups?.[0]?.field ? [groups[0].field] : [],
+    ...gridParams,
   });
 
   return (
