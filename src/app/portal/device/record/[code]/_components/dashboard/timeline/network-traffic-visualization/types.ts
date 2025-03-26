@@ -33,7 +33,7 @@ export interface IBandwidth {
 }
 
 export interface IState {
-  elements: { nodes: FlowElement[], edges: Edge[] }
+  flowData: any[]
   loading: boolean
 }
 
