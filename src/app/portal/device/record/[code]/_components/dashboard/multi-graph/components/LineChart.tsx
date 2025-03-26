@@ -39,7 +39,6 @@ function formatBytes(bytes:any, decimals = 1) {
 }
 
 export const formatNumber = (num: number) => {
-  console.log('%c Line:42 🥔 num', 'color:#2eafb0', num);
   
   return formatBytes(+num)
   // if(!num) return ''

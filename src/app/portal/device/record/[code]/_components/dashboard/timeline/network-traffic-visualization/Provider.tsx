@@ -133,7 +133,7 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
           bucket_size: resolution,
         })
         
-        console.log('%c Line:137 🥖 data', 'color:#e41a6a', data);
+        
         setUniqueSourceIP(data as string[]);
         setCurrentIndex(0);
         setLoading(false);
@@ -164,26 +164,16 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length]);
 
 
-  console.log('%c Line:169 🌰 unique_source_ips', 'color:#4fff4B', unique_source_ips);
   useEffect(() => {
 
-    
-    console.log('%c Line:169 🥖', 'color:#2eafb0', current_index, unique_source_ips.length);
     if (current_index + 10 > unique_source_ips.length) return;
     setCurrentIndex(current_index + 10);
-
-
     const fetchBandwidth = async () => {
-  console.log('%c Line:200 🥐 _refetch', 'color:#6ec1c2', _refetch, unique_source_ips);
-
       if (!unique_source_ips || unique_source_ips.length === 0) {
         console.warn("No source IPs available for fetching bandwidth");
         return;
       }
-
-      // const bandwidth = await callHehe(unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []);
-
-      console.log('%c Line:181 🍓', 'color:#b03734',  unique_source_ips?.slice(current_index, current_index + 10));
+      
       const bandwidth = await getBandwidthActions.mutateAsync({
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
@@ -195,7 +185,7 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
       
 
       if (!bandwidth) return;
-      console.log('%c Line:198 🍇 current_index', 'color:#6ec1c2', current_index);
+      
       if(current_index  == 0) {
         setBandwidth(bandwidth?.data || []);
         return;
@@ -209,7 +199,7 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     };
     fetchBandwidth();
   }, [_refetch]);
-  console.log('%c Line:202 🌶 _refetch', 'color:#465975', _refetch);
+  
 
   useEffect(() => {
     if (!bandwidth || bandwidth.length === 0) return;

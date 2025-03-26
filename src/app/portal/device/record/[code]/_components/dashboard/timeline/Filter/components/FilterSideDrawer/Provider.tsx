@@ -131,7 +131,7 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
       sorts: sorting,
       default_sorts: sorting,
     }
-    console.log("%c Line:139 🥟 filter_type", "color:#7f2b82", filter_type);
+    
     setUpdateFilterLoading(true)
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
     await updateGridFilter(modifyFilterDetails, filter_type)
