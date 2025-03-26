@@ -84,7 +84,7 @@ const GridTabContent = ({
                         hidden: true,
                         order: index,
                         metadata:{
-                          item_width: itemsRef.current[index].offsetWidth || 0,
+                          item_width: (itemsRef.current[index].offsetWidth + 6) || 0,
                         }
                         });
                     } else {
@@ -93,15 +93,16 @@ const GridTabContent = ({
                         hidden: false,
                         order: index,
                         metadata:{
-                          item_width: itemsRef.current[index].offsetWidth || 0,
+                          item_width: (itemsRef.current[index].offsetWidth + 6) || 0,
                         }
                         });
                     }
                   }
               }
 
-
-              return calculateVisibleItems(allItems, containerWidth, entity)
+              
+              const result  = calculateVisibleItems(allItems, containerWidth, entity)
+              return result
 
           };
     
@@ -150,7 +151,7 @@ const GridTabContent = ({
         <div
           ref={parentRef}
           className={cn(
-            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative max-w-[70vw]`, `overflow-hidden`,
+            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative lg:max-w-[70vw] max-w-[76vw]`, `overflow-hidden`,
           )}
         >
           <Sortable

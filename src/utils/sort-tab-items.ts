@@ -201,7 +201,7 @@ export const calculateVisibleItems = (items: any[], containerWidth: number, defa
           // Sort non-active visible items by priority (you can change this logic)
           const nonActiveVisibleItems = result
               .filter(item => !item.current && !item.hidden && item.name?.toLowerCase() !== entity_name)
-              .sort((a, b) => (b.metadata?.item_width || 0) - (a.metadata?.item_width || 0)); // Hide widest items first
+              .sort((a, b) => (b.metadata?.item_width || 0) - ((a.metadata?.item_width) || 0)); // Hide widest items first
           
           // Hide items until we fit
           for (const item of nonActiveVisibleItems) {
