@@ -46,7 +46,6 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     resolution = null
   } = time || {};
 
-  // const { refetch: fetchUniqueSourceIP } = api.packet.getUniqueSourceIP.useQuery(
   //   // {
   //   //   device_id: params?.id || '',
   //   //   // time_range: getLastTimeStamp(20, 'second' ) as any,
@@ -65,43 +64,6 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
   //     enabled: false, // Disable automatic query execution
   //   }
   // );
-
-
-  const { data } = api.packet.getBandwidthOfSourceIP.useQuery(
-
-    {
-      device_id: params?.id || '',
-      // time_range: getLastTimeStamp(20, 'second' ) as any,
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      bucket_size: resolution,
-      source_ips: unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []
-      // source_ips: unique_source_ip
-    },
-    {
-      enabled: !!unique_source_ips?.slice(current_index, current_index + 10)?.length
-    }
-    // {
-    //   device_id: '8f77d088-e9a7-41be-9072-154d9a6cd541',
-    //   time_range: [ '2025-03-24 16:00:00+00', '2025-03-26 05:15:32+00' ],
-    //   bucket_size: '12h',
-    //   source_ips: [
-    //     '10.100.0.77',
-    //     '10.100.0.78',
-    //     '10.100.0.79',
-    //     '10.100.0.80',
-    //     '10.100.0.81',
-    //     '10.100.0.83',
-    //     '10.100.0.86',
-    //     '10.100.0.90',
-    //     '10.100.0.91',
-    //     '10.100.0.92'
-    //   ]
-    // }
-
-    // {
-    //   enabled: false, // Disable automatic query execution
-    // }
-  );
 
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
@@ -159,9 +121,11 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return;
-    if (filterId) {
-      setTimeout(async () => {
-        // const aa = await fetchUniqueSourceIP();
+
+
+    if (!filterId) return
+
+      const a = async() => {
         const data = await getUniqueSourceActions.mutateAsync({
           device_id: params?.id || '',
           time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
@@ -169,29 +133,49 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
           bucket_size: resolution,
         })
         
+        console.log('%c Line:137 🥖 data', 'color:#e41a6a', data);
         setUniqueSourceIP(data as string[]);
+        setCurrentIndex(0);
         setLoading(false);
+      }
+
+
+      setTimeout(async () => {
+        // const aa = await fetchUniqueSourceIP();
+        a()
+       
       }, 500
       );
-    }
+
+    
+    const interval_ = setInterval(() => {
+      // setRefetch(Math.random());
+      a()
+    }, 15000);
 
     const interval = setInterval(() => {
       setRefetch(Math.random());
-    }, 5000);
+    }, 2000);
 
     // Clear the interval when the component unmounts
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval_);
+      clearInterval(interval)};
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length]);
 
 
+  console.log('%c Line:169 🌰 unique_source_ips', 'color:#4fff4B', unique_source_ips);
   useEffect(() => {
 
     
-    if (current_index + 10 == unique_source_ips.length) return;
+    console.log('%c Line:169 🥖', 'color:#2eafb0', current_index, unique_source_ips.length);
+    if (current_index + 10 > unique_source_ips.length) return;
     setCurrentIndex(current_index + 10);
 
 
     const fetchBandwidth = async () => {
+  console.log('%c Line:200 🥐 _refetch', 'color:#6ec1c2', _refetch, unique_source_ips);
+
       if (!unique_source_ips || unique_source_ips.length === 0) {
         console.warn("No source IPs available for fetching bandwidth");
         return;
@@ -199,16 +183,24 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
       // const bandwidth = await callHehe(unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []);
 
+      console.log('%c Line:181 🍓', 'color:#b03734',  unique_source_ips?.slice(current_index, current_index + 10));
       const bandwidth = await getBandwidthActions.mutateAsync({
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
+        // time_range: getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any,
         bucket_size: resolution,
-        source_ips: unique_source_ips?.slice(current_index, current_index + 10) as string[] as string[] || []
+        source_ips: unique_source_ips?.slice(current_index, current_index + 10) || []
         // source_ips: unique_source_ip
       },)
       
 
       if (!bandwidth) return;
+      console.log('%c Line:198 🍇 current_index', 'color:#6ec1c2', current_index);
+      if(current_index  == 0) {
+        setBandwidth(bandwidth?.data || []);
+        return;
+      };
+
 
       setBandwidth((prev: any) => [
         ...(prev || []),
@@ -216,7 +208,8 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
       ]);
     };
     fetchBandwidth();
-  }, [_refetch, unique_source_ips?.length, time_count, time_unit, resolution]);
+  }, [_refetch]);
+  console.log('%c Line:202 🌶 _refetch', 'color:#465975', _refetch);
 
   useEffect(() => {
     if (!bandwidth || bandwidth.length === 0) return;
@@ -227,7 +220,7 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
   }, [bandwidth]); // Dependency array ensures this runs when bandwidth changes
 
   const state = {
-    elements: flowData,
+     flowData,
     loading
   } as any;
 

@@ -28,7 +28,8 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
   return (value / maxValue) * maxPixels;
 }
 
-const getColorForValue = (value: number, maxBandwidth: number) => {
+const getColorForValue = (value: number) => {
+  const maxBandwidth = 1000000;
   if (value >= maxBandwidth) {
     return 'red'
   } else if (value > maxBandwidth / 2) {
