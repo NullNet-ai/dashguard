@@ -151,11 +151,11 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     const interval_ = setInterval(() => {
       // setRefetch(Math.random());
       a()
-    }, 10000);
+    }, 15000);
 
     const interval = setInterval(() => {
       setRefetch(Math.random());
-    }, 1000);
+    }, 2000);
 
     // Clear the interval when the component unmounts
     return () => {
