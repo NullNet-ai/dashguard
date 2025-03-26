@@ -67,7 +67,7 @@ export const useColumnConditions = (
 
         return (
           <>
-            {flexRender(
+            {flexRender<any>(
               columnConfig?.cell ||
                 ((props: any) => <div>{String(props.getValue())}</div>),
               {

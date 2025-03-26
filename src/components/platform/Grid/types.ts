@@ -254,6 +254,7 @@ export interface IExpandedRow {
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
   parentExpanded?: IExpandedRow[];
+  grouping?: GroupingState;
 }
 
 export interface IGridGroupingExpansionProps {
