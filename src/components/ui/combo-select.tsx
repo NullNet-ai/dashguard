@@ -66,6 +66,11 @@ export interface ComboSelectProps {
         scrollThreshold?: number;
         endMessage?: React.ReactNode;
     };
+    externalQuery?: string;
+    setExternalQuery?: (query: string) => void;
+    externalOpen?: boolean;
+    setExternalOpen?: (open: boolean) => void;
+    forceUpdate?: number; // A counter to force re-render when external data changes
 }
 
 export function ComboSelect({
@@ -89,9 +94,21 @@ export function ComboSelect({
     onQueryChange,
     testId,
     infiniteScroll,
+    externalQuery,
+    setExternalQuery,
+    externalOpen,
+    setExternalOpen,
+    forceUpdate,
 }: ComboSelectProps) {
-    const [query, setQuery] = useState("");
-    const [open, setOpen] = useState(false);
+    // Use external state if provided, otherwise use local state
+    const [localQuery, setLocalQuery] = useState("");
+    const [localOpen, setLocalOpen] = useState(false);
+
+    // Use either external or local state
+    const query = externalQuery !== undefined ? externalQuery : localQuery;
+    const setQuery = setExternalQuery || setLocalQuery;
+    const open = externalOpen !== undefined ? externalOpen : localOpen;
+    const setOpen = setExternalOpen || setLocalOpen;
 
     // InfiniteScroll state
     const initialLimit = infiniteScroll?.initialLimit || 50;
@@ -151,6 +168,11 @@ export function ComboSelect({
         }
     }, [query, onQueryChange]);
 
+    useEffect(() => {
+        if (forceUpdate !== undefined) {
+            setDisplayLimit(initialLimit);
+        }
+    }, [forceUpdate, initialLimit]);
     const filteredOptions = query === ""
         ? options
         : options.filter((option) =>
@@ -219,6 +241,7 @@ export function ComboSelect({
                     readOnly={inputReadOnly}
                     disabled={disabled}
                     ref={setReferenceElement}
+                    autoComplete='off'
                     className={cn(
                         "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
                         {
