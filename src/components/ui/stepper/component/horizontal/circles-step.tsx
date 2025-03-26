@@ -28,13 +28,13 @@ export const HorizontalCirclesStep = ({
   customDetails
 }: HorizontalCirclesStepProps) => {
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="flex items-center w-full justify-center">
+    <div className="flex flex-col items-center w-full relative">
+      <div className="flex items-center w-full justify-center relative z-20">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <div
               className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full border hover:opacity-80",  // Add hover effect here
+                "flex h-6 w-6 items-center justify-center rounded-full border hover:opacity-80 relative z-10",
                 status === "complete"
                   ? "bg-primary text-primary-foreground border-primary"
                   : status === "current"
@@ -47,7 +47,8 @@ export const HorizontalCirclesStep = ({
               ) : status === "current" ? (
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               ) : (
-                <div className="h-2 w-2 rounded-full bg-gray-300"></div>
+                // Removing the gray circle for inactive steps
+                <div className="h-2 w-2 rounded-full bg-transparent"></div>
               )}
             </div>
           </TooltipTrigger>
@@ -65,7 +66,7 @@ export const HorizontalCirclesStep = ({
 
       {/* Add connecting line for circles variant */}
       {!isLastStep && (
-        <div className="absolute top-3 left-1/2 w-full h-0.5 -z-10">
+        <div className="absolute top-3 left-1/2 w-full h-0.5 z-0">
           <div className={cn(
             "h-0.5 w-full",
             index < currentStep ? "bg-primary" : "bg-gray-200"
