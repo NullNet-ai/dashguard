@@ -522,6 +522,58 @@ export const packetRouter = createTRPCRouter({
       return { source_ip, destination_ip, result: res?.data }
     }, { concurrency: 10 })
   }),
+  getBandwidthOfSourceIPandDestinationIPAction: privateProcedure.input(z.object({ packet_data: z.any() })).mutation(async ({ input, ctx }) => {
+    const { packet_data } = input
+    return await Bluebird.map(packet_data, async (item: { source_ip: string, destination_ip: string }) => {
+      const { source_ip, destination_ip } = item
+      const res = await ctx.dnaClient.aggregate({
+      // @ts-expect-error - entity is not defined in the type
+        query: {
+          entity: 'packets',
+          aggregations: [
+            {
+              aggregation: 'SUM',
+              aggregate_on: 'total_length',
+              bucket_name: 'bandwidth',
+            },
+          ],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'source_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                source_ip,
+              ],
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'destination_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                destination_ip,
+              ],
+            },
+          ],
+          joins: [],
+          limit: 20,
+          order: {
+            order_by: 'bucket',
+            order_direction: EOrderDirection.DESC,
+          },
+        },
+        token: ctx.token.value,
+      }).execute()
+
+      return { source_ip, destination_ip, result: res?.data }
+    }, { concurrency: 10 })
+  }),
   // getBandwidthOfSourceIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
   //   const { packet_data } = input
   //   return await Bluebird.map(packet_data, async (item: { source_ip: string }) => {
@@ -630,7 +682,161 @@ export const packetRouter = createTRPCRouter({
       _query
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).query(async ({ input, ctx }) => {
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()),  bucket_size: z.string(), source_ips: z.array(z.string()) })).query(async ({ input, ctx }) => {
+    const { device_id, time_range, bucket_size = '1h', source_ips } = input
+    
+    
+    
+
+    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
+
+      const res = await ctx.dnaClient.aggregate({
+        query: {
+          entity: 'packets',
+          aggregations: [
+            {
+              aggregation: 'SUM',
+              aggregate_on: 'total_length',
+              bucket_name: 'bandwidth',
+            },
+          ],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'timestamp',
+              entity: 'packets',
+              operator: EOperator.IS_BETWEEN,
+              values: time_range,
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria' as const,
+              field: 'source_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                source_ip,
+              ],
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          joins: [],
+          bucket_size,
+          order: {
+            order_by: 'bucket',
+            order_direction: EOrderDirection.DESC,
+          },
+          // timezone,
+        },
+        token: ctx.token.value,
+
+      }).execute()
+
+      
+
+      return { source_ip, result: res?.data }
+    }, { concurrency: 100 })
+
+    
+    
+    
+    
+    return{data: ab}
+  }),
+
+
+  getBandwidthOfSourceIPAction: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()),  bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, bucket_size = '1h', source_ips } = input
+    
+    
+    
+
+    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
+
+      const res = await ctx.dnaClient.aggregate({
+        query: {
+          entity: 'packets',
+          aggregations: [
+            {
+              aggregation: 'SUM',
+              aggregate_on: 'total_length',
+              bucket_name: 'bandwidth',
+            },
+          ],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'timestamp',
+              entity: 'packets',
+              operator: EOperator.IS_BETWEEN,
+              values: time_range,
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria' as const,
+              field: 'source_ip',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [
+                source_ip,
+              ],
+            },
+            {
+              type: 'operator',
+              operator: EOperator.AND,
+            },
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'packets',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          joins: [],
+          bucket_size,
+          order: {
+            order_by: 'bucket',
+            order_direction: EOrderDirection.DESC,
+          },
+          // timezone,
+        },
+        token: ctx.token.value,
+
+      }).execute()
+
+      
+
+      return { source_ip, result: res?.data }
+    }, { concurrency: 100 })
+
+    
+    
+    
+    
+    return{data: ab}
+  }),
+
+  getUniqueSourceIPMutation: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
+
+    
+    
     
     // return []
     const { device_id, time_range, filter_id, bucket_size = '1h' } = input
@@ -718,14 +924,21 @@ export const packetRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             track_total_records: true,
+            distinct_by: "source_ip",
             pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
             ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
             order: {
               starts_at,
-              limit: group_advance_filters?.length > 1? limit : 5,
+              limit: group_advance_filters?.length > 1? limit : 1000,
               by_field: 'code',
               by_direction: EOrderDirection.DESC,
             },
+            multiple_sort: [
+              {
+                  "by_field": "packets.source_ip",
+                  "by_direction": EOrderDirection.ASC
+              }
+          ] 
           },
 
         })
@@ -733,14 +946,13 @@ export const packetRouter = createTRPCRouter({
 
 
       const _packets = packets?.data || []
-      
       const _packets_length = _packets.length
 
       
       const sourceIPs = new Set()
       for (let i = 0; i < _packets_length; i++) {
         if (_packets?.[i]) {
-          sourceIPs.add((_packets[i] as any).source_ip)
+          sourceIPs.add((_packets[i]?.packets as any).source_ip)
         }
       }
 
@@ -756,74 +968,7 @@ export const packetRouter = createTRPCRouter({
     await filterPackets(0)
 
     
-
-    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
-      
-
-      const res = await ctx.dnaClient.aggregate({
-        query: {
-          entity: 'packets',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_length',
-              bucket_name: 'bandwidth',
-            },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'timestamp',
-              entity: 'packets',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria' as const,
-              field: 'source_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                source_ip,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'device_id',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [device_id],
-            },
-          ],
-          joins: [],
-          bucket_size,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
-          },
-          // timezone,
-        },
-        token: ctx.token.value,
-
-      }).execute()
-
-      
-
-      return { source_ip, result: res?.data }
-    }, { concurrency: 10 })
-
-    
-    
-    
-    return ab
+    return source_ips || []
   }),
 
 })
