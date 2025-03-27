@@ -4,12 +4,10 @@ import {
 } from '@dna-platform/common-orm'
 import Bluebird from 'bluebird'
 import moment from 'moment-timezone'
-import { object, z } from 'zod'
+import { z } from 'zod'
 
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
-import { IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
-import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
 
