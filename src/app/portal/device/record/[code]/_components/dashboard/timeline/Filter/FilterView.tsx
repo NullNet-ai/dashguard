@@ -46,7 +46,7 @@ const FilterView = () => {
   }
 
   return (
-    <div className="p-4 ps-0 pb-0 flex flex-col gap-4">
+    <div className="p-4 ps-0 pb-0 flex flex-col gap-4 sticky">
       <div className="flex">
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
