@@ -108,7 +108,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const { fetchData, data, error, isLoading } = useFetchGridData(
     {
       current: pagination?.current_page,
-      limit: pagination?.limit_per_page,
+      limit: groupFields?.[0]?.field ? 500 : pagination?.limit_per_page,
       entity: config.entity,
       pluck: config.searchConfig?.query_params?.pluck,
       sorting: newSorting?.length
