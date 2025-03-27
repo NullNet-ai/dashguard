@@ -29,8 +29,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE');
   const [searchBy, setSearchBy] = useState();
   const [bandwidth, setBandwidth] = useState<any>([]);
-  const [flowData, setFlowData] = useState<any>([]);
-  const [_refetch, setRefetch] = React.useState(Math.random());
   const [loading, setLoading] = useState<boolean>(false);
   const [time, setTime] = useState<Record<string, any> | null>(null);
   const [current_index, setCurrentIndex] = useState<number>(0);
@@ -60,10 +58,9 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
   useEffect(() => {
     if (!eventEmitter) return;
+
     const setFID = async (data: any) => {
-
       if (typeof data !== 'string') return;
-
       setFilterID(data);
     };
     const setSBy = (data: any) => {
@@ -80,41 +77,39 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
 
   useEffect(() => {
+    if(!filterId) return;
 
-    if (filterId) {
-      setLoading(true);
-      const fetchTimeUnitandResolution = async () => {
-        const {
-          data: time_unit_resolution
-        } = await refetchTimeUnitandResolution();
+    setLoading(true);
+    const fetchTimeUnitandResolution = async () => {
+      const {
+        data: time_unit_resolution
+      } = await refetchTimeUnitandResolution();
 
-        const { time, resolution = '1h' } = time_unit_resolution || {};
-        const { time_count = 12, time_unit = 'hour' } = time || {};
-        setTime({
-          time_count,
-          time_unit: time_unit as 'hour',
-          resolution: resolution as '1h'
-        });
-      };
-      fetchTimeUnitandResolution();
-    }
+      const { time, resolution = '1h' } = time_unit_resolution || {};
+      const { time_count = 12, time_unit = 'hour' } = time || {};
+      setTime({
+        time_count,
+        time_unit: time_unit as 'hour',
+        resolution: resolution as '1h'
+      });
+    };
+    fetchTimeUnitandResolution();
+
   }, [filterId, (searchBy ?? [])?.length]);
 
+  
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return;
-
-
     if (!filterId) return
 
-      const a = async() => {
+      const fetchUniqueSourceIP = async() => {
         const data = await getUniqueSourceActions.mutateAsync({
           device_id: params?.id || '',
           time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
           filter_id: filterId,
           bucket_size: resolution,
         })
-        
-        
+
         setUniqueSourceIP(data as string[]);
         setCurrentIndex(0);
         setLoading(false);
@@ -122,51 +117,36 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
 
       setTimeout(async () => {
-        // const aa = await fetchUniqueSourceIP();
-        a()
-       
-      }, 500
-      );
+        fetchUniqueSourceIP()
+      }, 500);
 
     
     const interval_ = setInterval(() => {
-      // setRefetch(Math.random());
-      a()
+      fetchUniqueSourceIP()
     }, 15000);
 
-    const interval = setInterval(() => {
-      setRefetch(Math.random());
-    }, 20000);
-
-    // Clear the interval when the component unmounts
-    return () => {
-      clearInterval(interval_);
-      // clearInterval(interval)
-    };
+    return () => clearInterval(interval_);
+ 
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length]);
 
 
   useEffect(() => {
-
+    if (!unique_source_ips || unique_source_ips.length === 0) {
+      console.warn("No source IPs available for fetching bandwidth");
+      return;
+    }
     if (current_index + 10 > unique_source_ips.length) return;
     setCurrentIndex(current_index + 10);
+
     const fetchBandwidth = async () => {
-      if (!unique_source_ips || unique_source_ips.length === 0) {
-        console.warn("No source IPs available for fetching bandwidth");
-        return;
-      }
-      
       const bandwidth = await getBandwidthActions.mutateAsync({
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-        // time_range: getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any,
         bucket_size: resolution,
         source_ips: unique_source_ips
         // source_ips: unique_source_ips?.slice(current_index, current_index + 10) || []
-        // source_ips: unique_source_ip
       },)
       
-
       if (!bandwidth) return;
       
       if(current_index  == 0) {
@@ -180,20 +160,22 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
         ...(bandwidth?.data || []),
       ]);
     };
+
+
     fetchBandwidth();
-  }, [_refetch]);
   
 
-  useEffect(() => {
-    if (!bandwidth || bandwidth.length === 0) return;
+    const interval = setInterval(() => {
+      fetchBandwidth()
+    }, 15000);
 
-    // Generate flow data whenever bandwidth is updated
-    // const updatedFlowData = generateFlowData(bandwidth)
-    setFlowData(bandwidth as any);
-  }, [bandwidth]); // Dependency array ensures this runs when bandwidth changes
+    return () => clearInterval(interval);
 
+
+  }, [unique_source_ips]);
+  
   const state = {
-     flowData,
+     flowData: bandwidth,
     loading
   } as any;
 
