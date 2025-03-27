@@ -46,24 +46,6 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     resolution = null
   } = time || {};
 
-  //   // {
-  //   //   device_id: params?.id || '',
-  //   //   // time_range: getLastTimeStamp(20, 'second' ) as any,
-  //   //   time_range: getLastTimeStamp({count: time_count, unit: time_unit,add_remaining_time: true } ) as any,
-  //   //   filter_id: filterId,
-  //   //   bucket_size: resolution,
-  //   // },
-  //   {
-  //     device_id: '8f77d088-e9a7-41be-9072-154d9a6cd541',
-  //     time_range: ['2025-03-24 16:00:00+00', '2025-03-26 05:03:35+00'],
-  //     filter_id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
-  //     bucket_size: '12h'
-  //   }
-  //   ,
-  //   {
-  //     enabled: false, // Disable automatic query execution
-  //   }
-  // );
 
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
@@ -75,7 +57,6 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     }
   );
 
-  useEffect(() => { }, []);
 
   useEffect(() => {
     if (!eventEmitter) return;
@@ -155,12 +136,13 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
 
     const interval = setInterval(() => {
       setRefetch(Math.random());
-    }, 2000);
+    }, 20000);
 
     // Clear the interval when the component unmounts
     return () => {
       clearInterval(interval_);
-      clearInterval(interval)};
+      // clearInterval(interval)
+    };
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length]);
 
 
@@ -179,7 +161,8 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         // time_range: getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any,
         bucket_size: resolution,
-        source_ips: unique_source_ips?.slice(current_index, current_index + 10) || []
+        source_ips: unique_source_ips
+        // source_ips: unique_source_ips?.slice(current_index, current_index + 10) || []
         // source_ips: unique_source_ip
       },)
       

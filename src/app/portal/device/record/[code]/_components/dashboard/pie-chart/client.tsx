@@ -63,8 +63,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    const interval = setInterval(fetchChartData, 1000)
-    return () => clearInterval(interval)
+    // const interval = setInterval(fetchChartData, 1000)
+    // return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Update previousTrafficRef whenever trafficData.traffic changes
