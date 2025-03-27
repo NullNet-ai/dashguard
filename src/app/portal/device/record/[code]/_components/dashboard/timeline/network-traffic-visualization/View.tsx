@@ -7,6 +7,7 @@ import { useFetchNetworkFlow } from './Provider'
 import { Loader } from '~/components/ui/loader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import moment from 'moment'
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0;
@@ -68,6 +69,20 @@ export default function NetworkFlowView() {
         <div className=" ">
           {/* ReactFlow with larger canvas to allow scrolling */}
           <div className="h-full container-react-flow flex flex-col gap-y-2 overflow-x-scroll pb-12">
+
+
+          <InfiniteScroll
+    dataLength={flowData?.length || 0}
+    next={() => {
+
+      console.log('%c Line:78 🍊', 'color:#2eafb0');
+    }}
+    style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+    inverse={true} //
+    hasMore={true}
+    loader={<h4>Loading...</h4>}
+    scrollableTarget="scrollableDiv"
+  >
               {flowData?.map(el => {
                 return <div className='flex-row flex items-center'>
                   <> 
@@ -122,6 +137,8 @@ export default function NetworkFlowView() {
                   </div>
                 </div>
               })}
+
+</InfiniteScroll>
           </div>
         </div>
       </div>

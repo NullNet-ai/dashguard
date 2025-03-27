@@ -165,11 +165,11 @@ const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation(
     fetchBandwidth();
   
 
-    const interval = setInterval(() => {
-      fetchBandwidth()
-    }, 15000);
+    // const interval = setInterval(() => {
+    //   fetchBandwidth()
+    // }, 15000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
 
 
   }, [unique_source_ips]);
