@@ -233,6 +233,12 @@ export const contactRouter = createTRPCRouter({
               separator: ' ',
               entity: 'contacts',
             },
+            {
+              fields: ['updated_date', 'updated_time'],
+              field_name: 'updated_date_time',
+              separator: ' ',
+              entity: 'contacts',
+            },
           ],
         },
       })
