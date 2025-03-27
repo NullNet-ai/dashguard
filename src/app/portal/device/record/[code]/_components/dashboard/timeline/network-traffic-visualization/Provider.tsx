@@ -5,9 +5,11 @@ import React, {
   useState,
   type PropsWithChildren,
 } from 'react'
+
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
+
 import { type INetworkFlowContext } from './types'
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
@@ -30,10 +32,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
-  
 
-  const getBandwidthActions = api.packet.getBandwidthOfSourceIPAction.useMutation()
-  const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation()
+  const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
+  const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
 
   const {
     time_count = null,
@@ -86,7 +87,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!eventEmitter) return
 
-    const setFID = async (data: any) => {
+    const setFID = (data: any) => {
       if (typeof data !== 'string') return
       setFilterID(data)
     }
@@ -131,7 +132,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
-        bucket_size: resolution,
       })
 
       setUniqueSourceIP(data as string[])
@@ -140,8 +140,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
 
     setTimeout(() => fetchUniqueSourceIP(), 500) // delay to wait for the searchBy to be set in redis
-
-
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {

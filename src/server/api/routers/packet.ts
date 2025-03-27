@@ -564,46 +564,6 @@ export const packetRouter = createTRPCRouter({
       return { source_ip, destination_ip, result: res?.data }
     }, { concurrency: 10 })
   }),
-  // getBandwidthOfSourceIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
-  //   const { packet_data } = input
-  //   return await Bluebird.map(packet_data, async (item: { source_ip: string }) => {
-  //     const { source_ip } = item
-
-  //     const res = await ctx.dnaClient.aggregate({
-  //     // @ts-expect-error - entity is not defined in the type
-  //       query: {
-  //         entity: 'packets',
-  //         aggregations: [
-  //           {
-  //             aggregation: 'SUM',
-  //             aggregate_on: 'total_length',
-  //             bucket_name: 'bandwidth',
-  //           },
-  //         ],
-  //         advance_filters: [
-  //           {
-  //             type: 'criteria',
-  //             field: 'source_ip',
-  //             entity: 'packets',
-  //             operator: EOperator.EQUAL,
-  //             values: [
-  //               source_ip,
-  //             ],
-  //           },
-  //         ],
-  //         joins: [],
-  //         limit: 20,
-  //         order: {
-  //           order_by: 'bucket',
-  //           order_direction: EOrderDirection.DESC,
-  //         },
-  //       },
-  //       token: ctx.token.value,
-  //     }).execute()
-
-  //     return { source_ip, result: res?.data }
-  //   }, { concurrency: 10 })
-  // }),
   filterPackets: privateProcedure.input(z.record(z.unknown())).query(async ({ input, ctx }) => {
     const {
       limit = 50,
@@ -670,7 +630,7 @@ export const packetRouter = createTRPCRouter({
       _query,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).query(async ({ input, ctx }) => {
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, bucket_size = '1h', source_ips } = input
 
     const ab = await Bluebird.map(source_ips, async (source_ip: string) => {
@@ -735,73 +695,8 @@ export const packetRouter = createTRPCRouter({
     return { data: ab }
   }),
 
-  getBandwidthOfSourceIPAction: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, bucket_size = '1h', source_ips } = input
-
-    const ab = await Bluebird.map(source_ips, async (source_ip: string) => {
-      const res = await ctx.dnaClient.aggregate({
-        query: {
-          entity: 'packets',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_length',
-              bucket_name: 'bandwidth',
-            },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'timestamp',
-              entity: 'packets',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria' as const,
-              field: 'source_ip',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [
-                source_ip,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'device_id',
-              entity: 'packets',
-              operator: EOperator.EQUAL,
-              values: [device_id],
-            },
-          ],
-          joins: [],
-          bucket_size,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
-          },
-          // timezone,
-        },
-        token: ctx.token.value,
-
-      }).execute()
-
-      return { source_ip, result: res?.data }
-    }, { concurrency: 100 })
-
-    return { data: ab }
-  }),
-
-  getUniqueSourceIPMutation: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, filter_id, bucket_size = '1h' } = input
+  getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, filter_id } = input
 
     let source_ips: string[] = []
 
@@ -885,8 +780,8 @@ export const packetRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             track_total_records: true,
-            pluck: ['source_ip',  'timestamp'],
-            ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
+            pluck: ['source_ip', 'timestamp'],
+            ...(group_advance_filters?.length > 1 ? { group_advance_filters } : { advance_filters: group_advance_filters?.[0]?.filters }),
             order: {
               starts_at,
               limit,
@@ -894,20 +789,20 @@ export const packetRouter = createTRPCRouter({
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
             },
-          //   multiple_sort: [
-          //     {
-          //         "by_field": "packets.source_ip",
-          //         "by_direction": EOrderDirection.ASC
-          //     }
-          // ] 
-      
+            //   multiple_sort: [
+            //     {
+            //         "by_field": "packets.source_ip",
+            //         "by_direction": EOrderDirection.ASC
+            //     }
+            // ]
+
           },
 
         }).groupBy({
           query: { fields: [
-              "source_ip"
-          ]}
-      })
+            'source_ip',
+          ] },
+        })
         .execute()
 
       const _packets = packets?.data || []
@@ -921,8 +816,7 @@ export const packetRouter = createTRPCRouter({
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
-      console.log('%c Line:961 🥖 source_ips', 'color:#b03734', source_ips);
-      
+      console.log('%c Line:961 🥖 source_ips', 'color:#b03734', source_ips)
 
       if (_packets_length == limit) {
         const new_start = starts_at + limit
