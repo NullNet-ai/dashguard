@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import '@xyflow/react/dist/style.css'
 
@@ -28,7 +28,7 @@ function getMaxBandwidth(data: any[]) {
 }
 
 function getPercentage(value: number, maxValue: number, maxPixels = 300) {
-  if (maxValue === 0) return 0 // Avoid division by zero
+  if (maxValue === 0) return 0 
   return (value / maxValue) * maxPixels
 }
 
@@ -54,11 +54,9 @@ const getColorForValue = (value: number) => {
 const maxWidth = 300
 
 export default function NetworkFlowView() {
-  const { state, fetchMoreData } = useFetchNetworkFlow()
-  const { flowData, loading } = state ?? {}
-  console.log('%c Line:59 🥔 flowData', 'color:#7f2b82', flowData)
+  const { state,  } = useFetchNetworkFlow()
+  const { flowData, loading, fetchMoreData, unique_source_ips } = state ?? {}
 
-  const maxdata: number = getMaxBandwidth(flowData ?? []) ?? 0
 
   if (loading) return (
     <Loader
@@ -76,10 +74,10 @@ export default function NetworkFlowView() {
         dataLength = { (flowData || []).length }
         endMessage = { <p style = { { textAlign: 'center' } }><b>{"Yay! You have seen it all"}</b></p> }
         hasMore = { true }
-        loader = { <h4>{"Loading..."}</h4> }
-        next = { fetchMoreData }
+        loader = {unique_source_ips?.length == flowData?.length ? null: <h4>{"Loading..."}</h4> }
+        next = { fetchMoreData as any }
         scrollableTarget = "scrollableDiv"
-        scrollThreshold = { 0.5 } // Load more when 80% scrolled
+        scrollThreshold = { 0.5 }
       >
         {flowData?.map((el, index) => {
           return (
@@ -119,7 +117,7 @@ export default function NetworkFlowView() {
                           <div
                             className = 'rounded-md h-[20px] flex-shrink-0'
                             style = { {
-                              width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
+                              width: `${getPercentage(parseInt(res.bandwidth, 10), 1000000)}px`,
                               maxWidth: `${maxWidth}px`,
                               backgroundColor: getColorForValue(Number(res.bandwidth)),
                             }}

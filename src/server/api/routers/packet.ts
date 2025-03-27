@@ -885,25 +885,29 @@ export const packetRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             track_total_records: true,
-            distinct_by: 'source_ip',
-            pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
-            ...(group_advance_filters?.length > 1 ? { group_advance_filters } : { advance_filters: group_advance_filters?.[0]?.filters }),
+            pluck: ['source_ip',  'timestamp'],
+            ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
             order: {
               starts_at,
-              // limit: group_advance_filters?.length > 1 ? limit : 1000,
               limit,
-              by_field: 'code',
+              // limit: group_advance_filters?.length > 1? limit : 50,
+              by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
             },
-            multiple_sort: [
-              {
-                by_field: 'packets.source_ip',
-                by_direction: EOrderDirection.ASC,
-              },
-            ],
+          //   multiple_sort: [
+          //     {
+          //         "by_field": "packets.source_ip",
+          //         "by_direction": EOrderDirection.ASC
+          //     }
+          // ] 
+      
           },
 
-        })
+        }).groupBy({
+          query: { fields: [
+              "source_ip"
+          ]}
+      })
         .execute()
 
       const _packets = packets?.data || []
@@ -917,6 +921,8 @@ export const packetRouter = createTRPCRouter({
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
+      console.log('%c Line:961 🥖 source_ips', 'color:#b03734', source_ips);
+      
 
       if (_packets_length == limit) {
         const new_start = starts_at + limit

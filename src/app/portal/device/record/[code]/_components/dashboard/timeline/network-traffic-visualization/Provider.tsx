@@ -5,13 +5,10 @@ import React, {
   useState,
   type PropsWithChildren,
 } from 'react'
-
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
-
-import { generateFlowData } from './functions/generateFlowData'
-import { Edge, type INetworkFlowContext } from './types'
+import { type INetworkFlowContext } from './types'
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -33,6 +30,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
+  
 
   const getBandwidthActions = api.packet.getBandwidthOfSourceIPAction.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIPMutation.useMutation()
@@ -52,21 +50,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
   )
 
-  const fetchMoreData = async () => {
-    if (!unique_source_ips || unique_source_ips.length === 0) {
-      console.warn('No source IPs available for fetching bandwidth')
-      return
-    }
-
-    if (current_index + 2 > unique_source_ips.length) return
-    setCurrentIndex(current_index + 2)
-
+  const fetchBandwidth = async (add_data_count: number) => {
     const bandwidth = await getBandwidthActions.mutateAsync({
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
-      // source_ips: unique_source_ips,
-      source_ips: unique_source_ips?.slice(current_index, current_index + 2) || [],
+      source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
     },)
 
     if (!bandwidth) return
@@ -80,6 +69,18 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       ...(prev || []),
       ...(bandwidth?.data || []),
     ])
+  }
+
+  const fetchMoreData = async () => {
+    if (!unique_source_ips || unique_source_ips.length === 0) {
+      console.warn('No source IPs available for fetching bandwidth')
+      return
+    }
+
+    if (current_index + 2 > unique_source_ips.length) return
+    setCurrentIndex(current_index + 2)
+
+    fetchBandwidth(2)
   }
 
   useEffect(() => {
@@ -138,15 +139,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setLoading(false)
     }
 
-    setTimeout(async () => {
-      fetchUniqueSourceIP()
-    }, 500)
+    setTimeout(() => fetchUniqueSourceIP(), 500) // delay to wait for the searchBy to be set in redis
 
-    // const interval_ = setInterval(() => {
-    //   fetchUniqueSourceIP()
-    // }, 15000)
 
-    // return () => clearInterval(interval_)
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
@@ -154,50 +149,24 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       console.warn('No source IPs available for fetching bandwidth')
       return
     }
-    if (current_index + 20 > unique_source_ips.length) return
+    if (bandwidth?.length == unique_source_ips.length) return
     setCurrentIndex(current_index + 20)
 
-    const fetchBandwidth = async () => {
-      const bandwidth = await getBandwidthActions.mutateAsync({
-        device_id: params?.id || '',
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-        bucket_size: resolution,
-        // source_ips: unique_source_ips,
-        source_ips: unique_source_ips?.slice(current_index, current_index + 20) || [],
-      },)
-
-      if (!bandwidth) return
-
-      if (current_index == 0) {
-        setBandwidth(bandwidth?.data || [])
-        return
-      }
-
-      setBandwidth((prev: any) => [
-        ...(prev || []),
-        ...(bandwidth?.data || []),
-      ])
-    }
-
-    fetchBandwidth()
-
-    // const interval = setInterval(() => {
-    //   fetchBandwidth()
-    // }, 15000);
-
-    // return () => clearInterval(interval);
+    fetchBandwidth(20)
   }, [unique_source_ips])
 
   const state = {
     flowData: bandwidth,
     loading,
+    unique_source_ips,
+    fetchMoreData,
+
   } as any
 
   return (
     <NetworkFlowContext.Provider
       value={{
         state,
-        fetchMoreData,
       } }
     >
       {children}

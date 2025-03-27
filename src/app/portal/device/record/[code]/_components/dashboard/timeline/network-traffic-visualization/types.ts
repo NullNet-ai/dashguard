@@ -35,6 +35,8 @@ export interface IBandwidth {
 export interface IState {
   flowData: any[]
   loading: boolean
+  fetchMoreData: () => any
+  unique_source_ips: string[]
 }
 
 export interface IAction {
