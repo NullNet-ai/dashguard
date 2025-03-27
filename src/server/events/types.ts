@@ -1,4 +1,4 @@
-import { TMethod } from '../utils/createSchedule'
+import { TMethod } from '../../lib/createSchedule'
 
 // Event Types
 export enum EEventType {

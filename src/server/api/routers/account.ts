@@ -25,7 +25,7 @@ import {
   TMethod,
   createSchedule,
   dateToCron,
-} from '~/server/utils/createSchedule';
+} from '~/lib/createSchedule';
 
 const {
   MAILER_AUTH_USER,
