@@ -7,11 +7,11 @@ import moment from 'moment-timezone'
 import { object, z } from 'zod'
 
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
+import { IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
-import { IAdvanceFilter } from '~/components/platform/Grid/Search/types';
 
 interface InputData {
   bucket: string
@@ -24,45 +24,45 @@ interface OutputData {
 }
 
 export function cleanFilter(filters: any) {
-  let extracted = {
-    "Time Range": null,
-    "Resolution": null,
-    "Graph Type": null
-  };
+  const extracted = {
+    'Time Range': null,
+    'Resolution': null,
+    'Graph Type': null,
+  }
 
-  let newFilters = [];
-  let skipNext = false;
+  const newFilters = []
+  let skipNext = false
 
   for (let i = 0; i < filters.length; i++) {
-    let filter = filters[i];
+    const filter = filters[i]
 
     if (skipNext) {
-      skipNext = false; // Skip the next operator
-      continue;
+      skipNext = false // Skip the next operator
+      continue
     }
 
-    if (filter.field === "Time Range") {
-      extracted["Time Range"] = filter["Time Range"];
-      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
-    } else if (filter.field === "Resolution") {
-      extracted["Resolution"] = filter["Resolution"];
-      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
-    } else if (filter.field === "Graph Type") {
-      
-      extracted["Graph Type"] = filter["Graph Type"];
-      skipNext = filters[i + 1]?.operator === "and"; // Mark next operator for removal
-    } else {
-      newFilters.push(filter);
+    if (filter.field === 'Time Range') {
+      extracted['Time Range'] = filter['Time Range']
+      skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
+    }
+    else if (filter.field === 'Resolution') {
+      extracted.Resolution = filter.Resolution
+      skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
+    }
+    else if (filter.field === 'Graph Type') {
+      extracted['Graph Type'] = filter['Graph Type']
+      skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
+    }
+    else {
+      newFilters.push(filter)
     }
   }
 
   return {
     extracted,
-    newFilters
-  };
+    newFilters,
+  }
 }
-
-
 
 function transformData(data: InputData[]): OutputData[] {
   const result = data.map((item) => {
@@ -130,8 +130,6 @@ export const packetRouter = createTRPCRouter({
 
       const { filter, search }: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
-      
-
       const filter_id = '01JNQTACVP5MR3TBZVZGMY6QCH'
       const findFilter = filter?.find((item: any) => item?.id === filter_id)
       const _filter = findFilter?.default_filter
@@ -148,7 +146,6 @@ export const packetRouter = createTRPCRouter({
         },
       ]
 
-      
       const res = await ctx.dnaClient
         .findAll({
           entity: 'packets',
@@ -251,24 +248,19 @@ export const packetRouter = createTRPCRouter({
     const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
     const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
-    
 
-    
     const result = timestamps.map((item) => {
-      const data = res?.data.find((element: any) =>  element.bucket?.includes(item))
+      const data = res?.data.find((element: any) => element.bucket?.includes(item))
       if (data) {
         return { bucket: item, bandwidth: data.bandwidth }
       }
       return { bucket: item, bandwidth: 0 }
     })
 
-    
     return result
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
   })).query(async ({ input, ctx }) => {
-    
-    
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
 
     if (
@@ -401,11 +393,9 @@ export const packetRouter = createTRPCRouter({
       token: ctx.token.value,
 
     }).execute()
- 
-    const transformedData: OutputData[] = transformData(res?.data as InputData[])
- 
 
-    
+    const transformedData: OutputData[] = transformData(res?.data as InputData[])
+
     return transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
   }),
   getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
@@ -621,13 +611,12 @@ export const packetRouter = createTRPCRouter({
       pluck_object: _pluck_object,
       time_range,
       device_id,
-      _query
+      _query,
     } = input || {}
-    
-    
-    if((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length){
+
+    if ((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length) {
       return {
-        items: []
+        items: [],
       }
     }
 
@@ -641,7 +630,7 @@ export const packetRouter = createTRPCRouter({
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
           advance_filters: [
-            
+
             {
               type: 'criteria',
               field: 'timestamp',
@@ -676,20 +665,15 @@ export const packetRouter = createTRPCRouter({
       })
       .execute()
 
-      
     return {
       items: res?.data,
-      _query
+      _query,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()),  bucket_size: z.string(), source_ips: z.array(z.string()) })).query(async ({ input, ctx }) => {
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).query(async ({ input, ctx }) => {
     const { device_id, time_range, bucket_size = '1h', source_ips } = input
-    
-    
-    
 
-    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
-
+    const ab = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
         query: {
           entity: 'packets',
@@ -745,27 +729,16 @@ export const packetRouter = createTRPCRouter({
 
       }).execute()
 
-      
-
       return { source_ip, result: res?.data }
     }, { concurrency: 100 })
 
-    
-    
-    
-    
-    return{data: ab}
+    return { data: ab }
   }),
 
-
-  getBandwidthOfSourceIPAction: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()),  bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
+  getBandwidthOfSourceIPAction: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, bucket_size = '1h', source_ips } = input
-    
-    
-    
 
-    const ab = await Bluebird.map( source_ips, async (source_ip: string) => {
-
+    const ab = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
         query: {
           entity: 'packets',
@@ -821,23 +794,15 @@ export const packetRouter = createTRPCRouter({
 
       }).execute()
 
-      
-
       return { source_ip, result: res?.data }
     }, { concurrency: 100 })
 
-    
-    
-    
-    
-    return{data: ab}
+    return { data: ab }
   }),
 
   getUniqueSourceIPMutation: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
-    
     const { device_id, time_range, filter_id, bucket_size = '1h' } = input
-    
-    
+
     let source_ips: string[] = []
 
     const filterPackets = async (starts_at: number) => {
@@ -847,21 +812,21 @@ export const packetRouter = createTRPCRouter({
       const { account } = ctx.session
       const { contact } = account
 
-      const [ __filter = [], search = []] : any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+      const [__filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
-      const findFilter = Array.isArray(__filter) ?  __filter?.find((item: any) => item?.id === filter_id): undefined
-      
+      const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
-      
       const _filter = findFilter?.group_advance_filters || []
-       const [,,...rest_group_filter] = _filter || []
-       
-      let  default_filters: any = [
-        ...(search?.length? [...search || [],
-        {
-          type: 'operator',
-          operator: EOperator.AND,
-        },] : []),
+      const [,,...rest_group_filter] = _filter || []
+
+      let default_filters: any = [
+        ...(search?.length
+          ? [...search || [],
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              }]
+          : []),
         {
           type: 'criteria',
           field: 'timestamp',
@@ -892,26 +857,26 @@ export const packetRouter = createTRPCRouter({
               operator: EOperator.NOT_EQUAL,
               values: source_ips,
             }]
-            : []),
-          ]?.map((item: any) => ({
-            ...item,
-            entity: 'packets',
-          }))
-          
-      
-      default_filters = {
-        type: "criteria",
-        filters: default_filters
-      }
+          : []),
+      ]?.map((item: any) => ({
+        ...item,
+        entity: 'packets',
+      }))
 
+      default_filters = {
+        type: 'criteria',
+        filters: default_filters,
+      }
 
       const group_advance_filters = [
         default_filters,
-        ... (rest_group_filter?.length? [ {
-          "type": "operator",
-          "operator": "and"
-        },
-        ...rest_group_filter] : [])
+        ...(rest_group_filter?.length
+          ? [{
+              type: 'operator',
+              operator: 'and',
+            },
+            ...rest_group_filter]
+          : []),
       ]
 
       const packets = await ctx.dnaClient
@@ -920,31 +885,30 @@ export const packetRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             track_total_records: true,
-            distinct_by: "source_ip",
+            distinct_by: 'source_ip',
             pluck: ['source_ip', 'id', 'device_id', 'timestamp'],
-            ...(group_advance_filters?.length > 1 ? {group_advance_filters} : {advance_filters: group_advance_filters?.[0]?.filters}),
+            ...(group_advance_filters?.length > 1 ? { group_advance_filters } : { advance_filters: group_advance_filters?.[0]?.filters }),
             order: {
               starts_at,
-              limit: group_advance_filters?.length > 1? limit : 50,
+              // limit: group_advance_filters?.length > 1 ? limit : 1000,
+              limit,
               by_field: 'code',
               by_direction: EOrderDirection.DESC,
             },
             multiple_sort: [
               {
-                  "by_field": "packets.source_ip",
-                  "by_direction": EOrderDirection.ASC
-              }
-          ] 
+                by_field: 'packets.source_ip',
+                by_direction: EOrderDirection.ASC,
+              },
+            ],
           },
 
         })
         .execute()
 
-
       const _packets = packets?.data || []
       const _packets_length = _packets.length
 
-      
       const sourceIPs = new Set()
       for (let i = 0; i < _packets_length; i++) {
         if (_packets?.[i]) {
@@ -953,7 +917,6 @@ export const packetRouter = createTRPCRouter({
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
-      
 
       if (_packets_length == limit) {
         const new_start = starts_at + limit
@@ -963,7 +926,6 @@ export const packetRouter = createTRPCRouter({
 
     await filterPackets(0)
 
-    
     return source_ips || []
   }),
 

@@ -3,52 +3,60 @@ import React from 'react'
 
 import '@xyflow/react/dist/style.css'
 
-import { useFetchNetworkFlow } from './Provider'
-import { Loader } from '~/components/ui/loader';
+import InfiniteScroll from 'react-infinite-scroll-component'
+
+import { Loader } from '~/components/ui/loader'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
+
+import { useFetchNetworkFlow } from './Provider'
+
 import moment from 'moment'
-import InfiniteScroll from 'react-infinite-scroll-component';
 
 function getMaxBandwidth(data: any[]) {
-  let maxBandwidth = 0;
-  if(!data) return ;
-  data?.forEach(entry => {
-      entry.result.forEach((record: Record<string, any>) => {
-          const bandwidth = parseInt(record.bandwidth, 10);
-          if (bandwidth > maxBandwidth) {
-              maxBandwidth = bandwidth;
-          }
-      });
-  });
+  let maxBandwidth = 0
+  if (!data) return
+  data?.forEach((entry) => {
+    entry.result.forEach((record: Record<string, any>) => {
+      const bandwidth = parseInt(record.bandwidth, 10)
+      if (bandwidth > maxBandwidth) {
+        maxBandwidth = bandwidth
+      }
+    })
+  })
 
-  return maxBandwidth;
+  return maxBandwidth
 }
 
 function getPercentage(value: number, maxValue: number, maxPixels = 300) {
-  if (maxValue === 0) return 0; // Avoid division by zero
-  return (value / maxValue) * maxPixels;
+  if (maxValue === 0) return 0 // Avoid division by zero
+  return (value / maxValue) * maxPixels
 }
 
 const getColorForValue = (value: number) => {
-  const maxBandwidth = 1000000;
+  const maxBandwidth = 1000000
   if (value >= maxBandwidth) {
     return 'red'
-  } else if (value > maxBandwidth / 2) {
+  }
+  else if (value > maxBandwidth / 2) {
     return 'orange'
-  } else if (value > maxBandwidth / 5) {
+  }
+  else if (value > maxBandwidth / 5) {
     return 'blue'
-  } else if (value > maxBandwidth / 10) {
+  }
+  else if (value > maxBandwidth / 10) {
     return 'gray'
-  } else {
+  }
+  else {
     return '#16a34a'
   }
 }
 
-const maxWidth = 300;
+const maxWidth = 300
 
 export default function NetworkFlowView() {
-  const { state } = useFetchNetworkFlow()
+  const { state, fetchMoreData } = useFetchNetworkFlow()
   const { flowData, loading } = state ?? {}
+  console.log('%c Line:59 🥔 flowData', 'color:#7f2b82', flowData)
 
   const maxdata: number = getMaxBandwidth(flowData ?? []) ?? 0
 
@@ -62,88 +70,84 @@ export default function NetworkFlowView() {
   )
 
   return (
-   
-    <div className="py-4 h-full flex flex-col">
-      <div className="h-full  bg-white relative">
-        {/* Scrollable Wrapper */}
-        <div className=" ">
-          {/* ReactFlow with larger canvas to allow scrolling */}
-          <div className="h-full container-react-flow flex flex-col gap-y-2 overflow-x-scroll pb-12">
 
-
-          <InfiniteScroll
-    dataLength={flowData?.length || 0}
-    next={() => {
-
-      console.log('%c Line:78 🍊', 'color:#2eafb0');
-    }}
-    style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
-    inverse={true} //
-    hasMore={true}
-    loader={<h4>Loading...</h4>}
-    scrollableTarget="scrollableDiv"
-  >
-              {flowData?.map(el => {
-                return <div className='flex-row flex items-center'>
-                  <> 
-                  <TooltipProvider>
-                    <Tooltip delayDuration={0}>
-                    <TooltipTrigger>
+    <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
+      <InfiniteScroll
+        dataLength = { (flowData || []).length }
+        endMessage = { <p style = { { textAlign: 'center' } }><b>{"Yay! You have seen it all"}</b></p> }
+        hasMore = { true }
+        loader = { <h4>{"Loading..."}</h4> }
+        next = { fetchMoreData }
+        scrollableTarget = "scrollableDiv"
+        scrollThreshold = { 0.5 } // Load more when 80% scrolled
+      >
+        {flowData?.map((el, index) => {
+          return (
+            <div className = 'flex-row flex items-center' key={index}>
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger>
                     <div className='min-w-[200px] flex'>
-                    <div className='bg-blue-100 border border-primary text-sm mr-4 font-semibold p-2 rounded-md self-start'>
-                      {el?.source_ip}
+                      <div className='bg-blue-100 border border-primary text-sm mr-4 font-semibold p-2 rounded-md self-start mb-2'>
+                        {el?.source_ip}
+                      </div>
+                      <TooltipContent side="top">
+                        <div className="text-lg">
+                          <span className='font-bold text-justify'>{'Country: '}</span>
+                          {' '}
+                          {' Philippines'}
+                        </div>
+                        <div className="text-lg">
+                          <span className='font-bold text-justify'>{'Source IP: '}</span>
+                          { el?.source_ip}
+                        </div>
+                      </TooltipContent>
                     </div>
-                    <TooltipContent side="top">
-                      <div className="text-lg">
-                        <span className='font-bold text-justify'>Country: </span> {" Philippines"}
-                      </div>
-                      <div className="text-lg">
-                        <span className='font-bold text-justify'>Source IP: </span> 
-                        { el?.source_ip}
-                      </div>
-                    </TooltipContent>
-                  </div>
                   </TooltipTrigger>
-                  </Tooltip>
-                </TooltipProvider>
-                  </>
-                  <div className='flex flex-row items-center gap-1'>
-                      {el?.result?.map((res: Record<string, any>) => {
-                        const formattedTime = res.bucket ? moment(res.bucket).tz('UTC').format('HH:mm:ss') : 'Invalid Time'
-                        return <>
-                        <TooltipProvider>
-                        <Tooltip delayDuration={0}>
-                          <TooltipTrigger>
-                        <div className='rounded-md h-[20px] flex-shrink-0' 
-                          style={{
-                            width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
-                            maxWidth: `${maxWidth}px`,
-                            backgroundColor: getColorForValue(Number(res.bandwidth))
-                          }}
-                        />
-                        <TooltipContent side="top">
-                          <div className="text-lg">
-                          <span className='font-bold text-justify'>Time: </span> {formattedTime}
-                          </div>
-                          <div className="text-lg">
-                          <span className='font-bold text-justify'>Total Bandwidth: </span>  {res.bandwidth}
-                          </div>
-                        </TooltipContent> 
+                </Tooltip>
+              </TooltipProvider>
+              <div className = 'flex flex-row items-center gap-1'>
+                {el?.result?.map((res: Record<string, any>) => {
+                  const formattedTime = res.bucket
+                    ? moment(res.bucket).tz('UTC')
+                        .format('HH:mm:ss')
+                    : 'Invalid Time'
+                  return (
+                    <TooltipProvider>
+                      <Tooltip delayDuration = { 0 }>
+                        <TooltipTrigger>
+                          <div
+                            className = 'rounded-md h-[20px] flex-shrink-0'
+                            style = { {
+                              width: `${getPercentage(parseInt(res.bandwidth, 10), maxdata)}px`,
+                              maxWidth: `${maxWidth}px`,
+                              backgroundColor: getColorForValue(Number(res.bandwidth)),
+                            }}
+                          />
+                          <TooltipContent side = "top">
+                            <div className = "text-lg">
+                              <span className = 'font-bold text-justify'>{'Time: '}</span>
+                              {' '}
+                              {formattedTime}
+                            </div>
+                            <div className = "text-lg">
+                              <span className = 'font-bold text-justify'>{'Total Bandwidth: '}</span>
+                              {' '}
+                              {res.bandwidth}
+                            </div>
+                          </TooltipContent>
                         </TooltipTrigger>
                       </Tooltip>
                     </TooltipProvider>
-                      </>
-                      })}
-                  </div>
-                </div>
-              })}
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
 
-</InfiniteScroll>
-          </div>
-        </div>
-      </div>
+      </InfiniteScroll>
+
     </div>
-    
-    
   )
 }
