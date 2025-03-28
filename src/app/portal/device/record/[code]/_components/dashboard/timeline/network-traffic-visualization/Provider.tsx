@@ -11,6 +11,8 @@ import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
 
 import { type INetworkFlowContext } from './types'
+import useSocketNotifications from './custom-hooks/useSocketConnection';
+import { userToken } from './custom-hooks/userToken';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -51,6 +53,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
   )
 
+  const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
+
+
   const fetchBandwidth = async (add_data_count: number) => {
     const bandwidth = await getBandwidthActions.mutateAsync({
       device_id: params?.id || '',
@@ -83,6 +88,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     fetchBandwidth(2)
   }
+
+
 
   useEffect(() => {
     if (!eventEmitter) return
