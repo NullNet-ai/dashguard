@@ -84,26 +84,26 @@ export default function SelectDetails({ }) {
                     multi_select_creatable: creatableOptions,
                 }}
                 fields={[
-                    // {
-                    //     id: "select_with_options",
-                    //     formType: "select",
-                    //     name: "select_with_options",
-                    //     label: "Select with Options",
-                    //     required: true,
-                    //     selectSearchable: true,
-                    //     selectIcon: UserIcon,
-                    //     // readonly:true,
-                    // },
-                    // {
-                    //     id: "select_single",
-                    //     formType: "select",
-                    //     name: "select_single",
-                    //     label: "Select Single",
-                    //     required: true,
-                    //     selectIcon: UserIcon,
-                    //     selectSearchable: true,
-                    //     // disabled:true
-                    // },
+                    {
+                        id: "select_with_options",
+                        formType: "select",
+                        name: "select_with_options",
+                        label: "Select with Options",
+                        required: true,
+                        selectSearchable: true,
+                        selectIcon: UserIcon,
+                        // readonly:true,
+                    },
+                    {
+                        id: "select_single",
+                        formType: "select",
+                        name: "select_single",
+                        label: "Select Single",
+                        required: true,
+                        selectIcon: UserIcon,
+                        selectSearchable: true,
+                        // disabled:true
+                    },
                     {
                         id: "select_creatable",
                         formType: "select",
@@ -132,23 +132,23 @@ export default function SelectDetails({ }) {
                             return Promise.resolve(existingOption || { label: query, value: query });
                         }
                     },
-                    // {
-                    //     id: "multi_select_creatable",
-                    //     formType: "multi-select",
-                    //     name: "multi_select_creatable",
-                    //     label: "Multiple Select Creatable",
-                    //     placeholder: "Select multiple or create...",
-                    //     required: true,
-                    //     selectSearchable: true,
-                    //     selectEnableCreate: true,
-                    //     selectOnCreateRecord: async (query: string) => {
-                    //         creatableOptions.push({ label: query, value: query });
-                    //         return Promise.resolve({
-                    //             label: query,
-                    //             value: query,
-                    //         });
-                    //     }
-                    // },
+                    {
+                        id: "multi_select_creatable",
+                        formType: "multi-select",
+                        name: "multi_select_creatable",
+                        label: "Multiple Select Creatable",
+                        placeholder: "Select multiple or create...",
+                        required: true,
+                        selectSearchable: true,
+                        selectEnableCreate: true,
+                        selectOnCreateRecord: async (query: string) => {
+                            creatableOptions.push({ label: query, value: query });
+                            return Promise.resolve({
+                                label: query,
+                                value: query,
+                            });
+                        }
+                    },
                 ]}
             />
         </>

@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormMultiSelect",
-  "tag": "2.0.0",
-  "branch": "released/2.0.0",
-  "message": "Update packages",
-  "publish_name": "Bryan Jay Mabuan"
+  "tag": "1.8.0",
+  "branch": "released/1.8.0",
+  "message": "release 1.8.0 form-multi-select",
+  "publish_name": "Rob Caldosa"
 }
