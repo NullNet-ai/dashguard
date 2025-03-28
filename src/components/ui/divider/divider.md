@@ -2,7 +2,15 @@
 
 ## Overview
 
-The `Divider` component is a flexible and versatile React component designed to create visually appealing and configurable dividers in your user interface. It supports both horizontal and vertical orientations, multiple content types, and various styling options.
+The `Divider` component is a versatile and flexible React component designed to create visually appealing and configurable dividers. It supports both horizontal and vertical orientations, multiple content types, and various styling options.
+
+## Key Features
+
+- Horizontal and vertical orientation support
+- Multiple content positioning options
+- Customizable line styles and colors
+- Flexible content placement
+- Accessibility-enhanced
 
 ## Props Interface
 
@@ -11,7 +19,7 @@ The `Divider` component is a flexible and versatile React component designed to 
 | Prop Name | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `content` | `DividerItem` or `DividerItem[]` | `undefined` | Content to be displayed within or alongside the divider |
-| `variant` | `"solid" \| "dashed" \| "dotted" \| "outlined"` | `"solid"` | Style of the divider line |
+| `variant` | `"solid" \| "dashed" \| "dotted"` | `"solid"` | Style of the divider line |
 | `position` | `"left" \| "center" \| "right" \| "top" \| "bottom"` | `"center"` | Position of content relative to the divider |
 | `className` | `string` | `undefined` | Additional CSS classes to apply to the divider |
 | `contentColor` | `string` | `"white"` | Background color for content areas |
@@ -21,48 +29,53 @@ The `Divider` component is a flexible and versatile React component designed to 
 | `positionMargin` | `number` | `0` | Margin for positioned content |
 | `children` | `React.ReactNode` | `undefined` | Alternative way to provide content |
 
-## `DividerItem` Interface
+### `DividerItem` Interface
 
 | Prop Name | Type | Description |
 |-----------|------|-------------|
 | `content` | `React.ReactNode` | Content to be displayed |
 | `position` | `"left" \| "center" \| "right" \| "top" \| "bottom"` | Position of the content item |
+| `variant` | `"solid" \| "dashed" \| "dotted"` | Line style for the divider |
 | `positionMargin` | `number` | Optional margin for the specific content item |
 
 ## Usage Examples
 
+### Basic Horizontal Divider
+```tsx
+<Divider />
+```
+
+### Vertical Divider
+```tsx
+<Divider vertical height="200px" />
+```
+
+### Customized Line Style
+```tsx
+<Divider variant="dashed" />
+<Divider variant="dotted" />
+```
+
 ### Custom Line Color
 ```tsx
-{/* Default line color (slate-300) */}
-<Divider />
-
-{/* Custom line color */}
 <Divider lineColor="#3B82F6" />  {/* Blue line */}
 <Divider lineColor="red" />      {/* Red line */}
-<Divider lineColor="#10B981" />  {/* Green line */}
 ```
 
-### Combining Line Color with Other Variants
+### Content Positioning
 ```tsx
-{/* Dashed divider with custom color */}
+{/* Horizontal with content */}
 <Divider 
-  variant="dashed" 
-  lineColor="#6366F1"  {/* Indigo line */}
+  content={[
+    { content: "Start", position: "left" },
+    { content: "Middle", position: "center" },
+    { content: "End", position: "right" }
+  ]} 
 />
 
-{/* Dotted divider with custom color */}
+{/* Vertical with content */}
 <Divider 
-  variant="dotted" 
-  lineColor="#EC4899"  {/* Pink line */}
-/>
-```
-
-### Vertical Divider with Custom Line Color
-```tsx
-<Divider 
-  vertical 
-  height="200px" 
-  lineColor="#8B5CF6"  {/* Purple line */}
+  vertical
   content={[
     { content: "Top", position: "top" },
     { content: "Center", position: "center" },
@@ -71,37 +84,43 @@ The `Divider` component is a flexible and versatile React component designed to 
 />
 ```
 
-## Line Color Implementation Details
+### With Children
+```tsx
+<Divider>
+  <span>Custom Content</span>
+</Divider>
+```
 
-### Color Specification
-- Accepts any valid CSS color value
-- Supports:
-  - Color names: `"red"`, `"blue"`
-  - Hex codes: `"#CBD5E1"`, `"#3B82F6"`
-  - RGB/RGBA: `"rgb(59, 130, 246)"`, `"rgba(59, 130, 246, 0.5)"`
-  - HSL/HSLA: `"hsl(217, 91%, 60%)"`, `"hsla(217, 91%, 60%, 0.8)"`
+## Advanced Configuration
 
-### Default Color
-- Default value is `"#CBD5E1"` (Tailwind's slate-300)
-- Provides a neutral, subtle divider appearance out of the box
+### Line Style Variants
+- `solid`: Standard continuous line
+- `dashed`: Segmented line with dashes
+- `dotted`: Line composed of dots
 
-## Best Practices for Line Color
-- Choose colors that complement your design system
-- Ensure sufficient contrast with background
+### Positioning Strategies
+- `left/right` for horizontal alignment
+- `top/bottom` for vertical alignment
+- `center` as default positioning
+
+## Accessibility Features
+- `role="separator"` for screen readers
+- `aria-orientation` to indicate line direction
+- Semantic HTML structure
+
+## Performance Considerations
+- Lightweight component
+- Minimal rendering overhead
+- Flexible prop types
+- Efficient class name management with `cn()` utility
+
+## Best Practices
 - Use consistent color schemes
-- Consider accessibility and readability
+- Ensure sufficient color contrast
+- Choose appropriate line styles
+- Consider content readability
 
-## Accessibility Considerations
-- Verify color contrast meets WCAG guidelines
-- Test with color contrast checking tools
-- Provide alternative visual separators if needed
-
-## Performance Notes
-- `lineColor` uses inline styling for maximum flexibility
-- Minimal performance impact
-- Allows dynamic color changes without re-rendering
-
-## Potential Improvements
-- Add color validation
-- Implement theme-based color selection
-- Create predefined color variants
+## Customization Tips
+- Combine `variant`, `lineColor`, and `contentColor`
+- Adjust `positionMargin` for precise spacing
+- Leverage `vertical` prop for unique layouts
