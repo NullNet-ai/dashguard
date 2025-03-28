@@ -13,6 +13,7 @@ interface DividerProps {
 	position?: "left" | "center" | "right" | "top" | "bottom";
 	className?: string;
 	contentColor?: string;
+	lineColor?: string;
 	height?: string;
 	vertical?: boolean;
 	positionMargin?: number;
@@ -27,6 +28,7 @@ export function Divider({
 	position = "center",
 	positionMargin = 0,
 	contentColor = "white",
+	lineColor = "#CBD5E1",
 	className,
 	children,
 }: DividerProps) {
@@ -51,6 +53,7 @@ export function Divider({
 						variant === "dotted" && "border-t-[3px]",
 						variant === "dashed" && "border-t-[2px]"
 					)}
+					style={{ borderColor: lineColor }}
 				/>
 				{/* children */}
 				{children ? (

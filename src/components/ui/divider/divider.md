@@ -15,6 +15,7 @@ The `Divider` component is a flexible and versatile React component designed to 
 | `position` | `"left" \| "center" \| "right" \| "top" \| "bottom"` | `"center"` | Position of content relative to the divider |
 | `className` | `string` | `undefined` | Additional CSS classes to apply to the divider |
 | `contentColor` | `string` | `"white"` | Background color for content areas |
+| `lineColor` | `string` | `"#CBD5E1"` | Color of the divider line |
 | `height` | `string` | `"100px"` | Height of vertical divider |
 | `vertical` | `boolean` | `false` | Switch between horizontal and vertical orientation |
 | `positionMargin` | `number` | `0` | Margin for positioned content |
@@ -30,38 +31,38 @@ The `Divider` component is a flexible and versatile React component designed to 
 
 ## Usage Examples
 
-### Basic Horizontal Divider
+### Custom Line Color
 ```tsx
+{/* Default line color (slate-300) */}
 <Divider />
+
+{/* Custom line color */}
+<Divider lineColor="#3B82F6" />  {/* Blue line */}
+<Divider lineColor="red" />      {/* Red line */}
+<Divider lineColor="#10B981" />  {/* Green line */}
 ```
 
-### Variant Styles
+### Combining Line Color with Other Variants
 ```tsx
-<Divider variant="dashed" />
-<Divider variant="dotted" />
-```
-
-### Horizontal Divider with Label
-```tsx
-<Divider content={{ content: "Continue", position: "center" }} />
-```
-
-### Horizontal Divider with Multiple Items
-```tsx
+{/* Dashed divider with custom color */}
 <Divider 
-  content={[
-    { content: "Start", position: "left" },
-    { content: "Middle", position: "center" },
-    { content: "End", position: "right" }
-  ]} 
+  variant="dashed" 
+  lineColor="#6366F1"  {/* Indigo line */}
+/>
+
+{/* Dotted divider with custom color */}
+<Divider 
+  variant="dotted" 
+  lineColor="#EC4899"  {/* Pink line */}
 />
 ```
 
-### Vertical Divider
+### Vertical Divider with Custom Line Color
 ```tsx
 <Divider 
   vertical 
   height="200px" 
+  lineColor="#8B5CF6"  {/* Purple line */}
   content={[
     { content: "Top", position: "top" },
     { content: "Center", position: "center" },
@@ -70,47 +71,37 @@ The `Divider` component is a flexible and versatile React component designed to 
 />
 ```
 
-### With Custom Margin
-```tsx
-<Divider 
-  content={[
-    { content: "Start", position: "left", positionMargin: 10 },
-    { content: "End", position: "right", positionMargin: 40 }
-  ]} 
-/>
-```
+## Line Color Implementation Details
 
-## Key Features
-- Supports both horizontal and vertical orientations
-- Multiple content positioning options
-- Configurable line styles (solid, dashed, dotted)
-- Custom content margins
-- Flexible content types (text, icons, buttons)
-- Easy integration with other UI components
+### Color Specification
+- Accepts any valid CSS color value
+- Supports:
+  - Color names: `"red"`, `"blue"`
+  - Hex codes: `"#CBD5E1"`, `"#3B82F6"`
+  - RGB/RGBA: `"rgb(59, 130, 246)"`, `"rgba(59, 130, 246, 0.5)"`
+  - HSL/HSLA: `"hsl(217, 91%, 60%)"`, `"hsla(217, 91%, 60%, 0.8)"`
 
-## Best Practices
-- Use `positionMargin` to fine-tune content spacing
-- Choose appropriate `variant` for visual hierarchy
-- Select `position` that best suits your layout design
-- Utilize `vertical` prop for unique page layouts
+### Default Color
+- Default value is `"#CBD5E1"` (Tailwind's slate-300)
+- Provides a neutral, subtle divider appearance out of the box
+
+## Best Practices for Line Color
+- Choose colors that complement your design system
+- Ensure sufficient contrast with background
+- Use consistent color schemes
+- Consider accessibility and readability
 
 ## Accessibility Considerations
-- Ensure sufficient color contrast for divider and content
-- Add meaningful labels for screen readers
-- Consider keyboard navigation for interactive content
+- Verify color contrast meets WCAG guidelines
+- Test with color contrast checking tools
+- Provide alternative visual separators if needed
 
 ## Performance Notes
-- Utilizes `cn()` utility for efficient class name management
-- Lightweight component with minimal rendering overhead
-- Flexible prop types allow for diverse use cases
+- `lineColor` uses inline styling for maximum flexibility
+- Minimal performance impact
+- Allows dynamic color changes without re-rendering
 
 ## Potential Improvements
-- Add `aria-` attributes for enhanced accessibility
-- Implement transition/animation options
-- Create more granular styling configurations
-
-## Contribution
-When contributing to this component, please:
-- Maintain existing type definitions
-- Add comprehensive test coverage
-- Document new features and modifications
+- Add color validation
+- Implement theme-based color selection
+- Create predefined color variants
