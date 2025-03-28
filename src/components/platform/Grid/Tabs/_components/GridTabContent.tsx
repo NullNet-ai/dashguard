@@ -12,7 +12,7 @@ import { ChevronDownIcon, Search, X } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { debounce, lowerCase, toLower } from 'lodash';
 import GridtabDropItem from './GridtabDropItem';
-import { reorderGridTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
+import { calculateVisibleItems, reorderGridTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import GridMenuClient from '../GridMenuClient';
 import GridMenuDropClient from './GridMenuDropClient';
@@ -27,7 +27,7 @@ const GridTabContent = ({
     variant}: any) => {
 
     const parentRef = useRef<HTMLDivElement>(null);
-    const [data, setData] = useState<any[]>([]);
+    const [data, setData] = useState<any[]>(par_items);
     const [datas, setDatas] = useState(par_items)
     const itemsRef = useRef<any[]>([]);
     const [entity] = pathname.split('/').slice(2);
@@ -63,47 +63,56 @@ const GridTabContent = ({
         }))
       }
 
-
     useEffect(() => {
 
-        if(JSON.stringify(par_items) !== JSON.stringify(datas)) {
-            setDatas(par_items)
-          }
-
          const calc = (items?: any[]) => {
-        const allItems: any[] = [];
-        const newData = items || par_items;
-        // clear width, more width, and search by
-        let totalWidth = 0;
-        const containerWidth = parentRef.current?.offsetWidth || 0;
 
-        for (let index = 0; index < newData?.length; index++) {
-            if (itemsRef.current[index]?.offsetWidth) {
-            totalWidth += itemsRef.current[index].offsetWidth || 0;
-            totalWidth += 6;
-            if (totalWidth > containerWidth) {
-                allItems?.push({
-                ...newData[index],
-                hidden: true,
-                });
-            } else {
-                allItems?.push({
-                ...newData[index],
-                hidden: false,
-                });
-            }
-            }
-        }
+              const allItems: any[] = [];
+              const newData = par_items ;
+              // clear width, more width, and search by
+              let totalWidth = 0;
+              const containerWidth = parentRef.current?.offsetWidth || 0;
 
-        return allItems
+              for (let index = 0; index < newData?.length; index++) {
+                  if (itemsRef.current[index]?.offsetWidth) {
+                    totalWidth += itemsRef.current[index].offsetWidth || 0;
+                    totalWidth += 6;
 
-    };
+                    if (totalWidth > containerWidth) {
+                        allItems?.push({
+                        ...newData[index],
+                        hidden: true,
+                        order: index,
+                        metadata:{
+                          item_width: (itemsRef.current[index].offsetWidth + 6) || 0,
+                        }
+                        });
+                    } else {
+                        allItems?.push({
+                        ...newData[index],
+                        hidden: false,
+                        order: index,
+                        metadata:{
+                          item_width: (itemsRef.current[index].offsetWidth + 6) || 0,
+                        }
+                        });
+                    }
+                  }
+              }
 
+              
+              const result  = calculateVisibleItems(allItems, containerWidth, entity)
+              return result
+
+          };
     
-        const handleResize = () => {
+        const handleResize =  async () => {
+
           const items = calc();
-          if (JSON.stringify(items) !== JSON.stringify(data)) {
+
+          if (JSON.stringify(items) !== JSON.stringify(par_items)) {
             setData(items);
+
           }
         };
         handleResize();
@@ -142,14 +151,14 @@ const GridTabContent = ({
         <div
           ref={parentRef}
           className={cn(
-            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative max-w-[70vw]`, `overflow-hidden`,
+            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative lg:max-w-[70vw] max-w-[73vw]`, `overflow-hidden`,
           )}
         >
           <Sortable
             orientation="horizontal"
-            value={datas}
+            value={data}
             onMove={({ activeIndex, overIndex }) => {
-              setDatas((items: any) => {
+              setData((items: any) => {
                 const newItems = [...items];
                 const [removed] = newItems.splice(activeIndex, 1);
                 newItems.splice(overIndex, 0, removed);
@@ -163,7 +172,7 @@ const GridTabContent = ({
               
             }}
           >
-            {datas.map((tab: any, index: number) => {
+            {par_items.map((tab: any, index: number) => {
 
               const isHidden = data?.[index]?.hidden;
               const lastword = entity.split("_")?.[1] ? entity.split("_")?.[1] : entity;
