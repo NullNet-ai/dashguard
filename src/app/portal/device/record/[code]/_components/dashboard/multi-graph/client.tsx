@@ -105,10 +105,10 @@ const InteractiveGraph = ({
 
   useEffect(() => {
     fetchChartData()
-    // const interval = setInterval(() => {
-    // setRefetch(Math.random())
-    // }, 1000)
-    // return () => clearInterval(interval)
+    const interval = setInterval(() => {
+    setRefetch(Math.random())
+    }, 1000)
+    return () => clearInterval(interval)
 
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
