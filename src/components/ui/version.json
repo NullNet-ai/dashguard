@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.4.0",
-  "branch": "released/feat/3490-3494/2.4.0",
-  "message": "banner and card component release",
+  "tag": "2.4.1-rc.3<unreleased>",
+  "branch": "unreleased/feat/3495/2.4.1-rc.3<unreleased>",
+  "message": "divider component",
   "publish_name": "Save Ducto"
 }
