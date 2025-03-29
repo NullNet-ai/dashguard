@@ -104,6 +104,12 @@ interface MultiFieldOption {
   placeholder?: string;
 }
 
+interface DateRangeConfig {
+  withTime?: boolean;
+  is24Hour?: boolean;
+  showPresets?: boolean;
+}
+
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>['className'];
@@ -128,6 +134,7 @@ interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   timePickerProps?: TimePickerProps;
+  dateRangeConfig?: DateRangeConfig;  
   dateTimePickerProps?: DateTimeLocalInputProps & {
     granularity?: DateGranularity
     minDate?: Date
