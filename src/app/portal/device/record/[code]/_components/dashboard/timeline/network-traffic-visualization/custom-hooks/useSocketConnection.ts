@@ -13,7 +13,7 @@ const useSocketNotifications = (token: string) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  console.log('%c Line:16 🌭 isConnected', 'color:#4fff4B', isConnected);
+  
 
   useEffect(() => {
     if (!token) return;
@@ -38,13 +38,10 @@ const useSocketNotifications = (token: string) => {
     });
 
     newSocket.on("packet_123-ee1b9a50-51ec-4ecf-bcc2-8f9511f9feb8", (data: Record<string,string>) => {
-      console.log('%c Line:41 🍊 data', 'color:#ed9ec7', data);
       addNotification("Database Change", data);
     });
 
     newSocket.on("new_packet-09b37b11-61be-4fb7-8846-35684eff11d1-09b37b11-61be-4fb7-8846-35684eff11d1e8078103-0c83-4f34-a45d-79baf1baf800", (data: Record<string,string>) => {
-
-      console.log('%c Line:47 🥔', 'color:#ea7e5c', data);
       addNotification("Database Change", data);
     });
 

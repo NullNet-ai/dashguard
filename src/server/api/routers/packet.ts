@@ -10,6 +10,7 @@ import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/devi
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
+import { IAdvanceFilter } from '~/components/platform/Grid/Search/types';
 
 interface InputData {
   bucket: string
@@ -71,6 +72,39 @@ function transformData(data: InputData[]): OutputData[] {
   })
 
   return result
+}
+
+function mergeCriteria(filters: IAdvanceFilter[]) {
+  const criteriaMap = new Map();
+  const result = [];
+
+  for (const item of filters) {
+    if (item.type === "criteria") {
+      const key = `${item.entity}|${item.field}|${item.operator}`;
+
+      if (criteriaMap.has(key)) {
+        // Merge values while ensuring uniqueness
+        const existingCriteria = criteriaMap.get(key);
+        existingCriteria.values = [...new Set([...existingCriteria.values, ...(item.values || [])])];
+      } else {
+        // Store new criteria
+        criteriaMap.set(key, { ...item });
+        result.push(criteriaMap.get(key));
+      }
+    } else if (item.type === "operator") {
+      // Push operator only if the last added item is NOT an operator
+      if (result.length > 0 && result[result.length - 1].type !== "operator") {
+        result.push(item);
+      }
+    }
+  }
+
+  // Remove last operator if it's left at the end
+  if (result.length > 0 && result[result.length - 1].type === "operator") {
+    result.pop();
+  }
+
+  return result;
 }
 
 export const packetRouter = createTRPCRouter({
@@ -571,7 +605,8 @@ export const packetRouter = createTRPCRouter({
       device_id,
       _query,
     } = input || {}
-
+    
+    
     if ((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length) {
       return {
         items: [],
@@ -587,7 +622,7 @@ export const packetRouter = createTRPCRouter({
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
-          advance_filters: [
+          advance_filters:[
 
             {
               type: 'criteria',
@@ -630,7 +665,7 @@ export const packetRouter = createTRPCRouter({
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, bucket_size = '1h', source_ips } = input
-
+// return []
     const ab = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
         query: {
@@ -707,9 +742,11 @@ export const packetRouter = createTRPCRouter({
 
       const [__filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
+      
       const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
       const _filter = findFilter?.group_advance_filters || []
+      
       const [,,...rest_group_filter] = _filter || []
 
       let default_filters: any = [
@@ -814,7 +851,7 @@ export const packetRouter = createTRPCRouter({
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
-      console.log('%c Line:961 🥖 source_ips', 'color:#b03734', source_ips)
+      
 
       if (_packets_length == limit) {
         const new_start = starts_at + limit

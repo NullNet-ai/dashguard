@@ -11,8 +11,6 @@ import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
 
 import { type INetworkFlowContext } from './types'
-import useSocketNotifications from './custom-hooks/useSocketConnection';
-import { userToken } from './custom-hooks/userToken';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -53,27 +51,27 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
   )
 
-  const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
+  // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
 
 
   const fetchBandwidth = async (add_data_count: number) => {
-    const bandwidth = await getBandwidthActions.mutateAsync({
+    const _bandwidth: any = await getBandwidthActions.mutateAsync({
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
       source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
     },)
 
-    if (!bandwidth) return
+    if (!_bandwidth) return
 
     if (current_index == 0) {
-      setBandwidth(bandwidth?.data || [])
+      setBandwidth(_bandwidth?.data || [])
       return
     }
 
     setBandwidth((prev: any) => [
       ...(prev || []),
-      ...(bandwidth?.data || []),
+      ...(_bandwidth?.data || []),
     ])
   }
 
@@ -95,6 +93,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!eventEmitter) return
 
     const setFID = (data: any) => {
+      
       if (typeof data !== 'string') return
       setFilterID(data)
     }
@@ -102,7 +101,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setSearchBy(data)
     }
 
-    eventEmitter.on(`timeline_filter_id`, data => setFID(data))
+    eventEmitter.on(`timeline_filter_id`, setFID)
     eventEmitter.on('timeline_search', setSBy)
     return () => {
       eventEmitter.off(`timeline_filter_id`, setFID)
@@ -121,6 +120,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       const { time, resolution = '1h' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
+      
       setTime({
         time_count,
         time_unit: time_unit as 'hour',
@@ -146,19 +146,33 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setLoading(false)
     }
 
-    setTimeout(() => fetchUniqueSourceIP(), 500) // delay to wait for the searchBy to be set in redis
+    setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
-  useEffect(() => {
-    if (!unique_source_ips || unique_source_ips.length === 0) {
-      console.warn('No source IPs available for fetching bandwidth')
-      return
-    }
-    if (bandwidth?.length == unique_source_ips.length) return
-    setCurrentIndex(current_index + 20)
 
-    fetchBandwidth(20)
-  }, [unique_source_ips])
+
+  useEffect(() => {
+    // if (!unique_source_ips || unique_source_ips.length === 0) {
+    //   console.warn('No source IPs available for fetching bandwidth');
+    //   return;
+    // }
+  
+    const bandwidthIps = bandwidth?.map((entry: {
+      source_ip: string;
+    }) => entry.source_ip) || [];
+  
+  
+    const areIpsSame = 
+      bandwidthIps.length === unique_source_ips.length && 
+      unique_source_ips.every(ip => bandwidthIps.includes(ip));
+  
+    if (areIpsSame) return;
+  
+    setCurrentIndex(current_index + 20);
+    setBandwidth([])
+    fetchBandwidth(20);
+  }, [unique_source_ips]);
+  
 
   const state = {
     flowData: bandwidth,
