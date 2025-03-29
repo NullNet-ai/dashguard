@@ -57,10 +57,10 @@ export function Divider({
 					className="px-1"
 					style={{
 						backgroundColor: contentColor || "white",
-						marginLeft: item.position === "left" ? item.positionMargin || 0 : undefined,
-						marginRight: item.position === "right" ? item.positionMargin || 0 : undefined,
-						marginTop: item.position === "top" ? item.positionMargin || 0 : undefined,
-						marginBottom: item.position === "bottom" ? item.positionMargin || 0 : undefined,
+						marginLeft: item.position === "left" ? item.positionMargin : undefined,
+						marginRight: item.position === "right" ? item.positionMargin : undefined,
+						marginTop: item.position === "top" ? item.positionMargin : undefined,
+						marginBottom: item.position === "bottom" ? item.positionMargin : undefined,
 					}}
 				>
 					{item.content}
