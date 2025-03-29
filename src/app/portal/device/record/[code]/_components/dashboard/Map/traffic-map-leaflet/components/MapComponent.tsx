@@ -156,18 +156,18 @@ const MapComponent = () => {
     
     for (const country in trafficData) {
       cityCoordinates[country] = await geocodeAddress(trafficData[country].city);
-      console.log("%c Coordinates for:", "color:#4fff4B", trafficData[country].city, cityCoordinates[country]);
+      
       
       // Also get coordinates for the country center (for region-to-region connections)
       countryCoordinates[country] = await geocodeAddress(country);
-      console.log("%c Country coordinates:", "color:#4fff4B", country, countryCoordinates[country]);
+      
     }
     
     // Get coordinates for additional cities
     const additionalCityCoordinates: any = {};
     for (const cityData of additionalCityConnections) {
       additionalCityCoordinates[cityData.city] = await geocodeAddress(cityData.city);
-      console.log("%c Additional city coordinates:", "color:#4fff4B", cityData.city, additionalCityCoordinates[cityData.city]);
+      
     }
     
     // Get coordinates for region to region connection
@@ -177,7 +177,7 @@ const MapComponent = () => {
       const coords = await geocodeAddress(regionData.toRegion);
       if (coords) {
         regionCoordinates[regionData.toRegion] = coords;
-        console.log("%c Region coordinates:", "color:#4fff4B", regionData.toRegion, coords);
+        
       } else {
         console.error(`Failed to get coordinates for region: ${regionData.toRegion}`);
       }
@@ -361,7 +361,7 @@ const MapComponent = () => {
         return;
       }
       
-      console.log(`Creating marker for region: ${toRegion} at ${toCoordinates}`);
+      
       
       // Add a marker for the destination region if not already displayed
       createCityMarker(toCoordinates, toRegion, trafficLevel);
