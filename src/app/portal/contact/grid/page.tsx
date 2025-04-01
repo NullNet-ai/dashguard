@@ -70,6 +70,7 @@ export default async function Page() {
         defaultValues: {
           categories: ['Contact', 'Employee'],
         },
+        paginationType: 'default',
         defaultShownColumns: ['raw_phone_number', 'email'],
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,

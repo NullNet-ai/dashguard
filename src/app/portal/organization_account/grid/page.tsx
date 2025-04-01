@@ -29,6 +29,7 @@ export default async function Page() {
       advanceFilter={filters?.advanceFilter || []}
       config={{
         entity: 'organization_account',
+        paginationType:'centered',
         title: 'Accounts',
         enableRowExpansion: true,
         rowExpansionOptions:{

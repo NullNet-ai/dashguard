@@ -57,6 +57,7 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     <Grid
       config={{
         entity: 'organization',
+        paginationType:'simple-card',
         title: 'Organizations',
         columns: gridColumns,
         columnsOrder: columnOrder,
