@@ -131,7 +131,7 @@ export const gridFilterRouter = createTRPCRouter({
         _id: ctx.session.account.contact.id,
       });
 
-      await ctx.redisClient.cacheData(_tabMenuId, input);
+      await ctx.redisClient.cacheData(_tabMenuId, input?.tabs);
 
    }),
   updateGridFilter: privateProcedure

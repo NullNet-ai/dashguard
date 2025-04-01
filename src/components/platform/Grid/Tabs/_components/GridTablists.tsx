@@ -28,6 +28,7 @@ const GridTabLists = ({tabs}: {
     const {width} = useWindowSize();
     const [cachedItem, setCachedItem] = useState<any>({})
 
+
  // window load
     useEffect(() => {
         const handleLoad = () => setIsWindowLoaded(true)
@@ -62,7 +63,8 @@ const GridTabLists = ({tabs}: {
             localStorage.setItem('cachedPortalItems', JSON.stringify({
                 ...cachedItems,
                 [`grid_tab_${entity}`]: {
-                    tabs: tabs
+                  ...cachedItems[`grid_tab_${entity}`],
+                  tabs: tabs,
                 }
             }))
         }
@@ -82,6 +84,7 @@ const GridTabLists = ({tabs}: {
           const isSameItems = JSON.stringify(newTabs) === JSON.stringify(cachedItem?.tabs)
 
           const copiedItem = (newTabs?.length !== cachedItem?.tabs?.length || !isSameItems) ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
+
           const result =  reorderGridTabActive(copiedItem, activeItem?.id ?? '', application ?? '')
           return result
           

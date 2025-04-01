@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormSelect",
-  "tag": "2.0.1-rc.2<unreleased>",
-  "branch": "unreleased/fix/2.0.1-rc.2<unreleased>",
-  "message": "Fix Createable feature ",
+  "tag": "2.0.1",
+  "branch": "released/3605/2.0.1",
+  "message": "release select",
   "publish_name": "Rob Caldosa"
 }

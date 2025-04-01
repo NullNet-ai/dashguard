@@ -7,6 +7,8 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatGridTabName, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import GridMenuDropClient from './GridMenuDropClient';
+import { updateAllFilterdata } from '../SideDrawer/actions';
+import { reorderGridTabActive } from '~/utils/sort-tab-items';
 
 type InnerTabitemProps = {
   tab: any
@@ -41,18 +43,35 @@ const GridtabDropItem = ({
   }, [shownItems]);
 
 
-  const handleClickLink = () => {
+  const handleClickLink = async (tabid?: string) => {
 
     const getCurrent = shownItems?.find((item: any) => item.current)?.id;
+    const newItems = [...shownItems].map(item => {
+      return { ...item, current: item.id === tab.id, is_current: item.id === tab.id}
+        
+    })
+
+    const sorted = reorderGridTabActive(newItems, tabid ?? '', application ?? '')
+
+    const removeHidden = sorted.filter((item: any) => !item.hidden);
+    const lastItem = removeHidden[removeHidden.length - 1]
+
+
     const cachedData = {
-      tabs: [...shownItems].map(item => {
-            return { ...item, current: item.id === tab.id }
-      }),
-      lastShownItem: lastShownItem?.name,
-      lastShownItemID: lastShownItem?.id,
+      tabs: sorted,
+      lastShownItem: lastItem?.name,
+      lastShownItemID: lastItem?.id,
       prevCurrent: getCurrent,
       key:  'grid_tab_' + entityName,
     }
+
+    try {
+      await updateAllFilterdata(sorted)
+    } catch (error) {
+        console.error(error)
+    }
+
+    
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
@@ -71,7 +90,7 @@ const GridtabDropItem = ({
           'apptab-' + tabNameRole
         }
         onClick={() => {
-          handleClickLink()
+          handleClickLink(tab?.id)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}

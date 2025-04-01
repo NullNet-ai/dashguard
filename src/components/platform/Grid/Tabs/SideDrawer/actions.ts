@@ -14,7 +14,9 @@ export const updateGridFilter = async (data : any)  => {
 }
 
 export const updateAllFilterdata = async (tabs : any[])  => {
-   await api.gridFilter.updateGridAllFilter(tabs)
+
+    
+   await api.gridFilter.updateGridAllFilter({tabs})
 
 }
 
