@@ -7,7 +7,8 @@ import OrganizationGridExpansion from './OrganizationGridExpansion';
 import useFetchGridData from '~/hooks/useFetchGridData';
 
 const AccountGridExpansion = (props: IExpansionComponentProps ) => {
-  const { rowData, grouping } = props ?? {};
+  const { rowData, grouping, viewMode } = props ?? {};
+
   const _pluck = [
     'id',
     'code',
@@ -87,6 +88,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
         enableAutoCreate: false,
         enableRowSelection: false,
         enableRowExpansion: true,
+        viewMode: viewMode || 'table',
         rowExpansionBuilder: <OrganizationGridExpansion />,
         onFetchRecords: fetchData,
         searchConfig: {

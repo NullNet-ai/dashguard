@@ -63,6 +63,7 @@ export default function GridProvider({
   parentType,
   gridLevel = 1,
   grouping: initialGrouping = [],
+  
 }: IProps) {
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
@@ -101,7 +102,9 @@ export default function GridProvider({
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  
+  const [viewMode, setViewMode] = useState<'table' | 'card'>(_propsConfig?.viewMode ?? 'table');
+
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {
       ...resolvedGroupings?.reduce((acc: any, curr) => {
@@ -570,6 +573,7 @@ export default function GridProvider({
     handleUpdateInfiniteData,
     handleMergeBufferInfinite,
   };
+
 
   const state_context = {
     config: {
