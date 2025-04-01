@@ -167,14 +167,14 @@ export const reorderGridTabActive = (items: any[], activeName: string, entity: s
 export const calculateVisibleItems = (items: any[], containerWidth: number, defaultName: string) => {
   // Make a copy of the items to avoid modifying the original
 
-  let entity_name = 
+  const entity_name = 
     defaultName === 'user_role' ? 'all role': 
     defaultName === 'organization_account'? 'all accounts':
     defaultName === 'communication_template'? 'all communication template':
     `all ${defaultName}`
 
 
-  let result = [...items];
+  const result = [...items];
   
   // Find the active item (using current key instead of active)
   const activeItem = result.find(item => item.current);
