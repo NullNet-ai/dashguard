@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.4.0",
-  "branch": "released/feat/3490-3494/2.4.0",
-  "message": "banner and card component release",
+  "tag": "2.5.0<unreleased>",
+  "branch": "unreleased/fix/3495/2.5.0<unreleased>",
+  "message": "style: divider add margin for multiple items",
   "publish_name": "Save Ducto"
 }
