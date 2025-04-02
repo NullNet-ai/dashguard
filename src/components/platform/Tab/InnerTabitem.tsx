@@ -9,6 +9,7 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata, updateMainTabItem } from './Actions/actions';
 
 type InnerTabitemProps = {
   tab: any
@@ -49,10 +50,12 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     return code
   }
 
-  const handleClickLink = () => {
+  const handleClickLink =  async (tab?: string) => {
     if (isHidden) {
       return
     }
+
+
     const getCurrent = getActiveName() || ''
 
     const cachedData = {
@@ -67,6 +70,15 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       ...cachedItems,
       [`inner_tab_data_${entityName}`]: cachedData,
     }))
+
+    try {
+      console.log("tabss", tab)
+      await updateMainTabItem(tab, entityName ?? '')
+    } catch (error) {
+        console.error(error)
+    }
+
+    //update maintab
 
     // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
     // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
@@ -104,7 +116,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             entityName + '-apptab-' + tabNameRole
           }
           onClick={() => {
-            handleClickLink()
+            handleClickLink(tab)
           }}
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}

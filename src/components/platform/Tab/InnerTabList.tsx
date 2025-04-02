@@ -4,6 +4,7 @@ import { api } from '~/trpc/server'
 
 import InnerTabItems from './InnerTabItems'
 import { type IPropsTabList, type InnerTabsProps } from './type'
+import { updateMainTabItem } from './Actions/actions'
 
 const getSessionTabs = async () => {
   const headerList = headers()
@@ -76,6 +77,13 @@ const getSessionTabs = async () => {
       href: `${pathname}?${fullSearchQueryParams}`,
       current: true,
     })
+
+    await updateMainTabItem({
+      name: identifier,
+      href: `${pathname}?${fullSearchQueryParams}`,
+      current: true,
+    }, mainEntity ?? '')//update current in main tab
+
   }
 
   await api.tab.insertSubTabs({

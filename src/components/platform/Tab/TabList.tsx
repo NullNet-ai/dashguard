@@ -6,6 +6,7 @@ import { api } from '~/trpc/server';
 
 import TabItems from './TabItems';
 import type { IPropsTabList } from './type';
+import { loadGetInitialProps } from 'next/dist/shared/lib/utils';
 
 const getSessionTabs = async (): Promise<{
   pathname: string
@@ -17,13 +18,17 @@ const getSessionTabs = async (): Promise<{
   const stateTabs = (await api.tab.getMainTabs()) as IPropsTabList[];
   const currentContext = `/${portal}/${mainEntity}`;
 
+
+
   let newTabs = stateTabs.map((tab) => {
     return {
-      name: tab.name,
-      href: tab.href,
-      current: tab.href.match(currentContext) ? true : false,
+      ...tab,
+      current: tab.name === mainEntity,
+      is_current: tab.name === mainEntity,
     };
   });
+  
+
 
   if (newTabs.length === 0) {
     newTabs = [
@@ -31,19 +36,21 @@ const getSessionTabs = async (): Promise<{
         name: mainEntity!,
         href: pathname,
         current: true,
+        is_current: true,
       },
     ];
   }
 
-  if (!newTabs.find(item => item.current === true)) {
-    newTabs.push({
-      name: mainEntity!,
-      href: pathname,
-      current: true,
-    });
-  }
+  // if (!newTabs.find(item => item.current === true)) {
+  //   newTabs.push({
+  //     name: mainEntity!,
+  //     href: pathname,
+  //     current: true,
 
-  api.tab.insertMainTabs(newTabs);
+  //   });
+  // }
+
+  // api.tab.insertMainTabs(newTabs);
   return { pathname, newTabs };
 };
 

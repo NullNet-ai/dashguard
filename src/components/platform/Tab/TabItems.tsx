@@ -12,6 +12,7 @@ import { api } from '~/trpc/react';
 import { type IPropsTabList } from './type';
 import { reorderMainTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
 import MainTabContent from './MainTabContent';
+import { updateAllMaindata } from './Actions/actions';
 
 
 type TabItemsProps = {
@@ -43,6 +44,9 @@ const TabItems = ({ items }: TabItemsProps) => {
   const [application, code] = (pathname || '').split('/').slice(3)
   const {width} = useWindowSize();
   const { isBannerPresent } = useSidebar()
+
+  console.log("TabItems items", items)
+
   // Adjust sidebar width based on whether it is open or closed.
   useEffect(() => {
     setIsClient(true)
@@ -75,6 +79,8 @@ const TabItems = ({ items }: TabItemsProps) => {
         prevCurrent: getCurrent,
         key:  'main_tab_data',
       }
+
+
       const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
   
       localStorage.setItem('cachedPortalItems', JSON.stringify({
@@ -105,26 +111,27 @@ const TabItems = ({ items }: TabItemsProps) => {
 
   const sortTabsActiveWillSecond = useMemo(() => {
     if (!isClient) {
-      return newTabList?.map(tab => ({...tab, id: tab?.name}))
+      return items?.map(tab => ({...tab, id: tab?.name}))
     }
 
-    if (newTabList.length) {
+    if (items.length) {
 
-      const newTabs = newTabList?.map(tab => ({...tab, id: tab?.name}))
+      const newTabs = items?.map(tab => ({...tab, id: tab?.name}))
       const activeItem = newTabs.find(a => a.name === entity)
       const copiedItem = newTabs?.length > cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
-      const result =  reorderMainTabActive(copiedItem, activeItem?.name || 'dashboard', entity ?? 'dashboard')
+      const result =  reorderMainTabActive(newTabs, activeItem?.name || 'dashboard', entity ?? 'dashboard')
+
       return result
       
     }
-    return newTabList?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
+    return items?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
   }, [newTabList, code, isClient, cachedItem, width, items])
   
 
 
   // Insert new tabs into the tab list.
-  const insertMainTabs = () => {
-    const found = newTabList.find((tab) => {
+  const insertMainTabs = async () => {
+    const found = sortTabsActiveWillSecond.find((tab) => {
       const [, , entityName] = tab.href.split('/');
       return entityName === entity;
     });
@@ -133,7 +140,7 @@ const TabItems = ({ items }: TabItemsProps) => {
       return;
     }
     const newTab = [
-      ...newTabList,
+      ...sortTabsActiveWillSecond,
       {
         name: entity,
         href: pathname,
@@ -146,21 +153,31 @@ const TabItems = ({ items }: TabItemsProps) => {
       };
     }) as IPropsTabList[];
     setNewTabList(newTab);
-    insertTabs.mutateAsync(newTab);
-    // Drop by into database
+    try {
+      await updateAllMaindata(newTab)
+      router.refresh();
+    } catch (error) {
+        console.error(error)
+    }
   };
 
   // Close Class Tab
   // Not the current tab
-  const closeTab = (tab: IPropsTabList) => {
-    const newTab = newTabList.filter(item => item.href !== tab?.href);
+  const closeTab = async (tab: IPropsTabList) => {
+    const newTab = sortTabsActiveWillSecond.filter(item => item.href !== tab?.href);
+    setNewTabList(newTab);
+    try {
+      await updateAllMaindata(newTab)
+    } catch (error) {
+        console.error(error)
+    }
+
     // make it current tab
     const activeTab = newTab[newTab.length - 1];
     if (activeTab) {
       activeTab.current = true;
       router.push(activeTab?.href);
     }
-    setNewTabList(newTab);
   };
   // Close Current Tab
   // Current tab
@@ -238,12 +255,12 @@ const TabItems = ({ items }: TabItemsProps) => {
     insertMainTabs();
   }, [entity]);
 
-  useEffect(() => {
-    if (newTabList.length !== 0) {
-      insertTabs.mutateAsync(newTabList);
-      return;
-    }
-  }, [newTabList]);
+  // useEffect(() => {
+  //   if (newTabList.length !== 0) {
+  //     insertTabs.mutateAsync(newTabList);
+  //     return;
+  //   }
+  // }, [newTabList]);
 
   return (
     <nav

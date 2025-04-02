@@ -10,11 +10,12 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata } from './Actions/actions';
 
 type InnerTabitemProps = {
   tab: any
   pathname?: string
-  newItems: any
+  newItems: any[]
   index?: number
   className?: string
   isHidden?: boolean
@@ -52,17 +53,28 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     return code
   }
 
-  const handleClickLink = () => {
+  const handleClickLink = async (tabid?: string) => {
     if (isHidden) {
       return
     }
     const getCurrent = getActiveName() || ''
+    const newList = newItems.map(item => {
+      return {...item, current: item.name === tabid, is_current: item.name === tabid}
+    })
+
+    
+
+    try {
+      await updateAllMaindata(newList)
+    } catch (error) {
+        console.error(error)
+    }
 
     const cachedData = {
-      tabs: newItems,
+      tabs: newList,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'main_tab_data' ,
+      key:  'main_tab_data',
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
@@ -102,7 +114,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             entityName + '-apptab-' + tabNameRole
           }
           onClick={() => {
-            handleClickLink()
+            handleClickLink(tab.name)
           }}
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}

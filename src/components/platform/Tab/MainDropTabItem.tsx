@@ -7,6 +7,7 @@ import MainTabMenu from '~/components/application-layout/common/MainTabMenu';
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata } from './Actions/actions';
 
 type MainDropdTabitemProps = {
   tab: any
@@ -57,11 +58,22 @@ const MainDropTabItem = ({
   }, [shownItems]);
 
 
-  const handleClickLink = () => {
-
+  const handleClickLink = async (tabid?: string) => {
     const getCurrent = getActiveName() || ''
+    const newItems = shownItems.map(item => {
+      return {...item, current: item.name === tabid, is_current: item.name === tabid}
+    })
+
+    
+
+    try {
+      await updateAllMaindata(newItems)
+    } catch (error) {
+        console.error(error)
+    }
+
     const cachedData = {
-      tabs: shownItems,
+      tabs: newItems,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
       key:  'main_tab_data',
@@ -93,7 +105,7 @@ const MainDropTabItem = ({
           'apptab-' + tabNameRole
         }
         onClick={() => {
-          handleClickLink()
+          handleClickLink(tab.name)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
