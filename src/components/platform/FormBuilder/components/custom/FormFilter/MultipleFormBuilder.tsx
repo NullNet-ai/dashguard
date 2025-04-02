@@ -73,6 +73,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
   const enableFormRegisterToParent =
     myParent === 'record' ? false : _enableFormRegisterToParent;
 
+  const { enableFormFilterCreate } = features ?? {}
+
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -523,7 +525,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                                           Cancel
                                         </Button>
                                       )}
-                                    {formLabel && !formProps?.isOpenSearch && (
+                                    {formLabel && enableFormFilterCreate && !formProps?.isOpenSearch && (
                                       <>
                                         <Button
                                           variant={'default'}
