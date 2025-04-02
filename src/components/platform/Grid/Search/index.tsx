@@ -19,6 +19,7 @@ export default function Main({
   creatable = true,
   switchable = true,
   gridType = 'table',
+  viewMode='table'
 }: any) {
   return (
     <GridSearchProvider>
@@ -55,11 +56,11 @@ export default function Main({
           </div>
         </GridSearchContainer>
       ) : parentType === 'grid_expansion' ? (
-        <div className="grid-expansion-search flex flex-row justify-between lg:w-[49%]">
-          <div className="hidden min-h-[40px] flex-1 lg:block">
+        <div className={cn(`grid-expansion-search flex flex-row justify-between`, `${viewMode === 'table' ? 'lg:w-[49%]' : 'w-full'}`)}>
+          <div className={cn(`hidden min-h-[40px] flex-1 lg:block`, `${viewMode ==='card' ? 'lg:hidden' : ''}`)}>
             <SearchList />
           </div>
-          <div className="min-h-[40px] lg:hidden">
+          <div className={cn(`min-h-[40px]`, `${viewMode === 'table' ? 'lg:hidden' : ''}`)}>
             <SearchListMobile gridType={gridType} parentType={parentType}/>
           </div>
           <SearchDialog />

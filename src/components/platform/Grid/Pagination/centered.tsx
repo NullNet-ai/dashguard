@@ -2,24 +2,13 @@
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/20/solid';
 import { camelCase } from 'lodash';
 import { useContext, useMemo, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
-import { Label } from '~/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select';
+
 import { useSidebar } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
@@ -45,25 +34,7 @@ export default function PaginationCentered({ width: customWidth }: { width?: str
     };
   }, [pagination, state?.totalCount]);
 
-  const rowsPerPage = [10, 20, 30, 40, 50, 100];
 
-  const handlePerPageValueChange = (value: string) => {
-    setPagination({
-      current_page: 1,
-      limit_per_page: Number(value),
-    })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
-      state?.config?.onFetchRecords?.({
-        current: 1,
-        limit: Number(value),
-      });
-      return;
-    }
-    UpdateReportPagination({
-      current_page: 1,
-      limit_per_page: Number(value),
-    });
-  };
 
   const handlePaginationChange = (page: number) => {
     setPagination({
@@ -81,17 +52,6 @@ export default function PaginationCentered({ width: customWidth }: { width?: str
       current_page: Number(page),
       limit_per_page: Number(rows),
     });
-  };
-
-  const generatePaginationText = (
-    limit: number,
-    pageNumber: number,
-    totalCount: number,
-  ): string => {
-    const start = (pageNumber - 1) * limit + 1;
-    const end = Math.min(pageNumber * limit, totalCount);
-
-    return `Showing ${start} to ${end} of ${totalCount} results`;
   };
 
   const width = open

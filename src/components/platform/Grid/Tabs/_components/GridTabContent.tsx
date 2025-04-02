@@ -151,7 +151,7 @@ const GridTabContent = ({
         <div
           ref={parentRef}
           className={cn(
-            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative lg:max-w-[70vw] max-w-[73vw]`, `overflow-hidden`,
+            `flex items-center grid-tab-content flex-1 w-full gap-x-1 relative lg:max-w-[70vw] max-w-[71vw]`, `overflow-hidden`,
           )}
         >
           <Sortable

@@ -71,8 +71,6 @@ export default function GridCardView({parentType} : any) {
               defaultShownColumns?.includes(cell.column.id),
             );
 
-
-
             return <GridCardViewContent
                 row={row}
                 key={row.id}

@@ -5,7 +5,7 @@ import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
 const timePickerInputBase =
-  "p-1 inline tabular-nums h-fit border-none outline-none select-none content-box caret-transparent rounded-md min-w-8 text-center focus:text-primary-foreground focus:bg-primary focus:placeholder:text-primary-foreground  focus-visible:ring-0 focus-visible:outline-none opacity-0 transition-opacity duration-200";
+  "p-1 inline tabular-nums h-fit border-none outline-none select-none content-box caret-transparent rounded-md text-center focus:text-primary-foreground focus:bg-primary focus:placeholder:text-primary-foreground focus-visible:ring-0 focus-visible:outline-none opacity-0 transition-opacity duration-200";
 const timePickerSeparatorBase =
   "text-xs text-foreground opacity-0 transition-opacity duration-200 font-bold";
 
@@ -37,8 +37,9 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
         {...timescape.getRootProps()}
         ref={ref}
         className={cn(
-          `flex ${!options.hour12 ? "w-44" : "w-44"} h-full items-center justify-around py-[1.7px] px-1`,
+          "flex h-full items-center justify-start py-[1.7px] px-1 w-fit",
           "rounded-md",
+          disabled && "bg-muted pointer-events-none opacity-70",
           className,
         )}
       >
@@ -47,7 +48,7 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
           containerClassName="w-auto !my-auto"
           className={cn(
             timePickerInputBase,
-            "!w-[15px] opacity-100",
+            "w-[3.5ch] min-w-[3.5ch] opacity-100",
             readonly && "pointer-events-none",
           )}
           disabled={disabled}
@@ -60,7 +61,7 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
           containerClassName="w-auto !my-auto"
           className={cn(
             timePickerInputBase,
-            "!w-[15px] opacity-100",
+            "w-[3.5ch] min-w-[3.5ch] opacity-100",
             readonly && "pointer-events-none",
           )}
           disabled={disabled}
@@ -68,13 +69,13 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
           {...timescape.getInputProps("minutes")}
           placeholder="MM"
         />
-        {!options.hour12 && <div className="w-[60px]"></div>}
+        {!options.hour12 && <div className="w-[1px]"></div>}
         {options.hour12 && (
           <Input
             containerClassName="w-auto !my-auto"
             className={cn(
               timePickerInputBase,
-              "!w-[62px] max-w-min opacity-100",
+              "w-[6ch] min-w-[6ch] opacity-100",
               readonly && "pointer-events-none",
             )}
             disabled={disabled}

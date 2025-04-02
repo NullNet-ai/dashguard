@@ -272,7 +272,7 @@ const handleResizeEnd = () => {
           ),
           // Apply Y positioning for pinned state (no transition)
           !isMobile && `${effectiveIsPinned && isOpen ? "-translate-y-9 lg:-translate-y-4" : "translate-y-2 lg:translate-y-[2px]"}`,
-          isBannerPresent ? 'md:h-[calc(100dvh-50px)]' : 'md:h-[calc(100dvh-34px)]',
+          isBannerPresent ? 'md:h-[calc(100dvh-69px)]' : 'md:h-[calc(100dvh-37px)]',
           effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
           isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]',
           isBannerPresent && effectiveIsPinned && isOpen && 'lg:translate-y-4'

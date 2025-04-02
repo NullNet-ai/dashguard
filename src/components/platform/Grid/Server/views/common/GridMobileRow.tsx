@@ -13,6 +13,7 @@ import GridMobileRowContent from './GridMobileRowContent';
 
 export default function GridMobileRow({
   parent = 'grid',
+  gridLevel,
 }: {
   parent?: string
   gridLevel?: number
@@ -22,11 +23,16 @@ export default function GridMobileRow({
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
-  const { defaultShownColumns, statusColumn  } = state?.config ?? {}
+  const { defaultShownColumns, statusColumn, defaultValues  } = state?.config ?? {}
 
   const level = state?.gridLevel
 
   const getCols = useMemo(() => {
+
+    if(state?.viewMode === 'card') {
+      return 'grid-cols-1'
+    }
+
     switch (size) {
       case 'sm':
         return 'grid-cols-1';
@@ -79,7 +85,7 @@ export default function GridMobileRow({
                   rowIndex={rowIndex}
                   state={state}
                   statusCell={getCell('status')}
-                  codecell={getCell('code')}
+                  codecell={getCell( defaultValues?.id || 'code')}
                   categoryCell={getCell('categories')}
                   flexRender={flexRender}
                     selectedDefaultCells={selectedDefaultCells}
@@ -97,7 +103,7 @@ export default function GridMobileRow({
           )
         : (
             <div className="p-4 lg:p-0 ">
-              <div className="lg:h-24 text-center text-foreground text-sm lg:text-base">No results.</div>
+              <div className={cn(`text-center text-foreground text-sm `, `${gridLevel === 1 ? 'lg:h-24 lg:text-base' : 'text-sm'} `)}>No results.</div>
             </div>
           )}
       {state?.showArchiveConfirmationModal && (

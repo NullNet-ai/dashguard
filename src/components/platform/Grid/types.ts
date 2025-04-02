@@ -121,8 +121,9 @@ export interface IConfigGrid {
   };
   hideCreateButton?: boolean;
   enableRowExpansion?: boolean;
+  viewMode?: 'table' | 'card';
   // for custom row expansion component
-  rowExpansionBuilder?: ReactElement | ((rowData: any) => JSX.Element);
+  rowExpansionBuilder?: ReactElement | ((rowData: any, viewMode?:  string) => JSX.Element);
   // to hide/show checkbox
   enableRowSelection?: boolean;
   // to identify if grid is a child grid
@@ -255,6 +256,7 @@ export interface IExpandedRow {
 
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
+  viewMode?: 'table' | 'card'
   parentExpanded?: IExpandedRow[];
   grouping?: GroupingState;
 }

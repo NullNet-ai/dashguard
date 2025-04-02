@@ -103,6 +103,14 @@ export const useColumnConditions = (
 
     // Exclude selectTableRow and actionRow if view mode is 'card'
     if (viewMode === 'card') {
+      if (
+        (config?.enableGridGrouping && grouping.length) ||
+        config?.enableRowExpansion ||
+        grouping.length
+      ) {
+        columns = [expandTableRow?.current, ...columns];
+      }
+
       return [...columns];
     }
 

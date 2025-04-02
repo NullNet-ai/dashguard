@@ -69,6 +69,7 @@ export default async function Page() {
         columns: gridColumns,
         defaultValues: {
           categories: ['Contact', 'Employee'],
+          id: 'code'
         },
         paginationType: 'default',
         defaultShownColumns: ['raw_phone_number', 'email'],
