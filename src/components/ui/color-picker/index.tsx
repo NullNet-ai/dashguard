@@ -1,0 +1,377 @@
+'use client'
+
+import * as React from 'react'
+import { cn } from '~/lib/utils'
+import { Button } from '~/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
+import { type ColorFormat } from './types'
+import { formatColor } from './utils'
+import {
+  ColorPreview,
+  ColorPickerArea,
+  HueSlider,
+  AlphaSlider,
+  FormatSelector,
+  ColorInputs
+} from './components'
+import { toast } from 'sonner'
+// Lazy load ColorPresets component which might be heavy due to color palette data
+const ColorPresets = React.lazy(() => import('./components/color-presets').then(module => ({ default: module.ColorPresets })))
+import { useCallback, useMemo } from 'react'
+import { useMediaQuery } from 'react-responsive'
+import { RecentColors } from './components/recent-colors'
+import { ColorValueInput } from './components/color-value-input'
+import { debounce } from 'lodash'
+// Import debounce utility
+
+// Props interface for the ColorPicker component
+export interface ColorPickerProps {
+  /**
+   * Initial color value (default: Tailwind "slate-500")
+   */
+  defaultColor?: string
+  
+  /**
+   * Default color format to display
+   */
+  format?: ColorFormat
+ 
+  /**
+   * Whether to enable alpha/opacity control
+   */
+  enableAlpha?: boolean
+  
+  /**
+   * Default alpha/opacity value (0-100)
+   */
+  defaultAlpha?: number
+  
+  /**
+   * Callback when color changes
+   */
+  onColorChange?: (color: {
+    value: string
+    format: ColorFormat
+    alpha?: number
+    tailwindClass?: string
+  }) => void
+  
+  /**
+   * Additional class names
+   */
+  className?: string
+}
+
+
+export function ColorPicker({
+  defaultColor = '#64748b', // Tailwind slate-500
+  format = 'hex',
+  enableAlpha = false,
+  defaultAlpha = 100,
+  onColorChange,
+  className
+}: ColorPickerProps) {
+  // State for the current color value
+  const [color, setColor] = React.useState<string>(defaultColor)
+  
+  // State for the current color format
+  const [activeFormat, setActiveFormat] = React.useState<ColorFormat>(format)
+  
+  // State for alpha/opacity value (0-100)
+  const [alpha, setAlpha] = React.useState<number>(defaultAlpha)
+  
+  // State for tracking if color was copied to clipboard
+  const [copied, setCopied] = React.useState<boolean>(false)
+  
+  // State for the popover
+  const [open, setOpen] = React.useState<boolean>(false)
+  
+  // State for eyedropper active status
+  const [eyeDropperActive, setEyeDropperActive] = React.useState<boolean>(false)
+  
+  // State for showing tailwind color palette
+  const [showTailwindPalette, setShowTailwindPalette] = React.useState<boolean>(false)
+  
+  // State for recent colors
+  const [recentColors, setRecentColors] = React.useState<string[]>([])
+  
+  // Load recent colors from localStorage on component mount
+  React.useEffect(() => {
+    const savedColors = localStorage.getItem('recentColors')
+    if (savedColors) {
+      try {
+        setRecentColors(JSON.parse(savedColors))
+      } catch (e) {
+        console.error('Failed to parse recent colors from localStorage', e)
+      }
+    }
+  }, [])
+  
+  // Memoize the formatted color value to avoid unnecessary recalculations
+  const formattedColor = useMemo(() => 
+    formatColor(
+      color, 
+      activeFormat, 
+      activeFormat === 'hex' ? undefined : (enableAlpha ? alpha : undefined)
+    ),
+    [color, activeFormat, alpha, enableAlpha]
+  )
+  
+  // State for tracking the displayed color value during editing
+  const [displayedColor, setDisplayedColor] = React.useState<string>(formatColor(defaultColor, format, enableAlpha ? defaultAlpha : undefined))
+  
+  // Update displayed color when formatted color changes
+  React.useEffect(() => {
+    setDisplayedColor(formattedColor)
+  }, [formattedColor])
+  
+  // Create a debounced version of the onColorChange callback
+  const debouncedOnColorChange = React.useRef(
+    debounce((params: {
+      value: string,
+      format: ColorFormat,
+      alpha?: number,
+      tailwindClass?: string
+    }) => {
+      if (onColorChange) {
+        onColorChange(params)
+      }
+    }, 50) // 50ms debounce delay
+  ).current
+  
+  // Handle color change with debouncing
+  const handleColorChange = React.useCallback((newColor: string) => {
+    setColor(newColor)
+    
+    // Use the debounced callback
+    debouncedOnColorChange({
+      value: formatColor(newColor, activeFormat, enableAlpha && activeFormat !== 'hex' ? alpha : undefined),
+      format: activeFormat,
+      alpha: enableAlpha && activeFormat !== 'hex' ? alpha : undefined,
+      // TODO: Add tailwind class detection
+    })
+  }, [activeFormat, alpha, enableAlpha, debouncedOnColorChange])
+  
+  // Add color to recent colors when color picker is closed
+  React.useEffect(() => {
+    if (!open && color) {
+      // Only add the color if it's not already the most recent one
+      setRecentColors(prev => {
+        const newColors = prev.filter(c => c !== color)
+        // Add new color to the beginning and limit to 12 colors
+        const updatedColors = [color, ...newColors].slice(0, 12)
+        // Save to localStorage
+        localStorage.setItem('recentColors', JSON.stringify(updatedColors))
+        return updatedColors
+      })
+    }
+  }, [open, color])
+
+
+  // Use useMediaQuery hook for responsive behavior
+  const isDesktop = useMediaQuery({ query: '(min-width: 768px)' }) // 768px is typical md breakpoint
+  
+  // Handle alpha change with debouncing
+  const handleAlphaChange = useCallback((newAlpha: number) => {
+    setAlpha(newAlpha)
+    
+    // Use the debounced callback
+    debouncedOnColorChange({
+      value: formatColor(color, activeFormat, newAlpha),
+      format: activeFormat,
+      alpha: newAlpha,
+      // TODO: Add tailwind class detection
+    })
+  }, [color, activeFormat, debouncedOnColorChange])
+  
+  // Handle format change
+  const handleFormatChange = React.useCallback((newFormat: ColorFormat) => {
+    setActiveFormat(newFormat)
+    
+    // Reset alpha to 100% when switching to HEX format
+    if (newFormat === 'hex' && enableAlpha) {
+      setAlpha(100)
+    }
+    
+    // Update the color value in the new format
+    debouncedOnColorChange({
+      value: formatColor(color, newFormat, newFormat === 'hex' ? undefined : (enableAlpha ? alpha : undefined)),
+      format: newFormat,
+      alpha: newFormat === 'hex' ? undefined : (enableAlpha ? alpha : undefined),
+      // TODO: Add tailwind class detection
+    })
+  }, [color, alpha, enableAlpha, debouncedOnColorChange])
+  
+  // Copy color value to clipboard
+  const copyToClipboard = React.useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(formattedColor)
+      setCopied(true)
+      toast.info('Color copied to clipboard',{
+        richColors:true
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy color to clipboard', err)
+    }
+  }, [formattedColor])
+  
+  // Handle eye dropper
+  const handleEyeDropper = React.useCallback(async () => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') return;
+    
+    // Check if EyeDropper API is available
+    if (!('EyeDropper' in window)) {
+      alert('Eye dropper is not supported in this browser')
+      return
+    }
+    
+    try {
+      setEyeDropperActive(true)
+      // @ts-expect-error - EyeDropper is not in the TypeScript DOM types yet
+      const eyeDropper = new window.EyeDropper()
+      const result = await eyeDropper.open()
+      handleColorChange(result.sRGBHex)
+    } catch (error) {
+      console.error('Error using eye dropper:', error)
+    } finally {
+      setEyeDropperActive(false)
+    }
+  }, [handleColorChange])
+  
+  // Check if we're in a browser environment for EyeDropper support
+  const isEyeDropperSupported = React.useMemo(() => {
+    return typeof window !== 'undefined' && 'EyeDropper' in window;
+  }, []);
+
+  // Memoize the color preview component to prevent unnecessary re-renders
+  const colorPreviewComponent = useMemo(() => (
+    <ColorPreview 
+      color={color} 
+      alpha={alpha} 
+      enableAlpha={enableAlpha && activeFormat !== 'hex'} 
+    />
+  ), [color, alpha, enableAlpha, activeFormat]);
+
+  // Memoize the color picker area and sliders
+  const colorPickerComponents = useMemo(() => (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium">Color Picker</label>
+        <span className="text-xs text-muted-foreground">Click or drag to select</span>
+      </div>
+      
+      <ColorPickerArea 
+        color={color} 
+        onColorChange={handleColorChange} 
+      />
+      
+      <HueSlider 
+        color={color} 
+        onColorChange={handleColorChange} 
+      />
+      
+      {/* Only show alpha slider if enableAlpha is true AND format is not hex */}
+      {enableAlpha && activeFormat !== 'hex' && (
+        <AlphaSlider 
+          color={color} 
+          alpha={alpha} 
+          onAlphaChange={handleAlphaChange} 
+        />
+      )}
+    </div>
+  ), [color, alpha, enableAlpha, activeFormat, handleColorChange, handleAlphaChange]);
+
+  return (
+    <div className="flex items-center gap-2">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="outline" 
+          className={cn("w-[220px] justify-start text-left font-normal", className)}
+        >
+          <div className="flex items-center gap-2">
+            <div 
+              className="h-4 w-4 rounded-full border border-input relative overflow-hidden" 
+              style={{ 
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' viewBox=\'0 0 8 8\'%3E%3Cpath fill-rule=\'evenodd\' clip-rule=\'evenodd\' d=\'M0 0h4v4H0V0zm4 4h4v4H4V4z\' fill=\'%23ddd\'/%3E%3C/svg%3E")',
+                backgroundSize: '8px 8px'
+              }}
+            >
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  backgroundColor: color,
+                  opacity: enableAlpha ? alpha / 100 : 1
+                }}
+              />
+            </div>
+            <span>{displayedColor}</span>
+          </div>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[280px] p-4">
+        <div className="flex flex-col gap-4">
+          {/* Color preview */}
+          {colorPreviewComponent}
+          
+          {/* Recent colors component */}
+          <RecentColors
+            recentColors={recentColors}
+            onColorSelect={handleColorChange}
+            isDesktop={isDesktop}
+            showTailwindPalette={showTailwindPalette}
+            setShowTailwindPalette={setShowTailwindPalette}
+          />
+          
+          {/* Tailwind color palette - only show on mobile when expanded */}
+          {!isDesktop && showTailwindPalette && (
+            <React.Suspense fallback={<div className="h-40 flex items-center justify-center">Loading color presets...</div>}>
+              <ColorPresets
+                onColorSelect={handleColorChange}
+                isDesktop={false}
+                showInline={true}
+              />
+            </React.Suspense>
+          )}
+          
+          {/* Custom hue and saturation picker */}
+          {colorPickerComponents}
+          
+          {/* Format selector and color input */}
+          <div className="space-y-3">
+            <FormatSelector 
+              activeFormat={activeFormat} 
+              onFormatChange={handleFormatChange} 
+            />
+            
+            <ColorInputs 
+              color={color}
+              alpha={alpha}
+              activeFormat={activeFormat}
+              enableAlpha={enableAlpha && activeFormat !== 'hex'}
+              onColorChange={handleColorChange}
+              onAlphaChange={handleAlphaChange}
+            />
+            
+            <ColorValueInput
+              displayedColor={displayedColor}
+              activeFormat={activeFormat}
+              handleColorChange={handleColorChange}
+              setDisplayedColor={setDisplayedColor}
+              copyToClipboard={copyToClipboard}
+              handleEyeDropper={handleEyeDropper}
+              eyeDropperActive={eyeDropperActive}
+              isEyeDropperSupported={isEyeDropperSupported}
+              copied={copied}
+            />
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+    </div>
+  )
+}
+
+export { ColorFormat }
