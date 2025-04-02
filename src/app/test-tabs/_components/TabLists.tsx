@@ -93,7 +93,7 @@
 
 //   const handleTabClick = (selectedTab: any) => {
 //     setActiveTab(selectedTab.id);
-//     const newTablist = tablists.map((tab) => {
+//     const newTablist = tablists.map((tab: any) => {
 //       return {
 //         ...tab,
 //         current: tab.id === selectedTab.id,
@@ -107,7 +107,7 @@
 
 //   const handleTabClickDropdown = (selectedTab: any) => {
 //     setActiveTab(selectedTab.id);
-//     const newTablist = tablists.map((tab) => {
+//     const newTablist = tablists.map((tab: any) => {
 //       return {
 //         ...tab,
 //         current: tab.id === selectedTab.id,
@@ -120,7 +120,7 @@
 //   };
 
 //   const handleRemoveTab = (tab: any) => {
-//     const newTablist = tablists.filter((item) => item.id !== tab.id);
+//     const newTablist = tablists.filter((item: any) => item.id !== tab.id);
 //     setTablists(newTablist);
 //     onTabChange?.(newTablist[0]);
 //   };

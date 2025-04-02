@@ -30,8 +30,6 @@ export default function MyTableBody({
   reachEnd,
 }: MyTableBodyProps) {
   const { state, actions } = useContext(GridContext);
-
-
   const context = useContext(ScrollContainerContext);
   const { isEndReached = false } = context ?? {};
   const expandedState = state?.table.getState().expanded as
@@ -60,8 +58,6 @@ export default function MyTableBody({
     gridLevel,
   );
   const allExpandedRows = [...(parentExpanded ?? []), ...expandedRows];
-
-
 
   const visibleLeafColumns = state?.table.getVisibleLeafColumns();
   const visibleColumns = state?.initial_columns.filter((column) =>
@@ -219,7 +215,7 @@ export default function MyTableBody({
                           'function' ? (
                             state?.config?.rowExpansionBuilder({
                               rowData: row.original, 
-                              viewMode: 'table'
+                              viewMode: 'table',
                             })
                           ) : (
                             React.cloneElement(
@@ -229,7 +225,7 @@ export default function MyTableBody({
                                 parentExpanded: allExpandedRows,
                                 key: `expanded:${row.id ?? index}`,
                                 grouping: state.grouping,
-                                viewMode: 'table'
+                                viewMode: 'table',
                               },
                             )
                           )

@@ -77,6 +77,11 @@ const OrganizationGridExpansion = (props: IExpansionComponentProps) => {
         entity: 'organization',
         title: 'Organizations',
         viewMode: props.viewMode,
+        defaultValues: {
+          id: 'code'
+        },
+        paginationType: 'default',
+        defaultShownColumns: ['name'],
         columns: gridColumns,
         disableDefaultAction: true,
         enableRowClick: false,

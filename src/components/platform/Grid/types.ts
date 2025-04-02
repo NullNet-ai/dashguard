@@ -130,6 +130,7 @@ export interface IConfigGrid {
   isChildGrid?: boolean;
   expandTriggerPosition?: 'left' | 'right';
   columnsOrder?: Record<string,any>[];
+  paginationType?: 'default' | 'centered' |'simple-card';
   rowActions?: {
     [R in TRowActionType]?: {
       state?: {
@@ -194,6 +195,7 @@ export interface IState {
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
   groupConfigs?: IGroupBy[];
+  
 }
 
 export interface IAction {
