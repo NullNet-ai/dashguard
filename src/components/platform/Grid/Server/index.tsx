@@ -18,6 +18,7 @@ function MainServer({
   parentType = 'grid',
   grouping
 }: IPropsGrid) {
+
   return (
     <GridProvider
       totalCount={totalCount}

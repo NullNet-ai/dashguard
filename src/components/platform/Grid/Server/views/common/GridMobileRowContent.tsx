@@ -30,6 +30,10 @@ const GridMobileRowContent = ({
 
   const hasExpandButton = visibleCells.some((cell: any) => cell.column.id === 'expand')
 
+  const viewmode = state?.viewMode || 'table'
+
+  const {defaultValues} = state?.config
+
   return (
    <>
      <div
@@ -191,6 +195,10 @@ const GridMobileRowContent = ({
           )
             return null
 
+          if(defaultValues?.id && cell.column.id === defaultValues?.id) {
+            return null
+          }
+
            //selectedDefaultCells must hidden
            if (selectedDefaultCells?.length && selectedDefaultCells?.map((cell: any) => cell.column.id).includes(cell.column.id)) return null
 
@@ -243,11 +251,12 @@ const GridMobileRowContent = ({
                     'function' ? (
                       state?.config?.rowExpansionBuilder({
                         rowData: row.original,
+                        viewMode: viewmode,
                       })
                     ) : (
                       React.cloneElement(
                         state?.config?.rowExpansionBuilder,
-                        { rowData: row.original },
+                        { rowData: row.original,   viewMode: viewmode, },
                       )
                     )
                   ) : (
