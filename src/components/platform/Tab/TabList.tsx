@@ -58,7 +58,17 @@ export default async function TabList({ className }: { className?: string }) {
   const { newTabs } = await getSessionTabs();
 
   if (!newTabs?.length) return null;
+
+  const withIDTabs = newTabs.map((tab) => {
+    return {
+      ...tab,
+     id: tab.name,
+    }
+  })
+
+  console.log("withIDTabs", withIDTabs)
+
   return (
-    <TabItems items={newTabs} />
+    <TabItems items={withIDTabs} />
   );
 }

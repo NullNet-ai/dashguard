@@ -1,6 +1,7 @@
 import Tablists from './_components/TabLists';
 import { api } from '~/trpc/server';
 import { headers } from 'next/headers';
+import { id } from 'date-fns/locale';
 
 const getTabs = async () => {
   const headerList = headers();
@@ -19,9 +20,16 @@ export default async function Page() {
   // Get tabs from api 
   const { tabs, currentContext } = await getTabs();
 
+  const newTabs = tabs.map((tab) => {
+    return {
+      ...tab,
+     id: tab.name,
+    }
+  })
+
   return (
     <div>
-      <Tablists tabs={tabs} />
+      <Tablists tabs={newTabs} />
     </div>
   )
 }

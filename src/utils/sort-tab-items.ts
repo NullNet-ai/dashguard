@@ -254,6 +254,8 @@ export const calculateMainTabItems = (items: any[], containerWidth: number, defa
       item.hidden = false;
     }
   });
+
+  console.log('resultresultxx', result)
   
   // If active item is hidden, we need to make it visible
   if (activeItem && activeItem.hidden) {

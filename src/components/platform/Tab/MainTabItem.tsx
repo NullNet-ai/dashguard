@@ -19,8 +19,9 @@ type InnerTabitemProps = {
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  lastShownItem?: any
   actions?: any
+  handleClick?: (tab: any) => void
 }
 
 const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -31,6 +32,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   lastShownItem,
   isHidden,
   actions,
+  handleClick,
 }, ref) => {
   const isGrid = tab.name === 'Dashboard' || tab.name === 'dashboard';
   const newPathname = usePathname()
@@ -109,21 +111,22 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             aria-hidden="true"
           />
         </SortableDragHandleRawItem> : null}
-        <Link
+        <div
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
           onClick={() => {
-            handleClickLink(tab.name)
+            // handleClickLink(tab.name)
+            handleClick?.(tab)
           }}
-          href={isHidden ? `${newPathname}#` : tab.href}
+          // href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pl-[0px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'cursor-pointer whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pl-[0px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}
-        </Link>
+        </div>
   
           {isActive ? <div className='absolute z-[1000] bottom-[-4px] h-1 left-0 w-full bg-white' /> : null }
 

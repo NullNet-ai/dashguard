@@ -1,7 +1,8 @@
 'use client';
 
+import { capitalize } from 'lodash';
 import { ChevronDownIcon, GripVerticalIcon, X } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   updateAllMaindata,
   updateAllMaindata2,
@@ -13,6 +14,7 @@ import {
   SortableItem,
 } from '~/components/ui/sortable';
 import { cn } from '~/lib/utils';
+import { calculateMainTabItems } from '~/utils/sort-tab-items';
 
 const Tablists = ({
   tabs = [],
@@ -73,12 +75,19 @@ const Tablists = ({
         }
       }
 
-      return allItems;
+      const result = calculateMainTabItems(allItems, containerWidth, '')
+
+      return result;
     };
 
-    const handleResize = () => {
+    const handleResize = () => {  
       const items = calc(tablists);
       setCopyTab(items);
+
+      if(JSON.stringify(tablists) !== JSON.stringify(items)) {
+        setTablists(items);
+      }
+
       updatecachedItems(items);
     };
     handleResize();
@@ -108,9 +117,11 @@ const Tablists = ({
   const handleTabClickDropdown = (selectedTab: any) => {
     setActiveTab(selectedTab.id);
     const newTablist = tablists.map((tab: any) => {
+      const { fromDropdown, ...rest } = tab;
       return {
-        ...tab,
+        ...rest,
         current: tab.id === selectedTab.id,
+        ...(tab.id === selectedTab.id && { fromDropdown: true }),
         is_current: tab.id === selectedTab.id,
       };
     });
@@ -173,13 +184,14 @@ const Tablists = ({
                       : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700',
                   )}
                 >
-                  <SortableDragHandleRawItem className="mr-1 cursor-grab">
+                  {tab.name !== 'dashboard' ? <SortableDragHandleRawItem className="mr-1 cursor-grab">
                     <GripVerticalIcon
                       className="h-3.5 w-3.5 text-default-foreground/60"
                       aria-hidden="true"
                     />
-                  </SortableDragHandleRawItem>
-                  {tab.name}
+                  </SortableDragHandleRawItem> : null}
+                  
+                  {capitalize(tab.name)}
 
                   <button
                     onClick={(e) => {
@@ -187,7 +199,7 @@ const Tablists = ({
                       handleRemoveTab(tab);
                     }}
                   >
-                    X
+                     {tab?.name !=='dashboard' ?   <X className="size-3 ml-1" /> : null}
                   </button>
                 </div>
               </SortableItem>
@@ -197,7 +209,7 @@ const Tablists = ({
         {/* has hidden items */}
       </div>
       {copyTab?.some((tab) => tab.hidden) ? (
-        <div className="flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-400">
+        <div className="flex items-start justify-center px-2 py-1 text-xs font-medium text-gray-400">
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
@@ -217,7 +229,7 @@ const Tablists = ({
                   }}
                   className="text-default/60 transition-opacity duration-200 hover:opacity-30"
                 >
-                  <X className="size-4" />
+                  <X className="size-3 ml-1" />
                 </button>
               </div>
 
@@ -242,6 +254,7 @@ const Tablists = ({
                             handleTabClickDropdown(itm);
                             setIsDropdownOpen(false);
                           }}
+                          className={cn(`${itm.current ? 'text-primary' : 'text-gray-500'} group-hover:text-primary transition-colors duration-200`)}
                         >
                           {itm?.name}
                         </button>
@@ -255,7 +268,17 @@ const Tablists = ({
       ) : (
         'no'
       )}
-      <div>Other components</div>
+      <div className='h-[700px] overflow-auto'>
+        <div>Active: {copyTab?.find(tab => tab.current)?.name  }</div>
+        <div className='flex flex-row'>
+        <pre className="rounded bg-gray-100 p-4  text-[10px]">
+          <code>{JSON.stringify(tablists, null, 2)}</code>
+        </pre>
+        <pre className="rounded bg-gray-200 p-4 text-[10px]">
+          <code>{JSON.stringify(copyTab, null, 2)}</code>
+        </pre>
+        </div>
+      </div>
     </div>
   );
 };

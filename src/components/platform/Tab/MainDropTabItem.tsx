@@ -17,6 +17,7 @@ type MainDropdTabitemProps = {
   onSelect?: () => void
   shownItems: any[]
   actions ?: any
+  handleClickItem?: (item: any) => void
 };
 
 const MainDropTabItem = ({
@@ -26,7 +27,8 @@ const MainDropTabItem = ({
   isActive,
   onSelect,
   shownItems,
-  actions
+  actions,
+  handleClickItem
 }: MainDropdTabitemProps) => {
 
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
@@ -105,7 +107,8 @@ const MainDropTabItem = ({
           'apptab-' + tabNameRole
         }
         onClick={() => {
-          handleClickLink(tab.name)
+          // handleClickLink(tab.name)
+          handleClickItem?.(tab)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
