@@ -23,6 +23,8 @@ import { ChevronDownIcon, Search, X } from 'lucide-react';
 import { Button } from '@headlessui/react';
 import { Input } from '~/components/ui/input';
 import MainDropTabItem from './MainDropTabItem';
+import { id } from 'date-fns/locale';
+import { current } from 'immer';
 
 
 type TabItemsProps = {
@@ -53,8 +55,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('')
   const [activeTab, setActiveTab] = useState<string>(
-    items?.length > 0 ? items.find((tab) => tab.current)?.id : 0,
+    items?.length > 0 ? items.find((tab) => tab.current)?.id : 'dashboard',
   );
+
   const [cachedItem, setCachedItem] = useState<any>({})
   const [isClient, setIsClient] = useState(false)
   const [application, code] = (pathname || '').split('/').slice(3)
@@ -93,37 +96,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     }
   }, [application, entity]);
 
-  // useEffect(() => {
-  //   if(!isClient) {
-  //     setCachedItem(items)
-  //   }
-  //   const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
-  //   const selectedCached = cachedItems?.main_tab_data
-  //   const notEqual = JSON.stringify(selectedCached?.tabs || [] ) !== JSON.stringify(newTabList)
-    
-
-  //   if(!selectedCached?.tabs?.length || notEqual) {
-  //     const getCurrent = getActiveName() || ''
-
-  //     const cachedData = {
-  //       tabs:  items?.map(tab => ({...tab, id: tab?.name})),
-  //       prevCurrent: getCurrent,
-  //       key:  'main_tab_data',
-  //     }
-
-
-  //     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-  
-  //     localStorage.setItem('cachedPortalItems', JSON.stringify({
-  //       ...cachedItems,
-  //       [`main_tab_data`]: cachedData,
-  //     }))
-  //   }
-
-  //   setCachedItem(selectedCached)
-  // }, [code, isClient, items, newTabList])
-  
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true)
 
@@ -174,7 +147,6 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
           }
         }
       }
-
       const result = calculateMainTabItems(allItems, containerWidth, '')
 
       return result;
@@ -185,10 +157,18 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
       setCopyTab(items);
 
       if(JSON.stringify(tablists) !== JSON.stringify(items)) {
-        setTablists(items);
+        if(items?.length) {
+          setTablists(items);
+          updatecachedItems(items);
+
+          if(activeTab) {
+            const href= items?.find((item) => item.current)?.href;
+            router.push(href);
+          }
+           
+        }
       }
 
-      updatecachedItems(items);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -208,10 +188,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
       };
     });
 
-   
-
     setTablists(newTablist);
-    // router.push(selectedTab.href);
   };
 
   const handleTabClickDropdown = (selectedTab: any) => {
@@ -230,12 +207,28 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   };
 
   const handleRemoveTab = (tab: any) => {
-    const newTablist = tablists.filter((item: any) => item.id !== tab.id);
-    setTablists(newTablist);
+    const newTablist = tablists.filter((item: any) => item.id !== tab.id)
+    if(newTablist?.find((item: any) => item.current)) {
+      setTablists(newTablist);
+      updatecachedItems(newTablist);
+    }
+    else {
+      newTablist[newTablist.length - 1] = {
+        ...newTablist[newTablist.length - 1],
+        current: true,
+        is_current: true
+      }
+      const activeTab = newTablist[newTablist.length - 1];
+      if(activeTab) {
+        setActiveTab(activeTab.id);
+        setTablists(newTablist);
+        updatecachedItems(newTablist);
+        router.push(activeTab?.href);
+      }
+    }    
   };
 
   const updatecachedItems = async (items: any) => {
-    console.log("update cached")
     try {
       await updateAllMaindata(items);
     } catch (error) {
@@ -243,41 +236,38 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     }
   };
 
-
-  // const sortTabsActiveWillSecond = useMemo(() => {
-  //   if (!isClient) {
-  //     return items?.map(tab => ({...tab, id: tab?.name}))
-  //   }
-
-  //   if (items.length) {
-
-  //     const newTabs = items?.map(tab => ({...tab, id: tab?.name}))
-  //     const activeItem = newTabs.find(a => a.name === entity)
-  //     const copiedItem = newTabs?.length > cachedItem?.tabs?.length ? newTabs : cachedItem?.tabs?.length ? cachedItem?.tabs : [];
-  //     const result =  reorderMainTabActive(newTabs, activeItem?.name || 'dashboard', entity ?? 'dashboard')
-
-  //     return result
-      
-  //   }
-  //   return items?.map(tab => ({...tab, id: tab?.name})).filter(Boolean)
-  // }, [newTabList, code, isClient, cachedItem, width, items])
-  
-
-
   // Insert new tabs into the tab list.
   const insertMainTabs = async () => {
     const found = tablists.find((tab) => {
       const [, , entityName] = tab.href.split('/');
       return entityName === entity;
     });
-
+    
     if (found) {
+        const tablist = tablists.map((tab) => {
+          if (tab.href === found.href) {
+            return {
+            ...tab,
+              current: true,
+              is_current: true,
+            };
+          }
+          return {
+           ...tab,
+            current: false,
+            is_current: false,
+          }
+        })
+
+        setActiveTab(found?.id)
+        setTablists(tablist);
       return;
     }
     const newTab = [
-      ...tablists,
+      ...tablists.map(tab=> ({...tab, current: false, is_current:false})),
       {
         name: entity,
+        id: entity,
         href: pathname,
         current: true,
       },
@@ -286,7 +276,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
         ...item,
         current: item.href === pathname,
       };
-    }) as IPropsTabList[];
+    }) as any[];
+
+    setActiveTab(entity || '');
     setTablists(newTab);
     try {
       await updateAllMaindata(newTab)
@@ -346,44 +338,49 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   // Except dashboard
 
   const closeAllTabs = () => {
-    // const newTab = newTabList.filter(item => item.name === 'dashboard');
-    // setNewTabList(newTab);
-    // const found = newTab.find(item => item.name === 'dashboard');
-    // if (!found) {
-    //   router.push('/portal/dashboard');
-    //   return;
-    // }
-    // router.push(found?.href);
+    const newTablist = tablists.filter((item: any) => item.id === 'dashboard' || item.name === 'dashboard')
+    setTablists(newTablist);
+    updatecachedItems(newTablist);
+    setActiveTab('dashboard');
+    router.push('/portal/dashboard');
   };
 
   // Close Other tabs
   const closeOtherTabs = (tab: IPropsTabList) => {
-    // const newTab = newTabList.filter(
-    //   item => item.name === tab?.name || item.name === 'dashboard',
-    // );
-    // if (newTab.length > 0 && newTab[0]) {
-    //   newTab?.map((item) => {
-    //     return {
-    //       ...item,
-    //       current: item.name === tab.name,
-    //     };
-    //   });
-    //   const found = newTab.find(item => item.name == tab.name);
-    //   if (!found) {
-    //     newTab[0].current = true;
-    //     router.push(newTab[0]?.href);
-    //     return;
-    //   }
-    //   router.push(found?.href)
-    // }
-    // setNewTabList(newTab);
-  };
+    const newTab = tablists.filter(
+      (item: any) => item.name === tab?.name || item.name === 'dashboard',
+    );
+    const found = newTab.find((item: any) => item.current);
+
+
+    if (!found) {
+      newTab[newTab.length - 1] = {
+        ...newTab[newTab.length - 1],
+        current: true,
+        is_current: true
+      }
+      const activeTab = newTab[newTab.length - 1];
+
+
+      if(activeTab) {
+        setActiveTab(activeTab.id);
+        setTablists(newTab);
+        updatecachedItems(newTab);
+        router.push(activeTab?.href);
+      }
+    }   
+    setTablists(newTab);
+    updatecachedItems(newTab);
+  }
+
+
 
   const actions = {
     closeTab,
     closeCurrentTab,
     closeAllTabs,
     closeOtherTabs,
+    handleRemoveTab
   } as IActions;
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
@@ -440,9 +437,8 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
             const resetOrder = newTablists.map((tab, index) => {
               return { ...tab, order: index };
             });
-
             setTablists(resetOrder);
-
+            updatecachedItems(resetOrder);
             
           }}
         >
@@ -462,6 +458,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
                       }
                     }}
                     index={index}
+                    activeItem={activeTab}
                     tab={tab}
                     handleClick={handleTabClick}
                     newItems={tablists}
@@ -485,6 +482,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
                         }
                       }
                     }}
+                    activeItem={activeTab}
                     index={index}
                     handleClick={handleTabClick}
                     tab={tab}

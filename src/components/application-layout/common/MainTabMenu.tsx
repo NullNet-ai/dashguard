@@ -56,7 +56,9 @@ const MainTabMenu = ({
                 tabs: newItems,
               }
             }))
-            actions?.closeTab(tab)
+            // actions?.closeTab(tab)
+            actions?.handleRemoveTab(tab)
+
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
