@@ -24,6 +24,7 @@ export interface IConfigWizard {
   saveCloseLoading?: boolean;
   formSave?: Record<string, string>;
   stepValidation?: Record<string, IConfigValidationWizard[]>;
+  defaultRecordTab?: string
 }
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {

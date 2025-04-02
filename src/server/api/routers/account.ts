@@ -1391,6 +1391,9 @@ export const accountRouter = createTRPCRouter({
                 'updated_date',
                 'expiration_date',
                 'updated_time',
+                'categories',
+                'created_date',
+                'created_time',
               ],
               organization_accounts: [
                 'id',

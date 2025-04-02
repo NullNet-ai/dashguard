@@ -9,8 +9,17 @@ import {
 } from '~/server/api/trpc';
 import type { TokenData } from '../types';
 import { ulid } from 'ulid';
+import { sendEmail } from '~/lib/email-helper';
+import { headers } from 'next/headers';
+import { formatDate } from '~/server/utils/formatDate';
+import { TRPCError } from '@trpc/server';
+import { TMethod, createSchedule, dateToCron } from '~/lib/createSchedule';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
+const INVITATION_LINK_EXPIRED = parseInt(
+  process.env.INVITATION_LINK_EXPIRED || '1',
+  10,
+);
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -81,9 +90,11 @@ export const authRouter = createTRPCRouter({
 
   getToken: privateProcedure
     .input(
-      z.object({
-        username: z.string().min(1),
-      }).optional(),
+      z
+        .object({
+          username: z.string().min(1),
+        })
+        .optional(),
     )
     .mutation(async ({ ctx }) => {
       // const token = await ctx.redisClient.getCachedData(
@@ -145,7 +156,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const asRoot = true
+        const asRoot = true;
         const currentToken = ctx.token.value;
         const rootAccount = await ctx.dnaClient
           .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
@@ -353,5 +364,165 @@ export const authRouter = createTRPCRouter({
         .updateOrganizationAccount(organization, account)
         .execute();
       return result;
+    }),
+  sendForgotPasswordEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const accountDetails = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: rootAccountToken,
+          as_root: asRoot,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'account_id',
+                operator: EOperator.EQUAL,
+                values: [input.email],
+              },
+            ],
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'organization_id',
+                'account_id',
+                'contact_id',
+                'status',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+            },
+            order: {
+              limit: 1,
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .execute();
+      if (!accountDetails?.success) {
+        return null;
+      }
+      const expirationDate = new Date();
+      expirationDate.setDate(
+        expirationDate.getDate() + INVITATION_LINK_EXPIRED,
+      );
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: rootAccountToken,
+          as_root: asRoot,
+          mutation: {
+            params: {
+              status: 'Active',
+              expiration_date: formatDate(expirationDate).date,
+              account_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+              categories: ['Reset Password'],
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Invitation]', record?.data);
+      const invitationRecord = record?.data?.[0] ?? {};
+      const headerList = headers();
+      const host = headerList.get('host'); // Get the host from request headers
+      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
+      const _host = '10.4.10.45:3000'
+      const baseURL = `${protocol}://${_host}`; // Construct base URL
+
+      const resetPasswordLink = `${baseURL}/reset-password/${invitationRecord?.id}`;
+      await sendEmail({
+        from: 'no-reply@dnamicro.com',
+        to: input.email,
+        subject: 'Forgot Password',
+        html: `
+        <p>Hello ${accountDetails?.data?.[0]?.contacts?.first_name} ${accountDetails?.data?.[0]?.contacts?.last_name},</p>
+        <p>You have requested to reset your password.</p>
+        <p>Please click the link below to reset your password.</p>
+        <p><a href="${resetPasswordLink}">Reset Password</a></p>
+        <p>Thank you,</p>
+        <p>DNA Platform</p>
+        `,
+      });
+      const cronTime = dateToCron(
+        new Date(formatDate(expirationDate).dataTime),
+      );
+      const _cronTime = '51 9 3 4 *'
+      const scheduleConfig = {
+        enabled: true,
+        cron: _cronTime,
+        callback_url: `${baseURL}/api/account/reset-password-expire`,
+        method: 'POST' as TMethod,
+        parameters: {
+          invitation_id: invitationRecord?.id,
+        },
+        wait_for_completion: true,
+      };
+      createSchedule(scheduleConfig);
+      return accountDetails?.data;
+    }),
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const password = await argon2.hash(input.account_secret);
+      const response = await ctx.dnaClient
+        .update(input.id, {
+          entity: 'organization_accounts',
+          token: rootAccountToken,
+          as_root: asRoot,
+          mutation: {
+            params: {
+              is_new_user: false,
+              account_secret: password,
+              password,
+              account_status: 'Active',
+            },
+            pluck: ['id', 'account_secret', 'is_new_user'],
+          },
+        })
+        .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+      return response?.data?.[0];
     }),
 });

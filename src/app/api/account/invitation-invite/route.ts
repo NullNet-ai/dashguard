@@ -1,12 +1,10 @@
 import { EClientDatabaseProvider, ORM } from '@dna-platform/common-orm';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { generateQueryParamsFromTemplate } from '~/lib/template-parser';
+import { replaceTemplateVariables } from '~/lib/template-parser';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 
-const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
-
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // const body = await request.json();
     const orm = ORM({
@@ -14,8 +12,6 @@ export async function POST(request: Request) {
     });
     const cookieStore = cookies();
     const { value: token = null } = cookieStore.get('token') || {};
-    console.log('🚀 ~ POST ~ token:', token);
-    // const token = await api.auth.getToken()
     if (!token) {
       return NextResponse.json({ message: 'No token found' }, { status: 401 });
     }
@@ -34,21 +30,28 @@ export async function POST(request: Request) {
         },
       })
       .execute();
-    console.log('🚀 ~ POST ~ data:', data);
     const {
       subject,
       content,
     } = data?.[0] ?? {};
 
-    // create a function that will replace the group
-    
-const queryParams = generateQueryParamsFromTemplate(subject, content);
-console.log("🚀 ~ POST ~ queryParams:", queryParams)
+    const templateData = {
+      contact: {
+        first_name: 'John',
+        last_name: 'Doe'
+      },
+      organization_account: {
+        id: 'john.doe@example.com'
+      }
+    };
 
+    const parsedSubject = replaceTemplateVariables(subject, templateData);
+    const parsedContent = replaceTemplateVariables(content, templateData);
     return NextResponse.json({
       success: true,
       data: {
-        queryParams
+        subject: parsedSubject,
+        content: parsedContent,
       },
       message: 'Account Invitation sent successfully',
     });

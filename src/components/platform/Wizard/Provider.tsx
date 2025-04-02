@@ -318,7 +318,7 @@ export default function WizardProvider({
         if (toastMessage) {
           toast.success(toastMessage);
         }
-        await SaveAndContinue(data);
+        await SaveAndContinue({...data, defaultRecordTab: config?.defaultRecordTab});
       };
       setSaveContinueLoading(true);
       if (callbackHandlers?.onClickWizardSave) {

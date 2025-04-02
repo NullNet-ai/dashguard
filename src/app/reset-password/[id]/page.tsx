@@ -1,60 +1,28 @@
 import Image from 'next/image';
-import { api } from '~/trpc/server';
-import { headers } from 'next/headers';
-import SignInLabel from '~/app/sign-up/_components/SignInLabel';
-import SignUpForm from '~/app/sign-up/_components/SignUpForm';
-import { redirect, RedirectType } from 'next/navigation';
 
-export default async function Invite({ searchParams }: any) {
-  // if (!searchParams.token) {
-  //   return redirect('/login');
-  // }
+import ResetPasswordForm from './_components/ResetPasswordForm';
+import { RedirectType, redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { api } from '~/trpc/server';
+import { isInvitationLinkExpired } from '~/utils/isInvitationLinkExpired';
+
+export default async function SetupPassword() {
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
   const record = await api.account.getInvitationAccountDetailsPublicly({
     id: id!,
-    // token: searchParams.token,
   });
-
   if (
-    !record ||
     !record?.invitation?.id ||
-    !['Pending Setup', 'Invited'].includes(record?.account_status) ||
     record.invitation?.status === 'Archived' ||
-    record?.status === 'Archived'
+    isInvitationLinkExpired(
+      record.invitation?.created_date,
+      record.invitation?.created_time,
+    )
   ) {
-    Promise.all([
-      // api.record.updateDynamicRecord({
-      //   entity: 'organization_account',
-      //   id: record?.id,
-      //   data: {
-      //     account_status: ['Pending Setup', 'Invited'].includes(
-      //       record?.account_status,
-      //     )
-      //       ? 'Invitation Expired'
-      //       : record?.account_status,
-      //   },
-      // }),
-      api.record.updateDynamicRecord({
-        entity: 'invitation',
-        id: record.invitation?.id,
-        data: {
-          status: 'Archived',
-        },
-      }),
-    ]);
-
     return redirect('/expired-link', RedirectType.push);
   }
-
-  if (record?.categories?.includes('Internal User')) {
-    return redirect(
-      `/login/${record.id}?token=${searchParams.token}&invitation_id=${record.invitation?.id}`,
-      RedirectType.push,
-    );
-  }
-
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
@@ -68,28 +36,17 @@ export default async function Invite({ searchParams }: any) {
               width={58}
             />
             <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-foreground lg:text-left">
-              Create Account
+              Reset Your Password
             </h2>
             <p className="text-xs lg:text-left">
-              Tell us about your company to get started.
+              Secure your account with a strong password
             </p>
           </div>
 
           <div className="mt-11">
             <div>
-              <SignUpForm
-                recordData={
-                  record?.categories?.includes('External User') ? record : {}
-                }
-                account_id={
-                  record?.categories?.includes('External User')
-                    ? record?.id
-                    : ''
-                }
-                invitation_id={record?.invitation?.id}
-              />
+              <ResetPasswordForm />
             </div>
-            <SignInLabel />
           </div>
         </div>
         <footer className="absolute bottom-0 w-full py-4 text-center text-[10px] text-muted-foreground">
