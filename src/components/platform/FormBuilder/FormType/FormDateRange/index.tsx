@@ -43,7 +43,10 @@ export default function FormDateRange({
 }: IProps) {
   const { field } = formRenderProps;
   const { disabled, value, onChange } = field;
-  const { description, label, required, disabled: isFieldConfigDisabled, dateRangeConfig:config, placeholder: fieldPlaceholder } = fieldConfig;
+  const { description, label, required, disabled: isFieldConfigDisabled, dateRangeConfig:config, placeholder: fieldPlaceholder, readonly } = fieldConfig;
+  
+  const isDisabled = disabled || isFieldConfigDisabled;
+  const isReadonly = readonly === true;
   
   // Extract date range configuration with defaults
   const withTime = config?.withTime ?? false;
@@ -237,14 +240,15 @@ export default function FormDateRange({
       >
         {label}
       </FormLabel>
-      <div className={cn("grid gap-2")}>
+      <div className={cn("grid gap-2 rounded-md")}>
         <DateRangePicker
           value={convertToDateObjects()}
           onChange={handleSafeChange}
           withTime={withTime}
           is24Hour={is24Hour}
           showPresets={showPresets}
-          disabled={disabled || isFieldConfigDisabled}
+          disabled={isDisabled}
+          readonly={isReadonly}
           placeholder={placeholder}
           displayValue={formatDateRangeForDisplay()}
         />

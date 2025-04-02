@@ -216,34 +216,57 @@ export function ColorPicker({
     }
   }, [formattedColor])
   
+
+  
+  // Check if we're in a browser environment for EyeDropper support
+  const isEyeDropperSupported = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      // More robust detection of EyeDropper API
+      // @ts-expect-error - EyeDropper is not in the TypeScript DOM types yet
+      return typeof window.EyeDropper === 'function' || 
+        // @ts-expect-error - EyeDropper is not in the TypeScript DOM types yet
+        (window.EyeDropper && typeof window.EyeDropper.prototype.open === 'function');
+    } catch (e) {
+      console.error('Error checking EyeDropper support:', e);
+      return false;
+    }
+  }, []);
+  
   // Handle eye dropper
   const handleEyeDropper = React.useCallback(async () => {
     // Check if we're in a browser environment
     if (typeof window === 'undefined') return;
     
-    // Check if EyeDropper API is available
-    if (!('EyeDropper' in window)) {
-      alert('Eye dropper is not supported in this browser')
-      return
-    }
-    
     try {
-      setEyeDropperActive(true)
+      // More robust check for EyeDropper API availability
+      if (!isEyeDropperSupported) {
+        toast.error('Eye dropper is not supported in this browser', {
+          richColors: true
+        });
+        return;
+      }
+      
+      setEyeDropperActive(true);
       // @ts-expect-error - EyeDropper is not in the TypeScript DOM types yet
-      const eyeDropper = new window.EyeDropper()
-      const result = await eyeDropper.open()
-      handleColorChange(result.sRGBHex)
+      const eyeDropper = new window.EyeDropper();
+      const result = await eyeDropper.open();
+      handleColorChange(result.sRGBHex);
     } catch (error) {
-      console.error('Error using eye dropper:', error)
+      console.error('Error using eye dropper:', error);
+      // Show a more user-friendly error message
+      if (error instanceof Error && error.name === 'AbortError') {
+        // User canceled the eye dropper
+        // console.log('Eye dropper was canceled');
+      } else {
+        toast.error('Failed to use the eye dropper tool', {
+          richColors: true
+        });
+      }
     } finally {
-      setEyeDropperActive(false)
+      setEyeDropperActive(false);
     }
-  }, [handleColorChange])
-  
-  // Check if we're in a browser environment for EyeDropper support
-  const isEyeDropperSupported = React.useMemo(() => {
-    return typeof window !== 'undefined' && 'EyeDropper' in window;
-  }, []);
+  }, [handleColorChange]);
 
   // Memoize the color preview component to prevent unnecessary re-renders
   const colorPreviewComponent = useMemo(() => (

@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.5.0<unreleased>",
-  "branch": "unreleased/fix/3495/2.5.0<unreleased>",
-  "message": "style: divider add margin for multiple items",
-  "publish_name": "Save Ducto"
+  "tag": "2.5.0-rc.2<unreleased>",
+  "branch": "unreleased/fix/2.5.0-rc.2<unreleased>",
+  "message": "fix color picker eyedropper not working in production, date range ui fix ",
+  "publish_name": "Rob Caldosa"
 }

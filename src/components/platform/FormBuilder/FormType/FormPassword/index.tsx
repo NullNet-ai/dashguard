@@ -47,13 +47,16 @@ export default function FormPassword({
   value,
   formKey,
 }: IProps) {
-  // Destructure configurable properties with default values
-  const { showPasswordStrengthBar = false, hasComplexValidation = false } =
-    fieldConfig;
+  const { 
+    showPasswordStrengthBar = false, 
+    hasComplexValidation = false,
+    showPasswordGenerator = false 
+  } = fieldConfig;
 
   const isDisabled = fieldConfig.isCustomFormField
     ? fieldConfig?.disabled || fieldConfig?.readonly
     : formRenderProps?.field?.disabled;
+  const isReadonly = fieldConfig?.readonly;
   const [showPassword, setShowPassword] = useState(false);
 
   // State for password validation rules
@@ -154,13 +157,42 @@ export default function FormPassword({
   // Function to copy password to clipboard
   const copyPasswordToClipboard = () => {
     if (formRenderProps?.field?.value) {
-      navigator.clipboard.writeText(String(formRenderProps.field.value))
-        .then(() => {
+      // Use a more reliable method for clipboard copying
+      try {
+        // Create a temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = String(formRenderProps.field.value);
+        
+        // Make the textarea out of viewport
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-999999px';
+        textarea.style.top = '-999999px';
+        
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        
+        // Execute copy command
+        const successful = document.execCommand('copy');
+        
+        // Clean up
+        document.body.removeChild(textarea);
+        
+        if (successful) {
           toast.success("Password copied to clipboard");
-        })
-        .catch(() => {
-          toast.error("Could not copy password to clipboard");
-        });
+        } else {
+          // Fall back to the Clipboard API if execCommand fails
+          navigator.clipboard.writeText(String(formRenderProps.field.value))
+            .then(() => {
+              toast.success("Password copied to clipboard");
+            })
+            .catch(() => {
+              toast.error("Could not copy password to clipboard");
+            });
+        }
+      } catch (err) {
+        toast.error("Could not copy password to clipboard");
+      }
     }
   };
 
@@ -208,7 +240,7 @@ export default function FormPassword({
             placeholder={fieldConfig?.placeholder}
             readOnly={(isDisabled || fieldConfig?.readonly) ?? false}
             defaultValue={value}
-            disabled={false}
+            disabled={fieldConfig.disabled}
             aria-invalid={!!formRenderProps.fieldState.error}
             aria-describedby={
               formRenderProps.fieldState.error
@@ -221,7 +253,7 @@ export default function FormPassword({
           {/* Password Generator and Copy Buttons */}
           <div className="absolute right-0 top-0 flex h-full items-center">
             {/* Copy Password Button */}
-            {formRenderProps?.field?.value && (
+            {formRenderProps?.field?.value && showPasswordGenerator && !isDisabled && !isReadonly && (
               <Button
                 className="mr-1 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
                 data-test-id={`${formKey}-copy-pwd-btn-${fieldConfig.name}`}
@@ -238,127 +270,131 @@ export default function FormPassword({
               </Button>
             )}
             
-            {/* Password Generator Button */}
-            <Popover open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  className="mr-1 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
-                  data-test-id={`${formKey}-generate-pwd-btn-${fieldConfig.name}`}
-                  disabled={isDisabled}
-                  Icon={ArrowPathIcon}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                  aria-label="Generate password"
-                  title="Generate password"
-                  aria-expanded={isGeneratorOpen}
-                  aria-controls={`${formKey}-password-generator-content`}
-                >
-                  <span className="sr-only">Generate password</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent 
-                className="w-80 animate-in fade-in-50 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95" 
-                id={`${formKey}-password-generator-content`}
-                role="dialog"
-                aria-label="Password generator options"
-              >
-                <div className="space-y-4">
-                  <h4 className="font-medium" id={`${formKey}-generator-heading`}>Password Generator</h4>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span id={`${formKey}-length-label`}>Length: {passwordLength}</span>
-                    </div>
-                    <Slider
-                      value={[passwordLength]}
-                      min={8}
-                      max={32}
-                      step={1}
-                      onValueChange={(value) => setPasswordLength(value[0] || 16)}
-                      aria-labelledby={`${formKey}-length-label`}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`${formKey}-uppercase`}
-                        checked={includeUppercase}
-                        onCheckedChange={(checked) => 
-                          setIncludeUppercase(checked === true)}
-                      />
-                      <label htmlFor={`${formKey}-uppercase`} className="text-sm">
-                        Uppercase (A-Z)
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`${formKey}-lowercase`}
-                        checked={includeLowercase}
-                        onCheckedChange={(checked) => 
-                          setIncludeLowercase(checked === true)}
-                      />
-                      <label htmlFor={`${formKey}-lowercase`} className="text-sm">
-                        Lowercase (a-z)
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`${formKey}-numbers`}
-                        checked={includeNumbers}
-                        onCheckedChange={(checked) => 
-                          setIncludeNumbers(checked === true)}
-                      />
-                      <label htmlFor={`${formKey}-numbers`} className="text-sm">
-                        Numbers (0-9)
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`${formKey}-special`}
-                        checked={includeSpecialChars}
-                        onCheckedChange={(checked) => 
-                          setIncludeSpecialChars(checked === true)}
-                      />
-                      <label htmlFor={`${formKey}-special`} className="text-sm">
-                        Special Characters (!@#$...)
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
-                    onClick={generatePassword}
-                    data-test-id={`${formKey}-confirm-generate-pwd-btn-${fieldConfig.name}`}
+            {/* Password Generator Button - Only show if enabled in config and not disabled/readonly */}
+            {showPasswordGenerator && !isDisabled && !isReadonly && (
+              <Popover open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    className="mr-1 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
+                    data-test-id={`${formKey}-generate-pwd-btn-${fieldConfig.name}`}
+                    disabled={isDisabled}
+                    Icon={ArrowPathIcon}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                    aria-label="Generate password"
+                    title="Generate password"
+                    aria-expanded={isGeneratorOpen}
+                    aria-controls={`${formKey}-password-generator-content`}
                   >
-                    Generate Password
+                    <span className="sr-only">Generate password</span>
                   </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-80 animate-in fade-in-50 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95" 
+                  id={`${formKey}-password-generator-content`}
+                  role="dialog"
+                  aria-label="Password generator options"
+                >
+                  <div className="space-y-4">
+                    <h4 className="font-medium" id={`${formKey}-generator-heading`}>Password Generator</h4>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span id={`${formKey}-length-label`}>Length: {passwordLength}</span>
+                      </div>
+                      <Slider
+                        value={[passwordLength]}
+                        min={8}
+                        max={32}
+                        step={1}
+                        onValueChange={(value) => setPasswordLength(value[0] || 16)}
+                        aria-labelledby={`${formKey}-length-label`}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${formKey}-uppercase`}
+                          checked={includeUppercase}
+                          onCheckedChange={(checked) => 
+                            setIncludeUppercase(checked === true)}
+                        />
+                        <label htmlFor={`${formKey}-uppercase`} className="text-sm">
+                          Uppercase (A-Z)
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${formKey}-lowercase`}
+                          checked={includeLowercase}
+                          onCheckedChange={(checked) => 
+                            setIncludeLowercase(checked === true)}
+                        />
+                        <label htmlFor={`${formKey}-lowercase`} className="text-sm">
+                          Lowercase (a-z)
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${formKey}-numbers`}
+                          checked={includeNumbers}
+                          onCheckedChange={(checked) => 
+                            setIncludeNumbers(checked === true)}
+                        />
+                        <label htmlFor={`${formKey}-numbers`} className="text-sm">
+                          Numbers (0-9)
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${formKey}-special`}
+                          checked={includeSpecialChars}
+                          onCheckedChange={(checked) => 
+                            setIncludeSpecialChars(checked === true)}
+                        />
+                        <label htmlFor={`${formKey}-special`} className="text-sm">
+                          Special Characters (!@#$...)
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
+                      onClick={generatePassword}
+                      data-test-id={`${formKey}-confirm-generate-pwd-btn-${fieldConfig.name}`}
+                    >
+                      Generate Password
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
             
-            {/* Show/Hide Password Button */}
-            <Button
-              className="mr-4 py-2 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
-              data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
-              disabled={isDisabled}
-              Icon={showPassword ? EyeIcon : EyeSlashIcon}
-              size="sm"
-              type="button"
-              variant="ghost"
-              onClick={() => setShowPassword((prev) => !prev)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              title={showPassword ? "Hide password" : "Show password"}
-              aria-pressed={showPassword}
-            >
-              <span className="sr-only">
-                {showPassword ? 'Hide password' : 'Show password'}
-              </span>
-            </Button>
+            {/* Show/Hide Password Button - Only show if not disabled/readonly */}
+            {!isDisabled && !isReadonly && (
+              <Button
+                className="mr-4 py-2 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
+                data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
+                disabled={isDisabled}
+                Icon={showPassword ? EyeIcon : EyeSlashIcon}
+                size="sm"
+                type="button"
+                variant="ghost"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                <span className="sr-only">
+                  {showPassword ? 'Hide password' : 'Show password'}
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </FormControl>

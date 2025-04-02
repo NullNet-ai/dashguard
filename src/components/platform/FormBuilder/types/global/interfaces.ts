@@ -244,6 +244,7 @@ interface IField {
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
   showPasswordStrengthBar?: boolean;
+  showPasswordGenerator?: boolean;
   hasComplexValidation?: boolean;
   isCustomFormField?: boolean;
   groupConfig?: {
