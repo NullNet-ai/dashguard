@@ -30,14 +30,18 @@ import { IPagination } from './types';
 import PaginationSimpleCard from './Pagination/simple-card';
 import PaginationCentered from './Pagination/centered';
 import PaginationDefault from './Pagination/default';
-export default function Pagination({ width: customWidth }: { width?: string | number }) {
-  const renderType = 'default';
+export default function Pagination({ width: customWidth }: { width?: string | number,
+  renderType?: 'default' | 'simple-card' | 'centered'
+ }) {
 
-  if(renderType === 'simple-card'){
+  const { state } = useContext(GridContext);
+
+
+  if(state?.config?.paginationType === 'simple-card'){
     return <PaginationSimpleCard />
   }
 
-  else if(renderType === 'centered') {
+  else if(state?.config?.paginationType ==='centered') {
     return <PaginationCentered />
   }
 

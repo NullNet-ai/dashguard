@@ -32,7 +32,7 @@ export const FormBuilder = (props: IPropsForms) => {
     handleSubmit,
     enableAppendForm,
     //* other
-    enableFormRegisterToParent: _enableFormRegisterToParent,
+    enableFormRegisterToParent: _enableFormRegisterToParent = true,
     filterGridConfig,
     defaultDisplay = 'expanded',
     customRender,

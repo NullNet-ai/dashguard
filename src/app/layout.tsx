@@ -13,10 +13,17 @@ import { TRPCReactProvider } from '~/trpc/react'
 import { ToastProvider } from '../context/ToastProvider'
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { OpenReplayProvider } from "~/context/OpenReplay";
+import { Loader } from '~/components/ui/loader'
 
 export const metadata: Metadata = {
   title: 'Platform',
   description: 'All in one platform for recruitment',
+}
+
+const LoadingScreen = () => {
+  return <div className='flex justify-center items-center h-screen w-screen'>
+      <Loader variant='circularShadow' size={'lg'} />
+    </div>
 }
 
 export default function RootLayout({
@@ -35,7 +42,7 @@ export default function RootLayout({
         <meta content='email=no' name='format-detection' />
       </head>
       <body>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={LoadingScreen()}>
           <OpenReplayProvider>
           <TRPCReactProvider>
             <EventEmitterProvider>

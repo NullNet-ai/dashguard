@@ -38,11 +38,15 @@ export default function SessionChecker() {
   const apiAuth = api.auth.logout.useMutation()
 
   const handleLogout = async () => {
-    await apiAuth.mutateAsync().then(() => {
-      router.replace('/login')
-      Cookies.remove('token')
-      sessionStorage.setItem('sessionExpired', 'true')
-    })
+    try {
+      await apiAuth.mutateAsync();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      router.replace('/login');
+      Cookies.remove('token');
+      sessionStorage.setItem('sessionExpired', 'true');
+    }
   }
 
   const handleSessionExpiration = async () => {
@@ -62,6 +66,8 @@ export default function SessionChecker() {
 
       try {
         const payload = JSON.parse(atob(token?.split('.')[1] || ''))
+        if (!payload?.exp) throw new Error("Invalid token format");
+
         const { exp } = payload
         const currentTime = Math.floor(Date.now() / 1000)
         const remainingTime = exp - currentTime
