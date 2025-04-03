@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.6.0",
-  "branch": "released/feat/3495/2.6.0",
-  "message": "feat: divider component",
-  "publish_name": "Save Ducto"
+  "tag": "2.6.1-rc.2<unreleased>",
+  "branch": "unreleased/fix2346/2.6.1-rc.2<unreleased>",
+  "message": "feat(message): add message thread component and improve color picker- Introduce new message thread component with configurable styling and alignment- Add emoji picker integration and input box for message composition- Refactor color picker to support alpha channel and improve color formatting- Remove unused color picker components and simplify color input handling- Update autosize textarea to support width constraints and manual resizing",
+  "publish_name": "Rob Caldosa"
 }

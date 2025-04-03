@@ -44,6 +44,8 @@ export default function FormTextArea({
           icon={fieldConfig.textAreaIcon}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight ?? 50}
+          maxWidth={fieldConfig.textAreaMaxWidth}
+          minWidth={fieldConfig.textAreaMinWidth}
           showCharCount={fieldConfig.textAreaShowCharCount}
           maxCharCount={fieldConfig.textAreaMaxCharCount}
           lineWrapping={fieldConfig.textAreaLineWrapping}

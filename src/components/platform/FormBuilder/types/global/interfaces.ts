@@ -213,6 +213,8 @@ interface IField {
   };
   textAreaMaxHeight?: number;
   textAreaMinHeight?: number;
+  textAreaMaxWidth?: number;
+  textAreaMinWidth?: number;
   textAreaIcon?: React.ElementType;
   textAreaMaxLines?: number;
   textAreaLineWrapping?: boolean;

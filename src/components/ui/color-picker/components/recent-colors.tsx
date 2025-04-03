@@ -5,6 +5,7 @@ import { Button } from '~/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { ColorPresets } from './color-presets'
+import { type ColorFormat } from '../types'
 
 interface RecentColorsProps {
   recentColors: string[]
@@ -12,6 +13,7 @@ interface RecentColorsProps {
   isDesktop: boolean
   showTailwindPalette: boolean
   setShowTailwindPalette: (show: boolean) => void
+  activeFormat: ColorFormat
 }
 
 export function RecentColors({
@@ -19,7 +21,7 @@ export function RecentColors({
   onColorSelect,
   isDesktop,
   showTailwindPalette,
-  setShowTailwindPalette
+  setShowTailwindPalette,
 }: RecentColorsProps) {
   // State to control the "more colors" popover
   const [moreColorsOpen, setMoreColorsOpen] = React.useState(false)
