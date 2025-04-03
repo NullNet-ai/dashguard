@@ -40,16 +40,12 @@ export interface IActions {
 }
 
 const TabItems = ({ items =[]}: TabItemsProps) => {
-  const winWidth = useWindowSize().width;
-  const contRef = React.useRef<HTMLDivElement>(null);
   const { open } = useSidebar();
-  const screenSize = useScreenType();
   const [isWindowLoaded, setIsWindowLoaded] = useState(false)
   const pathname = usePathname();
   const router = useRouter();
   // eslint-disable-next-line no-unsafe-optional-chaining
   const [, , entity] = pathname?.split('/');
-  const insertTabs = api.tab.insertMainTabs.useMutation();
   const [tablists, setTablists] = useState<any[]>(items);
   const [copyTab, setCopyTab] = useState<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
@@ -58,10 +54,8 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     items?.length > 0 ? items.find((tab) => tab.current)?.id : 'dashboard',
   );
 
-  const [cachedItem, setCachedItem] = useState<any>({})
   const [isClient, setIsClient] = useState(false)
   const [application, code] = (pathname || '').split('/').slice(3)
-  const { isBannerPresent } = useSidebar()
   const  {state: drawerState,  } = useSideDrawer ()
   const {width, isOpen, isPinned} = drawerState
 

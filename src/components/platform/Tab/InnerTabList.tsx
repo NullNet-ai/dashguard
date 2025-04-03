@@ -2,9 +2,10 @@ import { headers } from 'next/headers'
 
 import { api } from '~/trpc/server'
 
+import { toCapitalize } from '~/lib/capitalize'
 import InnerTabItems from './InnerTabItems'
 import { type IPropsTabList, type InnerTabsProps } from './type'
-import { updateMainTabItem } from './Actions/actions'
+import { pluralize } from '~/server/utils/pluralize'
 
 const getSessionTabs = async () => {
   const headerList = headers()
@@ -26,6 +27,20 @@ const getSessionTabs = async () => {
 
   const grid = stateTabs.find(item => item.name === 'Grid')
   const hasIdentifier = stateTabs?.find(item => item.name === identifier)
+
+  let entity
+  switch(mainEntity) {
+    case 'user_role':
+      entity = 'role'
+      break
+    case 'organization_account':
+      entity = 'account'
+      break
+    default:
+      entity = mainEntity
+  }
+
+
   const newTabs = stateTabs.map((tab) => {
     let path
     let href
@@ -49,8 +64,10 @@ const getSessionTabs = async () => {
     }
 
     return {
+      ...tab,
       name: tab.name,
       href,
+      label: tab.name === 'Grid' ? `All ${toCapitalize(pluralize(entity || ''))}` : tab.name,
       current: href.match(path) ? true : false,
     }
   })
@@ -60,6 +77,7 @@ const getSessionTabs = async () => {
       name: 'Grid',
       href: pathname,
       current: true,
+      label : `All ${toCapitalize(pluralize(entity || ''))}s`,
     })
   }
 
@@ -68,6 +86,7 @@ const getSessionTabs = async () => {
       name: identifier,
       href: pathname,
       current: true,
+      label : identifier,
     })
   }
 
@@ -76,14 +95,8 @@ const getSessionTabs = async () => {
       name: identifier,
       href: `${pathname}?${fullSearchQueryParams}`,
       current: true,
+      label : identifier,
     })
-
-    await updateMainTabItem({
-      name: identifier,
-      href: `${pathname}?${fullSearchQueryParams}`,
-      current: true,
-    }, mainEntity ?? '')//update current in main tab
-
   }
 
   await api.tab.insertSubTabs({
@@ -109,7 +122,35 @@ const InnerTabs = async ({
   const newTabs = await getSessionTabs()
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
-  return <InnerTabItems pathname={pathname} tabs={newTabs} variant={variant}/>
+
+  const withIDTabs = newTabs.map((tab) => {
+      return {
+        ...tab,
+      id: tab.name,
+      }
+    }) 
+
+  return <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant}/>
 }
 
 export default InnerTabs
+
+// const pathname = headerList.get('x-pathname') || ''
+
+// const [, , entity, , ]
+//   = pathname.split('/') || 'New Tab'
+
+// const withIDTabs = newTabs.map((tab) => {
+  
+//   if(lowerCase(tab.name) === 'grid') {
+//     return {
+//      ...tab,
+//      id: tab.name,
+//      label: `All ${capitalize(pluralize(entity || ''))}`
+//     }
+//   }
+//   return {
+//     ...tab,
+//    id: tab.name,
+//   }
+// }) 

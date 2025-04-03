@@ -1,3 +1,5 @@
+'use client'
+
 import Cookies from 'js-cookie';
 import { toLower } from 'lodash';
 import { GripVerticalIcon } from 'lucide-react';
@@ -18,7 +20,8 @@ type InnerTabitemProps = {
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  lastShownItem?: any
+  handleClick?: (tab: any) => void
 }
 
 const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -28,6 +31,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   className,
   lastShownItem,
   isHidden,
+  handleClick
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -72,7 +76,6 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     }))
 
     try {
-      console.log("tabss", tab)
       await updateMainTabItem(tab, entityName ?? '')
     } catch (error) {
         console.error(error)
@@ -93,7 +96,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   }, [isActive])
 
 
-  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
+  const tabNameRole =tab?.label ||  (tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase())
   return (
     <div
       ref={ref}
@@ -102,7 +105,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[3px]'} `, className,
       )}
     >
-      {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
+      {toLower(formatTabName(tab.name)) !== 'grid' ? (
         <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
@@ -111,22 +114,23 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         </SortableDragHandleRawItem>
       ) : null}
       
-        <Link
+        <div
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
-            handleClickLink(tab)
+          onClick={(e) => {
+            e.stopPropagation()
+            handleClick?.(tab)
+
           }}
-          href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'cursor-pointer whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}
           <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-        </Link>
+        </div>
   
       {!isHidden && !isGrid
         ? (
