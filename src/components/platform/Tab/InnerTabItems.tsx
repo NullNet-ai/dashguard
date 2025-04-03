@@ -134,12 +134,16 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
         if(items?.length) {
           // setTablists(items);
           updatecachedItems(items);
-
           if(activeTab) {
             const href= items?.find((item) => item.current)?.href;
             router.push(href);
           }
            
+        }
+      } else {
+        if(activeTab) {
+          const href= items?.find((item) => item.current)?.href;
+          router.push(href);
         }
       }
 
