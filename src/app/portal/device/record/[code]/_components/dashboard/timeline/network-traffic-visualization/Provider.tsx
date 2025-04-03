@@ -158,6 +158,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const fetchCountryIP = async () => {
       const data = await getCountryIP.mutateAsync({
         source_ips: unique_source_ips,
+        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       })
 
       const flag_data = {
@@ -212,6 +213,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     setBandwidth([])
     fetchBandwidth(20)
   }, [unique_source_ips])
+
+  console.log("@@@@@@@@@@bandwidth", bandwidth)
 
   const state = {
     flowData: bandwidth,
