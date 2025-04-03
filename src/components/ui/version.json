@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.5.0-rc.2<unreleased>",
-  "branch": "unreleased/fix/2.5.0-rc.2<unreleased>",
-  "message": "fix color picker eyedropper not working in production, date range ui fix ",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.6.0",
+  "branch": "released/feat/3495/2.6.0",
+  "message": "feat: divider component",
+  "publish_name": "Save Ducto"
 }
