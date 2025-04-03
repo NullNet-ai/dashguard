@@ -7,6 +7,7 @@ import MainTabMenu from '~/components/application-layout/common/MainTabMenu';
 import TabMenu from '~/components/application-layout/common/TabMenu';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata } from './Actions/actions';
 
 type MainDropdTabitemProps = {
   tab: any
@@ -16,6 +17,7 @@ type MainDropdTabitemProps = {
   onSelect?: () => void
   shownItems: any[]
   actions ?: any
+  handleClickItem?: (item: any) => void
 };
 
 const MainDropTabItem = ({
@@ -25,7 +27,8 @@ const MainDropTabItem = ({
   isActive,
   onSelect,
   shownItems,
-  actions
+  actions,
+  handleClickItem
 }: MainDropdTabitemProps) => {
 
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
@@ -57,53 +60,66 @@ const MainDropTabItem = ({
   }, [shownItems]);
 
 
-  const handleClickLink = () => {
+  // const handleClickLink = async (tabid?: string) => {
+  //   const getCurrent = getActiveName() || ''
+  //   const newItems = shownItems.map(item => {
+  //     return {...item, current: item.name === tabid, is_current: item.name === tabid}
+  //   })
 
-    const getCurrent = getActiveName() || ''
-    const cachedData = {
-      tabs: shownItems,
-      lastShownItem: lastShownItem?.name,
-      prevCurrent: getCurrent,
-      key:  'main_tab_data',
-    }
-    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+    
 
-    localStorage.setItem('cachedPortalItems', JSON.stringify({
-      ...cachedItems,
-      [`main_tab_data`]: cachedData,
-    }))
+  //   try {
+  //     await updateAllMaindata(newItems)
+  //   } catch (error) {
+  //       console.error(error)
+  //   }
 
-    // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
-    // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
-  }
+  //   const cachedData = {
+  //     tabs: newItems,
+  //     lastShownItem: lastShownItem?.name,
+  //     prevCurrent: getCurrent,
+  //     key:  'main_tab_data',
+  //   }
+  //   const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
-  useEffect(() => {
-    void updateSubtabs.mutateAsync({
-      current_context: '/portal/' + entityName,
-      is_active: active,
-      tab_name: tab.name,
-    })
-  }, [active]);
+  //   localStorage.setItem('cachedPortalItems', JSON.stringify({
+  //     ...cachedItems,
+  //     [`main_tab_data`]: cachedData,
+  //   }))
+
+  //   // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
+  //   // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
+  // }
+
+  // useEffect(() => {
+  //   void updateSubtabs.mutateAsync({
+  //     current_context: '/portal/' + entityName,
+  //     is_active: active,
+  //     tab_name: tab.name,
+  //   })
+  // }, [active]);
 
   const tabNameRole = tab.name === 'user_role' ? 'role' : tab.name.split(' ').join('-').toLowerCase();
   return (
     <>
-      <Link
+      <div
         data-test-id={
           'apptab-' + tabNameRole
         }
-        onClick={() => {
-          handleClickLink()
+        onClick={(e) => {
+          // handleClickLink(tab.name)
+            e.stopPropagation()
+          handleClickItem?.(tab)
           onSelect?.()
         }}
-        href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
+        // href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}
         aria-current={isActive ? 'page' : undefined}
         className={cn(
-          isActive ? 'text-primary' : 'text-default/70', 'whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
+          isActive ? 'text-primary' : 'text-default/70', 'cursor-pointer whitespace-nowrap px-1 pr-1 text-sm font-medium', 'flex items-center space-x-2 flex-1', 'hover:border-t-primary hover:text-primary',
         )}
       >
         {formatTabName(tabNameRole)}
-      </Link>
+      </div>
       <div className="absolute right-0 h-[50%] hidden w-[1px] bg-gray-300 dark:bg-gray-600" />
       <MainTabMenu
         current={!!tab.href.match(pathname)}

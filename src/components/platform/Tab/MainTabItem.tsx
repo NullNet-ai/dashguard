@@ -10,16 +10,19 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata } from './Actions/actions';
 
 type InnerTabitemProps = {
   tab: any
   pathname?: string
-  newItems: any
+  newItems: any[]
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  lastShownItem?: any
   actions?: any
+  handleClick?: (tab: any) => void
+  activeItem?: any
 }
 
 const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -30,39 +33,54 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   lastShownItem,
   isHidden,
   actions,
+  handleClick,
+  activeItem
 }, ref) => {
-  const isGrid = tab.name === 'Dashboard' || tab.name === 'dashboard';
+ 
   const newPathname = usePathname()
 
   const [, , entityName, application, code] = (newPathname || '').split('/')
+
+  const isDashboard = lowerCase(tab.id) === 'dashboard' && entityName === 'dashboard';
   const updateSubtabs = api.tab.updateSubTabs.useMutation()
 
   const isActive = useMemo(() => {
-    if (isGrid && application === 'dashboard') {
+    if (isDashboard) {
       return true
     }
 
-    return entityName === tab?.name
-  }, [entityName, application])
+    return activeItem.id === tab?.name || activeItem.name === tab?.name || tab.current
+  }, [entityName, application, activeItem, tab])
 
   const getActiveName = () => {
-    if (isGrid && application === 'dashboard') {
+    if (isDashboard && application === 'dashboard') {
       return 'dashboard'
     }
     return code
   }
 
-  const handleClickLink = () => {
+  const handleClickLink = async (tabid?: string) => {
     if (isHidden) {
       return
     }
     const getCurrent = getActiveName() || ''
+    const newList = newItems.map(item => {
+      return {...item, current: item.name === tabid, is_current: item.name === tabid}
+    })
+
+    
+
+    try {
+      await updateAllMaindata(newList)
+    } catch (error) {
+        console.error(error)
+    }
 
     const cachedData = {
-      tabs: newItems,
+      tabs: newList,
       lastShownItem: lastShownItem?.name,
       prevCurrent: getCurrent,
-      key:  'main_tab_data' ,
+      key:  'main_tab_data',
     }
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
@@ -72,13 +90,13 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     }))
   }
 
-  useEffect(() => {
-    void updateSubtabs.mutateAsync({
-      current_context: '/portal/' + entityName,
-      is_active: isActive,
-      tab_name: tab.name,
-    })
-  }, [isActive])
+  // useEffect(() => {
+  //   void updateSubtabs.mutateAsync({
+  //     current_context: '/portal/' + entityName,
+  //     is_active: isActive,
+  //     tab_name: tab.name,
+  //   })
+  // }, [isActive])
 
 
   const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
@@ -97,25 +115,27 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
             aria-hidden="true"
           />
         </SortableDragHandleRawItem> : null}
-        <Link
+        <div
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
-            handleClickLink()
+          onClick={(e) => {
+            e.stopPropagation()
+            // handleClickLink(tab.name)
+            handleClick?.(tab)
           }}
-          href={isHidden ? `${newPathname}#` : tab.href}
+          // href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px] pl-[0px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'cursor-pointer whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isDashboard ? 'px-[8px] pl-[0px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}
-        </Link>
+        </div>
   
           {isActive ? <div className='absolute z-[1000] bottom-[-4px] h-1 left-0 w-full bg-white' /> : null }
 
-      {(!isHidden && !isGrid) 
+      {(!isHidden && !isDashboard) 
         ? (
             <MainTabMenu
               current={!!tab.href.match(pathname)}

@@ -1,3 +1,4 @@
+import { ta } from 'date-fns/locale'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
@@ -43,6 +44,29 @@ export const tabRouter = createTRPCRouter({
 
     return response
   }),
+  updateMainTabItem: privateProcedure
+   .input(
+      z.object({
+        tab: z.any(),
+        entity: z.string().min(1),
+      })
+    )
+   .mutation(async ({ input, ctx }) => {
+      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const response = await ctx.redisClient.getCachedData(key)
+
+      const update_tabs = response?.map((tab: Record<string, any>) => {
+        if (tab.name === input.entity || tab.id === input.entity) {
+          return {
+          ...tab,
+           href: input.tab.href,
+          }
+        }
+        return tab
+      })
+      await ctx.redisClient.cacheData(key, update_tabs, 90000000)
+      
+   }),
   insertSubTabs: privateProcedure
     .input(
       z.object({
@@ -95,6 +119,28 @@ export const tabRouter = createTRPCRouter({
     return response
   }),
   updateAllMainTabs: privateProcedure
+  .input(
+    z.object({
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.contact?.id}`
+
+    const response = await tabs
+      .cacheData(key, input.tabs, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
+  updateAllMainTabs2: privateProcedure
   .input(
     z.object({
       tabs: z.array(z.any()),
