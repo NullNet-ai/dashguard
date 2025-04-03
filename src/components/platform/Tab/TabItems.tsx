@@ -50,8 +50,8 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   // eslint-disable-next-line no-unsafe-optional-chaining
   const [, , entity] = pathname?.split('/');
   const insertTabs = api.tab.insertMainTabs.useMutation();
-  const [tablists, setTablists] = useState<any>(items);
-  const [copyTab, setCopyTab] = useState<any>(null);
+  const [tablists, setTablists] = useState<any[]>(items);
+  const [copyTab, setCopyTab] = useState<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('')
   const [activeTab, setActiveTab] = useState<string>(
@@ -158,7 +158,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
 
       if(JSON.stringify(tablists) !== JSON.stringify(items)) {
         if(items?.length) {
-          setTablists(items);
+          // setTablists(items);
           updatecachedItems(items);
 
           if(activeTab) {
@@ -288,50 +288,14 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     }
   };
 
-  // Close Class Tab
-  // Not the current tab
-  const closeTab = async (tab: IPropsTabList) => {
-    // const newTab = sortTabsActiveWillSecond.filter(item => item.href !== tab?.href);
-    // setNewTabList(newTab);
-    // try {
-    //   await updateAllMaindata(newTab)
-    // } catch (error) {
-    //     console.error(error)
-    // }
 
-    // // make it current tab
-    // const activeTab = newTab[newTab.length - 1];
-    // if (activeTab) {
-    //   activeTab.current = true;
-    //   router.push(activeTab?.href);
-    // }
+  const closeTab = async (tab: IPropsTabList) => {
+    return null
   };
   // Close Current Tab
   // Current tab
   const closeCurrentTab = (tab: IPropsTabList) => {
-    // 1. Find the current tab
-    // 2. remove the current tab
-    // 3. active tab will be the left tab if the current tab is the last tab
-    // 4. active tab will be the right tab if the current tab is the first tab
-    // const currentTabIndex = newTabList.findIndex(
-    //   item => item.href === tab.href,
-    // );
-    // if (currentTabIndex === -1) {
-    //   return;
-    // }
-    // const newTab = [...newTabList];
-    // newTab.splice(currentTabIndex, 1);
-    // let activeTabIndex = currentTabIndex - 1;
-    // if (activeTabIndex < 0) {
-    //   activeTabIndex = 0;
-    // }
-    // const activeTab = newTab[activeTabIndex];
-    // if (activeTab) {
-    //   activeTab.current = true;
-    //   router.push(activeTab?.href);
-    // }
-
-    // setNewTabList(newTab);
+    return null
   };
 
   // Close All tabs
@@ -549,7 +513,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
                       <MainDropTabItem
                         tab={itm}
                         shownItems={tablists}
-                        dropItems={copyTab?.filter((dta) => dta.hidden)}
+                        dropItems={copyTab?.filter((dta: any) => dta.hidden)}
                         handleClickItem={handleTabClickDropdown}
                         pathname={pathname}
                         onSelect={() => setIsDropdownOpen(false)}

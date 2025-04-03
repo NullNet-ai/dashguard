@@ -119,7 +119,8 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation()
             // handleClickLink(tab.name)
             handleClick?.(tab)
           }}

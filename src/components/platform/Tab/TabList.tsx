@@ -66,8 +66,6 @@ export default async function TabList({ className }: { className?: string }) {
     }
   })
 
-  console.log("withIDTabs", withIDTabs)
-
   return (
     <TabItems items={withIDTabs} />
   );
