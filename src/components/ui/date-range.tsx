@@ -67,6 +67,18 @@ export function DateRangePicker({
   const [selectedRange, setSelectedRange] = useState<DateRange | DateRangeWithTime | undefined>(value);
   const [activePreset, setActivePreset] = useState<DateRangePreset | undefined>(undefined);
 
+  // Add useEffect to sync value with selectedRange
+  useEffect(() => {
+    // If value changes externally, update the selectedRange
+    if (value !== undefined) {
+      setSelectedRange(value);
+    } else {
+      // If value is undefined (which happens during form reset), clear the selection
+      setSelectedRange(undefined);
+      setActivePreset(undefined);
+    }
+  }, [value]);
+
   const handlePresetSelect = (preset: DateRangePreset) => {
     const today = new Date();
     let newRange: DateRange | DateRangeWithTime;
@@ -234,6 +246,29 @@ export function DateRangePicker({
       onChange?.(newRange);
     }
   };
+
+  // Add the missing handleResetSelection function
+  const handleResetSelection = () => {
+    setSelectedRange(undefined);
+    setActivePreset(undefined);
+    // Pass undefined to the onChange handler to properly reset the field
+    onChange?.(undefined);
+  };
+  
+  // Modify the useEffect to properly handle reset
+  useEffect(() => {
+    // If value changes externally, update the selectedRange
+    if (value !== undefined) {
+      setSelectedRange(value);
+    } else {
+      // If value is undefined (which happens during form reset), clear the selection
+      setSelectedRange(undefined);
+      setActivePreset(undefined);
+    }
+  }, [value]);
+  
+  // Remove the duplicate useEffect that was added
+  // (The one at the end of the file that doesn't handle undefined values)
 
   // Validate the range
   useEffect(() => {
@@ -462,11 +497,7 @@ export function DateRangePicker({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSelectedRange(undefined);
-                      setActivePreset(undefined);
-                      onChange?.(undefined);
-                    }}
+                    onClick={handleResetSelection}
                     className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     Reset Selection
@@ -531,11 +562,7 @@ export function DateRangePicker({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setSelectedRange(undefined);
-                  setActivePreset(undefined);
-                  onChange?.(undefined);
-                }}
+                onClick={handleResetSelection}
                 className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 Reset Selection

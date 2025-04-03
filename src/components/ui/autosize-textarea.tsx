@@ -7,8 +7,8 @@ interface UseAutosizeTextAreaProps {
   textAreaRef: React.MutableRefObject<HTMLTextAreaElement | null>;
   minHeight?: number;
   maxHeight?: number;
-  minWidth?: number;  // Add new props
-  maxWidth?: number;  // Add new props
+  minWidth?: number;  
+  maxWidth?: number;  
   triggerAutoSize: string;
   maxLines?: number;
   lineWrapping?: boolean;
@@ -155,6 +155,30 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
     const [triggerAutoSize, setTriggerAutoSize] = React.useState('');
     const [charCount, setCharCount] = React.useState(0);
 
+    // Add a resize observer to enforce max height/width constraints
+    React.useEffect(() => {
+      const textAreaElement = textAreaRef.current;
+      if (!textAreaElement) return;
+      
+      const resizeObserver = new ResizeObserver(() => {
+        // Enforce max height constraint
+        if (maxHeight !== Number.MAX_SAFE_INTEGER && textAreaElement.clientHeight > maxHeight) {
+          textAreaElement.style.height = `${maxHeight}px`;
+        }
+        
+        // Enforce max width constraint
+        if (maxWidth !== Number.MAX_SAFE_INTEGER && textAreaElement.clientWidth > maxWidth) {
+          textAreaElement.style.width = `${maxWidth}px`;
+        }
+      });
+      
+      resizeObserver.observe(textAreaElement);
+      
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, [maxHeight, maxWidth]);
+
     useAutosizeTextArea({
       textAreaRef,
       triggerAutoSize: triggerAutoSize,
@@ -220,6 +244,8 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
               resize: (disabled || readOnly) ? 'none' : 'both',
               width: '100%',
               cursor: disabled ? 'not-allowed' : readOnly ? 'default' : 'text',
+              maxHeight: maxHeight !== Number.MAX_SAFE_INTEGER ? `${maxHeight}px` : undefined,
+              maxWidth: maxWidth !== Number.MAX_SAFE_INTEGER ? `${maxWidth}px` : undefined,
             }}
             className={cn(
               'rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-primary',
