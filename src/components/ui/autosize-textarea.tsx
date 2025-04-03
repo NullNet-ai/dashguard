@@ -145,6 +145,8 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
       lineWrapping = true,
       showCharCount = false,
       maxCharCount,
+      disabled,
+      readOnly,
       ...props
     }: AutosizeTextAreaProps,
     ref: React.Ref<AutosizeTextAreaRef>,
@@ -199,28 +201,40 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
     };
 
     return (
-      <div className="relative flex flex-col">
+      <div className={cn(
+        "relative flex flex-col",
+        disabled && "pointer-events-none" // Only apply pointer-events-none for disabled, not readonly
+      )}>
         <div className="relative flex items-center w-full">
-          {Icon && <Icon className="absolute left-1.5 top-2 h-5 w-5 text-muted-foreground" />}
+          {Icon && <Icon className={cn(
+            "absolute left-1.5 top-2 h-5 w-5 text-muted-foreground",
+            (disabled || readOnly) && "opacity-50"
+          )} />}
           <textarea
             {...props}
             value={value}
             ref={textAreaRef}
+            disabled={disabled}
+            readOnly={readOnly}
             style={{ 
-              resize: 'both',
-              width: '100%'
+              resize: (disabled || readOnly) ? 'none' : 'both',
+              width: '100%',
+              cursor: disabled ? 'not-allowed' : readOnly ? 'default' : 'text',
             }}
             className={cn(
-              'rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted',
-              'disabled:resize-none readonly:resize-none',
+              'rounded-md border border-input bg-background px-3 py-2 text-md ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-primary',
               Icon ? 'ps-7' : 'px-3',
+              disabled && "opacity-50 bg-muted",
               className,
             )}
             onChange={handleChange}
           />
         </div>
         {(showCharCount || maxCharCount) && (
-          <div className="text-xs text-foreground flex justify-start mt-1">
+          <div className={cn(
+            "text-xs text-foreground flex justify-start mt-1",
+            (disabled || readOnly) && "opacity-50"
+          )}>
             {showCharCount && (
               <span>
                 {charCount}{maxCharCount ? ` / ${maxCharCount}` : ''}
