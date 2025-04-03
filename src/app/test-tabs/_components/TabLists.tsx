@@ -23,7 +23,7 @@ const Tablists = ({
   tabs: any[];
   onTabChange?: (tab: any) => void;
 }) => {
-  const [tablists, setTablists] = useState<any>(tabs);
+  const [tablists, setTablists] = useState<any[]>(tabs);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 0,
@@ -208,7 +208,7 @@ const Tablists = ({
         </Sortable>
         {/* has hidden items */}
       </div>
-      {copyTab?.some((tab) => tab.hidden) ? (
+      {copyTab?.some((tab: any) => tab.hidden) ? (
         <div className="flex items-start justify-center px-2 py-1 text-xs font-medium text-gray-400">
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
@@ -236,10 +236,10 @@ const Tablists = ({
               <div className="my-2 max-h-[calc(100vh-209px)] overflow-y-auto">
                 {copyTab
                   ?.filter(
-                    (dta) =>
+                    (dta: any) =>
                       dta.hidden 
                   )
-                  .map((itm) => {
+                  .map((itm: any) => {
                     if (!itm.hidden) {
                       return null;
                     }
@@ -269,7 +269,7 @@ const Tablists = ({
         'no'
       )}
       <div className='h-[700px] overflow-auto'>
-        <div>Active: {copyTab?.find(tab => tab.current)?.name  }</div>
+        <div>Active: {copyTab?.find((tab: any) => tab.current)?.name  }</div>
         <div className='flex flex-row'>
         <pre className="rounded bg-gray-100 p-4  text-[10px]">
           <code>{JSON.stringify(tablists, null, 2)}</code>
