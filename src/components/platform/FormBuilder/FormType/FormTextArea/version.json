@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormTextArea",
-  "tag": "2.0.1-rc.2<unreleased>",
-  "branch": "unreleased/fix2346/2.0.1-rc.2<unreleased>",
-  "message": "handle resize width or horizontally",
+  "tag": "2.0.1-rc.3<unreleased>",
+  "branch": "unreleased/fix/2.0.1-rc.3<unreleased>",
+  "message": "refactor(FormTextArea): reorder props for better readabilityReordered the props in the FormTextArea component to group related properties together, improving code readability and maintainability",
   "publish_name": "Rob Caldosa"
 }
