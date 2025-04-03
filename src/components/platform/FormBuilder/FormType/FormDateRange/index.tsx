@@ -203,18 +203,25 @@ export default function FormDateRange({
   const handleSafeChange = (newValue: DateRange | DateRangeWithTime | undefined) => {
     try {
       if (!newValue) {
-        onChange(["", ""]);
+        // When resetting, set to undefined instead of empty array
+        onChange(undefined);
         return;
       }
       
       // Format the date range as an array of strings
       const formattedArray = formatDateRangeToArray(newValue);
       
+      // If both values are empty strings, return undefined instead
+      if (formattedArray[0] === "" && formattedArray[1] === "") {
+        onChange(undefined);
+        return;
+      }
+      
       // Update form with the formatted array
       onChange(formattedArray);
     } catch (error) {
       console.error("Error in DateRange onChange handler:", error);
-      onChange(["", ""]);
+      onChange(undefined);
     }
   };
 
