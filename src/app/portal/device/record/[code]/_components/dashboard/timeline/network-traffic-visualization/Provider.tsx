@@ -6,6 +6,7 @@ import React, {
   type PropsWithChildren,
 } from 'react'
 
+import { getFlagDetails } from '~/app/api/device/get_flags'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
@@ -32,9 +33,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
+  const [flagDetails, setFlagDetails] = useState<any>()
 
   const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
+  const getCountryIP = api.packet.getCountriesSourceIP.useMutation()
 
   const {
     time_count = null,
@@ -52,7 +55,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   )
 
   // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
-
 
   const fetchBandwidth = async (add_data_count: number) => {
     const _bandwidth: any = await getBandwidthActions.mutateAsync({
@@ -87,13 +89,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     fetchBandwidth(2)
   }
 
-
-
   useEffect(() => {
     if (!eventEmitter) return
 
     const setFID = (data: any) => {
-      
       if (typeof data !== 'string') return
       setFilterID(data)
     }
@@ -120,7 +119,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       const { time, resolution = '1h' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
-      
+
       setTime({
         time_count,
         time_unit: time_unit as 'hour',
@@ -140,6 +139,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
       })
+      console.log('%c Line:137 🌮 data', 'color:#ea7e5c', data)
 
       setUniqueSourceIP(data as string[])
       setCurrentIndex(0)
@@ -149,33 +149,73 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
+  useEffect(() => {
+    if (!unique_source_ips || unique_source_ips.length === 0) {
+      console.warn('No source IPs available for fetching bandwidth')
+      return
+    }
 
+    const fetchCountryIP = async () => {
+      const data = await getCountryIP.mutateAsync({
+        source_ips: unique_source_ips,
+      })
+
+      const flag_data = {
+        country: 'PH',
+        region: 'California',
+        city: 'San Francisco',
+        ip: '151.101.1.55',
+      }
+
+      setBandwidth(async (prev) => {
+        const combinedData = await Promise.all(
+          bandwidth.map(async (bwEntry) => {
+              const matchingData = data.find(entry => entry.ip === bwEntry.source_ip);
+              
+              if (matchingData) {
+                  const flagDetails = await getFlagDetails(matchingData?.country);
+                  return { ...matchingData, ...flagDetails, result: bwEntry.result };
+              }
+              return bwEntry;
+          })
+      );
+  
+      return combinedData;
+  
+      })
+
+      const flag_details: any = await getFlagDetails(flag_data?.country)
+
+      setFlagDetails(flag_details)
+    }
+
+    fetchCountryIP()
+  }, [unique_source_ips])
 
   useEffect(() => {
     // if (!unique_source_ips || unique_source_ips.length === 0) {
     //   console.warn('No source IPs available for fetching bandwidth');
     //   return;
     // }
-  
+
     const bandwidthIps = bandwidth?.map((entry: {
-      source_ip: string;
-    }) => entry.source_ip) || [];
-  
-  
-    const areIpsSame = 
-      bandwidthIps.length === unique_source_ips.length && 
-      unique_source_ips.every(ip => bandwidthIps.includes(ip));
-  
-    if (areIpsSame) return;
-  
-    setCurrentIndex(current_index + 20);
+      source_ip: string
+    }) => entry.source_ip) || []
+
+    const areIpsSame
+      = bandwidthIps.length === unique_source_ips.length
+        && unique_source_ips.every(ip => bandwidthIps.includes(ip))
+
+    if (areIpsSame) return
+
+    setCurrentIndex(current_index + 20)
     setBandwidth([])
-    fetchBandwidth(20);
-  }, [unique_source_ips]);
-  
+    fetchBandwidth(20)
+  }, [unique_source_ips])
 
   const state = {
     flowData: bandwidth,
+    flagDetails,
     loading,
     unique_source_ips,
     fetchMoreData,

@@ -7,10 +7,10 @@ import moment from 'moment-timezone'
 import { z } from 'zod'
 
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
+import { type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
-import { IAdvanceFilter } from '~/components/platform/Grid/Search/types';
 
 interface InputData {
   bucket: string
@@ -75,36 +75,38 @@ function transformData(data: InputData[]): OutputData[] {
 }
 
 function mergeCriteria(filters: IAdvanceFilter[]) {
-  const criteriaMap = new Map();
-  const result = [];
+  const criteriaMap = new Map()
+  const result = []
 
   for (const item of filters) {
-    if (item.type === "criteria") {
-      const key = `${item.entity}|${item.field}|${item.operator}`;
+    if (item.type === 'criteria') {
+      const key = `${item.entity}|${item.field}|${item.operator}`
 
       if (criteriaMap.has(key)) {
         // Merge values while ensuring uniqueness
-        const existingCriteria = criteriaMap.get(key);
-        existingCriteria.values = [...new Set([...existingCriteria.values, ...(item.values || [])])];
-      } else {
-        // Store new criteria
-        criteriaMap.set(key, { ...item });
-        result.push(criteriaMap.get(key));
+        const existingCriteria = criteriaMap.get(key)
+        existingCriteria.values = [...new Set([...existingCriteria.values, ...(item.values || [])])]
       }
-    } else if (item.type === "operator") {
+      else {
+        // Store new criteria
+        criteriaMap.set(key, { ...item })
+        result.push(criteriaMap.get(key))
+      }
+    }
+    else if (item.type === 'operator') {
       // Push operator only if the last added item is NOT an operator
-      if (result.length > 0 && result[result.length - 1].type !== "operator") {
-        result.push(item);
+      if (result.length > 0 && result[result.length - 1].type !== 'operator') {
+        result.push(item)
       }
     }
   }
 
   // Remove last operator if it's left at the end
-  if (result.length > 0 && result[result.length - 1].type === "operator") {
-    result.pop();
+  if (result.length > 0 && result[result.length - 1].type === 'operator') {
+    result.pop()
   }
 
-  return result;
+  return result
 }
 
 export const packetRouter = createTRPCRouter({
@@ -605,8 +607,7 @@ export const packetRouter = createTRPCRouter({
       device_id,
       _query,
     } = input || {}
-    
-    
+
     if ((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length) {
       return {
         items: [],
@@ -622,7 +623,7 @@ export const packetRouter = createTRPCRouter({
           pluck: [
             'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
           ],
-          advance_filters:[
+          advance_filters: [
 
             {
               type: 'criteria',
@@ -665,7 +666,7 @@ export const packetRouter = createTRPCRouter({
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, bucket_size = '1h', source_ips } = input
-// return []
+    // return []
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
         query: {
@@ -730,6 +731,7 @@ export const packetRouter = createTRPCRouter({
 
   getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, filter_id } = input
+    console.log('%c Line:734 🍧 time_range', 'color:#b03734', time_range)
 
     let source_ips: string[] = []
 
@@ -742,11 +744,10 @@ export const packetRouter = createTRPCRouter({
 
       const [__filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
 
-      
       const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
       const _filter = findFilter?.group_advance_filters || []
-      
+
       const [,,...rest_group_filter] = _filter || []
 
       let default_filters: any = [
@@ -851,7 +852,6 @@ export const packetRouter = createTRPCRouter({
       }
 
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
-      
 
       if (_packets_length == limit) {
         const new_start = starts_at + limit
@@ -864,4 +864,45 @@ export const packetRouter = createTRPCRouter({
     return source_ips || []
   }),
 
+  getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
+    const { source_ips, time_range } = input
+    const _res = await Bluebird.map(source_ips, async (source_ip: string) => {
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: 'ip_info',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'ip',
+                operator: EOperator.EQUAL,
+                values: [source_ip],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
+              },
+            ],
+            order: {
+              limit: 10,
+              by_field: 'ip',
+              by_direction: EOrderDirection.DESC,
+            },
+            pluck: ['country', 'region', 'city', 'ip'],
+          },
+        })
+        .execute()
+
+      if (!res?.data?.length) return null
+      return { result: res?.data }
+    }, { concurrency: 100 })
+    return _res?.filter(Boolean)
+  }),
 })
