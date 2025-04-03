@@ -187,7 +187,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   // actions
   const handleTabClick = (selectedTab: any) => {
 
-    console.log("selectedTab", selectedTab)
     setActiveTab(selectedTab.id);
     const newTablist = tablists.map((tab: any) => {
       return {
