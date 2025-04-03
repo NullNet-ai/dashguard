@@ -15,11 +15,12 @@ export default async function SetupPassword() {
   });
   if (
     !record?.invitation?.id ||
-    record.invitation?.status === 'Archived' ||
-    isInvitationLinkExpired(
-      record.invitation?.created_date,
-      record.invitation?.created_time,
-    )
+    record.invitation?.status === 'Archived' 
+    // ||
+    // isInvitationLinkExpired(
+    //   record.invitation?.created_date,
+    //   record.invitation?.created_time,
+    // )
   ) {
     return redirect('/expired-link', RedirectType.push);
   }

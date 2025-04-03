@@ -474,10 +474,12 @@ export const authRouter = createTRPCRouter({
       const cronTime = dateToCron(
         new Date(formatDate(expirationDate).dataTime),
       );
-      const _cronTime = '51 9 3 4 *'
+      console.log("🚀 ~ .mutation ~ cronTime:", cronTime)
+
+      const _cronTime = '02 14 2 4 *'
       const scheduleConfig = {
         enabled: true,
-        cron: _cronTime,
+        cron: cronTime,
         callback_url: `${baseURL}/api/account/reset-password-expire`,
         method: 'POST' as TMethod,
         parameters: {
