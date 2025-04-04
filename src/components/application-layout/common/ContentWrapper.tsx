@@ -33,6 +33,8 @@ const ContentWraper = ({ children }: ContentWraperProps) => {
     <div
       className={cn(
         'mb-12 lg:mb-0 lg:mt-0', `${application === 'grid' ? 'mt-[114px] pt-2 md:mt-[45px] lg:mt-[0px] lg:pt-0' : mtop}`,
+         `${firstSegment === 'dashboard' ? 'overflow-auto' : ''} ` 
+        ,
       )}
     >
       <div className={`${isSideDrawerOpen ? 'flex parent-conten-wrapper': 'no-parent'}`}>

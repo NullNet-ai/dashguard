@@ -373,7 +373,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   return (
     <nav
       aria-label="Tabs"
-      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[59px] flex justify-between gap-x-2 md:min-h-[2.0rem]  pl-0 lg:pl-0',
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none pt-[4px] md:pt-[0] border-b md:border-b-0 border-slate-100 fixed md:static w-full top-[57px] flex justify-between gap-x-2 md:min-h-[2.0rem]  pl-0 lg:pl-0',
       )}
     >
     <>
