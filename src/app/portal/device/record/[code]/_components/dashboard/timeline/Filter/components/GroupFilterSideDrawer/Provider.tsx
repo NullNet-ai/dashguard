@@ -63,22 +63,8 @@ export function ManageFilterProvider({
   const [errors, setErrors] = useState({})
   const eventEmitter = useEventEmitter()
   const handleUpdateFilter = (data: any) => {
-  //   const getUniqueFilterGroups = (data: any) => {
-  //     const uniqueIds = new Set();
-  //     return {
-  //         filterGroups: data.filterGroups.filter((group: any) => {
-  //             if (!uniqueIds.has(group.id)) {
-  //                 uniqueIds.add(group.id);
-  //                 return true;
-  //             }
-  //             return false;
-  //         })
-  //     };
-  // }
     setFilterDetails({
       ...filterDetails,
-      // ...(data?.filterGroups?
-      //   getUniqueFilterGroups(data): data),
       ...data
     });
   };

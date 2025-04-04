@@ -76,55 +76,22 @@ const useFilterContentActions = (filter_type: string) => {
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
     return (
-      // filterDetails.filterGroups
-      // ||
+      filterDetails.filterGroups
+      ||
       [
         {
           id: '1',
           groupOperator: 'and',
           filters: default_filters(filter_type),
-          // filters: [
-          //   {
-          //     field: '',
-          //     operator: '',
-          //     label: '',
-          //     values: [],
-          //     type: 'criteria',
-          //     default: true,
-          //   },
-          // ],
         },
       ]
     )
   }, [filterDetails])
   
-
-  const dvalue = [
-    {
-      id: '1',
-      groupOperator: 'and',
-      filters: default_filters(filter_type),
-      // filters: [
-      //   {
-      //     field: '',
-      //     operator: '',
-      //     label: '',
-      //     values: [],
-      //     type: 'criteria',
-      //     default: true,
-      //   },
-      // ],
-    },
-  ]
-
-  
   const form = useForm<z.infer<typeof ZodSchema>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
-      filterGroups: [
-        ...(filterDetails?.filterGroups || []),
-        ...initialFilterGroups,
-      ],
+      filterGroups: initialFilterGroups,
     },
   })
 
@@ -142,6 +109,7 @@ const useFilterContentActions = (filter_type: string) => {
 
   // Watch for changes and update filter
   form.watch((data: any, {name}) => {
+    console.log('%c Line:145 🍏 data', 'color:#42b983', data);
     if (data.filterGroups) {
       // Check if the changed field is either 'field' or 'operator'
       // if (name?.includes('.field') || name?.includes('.operator')) {
