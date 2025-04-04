@@ -63,10 +63,23 @@ export function ManageFilterProvider({
   const [errors, setErrors] = useState({})
   const eventEmitter = useEventEmitter()
   const handleUpdateFilter = (data: any) => {
-    console.log("%c Line:63 🥤 data", "color:#b03734", data);
+  //   const getUniqueFilterGroups = (data: any) => {
+  //     const uniqueIds = new Set();
+  //     return {
+  //         filterGroups: data.filterGroups.filter((group: any) => {
+  //             if (!uniqueIds.has(group.id)) {
+  //                 uniqueIds.add(group.id);
+  //                 return true;
+  //             }
+  //             return false;
+  //         })
+  //     };
+  // }
     setFilterDetails({
       ...filterDetails,
-      ...data,
+      // ...(data?.filterGroups?
+      //   getUniqueFilterGroups(data): data),
+      ...data
     });
   };
 

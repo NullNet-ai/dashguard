@@ -10,7 +10,7 @@ const useFilterContentActions = (filter_type: string) => {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
   const { filterDetails } = state ?? {}
-  console.log('%c Line:13 🍇 filterDetails', 'color:#f5ce50', filterDetails)
+  
 
   const _def_filters = [
     {
@@ -72,7 +72,7 @@ const useFilterContentActions = (filter_type: string) => {
     ]
   }
 
-  console.log('%c Line:79 🌰 filterDetails', 'color:#4fff4B', filterDetails)
+  
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
     return (
@@ -97,7 +97,7 @@ const useFilterContentActions = (filter_type: string) => {
       ]
     )
   }, [filterDetails])
-  console.log('%c Line:76 🍬 initialFilterGroups', 'color:#7f2b82', initialFilterGroups)
+  
 
   const dvalue = [
     {
@@ -117,7 +117,7 @@ const useFilterContentActions = (filter_type: string) => {
     },
   ]
 
-  console.log('SHHHHHHHHHHHHHHHHEEEEEEEEEEETTTTTTTTTTTTTTtt', dvalue, (filterDetails?.filterGroups || []), initialFilterGroups,)
+  
   const form = useForm<z.infer<typeof ZodSchema>>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
@@ -128,7 +128,6 @@ const useFilterContentActions = (filter_type: string) => {
     },
   })
 
-  console.log('SHHHHHHHHHHHHHHHHEEEEEEEEEEETTTTTTTTTTTTTTtt 2', form.getValues())
 
   const {
     fields: filterGroups,
@@ -139,31 +138,29 @@ const useFilterContentActions = (filter_type: string) => {
     control: form.control,
     name: 'filterGroups',
   })
-  console.log('%c Line:109 🌶 filterGroups', 'color:#fca650', filterGroups)
+  
 
   // Watch for changes and update filter
-  // form.watch((data, { name }) => {
-  //   if (data.filterGroups) {
-  //     // Check if the changed field is either 'field' or 'operator'
-  //     // if (name?.includes('.field') || name?.includes('.operator')) {
-  //     //   const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
+  form.watch((data: any, {name}) => {
+    if (data.filterGroups) {
+      // Check if the changed field is either 'field' or 'operator'
+      // if (name?.includes('.field') || name?.includes('.operator')) {
+      //   const [_, groupIndex, __, filterIndex] = name?.split('.') || [];
 
-  //     //   // Reset the values field for the corresponding filter
-  //     //   // if (groupIndex && filterIndex) {
-  //     //   //   form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
-  //     //   // }
-  //     // }
+      //   // Reset the values field for the corresponding filter
+      //   // if (groupIndex && filterIndex) {
+      //   //   form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
+      //   // }
+      // }
 
-  //     handleUpdateFilter({ filterGroups: data.filterGroups })
-  //   }
-  // })
+      handleUpdateFilter({ filterGroups: data.filterGroups })
+    }
+  })
 
   // Add Filter Group function
   const handleAddFilterGroup = () => {
     // Clone the current state of filterGroups
     const currentValues = [...(form.getValues('filterGroups') || [])]
-    console.log('Current Filter Groups (before append):', currentValues)
-
     // Append a new group
     appendGroup({
       id: String(Date.now()),
@@ -180,7 +177,7 @@ const useFilterContentActions = (filter_type: string) => {
       ],
     })
 
-    console.log('Filter Groups (after append):', form.getValues('filterGroups'))
+    
   }
 
   // Remove Filter Group function
@@ -206,7 +203,7 @@ const useFilterContentActions = (filter_type: string) => {
 
   // Add Filter function - moved from FilterGroupActions
   const handleAppendFilter = (groupIndex: number) => {
-    console.log('%c Line:209 🥪 groupIndex', 'color:#3f7cff', groupIndex)
+    
     const currentFilters = form.getValues(`filterGroups.${groupIndex}.filters`)
     const updatedFilters = [...(currentFilters || [])]
 
@@ -291,7 +288,7 @@ const useFilterContentActions = (filter_type: string) => {
     }
   }
 
-  console.log('%c Line:287 🥐 filterGroups', 'color:#b03734', filterGroups)
+  
   return {
     form,
     filterGroups,

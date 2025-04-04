@@ -68,10 +68,9 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
   onRemoveFilter: (index: number) => void, form: any, filter_type: string, groupIndex: number
   onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
   const { actions, state } = useManageFilter()
-  const { handleUpdateFilter } = actions
   const { columns, errors } = state ?? {}
 
-  console.log('formstate filterGroups', form.getValues())
+  
   const fields = form.getValues().filterGroups
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
@@ -81,11 +80,11 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
     return options
   }
   const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`) // Get selected value
-  console.log('%c Line:88 🍌 selectedTimeRange', 'color:#ed9ec7', selectedTimeRange)
+  
   const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange])
 
   // form.watch((fields: Record<string, any>) => {
-  //   console.log('%c Line:87 🍻 fields', 'color:#2eafb0', fields)
+  //   
   //   handleUpdateFilter({ filterGroups: fields.filterGroups })
   // })
 
@@ -100,22 +99,22 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
     }
   }, [errors])
 
-  // useEffect(() => {
-  //   const subscription = form.watch((values: Record<string, any>) => {
-  //     values?.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
-  //       if (required_fields.includes(filter.field) && filter?.[filter.field]) {
-  //         form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`)
-  //       }
-  //       else {
-  //         if (filter.field) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.field`)
-  //         if (filter.operator) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.operator`)
-  //         if (filter.values && filter.values.length > 0) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.values`)
-  //       }
-  //     })
-  //   })
+  useEffect(() => {
+    const subscription = form.watch((values: Record<string, any>) => {
+      values?.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
+        if (required_fields.includes(filter.field) && filter?.[filter.field]) {
+          form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`)
+        }
+        else {
+          if (filter.field) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.field`)
+          if (filter.operator) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.operator`)
+          if (filter.values && filter.values.length > 0) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.values`)
+        }
+      })
+    })
 
-  //   return () => subscription.unsubscribe()
-  // }, [form.watch])
+    return () => subscription.unsubscribe()
+  }, [form.watch])
 
   const criteriaFilters = fields?.[groupIndex]?.filters?.filter((_filter: IFilter) => _filter.type === 'criteria')
   const hasManyFilters = criteriaFilters?.length > 1
@@ -173,10 +172,8 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         id: `${prefix}.field`,
                         formType: 'input',
                         name: `${prefix}.field`,
-                        // placeholder: 'Select a Field',
-                        // selectSearchable: true,
                         value: field?.label,
-                        disabled: true,
+                        readonly: true,
                       },
                       {
                         id: `${prefix}.operator`,
@@ -184,7 +181,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         name: `${prefix}.operator`,
                         placeholder: 'Select an operator',
                         selectSearchable: true,
-                        disabled: true,
+                        readonly: true,
                       },
                       {
                         id: `${prefix}.${field.field}`,
@@ -193,10 +190,6 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         isAlphabetical: false,
-
-                        // multiSelectEnableCreate: true,
-                        // multiSelectShowCreatableItem: false,
-                        // multiSelectUseStringValues: true,
                       },
                     ]}
                     form={form}
