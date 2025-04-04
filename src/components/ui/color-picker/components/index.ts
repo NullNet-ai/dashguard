@@ -1,6 +1,4 @@
 export { ColorPreview } from './color-preview'
 export { ColorPickerArea } from './color-picker-area'
-export { AlphaSlider } from './alpha-slider'
 export { FormatSelector } from './format-selector'
 export { ColorInputs } from './color-inputs'
-export {HueSlider} from './hue-slider'

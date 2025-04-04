@@ -13,3 +13,16 @@ export const updateAllMaindata = async (tabs: any[]) => {
     tabs,
   })
 }
+
+export const updateMainTabItem = async (tab: any, entity: string) => {
+  await api.tab.updateMainTabItem({
+    tab,
+    entity,
+  })
+}
+
+export const updateAllMaindata2 = async (tabs: any[]) => {
+  await api.tab.updateAllMainTabs2({
+    tabs,
+  })
+}

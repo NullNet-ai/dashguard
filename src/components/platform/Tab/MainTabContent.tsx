@@ -24,11 +24,12 @@ import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
-import { reorderShowActiveItem } from '~/utils/sort-tab-items';
+import { calculateMainTabItems, calculateVisibleItems, reorderShowActiveItem } from '~/utils/sort-tab-items';
 
 import MainTabitem from './MainTabItem';
 import MainDropTabItem from './MainDropTabItem';
 import { updateAllMaindata } from './Actions/actions';
+import { useIsMobile } from '~/hooks/use-mobile';
 const MainTabContent = ({
   par_items = [],
   pathname,
@@ -49,8 +50,10 @@ const MainTabContent = ({
   const [entity] = pathname.split('/').slice(2);
   const [datas, setDatas] = useState(par_items)
 
+  const ismobile = useIsMobile()
+
   const conWidth = useMemo(() =>   ({
-    width: `calc(100vw - ${open ? '397px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
+    width: `calc(100vw - ${open ? '397px' : ismobile ? '60px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
 
 
@@ -110,13 +113,10 @@ const MainTabContent = ({
 
   useEffect(() => {
 
-    if(JSON.stringify(par_items) !== JSON.stringify(datas)) {
-      setDatas(par_items)
-    }
-    
     const calc = (items?: any[]) => {
       const allItems: any[] = [];
       const newData = items || par_items;
+
       // clear width, more width, and search by
       let totalWidth = 0;
       const containerWidth = parentRef.current?.offsetWidth || 0;
@@ -124,28 +124,42 @@ const MainTabContent = ({
       for (let index = 0; index < newData?.length; index++) {
         if (itemsRef.current[index]?.offsetWidth) {
           totalWidth += itemsRef.current[index].offsetWidth || 0;
-          totalWidth += 8;
           if (totalWidth > containerWidth) {
             allItems?.push({
               ...newData[index],
               hidden: true,
+              order: index,
+              metadata:{
+                item_width: (itemsRef.current[index].offsetWidth) || 0,
+              }
             });
           } else {
             allItems?.push({
               ...newData[index],
               hidden: false,
+              order: index,
+              metadata:{
+                item_width: (itemsRef.current[index].offsetWidth) || 0,
+              }
             });
           }
+
         }
       }
-      return allItems
+    
+      const result  = calculateMainTabItems(allItems, containerWidth, 'dashboard')
+
+
+      return result
+
     };
 
 
     const handleResize = () => {
       const items = calc();
-      if (JSON.stringify(items) !== JSON.stringify(data)) {
-        setData(items);
+
+      if (JSON.stringify(items) !== JSON.stringify(par_items)) {
+        setDatas(par_items);
       }
     };
     handleResize();
@@ -157,11 +171,79 @@ const MainTabContent = ({
   }, [par_items, parentRef?.current?.offsetWidth, drawerState])
 
 
+  useEffect(() => {
+    const calc = (items?: any[]) => {
+      const allItems: any[] = [];
+      const newData = items || par_items;
+
+      // clear width, more width, and search by
+      let totalWidth = 0;
+      const containerWidth = parentRef.current?.offsetWidth || 0;
+
+      for (let index = 0; index < newData?.length; index++) {
+        if (itemsRef.current[index]?.offsetWidth) {
+          totalWidth += itemsRef.current[index].offsetWidth || 0;
+          if (totalWidth > containerWidth) {
+            allItems?.push({
+              ...newData[index],
+              hidden: true,
+              order: index,
+              metadata:{
+                item_width: (itemsRef.current[index].offsetWidth) || 0,
+              }
+            });
+          } else {
+            allItems?.push({
+              ...newData[index],
+              hidden: false,
+              order: index,
+              metadata:{
+                item_width: (itemsRef.current[index].offsetWidth) || 0,
+              }
+            });
+          }
+
+        }
+      }
+    
+      const result  = calculateMainTabItems(allItems, containerWidth, 'dashboard')
+
+
+      return result
+
+    };
+  
+
+    const handleResize = () => {
+      const items = calc(par_items);
+
+      if (JSON.stringify(items) !== JSON.stringify(par_items)) {
+        setData(items);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+
+   
+  }, [datas])
+  
+
+
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
     setSearchValue(searchValue);
   }, 300);  // 300ms delay
   
+  // useEffect(() => {
+  //   const items = calc();
+  //   setDatas(items);
+  // }, [datas])
+  
+
 
   useEffect(() => {
     let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -232,34 +314,33 @@ const MainTabContent = ({
               return newItems;
             });
 
-            setTimeout(() => {
-              updateCache()
-            }, 1000);
             
           }}
         >
           {datas.map((tab: any, index: number) => {
-            const isHidden = data?.[index]?.hidden;
+            const isHidden = datas?.[index]?.hidden;
 
             if(lowerCase(tab.name) === 'dashboard') {
-             return <MainTabitem
-                  className={cn({ 'opacity-0': isHidden })}
-                  isHidden={isHidden}
-                  ref={(el) => {
-                    if (el) {
-                      if (itemsRef.current) {
-                        itemsRef.current[index] = el;
+             return (
+                <MainTabitem
+                    className={cn({ 'opacity-0': isHidden })}
+                    isHidden={isHidden}
+                    ref={(el) => {
+                      if (el) {
+                        if (itemsRef.current) {
+                          itemsRef.current[index] = el;
+                        }
                       }
-                    }
-                  }}
-                  lastShownItem={lastShownItem}
-                  index={index}
-                  tab={tab}
-                  newItems={data}
-                  pathname={pathname}
-                  key={index}
-                  actions={actions}
+                    }}
+                    lastShownItem={lastShownItem}
+                    index={index}
+                    tab={tab}
+                    newItems={data}
+                    pathname={pathname}
+                    key={index}
+                    actions={actions}
                 /> 
+             )
             }
 
             return (

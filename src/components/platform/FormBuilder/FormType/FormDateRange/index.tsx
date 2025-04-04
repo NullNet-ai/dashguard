@@ -43,7 +43,10 @@ export default function FormDateRange({
 }: IProps) {
   const { field } = formRenderProps;
   const { disabled, value, onChange } = field;
-  const { description, label, required, disabled: isFieldConfigDisabled, dateRangeConfig:config, placeholder: fieldPlaceholder } = fieldConfig;
+  const { description, label, required, disabled: isFieldConfigDisabled, dateRangeConfig:config, placeholder: fieldPlaceholder, readonly } = fieldConfig;
+  
+  const isDisabled = disabled || isFieldConfigDisabled;
+  const isReadonly = readonly === true;
   
   // Extract date range configuration with defaults
   const withTime = config?.withTime ?? false;
@@ -200,18 +203,25 @@ export default function FormDateRange({
   const handleSafeChange = (newValue: DateRange | DateRangeWithTime | undefined) => {
     try {
       if (!newValue) {
-        onChange(["", ""]);
+        // When resetting, set to undefined instead of empty array
+        onChange(undefined);
         return;
       }
       
       // Format the date range as an array of strings
       const formattedArray = formatDateRangeToArray(newValue);
       
+      // If both values are empty strings, return undefined instead
+      if (formattedArray[0] === "" && formattedArray[1] === "") {
+        onChange(undefined);
+        return;
+      }
+      
       // Update form with the formatted array
       onChange(formattedArray);
     } catch (error) {
       console.error("Error in DateRange onChange handler:", error);
-      onChange(["", ""]);
+      onChange(undefined);
     }
   };
 
@@ -237,14 +247,15 @@ export default function FormDateRange({
       >
         {label}
       </FormLabel>
-      <div className={cn("grid gap-2")}>
+      <div className={cn("grid gap-2 rounded-md")}>
         <DateRangePicker
           value={convertToDateObjects()}
           onChange={handleSafeChange}
           withTime={withTime}
           is24Hour={is24Hour}
           showPresets={showPresets}
-          disabled={disabled || isFieldConfigDisabled}
+          disabled={isDisabled}
+          readonly={isReadonly}
           placeholder={placeholder}
           displayValue={formatDateRangeForDisplay()}
         />

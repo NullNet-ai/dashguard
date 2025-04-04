@@ -281,3 +281,24 @@ body {
   box-shadow: none !important;
   border-color: hsl(var(--input)) !important;
 }
+
+
+
+.emoji-picker-wrapper {
+  width: 320px;
+  height: 400px;
+}
+
+.emoji-picker-react {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: white !important;
+}
+
+.EmojiPickerReact {
+  --epr-emoji-size: 24px;
+  --epr-category-label-height: 30px;
+  --epr-header-padding: 10px;
+}

@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormDateRange",
-  "tag": "2.0.0",
-  "branch": "released/2.0.0",
-  "message": "Update packages",
-  "publish_name": "Bryan Jay Mabuan"
+  "tag": "2.1.0-rc.3<unreleased>",
+  "branch": "unreleased/fix/2.1.0-rc.3<unreleased>",
+  "message": "fix(FormDateRange): handle undefined values instead of empty arrayWhen resetting or receiving empty values, the component now sets the value to undefined instead of an empty array. This ensures consistency and avoids potential issues with form validation and state management.",
+  "publish_name": "Rob Caldosa"
 }

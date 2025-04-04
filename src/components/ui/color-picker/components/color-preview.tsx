@@ -3,10 +3,9 @@ import React from 'react'
 interface ColorPreviewProps {
   color: string
   alpha: number
-  enableAlpha: boolean
 }
 
-export function ColorPreview({ color, alpha, enableAlpha }: ColorPreviewProps) {
+export function ColorPreview({ color, alpha }: ColorPreviewProps) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
@@ -24,7 +23,7 @@ export function ColorPreview({ color, alpha, enableAlpha }: ColorPreviewProps) {
           className="absolute inset-0"
           style={{ 
             backgroundColor: color,
-            opacity: enableAlpha ? alpha / 100 : 1
+            opacity:  alpha / 100 
           }}
         />
       </div>

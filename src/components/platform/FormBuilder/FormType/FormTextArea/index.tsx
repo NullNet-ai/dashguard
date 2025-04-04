@@ -42,6 +42,8 @@ export default function FormTextArea({
           {...register(fieldConfig.name)}
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           icon={fieldConfig.textAreaIcon}
+          minWidth={fieldConfig.textAreaMinWidth ?? 100}
+          maxWidth={fieldConfig.textAreaMaxWidth}
           maxHeight={fieldConfig.textAreaMaxHeight}
           minHeight={fieldConfig.textAreaMinHeight ?? 50}
           showCharCount={fieldConfig.textAreaShowCharCount}

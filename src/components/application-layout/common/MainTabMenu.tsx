@@ -41,7 +41,7 @@ const MainTabMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem
-          className="relative flex gap-2"
+          className="relative flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
             const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
@@ -56,14 +56,16 @@ const MainTabMenu = ({
                 tabs: newItems,
               }
             }))
-            actions?.closeTab(tab)
+            // actions?.closeTab(tab)
+            actions?.handleRemoveTab(tab)
+
           }}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
           <span>Close Tab</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2"
+          className="flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
 
@@ -88,7 +90,7 @@ const MainTabMenu = ({
           <span>Close Other Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2"
+          className="flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
 
@@ -112,7 +114,7 @@ const MainTabMenu = ({
           <span>Close All Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-2">
+        <DropdownMenuItem className="flex gap-2 cursor-pointer">
           <StarIcon className="h-4 w-4" />
           <span>Add to Favorites</span>
         </DropdownMenuItem>
