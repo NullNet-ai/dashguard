@@ -41,16 +41,17 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const [copyTab, setCopyTab] = useState<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('')
-    const  {state: drawerState,  } = useSideDrawer ()
+  const  {state: drawerState,  } = useSideDrawer ()
   const {width, isOpen, isPinned} = drawerState
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
 
+  console.log("render", tabs)
+
   const conWidth = useMemo(() =>   ({
     width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
-
 
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -128,6 +129,8 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
 
     const handleResize = () => {  
       const items = calc(tablists);
+
+
       setCopyTab(items);
 
       if(JSON.stringify(tablists) !== JSON.stringify(items)) {
@@ -141,6 +144,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
            
         }
       } else {
+        updatecachedItems(items);
         if(activeTab) {
           const href= items?.find((item) => item.current)?.href;
           router.push(href);
@@ -196,6 +200,8 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
       };
     });
 
+    console.log("newTablist", newTablist)
+
     setTablists(newTablist);
   };
 
@@ -239,8 +245,8 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
             const resetOrder = newTablists.map((tab, index) => {
               return { ...tab, order: index };
             });
-            setTablists(resetOrder);
             updatecachedItems(resetOrder);
+            setTablists(resetOrder);
             
           }}
         >
