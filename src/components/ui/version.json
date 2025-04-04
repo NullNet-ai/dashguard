@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.6.1-rc.3<unreleased>",
-  "branch": "unreleased/feat/2.6.1-rc.3<unreleased>",
-  "message": "fix(autosize-textarea): enforce max height/width constraints with resize observerAdd a resize observer to ensure the textarea respects max height and width constraints. This prevents the textarea from exceeding the specified dimensions, improving user experience.fix(date-range): sync value with selectedRange and handle reset properlyAdd useEffect to sync the external value with the internal selectedRange state. Introduce handleResetSelection function to centralize reset logic and remove duplicate useEffect to avoid inconsistencies.",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.6.2<unreleased>",
+  "branch": "unreleased/fix/2278/2.6.2<unreleased>",
+  "message": "code-editor default to html and documentation",
+  "publish_name": "Save Ducto"
 }
