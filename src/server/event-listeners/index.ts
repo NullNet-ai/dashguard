@@ -1,23 +1,44 @@
-import ACCOUNT_DEACTIVATE from './account/ACCOUNT_DEACTIVATE'
-import ACCOUNT_INVITE from './account/ACCOUNT_INVITE'
-import INVITATION_EXPIRE from './account/INVITATION_EXPIRE'
-import LICENSE_EXPIRE from './account/LICENSE_EXPIRE'
-import type { EEventType, IEventConfig } from './types'
+'use server'
+import { EEventType } from '../events/types';
+import {  accountInvite } from './account/accountInvite';
 
-// Event Configurations
-export const events: IEventConfig[] = [
-  INVITATION_EXPIRE,
-  ACCOUNT_DEACTIVATE,
-  LICENSE_EXPIRE,
-  ACCOUNT_INVITE,
-]
+type EventHandler = (args: any) => Promise<void>;
 
-// Helper function to get event configuration
-export const getEventConfig = (type: EEventType): IEventConfig | undefined => {
-  return events.find(event => event.type === type)
+const actions: Record<EEventType, EventHandler> = {
+  [EEventType.ACCOUNT_INVITE]: accountInvite
+};
+
+interface EventResult {
+  success: boolean;
+  message?: string;
+  error?: Error;
 }
 
-// helper function to get event types
-export const getEventTypes = (): EEventType[] => {
-  return events.map(event => event.type)
-}
+export const handleEvent = async (
+  eventName: EEventType,
+  args: unknown[],
+): Promise<EventResult> => {
+  const eventAction = actions[eventName];
+
+  if (!eventAction) {
+    return {
+      success: false,
+      message: `No handler found for event: ${eventName}`,
+    };
+  }
+
+  try {
+    await eventAction?.(args);
+    return {
+      success: true,
+      message: `Successfully handled event: ${eventName}`,
+    };
+  } catch (error) {
+    console.error(`Error handling event ${eventName}:`, error);
+    return {
+      success: false,
+      message: `Failed to handle event: ${eventName}`,
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
+  }
+};

@@ -3,7 +3,7 @@
 import { cn } from '~/lib/utils';
 import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Sortable, SortableItem } from '~/components/ui/sortable';
 import GridTabItem from './GridtabItem';
 import { usePathname } from 'next/navigation';
@@ -16,11 +16,28 @@ import GridTabContent from './GridTabContent';
 import useWindowSize from '~/hooks/use-resize';
 import { reorderGridTabActive, reorderShowActiveItem } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
+import pluralize from 'pluralize';
+import { GridContext } from '../../Provider';
+import { tabName } from '~/lib/grid-default-tab';
 
-const GridTabLists = ({tabs}: {
+const GridTabLists = ({tabs: gridTabs}: {
     tabs: any[]
 }) => {
-
+  const { state } = useContext(GridContext) ?? {}; 
+  const tableEntity = state?.config?.entity;
+  const tabLabel = tableEntity ? tabName[tableEntity] ? pluralize(tabName[tableEntity] || '') :  pluralize(tableEntity) : '';
+  const tabs = useMemo(() => {
+    return gridTabs?.length
+      ? gridTabs
+      : [
+          {
+            id: 'all',
+            name: `All ${tabLabel}`,
+            current: true,
+            href: '/',
+          },
+        ];
+  }, [gridTabs?.length]);
     const pathname = usePathname()
     const [portal, entity, application, code] = (pathname || '').split('/').slice(1)
     const [isWindowLoaded, setIsWindowLoaded] = useState(false)

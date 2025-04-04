@@ -1,14 +1,8 @@
 import type { EEventType, IEventConfig } from './types'
-import INVITATION_EXPIRE from './account/INVITATION_EXPIRE'
-import LICENSE_EXPIRE from './account/LICENSE_EXPIRE'
-import ACCOUNT_DEACTIVATE from './account/ACCOUNT_DEACTIVATE'
 import ACCOUNT_INVITE from './account/ACCOUNT_INVITE'
 
 // Event Configurations
 export const events: IEventConfig[] = [
-  INVITATION_EXPIRE,
-  ACCOUNT_DEACTIVATE,
-  LICENSE_EXPIRE,
   ACCOUNT_INVITE
 ]
 

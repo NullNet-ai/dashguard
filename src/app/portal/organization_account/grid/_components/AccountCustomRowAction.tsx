@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '~/components/ui/tooltip';
+import { useSocket } from '~/context/SocketProvider';
 import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
 
@@ -92,6 +93,8 @@ export function AccountCustomRowAction({
     account_id,
   } = row?.original ?? {};
 
+  const socketClient = useSocket()
+
   const updateRecordStatus = api.record.updateRecordStatus.useMutation();
   const resendInvite = api.account.createInvitationRecord.useMutation();
   const archiveAccountInvitation =
@@ -118,10 +121,17 @@ export function AccountCustomRowAction({
 
   const handleResendInvite = async () => {
     try {
-      await resendInvite.mutateAsync({
+     const response =  await resendInvite.mutateAsync({
         account_code: code,
         manual_trigger: true,
       });
+      socketClient.publish({
+        type: 'ACCOUNT_INVITE',
+        payload: {
+          ...response,
+          record_id: row.original?.id,
+        }
+      })
       pathName && router.push(pathName);
     } catch {
       toast.error('Failed to resend invitation');
