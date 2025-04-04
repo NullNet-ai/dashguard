@@ -1,7 +1,9 @@
 'use client'
-import {  MinusCircle } from 'lucide-react'
+import { MinusCircle } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
 import { z } from 'zod'
 
+import { type IDropdown } from '~/app/portal/contact/_components/forms/category-details/types'
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
 import { Button } from '~/components/ui/button'
 import { Form } from '~/components/ui/form'
@@ -12,10 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { useEffect, useMemo } from 'react';
-import { IDropdown } from '~/app/portal/contact/_components/forms/category-details/types';
+
+import { type IFilter } from '../../../../../types'
 import { useManageFilter } from '../../Provider'
-import { IFilter } from '../../../../../types'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -63,104 +64,95 @@ const time_resolution_options: { [key: string]: string[] } = {
   '7d': ['12h', '1d'],
 }
 
-export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionOperator}: {
-  onRemoveFilter: (index: number) => void,form: any, filter_type: string, groupIndex: number, 
-  onUpdateJunctionOperator: (index: number, operator: string) => void;}) => {
-    
+export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunctionOperator }: {
+  onRemoveFilter: (index: number) => void, form: any, filter_type: string, groupIndex: number
+  onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
   const { actions, state } = useManageFilter()
   const { handleUpdateFilter } = actions
-  const { columns, errors} = state ?? {}
-  
-  
+  const { columns, errors } = state ?? {}
+
+  console.log('formstate filterGroups', form.getValues())
   const fields = form.getValues().filterGroups
-  
 
   const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
-    const resolutionOptions: { [key: string]: string[] } = time_resolution_options;
-   
-    const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || [];
-    return options;
-  };
-  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`); // Get selected value
-  const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange]);
-  
-  // form.watch((fields: Record<string,any>) => {
+    const resolutionOptions: { [key: string]: string[] } = time_resolution_options
+
+    const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
+    return options
+  }
+  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`) // Get selected value
+  console.log('%c Line:88 🍌 selectedTimeRange', 'color:#ed9ec7', selectedTimeRange)
+  const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange])
+
+  // form.watch((fields: Record<string, any>) => {
+  //   console.log('%c Line:87 🍻 fields', 'color:#2eafb0', fields)
   //   handleUpdateFilter({ filterGroups: fields.filterGroups })
   // })
 
   useEffect(() => {
     if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
-      for (let key in errors) {
+      for (const key in errors) {
         form.setError(key, {
           type: 'required',
           message: errors[key],
-        });
+        })
       }
     }
-  }, [errors]);
+  }, [errors])
 
-  
-  
-  useEffect(() => {
-    const subscription = form.watch((values: Record<string,any>) => {
-      values?.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
-        if (required_fields.includes(filter.field) && filter?.[filter.field]) {
-          form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`);
-        } else {
-          if (filter.field) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.field`);
-          if (filter.operator) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.operator`);
-          if (filter.values && filter.values.length > 0) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.values`);
-        }
-      });
-    });
-  
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
-  
-  
+  // useEffect(() => {
+  //   const subscription = form.watch((values: Record<string, any>) => {
+  //     values?.filterGroups?.[groupIndex]?.filters?.forEach((filter: any, index: number) => {
+  //       if (required_fields.includes(filter.field) && filter?.[filter.field]) {
+  //         form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.${filter.field}`)
+  //       }
+  //       else {
+  //         if (filter.field) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.field`)
+  //         if (filter.operator) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.operator`)
+  //         if (filter.values && filter.values.length > 0) form.clearErrors(`filterGroups.${groupIndex}.filters.${index}.values`)
+  //       }
+  //     })
+  //   })
 
+  //   return () => subscription.unsubscribe()
+  // }, [form.watch])
 
-  const criteriaFilters = fields?.[groupIndex]?.filters?.filter((_filter: IFilter) => _filter.type === 'criteria');
-  const hasManyFilters = criteriaFilters.length > 1;
+  const criteriaFilters = fields?.[groupIndex]?.filters?.filter((_filter: IFilter) => _filter.type === 'criteria')
+  const hasManyFilters = criteriaFilters?.length > 1
 
   return (
     <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
       <Form {...form}>
         <div className="space-y-4">
-          {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {  
-            
-          const criteriaIndex =
-          fields?.[groupIndex]?.filters?.slice(0, index + 1).filter((f: Record<string, any>) => f.type === 'criteria')
-            .length - 1;
+          {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {
+            const criteriaIndex
+          = fields?.[groupIndex]?.filters?.slice(0, index + 1).filter((f: Record<string, any>) => f.type === 'criteria')
+            .length - 1
             const no_group_filter = form.getValues()?.filterGroups?.length == 1
-            
-            const default_filter_last_operation = (groupIndex == 0 && fields?.[groupIndex]?.filters?.length -1 == index && no_group_filter) 
 
-            
-            const prefix = `filterGroups.${groupIndex}.filters.${index}`          
-            const filterData =
-            form.getValues().filterGroups?.[groupIndex]?.filters[index];
-          
-            
-            if(!filterData) return null
-            
+            const default_filter_last_operation = (groupIndex == 0 && fields?.[groupIndex]?.filters?.length - 1 == index && no_group_filter)
+
+            const prefix = `filterGroups.${groupIndex}.filters.${index}`
+            const filterData
+            = form.getValues().filterGroups?.[groupIndex]?.filters[index]
+
+            if (!filterData) return null
+
             return (
               <div
                 className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
                 key={field.id}
               >
-                {((( groupIndex == 1 && index == 0)) || (index > 0 && (!default_filter_last_operation) )) && field.type === 'operator' && (
+                {(((groupIndex == 1 && index == 0)) || (index > 0 && (!default_filter_last_operation))) && field.type === 'operator' && (
                   <div className="col-span-4 mb-2">
                     <Select
-                      value={
+                      disabled = { true }
+                      value = {
                         fields[index - 1]?.type === 'operator'
                           ? fields?.[index - 1]?.operator
                           : 'and'
                       }
-                      onValueChange={(operator) =>
-                        onUpdateJunctionOperator(index - 1, operator)
-                      }
-                      disabled={true}
+                      onValueChange = { (operator) => onUpdateJunctionOperator(index - 1, operator)}
                     >
                       <SelectTrigger className="w-[100px] border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
@@ -173,8 +165,8 @@ export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionO
                   </div>
                 )}
 
-                {required_fields?.includes(field?.field) && 
-                (
+                {required_fields?.includes(field?.field)
+                && (
                   <FormModule
                     fields={[
                       {
@@ -225,7 +217,7 @@ export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionO
                           { label: '7 Days', value: '7d' },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,
-                        [`${prefix}.Resolution`]:  resolutionOptions,
+                        [`${prefix}.Resolution`]: resolutionOptions,
                         [`${prefix}.Graph Type`]: [
                           { label: 'Line Chart', value: 'line' },
                           { label: 'Bar Chart', value: 'bar' },
@@ -278,15 +270,15 @@ export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionO
                         },
                       }}
                     />
-                   
-                   {hasManyFilters && (
-                    <Button
-                      onClick={() => onRemoveFilter(criteriaIndex)}
-                      variant="ghost"
-                    >
-                      <MinusCircle className="h-4 w-4 text-red-600" />
-                    </Button>
-                  )}
+
+                    {hasManyFilters && (
+                      <Button
+                        variant = "ghost"
+                        onClick = { () => onRemoveFilter(criteriaIndex) }
+                      >
+                        <MinusCircle className="h-4 w-4 text-red-600" />
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
@@ -297,5 +289,3 @@ export const FilterGroup = ({form, groupIndex, onRemoveFilter, onUpdateJunctionO
     </div>
   )
 }
-
-
