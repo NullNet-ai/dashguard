@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import TimePicker from "~/components/ui/time-picker";
+import { useMediaQuery } from "react-responsive";
 
 export type DateRangePreset =
   | "today"
@@ -66,6 +67,8 @@ export function DateRangePicker({
 }: DateRangeProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange | DateRangeWithTime | undefined>(value);
   const [activePreset, setActivePreset] = useState<DateRangePreset | undefined>(undefined);
+  // Add media query hook for responsive design
+  const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
 
   // Add useEffect to sync value with selectedRange
   useEffect(() => {
@@ -383,8 +386,8 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 max-h-[80vh] overflow-auto",
-            withTime ? "w-[350px] sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
+            "p-0 max-h-[76vh] overflow-auto",
+            withTime ? "sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
           )}
           align="start"
         >
@@ -488,7 +491,8 @@ export function DateRangePicker({
                     : selectedRange as DateRange
                   }
                   onSelect={handleCalendarSelect}
-                  numberOfMonths={2}
+                  numberOfMonths={isDesktop ? 2 : 1}
+                  showOutsideDays={!isDesktop}
                   disabled={disabled}
                   className="rounded-md w-full"
                 />
