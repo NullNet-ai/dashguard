@@ -42,11 +42,13 @@ export default function FormDateRange({
   formKey
 }: IProps) {
   const { field } = formRenderProps;
+  const { fieldState } = formRenderProps; // Extract fieldState
   const { disabled, value, onChange } = field;
   const { description, label, required, disabled: isFieldConfigDisabled, dateRangeConfig:config, placeholder: fieldPlaceholder, readonly } = fieldConfig;
   
   const isDisabled = disabled || isFieldConfigDisabled;
   const isReadonly = readonly === true;
+  const hasError = !!fieldState.error; // Check if there's an error
   
   // Extract date range configuration with defaults
   const withTime = config?.withTime ?? false;
@@ -87,7 +89,8 @@ export default function FormDateRange({
             if (!isNaN(fromDate.getTime())) {
               result.from = { 
                 date: new Date(fromDate.setHours(0, 0, 0, 0)), // Ensure consistent time part
-                time: undefined 
+                // Set default time to 00:00 if no time provided
+                time: fromTimeStr ? undefined : new Date(new Date(fromDate).setHours(0, 0, 0, 0))
               };
               
               // Parse time if available
@@ -98,9 +101,14 @@ export default function FormDateRange({
                   
                   if (!isNaN(fromTime.getTime())) {
                     result.from.time = new Date(fromTime);
+                  } else {
+                    // If parsing fails, set default time
+                    result.from.time = new Date(new Date(fromDate).setHours(0, 0, 0, 0));
                   }
                 } catch (e) {
                   console.error("Error parsing from time:", e);
+                  // Set default time on error
+                  result.from.time = new Date(new Date(fromDate).setHours(0, 0, 0, 0));
                 }
               }
             }
@@ -119,7 +127,8 @@ export default function FormDateRange({
             if (!isNaN(toDate.getTime())) {
               result.to = { 
                 date: new Date(toDate.setHours(0, 0, 0, 0)), // Ensure consistent time part
-                time: undefined 
+                // Set default time to 23:59 if no time provided
+                time: toTimeStr ? undefined : new Date(new Date(toDate).setHours(23, 59, 0, 0))
               };
               
               // Parse time if available
@@ -130,9 +139,14 @@ export default function FormDateRange({
                   
                   if (!isNaN(toTime.getTime())) {
                     result.to.time = new Date(toTime);
+                  } else {
+                    // If parsing fails, set default time
+                    result.to.time = new Date(new Date(toDate).setHours(23, 59, 0, 0));
                   }
                 } catch (e) {
                   console.error("Error parsing to time:", e);
+                  // Set default time on error
+                  result.to.time = new Date(new Date(toDate).setHours(23, 59, 0, 0));
                 }
               }
             }
@@ -454,6 +468,7 @@ export default function FormDateRange({
           readonly={isReadonly}
           placeholder={placeholder}
           displayValue={formatDateRangeForDisplay()}
+          error={hasError} // Pass the error state
         />
       </div>
       <FormDescription>{description}</FormDescription>

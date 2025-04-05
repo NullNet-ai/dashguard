@@ -170,19 +170,21 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   showTimestamps = true,
   showUserNames = true,
   messageAlignment = "alternate",
-  threadMaxHeight = 500,
+  threadMaxHeight = Number.MAX_SAFE_INTEGER,
   dateFormat = "MMM d",
   timeFormat = "h:mm a",
   emojiPickerConfig,
   inputConfig,
   showHelperText = true,
   helperText = {
-    emoji: "Try clicking the emoji button to add emojis",
-    enter: "Press Enter to submit, Shift+Enter for a new line"
+    emoji: "",
+    enter: ""
   }
 }) => {
   const [comment, setComment] = React.useState("");
-
+  
+  // Remove the thread height state and ref since we want it to grow naturally
+  
   const handleSubmit = () => {
     if (comment.trim()) {
       onCommentSubmit(comment);
@@ -206,8 +208,8 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
     <div className={cn("max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-sm border", className)}>
       {title && <h2 className="text-xl font-semibold mb-4 text-center">{title}</h2>}
       
-      {/* Display existing comments */}
-      <div className={`space-y-4 mb-6 overflow-y-auto`} style={{ maxHeight: `${threadMaxHeight}px` }}>
+      {/* Display existing comments - remove all height constraints and overflow */}
+      <div className="space-y-4 mb-6">
         {comments.map((comment) => (
           <div 
             key={comment.id} 
@@ -236,7 +238,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
               </div>
             )}
             <div className={cn(
-              "mt-1",
+              "mt-1 break-words",
               comment.isCurrentUser ? currentUserTextColor : otherUserTextColor
             )}>
               {comment.content}
@@ -254,8 +256,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
       </div>
       
       {/* Message input box */}
-      <div className="mt-4 border-t pt-4">
-        <h3 className="text-sm font-medium mb-2">Add your response</h3>
+      <div className="mt-4 pt-4">
         <MessageInputBox
           value={comment}
           onChange={setComment}
@@ -267,12 +268,12 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
           minHeight={inputConfig?.minHeight ?? 60}
           maxHeight={inputConfig?.maxHeight ?? 200}
           maxLines={inputConfig?.maxLines}
-          maxCharCount={inputConfig?.maxCharCount ?? 500}
+          maxCharCount={inputConfig?.maxCharCount ?? Number.MAX_SAFE_INTEGER}
           className={inputConfig?.className ?? "border-primary/20"}
           textareaClassName={inputConfig?.textareaClassName}
           actionsClassName={inputConfig?.actionsClassName}
           submitButtonClassName={inputConfig?.submitButtonClassName}
-          showCharCount={inputConfig?.showCharCount ?? true}
+          showCharCount={inputConfig?.showCharCount ?? false}
           emojiPickerConfig={emojiPickerConfig}
         />
         

@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormDateRange",
-  "tag": "2.1.0-rc.3<unreleased>",
-  "branch": "unreleased/fix/2.1.0-rc.3<unreleased>",
-  "message": "fix(FormDateRange): handle undefined values instead of empty arrayWhen resetting or receiving empty values, the component now sets the value to undefined instead of an empty array. This ensures consistency and avoids potential issues with form validation and state management.",
+  "tag": "2.1.0-rc.5<unreleased>",
+  "branch": "unreleased/feat/2.1.0-rc.5<unreleased>",
+  "message": "feat(FormDateRange): add error state handling to date range componentExtract fieldState from formRenderProps and pass the error state to the date range component to improve validation feedback. Additionally, set default time values for date ranges when parsing fails or no time is provided to ensure consistent behavior.",
   "publish_name": "Rob Caldosa"
 }

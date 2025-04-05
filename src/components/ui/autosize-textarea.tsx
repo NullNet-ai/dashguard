@@ -32,6 +32,7 @@ type AutosizeTextAreaProps = {
   lineWrapping?: boolean;
   showCharCount?: boolean;
   maxCharCount?: number;
+  disableResize?: boolean; // New prop to disable manual resizing
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 // Remove the custom resize event listeners effect
@@ -47,6 +48,11 @@ export const useAutosizeTextArea = ({
 }: UseAutosizeTextAreaProps) => {
   const [init, setInit] = React.useState(true);
   const [manuallyResized, setManuallyResized] = React.useState(false);
+  
+  // Reset manuallyResized when triggerAutoSize changes
+  React.useEffect(() => {
+    setManuallyResized(false);
+  }, [triggerAutoSize]);
   
   // Add resize observer to detect manual resizing
   React.useEffect(() => {
@@ -72,24 +78,19 @@ export const useAutosizeTextArea = ({
   
   // Original effect for auto-sizing
   React.useEffect(() => {
-    const offsetBorder = 6;
+    const offsetBorder = 2; // Reduced from 6 to prevent excessive padding
     const textAreaElement = textAreaRef.current;
     if (textAreaElement) {
       // Initial setup
       if (init) {
-        textAreaElement.style.minHeight = `${minHeight + offsetBorder}px`;
+        // Apply min/max constraints directly
+        textAreaElement.style.minHeight = `${minHeight}px`;
+        textAreaElement.style.maxHeight = maxHeight !== Number.MAX_SAFE_INTEGER ? `${maxHeight}px` : 'none';
         
         // Set initial width to 100% of parent
-        const parentWidth = textAreaElement.parentElement?.clientWidth ?? 0;
-        textAreaElement.style.width = `${parentWidth - offsetBorder}px`;
-        textAreaElement.style.minWidth = `${minWidth + offsetBorder}px`;
-        
-        if (maxHeight > minHeight) {
-          textAreaElement.style.maxHeight = `${maxHeight}px`;
-        }
-        if (maxWidth > minWidth) {
-          textAreaElement.style.maxWidth = `${maxWidth}px`;
-        }
+        textAreaElement.style.width = '100%';
+        textAreaElement.style.minWidth = `${minWidth}px`;
+        textAreaElement.style.maxWidth = maxWidth !== Number.MAX_SAFE_INTEGER ? `${maxWidth}px` : 'none';
         
         // Configure line wrapping
         textAreaElement.style.overflowWrap = lineWrapping ? 'break-word' : 'normal';
@@ -101,18 +102,21 @@ export const useAutosizeTextArea = ({
       // Skip height adjustment if manually resized
       if (!manuallyResized) {
         // Reset height to calculate actual scroll dimensions
-        textAreaElement.style.height = `${minHeight + offsetBorder}px`;
+        textAreaElement.style.height = 'auto';
     
         const scrollHeight = textAreaElement.scrollHeight;
         
         // Handle max height and line limit
         if (maxLines) {
-          const lineHeight = parseInt(window.getComputedStyle(textAreaElement).lineHeight);
+          const lineHeight = parseInt(window.getComputedStyle(textAreaElement).lineHeight) || 20; // Fallback to 20px
           const maxLinesHeight = lineHeight * maxLines;
           
           if (scrollHeight > maxLinesHeight) {
-            textAreaElement.style.height = `${maxLinesHeight + offsetBorder}px`;
+            textAreaElement.style.height = `${Math.min(maxLinesHeight, maxHeight)}px`;
             textAreaElement.style.overflowY = 'auto';
+          } else if (scrollHeight < minHeight) {
+            textAreaElement.style.height = `${minHeight}px`;
+            textAreaElement.style.overflowY = 'hidden';
           } else {
             textAreaElement.style.height = `${scrollHeight + offsetBorder}px`;
             textAreaElement.style.overflowY = 'hidden';
@@ -120,6 +124,9 @@ export const useAutosizeTextArea = ({
         } else if (scrollHeight > maxHeight) {
           textAreaElement.style.height = `${maxHeight}px`;
           textAreaElement.style.overflowY = 'auto';
+        } else if (scrollHeight < minHeight) {
+          textAreaElement.style.height = `${minHeight}px`;
+          textAreaElement.style.overflowY = 'hidden';
         } else {
           textAreaElement.style.height = `${scrollHeight + offsetBorder}px`;
           textAreaElement.style.overflowY = 'hidden';
@@ -147,6 +154,7 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
       maxCharCount,
       disabled,
       readOnly,
+      disableResize = false, // Default to false to maintain current behavior
       ...props
     }: AutosizeTextAreaProps,
     ref: React.Ref<AutosizeTextAreaRef>,
@@ -241,7 +249,7 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
             disabled={disabled}
             readOnly={readOnly}
             style={{ 
-              resize: (disabled || readOnly) ? 'none' : 'both',
+              resize: (disabled || readOnly || disableResize) ? 'none' : 'both',
               width: '100%',
               cursor: disabled ? 'not-allowed' : readOnly ? 'default' : 'text',
               maxHeight: maxHeight !== Number.MAX_SAFE_INTEGER ? `${maxHeight}px` : undefined,
