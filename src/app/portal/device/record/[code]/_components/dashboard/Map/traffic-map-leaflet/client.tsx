@@ -119,40 +119,45 @@ export default function TrafficMaps({ params }: IFormProps) {
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
       })
-      
-      console.log("%c Line:118 🥑 data", "color:#42b983", data);
+
       const destinationData: Record<string, { city: string, trafficLevel: number, destination_ip: string }> = {}
       const sourceData: Record<string, { city: string, trafficLevel: number, source_ip: string }> = {}
 
-      // Collect all async calls in an array
       const promises = data?.map(async (entry: Record<string, any>) => {
-        const { source_ip, destination_ip, source_country, destination_country } = entry
+        const { source_ip, destination_ip, destination_country } = entry
         const { country, city } = destination_country ?? {}
-        const { country: source_ip_country, city: source_ip_city } = destination_country ?? {}
+
+        const { country: source_ip_country, city: source_ip_city } = entry.source_country ?? {}
 
         try {
-          const flagDetails = await getFlagDetails(country)
+          if (country && !destinationData[country]) {
+            const flagDetails = await getFlagDetails(country)
+            const { name: country_name } = flagDetails ?? {}
 
-          const { name: country_name } = flagDetails ?? {}
-          if (!country_name) return
-
-          destinationData[country_name] = {
-            city: `${city}, ${country_name}`,
-            trafficLevel: Math.floor(Math.random() * 100),
-            destination_ip: destination_ip || 'Unknown IP',
+            if (country_name) {
+              destinationData[country_name] = {
+                city: `${city}, ${country_name}`,
+                trafficLevel: Math.floor(Math.random() * 100),
+                destination_ip: destination_ip || 'Unknown IP',
+              }
+            }
           }
 
-          const sourceFlagDetails = await getFlagDetails(source_ip_country)
-          const { name: source_ip_country_name } = sourceFlagDetails ?? {}
-          if (!source_ip_country_name) return
-          sourceData[source_ip_country_name] = {
-            city: `${source_ip_city}, ${source_ip_country_name}`,
-            trafficLevel: Math.floor(Math.random() * 100),
-            source_ip: source_ip || 'Unknown IP',
+          if (source_ip_country && !sourceData[source_ip_country]) {
+            const sourceFlagDetails = await getFlagDetails(source_ip_country)
+            const { name: source_ip_country_name } = sourceFlagDetails ?? {}
+
+            if (source_ip_country_name) {
+              sourceData[source_ip_country_name] = {
+                city: `${source_ip_city}, ${source_ip_country_name}`,
+                trafficLevel: Math.floor(Math.random() * 100),
+                source_ip: source_ip || 'Unknown IP',
+              }
+            }
           }
         }
         catch (error) {
-          console.error(`Error fetching flag details for ${country}:`, error)
+          console.error(`Error fetching flag details:`, error)
         }
       })
 
