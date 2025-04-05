@@ -1,7 +1,17 @@
 import axios from 'axios'
 
 export async function getFlagDetails(country: string) {
-  const data = await axios.get(`https://restcountries.com/v3.1/alpha/${country}`)
+  if (!country || typeof country !== 'string' || country.length < 2) {
+    console.error('Invalid country code:', country)
+    return { flag: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgMhTDC-OumaVj0TC9I486UVVWDW22Qt61ISByC_Qcz7WR4mBPLbVfMzN2aPxlumjIdvY&usqp=CAU', name: 'No IP Info', country }
+  }
 
-  return { flag: data?.data?.[0]?.flags?.svg, name: data?.data?.[0]?.name?.common, country }
+  try {
+    const data = await axios.get(`https://restcountries.com/v3.1/alpha/${country}`)
+    return { flag: data?.data?.[0]?.flags?.svg, name: data?.data?.[0]?.name?.common, country }
+  }
+  catch (error) {
+    console.error(`Failed to fetch flag details for country: ${country}`, error)
+    return { flag: null, name: null, country }
+  }
 }

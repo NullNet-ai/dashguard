@@ -6,6 +6,8 @@ import Bluebird from 'bluebird'
 import moment from 'moment-timezone'
 import { z } from 'zod'
 
+import { getFlagDetails } from '~/app/api/device/get_flags'
+import { isPrivateIp } from '~/app/portal/device/record/[code]/_components/dashboard/Map/traffic-map-leaflet/checkSourceIPS'
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
 import { type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
@@ -723,7 +725,30 @@ export const packetRouter = createTRPCRouter({
 
       }).execute()
 
-      return { source_ip, result: res?.data }
+      const ip_info = await ctx.dnaClient
+        .findAll({
+          entity: 'ip_info',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'ip',
+                operator: EOperator.EQUAL,
+                values: [source_ip],
+              },
+            ],
+            order: {
+              limit: 10,
+              by_field: 'ip',
+              by_direction: EOrderDirection.DESC,
+            },
+            pluck: ['country', 'region', 'city', 'ip'],
+          },
+        })
+        .execute()
+      const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
+      return { source_ip, result: res?.data, ...flagDetails }
     }, { concurrency: 100 })
 
     return { data: ips }
@@ -731,7 +756,6 @@ export const packetRouter = createTRPCRouter({
 
   getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
     const { device_id, time_range, filter_id } = input
-    console.log('%c Line:734 🍧 time_range', 'color:#b03734', time_range)
 
     let source_ips: string[] = []
 
@@ -749,6 +773,21 @@ export const packetRouter = createTRPCRouter({
       const _filter = findFilter?.group_advance_filters || []
 
       const [,,...rest_group_filter] = _filter || []
+      // Separate filters for "country"
+      const countryFilters = rest_group_filter.filter((filter: any) => {
+        if (filter.type === 'criteria' && Array.isArray(filter.filters)) {
+          return filter.filters.some((subFilter: any) => subFilter.field === 'country')
+        }
+        return false
+      })
+
+      // Remove "country" filters from the original rest_group_filter
+      const otherFilters = rest_group_filter.filter((filter: any) => {
+        if (filter.type === 'criteria' && Array.isArray(filter.filters)) {
+          return !filter.filters.some((subFilter: any) => subFilter.field === 'country')
+        }
+        return true
+      })
 
       let default_filters: any = [
         ...(search?.length
@@ -801,12 +840,12 @@ export const packetRouter = createTRPCRouter({
 
       const group_advance_filters = [
         default_filters,
-        ...(rest_group_filter?.length
+        ...(otherFilters?.length
           ? [{
               type: 'operator',
               operator: 'and',
             },
-            ...rest_group_filter]
+            ...otherFilters]
           : []),
       ]
 
@@ -850,12 +889,57 @@ export const packetRouter = createTRPCRouter({
           sourceIPs.add((_packets[i]?.packets as any).source_ip)
         }
       }
-
+      // 209.58.181.171
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
+      if (countryFilters?.length) {
+        const _res = await Bluebird.map(source_ips, async (source_ip: string) => {
+          const res = await ctx.dnaClient
+            .findAll({
+              entity: 'ip_info',
+              token: ctx.token.value,
+              query: {
+                advance_filters: [
+                  {
+                    type: 'criteria',
+                    field: 'ip',
+                    operator: EOperator.EQUAL,
+                    values: [source_ip],
+                  },
+                  {
+                    type: 'operator',
+                    operator: EOperator.AND,
+                  },
+                  ...(Array.isArray(countryFilters) && countryFilters.length > 0
+                    ? countryFilters[0]?.filters || []
+                    : []),
+                ],
+                order: {
+                  limit: 10,
+                  by_field: 'ip',
+                  by_direction: EOrderDirection.DESC,
+                },
+                pluck: ['country', 'region', 'city', 'ip'],
+              },
+            })
+            .execute()
 
-      if (_packets_length == limit) {
-        const new_start = starts_at + limit
-        await filterPackets(new_start)
+          if (!res?.data?.length) return null
+          return { result: res?.data }
+        }, { concurrency: 100 })
+
+        if (_packets_length == limit) {
+          const new_start = starts_at + limit
+          await filterPackets(new_start)
+        }
+        const ips_with_country = (_res?.filter(Boolean))?.map(item => item?.result?.[0]?.ip)
+        source_ips = ips_with_country as string[]
+        return _res?.filter(Boolean)
+      }
+      else {
+        if (_packets_length == limit) {
+          const new_start = starts_at + limit
+          await filterPackets(new_start)
+        }
       }
     }
 
@@ -863,6 +947,225 @@ export const packetRouter = createTRPCRouter({
 
     return source_ips || []
   }),
+
+  getUniqueSourceAndDestinationIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range } = input
+    let source_and_destination_ips: Record<string, any>[] = []
+
+    const filterPackets = async (starts_at: number) => {
+      const limit = 1000
+
+      const packets = await ctx.dnaClient
+        .findAll({
+          entity: 'packets',
+          token: ctx.token.value,
+          query: {
+            track_total_records: true,
+            pluck: ['source_ip', 'timestamp', 'destination_ip'],
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'packets',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'device_id',
+                entity: 'packets',
+                operator: EOperator.EQUAL,
+                values: [device_id],
+              },
+            ],
+            order: {
+              starts_at,
+              limit,
+              by_field: 'timestamp',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+
+      const _packets = packets?.data || []
+      const _packets_length = _packets.length
+
+      const sourceAndDestinationIPs = new Set()
+      for (let i = 0; i < _packets_length; i++) {
+        if (_packets?.[i]) {
+          sourceAndDestinationIPs.add({ source_ip: (_packets[i] as any).source_ip, destination_ip: (_packets[i] as any).destination_ip })
+        }
+      }
+      source_and_destination_ips = [...new Set([...source_and_destination_ips, ...sourceAndDestinationIPs])] as Record<string, any>[]
+    }
+    await filterPackets(0)
+
+    const _res = await Bluebird.map((source_and_destination_ips), async (ips: Record<string, any>) => {
+      const source_country = await ctx.dnaClient
+        .findAll({
+          entity: 'ip_info',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'ip',
+                operator: EOperator.EQUAL,
+                values: [ips?.source_ip],
+              },
+            ],
+            order: {
+              limit: 10,
+              by_field: 'ip',
+              by_direction: EOrderDirection.DESC,
+            },
+            pluck: ['country', 'region', 'city', 'ip'],
+          },
+        })
+        .execute()
+      const destination_country = await ctx.dnaClient
+        .findAll({
+          entity: 'ip_info',
+          token: ctx.token.value,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'ip',
+                operator: EOperator.EQUAL,
+                values: [ips?.destination_ip],
+              },
+            ],
+            order: {
+              limit: 10,
+              by_field: 'ip',
+              by_direction: EOrderDirection.DESC,
+            },
+            pluck: ['country', 'region', 'city', 'ip'],
+          },
+        })
+        .execute()
+
+      return {
+        source_ip: ips?.source_ip,
+        destination_ip: ips?.destination_ip,
+        source_country: source_country?.data?.length
+          ? source_country?.data?.[0]
+          : {
+              country: 'No IP Info',
+              region: 'No IP Info',
+              city: 'No IP Info',
+              ip: ips?.source_ip,
+            },
+        destination_country: destination_country?.data?.length
+          ? destination_country?.data?.[0]
+          : {
+              country: 'No IP Info',
+              region: 'No IP Info',
+              city: 'No IP Info',
+              ip: ips?.destination_ip,
+            },
+      }
+    }, { concurrency: 100 })
+
+    console.log('%c Line:1038 🍉 _res', 'color:#ffdd4d', _res)
+    return _res || []
+  }),
+
+  // getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()), device_id: z.string(), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
+  //   const { source_ips, time_range, device_id, bucket_size } = input
+  //   console.log('%c Line:893 🍢 source_ips', 'color:#42b983', source_ips)
+  //   const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
+  //     const res = await ctx.dnaClient.aggregate({
+  //       query: {
+  //         entity: 'packets',
+  //         aggregations: [
+  //           {
+  //             aggregation: 'SUM',
+  //             aggregate_on: 'total_length',
+  //             bucket_name: 'bandwidth',
+  //           },
+  //         ],
+  //         advance_filters: [
+  //           {
+  //             type: 'criteria',
+  //             field: 'timestamp',
+  //             entity: 'packets',
+  //             operator: EOperator.IS_BETWEEN,
+  //             values: time_range,
+  //           },
+  //           {
+  //             type: 'operator',
+  //             operator: EOperator.AND,
+  //           },
+  //           {
+  //             type: 'criteria' as const,
+  //             field: 'source_ip',
+  //             entity: 'packets',
+  //             operator: EOperator.EQUAL,
+  //             values: [
+  //               source_ip,
+  //             ],
+  //           },
+  //           {
+  //             type: 'operator',
+  //             operator: EOperator.AND,
+  //           },
+  //           {
+  //             type: 'criteria',
+  //             field: 'device_id',
+  //             entity: 'packets',
+  //             operator: EOperator.EQUAL,
+  //             values: [device_id],
+  //           },
+  //         ],
+  //         joins: [],
+  //         bucket_size,
+  //         order: {
+  //           order_by: 'bucket',
+  //           order_direction: EOrderDirection.DESC,
+  //         },
+  //         // timezone,
+  //       },
+  //       token: ctx.token.value,
+
+  //     }).execute()
+
+  //     const ip_info = await ctx.dnaClient
+  //       .findAll({
+  //         entity: 'ip_info',
+  //         token: ctx.token.value,
+  //         query: {
+  //           advance_filters: [
+  //             {
+  //               type: 'criteria',
+  //               field: 'ip',
+  //               operator: EOperator.EQUAL,
+  //               values: [source_ip],
+  //             },
+  //           ],
+  //           order: {
+  //             limit: 10,
+  //             by_field: 'ip',
+  //             by_direction: EOrderDirection.DESC,
+  //           },
+  //           pluck: ['country', 'region', 'city', 'ip'],
+  //         },
+  //       })
+  //       .execute()
+  //     console.log('%c Line:973 🍆 ip_info', 'color:#e41a6a', ip_info)
+  //     const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
+  //     return { source_ip, result: res?.data, ...ip_info?.data?.[0], ...flagDetails }
+  //   }, { concurrency: 100 })
+
+  //   console.log('%c Line:977 🥐 ips', 'color:#ffdd4d', ips)
+  //   return { data: ips }
+  // }),
 
   getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { source_ips, time_range } = input
