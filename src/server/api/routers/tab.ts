@@ -99,7 +99,6 @@ export const tabRouter = createTRPCRouter({
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
     const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
-    console.log("tabstabs", input.tabs)
     const response = await tabs
       .cacheData(key, input, 90000000)
       .then(() => {

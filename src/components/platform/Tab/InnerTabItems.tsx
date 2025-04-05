@@ -47,8 +47,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
 
-  console.log("render", tabs)
-
   const conWidth = useMemo(() =>   ({
     width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
@@ -129,8 +127,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
 
     const handleResize = () => {  
       const items = calc(tablists);
-
-
       setCopyTab(items);
 
       if(JSON.stringify(tablists) !== JSON.stringify(items)) {
@@ -199,8 +195,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
         is_current: tab.id === selectedTab.id,
       };
     });
-
-    console.log("newTablist", newTablist)
 
     setTablists(newTablist);
   };
@@ -351,6 +345,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
                     >
                       <InnerDropTabItem
                         tab={itm}
+                        onClickItem={handleTabClickDropdown}
                         shownItems={tablists}
                         dropItems={copyTab?.filter((dta: any) => dta.hidden)}
                         pathname={pathname}

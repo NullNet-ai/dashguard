@@ -234,6 +234,7 @@ const GridMobileRowContent = ({
             onClick={() => {
                 setShowMore(!showMore)
             }}
+            type='button'
             >
             {'Show '}
             {!showMore ? 'more' : 'less'}

@@ -267,7 +267,7 @@ const SummaryMobile = () => {
         setSelected(null);
       }}
     >
-      <div className="fixed bottom-0 flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
+      <div className="fixed z-[50] bottom-0 flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
         <Button
           className={cn(
             "flex w-1/2 items-center justify-center gap-2 p-4",
