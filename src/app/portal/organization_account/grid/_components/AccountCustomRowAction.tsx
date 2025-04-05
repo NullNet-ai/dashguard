@@ -127,10 +127,7 @@ export function AccountCustomRowAction({
       });
       socketClient.publish({
         type: 'ACCOUNT_INVITE',
-        payload: {
-          ...response,
-          record_id: row.original?.id,
-        }
+        payload: response
       })
       pathName && router.push(pathName);
     } catch {

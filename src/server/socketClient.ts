@@ -1,6 +1,4 @@
 import { io } from 'socket.io-client';
-import { handleEvent } from './event-listeners';
-import { triggerEvent } from './event-listeners/actions/triggerEvent';
 
 const {
   ROOM = 'portal-template',
@@ -67,7 +65,6 @@ class SocketClient {
 
   private onMessage(args: Record<string, any>) {
     console.info('Received message:', args);
-    triggerEvent(args.type, args.payload);
   }
 
   public publish({ payload, type }: { payload: unknown; type: string }) {

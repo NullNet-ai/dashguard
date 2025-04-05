@@ -7,7 +7,7 @@ export const updateAccountStatus = async (data: any) => {
     const result = await api.account.createInvitationRecord({
       account_code: data.identifier,
     })
-    return result.data
+    return result
   }
   catch (error) {
     throw error

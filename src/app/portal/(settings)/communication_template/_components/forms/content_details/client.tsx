@@ -4,14 +4,20 @@ import { useSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import Entities from '~/auto-generated/entities';
 import { FormBuilder } from '~/components/platform/FormBuilder';
-import {
-  type IHandleSubmit
-} from '~/components/platform/FormBuilder/types';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
 import { type IFormProps } from '../types';
 import ContentField from './custom/ContentSubjectField';
 import { formatTabName } from '~/lib/utils';
+
+const additionalSourceData = [
+  {
+    label: 'Link',
+    value: 'link',
+    custom: true
+  },
+];
 
 export default function Content({ params, defaultValues }: IFormProps) {
   const toast = useToast();
@@ -66,7 +72,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
       formLabel="Content"
       handleSubmit={handleSave}
       formKey="content"
-      formSchema={FormSchema} 
+      formSchema={FormSchema}
       defaultValues={defaultValues}
       fields={[
         {
@@ -90,7 +96,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
         },
       ]}
       selectOptions={{
-        data_source: data_source,
+        data_source: [...data_source, ...additionalSourceData],
       }}
     />
   );

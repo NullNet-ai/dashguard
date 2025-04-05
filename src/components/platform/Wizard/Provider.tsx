@@ -25,6 +25,7 @@ import useTraverseSteppedSaved from './Hooks/useTraverseStepSave';
 import usePrefetchWizardTraverse from './Hooks/usePrefetchWizardTraverse';
 import { NextPage } from './Action/NextPage';
 import { Create } from '../Grid/Action/Create';
+import { useSocket } from '~/context/SocketProvider';
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -112,6 +113,8 @@ export default function WizardProvider({
   const [callbackHandlers, setCallbackHandlers] = useState<ICallbackHandler>(
     config?.callbackHandlers || {},
   );
+
+  const socketClient = useSocket()
 
   /** @STATES */
   const nextStep = api.wizard.wizardCreateStep.useMutation();
@@ -255,6 +258,7 @@ export default function WizardProvider({
         await callbackHandlers?.onClickWizardSave({
           data,
           action_type: 'save_close',
+          socketClient,
           next,
         });
 
@@ -294,6 +298,7 @@ export default function WizardProvider({
         await callbackHandlers?.onClickWizardSave({
           data,
           action_type: 'save_new',
+          socketClient,
           next,
         });
         setSaveNewLoading(false);
@@ -325,6 +330,7 @@ export default function WizardProvider({
         await callbackHandlers?.onClickWizardSave({
           data,
           action_type: 'save_continue',
+          socketClient,
           next,
         });
         setSaveContinueLoading(false);

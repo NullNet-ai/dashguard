@@ -2,7 +2,7 @@
 import { EEventType } from '../events/types';
 import {  accountInvite } from './account/accountInvite';
 
-type EventHandler = (args: any) => Promise<void>;
+type EventHandler = (eventName: string, args: any) => Promise<void>;
 
 const actions: Record<EEventType, EventHandler> = {
   [EEventType.ACCOUNT_INVITE]: accountInvite
@@ -28,7 +28,7 @@ export const handleEvent = async (
   }
 
   try {
-    await eventAction?.(args);
+    await eventAction?.(eventName, args);
     return {
       success: true,
       message: `Successfully handled event: ${eventName}`,

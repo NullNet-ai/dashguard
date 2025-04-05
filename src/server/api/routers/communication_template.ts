@@ -1,15 +1,15 @@
 import {
   createTRPCRouter,
   privateProcedure,
-  publicProcedure,
 } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { pluralize } from '~/server/utils/pluralize';
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 
 const ENTITY = 'communication_template';
-
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 export const communicationTemplateRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
   updateDraftTemplate: privateProcedure
@@ -91,5 +91,34 @@ export const communicationTemplateRouter = createTRPCRouter({
       return {
         data: variables,
       };
+    }),
+  getCommunicationTemplate: privateProcedure
+    .input(
+      z.object({
+        eventName: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const communicationTemplate = await ctx.dnaClient
+        .findAll({
+          token: rootAccountToken,
+          as_root: asRoot,
+          entity: 'communication_templates',
+          query: {
+            pluck: ['id', 'name', 'event', 'subject', 'content', 'status'],
+            advance_filters: createAdvancedFilter({
+              event: input.eventName,
+              status: 'Active',
+              // categories: ['Email'],
+            }),
+          },
+        })
+        .execute();
+      return communicationTemplate?.data?.[0];
     }),
 });

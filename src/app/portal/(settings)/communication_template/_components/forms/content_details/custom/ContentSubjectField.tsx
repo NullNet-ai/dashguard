@@ -6,6 +6,16 @@ import { type CustomFieldProps } from '~/components/platform/FormBuilder/types'
 
 import { GetVariables } from '../actions/getVariables'
 
+const customVarialble: Record<string, any> = {
+  link: [
+    {
+      label: 'link',
+      value: 'link',
+    }
+  ]
+}
+
+
 const ContentSubjectField = (props: CustomFieldProps) => {
   const { form, formKey, fieldConfig, selectOptions, ...formRenderProps }
     = props
@@ -19,6 +29,12 @@ const ContentSubjectField = (props: CustomFieldProps) => {
   const getVariableOptions = async (entity: string) => {
     const variables = await GetVariables({ entity })
     setVariableOptions(variables)
+    setSelectedEntity(entity)
+  }
+
+  const getCustomVariable = (entity: string) => {
+    const customVariable = customVarialble[entity] ?? []
+    setVariableOptions(customVariable)
     setSelectedEntity(entity)
   }
 
@@ -43,7 +59,13 @@ const ContentSubjectField = (props: CustomFieldProps) => {
               emptyMessage: 'No entity types available',
               options: selectOptions?.data_source ?? [],
               isFilterMode: true,
-              onSelect: async (option) => {
+              onSelect: async (option: any) => {
+                if (option.custom) {
+                  getCustomVariable(
+                    option.value,
+                  )
+                  return
+                }
                 await getVariableOptions(option.value)
               },
             },
