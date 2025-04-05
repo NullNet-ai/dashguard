@@ -296,7 +296,7 @@ export const packetRouter = createTRPCRouter({
     return result
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
-  })).query(async ({ input, ctx }) => {
+  })).mutation(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
 
     if (
@@ -370,9 +370,6 @@ export const packetRouter = createTRPCRouter({
       const _end = moment(end as string).tz(timezone)
         .format('YYYY-MM-DD HH:mm:ss')
 
-      // const unit = bucket_size.slice(-1)
-      // const unitFull = getUnit(unit)
-      //
       const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
       const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
@@ -380,6 +377,7 @@ export const packetRouter = createTRPCRouter({
       const transform_data = timestamps?.map((item) => {
         const interface_val = res?.reduce((acc, intrfce: any) => {
           const [key, val] = Object.entries(intrfce)?.[0] as any
+          console.log('%c Line:380 🍿 val', 'color:#e41a6a', val);
           const same_val = val?.find((element: any) => element.bucket === item)
           return {
             ...acc,
@@ -392,6 +390,7 @@ export const packetRouter = createTRPCRouter({
           ...interface_val,
         }
       })
+      console.log('%c Line:397 🍒 transform_data', 'color:#fca650', transform_data);
 
       return transform_data
     }
@@ -431,8 +430,11 @@ export const packetRouter = createTRPCRouter({
     }).execute()
 
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
+    console.log('%c Line:434 🥐 res?.data', 'color:#7f2b82', res?.data);
+    const a = transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
+    console.log('%c Line:435 🥪 a', 'color:#93c0a4', a);
 
-    return transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
+    return a
   }),
   getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
   })).query(async ({ input, ctx }) => {
