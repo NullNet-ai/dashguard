@@ -636,6 +636,7 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">Start Time</span>
                       <TimePicker
+                        key={`from-time-${activePreset || 'custom'}`}
                         value={
                           selectedRange?.from &&
                           typeof selectedRange.from !== 'string' &&
@@ -658,6 +659,7 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">End Time</span>
                       <TimePicker
+                        key={`to-time-${activePreset || 'custom'}`}
                         value={
                           selectedRange?.to &&
                           typeof selectedRange.to !== 'string' &&
