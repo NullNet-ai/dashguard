@@ -70,17 +70,56 @@ export function DateRangePicker({
   // Add media query hook for responsive design
   const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
 
-  // Add useEffect to sync value with selectedRange
+  // Add useEffect to sync value with selectedRange - improve deep copying
   useEffect(() => {
     // If value changes externally, update the selectedRange
     if (value !== undefined) {
-      setSelectedRange(value);
+      // Create a deep copy to avoid reference issues
+      if (withTime && 'from' in (value as any)) {
+        const newValue: DateRangeWithTime = {
+          from: undefined,
+          to: undefined
+        };
+        
+        if ((value as DateRangeWithTime).from) {
+          newValue.from = {
+            date: new Date((value as DateRangeWithTime).from!.date),
+            time: (value as DateRangeWithTime).from!.time 
+              ? new Date((value as DateRangeWithTime).from!.time!) 
+              : undefined
+          };
+        }
+        
+        if ((value as DateRangeWithTime).to) {
+          newValue.to = {
+            date: new Date((value as DateRangeWithTime).to!.date),
+            time: (value as DateRangeWithTime).to!.time 
+              ? new Date((value as DateRangeWithTime).to!.time!) 
+              : undefined
+          };
+        }
+        
+        setSelectedRange(newValue);
+      } else {
+        // For regular DateRange
+        const newValue: DateRange = { from: undefined, to: undefined };
+        
+        if ((value as DateRange).from) {
+          newValue.from = new Date((value as DateRange).from!);
+        }
+        
+        if ((value as DateRange).to) {
+          newValue.to = new Date((value as DateRange).to!);
+        }
+        
+        setSelectedRange(newValue);
+      }
     } else {
       // If value is undefined (which happens during form reset), clear the selection
       setSelectedRange(undefined);
       setActivePreset(undefined);
     }
-  }, [value]);
+  }, [value, withTime]);
 
   const handlePresetSelect = (preset: DateRangePreset) => {
     const today = new Date();
@@ -267,7 +306,7 @@ export function DateRangePicker({
     onChange?.(newRange);
   };
 
-  // Add the missing handleCalendarSelect function
+  // Improve the handleCalendarSelect function
   const handleCalendarSelect = (range: DateRange | undefined) => {
     if (!range) {
       setSelectedRange(undefined);
@@ -308,8 +347,13 @@ export function DateRangePicker({
       setSelectedRange(newRange);
       onChange?.(newRange);
     } else {
-      setSelectedRange(range);
-      onChange?.(range);
+      // Create a new object to avoid reference issues
+      const newRange: DateRange = {
+        from: range.from ? new Date(range.from) : undefined,
+        to: range.to ? new Date(range.to) : undefined
+      };
+      setSelectedRange(newRange);
+      onChange?.(newRange);
     }
 
     setActivePreset("custom");
@@ -420,13 +464,6 @@ export function DateRangePicker({
     }
   }, [selectedRange, withTime, onChange]);
 
-  // Add useEffect to sync value with selectedRange
-  useEffect(() => {
-    // If value changes externally, update the selectedRange
-    if (value !== undefined) {
-      setSelectedRange(value);
-    }
-  }, [value]);
 
   return (
     <div className={cn("grid gap-2 ", className)}>
@@ -565,12 +602,13 @@ export function DateRangePicker({
                         ? selectedRange.from.date
                         : undefined
                   }
-                  selected={withTime && selectedRange
-                    ? {
-                      from: selectedRange.from && 'date' in selectedRange.from ? selectedRange.from.date : undefined,
-                      to: selectedRange.to && 'date' in selectedRange.to ? selectedRange.to.date : undefined
-                    }
-                    : selectedRange as DateRange
+                  selected={
+                    withTime && selectedRange && 'from' in selectedRange
+                      ? {
+                          from: selectedRange.from instanceof Date ? selectedRange.from : selectedRange.from?.date,
+                          to: selectedRange.to instanceof Date ? selectedRange.to : selectedRange.to?.date
+                        }
+                      : selectedRange as DateRange
                   }
                   onSelect={handleCalendarSelect}
                   numberOfMonths={isDesktop ? 2 : 1}

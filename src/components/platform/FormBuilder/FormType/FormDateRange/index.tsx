@@ -60,110 +60,226 @@ export default function FormDateRange({
   
   // Convert MM/DD/YYYY formatted string to DateRange or DateRangeWithTime object
   const convertToDateObjects = (): DateRange | DateRangeWithTime | undefined => {
-    if (!value) return undefined;
-    
-    try {
-      // Parse the value as an array of strings
-      const parts = Array.isArray(value) ? value : [value, ""];
-      
-      if (parts.length === 0) {
+    // First check if we have a value from the form
+    if (value) {
+      try {
+        // Parse the value as an array of strings
+        const parts = Array.isArray(value) ? value : [value, ""];
+        
+        if (parts.length === 0 || (parts[0] === "" && parts[1] === "")) {
+          return undefined;
+        }
+        
+        if (withTime) {
+          // For DateRangeWithTime
+          const result: DateRangeWithTime = {};
+          
+          // Parse the from date and time if available
+          if (parts[0]) {
+            const fromDateTimeParts = parts[0].split(' ');
+            const fromDateStr = fromDateTimeParts[0]; // MM/DD/YYYY
+            // Join the remaining parts to handle time with spaces (like "8:35 AM")
+            const fromTimeStr = fromDateTimeParts.length > 1 ? fromDateTimeParts.slice(1).join(' ') : undefined;
+            
+            // Parse date from MM/DD/YYYY format
+            const fromDate = parse(fromDateStr, 'MM/dd/yyyy', new Date());
+            
+            if (!isNaN(fromDate.getTime())) {
+              result.from = { 
+                date: new Date(fromDate.setHours(0, 0, 0, 0)), // Ensure consistent time part
+                time: undefined 
+              };
+              
+              // Parse time if available
+              if (fromTimeStr) {
+                const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
+                try {
+                  const fromTime = parse(fromTimeStr, timeFormat, new Date());
+                  
+                  if (!isNaN(fromTime.getTime())) {
+                    result.from.time = new Date(fromTime);
+                  }
+                } catch (e) {
+                  console.error("Error parsing from time:", e);
+                }
+              }
+            }
+          }
+          
+          // Parse the to date and time if available
+          if (parts[1]) {
+            const toDateTimeParts = parts[1].split(' ');
+            const toDateStr = toDateTimeParts[0]; // MM/DD/YYYY
+            // Join the remaining parts to handle time with spaces (like "8:35 PM")
+            const toTimeStr = toDateTimeParts.length > 1 ? toDateTimeParts.slice(1).join(' ') : undefined;
+            
+            // Parse date from MM/DD/YYYY format
+            const toDate = parse(toDateStr, 'MM/dd/yyyy', new Date());
+            
+            if (!isNaN(toDate.getTime())) {
+              result.to = { 
+                date: new Date(toDate.setHours(0, 0, 0, 0)), // Ensure consistent time part
+                time: undefined 
+              };
+              
+              // Parse time if available
+              if (toTimeStr) {
+                const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
+                try {
+                  const toTime = parse(toTimeStr, timeFormat, new Date());
+                  
+                  if (!isNaN(toTime.getTime())) {
+                    result.to.time = new Date(toTime);
+                  }
+                } catch (e) {
+                  console.error("Error parsing to time:", e);
+                }
+              }
+            }
+          }
+          
+          return result;
+        } else {
+          // For DateRange
+          const result: Partial<DateRange> = {};
+          
+          // Parse the from date in MM/DD/YYYY format
+          if (parts[0]) {
+            const fromDate = parse(parts[0], 'MM/dd/yyyy', new Date());
+            if (!isNaN(fromDate.getTime())) {
+              // Create a new Date object to avoid reference issues
+              result.from = new Date(fromDate.setHours(0, 0, 0, 0));
+            }
+          }
+          
+          // Parse the to date in MM/DD/YYYY format
+          if (parts[1]) {
+            const toDate = parse(parts[1], 'MM/dd/yyyy', new Date());
+            if (!isNaN(toDate.getTime())) {
+              // Create a new Date object to avoid reference issues
+              result.to = new Date(toDate.setHours(0, 0, 0, 0));
+            }
+          }
+          
+          return Object.keys(result).length ? result as DateRange : undefined;
+        }
+      } catch (error) {
+        console.error("Error parsing date range string:", error);
         return undefined;
       }
-      
-      if (withTime) {
-        // For DateRangeWithTime
-        const result: DateRangeWithTime = {
-          from: undefined,
-          to: undefined
-        };
-        
-        // Parse the from date and time if available
-        if (parts[0]) {
-          const fromDateTimeParts = parts[0].split(' ');
-          const fromDateStr = fromDateTimeParts[0]; // MM/DD/YYYY
-          // Join the remaining parts to handle time with spaces (like "8:35 AM")
-          const fromTimeStr = fromDateTimeParts.length > 1 ? fromDateTimeParts.slice(1).join(' ') : undefined;
-          
-          // Parse date from MM/DD/YYYY format
-          const fromDate = parse(fromDateStr, 'MM/dd/yyyy', new Date());
-          
-          if (!isNaN(fromDate.getTime())) {
-            result.from = { date: fromDate };
-            
-            // Parse time if available
-            if (fromTimeStr) {
-              const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
-              try {
-                const fromTime = parse(fromTimeStr, timeFormat, new Date());
-                
-                if (!isNaN(fromTime.getTime())) {
-                  result.from.time = fromTime;
-                }
-              } catch (e) {
-                console.error("Error parsing from time:", e);
-              }
-            }
-          }
+    } 
+    // If no form value but we have a default value in the field config, use that
+    else if (value) {
+      try {
+        // Handle default value which could be a string, array, or object
+        if (typeof value === 'string') {
+          // Single date string
+          return convertStringToDateObject(value, "");
+        } else if (Array.isArray(value)) {
+          // Array of date strings
+          return convertStringToDateObject(value[0] || "", value[1] || "");
+        } else if (typeof value === 'object') {
+          // Already in DateRange or DateRangeWithTime format
+          return value as DateRange | DateRangeWithTime;
         }
-        
-        // Parse the to date and time if available
-        if (parts[1]) {
-          const toDateTimeParts = parts[1].split(' ');
-          const toDateStr = toDateTimeParts[0]; // MM/DD/YYYY
-          // Join the remaining parts to handle time with spaces (like "8:35 PM")
-          const toTimeStr = toDateTimeParts.length > 1 ? toDateTimeParts.slice(1).join(' ') : undefined;
-          
-          // Parse date from MM/DD/YYYY format
-          const toDate = parse(toDateStr, 'MM/dd/yyyy', new Date());
-          
-          if (!isNaN(toDate.getTime())) {
-            result.to = { date: toDate };
-            
-            // Parse time if available
-            if (toTimeStr) {
-              const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
-              try {
-                const toTime = parse(toTimeStr, timeFormat, new Date());
-                
-                if (!isNaN(toTime.getTime())) {
-                  result.to.time = toTime;
-                }
-              } catch (e) {
-                console.error("Error parsing to time:", e);
-              }
-            }
-          }
-        }
-        
-        return result;
-      } else {
-        // For DateRange
-        const result: DateRange = {
-          from: undefined, // Initialize with undefined to satisfy TypeScript
-          to: undefined
-        };
-        
-        // Parse the from date in MM/DD/YYYY format
-        if (parts[0]) {
-          const fromDate = parse(parts[0], 'MM/dd/yyyy', new Date());
-          if (!isNaN(fromDate.getTime())) {
-            result.from = fromDate;
-          }
-        }
-        
-        // Parse the to date in MM/DD/YYYY format
-        if (parts[1]) {
-          const toDate = parse(parts[1], 'MM/dd/yyyy', new Date());
-          if (!isNaN(toDate.getTime())) {
-            result.to = toDate;
-          }
-        }
-        
-        return result;
+      } catch (error) {
+        console.error("Error parsing default date range:", error);
       }
-    } catch (error) {
-      console.error("Error parsing date range string:", error);
-      return undefined;
+    }
+    
+    return undefined;
+  };
+  
+  // Helper function to convert string dates to DateRange/DateRangeWithTime objects
+  const convertStringToDateObject = (fromStr: string, toStr: string): DateRange | DateRangeWithTime => {
+    if (withTime) {
+      // For DateRangeWithTime
+      const result: DateRangeWithTime = {};
+      
+      // Parse the from date and time if available
+      if (fromStr) {
+        const fromDateTimeParts = fromStr.split(' ');
+        const fromDateStr = fromDateTimeParts[0]; // MM/DD/YYYY
+        const fromTimeStr = fromDateTimeParts.length > 1 ? fromDateTimeParts.slice(1).join(' ') : undefined;
+        
+        // Parse date from MM/DD/YYYY format
+        const fromDate = fromDateStr ? parse(fromDateStr, 'MM/dd/yyyy', new Date()) : new Date();
+        
+        if (!isNaN(fromDate.getTime())) {
+          result.from = { 
+            date: new Date(fromDate.setHours(0, 0, 0, 0)),
+            time: undefined 
+          };
+          
+          // Parse time if available
+          if (fromTimeStr) {
+            const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
+            try {
+              const fromTime = parse(fromTimeStr, timeFormat, new Date());
+              
+              if (!isNaN(fromTime.getTime())) {
+                result.from.time = new Date(fromTime);
+              }
+            } catch (e) {
+              console.error("Error parsing from time:", e);
+            }
+          }
+        }
+      }
+      
+      // Parse the to date and time if available
+      if (toStr) {
+        const toDateTimeParts = toStr.split(' ');
+        const toDateStr = toDateTimeParts[0]; // MM/DD/YYYY
+        const toTimeStr = toDateTimeParts.length > 1 ? toDateTimeParts.slice(1).join(' ') : undefined;
+        
+        // Parse date from MM/DD/YYYY format
+        const toDate = toDateStr ? parse(toDateStr, 'MM/dd/yyyy', new Date()) : new Date();
+        
+        if (!isNaN(toDate.getTime())) {
+          result.to = { 
+            date: new Date(toDate.setHours(0, 0, 0, 0)),
+            time: undefined 
+          };
+          
+          // Parse time if available
+          if (toTimeStr) {
+            const timeFormat = is24Hour ? 'HH:mm' : 'h:mm a';
+            try {
+              const toTime = parse(toTimeStr, timeFormat, new Date());
+              
+              if (!isNaN(toTime.getTime())) {
+                result.to.time = new Date(toTime);
+              }
+            } catch (e) {
+              console.error("Error parsing to time:", e);
+            }
+          }
+        }
+      }
+      
+      return result;
+    } else {
+      // For DateRange
+      const result: Partial<DateRange> = {};
+      
+      // Parse the from date in MM/DD/YYYY format
+      if (fromStr) {
+        const fromDate = parse(fromStr, 'MM/dd/yyyy', new Date());
+        if (!isNaN(fromDate.getTime())) {
+          result.from = new Date(fromDate.setHours(0, 0, 0, 0));
+        }
+      }
+      
+      // Parse the to date in MM/DD/YYYY format
+      if (toStr) {
+        const toDate = parse(toStr, 'MM/dd/yyyy', new Date());
+        if (!isNaN(toDate.getTime())) {
+          result.to = new Date(toDate.setHours(0, 0, 0, 0));
+        }
+      }
+      
+      return Object.keys(result).length ? result as DateRange : { from: undefined, to: undefined };
     }
   };
   
