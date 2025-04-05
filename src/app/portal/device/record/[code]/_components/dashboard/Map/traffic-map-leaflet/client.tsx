@@ -1,6 +1,5 @@
 'use client'
 
-import Bluebird from 'bluebird'
 import { useEffect, useState } from 'react'
 
 import { getFlagDetails } from '~/app/api/device/get_flags'
@@ -32,6 +31,7 @@ export default function TrafficMaps({ params }: IFormProps) {
 
   const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
+  const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
   const getCountryIP = api.packet.getCountriesSourceIP.useMutation()
 
   const {
@@ -114,14 +114,63 @@ export default function TrafficMaps({ params }: IFormProps) {
     if (!filterId) return
 
     const fetchUniqueSourceIP = async () => {
-      const data = await getUniqueSourceActions.mutateAsync({
+      const data = await getUniqueSourceAndDestinationIP.mutateAsync({
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
       })
-      console.log('%c Line:137 🌮 data', 'color:#ea7e5c', data)
+      
+      console.log("%c Line:118 🥑 data", "color:#42b983", data);
+      const destinationData: Record<string, { city: string, trafficLevel: number, destination_ip: string }> = {}
+      const sourceData: Record<string, { city: string, trafficLevel: number, source_ip: string }> = {}
 
-      setUniqueSourceIP(data as string[])
+      // Collect all async calls in an array
+      const promises = data?.map(async (entry: Record<string, any>) => {
+        const { source_ip, destination_ip, source_country, destination_country } = entry
+        const { country, city } = destination_country ?? {}
+        const { country: source_ip_country, city: source_ip_city } = destination_country ?? {}
+
+        try {
+          const flagDetails = await getFlagDetails(country)
+
+          const { name: country_name } = flagDetails ?? {}
+          if (!country_name) return
+
+          destinationData[country_name] = {
+            city: `${city}, ${country_name}`,
+            trafficLevel: Math.floor(Math.random() * 100),
+            destination_ip: destination_ip || 'Unknown IP',
+          }
+
+          const sourceFlagDetails = await getFlagDetails(source_ip_country)
+          const { name: source_ip_country_name } = sourceFlagDetails ?? {}
+          if (!source_ip_country_name) return
+          sourceData[source_ip_country_name] = {
+            city: `${source_ip_city}, ${source_ip_country_name}`,
+            trafficLevel: Math.floor(Math.random() * 100),
+            source_ip: source_ip || 'Unknown IP',
+          }
+        }
+        catch (error) {
+          console.error(`Error fetching flag details for ${country}:`, error)
+        }
+      })
+
+      await Promise.all(promises)
+
+      // const _additionalCityConnections = await additionalCityConnections(data)
+      // const _regionToRegionConnections = await regionToRegionConnections(data)
+      // const _regionToCityConnections = await regionToCityConnections(data)
+      // const _cityToCityConnections = await cityToCityConnections(data)
+
+      // setAdditionCityConnections(_additionalCityConnections.filter(Boolean))
+      // setRegionToRegionConnections(_regionToRegionConnections.filter(Boolean))
+      // setRegionToCityConnections(_regionToCityConnections.filter(Boolean))
+      // setCityToCityConnections(_cityToCityConnections.filter(Boolean))
+
+      setCountryTrafficData({ destinationData, sourceData })
+
+      // setUniqueSourceIP(data as string[])
       setCurrentIndex(0)
       setLoading(false)
     }
@@ -129,73 +178,71 @@ export default function TrafficMaps({ params }: IFormProps) {
     setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
-  useEffect(() => {
-    if (!unique_source_ips || unique_source_ips.length === 0) {
-      console.warn('No source IPs available for fetching bandwidth')
-      return
-    }
+  // useEffect(() => {
+  //   if (!unique_source_ips || unique_source_ips.length === 0) {
+  //     console.warn('No source IPs available for fetching bandwidth')
+  //     return
+  //   }
 
-    console.log('%c Line:134 🍷 unique_source_ips', 'color:#ea7e5c', unique_source_ips)
-    const fetchCountryIP = async () => {
-      const data = await getCountryIP.mutateAsync({
-        source_ips: unique_source_ips,
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      })
-      console.log("%c Line:141 🍭 data", "color:#7f2b82", data);
+  //   console.log('%c Line:134 🍷 unique_source_ips', 'color:#ea7e5c', unique_source_ips)
+  //   const fetchCountryIP = async () => {
+  //     const data = await getCountryIP.mutateAsync({
+  //       source_ips: unique_source_ips,
+  //       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
+  //     })
+  //     console.log("%c Line:141 🍭 data", "color:#7f2b82", data);
 
-      const formattedData: Record<string, { city: string, trafficLevel: number }> = {}
+  //     const formattedData: Record<string, { city: string, trafficLevel: number }> = {}
 
-      // Collect all async calls in an array
-      const promises = data.flatMap(item => item.result.map(async (entry) => {
-        const { country } = entry
-        const city = entry.city || 'Unknown City'
+  //     // Collect all async calls in an array
+  //     const promises = data.flatMap(item => item.result.map(async (entry) => {
+  //       const { country } = entry
+  //       const city = entry.city || 'Unknown City'
 
-        try {
-          const flagDetails = await getFlagDetails(country)
+  //       try {
+  //         const flagDetails = await getFlagDetails(country)
 
-          const { name: country_name } = flagDetails ?? {}
-          if (!country_name) return // Skip if country name is missing
+  //         const { name: country_name } = flagDetails ?? {}
+  //         if (!country_name) return // Skip if country name is missing
 
-          formattedData[country_name] = {
-            city: `${city}, ${country_name}`,
-            trafficLevel: Math.floor(Math.random() * 100), // Assign a random traffic level
-          }
-        }
-        catch (error) {
-          console.error(`Error fetching flag details for ${country}:`, error)
-        }
-      })
-      )
+  //         formattedData[country_name] = {
+  //           city: `${city}, ${country_name}`,
+  //           trafficLevel: Math.floor(Math.random() * 100), // Assign a random traffic level
+  //         }
+  //       }
+  //       catch (error) {
+  //         console.error(`Error fetching flag details for ${country}:`, error)
+  //       }
+  //     })
+  //     )
 
-      await Promise.all(promises) // Wait for all async calls to complete
+  //     await Promise.all(promises) // Wait for all async calls to complete
 
-      console.log(formattedData, '#####formattedData')
+  //     const _additionalCityConnections = await additionalCityConnections(data)
+  //     const _regionToRegionConnections = await regionToRegionConnections(data)
+  //     const _regionToCityConnections = await regionToCityConnections(data)
+  //     const _cityToCityConnections = await cityToCityConnections(data)
 
-      const _additionalCityConnections = await additionalCityConnections(data)
-      const _regionToRegionConnections = await regionToRegionConnections(data)
-      const _regionToCityConnections = await regionToCityConnections(data)
-      const _cityToCityConnections = await cityToCityConnections(data)
+  //     setAdditionCityConnections(_additionalCityConnections.filter(Boolean))
+  //     setRegionToRegionConnections(_regionToRegionConnections.filter(Boolean))
+  //     setRegionToCityConnections(_regionToCityConnections.filter(Boolean))
+  //     setCityToCityConnections(_cityToCityConnections.filter(Boolean))
 
-      setAdditionCityConnections(_additionalCityConnections.filter(Boolean))
-      setRegionToRegionConnections(_regionToRegionConnections.filter(Boolean))
-      setRegionToCityConnections(_regionToCityConnections.filter(Boolean))
-      setCityToCityConnections(_cityToCityConnections.filter(Boolean))
+  //     setCountryTrafficData(formattedData) // Now formattedData has values
 
-      setCountryTrafficData(formattedData) // Now formattedData has values
+  //     // setBandwidth(async (prev) => {
+  //     // // Merge data and bandwidth based on IP
+  //     //   const combinedData = bandwidth.map((bwEntry) => {
+  //     //     const matchingData = data.find(entry => entry.ip === bwEntry.source_ip)
+  //     //     return matchingData ? { ...matchingData, result: bwEntry.result } : bwEntry
+  //     //   })
 
-      // setBandwidth(async (prev) => {
-      // // Merge data and bandwidth based on IP
-      //   const combinedData = bandwidth.map((bwEntry) => {
-      //     const matchingData = data.find(entry => entry.ip === bwEntry.source_ip)
-      //     return matchingData ? { ...matchingData, result: bwEntry.result } : bwEntry
-      //   })
+  //     //   return combinedData
+  //     // })
+  //   }
 
-      //   return combinedData
-      // })
-    }
-
-    fetchCountryIP()
-  }, [unique_source_ips])
+  //   fetchCountryIP()
+  // }, [unique_source_ips])
 
   useEffect(() => {
     // if (!unique_source_ips || unique_source_ips.length === 0) {

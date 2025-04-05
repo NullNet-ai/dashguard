@@ -58,28 +58,33 @@ const getConditionColor = (condition: string) => {
   }
 }
 
+// Default coordinates for "No IP Info" (in the sea)
+const DEFAULT_SEA_COORDINATES: LatLngExpression = [0, -30] // Near the equator in the Atlantic Ocean
+
 // Function to create a **curved** traffic flow line using Bezier curves
 const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<string, any>, trafficLevel: number, name: string, condition = null) => {
-  if (!fromCoord || !toCoord) {
+  if (!fromCoord && !toCoord) {
     console.error(`Missing coordinates for connection: ${name}`)
     return null
   }
+
+  const adjustedFromCoord = fromCoord || DEFAULT_SEA_COORDINATES
+  const adjustedToCoord = toCoord || DEFAULT_SEA_COORDINATES
 
   const curvePoints: any = []
   const segments = 50 // Higher = smoother curve
 
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
-    const x = fromCoord[1] * (1 - t) + toCoord[1] * t
+    const x = adjustedFromCoord[1] * (1 - t) + adjustedToCoord[1] * t
     const y
-      = fromCoord[0] * (1 - t)
-        + toCoord[0] * t
+      = adjustedFromCoord[0] * (1 - t)
+        + adjustedToCoord[0] * t
         + Math.sin(Math.PI * t) * 20 // Adjust curve height
 
     curvePoints.push([y, x])
   }
 
-  // Use condition color if provided, otherwise use traffic level color
   const lineColor = condition ? getConditionColor(condition) : getTrafficColor(trafficLevel)
 
   return L.polyline(curvePoints, {
@@ -91,6 +96,8 @@ const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<st
 }
 
 const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections }: any) => {
+  const { destinationData, sourceData } = countryTrafficData ?? {}
+  console.log('%c Line:100 🍋 countryTrafficData', 'color:#3f7cff', countryTrafficData)
   // Add state to track loaded connections
   const [loadedConnections, setLoadedConnections] = useState(0)
   const [map, setMap] = useState<L.Map | null>(null)
@@ -98,16 +105,15 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
   const [initialHighPriorityDisplayed, setInitialHighPriorityDisplayed] = useState(false)
   const cityCoordinatesCache = useRef<Record<string, any>>({})
   const priorityConnections = useRef<any[]>([])
-
-  console.log('%c Line:141 🍋 countryTrafficData', 'color:#93c0a4', { countryTrafficData, additionalCityConnections, regionToCityConnections, regionToRegionConnections })
-
+  // Store source coordinates for reuse
+  const sourceCoordinatesCache = useRef<Record<string, any>>({})
   // New function to identify high priority connections to show first
   const identifyHighPriorityConnections = () => {
     const highPriority = []
 
     // Add highest traffic countries (e.g., top 5)
-    if (countryTrafficData) {
-      const sortedCountries = Object.entries(countryTrafficData)
+    if (destinationData) {
+      const sortedCountries = Object.entries(destinationData)
         .sort((a: any, b: any) => b[1].trafficLevel - a[1].trafficLevel)
         .slice(0, 5)
 
@@ -117,6 +123,9 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
           country,
           city: (data as any).city,
           trafficLevel: (data as any).trafficLevel,
+          destination_ip: (data as any).destination_ip,
+          source_location: sourceData?.[country]?.location || 'Sea Point',
+          source_ip: sourceData?.[country]?.source_ip,
         })
       }
     }
@@ -132,6 +141,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
           type: 'additionalCity',
           city: cityData.city,
           trafficLevel: cityData.trafficLevel,
+          source_location: sourceData?.[cityData.city]?.location || 'Sea Point',
+          source_ip: sourceData?.[cityData.city]?.source_ip,
         })
       }
     }
@@ -142,7 +153,40 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
   useEffect(() => {
     // Identify high priority connections before map initialization
     priorityConnections.current = identifyHighPriorityConnections()
-  }, [countryTrafficData, additionalCityConnections])
+  }, [destinationData, additionalCityConnections, sourceData])
+
+  // Get a sea point based on destination coordinates
+  const getSeaPoint = (destinationCoords) => {
+    // Get a point in the ocean roughly in the direction of the destination
+    // This is a simplified approach - calculate a point 20 degrees west of destination
+    return [
+      destinationCoords[0] - (Math.random() * 5 - 2.5), // Add some randomness
+      destinationCoords[1] - 20,
+    ]
+  }
+
+  // Get source coordinates (either from sourceData or generate sea point)
+  const getSourceCoordinates = async (destinationName, destinationCoords) => {
+    // If we have source data for this destination
+    if (sourceData?.[destinationName]?.location) {
+      const locationName = sourceData[destinationName].location
+
+      // Check if we already cached these coordinates
+      if (sourceCoordinatesCache.current[locationName]) {
+        return sourceCoordinatesCache.current[locationName]
+      }
+
+      // Otherwise geocode and cache
+      const coords = await geocodeAddress(locationName)
+      if (coords) {
+        sourceCoordinatesCache.current[locationName] = coords
+        return coords
+      }
+    }
+
+    // If no source data or geocoding failed, return a sea point
+    return getSeaPoint(destinationCoords)
+  }
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -174,7 +218,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       L.geoJSON(geojson, {
         style: (feature) => {
           const countryName = feature?.properties.name
-          const trafficLevel = countryTrafficData[countryName]?.trafficLevel
+          const trafficLevel = destinationData[countryName]?.trafficLevel
 
           return {
             fillColor: trafficLevel ? getTrafficColor(trafficLevel) : 'transparent',
@@ -186,7 +230,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
         },
         onEachFeature: (feature, layer) => {
           const countryName = feature.properties.name
-          const trafficLevel = countryTrafficData[countryName]?.trafficLevel
+          const trafficLevel = destinationData[countryName]?.trafficLevel
+          const destination_ip = destinationData[countryName]?.destination_ip
 
           if (trafficLevel) {
             // Add country label
@@ -201,7 +246,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             layer.bindTooltip(
               `<div style="text-align: center;">
                 <strong>${countryName}</strong><br/>
-                Traffic Level: ${trafficLevel}%
+                Traffic Level: ${trafficLevel}%<br/>
+                Destination IP: ${destination_ip}
               </div>`, {
                 permanent: false,
                 direction: 'auto',
@@ -215,17 +261,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       // Set loading complete
       setIsLoading(false)
 
-      // Get Philippines coordinates early
-      const philippinesCoordinates = await geocodeAddress('Manila, Philippines')
-      if (philippinesCoordinates) {
-        cityCoordinatesCache.current['Manila, Philippines'] = philippinesCoordinates
-
-        // Add Philippines marker and label first
-        addPhilippinesMarker(mapInstance, philippinesCoordinates)
-
-        // Display high priority connections immediately
-        displayHighPriorityConnections(mapInstance, philippinesCoordinates)
-      }
+      // Display high priority connections immediately
+      displayHighPriorityConnections(mapInstance)
     }
 
     initializeMap()
@@ -235,53 +272,77 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
         map.remove()
       }
     }
-  }, [countryTrafficData])
+  }, [destinationData, sourceData])
 
-  // Function to add Philippines marker
-  const addPhilippinesMarker = (mapInstance: L.Map, philippinesCoordinates: LatLngExpression) => {
-    // Add a marker for the Philippines Server with a special style
-    const philippinesIcon = L.divIcon({
-      className: 'philippines-dot',
-      html: `<div class="dot pulse-animation" style="background: #0000FF; width: 16px; height: 16px;"></div>`,
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
+  // Create source marker based on source data
+  const createSourceMarker = (mapInstance: L.Map, coordinates: LatLngExpression, locationName: string, source_ip: string = null) => {
+    const adjustedCoordinates = coordinates || DEFAULT_SEA_COORDINATES
+
+    // Determine if this is a sea point or an actual location
+    const isSeaPoint = locationName === 'Sea Point'
+
+    // Create the source dot with appropriate styling
+    const dotColor = isSeaPoint ? '#00BFFF' : '#0000FF' // Light blue for sea, blue for actual locations
+    const divIcon = L.divIcon({
+      className: isSeaPoint ? 'sea-source-dot' : 'source-dot',
+      html: `<div class="dot ${!isSeaPoint ? 'pulse-animation' : ''}" style="background:${dotColor}; width:${isSeaPoint ? '10px' : '14px'}; height:${isSeaPoint ? '10px' : '14px'};"></div>`,
+      iconSize: [isSeaPoint ? 10 : 14, isSeaPoint ? 10 : 14],
+      iconAnchor: [isSeaPoint ? 5 : 7, isSeaPoint ? 5 : 7],
     })
 
-    const philippinesMarker = L.marker(philippinesCoordinates, { icon: philippinesIcon }).addTo(mapInstance)
+    const marker = L.marker(adjustedCoordinates, { icon: divIcon }).addTo(mapInstance)
 
-    // Add Philippines label
-    const philippinesLabelIcon = L.divIcon({
-      className: 'city-label',
-      html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">MANILA</div>`,
-      iconSize: [80, 20],
-      iconAnchor: [40, -15],
-    })
-    L.marker(philippinesCoordinates, { icon: philippinesLabelIcon }).addTo(mapInstance)
+    // Only add labels and circles for non-sea points
+    if (!isSeaPoint) {
+      // Add source label
+      const sourceLabelName = locationName.split(',')[0].toUpperCase()
+      const sourceLabelIcon = L.divIcon({
+        className: 'city-label',
+        html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${sourceLabelName}</div>`,
+        iconSize: [80, 20],
+        iconAnchor: [40, -15],
+      })
+      L.marker(adjustedCoordinates, { icon: sourceLabelIcon }).addTo(mapInstance)
 
-    // Add a highlighted circle for the Philippines
-    L.circle(philippinesCoordinates, {
-      color: '#0000FF',
-      fillColor: '#0000FF',
-      fillOpacity: 0.2,
-      radius: 200000, // Larger radius for the central hub
-      weight: 2,
-    }).addTo(mapInstance)
+      // Add a highlighted circle for the source
+      L.circle(adjustedCoordinates, {
+        color: dotColor,
+        fillColor: dotColor,
+        fillOpacity: 0.2,
+        radius: 150000, // Smaller radius than Philippines but still visible
+        weight: 2,
+      }).addTo(mapInstance)
 
-    philippinesMarker.bindTooltip(
-      `<div style="text-align: center;">
-        <strong>Philippines Server</strong><br/>
-        Central Hub
-      </div>`, {
+      // Add tooltip
+      const tooltipContent = source_ip
+        ? `<div style="text-align: center;"><strong>${locationName}</strong><br/>Source IP: ${source_ip}</div>`
+        : `<div style="text-align: center;"><strong>${locationName}</strong><br/>Traffic Source</div>`
+
+      marker.bindTooltip(tooltipContent, {
         permanent: false,
         direction: 'top',
         className: 'custom-tooltip',
-      }
-    )
+      })
+    }
+    else if (source_ip) {
+      // For sea points, only add tooltip if we have source IP
+      marker.bindTooltip(
+        `<div style="text-align: center;"><strong>Traffic Source</strong><br/>Source IP: ${source_ip}</div>`, {
+          permanent: false,
+          direction: 'top',
+          className: 'custom-tooltip',
+        }
+      )
+    }
+
+    return marker
   }
 
   // Function to create a city marker with circle and label
-  const createCityMarker = (mapInstance: L.Map, coordinates: LatLngExpression, name: string, trafficLevel: number, cityName = null) => {
-    if (!coordinates) {
+  const createCityMarker = (mapInstance: L.Map, coordinates: LatLngExpression, name: string, trafficLevel: number, cityName = null, destination_ip: string) => {
+    const adjustedCoordinates = coordinates || DEFAULT_SEA_COORDINATES
+
+    if (!adjustedCoordinates) {
       console.error(`Missing coordinates for city/region: ${cityName || name}`)
       return null
     }
@@ -295,10 +356,10 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       iconAnchor: [6, 6],
     })
 
-    const marker = L.marker(coordinates, { icon: divIcon }).addTo(mapInstance)
+    const marker = L.marker(adjustedCoordinates, { icon: divIcon }).addTo(mapInstance)
 
     // Add colored circle around the dot
-    const circle = L.circle(coordinates, {
+    const circle = L.circle(adjustedCoordinates, {
       color: dotColor,
       fillColor: dotColor,
       fillOpacity: 0.2,
@@ -316,13 +377,14 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       iconSize: [80, 20],
       iconAnchor: [40, -10], // Position label above the dot
     })
-    L.marker(coordinates, { icon: cityLabelIcon }).addTo(mapInstance)
+    L.marker(adjustedCoordinates, { icon: cityLabelIcon }).addTo(mapInstance)
 
     // Add tooltip to the marker
     marker.bindTooltip(
       `<div style="text-align: center;">
         <strong>${cityName || name}</strong><br/>
-        Traffic Level: ${trafficLevel}%
+        Traffic Level: ${trafficLevel}%<br/>
+        Destination IP: ${destination_ip || 'N/A'}
       </div>`, {
         permanent: false,
         direction: 'top',
@@ -334,34 +396,42 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
   }
 
   // Function to display high priority connections immediately
-  const displayHighPriorityConnections = async (mapInstance: L.Map, philippinesCoordinates: LatLngExpression) => {
+  const displayHighPriorityConnections = async (mapInstance: L.Map) => {
     if (initialHighPriorityDisplayed) return
 
     for (const connection of priorityConnections.current) {
       try {
-        let coordinates
+        let destinationCoordinates
 
         if (connection.type === 'country') {
           // Get coordinates for the country's main city
           if (!cityCoordinatesCache.current[connection.city]) {
             cityCoordinatesCache.current[connection.city] = await geocodeAddress(connection.city)
           }
-          coordinates = cityCoordinatesCache.current[connection.city]
+          destinationCoordinates = cityCoordinatesCache.current[connection.city]
 
-          if (coordinates) {
-            // Create city marker
-            createCityMarker(mapInstance, coordinates, connection.country, connection.trafficLevel, connection.city)
+          if (destinationCoordinates) {
+            // Get source coordinates
+            const sourceCoordinates = await getSourceCoordinates(connection.country, destinationCoordinates)
+
+            // Create source marker
+            createSourceMarker(mapInstance, sourceCoordinates, connection.source_location, connection.source_ip)
+
+            // Create destination city marker
+            createCityMarker(mapInstance, destinationCoordinates, connection.country, connection.trafficLevel, connection.city, connection.destination_ip)
 
             // Create curved flow line
             const curvedLine = createCurvedFlowLine(
-              philippinesCoordinates, coordinates, connection.trafficLevel, connection.city
+              sourceCoordinates, destinationCoordinates, connection.trafficLevel, connection.city
             )
 
             if (curvedLine) {
               curvedLine.bindTooltip(
                 `<div style="text-align: center;">
-                  <strong>${connection.city}</strong><br/>
-                  Traffic Level: ${connection.trafficLevel}%
+                  <strong>${connection.source_location || 'Traffic Source'} → ${connection.city}</strong><br/>
+                  Traffic Level: ${connection.trafficLevel}%<br/>
+                  ${connection.source_ip ? `Source IP: ${connection.source_ip}<br/>` : ''}
+                  ${connection.destination_ip ? `Destination IP: ${connection.destination_ip}` : ''}
                 </div>`, {
                   permanent: false,
                   direction: 'center',
@@ -379,22 +449,30 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
           if (!cityCoordinatesCache.current[connection.city]) {
             cityCoordinatesCache.current[connection.city] = await geocodeAddress(connection.city)
           }
-          coordinates = cityCoordinatesCache.current[connection.city]
+          destinationCoordinates = cityCoordinatesCache.current[connection.city]
 
-          if (coordinates) {
-            // Create city marker
-            createCityMarker(mapInstance, coordinates, connection.city, connection.trafficLevel)
+          if (destinationCoordinates) {
+            // Get source coordinates
+            const sourceCoordinates = await getSourceCoordinates(connection.city, destinationCoordinates)
+
+            // Create source marker
+            createSourceMarker(mapInstance, sourceCoordinates, connection.source_location, connection.source_ip)
+
+            // Create destination city marker
+            createCityMarker(mapInstance, destinationCoordinates, connection.city, connection.trafficLevel, connection.city, connection.destination_ip)
 
             // Create curved flow line
             const curvedLine = createCurvedFlowLine(
-              philippinesCoordinates, coordinates, connection.trafficLevel, connection.city
+              sourceCoordinates, destinationCoordinates, connection.trafficLevel, connection.city
             )
 
             if (curvedLine) {
               curvedLine.bindTooltip(
                 `<div style="text-align: center;">
-                  <strong>${connection.city}</strong><br/>
-                  Traffic Level: ${connection.trafficLevel}%
+                  <strong>${connection.source_location || 'Traffic Source'} → ${connection.city}</strong><br/>
+                  Traffic Level: ${connection.trafficLevel}%<br/>
+                  ${connection.source_ip ? `Source IP: ${connection.source_ip}<br/>` : ''}
+                  ${connection.destination_ip ? `Destination IP: ${connection.destination_ip}` : ''}
                 </div>`, {
                   permanent: false,
                   direction: 'center',
@@ -421,21 +499,6 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
     if (!map || isLoading) return
 
     const loadNextBatchOfConnections = async () => {
-      // Get Philippines coordinates (central hub) - reuse from cache if available
-      let philippinesCoordinates
-      if (cityCoordinatesCache.current['Manila, Philippines']) {
-        philippinesCoordinates = cityCoordinatesCache.current['Manila, Philippines']
-      }
-      else {
-        philippinesCoordinates = await geocodeAddress('Manila, Philippines')
-        cityCoordinatesCache.current['Manila, Philippines'] = philippinesCoordinates
-      }
-
-      if (!philippinesCoordinates) {
-        console.error('Could not get coordinates for Philippines hub')
-        return
-      }
-
       // Prepare all connections for staged loading
       const allConnections: any[] = []
 
@@ -444,10 +507,10 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       const countryCoordinates: any = {}
 
       // Pre-fetch all coordinates first
-      for (const country in countryTrafficData) {
-        if (!cityCoordinates[countryTrafficData[country].city]) {
-          cityCoordinates[countryTrafficData[country].city] = await geocodeAddress(countryTrafficData[country].city)
-          cityCoordinatesCache.current[countryTrafficData[country].city] = cityCoordinates[countryTrafficData[country].city]
+      for (const country in destinationData) {
+        if (!cityCoordinates[destinationData[country].city]) {
+          cityCoordinates[destinationData[country].city] = await geocodeAddress(destinationData[country].city)
+          cityCoordinatesCache.current[destinationData[country].city] = cityCoordinates[destinationData[country].city]
         }
         countryCoordinates[country] = await geocodeAddress(country)
       }
@@ -473,67 +536,112 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       }
 
       // 2. Prepare Country Traffic Data connections
-      Object.keys(countryTrafficData).forEach((country) => {
-        const { trafficLevel, city } = countryTrafficData[country]
-        const coordinates = cityCoordinates[city]
+      for (const country in destinationData) {
+        const { trafficLevel, city, destination_ip } = destinationData[country]
+        const destinationCoordinates = cityCoordinates[city]
 
         // Skip high priority connections that were already displayed
         const isHighPriority = priorityConnections.current.some(conn => conn.type === 'country' && conn.country === country
         )
 
-        if (coordinates && !isHighPriority) {
+        if (destinationCoordinates && !isHighPriority) {
+          // Get source coordinates for this country
+          const sourceCoordinates = await getSourceCoordinates(country, destinationCoordinates)
+
           allConnections.push({
             type: 'country',
-            fromCoord: philippinesCoordinates,
-            toCoord: coordinates,
+            fromCoord: sourceCoordinates,
+            toCoord: destinationCoordinates,
             name: city,
-            displayName: city,
+            displayName: `${sourceData?.[country]?.location || 'Traffic Source'} → ${city}`,
             trafficLevel,
+            destination_ip,
+            source_ip: sourceData?.[country]?.source_ip,
+            sourceName: sourceData?.[country]?.location || 'Sea Point',
             condition: null,
-            callback: () => createCityMarker(map, coordinates, country, trafficLevel, city),
+            callbacks: [
+              // Create source marker
+              () => createSourceMarker(map, sourceCoordinates, sourceData?.[country]?.location || 'Sea Point', sourceData?.[country]?.source_ip),
+              // Create destination marker
+              () => createCityMarker(map, destinationCoordinates, country, trafficLevel, city, destination_ip),
+            ],
           })
         }
-      })
+      }
 
       // 3. Prepare Additional City connections
       additionalCityConnections.forEach((cityData) => {
         const { city, trafficLevel } = cityData
-        const coordinates = additionalCityCoordinates[city]
+        const destinationCoordinates = additionalCityCoordinates[city]
 
         // Skip high priority connections that were already displayed
         const isHighPriority = priorityConnections.current.some(conn => conn.type === 'additionalCity' && conn.city === city
         )
 
-        if (coordinates && !isHighPriority) {
-          allConnections.push({
-            type: 'additionalCity',
-            fromCoord: philippinesCoordinates,
-            toCoord: coordinates,
-            name: city,
-            displayName: city,
-            trafficLevel,
-            condition: null,
-            callback: () => createCityMarker(map, coordinates, city, trafficLevel),
-          })
+        if (destinationCoordinates && !isHighPriority) {
+          // Use source data if available
+          const getSourceCoordAndCreateConnection = async () => {
+            // Get source coordinates
+            const sourceCoordinates = await getSourceCoordinates(city, destinationCoordinates)
+
+            allConnections.push({
+              type: 'additionalCity',
+              fromCoord: sourceCoordinates,
+              toCoord: destinationCoordinates,
+              name: city,
+              displayName: `${sourceData?.[city]?.location || 'Traffic Source'} → ${city}`,
+              trafficLevel,
+              destination_ip: destinationData[city]?.destination_ip,
+              source_ip: sourceData?.[city]?.source_ip,
+              sourceName: sourceData?.[city]?.location || 'Sea Point',
+              condition: null,
+              callbacks: [
+                // Create source marker
+                () => createSourceMarker(map, sourceCoordinates, sourceData?.[city]?.location || 'Sea Point', sourceData?.[city]?.source_ip),
+                // Create destination marker
+                () => createCityMarker(map, destinationCoordinates, city, trafficLevel, city, destinationData[city]?.destination_ip),
+              ],
+            })
+          }
+
+          // Add async function to execution queue
+          getSourceCoordAndCreateConnection()
         }
       })
 
       // 4. Prepare Region-to-Region connections
       regionToRegionConnections.forEach((connection) => {
         const { toRegion, trafficLevel, condition } = connection as Record<string, any>
-        const toCoordinates = regionCoordinates[toRegion]
+        const destinationCoordinates = regionCoordinates[toRegion]
 
-        if (toCoordinates) {
-          allConnections.push({
-            type: 'regionToRegion',
-            fromCoord: philippinesCoordinates,
-            toCoord: toCoordinates,
-            name: `Philippines to ${toRegion}`,
-            displayName: `NCR Region to ${toRegion}`,
-            trafficLevel,
-            condition,
-            callback: () => createCityMarker(map, toCoordinates, toRegion, trafficLevel),
-          })
+        if (destinationCoordinates) {
+          // Use source data if available or create sea point
+          const getSourceCoordAndCreateConnection = async () => {
+            // Get source coordinates
+            const sourceCoordinates = await getSourceCoordinates(toRegion, destinationCoordinates)
+
+            allConnections.push({
+              type: 'regionToRegion',
+              fromCoord: sourceCoordinates,
+              toCoord: destinationCoordinates,
+              name: `Traffic Source to ${toRegion}`,
+              displayName: `${sourceData?.[toRegion]?.location || 'Traffic Source'} → ${toRegion}`,
+              trafficLevel,
+              destination_ip: destinationData[toRegion]?.destination_ip,
+              source_ip: sourceData?.[toRegion]?.source_ip,
+              sourceName: sourceData?.[toRegion]?.location || 'Sea Point',
+              condition,
+              callbacks: [
+                // Create source marker
+                () => createSourceMarker(map, sourceCoordinates, sourceData?.[toRegion]?.location || 'Sea Point', sourceData?.[toRegion]?.source_ip),
+                // Create destination marker
+                () => createCityMarker(map, destinationCoordinates, toRegion, trafficLevel, toRegion, destinationData[toRegion]?.destination_ip),
+              ],
+            })
+          }
+
+          // Add async function to execution queue
+          getSourceCoordAndCreateConnection()
         }
       })
 
@@ -549,10 +657,12 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             fromCoord: fromCoordinates,
             toCoord: toCityCoordinates,
             name: `${fromRegion} to ${toCity}`,
-            displayName: `${fromRegion} to ${toCity}`,
+            displayName: `${fromRegion} → ${toCity}`,
             trafficLevel,
+            destination_ip: destinationData[toCity]?.destination_ip,
+            source_ip: sourceData?.[fromRegion]?.source_ip,
             condition,
-            callback: null, // No need for markers as they'll be created by other connection types
+            callbacks: [], // No need for markers as they'll be created by other connection types
           })
         }
       })
@@ -569,10 +679,12 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             fromCoord: fromCityCoordinates,
             toCoord: toCityCoordinates,
             name: `${fromCity} to ${toCity}`,
-            displayName: `${fromCity} to ${toCity}`,
+            displayName: `${fromCity} → ${toCity}`,
             trafficLevel,
+            destination_ip: destinationData[toCity]?.destination_ip,
+            source_ip: sourceData?.[fromCity]?.source_ip,
             condition,
-            callback: null, // No need for markers as they'll be created by other connection types
+            callbacks: [], // No need for markers as they'll be created by other connection types
           })
         }
       })
@@ -589,9 +701,11 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       for (let i = currentLoadedIndex; i < endIndex; i++) {
         const connection = allConnections[i]
 
-        // Execute callback to create marker if provided
-        if (connection.callback) {
-          connection.callback()
+        // Execute callbacks to create markers if provided
+        if (connection.callbacks && connection.callbacks.length > 0) {
+          connection.callbacks.forEach((callback) => {
+            if (callback) callback()
+          })
         }
 
         // Create and add curved line
@@ -600,16 +714,13 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
         )
 
         if (curvedLine) {
-          const tooltipContent = connection.condition
-            ? `<div style="text-align: center;">
-              <strong>${connection.displayName}</strong><br/>
-              Traffic Level: ${connection.trafficLevel}%<br/>
-              Condition: ${connection.condition}
-            </div>`
-            : `<div style="text-align: center;">
-              <strong>${connection.displayName}</strong><br/>
-              Traffic Level: ${connection.trafficLevel}%
-            </div>`
+          const tooltipContent = `<div style="text-align: center;">
+            <strong>${connection.displayName}</strong><br/>
+            Traffic Level: ${connection.trafficLevel}%<br/>
+            ${connection.source_ip ? `Source IP: ${connection.source_ip}<br/>` : ''}
+            ${connection.destination_ip ? `Destination IP: ${connection.destination_ip}<br/>` : ''}
+            ${connection.condition ? `Condition: ${connection.condition}` : ''}
+          </div>`
 
           curvedLine.bindTooltip(tooltipContent, {
             permanent: false,
@@ -651,7 +762,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%;"></span> High (50-80%)</div>
             <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 255, 0, 0.7); border-radius:50%;"></span> Medium (30-50%)</div>
             <div><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%;"></span> Low (<30%)</div>
-            <div><span style="display:inline-block; width:15px; height:15px; background:#0000FF; border-radius:50%;"></span> Philippines Server</div>
+            <div><span style="display:inline-block; width:15px; height:15px; background:#0000FF; border-radius:50%;"></span> Source Location</div>
+            <div><span style="display:inline-block; width:15px; height:15px; background:#00BFFF; border-radius:50%;"></span> Sea Source Point</div>
             
             <strong style="margin-top: 10px; display: block;">Connection Conditions</strong>
             <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 0, 0, 0.7);"></span> Congested</div>
@@ -659,8 +771,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 165, 0, 0.7);"></span> Low Bandwidth</div>
             <div><span style="display:inline-block; width:15px; height:3px; background:rgba(255, 255, 0, 0.7);"></span> Normal</div>
             <div><span style="display:inline-block; width:15px; height:3px; background:rgba(0, 191, 255, 0.7);"></span> Stable</div>
-            <div><span style="display:inline-block; width:15px; height:3px; background:rgba(0, 128, 0, 0.7);"></span> Optimized</div>
-          </div>
+            <div><span style="display:inline-block; width:15px; height:3px; background:rgba(0, 128, 0, 0.7);"></span> Optimize</div>
         `
         return div
       }
@@ -671,7 +782,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
     if (initialHighPriorityDisplayed && loadedConnections === 0) {
       loadNextBatchOfConnections()
     }
-  }, [map, isLoading, loadedConnections, countryTrafficData, additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections, initialHighPriorityDisplayed])
+  }, [map, isLoading, loadedConnections, destinationData, additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections, initialHighPriorityDisplayed])
 
   // Loading indicator - change based on loaded connections
   const getLoadingStatus = () => {
@@ -687,7 +798,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
     // Calculate total connections (approximate since we don't fetch yet)
     const highPriorityCount = priorityConnections.current.length
     const totalConnections = (
-      (countryTrafficData ? Object.keys(countryTrafficData).length : 0)
+      (destinationData ? Object.keys(destinationData).length : 0)
       + (additionalCityConnections ? additionalCityConnections.length : 0)
       + (regionToRegionConnections ? regionToRegionConnections.length : 0)
       + (regionToCityConnections ? regionToCityConnections.length : 0)
