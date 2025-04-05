@@ -156,8 +156,7 @@ function MainClient({
                 }
                
               </div>
-
-              <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`)}>
+              <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`, `${parentType === 'form' ? 'h-[calc(100dvh-339px)]' : ''}`)}>
                 {parentType === 'grid' || parentType === 'grid_expansion'
                   ? (
                       <GridMobile

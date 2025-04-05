@@ -71,13 +71,7 @@ export const tabRouter = createTRPCRouter({
     .input(
       z.object({
         current_context: z.string().min(1),
-        tabs: z.array(
-          z.object({
-            name: z.string().min(1),
-            href: z.string().min(1),
-            current: z.boolean(),
-          })
-        ),
+        tabs: z.array(z.any()),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -105,7 +99,6 @@ export const tabRouter = createTRPCRouter({
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
     const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
-
     const response = await tabs
       .cacheData(key, input, 90000000)
       .then(() => {

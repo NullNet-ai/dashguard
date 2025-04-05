@@ -19,12 +19,12 @@ const getSessionTabs = async () => {
       current_context: currentContext,
     })
     .then((res) => {
+
       return res?.tabs ?? []
     })
     .catch(() => {
       return []
-    })) as IPropsTabList[]
-
+    })) as any[]
   const grid = stateTabs.find(item => item.name === 'Grid')
   const hasIdentifier = stateTabs?.find(item => item.name === identifier)
 
@@ -78,6 +78,7 @@ const getSessionTabs = async () => {
       href: pathname,
       current: true,
       label : `All ${toCapitalize(pluralize(entity || ''))}s`,
+
     })
   }
 

@@ -76,7 +76,7 @@ const SummaryMobile = () => {
       <>
         <Separator />
         <DrawerFooter>
-          <div className="fixed bottom-0 left-0 z-20 flex w-full justify-between bg-muted text-default/60 lg:hidden">
+          <div className="fixed bottom-0 left-0 flex w-full justify-between bg-muted text-default/60 lg:hidden">
             <Button
               data-test-id={testIDFormatter(
                 `${entity}-wzrdsum-mobile-toggle-btn`,
@@ -267,7 +267,7 @@ const SummaryMobile = () => {
         setSelected(null);
       }}
     >
-      <div className="fixed bottom-0 flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
+      <div className="fixed z-[50] bottom-0 flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
         <Button
           className={cn(
             "flex w-1/2 items-center justify-center gap-2 p-4",
