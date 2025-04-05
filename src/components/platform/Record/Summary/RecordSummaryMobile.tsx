@@ -230,7 +230,7 @@ const RecordSummaryMobile = ({children}:RecordSummaryMobileProps) => {
         setSelected(null);
       }}
     >
-      <div className="fixed bottom-0 flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
+      <div className="fixed bottom-0 z-[50] flex w-full items-center justify-between gap-2 bg-muted lg:hidden">
         <Button
           className={cn(
             "flex w-1/2 items-center justify-center gap-2 p-4",
