@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import TimePicker from "~/components/ui/time-picker";
+import { useMediaQuery } from "react-responsive";
 
 export type DateRangePreset =
   | "today"
@@ -66,6 +67,8 @@ export function DateRangePicker({
 }: DateRangeProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange | DateRangeWithTime | undefined>(value);
   const [activePreset, setActivePreset] = useState<DateRangePreset | undefined>(undefined);
+  // Add media query hook for responsive design
+  const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
 
   // Add useEffect to sync value with selectedRange
   useEffect(() => {
@@ -87,64 +90,108 @@ export function DateRangePicker({
       case "today":
         newRange = withTime
           ? {
-            from: { date: today, time: new Date(today.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: new Date(new Date().setHours(0, 0, 0, 0)), 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: new Date(new Date().setHours(0, 0, 0, 0)), 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: today, to: today };
         break;
       case "yesterday":
-        const yesterday = addDays(today, -1);
+        const yesterday = addDays(new Date(), -1);
         newRange = withTime
           ? {
-            from: { date: yesterday, time: new Date(yesterday.setHours(0, 0, 0, 0)) },
-            to: { date: yesterday, time: new Date(yesterday.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: yesterday, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: yesterday, 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: yesterday, to: yesterday };
         break;
       case "tomorrow":
-        const tomorrow = addDays(today, 1);
+        const tomorrow = addDays(new Date(), 1);
         newRange = withTime
           ? {
-            from: { date: tomorrow, time: new Date(tomorrow.setHours(0, 0, 0, 0)) },
-            to: { date: tomorrow, time: new Date(tomorrow.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: tomorrow, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: tomorrow, 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: tomorrow, to: tomorrow };
         break;
       case "last7Days":
-        const sevenDaysAgo = addDays(today, -6);
+        // Fix: Use exactly 7 days ago (not 6)
+        const sevenDaysAgo = addDays(new Date(), -7);
         newRange = withTime
           ? {
-            from: { date: sevenDaysAgo, time: new Date(sevenDaysAgo.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: sevenDaysAgo, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: new Date(), 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: sevenDaysAgo, to: today };
         break;
       case "last30Days":
-        const thirtyDaysAgo = addDays(today, -29);
+        const thirtyDaysAgo = addDays(new Date(), -29);
         newRange = withTime
           ? {
-            from: { date: thirtyDaysAgo, time: new Date(thirtyDaysAgo.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: thirtyDaysAgo, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: new Date(), 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: thirtyDaysAgo, to: today };
         break;
       case "thisWeek":
-        const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-        const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+        // Fix: Use 0 for Sunday as the week start instead of 1 for Monday
+        const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
+        const weekEnd = endOfWeek(new Date(), { weekStartsOn: 0 });
         newRange = withTime
           ? {
-            from: { date: weekStart, time: new Date(weekStart.setHours(0, 0, 0, 0)) },
-            to: { date: weekEnd, time: new Date(weekEnd.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: weekStart, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: weekEnd, 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: weekStart, to: weekEnd };
         break;
       case "thisMonth":
-        const monthStart = startOfMonth(today);
-        const monthEnd = endOfMonth(today);
+        const monthStart = startOfMonth(new Date());
+        const monthEnd = endOfMonth(new Date());
         newRange = withTime
           ? {
-            from: { date: monthStart, time: new Date(monthStart.setHours(0, 0, 0, 0)) },
-            to: { date: monthEnd, time: new Date(monthEnd.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: monthStart, 
+              time: new Date(new Date().setHours(0, 0, 0, 0)) 
+            },
+            to: { 
+              date: monthEnd, 
+              time: new Date(new Date().setHours(23, 59, 59, 999)) 
+            }
           }
           : { from: monthStart, to: monthEnd };
         break;
@@ -153,9 +200,14 @@ export function DateRangePicker({
         return;
     }
 
+    // Immediately update the state with the new range
     setSelectedRange(newRange);
     setActivePreset(preset);
-    onChange?.(newRange);
+    
+    // Force a re-render to ensure time pickers update
+    setTimeout(() => {
+      onChange?.(newRange);
+    }, 0);
   };
 
   const formatDateRange = () => {
@@ -383,8 +435,8 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 max-h-[80vh] overflow-auto",
-            withTime ? "w-[350px] sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
+            "p-0 max-h-[76vh] overflow-auto z-0",
+            withTime ? "sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
           )}
           align="start"
         >
@@ -488,7 +540,8 @@ export function DateRangePicker({
                     : selectedRange as DateRange
                   }
                   onSelect={handleCalendarSelect}
-                  numberOfMonths={2}
+                  numberOfMonths={isDesktop ? 2 : 1}
+                  showOutsideDays={!isDesktop}
                   disabled={disabled}
                   className="rounded-md w-full"
                 />
@@ -512,6 +565,7 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">Start Time</span>
                       <TimePicker
+                        key={`from-time-${activePreset || 'custom'}`}
                         value={
                           selectedRange?.from &&
                             typeof selectedRange.from !== 'string' &&
@@ -534,6 +588,7 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">End Time</span>
                       <TimePicker
+                        key={`to-time-${activePreset || 'custom'}`}
                         value={
                           selectedRange?.to &&
                             typeof selectedRange.to !== 'string' &&
