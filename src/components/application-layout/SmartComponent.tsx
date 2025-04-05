@@ -109,7 +109,7 @@ export function SmartMobileComponent() {
 
   return (
     <Drawer>
-      <DrawerTrigger className={cn('fixed bottom-0 flex w-full justify-center gap-2 bg-muted p-4 lg:hidden', widthClass)}>
+      <DrawerTrigger className={cn('fixed bottom-0 flex w-full justify-center gap-2 bg-muted p-4 lg:hidden z-50', widthClass)}>
         <FolderSearchIcon className="h-5 w-5" /> Smart 
       </DrawerTrigger>
       <DrawerContent className="h-[70dvh]">
