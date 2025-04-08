@@ -6,13 +6,12 @@ import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 
+import { columns } from './components/GroupFilterSideDrawer/config'
 import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provider'
 import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import { useFilter } from './FilterProvider'
-import { columns } from './components/FilterSideDrawer/config'
 
-export default function FilterProperty({ filter , filter_type}: { filter: any,filter_type: string }) {
-  
+export default function FilterProperty({ filter, filter_type }: { filter: any, filter_type: string }) {
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
   const { actions } = useFilter()
@@ -25,11 +24,11 @@ export default function FilterProperty({ filter , filter_type}: { filter: any,fi
       body: {
         component: () => (
           <ManageFilterProvider
-            columns ={columns}
-            tab = { filter}
-            filter_type ={filter_type}
+            columns= { columns }
+            filter_type= { filter_type }
+            tab={filter }
           >
-            <GridManageFilter filter_type={filter_type}/>
+            <GridManageFilter filter_type={filter_type} />
           </ManageFilterProvider>
         ),
         componentProps: {},
@@ -49,7 +48,7 @@ export default function FilterProperty({ filter , filter_type}: { filter: any,fi
           <Grid className="mr-2 h-4 w-4" />
           {"Manage Filter"}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({...filter, name: `${filter.name} copy`,  })}>
+        <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({ ...filter, name: `${filter.name} copy` })}>
           <Copy className="mr-2 h-4 w-4" />
           {"Duplicate Filter"}
         </DropdownMenuItem>

@@ -1,4 +1,4 @@
-import MapComponent from "../../../_components/dashboard/Map/traffic-map-leaflet/components/MapComponent";
+import TrafficMaps from '../../../_components/dashboard/Map/traffic-map-leaflet/server'
 
-const FormContainer = async () => <MapComponent />;
-export default FormContainer;
+const FormContainer = async () => <TrafficMaps />
+export default FormContainer

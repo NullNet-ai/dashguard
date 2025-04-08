@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment-timezone'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -19,15 +19,26 @@ import FormClientFetch from '../pie-chart/client-fetch'
 import { type IFormProps } from '../types'
 
 import { renderChart } from './function/renderChart'
+import { useSocketConnection } from '../custom-hooks/useSocketConnection';
+import { updateNetworkBuckets } from './function/updateNetworkBucket';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+const channel_name = 'packets_interfaces'
 
 const InteractiveGraph = ({
   defaultValues,
   multiSelectOptions,
 }: IFormProps) => {
+
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
+  const [filteredData, setFilteredData] = React.useState<any[]>([])
+  const [token, setToken] = React.useState<string | null>(null)
+
+  const {socket} = useSocketConnection({channel_name, token})
+  const getAccount = api.organizationAccount.getAccountID.useMutation();
+  const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
+  
   const form = useForm({
     defaultValues: {
       graph_type: 'area',
@@ -35,8 +46,11 @@ const InteractiveGraph = ({
       pie_chart_interfaces: multiSelectOptions,
     },
   })
-  const [filteredData, setFilteredData] = React.useState<any[]>([])
-  const [_refetch, setRefetch] = React.useState(Math.random())
+  
+
+  
+  
+  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
   
   const _pie_chart_interfaces = form.watch('pie_chart_interfaces') ?? []
   const chartConfig = useMemo(() => {
@@ -58,16 +72,21 @@ const InteractiveGraph = ({
     )
   }, [interfaces])
 
-
-
-  const { refetch: fetchBandWidth }
-    = api.packet.getBandwithInterfacePerSecond.useQuery({
+  const fetchBandWidth = async () => {
+    const res = await getChartData.mutateAsync({
       bucket_size: '1s',
       timezone,
       device_id: defaultValues?.id,
       time_range: getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()}) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
-    }, { enabled: false })
+    })
+    
+    
+    setPacketsIP((prev) => {
+      const updatedData = [...prev, ...res].slice(-100) // Keep only last 100 records
+      return updatedData
+    })
+  }
 
     useEffect(() => {
       if (!packetsIP) return
@@ -80,41 +99,45 @@ const InteractiveGraph = ({
         }
       })
     
-      // Eviction: Keep only the last 100 records
       setFilteredData((prev) => [..._data].slice(-100))
     }, [packetsIP])
     
-
-    const fetchChartData = async () => {
-      const res = await fetchBandWidth()
-      const { data = [] } = res ?? {}
-    
-      setPacketsIP((prev) => {
-        const updatedData = [...prev, ...data].slice(-100) // Keep only last 100 records
-        return updatedData
-      })
-    }
-    
     useEffect(() => {
+      const _getAccount = async () => {
+        const res = await getAccount.mutateAsync()
+        console.log('%c Line:108 🥔 res', 'color:#42b983', res);
+        const { account_id, token } = res || {}
+        setOrgAccountID(account_id)
+        setToken(token)
+      }
+      
+      _getAccount()
+      // Eviction: Keep only the last 100 records
       return () => {
         setPacketsIP([])
         setFilteredData([])
       }
     }, [])
+
+    useEffect(() => {
+
+      
+      if (!socket || !org_acc_id) return
+      socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+        
+       const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
+       setFilteredData(updated_filtered_data)
+      })
+    },[socket, filteredData, org_acc_id])
     
 
   useEffect(() => {
-    fetchChartData()
-    // const interval = setInterval(() => {
-    // setRefetch(Math.random())
-    // }, 1000)
-    // return () => clearInterval(interval)
-
+    fetchBandWidth()
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   useEffect(() => {
-      fetchChartData()
-  }, [_refetch])
+      fetchBandWidth()
+  }, [])
 
   useEffect(() => {
     const interfacesData = form.watch('interfaces') || []

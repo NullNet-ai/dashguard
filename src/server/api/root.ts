@@ -26,6 +26,7 @@ import { cachedFilterRouter } from './routers/timeline_filter'
 import { userRolesRouter } from './routers/user_role'
 import { validatorRouter } from './routers/validator'
 import { wizardRouter } from './routers/wizard'
+import { organizationAccountRouter } from './routers/organization_account';
 
 /**
  * This is the primary router for your server.
@@ -59,6 +60,7 @@ export const appRouter = createTRPCRouter({
   deviceHeartbeats: deviceHeartbeatsRouter,
   packet: packetRouter,
   cachedFilter: cachedFilterRouter,
+  organizationAccount: organizationAccountRouter,
 })
 
 // export type definition of API

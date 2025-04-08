@@ -37,6 +37,10 @@ export interface IState {
   loading: boolean
   fetchMoreData: () => any
   unique_source_ips: string[]
+  flagDetails: {
+    name: string
+    flag: string
+  }
 }
 
 export interface IAction {
