@@ -278,7 +278,7 @@ export default function TrafficMaps({ params }: IFormProps) {
       <h1>Traffic Flow to Philippines Server</h1>
       {/* <MapComponent countryTrafficData={countryTrafficData} /> */}
       {Object.keys(country_traffic_data).length > 0 ? ( // Ensure countryTrafficData is not empty
-        <MapComponent additionalCityConnections = { true } additionalCityConnections = { addition_city_connections } cityToCityConnections = { city_to_city_connections } countryTrafficData={country_traffic_data} regionToCityConnections = { region_to_city_connections } regionToRegionConnections = { region_to_region_connections } />
+        <MapComponent additionalCityConnections = { true } cityToCityConnections = { city_to_city_connections } countryTrafficData={country_traffic_data} regionToCityConnections = { region_to_city_connections } regionToRegionConnections = { region_to_region_connections } />
       ) : (
         <p>Loading map data...</p> // Show a loading message while data is being prepared
       )}
