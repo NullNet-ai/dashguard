@@ -42,22 +42,9 @@ const TabMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem
-          className="relative flex gap-2"
+          className="relative flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
-            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-            const newItems = tabs.filter((tab: any) => {
-              return lowerCase(tab.name) !== lowerCase(name)
-            })
-
-            localStorage.setItem('cachedPortalItems', JSON.stringify({
-              ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
-                tabs: newItems,
-              }
-            }))
-         
             void closeInnerClassTab({
               pathname: href,
               current,
@@ -69,22 +56,9 @@ const TabMenu = ({
           <span>Close Tab</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2"
+          className="flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
-
-            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-            const newItems = tabs.filter((tab: any) => {
-              return   lowerCase(tab.name) === lowerCase(name) || lowerCase(tab.name) === 'grid'
-            })
-
-            localStorage.setItem('cachedPortalItems', JSON.stringify({
-              ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
-                tabs: newItems,
-              }
-            }))
 
             void closeOtherInnerClassTabs({
               pathname: href,
@@ -97,22 +71,9 @@ const TabMenu = ({
           <span>Close Other Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2"
+          className="flex gap-2 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
-
-            const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-            const newItems = tabs.filter((tab: any) => {
-              return  lowerCase(tab.name) === 'grid'
-            })
-
-            localStorage.setItem('cachedPortalItems', JSON.stringify({
-              ...cachedItems,
-              [`inner_tab_data_${entity}`]: {
-                ...cachedItems[`inner_tab_data_${entity}`],
-                tabs: newItems,
-              }
-            }))
 
             void closeAllInnerClassTabs({
               pathname: href,

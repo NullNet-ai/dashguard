@@ -1,14 +1,8 @@
-import Cookies from 'js-cookie';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
-
-import TabMenu from '~/components/application-layout/common/TabMenu';
-import { cn, formatGridTabName, formatTabName } from '~/lib/utils';
-import { api } from '~/trpc/react';
+import { cn, formatGridTabName } from '~/lib/utils';
 import GridMenuDropClient from './GridMenuDropClient';
-import { updateAllFilterdata } from '../SideDrawer/actions';
-import { reorderGridTabActive } from '~/utils/sort-tab-items';
 
 type InnerTabitemProps = {
   tab: any
@@ -17,71 +11,21 @@ type InnerTabitemProps = {
   isActive: boolean
   onSelect?: () => void
   shownItems: any[]
+  onClickItem?: (tab?: any) => void
 };
 
 const GridtabDropItem = ({
   tab,
   pathname,
-  dropItems,
-  isActive,
   onSelect,
   shownItems,
+  onClickItem
 }: InnerTabitemProps) => {
-  const updateSubtabs = api.tab.updateSubTabs.useMutation();
-  const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
-  const [, , entityName, application] = (pathname || '').split('/');
+  const [, , entityName] = (pathname || '').split('/');
   const [, , , , code] = (newPathname || '').split('/')
 
 
-  const lastShownItem = useMemo(() => {
-    if (shownItems?.length > 0) {
-      const removeHidden = shownItems.filter((item: any) => !item.hidden);
-      const lastItem = removeHidden[removeHidden.length - 1]
-      return lastItem
-    }
-  }, [shownItems]);
-
-
-  const handleClickLink = async (tabid?: string) => {
-
-    const getCurrent = shownItems?.find((item: any) => item.current)?.id;
-    const newItems = [...shownItems].map(item => {
-      return { ...item, current: item.id === tab.id, is_current: item.id === tab.id}
-        
-    })
-
-    const sorted = reorderGridTabActive(newItems, tabid ?? '', application ?? '')
-
-    const removeHidden = sorted.filter((item: any) => !item.hidden);
-    const lastItem = removeHidden[removeHidden.length - 1]
-
-
-    const cachedData = {
-      tabs: sorted,
-      lastShownItem: lastItem?.name,
-      lastShownItemID: lastItem?.id,
-      prevCurrent: getCurrent,
-      key:  'grid_tab_' + entityName,
-    }
-
-
-
-    try {
-      await updateAllFilterdata(sorted)
-    } catch (error) {
-        console.error(error)
-    }
-
-    
-    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-
-    localStorage.setItem('cachedPortalItems', JSON.stringify({
-      ...cachedItems,
-      [`grid_tab_${entityName}`]: cachedData,
-    }))
-
-  }
 
 
   const tabNameRole = tab.name === 'user_role' ? 'role' : tab.name.split(' ').join('-').toLowerCase();
@@ -91,8 +35,11 @@ const GridtabDropItem = ({
         data-test-id={
           'apptab-' + tabNameRole
         }
-        onClick={() => {
-          handleClickLink(tab?.id)
+        onClick={(e) => {
+          e?.preventDefault()
+          e?.stopPropagation
+          // handleClickLink(tab?.id)
+          onClickItem?.(tab)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}

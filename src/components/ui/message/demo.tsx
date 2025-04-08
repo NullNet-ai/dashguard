@@ -10,22 +10,22 @@ export const MessageThreadDemo: React.FC = () => {
   const [comments, setComments] = React.useState<MessageThreadComment[]>([
     {
       id: "1",
-      user: "Toom Cook",
-      content: "Called client, they reassured me the invoice would be paid by the 25th",
+      user: "John Smith",
+      content: "This is really helpful information. I've been looking for a solution like this for a while.",
       timestamp: new Date("2023-09-20T10:30:00"),
       isCurrentUser: false
     },
     {
       id: "2",
       user: "You",
-      content: "Thanks for the update. I'll make a note of that in our system.",
+      content: "Thanks! I'm glad you found it useful. Let me know if you have any questions.",
       timestamp: new Date("2023-09-20T10:35:00"),
       isCurrentUser: true
     },
     {
       id: "3",
-      user: "Toom Cook",
-      content: "I've also sent them a follow-up email with the updated payment terms.",
+      user: "Sarah Johnson",
+      content: "Could you provide more details about the implementation? I'm particularly interested in how you handled the edge cases.",
       timestamp: new Date("2023-09-20T10:40:00"),
       isCurrentUser: false
     }
@@ -33,15 +33,15 @@ export const MessageThreadDemo: React.FC = () => {
 
   // Custom styling options
   const [customConfig, setCustomConfig] = React.useState({
-    currentUserBgColor: "bg-primary",
-    otherUserBgColor: "bg-gray-100",
-    currentUserTextColor: "text-primary-foreground",
+    currentUserBgColor: "bg-blue-100",
+    otherUserBgColor: "bg-gray-50",
+    currentUserTextColor: "text-gray-800",
     otherUserTextColor: "text-gray-800",
     showTimestamps: true,
     showUserNames: true,
-    messageAlignment: "alternate" as MessageAlignment, // Add type assertion here
-    threadMaxHeight: 500,
-    dateFormat: "MMM d",
+    messageAlignment: "left" as MessageAlignment,
+    threadMaxHeight: Number.MAX_SAFE_INTEGER, // Allow it to grow naturally
+    dateFormat: "MMM d, yyyy",
     timeFormat: "h:mm a",
   });
 
@@ -69,18 +69,6 @@ export const MessageThreadDemo: React.FC = () => {
     console.log("Emoji button clicked");
   };
 
-  // Toggle between different message alignments
-  const toggleMessageAlignment = () => {
-    const alignments: MessageAlignment[] = ["alternate", "right", "left"];
-    const currentIndex = alignments.indexOf(customConfig.messageAlignment);
-    const nextIndex = (currentIndex + 1) % alignments.length;
-    
-    setCustomConfig({
-      ...customConfig,
-      messageAlignment: alignments[nextIndex] as MessageAlignment
-    });
-  };
-
   // Toggle timestamps visibility
   const toggleTimestamps = () => {
     setCustomConfig({
@@ -90,19 +78,12 @@ export const MessageThreadDemo: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Message Thread Component</h1>
+    <div className="p-4 ">
+      <h1 className="text-2xl font-bold mb-6">Comments Section</h1>
       
       <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Configuration Options</h2>
+        <h2 className="text-lg font-semibold mb-2">Display Options</h2>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={toggleMessageAlignment}
-          >
-            Alignment: {customConfig.messageAlignment}
-          </Button>
           <Button 
             size="sm" 
             variant="outline" 
@@ -119,9 +100,9 @@ export const MessageThreadDemo: React.FC = () => {
           onCommentSubmit={handleCommentSubmit}
           onAttachmentClick={handleAttachmentClick}
           onEmojiClick={handleEmojiClick}
-          title="Customer Communication"
-          placeholder="Type your message..."
-          submitButtonText="Send"
+          title="Discussion"
+          placeholder="Add a comment..."
+          submitButtonText="Post Comment"
           currentUserBgColor={customConfig.currentUserBgColor}
           otherUserBgColor={customConfig.otherUserBgColor}
           currentUserTextColor={customConfig.currentUserTextColor}
@@ -138,32 +119,24 @@ export const MessageThreadDemo: React.FC = () => {
             width: 320,
             height: 400,
             previewConfig: {
-              showPreview: true
+              showPreview: false
             }
           }}
           inputConfig={{
-            minHeight: 60,
+            minHeight: 80,
             maxHeight: 200,
-            maxCharCount: 500,
-            showCharCount: true,
-            className: "border-primary/20",
+            showCharCount: false,
+            maxCharCount: Number.MAX_SAFE_INTEGER,
+            className: "border-gray-200 shadow-sm",
+            textareaClassName: "resize-none"
+          }}
+          helperText={{
+            emoji: "",
+            enter: ""
           }}
         />
       </div>
-      
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Component Features</h2>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Fully configurable styling for messages (colors, alignment, etc.)</li>
-          <li>Customizable date and time formats</li>
-          <li>Toggle visibility of timestamps and user names</li>
-          <li>Configurable emoji picker options</li>
-          <li>Adjustable thread height and message input settings</li>
-          <li>Auto-expanding input box that grows with content</li>
-          <li>File attachment functionality</li>
-          <li>Character counter with configurable maximum limit</li>
-        </ul>
-      </div>
+   
     </div>
   );
 };
