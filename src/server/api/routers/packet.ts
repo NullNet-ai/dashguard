@@ -377,7 +377,7 @@ export const packetRouter = createTRPCRouter({
       const transform_data = timestamps?.map((item) => {
         const interface_val = res?.reduce((acc, intrfce: any) => {
           const [key, val] = Object.entries(intrfce)?.[0] as any
-          console.log('%c Line:380 🍿 val', 'color:#e41a6a', val);
+          
           const same_val = val?.find((element: any) => element.bucket === item)
           return {
             ...acc,
@@ -390,7 +390,7 @@ export const packetRouter = createTRPCRouter({
           ...interface_val,
         }
       })
-      console.log('%c Line:397 🍒 transform_data', 'color:#fca650', transform_data);
+      
 
       return transform_data
     }
@@ -430,11 +430,11 @@ export const packetRouter = createTRPCRouter({
     }).execute()
 
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
-    console.log('%c Line:434 🥐 res?.data', 'color:#7f2b82', res?.data);
-    const a = transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
-    console.log('%c Line:435 🥪 a', 'color:#93c0a4', a);
+    
+    const transformed = transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
+    
 
-    return a
+    return transformed
   }),
   getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
   })).query(async ({ input, ctx }) => {
@@ -1075,13 +1075,13 @@ export const packetRouter = createTRPCRouter({
       }
     }, { concurrency: 100 })
 
-    console.log('%c Line:1038 🍉 _res', 'color:#ffdd4d', _res)
+    
     return _res || []
   }),
 
   // getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()), device_id: z.string(), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
   //   const { source_ips, time_range, device_id, bucket_size } = input
-  //   console.log('%c Line:893 🍢 source_ips', 'color:#42b983', source_ips)
+  //   
   //   const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
   //     const res = await ctx.dnaClient.aggregate({
   //       query: {
@@ -1160,12 +1160,12 @@ export const packetRouter = createTRPCRouter({
   //         },
   //       })
   //       .execute()
-  //     console.log('%c Line:973 🍆 ip_info', 'color:#e41a6a', ip_info)
+  //     
   //     const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
   //     return { source_ip, result: res?.data, ...ip_info?.data?.[0], ...flagDetails }
   //   }, { concurrency: 100 })
 
-  //   console.log('%c Line:977 🥐 ips', 'color:#ffdd4d', ips)
+  //   
   //   return { data: ips }
   // }),
 

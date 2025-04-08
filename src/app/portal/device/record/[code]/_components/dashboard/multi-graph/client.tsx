@@ -30,15 +30,15 @@ const InteractiveGraph = ({
   multiSelectOptions,
 }: IFormProps) => {
 
-
-  const {socket} = useSocketConnection(channel_name)
-  const getAccount = api.organizationAccount.getAccountID.useMutation();
-  const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
-
-  
-
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
+  const [filteredData, setFilteredData] = React.useState<any[]>([])
+  const [token, setToken] = React.useState<string | null>(null)
+
+  const {socket} = useSocketConnection({channel_name, token})
+  const getAccount = api.organizationAccount.getAccountID.useMutation();
+  const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
+  
   const form = useForm({
     defaultValues: {
       graph_type: 'area',
@@ -47,9 +47,7 @@ const InteractiveGraph = ({
     },
   })
   
-  console.log('%c Line:42 🍷 packetsIP', 'color:#f5ce50', packetsIP);
-  const [filteredData, setFilteredData] = React.useState<any[]>([])
-  console.log('%c Line:52 🥤 filteredData', 'color:#33a5ff', filteredData);
+
   
   
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
@@ -82,7 +80,7 @@ const InteractiveGraph = ({
       time_range: getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()}) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     })
-    console.log('%c Line:87 🍢 res', 'color:#ed9ec7', res);
+    
     
     setPacketsIP((prev) => {
       const updatedData = [...prev, ...res].slice(-100) // Keep only last 100 records
@@ -107,7 +105,10 @@ const InteractiveGraph = ({
     useEffect(() => {
       const _getAccount = async () => {
         const res = await getAccount.mutateAsync()
-        setOrgAccountID(res)
+        console.log('%c Line:108 🥔 res', 'color:#42b983', res);
+        const { account_id, token } = res || {}
+        setOrgAccountID(account_id)
+        setToken(token)
       }
       
       _getAccount()
@@ -119,9 +120,11 @@ const InteractiveGraph = ({
     }, [])
 
     useEffect(() => {
+
+      
       if (!socket || !org_acc_id) return
-      socket.on( `${channel_name}-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
-        console.log('%c Line:125 🍬 data?.packet', 'color:#ed9ec7', data?.packet);
+      socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+        
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
        setFilteredData(updated_filtered_data)
       })

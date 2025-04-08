@@ -1,37 +1,42 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { userToken } from './userToken';
 
+// const SOCKET_URL = 'http://localhost:5001';
 const SOCKET_URL = 'http://datastore.nullnetqa.net';
 
-export function useSocketConnection(channel_name?: string) {
+export function useSocketConnection({channel_name, token}: {channel_name?: string, token: string | null}) {
   const socketRef = useRef<any | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!userToken) return;
+    if (!token) return;
 
     const socket: any = io(SOCKET_URL, {
-      auth: { token: userToken },
+      auth: { token: token },
       autoConnect: true,
     });
-
-    console.log('%c Line:20 🍅 socket', 'color:#93c0a4', socket);
+    
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Connected to server');
+      
       setIsConnected(true);
     });
 
     socket.on('disconnect', () => {
-      console.log('Disconnected from server');
+      
       setIsConnected(false);
     });
 
     socket.on('connect_error', (err: any) => {
       console.error('Connection error:', err.message);
       setIsConnected(false);
+    });
+
+    socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
+      console.log('%c Line:37 🍯 data', 'color:#ea7e5c', data);
+      
+    
     });
 
     if(channel_name) {
@@ -42,7 +47,7 @@ export function useSocketConnection(channel_name?: string) {
       socket.disconnect();
       setIsConnected(false);
     };
-  }, [userToken]);
+  }, [token]);
 
   const handleDisconnectSocket = () => {
     if (socketRef.current) {
@@ -51,7 +56,7 @@ export function useSocketConnection(channel_name?: string) {
     }
   };
 
-  console.log('%c Line:50 🍎', 'color:#93c0a4', socketRef.current);
+  
   return {
     socket: socketRef.current,
     isConnected,

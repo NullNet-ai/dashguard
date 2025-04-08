@@ -9,9 +9,7 @@ const entity = "";
 export const organizationAccountRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   getAccountID: privateProcedure.mutation(async ({ ctx }) => {
-    
-    console.log('%c Line:13 🌭', 'color:#4fff4B',  ctx.session.account);
     const { contact } = ctx.session.account || {}
-    return contact?.id
+    return { account_id: contact?.id, token: ctx.token.value };
   })
 });
