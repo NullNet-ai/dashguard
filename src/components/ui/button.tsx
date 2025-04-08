@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "~/lib/utils";
 import { ArrowPathIcon as Loader2 } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
 const buttonVariants = cva(
   "transition duration-200 inline-flex items-center justify-center whitespace-nowrap text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -60,11 +61,16 @@ interface IconProps {
   iconClassName?: React.HTMLAttributes<HTMLDivElement>["className"];
 }
 
-// interface IconRefProps {
-//   Icon?: never;
-//   iconPlacement?: undefined;
-//   iconClassName?: undefined;
-// }
+// Add tooltip interface
+interface TooltipProps {
+  tooltipContent?: React.ReactNode;
+  showTooltip?: boolean;
+  tooltipDelay?: number;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
+  tooltipAlign?: "center" | "start" | "end";
+  tooltipSideOffset?: number;
+  tooltipAlignOffset?: number;
+}
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -73,12 +79,11 @@ export interface ButtonProps
   loading?: boolean;
 }
 
-// export type ButtonIconProps = IconProps | IconRefProps;
-export type ButtonIconProps = IconProps ;
+export type ButtonIconProps = IconProps;
 
 const Button = React.forwardRef<
   HTMLButtonElement,
-  ButtonProps & ButtonIconProps
+  ButtonProps & ButtonIconProps & TooltipProps
 >(
   (
     {
@@ -92,6 +97,14 @@ const Button = React.forwardRef<
       iconClassName,
       iconPlacement = "right",
       borderRadius,
+      // Tooltip props with defaults
+      tooltipContent,
+      showTooltip = true,
+      tooltipDelay = 300,
+      tooltipSide = "top",
+      tooltipAlign = "center",
+      tooltipSideOffset = 4,
+      tooltipAlignOffset = 0,
       ...props
     },
     ref,
@@ -102,7 +115,8 @@ const Button = React.forwardRef<
     // Determine if this is an icon-only button
     const isIconOnly = Icon && !hasChildren;
     
-    return (
+    // Button content component
+    const ButtonContent = (
       <Comp
         data-test-id={name}
         className={cn(buttonVariants({ 
@@ -184,6 +198,30 @@ const Button = React.forwardRef<
             )}
         </Fragment>
       </Comp>
+    );
+
+    // If tooltip is disabled or no content, just return the button
+    if (!showTooltip || !tooltipContent) {
+      return ButtonContent;
+    }
+
+    // Return button with tooltip
+    return (
+      <TooltipProvider delayDuration={tooltipDelay}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {ButtonContent}
+          </TooltipTrigger>
+          <TooltipContent 
+            side={tooltipSide}
+            align={tooltipAlign}
+            sideOffset={tooltipSideOffset}
+            alignOffset={tooltipAlignOffset}
+          >
+            {tooltipContent}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   },
 );
