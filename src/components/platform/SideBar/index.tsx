@@ -89,8 +89,8 @@ export default function AppSideBar(config: ISideBarProps) {
   };
 
   // Use provided configs or fall back to static items
-  const favoriteItems = favoritesMenuConfig || generateStaticMenuItems('Favorite');
-  const historyItems = historyMenuConfig || generateStaticMenuItems('History');
+  const favoriteItems = favoritesMenuConfig || [];
+  const historyItems = historyMenuConfig || [];
 
   // Then modify the tabItems array to include tooltips
   
@@ -151,12 +151,18 @@ export default function AppSideBar(config: ISideBarProps) {
         ) : undefined,
         content: (
           <>
-            {favoriteItems.map((item, index) => (
-              <Fragment key={index}>
-                <Menu item={item} screenType={screen || screenType} />
-                {index % 5 === 4 && <Separator className="my-2" />}
-              </Fragment>
-            ))}
+            {favoriteItems.length > 0 ? (
+              favoriteItems.map((item, index) => (
+                <Fragment key={index}>
+                  <Menu item={item} screenType={screen || screenType} />
+                  {index % 5 === 4 && <Separator className="my-2" />}
+                </Fragment>
+              ))
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+                <p>Favorites Coming Soon</p>
+              </div>
+            )}
           </>
         )
       },
@@ -177,12 +183,18 @@ export default function AppSideBar(config: ISideBarProps) {
         ) : undefined,
         content: (
           <>
-            {historyItems.map((item, index) => (
-              <Fragment key={index}>
-                <Menu item={item} screenType={screen || screenType} />
-                {index % 5 === 4 && <Separator className="my-2" />}
-              </Fragment>
-            ))}
+            {historyItems.length > 0 ? (
+              historyItems.map((item, index) => (
+                <Fragment key={index}>
+                  <Menu item={item} screenType={screen || screenType} />
+                  {index % 5 === 4 && <Separator className="my-2" />}
+                </Fragment>
+              ))
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+                <p>History Coming Soon</p>
+              </div>
+            )}
           </>
         )
       }
