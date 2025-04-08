@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import type Error from 'next/error'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 import { getFlagDetails } from '~/app/api/device/get_flags'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
@@ -12,33 +13,271 @@ import Search from '../../timeline/Search'
 import { type IFormProps } from '../../types'
 
 import MapComponent from './components/MapComponent'
-import { additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections } from './functions'
+
+/**
+ * Formats IP data with country information, handling cases where country info is missing
+ * @param {Array} ipData - Array of IP data objects containing source and destination IPs
+ * @returns {Object} Formatted data with country mappings and connection information
+ */
+export function formatIpCountryConnections(ipData: Record<string, any>) {
+  // Initialize data structures
+  const formattedData = {
+    countryMap: {
+      sourceData: {},
+      destinationData: {},
+    },
+    connections: {
+      countryToCountry: [],
+      ipToIp: [],
+      unknownConnections: [],
+    },
+  } as any
+
+  // Process each IP entry
+  ipData.forEach((entry: Record<string, any>) => {
+    const { source_ip, destination_ip } = entry
+    const sourceCountry = entry.source_country?.country || 'Unknown'
+    const sourceCity = entry.source_country?.city || 'Unknown'
+    const destCountry = entry.destination_country?.country || 'Unknown'
+    const destCity = entry.destination_country?.city || 'Unknown'
+
+    // Generate unique keys for IPs with no country info
+    const sourceKey = sourceCountry === 'Unknown' ? `No IP Info_${source_ip}` : sourceCountry
+    const destKey = destCountry === 'Unknown' ? `No IP Info_${destination_ip}` : destCountry
+
+    // Format source country data
+    if (!formattedData.countryMap.sourceData[sourceKey]) {
+      formattedData.countryMap.sourceData[sourceKey] = {
+        country: sourceCountry === 'Unknown' ? 'No IP Info' : sourceCountry,
+        city: sourceCity === 'Unknown' ? 'No IP Info' : sourceCity,
+        ip: source_ip,
+        trafficVolume: 1,
+      }
+    }
+    else {
+      formattedData.countryMap.sourceData[sourceKey].trafficVolume += 1
+    }
+
+    // Format destination country data
+    if (!formattedData.countryMap.destinationData[destKey]) {
+      formattedData.countryMap.destinationData[destKey] = {
+        country: destCountry === 'Unknown' ? 'No IP Info' : destCountry,
+        city: destCity === 'Unknown' ? 'No IP Info' : destCity,
+        ip: destination_ip,
+        trafficVolume: 1,
+      }
+    }
+    else {
+      formattedData.countryMap.destinationData[destKey].trafficVolume += 1
+    }
+
+    // Create connection data
+    const connection = {
+      source: {
+        ip: source_ip,
+        country: sourceCountry,
+        city: sourceCity,
+      },
+      destination: {
+        ip: destination_ip,
+        country: destCountry,
+        city: destCity,
+      },
+      traffic: 1,
+    }
+
+    // Add connection to appropriate category
+    if (sourceCountry !== 'Unknown' && destCountry !== 'Unknown') {
+      formattedData.connections.countryToCountry.push(connection)
+    }
+    else {
+      formattedData.connections.unknownConnections.push(connection)
+    }
+
+    // Always add to IP-to-IP connections for complete mapping
+    formattedData.connections.ipToIp.push({
+      source_ip,
+      destination_ip,
+      source_location: sourceCountry !== 'Unknown' ? `${sourceCity}, ${sourceCountry}` : 'Unknown location',
+      destination_location: destCountry !== 'Unknown' ? `${destCity}, ${destCountry}` : 'Unknown location',
+    })
+  })
+
+  // Add summary statistics
+  formattedData.summary = {
+    totalConnections: ipData.length,
+    uniqueSourceCountries: Object.keys(formattedData.countryMap.sourceData).filter(k => !k.startsWith('No IP Info_')).length,
+    uniqueDestinationCountries: Object.keys(formattedData.countryMap.destinationData).filter(k => !k.startsWith('No IP Info_')).length,
+    missingCountryInfo: formattedData.connections.unknownConnections.length,
+  }
+
+  return formattedData
+}
+
+/**
+ * Helper function to integrate formatted data with map visualization
+ * @param {Object} formattedData - Output from formatIpCountryConnections
+ * @returns {Object} Data structure compatible with MapComponent
+ */
+export function prepareMapComponentData(formattedData: Record<string, any>) {
+  // Transform country data for map visualization
+  const mapReadyData = {
+    countryTrafficData: {
+      sourceData: {},
+      destinationData: {},
+    },
+    additionCityConnections: [],
+    regionToRegionConnections: [],
+    regionToCityConnections: [],
+    cityToCityConnections: [],
+  } as Record<string, any>
+
+  // Process source country data
+  Object.entries(formattedData.countryMap.sourceData).forEach(([key, data]: any) => {
+    if (key.startsWith('No IP Info_')) {
+      // For unknown country, create individual entries for each IP
+      const ipAddress = data.ip
+      mapReadyData.countryTrafficData.sourceData[`No IP Info_${ipAddress}`] = {
+        city: `No IP Info, No IP Info`,
+        trafficLevel: data.trafficVolume,
+        source_ips: ipAddress,
+      }
+    }
+    else if (data.country !== 'Unknown') {
+      // For known countries
+      mapReadyData.countryTrafficData.sourceData[data.country] = {
+        city: `${data.city}, ${data.country}`,
+        trafficLevel: data.trafficVolume,
+        source_ips: data.ip,
+      }
+    }
+  })
+
+  // Process destination country data
+  Object.entries(formattedData.countryMap.destinationData).forEach(([key, data]: any) => {
+    if (key.startsWith('No IP Info_')) {
+      // For unknown country, create individual entries for each IP
+      const ipAddress = data.ip
+      mapReadyData.countryTrafficData.destinationData[`No IP Info_${ipAddress}`] = {
+        city: `No IP Info, No IP Info`,
+        trafficLevel: data.trafficVolume,
+        destination_ip: ipAddress,
+      }
+    }
+    else if (data.country !== 'Unknown') {
+      // For known countries
+      mapReadyData.countryTrafficData.destinationData[data.country] = {
+        city: `${data.city}, ${data.country}`,
+        trafficLevel: data.trafficVolume,
+        destination_ip: data.ip,
+      }
+    }
+  })
+
+  // Process country-to-country connections for region visualization
+  formattedData.connections.countryToCountry.forEach((conn: Record<string, any>) => {
+    // Add to region-to-region connections for known countries
+    mapReadyData.regionToRegionConnections.push({
+      source: conn.source.country,
+      target: conn.destination.country,
+      value: conn.traffic,
+    })
+
+    // Add city-level connections when both city data are available
+    if (conn.source.city !== 'Unknown' && conn.destination.city !== 'Unknown') {
+      mapReadyData.cityToCityConnections.push({
+        sourceCity: `${conn.source.city}, ${conn.source.country}`,
+        targetCity: `${conn.destination.city}, ${conn.destination.country}`,
+        sourceIP: conn.source.ip,
+        targetIP: conn.destination.ip,
+        value: conn.traffic,
+      })
+    }
+  })
+
+  // Process connections with missing country data - handle each separately
+  formattedData.connections.unknownConnections.forEach((conn: Record<string, any>) => {
+    // Source known, destination unknown
+    if (conn.source.country !== 'Unknown' && conn.destination.country === 'Unknown') {
+      mapReadyData.regionToCityConnections.push({
+        sourceRegion: conn.source.country,
+        targetIP: conn.destination.ip,
+        targetLocation: 'No IP Info',
+        value: conn.traffic,
+      })
+    }
+    // Destination known, source unknown
+    else if (conn.source.country === 'Unknown' && conn.destination.country !== 'Unknown') {
+      mapReadyData.regionToCityConnections.push({
+        sourceIP: conn.source.ip,
+        sourceLocation: 'No IP Info',
+        targetRegion: conn.destination.country,
+        value: conn.traffic,
+      })
+    }
+    // Both source and destination countries are unknown
+    else {
+      mapReadyData.additionCityConnections.push({
+        sourceIP: conn.source.ip,
+        targetIP: conn.destination.ip,
+        value: conn.traffic,
+      })
+    }
+  })
+
+  return mapReadyData
+}
 
 export default function TrafficMaps({ params }: IFormProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [bandwidth, setBandwidth] = useState<any>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [time, setTime] = useState<Record<string, any> | null>(null)
-  const [current_index, setCurrentIndex] = useState<number>(0)
-  const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
-  const [country_traffic_data, setCountryTrafficData] = useState<any>({})
-  const [addition_city_connections, setAdditionCityConnections] = useState<any>([])
-  const [region_to_region_connections, setRegionToRegionConnections] = useState<any>([])
-  const [region_to_city_connections, setRegionToCityConnections] = useState<any>([])
-  const [city_to_city_connections, setCityToCityConnections] = useState<any>([])
+  const [mapData, setMapData] = useState({
+    countryTrafficData: {
+      sourceData: {},
+      destinationData: {},
+    },
+    additionCityConnections: [],
+    regionToRegionConnections: [],
+    regionToCityConnections: [],
+    cityToCityConnections: [],
+  })
+  const [batchInfo, setBatchInfo] = useState({
+    total_records: 0,
+    has_more: false,
+    next_offset: 0,
+    is_loading: false,
+    is_initial_load: true,
+    should_fetch: false,
+    fetch_trigger: 0,
+    auto_fetch_active: false,
+  })
+  const [isMapDataReady, setIsMapDataReady] = useState(false)
+  const [timeSettings, setTimeSettings] = useState({
+    time_count: 12,
+    time_unit: 'hour',
+    resolution: '1h',
+  })
+  // Use refs to prevent dependencies triggering re-renders
+  const mapDataRef = useRef(mapData)
+  const batchInfoRef = useRef(batchInfo)
+  const timeSettingsRef = useRef(timeSettings)
 
-  const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
-  const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
+  // Update refs when state changes
+  useEffect(() => {
+    mapDataRef.current = mapData
+  }, [mapData])
+
+  useEffect(() => {
+    batchInfoRef.current = batchInfo
+  }, [batchInfo])
+
+  useEffect(() => {
+    timeSettingsRef.current = timeSettings
+  }, [timeSettings])
+
+  // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
-  const getCountryIP = api.packet.getCountriesSourceIP.useMutation()
-
-  const {
-    time_count = null,
-    time_unit = null,
-    resolution = null,
-  } = time || {}
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'timeline_filter',
@@ -48,110 +287,35 @@ export default function TrafficMaps({ params }: IFormProps) {
     }
   )
 
-  const fetchBandwidth = async (add_data_count: number) => {
-    const _bandwidth: any = await getBandwidthActions.mutateAsync({
-      device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      bucket_size: resolution,
-      source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
-    },)
+  // Process data and update map
+  const processMapData = useCallback(async (ipData: Record<string, any>) => {
+    // Use ref to get current mapData value for merging
+    const currentMapData = mapDataRef.current
 
-    if (!_bandwidth) return
-
-    if (current_index == 0) {
-      setBandwidth(_bandwidth?.data || [])
-      return
-    }
-
-    setBandwidth((prev: any) => [
-      ...(prev || []),
-      ...(_bandwidth?.data || []),
-    ])
-  }
-
-  useEffect(() => {
-    if (!eventEmitter) return
-
-    const setFID = (data: any) => {
-      if (typeof data !== 'string') return
-      setFilterID(data)
-    }
-    const setSBy = (data: any) => {
-      setSearchBy(data)
-    }
-
-    eventEmitter.on(`timeline_filter_id`, setFID)
-    eventEmitter.on('timeline_search', setSBy)
-    return () => {
-      eventEmitter.off(`timeline_filter_id`, setFID)
-      eventEmitter.off(`timeline_search`, setSBy)
-    }
-  }, [eventEmitter])
-
-  useEffect(() => {
-    if (!filterId) return
-
-    setLoading(true)
-    const fetchTimeUnitandResolution = async () => {
-      const {
-        data: time_unit_resolution,
-      } = await refetchTimeUnitandResolution()
-
-      const { time, resolution = '1h' } = time_unit_resolution || {}
-      const { time_count = 12, time_unit = 'hour' } = time || {}
-
-      setTime({
-        time_count,
-        time_unit: time_unit as 'hour',
-        resolution: resolution as '1h',
-      })
-    }
-    fetchTimeUnitandResolution()
-  }, [filterId, (searchBy ?? [])?.length])
-
-  useEffect(() => {
-    if (!time_count || !time_unit || !resolution) return
-    if (!filterId) return
-
-    const fetchUniqueSourceIP = async () => {
-      const data = await getUniqueSourceAndDestinationIP.mutateAsync({
-        device_id: params?.id || '',
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-        filter_id: filterId,
-      })
-
-      const destinationData: Record<string, { city: string, trafficLevel: number, destination_ip: string }> = {}
-      const sourceData: Record<string, { city: string, trafficLevel: number, source_ip: string }> = {}
-
-      const promises = data?.map(async (entry: Record<string, any>) => {
-        const { source_ip, destination_ip, destination_country } = entry
-        const { country, city } = destination_country ?? {}
-
-        const { country: source_ip_country, city: source_ip_city } = entry.source_country ?? {}
+    try {
+      // Get country details for all entries that have them
+      const ipDataWithFlags = await Promise.all(ipData.map(async (entry: Record<string, any>) => {
+        const updatedEntry = { ...entry }
 
         try {
-          if (country && !destinationData[country]) {
-            const flagDetails = await getFlagDetails(country)
-            const { name: country_name } = flagDetails ?? {}
-
-            if (country_name) {
-              destinationData[country_name] = {
-                city: `${city}, ${country_name}`,
-                trafficLevel: Math.floor(Math.random() * 100),
-                destination_ip: destination_ip || 'Unknown IP',
+          // Get source country flag if available
+          if (entry.source_country?.country) {
+            const sourceFlagDetails = await getFlagDetails(entry.source_country.country)
+            if (sourceFlagDetails?.name) {
+              updatedEntry.source_country = {
+                ...updatedEntry.source_country,
+                country: sourceFlagDetails.name,
               }
             }
           }
 
-          if (source_ip_country && !sourceData[source_ip_country]) {
-            const sourceFlagDetails = await getFlagDetails(source_ip_country)
-            const { name: source_ip_country_name } = sourceFlagDetails ?? {}
-
-            if (source_ip_country_name) {
-              sourceData[source_ip_country_name] = {
-                city: `${source_ip_city}, ${source_ip_country_name}`,
-                trafficLevel: Math.floor(Math.random() * 100),
-                source_ip: source_ip || 'Unknown IP',
+          // Get destination country flag if available
+          if (entry.destination_country?.country) {
+            const destFlagDetails = await getFlagDetails(entry.destination_country.country)
+            if (destFlagDetails?.name) {
+              updatedEntry.destination_country = {
+                ...updatedEntry.destination_country,
+                country: destFlagDetails.name,
               }
             }
           }
@@ -159,130 +323,389 @@ export default function TrafficMaps({ params }: IFormProps) {
         catch (error) {
           console.error(`Error fetching flag details:`, error)
         }
+
+        return updatedEntry
+      }))
+
+      // Format the data with our improved utilities
+      const formattedData = formatIpCountryConnections(ipDataWithFlags)
+      const newMapData = prepareMapComponentData(formattedData)
+
+      // Helper to merge arrays of connection objects
+      const mergeConnections = (existing: Record<string, any>, newConnections: Record<string, any>) => {
+        if (!Array.isArray(existing) || !Array.isArray(newConnections)) {
+          return existing || newConnections || []
+        }
+
+        const merged = [...existing]
+        const existingKeys = new Set(merged.map(item => JSON.stringify(item)))
+
+        newConnections.filter(Boolean).forEach((item) => {
+          const itemKey = JSON.stringify(item)
+          if (!existingKeys.has(itemKey)) {
+            merged.push(item)
+            existingKeys.add(itemKey)
+          }
+        })
+
+        return merged
+      }
+
+      // Merge country traffic data
+      const mergedSourceData: Record<string, any> = { ...currentMapData.countryTrafficData?.sourceData || {} }
+      const mergedDestData: Record<string, any> = { ...currentMapData.countryTrafficData?.destinationData || {} }
+
+      // For source data, keep each No IP Info entry separate
+      Object.entries(newMapData.countryTrafficData?.sourceData || {}).forEach(([key, data]) => {
+        // If this is a No IP Info entry or a country entry, add it directly (no merging)
+        mergedSourceData[key] = data
       })
 
-      await Promise.all(promises)
+      // For destination data, keep each No IP Info entry separate
+      Object.entries(newMapData.countryTrafficData?.destinationData || {}).forEach(([key, data]) => {
+        // If this is a No IP Info entry or a country entry, add it directly (no merging)
+        mergedDestData[key] = data
+      })
 
-      // const _additionalCityConnections = await additionalCityConnections(data)
-      // const _regionToRegionConnections = await regionToRegionConnections(data)
-      // const _regionToCityConnections = await regionToCityConnections(data)
-      // const _cityToCityConnections = await cityToCityConnections(data)
+      // Return merged data
+      return {
+        countryTrafficData: {
+          sourceData: mergedSourceData,
+          destinationData: mergedDestData,
+        },
+        additionCityConnections: mergeConnections(currentMapData.additionCityConnections, newMapData.additionCityConnections),
+        regionToRegionConnections: mergeConnections(currentMapData.regionToRegionConnections, newMapData.regionToRegionConnections),
+        regionToCityConnections: mergeConnections(currentMapData.regionToCityConnections, newMapData.regionToCityConnections),
+        cityToCityConnections: mergeConnections(currentMapData.cityToCityConnections, newMapData.cityToCityConnections),
+      }
+    }
+    catch (error) {
+      console.error('Error processing map data:', error)
+      return currentMapData
+    }
+  }, [])
 
-      // setAdditionCityConnections(_additionalCityConnections.filter(Boolean))
-      // setRegionToRegionConnections(_regionToRegionConnections.filter(Boolean))
-      // setRegionToCityConnections(_regionToCityConnections.filter(Boolean))
-      // setCityToCityConnections(_cityToCityConnections.filter(Boolean))
+  // Fetch time settings
+  useEffect(() => {
+    if (!filterId) return
 
-      setCountryTrafficData({ destinationData, sourceData })
+    const fetchTimeSettings = async () => {
+      try {
+        const { data: time_unit_resolution } = await refetchTimeUnitandResolution()
+        const { time, resolution = '1h' } = time_unit_resolution || {}
+        const { time_count = 12, time_unit = 'hour' } = time || {}
 
-      // setUniqueSourceIP(data as string[])
-      setCurrentIndex(0)
-      setLoading(false)
+        setTimeSettings({
+          time_count,
+          time_unit: time_unit as 'hour',
+          resolution: resolution as '1h',
+        })
+
+        // Signal that we should fetch data after time settings update
+        setBatchInfo(prev => ({
+          ...prev,
+          is_initial_load: true,
+          should_fetch: true,
+          fetch_trigger: prev.fetch_trigger + 1,
+          auto_fetch_active: true,
+        }))
+      }
+      catch (error) {
+        console.error('Failed to fetch time settings:', error)
+      }
+    }
+    fetchTimeSettings().catch(error => console.error('Error in fetchTimeSettings:', error))
+  }, [filterId, searchBy, refetchTimeUnitandResolution])
+
+  // Fetch batch of data with better error handling and state management
+  const fetchBatch = useCallback(async (offset = 0, reset = false) => {
+    // Use ref to get current timeSettings
+    const { time_count, time_unit } = timeSettingsRef.current
+    const currentBatchInfo = batchInfoRef.current
+
+    if (!time_count || !time_unit || !filterId) {
+      return
     }
 
-    setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
-  }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
+    // Prevent duplicate fetches
+    if (currentBatchInfo.is_loading) {
+      return
+    }
 
-  // useEffect(() => {
-  //   if (!unique_source_ips || unique_source_ips.length === 0) {
-  //     console.warn('No source IPs available for fetching bandwidth')
-  //     return
-  //   }
+    // Set loading state
+    setBatchInfo(prev => ({
+      ...prev,
+      is_loading: true,
+      should_fetch: false,
+    }))
 
-  //   console.log('%c Line:134 🍷 unique_source_ips', 'color:#ea7e5c', unique_source_ips)
-  //   const fetchCountryIP = async () => {
-  //     const data = await getCountryIP.mutateAsync({
-  //       source_ips: unique_source_ips,
-  //       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-  //     })
-  //     console.log("%c Line:141 🍭 data", "color:#7f2b82", data);
+    try {
+      // Clear existing data if this is a reset
+      if (reset) {
+        setMapData({
+          countryTrafficData: {
+            sourceData: {},
+            destinationData: {},
+          },
+          additionCityConnections: [],
+          regionToRegionConnections: [],
+          regionToCityConnections: [],
+          cityToCityConnections: [],
+        })
+        setIsMapDataReady(false)
+      }
 
-  //     const formattedData: Record<string, { city: string, trafficLevel: number }> = {}
+      // Get time range for query
+      const timeRange = getLastTimeStamp({
+        count: time_count,
+        unit: time_unit as any,
+        add_remaining_time: true,
+      })
 
-  //     // Collect all async calls in an array
-  //     const promises = data.flatMap(item => item.result.map(async (entry) => {
-  //       const { country } = entry
-  //       const city = entry.city || 'Unknown City'
+      // Create input object for API
+      const input = {
+        device_id: params?.id || '',
+        time_range: timeRange,
+        filter_id: filterId,
+        batch_size: 10,
+        batch_offset: offset,
+      } as any
 
-  //       try {
-  //         const flagDetails = await getFlagDetails(country)
+      // Fetch batch of IP data
+      const result = await getUniqueSourceAndDestinationIP.mutateAsync(input)
 
-  //         const { name: country_name } = flagDetails ?? {}
-  //         if (!country_name) return // Skip if country name is missing
+      // Extract data and batch info
+      const ipData = Array.isArray(result) ? result : (result.data || [])
+      const batch_info = result.batch_info || {
+        total_records: ipData.length + offset,
+        has_more: ipData.length > 0,
+        next_offset: offset + ipData.length,
+      }
 
-  //         formattedData[country_name] = {
-  //           city: `${city}, ${country_name}`,
-  //           trafficLevel: Math.floor(Math.random() * 100), // Assign a random traffic level
-  //         }
-  //       }
-  //       catch (error) {
-  //         console.error(`Error fetching flag details for ${country}:`, error)
-  //       }
-  //     })
-  //     )
+      // Only process if we have data
+      if (ipData.length > 0) {
+        // Process this batch of data
+        const updatedMapData: any = await processMapData(ipData)
 
-  //     await Promise.all(promises) // Wait for all async calls to complete
+        // Update map data
+        setMapData(updatedMapData)
 
-  //     const _additionalCityConnections = await additionalCityConnections(data)
-  //     const _regionToRegionConnections = await regionToRegionConnections(data)
-  //     const _regionToCityConnections = await regionToCityConnections(data)
-  //     const _cityToCityConnections = await cityToCityConnections(data)
+        // Set map as ready after data is processed
+        setIsMapDataReady(true)
+      }
+      else if (offset === 0) {
+        // If first batch has no data, still mark as ready but with empty state
+        setIsMapDataReady(true)
+      }
 
-  //     setAdditionCityConnections(_additionalCityConnections.filter(Boolean))
-  //     setRegionToRegionConnections(_regionToRegionConnections.filter(Boolean))
-  //     setRegionToCityConnections(_regionToCityConnections.filter(Boolean))
-  //     setCityToCityConnections(_cityToCityConnections.filter(Boolean))
+      // Update batch info
+      const newBatchInfo = {
+        total_records: batch_info.total_records,
+        has_more: batch_info.has_more,
+        next_offset: batch_info.next_offset,
+        is_loading: false,
+        is_initial_load: false,
+        should_fetch: false,
+        fetch_trigger: currentBatchInfo.fetch_trigger,
+        auto_fetch_active: currentBatchInfo.auto_fetch_active,
+      }
 
-  //     setCountryTrafficData(formattedData) // Now formattedData has values
+      setBatchInfo(newBatchInfo)
 
-  //     // setBandwidth(async (prev) => {
-  //     // // Merge data and bandwidth based on IP
-  //     //   const combinedData = bandwidth.map((bwEntry) => {
-  //     //     const matchingData = data.find(entry => entry.ip === bwEntry.source_ip)
-  //     //     return matchingData ? { ...matchingData, result: bwEntry.result } : bwEntry
-  //     //   })
+      // If auto-fetch is active and there's more data, immediately fetch the next batch
+      if (newBatchInfo.auto_fetch_active && newBatchInfo.has_more) {
+        setTimeout(() => {
+          setBatchInfo(prev => ({
+            ...prev,
+            should_fetch: true,
+            fetch_trigger: prev.fetch_trigger + 1,
+          }))
+        }, 100)
+      }
+      else if (newBatchInfo.auto_fetch_active) {
+        // Turn off auto-fetch when complete
+        setBatchInfo(prev => ({
+          ...prev,
+          auto_fetch_active: false,
+        }))
+      }
 
-  //     //   return combinedData
-  //     // })
-  //   }
+      return batch_info
+    }
+    catch (error) {
+      console.error('Failed to fetch or process batch:', error)
 
-  //   fetchCountryIP()
-  // }, [unique_source_ips])
+      // Update state even on error to prevent UI from getting stuck
+      setBatchInfo(prev => ({
+        ...prev,
+        is_loading: false,
+        is_initial_load: false,
+        should_fetch: false,
+        auto_fetch_active: false,
+      }))
 
+      // If we haven't loaded any data yet, set map as ready to show error state
+      if (!isMapDataReady) {
+        setIsMapDataReady(true)
+      }
+    }
+  }, [filterId, params?.id, getUniqueSourceAndDestinationIP, processMapData, isMapDataReady])
+
+  // Handle data fetching when triggered by flag
   useEffect(() => {
-    // if (!unique_source_ips || unique_source_ips.length === 0) {
-    //   console.warn('No source IPs available for fetching bandwidth');
-    //   return;
-    // }
+    const currentBatchInfo = batchInfoRef.current
+    // Only fetch if explicitly told to do so and not already loading
+    if (currentBatchInfo.should_fetch && !currentBatchInfo.is_loading) {
+      // If auto-fetch is active and we have an offset, continue from there
+      // Otherwise start from the beginning
+      const offset = currentBatchInfo.auto_fetch_active && currentBatchInfo.next_offset > 0
+        ? currentBatchInfo.next_offset
+        : 0
+      const shouldReset = currentBatchInfo.is_initial_load || offset === 0
+      fetchBatch(offset, shouldReset).catch((error: Error) => {
+        console.error('Error in fetchBatch:', error)
+      })
+    }
+  }, [batchInfo.should_fetch, batchInfo.is_loading, batchInfo.is_initial_load, batchInfo.fetch_trigger, batchInfo.auto_fetch_active, fetchBatch])
 
-    const bandwidthIps = bandwidth?.map((entry: {
-      source_ip: string
-    }) => entry.source_ip) || []
+  // Function to explicitly load more data
+  const loadMoreData = useCallback(() => {
+    const currentBatchInfo = batchInfoRef.current
 
-    const areIpsSame
-          = bandwidthIps.length === unique_source_ips.length
-            && unique_source_ips.every(ip => bandwidthIps.includes(ip))
+    if (!currentBatchInfo.is_loading && currentBatchInfo.has_more) {
+      // Enable auto-fetch mode to get all remaining data
+      setBatchInfo(prev => ({
+        ...prev,
+        should_fetch: true,
+        auto_fetch_active: true,
+        fetch_trigger: prev.fetch_trigger + 1,
+      }))
+    }
+    else {
+      console.warn('No more data to load or already loading.')
+    }
+  }, [])
 
-    if (areIpsSame) return
+  // Function to force reset and reload all data
+  const reloadAllData = useCallback(() => {
+    setBatchInfo(prev => ({
+      ...prev,
+      is_initial_load: true,
+      should_fetch: true,
+      auto_fetch_active: true,
+      fetch_trigger: prev.fetch_trigger + 1,
+    }))
+  }, [])
 
-    setCurrentIndex(current_index + 20)
-    setBandwidth([])
-    fetchBandwidth(20)
-  }, [unique_source_ips])
+  // Set up event listeners
+  useEffect(() => {
+    if (!eventEmitter) return
 
-  console.log('%c Line:210 🍺 countryTrafficData', 'color:#42b983', country_traffic_data, addition_city_connections, city_to_city_connections, region_to_city_connections, region_to_region_connections)
+    const setFID = (data: any) => {
+      if (typeof data !== 'string') return
+      setFilterID(data)
+    }
+
+    const setSBy = (data: any) => {
+      setSearchBy(data)
+    }
+
+    eventEmitter.on(`timeline_filter_id`, setFID)
+    eventEmitter.on('timeline_search', setSBy)
+
+    return () => {
+      eventEmitter.off(`timeline_filter_id`, setFID)
+      eventEmitter.off(`timeline_search`, setSBy)
+    }
+  }, [eventEmitter])
   return (
     <div>
       <Filter params={params} type='map_filter' />
-      <Search filter_type = 'map_search' params = { { ...params, router: 'packet', resolver: 'filterPackets' } } />
-      <h1>Traffic Flow to Philippines Server</h1>
-      {/* <MapComponent countryTrafficData={countryTrafficData} /> */}
-      {Object.keys(country_traffic_data).length > 0 ? ( // Ensure countryTrafficData is not empty
-        <MapComponent additionalCityConnections = { true } additionalCityConnections = { addition_city_connections } cityToCityConnections = { city_to_city_connections } countryTrafficData={country_traffic_data} regionToCityConnections = { region_to_city_connections } regionToRegionConnections = { region_to_region_connections } />
-      ) : (
-        <p>Loading map data...</p> // Show a loading message while data is being prepared
-      )}
+      <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} />
+      <h1>Traffic Flow</h1>
 
+      {isMapDataReady
+        ? (
+            <div>
+            {Object.keys(mapData.countryTrafficData.sourceData).length > 0
+              || Object.keys(mapData.countryTrafficData.destinationData).length > 0
+                ? (
+                    <>
+                    <MapComponent
+                        additionalCityConnections={mapData.additionCityConnections}
+                        cityToCityConnections={mapData.cityToCityConnections}
+                        countryTrafficData={mapData.countryTrafficData}
+                        regionToCityConnections={mapData.regionToCityConnections}
+                        regionToRegionConnections={mapData.regionToRegionConnections}
+                      />
+
+                    <div className="mt-4 text-center">
+                        {batchInfo.is_loading
+                          ? (
+                              <div className="flex justify-center items-center">
+                              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2" />
+                              <span>
+                                  Loading data...(
+                                  {Math.min(batchInfo.next_offset, batchInfo.total_records)}
+                                  {' '}
+                                  'of'
+                                  {batchInfo.total_records || '?'}
+                                  {' '}
+                                  records)
+                                </span>
+                            </div>
+                            )
+                          : batchInfo.has_more
+                            ? (
+                                <button
+                                className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                                onClick={ loadMoreData }
+                              >
+                                {'Load all remaining data'}
+                              </button>
+                              )
+                            : (
+                                <div>
+                                <p className='text-sm text-blue-600'>All available data loaded</p>
+                                <button
+                                    className='mt-2 px-4 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm'
+                                    onClick={reloadAllData}
+                                  >
+                                    Refresh data
+                                  </button>
+                              </div>
+                              )}
+
+                        <p className='text-sm text-gray-500 mt-2'>
+                        {'Showing '}
+                        {Object.keys(mapData.countryTrafficData.sourceData).filter(k => !k.startsWith('No IP Info_')).length}
+                        {' '}
+                        {'source countries '}
+                        {'and'}
+                        {Object.keys(mapData.countryTrafficData.destinationData).filter(k => !k.startsWith('No IP Info_')).length}
+                        {' '}
+                        {'destination countries'}
+                        {batchInfo.total_records > 0 && ` (${Math.min(batchInfo.next_offset, batchInfo.total_records)} of ${batchInfo.total_records} records)`}
+                      </p>
+                      </div>
+                  </>
+                  )
+                : (
+                    <div className='text-center py-8'>
+                    <p className='text-lg text-gray-600'>No traffic data available for the selected filters.</p>
+                    <p className='text-sm text-gray-500 mt-2'>Try adjusting your filter criteria or time range.</p>
+                  </div>
+                  )}
+          </div>
+          )
+        : (
+            <div className='flex justify-center items-center h-64'>
+            <div className='text-center'>
+                <p className='mb-2'>Loading map data...</p>
+                <div className='w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto' />
+              </div>
+          </div>
+          )}
     </div>
   )
 }

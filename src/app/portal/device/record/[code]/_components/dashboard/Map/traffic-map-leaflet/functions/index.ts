@@ -2,82 +2,75 @@ import { getFlagDetails } from '~/app/api/device/get_flags'
 
 export const additionalCityConnections = async (data: any) => {
   return Promise.all(
-    data.flatMap(item => item.result
-      .map(async (entry) => {
-        const { country } = entry
-        const city = entry.city || 'Unknown City'
-        const flagDetails = await getFlagDetails(country)
-        if (!flagDetails) return null // Exclude if flagDetails is null
+    data.map((item: Record<string, any>) => {
+      const { country, city, name, destination_ip } = item ?? {}
+      return {
+        city: `${city}, ${name || country}`,
+        trafficLevel: Math.floor(Math.random() * 100),
+        destination_ip,
 
-        return {
-          city: `${city}, ${flagDetails?.name || country}`,
-          trafficLevel: Math.floor(Math.random() * 100),
-        }
-      })
-      .filter(Boolean) // Exclude null or undefined values
-    )
+      }
+    })
+      .filter(Boolean)
   )
 }
 
 export const regionToRegionConnections = async (data: any) => {
   return Promise.all(
-    data.flatMap(item => item.result
-      .map(async (entry) => {
-        const { country, region } = entry
-        if (!region) return null // Exclude if region is null
-        const flagDetails = await getFlagDetails(country)
-        if (!flagDetails) return null // Exclude if flagDetails is null
+    data.map(async (item: Record<string, any>) => {
+      const { region, country, name, destination_ip } = item ?? {}
+      if (!region) return null
+      const flagDetails = await getFlagDetails(country)
+      if (!flagDetails) return null
 
-        return {
-          toRegion: `${region}, ${flagDetails?.name || country}`,
-          trafficLevel: Math.floor(Math.random() * 100),
-          condition: getRandomCondition(),
-        }
-      })
-      .filter(Boolean) // Exclude null or undefined values
-    )
+      return {
+        toRegion: `${region}, ${name || country}`,
+        trafficLevel: Math.floor(Math.random() * 100),
+        destination_ip,
+        condition: getRandomCondition(),
+      }
+    })
+      .filter(Boolean)
   )
 }
 
 export const regionToCityConnections = async (data: any) => {
   return Promise.all(
-    data.flatMap(item => item.result
-      .map(async (entry) => {
-        const { country, region, city } = entry
-        if (!region || !city) return null // Exclude if region or city is null
-        const flagDetails = await getFlagDetails(country)
-        if (!flagDetails) return null // Exclude if flagDetails is null
+    data.map(async (item: Record<string, any>) => {
+      const { destination_ip, region, country, name, city } = item ?? {}
+      if (!region || !city) return null
+      const flagDetails = await getFlagDetails(country)
+      if (!flagDetails) return null
 
-        return {
-          fromRegion: region,
-          toCity: `${city}, ${flagDetails?.name || country}`,
-          trafficLevel: Math.floor(Math.random() * 100),
-          condition: getRandomCondition(),
-        }
-      })
-      .filter(Boolean) // Exclude null or undefined values
-    )
+      return {
+        fromRegion: region,
+        toCity: `${city}, ${name || country}`,
+        trafficLevel: Math.floor(Math.random() * 100),
+        destination_ip,
+        condition: getRandomCondition(),
+      }
+    })
+      .filter(Boolean)
   )
 }
 
 export const cityToCityConnections = async (data: any) => {
   return Promise.all(
-    data.flatMap(item => item.result
-      .map(async (entry) => {
-        const { country, city } = entry
-        if (!city) return null // Exclude if city is null
-        const flagDetails = await getFlagDetails(country)
-        if (!flagDetails) return null // Exclude if flagDetails is null
+    data.flatMap(async (item: Record<string, any>) => {
+      const { destination_ip, name, country, city } = item ?? {}
+      if (!city) return null
+      const flagDetails = await getFlagDetails(country)
+      if (!flagDetails) return null
 
-        return {
-          fromCity: `${city}, ${flagDetails?.name || country}`,
-          toCity: getRandomCity(),
-          trafficLevel: Math.floor(Math.random() * 100),
-          condition: getRandomCondition(),
-        }
-      })
-      .filter(Boolean) // Exclude null or undefined values
-    )
+      return {
+        fromCity: `${city}, ${name || country}`,
+        toCity: getRandomCity(),
+        trafficLevel: Math.floor(Math.random() * 100),
+        destination_ip,
+        condition: getRandomCondition(),
+      }
+    })
+      .filter(Boolean)
   )
 }
 

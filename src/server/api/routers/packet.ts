@@ -377,7 +377,7 @@ export const packetRouter = createTRPCRouter({
       const transform_data = timestamps?.map((item) => {
         const interface_val = res?.reduce((acc, intrfce: any) => {
           const [key, val] = Object.entries(intrfce)?.[0] as any
-          
+
           const same_val = val?.find((element: any) => element.bucket === item)
           return {
             ...acc,
@@ -390,7 +390,6 @@ export const packetRouter = createTRPCRouter({
           ...interface_val,
         }
       })
-      
 
       return transform_data
     }
@@ -430,9 +429,8 @@ export const packetRouter = createTRPCRouter({
     }).execute()
 
     const transformedData: OutputData[] = transformData(res?.data as InputData[])
-    
+
     const transformed = transformedData.sort((a, b) => a.bucket.localeCompare(b.bucket))
-    
 
     return transformed
   }),
@@ -950,14 +948,21 @@ export const packetRouter = createTRPCRouter({
     return source_ips || []
   }),
 
-  getUniqueSourceAndDestinationIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range } = input
+  // Modified backend procedure
+  getUniqueSourceAndDestinationIP: privateProcedure.input(z.object({
+    device_id: z.string(),
+    time_range: z.array(z.string()),
+    filter_id: z.string(),
+    batch_size: z.number().optional()
+      .default(100), // Number of records to fetch per batch
+    batch_offset: z.number().optional()
+      .default(0), // Starting position for the batch
+  })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, batch_size = 10, batch_offset = 0 } = input
     let source_and_destination_ips: Record<string, any>[] = []
 
-    const filterPackets = async (starts_at: number) => {
-      const limit = 1000
-
-      const packets = await ctx.dnaClient
+    const filterPackets = async () => {
+      const packets: any = await ctx.dnaClient
         .findAll({
           entity: 'packets',
           token: ctx.token.value,
@@ -985,8 +990,8 @@ export const packetRouter = createTRPCRouter({
               },
             ],
             order: {
-              starts_at,
-              limit,
+              starts_at: batch_offset, // Use the batch_offset parameter
+              limit: batch_size, // Use the batch_size parameter
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
             },
@@ -996,18 +1001,33 @@ export const packetRouter = createTRPCRouter({
 
       const _packets = packets?.data || []
       const _packets_length = _packets.length
+      const total_records = packets?.total_records || 0 // Get total record count for client pagination
 
       const sourceAndDestinationIPs = new Set()
       for (let i = 0; i < _packets_length; i++) {
         if (_packets?.[i]) {
-          sourceAndDestinationIPs.add({ source_ip: (_packets[i] as any).source_ip, destination_ip: (_packets[i] as any).destination_ip })
+          sourceAndDestinationIPs.add({
+            source_ip: (_packets[i] as any).source_ip,
+            destination_ip: (_packets[i] as any).destination_ip,
+          })
         }
       }
-      source_and_destination_ips = [...new Set([...source_and_destination_ips, ...sourceAndDestinationIPs])] as Record<string, any>[]
-    }
-    await filterPackets(0)
+      source_and_destination_ips = [...sourceAndDestinationIPs] as Record<string, any>[]
 
-    const _res = await Bluebird.map((source_and_destination_ips), async (ips: Record<string, any>) => {
+      return {
+        packets: source_and_destination_ips,
+        batch_info: {
+          total_records,
+          has_more: total_records > (batch_offset + batch_size),
+          next_offset: batch_offset + batch_size,
+        },
+      }
+    }
+
+    const { packets, batch_info } = await filterPackets()
+
+    // Process this batch of IPs
+    const _res = await Bluebird.map(packets, async (ips: Record<string, any>) => {
       const source_country = await ctx.dnaClient
         .findAll({
           entity: 'ip_info',
@@ -1030,6 +1050,7 @@ export const packetRouter = createTRPCRouter({
           },
         })
         .execute()
+
       const destination_country = await ctx.dnaClient
         .findAll({
           entity: 'ip_info',
@@ -1075,13 +1096,16 @@ export const packetRouter = createTRPCRouter({
       }
     }, { concurrency: 100 })
 
-    
-    return _res || []
+    // Return both the processed data and batch information
+    return {
+      data: _res || [],
+      batch_info,
+    }
   }),
 
   // getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()), device_id: z.string(), filter_id: z.string(), bucket_size: z.string() })).mutation(async ({ input, ctx }) => {
   //   const { source_ips, time_range, device_id, bucket_size } = input
-  //   
+  //
   //   const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
   //     const res = await ctx.dnaClient.aggregate({
   //       query: {
@@ -1160,12 +1184,12 @@ export const packetRouter = createTRPCRouter({
   //         },
   //       })
   //       .execute()
-  //     
+  //
   //     const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
   //     return { source_ip, result: res?.data, ...ip_info?.data?.[0], ...flagDetails }
   //   }, { concurrency: 100 })
 
-  //   
+  //
   //   return { data: ips }
   // }),
 
