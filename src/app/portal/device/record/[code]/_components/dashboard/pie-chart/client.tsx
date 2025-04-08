@@ -12,6 +12,7 @@ import {
 import { api } from '~/trpc/react'
 
 import { type IFormProps } from '../types'
+import { formatBytes } from './function/formatBytes'
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -62,8 +63,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    const interval = setInterval(fetchChartData, 1000)
-    return () => clearInterval(interval)
+    // const interval = setInterval(fetchChartData, 1000)
+    // return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Update previousTrafficRef whenever trafficData.traffic changes
@@ -143,10 +144,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
           {/* Traffic value display */}
           <div className="absolute top-[160px] bg-background/80 rounded-lg px-4 py-2 backdrop-blur-sm">
             <div className="text-xl font-bold tabular-nums">
-              {Math.round(animatedTraffic)} KB/s
+              {formatBytes(Math.round(animatedTraffic), 2)}
             </div>
             <div className="text-sm text-gray-500">
-              Previous: {Math.round(previousTraffic)} KB/s
+              Previous: {formatBytes(Math.round(previousTraffic), 2)}
             </div>
           </div>
         </div>

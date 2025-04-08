@@ -143,10 +143,10 @@ export const cachedFilterRouter = createTRPCRouter({
       if(!filter) {
         return {
           time: {
-            time_count: 2,
-            time_unit: 'minute'
+            time_count: 1,
+            time_unit: 'day'
           },
-          resolution: '1s'
+          resolution: '2h'
         }
       }
       

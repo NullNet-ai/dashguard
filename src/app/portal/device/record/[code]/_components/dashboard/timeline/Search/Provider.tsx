@@ -20,6 +20,7 @@ import {
   type IState,
 } from './types'
 import { removeSearchItems } from './utils/removeSearchItems'
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
 export const SearchGraphContext = React.createContext<ICreateContext>({
 })
@@ -47,12 +48,23 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     [],
   )
   const [rawItems, setRawItems] = useState<ISearchItem[]>( )
-  
   const [open, setOpen] = useState(false)
   const [search_params, setSearchParams] = useState({})
+  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
+  const [time, setTime] = useState<Record<string, any> | null>(null)
+
+
   // const [searchItems, setItems] = useState()
 
   
+  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
+    {
+      type: filter_type,
+      filter_id: filterId,
+    }, {
+      enabled: false,
+    }
+  )
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
@@ -97,7 +109,12 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     setOpen(open)
   }
 
-  const {time_count,time_unit = 'minute' } = timeDuration
+  // const {time_count,time_unit = 'minute' } = timeDuration
+
+  const {
+    time_count = null,
+    time_unit = null,
+  } = time || {}
   
 
   const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
@@ -116,6 +133,28 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     return data
   };
 
+
+  useEffect(() => {
+    if (!filterId) return
+
+    const fetchTimeUnitandResolution = async () => {
+      const {
+        data: time_unit_resolution,
+      } = await refetchTimeUnitandResolution()
+
+      const { time, resolution = '1h' } = time_unit_resolution || {}
+      const { time_count = 12, time_unit = 'hour' } = time || {}
+      
+      setTime({
+        time_count,
+        time_unit: time_unit as 'hour',
+        resolution: resolution as '1h',
+      })
+    }
+    fetchTimeUnitandResolution()
+  }, [filterId])
+
+
   useEffect(() => {
     const refetchSearchOption =async () => {
       const {data}: any = await refetch()
@@ -123,8 +162,8 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
         setRawItems(data?.items)
       }
     }
-refetchSearchOption()
-  },[JSON.stringify(search_params)])
+    refetchSearchOption()
+  },[search_params])
   
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
@@ -185,6 +224,24 @@ refetchSearchOption()
   useEffect(() => {
     setSearchItems(cached_search_items || [])
   }, [cached_search_items?.length])
+
+
+  const eventEmitter = useEventEmitter()
+
+  useEffect(() => {
+    const setFID = (data: any) => {
+      if (typeof data !== 'string') return
+      setFilterID(data)
+    }
+
+    // eventEmitter.on(`${filter_type}_id`, setFID)
+    eventEmitter.on(`timeline_filter_id`, setFID)
+
+    return () => {
+      eventEmitter.off(`timeline_filter_id`, setFID)
+    }
+
+  }, [eventEmitter])
 
   const state_context = {
     open,

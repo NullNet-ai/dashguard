@@ -68,11 +68,18 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
           query: {
             pluck,
             advance_filters,
-            order: {
-              limit: limit || 100,
-              by_field: 'created_date',
-              by_direction: EOrderDirection.DESC,
-            },
+            // order: {
+            //   limit: limit || 100,
+            //   by_field: 'created_date',
+            //   by_direction: EOrderDirection.DESC,
+            // },
+          
+            multiple_sort: [
+              {
+                  "by_field": "devices.status",
+                  "by_direction": EOrderDirection.ASC
+              }
+          ] 
           },
         })
         .execute()

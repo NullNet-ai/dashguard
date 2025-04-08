@@ -33,8 +33,14 @@ export interface IBandwidth {
 }
 
 export interface IState {
-  elements: { nodes: FlowElement[], edges: Edge[] }
+  flowData: any[]
   loading: boolean
+  fetchMoreData: () => any
+  unique_source_ips: string[]
+  flagDetails: {
+    name: string
+    flag: string
+  }
 }
 
 export interface IAction {

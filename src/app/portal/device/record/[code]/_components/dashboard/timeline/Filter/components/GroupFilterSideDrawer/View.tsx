@@ -1,67 +1,69 @@
-import StateTab from '~/components/platform/StateTab';
-import { Input } from '~/components/ui/input';
-import { Button } from '~/components/ui/button';
-import { useManageFilter } from './Provider';
-import FilterContent from './Tabs/Filter/FilterContent';
+import StateTab from '~/components/platform/StateTab'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 
+import { useManageFilter } from './Provider'
+import FilterContent from './Tabs/Filter/FilterContent'
 
-export default function SideDrawer({filter_type}: {filter_type: string}) {
-  const { state, actions } = useManageFilter();
-  const { tab_props, filterDetails, createFilterLoading, updateFilterLoading } = state ?? {};
+export default function SideDrawer({ filter_type }: { filter_type: string }) {
+  const { state, actions } = useManageFilter()
+  const { tab_props, filterDetails, createFilterLoading, updateFilterLoading } = state ?? {}
   const tabs = [
     {
       id: 'filter',
       label: 'Filter',
-      content: <FilterContent filter_type={filter_type}/>,
+      content: <FilterContent filter_type={filter_type} />,
     },
-  ];
+  ]
 
   return (
     <div className="space-y-4 p-4">
       <div className="flex justify-end space-x-2">
-        {tab_props.id ? (
-          <>
-            <Button
-              variant="default"
-              className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={actions.saveUpdatedFilter}
-              loading={updateFilterLoading}
+        {tab_props.id
+          ? (
+              <>
+              <Button
+                  className = "bg-blue-600 text-white hover:bg-blue-700"
+                  loading = { updateFilterLoading }
+                  variant = "default"
+                  onClick = { actions.saveUpdatedFilter }
+                >
+                  {'✓ Update Filter'}
+                </Button>
+              <Button
+                  className = "bg-blue-600 text-white hover:bg-blue-700"
+                  loading = { createFilterLoading }
+                  variant = "default"
+                  onClick = { actions.handleCreateNewFilter }
+                >
+                  {'✓ Create as New Filter'}
+                </Button>
+            </>
+            )
+          : (
+              <Button
+              className = "bg-blue-600 text-white hover:bg-blue-700"
+              loading = { createFilterLoading }
+              variant = "default"
+              onClick = { actions.handleCreateNewFilter }
             >
-              ✓ Update Filter
+                ✓ Create New Filter
             </Button>
-            <Button
-              variant="default"
-              className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={actions.handleCreateNewFilter}
-              loading={createFilterLoading}
-            >
-              ✓ Create as New Filter
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="default"
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={actions.handleCreateNewFilter}
-            loading={createFilterLoading}
-          >
-            ✓ Create New Filter
-          </Button>
-        )}
+            )}
       </div>
       <div className="space-y-2">
-        <label htmlFor="filterName" className="text-sm font-bold text-gray-700">
+        <label className = "text-sm font-bold text-gray-700" htmlFor = "filterName">
           Name
         </label>
         <div className="flex items-center justify-between">
           <Input
-            id="filterName"
-            placeholder="Filter Name"
-            value={filterDetails.name}
-            onChange={(e) => actions.handleUpdateFilter({
-              name: e.target.value
-            })}
-            className="max-w-full"
+            className = "max-w-full"
+            id = "filterName"
+            placeholder = "Filter Name"
+            value = { filterDetails.name }
+            onChange = { (e) => actions.handleUpdateFilter({
+              name: e.target.value,
+            }) }
           />
         </div>
       </div>
@@ -69,13 +71,13 @@ export default function SideDrawer({filter_type}: {filter_type: string}) {
       {/* Tabs */}
       <div className="flex-1 overflow-y-auto">
         <StateTab
-          defaultValue="filter"
-          persistKey="side-drawer-tabs"
-          tabs={tabs}
-          variant="default"
-          size="sm"
+          defaultValue = "filter"
+          persistKey = "side-drawer-tabs"
+          size = "sm"
+          tabs = { tabs }
+          variant = "default"
         />
       </div>
     </div>
-  );
+  )
 }

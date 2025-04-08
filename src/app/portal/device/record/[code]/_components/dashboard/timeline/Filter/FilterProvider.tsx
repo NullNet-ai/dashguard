@@ -6,8 +6,7 @@ import { api } from '~/trpc/react'
 
 import { type IAction, type IProps, type IFilterContext, type IState, type IData, IFilter, type SearchItem } from '../types'
 
-import {  removeFilter } from './components/FilterSideDrawer/actions'
-
+import { removeFilter } from './components/FilterSideDrawer/actions'
 
 export const FilterContext = createContext<IFilterContext>({})
 
@@ -21,9 +20,8 @@ export const useFilter = (): IFilterContext => {
 }
 
 const FilterProvider = ({ children, params, type }: any) => {
-  
   const eventEmitter = useEventEmitter()
-  const {router, resolver} = params || {}
+  const { router, resolver } = params || {}
 
   const [filters, setFilters] = useState<Record<string, any>[]>(
     [
@@ -35,47 +33,42 @@ const FilterProvider = ({ children, params, type }: any) => {
       },
     ]
   )
-  
 
-  
+  console.log("%c Line:27 🍩 filters", "color:#4fff4B", filters);
   const {
     data: cached_filter_items = [],
   } = api.cachedFilter.fetchCachedFilter.useQuery({
-    type: type,
+    type,
   })
 
   const [_refetchTrigger, _setRefetchTrigger] = useState(0)
   const [filterQuery, setFilterQuery] = useState<Record<string, any>>({})
 
   const fetchDetails = async (data: IData) => {
-    if (!data?.modifyFilterDetails || !data?.modifyFilterDetails?.id) return;
+    if (!data?.modifyFilterDetails?.id) return
 
     setFilters((prev) => {
-      const updatedFilters = new Map(prev.map(item => [item.id, item]));
-      const { id, name, default_filter, ...rest } = data.modifyFilterDetails;
-  
+      const updatedFilters = new Map(prev.map(item => [item.id, item]))
+      const { id, name, default_filter, ...rest } = data.modifyFilterDetails
+
       updatedFilters.set(id, {
         ...updatedFilters.get(id),
         ...rest,
         id,
         name: name || '',
         label: name || '',
-        default_filter: default_filter?.map((f) =>
-          f.type === 'criteria'
-            ? { ...f, values: f.values?.map((v: SearchItem) => ({ label: v, value: v })) }
-            : f
+        default_filter: default_filter?.map(f => f.type === 'criteria'
+          ? { ...f, values: f.values?.map((v: SearchItem) => ({ label: v, value: v })) }
+          : f
         ),
-      });
-  
-      return [...updatedFilters.values()];
-    });
-  };
-  
+      })
 
-  
+      return [...updatedFilters.values()]
+    })
+  }
+
   useEffect(() => {
     eventEmitter.emit(`${type}_id`, filterQuery)
-    
   }, [_refetchTrigger, filterQuery])
 
   useEffect(() => {
@@ -90,7 +83,7 @@ const FilterProvider = ({ children, params, type }: any) => {
 
   useEffect(() => {
     if (!cached_filter_items?.length) return
-    
+
     const fetchFilter = async () => { // Refactor this function
       setFilters((prev) => {
         // Convert previous filters to a Map
@@ -119,7 +112,6 @@ const FilterProvider = ({ children, params, type }: any) => {
           })
         })
 
-        
         return [...updatedFilters.values()]
       })
     }
@@ -135,13 +127,13 @@ const FilterProvider = ({ children, params, type }: any) => {
     setFilters(prev => prev.filter(item => item.id !== id))
     await removeFilter(id, type)
   }
-  
-  
-  const duplicateFilter= api.cachedFilter.duplicateFilter.useMutation()
+
+  const duplicateFilter = api.cachedFilter.duplicateFilter.useMutation()
   const handleDuplicateTab = async (tab: Record<string, any>) => {
-    const response: Record<string,any> = await duplicateFilter.mutateAsync({ type: type, data: tab })
-    setFilters(prev => {
-      return [...prev, response]})
+    const response: Record<string, any> = await duplicateFilter.mutateAsync({ type, data: tab })
+    setFilters((prev) => {
+      return [...prev, response]
+    })
   }
 
   const state = {

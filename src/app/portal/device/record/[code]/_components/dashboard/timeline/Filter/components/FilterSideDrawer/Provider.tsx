@@ -63,21 +63,22 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
 
   function validateCriteria(data: any) {
     const required_fields = ["Time Range", "Resolution", "Graph Type"];
+    const error_message = "This field is required";
     let errors: any = {};
 
     data.forEach((item: any, index: number) => {
         if (item.hasOwnProperty("field") && !item.field) {
-            errors[`filters.${index}.field`] = "This field is required.";
+            errors[`filters.${index}.field`] = error_message;
         }
         if (item.hasOwnProperty("operator") && !item.operator) {
-            errors[`filters.${index}.operator`] = "This field is required.";
+            errors[`filters.${index}.operator`] = error_message;
         }
         if( required_fields.includes(item.field)){
           if (item.hasOwnProperty("values") && !item?.[item.field]) {
-            errors[`filters.${index}.${item.field}`] = "This field is required.";
+            errors[`filters.${index}.${item.field}`] = error_message;
           }
         }else if (item.hasOwnProperty("values") && Array.isArray(item.values) && item.values.length === 0) {
-            errors[`filters.${index}.values`] = "This field is required.";
+            errors[`filters.${index}.values`] = error_message;
         }
     });
 
@@ -131,7 +132,7 @@ export function ManageFilterProvider({ children, tab, columns, filter_type }: { 
       sorts: sorting,
       default_sorts: sorting,
     }
-    console.log("%c Line:139 🥟 filter_type", "color:#7f2b82", filter_type);
+    
     setUpdateFilterLoading(true)
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
     await updateGridFilter(modifyFilterDetails, filter_type)
