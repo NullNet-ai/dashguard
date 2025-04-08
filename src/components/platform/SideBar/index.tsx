@@ -58,8 +58,8 @@ export default function AppSideBar(config: ISideBarProps) {
     mainMenuConfig,
     screenType,
     tabsDisplayVariant = 'label-only',
-    favoritesMenuConfig, // New prop for favorites menu
-    historyMenuConfig,   // New prop for history menu
+    favoritesMenuConfig, 
+    historyMenuConfig,   
   } = config
   const apiAuth = api.auth.logout.useMutation()
   const navigate = useRouter()
@@ -79,14 +79,7 @@ export default function AppSideBar(config: ISideBarProps) {
     Cookies.set('screen-type', `${screen}`, { expires: 7 })
   }
 
-  // Generate static menu items for Favorites and History tabs
-  const generateStaticMenuItems = (prefix: string) => {
-    return Array.from({ length: 20 }, (_, i) => ({
-      title: `${prefix} Item ${i + 1}`,
-      icon: 'DocumentTextIcon',
-      path: `/${prefix.toLowerCase()}/item-${i + 1}`,
-    }));
-  };
+
 
   // Use provided configs or fall back to static items
   const favoriteItems = favoritesMenuConfig || [];
