@@ -7,7 +7,7 @@ import moment from 'moment-timezone'
 import { z } from 'zod'
 
 import { getFlagDetails } from '~/app/api/device/get_flags'
-import { isPrivateIp } from '~/app/portal/device/record/[code]/_components/dashboard/Map/traffic-map-leaflet/checkSourceIPS'
+// import { isPrivateIp } from '~/app/portal/device/record/[code]/_components/dashboard/Map/traffic-map-leaflet/checkSourceIPS'
 import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/device/utils/timeRange'
 import { type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
