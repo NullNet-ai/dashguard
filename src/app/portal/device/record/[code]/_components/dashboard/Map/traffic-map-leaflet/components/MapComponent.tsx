@@ -39,28 +39,27 @@ const geocodeAddress = async (address: any) => {
 
 // Function to determine traffic color
 const getTrafficColor = (trafficLevel: number) => {
-  if (trafficLevel > 80) return 'rgba(255, 0, 0, 0.7)' // 🔴 Very High
-  if (trafficLevel >= 50) return 'rgba(255, 165, 0, 0.7)' // 🟠 High
-  if (trafficLevel >= 30) return 'rgba(255, 255, 0, 0.7)' // 🟡 Medium
-  return 'rgba(0, 128, 0, 0.7)' // 🟢 Low
+  if (trafficLevel > 80) return 'rgba(255, 0, 0, 0.7)'
+  if (trafficLevel >= 50) return 'rgba(255, 165, 0, 0.7)'
+  if (trafficLevel >= 30) return 'rgba(255, 255, 0, 0.7)'
+  return 'rgba(0, 128, 0, 0.7)'
 }
 
 // Function to get color for connection condition
 const getConditionColor = (condition: string) => {
   switch (condition) {
-    case 'Congested': return 'rgba(255, 0, 0, 0.7)' // Red
-    case 'High Latency': return 'rgba(255, 0, 255, 0.7)' // Purple
-    case 'Low Bandwidth': return 'rgba(255, 165, 0, 0.7)' // Orange
-    case 'Normal': return 'rgba(255, 255, 0, 0.7)' // Yellow
-    case 'Stable': return 'rgba(0, 191, 255, 0.7)' // Light Blue
-    case 'Optimized': return 'rgba(0, 128, 0, 0.7)' // Green
-    default: return 'rgba(128, 128, 128, 0.7)' // Gray
+    case 'Congested': return 'rgba(255, 0, 0, 0.7)'
+    case 'High Latency': return 'rgba(255, 0, 255, 0.7)'
+    case 'Low Bandwidth': return 'rgba(255, 165, 0, 0.7)'
+    case 'Normal': return 'rgba(255, 255, 0, 0.7)'
+    case 'Stable': return 'rgba(0, 191, 255, 0.7)'
+    case 'Optimized': return 'rgba(0, 128, 0, 0.7)'
+    default: return 'rgba(128, 128, 128, 0.7)'
   }
 }
 
 // Default coordinates for "No IP Info" (in the sea)
-const DEFAULT_SEA_COORDINATES: LatLngExpression = [0, -30] // Near the equator in the Atlantic Ocean
-
+const DEFAULT_SEA_COORDINATES: LatLngExpression = [0, -30]
 // Function to create a **curved** traffic flow line using Bezier curves
 const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<string, any>, trafficLevel: number, name: string, condition = null) => {
   if (!fromCoord && !toCoord) {
@@ -72,7 +71,7 @@ const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<st
   const adjustedToCoord = toCoord || DEFAULT_SEA_COORDINATES
 
   const curvePoints: any = []
-  const segments = 50 // Higher = smoother curve
+  const segments = 50
 
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
@@ -80,7 +79,7 @@ const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<st
     const y
       = adjustedFromCoord[0] * (1 - t)
         + adjustedToCoord[0] * t
-        + Math.sin(Math.PI * t) * 20 // Adjust curve height
+        + Math.sin(Math.PI * t) * 20
 
     curvePoints.push([y, x])
   }
@@ -91,13 +90,12 @@ const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<st
     color: lineColor,
     weight: Math.max(3, trafficLevel / 20),
     opacity: 0.8,
-    dashArray: '5, 5', // Dotted curve
+    dashArray: '5, 5',
   })
 }
 
 const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections }: any) => {
   const { destinationData, sourceData } = countryTrafficData ?? {}
-  console.log('%c Line:100 🍋 countryTrafficData', 'color:#3f7cff', countryTrafficData)
   // Add state to track loaded connections
   const [loadedConnections, setLoadedConnections] = useState(0)
   const [map, setMap] = useState<L.Map | null>(null)
@@ -156,17 +154,17 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
   }, [destinationData, additionalCityConnections, sourceData])
 
   // Get a sea point based on destination coordinates
-  const getSeaPoint = (destinationCoords) => {
+  const getSeaPoint = (destinationCoords: Record<string, any>) => {
     // Get a point in the ocean roughly in the direction of the destination
     // This is a simplified approach - calculate a point 20 degrees west of destination
     return [
-      destinationCoords[0] - (Math.random() * 5 - 2.5), // Add some randomness
+      destinationCoords[0] - (Math.random() * 5 - 2.5),
       destinationCoords[1] - 20,
     ]
   }
 
   // Get source coordinates (either from sourceData or generate sea point)
-  const getSourceCoordinates = async (destinationName, destinationCoords) => {
+  const getSourceCoordinates = async (destinationName: any, destinationCoords: Record<string, any>) => {
     // If we have source data for this destination
     if (sourceData?.[destinationName]?.location) {
       const locationName = sourceData[destinationName].location
@@ -262,10 +260,14 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       setIsLoading(false)
 
       // Display high priority connections immediately
-      displayHighPriorityConnections(mapInstance)
+      displayHighPriorityConnections(mapInstance).catch((error) => {
+        console.error('Error displaying high priority connections:', error)
+      })
     }
 
-    initializeMap()
+    initializeMap().catch((error) => {
+      console.error('Error initializing map:', error)
+    })
 
     return () => {
       if (map) {
@@ -275,14 +277,19 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
   }, [destinationData, sourceData])
 
   // Create source marker based on source data
-  const createSourceMarker = (mapInstance: L.Map, coordinates: LatLngExpression, locationName: string, source_ip: string = null) => {
+  const createSourceMarker = (
+    mapInstance: L.Map,
+    coordinates: LatLngExpression,
+    locationName: string,
+    source_ip: string | null = null
+  ) => {
     const adjustedCoordinates = coordinates || DEFAULT_SEA_COORDINATES
 
     // Determine if this is a sea point or an actual location
     const isSeaPoint = locationName === 'Sea Point'
 
     // Create the source dot with appropriate styling
-    const dotColor = isSeaPoint ? '#00BFFF' : '#0000FF' // Light blue for sea, blue for actual locations
+    const dotColor = isSeaPoint ? '#00BFFF' : '#0000FF'
     const divIcon = L.divIcon({
       className: isSeaPoint ? 'sea-source-dot' : 'source-dot',
       html: `<div class="dot ${!isSeaPoint ? 'pulse-animation' : ''}" style="background:${dotColor}; width:${isSeaPoint ? '10px' : '14px'}; height:${isSeaPoint ? '10px' : '14px'};"></div>`,
@@ -295,7 +302,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
     // Only add labels and circles for non-sea points
     if (!isSeaPoint) {
       // Add source label
-      const sourceLabelName = locationName.split(',')[0].toUpperCase()
+      const safeLocationName: any = locationName ?? 'Unknown Location'
+      const sourceLabelName = safeLocationName?.split(',')[0].toUpperCase()
       const sourceLabelIcon = L.divIcon({
         className: 'city-label',
         html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${sourceLabelName}</div>`,
@@ -309,7 +317,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
         color: dotColor,
         fillColor: dotColor,
         fillOpacity: 0.2,
-        radius: 150000, // Smaller radius than Philippines but still visible
+        radius: 150000,
         weight: 2,
       }).addTo(mapInstance)
 
@@ -359,23 +367,23 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
     const marker = L.marker(adjustedCoordinates, { icon: divIcon }).addTo(mapInstance)
 
     // Add colored circle around the dot
-    const circle = L.circle(adjustedCoordinates, {
-      color: dotColor,
-      fillColor: dotColor,
-      fillOpacity: 0.2,
-      radius: 100000, // Adjust radius as needed (in meters)
-      weight: 1,
-    }).addTo(mapInstance)
+    // const circle = L.circle(adjustedCoordinates, {
+    //   color: dotColor,
+    //   fillColor: dotColor,
+    //   fillOpacity: 0.2,
+    //   radius: 100000,
+    //   weight: 1,
+    // }).addTo(mapInstance)
 
     // Add city label - with black color and all uppercase
     const displayCityName: any = cityName || name
-    const cityLabel = displayCityName?.split(',')[0].toUpperCase() // Extract just the city name before the comma and convert to uppercase
+    const cityLabel = displayCityName?.split(',')[0].toUpperCase()
 
     const cityLabelIcon = L.divIcon({
       className: 'city-label',
       html: `<div style="color: black; font-family: geist; font-weight: bold; font-size: .7em; text-shadow: 1px 1px 1px rgba(255,255,255,0.8);">${cityLabel}</div>`,
       iconSize: [80, 20],
-      iconAnchor: [40, -10], // Position label above the dot
+      iconAnchor: [40, -10],
     })
     L.marker(adjustedCoordinates, { icon: cityLabelIcon }).addTo(mapInstance)
 
@@ -570,7 +578,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       }
 
       // 3. Prepare Additional City connections
-      additionalCityConnections.forEach((cityData) => {
+      additionalCityConnections.forEach((cityData: Record<string, any>) => {
         const { city, trafficLevel } = cityData
         const destinationCoordinates = additionalCityCoordinates[city]
 
@@ -605,12 +613,12 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
           }
 
           // Add async function to execution queue
-          getSourceCoordAndCreateConnection()
+          void getSourceCoordAndCreateConnection()
         }
       })
 
       // 4. Prepare Region-to-Region connections
-      regionToRegionConnections.forEach((connection) => {
+      regionToRegionConnections.forEach((connection: Record<string, any>) => {
         const { toRegion, trafficLevel, condition } = connection as Record<string, any>
         const destinationCoordinates = regionCoordinates[toRegion]
 
@@ -641,12 +649,12 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
           }
 
           // Add async function to execution queue
-          getSourceCoordAndCreateConnection()
+          void getSourceCoordAndCreateConnection()
         }
       })
 
       // 5. Prepare Region-to-City connections
-      regionToCityConnections.forEach((connection) => {
+      regionToCityConnections.forEach((connection: Record<string, any>) => {
         const { fromRegion, toCity, trafficLevel, condition } = connection as Record<string, any>
         const fromCoordinates = countryCoordinates[fromRegion]
         const toCityCoordinates = additionalCityCoordinates[toCity]
@@ -662,13 +670,13 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             destination_ip: destinationData[toCity]?.destination_ip,
             source_ip: sourceData?.[fromRegion]?.source_ip,
             condition,
-            callbacks: [], // No need for markers as they'll be created by other connection types
+            callbacks: [],
           })
         }
       })
 
       // 6. Prepare City-to-City connections
-      cityToCityConnections.forEach((connection) => {
+      cityToCityConnections.forEach((connection: Record<string, any>) => {
         const { fromCity, toCity, trafficLevel, condition } = connection as Record<string, any>
         const fromCityCoordinates = additionalCityCoordinates[fromCity]
         const toCityCoordinates = additionalCityCoordinates[toCity]
@@ -684,7 +692,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
             destination_ip: destinationData[toCity]?.destination_ip,
             source_ip: sourceData?.[fromCity]?.source_ip,
             condition,
-            callbacks: [], // No need for markers as they'll be created by other connection types
+            callbacks: [],
           })
         }
       })
@@ -703,8 +711,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
 
         // Execute callbacks to create markers if provided
         if (connection.callbacks && connection.callbacks.length > 0) {
-          connection.callbacks.forEach((callback) => {
-            if (callback) callback()
+          connection.callbacks.forEach((callback: () => void) => {
+            if (typeof callback === 'function') callback()
           })
         }
 
@@ -741,8 +749,8 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       if (endIndex < totalConnections) {
         setTimeout(() => {
           // We'll call this same function again after a delay
-          loadNextBatchOfConnections()
-        }, 1000) // 1 second delay between batches
+          void loadNextBatchOfConnections()
+        }, 1000)
       }
       else {
         // All connections loaded, add the legend
@@ -780,7 +788,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
 
     // Start the loading process for the first time if high priority connections are already displayed
     if (initialHighPriorityDisplayed && loadedConnections === 0) {
-      loadNextBatchOfConnections()
+      void loadNextBatchOfConnections()
     }
   }, [map, isLoading, loadedConnections, destinationData, additionalCityConnections, cityToCityConnections, regionToCityConnections, regionToRegionConnections, initialHighPriorityDisplayed])
 
@@ -803,11 +811,11 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
       + (regionToRegionConnections ? regionToRegionConnections.length : 0)
       + (regionToCityConnections ? regionToCityConnections.length : 0)
       + (cityToCityConnections ? cityToCityConnections.length : 0)
-      - highPriorityCount // Subtract high priority connections that were already displayed
+      - highPriorityCount
     )
 
     if (loadedConnections >= totalConnections) {
-      return null // Don't show when complete
+      return null
     }
 
     return `Loading additional connections: ${loadedConnections}/${totalConnections}`
@@ -892,7 +900,7 @@ const MapComponent = ({ countryTrafficData, additionalCityConnections, cityToCit
 
       {loadingStatus
       && (
-        <div className = "loading-overlay">
+        <div className="loading-overlay">
           {loadingStatus}
         </div>
       )}

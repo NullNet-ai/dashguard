@@ -54,9 +54,8 @@ const maxWidth = 300
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow()
-  const { flowData, loading, fetchMoreData, unique_source_ips, flagDetails } = state ?? {}
+  const { flowData, loading, fetchMoreData, unique_source_ips } = state ?? {}
 
-  const { flag, name } = flagDetails || {}
   if (loading) return (
     <Loader
       className="bg-primary text-primary"
@@ -79,7 +78,7 @@ export default function NetworkFlowView() {
         scrollThreshold={ 0.5 }
       >
         {flowData?.map((el, index) => {
-          // const { flag, name } = el
+          const { flag, name } = el
           return (
             <div className='flex-row flex items-center' key={index}>
               <TooltipProvider>
