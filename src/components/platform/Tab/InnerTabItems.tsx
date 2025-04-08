@@ -30,7 +30,6 @@ type InnerTabItemsProps = {
 const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const { isBannerPresent } = useSidebar()
   const newPathname = usePathname()
-  const [cachedItem, setCachedItem] = useState<any>({})
   const { open } = useSidebar();
   const router = useRouter();
   const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
@@ -178,7 +177,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   };
 
   const hasResult = useMemo(() => {
-    if(tablists?.length) {
+    if(tablists?.length && searchValue !== '') {
      return  Boolean(tablists?.filter((dta) => dta.hidden && (!!searchValue ? toLower(dta?.name)?.includes(toLower(searchValue)) : true ))?.length)
     } 
     return false
