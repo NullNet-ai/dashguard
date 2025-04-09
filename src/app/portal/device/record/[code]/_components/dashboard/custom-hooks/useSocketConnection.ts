@@ -8,6 +8,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
   const socketRef = useRef<any | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  
   useEffect(() => {
     if (!token) return;
 
@@ -43,6 +44,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
       socket.emit('updateHighWaterMark', { channel_name: channel_name, highWaterMark: 10 });
     }
 
+    console.log('%c Line:47 🍫', 'color:#ffdd4d', socketRef.current);
     return () => {
       socket.disconnect();
       setIsConnected(false);
