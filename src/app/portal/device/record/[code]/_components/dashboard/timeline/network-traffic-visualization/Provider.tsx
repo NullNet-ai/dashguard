@@ -11,9 +11,12 @@ import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
 
 import { type INetworkFlowContext } from './types'
+import { useSocketConnection } from '../../custom-hooks/useSocketConnection';
+import { updateBandwidth } from './functions/updateBandwidth';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
+const channel_name = 'packets_timeline'
 
 interface IProps extends PropsWithChildren {
   params?: {
@@ -32,6 +35,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
+  const [token, setToken] = React.useState<string | null>(null)
+  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+
+  const {socket} = useSocketConnection({channel_name, token})
+  const getAccount = api.organizationAccount.getAccountID.useMutation();
 
   const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
@@ -72,6 +80,26 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       ...(_bandwidth?.data || []),
     ])
   }
+
+  useEffect(() => {
+    const _getAccount = async () => {
+      const res = await getAccount.mutateAsync()
+      
+      const { account_id, token } = res || {}
+      setOrgAccountID(account_id)
+      setToken(token)
+    }
+    
+    _getAccount()
+  }, [])
+  useEffect(() => {
+    if (!socket || !org_acc_id) return
+    socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+     const a =  updateBandwidth(bandwidth, data?.packet)
+     console.log('%c Line:99 🌶 a', 'color:#ffdd4d', a, bandwidth);
+     setBandwidth(a)
+    })
+  },[socket, org_acc_id])
 
   const fetchMoreData = async () => {
     if (!unique_source_ips || unique_source_ips.length === 0) {

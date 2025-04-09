@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   type ChartConfig,
@@ -10,7 +9,6 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 import { api } from '~/trpc/react'
-
 import { type IFormProps } from '../types'
 import { formatBytes } from './function/formatBytes'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
@@ -38,8 +36,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
-
-
 
   // Use a ref to store the previous traffic value
   const previousTrafficRef = useRef<number>(initialTraffic)
