@@ -9,7 +9,6 @@ import {
 
 import { api } from "~/trpc/server";
 import { type ITabGrid } from "~/server/api/types";
-import { headers } from "next/headers";
 import { useEffect, useState } from 'react';
 import { get_filter_by, get_sort_by } from '../Action/getFilterby';
 import TabGridMenu from '../TabGridMenu';

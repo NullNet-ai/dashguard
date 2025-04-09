@@ -159,7 +159,7 @@ export const MessageInputBox = React.forwardRef<HTMLDivElement, MessageInputBoxP
     maxLines,
     showCharCount = false,
     maxCharCount,
-    emojiPickerConfig, // Add this line to destructure the prop
+    emojiPickerConfig,
     ...props
   }, ref) => {
     const [isEmojiOpen, setIsEmojiOpen] = React.useState(false);
@@ -194,11 +194,11 @@ export const MessageInputBox = React.forwardRef<HTMLDivElement, MessageInputBoxP
     return (
       <div 
         ref={ref} 
-        className={cn("mt-1 border rounded-md bg-white", className)}
+        className={cn("mt-1 border rounded-md bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary", className)}
         {...props}
       >
         <form onSubmit={handleSubmit}>
-          <div className="p-3">
+          <div className="p-3 pb-0">
             <AutosizeTextarea
               value={value}
               onChange={handleChange}
@@ -209,13 +209,14 @@ export const MessageInputBox = React.forwardRef<HTMLDivElement, MessageInputBoxP
               maxLines={maxLines}
               showCharCount={showCharCount}
               maxCharCount={maxCharCount}
+              disableResize
               className={cn(
-                "text-sm border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none",
+                "text-md border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0",
                 textareaClassName
               )}
             />
           </div>
-          <div className={cn("px-3 py-2 flex justify-between items-center", actionsClassName)}>
+          <div className={cn("px-3 py-2 pt-0 flex justify-between items-center", actionsClassName)}>
             <div className="flex gap-2">
               {onAttachmentClick && (
                 <button 

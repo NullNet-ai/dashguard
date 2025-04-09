@@ -47,7 +47,7 @@ export default function Wizard(props: Wizard) {
             <div className="border-b flex items-center md:h-[2.72rem]">
               <Header />
             </div>
-            <div className="h-[calc(100vh-10rem)] overflow-auto">
+            <div className="md:h-[calc(100vh-10rem)] h-[calc(100vh-14rem)] overflow-auto">
               {children}
             </div>
           </div>

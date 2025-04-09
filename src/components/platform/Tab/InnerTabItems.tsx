@@ -30,7 +30,6 @@ type InnerTabItemsProps = {
 const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const { isBannerPresent } = useSidebar()
   const newPathname = usePathname()
-  const [cachedItem, setCachedItem] = useState<any>({})
   const { open } = useSidebar();
   const router = useRouter();
   const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
@@ -41,7 +40,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const [copyTab, setCopyTab] = useState<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('')
-    const  {state: drawerState,  } = useSideDrawer ()
+  const  {state: drawerState,  } = useSideDrawer ()
   const {width, isOpen, isPinned} = drawerState
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
@@ -50,7 +49,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const conWidth = useMemo(() =>   ({
     width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
   }), [open, width]);
-
 
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -141,6 +139,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
            
         }
       } else {
+        updatecachedItems(items);
         if(activeTab) {
           const href= items?.find((item) => item.current)?.href;
           router.push(href);
@@ -178,7 +177,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   };
 
   const hasResult = useMemo(() => {
-    if(tablists?.length) {
+    if(tablists?.length && searchValue !== '') {
      return  Boolean(tablists?.filter((dta) => dta.hidden && (!!searchValue ? toLower(dta?.name)?.includes(toLower(searchValue)) : true ))?.length)
     } 
     return false
@@ -239,8 +238,8 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
             const resetOrder = newTablists.map((tab, index) => {
               return { ...tab, order: index };
             });
-            setTablists(resetOrder);
             updatecachedItems(resetOrder);
+            setTablists(resetOrder);
             
           }}
         >
@@ -345,6 +344,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
                     >
                       <InnerDropTabItem
                         tab={itm}
+                        onClickItem={handleTabClickDropdown}
                         shownItems={tablists}
                         dropItems={copyTab?.filter((dta: any) => dta.hidden)}
                         pathname={pathname}

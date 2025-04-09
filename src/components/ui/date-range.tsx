@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import TimePicker from "~/components/ui/time-picker";
+import { useMediaQuery } from "react-responsive";
 
 export type DateRangePreset =
   | "today"
@@ -41,10 +42,11 @@ export interface DateRangeProps {
   showPresets?: boolean;
   className?: string;
   disabled?: boolean;
-  readonly?: boolean; // Add readonly prop
+  readonly?: boolean;
   placeholder?: string;
   presets?: DateRangePreset[];
   displayValue?: string;
+  error?: boolean; // Add error prop
 }
 
 const isValidDate = (date: any): boolean => {
@@ -59,25 +61,67 @@ export function DateRangePicker({
   showPresets = false,
   className,
   disabled = false,
-  readonly = false, // Add readonly with default false
+  readonly = false,
   placeholder = "Select date range",
   presets = ["today", "yesterday", "tomorrow", "last7Days", "thisWeek", "thisMonth", "custom"],
   displayValue,
+  error = false, // Add error with default false
 }: DateRangeProps) {
   const [selectedRange, setSelectedRange] = useState<DateRange | DateRangeWithTime | undefined>(value);
   const [activePreset, setActivePreset] = useState<DateRangePreset | undefined>(undefined);
+  // Add media query hook for responsive design
+  const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
 
-  // Add useEffect to sync value with selectedRange
+  // Add useEffect to sync value with selectedRange - improve deep copying
   useEffect(() => {
     // If value changes externally, update the selectedRange
     if (value !== undefined) {
-      setSelectedRange(value);
+      // Create a deep copy to avoid reference issues
+      if (withTime && 'from' in (value as any)) {
+        const newValue: DateRangeWithTime = {
+          from: undefined,
+          to: undefined
+        };
+        
+        if ((value as DateRangeWithTime).from) {
+          newValue.from = {
+            date: new Date((value as DateRangeWithTime).from!.date),
+            time: (value as DateRangeWithTime).from!.time 
+              ? new Date((value as DateRangeWithTime).from!.time!) 
+              : undefined
+          };
+        }
+        
+        if ((value as DateRangeWithTime).to) {
+          newValue.to = {
+            date: new Date((value as DateRangeWithTime).to!.date),
+            time: (value as DateRangeWithTime).to!.time 
+              ? new Date((value as DateRangeWithTime).to!.time!) 
+              : undefined
+          };
+        }
+        
+        setSelectedRange(newValue);
+      } else {
+        // For regular DateRange
+        const newValue: DateRange = { from: undefined, to: undefined };
+        
+        if ((value as DateRange).from) {
+          newValue.from = new Date((value as DateRange).from!);
+        }
+        
+        if ((value as DateRange).to) {
+          newValue.to = new Date((value as DateRange).to!);
+        }
+        
+        setSelectedRange(newValue);
+      }
     } else {
       // If value is undefined (which happens during form reset), clear the selection
       setSelectedRange(undefined);
       setActivePreset(undefined);
     }
-  }, [value]);
+  }, [value, withTime]);
 
   const handlePresetSelect = (preset: DateRangePreset) => {
     const today = new Date();
@@ -87,64 +131,106 @@ export function DateRangePicker({
       case "today":
         newRange = withTime
           ? {
-            from: { date: today, time: new Date(today.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: new Date(new Date().setHours(0, 0, 0, 0)), 
+              time: new Date(new Date().setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: new Date(new Date().setHours(0, 0, 0, 0)), 
+              time: new Date(new Date().setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: today, to: today };
         break;
       case "yesterday":
-        const yesterday = addDays(today, -1);
+        const yesterday = addDays(new Date(), -1);
         newRange = withTime
           ? {
-            from: { date: yesterday, time: new Date(yesterday.setHours(0, 0, 0, 0)) },
-            to: { date: yesterday, time: new Date(yesterday.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: yesterday, 
+              time: new Date(new Date(yesterday).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: yesterday, 
+              time: new Date(new Date(yesterday).setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: yesterday, to: yesterday };
         break;
       case "tomorrow":
-        const tomorrow = addDays(today, 1);
+        const tomorrow = addDays(new Date(), 1);
         newRange = withTime
           ? {
-            from: { date: tomorrow, time: new Date(tomorrow.setHours(0, 0, 0, 0)) },
-            to: { date: tomorrow, time: new Date(tomorrow.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: tomorrow, 
+              time: new Date(new Date(tomorrow).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: tomorrow, 
+              time: new Date(new Date(tomorrow).setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: tomorrow, to: tomorrow };
         break;
       case "last7Days":
-        const sevenDaysAgo = addDays(today, -6);
+        const sevenDaysAgo = addDays(new Date(), -7);
         newRange = withTime
           ? {
-            from: { date: sevenDaysAgo, time: new Date(sevenDaysAgo.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: sevenDaysAgo, 
+              time: new Date(new Date(sevenDaysAgo).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: new Date(), 
+              time: new Date(new Date().setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: sevenDaysAgo, to: today };
         break;
       case "last30Days":
-        const thirtyDaysAgo = addDays(today, -29);
+        const thirtyDaysAgo = addDays(new Date(), -29);
         newRange = withTime
           ? {
-            from: { date: thirtyDaysAgo, time: new Date(thirtyDaysAgo.setHours(0, 0, 0, 0)) },
-            to: { date: today, time: new Date(today.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: thirtyDaysAgo, 
+              time: new Date(new Date(thirtyDaysAgo).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: new Date(), 
+              time: new Date(new Date().setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: thirtyDaysAgo, to: today };
         break;
       case "thisWeek":
-        const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-        const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+        const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
+        const weekEnd = endOfWeek(new Date(), { weekStartsOn: 0 });
         newRange = withTime
           ? {
-            from: { date: weekStart, time: new Date(weekStart.setHours(0, 0, 0, 0)) },
-            to: { date: weekEnd, time: new Date(weekEnd.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: weekStart, 
+              time: new Date(new Date(weekStart).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: weekEnd, 
+              time: new Date(new Date(weekEnd).setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: weekStart, to: weekEnd };
         break;
       case "thisMonth":
-        const monthStart = startOfMonth(today);
-        const monthEnd = endOfMonth(today);
+        const monthStart = startOfMonth(new Date());
+        const monthEnd = endOfMonth(new Date());
         newRange = withTime
           ? {
-            from: { date: monthStart, time: new Date(monthStart.setHours(0, 0, 0, 0)) },
-            to: { date: monthEnd, time: new Date(monthEnd.setHours(23, 59, 59, 999)) }
+            from: { 
+              date: monthStart, 
+              time: new Date(new Date(monthStart).setHours(0, 0, 0, 0))  // Set default time to 00:00
+            },
+            to: { 
+              date: monthEnd, 
+              time: new Date(new Date(monthEnd).setHours(23, 59, 0, 0))  // Set default time to 23:59
+            }
           }
           : { from: monthStart, to: monthEnd };
         break;
@@ -153,19 +239,101 @@ export function DateRangePicker({
         return;
     }
 
+    // Update state immediately without JSON serialization to avoid flickering
     setSelectedRange(newRange);
     setActivePreset(preset);
+    
+    // Notify parent without setTimeout to reduce flickering
     onChange?.(newRange);
   };
 
-  const formatDateRange = () => {
+  // Fix the handleTimeChange function to ensure proper typing
+  const handleTimeChange = (date: Date | undefined, isFrom: boolean) => {
+    if (!withTime || !selectedRange) return;
 
+    // Create a deep copy of the current range to avoid reference issues
+    const currentRange = selectedRange as DateRangeWithTime;
+    
+    // Create a new range object with proper Date objects
+    const newRange: DateRangeWithTime = {
+      from: currentRange.from ? {
+        date: new Date(currentRange.from.date),
+        time: currentRange.from.time ? new Date(currentRange.from.time) : undefined
+      } : undefined,
+      to: currentRange.to ? {
+        date: new Date(currentRange.to.date),
+        time: currentRange.to.time ? new Date(currentRange.to.time) : undefined
+      } : undefined
+    };
+    
+    // Update the appropriate time value
+    if (isFrom && newRange.from) {
+      newRange.from.time = date ? new Date(date) : undefined;
+    } else if (!isFrom && newRange.to) {
+      newRange.to.time = date ? new Date(date) : undefined;
+    }
+    
+    // Update local state first
+    setSelectedRange(newRange);
+    
+    // Then notify parent component
+    onChange?.(newRange);
+  };
+
+  // Improve the handleCalendarSelect function
+  const handleCalendarSelect = (range: DateRange | undefined) => {
+    if (!range) {
+      setSelectedRange(undefined);
+      onChange?.(undefined);
+      return;
+    }
+
+    if (withTime) {
+      // Create a new range with default times
+      const newRange: DateRangeWithTime = {
+        from: range.from ? {
+          date: new Date(range.from),
+          // Always set a default time for from date
+          time: new Date(new Date(range.from).setHours(0, 0, 0, 0))
+        } : undefined,
+        to: range.to ? {
+          date: new Date(range.to),
+          // Always set a default time for to date
+          time: new Date(new Date(range.to).setHours(23, 59, 0, 0))
+        } : undefined
+      };
+      
+      // Update state directly with the new range that includes time values
+      setSelectedRange(newRange);
+      onChange?.(newRange);
+    } else {
+      // Create a new object to avoid reference issues
+      const newRange: DateRange = {
+        from: range.from ? new Date(range.from) : undefined,
+        to: range.to ? new Date(range.to) : undefined
+      };
+      setSelectedRange(newRange);
+      onChange?.(newRange);
+    }
+
+    setActivePreset("custom");
+  };
+
+  // Add the missing handleResetSelection function after handleCalendarSelect
+  // Fix the handleResetSelection function by removing the unused parameter
+  const handleResetSelection = () => {
+    setSelectedRange(undefined);
+    setActivePreset(undefined);
+    onChange?.(undefined);
+  };
+
+  // Fix the nested useEffect issue by moving formatDateRange outside
+  const formatDateRange = () => {
     if (displayValue !== undefined) return displayValue;
 
     if (!selectedRange) return placeholder;
 
     if (withTime && 'from' in selectedRange && selectedRange.from) {
-
       if ('date' in selectedRange.from) {
         const fromDate = selectedRange.from.date;
         const fromTime = selectedRange.from.time;
@@ -175,10 +343,10 @@ export function DateRangePicker({
         if (!isValidDate(fromDate)) return placeholder;
 
         if (!toDate || !isValidDate(toDate)) {
-          return `${format(fromDate, "MM/dd/yyyy")} ${fromTime && isValidDate(fromTime) ? format(fromTime, "hh:mm a") : ""}`;
+          return `${format(fromDate, "MM/dd/yyyy")}${fromTime && isValidDate(fromTime) ? ` ${format(fromTime, is24Hour ? "HH:mm" : "hh:mm a")}` : ""}`;
         }
 
-        return `${format(fromDate, "MM/dd/yyyy")} ${fromTime && isValidDate(fromTime) ? format(fromTime, "hh:mm a") : ""} – ${format(toDate, "MM/dd/yyyy")} ${toTime && isValidDate(toTime) ? format(toTime, "hh:mm a") : ""}`;
+        return `${format(fromDate, "MM/dd/yyyy")}${fromTime && isValidDate(fromTime) ? ` ${format(fromTime, is24Hour ? "HH:mm" : "hh:mm a")}` : ""} – ${format(toDate, "MM/dd/yyyy")}${toTime && isValidDate(toTime) ? ` ${format(toTime, is24Hour ? "HH:mm" : "hh:mm a")}` : ""}`;
       }
     }
 
@@ -191,86 +359,7 @@ export function DateRangePicker({
     return `${format(from, "MM/dd/yyyy")} – ${format(to, "MM/dd/yyyy")}`;
   };
 
-  const handleCalendarSelect = (range: DateRange | undefined) => {
-    if (!range) {
-      setSelectedRange(undefined);
-      onChange?.(undefined);
-      return;
-    }
-
-    if (withTime) {
-      const newRange: DateRangeWithTime = {
-        from: range.from ? {
-          date: range.from,
-          time: selectedRange && 'from' in selectedRange && selectedRange.from &&
-            'date' in selectedRange.from ? selectedRange.from.time : undefined
-        } : undefined,
-        to: range.to ? {
-          date: range.to,
-          time: selectedRange && 'to' in selectedRange && selectedRange.to &&
-            'date' in selectedRange.to ? selectedRange.to.time : undefined
-        } : undefined
-      };
-      setSelectedRange(newRange);
-      onChange?.(newRange);
-    } else {
-      setSelectedRange(range);
-      onChange?.(range);
-    }
-
-    setActivePreset("custom");
-  };
-
-  const handleTimeChange = (date: Date | undefined, isFrom: boolean) => {
-    if (!withTime || !selectedRange) return;
-
-    if (date && !isValidDate(date)) {
-      date = undefined;
-    }
-
-    const rangeWithTime = selectedRange as DateRangeWithTime;
-
-    if (isFrom && rangeWithTime.from) {
-      const newRange = {
-        ...rangeWithTime,
-        from: { ...rangeWithTime.from, time: date }
-      };
-      setSelectedRange(newRange);
-      onChange?.(newRange);
-    } else if (!isFrom && rangeWithTime.to) {
-      const newRange = {
-        ...rangeWithTime,
-        to: { ...rangeWithTime.to, time: date }
-      };
-      setSelectedRange(newRange);
-      onChange?.(newRange);
-    }
-  };
-
-  // Add the missing handleResetSelection function
-  const handleResetSelection = () => {
-    setSelectedRange(undefined);
-    setActivePreset(undefined);
-    // Pass undefined to the onChange handler to properly reset the field
-    onChange?.(undefined);
-  };
-  
-  // Modify the useEffect to properly handle reset
-  useEffect(() => {
-    // If value changes externally, update the selectedRange
-    if (value !== undefined) {
-      setSelectedRange(value);
-    } else {
-      // If value is undefined (which happens during form reset), clear the selection
-      setSelectedRange(undefined);
-      setActivePreset(undefined);
-    }
-  }, [value]);
-  
-  // Remove the duplicate useEffect that was added
-  // (The one at the end of the file that doesn't handle undefined values)
-
-  // Validate the range
+  // Fix the validation useEffect (remove the nested useEffect)
   useEffect(() => {
     if (!selectedRange) return;
 
@@ -335,13 +424,6 @@ export function DateRangePicker({
     }
   }, [selectedRange, withTime, onChange]);
 
-  // Add useEffect to sync value with selectedRange
-  useEffect(() => {
-    // If value changes externally, update the selectedRange
-    if (value !== undefined) {
-      setSelectedRange(value);
-    }
-  }, [value]);
 
   return (
     <div className={cn("grid gap-2 ", className)}>
@@ -353,7 +435,10 @@ export function DateRangePicker({
           }
         }}>
           {readonly ? (
-            <div className="flex items-center h-[36px] w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-ring">
+            <div className={cn(
+              "flex items-center h-[36px] w-full rounded-md border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-ring",
+              error ? "border-destructive" : "border-input"
+            )}>
               <CalendarIcon className="mr-2 size-5 text-muted-foreground flex-shrink-0" />
               <input 
                 type="text" 
@@ -372,7 +457,8 @@ export function DateRangePicker({
               className={cn(
                 "w-full justify-start text-left text-md font-normal rounded-md h-[36px]",
                 (!selectedRange || !value) && "text-muted-foreground",
-                selectedRange && value && "text-foreground"
+                selectedRange && value && "text-foreground",
+                error && "border-destructive"
               )}
               disabled={disabled}
             >
@@ -383,8 +469,8 @@ export function DateRangePicker({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 max-h-[80vh] overflow-auto",
-            withTime ? "w-[350px] sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
+            "p-0 max-h-[76vh] overflow-auto z-0",
+            withTime ? "sm:w-[400px] md:w-auto" : "w-[300px] md:w-auto"
           )}
           align="start"
         >
@@ -480,15 +566,17 @@ export function DateRangePicker({
                         ? selectedRange.from.date
                         : undefined
                   }
-                  selected={withTime && selectedRange
-                    ? {
-                      from: selectedRange.from && 'date' in selectedRange.from ? selectedRange.from.date : undefined,
-                      to: selectedRange.to && 'date' in selectedRange.to ? selectedRange.to.date : undefined
-                    }
-                    : selectedRange as DateRange
+                  selected={
+                    withTime && selectedRange && 'from' in selectedRange
+                      ? {
+                          from: selectedRange.from instanceof Date ? selectedRange.from : selectedRange.from?.date,
+                          to: selectedRange.to instanceof Date ? selectedRange.to : selectedRange.to?.date
+                        }
+                      : selectedRange as DateRange
                   }
                   onSelect={handleCalendarSelect}
-                  numberOfMonths={2}
+                  numberOfMonths={isDesktop ? 2 : 1}
+                  showOutsideDays={!isDesktop}
                   disabled={disabled}
                   className="rounded-md w-full"
                 />
@@ -512,12 +600,13 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">Start Time</span>
                       <TimePicker
+                        key={`start-time-${selectedRange?.from && 'date' in selectedRange.from ? selectedRange.from.date.getTime() : 'none'}`}
                         value={
                           selectedRange?.from &&
-                            typeof selectedRange.from !== 'string' &&
-                            'date' in selectedRange.from ?
-                            selectedRange.from.time :
-                            undefined
+                          typeof selectedRange.from !== 'string' &&
+                          'date' in selectedRange.from ?
+                          selectedRange.from.time :
+                          undefined
                         }
                         onChange={(date) => handleTimeChange(date, true)}
                         is24Hour={is24Hour}
@@ -534,12 +623,13 @@ export function DateRangePicker({
                     <div className="">
                       <span className="text-sm font-medium">End Time</span>
                       <TimePicker
+                        key={`end-time-${selectedRange?.to && 'date' in selectedRange.to ? selectedRange.to.date.getTime() : 'none'}`}
                         value={
                           selectedRange?.to &&
-                            typeof selectedRange.to !== 'string' &&
-                            'date' in selectedRange.to ?
-                            selectedRange.to.time :
-                            undefined
+                          typeof selectedRange.to !== 'string' &&
+                          'date' in selectedRange.to ?
+                          selectedRange.to.time :
+                          undefined
                         }
                         onChange={(date) => handleTimeChange(date, false)}
                         is24Hour={is24Hour}

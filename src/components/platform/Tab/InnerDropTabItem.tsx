@@ -14,6 +14,7 @@ type InnerTabitemProps = {
   isActive: boolean
   onSelect?: () => void
   shownItems: any[]
+  onClickItem?: (tab?: any) => void
 };
 
 const InnerDropTabItem = ({
@@ -23,6 +24,7 @@ const InnerDropTabItem = ({
   isActive,
   onSelect,
   shownItems,
+  onClickItem,
 }: InnerTabitemProps) => {
   const updateSubtabs = api.tab.updateSubTabs.useMutation();
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
@@ -88,8 +90,9 @@ const InnerDropTabItem = ({
         data-test-id={
           'apptab-' + tabNameRole
         }
-        onClick={() => {
-          handleClickLink()
+        onClick={(e) => {
+          e?.preventDefault()
+          onClickItem?.(tab)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}

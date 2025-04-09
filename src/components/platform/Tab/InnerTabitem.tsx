@@ -114,15 +114,17 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         </SortableDragHandleRawItem>
       ) : null}
       
-        <div
+        <Link
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
           onClick={(e) => {
+            e.preventDefault()
             e.stopPropagation()
             handleClick?.(tab)
-
+            
           }}
+          href={tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
             isActive ? 'text-primary ' : 'text-default-foreground/60', 'cursor-pointer whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
@@ -130,7 +132,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         >
           {formatTabName(tabNameRole)}
           <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-        </div>
+        </Link>
   
       {!isHidden && !isGrid
         ? (

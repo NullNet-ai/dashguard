@@ -21,7 +21,7 @@ type InnerTabitemProps = {
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  onClickItem?: (tab?: any) => void
 }
 
 const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -29,8 +29,8 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   pathname,
   newItems,
   className,
-  lastShownItem,
   isHidden,
+  onClickItem
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -131,8 +131,10 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
-            handleClickLink(tab)
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation
+            onClickItem?.(tab)
           }}
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={tab.current ? 'page' : undefined}
