@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "http://localhost:5001";
+const SOCKET_SERVER_URL = "http://datastore.nullnetqa.net";
 
 interface Notification {
   type: string;
