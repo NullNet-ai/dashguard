@@ -119,10 +119,12 @@ const InteractiveGraph = ({
       }
     }, [])
 
+    console.log('%c Line:122 🥓', 'color:#ea7e5c', {socket, org_acc_id});
     useEffect(() => {
 
       
       console.log('%c Line:126 🍧 socket', 'color:#ffdd4d', socket);
+      console.log('%c Line:127 🍋 org_acc_id', 'color:#ea7e5c', org_acc_id);
       if (!socket || !org_acc_id) return
 
       console.log('%c Line:128 🍻', 'color:#2eafb0', `${channel_name}-${org_acc_id}`);
