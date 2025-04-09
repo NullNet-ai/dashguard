@@ -59,6 +59,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
   };
 
   
+  console.log('%c Line:62 🍑', 'color:#ea7e5c', socketRef.current);
   return {
     socket: socketRef.current,
     isConnected,
