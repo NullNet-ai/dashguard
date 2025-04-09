@@ -122,9 +122,11 @@ const InteractiveGraph = ({
     useEffect(() => {
 
       
+      console.log('%c Line:126 🍧 socket', 'color:#ffdd4d', socket);
       if (!socket || !org_acc_id) return
       socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
         
+        console.log('%c Line:128 🍫', 'color:#f5ce50', `${channel_name}-${org_acc_id}`,'data:: ', data);
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
        setFilteredData(updated_filtered_data)
       })
