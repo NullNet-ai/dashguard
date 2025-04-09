@@ -46,7 +46,7 @@ export default async function SetupPassword() {
 
           <div className="mt-11">
             <div>
-              <ResetPasswordForm />
+              <ResetPasswordForm account_id={record.id as string} />
             </div>
           </div>
         </div>

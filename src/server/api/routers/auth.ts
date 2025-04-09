@@ -2,18 +2,14 @@ import { EOperator } from '@dna-platform/common-orm';
 import argon2 from 'argon2';
 import { z } from 'zod';
 
+import { TRPCError } from '@trpc/server';
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from '~/server/api/trpc';
-import type { TokenData } from '../types';
-import { ulid } from 'ulid';
-import { sendEmail } from '~/lib/email-helper';
-import { headers } from 'next/headers';
 import { formatDate } from '~/server/utils/formatDate';
-import { TRPCError } from '@trpc/server';
-import { TMethod, createSchedule, dateToCron } from '~/lib/createSchedule';
+import type { TokenData } from '../types';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 const INVITATION_LINK_EXPIRED = parseInt(
@@ -53,16 +49,12 @@ export const authRouter = createTRPCRouter({
       } catch (error: any) {
         let errorMessage = 'Something went wrong please try again';
         let errorType = 'unknown';
-
-        switch (error?.message) {
-          case 'Invalid Credentials':
-            errorMessage = 'The email or password you entered is incorrect.';
-            errorType = 'invalid';
-            break;
-          case 'Account not found':
-            errorMessage = 'No account was found with this email address.';
-            errorType = ' notfound';
-            break;
+        if (error.errors?.[0]?.message.includes('Invalid Credentials')) {
+          errorMessage = 'The email or password you entered is incorrect.';
+          errorType = 'invalid';
+        } else if (error.errors?.[0]?.message.includes('Account not found')) {
+          errorMessage = 'No account was found with this email address.';
+          errorType = 'notfound';
         }
 
         return {
@@ -451,44 +443,11 @@ export const authRouter = createTRPCRouter({
       }
       console.info('[Create Invitation]', record?.data);
       const invitationRecord = record?.data?.[0] ?? {};
-      const headerList = headers();
-      const host = headerList.get('host'); // Get the host from request headers
-      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
-      const _host = '10.4.10.45:3000'
-      const baseURL = `${protocol}://${_host}`; // Construct base URL
 
-      const resetPasswordLink = `${baseURL}/reset-password/${invitationRecord?.id}`;
-      await sendEmail({
-        from: 'no-reply@dnamicro.com',
-        to: input.email,
-        subject: 'Forgot Password',
-        html: `
-        <p>Hello ${accountDetails?.data?.[0]?.contacts?.first_name} ${accountDetails?.data?.[0]?.contacts?.last_name},</p>
-        <p>You have requested to reset your password.</p>
-        <p>Please click the link below to reset your password.</p>
-        <p><a href="${resetPasswordLink}">Reset Password</a></p>
-        <p>Thank you,</p>
-        <p>DNA Platform</p>
-        `,
-      });
-      const cronTime = dateToCron(
-        new Date(formatDate(expirationDate).dataTime),
-      );
-      console.log("🚀 ~ .mutation ~ cronTime:", cronTime)
-
-      const _cronTime = '02 14 2 4 *'
-      const scheduleConfig = {
-        enabled: true,
-        cron: cronTime,
-        callback_url: `${baseURL}/api/account/reset-password-expire`,
-        method: 'POST' as TMethod,
-        parameters: {
-          invitation_id: invitationRecord?.id,
-        },
-        wait_for_completion: true,
+      return {
+        account_record_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+        invitationRecord,
       };
-      createSchedule(scheduleConfig);
-      return accountDetails?.data;
     }),
   resetPassword: publicProcedure
     .input(
@@ -503,21 +462,10 @@ export const authRouter = createTRPCRouter({
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
-      const password = await argon2.hash(input.account_secret);
+   
       const response = await ctx.dnaClient
-        .update(input.id, {
-          entity: 'organization_accounts',
+        .rootUpdateAccountPassword(input.id, input.account_secret, {
           token: rootAccountToken,
-          as_root: asRoot,
-          mutation: {
-            params: {
-              is_new_user: false,
-              account_secret: password,
-              password,
-              account_status: 'Active',
-            },
-            pluck: ['id', 'account_secret', 'is_new_user'],
-          },
         })
         .execute();
 
@@ -525,6 +473,6 @@ export const authRouter = createTRPCRouter({
         return null;
       }
 
-      return response?.data?.[0];
+      return response;
     }),
 });

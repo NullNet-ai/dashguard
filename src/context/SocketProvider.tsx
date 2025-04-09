@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect } from 'react';
-import { handleEvent } from '~/server/event-listeners';
+import { handleEvent } from '~/server/events';
 import socketClient from '~/server/socketClient';
 
 const SocketContext = createContext(socketClient);
@@ -15,7 +15,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       // Cleanup on unmount
       socketClient.socket?.removeAllListeners();
-      socketClient.onDisconnect();
     };
   }, []);
   return (
@@ -25,4 +24,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error('useSocket must be used within a SocketProvider');
+  }
+  return context;
+};

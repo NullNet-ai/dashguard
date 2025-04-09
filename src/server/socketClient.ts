@@ -9,7 +9,7 @@ const {
 
 class SocketClient {
   public socket;
-  private token = '';
+  public token = '';
 
   constructor() {
     this.socket = io(SOCKET_URL, {
@@ -52,6 +52,7 @@ class SocketClient {
 
   public onDisconnect() {
     console.info('Socket disconnected');
+    this.socket.connect();
   }
 
   private onConnect() {
@@ -88,26 +89,6 @@ class SocketClient {
     );
   }
 
-  public addEventListener(
-    eventName: string,
-    callback: (...args: any[]) => void,
-  ) {
-    if (!this.socket.connected) {
-      this.socket.connect();
-    }
-
-    if (eventName === '*') {
-      this.socket.onAny((...args) => {
-        console.info(`Event received: ${args[0]}`, args.slice(1));
-        callback(...args);
-      });
-    } else {
-      this.socket.on(eventName, (...args) => {
-        console.info(`Event ${eventName} received:`, args);
-        callback(...args);
-      });
-    }
-  }
 }
 
 const client = new SocketClient();

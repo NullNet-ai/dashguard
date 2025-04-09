@@ -6,7 +6,7 @@ interface IProps {
   entity: string;
 }
 
-const additionalVariables = [
+const customVariables = [
   {
     value: 'link',
     label: 'link',
@@ -21,5 +21,5 @@ export async function GetVariables({ entity }: IProps) {
     value: variable,
     label: variable,
   }));
-  return [options, ...additionalVariables];
+  return [...options, ...customVariables];
 }

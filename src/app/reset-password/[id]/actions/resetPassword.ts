@@ -15,7 +15,7 @@ export const resetPassword = async ({
     id,
     account_secret,
   });
-  if (response?.id) {
+  if (response?.success) {
     redirect('/login');
   }
 };

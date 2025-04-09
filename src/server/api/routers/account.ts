@@ -1730,13 +1730,19 @@ export const accountRouter = createTRPCRouter({
           .execute();
       });
     }),
-  getAccountDetails: privateProcedure
+  getAccountDetails: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
       const account = await ctx.dnaClient
         .findAll({
           entity: 'organization_accounts',
-          token: ctx.token.value,
+          token: rootAccountToken,
+          as_root: asRoot,
           query: {
             advance_filters: createAdvancedFilter({
               id: input?.id,

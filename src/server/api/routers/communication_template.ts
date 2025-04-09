@@ -1,6 +1,7 @@
 import {
   createTRPCRouter,
   privateProcedure,
+  publicProcedure,
 } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
@@ -92,7 +93,7 @@ export const communicationTemplateRouter = createTRPCRouter({
         data: variables,
       };
     }),
-  getCommunicationTemplate: privateProcedure
+  getCommunicationTemplate: publicProcedure
     .input(
       z.object({
         eventName: z.string(),

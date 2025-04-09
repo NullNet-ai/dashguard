@@ -11,14 +11,6 @@ import { type IFormProps } from '../types';
 import ContentField from './custom/ContentSubjectField';
 import { formatTabName } from '~/lib/utils';
 
-const additionalSourceData = [
-  {
-    label: 'Link',
-    value: 'link',
-    custom: true
-  },
-];
-
 export default function Content({ params, defaultValues }: IFormProps) {
   const toast = useToast();
   const searchParams = useSearchParams();
@@ -96,7 +88,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
         },
       ]}
       selectOptions={{
-        data_source: [...data_source, ...additionalSourceData],
+        data_source: data_source,
       }}
     />
   );
