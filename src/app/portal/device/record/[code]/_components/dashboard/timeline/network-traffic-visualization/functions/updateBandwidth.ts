@@ -42,15 +42,16 @@ export function updateBandwidth(data: SourceData[], packet: Packet): SourceData[
           .sort((a, b) => new Date(b.bucket).getTime() - new Date(a.bucket).getTime())
           .slice(0, 20);
   } else {
-      data.push({
-          source_ip: packet.source_ip,
-          result: [{
-              bucket: bucketTime,
-              bandwidth: packet.total_length.toString()
-          }],
-          flag: "", // Placeholder, can be set dynamically
-          name: "No IP Info"
-      });
+      // data.push();
+      data.unshift({
+        source_ip: packet.source_ip,
+        result: [{
+            bucket: bucketTime,
+            bandwidth: packet.total_length.toString()
+        }],
+        flag: "", // Placeholder, can be set dynamically
+        name: "No IP Info"
+    });
   }
 
   console.log('%c Line:57 🌰 data', 'color:#3f7cff', data);

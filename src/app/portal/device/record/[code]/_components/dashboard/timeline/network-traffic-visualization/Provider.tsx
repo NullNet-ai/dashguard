@@ -99,7 +99,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
      console.log('%c Line:99 🌶 a', 'color:#ffdd4d', a, bandwidth);
      setBandwidth(a)
     })
-  },[socket, org_acc_id])
+  },[socket, org_acc_id, bandwidth])
 
   const fetchMoreData = async () => {
     if (!unique_source_ips || unique_source_ips.length === 0) {
