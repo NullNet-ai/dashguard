@@ -45,6 +45,12 @@ const useSocketNotifications = (token: string) => {
       addNotification("Database Change", data);
     });
 
+    newSocket.on("packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4", (data: Record<string,string>) => {
+      console.log('%c Line:49 🍇 data', 'color:#2eafb0', data);
+      addNotification("Database Change", data);
+    });
+    
+
     setSocket(newSocket);
 
     return () => {
