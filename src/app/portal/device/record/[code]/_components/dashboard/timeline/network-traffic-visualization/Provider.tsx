@@ -1,7 +1,9 @@
 'use client'
 import React, {
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type PropsWithChildren,
 } from 'react'
@@ -92,14 +94,28 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     
     _getAccount()
   }, [])
+
+  const handleSocketData = useCallback(
+    (data: Record<string, any>) => {
+      const _bandwidth = updateBandwidth(bandwidth, data?.packet);
+      console.log('%c Line:99 🌶 a', 'color:#ffdd4d', _bandwidth, bandwidth);
+      setBandwidth([..._bandwidth])
+    },
+    [bandwidth]
+  );
+  
   useEffect(() => {
-    if (!socket || !org_acc_id) return
-    socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
-     const a =  updateBandwidth(bandwidth, data?.packet)
-     console.log('%c Line:99 🌶 a', 'color:#ffdd4d', a, bandwidth);
-     setBandwidth(a)
-    })
-  },[socket, org_acc_id, bandwidth])
+    if (!socket || !org_acc_id) return;
+  
+    const eventKey = `${channel_name}-${org_acc_id}`;
+    socket.on(eventKey, handleSocketData);
+  
+    return () => {
+      socket.off(eventKey, handleSocketData); // Cleanup
+    };
+  }, [socket, org_acc_id, handleSocketData]);
+  console.log('%c Line:193 🍞 bandwidth', 'color:#93c0a4', bandwidth);
+  
 
   const fetchMoreData = async () => {
     if (!unique_source_ips || unique_source_ips.length === 0) {
@@ -188,11 +204,14 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     fetchBandwidth(20)
   }, [unique_source_ips])
 
+const chartData = useMemo(() => bandwidth,[bandwidth])
+
   const state = {
     flowData: bandwidth,
     loading,
     unique_source_ips,
     fetchMoreData,
+    chartData
 
   } as any
 

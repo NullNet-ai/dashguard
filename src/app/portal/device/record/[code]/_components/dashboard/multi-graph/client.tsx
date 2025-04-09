@@ -116,6 +116,10 @@ const InteractiveGraph = ({
     useEffect(() => {
       
       if (!socket || !org_acc_id) return
+      socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
+        console.log('%c Line:120 🥚 data', 'color:#b03734', data, socket);
+      
+      });
 
       socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
         // socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {

@@ -17,7 +17,7 @@ type Packet = {
 };
 
 export function updateBandwidth(data: SourceData[], packet: Packet): SourceData[] {
-  console.log('%c Line:20 🌶 data', 'color:#fca650', data);
+  
   const roundedTimestamp = new Date(packet.timestamp);
   roundedTimestamp.setMinutes(0, 0, 0); // Round down to the hour
   const bucketTime = roundedTimestamp.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:00:00"
@@ -28,6 +28,7 @@ export function updateBandwidth(data: SourceData[], packet: Packet): SourceData[
       const result = existingEntry.result;
       const match = result.find(r => r.bucket === bucketTime);
 
+      
       if (match) {
           match.bandwidth = (parseInt(match.bandwidth) + packet.total_length).toString();
       } else {
@@ -53,7 +54,6 @@ export function updateBandwidth(data: SourceData[], packet: Packet): SourceData[
         name: "No IP Info"
     });
   }
-
-  console.log('%c Line:57 🌰 data', 'color:#3f7cff', data);
+  
   return data;
 }
