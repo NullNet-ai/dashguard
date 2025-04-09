@@ -14,7 +14,6 @@ import { Card } from '~/components/ui/card'
 import { ChartContainer } from '~/components/ui/chart'
 import { Form } from '~/components/ui/form'
 import { api } from '~/trpc/react'
-
 import FormClientFetch from '../pie-chart/client-fetch'
 import { type IFormProps } from '../types'
 
@@ -34,6 +33,7 @@ const InteractiveGraph = ({
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const [filteredData, setFilteredData] = React.useState<any[]>([])
   const [token, setToken] = React.useState<string | null>(null)
+  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -46,11 +46,6 @@ const InteractiveGraph = ({
       pie_chart_interfaces: multiSelectOptions,
     },
   })
-  
-
-  
-  
-  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
   
   const _pie_chart_interfaces = form.watch('pie_chart_interfaces') ?? []
   const chartConfig = useMemo(() => {
@@ -105,7 +100,6 @@ const InteractiveGraph = ({
     useEffect(() => {
       const _getAccount = async () => {
         const res = await getAccount.mutateAsync()
-        console.log('%c Line:108 🥔 res', 'color:#42b983', res);
         const { account_id, token } = res || {}
         setOrgAccountID(account_id)
         setToken(token)
@@ -119,19 +113,13 @@ const InteractiveGraph = ({
       }
     }, [])
 
-    console.log('%c Line:122 🥓', 'color:#ea7e5c', {socket, org_acc_id});
     useEffect(() => {
-
       
-      console.log('%c Line:126 🍧 socket', 'color:#ffdd4d', socket);
-      console.log('%c Line:127 🍋 org_acc_id', 'color:#ea7e5c', org_acc_id);
       if (!socket || !org_acc_id) return
 
-      console.log('%c Line:128 🍻', 'color:#2eafb0', `${channel_name}-${org_acc_id}`);
       socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
         // socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
         
-        console.log('%c Line:128 🍫', 'color:#f5ce50', `${channel_name}-${org_acc_id}`,'data:: ', data);
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
        setFilteredData(updated_filtered_data)
       })

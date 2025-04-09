@@ -13,7 +13,9 @@ import { api } from '~/trpc/react'
 
 import { type IFormProps } from '../types'
 import { formatBytes } from './function/formatBytes'
+import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 
+const channel_name = 'packets_pie_chart'
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const initialTraffic = 0
@@ -31,6 +33,13 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     maxTraffic: 100,
   })
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic)
+  const [token, setToken] = React.useState<string | null>(null)
+  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+
+  const {socket} = useSocketConnection({channel_name, token})
+  const getAccount = api.organizationAccount.getAccountID.useMutation();
+
+
 
   // Use a ref to store the previous traffic value
   const previousTrafficRef = useRef<number>(initialTraffic)
@@ -43,6 +52,36 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       time_range: getLastTimeStamp({ count: 2, unit: 'minute', _now: new Date() }) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     }, { enabled: false })
+
+
+  useEffect(() => {
+    const _getAccount = async () => {
+      const res = await getAccount.mutateAsync()
+      
+      const { account_id, token } = res || {}
+      setOrgAccountID(account_id)
+      setToken(token)
+    }
+    
+    _getAccount()
+  }, [])
+
+  useEffect(() => {
+    if (!socket || !org_acc_id) return
+    let currentTime: any = null
+
+    
+    socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+      let currentTraffic = data?.packet?.total_length || 0
+      if(currentTime == data?.packet?.timestamp) {
+         currentTraffic = trafficData.traffic + data?.packet?.total_length
+      }
+      const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
+      setTrafficData({ traffic: currentTraffic, maxTraffic })
+      currentTime = data?.packet?.timestamp
+    })
+  },[socket, org_acc_id])
+    
 
   // Fetch traffic data every second
   useEffect(() => {
