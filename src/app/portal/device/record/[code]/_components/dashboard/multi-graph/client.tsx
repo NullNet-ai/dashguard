@@ -128,7 +128,8 @@ const InteractiveGraph = ({
       if (!socket || !org_acc_id) return
 
       console.log('%c Line:128 🍻', 'color:#2eafb0', `${channel_name}-${org_acc_id}`);
-      socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
+      socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+        // socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
         
         console.log('%c Line:128 🍫', 'color:#f5ce50', `${channel_name}-${org_acc_id}`,'data:: ', data);
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)

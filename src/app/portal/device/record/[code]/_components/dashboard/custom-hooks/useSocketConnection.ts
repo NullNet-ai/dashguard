@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
-// const SOCKET_URL = 'http://localhost:5001';
-const SOCKET_URL = 'http://datastore.nullnetqa.net';
+const SOCKET_URL = 'http://localhost:5001';
+// const SOCKET_URL = 'http://datastore.nullnetqa.net';
 
 export function useSocketConnection({channel_name, token}: {channel_name?: string, token: string | null}) {
   const socketRef = useRef<any | null>(null);

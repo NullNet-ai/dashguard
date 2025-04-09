@@ -17,16 +17,16 @@ export function updateNetworkBuckets(
     updatedBucket[interface_name] += total_length;
     updatedBuckets[existingIndex] = updatedBucket;
   } else {
+    const _keys = Object.keys(updatedBuckets[0]);
     // Bucket doesn't exist — create new one
     const newBucket: any = {
       bucket: bucketTime as string,
-      vtnet0: 0,
-      vtnet1: 0,
+      // Initialize all interfaces to 0
+      ...Object.fromEntries(_keys.filter((key) => key !== 'bucket').map((key) => [key, 0])),
+      [interface_name]:total_length
     };
-    newBucket[interface_name] = total_length;
-
+    // newBucket[interface_name] = total_length;
     updatedBuckets.push(newBucket);
-
     // Keep array length consistent by removing the oldest
     if (updatedBuckets.length > buckets.length) {
       updatedBuckets.shift();
