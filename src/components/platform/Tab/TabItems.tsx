@@ -23,9 +23,6 @@ import { ChevronDownIcon, Search, X } from 'lucide-react';
 import { Button } from '@headlessui/react';
 import { Input } from '~/components/ui/input';
 import MainDropTabItem from './MainDropTabItem';
-import { id } from 'date-fns/locale';
-import { current } from 'immer';
-
 
 type TabItemsProps = {
   items: IPropsTabList[]
@@ -69,7 +66,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   const itemsRef = useRef<any[]>([]);
 
   useEffect(() => {
+    // Only update tablists if they're different from current state
     setTablists(items);
+    
     if (items.length > 0 && !activeTab) {
       setActiveTab(items?.[0]?.id);
     }
@@ -141,7 +140,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
           }
         }
       }
-      const result = calculateMainTabItems(allItems, containerWidth, '')
+      const result = calculateMainTabItems(allItems, containerWidth, 'dashboard')
+
+
 
       return result;
     };
@@ -154,10 +155,10 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
         if(items?.length) {
           // setTablists(items);
           updatecachedItems(items);
-
           if(activeTab) {
             const href= items?.find((item) => item.current)?.href;
-            router.push(href);
+            //dont redirect if same url or href
+            // router.push(href);
           }
            
         }
@@ -183,6 +184,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     });
 
     setTablists(newTablist);
+    setTimeout(() => {
+      router.push(selectedTab.href);
+    }, 500);
   };
 
   const handleTabClickDropdown = (selectedTab: any) => {
@@ -198,6 +202,9 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
     });
 
     setTablists(newTablist);
+    setTimeout(() => {
+      router.push(selectedTab.href);
+    }, 500);
   };
 
   const handleRemoveTab = (tab: any) => {
