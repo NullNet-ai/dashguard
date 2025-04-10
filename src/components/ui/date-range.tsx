@@ -575,8 +575,8 @@ export function DateRangePicker({
                       : selectedRange as DateRange
                   }
                   onSelect={handleCalendarSelect}
-                  numberOfMonths={isDesktop ? 2 : 1}
-                  showOutsideDays={!isDesktop}
+                  numberOfMonths={1}
+                  showOutsideDays={false}
                   disabled={disabled}
                   className="rounded-md w-full"
                 />
