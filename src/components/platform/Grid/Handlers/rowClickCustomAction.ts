@@ -44,7 +44,7 @@ export const handleCustomAction = ({
   const { application_config, action_type } =
     config?.rowClickCustomAction as IRowClickCustomConfig;
 
-  const actionHandlers: Record<string, Function> = {
+  const actionHandlers: Record<string, any> = {
     'open-sidedrawer': () =>
       handleSideDrawer({ application_config, row, actions }),
     // Add more action types here
