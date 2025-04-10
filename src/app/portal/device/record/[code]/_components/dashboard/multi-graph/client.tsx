@@ -33,7 +33,7 @@ const InteractiveGraph = ({
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const [filteredData, setFilteredData] = React.useState<any[]>([])
   const [token, setToken] = React.useState<string | null>(null)
-  const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+  const [orgID, setOrgID] = React.useState<string | null>(null)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -100,8 +100,8 @@ const InteractiveGraph = ({
     useEffect(() => {
       const _getAccount = async () => {
         const res = await getAccount.mutateAsync()
-        const { account_id, token } = res || {}
-        setOrgAccountID(account_id)
+        const { organization_id, token } = res || {}
+        setOrgID(organization_id)
         setToken(token)
       }
       
@@ -115,19 +115,20 @@ const InteractiveGraph = ({
 
     useEffect(() => {
       
-      if (!socket || !org_acc_id) return
-      socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
+      console.log('%c Line:118 🍊', 'color:#ffdd4d', `packets_interfaces-${orgID}-${defaultValues?.id}`, 'defaultValues?.id', defaultValues?.id);
+      if (!socket || !orgID) return
+      socket.on(`testing-${orgID}-${defaultValues?.id}`, (data: any) => {
         console.log('%c Line:120 🥚 data', 'color:#b03734', data, socket);
       
       });
 
-      socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+      socket.on( `${channel_name}-${orgID}`, (data: Record<string,any>) => {
         // socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
         
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
        setFilteredData(updated_filtered_data)
       })
-    },[socket, filteredData, org_acc_id])
+    },[socket, filteredData, orgID])
     
 
   useEffect(() => {

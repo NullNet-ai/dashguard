@@ -11,7 +11,7 @@ export const organizationAccountRouter = createTRPCRouter({
   getAccountID: privateProcedure.mutation(async ({ ctx }) => {
 
     console.log('%c Line:13 🍋', 'color:#465975', ctx.session.account);
-    const { contact, id } = ctx.session.account || {}
-    return { account_id: id || contact?.id, token: ctx.token.value };
+    const {organization_id} = ctx.session.account || {}
+    return { account_id: '', organization_id , token: ctx.token.value };
   })
 });

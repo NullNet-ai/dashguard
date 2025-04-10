@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
 const SOCKET_URL = 'http://datastore.nullnetqa.net:5001';
-// const SOCKET_URL = 'http://datastore.nullnetqa.net';
+// const SOCKET_URL = 'http://localhost:5001';
 
 export function useSocketConnection({channel_name, token}: {channel_name?: string, token: string | null}) {
   const socketRef = useRef<any | null>(null);
@@ -36,7 +36,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
       console.error('Connection error:', err.message);
       setIsConnected(false);
     });
-    
+
     console.log('%c Line:38 🥃 socket', 'color:#7f2b82', socket);
     socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
       console.log('%c Line:38 🥚 data', 'color:#33a5ff', data);
