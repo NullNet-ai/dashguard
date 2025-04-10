@@ -1,11 +1,12 @@
 'use client';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
 import { api } from '~/trpc/react';
 import { formatPhoneNumber } from '~/utils/formatter';
 import { cn } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
+import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
 
 const fields = {
   Category: 'categories',
@@ -33,6 +34,10 @@ const RecordShellSummary = ({
     code: identifier!,
     pluck_fields: ['id'],
   });
+
+  const { isCollapseRecordSummary } =
+  useContext(RecordWrapperContext);
+
   const {
     emails: _email,
     phones: _phone,
@@ -135,6 +140,8 @@ const RecordShellSummary = ({
   if (error) {
     return <div>Error: {error.message}</div>;
   }
+
+  if(isCollapseRecordSummary) return null
 
   return (
     <div>

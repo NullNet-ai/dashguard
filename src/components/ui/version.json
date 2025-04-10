@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.0-rc.2<unreleased>",
-  "branch": "unreleased/fix/2.7.0-rc.2<unreleased>",
-  "message": "fix(FormDateRange): set default time and handle errors in date parsingEnsure default times are set when no time is provided or when parsing fails. This prevents undefined behavior and improves user experience by providing consistent default values. Additionally, pass the error state to the component for better error handling.",
+  "tag": "2.7.0",
+  "branch": "released/2346-3496-2344-3605-3498/2.7.0",
+  "message": "release version 2.7.0",
   "publish_name": "Rob Caldosa"
 }

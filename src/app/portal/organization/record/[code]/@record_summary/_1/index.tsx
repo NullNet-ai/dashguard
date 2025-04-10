@@ -2,6 +2,8 @@
 
 import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
+import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
+import { useContext } from 'react';
 
 const fields = {
   Name: "name",
@@ -26,6 +28,10 @@ const RecordShellSummary = ({
 
   const { data } = record ?? {};
 
+
+  const { isCollapseRecordSummary } =
+  useContext(RecordWrapperContext);
+
   useRefetchRecord({
     refetch,
     form_key,
@@ -34,6 +40,8 @@ const RecordShellSummary = ({
   if (error) {
     return <div>Error: {error.message}</div>;
   }
+
+  if(isCollapseRecordSummary) return null
 
   return (
     <div>

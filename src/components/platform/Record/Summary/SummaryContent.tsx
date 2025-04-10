@@ -1,13 +1,9 @@
 import { cookies, headers } from 'next/headers'
 import React from 'react'
 
-import { Separator } from '~/components/ui/separator'
 import { api } from '~/trpc/server'
 
-import IdentifierComponent from './Header/IdentifierComponent'
-import ProfileImage from './Header/ProfileImage'
-import SummaryRecordTab from './Header/SummaryTab'
-import SystemDates from './Header/SystemDate'
+import SummaryClientContent from './SummaryClientContent'
 
 const RecordSummaryContent = async () => {
   const headerList = headers()
@@ -45,34 +41,7 @@ const RecordSummaryContent = async () => {
   }
 
   return (
-    <div>
-      {/* <Separator /> */}
-      <IdentifierComponent
-        code={recordDetails?.data?.code!}
-        status={recordDetails?.data?.status!}
-      />
-      <SummaryRecordTab />
-      <ProfileImage details={recordDetails} entity={mainEntity} token={token}/>
-      <SystemDates
-        created_date={recordDetails?.data?.created_date!}
-        created_time={recordDetails?.data?.created_time!}
-        updated_date={recordDetails?.data?.updated_date!}
-        updated_time={recordDetails?.data?.updated_time!}
-        created_by_first_name={
-          recordDetails?.data?.created_by_data?.first_name || ''
-        }
-        created_by_last_name={
-          recordDetails?.data?.created_by_data?.last_name || ''
-        }
-        updated_by_first_name={
-          recordDetails?.data?.updated_by_data?.first_name || ''
-        }
-        updated_by_last_name={
-          recordDetails?.data?.updated_by_data?.last_name || ''
-        }
-      />
-      <Separator />
-    </div>
+      <SummaryClientContent recordDetails={recordDetails} mainEntity={mainEntity}  token={token}/>
   )
 };
 
