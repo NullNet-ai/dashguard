@@ -21,7 +21,7 @@ master_build:
     - 'docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
     - 'docker push $REGISTRY_ADDRESS/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
   only:
-    - 'development'
+    - 'qa'
 
 # pusher_dev:
 #   stage: pusher-dev
