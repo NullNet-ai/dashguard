@@ -81,20 +81,14 @@ const gridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    data_type: 'datetime',
-    sortKey: ['updated_date', 'updated_time'],
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: ["updated_date", "updated_time"],
+    search: {
+      field: "updated_date_time",
+      operator: 'like'
+    }
   },
   {
     header: 'Updated By',

@@ -16,6 +16,10 @@ import GridCardLists from './views/GridCardLists'
 import GridMobileForm from './views/GridMobileForm'
 import { cn } from '~/lib/utils'
 import { useIsMobile } from '~/hooks/use-mobile'
+import { Card } from '~/components/ui/card'
+import GridCardView from '../Server/views/common/GridCardview'
+import GridMobileRow from '../Server/views/common/GridMobileRow'
+import GridCardViewClient from './views/common/GridCardViewClient'
 
 interface IClientProps extends IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
@@ -65,7 +69,8 @@ function MainClient({
   isError = false,
   parentExpanded,
   cardListOption,
-  grouping
+  grouping,
+
 }: IClientProps) {
   const { open } = useSidebar()
   const { width } = useWindowSize()
@@ -118,22 +123,40 @@ function MainClient({
     >
       {gridType === 'table'
         ? (
+
+          
             <>
               <div className="hidden lg:grid">
-                <GridDesktop
-                  height={height}
-                  hideSearch={hideSearch}
-                  parentProps={parentProps}
-                  parentType={parentType}
-                  showAction={showAction}
-                  showPagination={showPagination ?? false}
-                  isLoading
-                  gridLevel={gridLevel}
-                  parentExpanded={parentExpanded}
-                />
+                {
+                  config?.viewMode === 'card' ? (
+                    <GridCardViewClient   
+                      height={height}
+                      hideSearch={hideSearch}
+                      parentProps={parentProps}
+                      parentType={parentType}
+                      showAction={showAction}
+                      showPagination={showPagination ?? false}
+                      isLoading
+                      gridLevel={gridLevel}
+                      parentExpanded={parentExpanded}
+                    />
+                  ) : (
+                    <GridDesktop
+                    height={height}
+                    hideSearch={hideSearch}
+                    parentProps={parentProps}
+                    parentType={parentType}
+                    showAction={showAction}
+                    showPagination={showPagination ?? false}
+                    isLoading
+                    gridLevel={gridLevel}
+                    parentExpanded={parentExpanded}
+                  />
+                  )
+                }
+               
               </div>
-
-              <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`)}>
+              <div className={cn(`flex  overflow-y-auto  py-1 lg:py-4 px-2 lg:hidden lg:h-[500px]`, `${gridLevel > 1  ? 'pr-0 lg:pr-2 pl-4 lg:pl-2' : 'h-[300px]'}`, `${parentType === 'form' ? 'h-[calc(100dvh-339px)]' : ''}`)}>
                 {parentType === 'grid' || parentType === 'grid_expansion'
                   ? (
                       <GridMobile

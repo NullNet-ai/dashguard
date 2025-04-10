@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormDateRange",
-  "tag": "2.0.0",
-  "branch": "released/2.0.0",
-  "message": "Update packages",
-  "publish_name": "Bryan Jay Mabuan"
+  "tag": "2.1.0-rc.5<unreleased>",
+  "branch": "unreleased/feat/2.1.0-rc.5<unreleased>",
+  "message": "feat(FormDateRange): add error state handling to date range componentExtract fieldState from formRenderProps and pass the error state to the date range component to improve validation feedback. Additionally, set default time values for date ranges when parsing fails or no time is provided to ensure consistent behavior.",
+  "publish_name": "Rob Caldosa"
 }

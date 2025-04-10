@@ -63,7 +63,7 @@ export default function CodeEditor({
 	editorCode = ''
 }: CodeEditorProps) {
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
-	const [language, setLanguage] = useState<Language>('javascript');
+	const [language, setLanguage] = useState<Language>('html');
 	const [fontSize, setFontSize] = useState<number>(14);
 	const [isEditorReady, setIsEditorReady] = useState<boolean>(false);
 	const [hideEditor, setHideEditor] = useState<boolean>(false);

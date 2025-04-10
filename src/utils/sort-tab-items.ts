@@ -163,3 +163,147 @@ export const reorderGridTabActive = (items: any[], activeName: string, entity: s
 
   return result;
 }
+
+export const calculateVisibleItems = (items: any[], containerWidth: number, defaultName: string) => {
+  // Make a copy of the items to avoid modifying the original
+
+  const entity_name = 
+    defaultName === 'user_role' ? 'all role': 
+    defaultName === 'organization_account'? 'all accounts':
+    defaultName === 'communication_template'? 'all communication template':
+    `all ${defaultName}`
+
+
+  const result = [...items];
+  
+  // Find the active item (using current key instead of active)
+  const activeItem = result.find(item => item.current);
+  
+  // Ensure "All contact" is never hidden
+  result.forEach(item => {
+    if (item.name?.toLowerCase() === entity_name) {
+      item.hidden = false;
+    }
+  });
+  
+  // If active item is hidden, we need to make it visible
+  if (activeItem && activeItem.hidden) {
+      // Make active item visible
+      activeItem.hidden = false;
+      
+      // Calculate total width of visible items using metadata.item_width
+      let visibleWidth = result
+          .filter(item => !item.hidden)
+          .reduce((sum, item) => sum + (item.metadata?.item_width || 0), 0);
+      
+      // If total width exceeds container, hide non-active items until it fits
+      if (visibleWidth > containerWidth) {
+          // Sort non-active visible items by priority (you can change this logic)
+          const nonActiveVisibleItems = result
+              .filter(item => !item.current && !item.hidden && item.name?.toLowerCase() !== entity_name)
+              .sort((a, b) => (b.metadata?.item_width || 0) - ((a.metadata?.item_width) || 0)); // Hide widest items first
+          
+          // Hide items until we fit
+          for (const item of nonActiveVisibleItems) {
+              if (visibleWidth > containerWidth) {
+                  item.hidden = true;
+                  visibleWidth -= (item.metadata?.item_width || 0);
+              } else {
+                  break;
+              }
+          }
+      }
+  }
+  
+  // Sort the result by hidden property (not hidden first, then hidden)
+  // and then by order if available, but ensure "all contact" is always first
+  result.sort((a, b) => {
+      // Check if either item is "all contact" (case insensitive)
+      const aIsAllContact = a.name?.toLowerCase() === entity_name;
+      const bIsAllContact = b.name?.toLowerCase() === entity_name;
+      
+      // If one is "all contact", it comes first
+      if (aIsAllContact && !bIsAllContact) return -1;
+      if (!aIsAllContact && bIsAllContact) return 1;
+      
+      // If neither or both are "all contact", sort by hidden status
+      if (a.hidden !== b.hidden) {
+          return a.hidden ? 1 : -1;
+      }
+      
+      // Then sort by order if both have the same hidden status
+      return (a.order || 0) - (b.order || 0);
+  });
+  
+  return result;
+}
+
+export const calculateMainTabItems = (items: any[], containerWidth: number, defaultName: string) => {
+  // Make a copy of the items to avoid modifying the original
+
+  const entity_name = defaultName
+
+  const result = [...items];
+  
+  // Find the active item (using current key instead of active)
+  const activeItem = result.find(item => item.current);
+  
+  // Ensure "All contact" is never hidden
+  result.forEach(item => {
+    if (item.name?.toLowerCase() === entity_name) {
+      item.hidden = false;
+    }
+  });
+
+  
+  // If active item is hidden, we need to make it visible
+  if (activeItem && activeItem.hidden) {
+      // Make active item visible
+      activeItem.hidden = false;
+      
+      // Calculate total width of visible items using metadata.item_width
+      let visibleWidth = result
+          .filter(item => !item.hidden)
+          .reduce((sum, item) => sum + (item.metadata?.item_width || 0), 0);
+      
+      // If total width exceeds container, hide non-active items until it fits
+      if (visibleWidth > containerWidth) {
+          // Sort non-active visible items by priority (you can change this logic)
+          const nonActiveVisibleItems = result
+              .filter(item => !item.current && !item.hidden && item.name?.toLowerCase() !== entity_name)
+              .sort((a, b) => (b.metadata?.item_width || 0) - ((a.metadata?.item_width) || 0)); // Hide widest items first
+          
+          // Hide items until we fit
+          for (const item of nonActiveVisibleItems) {
+              if (visibleWidth > containerWidth) {
+                  item.hidden = true;
+                  visibleWidth -= (item.metadata?.item_width || 0);
+              } else {
+                  break;
+              }
+          }
+      }
+  }
+  
+  // Sort the result by hidden property (not hidden first, then hidden)
+  // and then by order if available, but ensure "all contact" is always first
+  result.sort((a, b) => {
+      // Check if either item is "all contact" (case insensitive)
+      const aIsAllContact = a.name?.toLowerCase() === entity_name;
+      const bIsAllContact = b.name?.toLowerCase() === entity_name;
+      
+      // If one is "all contact", it comes first
+      if (aIsAllContact && !bIsAllContact) return -1;
+      if (!aIsAllContact && bIsAllContact) return 1;
+      
+      // If neither or both are "all contact", sort by hidden status
+      if (a.hidden !== b.hidden) {
+          return a.hidden ? 1 : -1;
+      }
+      
+      // Then sort by order if both have the same hidden status
+      return (a.order || 0) - (b.order || 0);
+  });
+  
+  return result;
+}

@@ -57,7 +57,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
       <div className={cn("flex flex-row")}>
         {newItems.map((tab) => {
           return (
-            <div key={tab.id} className="group relative flex items-center px-4">
+            <div key={tab.id} className="group relative flex items-center px-4 cursor-pointer">
               <a
                 data-test-id={
                   entityName +

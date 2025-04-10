@@ -40,18 +40,6 @@ export default function AddressDetails({}) {
         formKey="address-details"
         handleSubmit={handleSave}
         formSchema={FormSchema}
-        selectOptions={{
-          select: [
-            {
-              label: "Option 1",
-              value: "option1",
-            },
-            {
-              label: "Option 2",
-              value: "option2",
-            },
-          ],
-        }}
         defaultValues={{
           searchedAddress: "",
           details: {
@@ -86,31 +74,6 @@ export default function AddressDetails({}) {
             required: true,
             placeholder: "Address",
             accuracy: 100,
-          },
-          {
-            id: "text",
-            formType: "input",
-            name: "text",
-            label: "Text",
-            required: true,
-            placeholder: "Text",
-          },
-          {
-            id: "select",
-            formType: "select",
-            name: "select",
-            label: "Select",
-            required: true,
-            placeholder: "Select",
-          },
-          {
-            id: "smartDate",
-            formType: "smart-date",
-            name: "smartDate",
-            label: "Smart Date",
-            dateTimePickerProps: {
-              disablePastDates: true,
-            },
           },
         ]}
       />

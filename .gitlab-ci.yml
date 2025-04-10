@@ -103,5 +103,5 @@ update_stack_qa:
 #     - sed -i "s/${CI_PROJECT_NAME}:.*/${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}/g" $FILE_PATH/$PORTAINER_YML_FILE
 #     - echo 'updating recruitment-portal'
 #     - PORTAINER_HOST=$PORTAINER_HOST portainer stack:update  $ENDPOINT_ID  $STACK_ID  $FILE_PATH/$PORTAINER_YML_FILE
-#   only:
-#     - 'qa'
+  only:
+    - 'qa'

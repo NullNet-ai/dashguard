@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.3.1-rc.2<unreleased>",
-  "branch": "unreleased/fix/2.3.1-rc.2<unreleased>",
-  "message": "adjust platform stepper variant",
+  "tag": "2.7.0",
+  "branch": "released/2346-3496-2344-3605-3498/2.7.0",
+  "message": "release version 2.7.0",
   "publish_name": "Rob Caldosa"
 }

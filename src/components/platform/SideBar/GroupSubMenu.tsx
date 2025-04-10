@@ -64,7 +64,6 @@ function GroupSubMenu(props: IProps) {
   return (
     <SidebarMenuSubItem
       key={subItem?.title}
-      className="pl-4"
       ref={(el: any) => (refs.current[index] = el!)}
     >
       <SidebarMenuSubButton
@@ -80,7 +79,7 @@ function GroupSubMenu(props: IProps) {
           )}
         >
           {subItem?.icon && (
-            <SUB_ICON className={`h-5 w-5 ${open ? "mr-2" : ""}`} />
+            <SUB_ICON className={`h-5 w-5 mr-2 ml-4  ${isActive && "text-primary"}`} />
           )}
           {((open && (sType === "sm" || sType === "md" || sType === "xs")) ||
             openMobile ||

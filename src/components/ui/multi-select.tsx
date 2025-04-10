@@ -710,7 +710,7 @@ const MultipleSelector = React.forwardRef<
         {open && portalElement && createPortal(
             <CommandList
               className={cn(
-                "fixed z-[9999] w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",
+                "absolute z-[9999] w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",
               )}
               onMouseLeave={() => {
                 setOnScrollbar(false);

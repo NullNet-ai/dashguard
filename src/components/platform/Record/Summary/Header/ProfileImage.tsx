@@ -180,7 +180,7 @@ export default function ProfileImage({ details, entity, token }: any) {
   return (
     <>
       <div className="mt-1 px-4 flex justify-center">
-        <div className='relative group'>
+        <div className='relative group w-full'>
           <div
             title="Record summary image"
             className="bg-muted w-full md:w-[277px] h-[150px] flex items-center justify-center cursor-pointer"

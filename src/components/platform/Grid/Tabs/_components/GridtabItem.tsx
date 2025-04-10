@@ -11,6 +11,8 @@ import { cn, formatGridTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import GridMenu from '../GridMenu';
 import GridMenuClient from '../GridMenuClient';
+import { updateAllFilterdata } from '../SideDrawer/actions';
+import { reorderGridTabActive } from '~/utils/sort-tab-items';
 
 type InnerTabitemProps = {
   tab: any
@@ -19,7 +21,7 @@ type InnerTabitemProps = {
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  onClickItem?: (tab?: any) => void
 }
 
 const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -27,8 +29,8 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   pathname,
   newItems,
   className,
-  lastShownItem,
   isHidden,
+  onClickItem
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -44,21 +46,33 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     return code
   }
 
-  const handleClickLink = (tab : any) => {
-    if (isHidden) {
-      return
-    }
+  const handleClickLink = async (tabid?: string) => {
 
     const getCurrent = newItems?.find((item: any) => item.current)?.id;
+    const newItem = [...newItems].map(item => {
+      return { ...item, current: item.id === tab.id, is_current: item.id === tab.id}
+    })
+
+    const sorted = reorderGridTabActive(newItem, tabid ?? '', application ?? '')
+
+    const removeHidden = sorted.filter((item: any) => !item.hidden);
+    const lastItem = removeHidden[removeHidden.length - 1]
+
     const cachedData = {
-      tabs: [...newItems].map(item => {
-            return { ...item, current: item.id === tab.id }
-      }),
-      lastShownItem: lastShownItem?.name,
-      lastShownItemID: lastShownItem?.id,
+      tabs: sorted,
+      lastShownItem: lastItem?.name,
+      lastShownItemID: lastItem?.id,
       prevCurrent: getCurrent,
       key:  'grid_tab_' + entityName,
     }
+
+    try {
+      await updateAllFilterdata(sorted)
+    } catch (error) {
+        console.error(error)
+    }
+
+    
     const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
 
     localStorage.setItem('cachedPortalItems', JSON.stringify({
@@ -66,9 +80,33 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       [`grid_tab_${entityName}`]: cachedData,
     }))
 
-    // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
-    // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
   }
+
+  // const handleClickLink = (tab : any) => {
+  //   if (isHidden) {
+  //     return
+  //   }
+
+  //   const getCurrent = newItems?.find((item: any) => item.current)?.id;
+  //   const cachedData = {
+  //     tabs: [...newItems].map(item => {
+  //           return { ...item, current: item.id === tab.id }
+  //     }),
+  //     lastShownItem: lastShownItem?.name,
+  //     lastShownItemID: lastShownItem?.id,
+  //     prevCurrent: getCurrent,
+  //     key:  'grid_tab_' + entityName,
+  //   }
+  //   const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
+
+  //   localStorage.setItem('cachedPortalItems', JSON.stringify({
+  //     ...cachedItems,
+  //     [`grid_tab_${entityName}`]: cachedData,
+  //   }))
+
+  //   // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
+  //   // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
+  // }
 
 
   const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
@@ -93,8 +131,10 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
-            handleClickLink(tab)
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation
+            onClickItem?.(tab)
           }}
           href={isHidden ? `${newPathname}#` : tab.href}
           aria-current={tab.current ? 'page' : undefined}

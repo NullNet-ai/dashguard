@@ -8,6 +8,7 @@ import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable'
 import { api } from '~/trpc/server'
 
 import type { IProps } from './types'
+import RecordContainer from './_component/RecordContainer'
 
 const Wrapper = async ({
   record,
@@ -60,9 +61,11 @@ const Wrapper = async ({
       >
         <section className='mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]'>
           <ResizablePanelGroup className='flex' direction='horizontal'>
-            <div className='hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]'>
-              <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
-            </div>
+           <RecordWrapperProvider>
+                <RecordContainer>
+                  {record_summary}
+                </RecordContainer>
+              </RecordWrapperProvider>
             <ResizablePanel
               className='min-h-60 flex-grow-[6] bg-transparent'
               defaultSize={95}

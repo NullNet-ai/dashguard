@@ -6,6 +6,8 @@ import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 
 import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
+import { useContext } from 'react';
 
 const statuses = {
   Active: 'text-green-600 bg-green-400/10',
@@ -25,6 +27,10 @@ const RecordShellSummary = ({
   identifier: string;
   main_entity: string;
 }) => {
+
+  const { isCollapseRecordSummary } =
+  useContext(RecordWrapperContext);
+
   const {
     data: record = { data: { id: null } },
     refetch,
@@ -37,6 +43,8 @@ const RecordShellSummary = ({
     refetch,
     form_key,
   });
+
+  if(isCollapseRecordSummary) return null
 
   return (
     <div>

@@ -1,11 +1,7 @@
-import Cookies from 'js-cookie';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
-
-import TabMenu from '~/components/application-layout/common/TabMenu';
-import { cn, formatGridTabName, formatTabName } from '~/lib/utils';
-import { api } from '~/trpc/react';
+import { cn, formatGridTabName } from '~/lib/utils';
 import GridMenuDropClient from './GridMenuDropClient';
 
 type InnerTabitemProps = {
@@ -15,52 +11,21 @@ type InnerTabitemProps = {
   isActive: boolean
   onSelect?: () => void
   shownItems: any[]
+  onClickItem?: (tab?: any) => void
 };
 
 const GridtabDropItem = ({
   tab,
   pathname,
-  dropItems,
-  isActive,
   onSelect,
   shownItems,
+  onClickItem
 }: InnerTabitemProps) => {
-  const updateSubtabs = api.tab.updateSubTabs.useMutation();
-  const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
-  const [, , entityName, application] = (pathname || '').split('/');
+  const [, , entityName] = (pathname || '').split('/');
   const [, , , , code] = (newPathname || '').split('/')
 
 
-  const lastShownItem = useMemo(() => {
-    if (shownItems?.length > 0) {
-      const removeHidden = shownItems.filter((item: any) => !item.hidden);
-      const lastItem = removeHidden[removeHidden.length - 1]
-      return lastItem
-    }
-  }, [shownItems]);
-
-
-  const handleClickLink = () => {
-
-    const getCurrent = shownItems?.find((item: any) => item.current)?.id;
-    const cachedData = {
-      tabs: [...shownItems].map(item => {
-            return { ...item, current: item.id === tab.id }
-      }),
-      lastShownItem: lastShownItem?.name,
-      lastShownItemID: lastShownItem?.id,
-      prevCurrent: getCurrent,
-      key:  'grid_tab_' + entityName,
-    }
-    const cachedItems = JSON.parse(localStorage.getItem('cachedPortalItems') || '{}')
-
-    localStorage.setItem('cachedPortalItems', JSON.stringify({
-      ...cachedItems,
-      [`grid_tab_${entityName}`]: cachedData,
-    }))
-
-  }
 
 
   const tabNameRole = tab.name === 'user_role' ? 'role' : tab.name.split(' ').join('-').toLowerCase();
@@ -70,8 +35,11 @@ const GridtabDropItem = ({
         data-test-id={
           'apptab-' + tabNameRole
         }
-        onClick={() => {
-          handleClickLink()
+        onClick={(e) => {
+          e?.preventDefault()
+          e?.stopPropagation
+          // handleClickLink(tab?.id)
+          onClickItem?.(tab)
           onSelect?.()
         }}
         href={tab.href + (tab.href.includes('?') ? '&' : '?') + 'dropdown=true'}

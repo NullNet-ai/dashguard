@@ -1,3 +1,5 @@
+'use client'
+
 import Cookies from 'js-cookie';
 import { toLower } from 'lodash';
 import { GripVerticalIcon } from 'lucide-react';
@@ -9,6 +11,7 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
+import { updateAllMaindata, updateMainTabItem } from './Actions/actions';
 
 type InnerTabitemProps = {
   tab: any
@@ -17,7 +20,8 @@ type InnerTabitemProps = {
   index?: number
   className?: string
   isHidden?: boolean
-  lastShownItem: any
+  lastShownItem?: any
+  handleClick?: (tab: any) => void
 }
 
 const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
@@ -27,6 +31,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   className,
   lastShownItem,
   isHidden,
+  handleClick
 }, ref) => {
   const isGrid = tab.name === 'Grid' || tab.name === 'grid';
   const newPathname = usePathname()
@@ -49,10 +54,12 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
     return code
   }
 
-  const handleClickLink = () => {
+  const handleClickLink =  async (tab?: string) => {
     if (isHidden) {
       return
     }
+
+
     const getCurrent = getActiveName() || ''
 
     const cachedData = {
@@ -68,6 +75,14 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       [`inner_tab_data_${entityName}`]: cachedData,
     }))
 
+    try {
+      await updateMainTabItem(tab, entityName ?? '')
+    } catch (error) {
+        console.error(error)
+    }
+
+    //update maintab
+
     // Cookies.set('innerCopiedLastItems', JSON.stringify(newItems))
     // Cookies.set(`${entityName}-innerLastShownItem`, lastShownItem?.name)
   }
@@ -81,7 +96,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   }, [isActive])
 
 
-  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
+  const tabNameRole =tab?.label ||  (tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase())
   return (
     <div
       ref={ref}
@@ -90,7 +105,7 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
         `group relative group whitespace-nowrap flex h-[36px] items-center md:h-[32px]`, `${isGrid ? 'pl-0' : 'pl-[3px]'} `, className,
       )}
     >
-      {toLower(formatTabName(tabNameRole)) !== 'grid' ? (
+      {toLower(formatTabName(tab.name)) !== 'grid' ? (
         <SortableDragHandleRawItem className='cursor-grab mr-1'>
           <GripVerticalIcon
             className="w-3.5 h-3.5 text-default-foreground/60"
@@ -103,13 +118,16 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
           data-test-id={
             entityName + '-apptab-' + tabNameRole
           }
-          onClick={() => {
-            handleClickLink()
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleClick?.(tab)
+            
           }}
-          href={isHidden ? `${newPathname}#` : tab.href}
+          href={tab.href}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
-            isActive ? 'text-primary ' : 'text-default-foreground/60', 'whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
+            isActive ? 'text-primary ' : 'text-default-foreground/60', 'cursor-pointer whitespace-nowrap text-sm font-medium', 'flex items-center space-x-2', 'hover:border-t-primary hover:text-primary', `${isGrid ? 'px-[8px]' : 'pr-0'}`, isHidden ? 'cursor-default' : '',
           )}
         >
           {formatTabName(tabNameRole)}

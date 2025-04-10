@@ -130,14 +130,16 @@ export interface IConfigGrid {
   };
   hideCreateButton?: boolean;
   enableRowExpansion?: boolean;
+  viewMode?: 'table' | 'card';
   // for custom row expansion component
-  rowExpansionBuilder?: ReactElement | ((rowData: any) => JSX.Element);
+  rowExpansionBuilder?: ReactElement | ((rowData: any, viewMode?:  string) => JSX.Element);
   // to hide/show checkbox
   enableRowSelection?: boolean;
   // to identify if grid is a child grid
   isChildGrid?: boolean;
   expandTriggerPosition?: 'left' | 'right';
   columnsOrder?: Record<string,any>[];
+  paginationType?: 'default' | 'centered' |'simple-card';
   rowActions?: {
     [R in TRowActionType]?: {
       state?: {
@@ -202,6 +204,7 @@ export interface IState {
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
   groupConfigs?: IGroupBy[];
+  
 }
 
 export interface IAction {
@@ -262,6 +265,7 @@ export interface IExpandedRow {
 
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
+  viewMode?: 'table' | 'card'
   parentExpanded?: IExpandedRow[];
   grouping?: GroupingState;
 }

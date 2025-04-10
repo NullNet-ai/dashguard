@@ -104,6 +104,12 @@ interface MultiFieldOption {
   placeholder?: string;
 }
 
+interface DateRangeConfig {
+  withTime?: boolean;
+  is24Hour?: boolean;
+  showPresets?: boolean;
+}
+
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>['className'];
@@ -128,6 +134,7 @@ interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   timePickerProps?: TimePickerProps;
+  dateRangeConfig?: DateRangeConfig;  
   dateTimePickerProps?: DateTimeLocalInputProps & {
     granularity?: DateGranularity
     minDate?: Date
@@ -206,6 +213,8 @@ interface IField {
   };
   textAreaMaxHeight?: number;
   textAreaMinHeight?: number;
+  textAreaMaxWidth?: number;
+  textAreaMinWidth?: number;
   textAreaIcon?: React.ElementType;
   textAreaMaxLines?: number;
   textAreaLineWrapping?: boolean;
@@ -237,6 +246,7 @@ interface IField {
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
   showPasswordStrengthBar?: boolean;
+  showPasswordGenerator?: boolean;
   hasComplexValidation?: boolean;
   isCustomFormField?: boolean;
   groupConfig?: {
