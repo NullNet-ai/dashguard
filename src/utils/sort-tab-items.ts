@@ -238,7 +238,7 @@ export const calculateVisibleItems = (items: any[], containerWidth: number, defa
   return result;
 }
 
-export const calculateMainTabItems = (items: any[], containerWidth: number, defaultName: string) => {
+export const calculateMainTabItems = (items: any[], containerWidth: number, defaultName: string, alwaysFirst?: string) => {
   // Make a copy of the items to avoid modifying the original
 
   const entity_name = defaultName
@@ -248,12 +248,15 @@ export const calculateMainTabItems = (items: any[], containerWidth: number, defa
   // Find the active item (using current key instead of active)
   const activeItem = result.find(item => item.current);
   
+
+
   // Ensure "All contact" is never hidden
   result.forEach(item => {
     if (item.name?.toLowerCase() === entity_name) {
       item.hidden = false;
     }
   });
+
 
   
   // If active item is hidden, we need to make it visible
