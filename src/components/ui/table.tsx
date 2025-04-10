@@ -9,11 +9,22 @@ type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
 const Table = React.forwardRef<
   HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  // <div className="inline-block min-w-full align-middle">
-  <table ref={ref} className={cn('min-w-full', className)} {...props} />
-  // </div>
+  React.HTMLAttributes<HTMLTableElement> & {
+    withStripedRows?: boolean;
+    withVerticalLines?: boolean;
+    zebra?: boolean;
+  }
+>(({ className, withStripedRows, withVerticalLines, zebra, ...props }, ref) => (
+  <table 
+    ref={ref} 
+    className={cn(
+      'min-w-full',
+      (withStripedRows || zebra) && '[&_tbody_tr:nth-child(even)]:bg-slate-50',
+      withVerticalLines && '[&_td]:border-r [&_td:last-child]:border-r-0 [&_th]:border-r [&_th:last-child]:border-r-0 [&_td]:border-gray-200 [&_th]:border-gray-200',
+      className
+    )} 
+    {...props} 
+  />
 ));
 Table.displayName = 'Table';
 
@@ -68,12 +79,15 @@ TableFooter.displayName = 'TableFooter';
 
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
-  React.HTMLAttributes<HTMLTableRowElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLTableRowElement> & {
+    isEven?: boolean;
+  }
+>(({ className, isEven, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
       'transition-colors hover:bg-muted/50 data-[state=selected]:bg-sky-50',
+      isEven && 'bg-gray-50',
       className,
     )}
     {...props}
@@ -137,6 +151,61 @@ const TableCell = React.forwardRef<
 });
 TableCell.displayName = 'TableCell';
 
+// Add SummaryRow component
+const SummaryRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement> & {
+    colSpan?: number;
+    align?: 'left' | 'center' | 'right';
+    variant?: 'default' | 'total' | 'subtotal';
+  }
+>(({ className, colSpan = 1, align = 'left', variant = 'default', children, ...props }, ref) => {
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'total':
+        return 'bg-sky-50 text-sky-900 font-semibold';
+      case 'subtotal':
+        return 'bg-gray-100 text-gray-800 font-medium';
+      default:
+        return 'bg-gray-50 text-gray-700';
+    }
+  };
+
+  const getAlignClasses = () => {
+    switch (align) {
+      case 'center':
+        return 'text-center';
+      case 'right':
+        return 'text-right';
+      default:
+        return 'text-left';
+    }
+  };
+
+  return (
+    <tr
+      ref={ref}
+      className={cn(
+        'transition-colors',
+        getVariantClasses(),
+        className,
+      )}
+      {...props}
+    >
+      <td 
+        colSpan={colSpan} 
+        className={cn(
+          'px-2 py-2 text-sm border-t border-b border-gray-200',
+          getAlignClasses()
+        )}
+      >
+        {children}
+      </td>
+    </tr>
+  );
+});
+SummaryRow.displayName = 'SummaryRow';
+
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
@@ -158,4 +227,5 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  SummaryRow,
 };

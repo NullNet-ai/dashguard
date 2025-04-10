@@ -162,6 +162,12 @@ export interface IConfigGrid {
   new_button_title?: string;
   enableGridGrouping?: boolean;
   parentGroupFields?: IGroupBy[];
+  dimentionOptions?: {
+    gridStartPosition?: number;
+    gridEndPosition?: number;
+    minHeight?: number;
+    summaryWidth?: number;
+  }
 }
 
 interface IRowToArchive extends Row<any> {

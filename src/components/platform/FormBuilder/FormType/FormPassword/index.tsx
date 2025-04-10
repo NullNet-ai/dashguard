@@ -129,7 +129,7 @@ export default function FormPassword({
   const generatePassword = () => {
     // Check if at least one character type is selected
     if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSpecialChars) {
-      toast.error("Please select at least one character type");
+      toast.error("Please select at least one option");
       return;
     }
     

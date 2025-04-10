@@ -7,6 +7,7 @@ import Pagination from '../../Pagination'
 
 import GridDesktopContainer from './common/GridDesktopContainer'
 import ScrollContainer from './common/GridScrollContainer'
+import { cn } from '~/lib/utils'
 
 function GridDesktop({ parentType }: any) {
   return (
@@ -14,11 +15,11 @@ function GridDesktop({ parentType }: any) {
       <CardHeader>
         <Header />
       </CardHeader>
-      <ScrollContainer>
+      <ScrollContainer parentType={parentType}>
         <GridDesktopContainer parentType={parentType} />
         {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollContainer>
-      <div className="sticky bottom-0">
+      <div className={cn(`sticky `, `${parentType === 'record' ? 'bottom-[-25px]' : 'bottom-0'}`)}>
         <CardFooter>
           <Pagination />
         </CardFooter>

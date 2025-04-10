@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormPassword",
-  "tag": "2.1.0-rc.2<unreleased>",
-  "branch": "unreleased/fix/2.1.0-rc.2<unreleased>",
-  "message": "handle readonly and disabled ui issues",
+  "tag": "2.1.0-rc.3<unreleased>",
+  "branch": "unreleased/fix3686/2.1.0-rc.3<unreleased>",
+  "message": "refactor(FormPassword): improve error message clarityThe error message in the password generation logic was updated to be more user-friendly by replacing \"character type\" with \"option\". This change enhances user experience by using more intuitive language.",
   "publish_name": "Rob Caldosa"
 }
