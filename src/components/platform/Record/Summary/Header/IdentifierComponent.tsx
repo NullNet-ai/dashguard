@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
 import { Badge } from "~/components/ui/badge";
 import { StatusPoint } from "~/components/ui/StatusPoint";
@@ -10,6 +9,7 @@ import { RecordContext } from "../../Provider";
 import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
 import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
 import capitalize from 'lodash/capitalize';
+import { Button } from '@headlessui/react';
 
 const ellipsis = (str: string, length: number) => {
   const sanitizedStr = str?.replace(/["']/g, "");
@@ -53,16 +53,22 @@ export default function IdentifierComponent({
         </Badge>
       </div>
       <div className="flex flex-row items-center gap-x-1">
+
+        <Button 
+          className='hidden md:flex bg-primary/10 rounded-full size-5 items-center justify-center'
+            onClick={handleClickCollapseButton}
+        >
         <ChevronLeftIcon
-          className={`hidden h-4 w-4 text-slate-500 md:block cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
+          className={`hidden h-4 w-4 text-primary md:block cursor-pointer transition-transform
             }`}
-          onClick={handleClickCollapseButton}
+        
         />
-        <ChevronDownIcon
+        </Button>
+        {/* <ChevronDownIcon
           className={`h-4 w-4 text-slate-500 md:hidden cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
             }`}
           onClick={handleClickCollapseButton}
-        />
+        /> */}
         <DefaultSummaryMenuOptions
           key={state?.recordId}
           menuOptionConfig={state?.identifierOption}

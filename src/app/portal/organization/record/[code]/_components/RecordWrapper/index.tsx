@@ -7,6 +7,7 @@ import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
 import statusOptions from "../../../_actions/statusOptions";
 import tabs from "../../../_config/tabs";
+import RecordContainer from './_component/RecordContainer';
 
 const Wrapper = ({
   record,
@@ -24,9 +25,11 @@ const Wrapper = ({
     >
       <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
         <ResizablePanelGroup direction="horizontal" className="flex">
-          <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
-            <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
-          </div>
+            <RecordWrapperProvider>
+            <RecordContainer>
+              {record_summary}
+            </RecordContainer>
+            </RecordWrapperProvider>
           <ResizablePanel
             defaultSize={95}
             minSize={25}

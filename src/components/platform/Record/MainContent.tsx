@@ -1,8 +1,9 @@
 "use client";
-import { type ComponentProps } from "react";
+import { useContext, type ComponentProps } from "react";
 import { useSidebar } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
 import { useSideDrawer } from '../SideDrawer';
+import { RecordWrapperContext } from './providers/RecordWrapperProvider';
 
 type MainContentProps = ComponentProps<"section"> & {
   application?: string;
@@ -16,11 +17,14 @@ const MainContent = ({
 }: MainContentProps) => {
   const { open } = useSidebar();
   const {state: drawerState } = useSideDrawer()
+  const { isCollapseRecordSummary } =
+    useContext(RecordWrapperContext);
+
 
   const { isPinned, isOpen, width } = drawerState;
 
   const customStyle = {
-    width: !open
+    width: isCollapseRecordSummary ? '100%' : !open
       ? application === "record"
         ? (isOpen && isPinned && !!width) ? `calc(100vw - ${width})` : '100%'
         : "calc(100vw - 300px - 3rem)"
