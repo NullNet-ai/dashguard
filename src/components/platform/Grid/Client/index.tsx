@@ -81,15 +81,15 @@ function MainClient({
   if (isLoading && !data?.length) {
     return (
       <div
-        className="flex h-full items-center justify-center"
+        className="flex h-full items-center justify-center p-4"
         style={{ width: isMobile ? '100%' : gridLevel && gridLevel > 2 ? '100%' : _width }}
       >
         <Loader
-          className="bg-primary text-primary"
-          label="Fetching data..."
-          size="md"
-          variant="circularShadow"
-        />
+            className="bg-primary text-primary"
+            label="Fetching data..."
+            size="lg"
+            variant='spinner'
+          />
       </div>
     )
   }
