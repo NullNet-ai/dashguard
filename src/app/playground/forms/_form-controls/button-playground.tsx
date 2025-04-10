@@ -545,7 +545,96 @@ const DropdownButtonsSection = () => {
   );
 };
 
-// Main Component - update to include the new sections
+// Add this new section component for tooltip examples
+const TooltipButtonsSection = () => {
+  return (
+    <Section title="Buttons with Tooltips" columns={4}>
+      <div className="flex flex-col">
+        <Label className="mb-4">Default Tooltip (Top)</Label>
+        <Button 
+          tooltipContent="This is a default tooltip"
+        >
+          Hover Me
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Bottom Tooltip</Label>
+        <Button 
+          tooltipContent="This tooltip appears below"
+          tooltipSide="bottom"
+        >
+          Bottom Tooltip
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Left Tooltip</Label>
+        <Button 
+          tooltipContent="Left side tooltip"
+          tooltipSide="left"
+        >
+          Left Tooltip
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Right Tooltip</Label>
+        <Button 
+          tooltipContent="Right side tooltip"
+          tooltipSide="right"
+        >
+          Right Tooltip
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Custom Delay (1000ms)</Label>
+        <Button 
+          tooltipContent="This tooltip has a longer delay"
+          tooltipDelay={1000}
+        >
+          Longer Delay
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Tooltip with JSX Content</Label>
+        <Button 
+          tooltipContent={
+            <div className="flex flex-col">
+              <span className="font-bold">Rich Tooltip</span>
+              <span>With multiple lines</span>
+            </div>
+          }
+        >
+          Rich Content
+        </Button>
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Icon Button with Tooltip</Label>
+        <Button 
+          Icon={StarIcon}
+          tooltipContent="Star this item"
+          size="icon"
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <Label className="mb-4">Disabled Tooltip</Label>
+        <Button 
+          tooltipContent="You won't see this tooltip"
+          showTooltip={false}
+        >
+          No Tooltip
+        </Button>
+      </div>
+    </Section>
+  );
+};
+
+// Main Component - update to include the new tooltip section
 const ButtonPlayground = () => (
   <div className="min-h-screen p-8">
     <div className="flex flex-col">
@@ -553,6 +642,7 @@ const ButtonPlayground = () => (
         Button Playground
       </h1>
 
+      <TooltipButtonsSection />
       <ButtonGroupSection />
       <CheckboxButtonsSection />
       <DropdownButtonsSection />
