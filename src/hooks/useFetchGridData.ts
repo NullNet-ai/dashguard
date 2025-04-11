@@ -50,7 +50,7 @@ const advanceFilterResolver = (advance_filters: IAdvanceFilter[]) => {
   )
   return advanceFilter
 }
-const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryOptions) => {
+const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryOptions,queryConditions?: any, ) => {
   const [args, setArgs] = useState(initialArgs)
   const [currentData, setCurrentData] = useState<IData>()
   const { router = 'grid', resolver = 'items' } = query_options ?? {}
@@ -62,7 +62,7 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
     sorting: args.sorting,
     advance_filters: advanceFilterResolver(args.advance_filters ?? []),
     ...args,
-  })
+  }, queryConditions)
 
   useEffect(() => {
     if (!isLoading) {

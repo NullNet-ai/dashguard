@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { cn } from '~/lib/utils';
 import { handleEdit } from '../platform/Grid/DefatultRow/Actions';
+import { useSideDrawer } from '../platform/SideDrawer';
+import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
 
 type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
@@ -116,29 +118,37 @@ const TableCell = React.forwardRef<
     config?: any;
     column_id?: any;
   }
->(({ className, row, config, column_id, ...props }, ref) => (
-  <td
-    ref={ref}
-    onClick={() => {
-      if (
-        !['select', 'action', 'expand'].includes(column_id) &&
-        config?.enableRowClick && !row?.original?.is_group_by
-      ) {
-        if (config?.rowClickCustomAction) {
-          config.rowClickCustomAction({ row, config });
-          return;
+>(({ className, row, config, column_id, ...props }, ref) => {
+  const { actions } = useSideDrawer();
+
+  return (
+    <td
+      ref={ref}
+      onClick={() => {
+        if (
+          !['select', 'action', 'expand'].includes(column_id) &&
+          config?.enableRowClick && !row.original.is_group_by
+        ) {
+          if (config?.rowClickCustomAction) {
+            if (typeof config?.rowClickCustomAction === 'function') {
+              config?.rowClickCustomAction({ row, config });
+              return;
+            }
+            handleCustomAction({ config, row, actions });
+            return;
+          }
+          handleEdit({ row, config });
         }
-        handleEdit({ row, config });
-      }
-    }}
-    className={cn(
-      'whitespace-nowrap px-2 py-1 text-sm text-gray-500' +
-        (config?.enableRowClick && !row?.original?.is_group_by ? ' cursor-pointer' : ''),
-      className,
-    )}
-    {...props}
-  />
-));
+      }}
+      className={cn(
+        'whitespace-nowrap px-2 py-1 text-sm text-gray-500' +
+          (config?.enableRowClick && !row.original.is_group_by ? ' cursor-pointer' : ''),
+        className,
+      )}
+      {...props}
+    />
+  )
+});
 TableCell.displayName = 'TableCell';
 
 // Add SummaryRow component

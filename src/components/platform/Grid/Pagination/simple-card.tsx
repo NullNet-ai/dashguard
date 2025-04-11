@@ -51,7 +51,7 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
       current_page: 1,
       limit_per_page: Number(value),
     })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
+    if (state?.config?.onFetchRecords) {
       state?.config?.onFetchRecords?.({
         current: 1,
         limit: Number(value),
@@ -69,7 +69,7 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
       current_page: Number(page),
       limit_per_page: Number(rows),
     })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
+    if (state?.config?.onFetchRecords) {
       state?.config?.onFetchRecords?.({
         current: Number(page),
         limit: Number(rows),

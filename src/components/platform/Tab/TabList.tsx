@@ -66,7 +66,12 @@ export default async function TabList({ className }: { className?: string }) {
     }
   })
 
-
+  //dashboard name should alway first
+  const dashboardTab = withIDTabs.find(item => item.name === 'dashboard');
+  if (dashboardTab) {
+    withIDTabs.splice(withIDTabs.indexOf(dashboardTab), 1);
+    withIDTabs.unshift(dashboardTab);
+  }
 
   return (
     <TabItems items={withIDTabs} />

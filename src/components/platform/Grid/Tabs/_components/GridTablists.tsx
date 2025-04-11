@@ -3,7 +3,14 @@ import { cn } from '~/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Sortable, SortableItem } from '~/components/ui/sortable';
 import GridTabItem from './GridtabItem';
 import {
@@ -17,14 +24,34 @@ import { Input } from '~/components/ui/input';
 import { debounce, lowerCase, toLower } from 'lodash';
 import GridtabDropItem from './GridtabDropItem';
 import useWindowSize from '~/hooks/use-resize';
-import {
-  calculateMainTabItems,
-} from '~/utils/sort-tab-items';
+import { calculateMainTabItems } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
+import { GridContext } from '../../Provider';
+import { tabName } from '~/lib/grid-default-tab';
+import pluralize from 'pluralize';
 
-const GridTabLists = ({ tabs }: { tabs: any[] }) => {
+const GridTabLists = ({ tabs: gridTabs }: { tabs: any[] }) => {
+  const { state } = useContext(GridContext) ?? {};
+  const tableEntity = state?.config?.entity;
+  const tabLabel = tableEntity
+    ? tabName[tableEntity]
+      ? pluralize(tabName[tableEntity] || '')
+      : pluralize(tableEntity)
+    : '';
+  const tabs = useMemo(() => {
+    return gridTabs?.length
+      ? gridTabs
+      : [
+          {
+            id: 'all',
+            name: `All ${tabLabel}`,
+            current: true,
+            href: '/',
+          },
+        ];
+  }, [gridTabs?.length]);
   const newPathname = usePathname();
   const { open } = useSidebar();
   const router = useRouter();
@@ -58,7 +85,6 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   }, [tabs]);
 
   const handleTabClick = (selectedTab: any) => {
-
     setActiveTab(selectedTab.id);
     const newTablist = tablists.map((tab: any) => {
       return {
@@ -103,14 +129,13 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     };
   }, []);
 
-
   useEffect(() => {
     const calc = (params?: any[]) => {
       const allItems: any[] = [];
       const newData = params || tabs;
 
       // clear width, more width, and search by
-      let totalWidth = 32
+      let totalWidth = 32;
       const containerWidth = parentRef.current?.offsetWidth || 0;
 
       for (let index = 0; index < newData?.length; index++) {
@@ -138,35 +163,33 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
         }
       }
 
-      const result = calculateMainTabItems(allItems, containerWidth, '')
+      const result = calculateMainTabItems(allItems, containerWidth, '');
 
       return result;
     };
 
-    const handleResize = () => {  
+    const handleResize = () => {
       const items = calc(tablists);
       setCopyTab(items);
 
-      if(JSON.stringify(tablists) !== JSON.stringify(items)) {
-        if(items?.length) {
+      if (JSON.stringify(tablists) !== JSON.stringify(items)) {
+        if (items?.length) {
           // setTablists(items);
           updatecachedItems(items);
-          if(activeTab) {
-            const href= items?.find((item) => item.current)?.href;
+          if (activeTab) {
+            const href = items?.find((item) => item.current)?.href;
             router.push(href);
           }
-           
         }
       } else {
         updatecachedItems(items);
-        if(activeTab) {
-          const href= items?.find((item) => item.current)?.href;
+        if (activeTab) {
+          const href = items?.find((item) => item.current)?.href;
           router.push(href);
         }
       }
-
     };
-    if(isClient){
+    if (isClient) {
       handleResize();
     }
     window.addEventListener('resize', handleResize);
@@ -179,29 +202,36 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
     setSearchValue(searchValue);
-  }, 300);  // 300ms delay
+  }, 300); // 300ms delay
 
   useEffect(() => {
-    if(!isDropdownOpen) {
-      setSearchValue('')
+    if (!isDropdownOpen) {
+      setSearchValue('');
     }
-  }, [isDropdownOpen])
+  }, [isDropdownOpen]);
 
   const updatecachedItems = async (items: any) => {
     try {
-      await updateAllGridData(items)
+      await updateAllGridData(items);
     } catch (error) {
       console.error(error);
     }
   };
 
   const hasResult = useMemo(() => {
-    if(tablists?.length) {
-     return  Boolean(tablists?.filter((dta) => dta.hidden && (!!searchValue ? toLower(dta?.name)?.includes(toLower(searchValue)) : true ))?.length)
-    } 
-    return false
-  }, [tablists, searchValue])
-
+    if (tablists?.length) {
+      return Boolean(
+        tablists?.filter(
+          (dta) =>
+            dta.hidden &&
+            (!!searchValue
+              ? toLower(dta?.name)?.includes(toLower(searchValue))
+              : true),
+        )?.length,
+      );
+    }
+    return false;
+  }, [tablists, searchValue]);
 
   useEffect(() => {
     setIsClient(true);
@@ -238,7 +268,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             const isHidden = copyTab?.[index]?.hidden;
             const lastword: any = entity?.split('_')?.[1]
               ? entity.split('_')?.[1]
-              : entity || ''
+              : entity || '';
 
             if (
               lowerCase(tab.name).includes('all') &&

@@ -16,6 +16,7 @@ import { type appRouter } from '../../../server/api/root';
 
 import { type ISearchItem, type ISearchParams } from './Search/types';
 import { IGroupBy } from './Category/type';
+import { ISideDrawerConfig } from '../SideDrawer/types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -74,6 +75,12 @@ export interface IActionCondition {
   conditions: IActionConditionItem[];
 }
 
+export interface IRowClickCustomConfig {
+  action_type: 'open-sidedrawer' // specify additional action_type here;
+  application_config: ISideDrawerConfig;
+}
+
+
 export type TActionUIState = 'disabled' | 'hidden';
 export interface IConfigGrid {
   entity: string;
@@ -104,7 +111,9 @@ export interface IConfigGrid {
   // toggle for single and multi select
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
-  rowClickCustomAction?: (args: DefaultRowActions) => void;
+  rowClickCustomAction?:
+    | ((args: DefaultRowActions) => void)
+    | IRowClickCustomConfig;
   onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
   rowExpansionOptions?: IRowExpansionOptions
