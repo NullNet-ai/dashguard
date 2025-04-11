@@ -57,7 +57,7 @@ export default function CodeEditor({
 	disabled = false,
 	hasError = false,
 	defaultTheme = 'vs-light',
-	minHeight = '10vh',
+	minHeight = '25vh',
 	maxHeight = '50vh',
 	placeholder = 'Type your code here...',
 	editorCode = ''
@@ -219,9 +219,10 @@ export default function CodeEditor({
 			className={cn(
 				themeClass,
 				"relative border overflow-hidden rounded-lg w-full ring-offset-background focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
-				disabled ? "opacity-90 pointer-events-none cursor-not-allowed" : "",
+				disabled ? "pointer-events-none cursor-not-allowed" : "",
 				hasError ? "border-destructive": "border-input "
 			)}>
+			{disabled && <div className="absolute z-50 top-0 opacity-40 bg-secondary w-full h-full"></div>}
 			<div className={cn(
 				'flex gap-2 justify-between p-2',
 				themeClass,
@@ -230,7 +231,7 @@ export default function CodeEditor({
 				{!readOnly && !isReadOnly &&
 					<div className={cn(
 						themeClass,
-						'flex flex-wrap gap-2'
+						'flex flex-wrap gap-2 sm:w-full'
 					)}>
 						<SelectComponent
 							options={languages}
@@ -239,27 +240,29 @@ export default function CodeEditor({
 							placeholder="Language"
 							ariaLabel="Select Programming language"
 							themeClass={themeClass}
-							className="w-32"
+							className="w-full sm:w-max"
 						/>
-						<SelectComponent
-							options={themes}
-							value={theme}
-							onValueChange={handleThemeChange}
-							placeholder="Theme"
-							ariaLabel="Select Editor Theme"
-							themeClass={themeClass}
-							className="w-52"
-						/>
-						<SelectComponent
-							options={fontSizes}
-							value={fontSize.toString()}
-							onValueChange={handleFontSizeChange}
-							placeholder="Font Size"
-							ariaLabel="Select Font Size"
-							themeClass={themeClass}
-							className="w-20"
-						/>
-						<ToggleGroup type="multiple" variant="outline" size="sm" className="flex flex-wrap gap-2">
+						<div className="flex w-full gap-2 sm:w-max">
+							<SelectComponent
+								options={themes}
+								value={theme}
+								onValueChange={handleThemeChange}
+								placeholder="Theme"
+								ariaLabel="Select Editor Theme"
+								themeClass={themeClass}
+								className="w-[65%] sm:w-max"
+							/>
+							<SelectComponent
+								options={fontSizes}
+								value={fontSize.toString()}
+								onValueChange={handleFontSizeChange}
+								placeholder="Font Size"
+								ariaLabel="Select Font Size"
+								themeClass={themeClass}
+								className="w-[35%] sm:w-max"
+							/>
+						</div>
+						<ToggleGroup type="multiple" variant="outline" size="sm" className="flex flex-wrap gap-2 justify-start">
 							<ToggleItem
 								value="editorDisplay"
 								tooltip="Show/Hide Editor"
@@ -290,10 +293,47 @@ export default function CodeEditor({
 								className={showMiniMap ? '!text-blue-500' : ''}>
 								<Map size={14} />
 							</ToggleItem>
+							<div className="sm:hidden">
+								<ToggleItem
+									value="devMode"
+									tooltip="Toggle Developer/Read-only Mode"
+									ariaLabel={displayTools ? 'Show developer mode view' : 'Show read-only mode view'}
+									ariaPressed={displayTools}
+									onClick={handleDevMode}
+									themeClass={themeClass}
+									className={displayTools ? '!text-blue-500' : ''}>
+									<CodeXml size={14} />
+								</ToggleItem>
+							</div>
+							<div className="sm:hidden">
+								<ToggleItem
+									value="copyClipboard"
+									tooltip="Copy to clipboard"
+									ariaLabel={copied ? "Code copied to clipboard" : "Copy code to clipboard"}
+									ariaPressed={copied}
+									ariaLive="polite"
+									onClick={handleCopy}
+									themeClass={themeClass}
+									className={copied ? '!text-blue-500' : ''}>
+									{copied ? (
+											<span className="text-sm"><ClipboardCheck size={14} />{copied && 'Copied!'}</span>
+									) : (
+										<Clipboard size={14} />
+									)}
+								</ToggleItem>
+							</div>
 						</ToggleGroup>
 					</div>
 				}
-				<ToggleGroup type="multiple" variant="outline" size="sm" className="flex gap-2 mr-auto h-max sm:mr-0">
+				<ToggleGroup 
+					type="multiple" 
+					variant="outline" 
+					size="sm" 
+					className={cn(
+						"gap-2 mr-auto h-max sm:mr-0", 
+						!isReadOnly && !readOnly && "hidden sm:flex"
+					)}
+				>
 					{!readOnly && enable_editor_tools &&
 						<ToggleItem
 							value="devMode"
