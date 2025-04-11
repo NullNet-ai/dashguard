@@ -231,7 +231,7 @@ export default function CodeEditor({
 				{!readOnly && !isReadOnly &&
 					<div className={cn(
 						themeClass,
-						'flex flex-wrap gap-2 sm:w-full'
+						'flex flex-wrap gap-2 lg:w-full'
 					)}>
 						<SelectComponent
 							options={languages}
@@ -240,9 +240,9 @@ export default function CodeEditor({
 							placeholder="Language"
 							ariaLabel="Select Programming language"
 							themeClass={themeClass}
-							className="w-full sm:w-max"
+							className="w-full lg:w-max"
 						/>
-						<div className="flex w-full gap-2 sm:w-max">
+						<div className="flex w-full gap-2 lg:w-max">
 							<SelectComponent
 								options={themes}
 								value={theme}
@@ -250,7 +250,7 @@ export default function CodeEditor({
 								placeholder="Theme"
 								ariaLabel="Select Editor Theme"
 								themeClass={themeClass}
-								className="w-[65%] sm:w-max"
+								className="w-[65%] lg:w-max"
 							/>
 							<SelectComponent
 								options={fontSizes}
@@ -259,7 +259,7 @@ export default function CodeEditor({
 								placeholder="Font Size"
 								ariaLabel="Select Font Size"
 								themeClass={themeClass}
-								className="w-[35%] sm:w-max"
+								className="w-[35%] lg:w-max"
 							/>
 						</div>
 						<ToggleGroup type="multiple" variant="outline" size="sm" className="flex flex-wrap gap-2 justify-start">
@@ -293,7 +293,7 @@ export default function CodeEditor({
 								className={showMiniMap ? '!text-blue-500' : ''}>
 								<Map size={14} />
 							</ToggleItem>
-							<div className="sm:hidden">
+							<div className="lg:hidden">
 								<ToggleItem
 									value="devMode"
 									tooltip="Toggle Developer/Read-only Mode"
@@ -305,7 +305,7 @@ export default function CodeEditor({
 									<CodeXml size={14} />
 								</ToggleItem>
 							</div>
-							<div className="sm:hidden">
+							<div className="lg:hidden">
 								<ToggleItem
 									value="copyClipboard"
 									tooltip="Copy to clipboard"
@@ -331,7 +331,7 @@ export default function CodeEditor({
 					size="sm" 
 					className={cn(
 						"gap-2 mr-auto h-max sm:mr-0", 
-						!isReadOnly && !readOnly && "hidden sm:flex"
+						!isReadOnly && !readOnly && "hidden lg:flex"
 					)}
 				>
 					{!readOnly && enable_editor_tools &&

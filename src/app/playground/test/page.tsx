@@ -51,7 +51,7 @@ export default function CodeEditorForm() {
 						enable_editor_tools: true,
 						enable_auto_height : true,
 						defaultTheme: 'vs-light',
-						minHeight: '10vh',
+						minHeight: '25vh',
 						maxHeight: '50vh',
 					}
 				},
