@@ -1,16 +1,42 @@
-import type { EEventType, IEventConfig } from './types'
-import INVITATION_EXPIRE from './list/INVITATION_EXPIRE'
-import LICENSE_EXPIRE from './list/LICENSE_EXPIRE'
-import ACCOUNT_DEACTIVATE from './list/ACCOUNT_DEACTIVATE'
-import ACCOUNT_INVITE from './list/ACCOUNT_INVITE'
+import type { EEventType, EventResult, IEventConfig } from './types'
+import ACCOUNT_INVITE from './account/ACCOUNT_INVITE'
+import RESET_PASSWORD from './account/RESET_PASSWORD'
 
 // Event Configurations
 export const events: IEventConfig[] = [
-  INVITATION_EXPIRE,
-  ACCOUNT_DEACTIVATE,
-  LICENSE_EXPIRE,
-  ACCOUNT_INVITE
+  ACCOUNT_INVITE,
+  RESET_PASSWORD
 ]
+
+// Event Handler
+export const handleEvent = async (
+  eventName: EEventType,
+  args: unknown[],
+): Promise<EventResult> => {
+  const eventAction = events.find(event => event.type === eventName)?.handler
+
+  if (!eventAction) {
+    return {
+      success: false,
+      message: `No handler found for event: ${eventName}`,
+    };
+  }
+
+  try {
+    await eventAction?.(eventName, args);
+    return {
+      success: true,
+      message: `Successfully handled event: ${eventName}`,
+    };
+  } catch (error) {
+    console.error(`Error handling event ${eventName}:`, error);
+    return {
+      success: false,
+      message: `Failed to handle event: ${eventName}`,
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
+  }
+};
 
 // Helper function to get event configuration
 export const getEventConfig = (type: EEventType): IEventConfig | undefined => {

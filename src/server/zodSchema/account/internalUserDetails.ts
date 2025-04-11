@@ -138,7 +138,7 @@ export const AccountDetailSchema = z
           code: 'custom',
         });
       }
-    } catch (error) {
+    } catch {
       ctx.addIssue({
         path: ['username'],
         message: 'Error checking Email availability.',

@@ -4,7 +4,6 @@ import { headers } from 'next/headers';
 import SignInLabel from '~/app/sign-up/_components/SignInLabel';
 import SignUpForm from '~/app/sign-up/_components/SignUpForm';
 import { redirect, RedirectType } from 'next/navigation';
-import { isInvitationLinkExpired } from './_actions/isInvitationLinkExpired';
 
 export default async function Invite({ searchParams }: any) {
   // if (!searchParams.token) {

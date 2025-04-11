@@ -41,7 +41,7 @@ export default function PaginationCentered({ width: customWidth }: { width?: str
       current_page: Number(page),
       limit_per_page: Number(rows),
     })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
+    if (state?.config?.onFetchRecords) {
       state?.config?.onFetchRecords?.({
         current: Number(page),
         limit: Number(rows),

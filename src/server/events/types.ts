@@ -1,16 +1,16 @@
-import { TMethod } from '../utils/createSchedule'
-
 // Event Types
 export enum EEventType {
-    INVITATION_EXPIRE = 'INVITATION_EXPIRE',
-    ACCOUNT_DEACTIVATE = 'ACCOUNT_DEACTIVATE',
-    LICENSE_EXPIRE = 'LICENSE_EXPIRE',
-    ACCOUNT_INVITE = 'ACCOUNT_INVITE',
-  }
+  ACCOUNT_INVITE = 'ACCOUNT_INVITE',
+  RESET_PASSWORD = 'RESET_PASSWORD',
+}
 
-  export interface IEventConfig {
-    type: EEventType
-    callback_url: string
-    method: TMethod
-    description: string
-  }
+export interface IEventConfig {
+  type: EEventType;
+  handler: (eventName: string, data: any) => Promise<any>;
+}
+
+export interface EventResult {
+  success: boolean;
+  message?: string;
+  error?: Error;
+}

@@ -21,11 +21,7 @@ import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
 import { pick } from 'lodash';
 import { formatDate } from '~/server/utils/formatDate';
-import {
-  TMethod,
-  createSchedule,
-  dateToCron,
-} from '~/server/utils/createSchedule';
+import { TMethod, createSchedule, dateToCron } from '~/lib/createSchedule';
 
 const {
   MAILER_AUTH_USER,
@@ -980,54 +976,7 @@ export const accountRouter = createTRPCRouter({
 
       const category = accountRecord?.categories?.[0];
 
-      const headerList = headers();
-      const host = headerList.get('host'); // Get the host from request headers
-      const protocol = headerList.get('x-forwarded-proto') || 'http'; // Detect if running on HTTPS
-
-      const baseURL = `${protocol}://${host}`; // Construct base URL
-
-      const invitationLink = `${baseURL}/invite/${invitationRecord?.id}`;
       const loggedInUser = ctx.session.account;
-
-      try {
-        await transporter.sendMail({
-          from: loggedInUser.email,
-          to: accountRecord?.email,
-          subject: 'Account Invitation',
-          html: `
-          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>Welcome to Our Platform!</h2>
-            <p>You have been invited to join our platform. Please follow the instructions below to access your account:</p>
-            <ol>
-              <li>Click on the invitation link below.</li>
-              <li>Log in using your registered email and temporary password.</li>
-              <li>Follow the prompts to set up your account.</li>
-            </ol>
-            <p><strong>Invitation Link:</strong> <a href="${invitationLink}" style="color: #1a73e8;">Click here to join</a></p>
-            <p>If you have any issues, please contact our support team.</p>
-            <p>Best regards,<br> The Team</p>
-          </div>`,
-        });
-        console.info('Invitation email sent successfully');
-      } catch (error) {
-        console.error('Error sending email:', error);
-        throw error;
-      }
-      const cronTime = dateToCron(
-        new Date(formatDate(expirationDate).dataTime),
-      );
-      const scheduleConfig = {
-        enabled: true,
-        cron: cronTime,
-        callback_url: `${baseURL}/api/account/invitation-expire`,
-        method: 'POST' as TMethod,
-        parameters: {
-          account_id: accountRecord?.id,
-          invitation_id: invitationRecord?.id,
-        },
-        wait_for_completion: true,
-      };
-      createSchedule(scheduleConfig);
 
       await ctx.dnaClient
         .update(accountRecord?.id, {
@@ -1048,8 +997,11 @@ export const accountRouter = createTRPCRouter({
           },
         })
         .execute();
+
       return {
-        data: invitationRecord,
+        invitationRecord: invitationRecord,
+        loggedInUser,
+        account_record_id: accountRecord?.id,
       };
     }),
   createInvitationRecordByAccountId: privateProcedure
@@ -1391,6 +1343,9 @@ export const accountRouter = createTRPCRouter({
                 'updated_date',
                 'expiration_date',
                 'updated_time',
+                'categories',
+                'created_date',
+                'created_time',
               ],
               organization_accounts: [
                 'id',
@@ -1774,5 +1729,81 @@ export const accountRouter = createTRPCRouter({
           })
           .execute();
       });
+    }),
+  getAccountDetails: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const account = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: rootAccountToken,
+          as_root: asRoot,
+          query: {
+            advance_filters: createAdvancedFilter({
+              id: input?.id,
+            }),
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'code',
+                'account_organization_id',
+                'role_id',
+                'account_id',
+                'organization_id',
+                'status',
+                'email',
+                'categories',
+                'account_status',
+                'created_date',
+                'created_time',
+                'updated_date',
+                'updated_time',
+                'create_by',
+                'updated_by',
+                'password',
+                'email',
+                'account_status',
+              ],
+              contacts: [
+                'id',
+                'first_name',
+                'last_name',
+                'middle_name',
+                'code',
+                'status',
+                'categories',
+                'created_date',
+                'created_time',
+                'updated_date',
+                'updated_time',
+                'create_by',
+                'updated_by',
+              ],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .execute();
+      return {
+        contact: account?.data?.[0]?.contacts,
+        organization_account: account?.data?.[0]?.organization_accounts,
+      };
     }),
 });

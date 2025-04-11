@@ -1,24 +1,25 @@
-import '../styles/globals.css'
+import '../styles/globals.css';
 // eslint-disable-next-line import/no-unresolved
-import { GeistSans } from 'geist/font/sans'
-import type { Metadata } from 'next'
-import React, { Suspense } from 'react'
+import { GeistSans } from 'geist/font/sans';
+import type { Metadata } from 'next';
+import React, { Suspense } from 'react';
 
-import { TooltipProvider } from '~/components/ui/tooltip'
-import { EventEmitterProvider } from '~/context/EventEmitterProvider'
-import { ThemeProvider } from '~/context/ThemeProvider'
-import config from '~/styles/config/config.json'
-import { TRPCReactProvider } from '~/trpc/react'
+import { TooltipProvider } from '~/components/ui/tooltip';
+import { EventEmitterProvider } from '~/context/EventEmitterProvider';
+import { ThemeProvider } from '~/context/ThemeProvider';
+import config from '~/styles/config/config.json';
+import { TRPCReactProvider } from '~/trpc/react';
 
 import { ToastProvider } from '../context/ToastProvider'
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { OpenReplayProvider } from "~/context/OpenReplay";
 import { Loader } from '~/components/ui/loader'
+import { SocketProvider } from '~/context/SocketProvider';
 
 export const metadata: Metadata = {
   title: 'Platform',
   description: 'All in one platform for recruitment',
-}
+};
 
 const LoadingScreen = () => {
   return <div className='flex justify-center items-center h-screen w-screen'>
@@ -29,45 +30,46 @@ const LoadingScreen = () => {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html
       className={`${GeistSans.className}`}
-      lang='en'
+      lang="en"
       suppressHydrationWarning={true}
     >
       <head>
-        <meta content='telephone=no' name='format-detection' />
-        <meta content='email=no' name='format-detection' />
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
       </head>
       <body>
         <Suspense fallback={LoadingScreen()}>
           <OpenReplayProvider>
-          <TRPCReactProvider>
-            <EventEmitterProvider>
-              {/** TODO: put side bar inside the portal */}
-              <SidebarProvider defaultOpen={false} className='block'>
-                <TooltipProvider>
-                  <ToastProvider>
-                    <ThemeProvider
-                      attribute='class'
-                      defaultTheme='light'
-                      disableTransitionOnChange={true}
-                      enableSystem={true}
-                      layout={config.ApplicationLayout}
-                    >
-                      {children}
-                    </ThemeProvider>
-                  </ToastProvider>
-                </TooltipProvider>
-
-              </SidebarProvider>
-            </EventEmitterProvider>
-          </TRPCReactProvider>
+            <TRPCReactProvider>
+              <SocketProvider>
+                <EventEmitterProvider>
+                  {/** TODO: put side bar inside the portal */}
+                  <SidebarProvider defaultOpen={false} className="block">
+                    <TooltipProvider>
+                      <ToastProvider>
+                        <ThemeProvider
+                          attribute="class"
+                          defaultTheme="light"
+                          disableTransitionOnChange={true}
+                          enableSystem={true}
+                          layout={config.ApplicationLayout}
+                        >
+                          {children}
+                        </ThemeProvider>
+                      </ToastProvider>
+                    </TooltipProvider>
+                  </SidebarProvider>
+                </EventEmitterProvider>
+              </SocketProvider>
+            </TRPCReactProvider>
           </OpenReplayProvider>
         </Suspense>
       </body>
     </html>
-  )
+  );
 }
