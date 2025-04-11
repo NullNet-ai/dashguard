@@ -72,8 +72,6 @@ export function ColorPicker({
   // State for alpha/opacity value (0-100)
   const [alpha, setAlpha] = React.useState<number>(defaultAlpha)
 
-  // State for tracking if color was copied to clipboard
-  const [copied, setCopied] = React.useState<boolean>(false)
 
   // State for the popover
   const [open, setOpen] = React.useState<boolean>(false)
@@ -166,29 +164,20 @@ export function ColorPicker({
   // Handle format change
   const handleFormatChange = React.useCallback((newFormat: ColorFormat) => {
     setActiveFormat(newFormat)
+    
+    // Reset alpha to 100 when switching to hex format
+    if (newFormat === 'hex' && alpha !== 100) {
+      setAlpha(100)
+    }
 
     // Update the color value in the new format
     debouncedOnColorChange({
-      value: formatColor(color, newFormat, alpha),
+      value: formatColor(color, newFormat, newFormat === 'hex' ? 100 : alpha),
       format: newFormat,
-      alpha: alpha,
-      // TODO: Add tailwind class detection
+      alpha: newFormat === 'hex' ? 100 : alpha,
     })
   }, [color, debouncedOnColorChange, alpha])
 
-  // Copy color value to clipboard
-  const copyToClipboard = React.useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(formattedColor)
-      setCopied(true)
-      toast.info('Color copied to clipboard', {
-        richColors: true
-      })
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy color to clipboard', err)
-    }
-  }, [formattedColor])
 
 
 
@@ -264,6 +253,7 @@ export function ColorPicker({
           onColorChange={handleColorChange}
           alpha={alpha}
           onAlphaChange={setAlpha}
+          format={activeFormat}  // Pass the activeFormat
         />
       </section>
       
@@ -280,16 +270,14 @@ export function ColorPicker({
         activeFormat={activeFormat}
         handleColorChange={handleColorChange}
         setDisplayedColor={setDisplayedColor}
-        copyToClipboard={copyToClipboard}
         handleEyeDropper={handleEyeDropper}
         eyeDropperActive={eyeDropperActive}
         isEyeDropperSupported={isEyeDropperSupported}
-        copied={copied}
         alpha={alpha}
         onAlphaChange={setAlpha}
       />
     </div>
-  ), [color, handleColorChange, alpha, activeFormat, displayedColor, copyToClipboard, handleEyeDropper, eyeDropperActive, isEyeDropperSupported, copied]);
+  ), [color, handleColorChange, alpha, activeFormat, displayedColor, handleEyeDropper, eyeDropperActive, isEyeDropperSupported]);
 
   return (
     <div className="flex items-center gap-2">

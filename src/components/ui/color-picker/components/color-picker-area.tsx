@@ -5,19 +5,22 @@ import {
   hsvaToHex,
 } from '@uiw/color-convert'
 import Chrome from '@uiw/react-color-chrome'
+import { ColorFormat } from '../types'
 
 interface ColorPickerAreaProps {
   color: string
   onColorChange: (color: string) => void
   alpha?: number
   onAlphaChange?: (alpha: number) => void
+  format?: ColorFormat  // Add format prop
 }
 
 export function ColorPickerArea({ 
   color, 
   onColorChange,
   alpha = 100,
-  onAlphaChange
+  onAlphaChange,
+  format = 'hex'  // Default to hex
 }: ColorPickerAreaProps) {
   // Convert initial color to hsva and maintain state
   const [hsva, setHsva] = useState<HsvaColor>(() => {
@@ -52,14 +55,21 @@ export function ColorPickerArea({
 
   // Handle color change from the Chrome picker
   const handleColorChange = (colorResult: { hsva: HsvaColor }) => {
-    setHsva(colorResult.hsva)
+    const newHsva = { ...colorResult.hsva }
+    
+    // Force alpha to 1 for hex format
+    if (format === 'hex') {
+      newHsva.a = 1
+    }
+    
+    setHsva(newHsva)
     
     // Update the hex color
-    const hexColor = hsvaToHex(colorResult.hsva)
+    const hexColor = hsvaToHex(newHsva)
     onColorChange(hexColor)
     
-    // Update alpha if handler is provided
-    if (onAlphaChange) {
+    // Only update alpha for non-hex formats
+    if (onAlphaChange && format !== 'hex') {
       const newAlpha = Math.round(colorResult.hsva.a * 100)
       onAlphaChange(newAlpha)
     }
@@ -70,7 +80,7 @@ export function ColorPickerArea({
       <Chrome
         color={hsva}
         onChange={handleColorChange}
-        showAlpha={!!onAlphaChange}
+        showAlpha={format !== 'hex'} // Only hide alpha slider for hex format
         showColorPreview={false}
         showEditableInput={false}
         style={{

@@ -22,22 +22,21 @@ export function FormatSelector({ activeFormat, onFormatChange }: FormatSelectorP
           <SelectItem value="hex">
             <div className="flex items-center justify-between w-full">
               <span>HEX</span>
-              <span className="text-xs text-muted-foreground ml-2">#RRGGBB[AA]</span>
+              <span className="text-xs text-muted-foreground ml-2">#FFFFFF</span>
             </div>
           </SelectItem>
           <SelectItem value="rgb">
             <div className="flex items-center justify-between w-full">
-              <span>RGB</span>
-              <span className="text-xs text-muted-foreground ml-2">rgba(R, G, B, [A])</span>
+              <span>RGBA</span>
+              <span className="text-xs text-muted-foreground ml-2">rgba(255, 255, 255, 0.8)</span>
             </div>
           </SelectItem>
           <SelectItem value="hsl">
             <div className="flex items-center justify-between w-full">
-              <span>HSL</span>
-              <span className="text-xs text-muted-foreground ml-2">hsla(H, S%, L%, [A])</span>
+              <span>HSLA</span>
+              <span className="text-xs text-muted-foreground ml-2">hsla(0, 0%, 100%, 0.8)</span>
             </div>
           </SelectItem>
-    
         </SelectContent>
       </Select>
     </div>
