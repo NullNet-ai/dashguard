@@ -49,8 +49,11 @@ export default function PaginationCentered({ width: customWidth }: { width?: str
       return;
     }
     UpdateReportPagination({
-      current_page: Number(page),
-      limit_per_page: Number(rows),
+      pagination: {
+        current_page: Number(page),
+        limit_per_page: Number(rows),
+      },
+      gridKey: state?.gridKey,
     });
   };
 

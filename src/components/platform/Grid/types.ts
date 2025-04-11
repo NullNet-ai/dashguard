@@ -9,6 +9,7 @@ import {
   type Row,
   type Table,
   GroupingState,
+  Updater,
 } from '@tanstack/react-table';
 import { type ReactElement } from 'react';
 
@@ -40,12 +41,8 @@ export type TActionType =
   | 'multi-select'
   | 'default'
   | 'custom';
-  
-export type TRowActionType =
-  | 'edit'
-  | 'delete'
-  | 'archive'
-  | 'restore'
+
+export type TRowActionType = 'edit' | 'delete' | 'archive' | 'restore';
 
 export type TLayerType = 'main' | 'sub';
 
@@ -61,13 +58,19 @@ interface IActionConditionItem {
   value: Array<null | string | number | boolean>;
 }
 
-export interface IRowExpansionOptions{
+export interface IRowExpansionOptions {
   expandPosition?: 'left' | 'right';
   rowExpansionComponent?: ReactElement | ((rowData: any) => JSX.Element);
-  icons ?: {
-    expandIcon?: ReactElement | React.ComponentType<any> | ((rowData: any) => JSX.Element);
-    collapseIcon?: ReactElement | React.ComponentType<any> | ((rowData: any) => JSX.Element);
-  } 
+  icons?: {
+    expandIcon?:
+      | ReactElement
+      | React.ComponentType<any>
+      | ((rowData: any) => JSX.Element);
+    collapseIcon?:
+      | ReactElement
+      | React.ComponentType<any>
+      | ((rowData: any) => JSX.Element);
+  };
 }
 
 export interface IActionCondition {
@@ -76,10 +79,9 @@ export interface IActionCondition {
 }
 
 export interface IRowClickCustomConfig {
-  action_type: 'open-sidedrawer' // specify additional action_type here;
+  action_type: 'open-sidedrawer'; // specify additional action_type here;
   application_config: ISideDrawerConfig;
 }
-
 
 export type TActionUIState = 'disabled' | 'hidden';
 export interface IConfigGrid {
@@ -102,7 +104,7 @@ export interface IConfigGrid {
   editCustomAction?: (args: DefaultRowActions) => void;
   deleteCustomAction?: (args: DefaultRowActions) => void;
   archiveCustomAction?: (
-    args: Record<string, any>, 
+    args: Record<string, any>,
   ) => void | Promise<string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
   archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
@@ -116,13 +118,13 @@ export interface IConfigGrid {
     | IRowClickCustomConfig;
   onFetchRecords?: (args: any) => void;
   searchableFields?: any[];
-  rowExpansionOptions?: IRowExpansionOptions
+  rowExpansionOptions?: IRowExpansionOptions;
   is_warning_archive?: boolean;
   infiniteConfig?: {
-    router: AppRouterKeys,
+    router: AppRouterKeys;
     resolver?: string;
     query_params?: ISearchParams;
-  }
+  };
   searchConfig?: {
     router?: AppRouterKeys;
     resolver?: string;
@@ -132,14 +134,16 @@ export interface IConfigGrid {
   enableRowExpansion?: boolean;
   viewMode?: 'table' | 'card';
   // for custom row expansion component
-  rowExpansionBuilder?: ReactElement | ((rowData: any, viewMode?:  string) => JSX.Element);
+  rowExpansionBuilder?:
+    | ReactElement
+    | ((rowData: any, viewMode?: string) => JSX.Element);
   // to hide/show checkbox
   enableRowSelection?: boolean;
   // to identify if grid is a child grid
   isChildGrid?: boolean;
   expandTriggerPosition?: 'left' | 'right';
-  columnsOrder?: Record<string,any>[];
-  paginationType?: 'default' | 'centered' |'simple-card';
+  columnsOrder?: Record<string, any>[];
+  paginationType?: 'default' | 'centered' | 'simple-card';
   rowActions?: {
     [R in TRowActionType]?: {
       state?: {
@@ -153,9 +157,9 @@ export interface IConfigGrid {
     };
   };
   customRowAction?: React.FC<any>;
-  isInfinite?: boolean
+  isInfinite?: boolean;
   additionalData?: Record<string, any>;
-  gridColumns? : Record<string,any>[];
+  gridColumns?: Record<string, any>[];
   group_by_initial_columns?: CustomColumnDef<any>[];
   parentGroupData?: Record<string, any>[];
   new_button_action?: () => void;
@@ -167,7 +171,7 @@ export interface IConfigGrid {
     gridEndPosition?: number;
     minHeight?: number;
     summaryWidth?: number;
-  }
+  };
 }
 
 interface IRowToArchive extends Row<any> {
@@ -202,15 +206,15 @@ export interface IState {
     page: number;
     limit: number;
     current: number;
-    hasMore ?: boolean;
-    infiniteData ?: any[];
+    hasMore?: boolean;
+    infiniteData?: any[];
     infiniteCount?: number;
     bufferData?: any[];
-  },
+  };
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
   groupConfigs?: IGroupBy[];
-  
+  gridKey?: string;
 }
 
 export interface IAction {
@@ -227,15 +231,16 @@ export interface IAction {
   setBulkActionType: (type: string | null) => void;
   setShowBulkActionConfirmationModal: (show: boolean) => void;
   setHasMore: React.Dispatch<any>;
-  infiniteActions ?: {
+  infiniteActions?: {
     setCurrent: React.Dispatch<any>;
     setLimit: React.Dispatch<any>;
     setPage: React.Dispatch<any>;
     setHasMore: React.Dispatch<any>;
     setInfiniteData: React.Dispatch<any>;
-    handleUpdateInfiniteData : (args?: any) => Promise<void>;
+    handleUpdateInfiniteData: (args?: any) => Promise<void>;
     handleMergeBufferInfinite?: () => void;
-  }
+  };
+  handleUpdateGrouping: (updater: Updater<GroupingState>) => Promise<void>;
 }
 
 export interface ICreateContext {
@@ -262,6 +267,7 @@ export interface IPropsGrid {
   parentExpanded?: IExpandedRow[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
   grouping?: IGroupBy[] | GroupingState;
+  gridKey?: string;
 }
 
 export interface IExpandedRow {
@@ -271,7 +277,7 @@ export interface IExpandedRow {
 
 export interface IExpansionComponentProps {
   rowData?: Record<string, any>;
-  viewMode?: 'table' | 'card'
+  viewMode?: 'table' | 'card';
   parentExpanded?: IExpandedRow[];
   grouping?: GroupingState;
 }

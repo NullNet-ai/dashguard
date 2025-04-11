@@ -8,16 +8,17 @@ import { ISearchItem } from "../Search/types";
 
 export async function UpdateReportFilter({
   filters,
-  filterItemId
+  gridKey
 }: {
   filters: ISearchItem[];
-  filterItemId?: string;
+  gridKey?: string;
 }) {
   const headerList = headers();
   const searchParams = headerList.get("x-full-search-query-params") || "";
   const fullUrl = headerList.get("x-full-pathname") || "";
   await api.grid.updateReportFilter({
     filters,
+    gridKey
   });
   revalidatePath(fullUrl)
   return fullUrl

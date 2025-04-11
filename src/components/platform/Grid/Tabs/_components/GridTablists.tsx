@@ -32,26 +32,7 @@ import { GridContext } from '../../Provider';
 import { tabName } from '~/lib/grid-default-tab';
 import pluralize from 'pluralize';
 
-const GridTabLists = ({ tabs: gridTabs }: { tabs: any[] }) => {
-  const { state } = useContext(GridContext) ?? {};
-  const tableEntity = state?.config?.entity;
-  const tabLabel = tableEntity
-    ? tabName[tableEntity]
-      ? pluralize(tabName[tableEntity] || '')
-      : pluralize(tableEntity)
-    : '';
-  const tabs = useMemo(() => {
-    return gridTabs?.length
-      ? gridTabs
-      : [
-          {
-            id: 'all',
-            name: `All ${tabLabel}`,
-            current: true,
-            href: '/',
-          },
-        ];
-  }, [gridTabs?.length]);
+const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
   const { open } = useSidebar();
   const router = useRouter();

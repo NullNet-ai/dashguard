@@ -41,7 +41,7 @@ export default function GridSearchProvider({ children }: IProps) {
     onFetchRecords,
   } = gridState?.config ?? {};
 
-  const { parentType, advanceFilter } = gridState ?? {};
+  const { parentType, gridKey } = gridState ?? {};
 
   const { query_params } = searchConfig ?? {};
   const { group_advance_filters } = query_params ?? {};
@@ -135,7 +135,7 @@ export default function GridSearchProvider({ children }: IProps) {
     }
     await UpdateReportFilter({
       filters: updateSearchItems,
-      filterItemId: filterItem.id,
+      gridKey
     });
     router.refresh()
   };
@@ -151,7 +151,7 @@ export default function GridSearchProvider({ children }: IProps) {
     }
     await UpdateReportFilter({
       filters: updatedSearchItems,
-      filterItemId: filterItem.id,
+      gridKey
     });
     router.refresh()
   };
@@ -172,6 +172,7 @@ export default function GridSearchProvider({ children }: IProps) {
 
     await UpdateReportFilter({
       filters: updatedSearchItems,
+      gridKey
     });
 
     router.refresh()

@@ -1,11 +1,14 @@
 import { api } from '~/trpc/server';
 import GridTabLists from './_components/GridTablists';
 
-const GridTabs = async () => {
-  const gridTabsData = await api.grid.getSessionGridTabs();
-  return (
-      <GridTabLists tabs={gridTabsData}/>
-  );
+interface IProps {
+  gridKey?: string;
+}
+
+const GridTabs = async ({ gridKey }: IProps) => {
+  const gridTabsData = await api.grid.getSessionGridTabs({ gridKey });
+  return <GridTabLists tabs={gridTabsData} />;
 };
 
 export default GridTabs;
+

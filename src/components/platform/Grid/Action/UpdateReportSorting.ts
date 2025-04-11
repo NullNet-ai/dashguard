@@ -7,12 +7,14 @@ import { headers } from "next/headers";
 
 export async function UpdateReportSorting({
   sorting,
+  gridKey
 }: {
   sorting: {
     id: string;
     desc: boolean;
     sort_key?: string;
   }[];
+  gridKey?: string;
 }) {
   const headerList = headers();
   const pathName = headerList.get("x-pathname") || "";
@@ -21,6 +23,7 @@ export async function UpdateReportSorting({
 
   api.grid.updateReportSorting({
     sorting,
+    gridKey
   });
 
   const sortingParams = sorting
