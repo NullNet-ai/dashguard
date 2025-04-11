@@ -86,8 +86,7 @@ export const closeCurrentInnerClassTab = async ({
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
 
-  await api.tab.closeCurrentInnerClassTab({
-    href: pathname,
+  await api.tab.removeNewInnerClassTab({
     current_context: currentContext,
   });
 
