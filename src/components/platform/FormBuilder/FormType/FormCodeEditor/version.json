@@ -1,7 +1,7 @@
 {
   "app_name": "FormControl__FormCodeEditor",
-  "tag": "2.0.1",
-  "branch": "released/2278/2.0.1",
-  "message": "feat: code-editor",
+  "tag": "2.1.0-rc.1<unreleased>",
+  "branch": "unreleased/fix2278/2.1.0-rc.1<unreleased>",
+  "message": "fix: code-editor responsiveness",
   "publish_name": "Save Ducto"
 }
