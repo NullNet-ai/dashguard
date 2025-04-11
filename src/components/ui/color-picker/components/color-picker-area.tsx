@@ -5,7 +5,7 @@ import {
   hsvaToHex,
 } from '@uiw/color-convert'
 import Chrome from '@uiw/react-color-chrome'
-import { ColorFormat } from '../types'
+import { type ColorFormat } from '../types'
 
 interface ColorPickerAreaProps {
   color: string
