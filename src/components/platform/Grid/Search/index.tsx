@@ -27,13 +27,13 @@ export default function Main({
         <GridSearchContainer>
           <div
             className={cn(
-              `relative flex flex-1 flex-row`,
+              `relative flex flex-1 flex-row justify-end`,
               `${switchable ? 'gap-x-2' : ''}`,
             )}
           >
-            <div className="my-2 h-[40px] w-full md:my-0">
+            {/* <div className="my-2 h-[40px] w-full md:my-0">
               <Search gridType={gridType} />
-            </div>
+            </div> */}
             <div className="hidden h-[36px] flex-shrink-0 flex-row items-center lg:flex">
               {switchable ? (
                 <>
@@ -49,16 +49,19 @@ export default function Main({
             ) : null}
           </div>
           <div className="hidden min-h-[40px] lg:block">
-            <SearchList />
+            <SearchList parentType='grid'/>
           </div>
           <div className="min-h-[40px] lg:hidden">
+           <div className='flex justify-end'>
+           <SearchDialog />
+           </div>
             <SearchListMobile gridType={gridType} />
           </div>
         </GridSearchContainer>
       ) : parentType === 'grid_expansion' ? (
         <div className={cn(`grid-expansion-search flex flex-row justify-between`, `${viewMode === 'table' ? 'lg:w-[49%]' : 'w-full'}`)}>
           <div className={cn(`hidden min-h-[40px] flex-1 lg:block`, `${viewMode ==='card' ? 'lg:hidden' : ''}`)}>
-            <SearchList />
+            <SearchList parentType={parentType}/>
           </div>
           <div className={cn(`min-h-[40px]`, `${viewMode === 'table' ? 'lg:hidden' : ''}`)}>
             <SearchListMobile gridType={gridType} parentType={parentType}/>

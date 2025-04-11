@@ -15,6 +15,7 @@ import useScreenType from '~/hooks/use-screen-type'
 import { cn, formatAndCapitalize } from '~/lib/utils'
 
 import { SearchGridContext } from './Provider'
+import SearchDialog from './SearchDialog'
 
 const SearchListMobile = ({gridType, parentType} : any) => {
   const conref = useRef<any>(null)
@@ -232,6 +233,7 @@ const SearchListMobile = ({gridType, parentType} : any) => {
             )
           : null}
       </div>
+     
     </div>
   )
 }
