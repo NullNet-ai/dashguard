@@ -87,7 +87,6 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
-
                   if (
                     cell.column.id === 'action' &&
                     !row?.original?.is_group_by
@@ -141,21 +140,40 @@ export default function MyTableBody({
                         ...getCommonPinningStyles(cell.column).style,
                       }}
                     >
-                      {cell.column.id === 'status'  ? (
+                      {!row.original.is_group_by ? (
                         <>
-                        {/* get the string value of the cell */}
-                        <StatusCell value={cell.getValue() as string}  renderType='value' />
+                          {cell.column.id === 'status' ? (
+                            <>
+                              {/* get the string value of the cell */}
+                              <StatusCell
+                                value={cell.getValue() as string}
+                                renderType="value"
+                              />
+                            </>
+                          ) : (
+                            <div className="flex flex-row flex-wrap gap-y-1">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
+                          )}
                         </>
                       ) : (
-                        <div className="flex flex-row flex-wrap gap-y-1">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
+                        <>
+                          {['grouping', 'select', 'expand'].includes(
+                            cell.column.id,
+                          ) && (
+                            <div className="flex flex-row flex-wrap gap-y-1">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
                           )}
-                        </div>
+                        </>
                       )}
 
-                    
                       <div
                         {...{
                           className: !row.original.is_group_by
@@ -186,7 +204,10 @@ export default function MyTableBody({
                         visibleColumns={visibleColumns ?? []}
                         parentGroupData={state?.config?.parentGroupData || []}
                         gridState={state}
-                        parentGroupFields={state?.config?.parentGroupFields || state?.groupConfigs}
+                        parentGroupFields={
+                          state?.config?.parentGroupFields ||
+                          state?.groupConfigs
+                        }
                       />
                     </td>
                   </TableRow>
@@ -214,7 +235,7 @@ export default function MyTableBody({
                           typeof state?.config?.rowExpansionBuilder ===
                           'function' ? (
                             state?.config?.rowExpansionBuilder({
-                              rowData: row.original, 
+                              rowData: row.original,
                               viewMode: 'table',
                             })
                           ) : (

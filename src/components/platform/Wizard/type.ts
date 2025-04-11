@@ -24,6 +24,7 @@ export interface IConfigWizard {
   saveCloseLoading?: boolean;
   formSave?: Record<string, string>;
   stepValidation?: Record<string, IConfigValidationWizard[]>;
+  defaultRecordTab?: string
 }
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {
@@ -36,6 +37,7 @@ export interface ICallbackHandler {
      * next() will continue to the default next step
      */
     next: () => Promise<void>;
+    socketClient: any // todo types
   }) => Promise<void>;
   customizeWizardButtonSave?: {
     label?: string;

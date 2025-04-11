@@ -39,7 +39,7 @@ export const ExternalUserDetailsSchema = z
           code: 'custom',
         });
       }
-    } catch (error) {
+    } catch {
       ctx.addIssue({
         path: ['username'],
         message: 'Error checking username availability.',

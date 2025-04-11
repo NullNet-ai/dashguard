@@ -63,7 +63,7 @@ export default function GridProvider({
   parentType,
   gridLevel = 1,
   grouping: initialGrouping = [],
-  
+  gridKey
 }: IProps) {
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
@@ -357,7 +357,7 @@ export default function GridProvider({
         sorting: resolvedSorting,
       });
     }
-    UpdateReportSorting({ sorting: resolvedSorting });
+    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
@@ -370,19 +370,19 @@ export default function GridProvider({
       typeof updater === 'function' ? updater(grouping) : updater;
 
     // Update column visibility to hide grouped columns
-    setColumnVisibility((prev: any) => {
-      const visibility: any = { ...prev };
-      // Show all previously grouped columns
-      grouping.forEach((columnId) => {
-        visibility[columnId] = true;
-      });
-      // Hide newly grouped columns
-      newGrouping.forEach((columnId) => {
-        visibility[columnId] = false;
-      });
-      return visibility;
-    });
-    setGrouping(newGrouping);
+    // setColumnVisibility((prev: any) => {
+    //   const visibility: any = { ...prev };
+    //   // Show all previously grouped columns
+    //   grouping.forEach((columnId) => {
+    //     visibility[columnId] = true;
+    //   });
+    //   // Hide newly grouped columns
+    //   newGrouping.forEach((columnId) => {
+    //     visibility[columnId] = false;
+    //   });
+    //   return visibility;
+    // });
+    // setGrouping(newGrouping);
     const groupings = newGrouping?.map((item) => {
       const columnConfig = config?.columns?.find(
         (column: any) => column?.accessorKey === item,
@@ -404,7 +404,7 @@ export default function GridProvider({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
     }
-    UpdateReportGrouping({ grouping: groupings });
+    UpdateReportGrouping({ grouping: groupings, gridKey });
   };
 
   /** @HOOKS */
@@ -609,6 +609,7 @@ export default function GridProvider({
     initial_columns: config?.columns,
     grouping,
     groupConfigs: initialGrouping,
+    gridKey
   } as IState;
   const actions = {
     handleCreate,
@@ -627,6 +628,7 @@ export default function GridProvider({
     infiniteActions: {
       ...infinite_actions,
     },
+    handleUpdateGrouping
   } as IAction;
 
   return (

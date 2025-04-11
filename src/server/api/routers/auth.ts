@@ -2,15 +2,20 @@ import { EOperator } from '@dna-platform/common-orm';
 import argon2 from 'argon2';
 import { z } from 'zod';
 
+import { TRPCError } from '@trpc/server';
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from '~/server/api/trpc';
+import { formatDate } from '~/server/utils/formatDate';
 import type { TokenData } from '../types';
-import { ulid } from 'ulid';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
+const INVITATION_LINK_EXPIRED = parseInt(
+  process.env.INVITATION_LINK_EXPIRED || '1',
+  10,
+);
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -44,16 +49,12 @@ export const authRouter = createTRPCRouter({
       } catch (error: any) {
         let errorMessage = 'Something went wrong please try again';
         let errorType = 'unknown';
-
-        switch (error?.message) {
-          case 'Invalid Credentials':
-            errorMessage = 'The email or password you entered is incorrect.';
-            errorType = 'invalid';
-            break;
-          case 'Account not found':
-            errorMessage = 'No account was found with this email address.';
-            errorType = ' notfound';
-            break;
+        if (error.errors?.[0]?.message.includes('Invalid Credentials')) {
+          errorMessage = 'The email or password you entered is incorrect.';
+          errorType = 'invalid';
+        } else if (error.errors?.[0]?.message.includes('Account not found')) {
+          errorMessage = 'No account was found with this email address.';
+          errorType = 'notfound';
         }
 
         return {
@@ -81,9 +82,11 @@ export const authRouter = createTRPCRouter({
 
   getToken: privateProcedure
     .input(
-      z.object({
-        username: z.string().min(1),
-      }),
+      z
+        .object({
+          username: z.string().min(1),
+        })
+        .optional(),
     )
     .mutation(async ({ ctx }) => {
       // const token = await ctx.redisClient.getCachedData(
@@ -145,7 +148,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const asRoot = true
+        const asRoot = true;
         const currentToken = ctx.token.value;
         const rootAccount = await ctx.dnaClient
           .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
@@ -353,5 +356,123 @@ export const authRouter = createTRPCRouter({
         .updateOrganizationAccount(organization, account)
         .execute();
       return result;
+    }),
+  sendForgotPasswordEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const accountDetails = await ctx.dnaClient
+        .findAll({
+          entity: 'organization_accounts',
+          token: rootAccountToken,
+          as_root: asRoot,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'account_id',
+                operator: EOperator.EQUAL,
+                values: [input.email],
+              },
+            ],
+            pluck_object: {
+              organization_accounts: [
+                'id',
+                'organization_id',
+                'account_id',
+                'contact_id',
+                'status',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+            },
+            order: {
+              limit: 1,
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'organization_accounts',
+              field: 'contact_id',
+            },
+          },
+        })
+        .execute();
+      if (!accountDetails?.success) {
+        return null;
+      }
+      const expirationDate = new Date();
+      expirationDate.setDate(
+        expirationDate.getDate() + INVITATION_LINK_EXPIRED,
+      );
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: rootAccountToken,
+          as_root: asRoot,
+          mutation: {
+            params: {
+              status: 'Active',
+              expiration_date: formatDate(expirationDate).date,
+              account_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+              categories: ['Reset Password'],
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Invitation]', record?.data);
+      const invitationRecord = record?.data?.[0] ?? {};
+
+      return {
+        account_record_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+        invitationRecord,
+      };
+    }),
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+   
+      const response = await ctx.dnaClient
+        .rootUpdateAccountPassword(input.id, input.account_secret, {
+          token: rootAccountToken,
+        })
+        .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+      return response;
     }),
 });

@@ -22,9 +22,15 @@ export interface IGridCacheDataResponse {
   columns: Record<string, any>[];
   groups: IGroupBy[];
 }
-export const getGridCacheData = async (): Promise<IGridCacheDataResponse> => {
-  const cachedData =
-    (await api.grid.getReportCachedData()) as unknown as IGridCacheDataResponse;
+interface IGridCacheData {
+  gridKey?: string;
+}
+export const getGridCacheData = async (
+  args?: IGridCacheData,
+): Promise<IGridCacheDataResponse> => {
+  const cachedData = (await api.grid.getReportCachedData({
+    gridKey: args?.gridKey,
+  })) as unknown as IGridCacheDataResponse;
   return typeof cachedData === 'object'
     ? cachedData
     : ({

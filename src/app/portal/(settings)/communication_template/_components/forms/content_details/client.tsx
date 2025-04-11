@@ -4,9 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import Entities from '~/auto-generated/entities';
 import { FormBuilder } from '~/components/platform/FormBuilder';
-import {
-  type IHandleSubmit
-} from '~/components/platform/FormBuilder/types';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
 import { type IFormProps } from '../types';
@@ -66,7 +64,7 @@ export default function Content({ params, defaultValues }: IFormProps) {
       formLabel="Content"
       handleSubmit={handleSave}
       formKey="content"
-      formSchema={FormSchema} 
+      formSchema={FormSchema}
       defaultValues={defaultValues}
       fields={[
         {

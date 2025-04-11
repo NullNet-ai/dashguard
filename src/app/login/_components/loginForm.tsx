@@ -121,8 +121,7 @@ export default function LoginForm(props: any) {
               </label>
             </div>
             <div className="text-md">
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a className="font-semibold text-primary" href="#">
+              <a className="font-semibold text-primary" href="forgot-password">
                 Forgot Password?
               </a>
             </div>

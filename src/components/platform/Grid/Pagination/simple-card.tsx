@@ -27,10 +27,16 @@ import { testIDFormatter } from '~/utils/formatter';
 import { UpdateReportPagination } from '../Action/UpdateReportPagination';
 import { GridContext } from '../Provider';
 import { IPagination } from '../types';
-export default function PaginationSimpleCard({ width: customWidth }: { width?: string | number }) {
+export default function PaginationSimpleCard({
+  width: customWidth,
+}: {
+  width?: string | number;
+}) {
   const { state } = useContext(GridContext);
   const { open } = useSidebar();
-  const [pagination, setPagination] = useState<IPagination | undefined>(state?.pagination);
+  const [pagination, setPagination] = useState<IPagination | undefined>(
+    state?.pagination,
+  );
 
   const { currentPage, totalPages, rows, totalRows } = useMemo(() => {
     const { current_page = 1, limit_per_page = 100 } = pagination ?? {};
@@ -50,8 +56,8 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
     setPagination({
       current_page: 1,
       limit_per_page: Number(value),
-    })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
+    });
+    if (state?.config?.onFetchRecords) {
       state?.config?.onFetchRecords?.({
         current: 1,
         limit: Number(value),
@@ -59,8 +65,11 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
       return;
     }
     UpdateReportPagination({
-      current_page: 1,
-      limit_per_page: Number(value),
+      pagination: {
+        current_page: 1,
+        limit_per_page: Number(value),
+      },
+      gridKey: state?.gridKey,
     });
   };
 
@@ -68,8 +77,8 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
     setPagination({
       current_page: Number(page),
       limit_per_page: Number(rows),
-    })
-    if (state?.parentType && state?.parentType == 'grid_expansion') {
+    });
+    if (state?.config?.onFetchRecords) {
       state?.config?.onFetchRecords?.({
         current: Number(page),
         limit: Number(rows),
@@ -77,8 +86,11 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
       return;
     }
     UpdateReportPagination({
-      current_page: Number(page),
-      limit_per_page: Number(rows),
+      pagination: {
+        current_page: Number(page),
+        limit_per_page: Number(rows),
+      },
+      gridKey: state?.gridKey,
     });
   };
 
@@ -99,30 +111,28 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
   return (
     <div
       className={cn(
-        'border-grid-header  bg-grid-footer fixed bottom-14 flex w-full items-center justify-between bg-background px-4 py-2 transition-all duration-300 ease-in-out sm:px-2 sm:py-0 lg:static lg:w-full', width,
+        'border-grid-header bg-grid-footer fixed bottom-14 flex w-full items-center justify-between bg-background px-4 py-2 transition-all duration-300 ease-in-out sm:px-2 sm:py-0 lg:static lg:w-full',
+        width,
       )}
       style={{
-        width: customWidth
-          ? customWidth
-          : undefined }}
+        width: customWidth ? customWidth : undefined,
+      }}
     >
-      <div className="hidden border flex-col gap-x-2 sm:flex sm:flex-1 sm:items-center sm:justify-between lg:flex-row px-4 py-2">
+      <div className="hidden flex-col gap-x-2 border px-4 py-2 sm:flex sm:flex-1 sm:items-center sm:justify-between lg:flex-row">
         <div className="flex w-full flex-1 items-center justify-between">
           <p className="text-sm text-muted-foreground">
             <span className="font-medium">
               {generatePaginationText(rows, currentPage, totalRows)}
             </span>
           </p>
-
         </div>
 
         <div className="flex w-full items-center justify-between gap-10 lg:w-auto">
           <nav
             aria-label="Pagination"
-            className="isolate inline-flex -space-x-px rounded-md gap-x-4"
+            className="isolate inline-flex gap-x-4 -space-x-px rounded-md"
           >
-
-{/* <Select
+            {/* <Select
               defaultValue={`${rows}` || '10'}
               onValueChange={handlePerPageValueChange}
             >
@@ -154,25 +164,27 @@ export default function PaginationSimpleCard({ width: customWidth }: { width?: s
               )}
               disabled={currentPage == 1}
               variant="outline"
-              onClick={() => handlePaginationChange(Math.max(Number(currentPage) - 1, 1))}
+              onClick={() =>
+                handlePaginationChange(Math.max(Number(currentPage) - 1, 1))
+              }
             >
-             Previous
+              Previous
             </Button>
 
-     
             <Button
               data-test-id={testIDFormatter(
                 `${state?.config.entity}-grd-pagination-next-btn`,
               )}
               disabled={currentPage == totalPages}
               variant="outline"
-              onClick={() => handlePaginationChange(
-                Math.min(Number(currentPage) + 1, totalPages),
-              )}
+              onClick={() =>
+                handlePaginationChange(
+                  Math.min(Number(currentPage) + 1, totalPages),
+                )
+              }
             >
-             Next
+              Next
             </Button>
-
           </nav>
         </div>
       </div>
