@@ -307,7 +307,6 @@ export const tabRouter = createTRPCRouter({
     removeNewInnerClassTab: privateProcedure
     .input(
       z.object({
-        href: z.string().min(1),
         current_context: z.string().min(1),
       })
     )
