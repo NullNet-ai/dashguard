@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.1-rc.4<unreleased>",
-  "branch": "unreleased/fix3687/2.7.1-rc.4<unreleased>",
-  "message": "fix copy capability and color value input ",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.7.1-rc.5<unreleased>",
+  "branch": "unreleased/fix2278/2.7.1-rc.5<unreleased>",
+  "message": "fix: code-editor responsiveness",
+  "publish_name": "Save Ducto"
 }
