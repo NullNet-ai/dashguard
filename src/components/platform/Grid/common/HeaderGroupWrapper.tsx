@@ -3,7 +3,7 @@
 import { ChevronDownIcon, X } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { type IState } from '../types';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { cn } from '~/lib/utils';
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
+import { GridContext } from '../Provider';
 
 interface HeaderGroupWrapperProps {
   items: any[];
@@ -21,10 +22,18 @@ export const HeaderGroupWrapper = ({
   items,
   state,
 }: HeaderGroupWrapperProps) => {
+  const { actions } = useContext(GridContext);
   const [newItems, setNewItems] = useState(items);
   const parentRef = React.useRef<HTMLDivElement>(null);
   const itemsRef = React.useRef<any[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleRemoveGroup = (columnId: string) => {
+    const grouping = newItems
+      ?.filter((item) => item.key !== columnId)
+      .map((item) => item.key);
+    actions?.handleUpdateGrouping(grouping);
+  };
 
   useEffect(() => {
     const calc = (param_items?: any[]) => {
@@ -45,7 +54,7 @@ export const HeaderGroupWrapper = ({
             });
           } else {
             allItems?.push({
-                key: newData[index],
+              key: newData[index],
               hidden: false,
             });
           }
@@ -117,7 +126,8 @@ export const HeaderGroupWrapper = ({
                   className="h-3 w-3 cursor-pointer text-gray-400 hover:text-destructive"
                   onClick={() => {
                     if (!isHidden) {
-                      column?.toggleGrouping();
+                      handleRemoveGroup(columnId);
+                      // column?.toggleGrouping();
                     }
                   }}
                 />
@@ -162,14 +172,17 @@ export const HeaderGroupWrapper = ({
                 return (
                   <DropdownMenuItem
                     key={itm.name}
-                    className={cn(`group relative flex p-0 border py-0.5 text-sm font-normal transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary rounded-md items-center gap-1 px-2 w-fit mb-1`)}
+                    className={cn(
+                      `group relative mb-1 flex w-fit items-center gap-1 rounded-md border border-transparent bg-primary/10 p-0 px-2 py-0.5 text-sm font-normal text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`,
+                    )}
                   >
                     {column?.columnDef?.header as string}
                     <X
-                    className="h-3 w-3 cursor-pointer text-gray-400 hover:text-destructive"
-                    onClick={() => {
-                        column?.toggleGrouping();
-                    }}
+                      className="h-3 w-3 cursor-pointer text-gray-400 hover:text-destructive"
+                      onClick={() => {
+                        handleRemoveGroup(itm?.key);
+                        // column?.toggleGrouping();
+                      }}
                     />
                   </DropdownMenuItem>
                 );

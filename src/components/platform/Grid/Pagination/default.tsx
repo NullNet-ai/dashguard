@@ -65,8 +65,11 @@ export default function PaginationDefault({
       return;
     }
     UpdateReportPagination({
-      current_page: 1,
-      limit_per_page: Number(value),
+      pagination: {
+        current_page: 1,
+        limit_per_page: Number(value),
+      },
+      gridKey: state?.gridKey,
     });
   };
 
@@ -83,8 +86,11 @@ export default function PaginationDefault({
       return;
     }
     UpdateReportPagination({
-      current_page: Number(page),
-      limit_per_page: Number(rows),
+      pagination: {
+        current_page: Number(page),
+        limit_per_page: Number(rows),
+      },
+      gridKey: state?.gridKey,
     });
   };
 

@@ -1,10 +1,10 @@
-import { ulid } from "ulid";
-import GRIDTABS from '../server/default-grid-tab'
+import { ulid } from 'ulid';
+import GRIDTABS from '../server/default-grid-tab';
 
 export const tabName: Record<string, string> = {
-  user_role: "role",
-  organization_account: "Accounts",
-}
+  user_role: 'role',
+  organization_account: 'Accounts',
+};
 
 export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   const _id = ulid();
@@ -17,7 +17,7 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   };
 };
 
-export const SetIdTab = (mainEntity: string) => {
+export const SetIdTab = (mainEntity: string, href?: string) => {
   const modified_entity = tabName[mainEntity] || mainEntity;
 
   const additional_tabs = GRIDTABS[mainEntity] || [];
@@ -26,36 +26,36 @@ export const SetIdTab = (mainEntity: string) => {
     {
       name: `All ${modified_entity}`,
       current: true,
-      href: `/portal/${mainEntity}/grid?filter_id=`,
+      href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
       default: true,
       default_filter: [
         {
-          operator: "equal",
-          type: "criteria",
-          field: "status",
+          operator: 'equal',
+          type: 'criteria',
+          field: 'status',
           id: ulid(),
-          label: "Status",
-          values: ["Active"],
+          label: 'Status',
+          values: ['Active'],
           default: true,
         },
         {
-          operator: "or",
-          type: "operator",
+          operator: 'or',
+          type: 'operator',
           default: true,
         },
         {
-          operator: "equal",
-          type: "criteria",
-          field: "status",
+          operator: 'equal',
+          type: 'criteria',
+          field: 'status',
           id: ulid(),
-          label: "Status",
-          values: ["Draft"],
+          label: 'Status',
+          values: ['Draft'],
           default: true,
         },
       ],
     },
-    ...additional_tabs
-  ]
+    ...additional_tabs,
+  ];
 
   return tabs.map((tab) => {
     const _id = ulid();

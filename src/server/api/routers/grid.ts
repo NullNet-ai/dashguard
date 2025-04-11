@@ -383,43 +383,59 @@ export const gridRouter = createTRPCRouter({
         totalPages,
       };
     }),
-  getSessionGridTabs: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const gridTabId = headerList.get('x-grid-tab-id') || '';
-    const pathName = headerList.get('x-pathname') || '';
-    const [, , mainEntity, application] = pathName.split('/');
-    if (application !== 'grid' || !mainEntity) return [];
-    const _tabMenuId = tabMenuId({
-      _mainEntity: mainEntity || '',
-      _application: application || '',
-      _id: ctx.session.account.contact.id,
-    });
-    const _tabMenuHref = `/portal/${mainEntity}/grid`;
-    const activeTab = (await ctx.redisClient.getCachedData(
-      _tabMenuId,
-    )) as ITabGrid[];
-    if (!gridTabId) {
-      if (activeTab) return activeTab;
-    }
-    const gridTabFilterList = (await ctx.redisClient.getCachedData(
-      _tabMenuId,
-    )) as ITabGrid[];
-    if (!gridTabFilterList) return [];
-    const setActiveTab = gridTabFilterList?.map((tab) => {
-      const newCurrent =
-        _tabMenuHref === gridTabId
-          ? activeTab?.find((e) => e.id === gridTabId)
-          : gridTabId;
-      return {
-        ...tab,
-        current: tab.id === newCurrent,
-      };
-    });
+  getSessionGridTabs: privateProcedure
+    .input(
+      z
+        .object({
+          gridKey: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const headerList = headers();
+      const gridTabId = headerList.get('x-grid-tab-id') || '';
+      const pathName = headerList.get('x-pathname') || '';
+      const [, , mainEntity, application] = pathName.split('/');
+      const searchParams = headerList.get('x-full-search-query-params') || '';
+      // if (application !== 'grid' || !mainEntity) return [];
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+        _gridKey: input?.gridKey || '',
+      });
+      const _tabMenuHref = `/portal/${mainEntity}/grid`;
+      const activeTab = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+      if (!gridTabId) {
+        if (activeTab) return activeTab;
+        if (input?.gridKey && application !== 'grid') {
+          const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
+          const setIdTab = SetIdTab(input.gridKey, href);
+          ctx.redisClient.cacheData(_tabMenuId, setIdTab);
+          return setIdTab;
+        }
+      }
+      const gridTabFilterList = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+      if (!gridTabFilterList) return [];
+      const setActiveTab = gridTabFilterList?.map((tab) => {
+        const newCurrent =
+          _tabMenuHref === gridTabId
+            ? activeTab?.find((e) => e.id === gridTabId)
+            : gridTabId;
+        return {
+          ...tab,
+          current: tab.id === newCurrent,
+        };
+      });
 
-    ctx.redisClient.cacheData(_tabMenuId, setActiveTab);
+      ctx.redisClient.cacheData(_tabMenuId, setActiveTab);
 
-    return setActiveTab;
-  }),
+      return setActiveTab;
+    }),
   appendGridTab: privateProcedure
     .input(
       z.object({
@@ -714,6 +730,7 @@ export const gridRouter = createTRPCRouter({
             sort_key: z.string().optional(),
           }),
         ),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -732,6 +749,7 @@ export const gridRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.contact.id,
+        _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
@@ -781,6 +799,7 @@ export const gridRouter = createTRPCRouter({
             filters: z.array(z.any()).optional(),
           }),
         ),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -801,6 +820,7 @@ export const gridRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.contact.id,
+        _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
@@ -847,114 +867,155 @@ export const gridRouter = createTRPCRouter({
   updateReportPagination: privateProcedure
     .input(
       z.object({
-        current_page: z.number(),
-        limit_per_page: z.number(),
+        pagination: z.object({
+          current_page: z.number(),
+          limit_per_page: z.number(),
+        }),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { current_page, limit_per_page } = input;
+      const { pagination } = input;
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
+      const searchQueryParams =
+        headerList.get('x-full-search-query-params') || '';
+      const searchParams = new URLSearchParams(searchQueryParams);
+      const filter_id = searchParams.get('filter_id');
       const [, , mainEntity, application] = pathName.split('/');
       if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
         return [];
-      const cached_id =
-        (await gridCacheId({ context: ctx, type: 'pagination' })) ?? '';
-      if (!cached_id) return;
-      return await ctx.redisClient.cacheData(cached_id, {
-        current_page,
-        limit_per_page,
+
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+        _gridKey: input.gridKey,
       });
+      const menus = await ctx.redisClient.getCachedData(_tabMenuId);
+      const tabDetails = Array.isArray(menus) ? menus : [];
+      const defaultPagination = filter_id
+        ? tabDetails?.find((tab) => tab.id === filter_id)
+        : tabDetails?.find((tab) => tab.current);
+
+      const newTabs = tabDetails?.map((tab) => {
+        if (tab.id === defaultPagination.id) {
+          return {
+            ...tab,
+            pagination,
+          };
+        }
+        return tab;
+      });
+      await ctx.redisClient.cacheData(_tabMenuId, newTabs);
     }),
-  getReportCachedData: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
-    const pathName = headerList.get('x-pathname') || '';
-    const searchQueryParams =
-      headerList.get('x-full-search-query-params') || '';
-    const searchParams = new URLSearchParams(searchQueryParams);
-    const filter_id = searchParams.get('filter_id');
-    const [, , mainEntity, application] = pathName.split('/');
-    if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
-      return [];
-    const cacheTypes: TReportDataType[] = ['pagination', 'grid_tabs'];
-    const cacheIds = await Promise.all(
-      cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
-    );
+  getReportCachedData: privateProcedure
+    .input(
+      z
+        .object({
+          gridKey: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const searchQueryParams =
+        headerList.get('x-full-search-query-params') || '';
+      const searchParams = new URLSearchParams(searchQueryParams);
+      const filter_id = searchParams.get('filter_id');
+      const [, , mainEntity, application] = pathName.split('/');
+      if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
+        return [];
+      // const cacheTypes: TReportDataType[] = ['pagination', 'grid_tabs'];
+      // const cacheIds = await Promise.all(
+      //   cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
+      // );
 
-    const [pagination, grid_tabs] = await Promise.all(
-      cacheIds
-        .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
-        .filter(Boolean),
-    );
-    const tabDetails = Array.isArray(grid_tabs) ? grid_tabs : [];
-    const reportPagination: IPagination =
-      typeof pagination === 'object' ? pagination : {};
+      // const [pagination, grid_tabs] = await Promise.all(
+      //   cacheIds
+      //     .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
+      //     .filter(Boolean),
+      // );
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.contact.id,
+        _gridKey: input?.gridKey,
+      });
+      const grid_tabs = await ctx.redisClient.getCachedData(_tabMenuId);
+      const tabDetails = Array.isArray(grid_tabs) ? grid_tabs : [];
+      // const reportPagination: IPagination =
+      //   typeof pagination === 'object' ? pagination : {};
 
-    const filterDetails = filter_id
-      ? tabDetails?.find((tab) => tab.id === filter_id)
-      : tabDetails?.find((tab) => tab.current);
+      const filterDetails = filter_id
+        ? tabDetails?.find((tab) => tab.id === filter_id)
+        : tabDetails?.find((tab) => tab.current);
 
-    const filter: ISearchItem[] = filterDetails?.default
-      ? filterDetails?.advance_filters
-      : filterDetails?.default_filter;
+      const filter: ISearchItem[] = filterDetails?.default
+        ? filterDetails?.advance_filters
+        : filterDetails?.default_filter;
 
-    const groupAdvanceFilters: ISearchItem[] = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)
-          ?.group_advance_filters ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
+      const groupAdvanceFilters: ISearchItem[] = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)
+            ?.group_advance_filters ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
 
-    const defaultFilters = (filter ?? []).filter(
-      (item) => item.default === true,
-    );
-    const sorts: ISortBy = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
-    const defaultSorts: ISortBy = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
+      const defaultFilters = (filter ?? []).filter(
+        (item) => item.default === true,
+      );
+      const sorts: ISortBy = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
+      const defaultSorts: ISortBy = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
 
-    const gridColumns = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.columns ?? []);
-    const groups = filter_id
-      ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
-      : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
+      const gridColumns = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.columns ?? []);
+      const groups = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
+      const pagination = filter_id
+        ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
+        : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
 
-    const advanceFilter = filter?.map((item) => {
+      const advanceFilter = filter?.map((item) => {
+        return {
+          entity: item.entity,
+          operator: item.operator,
+          type: item.type,
+          field: item.field,
+          values: item.values,
+          default: item.default,
+        };
+      });
+      const groupSorts = groups?.map((item: any) => ({
+        id: item.value,
+        desc: typeof item.desc === 'boolean' ? item.desc : false,
+        sort_key: item.field,
+      }));
       return {
-        entity: item.entity,
-        operator: item.operator,
-        type: item.type,
-        field: item.field,
-        values: item.values,
-        default: item.default,
+        filters: {
+          reportFilter: defaultFilters,
+          advanceFilter,
+          defaultFilters,
+          groupAdvanceFilters,
+        },
+        sorts: {
+          sorting: sorts,
+          defaultSorting: defaultSorts,
+          groupSorts,
+        },
+        pagination: {
+          current_page: +(pagination?.current_page ?? '1'),
+          limit_per_page: +(pagination?.limit_per_page ?? '100'),
+        },
+        columns: gridColumns,
+        groups,
       };
-    });
-    const groupSorts = groups?.map((item: any) => ({
-      id: item.value,
-      desc: typeof item.desc === 'boolean' ? item.desc : false,
-      sort_key: item.field,
-    }));
-    return {
-      filters: {
-        reportFilter: defaultFilters,
-        advanceFilter,
-        defaultFilters,
-        groupAdvanceFilters,
-      },
-      sorts: {
-        sorting: sorts,
-        defaultSorting: defaultSorts,
-        groupSorts,
-      },
-      pagination: {
-        current_page: +(reportPagination?.current_page ?? '1'),
-        limit_per_page: +(reportPagination?.limit_per_page ?? '100'),
-      },
-      columns: gridColumns,
-      groups,
-    };
-  }),
+    }),
 
   getInfiniteData: privateProcedure
     .input(
@@ -1028,6 +1089,7 @@ export const gridRouter = createTRPCRouter({
             desc: z.boolean(),
           }),
         ),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -1046,15 +1108,16 @@ export const gridRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.contact.id,
+        _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
-      const defaultSort = filter_id
+      const defaultGroup = filter_id
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
 
       const newTabs = tabDetails?.map((tab) => {
-        if (tab.id === defaultSort.id) {
+        if (tab.id === defaultGroup.id) {
           return {
             ...tab,
             groups: grouping,
@@ -1062,10 +1125,10 @@ export const gridRouter = createTRPCRouter({
         }
         return tab;
       });
-      if (!defaultSort.is_default) {
+      if (!defaultGroup.is_default) {
         // update the grid filter entity on database
         ctx.dnaClient
-          .update(defaultSort.id, {
+          .update(defaultGroup.id, {
             entity: 'grid_filter',
             token: ctx.token.value,
             mutation: {

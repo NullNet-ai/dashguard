@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 
-import { GridScrollView } from '../common/GridScrollview'
-import GridProvider from '../Provider'
-import { type IPropsGrid } from '../types'
+import { GridScrollView } from '../common/GridScrollview';
+import GridProvider from '../Provider';
+import { type IPropsGrid } from '../types';
 
-import { GridDesktop, GridMobile } from './views'
+import { GridDesktop, GridMobile } from './views';
 
 function MainServer({
   config,
@@ -16,9 +16,9 @@ function MainServer({
   advanceFilter,
   pagination,
   parentType = 'grid',
-  grouping
+  grouping,
+  gridKey,
 }: IPropsGrid) {
-
   return (
     <GridProvider
       totalCount={totalCount}
@@ -30,15 +30,16 @@ function MainServer({
       advanceFilter={advanceFilter}
       pagination={pagination}
       grouping={grouping}
+      gridKey={gridKey}
     >
       <GridScrollView className="hidden lg:block">
-        <GridDesktop parentType={parentType} />
+        <GridDesktop parentType={parentType} gridKey={gridKey} />
       </GridScrollView>
-      <div className="my-0 lg:my-8 h-full md:my-8 md:mt-0 md:mb-12 lg:mb-0 lg:hidden">
+      <div className="my-0 h-full md:my-8 md:mb-12 md:mt-0 lg:my-8 lg:mb-0 lg:hidden">
         <GridMobile />
       </div>
     </GridProvider>
-  )
+  );
 }
 
-export default MainServer
+export default MainServer;
