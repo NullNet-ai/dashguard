@@ -5,17 +5,18 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { type ColorFormat } from '../types'
 import { useEffect } from 'react'
+import { toast } from 'sonner'
+import { useState } from 'react'
 
+// Remove copied from interface
 interface ColorValueInputProps {
   displayedColor: string
   activeFormat: ColorFormat
   handleColorChange: (color: string) => void
   setDisplayedColor: (color: string) => void
-  copyToClipboard: () => void
   handleEyeDropper: () => void
   eyeDropperActive: boolean
   isEyeDropperSupported: boolean
-  copied: boolean
   alpha?: number
   onAlphaChange?: (alpha: number) => void
 }
@@ -25,14 +26,11 @@ export function ColorValueInput({
   activeFormat,
   handleColorChange,
   setDisplayedColor,
-  copyToClipboard,
-  copied,
   alpha = 100,
   onAlphaChange,
-  handleEyeDropper,
-  eyeDropperActive,
-  isEyeDropperSupported
 }: ColorValueInputProps) {
+  const [copied, setCopied] = useState(false)
+
   // Update displayed color when alpha changes for formats that support alpha
   useEffect(() => {
     if (!onAlphaChange) return;
@@ -155,7 +153,18 @@ export function ColorValueInput({
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={copyToClipboard}
+            onClick={async (e) => {
+              e.preventDefault()
+              try {
+                await navigator.clipboard.writeText(displayedColor)
+                setCopied(true)
+                toast.success('Color copied to clipboard')
+                setTimeout(() => setCopied(false), 2000)
+              } catch (err) {
+                console.error('Failed to copy color to clipboard', err)
+                toast.error('Failed to copy color')
+              }
+            }}
             title="Copy color"
           >
             {copied ? (
