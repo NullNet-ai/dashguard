@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.1-rc.5<unreleased>",
-  "branch": "unreleased/fix2278/2.7.1-rc.5<unreleased>",
-  "message": "fix: code-editor responsiveness",
+  "tag": "2.7.1",
+  "branch": "released/3688/2.7.1",
+  "message": "feat: modal component",
   "publish_name": "Save Ducto"
 }
