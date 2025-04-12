@@ -10,6 +10,7 @@ import { cn } from "~/lib/utils";
 import SelectComponent from './SelectComponent';
 import ToggleItem from './ToggleItem';
 import { ToggleGroup } from '../../toggle-group';
+import copy from 'copy-to-clipboard';
 
 interface CodeEditorProps {
 	enable_editor_tools?: boolean;
@@ -173,14 +174,14 @@ export default function CodeEditor({
 		setShowPreviewer(false);
 	}, []);
 
-	const handleCopy = useCallback(async () => {
+	const handleCopy = useCallback(() => {
 		if (!editorCode) return;
-		try {
-			await navigator.clipboard.writeText(editorCode);
+		const success = copy(editorCode);
+		if (success) {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
-		} catch (err) {
-			console.error('Failed to copy:', err);
+		} else {
+			console.error('Failed to copy to clipboard');
 		}
 	}, [editorCode]);
 	
@@ -384,10 +385,10 @@ export default function CodeEditor({
 								wordWrap: 'on',
 								autoIndent: 'advanced',
 								cursorSmoothCaretAnimation: "explicit",
-								lineNumbers: readOnly ? "off" : isReadOnly ? "off" : "on",
+								lineNumbers: readOnly || disabled ? "off" : isReadOnly ? "off" : "on",
 								accessibilitySupport: 'on',
 								acceptSuggestionOnEnter: 'smart',
-								renderLineHighlight: readOnly ? "none" : isReadOnly ? "none" : "all",
+								renderLineHighlight: readOnly || disabled ? "none" : isReadOnly ? "none" : "all",
 								placeholder: isReadOnly || readOnly ? '' : placeholder,
 								tabSize: 2,
 								scrollbar: {
