@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/compon
 import { cn } from '~/lib/utils'
 import { testIDFormatter } from '~/utils/formatter'
 
-import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../DefatultRow/Actions'
+import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../DefaultRow/Actions'
 import {Button as HeadlessBtn} from '@headlessui/react'
 import StatusCell from '~/components/ui/status-cell'
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { cn } from '~/lib/utils';
-import { handleEdit } from '../platform/Grid/DefatultRow/Actions';
+import { handleEdit } from '../platform/Grid/DefaultRow/Actions';
 import { useSideDrawer } from '../platform/SideDrawer';
 import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
 
