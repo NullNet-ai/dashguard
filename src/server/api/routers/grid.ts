@@ -397,11 +397,6 @@ export const gridRouter = createTRPCRouter({
       const [, , mainEntity, application] = pathName.split('/');
       const searchParams = headerList.get('x-full-search-query-params') || '';
 
-
-      console.log("gridTabId",{ 
-        gridTabId, mainEntity, application, searchParams
-      })
-
       // if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
@@ -409,8 +404,6 @@ export const gridRouter = createTRPCRouter({
         _id: ctx.session.account.contact.id,
         _gridKey: input?.gridKey || '',
       });
-
-      console.log("_tabMenuId", _tabMenuId)
 
       const _tabMenuHref = `/portal/${mainEntity}/grid`;
       const activeTab = (await ctx.redisClient.getCachedData(

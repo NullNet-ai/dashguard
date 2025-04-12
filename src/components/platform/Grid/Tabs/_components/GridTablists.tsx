@@ -28,9 +28,6 @@ import { calculateMainTabItems } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
-import { GridContext } from '../../Provider';
-import { tabName } from '~/components/platform/Grid/utils/griddefault-tab';
-import pluralize from 'pluralize';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();

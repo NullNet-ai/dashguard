@@ -1,6 +1,6 @@
 import { headers } from 'next/headers'
 
-import { getGridCacheData } from '~/components/platform/Grid/utils/gridget-cache-data'
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data'
 import { api } from '~/trpc/server'
 
 import defaultSorting from './_config/sorting'
