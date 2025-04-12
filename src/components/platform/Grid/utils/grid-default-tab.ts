@@ -1,5 +1,6 @@
 import { ulid } from 'ulid';
-import GRIDTABS from '../server/default-grid-tab';
+import GRIDTABS from '~/server/default-grid-tab';
+
 
 export const tabName: Record<string, string> = {
   user_role: 'role',

@@ -1,7 +1,6 @@
 import { api } from '~/trpc/server';
 import Grid from '~/components/platform/Grid';
 import { headers } from 'next/headers';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
 
 /**
  *
@@ -11,6 +10,7 @@ import { getGridCacheData } from '~/lib/grid-get-cache-data';
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 export default async function Page() {
   const { sorts, pagination, filters, groups } =

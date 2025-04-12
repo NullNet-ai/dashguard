@@ -1,11 +1,11 @@
 import Grid from '~/components/platform/Grid';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
 import { api } from '~/trpc/server';
 import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow';
 import { AccountCustomRowAction } from './_components/AccountCustomRowAction';
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 export default async function Page() {
   const { sorts, filters, pagination, columns : columnOrder,   groups } = (await getGridCacheData()) ?? {}

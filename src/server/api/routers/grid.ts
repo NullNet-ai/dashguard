@@ -13,9 +13,9 @@ import {
   type IPagination,
   type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
-import { gridCacheId, type TReportDataType } from '~/lib/grid-cache-id';
-import { SetIdTab, SetTab } from '~/lib/grid-default-tab';
-import { getGridLink } from '~/lib/grid-get-link';
+import { gridCacheId, type TReportDataType } from '~/components/platform/Grid/utils/grid-cache-id';
+import { SetIdTab, SetTab } from '~/components/platform/Grid/utils/grid-default-tab';
+import { getGridLink } from '~/components/platform/Grid/utils/grid-get-link';
 import { tabMenuId } from '~/lib/tab-menu-id';
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { formatSorting } from '~/server/utils/formatSorting';

@@ -1,4 +1,4 @@
-import { getGridLink } from "~/lib/grid-get-link";
+import { getGridLink } from "~/components/platform/Grid/utils/grid-get-link";
 import { ISidebarMenu } from "~/components/platform/SideBar/type";
 
 const menu = {
