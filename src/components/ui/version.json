@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.2",
-  "branch": "released/3611/2.7.2",
-  "message": "relase version 2.7.2",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.8.0-rc.1<unreleased>",
+  "branch": "unreleased/fix2278/2.8.0-rc.1<unreleased>",
+  "message": "fix: code editor disabled stated and copy to clipboard",
+  "publish_name": "Save Ducto"
 }
