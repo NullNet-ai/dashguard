@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "2.0.2",
-  "branch": "released/noticket,applyWAchanges/2.0.2",
-  "message": "apply WA changes",
-  "publish_name": "Juphet Vitualla"
+  "tag": "2.0.3-rc.1<unreleased>",
+  "branch": "unreleased/feat/2.0.3-rc.1<unreleased>",
+  "message": "add handleCustomAction",
+  "publish_name": "Rob Caldosa"
 }

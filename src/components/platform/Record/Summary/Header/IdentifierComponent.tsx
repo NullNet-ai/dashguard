@@ -48,7 +48,10 @@ export default function IdentifierComponent({
         <span data-test-id={entityName + "-rcrd-code"} className='font-semibold me-2'>
           {ellipsis(JSON.stringify(code), 8)}
         </span>
-        <Badge variant={status === "Archived" ? "secondary" : "success"}>
+        <Badge 
+          variant={status === "Archived" ? "secondary" : "success"}
+          data-test-id={entityName + "-rcrd-status"}
+        >
           {capitalize(status)}
         </Badge>
       </div>

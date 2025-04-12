@@ -339,6 +339,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
                   iconPlacement="left"
                   iconClassName="size-4"
                   placeholder="Search..."
+                  data-test-id={'apptab-search-input'}
                   onChange={handleSearch}
                 />
               </div>

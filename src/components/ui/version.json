@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.2-rc.3<unreleased>",
-  "branch": "unreleased/feat/2.7.2-rc.3<unreleased>",
-  "message": "feat(carousel): add indicator styles and partial slides support",
+  "tag": "2.7.2",
+  "branch": "released/3611/2.7.2",
+  "message": "relase version 2.7.2",
   "publish_name": "Rob Caldosa"
 }

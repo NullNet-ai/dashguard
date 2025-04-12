@@ -228,6 +228,7 @@ export default function MyVerticalStepper() {
                                   data-test-id={testIDFormatter(
                                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
                                   )}
+                                  iconPosition='right'
                                 >
                                   <span className="text-sm font-medium sm:block">
                                     {label
@@ -236,7 +237,12 @@ export default function MyVerticalStepper() {
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block mt-[8px]">
+                                  <div 
+                                    data-test-id={testIDFormatter(
+                                      `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-content-${label}`
+                                    )}
+                                    className="text-sm font-medium sm:block mt-[8px]"
+                                  >
                                     {component}
                                   </div>
                                 </AccordionContent>
