@@ -59,93 +59,26 @@ export function ColorValueInput({
         <Input
           value={displayedColor}
           onChange={(e) => {
-            setDisplayedColor(e.target.value)
-
-            // Only update the actual color if it's a valid format
+            // Only allow editing in hex format
             if (activeFormat === 'hex') {
-              // Handle standard 6-digit hex
-              if (/^#[0-9A-Fa-f]{6}$/i.test(e.target.value)) {
-                handleColorChange(e.target.value)
-                // Reset alpha to 100% if we're switching from 8-digit to 6-digit hex
-                if (onAlphaChange && alpha !== 100) {
-                  onAlphaChange(100);
-                }
-              } 
-              // Handle 8-digit hex with alpha
-              else if (/^#[0-9A-Fa-f]{8}$/i.test(e.target.value)) {
-                // Extract the alpha value from the hex
-                const alphaHex = e.target.value.slice(7, 9)
-                const alphaDecimal = parseInt(alphaHex, 16)
-                const alphaPercent = Math.round((alphaDecimal / 255) * 100)
+              // Limit input to # plus 6 hex characters
+              if (e.target.value.startsWith('#') && e.target.value.length <= 7 && /^#[0-9A-Fa-f]*$/i.test(e.target.value)) {
+                setDisplayedColor(e.target.value)
                 
-                // Update alpha if handler is provided
-                if (onAlphaChange) {
-                  onAlphaChange(alphaPercent)
-                }
-                
-                // Update color (first 7 characters of the hex)
-                handleColorChange(e.target.value.slice(0, 7))
-              }
-              // For hex format, try to update as user types if it's a valid partial hex
-              else if (e.target.value.startsWith('#') && 
-                  /^#[0-9A-Fa-f]{0,8}$/i.test(e.target.value)) {
-                if (e.target.value.length >= 7) {
-                  handleColorChange(e.target.value.slice(0, 7))
-                  
-                  // If we have alpha digits (8-digit hex)
-                  if (e.target.value.length > 7 && onAlphaChange) {
-                    const alphaHex = e.target.value.slice(7).padEnd(2, '0')
-                    const alphaDecimal = parseInt(alphaHex, 16)
-                    const alphaPercent = Math.round((alphaDecimal / 255) * 100)
-                    onAlphaChange(alphaPercent)
+                // Only update the actual color if it's a valid 6-digit hex
+                if (/^#[0-9A-Fa-f]{6}$/i.test(e.target.value)) {
+                  handleColorChange(e.target.value)
+                  // Reset alpha to 100% if needed
+                  if (onAlphaChange && alpha !== 100) {
+                    onAlphaChange(100);
                   }
                 }
               }
-            } else if (activeFormat === 'rgb' && /^rgba?\(.*\)$/i.test(e.target.value)) {
-              handleColorChange(e.target.value)
-              
-              // Extract alpha from rgba if present
-              if (e.target.value.startsWith('rgba') && onAlphaChange) {
-                const match = /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([\d.]+)\s*\)/.exec(e.target.value)
-                if (match && match[1]) {
-                  const alphaDecimal = parseFloat(match[1])
-                  const alphaPercent = Math.round(alphaDecimal * 100)
-                  onAlphaChange(alphaPercent)
-                }
-              } else if (e.target.value.startsWith('rgb') && onAlphaChange && alpha !== 100) {
-                // Reset alpha to 100% if we're switching from rgba to rgb
-                onAlphaChange(100);
-              }
-            } else if (activeFormat === 'hsl' && /^hsla?\(.*\)$/i.test(e.target.value)) {
-              handleColorChange(e.target.value)
-              
-              // Extract alpha from hsla if present
-              if (e.target.value.startsWith('hsla') && onAlphaChange) {
-                const match = /hsla\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*,\s*([\d.]+)\s*\)/.exec(e.target.value)
-                if (match && match[1]) {
-                  const alphaDecimal = parseFloat(match[1])
-                  const alphaPercent = Math.round(alphaDecimal * 100)
-                  onAlphaChange(alphaPercent)
-                }
-              } else if (e.target.value.startsWith('hsl') && onAlphaChange && alpha !== 100) {
-                // Reset alpha to 100% if we're switching from hsla to hsl
-                onAlphaChange(100);
-              }
-            } else if (activeFormat === 'oklch' && /^oklch\(.*\)$/i.test(e.target.value)) {
-              handleColorChange(e.target.value)
-              
-              // Extract alpha from oklch if present
-              if (e.target.value.includes('/') && onAlphaChange) {
-                const match = /oklch\(.*\/\s*([\d.]+)\s*\)/.exec(e.target.value)
-                if (match && match[1]) {
-                  const alphaDecimal = parseFloat(match[1])
-                  const alphaPercent = Math.round(alphaDecimal * 100)
-                  onAlphaChange(alphaPercent)
-                }
-              }
             }
+            // For other formats, don't allow editing (handled in readonly prop)
           }}
-          className="pr-16"
+          readOnly={activeFormat !== 'hex'}
+          className={`pr-16 ${activeFormat !== 'hex' ? 'cursor-not-allowed opacity-70' : ''}`}
         />
         <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-1">
           <Button
@@ -156,14 +89,42 @@ export function ColorValueInput({
             onClick={async (e) => {
               e.preventDefault()
               try {
-                await navigator.clipboard.writeText(displayedColor)
-                setCopied(true)
-                toast.success('Color copied to clipboard')
-                setTimeout(() => setCopied(false), 2000)
-              } catch (err) {
-                console.error('Failed to copy color to clipboard', err)
-                toast.error('Failed to copy color')
+                // Primary method using modern API
+                if (navigator.clipboard?.writeText) {
+                  try {
+                    await navigator.clipboard.writeText(displayedColor)
+                  } catch (clipboardError) {
+                    throw clipboardError // Force fallthrough to fallback
+                  }
+                } else {
+                  throw new Error('Clipboard API not available')
+                }
+              } catch (_) {
+                // Reliable fallback for all browsers
+                const textArea = document.createElement('textarea')
+                textArea.value = displayedColor
+                textArea.style.position = 'fixed' // Prevent scrolling
+                textArea.style.opacity = '0'
+                
+                document.body.appendChild(textArea)
+                textArea.select()
+                
+                try {
+                  const success = document.execCommand('copy')
+                  if (!success) {
+                    throw new Error('execCommand failed')
+                  }
+                } finally {
+                  document.body.removeChild(textArea)
+                }
               }
+
+              setCopied(true)
+              toast.success('Color copied to clipboard', {
+                duration: 2000,
+                position: 'top-center'
+              })
+              setTimeout(() => setCopied(false), 2000)
             }}
             title="Copy color"
           >

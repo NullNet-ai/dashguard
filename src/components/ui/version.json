@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.1-rc.4<unreleased>",
-  "branch": "unreleased/fix3687/2.7.1-rc.4<unreleased>",
-  "message": "fix copy capability and color value input ",
+  "tag": "2.7.2-rc.1<unreleased>",
+  "branch": "unreleased/feat/2.7.2-rc.1<unreleased>",
+  "message": "refactor(color-picker): simplify hex input handling and clipboard logic- Restrict color input to hex format only, simplifying validation and user interaction- Improve clipboard copy functionality with fallback for older browsers- Add visual feedback for non-hex formats to indicate read-only state",
   "publish_name": "Rob Caldosa"
 }
