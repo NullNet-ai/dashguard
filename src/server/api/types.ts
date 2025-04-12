@@ -35,7 +35,7 @@ interface Account {
   contact: Contact;
   organization: Organization;
   organization_id: string;
-  email: string
+  account_id: string
   organization_account_id: string;
 }
 
