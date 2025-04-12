@@ -196,7 +196,7 @@ export const recordRouter = createTRPCRouter({
         as_root: asRoot,
         query: {
           advance_filters: createAdvancedFilter({
-            account_id: response?.email,
+            account_id: response?.account_id,
             status: 'Active',
             account_status: 'Active',
           }),
@@ -466,7 +466,7 @@ export const recordRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
 
       const account = ctx.session.account;
-      const accountEmail = account?.email;
+      const accountEmail = account?.account_id;
 
       const menuOptions = {
         Active: [
