@@ -6,8 +6,8 @@ import useScreenType from '~/hooks/use-screen-type';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import { GridContext } from '../../../Provider';
-import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
+import { GridContext } from '../Provider';
+import ArchiveConfirmationModal from '../views/ArchiveConfirmationModal';
 
 import GridMobileRowContent from './GridMobileRowContent';
 

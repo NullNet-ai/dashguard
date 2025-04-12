@@ -5,9 +5,9 @@ import { useContext } from 'react'
 import { Card } from '~/components/ui/card'
 import { Table, TableHeader } from '~/components/ui/table'
 
-import { GridContext } from '../../../Provider'
-import MyTableBody from '../../../TableBody'
-import MyTableHead from '../../../TableHead'
+import { GridContext } from '../Provider'
+import MyTableBody from '../TableBody'
+import MyTableHead from '../TableHead'
 
 import GridCardView from './GridCardview'
 

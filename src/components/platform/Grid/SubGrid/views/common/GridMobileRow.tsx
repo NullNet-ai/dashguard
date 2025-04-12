@@ -8,7 +8,7 @@ import { testIDFormatter } from '~/utils/formatter';
 
 import { GridContext } from '../../../Provider';
 import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
-import GridMobileRowContent from '../../../Server/views/common/GridMobileRowContent';
+import GridMobileRowContent from '../../../common/GridMobileRowContent';
 
 export default function GridMobileRow({
   parent = 'grid',

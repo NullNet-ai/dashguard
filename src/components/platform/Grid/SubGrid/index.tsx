@@ -16,9 +16,6 @@ import GridCardLists from './views/GridCardLists'
 import GridMobileForm from './views/GridMobileForm'
 import { cn } from '~/lib/utils'
 import { useIsMobile } from '~/hooks/use-mobile'
-import { Card } from '~/components/ui/card'
-import GridCardView from '../Server/views/common/GridCardview'
-import GridMobileRow from '../Server/views/common/GridMobileRow'
 import GridCardViewClient from './views/common/GridCardViewClient'
 
 interface IClientProps extends IPropsGrid {

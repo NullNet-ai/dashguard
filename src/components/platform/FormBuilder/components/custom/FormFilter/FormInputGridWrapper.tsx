@@ -15,7 +15,7 @@ import {
   type ISearchParams,
   type TFormSchema,
 } from '../../../../FormBuilder/types'
-import Grid from '../../../../Grid/Client'
+import Grid from '../../../../Grid/SubGrid'
 
 export default function FormInputGridWrapper({
   fieldConfig,

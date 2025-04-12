@@ -1,6 +1,5 @@
 'use client';
 import { flexRender } from '@tanstack/react-table';
-import { EllipsisVertical } from 'lucide-react';
 import React, { useContext, useMemo } from 'react';
 
 
@@ -9,8 +8,8 @@ import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
 
-import { GridContext } from '../../../Provider';
-import ArchiveConfirmationModal from '../../../views/ArchiveConfirmationModal';
+import { GridContext } from '../Provider';
+import ArchiveConfirmationModal from '../views/ArchiveConfirmationModal';
 import GridCardViewContent from './GridCardViewContent';
 
 export default function GridCardView({parentType} : any) {

@@ -2,7 +2,7 @@
 import Bluebird from 'bluebird';
 import React from 'react';
 
-import Grid from '~/components/platform/Grid/Server';
+import Grid from '~/components/platform/Grid';
 import { getGridCacheData } from '~/lib/grid-get-cache-data';
 import { api } from '~/trpc/server';
 

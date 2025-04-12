@@ -5,8 +5,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/compon
 import { cn } from '~/lib/utils'
 import { testIDFormatter } from '~/utils/formatter'
 import {Button as HeadlessBtn} from '@headlessui/react'
-import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
 import StatusCell from '~/components/ui/status-cell'
+import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../DefatultRow/Actions'
 
 const GridCardViewContent = ({ 
     row, 

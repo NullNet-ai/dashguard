@@ -1,13 +1,10 @@
 import { Card, CardFooter } from "~/components/ui/card";
 import React from "react";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import GridMobileRow from "./common/GridMobileRow";
-import Pagination from "../../Pagination";
-import InfiniteScrollContainer from '../../Server/views/InfiniteScroll';
 import CreateButton from '../../Header/ButtonHeader';
 import Search from '../../Search';
 import { cn } from '~/lib/utils';
 import Sorting from '../../Sorting';
+import InfiniteScrollContainer from '../../common/InfiniteScroll';
 
 function GridMobile({shownPagination, parentType='grid', gridLevel = 1, hideSearch } : {
   shownPagination?: boolean;

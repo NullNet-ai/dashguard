@@ -2,7 +2,7 @@
 import React, { useContext, useRef, useState } from 'react';
 import useWindowSize from '~/hooks/use-resize';
 import { remToPx } from '~/utils/fetcher';
-import { GridContext } from '../../../Provider';
+import { GridContext } from '../Provider';
 
 export const ScrollContainerContext = React.createContext<any>(null);
 

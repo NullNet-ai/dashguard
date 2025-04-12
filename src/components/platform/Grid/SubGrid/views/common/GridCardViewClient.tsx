@@ -1,5 +1,4 @@
 import { Card } from '~/components/ui/card';
-import GridMobileRow from '../../../Server/views/common/GridMobileRow';
 import { cn } from '~/lib/utils';
 import { useContext, useMemo } from 'react';
 import { useSidebar } from '~/components/ui/sidebar';
@@ -8,6 +7,7 @@ import { remToPx } from '~/utils/fetcher';
 import { GridContext } from '../../../Provider';
 import Search from '../../../Search';
 import Sorting from '../../../Sorting';
+import GridMobileRow from '../../../common/GridMobileRow';
 
 
 const GridCardViewClient = ({  parentType,

@@ -1,11 +1,11 @@
-import { ChevronDown, ChevronRight, ChevronUp, EllipsisVertical } from 'lucide-react'
+import { ChevronDown, ChevronRight, EllipsisVertical } from 'lucide-react'
 import React from 'react'
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { cn } from '~/lib/utils'
 import { testIDFormatter } from '~/utils/formatter'
 
-import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../../../DefatultRow/Actions'
+import { ArchiveComponent, DeleteComponent, EditComponent, RestoreComponent } from '../DefatultRow/Actions'
 import {Button as HeadlessBtn} from '@headlessui/react'
 import StatusCell from '~/components/ui/status-cell'
 

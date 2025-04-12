@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useContext } from "react";
 import GridTabs from "../Tabs/Tabs";
 import Search from "../Search";

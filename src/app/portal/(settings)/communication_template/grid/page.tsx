@@ -1,5 +1,5 @@
 import { api } from '~/trpc/server';
-import Grid from '~/components/platform/Grid/Server';
+import Grid from '~/components/platform/Grid';
 import { headers } from 'next/headers';
 import { getGridCacheData } from '~/lib/grid-get-cache-data';
 

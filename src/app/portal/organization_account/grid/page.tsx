@@ -1,4 +1,4 @@
-import Grid from '~/components/platform/Grid/Server';
+import Grid from '~/components/platform/Grid';
 import { getGridCacheData } from '~/lib/grid-get-cache-data';
 import { api } from '~/trpc/server';
 import ExpandedDefaultRow from '~/components/platform/Grid/common/ExpandedDefaultRow';

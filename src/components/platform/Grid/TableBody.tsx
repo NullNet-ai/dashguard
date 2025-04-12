@@ -5,14 +5,14 @@ import { TableBody, TableCell, TableRow } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
 import { testIDFormatter } from '~/utils/formatter';
 
-import GridGroupingExpansion from './Client/views/GridGroupingExpansion';
+import GridGroupingExpansion from './SubGrid/views/GridGroupingExpansion';
 import { getCommonPinningStyles } from './ColumnPining';
 import { GridContext } from './Provider';
-import { ScrollContainerContext } from './Server/views/common/GridScrollContainer';
 import { type IExpandedRow } from './types';
 import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
 import StatusCell from '~/components/ui/status-cell';
+import { ScrollContainerContext } from './common/GridScrollContainer';
 
 type MyTableBodyProps = {
   showAction?: boolean;

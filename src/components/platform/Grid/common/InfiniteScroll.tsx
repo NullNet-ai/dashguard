@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Loader } from '~/components/ui/loader';
 
-import { GridContext } from '../../Provider';
 
-import GridMobileRow from './common/GridMobileRow';
-import getData from './actions/getData';
+import GridMobileRow from './GridMobileRow';
 import useScreenType from '~/hooks/use-screen-type';
 import { cn } from '~/lib/utils';
+import getData from '../Action/getData';
+import { GridContext } from '../Provider';
 
 const InfiniteScrollContainer = ({gridlevel}: any) => {
   const screen = useScreenType();
