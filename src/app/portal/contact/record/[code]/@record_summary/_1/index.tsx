@@ -7,6 +7,7 @@ import { cn } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
 import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
+import { testIDFormatter } from '~/utils/formatter';
 
 const fields = {
   Category: 'categories',
@@ -144,54 +145,93 @@ const RecordShellSummary = ({
   if(isCollapseRecordSummary) return null
 
   return (
-    <div>
+    <div data-test-id={testIDFormatter('rcrd-sum-details-container')}>
       {Object.entries(fields).map(([key, value], index) => {
         const fieldValue = (record_details as { [key: string]: any })?.[value];
         if (value === 'categories' && !fieldValue) {
           return null;
         }
         return (
-          <div className={cn(`${index !== 0 ? 'pt-[4px]' : ''}`)} key={key}>
+          <div 
+            className={cn(`${index !== 0 ? 'pt-[4px]' : ''}`)} 
+            key={key}
+            data-test-id={testIDFormatter(`rcrd-sum-details-${value}`)}
+          >
             <div className="px-5">
               <div className="p-1 text-sm">
                 <div>
-                  <span className="text-slate-400">{key}: </span>
+                  <span 
+                    className="text-slate-400"
+                    data-test-id={testIDFormatter(`rcrd-sum-details-${value}-label`)}
+                  >
+                    {key}: 
+                  </span>
                   {value === 'categories' ? (
-                    <div className="inline-flex gap-2 p-1">
+                    <div 
+                      className="inline-flex gap-2 p-1"
+                      data-test-id={testIDFormatter('rcrd-sum-details-categories')}
+                    >
                       {fieldValue.map((category: string) => (
-                        <Badge variant={'primary'} className="" key={category}>
+                        <Badge 
+                          variant={'primary'} 
+                          className="" 
+                          key={category}
+                          data-test-id={testIDFormatter(`rcrd-sum-details-category-${category}`)}
+                        >
                           {category}
                         </Badge>
                       ))}
                     </div>
                   ) : (
-                    <span>{fieldValue || 'None'}</span>
+                    <span data-test-id={testIDFormatter(`rcrd-sum-details-${value}-value`)}>
+                      {fieldValue || 'None'}
+                    </span>
                   )}
                 </div>
               </div>
             </div>
-            {value === 'categories' && fieldValue && <Separator />}
+            {value === 'categories' && fieldValue && (
+              <Separator data-test-id={testIDFormatter('rcrd-sum-details-separator')} />
+            )}
           </div>
         );
       })}
       {account && account.account_id && (
-        <div className='mt-2'>
-          <Separator />
+        <div 
+          className='mt-2'
+          data-test-id={testIDFormatter('rcrd-sum-details-account')}
+        >
+          <Separator data-test-id={testIDFormatter('rcrd-sum-details-account-separator')} />
           <div className="p-1 px-5">
-            <span className="text-sm font-semibold text-foreground">
+            <span 
+              className="text-sm font-semibold text-foreground"
+              data-test-id={testIDFormatter('rcrd-sum-details-account-title')}
+            >
               Account Details
             </span>
           </div>
           <div className="p-1 px-5 text-sm">
             <div>
-              <span className="text-slate-400">{'Role: '}</span>
-              <span>{account?.role || 'None'}</span>
+              <span 
+                className="text-slate-400"
+                data-test-id={testIDFormatter('rcrd-sum-details-account-role-label')}
+              >
+                {'Role: '}
+              </span>
+              <span data-test-id={testIDFormatter('rcrd-sum-details-account-role-value')}>
+                {account?.role || 'None'}
+              </span>
             </div>
           </div>
           <div className="p-1 px-5 text-sm">
             <div>
-              <span className="text-slate-400">{'Email: '}</span>
-              <span>
+              <span 
+                className="text-slate-400"
+                data-test-id={testIDFormatter('rcrd-sum-details-account-email-label')}
+              >
+                {'Email: '}
+              </span>
+              <span data-test-id={testIDFormatter('rcrd-sum-details-account-email-value')}>
                 {account?.account_id || 'None'}
               </span>
             </div>

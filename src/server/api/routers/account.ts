@@ -492,7 +492,7 @@ export const accountRouter = createTRPCRouter({
     .input(ZodItems)
     .query(async ({ ctx, input }) => {
       const account = ctx.session.account;
-      const accountEmail = account?.email;
+      const accountEmail = account?.account_id;
 
       const query = ctx.dnaClient
         .findAll({
@@ -1101,7 +1101,7 @@ export const accountRouter = createTRPCRouter({
 
       try {
         await transporter.sendMail({
-          from: loggedInUser.email,
+          from: loggedInUser.account_id,
           to: accountRecord?.email,
           subject: 'Account Invitation',
           html: `

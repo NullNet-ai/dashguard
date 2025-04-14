@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.2-rc.1<unreleased>",
-  "branch": "unreleased/feat/2.7.2-rc.1<unreleased>",
-  "message": "refactor(color-picker): simplify hex input handling and clipboard logic- Restrict color input to hex format only, simplifying validation and user interaction- Improve clipboard copy functionality with fallback for older browsers- Add visual feedback for non-hex formats to indicate read-only state",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.8.0-rc.1<unreleased>",
+  "branch": "unreleased/fix2278/2.8.0-rc.1<unreleased>",
+  "message": "fix: code editor disabled stated and copy to clipboard",
+  "publish_name": "Save Ducto"
 }

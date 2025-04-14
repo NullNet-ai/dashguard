@@ -39,7 +39,12 @@ const FormHeader = (props: IFormHeaderProps) => {
         'flex flex-row items-center justify-between bg-slate-100', headerClassName,
       )}
     >
-      <CardDescription className='text-md font-semibold text-foreground'>
+      <CardDescription 
+        className='text-md font-semibold text-foreground' 
+        data-test-id={testIDFormatter(
+          `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-name`
+        )}
+      >
         {formLabel}
         {' '}
       </CardDescription>
