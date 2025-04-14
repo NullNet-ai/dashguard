@@ -13,9 +13,9 @@ import {
   type IPagination,
   type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
-import { gridCacheId, type TReportDataType } from '~/lib/grid-cache-id';
-import { SetIdTab, SetTab } from '~/lib/grid-default-tab';
-import { getGridLink } from '~/lib/grid-get-link';
+import { gridCacheId, type TReportDataType } from '~/components/platform/Grid/utils/grid-cache-id';
+import { SetIdTab, SetTab } from '~/components/platform/Grid/utils/grid-default-tab';
+import { getGridLink } from '~/components/platform/Grid/utils/grid-get-link';
 import { tabMenuId } from '~/lib/tab-menu-id';
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { formatSorting } from '~/server/utils/formatSorting';
@@ -385,18 +385,18 @@ export const gridRouter = createTRPCRouter({
     }),
   getSessionGridTabs: privateProcedure
     .input(
-      z
-        .object({
+      z.object({
           gridKey: z.string().optional(),
-        })
-        .optional(),
+      })
     )
     .query(async ({ ctx, input }) => {
+
       const headerList = headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       const searchParams = headerList.get('x-full-search-query-params') || '';
+
       // if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
@@ -404,6 +404,7 @@ export const gridRouter = createTRPCRouter({
         _id: ctx.session.account.contact.id,
         _gridKey: input?.gridKey || '',
       });
+
       const _tabMenuHref = `/portal/${mainEntity}/grid`;
       const activeTab = (await ctx.redisClient.getCachedData(
         _tabMenuId,

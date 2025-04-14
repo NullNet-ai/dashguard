@@ -12,7 +12,7 @@ import {
   DeleteComponent,
   EditComponent,
   RestoreComponent,
-} from '../DefatultRow/Actions';
+} from '../DefaultRow/Actions';
 import type { IConfigGrid } from '../types';
 
 export const useActionColumns = (

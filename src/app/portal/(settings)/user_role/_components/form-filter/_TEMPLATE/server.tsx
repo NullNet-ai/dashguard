@@ -1,8 +1,7 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import BasicDetails from "./client";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
-import defaultSorting from "./_config/sorting";
+
 
 const form_filter_entity = "";
 

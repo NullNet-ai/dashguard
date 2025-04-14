@@ -1,4 +1,4 @@
-import { getGridLink } from "~/lib/grid-get-link";
+import { getGridLink } from "~/components/platform/Grid/utils/grid-get-link";
 
 const menu = {
   title: "Role",

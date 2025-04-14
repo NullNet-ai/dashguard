@@ -1,41 +1,36 @@
-import { Table, TableHeader } from "~/components/ui/table";
-import MyTableHead from "../TableHead";
-import MyTableBody from "../TableBody";
-import { Card, CardFooter, CardHeader } from "~/components/ui/card";
-import Pagination from "../Pagination";
-import React from "react";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import Header from "../Header";
+'use client'
 
-interface IGridDesktopProps {
-  parentRenderType: "client" | "server";
+import React from 'react'
+
+import { Card, CardFooter, CardHeader } from '~/components/ui/card'
+
+import Header from '../Header'
+import Pagination from '../Pagination'
+
+import { cn } from '~/lib/utils'
+import ScrollContainer from '../common/GridScrollContainer'
+import GridDesktopContainer from '../common/GridDesktopContainer'
+interface IProps {
+  gridKey?: string;
+  parentType?: string;
 }
-
-function GridDesktop({ parentRenderType = "server" }: IGridDesktopProps) {
+function GridDesktop({ parentType, gridKey }: IProps) {
   return (
     <Card className="col-span-full border-0 shadow-none">
-      {parentRenderType === "server" ? (
-        <CardHeader>
-          <Header />
-        </CardHeader>
-      ) : null}
-      <ScrollArea
-        style={{ height: "calc(100vh - 16rem)" }}
-        className="mx-2 rounded-md border bg-card text-card-foreground"
-      >
-        <Table>
-          <TableHeader>
-            <MyTableHead />
-          </TableHeader>
-          <MyTableBody />
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-      <CardFooter>
-        <Pagination />
-      </CardFooter>
+      <CardHeader>
+        <Header gridKey={gridKey} />
+      </CardHeader>
+      <ScrollContainer parentType={parentType}>
+        <GridDesktopContainer parentType={parentType} />
+        {/* <ScrollBar orientation="horizontal" /> */}
+      </ScrollContainer>
+      <div className={cn(`sticky `, `${parentType === 'record' ? 'bottom-[-25px]' : 'bottom-0'}`)}>
+        <CardFooter>
+          <Pagination />
+        </CardFooter>
+      </div>
     </Card>
-  );
+  )
 }
 
-export default GridDesktop;
+export default GridDesktop

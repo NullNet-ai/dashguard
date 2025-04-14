@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.7.2-rc.3<unreleased>",
-  "branch": "unreleased/feat/2.7.2-rc.3<unreleased>",
-  "message": "feat(carousel): add indicator styles and partial slides support",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.8.0-rc.1<unreleased>",
+  "branch": "unreleased/fix2278/2.8.0-rc.1<unreleased>",
+  "message": "fix: code editor disabled stated and copy to clipboard",
+  "publish_name": "Save Ducto"
 }

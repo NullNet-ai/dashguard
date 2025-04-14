@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { EOperator } from "@dna-platform/common-orm";
 import { api } from "~/trpc/server";
-import Grid from "~/components/platform/Grid/Server";
+import Grid from "~/components/platform/Grid";
 import React from "react"; // Import React if needed
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "../_config/columns";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import { getGridCacheData } from "~/components/platform/Grid/utils/grid-get-cache-data";
 import { defaultSorting } from "../_config/sorting";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
 

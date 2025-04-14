@@ -2,7 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import ConfirmationDetails from "./client";
 import { transformDataToOptions } from "./actions/utils";
-import ConfirmationSummary from "./custom/ConfirmationSummary";
+import { ConfirmationSummary } from '~/components/platform/ConfirmationForm';
 
 const FormServerFetch = async () => {
   const headerList = headers();
