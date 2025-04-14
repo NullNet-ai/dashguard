@@ -3,7 +3,6 @@
 import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
 import { CardFooter } from '~/components/ui/card';
 import { Loader } from '~/components/ui/loader';
-import useFetchGridData from '~/hooks/useFetchGridData';
 import Pagination from '../../Pagination';
 import GridProvider from '../../Provider';
 import MyTableBody from '../../TableBody';
@@ -11,6 +10,7 @@ import ErrorPage from '../../common/ErrorPage';
 import { useSidebar } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 import { resolveAdvanceFilter } from '../../Search/utils/advanceFilterResolver';
+import useFetchGridData from '../../hooks/useFetchGridData';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
