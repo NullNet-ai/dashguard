@@ -2,7 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import RoleDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 const FormServerFetch = async () => {
   const headerList = headers();

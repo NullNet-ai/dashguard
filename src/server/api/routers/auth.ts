@@ -235,7 +235,7 @@ export const authRouter = createTRPCRouter({
               type: 'criteria',
               field: 'account_id',
               operator: EOperator.EQUAL,
-              values: [response?.email],
+              values: [response?.account_id],
             },
           ],
           pluck_object: {

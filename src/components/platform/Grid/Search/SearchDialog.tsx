@@ -10,7 +10,7 @@ import {
   DialogPanel,
 } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
-import { SearchIcon } from 'lucide-react';
+import { Clock, SearchIcon, X } from 'lucide-react';
 import { useContext, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
@@ -22,12 +22,39 @@ import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
 import { type ISearchItemResult } from './types';
 import { transformSearchData } from './utils/transformSearchData';
-import { cn } from '~/lib/utils';
+import { cn, formatAndCapitalize } from '~/lib/utils';
+import { Badge } from '~/components/ui/badge';
+import { Separator } from '~/components/ui/separator';
 
 export default function SearchDialog() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
   const [openDialog, setOpenDialog] = useState(false);
+
+  const { searchItems = [] } = state ?? {};
+
+  const displaySearchItemResolver = searchItems.reduce((acc: any, item) => {
+    if (!item.filters || !Array.isArray(item.filters)) {
+      acc.push(item);
+    } else {
+      acc.push(...item.filters);
+    }
+    return acc;
+  }, []);
+  const selectedSearchItems = displaySearchItemResolver?.filter(
+    (item: any) => !item?.default,
+  );
+  const defaultSearchItems = selectedSearchItems
+  ?.map((item: any) => ({ ...item, hidden: false }))
+  .filter((itm: any) => itm.type !== 'operator')
+  .filter((item: any, index: number, self: any) =>
+    index === self.findIndex((t: any) =>
+      t.entity === item.entity &&
+      t.field === item.field &&
+      JSON.stringify(t.values) === JSON.stringify(item.values)
+    )
+  );
+
 
   const {
     searchableFields = [],
@@ -57,7 +84,8 @@ export default function SearchDialog() {
       ],
       advance_filters: advanceFilterItems as IAdvanceFilters[],
       ...(searchConfig?.query_params ?? {}),
-    }, {
+    },
+    {
       refetchOnWindowFocus: false,
       gcTime: 0,
       enabled: !!debouncedSearchInput,
@@ -76,14 +104,14 @@ export default function SearchDialog() {
   return (
     <>
       <Button
-          className={cn('flex gap-x-1')}
-          size='md'
-          variant='softPrimary'
-          onClick={() => handleOpenDialog()}
-        >
-           <SearchIcon className="size-4" />
-           <span className="mr-1">Search</span> 
-        </Button>
+        className={cn('flex gap-x-1')}
+        size="md"
+        variant="softPrimary"
+        onClick={() => handleOpenDialog()}
+      >
+        <SearchIcon className="size-4" />
+        <span className="mr-1">Search</span>
+      </Button>
 
       <Dialog
         className="relative z-50"
@@ -138,7 +166,9 @@ export default function SearchDialog() {
                       <SearchResult
                         results={
                           (transformSearchData(
-                            items, debouncedSearchInput, searchableFields,
+                            items,
+                            debouncedSearchInput,
+                            searchableFields,
                           ) as ISearchItemResult[]) || null
                         }
                         closeDialog={handleCloseDialog}
@@ -148,9 +178,77 @@ export default function SearchDialog() {
                 </ComboboxOptions>
               )}
             </Combobox>
+            {defaultSearchItems?.length ? (
+              <div className="p-4">
+                <span className="text-xs">Search By:</span>
+                <div className="flex flex-row flex-wrap gap-1">
+                  {defaultSearchItems?.map((item: any, index: number) => {
+                    return (
+                      <Badge
+                        className={cn(
+                          `item-ref m-1 flex items-center gap-1 whitespace-nowrap`,
+                        )}
+                        key={item.id}
+                        variant="secondary"
+                      >
+                        {item.type === 'criteria'
+                          ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
+                          : item?.operator}
+                        {item.type === 'criteria' && !item.default && (
+                          <Button
+                            className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                            key={`${item.id}-remove`}
+                            name="removeSortingButton"
+                            size="xs"
+                            variant="ghost"
+                            // onClick={() => {
+                            //   if (isHidden) return;
+                            //   actions?.handleRemoveSearchItem(item);
+                            // }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </Badge>
+                    );
+                  })}
+                  <Button
+                    type="button"
+                    className={cn(
+                      `h-[30px] text-default/60 underline hover:no-underline`,
+                    )}
+                    name="resetSortButton"
+                    variant="link"
+                    onClick={() => {
+                      actions?.handleClearSearchItems();
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                {/* <Separator className='my-2 bg-slate-100'/>
+                <div>
+                  <span className="text-xs mb-2 block">Recent Searches:</span>
+                  <div className='flex flex-col gap-y-2'>
+                    <div className='flex items-center gap-x-1'>
+                      <Clock className="h-3 w-3 text-gray-400 " />
+                      <span className='text-sm text-default'>ID100004</span>
+                    </div>
+                    <div className='flex items-center gap-x-1'>
+                      <Clock className="h-3 w-3 text-gray-400 " />
+                      <span className='text-sm text-default'>John Smith</span>
+                    </div>
+                    <div className='flex items-center gap-x-1'>
+                      <Clock className="h-3 w-3 text-gray-400 " />
+                      <span className='text-sm text-default'>(+1) 345-009-1234</span>
+                    </div>
+                  </div>
+                </div> */}
+              </div>
+            ) : null}
           </DialogPanel>
         </div>
       </Dialog>
     </>
-  )
+  );
 }

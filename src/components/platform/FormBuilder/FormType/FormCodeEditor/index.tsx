@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import CodeEditor from '~/components/ui/code-editor';
-import { DevTool } from '@hookform/devtools';
 
 interface IProps {
   fieldConfig: IField;
@@ -64,7 +63,6 @@ export default function FormCodeEditor({
         data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
         detail={fieldConfig.detail}
       />
-      <DevTool  control={form.control} />
     </FormItem>
   );
 }

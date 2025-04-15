@@ -304,6 +304,37 @@ export const tabRouter = createTRPCRouter({
       await tabs.cacheData(key, response, 90000000)
     }),
 
+    removeNewInnerClassTab: privateProcedure
+    .input(
+      z.object({
+        current_context: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      let response = await tabs
+        .getCachedData(key)
+        .then((res) => {
+          return res || []
+        })
+        .catch(() => {
+          return []
+        })
+
+      const update_tabs = response?.tabs?.filter(
+        (tab: Record<string, any>) => tab.name !== "new" && tab.id !== "new"
+      )
+
+      response = {
+        ...response,
+        tabs: update_tabs,
+      }
+
+      await tabs.cacheData(key, response, 90000000)
+    }),
+
+
   closeAllInnerClassTabs: privateProcedure
     .input(
       z.object({

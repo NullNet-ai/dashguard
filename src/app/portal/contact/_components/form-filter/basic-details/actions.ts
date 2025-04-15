@@ -7,7 +7,7 @@ import { ISearchItem } from '~/components/platform/Grid/Search/types';
 import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
 import { api } from '~/trpc/server';
 import { defaultSorting } from '../../../grid/_config/sorting';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 const defaultAdvanceFilter = [
   {
@@ -86,8 +86,7 @@ export const closeCurrentInnerClassTab = async ({
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
 
-  await api.tab.closeCurrentInnerClassTab({
-    href: pathname,
+  await api.tab.removeNewInnerClassTab({
     current_context: currentContext,
   });
 

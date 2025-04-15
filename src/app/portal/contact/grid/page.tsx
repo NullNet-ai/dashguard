@@ -1,10 +1,10 @@
-import Grid from '~/components/platform/Grid/Server';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import Grid from '~/components/platform/Grid/';
 import { api } from '~/trpc/server';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
 import AccountGridExpansion from '../_components/grids/AccountGridExpansion';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import { defaultSorting } from './_config/sorting';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page() {

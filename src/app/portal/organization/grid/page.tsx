@@ -2,8 +2,8 @@
 import Bluebird from 'bluebird';
 import React from 'react';
 
-import Grid from '~/components/platform/Grid/Server';
-import { getGridCacheData } from '~/lib/grid-get-cache-data';
+import Grid from '~/components/platform/Grid';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { api } from '~/trpc/server';
 
 import ArchiveDialog from '../_components/controls/ArchiveDialog';

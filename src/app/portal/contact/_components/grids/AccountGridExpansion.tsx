@@ -1,5 +1,5 @@
 'use client';
-import Grid from '~/components/platform/Grid/Client';
+import Grid from '~/components/platform/Grid/SubGrid';
 import StatusCell from '~/components/ui/status-cell';
 
 import { type IExpansionComponentProps } from '~/components/platform/Grid/types';

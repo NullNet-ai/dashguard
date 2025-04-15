@@ -28,9 +28,6 @@ import { calculateMainTabItems } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
-import { GridContext } from '../../Provider';
-import { tabName } from '~/lib/grid-default-tab';
-import pluralize from 'pluralize';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
@@ -339,6 +336,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
                   iconPlacement="left"
                   iconClassName="size-4"
                   placeholder="Search..."
+                  data-test-id={'apptab-search-input'}
                   onChange={handleSearch}
                 />
               </div>

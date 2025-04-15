@@ -1,6 +1,6 @@
 'use client'
 
-import Grid from '~/components/platform/Grid/Client'
+import Grid from '~/components/platform/Grid/SubGrid'
 import { type IExpansionComponentProps } from '~/components/platform/Grid/types'
 import StatusCell from '~/components/ui/status-cell'
 import useFetchGridData from '~/hooks/useFetchGridData'

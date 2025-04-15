@@ -9,7 +9,7 @@ import { useEventEmitter } from '~/context/EventEmitterProvider';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 
-import Grid from '../../../../Grid/Client';
+import Grid from '../../../../Grid/SubGrid';
 import Skeleton from '../../../../Grid/Skeleton';
 import { type IFilterGridConfig } from '../../../types/global/interfaces';
 

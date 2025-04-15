@@ -82,7 +82,7 @@ export default function ContactDetails({
         router.replace(`/portal/contact/wizard/${response.code}/1`);
       }
 
-      if (action_type === 'Create' || action_type === 'Next') {
+      if(action_type && ['Create', 'Next', 'Paste'].includes(action_type) && response?.code) {
         await closeCurrentInnerClassTab({
           customPathname : `/portal/contact/wizard/${response.code}/1`,
           code: response.code!,
@@ -283,6 +283,9 @@ export default function ContactDetails({
       formSchema={ContactPhoneEmailSchema}
       handleSubmitFormGrid={handleSave}
       myParent={params.shell_type}
+      features={{
+        enableAutoSelect : true
+      }}
     />
   );
 }

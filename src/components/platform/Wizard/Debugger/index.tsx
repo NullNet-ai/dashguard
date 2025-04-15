@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/accordion";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { WizardContext } from "../Provider";
+import { testIDFormatter } from '~/utils/formatter';
 
 export default function DebuggerComponent() {
   const { state } = useContext(WizardContext);
@@ -36,6 +37,7 @@ export default function DebuggerComponent() {
           isExpanded ? "rounded-b-none" : ""
         }`}
         onClick={() => setIsExpanded(!isExpanded)}
+        data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-toggle`)}
       >
         <h3 className="text-lg font-medium text-card-foreground">
           DEBUGGER wizard
@@ -49,19 +51,20 @@ export default function DebuggerComponent() {
 
       <div
         className={`h-[calc(100%-60px)] overflow-y-auto ${isExpanded ? "block" : "hidden"}`}
+        data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-content`)}
       >
         <ScrollArea>
           <Accordion type="multiple" className="p-2">
             <AccordionItem value="wizardProps">
-              <AccordionTrigger>
+              <AccordionTrigger data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-accordion-trigger`)}>
                 <h4 className="text-md font-semibold">wizardProps</h4>
               </AccordionTrigger>
               <AccordionContent>
-                <Card>
-                  <CardHeader>wizardProps</CardHeader>
-                  <CardContent>
-                    <label>handler registered</label>
-                    <pre className="whitespace-pre-wrap">
+                <Card data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-card`)}>
+                  <CardHeader data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-card-header`)}>wizardProps</CardHeader>
+                  <CardContent data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-card-content`)}>
+                    <label data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-label`)}>handler registered</label>
+                    <pre className="whitespace-pre-wrap" data-test-id={testIDFormatter(`${state?.entityName}-wzrddbg-pre`)}>
                       {JSON.stringify(formSaveState, null, 2)}
                     </pre>
                   </CardContent>
