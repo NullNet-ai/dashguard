@@ -297,7 +297,7 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
-    if (parentType === 'form') {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: updatedSorting,
       });
@@ -399,7 +399,7 @@ export default function GridProvider({
         desc: typeof sortBy === 'boolean' ? sortBy : false,
       };
     });
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
