@@ -11,7 +11,7 @@ const FormSchema = z.object({
   remote_access_type: z.string({message: "Connection Type is required"}).min(1, {message: "Connection Type is required"}),
 })
 
-export default function RemoteAccessDetails({record_data, entity}: IFormProps) {
+export default function RemoteAccessDetails({params, record_data}: IFormProps) {
   const toast = useToast();
   const update = api.deviceRemoteAccessSession.updateDeviceRemoteAccessSessions.useMutation();
 
@@ -24,7 +24,7 @@ export default function RemoteAccessDetails({record_data, entity}: IFormProps) {
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
       const { device_id, remote_access_type } = data;
-      const { id } = record_data ?? {};
+      const { id } = record_data || params;
       
       const res = await update.mutateAsync({
         id,
