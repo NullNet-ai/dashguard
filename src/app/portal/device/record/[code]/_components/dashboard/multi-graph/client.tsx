@@ -115,10 +115,10 @@ const InteractiveGraph = ({
 
     useEffect(() => {
       
-      console.log('%c Line:118 🍊', 'color:#ffdd4d', `packets_interfaces-${orgID}-${defaultValues?.id}`, 'defaultValues?.id', defaultValues?.id);
+      
       if (!socket || !orgID) return
       socket.on(`testing-${orgID}-${defaultValues?.id}`, (data: any) => {
-        console.log('%c Line:120 🥚 data', 'color:#b03734', data, socket);
+        
       
       });
 
@@ -133,11 +133,18 @@ const InteractiveGraph = ({
 
   useEffect(() => {
     fetchBandWidth()
+
+    // const interval = setInterval(() => {
+    //   fetchBandWidth()
+    // }, 1000)
+    // return () => {
+    //   clearInterval(interval)
+    // }
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
-  useEffect(() => {
-      fetchBandWidth()
-  }, [])
+  // useEffect(() => {
+  //     fetchBandWidth()
+  // }, [])
 
   useEffect(() => {
     const interfacesData = form.watch('interfaces') || []

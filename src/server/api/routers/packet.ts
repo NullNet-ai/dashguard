@@ -298,7 +298,7 @@ export const packetRouter = createTRPCRouter({
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
   })).mutation(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
-
+    
     if (
       interface_names?.length
     ) {
@@ -377,8 +377,10 @@ export const packetRouter = createTRPCRouter({
       const transform_data = timestamps?.map((item) => {
         const interface_val = res?.reduce((acc, intrfce: any) => {
           const [key, val] = Object.entries(intrfce)?.[0] as any
+          
 
-          const same_val = val?.find((element: any) => element.bucket === item)
+          const same_val = val?.find((element: any) => {
+            return element.bucket === item})
           return {
             ...acc,
             [key]: same_val?.bandwidth || 0,
