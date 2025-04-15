@@ -35,7 +35,7 @@ export default async function OrganizationGridPage({
     "updated_by",
   ];
 
-  const { sorting } = (await getGridCacheData()) ?? {};
+  const { sorts } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid
     .items({
@@ -44,7 +44,7 @@ export default async function OrganizationGridPage({
       entity: "organization",
       pluck: _pluck,
       advance_filters: [],
-      sorting: sorting?.length ? sorting : defaultSorting,
+      sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     })
     .then(async (res) => {
       const final_items = await Bluebird.map(res.items, async (item) => {
@@ -92,7 +92,7 @@ export default async function OrganizationGridPage({
     <Grid
       totalCount={totalCount || 0}
       defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
+      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       data={items}
       config={{
         entity: "organization",

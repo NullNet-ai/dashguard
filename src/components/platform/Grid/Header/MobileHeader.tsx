@@ -4,13 +4,13 @@ import Search from '../Search'
 import Sorting from '../Sorting'
 import GridTabs from '../Tabs/Tabs'
 
-export default function MobileHeader({parentType}: any) {
+export default function MobileHeader() {
   return (
     <div className="flex flex-col py-2 pb-0 lg:flex-row lg:justify-between">
       <div className='mb-2 lg:mb-0'>
         <GridTabs />
       </div>
-      <Search parentType={parentType}/>
+      <Search />
       <Sorting />
     </div>
   )

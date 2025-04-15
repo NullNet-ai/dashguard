@@ -58,8 +58,7 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer 
-        >
+        <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
@@ -69,7 +68,7 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config || {}).filter(
+  const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color,
   );
 
@@ -351,10 +350,6 @@ function getPayloadConfigFromPayload(
     ] as string;
   }
 
-  if (!config) {
-    return undefined; // or a default value
-  }
-  
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config];

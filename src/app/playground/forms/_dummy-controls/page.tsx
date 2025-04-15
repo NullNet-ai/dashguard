@@ -89,6 +89,7 @@ export default function GroupTabWithMultiField({ form, options }: any) {
   return (
     <GroupTab
       selected={selected}
+      //@ts-ignore
       tabs={data}
       disabled={isdisabled}
       onValueChange={setData}

@@ -1,4 +1,11 @@
 import { ulid } from "ulid";
+import GRIDTABS from '../server/default-grid-tab'
+
+const tabName: Record<string, string> = {
+  user_role: "role",
+  organization_account: "Accounts",
+  device_remote_access_session: "Remote Access",
+}
 
 export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   const _id = ulid();
@@ -12,9 +19,11 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
 };
 
 export const SetIdTab = (mainEntity: string) => {
-  const modified_entity = mainEntity === "user_role" ? "role" : mainEntity;
+  const modified_entity = tabName[mainEntity] || mainEntity;
 
-  return [
+  const additional_tabs = GRIDTABS[mainEntity] || [];
+
+  const tabs = [
     {
       name: `All ${modified_entity}`,
       current: true,
@@ -46,24 +55,10 @@ export const SetIdTab = (mainEntity: string) => {
         },
       ],
     },
-    {
-      name: "Draft",
-      current: false,
-      href: `/portal/${mainEntity}/grid?filter_id=`,
-      default: true,
-      default_filter: [
-        {
-          operator: "equal",
-          type: "criteria",
-          field: "status",
-          id: ulid(),
-          label: "Status",
-          values: ["Draft"],
-          default: true,
-        },
-      ],
-    },
-  ].map((tab) => {
+    ...additional_tabs
+  ]
+
+  return tabs.map((tab) => {
     const _id = ulid();
 
     return {

@@ -29,12 +29,12 @@ const FormServerFetch = async () => {
     "updated_by",
   ];
 
-  const { sorting } = (await getGridCacheData()) ?? {};
+  const { sorts } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
     pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     current: 0,
     limit: 100,
   });

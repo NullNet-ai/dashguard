@@ -1,31 +1,31 @@
+import React from 'react'
 
+import { Card, CardFooter, CardHeader } from '~/components/ui/card'
 
-import { Card, CardFooter, CardHeader } from "~/components/ui/card";
-import React from "react";
+import Header from '../../Header'
+import Pagination from '../../Pagination'
 
-import Pagination from "../../Pagination";
-import Header from "../../Header";
-import ScrollContainer from "./common/GridScrollContainer";
-import GridDesktopContainer from "./common/GridDesktopContainer";
+import GridDesktopContainer from './common/GridDesktopContainer'
+import ScrollContainer from './common/GridScrollContainer'
+import { cn } from '~/lib/utils'
 
-
-function GridDesktop({parentType}: any) {
+function GridDesktop({ parentType }: any) {
   return (
     <Card className="col-span-full border-0 shadow-none">
       <CardHeader>
-        <Header parentType={parentType}/>
+        <Header />
       </CardHeader>
       <ScrollContainer parentType={parentType}>
-          <GridDesktopContainer />
+        <GridDesktopContainer parentType={parentType} />
         {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollContainer>
-      <div className="sticky bottom-0">
+      <div className={cn(`sticky `, `${parentType === 'record' ? 'bottom-[-25px]' : 'bottom-0'}`)}>
         <CardFooter>
           <Pagination />
         </CardFooter>
       </div>
     </Card>
-  );
+  )
 }
 
-export default GridDesktop;
+export default GridDesktop

@@ -333,4 +333,28 @@ const SortableDragHandle = React.forwardRef<
 });
 SortableDragHandle.displayName = "SortableDragHandle";
 
-export { Sortable, SortableDragHandle, SortableItem, SortableOverlay };
+const SortableDragHandleRawItem = React.forwardRef<
+  HTMLButtonElement,
+  SortableDragHandleProps
+>(({ className, ...props }, ref) => {
+  const { attributes, listeners, isDragging } = useSortableItem();
+
+  return (
+    <button
+      type='button'
+      ref={composeRefs(ref)}
+      data-state={isDragging ? "dragging" : undefined}
+      className={cn(
+        "cursor-grab data-[state=dragging]:cursor-grabbing",
+        className,
+      )}
+      {...attributes}
+      {...listeners}
+      {...props}
+    />
+  );
+});
+
+SortableDragHandleRawItem.displayName = "SortableDragHandle";
+
+export { Sortable, SortableDragHandle, SortableItem, SortableOverlay, SortableDragHandleRawItem };

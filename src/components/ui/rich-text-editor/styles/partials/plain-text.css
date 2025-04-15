@@ -1,0 +1,40 @@
+
+.plain-text-editor.multiline .ProseMirror {
+  --plain-text-overflow-y: auto;
+  --plain-text-white-space: pre-wrap;
+}
+
+.plain-text-mode {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+/* Hide formatting marks in plain text mode */
+.plain-text-mode * {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  text-decoration: none !important;
+  background: transparent !important;
+}
+
+/* Ensure entity/variable references still look good */
+.plain-text-mode .entity-variable-reference {
+  display: inline-flex !important;
+  padding: 0 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Remove focus styles from editor */
+.minimal-tiptap-editor .ProseMirror:focus {
+  outline: none !important;
+}
+
+.minimal-tiptap-editor:focus-within {
+  border-color: hsl(var(--input)) !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: 0 !important;
+}

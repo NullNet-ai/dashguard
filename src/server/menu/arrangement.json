@@ -5,6 +5,7 @@
     "activity_log",
     "contact",
     "device",
+    "remote_access",
     "settings"
   ]
 }

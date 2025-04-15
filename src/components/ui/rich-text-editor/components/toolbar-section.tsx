@@ -53,80 +53,80 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = ({
   }, [actions, activeActions, mainActionCount]);
 
   const renderToolbarButton = React.useCallback(
-    (action: FormatAction) => (
-      <ToolbarButton
-        key={action.label}
-        className="disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
-        onClick={() => action.action(editor)}
-        disabled={disabled}
-        isActive={action.isActive(editor)}
-        tooltip={`${action.label} ${action.shortcuts.map((s) => getShortcutKey(s).symbol).join(" ")}`}
-        aria-label={action.label}
-        size={size}
-        variant={variant}
-      >
-        {action.icon}
-      </ToolbarButton>
-    ),
-    [editor, size, variant],
+    (action: FormatAction) => {
+      const handleClick = () => {
+        action.action(editor);
+      };
+      
+      return (
+        <ToolbarButton
+          key={action.label}
+          className="pointer-events-auto"
+          onClick={handleClick}
+          disabled={disabled}
+          isActive={action.isActive(editor)}
+          tooltip={`${action.label} ${action.shortcuts.map((s) => getShortcutKey(s).symbol).join(" ")}`}
+          aria-label={action.label}
+          size={size}
+          variant={variant}
+        >
+          {action.icon}
+        </ToolbarButton>
+      );
+    },
+    [editor, size, variant, disabled],
   );
 
   const renderDropdownMenuItem = React.useCallback(
-    (action: FormatAction) => (
-      <DropdownMenuItem
-        key={action.label}
-        onClick={() => action.action(editor)}
-        disabled={!action.canExecute(editor) && disabled}
-        className={cn(
-          "flex flex-row items-center justify-between gap-4 disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent",
-          {
-            "bg-accent": action.isActive(editor),
-          },
-        )}
-        aria-label={action.label}
-      >
-        <span className="grow">{action.label}</span>
-        <ShortcutKey keys={action.shortcuts} />
-      </DropdownMenuItem>
-    ),
-    [editor],
-  );
-
-  const isDropdownActive = React.useMemo(
-    () => dropdownActions.some((action) => action.isActive(editor)),
-    [dropdownActions, editor],
+    (action: FormatAction) => {
+      const handleClick = () => {
+        action.action(editor);
+      };
+      
+      return (
+        <DropdownMenuItem
+          key={action.label}
+          onClick={handleClick}
+          disabled={disabled}
+          className={cn(
+            "flex flex-row items-center justify-between gap-4",
+            "cursor-pointer", // Ensure cursor shows it's clickable
+            {
+              "bg-accent": action.isActive(editor),
+            },
+          )}
+          aria-label={action.label}
+        >
+          <span className="grow">{action.label}</span>
+          <ShortcutKey keys={action.shortcuts} />
+        </DropdownMenuItem>
+      );
+    },
+    [editor, disabled],
   );
 
   return (
-    <>
+    <div className="flex items-center gap-0.5">
       {mainActions.map(renderToolbarButton)}
       {dropdownActions.length > 0 && (
         <DropdownMenu>
-          <DropdownMenuTrigger
-            asChild
-            className="disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
-          >
+          <DropdownMenuTrigger asChild>
             <ToolbarButton
-              isActive={isDropdownActive}
+              className={cn("pointer-events-auto", dropdownClassName)}
               tooltip={dropdownTooltip}
-              aria-label={dropdownTooltip}
-              className={cn(dropdownClassName)}
+              disabled={disabled}
               size={size}
               variant={variant}
-              disabled={disabled}
             >
-              {dropdownIcon || <ChevronDownIcon className="size-5" />}
+              {dropdownIcon || <ChevronDownIcon className="h-4 w-4" />}
             </ToolbarButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="w-full disabled:cursor-auto disabled:text-foreground disabled:opacity-100 hover:disabled:bg-transparent"
-          >
+          <DropdownMenuContent align="start">
             {dropdownActions.map(renderDropdownMenuItem)}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </>
+    </div>
   );
 };
 

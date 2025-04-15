@@ -44,7 +44,7 @@ export default async function ConfigurationRuleGrid() {
     pluck_fields: ['id'],
   })
 
-  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {}
+  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {}
 
   const record_id = record?.data?.id as string
   const { items = [], totalCount } = await api.deviceRule.mainGrid({
@@ -53,7 +53,7 @@ export default async function ConfigurationRuleGrid() {
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
     is_case_sensitive_sorting: "false",
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     device_id: record_id,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
@@ -68,7 +68,7 @@ export default async function ConfigurationRuleGrid() {
     defaultSorting={defaultSorting}
     defaultAdvanceFilter={ []}
     advanceFilter={filters?.reportFilters || []}
-    sorting={sorting || []}
+    sorting={sorts?.sorting || []}
     pagination={pagination}
     config={{
       entity: 'device_rules',

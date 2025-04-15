@@ -20,8 +20,8 @@ const GridMenu = async ({ filter_id, tab }: IProps) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , ] = pathname.split("/");
-  
-  if(tab?.name === `All ${main_entity?.toLowerCase()}`) return null
+
+  // if(tab?.name === `All ${main_entity?.toLowerCase()}`) return null
 
   const filter_by = await api.grid.getFilters({ filter_id }).then((data) => {
     if (!data)
