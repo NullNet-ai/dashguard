@@ -83,7 +83,6 @@ export default function ContactDetails({
       }
 
       if(action_type && ['Create', 'Next', 'Paste'].includes(action_type) && response?.code) {
-        if(params.shell_type === 'wizard' && ['Next', 'Paste'].includes(action_type)) 
         await closeCurrentInnerClassTab({
           customPathname : `/portal/contact/wizard/${response.code}/1`,
           code: response.code!,
