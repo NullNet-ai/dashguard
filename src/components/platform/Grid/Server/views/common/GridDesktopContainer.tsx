@@ -1,54 +1,45 @@
-"use client";
+'use client'
 
-import { Table, TableHeader } from "~/components/ui/table";
-import MyTableHead from "../../../TableHead";
-import MyTableBody from "../../../TableBody";
-import { GridContext } from "../../../Provider";
-import { useContext } from "react";
-import { Card } from "~/components/ui/card";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import GridCardView from "./GridCardview";
+import { useContext } from 'react'
 
-const GridDesktopContainer = () => {
-  const { state } = useContext(GridContext);
+import { Card } from '~/components/ui/card'
+import { Table, TableHeader } from '~/components/ui/table'
 
-  if(state?.viewMode === "card") { 
+import { GridContext } from '../../../Provider'
+import MyTableBody from '../../../TableBody'
+import MyTableHead from '../../../TableHead'
+
+import GridCardView from './GridCardview'
+
+const GridDesktopContainer = ({ parentType }: any) => {
+  const { state } = useContext(GridContext)
+
+  if (state?.viewMode === 'card') {
     return (
-        <Card className="col-span-full border-0 shadow-none py-4">
-      {/* <CardHeader>
+      <Card className="col-span-full border-0 shadow-none py-4">
+        {/* <CardHeader>
         <Header />
       </CardHeader> */}
-      <ScrollArea
-        style={{ height: "calc(100vh - 16rem)" }}
-        className="mx-2 rounded-md text-card-foreground"
-      >
         <section>
-          <div>
-            <GridCardView />
+          <div className='px-2'>
+            <GridCardView parentType={parentType} />
           </div>
         </section>
-        {/* <Table>
-          <TableHeader>
-            <MyTableHead />
-          </TableHeader>
-          <MyTableBody />
-        </Table> */}
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </Card>
+
+      </Card>
     )
   }
 
   return (
     <Table
-      style={{width: state?.table?.getCenterTotalSize()}}
+      style={{ width: state?.table?.getCenterTotalSize() }}
     >
       <TableHeader>
         <MyTableHead />
       </TableHeader>
       <MyTableBody />
     </Table>
-  );
+  )
 };
 
-export default GridDesktopContainer;
+export default GridDesktopContainer

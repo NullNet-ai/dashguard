@@ -65,6 +65,7 @@ const Alert = React.forwardRef<
   Icon,
   IconClassName,
   dismissible = false,
+  toastId,
   ...props
 }, ref) => {
   const IconComponent = Icon || defaultIcons[variant as keyof typeof defaultIcons];
@@ -79,7 +80,7 @@ const Alert = React.forwardRef<
       {props.children}
       {dismissible && (
         <button
-          onClick={() => toast.dismiss()}
+          onClick={() => toastId ? toast.dismiss(toastId) : toast.dismiss()}
           className="absolute top-1/2 -translate-y-1/2 right-3"
           aria-label="Dismiss"
         >
@@ -97,7 +98,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    className={cn("mb-1 text-sm font-medium leading-none tracking-tight", className)}
     {...props}
   />
 ));

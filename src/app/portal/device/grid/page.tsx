@@ -10,7 +10,7 @@ import { defaultSorting } from './_config/sorting'
 import DeleteConfirmation from './Actions/Delete/DeleteConfirmation'
 
 export default async function Page() {
-  const { sorting, pagination, filters } = (await getGridCacheData()) ?? {}
+  const { sorts, pagination, filters } = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity] = pathname.split('/')
@@ -39,7 +39,7 @@ export default async function Page() {
     current: +(pagination?.current_page ?? '0'),
     is_case_sensitive_sorting: "false",
     limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
@@ -71,7 +71,7 @@ export default async function Page() {
       defaultAdvanceFilter={defaultAdvanceFilter || []}
       defaultSorting={defaultSorting}
       pagination={pagination}
-      sorting={sorting || []}
+      sorting={sorts?.sorting || []}
       totalCount={totalCount || 0}
     />
   )

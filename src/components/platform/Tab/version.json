@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Tab",
-  "tag": "1.6.0-rc.1<unreleased>",
-  "branch": "unreleased/test/Y/1.6.0-rc.1<unreleased>",
-  "message": "test tab in playground, no changes made",
+  "tag": "2.0.1",
+  "branch": "released/3374/2.0.1",
+  "message": "added draggble and fixed issue",
   "publish_name": "Juphet Vitualla"
 }

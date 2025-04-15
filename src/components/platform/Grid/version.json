@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Grid",
-  "tag": "1.12.0",
-  "branch": "released/fix/1.12.0",
-  "message": "Grid Fixes > select row",
-  "publish_name": "Mary Grace Tiburillo-Tan"
+  "tag": "2.0.2",
+  "branch": "released/noticket,applyWAchanges/2.0.2",
+  "message": "apply WA changes",
+  "publish_name": "Juphet Vitualla"
 }

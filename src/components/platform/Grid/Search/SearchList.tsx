@@ -20,16 +20,29 @@ const SearchList = () => {
   const { state, actions } = useContext(SearchGridContext)
 
   const { searchItems = [] } = state ?? {}
-  const selectedSearchItems = searchItems?.filter(item => !item?.default)
-  const defaultSearchItems = selectedSearchItems?.map(item => ({ ...item, hidden: false })).filter(itm => itm.type !== 'operator')
-
+  const displaySearchItemResolver = searchItems.reduce((acc : any, item) => {
+    if (!item.filters || !Array.isArray(item.filters)) {
+        acc.push(item);
+    } else {
+        acc.push(...item.filters);
+    }
+    return acc;
+}, [])
+  const selectedSearchItems = displaySearchItemResolver?.filter((item : any) => !item?.default)
+  const defaultSearchItems = selectedSearchItems?.map((item : any) => ({ ...item, hidden: false }))
+  .filter((itm : any) => itm.type !== 'operator')
+  // remove duplicates
+  .filter((item : any, index : number , self : any) =>
+    index === self.findIndex((t : any) => t.id === item.id)
+  )
+  
   const [data, setData] = useState<any[]>([])
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     const calc = (items?: any[]) => {
       const allItems: any[] = []
-      const newData = items || defaultSearchItems?.filter(item => item.type !== 'operator')
+      const newData = items || defaultSearchItems?.filter((item : any) => item.type !== 'operator')
       // clear width, more width, and search by
       const clearWidth = 65 + 63 + 61
       let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth
@@ -93,7 +106,7 @@ const SearchList = () => {
         {defaultSearchItems.length
           ? (
               <div className="flex flex-nowrap py-1 ">
-                {defaultSearchItems?.map((item, index) => {
+                {defaultSearchItems?.map((item : any, index: number) => {
                   const isHidden = data?.[index]?.hidden
                   return (
                     <Badge

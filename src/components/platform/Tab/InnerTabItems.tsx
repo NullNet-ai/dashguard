@@ -1,178 +1,371 @@
-"use client";
+'use client'
 
-import { ChevronDownIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import TabMenu from "~/components/application-layout/common/TabMenu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { useSidebar } from "~/components/ui/sidebar";
-import useWindowSize from "~/hooks/use-resize";
-import useScreenType from "~/hooks/use-screen-type";
-import { cn, formatTabName } from "~/lib/utils";
-import { remToPx } from "~/utils/fetcher";
+import { usePathname, useRouter } from 'next/navigation'
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+
+import { useSidebar } from '~/components/ui/sidebar'
+import { cn } from '~/lib/utils'
+import { calculateMainTabItems, reorderItems, reorderShowActiveItem } from '~/utils/sort-tab-items'
+
+import InnerTabsContent from './InnerTabsContent'
+import { api } from '~/trpc/react'
+import useWindowSize from '~/hooks/use-resize'
+import { useSideDrawer } from '../SideDrawer'
+import { Sortable, SortableItem } from '~/components/ui/sortable'
+import { updateAllInnerdata, updateAllMaindata } from './Actions/actions'
+import { debounce, lowerCase, toLower } from 'lodash'
+import InnerTabitem from './InnerTabitem'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
+import { ChevronDownIcon, Search, X } from 'lucide-react'
+import { Button } from '@headlessui/react'
+import { Input } from '~/components/ui/input'
+import InnerDropTabItem from './InnerDropTabItem'
 
 type InnerTabItemsProps = {
-  tabs: any[];
-  pathname?: string;
-};
+  tabs: any[]
+  pathname?: string
+  variant?: 'drawer' | 'dropdown'
+} 
 
-let SEARCH_BAR_WIDTH = 0;
-
-const InnerTabItems = ({ tabs, pathname }: InnerTabItemsProps) => {
-  const winWidth = useWindowSize().width;
+const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
+  const { isBannerPresent } = useSidebar()
+  const newPathname = usePathname()
+  const [cachedItem, setCachedItem] = useState<any>({})
   const { open } = useSidebar();
-  const newPathname = usePathname();
-  const [application, code] = (newPathname || "").split("/").slice(3);
-  const [isWindowLoaded, setIsWindowLoaded] = useState(false);
-  let sidebar_width = remToPx(open ? 16 : 5);
-  const size = useScreenType();
-  if (size === "xs" || size === "sm" || size === "md") {
-    SEARCH_BAR_WIDTH = 0;
-    sidebar_width = 0;
-  }
+  const router = useRouter();
+  const [portal, entity, application, code] = (newPathname || '').split('/').slice(1)
+  const [isWindowLoaded, setIsWindowLoaded] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  const {width: winWidth} = useWindowSize();
+  const [tablists, setTablists] = useState<any[]>(tabs);
+  const [copyTab, setCopyTab] = useState<any[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>('')
+  const  {state: drawerState,  } = useSideDrawer ()
+  const {width, isOpen, isPinned} = drawerState
+  const [activeTab, setActiveTab] = useState<string>(
+    tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
+  );
+
+  const conWidth = useMemo(() =>   ({
+    width: `calc(100vw - ${open ? '320px' : '140px'} ${width && (isOpen && isPinned) ? `- ${width} ` : ''})`
+  }), [open, width]);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<any[]>([]);
 
   useEffect(() => {
-    const handleLoad = () => setIsWindowLoaded(true);
+    // Only update tablists if they're different from current state
+    if (JSON.stringify(tablists) !== JSON.stringify(tabs)) {
+      setTablists(tabs);
+    }
+    
+    if (tabs.length > 0 && !activeTab) {
+      setActiveTab(tabs?.[0]?.id);
+    }
+  }, [tabs]);
 
-    if (typeof window !== "undefined") {
-      if (document.readyState === "complete") {
-        setIsWindowLoaded(true);
-      } else {
-        window.addEventListener("load", handleLoad);
+
+  useEffect(() => {
+    const handleLoad = () => setIsWindowLoaded(true)
+
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'complete') {
+        setIsWindowLoaded(true)
+      }
+      else {
+        window.addEventListener('load', handleLoad)
       }
     }
 
     return () => {
-      window.removeEventListener("load", handleLoad);
+      window.removeEventListener('load', handleLoad)
     };
-  }, []);
+  }, [])
 
-  const newItems = useMemo(() => {
-    if (!winWidth) return tabs;
-    const max_width = winWidth - sidebar_width - 57;
-    const showItem = max_width / 88;
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
-    return tabs.slice(0, Math.floor(showItem));
-  }, [winWidth, tabs, sidebar_width]);
+  useEffect(() => {
+    const calc = (params?: any[]) => {
+      const allItems: any[] = [];
+      const newData = params || tabs;
 
-  const dropdownItems = useMemo(() => {
-    if (!winWidth) return tabs;
-    const max_width = winWidth - sidebar_width - SEARCH_BAR_WIDTH - 57;
-    const showItem = max_width / 88;
+      // clear width, more width, and search by
+      let totalWidth = 0;
+      const containerWidth = parentRef.current?.offsetWidth || 0;
 
-    return tabs.slice(Math.floor(showItem));
-  }, [sidebar_width, tabs, winWidth]);
+      for (let index = 0; index < newData?.length; index++) {
+        if (itemsRef.current[index]?.offsetWidth) {
+          totalWidth += itemsRef.current[index].offsetWidth || 0;
+          if (totalWidth > containerWidth) {
+            allItems?.push({
+              ...newData[index],
+              hidden: true,
+              order: index,
+              metadata: {
+                item_width: itemsRef.current[index].offsetWidth || 0,
+              },
+            });
+          } else {
+            allItems?.push({
+              ...newData[index],
+              hidden: false,
+              order: index,
+              metadata: {
+                item_width: itemsRef.current[index].offsetWidth || 0,
+              },
+            });
+          }
+        }
+      }
+      const result = calculateMainTabItems(allItems, containerWidth, '')
 
-  const entity = pathname?.split("/").at(2);
-  const checkIfUserRole = (entity: string) =>
-    entity === "user_role" ? true : false;
+      return result;
+    };
+
+    const handleResize = () => {  
+      const items = calc(tablists);
+      setCopyTab(items);
+
+      if(JSON.stringify(tablists) !== JSON.stringify(items)) {
+        if(items?.length) {
+          // setTablists(items);
+          updatecachedItems(items);
+          if(activeTab) {
+            const href= items?.find((item) => item.current)?.href;
+            router.push(href);
+          }
+           
+        }
+      } else {
+        updatecachedItems(items);
+        if(activeTab) {
+          const href= items?.find((item) => item.current)?.href;
+          router.push(href);
+        }
+      }
+
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [tablists]);
+
+
+  const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
+    const searchValue = e.target.value;
+    setSearchValue(searchValue);
+  }, 300);  // 300ms delay
+
+  useEffect(() => {
+    if(!isDropdownOpen) {
+      setSearchValue('')
+    }
+  }, [isDropdownOpen])
+
+
+  const updatecachedItems = async (items: any) => {
+    try {
+      await updateAllInnerdata(items, `/${portal}/${entity}`)
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const hasResult = useMemo(() => {
+    if(tablists?.length) {
+     return  Boolean(tablists?.filter((dta) => dta.hidden && (!!searchValue ? toLower(dta?.name)?.includes(toLower(searchValue)) : true ))?.length)
+    } 
+    return false
+  }, [tablists, searchValue])
+
+  // actions
+  const handleTabClick = (selectedTab: any) => {
+
+    setActiveTab(selectedTab.id);
+    const newTablist = tablists.map((tab: any) => {
+      return {
+        ...tab,
+        current: tab.id === selectedTab.id,
+        is_current: tab.id === selectedTab.id,
+      };
+    });
+
+    setTablists(newTablist);
+  };
+
+  const handleTabClickDropdown = (selectedTab: any) => {
+    setActiveTab(selectedTab.id);
+    const newTablist = tablists.map((tab: any) => {
+      const { fromDropdown, ...rest } = tab;
+      return {
+        ...rest,
+        current: tab.id === selectedTab.id,
+        ...(tab.id === selectedTab.id && { fromDropdown: true }),
+        is_current: tab.id === selectedTab.id,
+      };
+    });
+
+    setTablists(newTablist);
+  };
+
 
   return (
     <nav
       aria-label="Tabs"
-      className={cn("scrollbar-hide flex justify-between gap-x-2 border-b md:min-h-[2.3rem] md:mt-[-4px]  pl-0 lg:pl-0")}
-    >
-      <div className="flex items-center">
-        {newItems.map((tab) => {
-          const isGrid = tab.name === "Grid" || tab.name === "grid";
-          const isGridActive = application === "Grid" || application === "grid";
-          const isActive = isGridActive ? !!isGrid : code === tab?.name;
-          return (
-            <div
-              key={checkIfUserRole(tab.name) ? "role" : tab.name}
-              className={cn(`group relative flex items-center  md:h-[32px] h-[36px]`, `${isGrid ? 'pl-0' : 'pl-[8px]'} `)}
-            >
-              <Link
-                data-test-id={
-                  entity + "-apptab-" + checkIfUserRole(tab.name)
-                    ? "role"
-                    : tab.name.split(" ").join("-").toLowerCase()
-                }
-                href={tab.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  isActive ? "text-primary" : "text-default-foreground/60",
-                  "whitespace-nowrap  text-sm font-medium",
-                  "flex items-center space-x-2",
-                  "hover:border-t-primary hover:text-primary",
-                  `${isGrid ? 'px-[8px]': 'pr-0'}`
-                )}
-              >
-                {formatTabName(checkIfUserRole(tab.name) ? "role" : tab.name)}
-                <span className="absolute right-0 h-[50%] w-[1px] bg-default/20"></span>
-              </Link>
-              <TabMenu
-                current={tab.href.match(pathname) ? true : false}
-                href={tab.href}
-                tabs={newItems}
-                name={checkIfUserRole(tab.name) ? "role" : tab.name}
-              />
-            </div>
-          );
-        })}
-      </div>
-      {dropdownItems.length > 0 && isWindowLoaded && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
-            data-test-id={"apptab-ddn-btn"}
-          >
-            <ChevronDownIcon
-              className="h-6 w-6 text-muted-foreground group-hover:text-primary"
-              aria-hidden="true"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="">
-            {dropdownItems.map((tab) => {
-              const isGrid = tab.name === "Grid" || tab.name === "grid";
-              const isGridActive =
-                application === "Grid" || application === "grid";
-              const isActive = isGridActive ? !!isGrid : code === tab?.name;
-              return (
-                <DropdownMenuItem
-                  key={checkIfUserRole(tab.name) ? "role" : tab.name}
-                  className="group relative flex items-center p-2 py-3"
-                >
-                  <Link
-                    data-test-id={
-                      "apptab-" + checkIfUserRole(tab.name)
-                        ? "role"
-                        : tab.name.split(" ").join("-").toLowerCase()
-                    }
-                    href={tab.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      isActive ? "text-primary" : "text-gray-500",
-                      "whitespace-nowrap px-4 pr-1 text-sm font-medium",
-                      "flex items-center space-x-2",
-                      "hover:border-t-primary hover:text-primary",
-                    )}
-                  >
-                    {formatTabName(
-                      checkIfUserRole(tab.name) ? "role" : tab.name,
-                    )}
-                  </Link>
-                  <div className="absolute right-0 h-[50%] w-[1px] bg-gray-300 dark:bg-gray-600 md:hidden" />
-                  <TabMenu
-                    current={tab.href.match(pathname) ? true : false}
-                    href={tab.href}
-                    tabs={dropdownItems}
-                    name={checkIfUserRole(tab.name) ? "role" : tab.name}
-                  />
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      className={cn('scrollbar-hide bg-white z-[49] md:bg-none  fixed md:static w-full top-[89px] flex justify-between gap-x-2 border-b md:min-h-[2.3rem]  pl-0 lg:pl-0', isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
       )}
+    >
+        <div
+        ref={parentRef}
+        className={cn(
+          `flex items-center`, `overflow-hidden`,
+        )}
+        style={conWidth}
+      >
+        <Sortable
+          orientation="horizontal"
+          value={tablists}
+          onMove={({ activeIndex, overIndex }) => {
+            const newTablists = [...tablists];
+            const [removed] = newTablists.splice(activeIndex, 1);
+            newTablists.splice(overIndex, 0, removed);
+
+            const resetOrder = newTablists.map((tab, index) => {
+              return { ...tab, order: index };
+            });
+            updatecachedItems(resetOrder);
+            setTablists(resetOrder);
+            
+          }}
+        >
+          {tablists.map((tab: any, index: number) => {
+            const isHidden = copyTab?.[index]?.hidden;
+
+            if(lowerCase(tab.name) === 'dashboard') {
+              return (
+                <InnerTabitem
+                  className={cn({ 'opacity-0': isHidden })}
+                  isHidden={isHidden}
+                  ref={(el) => {
+                    if (el) {
+                      if (itemsRef.current) {
+                        itemsRef.current[index] = el;
+                      }
+                    }
+                  }}
+                  handleClick={handleTabClick}
+                  index={index}
+                  tab={tab}
+                  newItems={tablists}
+                  pathname={pathname}
+                  key={index}
+                /> 
+              )
+            }
+            return (
+              <SortableItem key={tab.id} value={tab.id} className="relative">
+                <InnerTabitem
+                    className={cn({ 'opacity-0': isHidden })}
+                    isHidden={isHidden}
+                    handleClick={handleTabClick}
+                    ref={(el) => {
+                      if (el) {
+                        if (itemsRef.current) {
+                          itemsRef.current[index] = el;
+                        }
+                      }
+                    }}
+                    index={index}
+                    tab={tab}
+                    newItems={tablists}
+                    pathname={pathname}
+                    key={index}
+                  /> 
+              </SortableItem>
+            );
+          })}
+        </Sortable>
+      </div>
+      {copyTab?.some((tab: any) => tab.hidden) && isWindowLoaded && (
+        <>
+          {variant === 'dropdown' ? (
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+            <DropdownMenuTrigger
+              className="flex items-center space-x-1 bg-muted px-4 text-sm font-medium text-gray-500 hover:text-primary"
+              data-test-id="apptab-ddn-btn"
+            >
+              <ChevronDownIcon
+                className="h-6 w-6 text-muted-foreground group-hover:text-primary"
+                aria-hidden="true"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' alignOffset={5}>
+              <div className='p-2 pb-3 flex flex-row justify-between min-w-[265px]'>
+                <h3 className='text-base text-default/90'>Open Tabs</h3>
+                <Button
+                  onClick={() => {
+                    setIsDropdownOpen(false)
+                  }}
+                  className='text-default/60 hover:opacity-30 transition-opacity duration-200'>
+                    <X className='size-4'/>
+                </Button>
+              </div>
+
+              <div className='p-2'>
+                <Input Icon={Search}
+                  iconPlacement='left'
+                  iconClassName='size-4'
+                  placeholder='Search...'
+                  onChange={handleSearch}
+                />
+              </div>
+              <div className="max-h-[calc(100vh-209px)] overflow-y-auto my-2">
+              {copyTab
+                ?.filter((dta) => dta.hidden && (!!searchValue ? toLower(dta?.name)?.includes(toLower(searchValue)) : true ) )
+                .map((itm) => {
+                  const isGrid = itm.name === 'Grid' || itm.name === 'grid';
+                  const isGridActive =
+                    application === 'Grid' || application === 'grid';
+                  const isActive = isGridActive ? !!isGrid : code === itm?.name;
+  
+                  if (!itm.hidden) {
+                    return null;
+                  }
+  
+                  return (
+                    <DropdownMenuItem
+                      key={itm.name}
+                      className="group relative flex items-center py-1 justify-between"
+                    >
+                      <InnerDropTabItem
+                        tab={itm}
+                        onClickItem={handleTabClickDropdown}
+                        shownItems={tablists}
+                        dropItems={copyTab?.filter((dta: any) => dta.hidden)}
+                        pathname={pathname}
+                        onSelect={() => setIsDropdownOpen(false)}
+                        isActive={isActive}
+                      />
+                    </DropdownMenuItem>
+                  );
+                })}
+                {!hasResult ? <div className='text-sm text-center text-default/65'>No result...</div> : null}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          ) : ''
+          }
+        </>
+      )}
+
     </nav>
-  );
+  )
 };
 
-export default InnerTabItems;
+export default InnerTabItems

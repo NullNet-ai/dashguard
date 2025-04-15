@@ -1,7 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+
 import { api } from "~/trpc/server";
 import { ISearchItem } from "../Search/types";
 
@@ -13,14 +14,11 @@ export async function UpdateReportFilter({
   filterItemId?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get("x-pathname") || "";
   const searchParams = headerList.get("x-full-search-query-params") || "";
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
   await api.grid.updateReportFilter({
     filters,
   });
-
-  urlSearchParams.set("advanceFilterItem", filterItemId || "");
-
-  redirect(`${pathName}?${urlSearchParams}`);
+  revalidatePath(fullUrl)
+  return fullUrl
 }

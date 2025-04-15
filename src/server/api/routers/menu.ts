@@ -36,6 +36,7 @@ export const menuRouter = createTRPCRouter({
       {} as Record<string, ISidebarMenu>,
     );
 
+    console.log("%c Line:41 🧀 menuMap", "color:#fca650", {arrangement,menuMap});
     const newMenuItems = arrangement.order.map(
       (key) => menuMap[key],
     ) as ISidebarMenu[];

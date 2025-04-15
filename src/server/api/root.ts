@@ -27,6 +27,7 @@ import { userRolesRouter } from './routers/user_role'
 import { validatorRouter } from './routers/validator'
 import { wizardRouter } from './routers/wizard'
 import { organizationAccountRouter } from './routers/organization_account';
+import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session'
 
 /**
  * This is the primary router for your server.
@@ -61,6 +62,7 @@ export const appRouter = createTRPCRouter({
   packet: packetRouter,
   cachedFilter: cachedFilterRouter,
   organizationAccount: organizationAccountRouter,
+  deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
 })
 
 // export type definition of API

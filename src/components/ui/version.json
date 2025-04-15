@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "1.14.1-rc.4<unreleased>",
-  "branch": "unreleased/fix3114/1.14.1-rc.4<unreleased>",
-  "message": "add toast messages when there is a duplicate options to be added, configuration of showing creatable item, add keyboard navigation styles on the badges/pills when tabbing, add background color to multi-select component itself and improvement on the ui of creatable item ",
-  "publish_name": "Rob Caldosa"
+  "tag": "2.7.1",
+  "branch": "released/3688/2.7.1",
+  "message": "feat: modal component",
+  "publish_name": "Save Ducto"
 }

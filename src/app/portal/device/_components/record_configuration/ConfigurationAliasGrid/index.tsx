@@ -16,7 +16,7 @@ export default async function ConfigurationAliasGrid({
     perPage?: string
   }
 }) {
-  const { sorting, filters , pagination} = (await getGridCacheData()) ?? {}
+  const { sorts, filters , pagination} = (await getGridCacheData()) ?? {}
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity,,code] = pathname.split('/')
@@ -49,7 +49,7 @@ export default async function ConfigurationAliasGrid({
     pluck: _pluck,
     current: +(pagination?.current_page ?? "0"),
     limit: +(pagination?.limit_per_page ?? "100"),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     is_case_sensitive_sorting: "false",
     device_id: record_id,
     advance_filters: filters?.advanceFilter?.length
@@ -65,7 +65,7 @@ export default async function ConfigurationAliasGrid({
     defaultSorting={defaultSorting}
     defaultAdvanceFilter={ []}
     advanceFilter={filters?.reportFilters || []}
-    sorting={sorting || []}
+    sorting={sorts?.sorting || []}
     pagination={pagination}
     config={{
       entity: 'device_aliases',

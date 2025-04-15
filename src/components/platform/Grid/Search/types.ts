@@ -34,7 +34,8 @@ export interface ISearchParams {
   current?: number
   limit?: number
   advance_filters?: IAdvanceFilters[]
-  sorting?: any[]
+  sorting?: any[],
+  group_advance_filters?: any[]
 }
 export interface ISearchResult {
   totalCount: number
@@ -53,6 +54,7 @@ export interface ISearchItem {
   label?: string
   default?: boolean
   display_value?: string
+  filters?: ISearchItem[]
 }
 
 export interface ISortItem {
@@ -82,5 +84,6 @@ export interface IAdvanceFilter {
   operator: string
   field?: string
   entity?: string
-  values?: string[]
+  values?: any[]
+  default?: boolean
 }

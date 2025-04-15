@@ -15,7 +15,7 @@ import {
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { cn } from '~/lib/utils'
 import { isValidDate } from '~/server/zodSchema/contact/contactDetails'
-
+import ExternalTimePicker from '~/components/ui/time-picker'
 import { useFormField } from './form'
 import {
   Select,
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './select'
+import { Separator } from './separator'
 
 /* -------------------------------------------------------------------------- */
 /*                               Inspired By:                                 */
@@ -78,7 +79,7 @@ export const getDateTimeLocal = (timestamp?: Date): string => {
  * @param datetime - {Date | string}
  * @returns A string representation of the date and time
  */
-export const formatDateTime = (datetime: Date | string, includeTime = true) => {
+export const formatDateTime = (datetime: Date | string, includeTime = true, use24Hour = false) => {
   const options: Intl.DateTimeFormatOptions = {
     month: '2-digit',
     day: '2-digit',
@@ -88,7 +89,7 @@ export const formatDateTime = (datetime: Date | string, includeTime = true) => {
   if (includeTime) {
     options.hour = 'numeric'
     options.minute = 'numeric'
-    options.hour12 = true
+    options.hour12 = !use24Hour  // Use 24-hour format if use24Hour is true
   }
 
   return new Date(datetime).toLocaleString('en-US', options)
@@ -115,6 +116,9 @@ interface SmartDatetimeInputProps {
     maxDate?: Date
     disablePastDates?: boolean
     disableFutureDates?: boolean
+    useTimePicker?: boolean
+    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
+    is24Hour?: boolean
   }
   // Added className property
   className?: string
@@ -131,6 +135,15 @@ interface SmartDatetimeInputProps {
 interface SmartDatetimeInputContextProps extends SmartDatetimeInputProps {
   Time: string
   onTimeChange: (time: string) => void
+  dateTimePickerProps?: DateTimeLocalInputProps & {
+    minDate?: Date
+    maxDate?: Date
+    disablePastDates?: boolean
+    disableFutureDates?: boolean
+    useTimePicker?: boolean
+    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
+    is24Hour?: boolean
+  }
 }
 
 const SmartDatetimeInputContext
@@ -166,10 +179,6 @@ export const SmartDatetimeInput = React.forwardRef<
     inputProps,
     dateTimePickerProps,
   } = props
-  // ? refactor to be only used with controlled input
-  /*  const [dateTime, setDateTime] = React.useState<Date | undefined>(
-    value ?? undefined
-  ); */
 
   const [Time, setTime] = React.useState<string>('')
 
@@ -180,12 +189,18 @@ export const SmartDatetimeInput = React.forwardRef<
   const { error } = useFormField()
   return (
     <SmartDatetimeInputContext.Provider
-      value={{ value, onValueChange, Time, onTimeChange }}
+      value={{
+        value,
+        onValueChange,
+        Time,
+        onTimeChange,
+        dateTimePickerProps
+      }}
     >
       <div className='flex items-center justify-center'>
         <div
           className={cn(
-            'flex w-full items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
+            'flex w-full bg-background items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
           )}
         >
           <DateTimeLocalInput
@@ -352,7 +367,7 @@ const TimePicker = () => {
         const diff = Math.abs(j * timestamp - minutes)
         const selected
           = PM_AM === (formattedHours >= 12 ? 'PM' : 'AM')
-            && (minutes <= 53 ? diff < Math.ceil(timestamp / 2) : diff < timestamp)
+          && (minutes <= 53 ? diff < Math.ceil(timestamp / 2) : diff < timestamp)
 
         if (selected) {
           const trueIndex
@@ -381,9 +396,8 @@ const TimePicker = () => {
 
   return (
     <div className='relative space-y-2 py-3 pr-3'>
-      <h3 className='text-sm font-medium'>Time</h3>
       <ScrollArea
-        className='h-[90%] w-full py-0.5 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0'
+        className='h-[98%] w-full py-0.5 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0'
         style={{
           height,
         }}
@@ -391,7 +405,7 @@ const TimePicker = () => {
       >
         <ul
           className={cn(
-            'flex h-full max-h-56 w-28 flex-col items-center gap-1 px-1 py-0.5',
+            'flex h-full max-h-28 w-28 flex-col items-center gap-1 px-1 py-0.5',
           )}
         >
           {Array.from({ length: 24 }).map((_, i) => {
@@ -413,9 +427,8 @@ const TimePicker = () => {
 
               const isSuggested = !value && isSelected
 
-              const currentValue = `${formatIndex}:${
-                part === 0 ? '00' : timestamp * part
-              } ${PM_AM}`
+              const currentValue = `${formatIndex}:${part === 0 ? '00' : timestamp * part
+                } ${PM_AM}`
 
               return (
                 <button
@@ -427,7 +440,7 @@ const TimePicker = () => {
                       : isSelected
                         ? 'default'
                         : 'outline',
-                  }), 'h-8 w-full cursor-default px-3 text-sm outline-0 ring-0 focus-visible:border-0 focus-visible:outline-0',
+                  }), 'h-8 w-full mx-auto cursor-default px-3 py-2 text-sm outline-0 ring-0 focus-visible:border-0 focus-visible:outline-0',
                   )}
                   id={`time-${trueIndex}`}
                   key={`time-${trueIndex}`}
@@ -458,8 +471,10 @@ export interface NaturalLanguageInputProps {
   disabled?: boolean
   readOnly?: boolean
   includeTime?: boolean
+  displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
   onDateChange?: (date: Date) => void
   onTimeChange?: (time: string) => void
+  is24Hour?:boolean
 }
 
 const NaturalLanguageInput = React.forwardRef<
@@ -470,6 +485,7 @@ const NaturalLanguageInput = React.forwardRef<
     {
       placeholder,
       includeTime = false,
+      displayFormat,
       onDateChange,
       onTimeChange,
       readOnly = false,
@@ -482,6 +498,7 @@ const NaturalLanguageInput = React.forwardRef<
       value,
       onValueChange,
       onTimeChange: contextOnTimeChange,
+      dateTimePickerProps,
     } = useSmartDateInput()
 
     const _placeholder
@@ -489,37 +506,88 @@ const NaturalLanguageInput = React.forwardRef<
 
     const [inputValue, setInputValue] = React.useState<string>('')
 
+    // Use the format from props or context
+    const format = displayFormat || dateTimePickerProps?.displayFormat
     React.useEffect(() => {
       if (!value) {
         setInputValue('')
         return
       }
 
-      const formatted_date_time = formatDateTime(value, includeTime)
-      const formatted_date = formatted_date_time?.includes('Invalid Date')
-        ? value
-        : formatted_date_time
-      setInputValue(formatted_date as string)
+      // Get is24Hour from context or props
+      const is24Hour = props.is24Hour !== undefined 
+        ? props.is24Hour 
+        : dateTimePickerProps?.is24Hour || false;
+
+      let formatted_date: string | Date;
+
+      if (format) {
+        // Use moment.js or custom formatting logic
+        const dateObj = value instanceof Date ? value : new Date(value);
+
+        if (format === 'YYYY-MM-DD') {
+          if (includeTime) {
+            // Format time based on is24Hour setting
+            const hours = dateObj.getHours();
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            
+            if (is24Hour) {
+              // 24-hour format: YYYY-MM-DD, HH:MM
+              formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}, ${String(hours).padStart(2, '0')}:${minutes}`;
+            } else {
+              // 12-hour format: YYYY-MM-DD, h:MM AM/PM
+              const period = hours >= 12 ? 'PM' : 'AM';
+              const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+              formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}, ${hours12}:${minutes} ${period}`;
+            }
+          } else {
+            formatted_date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+          }
+        } else {
+          // Default to standard format with proper time format
+          const formatted_date_time = formatDateTime(value, includeTime, is24Hour);
+          formatted_date = formatted_date_time?.includes('Invalid Date')
+            ? value
+            : formatted_date_time;
+        }
+      } else {
+        // Use default formatting with proper time format
+        const formatted_date_time = formatDateTime(value, includeTime, is24Hour);
+        formatted_date = formatted_date_time?.includes('Invalid Date')
+          ? value
+          : formatted_date_time;
+      }
+
+      setInputValue(formatted_date as string);
 
       if (includeTime) {
-        const hour = value.getHours()
-        const timeVal = `${
-          hour >= 12 ? hour % 12 : hour
-        }:${value.getMinutes().toString()
-          .padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
+        // Format the time string based on is24Hour setting
+        let timeVal;
+        const hour = value.getHours();
+        const minutes = value.getMinutes().toString().padStart(2, '0');
+        
+        if (is24Hour) {
+          // 24-hour format
+          timeVal = `${hour.toString().padStart(2, '0')}:${minutes}`;
+        } else {
+          // 12-hour format
+          const period = hour >= 12 ? 'PM' : 'AM';
+          const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+          timeVal = `${hour12}:${minutes} ${period}`;
+        }
 
         if (onTimeChange) {
-          onTimeChange(timeVal)
+          onTimeChange(timeVal);
         }
         else {
-          contextOnTimeChange(timeVal)
+          contextOnTimeChange(timeVal);
         }
       }
 
       if (onDateChange) {
-        onDateChange(value)
+        onDateChange(value);
       }
-    }, [value, includeTime])
+    }, [value, includeTime, format, props.is24Hour, dateTimePickerProps?.is24Hour]);
 
     const handleParse = (
       e:
@@ -536,7 +604,12 @@ const NaturalLanguageInput = React.forwardRef<
 
       const parsedDateTime = parseDateTime(currentValue)
       if (parsedDateTime) {
-        const formatted = formatDateTime(parsedDateTime, includeTime)
+        // Get is24Hour from context or props
+        const is24Hour = props.is24Hour !== undefined 
+          ? props.is24Hour 
+          : dateTimePickerProps?.is24Hour || false;
+          
+        const formatted = formatDateTime(parsedDateTime, includeTime, is24Hour)
         const formatted_date = formatted?.includes('Invalid Date')
           ? parsedDateTime
           : formatted
@@ -545,18 +618,20 @@ const NaturalLanguageInput = React.forwardRef<
         setInputValue(formatted_date as string)
 
         if (includeTime) {
-          const PM_AM = (parsedDateTime as Date).getHours() >= 12 ? 'PM' : 'AM'
-          const PM_AM_hour = (parsedDateTime as Date).getHours()
-
-          const hour
-            = PM_AM_hour > 12
-              ? PM_AM_hour % 12
-              : PM_AM_hour === 0 || PM_AM_hour === 12
-                ? 12
-                : PM_AM_hour
-
-          const formattedTime = `${hour}:${(parsedDateTime as Date).getMinutes().toString()
-            .padStart(2, '0')} ${PM_AM}`
+          // Format the time string based on is24Hour setting
+          let formattedTime;
+          const hour = (parsedDateTime as Date).getHours();
+          const minutes = (parsedDateTime as Date).getMinutes().toString().padStart(2, '0');
+          
+          if (is24Hour) {
+            // 24-hour format
+            formattedTime = `${hour.toString().padStart(2, '0')}:${minutes}`;
+          } else {
+            // 12-hour format
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+            formattedTime = `${hour12}:${minutes} ${period}`;
+          }
 
           if (onTimeChange) {
             onTimeChange(formattedTime)
@@ -611,12 +686,25 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
   disablePastDates?: boolean
   disableFutureDates?: boolean
   includeTime?: boolean
+  useTimePicker?: boolean
+  is24Hour?: boolean
+  displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
   datePickerTestID?: string
 }) => {
-  const { value, onValueChange, Time } = useSmartDateInput()
+  const { value, onValueChange, Time, onTimeChange } = useSmartDateInput()
   const buttonRef = React.useRef<HTMLButtonElement>(null)
   const [isOpen, setIsOpen] = React.useState(false)
   const [, setErrorMessage] = React.useState<string | null>(null)
+
+  // Determine if we should use 24-hour format
+  const use24HourFormat = React.useMemo(() => {
+    // If explicitly set, use that value
+    if (props.is24Hour !== undefined) {
+      return props.is24Hour;
+    }
+    // If using YYYY-MM-DD format, default to 24-hour time
+    return props.displayFormat === 'YYYY-MM-DD';
+  }, [props.is24Hour, props.displayFormat]);
 
   const getValidDate = React.useCallback(
     (date: Date | undefined): Date | undefined => {
@@ -707,21 +795,21 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
     const endOfNewMonth = new Date(
       newDate.getFullYear(), newDate.getMonth() + 1, 0
     );
-  
+
     if (
       props.minDate &&
       startOfNewMonth < new Date(props.minDate.getFullYear(), props.minDate.getMonth(), 1)
     ) {
       return;
     }
-  
+
     if (
       props.maxDate &&
       endOfNewMonth > new Date(props.maxDate.getFullYear(), props.maxDate.getMonth() + 1, 0)
     ) {
       return;
     }
-  
+
     const today = new Date();
     if (props.disablePastDates) {
       const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -729,7 +817,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
         return;
       }
     }
-  
+
     if (props.disableFutureDates) {
       const endOfCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       if (endOfNewMonth > endOfCurrentMonth) {
@@ -870,12 +958,29 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
+
+  const handleTimePickerChange = (date: Date | undefined) => {
+    if (date && value) {
+      const newDate = new Date(value);
+      newDate.setHours(date.getHours(), date.getMinutes());
+      onValueChange(newDate);
+
+      // Update the time string for consistency
+      const hour = date.getHours();
+      const timeVal = `${hour >= 12 ? hour % 12 || 12 : hour || 12
+        }:${date.getMinutes().toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
+
+      onTimeChange(timeVal);
+    }
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild={true}>
         <Button
           className={cn(
-            'flex items-center justify-center font-normal hover:bg-transparent  disabled:opacity-100 active:!translate-y-0', !value && 'text-muted-foreground',
+            'flex items-center justify-center font-normal hover:bg-transparent disabled:opacity-100 active:!translate-y-0',
+            !value && 'text-muted-foreground',
           )}
           data-test-id={props.datePickerTestID}
           disabled={props.readOnly}
@@ -887,7 +992,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
           <span className='sr-only'>calendar</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align='start' className='w-auto p-0' sideOffset={10}>
+      <PopoverContent align='start' className='w-auto p-0 z-[103]' sideOffset={10}>
         <div className='p-3'>
           <div className='flex items-center justify-center gap-1'>
             {!(props.disablePastDates && new Date(year, month) < new Date()) && (
@@ -898,7 +1003,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
                 <SelectTrigger className='w-[140px]'>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='z-[105]'>
                   {validMonths.map((monthName, index) => (
                     <SelectItem key={monthName} value={index.toString()}>
                       {monthName}
@@ -911,7 +1016,7 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
               <SelectTrigger className='w-[100px]'>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className='z-[105]'>
                 {years.map(year => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
@@ -921,40 +1026,61 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
             </Select>
           </div>
           <div className='flex gap-1'>
-            <Calendar
-              {...props}
-              className={cn('peer flex justify-end', inputBase, props.className)}
-              disabled={(date) => {
-                if (props.minDate || props.maxDate) {
-                  return (
-                    (props.minDate ? date < props.minDate : false)
-                    || (props.maxDate ? date > props.maxDate : false)
-                  )
-                }
+            <div className='flex flex-col'>
+              <Calendar
+                {...props}
+                className={cn('peer flex justify-end', inputBase, props.className)}
+                disabled={(date) => {
+                  if (props.minDate || props.maxDate) {
+                    return (
+                      (props.minDate ? date < props.minDate : false)
+                      || (props.maxDate ? date > props.maxDate : false)
+                    )
+                  }
 
-                if (props.disablePastDates || props.disableFutureDates) {
-                  const today = new Date()
-                  today.setHours(0, 0, 0, 0)
+                  if (props.disablePastDates || props.disableFutureDates) {
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
 
-                  if (props.disablePastDates && date < today) return true
-                  if (props.disableFutureDates && date > today) return true
-                }
+                    if (props.disablePastDates && date < today) return true
+                    if (props.disableFutureDates && date > today) return true
+                  }
 
-                return false
-              }}
-              id='calendar'
-              initialFocus={true}
-              mode='single'
-              month={new Date(year, month)}
-              selected={value}
-              onMonthChange={handleMonthNavigation}
-              onSelect={formatSelectedDate}
-            />
+                  return false
+                }}
+                id='calendar'
+                initialFocus={true}
+                mode='single'
+                month={new Date(year, month)}
+                selected={value}
+                onMonthChange={handleMonthNavigation}
+                onSelect={formatSelectedDate}
+              />
+            </div>
 
-            {props.includeTime && <TimePicker />}
+            {/* Show built-in TimePicker beside the calendar */}
+            {props.includeTime && !props.useTimePicker && (
+              <div className="flex justify-center">
+                <TimePicker />
+              </div>
+            )}
           </div>
+
+          {/* Show external TimePicker below the calendar */}
+          {props.includeTime && props.useTimePicker && (
+            <>
+              <Separator className="my-2" />
+              <div className="flex justify-center w-full">
+                <ExternalTimePicker
+                  value={value}
+                  onChange={handleTimePickerChange}
+                  is24Hour={use24HourFormat}
+                />
+              </div>
+            </>
+          )}
         </div>
       </PopoverContent>
     </Popover>
-  )
-}
+  );
+};

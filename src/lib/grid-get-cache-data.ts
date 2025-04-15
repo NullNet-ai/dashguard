@@ -1,24 +1,45 @@
-import { type SortingState } from '@tanstack/react-table'
-
+import { SortingState } from '@tanstack/react-table';
 import {
-  type IAdvanceFilter,
-  type IPagination,
-  type ISearchItem,
-} from '~/components/platform/Grid/Search/types'
-import { api } from '~/trpc/server'
+  IPagination,
+  ISearchItem
+} from '~/components/platform/Grid/Search/types';
+import { api } from '~/trpc/server';
 
 interface IGridCacheDataResponse {
   filters: {
-    advanceFilter: IAdvanceFilter[]
-    reportFilters: ISearchItem[]
-    defaultFilters: ISearchItem[]
-  }
-  sorting: SortingState
-  pagination: IPagination
+    advanceFilter: ISearchItem[];
+    reportFilters: [];
+    defaultFilters: ISearchItem[];
+    groupAdvanceFilters: ISearchItem[];
+  };
+  sorts: {
+    sorting: SortingState;
+    defaultSorting: SortingState;
+  };
+  pagination: IPagination;
+  columns : Record<string,any>[];
 }
-export const getGridCacheData
-  = async (): Promise<IGridCacheDataResponse | null> => {
-    const cachedData
-      = (await api.grid.getReportCachedData()) as IGridCacheDataResponse
-    return typeof cachedData === 'object' ? cachedData : null
-  }
+export const getGridCacheData =
+  async (): Promise<IGridCacheDataResponse> => {
+    const cachedData =
+      (await api.grid.getReportCachedData() as unknown) as IGridCacheDataResponse;
+    return typeof cachedData === 'object'
+      ? cachedData
+      : ({
+        sorts: {
+            sorting : [],
+            defaultSorting : []
+          },
+          pagination: {
+            current_page: 1,
+            limit_per_page: 100,
+          },
+          filters: {
+            advanceFilter: [],
+            reportFilters: [],
+            defaultFilters: [],
+            groupAdvanceFilters: [],
+          },
+          columns : []
+        } as IGridCacheDataResponse);
+  };

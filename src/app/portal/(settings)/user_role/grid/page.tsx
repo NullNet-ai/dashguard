@@ -29,21 +29,21 @@ export default async function UserRoleGridPage({
     "updated_by",
   ];
 
-  const { sorting } = (await getGridCacheData()) ?? {};
+  const { sorts } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
     pluck: _pluck,
     current: +(searchParams.page ?? "0"),
     limit: +(searchParams.perPage ?? "100"),
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
   });
 
   return (
     <Grid
       totalCount={totalCount || 0}
       defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
+      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       data={items}
       config={{
         entity: main_entity!,

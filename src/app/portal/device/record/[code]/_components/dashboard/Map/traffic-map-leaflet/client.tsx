@@ -632,11 +632,11 @@ export default function TrafficMaps({ params }: IFormProps) {
                 ? (
                     <>
                     <MapComponent
-                        additionalCityConnections={mapData.additionCityConnections}
-                        cityToCityConnections={mapData.cityToCityConnections}
+                        // additionalCityConnections={mapData.additionCityConnections}
+                        // cityToCityConnections={mapData.cityToCityConnections}
                         countryTrafficData={mapData.countryTrafficData}
-                        regionToCityConnections={mapData.regionToCityConnections}
-                        regionToRegionConnections={mapData.regionToRegionConnections}
+                        // regionToCityConnections={mapData.regionToCityConnections}
+                        // regionToRegionConnections={mapData.regionToRegionConnections}
                       />
 
                     <div className="mt-4 text-center">
