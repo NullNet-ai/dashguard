@@ -13,14 +13,25 @@ import SearchList from './SearchList';
 import SearchListMobile from './SearchListMobile';
 import Search from './View';
 import GridSearchContainer from './_components/GridSearchContainer';
+import { useGrid } from '../Provider';
 // eslint-disable-next-line react/destructuring-assignment
 export default function Main({
   parentType = 'grid',
   creatable = true,
   switchable = true,
   gridType = 'table',
-  viewMode='table'
+  viewMode = 'table',
 }: any) {
+  const { state } = useGrid(); // Add this hook to get grid context
+  const renderedCreateButton = () => {
+    if (creatable && state?.customCreateButton) {
+      return state?.customCreateButton
+    }else if (creatable) {
+      return <CreateButton className="hidden lg:inline-flex" title="New"  />
+    }else {
+      return null;
+    }
+  }
   return (
     <GridSearchProvider>
       {parentType === 'grid' ? (
@@ -44,9 +55,8 @@ export default function Main({
               <div className="mx-2 h-full w-[1px] bg-tertiary" />
               <FilterButton />
             </div>
-            {creatable ? (
-              <CreateButton className="hidden lg:inline-flex" title="New" />
-            ) : null}
+            {/* Replace the existing create button with this logic */}
+            {renderedCreateButton()}
           </div>
           <div className="hidden min-h-[40px] lg:block">
             <SearchList parentType='grid'/>

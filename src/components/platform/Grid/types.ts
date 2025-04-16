@@ -11,7 +11,7 @@ import {
   GroupingState,
   Updater,
 } from '@tanstack/react-table';
-import { type ReactElement } from 'react';
+import { ReactNode, type ReactElement } from 'react';
 
 import { type appRouter } from '../../../server/api/root';
 
@@ -209,12 +209,13 @@ export interface IState {
     hasMore?: boolean;
     infiniteData?: any[];
     infiniteCount?: number;
-    bufferData?: any[];
+    bufferData?: any[];                                                                                                                                                                                                                                                                                                                                                                                                                  
   };
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
   groupConfigs?: IGroupBy[];
   gridKey?: string;
+  customCreateButton?: ReactNode | ReactElement;
 }
 
 export interface IAction {
@@ -268,6 +269,7 @@ export interface IPropsGrid {
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
+  customCreateButton?: ReactNode | ReactElement;
 }
 
 export interface IExpandedRow {

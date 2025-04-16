@@ -63,7 +63,8 @@ export default function GridProvider({
   parentType,
   gridLevel = 1,
   grouping: initialGrouping = [],
-  gridKey
+  gridKey,
+  customCreateButton
 }: IProps) {
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
@@ -609,7 +610,8 @@ export default function GridProvider({
     initial_columns: config?.columns,
     grouping,
     groupConfigs: initialGrouping,
-    gridKey
+    gridKey,
+    customCreateButton
   } as IState;
   const actions = {
     handleCreate,
