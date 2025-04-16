@@ -67,7 +67,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     let currentTime: any = null
 
     
-    socket.on( `${channel_name}-${org_acc_id}`, (data: Record<string,any>) => {
+    socket.on( `${channel_name}-${defaultValues?.id}-${org_acc_id}`, (data: Record<string,any>) => {
       let currentTraffic = data?.packet?.total_length || 0
       if(currentTime == data?.packet?.timestamp) {
          currentTraffic = trafficData.traffic + data?.packet?.total_length

@@ -115,20 +115,12 @@ const InteractiveGraph = ({
 
     useEffect(() => {
       
-      
-      if (!socket || !orgID) return
-      socket.on(`testing-${orgID}-${defaultValues?.id}`, (data: any) => {
-        
-      
-      });
-
-      socket.on( `${channel_name}-${orgID}`, (data: Record<string,any>) => {
-        // socket.on( `packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4`, (data: Record<string,any>) => {
-        
+      if (!socket || !defaultValues?.id || !orgID) return
+      socket.on( `packet_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
        setFilteredData(updated_filtered_data)
       })
-    },[socket, filteredData, orgID])
+    },[socket, filteredData, orgID, defaultValues?.id])
     
 
   useEffect(() => {
@@ -137,14 +129,16 @@ const InteractiveGraph = ({
     // const interval = setInterval(() => {
     //   fetchBandWidth()
     // }, 1000)
-    // return () => {
+    //  () => {
     //   clearInterval(interval)
     // }
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
-  // useEffect(() => {
-  //     fetchBandWidth()
-  // }, [])
+  useEffect(() => {
+      fetchBandWidth()
+  }, [])
+
+  // packet_multi_graph-
 
   useEffect(() => {
     const interfacesData = form.watch('interfaces') || []
