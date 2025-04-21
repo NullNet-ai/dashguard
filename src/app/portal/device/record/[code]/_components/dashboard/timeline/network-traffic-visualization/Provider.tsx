@@ -98,7 +98,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const handleSocketData = useCallback(
     (data: Record<string, any>) => {
       const _bandwidth = updateBandwidth(bandwidth, data?.packet);
-      console.log('%c Line:99 🌶 a', 'color:#ffdd4d', _bandwidth, bandwidth);
       setBandwidth([..._bandwidth])
     },
     [bandwidth]
@@ -114,7 +113,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       socket.off(eventKey, handleSocketData); // Cleanup
     };
   }, [socket, org_acc_id, handleSocketData]);
-  console.log('%c Line:193 🍞 bandwidth', 'color:#93c0a4', bandwidth);
+  
   
 
   const fetchMoreData = async () => {

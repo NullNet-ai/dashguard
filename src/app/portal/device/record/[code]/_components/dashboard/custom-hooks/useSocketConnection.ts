@@ -9,7 +9,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
   const [isConnected, setIsConnected] = useState(false);
 
   
-  console.log('%c Line:12 🍅', 'color:#ffdd4d');
+  
   useEffect(() => {
     if (!token) return;
 
@@ -31,20 +31,14 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
       setIsConnected(false);
     });
 
-    console.log('%c Line:35 🍯 socket', 'color:#465975', socket);
+    console.debug('%c Line:35 🥒 socket', 'color:#4fff4B', socket);
+    socket.on('packet_multi_graph-07da2369-432b-48f4-8714-372f9412ff57', (data: any) => {
+      console.debug('%c Line:35 🍌 data', 'color:#3f7cff', data);
+    })
+    
     socket.on('connect_error', (err: any) => {
       console.error('Connection error:', err.message);
       setIsConnected(false);
-    });
-
-    console.log('%c Line:38 🥃 socket', 'color:#7f2b82', socket);
-    socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
-      console.log('%c Line:38 🥚 data', 'color:#33a5ff', data);
-    
-    });
-
-    socket.on('packets_interfaces-dbcc1e63-eed0-4eb3-a181-019fb8c309e4', (data: any) => {
-      console.log('%c Line:38 🥚 data', 'color:#33a5ff packets_interfaces', data);
     });
 
     if(channel_name) {
