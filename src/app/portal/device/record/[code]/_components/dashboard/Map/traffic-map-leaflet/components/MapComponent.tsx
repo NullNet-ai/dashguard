@@ -132,7 +132,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     ];
 
     // Select a random ocean region
-    const region = oceanRegions[Math.floor(Math.random() * oceanRegions.length)];
+    const region:any = oceanRegions[Math.floor(Math.random() * oceanRegions.length)];
     
     // Generate random coordinates within the selected region
     const lat = region.lat[0] + Math.random() * (region.lat[1] - region.lat[0]);
@@ -150,13 +150,13 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     // Check if the point is inside any country polygon
     for (const feature of countriesGeoJSON.current.features) {
       if (feature.geometry.type === 'Polygon') {
-        const polygon = L.polygon(feature.geometry.coordinates[0].map(coord => [coord[1], coord[0]]));
+        const polygon = L.polygon(feature.geometry.coordinates[0].map((coord: Record<string, any>) => [coord[1], coord[0]]));
         if (polygon.getBounds().contains(point)) {
           return true;
         }
       } else if (feature.geometry.type === 'MultiPolygon') {
         for (const polygonCoords of feature.geometry.coordinates) {
-          const polygon = L.polygon(polygonCoords[0].map(coord => [coord[1], coord[0]]));
+          const polygon = L.polygon(polygonCoords[0].map((coord: Record<string, any>) => [coord[1], coord[0]]));
           if (polygon.getBounds().contains(point)) {
             return true;
           }
@@ -170,7 +170,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
   // Generate coordinates that are guaranteed to be in the ocean
   const getGuaranteedOceanCoordinates = useCallback(() => {
     let attempts = 0;
-    let coordinates;
+    let coordinates: any;
     
     do {
       coordinates = generateOceanCoordinates();
@@ -370,7 +370,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
       color: lineColor,
       weight: lineWidth,
       opacity: 0.8,
-      dashArray: condition === 'High Latency' ? '5, 5' : null,
+      dashArray: condition === 'High Latency' ? '5, 5' : null as any,
       className: 'traffic-flow-line',
     });
     

@@ -1,5 +1,6 @@
-import pluralize from 'pluralize';
+
 import { ulid } from 'ulid';
+import { pluralize } from '~/server/utils/pluralize';
 
 import { formatPhoneNumber } from '~/utils/formatter';
 

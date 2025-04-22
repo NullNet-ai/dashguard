@@ -2,7 +2,6 @@
 import { CopyPlus, Table, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
-import { Button } from '~/components/ui/button';
 import { useGrid } from '../Provider';
 import { duplicateFilterTab, removeGridFilter } from './SideDrawer/actions';
 import { ManageFilterProvider } from './SideDrawer/Provider';
@@ -47,6 +46,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
 
   const handleManageFilter = () => {
     actions?.openSideDrawer({
+      title: 'Manage Filter',
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {
@@ -73,7 +73,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
       router.refresh()
       
 
-      if (url && typeof url === 'string') {
+      if (typeof url === 'string') {
         router.replace(url);
       } else {
         router.refresh(); // Fallback: refresh the current page if no URL is returned

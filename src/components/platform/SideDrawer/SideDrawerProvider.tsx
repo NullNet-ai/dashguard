@@ -9,6 +9,7 @@ import {
 } from './types'
 
 const SideDrawerContext = createContext<ISideDrawerContextProps | undefined>(undefined)
+export const PINNED_STATE_KEY = 'sideDrawer_isPinned'
 
 export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false)

@@ -126,11 +126,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       [pluralize(input?.entity)]: pluck,
       organization_accounts: ['contact_id', 'id', 'device_id'],
     };
-    console.log("%c Line:125 🌽 pluck_object", "color:#2eafb0", pluck_object);
 
     const query = ctx.dnaClient.findAll({
       entity: input?.entity,
       token: ctx.token.value,
+      //@ts-expect-error - Expect error
       query: {
         pluck: input.pluck,
         track_total_records: true,

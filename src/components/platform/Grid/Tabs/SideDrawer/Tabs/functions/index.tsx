@@ -229,6 +229,7 @@ export function FilterGroup({
                       ] as IField[]
                     }
                     subConfig={{
+                      //@ts-expect-error - Expect error
                       selectOptions: {
                         [`${prefix}.field`]:
                           columns?.map(
