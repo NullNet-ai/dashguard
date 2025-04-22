@@ -1,3 +1,4 @@
+import { ta } from 'date-fns/locale'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
@@ -43,17 +44,34 @@ export const tabRouter = createTRPCRouter({
 
     return response
   }),
+  updateMainTabItem: privateProcedure
+   .input(
+      z.object({
+        tab: z.any(),
+        entity: z.string().min(1),
+      })
+    )
+   .mutation(async ({ input, ctx }) => {
+      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const response = await ctx.redisClient.getCachedData(key)
+
+      const update_tabs = response?.map((tab: Record<string, any>) => {
+        if (tab.name === input.entity || tab.id === input.entity) {
+          return {
+          ...tab,
+           href: input.tab.href,
+          }
+        }
+        return tab
+      })
+      await ctx.redisClient.cacheData(key, update_tabs, 90000000)
+      
+   }),
   insertSubTabs: privateProcedure
     .input(
       z.object({
         current_context: z.string().min(1),
-        tabs: z.array(
-          z.object({
-            name: z.string().min(1),
-            href: z.string().min(1),
-            current: z.boolean(),
-          })
-        ),
+        tabs: z.array(z.any()),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -81,7 +99,6 @@ export const tabRouter = createTRPCRouter({
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
     const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
-
     const response = await tabs
       .cacheData(key, input, 90000000)
       .then(() => {
@@ -95,6 +112,28 @@ export const tabRouter = createTRPCRouter({
     return response
   }),
   updateAllMainTabs: privateProcedure
+  .input(
+    z.object({
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.contact?.id}`
+
+    const response = await tabs
+      .cacheData(key, input.tabs, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
+  updateAllMainTabs2: privateProcedure
   .input(
     z.object({
       tabs: z.array(z.any()),
@@ -264,6 +303,37 @@ export const tabRouter = createTRPCRouter({
 
       await tabs.cacheData(key, response, 90000000)
     }),
+
+    removeNewInnerClassTab: privateProcedure
+    .input(
+      z.object({
+        current_context: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      let response = await tabs
+        .getCachedData(key)
+        .then((res) => {
+          return res || []
+        })
+        .catch(() => {
+          return []
+        })
+
+      const update_tabs = response?.tabs?.filter(
+        (tab: Record<string, any>) => tab.name !== "new" && tab.id !== "new"
+      )
+
+      response = {
+        ...response,
+        tabs: update_tabs,
+      }
+
+      await tabs.cacheData(key, response, 90000000)
+    }),
+
 
   closeAllInnerClassTabs: privateProcedure
     .input(

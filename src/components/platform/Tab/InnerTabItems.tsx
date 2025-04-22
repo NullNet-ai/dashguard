@@ -42,7 +42,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('')
   const  {state: drawerState,  } = useSideDrawer ()
-  const {width, isOpen, isPinned} = drawerState
+  const {width, isOpen, isPinned} = drawerState as any
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );

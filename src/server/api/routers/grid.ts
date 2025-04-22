@@ -282,6 +282,7 @@ export const gridRouter = createTRPCRouter({
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
+        //@ts-expect-error - expect error
         query: {
           pluck: input.pluck,
           track_total_records: true,
@@ -308,7 +309,7 @@ export const gridRouter = createTRPCRouter({
             ? {
                 multiple_sort:
                   input.sorting?.length && input?.sorting.length > 1
-                    ? formatSorting(input.sorting)
+                    ? formatSorting(input.sorting, input.entity)
                     : [],
                 concatenate_fields: [
                   {

@@ -57,7 +57,7 @@ const TabItems = ({ items =[]}: TabItemsProps) => {
   const [isClient, setIsClient] = useState(false)
   const [application, code] = (pathname || '').split('/').slice(3)
   const  {state: drawerState,  } = useSideDrawer ()
-  const {width, isOpen, isPinned} = drawerState
+  const {width, isOpen, isPinned} = drawerState as any
 
   const ismobile = useIsMobile()
 

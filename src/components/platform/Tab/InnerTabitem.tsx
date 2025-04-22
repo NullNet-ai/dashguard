@@ -11,7 +11,7 @@ import TabMenu from '~/components/application-layout/common/TabMenu';
 import { SortableDragHandleRawItem } from '~/components/ui/sortable';
 import { cn, formatTabName } from '~/lib/utils';
 import { api } from '~/trpc/react';
-import { updateAllMaindata, updateMainTabItem } from './Actions/actions';
+import {  updateMainTabItem } from './Actions/actions';
 
 type InnerTabitemProps = {
   tab: any

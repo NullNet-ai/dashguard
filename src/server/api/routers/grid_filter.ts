@@ -26,6 +26,8 @@ const sortSchema = z.object({
 const groupSchema = z.object({
   field: z.string(),
   label: z.string(),
+  value: z.string(),
+  desc: z.boolean(),
 });
 
 const columnSchema = z.object({
@@ -129,7 +131,7 @@ export const gridFilterRouter = createTRPCRouter({
         _id: ctx.session.account.contact.id,
       });
 
-      await ctx.redisClient.cacheData(_tabMenuId, input);
+      await ctx.redisClient.cacheData(_tabMenuId, input?.tabs);
 
    }),
   updateGridFilter: privateProcedure
@@ -429,14 +431,14 @@ export const gridFilterRouter = createTRPCRouter({
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
-      )) as ITabGrid[];
+      )) as ITabGrid[] as any[];
       tabs.push({
         id: filter?.id,
         name: filter?.name,
         current: true,
         href: filter?.link,
         default: false,
-        columns: filter?.columns,
+        columns: filter?.columns as any[],
         groups: filter?.groups,
         sorts: filter?.sorts,
         advance_filters: filter?.advance_filters,
