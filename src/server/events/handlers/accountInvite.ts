@@ -40,8 +40,8 @@ export const eventHandler = async (eventName: string, data: any) => {
     const parsedSubject = replaceTemplateVariables(subject, templateData);
     const parsedContent = replaceTemplateVariables(content, templateData);
     await sendEmail({
-      from: loggedInUser.email,
-      to: templateData.organization_account.email,
+      from: loggedInUser.account_id,
+      to: templateData.account_organization.email,
       subject: parsedSubject,
       html: parsedContent,
     });

@@ -16,12 +16,12 @@ const FormServerFetch = async () => {
     }),
   ]);
 
-  const { contact, accounts } = accountDetails ?? {};
+  const { contact, account } = accountDetails ?? {};
 
   return (
     <div className="space-y-2">
       <AccountDetails
-        defaultValues={{ ...accounts }}
+        defaultValues={{ ...account, contact_id: contact?.id }}
         selectOptions={{
           role_id: options?.user_role,
         }}

@@ -1,14 +1,14 @@
   import contact from "./contact";
   import dashboard from "./dashboard";
   import organization from "./organization";
-  import organization_account from "./organization_account";
+  import account_organization from "./account_organization";
   import settings from "./settings";
 
 const menu = [
   contact,
   dashboard,
   organization,
-  organization_account,
+  account_organization,
   settings,
 ];
 

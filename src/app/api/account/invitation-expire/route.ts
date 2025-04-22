@@ -31,12 +31,12 @@ export async function POST(request: Request) {
           .execute(),
         orm
           .update(account_id, {
-            entity: 'organization_account',
+            entity: 'account_organizations',
             token: rootAccountToken,
             as_root: true,
             mutation: {
               params: {
-                account_status: 'Invitation Expired',
+                account_organization_status: 'Invitation Expired',
               },
             },
           })

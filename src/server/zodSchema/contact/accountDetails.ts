@@ -14,11 +14,11 @@ const account_secret = z
 
 export const ContactAccountDetailSchema = z.object({
   id: z.string().optional(),
-  contact_id: z.string(),
-  organization_id: z.string().optional(),
+  contact_id: z.string().optional(),
+  // organization_id: z.string().optional(),
   role_id: z.string().min(1, { message: 'Role is required.' }),
-  account_id: z.string().min(1, { message: 'Username is required.' }),
-  account_secret,
+  email: z.string().min(1, { message: 'Email is required.' }),
+  // account_secret,
 })
 
 export const ContactAccountDetailsSchema = z.object({
