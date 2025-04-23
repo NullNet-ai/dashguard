@@ -117,7 +117,7 @@ const InteractiveGraph = ({
       
       if (!socket || !defaultValues?.id || !orgID) return
       socket.on( `connection_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
-       const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
+       const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
        setFilteredData(updated_filtered_data)
       })
     },[socket, filteredData, orgID, defaultValues?.id])
