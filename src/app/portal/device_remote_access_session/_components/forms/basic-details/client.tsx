@@ -6,16 +6,18 @@ import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { useToast } from "~/context/ToastProvider";
 import { type IFormProps } from "../types";
 import { api } from "~/trpc/react";
+
 const FormSchema = z.object({
   device_id: z.string({message: "Device is required"}).min(1, {message: "Device is required"}),
   remote_access_type: z.string({message: "Connection Type is required"}).min(1, {message: "Connection Type is required"}),
 })
 
-export default function RemoteAccessDetails({params, record_data}: IFormProps) {
+export default function RemoteAccessDetails(props: IFormProps) {
+  const { record_data } = props;
   const toast = useToast();
-  const update = api.deviceRemoteAccessSession.updateDeviceRemoteAccessSessions.useMutation();
+  const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation();
 
-  const {data: devices} = api.deviceRemoteAccessSession.fetchDevices.useQuery({
+  const { data: devices } = api.deviceRemoteAccessSession.fetchDevices.useQuery({
     limit: 100
   })
 
@@ -24,16 +26,21 @@ export default function RemoteAccessDetails({params, record_data}: IFormProps) {
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
       const { device_id, remote_access_type } = data;
-      const { id } = record_data || params;
       
-      const res = await update.mutateAsync({
-        id,
+      const res = await createUpdate.mutateAsync({
+        id: record_data?.id || '',
         device_id,
-        remote_access_type
+        remote_access_type,
+        category: remote_access_type.toLowerCase() === "console" ? "Console" : "Web",
       });
       if(res.status_code == 200) {
         toast.success("Remote Access submitted successfully");
-        window.location.reload();
+        if(remote_access_type.toLowerCase() == "console") {
+        window.open("http://localhost:3000/terminal", "_blank");
+        } else {
+          window.open("http://wallguard.nullnetqa.net:4444/", "_blank");
+        }
+
       }
     } catch (error) {
       toast.error("Failed to submit Remote Access");
@@ -122,3 +129,4 @@ export default function RemoteAccessDetails({params, record_data}: IFormProps) {
     />
   );
 }
+

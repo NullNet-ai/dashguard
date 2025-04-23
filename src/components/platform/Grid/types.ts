@@ -253,6 +253,7 @@ export interface IPropsGrid {
   parentExpanded?: IExpandedRow[];
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
   grouping?: IGroupBy[] | GroupingState;
+  customCreateButton?: React.ReactNode | ReactElement
 }
 
 export interface IExpandedRow {

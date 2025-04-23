@@ -19,8 +19,20 @@ export default function Main({
   creatable = true,
   switchable = true,
   gridType = 'table',
-  viewMode='table'
+  viewMode='table',
+  customCreateButton = null
 }: any) {
+
+  const renderedCreateButton = () => {
+    if (creatable && customCreateButton) {
+      return customCreateButton
+    }else if (creatable) {
+      return <CreateButton className="hidden lg:inline-flex" title="New" />
+    }else {
+      return null;
+    }
+  }
+  
   return (
     <GridSearchProvider>
       {parentType === 'grid' ? (
@@ -44,9 +56,7 @@ export default function Main({
               <div className="mx-2 h-full w-[1px] bg-tertiary" />
               <FilterButton />
             </div>
-            {creatable ? (
-              <CreateButton className="hidden lg:inline-flex" title="New" />
-            ) : null}
+            {renderedCreateButton()}
           </div>
           <div className="hidden min-h-[40px] lg:block">
             <SearchList />

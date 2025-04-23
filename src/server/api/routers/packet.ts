@@ -305,11 +305,11 @@ export const packetRouter = createTRPCRouter({
       const res = await Promise.all(interface_names.map(async (interface_name: string) => {
         const res = await ctx.dnaClient.aggregate({
           query: {
-            entity: 'packets',
+            entity: 'connections',
             aggregations: [
               {
                 aggregation: 'SUM',
-                aggregate_on: 'total_length',
+                aggregate_on: 'bytes',
                 bucket_name: 'bandwidth',
               },
             ],
@@ -317,7 +317,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria' as const,
                 field: 'interface_name',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.EQUAL,
                 values: [interface_name],
               },
@@ -328,7 +328,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria' as const,
                 field: 'device_id',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.EQUAL,
                 values: [
                   device_id,
@@ -341,7 +341,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria',
                 field: 'timestamp',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.IS_BETWEEN,
                 values: time_range,
               },
@@ -398,11 +398,11 @@ export const packetRouter = createTRPCRouter({
 
     const res = await ctx.dnaClient.aggregate({
       query: {
-        entity: 'packets',
+        entity: 'connections',
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'total_length',
+            aggregate_on: 'bytes',
             bucket_name: 'bandwidth',
           },
         ],
@@ -410,7 +410,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria' as const,
             field: 'device_id',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.EQUAL,
             values: [
               device_id,
@@ -442,11 +442,11 @@ export const packetRouter = createTRPCRouter({
 
     const res = await ctx.dnaClient.aggregate({
       query: {
-        entity: 'packets',
+        entity: 'connections',
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'total_length',
+            aggregate_on: 'bytes',
             bucket_name: 'bandwidth',
           },
         ],
@@ -454,7 +454,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria' as const,
             field: 'interface_name',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.EQUAL,
             values: interface_names,
           },
@@ -465,7 +465,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria' as const,
             field: 'device_id',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.EQUAL,
             values: [
               device_id,
@@ -478,7 +478,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'timestamp',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
@@ -620,7 +620,7 @@ export const packetRouter = createTRPCRouter({
 
     const res = await ctx.dnaClient
       .findAll({
-        entity: 'packets',
+        entity: 'connections',
         token: ctx.token.value,
         query: {
           track_total_records: true,
@@ -632,7 +632,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'timestamp',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.IS_BETWEEN,
               values: time_range,
             },
@@ -643,7 +643,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'device_id',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [device_id],
             },
@@ -674,11 +674,11 @@ export const packetRouter = createTRPCRouter({
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
         query: {
-          entity: 'packets',
+          entity: 'connections',
           aggregations: [
             {
               aggregation: 'SUM',
-              aggregate_on: 'total_length',
+              aggregate_on: 'bytes',
               bucket_name: 'bandwidth',
             },
           ],
@@ -686,7 +686,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'timestamp',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.IS_BETWEEN,
               values: time_range,
             },
@@ -697,7 +697,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria' as const,
               field: 'source_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [
                 source_ip,
@@ -710,7 +710,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'device_id',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [device_id],
             },
@@ -761,7 +761,7 @@ export const packetRouter = createTRPCRouter({
 
     let source_ips: string[] = []
 
-    const filterPackets = async (starts_at: number) => {
+    const filterConnections = async (starts_at: number) => {
       // const limit = 100000
       const limit = 1000
 
@@ -802,7 +802,7 @@ export const packetRouter = createTRPCRouter({
         {
           type: 'criteria',
           field: 'timestamp',
-          entity: 'packets',
+          entity: 'connections',
           operator: EOperator.IS_BETWEEN,
           values: time_range,
         },
@@ -813,7 +813,7 @@ export const packetRouter = createTRPCRouter({
         {
           type: 'criteria',
           field: 'device_id',
-          entity: 'packets',
+          entity: 'connections',
           operator: EOperator.EQUAL,
           values: [device_id],
         },
@@ -825,14 +825,14 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'source_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.NOT_EQUAL,
               values: source_ips,
             }]
           : []),
       ]?.map((item: any) => ({
         ...item,
-        entity: 'packets',
+        entity: 'connections',
       }))
 
       default_filters = {
@@ -851,9 +851,9 @@ export const packetRouter = createTRPCRouter({
           : []),
       ]
 
-      const packets = await ctx.dnaClient
+      const connections = await ctx.dnaClient
         .findAll({
-          entity: 'packets',
+          entity: 'connections',
           token: ctx.token.value,
           query: {
             track_total_records: true,
@@ -868,7 +868,7 @@ export const packetRouter = createTRPCRouter({
             },
             //   multiple_sort: [
             //     {
-            //         "by_field": "packets.source_ip",
+            //         "by_field": "connections.source_ip",
             //         "by_direction": EOrderDirection.ASC
             //     }
             // ]
@@ -882,13 +882,13 @@ export const packetRouter = createTRPCRouter({
         })
         .execute()
 
-      const _packets = packets?.data || []
-      const _packets_length = _packets.length
+      const _connections = connections?.data || []
+      const _connections_length = _connections.length
 
       const sourceIPs = new Set()
-      for (let i = 0; i < _packets_length; i++) {
-        if (_packets?.[i]) {
-          sourceIPs.add((_packets[i]?.packets as any).source_ip)
+      for (let i = 0; i < _connections_length; i++) {
+        if (_connections?.[i]) {
+          sourceIPs.add((_connections[i]?.connections as any).source_ip)
         }
       }
       // 209.58.181.171
@@ -929,23 +929,23 @@ export const packetRouter = createTRPCRouter({
           return { result: res?.data }
         }, { concurrency: 100 })
 
-        if (_packets_length == limit) {
+        if (_connections_length == limit) {
           const new_start = starts_at + limit
-          await filterPackets(new_start)
+          await filterConnections(new_start)
         }
         const ips_with_country = (_res?.filter(Boolean))?.map(item => item?.result?.[0]?.ip)
         source_ips = ips_with_country as string[]
         return _res?.filter(Boolean)
       }
       else {
-        if (_packets_length == limit) {
+        if (_connections_length == limit) {
           const new_start = starts_at + limit
-          await filterPackets(new_start)
+          await filterConnections(new_start)
         }
       }
     }
 
-    await filterPackets(0)
+    await filterConnections(0)
 
     return source_ips || []
   }),
@@ -963,10 +963,10 @@ export const packetRouter = createTRPCRouter({
     const { device_id, time_range, batch_size = 10, batch_offset = 0 } = input
     let source_and_destination_ips: Record<string, any>[] = []
 
-    const filterPackets = async () => {
-      const packets: any = await ctx.dnaClient
+    const filterConnections = async () => {
+      const connections: any = await ctx.dnaClient
         .findAll({
-          entity: 'packets',
+          entity: 'connections',
           token: ctx.token.value,
           query: {
             track_total_records: true,
@@ -975,7 +975,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria',
                 field: 'timestamp',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.IS_BETWEEN,
                 values: time_range,
               },
@@ -986,7 +986,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria',
                 field: 'device_id',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.EQUAL,
                 values: [device_id],
               },
@@ -1001,23 +1001,23 @@ export const packetRouter = createTRPCRouter({
         })
         .execute()
 
-      const _packets = packets?.data || []
-      const _packets_length = _packets.length
-      const total_records = packets?.total_records || 0 // Get total record count for client pagination
+      const _connections = connections?.data || []
+      const _connections_length = _connections.length
+      const total_records = connections?.total_records || 0 // Get total record count for client pagination
 
       const sourceAndDestinationIPs = new Set()
-      for (let i = 0; i < _packets_length; i++) {
-        if (_packets?.[i]) {
+      for (let i = 0; i < _connections_length; i++) {
+        if (_connections?.[i]) {
           sourceAndDestinationIPs.add({
-            source_ip: (_packets[i] as any).source_ip,
-            destination_ip: (_packets[i] as any).destination_ip,
+            source_ip: (_connections[i] as any).source_ip,
+            destination_ip: (_connections[i] as any).destination_ip,
           })
         }
       }
       source_and_destination_ips = [...sourceAndDestinationIPs] as Record<string, any>[]
 
       return {
-        packets: source_and_destination_ips,
+        connections: source_and_destination_ips,
         batch_info: {
           total_records,
           has_more: total_records > (batch_offset + batch_size),
@@ -1026,10 +1026,10 @@ export const packetRouter = createTRPCRouter({
       }
     }
 
-    const { packets, batch_info } = await filterPackets()
+    const { connections, batch_info } = await filterConnections()
 
     // Process this batch of IPs
-    const _res = await Bluebird.map(packets, async (ips: Record<string, any>) => {
+    const _res = await Bluebird.map(connections, async (ips: Record<string, any>) => {
       const source_country = await ctx.dnaClient
         .findAll({
           entity: 'ip_info',

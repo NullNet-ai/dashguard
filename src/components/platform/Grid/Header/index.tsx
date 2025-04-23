@@ -4,7 +4,7 @@ import Search from "../Search";
 import BulkActionButton from "./BulkActionButton";
 import Sorting from "../Sorting";
 
-export default function Header() {
+export default function Header({customCreateButton} : any) {
   return (
     <>
       <div className="flex flex-col-reverse gap-y-4 py-2 pb-0 lg:flex-row lg:justify-between">
@@ -16,7 +16,7 @@ export default function Header() {
            <Sorting />
           </div>
         </div>
-        <Search />
+        <Search customCreateButton={customCreateButton}/>
       </div>
       <BulkActionButton />
    

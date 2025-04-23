@@ -7,6 +7,9 @@ const gridColumns = [
   {
     header: "ID",
     accessorKey: "code",
+    search_config: {
+      operator: 'like',
+    }
   },
   {
     header: "State",
@@ -19,20 +22,35 @@ const gridColumns = [
   },
   {
     header: "Category",
-    accessorKey: "category"
+    accessorKey: "remote_access_category",
+    search_config: {
+      operator: 'like',
+    }
   },
   {
     header: "Type",
-    accessorKey: "remote_access_type"
+    accessorKey: "remote_access_type",
+    search_config: {
+      operator: 'like',
+    }
   },
   {
     header: "Device",
-    accessorKey: "device_name"
+    accessorKey: "device_name",
+    sortKey: 'devices.instance_name',
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'instance_name',
+    },
   },
 
   {
     header: "Status",
-    accessorKey: "remote_access_status"
+    accessorKey: "remote_access_status",
+    search_config: {
+      operator: 'like',
+    }
   },
   {
     header: 'Updated Date',

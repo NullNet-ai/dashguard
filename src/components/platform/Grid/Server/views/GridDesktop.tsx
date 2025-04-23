@@ -9,11 +9,11 @@ import GridDesktopContainer from './common/GridDesktopContainer'
 import ScrollContainer from './common/GridScrollContainer'
 import { cn } from '~/lib/utils'
 
-function GridDesktop({ parentType }: any) {
+function GridDesktop({ parentType, customCreateButton }: any) {
   return (
     <Card className="col-span-full border-0 shadow-none">
       <CardHeader>
-        <Header />
+        <Header customCreateButton={customCreateButton}/>
       </CardHeader>
       <ScrollContainer parentType={parentType}>
         <GridDesktopContainer parentType={parentType} />

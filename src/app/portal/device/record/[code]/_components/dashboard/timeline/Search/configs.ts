@@ -66,7 +66,7 @@ export const searchableFields = [
 
 export const searchConfig = {
   router: 'packet',
-  resolver: 'filterPackets',
+  resolver: 'filterConnections',
   defaultEntity: 'packets',
 }
 

@@ -2,6 +2,7 @@ import { EOrderDirection, IAdvanceFilters } from "@dna-platform/common-orm";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure , publicProcedure } from "~/server/api/trpc";
 import { formatSorting } from "~/server/utils/formatSorting";
+import { formatString } from "~/server/utils/formatString";
 import { pluralize } from "~/server/utils/pluralize";
 import { createAdvancedFilter } from "~/server/utils/transformAdvanceFilter";
 import ZodItems from "~/server/zodSchema/grid/items";
@@ -126,11 +127,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       [pluralize(input?.entity)]: pluck,
       organization_accounts: ['contact_id', 'id', 'device_id'],
     };
-    console.log("%c Line:125 🌽 pluck_object", "color:#2eafb0", pluck_object);
 
     const query = ctx.dnaClient.findAll({
       entity: input?.entity,
       token: ctx.token.value,
+      //@ts-expect-error - To be determined
       query: {
         pluck: input.pluck,
         track_total_records: true,
@@ -204,17 +205,22 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         created_by,
         devices,
         updated_by,
+        remote_access_type,
+        remote_access_category,
         ...rest
       } = item;
       
       return {
         ...entity_data,
         ...rest,
-        device_name: devices?.[0]?.instance_name,
+        remote_access_type,
+        remote_access_category: formatString(remote_access_category),
+        // type: formatString(remote_access_type),
+        device_name: formatString(devices?.[0]?.instance_name),
         created_by: created_by
           ? `${created_by?.[0]?.first_name} ${created_by?.[0]?.last_name}`
           : null,
-        updated_by: updated_by
+        updated_by: updated_by?.[0]?.first_name || updated_by?.[0]?.last_name
           ? `${updated_by?.[0]?.first_name} ${updated_by?.[0]?.last_name}`
           : null,
       };
@@ -230,27 +236,50 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     };
   }),
 
-  updateDeviceRemoteAccessSessions: privateProcedure
-    .input(z.object({ id: z.string(), device_id: z.string(),remote_access_type: z.string() }))
+  createUpdateDeviceRemoteAccessSessions: privateProcedure
+    .input(z.object({ id: z.string(), device_id: z.string(),remote_access_type: z.string(), category: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id, device_id, remote_access_type } = input
+      const { id, device_id, remote_access_type, category} = input
 
-      const res = await ctx.dnaClient
-        .update(id, {
-          entity,
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              device_id: device_id,
-              remote_access_type,
-              status: "Active"
+      if(!id){
+        const res = await ctx.dnaClient
+          .create({
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                device_id: device_id,
+                entity_prefix: 'RA',
+                remote_access_type,
+                remote_access_category: category,
+                status: "Active"
+              },
+              pluck: ['id', 'device_id', 'remote_access_type','code'],
             },
-            pluck: ['id', 'device_id', 'remote_access_type'],
-          },
-        })
-        .execute()
+          })
+          .execute()
+        return res
+      } else {
+        const res = await ctx.dnaClient
+          .update(id, {
+            entity,
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                device_id: device_id,
+                remote_access_type,
+                remote_access_category: category,
+                status: "Active"
+              },
+              pluck: ['id', 'device_id', 'remote_access_type'],
+            },
+          })
+          .execute()
 
-      return res
-    }),
+        return res
+      }
+    }), 
+
+      
 
 });

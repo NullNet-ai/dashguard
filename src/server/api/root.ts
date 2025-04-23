@@ -34,6 +34,8 @@ import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_
  *
  * All routers added in /api/routers should be manually added here.
  */
+
+
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   dashboard: dashboardRouter,

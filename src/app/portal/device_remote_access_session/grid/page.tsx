@@ -6,7 +6,7 @@ import { getGridCacheData } from "~/lib/grid-get-cache-data";
 import gridColumns from "./_config/columns";
 import defaultSorting from "./_config/sorting";
 import { CustomRowActions } from "./_components/CustomRowActions";
-import { newButtonCustomAction } from "./_components/custom_actions";
+import { CustomNewButton } from "./_components/CustomNewButton";
 
 export default async function Page() {
   const { sorts, pagination, filters } = (await getGridCacheData()) ?? {};
@@ -15,7 +15,7 @@ export default async function Page() {
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity] = pathname.split("/");
 
-  const _pluck = ["id", "code", "status", "remote_access_type", "device_id", "created_date", "updated_date", "created_by", "updated_by"];
+  const _pluck = ["id", "code", "status", "remote_access_type", "device_id", "remote_access_category","created_date", "updated_date", "created_by", "updated_by"];
 
   const { items = [], totalCount } = await api.deviceRemoteAccessSession.mainGrid({
     entity: main_entity!,
@@ -43,9 +43,18 @@ export default async function Page() {
         },
         disableDefaultAction: true,
         customRowAction: CustomRowActions,
-        // new_button_action: CustomNewButton
-        // new_button_action: newButtonCustomAction
+        searchConfig: {
+          router: 'deviceRemoteAccessSession',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: main_entity!,
+            pluck: _pluck,
+          },
+        },
       }}
+      customCreateButton={
+        <CustomNewButton />
+      }
     />
   );
 }
