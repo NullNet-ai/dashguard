@@ -40,6 +40,7 @@ export function ManageFilterProvider({
     router?: AppRouterKeys;
     resolver?: string;
     query_params?: ISearchParams;
+    entity?: string;
   };
 }) {
   const { actions } = useSideDrawer();
