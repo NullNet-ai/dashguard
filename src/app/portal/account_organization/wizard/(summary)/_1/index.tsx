@@ -16,12 +16,9 @@ interface IAccountDetails {
 }
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , , _, identifier] = pathName.split('/');
+  const [, , , , identifier] = pathName.split('/');
   const {
-    data = {
-      email: '',
-      role: '',
-    },
+    data = {},
     refetch,
     error,
   } = api.account.fetchWizardSummary.useQuery({

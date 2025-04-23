@@ -11,15 +11,18 @@ const wizardCallbacks = {
     try {
       const response = await updateAccountStatus(data);
 
-      socketClient.publish({
-        type: 'ACCOUNT_INVITE',
-        payload: response,
-      });
       if (response) {
+        socketClient.publish({
+          type:
+            response?.accountRecord?.categories[0] === 'Internal User'
+              ? 'ACCOUNT_INVITE_INTERNAL'
+              : 'ACCOUNT_INVITE_EXTERNAL',
+          payload: response,
+        });
         await next('Account is created successfully and invitation is sent');
         return;
       }
-      toast.error('Failed to activate the account');
+      await next();
       return;
     } catch {
       toast.error('Failed to activate account');

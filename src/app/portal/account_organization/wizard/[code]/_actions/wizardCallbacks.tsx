@@ -11,7 +11,10 @@ const wizardCallbacks = {
     try {
       const response = await updateAccountStatus(data);
       socketClient.publish({
-        type: 'ACCOUNT_INVITE',
+        type:
+          response?.accountRecord?.categories[0] === 'Internal User'
+            ? 'ACCOUNT_INVITE_INTERNAL'
+            : 'ACCOUNT_INVITE_EXTERNAL',
         payload: response,
       });
       if (response) {

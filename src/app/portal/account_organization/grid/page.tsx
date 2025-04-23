@@ -45,7 +45,7 @@ export default async function Page() {
           "first_name",
           "last_name",
         ],
-        statusColumn: 'account_status',
+        statusColumn: 'account_organization_status',
         columns: gridColumns,
         columnsOrder: columnOrder,
         // enableAutoCreate: false,
@@ -67,7 +67,7 @@ export default async function Page() {
                 match_condition: 'match_all',
                 conditions: [
                   {
-                    accessor: 'account_status',
+                    accessor: 'account_organization_status',
                     value: ['Active'],
                   },
                 ],

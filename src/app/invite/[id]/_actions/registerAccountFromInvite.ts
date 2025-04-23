@@ -37,17 +37,14 @@ export default async function registerAccountFromInvite({
   // register user
   let error = null;
   const account = {
-    id: account_id,
     first_name,
     last_name,
-    email: email.toLowerCase(),
-    password,
     account_id: email.toLowerCase(),
     account_secret: password,
-    account_organization_id: organization_id,
-    account_organization_name: organization_name,
-    categories: ['External User'],
-    is_new_user: false,
+    account_organization_id: account_id,
+    organization_name: organization_name,
+    organization_id,
+    is_invited: true,
   };
 
   const organization = {

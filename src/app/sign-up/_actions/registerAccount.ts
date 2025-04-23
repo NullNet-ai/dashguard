@@ -54,7 +54,7 @@ export default async function registerAccount({
       return error
     }
 
-    const { organization_account_id, organization_id, contact_id } =
+    const { account_organization_id, organization_id, contact_id } =
       registeredAccountDetails?.data?.[0] ?? {};
 
     /**
@@ -84,13 +84,11 @@ export default async function registerAccount({
      * Update account record
      */
     await api.form.updateDynamicRecord({
-      id: organization_account_id,
-      entity: 'organization_account',
+      id: account_organization_id,
+      entity: 'account_organization',
       data: {
         role_id: userRole.data?.[0]?.id,
         categories: ['Internal User'],
-        status: 'Active',
-        account_status: 'Active',
       },
     });
     const organizationContact = await api.form.createDynamicRecord({

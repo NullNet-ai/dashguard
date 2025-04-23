@@ -36,7 +36,7 @@ interface Account {
   organization: Organization;
   organization_id: string;
   account_id: string
-  organization_account_id: string;
+  account_organization_id: string;
 }
 
 interface Contact {

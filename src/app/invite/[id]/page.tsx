@@ -20,7 +20,9 @@ export default async function Invite({ searchParams }: any) {
   if (
     !record ||
     !record?.invitation?.id ||
-    !['Pending Setup', 'Invited'].includes(record?.account_status) ||
+    !['Pending Setup', 'Invited'].includes(
+      record?.account_organization_status,
+    ) ||
     record.invitation?.status === 'Archived' ||
     record?.status === 'Archived'
   ) {
@@ -48,7 +50,7 @@ export default async function Invite({ searchParams }: any) {
     return redirect('/expired-link', RedirectType.push);
   }
 
-  if (record?.categories?.includes('Internal User')) {
+  if (record?.account_id) {
     return redirect(
       `/login/${record.id}?token=${searchParams.token}&invitation_id=${record.invitation?.id}`,
       RedirectType.push,
@@ -78,15 +80,10 @@ export default async function Invite({ searchParams }: any) {
           <div className="mt-11">
             <div>
               <SignUpForm
-                recordData={
-                  record?.categories?.includes('External User') ? record : {}
-                }
-                account_id={
-                  record?.categories?.includes('External User')
-                    ? record?.id
-                    : ''
-                }
+                recordData={record}
+                account_id={record?.id}
                 invitation_id={record?.invitation?.id}
+                is_invited={true}
               />
             </div>
             <SignInLabel />

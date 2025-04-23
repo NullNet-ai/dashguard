@@ -107,19 +107,20 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       try {
         const account = ctx.session.account;
-        const accountId = account?.organization_account_id;
+        const accountId = account?.account_organization_id;
 
         const response = await ctx.dnaClient
           .findOne(accountId, {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             token: ctx.token.value,
             query: {
               pluck: [
                 'id',
                 'is_new_user',
                 'contact_id',
-                'account_status',
+                'account_organization_status',
                 'status',
+                'account_id'
               ],
             },
           })
@@ -198,7 +199,7 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const response = await ctx.dnaClient
         .update(input.id, {
-          entity: 'organization_accounts',
+          entity: 'account',
           token: ctx.token.value,
           mutation: {
             params: {
@@ -226,24 +227,25 @@ export const authRouter = createTRPCRouter({
     const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accountDetails = await ctx.dnaClient
       .findAll({
-        entity: 'organization_accounts',
+        entity: 'account_organizations',
         token: rootAccountToken,
         as_root: asRoot,
         query: {
           advance_filters: [
             {
               type: 'criteria',
-              field: 'account_id',
+              field: 'email',
               operator: EOperator.EQUAL,
               values: [response?.account_id],
             },
           ],
           pluck_object: {
-            organization_accounts: [
+            account_organizations: [
               'id',
               'organization_id',
               'account_id',
               'contact_id',
+              'email',
               'status',
             ],
             organizations: ['id', 'name'],
@@ -263,7 +265,7 @@ export const authRouter = createTRPCRouter({
             field: 'contact_organization_id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'organization_id',
           },
         },
@@ -276,7 +278,7 @@ export const authRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'organization_id',
           },
         },
@@ -295,7 +297,7 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const response = await ctx.dnaClient
         .findOne(input.id, {
-          entity: 'organization_account',
+          entity: 'account',
           token: ctx.token.value,
           query: {
             pluck: input.pluck_fields,

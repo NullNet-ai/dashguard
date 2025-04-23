@@ -52,7 +52,7 @@ const Wrapper = async ({
   })
 
   return (
-    <RecordMenuOptionsProvider menu_options={statusOptions} entity_field='account_status' formKey='account_details'>
+    <RecordMenuOptionsProvider menu_options={statusOptions} entity_field='account_organization_status' formKey='account_details'>
       <RecordProvider
         config={{
           entityCode: entity_code,

@@ -27,9 +27,9 @@ interface AccountCustomRowActionProps {
     original: {
       id: string;
       code: string;
-      account_status: string;
+      account_organization_status: string;
       categories: string[]; // Added category for logic (External/Internal User)
-      account_id: string;
+      email: string;
     };
   };
   viewMode?: 'table' | 'card';
@@ -87,13 +87,13 @@ export function AccountCustomRowAction({
 
   const {
     code,
-    account_status,
+    account_organization_status: account_status,
     categories = [],
     id,
-    account_id,
+    email,
   } = row?.original ?? {};
 
-  const socketClient = useSocket()
+  const socketClient = useSocket();
 
   const updateRecordStatus = api.record.updateRecordStatus.useMutation();
   const resendInvite = api.account.createInvitationRecord.useMutation();
@@ -121,14 +121,17 @@ export function AccountCustomRowAction({
 
   const handleResendInvite = async () => {
     try {
-     const response =  await resendInvite.mutateAsync({
+      const response = await resendInvite.mutateAsync({
         account_code: code,
         manual_trigger: true,
       });
       socketClient.publish({
-        type: 'ACCOUNT_INVITE',
-        payload: response
-      })
+        type:
+          categories[0] === 'Internal User'
+            ? 'ACCOUNT_INVITE_INTERNAL'
+            : 'ACCOUNT_INVITE_EXTERNAL',
+        payload: response,
+      });
       pathName && router.push(pathName);
     } catch {
       toast.error('Failed to resend invitation');
@@ -180,7 +183,7 @@ export function AccountCustomRowAction({
 
   const isDisable =
     config?.additionalData?.accountEmail?.toLowerCase() ===
-    account_id?.toLowerCase();
+    email?.toLowerCase();
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -197,7 +200,12 @@ export function AccountCustomRowAction({
               <Icon className={`h-3 w-3 ${color}`} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent  align='center' side='left' sideOffset={15} className="z-[9999]">
+          <TooltipContent
+            align="center"
+            side="left"
+            sideOffset={15}
+            className="z-[9999]"
+          >
             <p>{tooltip}</p>
           </TooltipContent>
         </Tooltip>
@@ -214,7 +222,12 @@ export function AccountCustomRowAction({
               <Send className="h-3 w-3 text-yellow-500" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent  align='center' side='left' sideOffset={15} className="z-[9999]">
+          <TooltipContent
+            align="center"
+            side="left"
+            sideOffset={15}
+            className="z-[9999]"
+          >
             <p>Re-send Invite</p>
           </TooltipContent>
         </Tooltip>

@@ -227,18 +227,18 @@ export const contactRouter = createTRPCRouter({
               entity: 'contacts',
               aliased_entity: 'updated_by',
             },
-            {
-              fields: ['created_date', 'created_time'],
-              field_name: 'created_date_time',
-              separator: ' ',
-              entity: 'contacts',
-            },
-            {
-              fields: ['updated_date', 'updated_time'],
-              field_name: 'updated_date_time',
-              separator: ' ',
-              entity: 'contacts',
-            },
+            // {
+            //   fields: ['created_date', 'created_time'],
+            //   field_name: 'created_date_time',
+            //   separator: ' ',
+            //   entity: 'contacts',
+            // },
+            // {
+            //   fields: ['updated_date', 'updated_time'],
+            //   field_name: 'updated_date_time',
+            //   separator: ' ',
+            //   entity: 'contacts',
+            // },
           ],
         },
       })
