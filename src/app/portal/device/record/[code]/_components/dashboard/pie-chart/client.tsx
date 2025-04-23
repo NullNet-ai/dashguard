@@ -13,7 +13,7 @@ import { type IFormProps } from '../types'
 import { formatBytes } from './function/formatBytes'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 
-const channel_name = 'packets_pie_chart'
+const channel_name = 'connections_pie_chart'
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const initialTraffic = 0
@@ -98,8 +98,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    // const interval = setInterval(fetchChartData, 1000)
-    // return () => clearInterval(interval)
+    const interval = setInterval(fetchChartData, 1000)
+    return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Update previousTrafficRef whenever trafficData.traffic changes
