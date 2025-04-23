@@ -126,12 +126,12 @@ const InteractiveGraph = ({
   useEffect(() => {
     fetchBandWidth()
 
-    const interval = setInterval(() => {
-      fetchBandWidth()
-    }, 1000)
-    return () => {
-      clearInterval(interval)
-    }
+    // const interval = setInterval(() => {
+    //   fetchBandWidth()
+    // }, 1000)
+    // return () => {
+    //   clearInterval(interval)
+    // }
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   useEffect(() => {
