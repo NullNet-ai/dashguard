@@ -122,8 +122,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       timezone,
       device_id: defaultValues?.id,
     }, { enabled:false })
-
-  const filteredData = packetsIP?.map((item) => {
+    const filteredData = packetsIP?.map((item) => {
     const date = moment(item.bucket)
     if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
       return {
@@ -133,19 +132,25 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     }
     return {...item, bucket: date.format('MM/DD')}
   })
-
+  
   useEffect(() => {
     refetch()
     setLoading(false)
+
+    const interval = setInterval(() => {
+      refetch()
+    }, 1000)
+    return () => {
+      clearInterval(interval)
+    }
   }
   , [resolution, time_unit, time_count, graphType])
-
 
 
   return (
     <>
     <Filter params={params} type='traffic_graph_filter'  />
-    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
+    <Search  params={{...params, router: 'packet', resolver: 'filterConnections' }} filter_type='traffic_graph_search' />
     {  loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."
