@@ -38,6 +38,7 @@ type TDisplayType = 'form' | 'selected';
 	 | 'code-editor'
 	 | 'button'
 	 | 'avatar'
+	 | 'badge'
 	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';

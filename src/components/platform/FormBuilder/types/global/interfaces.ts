@@ -45,6 +45,7 @@ import { EntityVariableOption } from '~/components/ui/rich-text-editor/component
 import { type ComboSelectProps } from '~/components/ui/combo-select';
 import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
 import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
+import { BadgeProps } from '~/components/ui/badge';
 
 interface OptionType {
   label: string;
@@ -278,6 +279,7 @@ interface IField {
     fallback?:   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
     fallbackText?: string
   }
+  badgeConfig?: BadgeProps
 }
 
 interface ISelectOptions {
