@@ -51,6 +51,7 @@ import FormGroupTab from '../../../FormType/FormGroupTab'
 import FormCustom from '../../../FormType/FormCustom'
 import FormComboBox from '../../../FormType/FormCombobox'
 import FormCodeEditor from '../../../FormType/FormCodeEditor'
+import FormImageViewer from '../../../FormType/FormImageViewer'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -333,6 +334,8 @@ export default function RenderFormType(
       )
     case 'alert':
       return <FormAlertComponent fieldConfig={fieldConfig} />
+    case 'image-viewer':
+      return <FormImageViewer fieldConfig={fieldConfig} />
     case 'space':
       return <FormSpaceComponent />
     case 'separator':

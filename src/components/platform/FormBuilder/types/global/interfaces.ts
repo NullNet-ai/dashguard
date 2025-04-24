@@ -2,6 +2,8 @@ import { type ColumnDef } from '@tanstack/react-table';
 import type React from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import {
+  DetailedHTMLProps,
+  ImgHTMLAttributes,
   type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
@@ -261,6 +263,7 @@ interface IField {
 		minHeight: string;
 		maxHeight?: string;
 	};
+  imageConfig?: DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
 }
 
 interface ISelectOptions {
