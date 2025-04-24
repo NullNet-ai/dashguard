@@ -36,6 +36,7 @@ type TDisplayType = 'form' | 'selected';
    | 'group-tab'
    | 'currency-input'
 	 | 'code-editor'
+	 | 'button'
 	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';

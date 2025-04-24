@@ -42,6 +42,7 @@ import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 import { type ComboSelectProps } from '~/components/ui/combo-select';
+import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
 
 interface OptionType {
   label: string;
@@ -264,6 +265,7 @@ interface IField {
 		maxHeight?: string;
 	};
   imageConfig?: DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
+  buttonConfig?: ButtonProps & IconProps & TooltipProps & React.RefAttributes<HTMLButtonElement>
 }
 
 interface ISelectOptions {
