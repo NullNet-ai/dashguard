@@ -1,9 +1,8 @@
 'use client'
 import moment from 'moment'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import '@xyflow/react/dist/style.css'
-
 import InfiniteScroll from 'react-infinite-scroll-component'
 
 import { Loader } from '~/components/ui/loader'
@@ -66,7 +65,6 @@ export default function NetworkFlowView() {
   )
 
   return (
-
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
       {/* <InfiniteScroll
         dataLength={ (flowData || []).length }
@@ -77,82 +75,89 @@ export default function NetworkFlowView() {
         scrollableTarget="scrollableDiv"
         scrollThreshold={ 0.5 }
       > */}
-        {flowData?.map((el, index) => {
-          const { flag, name } = el
-          return (
-            <div className='flex-row flex items-center' key={index}>
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger>
-                    <div className='min-w-[200px] flex'>
-                      <div className='flex gap-1 bg-blue-100 border border-primary text-sm mr-4 font-semibold p-2 rounded-md self-start mb-2 items-center'>
-                        {flag && (
-                          <img
-                            alt="Country Flag" // Provide an alt text for accessibility
-                            src={ flag } // Use the flag URL as the image source
-                            style={ { width: '35px', height: '15px' } } // Optional: Style the image
-                          />
-                        )}
+      {flowData?.map((el, index) => {
+        console.log("%c Line:79 🍖 el", "color:#4fff4B", el);
+//         "2025-04-24 11:00:00+00" - "2025-04-24 23:42:27+00"
+        const { flag, name } = el
+        return (
+          <div className='flex-row flex items-center' key={index}>
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <div className='min-w-[200px] flex'>
+                    <div
+                      className={`
+                        flex gap-1 text-xs mr-4 font-semibold p-1 rounded-md self-start mb-2 items-center h-5
+                        ${el.active ? 'bg-red-200 border border-red-500 text-red-800' : 'bg-blue-100 border border-primary text-primary'}
+                      `}
+                      style={{ fontSize: '0.75rem', minWidth: '150px' }}
+                    >
+                      {flag && (
+                        <img
+                          alt="Country Flag"
+                          src={flag}
+                          style={{ width: '35px', height: '15px' }}
+                        />
+                      )}
+                      {' '}
+                      {el?.source_ip}
+                    </div>
+                    <TooltipContent side="top">
+                      <div className="text-lg">
+                        <span className='font-bold text-justify'>{'Country: '}</span>
                         {' '}
+                        {name}
+                      </div>
+                      <div className="text-lg">
+                        <span className='font-bold text-justify'>{'Source IP: '}</span>
                         {el?.source_ip}
                       </div>
-                      <TooltipContent side="top">
-                        <div className="text-lg">
-                          <span className='font-bold text-justify'>{'Country: '}</span>
-                          {' '}
-                          {name}
-                        </div>
-                        <div className="text-lg">
-                          <span className='font-bold text-justify'>{'Source IP: '}</span>
-                          { el?.source_ip}
-                        </div>
-                      </TooltipContent>
-                    </div>
-                  </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
-              <div className='flex flex-row items-center gap-1'>
-                {el?.result?.map((res: Record<string, any>) => {
-                  const formattedTime = res.bucket
-                    ? moment(res.bucket).tz('UTC')
-                        .format('HH:mm:ss')
-                    : 'Invalid Time'
-                  return (
-                    <TooltipProvider>
-                      <Tooltip delayDuration={ 0 }>
-                        <TooltipTrigger>
-                          <div
-                            className='rounded-md h-[20px] flex-shrink-0'
-                            style={ {
-                              width: `${getPercentage(parseInt(res.bandwidth, 10), 1000000)}px`,
-                              maxWidth: `${maxWidth}px`,
-                              backgroundColor: getColorForValue(Number(res.bandwidth)),
-                            }}
-                          />
-                          <TooltipContent side="top">
-                            <div className="text-lg">
-                              <span className='font-bold text-justify'>{'Time: '}</span>
-                              {' '}
-                              {formattedTime}
-                            </div>
-                            <div className="text-lg">
-                              <span className='font-bold text-justify'>{'Total Bandwidth: '}</span>
-                              {' '}
-                              {res.bandwidth}
-                            </div>
-                          </TooltipContent>
-                        </TooltipTrigger>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )
-                })}
-              </div>
+                    </TooltipContent>
+                  </div>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+            <div className='flex flex-row items-center'>
+              {el?.result?.map((res: Record<string, any>) => {
+                const formattedTime = res.bucket
+                  ? moment(res.bucket).tz('UTC')
+                      .format('HH:mm:ss')
+                  : 'Invalid Time'
+                return (
+                  <TooltipProvider key={res.bucket + res.bandwidth}>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger>
+                        <div
+                          className='rounded-md h-[20px] flex-shrink-0'
+                          style={{
+                            width: `10px`,
+                            maxWidth: `5px`,
+                            height: `15px`,
+                            backgroundColor: getColorForValue(Number(res.bandwidth)),
+                          }}
+                        />
+                        <TooltipContent side="top">
+                          <div className="text-lg">
+                            <span className='font-bold text-justify'>{'Time: '}</span>
+                            {' '}
+                            {formattedTime}
+                          </div>
+                          <div className="text-lg">
+                            <span className='font-bold text-justify'>{'Total Bandwidth: '}</span>
+                            {' '}
+                            {res.bandwidth}
+                          </div>
+                        </TooltipContent>
+                      </TooltipTrigger>
+                    </Tooltip>
+                  </TooltipProvider>
+                )
+              })}
             </div>
-          )
-        })}
-
+          </div>
+        )
+      })}
       {/* </InfiniteScroll> */}
-
     </div>
   )
 }
