@@ -39,6 +39,7 @@ type TDisplayType = 'form' | 'selected';
 	 | 'button'
 	 | 'avatar'
 	 | 'badge'
+	 | 'adaptive-badge'
 	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';

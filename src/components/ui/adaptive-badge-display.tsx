@@ -20,7 +20,7 @@ export interface BadgeItem {
 }
 
 export interface AdaptiveBadgeDisplayProps {
-  badges: BadgeItem[];
+  badges?: BadgeItem[];
   displayMode?: "expand" | "dropdown";
   containerClassName?: string;
   badgeClassName?: string;
@@ -51,7 +51,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
 >(
   (
     {
-      badges,
+      badges = [],
       displayMode = "expand",
       containerClassName,
       badgeClassName,
@@ -206,7 +206,7 @@ export const AdaptiveBadgeDisplay = React.forwardRef<
       }, 50);
       
       return () => clearTimeout(timeoutId);
-    }, [badges, useOverflowDetection]);
+    }, [ useOverflowDetection]);
 
     // Handle keyboard navigation and accessibility
     const handleKeyDown = (e: React.KeyboardEvent) => {

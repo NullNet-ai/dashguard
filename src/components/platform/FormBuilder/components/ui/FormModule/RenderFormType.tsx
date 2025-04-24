@@ -55,6 +55,7 @@ import FormImageViewer from '../../../FormType/FormImageViewer'
 import FormButton from '../../../FormType/FormButton'
 import FormAvatar from '../../../FormType/FormAvatar'
 import FormBadge from '../../../FormType/FormBadge'
+import FormAdaptiveBadge from '../../../FormType/FormAdaptiveBadge'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -343,6 +344,8 @@ export default function RenderFormType(
       return <FormButton fieldConfig={fieldConfig} />
     case 'badge':
       return <FormBadge fieldConfig={fieldConfig} />
+    case 'adaptive-badge':
+      return <FormAdaptiveBadge fieldConfig={fieldConfig} />
     case 'avatar':
       return <FormAvatar fieldConfig={fieldConfig} />
     case 'space':

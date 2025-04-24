@@ -46,6 +46,7 @@ import { type ComboSelectProps } from '~/components/ui/combo-select';
 import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
 import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
 import { BadgeProps } from '~/components/ui/badge';
+import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
 
 interface OptionType {
   label: string;
@@ -280,6 +281,7 @@ interface IField {
     fallbackText?: string
   }
   badgeConfig?: BadgeProps
+  adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps & React.RefAttributes<HTMLDivElement>
 }
 
 interface ISelectOptions {
