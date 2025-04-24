@@ -32,7 +32,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [bandwidth, setBandwidth] = useState<any>([])
+  const [new_bandwidth, setNewBandwidth] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
@@ -62,26 +62,38 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
   // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
 
+  const time_range = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true })
+
   const fetchBandwidth = async (add_data_count: number) => {
+  // const fetchBandwidth = async () => {
     const _bandwidth: any = await getBandwidthActions.mutateAsync({
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
+      // source_ips: unique_source_ips
       source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
     },)
 
     if (!_bandwidth) return
 
+    console.log("%c Line:77 🥕 _bandwidth", "color:#fca650", _bandwidth);
     if (current_index == 0) {
-      setBandwidth(_bandwidth?.data || [])
+      setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
+        return {...item, time_unit, time_count, resolution, time_range}
+      }) || [])
       return
     }
 
-    setBandwidth((prev: any) => [
+    setNewBandwidth((prev: any) => [
       ...(prev || []),
-      ...(_bandwidth?.data || []),
+      ...(_bandwidth?.data?.map((item: Record<string, any>) => {
+        return {...item, time_unit, time_count, resolution, time_range}
+      }) || []),
     ])
   }
+  console.log("%c Line:83 🍪 new_bandwidth", "color:#ea7e5c", new_bandwidth);
+
+
 
   useEffect(() => {
     const _getAccount = async () => {
@@ -102,20 +114,22 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
     socket.on(eventKey, (data: any) => {
       
-      const updated_bandwidth = updateBandwidth(bandwidth, data);
-      setBandwidth([...updated_bandwidth])
+      console.log("%c Line:106 🍉 new_bandwidth", "color:#3f7cff", new_bandwidth);
+      const updated_bandwidth = updateBandwidth(new_bandwidth, data);
+      console.log("%c Line:106 🌮 updated_bandwidth", "color:#93c0a4", updated_bandwidth);
+      // setNewBandwidth([...updated_bandwidth])
     });
   
     // return () => {
     //   socket.off(eventKey, handleSocketData); // Cleanup
     // };
-  }, [socket, org_acc_id]);
+  }, [socket, org_acc_id, new_bandwidth]);
   
   
 
   // const fetchMoreData = async () => {
   //   if (!unique_source_ips || unique_source_ips.length === 0) {
-  //     console.warn('No source IPs available for fetching bandwidth')
+  //     console.warn('No source IPs available for fetching new_bandwidth')
   //     return
   //   }
 
@@ -152,10 +166,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const {
         data: time_unit_resolution,
       } = await refetchTimeUnitandResolution()
-
+      
+  console.log("%c Line:162 🍐 time_unit_resolution", "color:#b03734", time_unit_resolution);
       const { time, resolution = '1h' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
-
+      console.log("%c Line:167 🍧 time", "color:#33a5ff", time);
+      
       setTime({
         time_count,
         time_unit: time_unit as 'hour',
@@ -164,6 +180,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
+
+  console.log("%c Line:170 🍋 time_unit", "color:#fca650", {time,time_unit, resolution});
 
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return
@@ -185,7 +203,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
-    const bandwidthIps = bandwidth?.map((entry: {
+    const bandwidthIps = new_bandwidth?.map((entry: {
       source_ip: string
     }) => entry.source_ip) || []
 
@@ -196,14 +214,14 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (areIpsSame) return
 
     setCurrentIndex(current_index + 20)
-    setBandwidth([])
+    setNewBandwidth([])
     fetchBandwidth(20)
   }, [unique_source_ips])
 
-const chartData = useMemo(() => bandwidth,[bandwidth])
+const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
 
   const state = {
-    flowData: bandwidth,
+    flowData: new_bandwidth,
     loading,
     unique_source_ips,
     // fetchMoreData,
