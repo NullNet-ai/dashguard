@@ -68,7 +68,7 @@ export default function NetworkFlowView() {
   return (
 
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
-      <InfiniteScroll
+      {/* <InfiniteScroll
         dataLength={ (flowData || []).length }
         endMessage={ <p style={ { textAlign: 'center' } }><b>{"Yay! You have seen it all"}</b></p> }
         hasMore={ true }
@@ -76,7 +76,7 @@ export default function NetworkFlowView() {
         next={ fetchMoreData as any }
         scrollableTarget="scrollableDiv"
         scrollThreshold={ 0.5 }
-      >
+      > */}
         {flowData?.map((el, index) => {
           const { flag, name } = el
           return (
@@ -151,7 +151,7 @@ export default function NetworkFlowView() {
           )
         })}
 
-      </InfiniteScroll>
+      {/* </InfiniteScroll> */}
 
     </div>
   )
