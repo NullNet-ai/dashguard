@@ -1,5 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import type React from 'react';
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 // eslint-disable-next-line no-duplicate-imports
 import {
   DetailedHTMLProps,
@@ -43,6 +44,7 @@ import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 import { type ComboSelectProps } from '~/components/ui/combo-select';
 import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
+import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
 
 interface OptionType {
   label: string;
@@ -266,6 +268,16 @@ interface IField {
 	};
   imageConfig?: DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
   buttonConfig?: ButtonProps & IconProps & TooltipProps & React.RefAttributes<HTMLButtonElement>
+  avatarConfig?: {
+    avatar: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+      statusProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarStatus>, "containerRef">;
+      badgeProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarBadge>, "containerRef">;
+      size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+    },
+    image?: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+    fallback?:   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+    fallbackText?: string
+  }
 }
 
 interface ISelectOptions {

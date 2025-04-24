@@ -37,6 +37,7 @@ type TDisplayType = 'form' | 'selected';
    | 'currency-input'
 	 | 'code-editor'
 	 | 'button'
+	 | 'avatar'
 	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';

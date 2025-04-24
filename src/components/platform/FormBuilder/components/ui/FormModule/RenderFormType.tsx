@@ -53,6 +53,7 @@ import FormComboBox from '../../../FormType/FormCombobox'
 import FormCodeEditor from '../../../FormType/FormCodeEditor'
 import FormImageViewer from '../../../FormType/FormImageViewer'
 import FormButton from '../../../FormType/FormButton'
+import FormAvatar from '../../../FormType/FormAvatar'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -339,6 +340,8 @@ export default function RenderFormType(
       return <FormImageViewer fieldConfig={fieldConfig} />
     case 'button':
       return <FormButton fieldConfig={fieldConfig} />
+    case 'avatar':
+      return <FormAvatar fieldConfig={fieldConfig} />
     case 'space':
       return <FormSpaceComponent />
     case 'separator':
