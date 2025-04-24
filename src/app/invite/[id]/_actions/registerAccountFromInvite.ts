@@ -42,18 +42,16 @@ export default async function registerAccountFromInvite({
     account_id: email.toLowerCase(),
     account_secret: password,
     account_organization_id: account_id,
-    organization_name: organization_name,
-    organization_id,
     is_invited: true,
   };
 
   const organization = {
-    id: organization_id,
-    name: organization_name,
+    organization_id,
+    organization_name,
   };
 
   try {
-    const registrationDetails = await api.auth.updateOrganizationAccount({
+    const registrationDetails = await api.auth.registerAccount({
       account,
       organization,
     });

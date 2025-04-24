@@ -179,8 +179,8 @@ export const contactRouter = createTRPCRouter({
           pluck_group_object: {
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
+            // organization_contacts: ['id', 'contact_organization_id'],
+            // organizations: ['id', 'name', 'categories'],
           },
           pluck_object: {
             contact_emails: ['email', 'is_primary'],
@@ -191,8 +191,9 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name'],
+            account_organizations: ['contact_id', 'id'],
+            // organization_contacts: ['id', 'contact_organization_id'],
+            // organizations: ['id', 'name'],
           },
           track_total_records: true,
           advance_filters: input?.advance_filters as IAdvanceFilters[],
@@ -227,18 +228,18 @@ export const contactRouter = createTRPCRouter({
               entity: 'contacts',
               aliased_entity: 'updated_by',
             },
-            // {
-            //   fields: ['created_date', 'created_time'],
-            //   field_name: 'created_date_time',
-            //   separator: ' ',
-            //   entity: 'contacts',
-            // },
-            // {
-            //   fields: ['updated_date', 'updated_time'],
-            //   field_name: 'updated_date_time',
-            //   separator: ' ',
-            //   entity: 'contacts',
-            // },
+            {
+              fields: ['created_date', 'created_time'],
+              field_name: 'created_date_time',
+              separator: ' ',
+              entity: 'contacts',
+            },
+            {
+              fields: ['updated_date', 'updated_time'],
+              field_name: 'updated_date_time',
+              separator: ' ',
+              entity: 'contacts',
+            },
           ],
         },
       })
@@ -267,79 +268,95 @@ export const contactRouter = createTRPCRouter({
             field: 'id',
           },
         },
-      })
-      .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'created_by',
-          },
-          from: {
-            alias: 'created_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'updated_by',
-          },
-          from: {
-            alias: 'updated_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'organization_contacts',
-            field: 'contact_id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'organizations',
-            field: 'id',
-          },
-          from: {
-            entity: 'organization_contacts',
-            field: 'contact_organization_id',
-          },
-        },
       });
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'created_by_account_organizations',
+      //       entity: 'account_organizations',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'contacts',
+      //       field: 'created_by',
+      //     },
+      //   },
+      // })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'created_by',
+      //       entity: 'contacts',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'account_organizations',
+      //       field: 'contact_id',
+      //     },
+      //   },
+      // })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'updated_by_account_organizations',
+      //       entity: 'account_organizations',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'contacts',
+      //       field: 'updated_by',
+      //     },
+      //   },
+      // })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'updated_by',
+      //       entity: 'contacts',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'account_organizations',
+      //       field: 'contact_id',
+      //     },
+      //   },
+      // });
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       entity: 'organizations',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'organization_contacts',
+      //       field: 'contact_organization_id',
+      //     },
+      //   },
+      // });
     if (input.grouping?.length) {
       query.groupBy({
         query: {
           fields: input.grouping,
-          has_count: true
+          has_count: true,
         },
       });
     }
 
     const { total_count: totalCount = 1, data: items } = await query.execute();
+   
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
-    if(input.grouping?.length) {
+    if (input.grouping?.length) {
       return {
         totalCount,
         items: items,
         currentPage: 0,
         totalPages,
-      }
+      };
     }
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
@@ -398,7 +415,7 @@ export const contactRouter = createTRPCRouter({
           return names.filter((_, index) => {
             try {
               const category = JSON.parse(categories[index] || '[]');
-              return category.includes('Department');
+              return category?.includes('Department');
             } catch {
               return true;
             }
@@ -406,8 +423,8 @@ export const contactRouter = createTRPCRouter({
         };
         const organizationNames = organizations?.names
           ? filterDepartmentNames(
-              organizations.names,
-              organizations.categories ?? [],
+              organizations?.names,
+              organizations?.categories ?? [],
             )
           : [];
 
@@ -577,7 +594,7 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, emails, phones, code } = input
+      const { id, emails, phones, code } = input;
 
       const email_pluck = ['email', 'id', 'contact_id', 'is_primary'];
       const phone_pluck = [
@@ -592,8 +609,8 @@ export const contactRouter = createTRPCRouter({
 
       const phone_data = phones?.find((phone) => phone.is_primary);
 
-      let contact_id = id
-      let contact_code = code
+      let contact_id = id;
+      let contact_code = code;
 
       // Validate phone and email exists
       const fetchRecordData = async (
@@ -827,7 +844,7 @@ export const contactRouter = createTRPCRouter({
             pluck: pluck_fields,
             pluck_object: {
               contacts: pluck_fields,
-              organization_accounts: ['id', 'role_id', 'account_id'],
+              account_organizations: ['id', 'role_id', 'email'],
               user_roles: ['id', 'role'],
             },
             advance_filters: [
@@ -843,7 +860,7 @@ export const contactRouter = createTRPCRouter({
           type: 'left',
           field_relation: {
             to: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'contact_id',
             },
             from: {
@@ -860,7 +877,7 @@ export const contactRouter = createTRPCRouter({
               field: 'id',
             },
             from: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'role_id',
             },
           },
@@ -918,7 +935,7 @@ export const contactRouter = createTRPCRouter({
         address_id,
         account: {
           role: contact?.user_roles?.role,
-          account_id: contact?.organization_accounts?.account_id,
+          account_id: contact?.organization_accounts?.email,
         },
       };
     }),

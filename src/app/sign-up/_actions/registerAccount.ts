@@ -1,15 +1,15 @@
-'use server'
-import { redirect } from 'next/navigation'
+'use server';
+import { redirect } from 'next/navigation';
 
-import { verifySession } from '~/app/login/_actions/loginSubmit'
-import { api } from '~/trpc/server'
-import { handleLoginError } from '~/utils/login-validator'
+import { verifySession } from '~/app/login/_actions/loginSubmit';
+import { api } from '~/trpc/server';
+import { handleLoginError } from '~/utils/login-validator';
 interface RegisterAccountArgs {
-  first_name: string
-  last_name: string
-  email: string
-  password: string
-  organization_name?: string
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  organization_name?: string;
 }
 
 export default async function registerAccount({
@@ -19,25 +19,23 @@ export default async function registerAccount({
   password,
   organization_name,
 }: RegisterAccountArgs) {
-  let error = null
+  let error = null;
   try {
     /**
      * Registration data
      */
     const organization = {
-      name: organization_name || 'My Organization',
-    }
+      organization_name: organization_name || 'My Organization',
+    };
 
     const account = {
       first_name,
       last_name,
-      email: email.toLowerCase(),
-      password,
       account_id: email.toLowerCase(),
       account_secret: password,
       is_new_user: false,
       contact_categories: ['Contact', 'User'],
-      categories: ['Internal User'],
+      account_organization_categories: ['Internal User'],
     };
 
     /**
@@ -46,12 +44,12 @@ export default async function registerAccount({
     const registeredAccountDetails = await api.auth.registerAccount({
       account,
       organization,
-    })
+    });
 
-    const accountDataError = handleLoginError(registeredAccountDetails)
+    const accountDataError = handleLoginError(registeredAccountDetails);
     if (accountDataError) {
-      error = accountDataError
-      return error
+      error = accountDataError;
+      return error;
     }
 
     const { account_organization_id, organization_id, contact_id } =
@@ -63,22 +61,43 @@ export default async function registerAccount({
     await api.auth.login({
       username: email.toLowerCase(),
       password,
-    })
+    });
 
-    await verifySession()
+    await verifySession();
 
     /**
      * Create user Role
      */
-    const userRole = await api.form.createDynamicRecord({
-      entity: 'user_roles',
-      data: {
-        role: 'Administrator',
-        entity: 'Contact',
-        categories: ['User'],
-        status: 'Active',
-      },
-    })
+    // const userRole = await api.form.createDynamicRecord({
+    //   entity: 'user_roles',
+    //   data: {
+    //     role: 'Administrator',
+    //     entity: 'Contact',
+    //     categories: ['User'],
+    //     status: 'Active',
+    //   },
+    // })
+
+    const [userRole] = await Promise.all([
+      api.form.createDynamicRecord({
+        entity: 'user_roles',
+        data: {
+          role: 'Administrator',
+          entity: 'Contact',
+          categories: ['User'],
+          status: 'Active',
+        },
+      }),
+      api.form.createDynamicRecord({
+        entity: 'user_roles',
+        data: {
+          role: 'Device',
+          entity: 'Device',
+          categories: ['Device'],
+          status: 'Active',
+        },
+      }),
+    ]);
 
     /**
      * Update account record
@@ -117,8 +136,8 @@ export default async function registerAccount({
         error:
           (error as any)?.message ?? 'Something went wrong please try again',
         type: 'unknown',
-      }
+      };
     }
-    redirect('/portal/dashboard')
+    redirect('/portal/dashboard');
   }
 }

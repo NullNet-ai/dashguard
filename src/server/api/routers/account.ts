@@ -281,6 +281,7 @@ export const accountRouter = createTRPCRouter({
                 'status',
               ],
               user_roles: ['role'],
+              contacts: ['id', 'code']
             },
           },
         })
@@ -364,20 +365,20 @@ export const accountRouter = createTRPCRouter({
               ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
-              {
-                fields: ['first_name', 'last_name'],
-                field_name: 'full_name',
-                separator: ' ',
-                entity: 'contacts',
-                aliased_entity: 'created_by',
-              },
-              {
-                fields: ['first_name', 'last_name'],
-                field_name: 'full_name',
-                separator: ' ',
-                entity: 'contacts',
-                aliased_entity: 'updated_by',
-              },
+              // {
+              //   fields: ['first_name', 'last_name'],
+              //   field_name: 'full_name',
+              //   separator: ' ',
+              //   entity: 'contacts',
+              //   aliased_entity: 'created_by',
+              // },
+              // {
+              //   fields: ['first_name', 'last_name'],
+              //   field_name: 'full_name',
+              //   separator: ' ',
+              //   entity: 'contacts',
+              //   aliased_entity: 'updated_by',
+              // },
             ],
           },
         })
@@ -385,7 +386,6 @@ export const accountRouter = createTRPCRouter({
           type: 'left',
           field_relation: {
             to: {
-              alias: 'contact',
               entity: 'contact',
               field: 'id',
             },
@@ -395,34 +395,34 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              alias: 'created_by',
-              entity: 'contact',
-              field: 'id',
-            },
-            from: {
-              entity: 'account_organizations',
-              field: 'created_by',
-            },
-          },
-        })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              alias: 'updated_by',
-              entity: 'contact',
-              field: 'id',
-            },
-            from: {
-              entity: 'account_organizations',
-              field: 'updated_by',
-            },
-          },
-        });
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       alias: 'created_by',
+        //       entity: 'contact',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'account_organizations',
+        //       field: 'created_by',
+        //     },
+        //   },
+        // })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       alias: 'updated_by',
+        //       entity: 'contact',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: 'account_organizations',
+        //       field: 'updated_by',
+        //     },
+        //   },
+        // });
       // .join({
       //   type: 'left',
       //   field_relation: {
@@ -1340,7 +1340,7 @@ export const accountRouter = createTRPCRouter({
                 'created_time',
                 'updated_date',
                 'updated_time',
-                'create_by',
+                'created_by',
                 'updated_by',
               ],
               contacts: [
@@ -1355,7 +1355,7 @@ export const accountRouter = createTRPCRouter({
                 'created_time',
                 'updated_date',
                 'updated_time',
-                'create_by',
+                'created_by',
                 'updated_by',
               ],
               organizations: ['id', 'name'],

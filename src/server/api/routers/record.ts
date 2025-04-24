@@ -185,23 +185,24 @@ export const recordRouter = createTRPCRouter({
   getSessionInfo: privateProcedure.query(async ({ ctx }) => {
     const asRoot = true;
     const response = ctx.session.account;
+
     const rootAccount = await ctx.dnaClient
       .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
       .execute();
     const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accounts = await ctx.dnaClient
       .findAll({
-        entity: 'organization_accounts',
+        entity: 'account_organizations',
         token: rootAccountToken,
         as_root: asRoot,
         query: {
           advance_filters: createAdvancedFilter({
-            account_id: response?.account_id,
-            status: 'Active',
-            account_status: 'Active',
+            email: response?.account_id,
+            // status: 'Active',
+            // account_organization_status: 'Active',
           }),
           pluck_object: {
-            organization_accounts: [
+            account_organizations: [
               'id',
               'organization_id',
               'account_id',
@@ -211,7 +212,6 @@ export const recordRouter = createTRPCRouter({
             contacts: ['id', 'first_name', 'last_name'],
             organizations: ['name', 'id'],
             user_roles: ['role', 'id'],
-            external_contacts: ['id', 'first_name', 'last_name'],
           },
         },
       })
@@ -223,7 +223,7 @@ export const recordRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'contact_id',
           },
         },
@@ -236,7 +236,7 @@ export const recordRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'organization_id',
           },
         },
@@ -249,30 +249,21 @@ export const recordRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'role_id',
           },
         },
       })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'external_contacts',
-            field: 'id',
-          },
-          from: {
-            entity: 'organization_accounts',
-            field: 'external_contact_id',
-          },
-        },
-      })
       .execute();
+    const accountProfile = {
+      account_name: `${response?.profile?.first_name || ''} ${response?.profile?.last_name || ''}`,
+      username: response?.profile?.email,
+    }
 
     const accountOrganizations = accounts.data?.reduce(
       (orgs: any, account: any) => {
         const {
-          organization_accounts,
+          account_organizations,
           contacts,
           organizations,
           user_roles,
@@ -284,8 +275,7 @@ export const recordRouter = createTRPCRouter({
           return {
             ...orgs,
             current_organization: {
-              account_name: `${firstname || ''} ${lastname || ''}`,
-              username: organization_accounts?.account_id || '',
+              ...accountProfile,
               organization: organizations?.name || '',
               role: user_roles?.role,
               organization_id: organizations?.id,
@@ -299,7 +289,7 @@ export const recordRouter = createTRPCRouter({
             ...orgs.other_organizations,
             {
               account_name: `${firstname || ''} ${lastname || ''}`,
-              username: organization_accounts?.account_id || '',
+              username: account_organizations?.account_id || '',
               organization: organizations?.name || '',
               role: user_roles?.role,
               organization_id: organizations?.id,
@@ -405,15 +395,7 @@ export const recordRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().min(1),
-        entity: z.string().refine(
-          (value) => {
-            return Entities.includes(value);
-          },
-          {
-            message:
-              'Invalid entity name. It must be one of the DnaOrm models.',
-          },
-        ),
+        entity: z.string(),
         record_status: z.string().min(1),
         field_key: z.string().min(1),
       }),
