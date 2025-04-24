@@ -302,3 +302,11 @@ body {
   --epr-category-label-height: 30px;
   --epr-header-padding: 10px;
 }
+
+.dropdown-wrapper {
+	[data-radix-popper-content-wrapper] {
+		min-width: min-content !important;
+		padding-left: .5rem !important;
+		padding-right: .5rem !important;
+	}
+}
