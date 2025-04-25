@@ -437,6 +437,56 @@ export interface ISearchParams {
   sorting?: any[];
 }
 
+
+export interface IFormProperties {
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All actions inside the form will displayed in the form header
+   * Main variable if false all properties will not display
+   * @default true
+   */
+  hasActions?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All fields will be disabled
+   * @default true
+   */
+  isEditable?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * No create button will be shown
+   * @default false
+   */
+  selectOnly?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * If false Form filter can update record in grid
+   * @default true
+   */
+  allowUpdateRecord?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * copy will not show in form
+   * @default true
+   */ 
+  allowCopyPaste?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * @default true
+   */
+  allowRemoveSelection?: boolean;
+}
+
 interface IPropsForms {
   customDesign?: {
     formClassName?: string;
@@ -494,6 +544,7 @@ interface IPropsForms {
    * Else, the form filter will not override the current wizard record.
    */
   create_mode?: boolean;
+  properties?: IFormProperties;
 }
 
 interface IFieldFilterActions {

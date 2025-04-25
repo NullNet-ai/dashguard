@@ -8,6 +8,8 @@ import { testIDFormatter } from '~/utils/formatter';
 import { type IFormHeaderProps } from '../../../types/controls/interface';
 import { DebugButton, UnlockButton } from '../../ui';
 import ShowHideForm from '../../ui/Buttons/ShowHideForm';
+import { Fragment } from 'react';
+import { isUndefined } from 'lodash';
 
 const FormHeader = (props: IFormHeaderProps) => {
   const {
@@ -29,26 +31,27 @@ const FormHeader = (props: IFormHeaderProps) => {
     formKey,
     features,
     formProps,
+    properties,
   } = props;
-
+  const { isEditable = true, hasActions = true } = properties ?? {};
   const { enableUnlockFormFilter = true } = features ?? {};
 
   return (
     <CardHeader
       className={cn(
-        'flex flex-row items-center justify-between bg-slate-100', headerClassName,
+        'flex flex-row items-center justify-between bg-slate-100',
+        headerClassName,
       )}
     >
-      <CardDescription 
-        className='text-md font-semibold text-foreground' 
+      <CardDescription
+        className="text-md font-semibold text-foreground"
         data-test-id={testIDFormatter(
-          `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-name`
+          `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-name`,
         )}
       >
-        {formLabel}
-        {' '}
+        {formLabel}{' '}
       </CardDescription>
-      <div className='flex flex-row space-x-2'>
+      <div className="flex flex-row space-x-2">
         <DebugButton
           handleDebug={handleDebug}
           dataTestID={testIDFormatter(
@@ -56,65 +59,73 @@ const FormHeader = (props: IFormHeaderProps) => {
           )}
         />
 
-        {displayType === 'selected' && enableUnlockFormFilter && (
-          <Button
-            className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
-            type="button"
-            variant="ghost"
-            onClick={() => handleUpdateDisplayType('form')}
-            size="icon"
-            data-test-id={testIDFormatter(
-              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
-            )}
-          >
-            <LockIcon
-              className="h-4 w-4 cursor-pointer rounded-full border text-primary"
-            />
-          </Button>
-        )}
-
-        {form.formState.disabled
-        && !filterGridConfig
-        && (buttonConfig?.hideLockButton
-          ? null
-          : (
-              <UnlockButton
-                dataTestID={testIDFormatter(
-                  `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-unlock-btn`,
+        {properties?.hasActions ? (
+          <Fragment>
+            {displayType === 'selected' && enableUnlockFormFilter && (
+              <Button
+                className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
+                type="button"
+                variant="ghost"
+                onClick={() => handleUpdateDisplayType('form')}
+                size="icon"
+                data-test-id={testIDFormatter(
+                  `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
                 )}
-                handleLock={handleLock}
-              />
-            ))}
+              >
+                <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-primary" />
+              </Button>
+            )}
+          </Fragment>
+        ) : null}
+
+        {properties?.hasActions ? (
+          <Fragment>
+            {isEditable && (
+              <Fragment>
+                {form.formState.disabled &&
+                  !filterGridConfig &&
+                  (buttonConfig?.hideLockButton ? null : (
+                    <UnlockButton
+                      dataTestID={testIDFormatter(
+                        `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-unlock-btn`,
+                      )}
+                      handleLock={handleLock}
+                    />
+                  ))}
+              </Fragment>
+            )}
+          </Fragment>
+        ) : null}
         {buttonHeaderRender}
 
-        {displayType === 'selected'
-        && filterGridConfig?.actionType === 'multi-select' && (
-          <Button
-            data-test-id={testIDFormatter(
-              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-filter-grd-add-btn`,
-            )}
-            size='xs'
-            type='button'
-            onClick={() => {
-              handleNewRecordFormFilterGrid();
-            }}
-          >
-            <PlusIcon className='h-4 w-4' />
-            <span>Add</span>
-          </Button>
-        )}
+        {displayType === 'selected' &&
+          filterGridConfig?.actionType === 'multi-select' && (
+            <Button
+              data-test-id={testIDFormatter(
+                `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-filter-grd-add-btn`,
+              )}
+              size="xs"
+              type="button"
+              onClick={() => {
+                handleNewRecordFormFilterGrid();
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span>Add</span>
+            </Button>
+          )}
         {enableAppendForm && (
           <Button
             data-test-id={testIDFormatter(
               `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-append-btn`,
             )}
-            size='xs'
-            type='button'
+            size="xs"
+            type="button"
             onClick={() => {
               handleAppendForm();
             }}
           >
-            <PlusIcon className='h-4 w-4' />
+            <PlusIcon className="h-4 w-4" />
             <span>Add</span>
           </Button>
         )}
