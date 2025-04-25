@@ -43,12 +43,12 @@ export interface MessageThreadProps {
   /**
    * Array of comments to display
    */
-  comments: MessageThreadComment[];
+  comments?: MessageThreadComment[];
   
   /**
    * Callback when a new comment is submitted
    */
-  onCommentSubmit: (content: string) => void;
+  onCommentSubmit?: (content: string) => void;
   
   /**
    * Callback when attachment button is clicked
@@ -155,7 +155,7 @@ export interface MessageThreadProps {
 }
 
 export const MessageThread: React.FC<MessageThreadProps> = ({
-  comments,
+  comments = [],
   onCommentSubmit,
   onAttachmentClick,
   onEmojiClick,
@@ -187,7 +187,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   
   const handleSubmit = () => {
     if (comment.trim()) {
-      onCommentSubmit(comment);
+      onCommentSubmit?.(comment);
       setComment(""); // Clear the input after submission
     }
   };

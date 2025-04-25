@@ -47,6 +47,7 @@ import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/compone
 import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
 import { BadgeProps } from '~/components/ui/badge';
 import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
+import { MessageThreadProps } from '~/components/ui/message';
 
 interface OptionType {
   label: string;
@@ -282,6 +283,8 @@ interface IField {
   }
   badgeConfig?: BadgeProps
   adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps & React.RefAttributes<HTMLDivElement>
+  messageThreadConfig?: MessageThreadProps
+
 }
 
 interface ISelectOptions {

@@ -56,6 +56,7 @@ import FormButton from '../../../FormType/FormButton'
 import FormAvatar from '../../../FormType/FormAvatar'
 import FormBadge from '../../../FormType/FormBadge'
 import FormAdaptiveBadge from '../../../FormType/FormAdaptiveBadge'
+import FormMessageInputBox from '../../../FormType/FormMessageInputBox'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -341,6 +342,11 @@ export default function RenderFormType(
     case 'image-viewer':
       return <FormImageViewer fieldConfig={fieldConfig} />
     case 'button':
+      return <FormButton fieldConfig={fieldConfig} />
+    case 'message-input-box':
+      return (
+        <FormMessageInputBox fieldConfig={fieldConfig} />
+      )
       return <FormButton fieldConfig={fieldConfig} />
     case 'badge':
       return <FormBadge fieldConfig={fieldConfig} />
