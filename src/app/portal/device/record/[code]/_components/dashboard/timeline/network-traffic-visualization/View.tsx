@@ -9,6 +9,33 @@ import { Loader } from '~/components/ui/loader'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 
 import { useFetchNetworkFlow } from './Provider'
+import { cn } from '~/lib/utils'
+
+function generateTimeSeriesData(sampleData: any) {
+  const hourMap: any = {};
+  
+  for (let i = 0; i < 24; i++) {
+      const hour = i.toString().padStart(2, '0');
+      hourMap[hour] = 0;
+  }
+  
+  sampleData.forEach(item => {
+      // Extract hour from the bucket timestamp (format: "2025-04-24 23:00:00")
+      const hour = item.bucket.split(' ')[1].substring(0, 2);
+      hourMap[hour] = item?.bandwidth ? parseInt(item?.bandwidth) : 0
+  });
+  
+  const result = [];
+  for (let i = 0; i < 24; i++) {
+      const hour = i.toString().padStart(2, '0');
+      result.push({
+          time: `${hour}:00:00`,
+          bandwidth: hourMap[hour]
+      });
+  }
+  
+  return result;
+}
 
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0
@@ -33,19 +60,23 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
 const getColorForValue = (value: number) => {
   const maxBandwidth = 1000000
   if (value >= maxBandwidth) {
-    return 'red'
+    return '#00364b'
   }
-  else if (value > maxBandwidth / 2) {
-    return 'orange'
+  else if (value > maxBandwidth / 100) {
+    return '#1d576e'
   }
-  else if (value > maxBandwidth / 5) {
-    return 'blue'
+  else if (value > maxBandwidth / 200) {
+    return '#325e6f'
   }
-  else if (value > maxBandwidth / 10) {
-    return 'gray'
+  else if (value > maxBandwidth / 500) {
+    return '#556971'
+  }
+
+  else if (value === 0) {
+    return ''
   }
   else {
-    return '#16a34a'
+    return '#dadddf'
   }
 }
 
@@ -78,13 +109,18 @@ export default function NetworkFlowView() {
       {flowData?.map((el, index) => {
         console.log("%c Line:79 🍖 el", "color:#4fff4B", el);
 //         "2025-04-24 11:00:00+00" - "2025-04-24 23:42:27+00"
-        const { flag, name } = el
+        const { flag, name, result, source_ip } = el
+
+        const formattedTimeFrame = generateTimeSeriesData(result)
+
+        console.log("formattedTimeFrameformattedTimeFrame", {source_ip, formattedTimeFrame})
+
         return (
           <div className='flex-row flex items-center' key={index}>
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger>
-                  <div className='min-w-[200px] flex'>
+                  <div className='min-w-[250px] flex'>
                     <div
                       className={`
                         flex gap-1 text-xs mr-4 font-semibold p-1 rounded-md self-start mb-2 items-center h-5
@@ -118,7 +154,21 @@ export default function NetworkFlowView() {
               </Tooltip>
             </TooltipProvider>
             <div className='flex flex-row items-center'>
-              {el?.result?.map((res: Record<string, any>) => {
+
+              {formattedTimeFrame?.map((item, index) => {
+                return (
+                  <div className={cn(`size-4`)}
+                    style={{backgroundColor: getColorForValue(item.bandwidth)}}
+                  >
+                    
+                  </div>
+                )
+              })}
+
+              {/* {el?.result?.map((res: Record<string, any>) => {
+
+                console.log("res-data", res)
+
                 const formattedTime = res.bucket
                   ? moment(res.bucket).tz('UTC')
                       .format('HH:mm:ss')
@@ -152,7 +202,7 @@ export default function NetworkFlowView() {
                     </Tooltip>
                   </TooltipProvider>
                 )
-              })}
+              })} */}
             </div>
           </div>
         )
