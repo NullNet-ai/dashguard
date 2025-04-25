@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '~/trpc/server';
 import { headers } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 export async function UpdateReportPagination({
   pagination,
@@ -19,7 +20,7 @@ export async function UpdateReportPagination({
   const searchParams = headerList.get('x-full-search-query-params') || '';
   const urlSearchParams = new URLSearchParams(searchParams);
 
-  api.grid.updateReportPagination({
+  await api.grid.updateReportPagination({
     pagination,
     gridKey,
   });
@@ -27,5 +28,7 @@ export async function UpdateReportPagination({
     'pagination',
     `page=${pagination.current_page}&perPage=${pagination.limit_per_page}`,
   );
+
+  revalidatePath(`${pathName}?${urlSearchParams}`)
   redirect(`${pathName}?${urlSearchParams}`);
 }
