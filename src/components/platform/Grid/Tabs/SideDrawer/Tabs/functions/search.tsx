@@ -20,7 +20,6 @@ const pluck =  [
   "updated_by",
 ]
 export const searchRecords = async ({
-  entity,
   field,
   operator,
   value,
@@ -35,18 +34,18 @@ export const searchRecords = async ({
   fieldConfig : any
 }) => {
 
-  const { router = "contact", resolver = "main_grid", query_params } = searchConfig ?? {}
+  const { router = "contact", resolver = "main_grid", query_params, entity  } = searchConfig ?? {}
     const { items = [] } = await (api as any)?.[router as string]?.[resolver as string]?.({
     current: 0,
     limit: 100,
-    entity: "contact",
-    pluck,
+    entity,
+    pluck : query_params?.pluck || pluck,
     advance_filters: [{
         type: 'criteria',
         field : fieldConfig?.field || field,
         operator: fieldConfig?.operator || 'like',
         values: Array.isArray(value) ? value : [value],
-        entity: fieldConfig?.entity || 'contact'
+        entity: entity || 'contact'
       }]
   });
 

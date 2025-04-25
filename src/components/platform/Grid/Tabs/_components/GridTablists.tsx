@@ -295,8 +295,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           })}
         </Sortable>
         {!!copyTab?.length &&
-          !copyTab.some((item) => item.hidden) &&
-          isWindowLoaded && <CreateNewFilter />}
+          !copyTab.some((item) => item.hidden) && <CreateNewFilter />}
       </div>
       {copyTab?.some((tab: any) => tab.hidden) && isWindowLoaded && (
         <>

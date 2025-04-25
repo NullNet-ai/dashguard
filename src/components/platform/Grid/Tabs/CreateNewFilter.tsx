@@ -17,16 +17,20 @@ export default function CreateNewFilter() {
   const { state } = useGrid();
   const { config } = state ?? {};
 
-  const { gridColumns : _columns = [], searchConfig, entity: defaultEntity } = config ?? {};
-  
+  const {
+    gridColumns: _columns = [],
+    searchConfig,
+    entity: defaultEntity,
+  } = config ?? {};
+
   const gridColumns = _columns.map((column: any, index: number) => ({
     header: column.header,
     accessorKey: column.accessorKey,
     label: column.header,
     isShow: column.isShow || true,
     order: column.order || index,
-    search_config : column.search_config,
-    entity : column.entity || defaultEntity,
+    search_config: column.search_config,
+    entity: column.entity || defaultEntity,
     data_type: column.data_type,
   }));
 
@@ -42,7 +46,7 @@ export default function CreateNewFilter() {
               name: 'New Filter',
             }}
             columns={gridColumns as Record<string, any>[]}
-            searchConfig={searchConfig}
+            searchConfig={{ ...searchConfig, entity: defaultEntity }}
           >
             <GridManageFilter />
           </ManageFilterProvider>
@@ -60,9 +64,9 @@ export default function CreateNewFilter() {
             variant="ghost"
             size="icon"
             onClick={handleManageFilter}
-            className="text-primary h-full w-8 mr-2"
+            className="mr-2 h-full w-8 text-primary"
           >
-            <PlusCircle className="h-5 w-5 text-white fill-blue-700" />
+            <PlusCircle className="h-5 w-5 fill-blue-700 text-white" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
