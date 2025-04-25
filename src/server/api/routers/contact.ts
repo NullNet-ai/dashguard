@@ -311,7 +311,6 @@ export const contactRouter = createTRPCRouter({
     }
 
     const { total_count: totalCount = 1, data: items } = await query.execute();
-    console.log('🚀 ~ mainGrid:privateProcedure.input ~ items:', items);
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {

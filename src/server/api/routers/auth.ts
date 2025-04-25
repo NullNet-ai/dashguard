@@ -173,7 +173,7 @@ export const authRouter = createTRPCRouter({
 
         if (session) {
           ctx.storeCookies.set(
-            session.account.organization_account_id,
+            session.account.account_organization_id,
             newOrganization?.data?.[0]?.token,
           );
           return {
