@@ -24,7 +24,7 @@ export default async function LoginSubmit({
   invitation_id?: string;
 }) {
   const loginDetailsResponse = await api.auth.login({
-    username,
+    username: username.toLowerCase(),
     password,
   });
 

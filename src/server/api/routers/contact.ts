@@ -182,7 +182,10 @@ export const contactRouter = createTRPCRouter({
             // organization_contacts: ['id', 'contact_organization_id'],
             // organizations: ['id', 'name', 'categories'],
           },
+
           pluck_object: {
+            created_by: ['id', 'status'],
+            updated_by: ['id', 'status'],
             contact_emails: ['email', 'is_primary'],
             contact_phone_numbers: [
               'raw_phone_number',
@@ -268,76 +271,36 @@ export const contactRouter = createTRPCRouter({
             field: 'id',
           },
         },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            alias: 'created_by',
+            entity: 'account_organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'contacts',
+            field: 'created_by',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            alias: 'updated_by',
+            entity: 'account_organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'contacts',
+            field: 'updated_by',
+          },
+        },
       });
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'created_by_account_organizations',
-      //       entity: 'account_organizations',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'contacts',
-      //       field: 'created_by',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'created_by',
-      //       entity: 'contacts',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'contact_id',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'updated_by_account_organizations',
-      //       entity: 'account_organizations',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'contacts',
-      //       field: 'updated_by',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'updated_by',
-      //       entity: 'contacts',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'contact_id',
-      //     },
-      //   },
-      // });
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'organizations',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'organization_contacts',
-      //       field: 'contact_organization_id',
-      //     },
-      //   },
-      // });
+
     if (input.grouping?.length) {
       query.groupBy({
         query: {
@@ -348,7 +311,8 @@ export const contactRouter = createTRPCRouter({
     }
 
     const { total_count: totalCount = 1, data: items } = await query.execute();
-   
+    console.log('🚀 ~ mainGrid:privateProcedure.input ~ items:', items);
+
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
       return {
@@ -436,8 +400,8 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
-            created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
-            updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
+            created_by: created_by?.full_name ?? '',
+            updated_by: updated_by?.full_name ?? '',
             raw_phone_number: primary_phone_number,
             email: primary_email,
           },
@@ -717,7 +681,7 @@ export const contactRouter = createTRPCRouter({
             mutation: {
               params: {
                 status: 'Draft',
-                categories: ['Contact'],
+                categories: ['Contact', 'User'],
               },
               pluck: ['id', 'code'],
             },

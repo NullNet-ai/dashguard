@@ -17,8 +17,6 @@ const RecordSummaryContent = async () => {
     pluck_fields: [
       'id',
       'code',
-      'first_name',
-      'last_name',
       'status',
       'created_date',
       'created_time',

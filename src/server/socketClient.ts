@@ -26,6 +26,13 @@ class SocketClient {
   private initializeEventListeners() {
     this.socket.on('connect', this.onConnect.bind(this));
     this.socket.on('disconnect', this.onDisconnect.bind(this));
+    // this.socket.on('connect_error', (error) => {
+    //   console.error('Connection error:', error);
+    //   this.socket.connect();
+    // });
+    this.socket.on('reconnect_attempt', (attemptNumber) => {
+      console.info(`Reconnection attempt #${attemptNumber}`);
+    });
     this.socket.on('MESSAGE', this.onMessage.bind(this));
     this.socket.on('AUTHENTICATED', this.onAuthenticated.bind(this));
   }
@@ -52,7 +59,12 @@ class SocketClient {
 
   public onDisconnect() {
     console.info('Socket disconnected');
-    this.socket.connect();
+    setTimeout(() => {
+      if (!this.socket.connected) {
+        console.info('Attempting to reconnect...');
+        this.socket.connect();
+      }
+    }, 1000);
   }
 
   private onConnect() {

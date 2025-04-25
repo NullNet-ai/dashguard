@@ -36,6 +36,7 @@ export default async function registerAccount({
       is_new_user: false,
       contact_categories: ['Contact', 'User'],
       account_organization_categories: ['Internal User'],
+      account_type: 'contact',
     };
 
     /**
