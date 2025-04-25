@@ -35,7 +35,13 @@ type TDisplayType = 'form' | 'selected';
    | 'group-multi-field'
    | 'group-tab'
    | 'currency-input'
-	 | 'code-editor';
+	 | 'code-editor'
+	 | 'button'
+	 | 'avatar'
+	 | 'badge'
+	 | 'adaptive-badge'
+	 | 'message-input-box'
+	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';
 

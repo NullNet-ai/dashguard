@@ -49,7 +49,7 @@ const MainTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
       return true
     }
 
-    return activeItem.id === tab?.name || activeItem.name === tab?.name || tab.current
+    return activeItem?.id === tab?.name || activeItem?.name === tab?.name || tab?.current
   }, [entityName, application, activeItem, tab])
 
   const getActiveName = () => {

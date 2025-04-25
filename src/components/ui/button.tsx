@@ -55,14 +55,14 @@ const buttonVariants = cva(
   },
 );
 
-interface IconProps {
+export interface IconProps {
   Icon?: React.ElementType;
   iconPlacement?: "left" | "right";
   iconClassName?: React.HTMLAttributes<HTMLDivElement>["className"];
 }
 
 // Add tooltip interface
-interface TooltipProps {
+export interface TooltipProps {
   tooltipContent?: React.ReactNode;
   showTooltip?: boolean;
   tooltipDelay?: number;
