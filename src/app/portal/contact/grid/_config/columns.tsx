@@ -26,7 +26,6 @@ const gridColumns = [
     data_type: 'array',
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
-
       return categories?.map((category: string, index: number) => {
         return <StatusCell key={index} value={category} renderType="value" />;
       });

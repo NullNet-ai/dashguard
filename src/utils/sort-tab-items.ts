@@ -169,7 +169,7 @@ export const calculateVisibleItems = (items: any[], containerWidth: number, defa
 
   const entity_name = 
     defaultName === 'user_role' ? 'all role': 
-    defaultName === 'organization_account'? 'all accounts':
+    defaultName === 'account_organization'? 'all accounts':
     defaultName === 'communication_template'? 'all communication template':
     `all ${defaultName}`
 

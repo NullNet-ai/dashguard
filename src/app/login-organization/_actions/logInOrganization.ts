@@ -16,12 +16,12 @@ const loginOrganization = async (login_organization_id: string) => {
   }
 
   const accountDataResponse = await api.auth.getAccountData();
-  const { status, account_status, organization } = accountDataResponse ?? {};
+  const { status, account_organization_status, organization } = accountDataResponse ?? {};
 
   if (
     status !== 'Active' ||
-    (account_status &&
-      !['Active', 'Pending Setup', 'Invited'].includes(account_status ?? ''))
+    (account_organization_status &&
+      !['Active', 'Pending Setup', 'Invited'].includes(account_organization_status ?? ''))
   ) {
     const errorMessages = {
       Deactived:
@@ -36,7 +36,7 @@ const loginOrganization = async (login_organization_id: string) => {
       errorMessage:
         status === 'Archived'
           ? errorMessages.Archived
-          : (errorMessages[account_status as keyof typeof errorMessages] ??
+          : (errorMessages[account_organization_status as keyof typeof errorMessages] ??
             'Your account is no longer active. Contact your administrator for assistance.'),
     };
   }

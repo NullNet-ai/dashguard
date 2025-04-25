@@ -14,8 +14,9 @@ const Summary = ({ form_key }: { form_key: string }) => {
     error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: ['id', 'code', 'role', 'status'],
+    pluck_fields: ['id', 'code', 'status'],
   });
+
   const { emails: _email, phones: _phone } = record as unknown as Record<
     string,
     any

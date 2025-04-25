@@ -1,23 +1,22 @@
-"use client";
-import { api } from "~/trpc/react";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { usePathname } from "next/navigation";
-import { Separator } from "~/components/ui/separator";
+'use client';
+import { api } from '~/trpc/react';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { usePathname } from 'next/navigation';
 
 const fields = {
-  account_id: "Email",
-  role: "Role",
+  email: 'Email',
+  role: 'Role',
 };
 
 interface IAccountDetails {
   id?: string;
-  organization: string;
+  email: string;
   role: string;
   account_id: string;
 }
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-  const [, , , , identifier] = pathName.split("/");
+  const [, , , , identifier] = pathName.split('/');
   const {
     data = [],
     refetch,
@@ -36,31 +35,23 @@ const Summary = ({ form_key }: { form_key: string }) => {
   }
 
   return (
-    <div>
-      {(data as IAccountDetails[])?.map(
-        (account: IAccountDetails, index: number) =>
-          account?.id && (
-            <div key={account.id} className="mt-2">
-              {Object.entries(fields).map(([key, value]) => (
-                <p key={key} className="mb-[8px] no-underline">
-                  <strong> {value}: </strong>
-                  &nbsp; {account?.[key as keyof IAccountDetails] || "None"}
-                </p>
-              ))}
-              {index !== data?.length - 1 && <Separator />}
-            </div>
-          ),
-      )}
+    <div className="mt-2">
+      {Object.entries(fields).map(([key, value]) => (
+        <p key={key} className="mb-[8px] no-underline">
+          <strong> {value}: </strong>
+          &nbsp; {data?.[key as keyof IAccountDetails] || 'None'}
+        </p>
+      ))}
     </div>
   );
 };
 const SummaryConfig = {
-  label: "Step 5",
+  label: 'Step 5',
   required: false,
   show_summary: true,
   components: [
     {
-      label: "Account Details",
+      label: 'Account Details',
       component: <Summary form_key="account_details" />,
     },
   ],

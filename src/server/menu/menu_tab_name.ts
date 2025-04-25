@@ -1,4 +1,4 @@
 export const menu_tab_name: Record<string, string> = {
-  organization_account: 'Accounts',
+  account_organization: 'Accounts',
   user_role: 'Roles',
 }

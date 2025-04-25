@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { checkUsernameExist } from '~/app/portal/organization_account/_components/forms/account_details/actions';
+import { checkUsernameExist } from '~/app/portal/account_organization/_components/forms/account_details/actions';
 import { isPhoneValid } from '~/components/platform/FormBuilder/Utils/phoneValidator';
 import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
 
@@ -118,29 +118,29 @@ export const account_secret = z
 export const AccountDetailSchema = z
   .object({
     id: z.string().optional(),
-    role: z.string().min(1, { message: 'Role is required.' }),
-    username: z
-      .string({ required_error: 'Please enter your email.' })
-      .email('Please enter a valid email.'),
-    password: account_secret,
+    role_id: z.string().min(1, { message: 'Role is required.' }),
+    email: z
+    .string()
+    .min(1, { message: 'Email is required.' })
+    .email('Please enter a valid email.'),
   })
   .superRefine(async (data, ctx) => {
     try {
       // Call the tRPC validation endpoint
       const response = await checkUsernameExist({
-        username: data.username as string,
+        username: data.email as string,
         id: data.id as string,
       });
       if (!response?.isValid) {
         ctx.addIssue({
-          path: ['username'],
-          message: response.message.username || 'Email already exists.',
+          path: ['email'],
+          message:  'Email already exists.',
           code: 'custom',
         });
       }
     } catch {
       ctx.addIssue({
-        path: ['username'],
+        path: ['email'],
         message: 'Error checking Email availability.',
         code: 'custom',
       });

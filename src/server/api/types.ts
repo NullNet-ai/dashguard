@@ -36,7 +36,8 @@ interface Account {
   organization: Organization;
   organization_id: string;
   account_id: string
-  organization_account_id: string;
+  account_organization_id: string;
+  profile: Record<string, any>; // Adjust type based on the expected structure of the profile info
 }
 
 interface Contact {

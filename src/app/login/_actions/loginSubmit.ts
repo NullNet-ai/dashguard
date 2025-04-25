@@ -24,7 +24,7 @@ export default async function LoginSubmit({
   invitation_id?: string;
 }) {
   const loginDetailsResponse = await api.auth.login({
-    username,
+    username: username.toLowerCase(),
     password,
   });
 
@@ -40,15 +40,15 @@ export default async function LoginSubmit({
   // get account data
   const accountDataResponse = await api.auth.getAccountData({ username });
 
-  const { id, is_new_user, status, account_status } = accountDataResponse ?? {};
+  const { is_new_user, status, account_organization_status, account_id } = accountDataResponse ?? {};
 
   if (
     (status !== 'Active' ||
-      (account_status &&
+      (account_organization_status &&
         !['Active', 'Pending Setup', 'Invited'].includes(
-          account_status ?? '',
+          account_organization_status ?? '',
         ))) &&
-    fetchedOrganizations?.data?.length < 2
+    fetchedOrganizations?.data?.length === 1
   ) {
     const errorMessages = {
       Deactivated:
@@ -63,7 +63,7 @@ export default async function LoginSubmit({
       errorMessage:
         status === 'Archived'
           ? errorMessages.Archived
-          : (errorMessages[account_status as keyof typeof errorMessages] ??
+          : (errorMessages[account_organization_status as keyof typeof errorMessages] ??
             'Your account is no longer active. Contact your administrator for assistance.'),
     };
   }
@@ -80,7 +80,7 @@ export default async function LoginSubmit({
   }
 
   if (is_new_user) {
-    return redirect(`/setup-password?filter_id=${id ?? ''}`);
+    return redirect(`/setup-password?filter_id=${account_id ?? ''}`);
   }
 
   if (fetchedOrganizations?.data?.length > 1) {

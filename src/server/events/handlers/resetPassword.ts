@@ -44,7 +44,7 @@ export const eventHandler = async (eventName: string, data: any) => {
     const parsedContent = replaceTemplateVariables(content, templateData)
     await sendEmail({
       from: 'no-reply@dnamicro.com',
-      to: templateData.organization_account.account_id,
+      to: templateData.account_organization.account_id,
       subject: parsedSubject,
       html: parsedContent,
     })

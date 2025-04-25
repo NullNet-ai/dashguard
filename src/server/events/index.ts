@@ -1,10 +1,12 @@
 import type { EEventType, EventResult, IEventConfig } from './types'
-import ACCOUNT_INVITE from './account/ACCOUNT_INVITE'
 import RESET_PASSWORD from './account/RESET_PASSWORD'
+import ACCOUNT_INVITE_INTERNAL from './account/ACCOUNT_INVITE_INTERNAL';
+import ACCOUNT_INVITE_EXTERNAL from './account/ACCOUNT_INVITE_EXTERNAL';
 
 // Event Configurations
 export const events: IEventConfig[] = [
-  ACCOUNT_INVITE,
+  ACCOUNT_INVITE_INTERNAL,
+  ACCOUNT_INVITE_EXTERNAL,
   RESET_PASSWORD
 ]
 

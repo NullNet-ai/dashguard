@@ -33,7 +33,7 @@ const getSessionTabs = async () => {
     case 'user_role':
       entity = 'role'
       break
-    case 'organization_account':
+    case 'account_organization':
       entity = 'account'
       break
     default:

@@ -4,7 +4,7 @@ import GRIDTABS from '~/server/default-grid-tab';
 
 export const tabName: Record<string, string> = {
   user_role: 'role',
-  organization_account: 'Accounts',
+  account_organization: 'Accounts',
 };
 
 export const SetTab = ({ name, entity }: { name: string; entity: string }) => {

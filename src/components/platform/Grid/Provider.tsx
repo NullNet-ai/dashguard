@@ -249,6 +249,7 @@ export default function GridProvider({
         data,
         field,
         entity,
+        accessorKey: columnConfig?.accessorKey,
       });
     }
     return isMobileOrTablet && config.isInfinite ? infiniteData : data;

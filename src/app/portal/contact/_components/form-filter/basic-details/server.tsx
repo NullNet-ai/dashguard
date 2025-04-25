@@ -4,7 +4,7 @@ import BasicDetails from "./client";
 const FormServerFetch = async () => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
-  const pluck_fields = ["id", "code", "role", "status"];
+  const pluck_fields = ["id", "code", "status"];
   const [, , main_entity, application, identifier] = pathname.split("/");
 
   const record_data = await api.contact.fetchContactPhoneEmail({
@@ -20,8 +20,7 @@ const FormServerFetch = async () => {
     "first_name",
     "middle_name",
     "last_name",
-    "email_address",
-    "contact_status",
+    // "contact_status",
     "status",
     "created_date",
     "updated_date",

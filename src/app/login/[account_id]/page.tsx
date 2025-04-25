@@ -1,16 +1,8 @@
 import Image from 'next/image'
 
-import { api } from '~/trpc/server'
-
 import LoginForm from '../_components/loginForm'
 
-export default async function Login({ params, searchParams }: any) {
-  const response = await api.organizationAccount.getByIdPublicly({
-    id: params.account_id,
-    token: searchParams.token,
-    pluck_fields: ['account_id'],
-  })
-
+export default async function Login({ searchParams }: any) {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-10">
@@ -30,7 +22,7 @@ export default async function Login({ params, searchParams }: any) {
 
           <div className="mt-11">
             <div>
-              <LoginForm defaultValues={ { username: response?.data?.account_id ?? '' } } invitation_id={searchParams.invitation_id} />
+              <LoginForm defaultValues={ { username: searchParams.email ?? '' } } invitation_id={searchParams.invitation_id} />
             </div>
           </div>
         </div>

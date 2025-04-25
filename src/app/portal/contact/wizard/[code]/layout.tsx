@@ -8,6 +8,7 @@ import stepsNavigation from '../_config/stepsNavigation'
 import totalSteps from '../_config/totalSteps'
 import WizardSummaryComponent from '../_config/wizardSummaryConfig'
 import type { IWizardLayoutProps } from '../types'
+import wizardCallbacks from './_actions/wizardCallbacks'
 
 const WizardLayout = async ({ children }: IWizardLayoutProps) => {
   const headerList = headers()
@@ -40,6 +41,7 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
           enableAutoCreate: false,
           entityName: mainEntity,
           stepLabels,
+          callbackHandlers: wizardCallbacks,
         }}
         stepsNavigation={stepsNavigation}
         summary={wizard_summary}
