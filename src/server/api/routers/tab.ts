@@ -17,7 +17,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .cacheData(key, input, 90000000)
         .then(() => {
@@ -32,7 +32,7 @@ export const tabRouter = createTRPCRouter({
     }),
   getMainTabs: privateProcedure.query(async ({ ctx }) => {
     const tabs = ctx.redisClient
-    const key = `main-tabs:${ctx.session.account.contact?.id}`
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
     const response = await tabs
       .getCachedData(key)
       .then((res) => {
@@ -52,7 +52,7 @@ export const tabRouter = createTRPCRouter({
       })
     )
    .mutation(async ({ input, ctx }) => {
-      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await ctx.redisClient.getCachedData(key)
 
       const update_tabs = response?.map((tab: Record<string, any>) => {
@@ -76,7 +76,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .cacheData(key, input, 90000000)
         .then(() => {
@@ -98,7 +98,7 @@ export const tabRouter = createTRPCRouter({
   )
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
-    const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+    const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
     const response = await tabs
       .cacheData(key, input, 90000000)
       .then(() => {
@@ -119,7 +119,7 @@ export const tabRouter = createTRPCRouter({
   )
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
-    const key = `main-tabs:${ctx.session.account.contact?.id}`
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
 
     const response = await tabs
       .cacheData(key, input.tabs, 90000000)
@@ -141,7 +141,7 @@ export const tabRouter = createTRPCRouter({
   )
   .mutation(async ({ input, ctx }) => {
     const tabs = ctx.redisClient
-    const key = `main-tabs:${ctx.session.account.contact?.id}`
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
 
     const response = await tabs
       .cacheData(key, input.tabs, 90000000)
@@ -164,7 +164,7 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       const response = await ctx.redisClient.getCachedData(key)
 
       // If we're setting a tab to active, ensure only one tab is active
@@ -188,7 +188,7 @@ export const tabRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .getCachedData(key)
         .then((res) => {
@@ -209,7 +209,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = (await tabs
         .getCachedData(key)
         .then((res) => {
@@ -235,7 +235,7 @@ export const tabRouter = createTRPCRouter({
     }),
   closeAllClassTabs: privateProcedure.mutation(async ({ ctx }) => {
     const tabs = ctx.redisClient
-    const key = `main-tabs:${ctx.session.account.contact?.id}`
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
     const response = await tabs
       .getCachedData(key)
       .then((res) => {
@@ -257,7 +257,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .getCachedData(key)
         .then((res) => {
@@ -282,7 +282,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then((res) => {
@@ -312,7 +312,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then((res) => {
@@ -344,7 +344,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then((res) => {
@@ -375,7 +375,7 @@ export const tabRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const tabs = ctx.redisClient
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then(res => res || [])
@@ -401,7 +401,7 @@ export const tabRouter = createTRPCRouter({
       const pathName = headerList.get('x-pathname') || ''
       const [, portal, mainEntity] = pathName.split('/')
       const current_context = '/' + portal + '/' + mainEntity
-      const key = `sub-tabs:${current_context}:${ctx.session.account.contact?.id}`
+      const key = `sub-tabs:${current_context}:${ctx.session.account.account_organization_id}`
 
       const response = await ctx.redisClient.getCachedData(key)
       const isTabExist = response?.tabs?.find(
@@ -428,7 +428,7 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const key = `main-tabs:${ctx.session.account.contact?.id}`
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await ctx.redisClient.getCachedData(key)
       const update_tabs = response?.map((tab: Record<string, any>) => {
         if (tab.name === input.tab_name) {

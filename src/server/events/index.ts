@@ -2,6 +2,7 @@ import type { EEventType, EventResult, IEventConfig } from './types'
 import RESET_PASSWORD from './account/RESET_PASSWORD'
 import ACCOUNT_INVITE_INTERNAL from './account/ACCOUNT_INVITE_INTERNAL';
 import ACCOUNT_INVITE_EXTERNAL from './account/ACCOUNT_INVITE_EXTERNAL';
+import { redirect } from 'next/navigation';
 
 // Event Configurations
 export const events: IEventConfig[] = [
@@ -14,7 +15,7 @@ export const events: IEventConfig[] = [
 export const handleEvent = async (
   eventName: EEventType,
   args: unknown[],
-): Promise<EventResult> => {
+) => {
   const eventAction = events.find(event => event.type === eventName)?.handler
 
   if (!eventAction) {
@@ -25,10 +26,12 @@ export const handleEvent = async (
   }
 
   try {
-    await eventAction?.(eventName, args);
+    const response = await eventAction?.(eventName, args);
+
     return {
       success: true,
       message: `Successfully handled event: ${eventName}`,
+      ...response ?? {}
     };
   } catch (error) {
     console.error(`Error handling event ${eventName}:`, error);

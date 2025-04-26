@@ -1,5 +1,6 @@
 'use server'
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 import { type TMethod, createSchedule, dateToCron } from '~/lib/createSchedule'
 import { sendEmail } from '~/lib/email-helper'
@@ -44,7 +45,7 @@ export const eventHandler = async (eventName: string, data: any) => {
     const parsedContent = replaceTemplateVariables(content, templateData)
     await sendEmail({
       from: 'no-reply@dnamicro.com',
-      to: templateData.account_organization.account_id,
+      to: templateData.account_organization.email,
       subject: parsedSubject,
       html: parsedContent,
     })
@@ -63,6 +64,9 @@ export const eventHandler = async (eventName: string, data: any) => {
       wait_for_completion: true,
     }
     await createSchedule(scheduleConfig)
+    return {
+      redirectTo: '/forgot-password/submit-success'
+    }
   }
   catch (error) {
     console.error('🚀 ~ accountInvite ~ error:', error)

@@ -16,7 +16,7 @@ import registerAccount from '../_actions/registerAccount';
 
 import SignUpFormField from './SignUpFormField';
 import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
-import registerAccountFromInvite from '~/app/invite/[id]/_actions/registerAccountFromInvite';
+import registerAccountFromInvite from '~/app/sign-up/_actions/registerAccountFromInvite';
 
 const SignUpSchema = z
   .object({

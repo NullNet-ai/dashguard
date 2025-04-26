@@ -9,7 +9,7 @@ import { Button } from '~/components/ui/button';
 import { Form, FormField, FormMessage } from '~/components/ui/form';
 
 import FormInput from '~/components/platform/FormBuilder/FormType/FormInput';
-import { sendForgotPasswordEmail } from '../actions/sendForgotPasswordEmail';
+import { sendForgotPasswordEmail } from '../_actions/sendForgotPasswordEmail';
 import { useSocket } from '~/context/SocketProvider';
 import { useRouter } from 'next/navigation';
 
@@ -24,7 +24,6 @@ const ForgotPasswordForm = () => {
   const form = useForm({
     resolver: zodResolver(ForgotPasswordFormSchema),
   });
-  const router = useRouter();
   const socketClient = useSocket();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
@@ -35,11 +34,12 @@ const ForgotPasswordForm = () => {
       const response = await sendForgotPasswordEmail({
         email: data.email,
       });
-      socketClient.publish({
-        type: 'RESET_PASSWORD',
-        payload: response,
-      });
-      router.push('/forgot-password/submit-success');
+      if (response) {
+        socketClient.publish({
+          type: 'RESET_PASSWORD',
+          payload: response,
+        });
+      }
       setIsSubmitting(false);
     } catch (error: unknown) {
       setError('Something went wrong');

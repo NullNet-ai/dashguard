@@ -60,7 +60,9 @@ export const accountRouter = createTRPCRouter({
         contact_id,
       } = input ?? {};
       const rootAccount = await ctx.dnaClient
-        .login('root', ROOT_ACCOUNT_PASSWORD, true)
+        .login('root', ROOT_ACCOUNT_PASSWORD, true, {
+          previously_logged_in_token: ctx.token.value,
+        })
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
       const existingAccount = await ctx.dnaClient
@@ -70,7 +72,7 @@ export const accountRouter = createTRPCRouter({
           as_root: true,
           query: {
             advance_filters: createAdvancedFilter({
-              account_id: email!,
+              account_id: email?.toLowerCase()!,
               status: EStatus.ACTIVE,
             }),
             pluck: ['id'],
@@ -281,7 +283,7 @@ export const accountRouter = createTRPCRouter({
                 'status',
               ],
               user_roles: ['role'],
-              contacts: ['id', 'code']
+              contacts: ['id', 'code'],
             },
           },
         })
@@ -394,35 +396,35 @@ export const accountRouter = createTRPCRouter({
               field: 'contact_id',
             },
           },
-        })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       alias: 'created_by',
-        //       entity: 'contact',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'account_organizations',
-        //       field: 'created_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       alias: 'updated_by',
-        //       entity: 'contact',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'account_organizations',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // });
+        });
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'created_by',
+      //       entity: 'contact',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'account_organizations',
+      //       field: 'created_by',
+      //     },
+      //   },
+      // })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'updated_by',
+      //       entity: 'contact',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'account_organizations',
+      //       field: 'updated_by',
+      //     },
+      //   },
+      // });
       // .join({
       //   type: 'left',
       //   field_relation: {
