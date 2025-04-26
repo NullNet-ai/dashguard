@@ -1,47 +1,53 @@
-import { ulid } from 'ulid'
+import { headers } from "next/headers";
+import { ulid } from "ulid";
+import { ISearchItem } from "~/components/platform/Grid/Search/types";
+const headerList = headers();
+const pathname = headerList.get("x-pathname") || "";
+const entity = pathname.split("/")[2];
 
-import { type ISearchItem } from '~/components/platform/Grid/Search/types'
-import { GLOBAL_PARENT_VARIABLE_KEY } from '../constants'
+// ** This is initial advance filter for the <entity> module
 
-export const defaultAdvanceFilter = [
+const defaultAdvanceFilter = [
   {
-    entity: `${GLOBAL_PARENT_VARIABLE_KEY}`,
-    operator: 'equal',
-    type: 'criteria',
-    field: 'status',
+    entity: entity,
+    operator: "equal",
+    type: "criteria",
+    field: "status",
     id: ulid(),
-    label: 'Status',
-    values: ['Active'],
+    label: "Status",
+    values: ["Active"],
     default: true,
   },
   {
-    operator: 'or',
-    type: 'operator',
+    operator: "or",
+    type: "operator",
     default: true,
   },
   {
-    entity: `${GLOBAL_PARENT_VARIABLE_KEY}`,
-    operator: 'equal',
-    type: 'criteria',
-    field: 'status',
+    entity: entity,
+    operator: "equal",
+    type: "criteria",
+    field: "status",
     id: ulid(),
-    label: 'Status',
-    values: ['Draft'],
+    label: "Status",
+    values: ["Draft"],
     default: true,
   },
   {
-    operator: 'or',
-    type: 'operator',
+    operator: "or",
+    type: "operator",
     default: true,
   },
   {
-    entity: `${GLOBAL_PARENT_VARIABLE_KEY}`,
-    operator: 'equal',
-    type: 'criteria',
-    field: 'status',
+    entity: entity,
+    operator: "equal",
+    type: "criteria",
+    field: "status",
     id: ulid(),
-    label: 'Status',
-    values: ['Archived'],
+    label: "Status",
+    values: ["Archived"],
     default: true,
   },
-] as ISearchItem[]
+] as ISearchItem[];
+
+export default defaultAdvanceFilter;

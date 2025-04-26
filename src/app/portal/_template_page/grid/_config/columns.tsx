@@ -1,16 +1,12 @@
-"use client";
+'use client';
 
-import { type ColumnDef } from "@tanstack/react-table";
-import StatusCell from "~/components/ui/status-cell";
+import { type ColumnDef } from '@tanstack/react-table';
+import StatusCell from '~/components/ui/status-cell';
 
 const gridColumns = [
   {
-    header: "ID",
-    accessorKey: "code",
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
+    header: 'State',
+    accessorKey: 'status',
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.status;
@@ -18,8 +14,38 @@ const gridColumns = [
     },
   },
   {
-    header: "Created Date Time",
-    accessorKey: "created_date",
+    header: 'ID',
+    accessorKey: 'code',
+  },
+  {
+    header: 'Updated Date',
+    accessorKey: 'updated_date',
+    sortKey: ['updated_date', 'updated_time'],
+    cell: ({ row }) => {
+      const date = row?.original?.updated_date;
+      const time = row?.original?.updated_time;
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      );
+    },
+  },
+  {
+    header: 'Updated By',
+    accessorKey: 'updated_by',
+    sortKey: 'updated_by.full_name',
+    search_config: {
+      entity: 'updated_by',
+      field: 'full_name',
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Created Date',
+    accessorKey: 'created_date',
+    sortKey: ['created_date', 'created_time'],
     cell: ({ row }) => {
       const date = row?.original?.created_date;
       const time = row?.original?.created_time;
@@ -32,17 +58,13 @@ const gridColumns = [
     },
   },
   {
-    header: "Updated Date Time",
-    accessorKey: "updated_date",
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
+    header: 'Created By',
+    accessorKey: 'created_by',
+    sortKey: 'created_by.full_name',
+    search_config: {
+      entity: 'created_by',
+      field: 'full_name',
+      operator: 'like',
     },
   },
 ] as ColumnDef<any>[];
