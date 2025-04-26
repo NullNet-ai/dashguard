@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "~/components/ui/button";
-import { XCircleIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import { Button } from '~/components/ui/button';
+import Image from 'next/image';
+import React, { startTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ErrorPage({
   error,
@@ -11,33 +12,34 @@ export default function ErrorPage({
   error: Error & { digest?: string; statusCode?: number };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   function clearError() {
-    reset();
+    startTransition(() => {
+      router.refresh();
+      reset();
+    });
   }
 
   return (
-    <div className="rounded-md bg-red-100 p-4">
-      <div className="flex">
-        <div className="flex-shrink-0">
-          <XCircleIcon aria-hidden="true" className="h-5 w-5 text-red-400" />
-        </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-red-800">Error Details:</h3>
-          <p className="text-sm text-red-700">Message: {error.message}</p>
-          {error.statusCode && (
-            <p className="text-sm text-red-700">
-              Status Code: {error.statusCode}
-            </p>
-          )}
-          {error.digest && (
-            <p className="text-sm text-red-700">Error ID: {error.digest}</p>
-          )}
-          {/* {error.stack && (
-            <p className="text-sm text-red-700">Stack Trace: {error.stack}</p>
-          )} */}
-          <div className="mt-4">
-            <Button onClick={clearError}>Try again</Button>
-          </div>
+    <div className="flex justify-center p-4 py-6">
+      <div className="flex flex-col items-center">
+        <Image
+          src="/something-wrong.svg"
+          alt="Error"
+          width={100}
+          height={120}
+        />
+        <h2 className="text-sm font-bold mt-2">Something Went Wrong!</h2>
+        <div className="mt-3">
+          <Button
+            onClick={clearError}
+            className="border border-primary text-primary"
+            size={'xs'}
+            variant={'outline'}
+          >
+            Try again
+          </Button>
         </div>
       </div>
     </div>

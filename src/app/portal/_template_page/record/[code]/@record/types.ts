@@ -1,7 +1,8 @@
 export interface ILayoutProps {
-  children: any
-  [key: string]: any
+    children: React.ReactNode;
+    [key: string]: React.ReactNode | undefined;
 }
+
 export interface IRouteParams {
-  id: string
+    id: string;
 }

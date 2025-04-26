@@ -62,6 +62,7 @@ const Layout = async ({
       record_summary={record_summary}
       entity_code={identifier!}
       entity_name={main_entity!}
+      is_applicant={true}
     />
   );
 };

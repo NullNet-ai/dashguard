@@ -1,53 +1,48 @@
-import { headers } from 'next/headers'
-import MultipleFormFilters from './client'
-import { ulid } from 'ulid'
-import { GLOBAL_PARENT_VARIABLE_KEY } from './constants'
+import { api } from "~/trpc/server";
+import { headers } from "next/headers";
+import BasicDetails from "./client";
+
+const form_filter_entity = "";
+
 const FormServerFetch = async () => {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity, application, identifier] = pathname.split('/')
-  const _pluck = [
-    'id',
-    'code',
-    'status',
-    'created_date',
-    'updated_date',
-    'created_time',
-    'updated_time',
-  ]
+  const headerList = headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const pluck_fields = ["id", "code", "email", "status"];
+  const [, , main_entity, application, identifier] = pathname.split("/");
 
-  /**
-   * 
-   * ! Your code goes here
-   * ! Request your data here
-   * ! Trpc > defaultValues
-   */
+  // @ts-expect-error - Fix type later
+  const record_data = await api[main_entity].fetchContactPhoneEmail({
+    code: identifier!,
+    pluck_fields,
+    form_filter_entity,
+  });
 
-  const id = ulid();
+  const default_values = record_data;
+
+  const contact_id = default_values?.id;
+
+  const selectedRecords = default_values[form_filter_entity] || [];
 
   return (
-    <div className='space-y-2'>
-      <MultipleFormFilters
-        defaultValues={{
-          // ! 1 index is needed for the form to be displayed
-          [GLOBAL_PARENT_VARIABLE_KEY]: [
-            {
-              // ! This is needed to have an initial form field
-              id: ulid(),
-              // ! Code is indicator for record been created or not
-              code: "TEST",
-            },
-          ],
-        }}
+    <div className="space-y-2">
+      <BasicDetails
+        defaultValues={
+          selectedRecords.length
+            ? {
+                ...default_values,
+              }
+            : null
+        }
         params={{
-          id,
-          shell_type: application! as 'record' | 'wizard',
+          id: contact_id!,
+          shell_type: application! as "record" | "wizard",
           entity: main_entity,
-          pluck_fields: _pluck,
+          pluck_fields,
         }}
+        selectedRecords={selectedRecords.length ? [default_values] : []}
       />
     </div>
-  )
-}
+  );
+};
 
-export default FormServerFetch
+export default FormServerFetch;
