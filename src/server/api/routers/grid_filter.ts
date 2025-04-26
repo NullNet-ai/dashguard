@@ -128,7 +128,7 @@ export const gridFilterRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
 
       await ctx.redisClient.cacheData(_tabMenuId, input?.tabs);
@@ -188,7 +188,7 @@ export const gridFilterRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
@@ -248,7 +248,7 @@ export const gridFilterRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
@@ -427,7 +427,7 @@ export const gridFilterRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,

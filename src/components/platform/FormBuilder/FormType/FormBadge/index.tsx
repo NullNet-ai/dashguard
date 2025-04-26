@@ -1,3 +1,4 @@
+import { Badge } from '~/components/ui/badge'
 import {
   FormItem,
 } from '~/components/ui/form'
@@ -5,7 +6,6 @@ import {
 import {
   type IField,
 } from '../../types'
-import { Badge } from '~/components/ui/badge'
 
 interface IProps {
   fieldConfig: IField
@@ -14,7 +14,7 @@ interface IProps {
 export default function FormBadge({ fieldConfig }: IProps) {
   return (
     <FormItem>
-     <Badge {...fieldConfig.badgeConfig} />
+      <Badge {...fieldConfig.badgeConfig} />
     </FormItem>
   )
 }

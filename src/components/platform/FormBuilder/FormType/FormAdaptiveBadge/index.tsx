@@ -1,3 +1,4 @@
+import { AdaptiveBadgeDisplay } from '~/components/ui/adaptive-badge-display'
 import {
   FormItem,
 } from '~/components/ui/form'
@@ -5,7 +6,6 @@ import {
 import {
   type IField,
 } from '../../types'
-import { AdaptiveBadgeDisplay } from '~/components/ui/adaptive-badge-display'
 
 interface IProps {
   fieldConfig: IField

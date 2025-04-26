@@ -37,6 +37,7 @@ export const authRouter = createTRPCRouter({
         }
 
         const token = response?.data?.[0]?.token;
+
         // ctx.redisClient.cacheData(
         //   `account_token:${input.username}`,
         //   token,
@@ -97,16 +98,10 @@ export const authRouter = createTRPCRouter({
     }),
 
   getAccountData: privateProcedure
-    .input(
-      z
-        .object({
-          username: z.string().min(1),
-        })
-        .optional(),
-    )
     .mutation(async ({ ctx }) => {
       try {
         const account = ctx.session.account;
+
         const accountId = account?.account_organization_id;
 
         const response = await ctx.dnaClient
@@ -116,7 +111,6 @@ export const authRouter = createTRPCRouter({
             query: {
               pluck: [
                 'id',
-                'is_new_user',
                 'contact_id',
                 'account_organization_status',
                 'status',
@@ -247,26 +241,10 @@ export const authRouter = createTRPCRouter({
               'contact_id',
               'email',
               'status',
+              'account_organization_status'
             ],
             organizations: ['id', 'name'],
-            organization_contacts: [
-              'id',
-              'contact_organization_id',
-              'is_primary',
-            ],
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'organization_contacts',
-            field: 'contact_organization_id',
-          },
-          from: {
-            entity: 'account_organizations',
-            field: 'organization_id',
+            accounts: ['id', 'account_id', 'is_new_user'],
           },
         },
       })
@@ -283,9 +261,32 @@ export const authRouter = createTRPCRouter({
           },
         },
       })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'accounts',
+            field: 'id',
+          },
+          from: {
+            entity: 'account_organizations',
+            field: 'account_id',
+          },
+        },
+      })
       .execute();
-
-    return accountDetails;
+    const organizations = accountDetails?.data?.map((item) => {
+      const { id, name } = item?.organizations ?? {};
+      return {
+        value: id,
+        label: name,
+      };
+    });
+    return {
+      account_organization: accountDetails?.data?.[0]?.account_organizations,
+      is_new_user: accountDetails?.data?.[0]?.accounts?.is_new_user,
+      organizations
+    };
   }),
   fetchAccountDataById: privateProcedure
     .input(
@@ -373,23 +374,23 @@ export const authRouter = createTRPCRouter({
       const rootAccountToken = rootAccount?.data?.[0]?.token;
       const accountDetails = await ctx.dnaClient
         .findAll({
-          entity: 'organization_accounts',
+          entity: 'account_organizations',
           token: rootAccountToken,
           as_root: asRoot,
           query: {
             advance_filters: [
               {
                 type: 'criteria',
-                field: 'account_id',
+                field: 'email',
                 operator: EOperator.EQUAL,
-                values: [input.email],
+                values: [input.email.toLowerCase()],
               },
             ],
             pluck_object: {
-              organization_accounts: [
+              account_organizations: [
                 'id',
                 'organization_id',
-                'account_id',
+                'email',
                 'contact_id',
                 'status',
               ],
@@ -408,7 +409,7 @@ export const authRouter = createTRPCRouter({
               field: 'id',
             },
             from: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'contact_id',
             },
           },
@@ -421,6 +422,7 @@ export const authRouter = createTRPCRouter({
       expirationDate.setDate(
         expirationDate.getDate() + INVITATION_LINK_EXPIRED,
       );
+
       const record = await ctx.dnaClient
         .create({
           entity: 'invitations',
@@ -430,7 +432,8 @@ export const authRouter = createTRPCRouter({
             params: {
               status: 'Active',
               expiration_date: formatDate(expirationDate).date,
-              account_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+              expiration_time: formatDate(expirationDate).time,
+              account_organization_id: accountDetails?.data?.[0]?.account_organizations?.id,
               categories: ['Reset Password'],
             },
             pluck: ['id', 'code', 'status'],
@@ -447,7 +450,7 @@ export const authRouter = createTRPCRouter({
       const invitationRecord = record?.data?.[0] ?? {};
 
       return {
-        account_record_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+        account_record_id: accountDetails?.data?.[0]?.account_organizations?.id,
         invitationRecord,
       };
     }),

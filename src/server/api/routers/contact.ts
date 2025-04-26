@@ -340,6 +340,7 @@ export const contactRouter = createTRPCRouter({
           'country_code',
           'is_primaries',
         ]);
+
         const existing_contact = acc?.find(
           (acc_item: any) => acc_item?.id === contacts?.id,
         );
@@ -352,11 +353,12 @@ export const contactRouter = createTRPCRouter({
           is_primaries: p_is_primaries,
         } = phones;
         const { emails: _emails, is_primaries: e_is_primaries } = emails;
-        const filterPrimary = (li: string[], is_primaries: number[]) => {
+        const filterPrimary = (li: string[], is_primaries: number[] | boolean[]) => {
           if (!li || !is_primaries) return null;
           const index = is_primaries?.findIndex(
-            (is_primary) => is_primary === 1,
+            (is_primary) => is_primary === 1 || is_primary === true,
           );
+
           return index !== -1 ? li[index] : null;
         };
         const _primary_phone_number = filterPrimary(

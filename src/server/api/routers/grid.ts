@@ -92,7 +92,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: input?.entity || '',
         _application: input?.application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
 
       const hasTabMenu = await ctx.redisClient.getCachedData(_tabMenuId);
@@ -122,7 +122,7 @@ export const gridRouter = createTRPCRouter({
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
 
-      const contact_id = ctx.session.account.contact.id;
+      const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',
         token: ctx.token.value,
@@ -168,7 +168,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
 
       const gridTabFilterList = (await ctx.redisClient.getCachedData(
@@ -214,84 +214,18 @@ export const gridRouter = createTRPCRouter({
         entity,
         sorting,
       } = input;
-      // Calculate the number of items to skip based on the current page
-      // Fetch the total count of users
-      /**
-       *
-       * @Logic to get filters from the grid tab
-       *
-       */
-      const join_type =
-        input?.entity === 'contact'
-          ? 'self'
-          : ('left' as 'self' | 'left' | 'right' | 'inner');
-
-      const created_by_join = {
-        type: join_type,
-        field_relation:
-          join_type === 'self'
-            ? {
-                to: {
-                  entity,
-                  field: 'created_by',
-                },
-                from: {
-                  ...(join_type === 'self' ? { alias: 'created_by' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              }
-            : {
-                from: {
-                  entity,
-                  field: 'created_by',
-                },
-                to: {
-                  ...(join_type === 'left' ? { alias: 'created_by' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              },
-      };
-      const updated_by_join = {
-        type: join_type,
-        field_relation:
-          join_type === 'self'
-            ? {
-                to: {
-                  entity,
-                  field: 'updated_by',
-                },
-                from: {
-                  ...(join_type === 'self' ? { alias: 'updated_by' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              }
-            : {
-                from: {
-                  entity,
-                  field: 'updated_by',
-                },
-                to: {
-                  ...(join_type === 'left' ? { alias: 'updated_by' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              },
-      };
-
+ 
       const pluck_object = {
         created_by: ['id', 'status'],
         updated_by: ['id', 'status'],
         contacts: ['first_name', 'last_name'],
         account_organizations: ['id'],
-        [pluralize(input?.entity)]: input.pluck,
+        [pluralize(entity)]: input.pluck,
       };
 
       const query = ctx.dnaClient
         .findAll({
-          entity: input?.entity,
+          entity,
           token: ctx.token.value,
           query: {
             pluck: input.pluck,
@@ -318,8 +252,8 @@ export const gridRouter = createTRPCRouter({
             ...(pluck_object
               ? {
                   multiple_sort:
-                    input.sorting?.length && input?.sorting.length > 1
-                      ? formatSorting(input.sorting)
+                    sorting?.length && sorting?.length > 1
+                      ? formatSorting(sorting)
                       : [],
                   concatenate_fields: [
                     // {
@@ -444,7 +378,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input?.gridKey || '',
       });
 
@@ -493,7 +427,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
 
       const filters = await ctx.redisClient.getCachedData(
@@ -534,7 +468,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
       const menus = (await ctx.redisClient.getCachedData(
         _tabMenuId,
@@ -614,7 +548,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
       });
 
       const menus = (await ctx.redisClient.getCachedData(
@@ -792,7 +726,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
@@ -863,7 +797,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
@@ -933,7 +867,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
@@ -984,7 +918,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input?.gridKey,
       });
       const grid_tabs = await ctx.redisClient.getCachedData(_tabMenuId);
@@ -1151,7 +1085,7 @@ export const gridRouter = createTRPCRouter({
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
-        _id: ctx.session.account.contact.id,
+        _id: ctx.session.account.account_organization_id,
         _gridKey: input.gridKey,
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);

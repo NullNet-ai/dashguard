@@ -1,11 +1,11 @@
 import {
   FormItem,
 } from '~/components/ui/form'
+import { MessageThread } from '~/components/ui/message'
 
 import {
   type IField,
 } from '../../types'
-import { MessageThread } from '~/components/ui/message'
 
 interface IProps {
   fieldConfig: IField

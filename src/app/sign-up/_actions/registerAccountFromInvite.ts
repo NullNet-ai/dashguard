@@ -43,6 +43,8 @@ export default async function registerAccountFromInvite({
     account_secret: password,
     account_organization_id: account_id,
     is_invited: true,
+    account_organization_status: 'Active',
+    account_type: 'contact',
   };
 
   const organization = {
@@ -51,7 +53,7 @@ export default async function registerAccountFromInvite({
   };
 
   try {
-    const registrationDetails = await api.auth.registerAccount({
+    await api.auth.registerAccount({
       account,
       organization,
     });
@@ -90,8 +92,7 @@ export default async function registerAccountFromInvite({
      * Verify session
      */
     await verifySession();
-
-    return registrationDetails;
+   
   } catch (err) {
     error = err;
     return {
