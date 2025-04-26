@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { type Row, type Column } from '@tanstack/react-table';
-import SinglePill from './SinglePill';
-import PillCell from '../PillCell';
+import PillCell from './PillCell';
 const MultiPillCell = ({
   row,
   column,
@@ -30,20 +29,18 @@ const MultiPillCell = ({
     }
   };
 
-  
   const values = parseValues(value);
 
- // Find the matching attribute for each value
- const getStylesForValue = (val: string) => {
-  const matchingAttribute = metadata?.colors?.[0]?.attributes?.find(
-    (attr: any) => attr.name === val
-  );
-  return {
-    color: matchingAttribute?.color || 'bg-gray-400/10',
-    textColor: matchingAttribute?.textColor || 'text-gray-400'
+  // Find the matching attribute for each value
+  const getStylesForValue = (val: string) => {
+    const matchingAttribute = metadata?.colors?.[0]?.attributes?.find(
+      (attr: any) => attr.name === val,
+    );
+    return {
+      color: matchingAttribute?.color || 'bg-gray-400/10',
+      textColor: matchingAttribute?.textColor || 'text-gray-400',
+    };
   };
-};
-
 
   return (
     <div className="group/inner relative flex">
