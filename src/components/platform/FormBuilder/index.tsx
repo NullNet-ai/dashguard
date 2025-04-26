@@ -1,22 +1,23 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import { zodResolver } from '@hookform/resolvers/zod'
-import React, { type SetStateAction, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { type z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { type SetStateAction, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { type z } from 'zod';
 
-import { isSuccessStatus } from '~/components/platform/FormBuilder/Utils/http'
-import { Card } from '~/components/ui/card'
-import { Collapsible } from '~/components/ui/collapsible'
-import { useEventEmitter } from '~/context/EventEmitterProvider'
-import { useToast } from '~/context/ToastProvider'
-import { cn } from '~/lib/utils'
-import { testIDFormatter } from '~/utils/formatter'
+import { isSuccessStatus } from '~/components/platform/FormBuilder/Utils/http';
+import { Card } from '~/components/ui/card';
+import { Collapsible } from '~/components/ui/collapsible';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
+import { useToast } from '~/context/ToastProvider';
+import { cn } from '~/lib/utils';
+import { testIDFormatter } from '~/utils/formatter';
 
-import { useWizard } from '../Wizard/Provider'
+import { useWizard } from '../Wizard/Provider';
 
-import { UpdateCurrentSubTab } from './Actions/UpdateCurrentSubTab'
-import { FormBuilderLayout } from './components/ui'
-import { type IPropsForms, type TDisplayType } from './types'
+import { UpdateCurrentSubTab } from './Actions/UpdateCurrentSubTab';
+import { FormBuilderLayout } from './components/ui';
+import { type IPropsForms, type TDisplayType } from './types';
+import { isUndefined } from 'lodash';
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -42,101 +43,112 @@ export const FormBuilder = (props: IPropsForms) => {
     myParent,
     fieldConfig,
     customConfig,
-  } = props
+    properties = {
+      isEditable: true,
+      hasActions: true,
+      allowCopyPaste: true,
+      allowRemoveSelection: true,
+      allowUpdateRecord: true,
+      selectOnly: false,
+    },
+  } = props;
+  const { isEditable = true } = properties ?? {};
+  const { actions } = useWizard();
 
-  const { actions } = useWizard()
+  const enableFormRegisterToParent =
+    myParent === 'record' ? false : _enableFormRegisterToParent;
 
-  const enableFormRegisterToParent
-    = myParent === 'record' ? false : _enableFormRegisterToParent
-
-  const eventEmitter = useEventEmitter()
-  const toast = useToast()
+  const eventEmitter = useEventEmitter();
+  const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
     shouldFocusError: false,
-  })
+  });
 
   //* LOCAL STATES
-  const [isOpenGrid, setOpenGrid] = useState('')
-  const [formGridSelected, setFormGridSelected] = useState<any[]>([])
-  const [displayType, setDisplayType] = useState<TDisplayType>('form')
-  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false)
-  const [isSaveLoading, setIsSaveLoading] = useState(false)
-  const [isListLoading, setIsListLoading] = useState(false)
-  const [debugOn, setDebugOn] = useState(false)
+  const [isOpenGrid, setOpenGrid] = useState('');
+  const [formGridSelected, setFormGridSelected] = useState<any[]>([]);
+  const [displayType, setDisplayType] = useState<TDisplayType>('form');
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+  const [isSaveLoading, setIsSaveLoading] = useState(false);
+  const [isListLoading, setIsListLoading] = useState(false);
+  const [debugOn, setDebugOn] = useState(false);
   const [isFormOpened, setIsFormOpened] = useState(
     defaultDisplay === 'expanded',
-  )
-  const [showFormActions, setShowFormActions] = useState(false)
-  const [isOpenSearch, setIsOpenSearch] = useState(false)
+  );
+  const [showFormActions, setShowFormActions] = useState(false);
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
 
-  const { formHostInitialView } = features ?? {}
+  const { formHostInitialView } = features ?? {};
   //* EFFECTS
 
   //* Effect to listen to form submission
   useEffect(() => {
-    if (!form?.formState?.isDirty) return
+    if (!form?.formState?.isDirty) return;
     eventEmitter.emit(`formStatus:${formKey}`, {
       status: 'dirty',
       form_key: formKey,
-    })
-  }, [form?.formState?.isDirty])
+    });
+  }, [form?.formState?.isDirty]);
 
   //* Effect to listen to form errors
   useEffect(() => {
     if (form?.formState?.errors) {
       // eslint-disable-next-line no-console
-      console.debug(' 🇦🇨 [Form-Props ERRORS]', form?.formState?.errors)
+      console.debug(' 🇦🇨 [Form-Props ERRORS]', form?.formState?.errors);
     }
-  }, [form?.formState?.errors])
+  }, [form?.formState?.errors]);
 
   //* Effect to listen to form changes
   useEffect(() => {
-    if (!onFormChange) return
-    onFormChange(form)
-  }, [form, onFormChange])
+    if (!onFormChange) return;
+    onFormChange(form);
+  }, [form, onFormChange]);
 
   //* Effect to listen to data changes
   useEffect(() => {
-    if (!onDataChange) return
+    if (!onDataChange) return;
 
     // `watch` returns the updated form values each time any form field changes.
     const subscription = form.watch((values) => {
-      onDataChange(values)
-    })
+      onDataChange(values);
+    });
 
     // Clean up the subscription on unmount
-    return () => subscription.unsubscribe()
-  }, [form.watch, onDataChange])
+    return () => subscription.unsubscribe();
+  }, [form.watch, onDataChange]);
 
   //* Effect to listen to filter grid config changes
   useEffect(() => {
     if (!filterGridConfig?.selectedRecords?.length) {
-      const parsingResult = formSchema.safeParseAsync(defaultValues)
+      const parsingResult = formSchema.safeParseAsync(defaultValues);
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       parsingResult.then((result) => {
         if (result.success) {
           // form.control._disableForm(result.success)
-          setDisplayType('form')
+          setDisplayType('form');
         }
-      })
+      });
+    } else {
+      setFormGridSelected(filterGridConfig?.selectedRecords);
+      setDisplayType('selected');
     }
-    else {
-      setFormGridSelected(filterGridConfig?.selectedRecords)
-      setDisplayType('selected')
-    }
-  }, [filterGridConfig?.selectedRecords])
+  }, [filterGridConfig?.selectedRecords]);
 
   //* Effect to listen to event emitter
   useEffect(() => {
-    if (!eventEmitter) return
-    if (myParent === 'wizard' && actions?.registerSaveHandler && enableFormRegisterToParent) {
-      actions?.registerSaveHandler?.(formKey)
+    if (!eventEmitter) return;
+    if (
+      myParent === 'wizard' &&
+      actions?.registerSaveHandler &&
+      enableFormRegisterToParent
+    ) {
+      actions?.registerSaveHandler?.(formKey);
     }
 
     if (myParent === 'record') {
-      disableForm()
+      disableForm();
     }
 
     // Register the event listener for external submissions with a callback
@@ -146,57 +158,56 @@ export const FormBuilder = (props: IPropsForms) => {
     ) => {
       try {
         //
-        await form.handleSubmit(onSubmit)()
+        await form.handleSubmit(onSubmit)();
 
         if (Object.keys(form?.formState?.errors).length > 0) {
           reject({
             message: 'Validation failed',
             errors: form?.formState?.errors,
             status_code: 422,
-          })
+          });
           return;
         }
-        resolve()
+        resolve();
+      } catch (error) {
+        reject(error);
       }
-      catch (error) {
-        reject(error)
-      }
-    }
-    eventEmitter.on(`submitForm:${formKey}`, eventSubmitHandler)
+    };
+    eventEmitter.on(`submitForm:${formKey}`, eventSubmitHandler);
     // Clean up the listener when the component unmounts
     return () => {
-      eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler)
+      eventEmitter.off(`submitForm:${formKey}`, eventSubmitHandler);
     };
-  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent])
+  }, [enableFormRegisterToParent, eventEmitter, form, formKey, myParent]);
 
   useEffect(() => {
     if (
-      formHostInitialView === 'lock'
-      && enableFormRegisterToParent === undefined
-      && myParent === undefined
+      formHostInitialView === 'lock' &&
+      enableFormRegisterToParent === undefined &&
+      myParent === undefined
     ) {
-      disableForm()
+      disableForm();
     }
-  }, [formHostInitialView, myParent, enableFormRegisterToParent])
+  }, [formHostInitialView, myParent, enableFormRegisterToParent]);
 
   useEffect(() => {
-     if(customConfig?.defaultState === 'unlock') {
+    if (customConfig?.defaultState === 'unlock') {
       setTimeout(() => {
-        form.control._disableForm(false)
-      }, (100));
-     }
-  }, [])
+        form.control._disableForm(false);
+      }, 100);
+    }
+  }, []);
 
   //* HANDLERS
 
   //* handler to disable form
   const handleCloseGrid = () => {
-    setOpenGrid('')
+    setOpenGrid('');
   };
 
   const handleRemovedSelectedRecords = (records: any[]) => {
     if (!filterGridConfig?.onRemoveSelectedRecords) {
-      toast.error('No onRemoveSelectedRecords function found')
+      toast.error('No onRemoveSelectedRecords function found');
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -208,26 +219,25 @@ export const FormBuilder = (props: IPropsForms) => {
       }),
     ).then(() => {
       const newRecords = formGridSelected?.filter((item) => {
-        return !records.some(record => record.id === item.id)
-      })
+        return !records.some((record) => record.id === item.id);
+      });
 
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: 'done',
         form_key: formKey,
-      })
+      });
 
-      setFormGridSelected(newRecords)
-      setOpenGrid('')
+      setFormGridSelected(newRecords);
+      setOpenGrid('');
       if (!newRecords.length) {
-        const currentValues = form.getValues()
+        const currentValues = form.getValues();
         Object.keys(currentValues).forEach((key) => {
-          const value = currentValues[key]
+          const value = currentValues[key];
 
           if (Array.isArray(value)) {
             if (key === 'email') {
-              currentValues[key] = [{ email: '' }]
-            }
-            else if (key === 'phone') {
+              currentValues[key] = [{ email: '' }];
+            } else if (key === 'phone') {
               currentValues[key] = [
                 {
                   raw_phone_number: '',
@@ -235,98 +245,93 @@ export const FormBuilder = (props: IPropsForms) => {
                   country_code: '+1',
                   is_primary: true,
                 },
-              ]
+              ];
+            } else {
+              currentValues[key] = [];
             }
-            else {
-              currentValues[key] = []
-            }
+          } else if (typeof value === 'string') {
+            currentValues[key] = '';
+          } else if (typeof value === 'object' && value !== null) {
+            currentValues[key] = {};
+          } else {
+            currentValues[key] = null;
           }
-          else if (typeof value === 'string') {
-            currentValues[key] = ''
-          }
-          else if (typeof value === 'object' && value !== null) {
-            currentValues[key] = {}
-          }
-          else {
-            currentValues[key] = null
-          }
-        })
-        form.reset(currentValues)
+        });
+        form.reset(currentValues);
 
-        setDisplayType('form')
+        setDisplayType('form');
         return;
       }
-      setDisplayType('selected')
-    })
+      setDisplayType('selected');
+    });
   };
 
   const handleSearchOpen = () => {
-    setIsOpenSearch(!isOpenSearch)
+    setIsOpenSearch(!isOpenSearch);
   };
 
   const handleAccordionChange = (value: string) => {
-    setIsAccordionExpanded(value === 'item-1')
-    setOpenGrid(value)
+    setIsAccordionExpanded(value === 'item-1');
+    setOpenGrid(value);
   };
 
   const handleOpenForm = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    setIsFormOpened(!isFormOpened)
+    e.preventDefault();
+    setIsFormOpened(!isFormOpened);
   };
 
   const handleListLoading = (loading: boolean) => {
-    setIsListLoading(loading)
+    setIsListLoading(loading);
   };
 
   const handleDebug = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setDebugOn(!debugOn)
+    setDebugOn(!debugOn);
   };
 
   const handleLock = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    disableForm()
-
+    e.preventDefault();
+    disableForm();
   };
 
   const handleAccordionExpand = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    setIsAccordionExpanded(!isAccordionExpanded)
+    e.preventDefault();
+    setIsAccordionExpanded(!isAccordionExpanded);
   };
 
   const handleNewRecordFormFilterGrid = () => {
-    setDisplayType('form')
+    setDisplayType('form');
   };
 
   const handleSelectedGridRecords = (data: Record<string, any>[]) => {
-    const record
-    = filterGridConfig?.actionType === 'single-select' ? data?.[0] : data
+    const record =
+      filterGridConfig?.actionType === 'single-select' ? data?.[0] : data;
 
     form.reset(record, {
       keepDirty: false,
       keepTouched: true,
-    })
+    });
 
-    setFormGridSelected(data)
-    handleSearchOpen()
-    handleCloseGrid()
-    setDisplayType('selected')
+    setFormGridSelected(data);
+    handleSearchOpen();
+    handleCloseGrid();
+    setDisplayType('selected');
   };
 
   const handleAppendForm = () => {
-    if (!enableAppendForm) return
-    eventEmitter.emit(`${formKey}:${appendFormKey}`)
+    if (!enableAppendForm) return;
+    eventEmitter.emit(`${formKey}:${appendFormKey}`);
   };
 
   const handleUpdateDisplayType = (type: SetStateAction<TDisplayType>) => {
-    setDisplayType(type)
+    setDisplayType(type);
   };
 
   //* ACTIONS
   const disableForm = () => {
-    form.clearErrors()
-    form.control._disableForm(!form.formState.disabled)
+    form.clearErrors();
+    form.control._disableForm(!form.formState.disabled);
   };
 
   const saveForm = async (data: z.infer<typeof formSchema>) => {
@@ -334,18 +339,18 @@ export const FormBuilder = (props: IPropsForms) => {
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: 'form_save',
         form_key: 'action',
-      })
-      await onSubmit(data)
+      });
+      await onSubmit(data);
       return;
     }
-    await onSubmit(data)
+    await onSubmit(data);
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    setIsSaveLoading(true)
+    setIsSaveLoading(true);
     try {
       if (!form.formState.isDirty && !form.formState.defaultValues) {
-        return toast.error('Form is Unchanged')
+        return toast.error('Form is Unchanged');
       }
       // Handle form validation and other checks
       // what's the use of this function???
@@ -353,145 +358,146 @@ export const FormBuilder = (props: IPropsForms) => {
         eventEmitter.emit(`formStatus:${formKey}`, {
           status: 'done',
           form_key: formKey,
-        })
-        setIsSaveLoading(false)
-        form.control._disableForm(true)
+        });
+        setIsSaveLoading(false);
+        form.control._disableForm(true);
         return;
       }
 
-      if(handleSubmitFormGrid) {
+      if (handleSubmitFormGrid) {
         await onSubmitFormGrid(data, {
-          action_type : 'Next'
-        })
+          action_type: 'Next',
+        });
         return;
       }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
-        const res = (await handleSubmit({ data, form })) as any
+        const res = (await handleSubmit({ data, form })) as any;
         const {
           errors = {},
           existing = false,
           data: response_data,
-        } = res || {}
-        const { httpStatus } = response_data ?? {}
+        } = res || {};
+        const { httpStatus } = response_data ?? {};
 
-        const form_errors = errors?.form || []
-        setIsSaveLoading(false)
+        const form_errors = errors?.form || [];
+        setIsSaveLoading(false);
 
         if (form_errors.length || existing) {
           form_errors.map(
-            ({ field, message }: { field: string, message: string }) => {
+            ({ field, message }: { field: string; message: string }) => {
               form.setError(field, {
                 type: 'manual',
                 message,
-              })
+              });
             },
-          )
-          setIsSaveLoading(false)
+          );
+          setIsSaveLoading(false);
 
           return;
         }
 
         if (
-          !!Object.keys(form.formState.errors).length
-          || form_errors.length
-          || (httpStatus && !isSuccessStatus(httpStatus))
+          !!Object.keys(form.formState.errors).length ||
+          form_errors.length ||
+          (httpStatus && !isSuccessStatus(httpStatus))
         ) {
           eventEmitter.emit(`formStatus:${formKey}`, {
             status: 'failed',
             form_key: formKey,
-          })
-          setIsSaveLoading(false)
+          });
+          setIsSaveLoading(false);
 
           return;
         }
         form.reset(data, {
           keepDirty: false,
           keepTouched: true,
-        })
+        });
 
         eventEmitter.emit(`formStatus:${formKey}`, {
           status: 'done',
           form_key: formKey,
-        })
+        });
 
-        form.control._disableForm(true)
+        form.control._disableForm(true);
 
-        setIsSaveLoading(false)
+        setIsSaveLoading(false);
       }
-      setIsSaveLoading(false)
+      setIsSaveLoading(false);
+    } catch (error) {
+      setIsSaveLoading(false);
+      console.error('[Form-Filter] Failed to create new record', error);
     }
-    catch (error) {
-      setIsSaveLoading(false)
-      console.error('[Form-Filter] Failed to create new record', error)
-    }
-  }
+  };
 
   const onSubmitFormGrid = async (
     data: z.infer<typeof formSchema>,
     options?: {
-      action_type?: string
+      action_type?: string;
     },
   ) => {
-    if (!handleSubmitFormGrid) return
+    if (!handleSubmitFormGrid) return;
     try {
-      setIsSaveLoading(true)
+      setIsSaveLoading(true);
 
       const response = await handleSubmitFormGrid({
         data,
         main_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
         action_type:
-          options?.action_type
-          || (formGridSelected.length ? 'Update' : 'Create'),
+          options?.action_type ||
+          (formGridSelected.length ? 'Update' : 'Create'),
         form,
-      })
+      });
 
       if (!response?.length) {
         eventEmitter.emit(`formStatus:${formKey}`, {
           status: 'failed',
           form_key: formKey,
-        })
-        throw new Error('Failed to submit form grid')
+        });
+        throw new Error('Failed to submit form grid');
       }
 
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: 'done',
         form_key: formKey,
-      })
-      setFormGridSelected(response)
-      setDisplayType('selected')
-      setIsSaveLoading(false)
+      });
+      setFormGridSelected(response);
+      setDisplayType('selected');
+      setIsSaveLoading(false);
+    } catch (error) {
+      setIsSaveLoading(false);
+      console.error('[Form-Filter] Failed to create new record', error);
     }
-    catch (error) {
-      setIsSaveLoading(false)
-      console.error('[Form-Filter] Failed to create new record', error)
-    }
-  }
+  };
 
   const onSelectFieldFilterGrid = async () => {
     try {
-      const data = form.getValues()
+      const data = form.getValues();
       if (data?.code && create_mode) {
-        await UpdateCurrentSubTab({ tab_name: data.code })
+        await UpdateCurrentSubTab({ tab_name: data.code });
       }
       await filterGridConfig?.onSelectRecords?.({
         rows: [data],
         main_entity_id: filterGridConfig?.main_entity_id,
         filter_entity: filterGridConfig?.filter_entity,
-      })
-      setFormGridSelected([data])
+      });
+      setFormGridSelected([data]);
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: 'done',
         form_key: formKey,
-      })
-      setDisplayType('selected')
+      });
+      setDisplayType('selected');
+    } catch (error) {
+      console.error('[Form-Filter] Failed onSelectFieldFilterGrid', error);
     }
-    catch (error) {
-      console.error('[Form-Filter] Failed onSelectFieldFilterGrid', error)
-    }
-  }
+  };
+  useEffect(() => {
+    if (isUndefined(properties?.isEditable)) return;
+    form?.control._disableForm(!properties?.isEditable);
+  }, [properties?.isEditable]);
 
   //* RENDER
   return (
@@ -536,9 +542,10 @@ export const FormBuilder = (props: IPropsForms) => {
             showFormActions={showFormActions}
             onSelectFieldFilterGrid={onSelectFieldFilterGrid}
             onSubmitFormGrid={onSubmitFormGrid}
+            properties={properties}
           />
         </Card>
       </Collapsible>
     </form>
-  )
+  );
 };

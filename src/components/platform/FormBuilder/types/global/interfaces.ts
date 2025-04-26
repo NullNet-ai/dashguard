@@ -45,6 +45,9 @@ import { EntityVariableOption } from '~/components/ui/rich-text-editor/component
 import { type ComboSelectProps } from '~/components/ui/combo-select';
 import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
 import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
+import { BadgeProps } from '~/components/ui/badge';
+import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
+import { MessageThreadProps } from '~/components/ui/message';
 
 interface OptionType {
   label: string;
@@ -278,6 +281,10 @@ interface IField {
     fallback?:   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
     fallbackText?: string
   }
+  badgeConfig?: BadgeProps
+  adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps & React.RefAttributes<HTMLDivElement>
+  messageThreadConfig?: MessageThreadProps
+
 }
 
 interface ISelectOptions {
@@ -454,6 +461,56 @@ export interface ISearchParams {
   sorting?: any[];
 }
 
+
+export interface IFormProperties {
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All actions inside the form will displayed in the form header
+   * Main variable if false all properties will not display
+   * @default true
+   */
+  hasActions?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All fields will be disabled
+   * @default true
+   */
+  isEditable?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * No create button will be shown
+   * @default false
+   */
+  selectOnly?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * If false Form filter can update record in grid
+   * @default true
+   */
+  allowUpdateRecord?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * copy will not show in form
+   * @default true
+   */ 
+  allowCopyPaste?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * @default true
+   */
+  allowRemoveSelection?: boolean;
+}
+
 interface IPropsForms {
   customDesign?: {
     formClassName?: string;
@@ -511,6 +568,7 @@ interface IPropsForms {
    * Else, the form filter will not override the current wizard record.
    */
   create_mode?: boolean;
+  properties?: IFormProperties;
 }
 
 interface IFieldFilterActions {

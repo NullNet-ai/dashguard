@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.8.0-rc.2<unreleased>",
-  "branch": "unreleased/fix3958/2.8.0-rc.2<unreleased>",
-  "message": "fix: dropdown overlaps with the edges",
+  "tag": "2.8.0-rc.3<unreleased>",
+  "branch": "unreleased/fix2278/2.8.0-rc.3<unreleased>",
+  "message": "fix: code editor hide header on disabled, hide keyboard btn on mobile, and prevent zoom on click",
   "publish_name": "Save Ducto"
 }
