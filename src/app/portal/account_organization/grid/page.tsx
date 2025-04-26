@@ -30,7 +30,6 @@ export default async function Page() {
       advanceFilter={filters?.advanceFilter || []}
       config={{
         entity: 'account_organization',
-        paginationType:'centered',
         title: 'Accounts',
         enableRowExpansion: true,
         rowExpansionOptions:{
@@ -45,7 +44,7 @@ export default async function Page() {
           "first_name",
           "last_name",
         ],
-        statusColumn: 'account_organization_status',
+        // statusColumn: 'account_organization_status',
         columns: gridColumns,
         columnsOrder: columnOrder,
         // enableAutoCreate: false,

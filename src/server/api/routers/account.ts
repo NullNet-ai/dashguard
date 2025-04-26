@@ -425,19 +425,7 @@ export const accountRouter = createTRPCRouter({
       //     },
       //   },
       // });
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       entity: 'external_contacts',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'external_contact_id',
-      //     },
-      //   },
-      // });
+    
       if (input.grouping?.length) {
         query.groupBy({
           query: {
@@ -464,15 +452,15 @@ export const accountRouter = createTRPCRouter({
           [pluralize(input?.entity)]: entity_data,
           created_by,
           updated_by,
-          contact,
+          contacts,
           external_contacts,
           ...rest
         } = item;
         return {
           ...entity_data,
           ...rest,
-          first_name: contact?.first_name || external_contacts?.first_name,
-          last_name: contact?.last_name || external_contacts?.last_name,
+          first_name: contacts?.first_name || external_contacts?.first_name,
+          last_name: contacts?.last_name || external_contacts?.last_name,
           created_by: created_by
             ? `${created_by.first_name} ${created_by.last_name}`
             : null,
