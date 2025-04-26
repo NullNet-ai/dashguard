@@ -5,7 +5,7 @@ export function updateNetworkBuckets(
 ): Record<string,any>[] {
   const newTimestamp = new Date(newData.timestamp);
   const bucketTime = newTimestamp.toTimeString().split(' ')[0]; // "HH:MM:SS"
-  const { interface_name, byte_data: total_length } = newData;
+  const { interface_name, total_byte: total_length } = newData;
 
   // Clone the original array to avoid mutation
   const updatedBuckets: any = [...buckets];

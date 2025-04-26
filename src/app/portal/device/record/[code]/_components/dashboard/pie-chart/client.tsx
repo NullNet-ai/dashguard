@@ -68,9 +68,9 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     let currentTime: any = null
     
     socket.on( `pie_chart-${defaultValues?.id}-${org_acc_id}`, (data: Record<string,any>) => {
-      let currentTraffic = data?.byte_data || 0
+      let currentTraffic = data?.total_byte || 0
       if(currentTime == data?.timestamp) {
-         currentTraffic = trafficData.traffic + data?.byte_data
+         currentTraffic = trafficData.traffic + data?.total_byte
       }
       const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
       setTrafficData({ traffic: currentTraffic, maxTraffic })

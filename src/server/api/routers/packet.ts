@@ -234,7 +234,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'byte_data',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -293,6 +293,7 @@ export const packetRouter = createTRPCRouter({
       return { bucket: item, bandwidth: 0 }
     })
 
+    console.log("%c Line:297 🍿 result", "color:#6ec1c2", result);
     return result
   }),
   getBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
@@ -309,7 +310,7 @@ export const packetRouter = createTRPCRouter({
             aggregations: [
               {
                 aggregation: 'SUM',
-                aggregate_on: 'byte_data',
+                aggregate_on: 'total_byte',
                 bucket_name: 'bandwidth',
               },
             ],
@@ -402,7 +403,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'byte_data',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -446,7 +447,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'byte_data',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -679,7 +680,7 @@ export const packetRouter = createTRPCRouter({
           aggregations: [
             {
               aggregation: 'SUM',
-              aggregate_on: 'byte_data',
+              aggregate_on: 'total_byte',
               bucket_name: 'bandwidth',
             },
           ],
@@ -727,6 +728,7 @@ export const packetRouter = createTRPCRouter({
         token: ctx.token.value,
 
       }).execute()
+      console.log("%c Line:678 🍭 res", "color:#6ec1c2", res);
 
       const ip_info = await ctx.dnaClient
         .findAll({
@@ -754,6 +756,7 @@ export const packetRouter = createTRPCRouter({
       return { source_ip, result: res?.data, ...flagDetails }
     }, { concurrency: 100 })
 
+    console.log("%c Line:759 🍆 ips", "color:#4fff4B", ips);
     return { data: ips }
   }),
 
@@ -884,6 +887,7 @@ export const packetRouter = createTRPCRouter({
         .execute()
 
       const _connections = connections?.data || []
+      console.log("%c Line:890 🍷 _connections", "color:#33a5ff", _connections);
       const _connections_length = _connections.length
 
       const sourceIPs = new Set()

@@ -42,7 +42,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
     });
 
     if(channel_name) {
-      socket.emit('updateHighWaterMark', { channel_name: channel_name, highWaterMark: 10 });
+      socket.emit('updateHighWaterMark', { channel_name: channel_name, highWaterMark: 1 });
     }
 
     return () => {

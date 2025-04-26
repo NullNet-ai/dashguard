@@ -76,7 +76,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     if (!_bandwidth) return
 
-    console.log("%c Line:77 🥕 _bandwidth", "color:#fca650", _bandwidth);
     if (current_index == 0) {
       setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
         return {...item, time_unit, time_count, resolution, time_range}
@@ -91,7 +90,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }) || []),
     ])
   }
-  console.log("%c Line:83 🍪 new_bandwidth", "color:#ea7e5c", new_bandwidth);
+  
 
 
 
@@ -107,17 +106,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     _getAccount()
   }, [])
 
- 
   useEffect(() => {
     if (!socket || !org_acc_id) return;
   
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
     socket.on(eventKey, (data: any) => {
-      
-      console.log("%c Line:106 🍉 new_bandwidth", "color:#3f7cff", new_bandwidth);
       const updated_bandwidth = updateBandwidth(new_bandwidth, data);
-      console.log("%c Line:106 🌮 updated_bandwidth", "color:#93c0a4", updated_bandwidth);
-      // setNewBandwidth([...updated_bandwidth])
+      setNewBandwidth([...updated_bandwidth])
     });
   
     // return () => {
@@ -167,10 +162,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         data: time_unit_resolution,
       } = await refetchTimeUnitandResolution()
       
-  console.log("%c Line:162 🍐 time_unit_resolution", "color:#b03734", time_unit_resolution);
       const { time, resolution = '1h' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
-      console.log("%c Line:167 🍧 time", "color:#33a5ff", time);
       
       setTime({
         time_count,
@@ -181,7 +174,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
 
-  console.log("%c Line:170 🍋 time_unit", "color:#fca650", {time,time_unit, resolution});
 
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return
@@ -215,7 +207,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(current_index + 20)
     setNewBandwidth([])
-    fetchBandwidth(20)
+    fetchBandwidth(10)
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
