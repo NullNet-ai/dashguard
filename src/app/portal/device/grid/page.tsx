@@ -58,11 +58,9 @@ export default async function Page() {
         columnsOrder: columnOrder,
         columns: gridColumns,
         defaultValues: {
-          categories: ['Contact', 'Employee'],
           id: 'code'
         },
         paginationType: 'default',
-        defaultShownColumns: ['raw_phone_number', 'email'],
         enableAutoCreate: true,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
