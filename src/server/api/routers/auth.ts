@@ -480,4 +480,86 @@ export const authRouter = createTRPCRouter({
 
       return response;
     }),
+
+    deviceRegisterAccount: privateProcedure
+    .input(
+      z.object({
+        account: z.object({
+          account_id: z.string().min(1),
+          account_secret: z.string().min(1),
+          role_id : z.string().min(1),
+          account_organization_status : z.string().min(1),
+          account_organization_categories : z.array(z.string()).min(1),
+          device_categories : z.array(z.string()),
+          account_type : z.string().min(1),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account } = input;
+
+      const organization = {
+        organization_id : ctx.session.account.organization_id
+      }
+      const result = await ctx.dnaClient
+        .register(organization, account)
+        .execute();
+
+      // Save account id and secret in redis
+
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account.account_id}`,
+        {
+          account_id: input.account.account_id,
+          account_secret: input.account.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      );
+
+
+      return result
+    }),
+
+
+    resetDeviceAppSecret: privateProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+        account_id : z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot, {
+          previously_logged_in_token : ctx.token.value,
+        })
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+
+      const response = await ctx.dnaClient
+      .rootUpdateAccountPassword(input.id, input.account_secret, {
+        token: rootAccountToken,
+      })
+      .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+
+      // update redis app secret
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account_id}`,
+        {
+          account_id: input.account_id,
+          account_secret: input.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      )
+
+      return response;
+    }),
 });

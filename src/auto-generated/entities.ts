@@ -4,4 +4,5 @@ export default [
   "user_role",
   "communication_template",
   "account_organization",
+  "device",
 ];
