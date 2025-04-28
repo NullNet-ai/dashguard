@@ -109,13 +109,12 @@ export default function NetworkFlowView() {
                   <div className='min-w-[250px] flex'>
                     <div
                       className={`
-                        flex gap-1 text-xs mr-4 font-semibold p-1 rounded-md self-start mb-2 items-center h-5
+                        flex gap-1 text-xs mr-4 font-semibold p-1 py-[3px] rounded-md self-start mb-[3px] items-center h-5
                         ${el.active ? 'text-red-600' : 'text-black'}
                       `}
                       style={{ 
                         fontSize: '0.75rem', 
                         minWidth: '150px',
-                        border: '1px solid #ddd'
                       }}
                     >
                       {flag && (
