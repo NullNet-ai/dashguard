@@ -46,7 +46,7 @@ const gridColumns = [
       })
     },
     search_config: {
-      operator: 'contains',
+      parse_as: 'text'
     },
   },
   {

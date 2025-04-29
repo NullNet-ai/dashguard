@@ -55,6 +55,7 @@ export interface ISearchItem {
   default?: boolean
   display_value?: string
   filters?: ISearchItem[]
+  parse_as?: string
 }
 
 export interface ISortItem {

@@ -773,6 +773,7 @@ export const gridRouter = createTRPCRouter({
             default: z.boolean().optional(),
             display_value: z.string().optional(),
             filters: z.array(z.any()).optional(),
+            parse_as: z.string().optional(),
           }),
         ),
         gridKey: z.string().optional(),
@@ -965,6 +966,7 @@ export const gridRouter = createTRPCRouter({
           field: item.field,
           values: item.values,
           default: item.default,
+          ...(item.parse_as ? { parse_as: item.parse_as } : {}),
         };
       });
       const groupSorts = groups?.map((item: any) => ({

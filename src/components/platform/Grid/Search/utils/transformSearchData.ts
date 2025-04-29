@@ -1,18 +1,29 @@
-import { formatAndCapitalize } from "~/lib/utils";
-import { ISearchableField } from "../types";
-import { ulid } from "ulid";
+import { formatAndCapitalize } from '~/lib/utils';
+import { ISearchableField } from '../types';
+import { ulid } from 'ulid';
 
-const findTextInValue = (value: unknown, searchText: string, operator: string) => {
-  if (["contains", "like"].includes(operator)) {
-    if (typeof value === "string") {
-      return value.toLowerCase().includes(searchText.toLowerCase()) ? value : null;
-    } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
-      return value.find((v) => v.toLowerCase().includes(searchText.toLowerCase())) || null;
+const findTextInValue = (
+  value: unknown,
+  searchText: string,
+  operator: string,
+) => {
+  if (['contains', 'like'].includes(operator)) {
+    if (typeof value === 'string') {
+      return value.toLowerCase().includes(searchText.toLowerCase())
+        ? value
+        : null;
+    } else if (
+      Array.isArray(value) &&
+      value.every((v) => typeof v === 'string')
+    ) {
+      const resultValue = value.find((v) =>
+        v.toLowerCase().includes(searchText.toLowerCase()),
+      );
+      return resultValue
     }
   }
   return value === searchText ? value : null;
 };
-
 
 export const transformSearchData = (
   items: Record<string, any>[] | undefined,
@@ -26,13 +37,17 @@ export const transformSearchData = (
       const searchableField = searchableFields.find(
         (field) => field.accessorKey === key,
       );
-      const foundValue = findTextInValue(value, searchText, searchableField?.operator ?? "like");
+      const foundValue = findTextInValue(
+        value,
+        searchText,
+        searchableField?.operator ?? 'like',
+      );
       if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
           values: [foundValue],
-          operator: searchableField?.operator || "equal",
-          type: "criteria",
+          operator: searchableField?.operator || 'equal',
+          type: 'criteria',
           ...searchableField,
           label: searchableField?.label || formatAndCapitalize(key),
         });
@@ -50,6 +65,6 @@ export const transformSearchData = (
     }
   });
   const searchResults = Object.values(consolidated) || null;
-  
+
   return searchResults;
 };
