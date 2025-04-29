@@ -17,7 +17,7 @@ export default function StateName({ form,fieldConfig, formKey }: IFieldComponent
     );
   }, [address_values_country]);
   return (
-    <div>
+    <div className="w-full">
       <FormField
         name="details.state"
         control={form.control}
@@ -32,7 +32,7 @@ export default function StateName({ form,fieldConfig, formKey }: IFieldComponent
               name: formRenderProps.field.name,
                 // required: true,
                 placeholder: "Select State",
-                label: "State",
+                label: "State/Province",
                 id: `details.state`,
               }}
               form={form}

@@ -44,7 +44,7 @@ const AddressDetails = ({ form, formKey,fieldConfig }: IAddressDetails) => {
       <CountryName form={form} formKey={formKey} fieldConfig={fieldConfig} />
       <AddressLineOne form={form} formKey={formKey} fieldConfig={fieldConfig} />
       <AddressLineTwo form={form} formKey={formKey} fieldConfig={fieldConfig}/>
-      <div className="flex w-full flex-grow flex-row gap-2">
+      <div className="flex w-full flex-grow flex-wrap space-y-4 sm:space-y-0 sm:flex-nowrap sm:gap-2">
         <CityName form={form} formKey={formKey} fieldConfig={fieldConfig} />
         <StateName form={form} formKey={formKey} fieldConfig={fieldConfig}/>
         <PostalName form={form} formKey={formKey} fieldConfig={fieldConfig}/>
