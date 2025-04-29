@@ -1,6 +1,6 @@
 
 "use client"
-import { LinkIcon } from "@heroicons/react/20/solid";
+import { PlusIcon } from "@heroicons/react/20/solid";
 import BasicDetails from "~/app/portal/device_remote_access_session/_components/forms/basic-details/client";
 import { useSideDrawer } from "~/components/platform/SideDrawer";
 import { Button } from "~/components/ui/button";
@@ -33,7 +33,8 @@ export const CustomNewButton = () => {
   return (
     <div className="flex gap-2">
       <Button onClick={() => handleOpenSideDrawer()}>
-        <LinkIcon className={`h-4 w-4 text-secondary`} />
+        New
+        <PlusIcon className={`h-4 w-4 text-secondary`} />
       </Button>
     </div>
   );

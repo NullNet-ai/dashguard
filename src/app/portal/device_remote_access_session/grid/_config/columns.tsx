@@ -1,38 +1,61 @@
-"use client";
+'use client'
 
-import { type ColumnDef } from "@tanstack/react-table";
-import StatusCell from "~/components/ui/status-cell";
+import { type ColumnDef } from '@tanstack/react-table'
+
+import StatusCell from '~/components/ui/status-cell'
 
 const gridColumns = [
   {
-    header: "ID",
-    accessorKey: "code",
-  },
-  {
-    header: "State",
-    accessorKey: "status",
-    enableResizing: false,
-    cell: ({ row }) => {
-      const value = row?.original?.status;
-      return <StatusCell value={value} />;
+    header: 'ID',
+    accessorKey: 'code',
+    search_config: {
+      operator: 'like',
     },
   },
   {
-    header: "Category",
-    accessorKey: "category"
+    header: 'State',
+    accessorKey: 'status',
+    enableResizing: false,
+    cell: ({ row }) => {
+      const value = row?.original?.status
+      return <StatusCell value={value} />
+    },
   },
   {
-    header: "Type",
-    accessorKey: "remote_access_type"
+    header: 'Category',
+    accessorKey: 'remote_access_category',
+    search_config: {
+      operator: 'like',
+    },
   },
   {
-    header: "Device",
-    accessorKey: "device_name"
+    header: 'Type',
+    accessorKey: 'remote_access_type',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Device',
+    accessorKey: 'device_name',
+    sortKey: 'devices.instance_name',
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'instance_name',
+    },
   },
 
   {
-    header: "Status",
-    accessorKey: "remote_access_status"
+    header: 'Status',
+    accessorKey: 'remote_access_status',
+    cell: ({ row }) => {
+      const value = row?.original?.remote_access_status
+      return <StatusCell value={value} />
+    },
+    search_config: {
+      operator: 'like',
+    },
   },
   {
     header: 'Updated Date',
@@ -82,9 +105,9 @@ const gridColumns = [
       operator: 'like',
     },
   },
-] as ColumnDef<any>[];
+] as ColumnDef<any>[]
 
-export default gridColumns;
+export default gridColumns
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
-export const TO_HIDE_COLUMNS_WHEN_MOBILE = [];
+export const TO_HIDE_COLUMNS_WHEN_MOBILE = []

@@ -16,7 +16,8 @@ function MainServer({
   advanceFilter,
   pagination,
   parentType = 'grid',
-  grouping
+  grouping,
+  customCreateButton
 }: IPropsGrid) {
 
   return (
@@ -32,7 +33,7 @@ function MainServer({
       grouping={grouping}
     >
       <GridScrollView className="hidden lg:block">
-        <GridDesktop parentType={parentType} />
+        <GridDesktop parentType={parentType} customCreateButton={customCreateButton} />
       </GridScrollView>
       <div className="my-0 lg:my-8 h-full md:my-8 md:mt-0 md:mb-12 lg:mb-0 lg:hidden">
         <GridMobile />

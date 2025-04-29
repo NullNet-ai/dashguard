@@ -249,3 +249,8 @@ input[type="number"] {
   display: none; /* Chrome, Safari, and Opera */
 }
 
+
+.container-terminal .xterm-screen{
+  height: 100vh!important; 
+  width: 100vw!important;
+}
