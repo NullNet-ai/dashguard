@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { z } from "zod";
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { api } from "~/trpc/react";
+import { z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { api } from '~/trpc/react';
+import FormImplementationGuide from '../../form_guideline';
 
 // Remove this guideline
-import FormGuideLine from "../../form_guideline";
 
 const FormSchema = z.object({});
 // Paste the code snippet here
@@ -18,5 +18,5 @@ const FormSchema = z.object({});
 // 3. IHandleSubmit is imported from "~/components/platform/FormBuilder/types"
 // 4. Fields are defined in the FormBuilder component
 export default function BasicDetails({ params, defaultValues }: IFormProps) {
-  return <FormGuideLine />;
+  return <FormImplementationGuide />;
 }
