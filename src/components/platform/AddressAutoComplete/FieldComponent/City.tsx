@@ -23,7 +23,7 @@ export default function CityName({
   }, [address_values_country]);
 
   return (
-    <div>
+    <div className="w-full">
       <FormField
         name="details.city"
         control={form.control}
