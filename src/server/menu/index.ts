@@ -3,6 +3,7 @@
   import organization from "./organization";
   import account_organization from "./account_organization";
   import settings from "./settings";
+  import device from "./device";
 
 const menu = [
   contact,
@@ -10,6 +11,7 @@ const menu = [
   organization,
   account_organization,
   settings,
+  device,
 ];
 
 export default menu;

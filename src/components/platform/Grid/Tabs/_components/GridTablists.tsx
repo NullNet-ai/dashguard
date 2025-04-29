@@ -175,7 +175,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists]);
+  }, [tablists, isClient]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
