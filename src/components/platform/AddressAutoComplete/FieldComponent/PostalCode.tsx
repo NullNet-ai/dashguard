@@ -9,7 +9,7 @@ export default function PostalName({ form,fieldConfig,formKey }: IFieldComponent
   // };
 
   return (
-    <div className="space-y-0.5">
+    <div className="w-full">
       <FormField
         name="details.postal_code"
         control={form.control}
@@ -22,7 +22,7 @@ export default function PostalName({ form,fieldConfig,formKey }: IFieldComponent
                 ...fieldConfig,
                 required: true,
                 placeholder: "Enter ZIP Code",
-                label: "ZIP Code",
+                label: "ZIP/Postal Code",
                 id: `details.postal_code`,
               }}
               formRenderProps={formRenderProps}
