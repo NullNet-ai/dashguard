@@ -214,7 +214,7 @@ export const gridRouter = createTRPCRouter({
         entity,
         sorting,
       } = input;
- 
+
       const pluck_object = {
         created_by: ['id', 'status'],
         updated_by: ['id', 'status'],
@@ -223,98 +223,97 @@ export const gridRouter = createTRPCRouter({
         [pluralize(entity)]: input.pluck,
       };
 
-      const query = ctx.dnaClient
-        .findAll({
-          entity,
-          token: ctx.token.value,
-          query: {
-            pluck: input.pluck,
-            track_total_records: true,
-            pluck_object: pluck_object,
-            advance_filters: [...(_advance_filters as IAdvanceFilters[])],
-            order: {
-              starts_at:
-                // current 5 *  input.limit 50 = 250
-                (input.current || 0) === 0
-                  ? 0
-                  : (input.current || 1) * (input.limit || 100) -
-                    (input.limit || 100),
-              limit: input.limit || 1,
-              by_field:
-                input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
-              by_direction:
-                input?.sorting?.length === 1
-                  ? input.sorting[0]?.desc
-                    ? EOrderDirection.DESC
-                    : EOrderDirection.ASC
-                  : EOrderDirection.DESC,
-            },
-            ...(pluck_object
-              ? {
-                  multiple_sort:
-                    sorting?.length && sorting?.length > 1
-                      ? formatSorting(sorting)
-                      : [],
-                  concatenate_fields: [
-                    // {
-                    //   fields: ['first_name', 'last_name'],
-                    //   field_name: 'full_name',
-                    //   separator: ' ',
-                    //   entity: 'contacts',
-                    //   aliased_entity: 'created_by',
-                    // },
-                    // {
-                    //   fields: ['first_name', 'last_name'],
-                    //   field_name: 'full_name',
-                    //   separator: ' ',
-                    //   entity: 'contacts',
-                    //   aliased_entity: 'updated_by',
-                    // },
-                    // {
-                    //   fields: ['created_date', 'created_time'],
-                    //   field_name: 'created_date_time',
-                    //   separator: ' ',
-                    //   entity: 'contacts',
-                    // },
-                    // {
-                    //   fields: ['updated_date', 'updated_time'],
-                    //   field_name: 'updated_date_time',
-                    //   separator: ' ',
-                    //   entity: 'contacts',
-                    // },
-                  ],
-                }
-              : {}),
+      const query = ctx.dnaClient.findAll({
+        entity,
+        token: ctx.token.value,
+        query: {
+          pluck: input.pluck,
+          track_total_records: true,
+          pluck_object: pluck_object,
+          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+          order: {
+            starts_at:
+              // current 5 *  input.limit 50 = 250
+              (input.current || 0) === 0
+                ? 0
+                : (input.current || 1) * (input.limit || 100) -
+                  (input.limit || 100),
+            limit: input.limit || 1,
+            by_field:
+              input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+            by_direction:
+              input?.sorting?.length === 1
+                ? input.sorting[0]?.desc
+                  ? EOrderDirection.DESC
+                  : EOrderDirection.ASC
+                : EOrderDirection.DESC,
           },
-        })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       alias: 'created_by',
-        //       entity: 'account_organizations',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'contacts',
-        //       field: 'created_by',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       alias: 'updated_by',
-        //       entity: 'account_organizations',
-        //       field: 'id',
-        //     },
-        //     from: {
-        //       entity: 'contacts',
-        //       field: 'updated_by',
-        //     },
-        //   },
-        // });
+          ...(pluck_object
+            ? {
+                multiple_sort:
+                  sorting?.length && sorting?.length > 1
+                    ? formatSorting(sorting)
+                    : [],
+                concatenate_fields: [
+                  // {
+                  //   fields: ['first_name', 'last_name'],
+                  //   field_name: 'full_name',
+                  //   separator: ' ',
+                  //   entity: 'contacts',
+                  //   aliased_entity: 'created_by',
+                  // },
+                  // {
+                  //   fields: ['first_name', 'last_name'],
+                  //   field_name: 'full_name',
+                  //   separator: ' ',
+                  //   entity: 'contacts',
+                  //   aliased_entity: 'updated_by',
+                  // },
+                  // {
+                  //   fields: ['created_date', 'created_time'],
+                  //   field_name: 'created_date_time',
+                  //   separator: ' ',
+                  //   entity: 'contacts',
+                  // },
+                  // {
+                  //   fields: ['updated_date', 'updated_time'],
+                  //   field_name: 'updated_date_time',
+                  //   separator: ' ',
+                  //   entity: 'contacts',
+                  // },
+                ],
+              }
+            : {}),
+        },
+      });
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'created_by',
+      //       entity: 'account_organizations',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'contacts',
+      //       field: 'created_by',
+      //     },
+      //   },
+      // })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       alias: 'updated_by',
+      //       entity: 'account_organizations',
+      //       field: 'id',
+      //     },
+      //     from: {
+      //       entity: 'contacts',
+      //       field: 'updated_by',
+      //     },
+      //   },
+      // });
 
       if (input.grouping?.length) {
         query.groupBy({
@@ -775,6 +774,7 @@ export const gridRouter = createTRPCRouter({
             default: z.boolean().optional(),
             display_value: z.string().optional(),
             filters: z.array(z.any()).optional(),
+            parse_as: z.string().optional(),
           }),
         ),
         gridKey: z.string().optional(),
@@ -967,6 +967,7 @@ export const gridRouter = createTRPCRouter({
           field: item.field,
           values: item.values,
           default: item.default,
+          ...(item.parse_as ? { parse_as: item.parse_as } : {}),
         };
       });
       const groupSorts = groups?.map((item: any) => ({
