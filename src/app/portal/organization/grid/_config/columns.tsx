@@ -19,6 +19,7 @@ const gridColumns = [
   {
     header: 'Category',
     accessorKey: 'categories',
+    data_type: 'array',
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
       return categories?.map((category: string, index: number) => {
