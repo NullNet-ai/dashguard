@@ -230,11 +230,11 @@ export const packetRouter = createTRPCRouter({
     }
     const res = await ctx.dnaClient.aggregate({
       query: {
-        entity: 'packets',
+        entity: 'connections',
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'total_length',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -242,7 +242,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'timestamp',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.IS_BETWEEN,
             values: time_range,
           },
@@ -253,7 +253,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria',
             field: 'device_id',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.EQUAL,
             values: [
               device_id,
@@ -309,7 +309,7 @@ export const packetRouter = createTRPCRouter({
             aggregations: [
               {
                 aggregation: 'SUM',
-                aggregate_on: 'bytes',
+                aggregate_on: 'total_byte',
                 bucket_name: 'bandwidth',
               },
             ],
@@ -402,7 +402,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'bytes',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -446,7 +446,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'bytes',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],
@@ -678,7 +678,7 @@ export const packetRouter = createTRPCRouter({
           aggregations: [
             {
               aggregation: 'SUM',
-              aggregate_on: 'bytes',
+              aggregate_on: 'total_byte',
               bucket_name: 'bandwidth',
             },
           ],

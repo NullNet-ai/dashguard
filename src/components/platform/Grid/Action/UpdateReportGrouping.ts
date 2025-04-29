@@ -16,9 +16,9 @@ export async function UpdateReportGrouping({
   const searchParams = headerList.get("x-full-search-query-params") || "";
   const urlSearchParams = new URLSearchParams(searchParams);
 
-  api.grid.updateReportGrouping({
-    grouping,
-  });
+  // api.grid.updateReportGrouping({
+  //   grouping,
+  // });
 
   const groupParams = grouping.map((item) => item.value).join(",");
    

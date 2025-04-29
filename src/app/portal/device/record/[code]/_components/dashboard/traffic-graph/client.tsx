@@ -21,6 +21,8 @@ import Search from '../timeline/Search'
 import { timeDuration } from '../timeline/Search/configs'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { Loader } from '~/components/ui/loader';
+import { useSocketConnection } from '../custom-hooks/useSocketConnection';
+import { updateFilteredData } from './function/updateFilteredData'
 
 
 const chartConfig = {
@@ -35,13 +37,20 @@ const chartConfig = {
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
+
+const channel_name = 'connection_traffic_graph'
+
 const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const eventEmitter = useEventEmitter()
   const [_resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
-    const [loading, setLoading] = useState<boolean>(false)
-    const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
-    const [filterUpdateId, setFilterUpdateId] = useState("01JP0WDHVNQAVZN14AA")
+  const [loading, setLoading] = useState<boolean>(false)
+  const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
+  const [filterUpdateId, setFilterUpdateId] = useState("01JP0WDHVNQAVZN14AA")
+  const [token, setToken] = React.useState<string | null>(null)
+  const [orgID, setOrgID] = React.useState<string | null>(null)
+  const [filteredData, setFilteredData] = React.useState<any[]>([])
+  const {socket} = useSocketConnection({channel_name, token})
  const [{
     time_count,
     time_unit,
@@ -52,6 +61,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
     return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
   }, [graphType])
 
+  const getAccount = api.organizationAccount.getAccountID.useMutation();
 const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'traffic_graph_filter',
@@ -122,30 +132,61 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       timezone,
       device_id: defaultValues?.id,
     }, { enabled:false })
+  
 
-  const filteredData = packetsIP?.map((item) => {
-    const date = moment(item.bucket)
-    if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
-      return {
-        ...item,
-        bucket: date.format('HH:mm:ss')
+    useEffect(() => {
+      const _data = packetsIP?.map((item) => {
+        const date = moment(item.bucket)
+        if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
+        return {
+          ...item,
+          bucket: date.format('HH:mm:ss')
+        }
       }
-    }
-    return {...item, bucket: date.format('MM/DD')}
-  })
+      return {...item, bucket: date.format('MM/DD')}
+    })
+    setFilteredData(_data)
+  },[packetsIP])
 
+  useEffect(() => {
+        if (!socket || !defaultValues?.id || !orgID) return
+        socket.on( `traffic_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+         const updated_filtered_data =  updateFilteredData(filteredData, data)
+         setFilteredData(updated_filtered_data)
+         
+        })
+      },[socket, filteredData, orgID, defaultValues?.id])
+
+    useEffect(() => {
+      const _getAccount = async () => {
+        const res = await getAccount.mutateAsync()
+        const { organization_id, token } = res || {}
+        setOrgID(organization_id)
+        setToken(token)
+      }
+      
+      _getAccount()
+      
+    }, [])
+  
   useEffect(() => {
     refetch()
     setLoading(false)
+
+    const interval = setInterval(() => {
+      refetch()
+    }, 1000)
+    return () => {
+      clearInterval(interval)
+    }
   }
   , [resolution, time_unit, time_count, graphType])
-
 
 
   return (
     <>
     <Filter params={params} type='traffic_graph_filter'  />
-    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
+    <Search  params={{...params, router: 'packet', resolver: 'filterConnections' }} filter_type='traffic_graph_search' />
     {  loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."

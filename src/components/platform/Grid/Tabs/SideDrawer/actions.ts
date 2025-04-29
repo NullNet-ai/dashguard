@@ -2,13 +2,13 @@
 import { api } from '~/trpc/server'
 
 export const saveGridFilter = async (data : any)  => {
-    const saveGridFilter = await api.gridFilter.createGridFilter(data)
+    const saveGridFilter = await api.cachedFilter.createFilter(data)
     
     return saveGridFilter
 }
 
 export const updateGridFilter = async (data : any)  => {
-    const updateGridFilter = await api.gridFilter.updateGridFilter(data)
+    const updateGridFilter = await api.cachedFilter.updateFilter(data)
     
     return updateGridFilter
 }
@@ -16,20 +16,22 @@ export const updateGridFilter = async (data : any)  => {
 export const updateAllFilterdata = async (tabs : any[])  => {
 
     
-   await api.gridFilter.updateGridAllFilter({tabs})
+   await api.cachedFilter.updateFilter({type: 'timeline_filter',data: tabs})
 
 }
 
 export const removeGridFilter = async (id : string)  => {
-    const url = await api.gridFilter.removeGridFilter({
-        id
+    const url = await api.cachedFilter.removeFilter({
+        id,
+        type: 'timeline_filter'
     })
     return url
 }
 
 export const duplicateFilterTab = async (tab : Record<string,any>)  => {
-    const url = await api.gridFilter.duplicateGridFilter({
-        tab
+    const url = await api.cachedFilter.duplicateFilter({
+        data: tab,
+        type: 'timeline_filter',
     })
 
     return url

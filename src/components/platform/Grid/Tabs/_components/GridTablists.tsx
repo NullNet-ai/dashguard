@@ -22,7 +22,7 @@ import {
 } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
-import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
+import { updateAllMaindata } from '~/components/platform/Tab/Actions/actions';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
@@ -189,7 +189,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
 
   const updatecachedItems = async (items: any) => {
     try {
-      await updateAllGridData(items)
+      await updateAllMaindata(items)
     } catch (error) {
       console.error(error);
     }

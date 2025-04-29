@@ -3,7 +3,7 @@ import axios from 'axios'
 export async function getFlagDetails(country: string) {
   if (!country || typeof country !== 'string' || country.length < 2) {
     console.error('Invalid country code:', country)
-    return { flag: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgMhTDC-OumaVj0TC9I486UVVWDW22Qt61ISByC_Qcz7WR4mBPLbVfMzN2aPxlumjIdvY&usqp=CAU', name: 'No IP Info', country: 'No IP Info' }
+    return { flag: '/unknown-flag.svg', name: 'No IP Info', country: 'No IP Info' }
   }
 
   try {

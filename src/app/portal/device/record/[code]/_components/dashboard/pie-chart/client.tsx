@@ -13,7 +13,7 @@ import { type IFormProps } from '../types'
 import { formatBytes } from './function/formatBytes'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 
-const channel_name = 'packets_pie_chart'
+const channel_name = 'connections_pie_chart'
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const initialTraffic = 0
@@ -35,6 +35,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
 
   const {socket} = useSocketConnection({channel_name, token})
+  
   const getAccount = api.organizationAccount.getAccountID.useMutation();
 
   // Use a ref to store the previous traffic value
@@ -54,8 +55,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     const _getAccount = async () => {
       const res = await getAccount.mutateAsync()
       
-      const { account_id, token } = res || {}
-      setOrgAccountID(account_id)
+      const { organization_id, token } = res || {}
+      setOrgAccountID(organization_id)
       setToken(token)
     }
     
@@ -65,16 +66,15 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   useEffect(() => {
     if (!socket || !org_acc_id) return
     let currentTime: any = null
-
     
-    socket.on( `${channel_name}-${defaultValues?.id}-${org_acc_id}`, (data: Record<string,any>) => {
-      let currentTraffic = data?.packet?.total_length || 0
-      if(currentTime == data?.packet?.timestamp) {
-         currentTraffic = trafficData.traffic + data?.packet?.total_length
+    socket.on( `pie_chart-${defaultValues?.id}-${org_acc_id}`, (data: Record<string,any>) => {
+      let currentTraffic = data?.total_byte || 0
+      if(currentTime == data?.timestamp) {
+         currentTraffic = trafficData.traffic + data?.total_byte
       }
       const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
       setTrafficData({ traffic: currentTraffic, maxTraffic })
-      currentTime = data?.packet?.timestamp
+      currentTime = data?.timestamp
     })
   },[socket, org_acc_id])
     

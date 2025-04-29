@@ -18,7 +18,7 @@ import { updateBandwidth } from './functions/updateBandwidth';
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
-const channel_name = 'packets_timeline'
+const channel_name = 'timeline_connections'
 
 interface IProps extends PropsWithChildren {
   params?: {
@@ -32,7 +32,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [bandwidth, setBandwidth] = useState<any>([])
+  const [new_bandwidth, setNewBandwidth] = useState<any>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
@@ -62,71 +62,77 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
   // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
 
+  const time_range = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true })
+
   const fetchBandwidth = async (add_data_count: number) => {
+  // const fetchBandwidth = async () => {
     const _bandwidth: any = await getBandwidthActions.mutateAsync({
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
+      // source_ips: unique_source_ips
       source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
     },)
 
     if (!_bandwidth) return
 
     if (current_index == 0) {
-      setBandwidth(_bandwidth?.data || [])
+      setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
+        return {...item, time_unit, time_count, resolution, time_range}
+      }) || [])
       return
     }
 
-    setBandwidth((prev: any) => [
+    setNewBandwidth((prev: any) => [
       ...(prev || []),
-      ...(_bandwidth?.data || []),
+      ...(_bandwidth?.data?.map((item: Record<string, any>) => {
+        return {...item, time_unit, time_count, resolution, time_range}
+      }) || []),
     ])
   }
+  
+
+
 
   useEffect(() => {
     const _getAccount = async () => {
       const res = await getAccount.mutateAsync()
       
-      const { account_id, token } = res || {}
-      setOrgAccountID(account_id)
+      const { organization_id, token } = res || {}
+      setOrgAccountID(organization_id)
       setToken(token)
     }
     
     _getAccount()
   }, [])
 
-  const handleSocketData = useCallback(
-    (data: Record<string, any>) => {
-      const _bandwidth = updateBandwidth(bandwidth, data?.packet);
-      setBandwidth([..._bandwidth])
-    },
-    [bandwidth]
-  );
-  
   useEffect(() => {
     if (!socket || !org_acc_id) return;
   
-    const eventKey = `${channel_name}-${org_acc_id}`;
-    socket.on(eventKey, handleSocketData);
+    const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
+    socket.on(eventKey, (data: any) => {
+      const updated_bandwidth = updateBandwidth(new_bandwidth, data);
+      setNewBandwidth([...updated_bandwidth])
+    });
   
-    return () => {
-      socket.off(eventKey, handleSocketData); // Cleanup
-    };
-  }, [socket, org_acc_id, handleSocketData]);
+    // return () => {
+    //   socket.off(eventKey, handleSocketData); // Cleanup
+    // };
+  }, [socket, org_acc_id, new_bandwidth]);
   
   
 
-  const fetchMoreData = async () => {
-    if (!unique_source_ips || unique_source_ips.length === 0) {
-      console.warn('No source IPs available for fetching bandwidth')
-      return
-    }
+  // const fetchMoreData = async () => {
+  //   if (!unique_source_ips || unique_source_ips.length === 0) {
+  //     console.warn('No source IPs available for fetching new_bandwidth')
+  //     return
+  //   }
 
-    if (current_index + 2 > unique_source_ips.length) return
-    setCurrentIndex(current_index + 2)
+  //   if (current_index + 2 > unique_source_ips.length) return
+  //   setCurrentIndex(current_index + 2)
 
-    fetchBandwidth(2)
-  }
+  //   fetchBandwidth(2)
+  // }
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -155,10 +161,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const {
         data: time_unit_resolution,
       } = await refetchTimeUnitandResolution()
-
+      
       const { time, resolution = '1h' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
-
+      
       setTime({
         time_count,
         time_unit: time_unit as 'hour',
@@ -167,6 +173,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
+
 
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return
@@ -188,7 +195,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
-    const bandwidthIps = bandwidth?.map((entry: {
+    const bandwidthIps = new_bandwidth?.map((entry: {
       source_ip: string
     }) => entry.source_ip) || []
 
@@ -199,17 +206,17 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (areIpsSame) return
 
     setCurrentIndex(current_index + 20)
-    setBandwidth([])
-    fetchBandwidth(20)
+    setNewBandwidth([])
+    fetchBandwidth(10)
   }, [unique_source_ips])
 
-const chartData = useMemo(() => bandwidth,[bandwidth])
+const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
 
   const state = {
-    flowData: bandwidth,
+    flowData: new_bandwidth,
     loading,
     unique_source_ips,
-    fetchMoreData,
+    // fetchMoreData,
     chartData
 
   } as any

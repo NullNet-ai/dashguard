@@ -8,6 +8,12 @@ export const updateAllInnerdata = async (tabs: any[], context: string) => {
   })
 }
 
+export const updateAllGridData = async (tabs: any[]) => {
+  await api.gridFilter.updateGridAllFilter({
+    tabs,
+  })
+}
+
 export const updateAllMaindata = async (tabs: any[]) => {
   await api.tab.updateAllMainTabs({
     tabs,

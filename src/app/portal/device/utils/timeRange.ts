@@ -112,6 +112,7 @@ export const getLastTimeStamp = (
   };
 
 
+  console.log("%c Line:116 🍓 [formatDate(past), formatDate(now)]", "color:#fca650", [formatDate(past), formatDate(now)]);
   return [formatDate(past), formatDate(now)];
 };
 

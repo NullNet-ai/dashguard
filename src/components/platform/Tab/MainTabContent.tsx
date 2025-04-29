@@ -24,7 +24,7 @@ import { SideDrawerView, useSideDrawer } from '../SideDrawer';
 import { Input } from '~/components/ui/input';
 import { Button } from '@headlessui/react';
 import { debounce, lowerCase, toLower } from 'lodash';  // Add this import at the top
-import { calculateMainTabItems, calculateVisibleItems, reorderShowActiveItem } from '~/utils/sort-tab-items';
+import { calculateMainTabItems, reorderShowActiveItem } from '~/utils/sort-tab-items';
 
 import MainTabitem from './MainTabItem';
 import MainDropTabItem from './MainDropTabItem';
@@ -45,7 +45,7 @@ const MainTabContent = ({
   const { open } = useSidebar();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const  {state: drawerState,  } = useSideDrawer ()
-  const {width, isOpen, isPinned} = drawerState
+  const {width, isOpen, isPinned} = drawerState as any
   const [searchValue, setSearchValue] = useState<string>('')
   const [entity] = pathname.split('/').slice(2);
   const [datas, setDatas] = useState(par_items)

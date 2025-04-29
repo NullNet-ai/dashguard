@@ -22,7 +22,7 @@ import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 import { updateNetworkBuckets } from './function/updateNetworkBucket';
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-const channel_name = 'packets_interfaces'
+const channel_name = 'connection_interfaces'
 
 const InteractiveGraph = ({
   defaultValues,
@@ -115,8 +115,8 @@ const InteractiveGraph = ({
 
     useEffect(() => {
       if (!socket || !defaultValues?.id || !orgID) return
-      socket.on( `packet_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
-       const updated_filtered_data =  updateNetworkBuckets(filteredData, data?.packet)
+      socket.on( `connection_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+       const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
        setFilteredData(updated_filtered_data)
       })
     },[socket, filteredData, orgID, defaultValues?.id])
@@ -125,12 +125,6 @@ const InteractiveGraph = ({
   useEffect(() => {
     fetchBandWidth()
 
-    // const interval = setInterval(() => {
-    //   fetchBandWidth()
-    // }, 1000)
-    //  () => {
-    //   clearInterval(interval)
-    // }
   }, [interfaces, defaultValues?.id, defaultValues?.device_status])
 
   useEffect(() => {

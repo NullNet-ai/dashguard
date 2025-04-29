@@ -32,7 +32,7 @@ export default function CreateNewFilter() {
 
   const handleManageFilter = () => {
     actions?.openSideDrawer({
-      drawerType: 'manageFilter',
+      title: 'Manage Filter',
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {

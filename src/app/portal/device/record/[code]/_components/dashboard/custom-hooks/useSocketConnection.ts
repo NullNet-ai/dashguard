@@ -32,7 +32,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
     });
 
     console.debug('%c Line:35 🥒 socket', 'color:#4fff4B', socket);
-    socket.on('packet_multi_graph-07da2369-432b-48f4-8714-372f9412ff57', (data: any) => {
+    socket.on('connection_multi_graph-07da2369-432b-48f4-8714-372f9412ff57', (data: any) => {
       console.debug('%c Line:35 🍌 data', 'color:#3f7cff', data);
     })
     
@@ -42,7 +42,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
     });
 
     if(channel_name) {
-      socket.emit('updateHighWaterMark', { channel_name: channel_name, highWaterMark: 10 });
+      socket.emit('updateHighWaterMark', { channel_name: channel_name, highWaterMark: 1 });
     }
 
     return () => {
