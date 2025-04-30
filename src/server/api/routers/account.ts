@@ -1,7 +1,6 @@
 import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
-import argon2 from 'argon2';
-import { z } from 'zod';
 import Bluebird from 'bluebird';
+import { z } from 'zod';
 import {
   createTRPCRouter,
   privateProcedure,
@@ -10,26 +9,17 @@ import {
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { ContactAccountDetailSchema } from '~/server/zodSchema/contact/accountDetails';
 
-import { createDefineRoutes } from '../baseCrud';
-import { EStatus } from '../types';
-import ZodItems from '~/server/zodSchema/grid/items';
-import { formatSorting } from '~/server/utils/formatSorting';
-import { pluralize } from '~/server/utils/pluralize';
 import { TRPCError } from '@trpc/server';
-import { formatPhoneNumber } from '~/utils/formatter';
-import { headers } from 'next/headers';
-import nodemailer from 'nodemailer';
 import { pick } from 'lodash';
 import { formatDate } from '~/server/utils/formatDate';
-import { TMethod, createSchedule, dateToCron } from '~/lib/createSchedule';
+import { formatSorting } from '~/server/utils/formatSorting';
+import { pluralize } from '~/server/utils/pluralize';
+import ZodItems from '~/server/zodSchema/grid/items';
+import { formatPhoneNumber } from '~/utils/formatter';
+import { createDefineRoutes } from '../baseCrud';
+import { EStatus } from '../types';
 
-const {
-  MAILER_AUTH_USER,
-  MAILER_AUTH_PASS,
-  MAILER_HOST,
-  MAILER_PORT,
-  ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!',
-} = process.env;
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
 const INVITATION_LINK_EXPIRED = parseInt(
   process.env.INVITATION_LINK_EXPIRED || '1',
@@ -37,14 +27,6 @@ const INVITATION_LINK_EXPIRED = parseInt(
 );
 
 const ENTITY = 'account_organizations';
-const transporter = nodemailer.createTransport({
-  auth: {
-    user: MAILER_AUTH_USER,
-    pass: MAILER_AUTH_PASS,
-  },
-  host: MAILER_HOST,
-  port: Number(MAILER_PORT),
-});
 
 export const accountRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
@@ -349,9 +331,10 @@ export const accountRouter = createTRPCRouter({
                 'contact_id',
               ],
               contacts: ['id', 'first_name', 'last_name'],
-              // external_contacts: ['id', 'first_name', 'last_name'],
-              // created_by: ['first_name', 'last_name'],
-              // updated_by: ['first_name', 'last_name'],
+              created_by_account_organizations: ['id'],
+              created_by: ['id', 'first_name', 'last_name'],
+              updated_by_account_organizations: ['id'],
+              update_by: ['id', 'first_name', 'last_name'],
             },
             track_total_records: true,
             advance_filters: input.advance_filters as IAdvanceFilters[],
@@ -367,20 +350,20 @@ export const accountRouter = createTRPCRouter({
               ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
-              // {
-              //   fields: ['first_name', 'last_name'],
-              //   field_name: 'full_name',
-              //   separator: ' ',
-              //   entity: 'contacts',
-              //   aliased_entity: 'created_by',
-              // },
-              // {
-              //   fields: ['first_name', 'last_name'],
-              //   field_name: 'full_name',
-              //   separator: ' ',
-              //   entity: 'contacts',
-              //   aliased_entity: 'updated_by',
-              // },
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'created_by',
+              },
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'updated_by',
+              },
             ],
           },
         })
@@ -394,6 +377,64 @@ export const accountRouter = createTRPCRouter({
             from: {
               entity: 'account_organizations',
               field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'account_organizations',
+              field: 'id',
+            },
+            from: {
+              alias: 'created_by_account_organizations',
+              entity: 'account_organizations',
+              field: 'created_by',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
+              alias: 'created_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'created_by',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'account_organizations',
+              field: 'id',
+            },
+            from: {
+              alias: 'updated_by_account_organizations',
+              entity: 'account_organizations',
+              field: 'updated_by',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
+              alias: 'updated_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'updated_by',
             },
           },
         });
@@ -425,7 +466,7 @@ export const accountRouter = createTRPCRouter({
       //     },
       //   },
       // });
-    
+
       if (input.grouping?.length) {
         query.groupBy({
           query: {

@@ -1,5 +1,4 @@
 'use server';
-import Bluebird from 'bluebird';
 import React from 'react';
 
 import Grid from '~/components/platform/Grid';
@@ -13,7 +12,6 @@ import { defaultSorting } from './_config/sorting';
 import { customArchive } from './customArchiveAction';
 import ArchiveComponent from './customDefaultActions/Archive';
 import DeleteComponent from './customDefaultActions/Delete';
-import { defaultAdvanceFilter } from './_config/advanceFilter';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
 
 export default async function OrganizationGridPage(): Promise<React.ReactElement | null> {
@@ -33,8 +31,8 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
 
   const {
     sorts,
-    filters,
     pagination,
+    filters,
     columns: columnOrder,
     groups,
   } = (await getGridCacheData()) ?? {};
@@ -66,6 +64,15 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
         archiveCustomAction: customArchive,
         archiveCustomComponent: ArchiveComponent,
         archiveDialogCustomComponent: ArchiveDialog,
+        searchConfig: {
+          router: 'grid',
+          resolver: 'items',
+          query_params: {
+            entity: 'organization',
+            pluck: _pluck,
+            group_advance_filters: filters?.groupAdvanceFilters,
+          },
+        },
       }}
       data={items}
       defaultSorting={sorts?.defaultSorting || defaultSorting}
