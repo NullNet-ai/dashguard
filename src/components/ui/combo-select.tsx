@@ -378,6 +378,9 @@ export function ComboSelect({
                                                 "group flex items-center justify-between py-2 cursor-default select-none text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
                                                 "px-2"
                                             )}
+                                            onClick={()=> {
+                                                setOpen(false);
+                                            }}
                                             data-test-id={testId ? `${testId}-option-${option.value}` : undefined}
                                         >
                                             {/* Left side container with avatar, status, checkmark and label */}
@@ -463,6 +466,9 @@ export function ComboSelect({
                                                 "group flex items-center justify-between py-2 cursor-default select-none text-md text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
                                                 "px-2"
                                             )}
+                                            onClick={()=> {
+                                                setOpen(false);
+                                            }}
                                             data-test-id={testId ? `${testId}-option-${option.value}` : undefined}
                                         >
                                             {/* Left side container with avatar, status, checkmark and label */}
