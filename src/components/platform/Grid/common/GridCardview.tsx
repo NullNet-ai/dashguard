@@ -14,11 +14,10 @@ import GridCardViewContent from './GridCardViewContent';
 
 export default function GridCardView({parentType} : any) {
   const { state, actions } = useContext(GridContext);
-
   const { config, showArchiveConfirmationModal } = state ?? {};
   const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
   const size = useScreenType();
-  const { defaultShownColumns, statusColumn  } = state?.config ?? {}
+  const { defaultShownColumns, statusColumn, CustomRenderCardView  } = state?.config ?? {}
 
   const getCols = useMemo(() => {
     switch (size) {
@@ -69,6 +68,10 @@ export default function GridCardView({parentType} : any) {
             const selectedDefaultCells = row.getVisibleCells().filter((cell) =>
               defaultShownColumns?.includes(cell.column.id),
             );
+
+            if (CustomRenderCardView) {
+              return <CustomRenderCardView key={rowIndex} row={row}/>
+            }
 
             return <GridCardViewContent
                 row={row}

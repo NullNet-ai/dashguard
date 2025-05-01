@@ -172,6 +172,7 @@ export interface IConfigGrid {
     minHeight?: number;
     summaryWidth?: number;
   };
+  CustomRenderCardView?: (args: any) => JSX.Element;
 }
 
 interface IRowToArchive extends Row<any> {
