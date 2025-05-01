@@ -29,6 +29,7 @@ import { wizardRouter } from './routers/wizard'
 import { organizationAccountRouter } from './routers/organization_account';
 import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session'
 import { gridFilterRouter } from './routers/grid_filter'
+import { resolutionsRouter } from './routers/resolutions'
 
 /**
  * This is the primary router for your server.
@@ -67,6 +68,7 @@ export const appRouter = createTRPCRouter({
   organizationAccount: organizationAccountRouter,
   deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
   gridFilter: gridFilterRouter,
+  resolution: resolutionsRouter,
 })
 
 // export type definition of API

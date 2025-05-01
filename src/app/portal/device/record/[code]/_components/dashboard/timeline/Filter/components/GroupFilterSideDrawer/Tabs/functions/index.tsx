@@ -1,9 +1,8 @@
 'use client'
 import { MinusCircle } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 
-import { type IDropdown } from '~/app/portal/contact/_components/forms/category-details/types'
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
 import { Button } from '~/components/ui/button'
 import { Form } from '~/components/ui/form'
@@ -17,6 +16,8 @@ import {
 
 import { type IFilter } from '../../../../../types'
 import { useManageFilter } from '../../Provider'
+import { api } from '~/trpc/react'
+import { type IDropdown } from '~/app/portal/contact/_components/forms/category-details/types'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },
@@ -59,7 +60,9 @@ const required_fields = [
 ]
 
 const time_resolution_options: { [key: string]: string[] } = {
-  '1d': ['1h', '30m'],
+  '1d': ['1h', '30m', '5m'],
+  '1h': ['1m', '5m'],
+  '30m': ['1m', '5m'],
   '12h': ['1h', '30m'],
   '7d': ['12h', '1d'],
 }
@@ -69,24 +72,56 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
   onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
   const { actions, state } = useManageFilter()
   const { columns, errors } = state ?? {}
+  const [resolutionOptions, setResolutionOptions] = useState<any>([])
+  // console.log("%c Line:72 🥓 resolutionOptions", "color:#465975", resolutionOptions);
 
+  const {
+    refetch: refetchResolution,
+    error,
+  } = api.resolution.fetchResolutions.useQuery({
+  });
   
   const fields = form.getValues().filterGroups
 
-  const getResolutionOptions = (selectedTimeRange: string): IDropdown[] => {
-    const resolutionOptions: { [key: string]: string[] } = time_resolution_options
+  // const getResolutionOptions = async (selectedTimeRange: string): Promise<IDropdown[]> => {
+  //   const resolutionOptions: { [key: string]: string[] } = time_resolution_options
 
-    const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
-    return options
-  }
-  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`) // Get selected value
+  //   const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
+
+  //   const { data }: any = await refetchResolution()
+  //   console.log("%c Line:92 🍢 data", "color:#93c0a4", data);
+
+  //   return [...options, ...data]
+  // }
   
-  const resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange])
+  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`) // Get selected value
 
+  // const _resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange])
+
+  // setResolutionOptions(_resolutionOptions)
+
+  const createResolutionOptions = api.resolution.createResolution.useMutation()
   // form.watch((fields: Record<string, any>) => {
   //   
   //   handleUpdateFilter({ filterGroups: fields.filterGroups })
   // })
+
+  // useEffect(() => {
+  //   const fetchExistingResolutionOptions = async () => {
+  //   const _resolution_options = await getResolutionOptions(selectedTimeRange)
+  //   console.log("%c Line:111 🍓 _resolution_options", "color:#2eafb0", _resolution_options);
+  //   setResolutionOptions(_resolution_options)
+  //   }
+  //   fetchExistingResolutionOptions()
+  // },[selectedTimeRange])
+
+  useEffect(() => {
+    const fetchResolutionType = async () => {
+      const { data } = await refetchResolution()
+      setResolutionOptions(data)
+    }
+    fetchResolutionType()
+  },[resolutionOptions])
 
   useEffect(() => {
     if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
@@ -190,6 +225,29 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         isAlphabetical: false,
+                        selectEnableCreate: true,
+                        // selectOnCreateValidate(text) {
+                        //   const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
+                        //   const isValid = options?.some((option: any) => option.label === text)
+                        //   if (!isValid) {
+                        //     return 'Please select a valid option'
+                        //   }
+                        //   return true
+
+                        // },
+                        selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
+                          const response: any = await createResolutionOptions.mutateAsync({
+                            resolution_type: text,
+                          })
+                          if (response) {
+                            setResolutionOptions([response])
+                            return response
+                          }
+                          return { label: '', value: '' }
+                        },
+                        multiSelectEnableCreate: true,
+                        multiSelectShowCreatableItem: false,
+                        multiSelectUseStringValues: true,
                       },
                     ]}
                     form={form}

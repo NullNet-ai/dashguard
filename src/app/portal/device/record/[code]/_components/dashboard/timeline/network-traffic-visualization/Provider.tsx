@@ -110,14 +110,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!socket || !org_acc_id) return;
   
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
-    socket.on(eventKey, (data: any) => {
-      const updated_bandwidth = updateBandwidth(new_bandwidth, data);
+    socket.on(eventKey, async (data: any) => {
+      const updated_bandwidth = await updateBandwidth(new_bandwidth, data, time);
       setNewBandwidth([...updated_bandwidth])
     });
   
-    // return () => {
-    //   socket.off(eventKey, handleSocketData); // Cleanup
-    // };
+    // Cleanup function to remove the event listener
+    return () => {
+      socket.off(eventKey);
+    };
   }, [socket, org_acc_id, new_bandwidth]);
   
   
@@ -162,7 +163,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         data: time_unit_resolution,
       } = await refetchTimeUnitandResolution()
       
-      const { time, resolution = '1h' } = time_unit_resolution || {}
+      const { time, resolution = '1s' } = time_unit_resolution || {}
       const { time_count = 12, time_unit = 'hour' } = time || {}
       
       setTime({
@@ -207,7 +208,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(current_index + 20)
     setNewBandwidth([])
-    fetchBandwidth(10)
+    fetchBandwidth(1)
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])

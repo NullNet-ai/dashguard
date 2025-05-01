@@ -12,6 +12,7 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 const entity = 'device_remote_access_sessions'
+const remote_type = ['console', 'shell']
 
 export const deviceRemoteAccessSessionRouter = createTRPCRouter({
   fetchDevices: privateProcedure
@@ -31,7 +32,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         token: ctx.token.value,
         query: {
           pluck: ['id', 'device_id', 'remote_access_status'],
-          advance_filters: createAdvancedFilter({ status: 'Active' }),
+          advance_filters: createAdvancedFilter({ status: 'Active', remote_access_status: 'active' }),
           order: {
             limit: limit || 10,
             by_field: 'created_date',
@@ -279,11 +280,13 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         .execute()
         
 
-        const ra_type = remote_access_type.toLowerCase() === 'console' ? 'Shell' : 'UI'
+        const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
 
+        console.log("%c Line:285 🍧 res", "color:#fca650", res);
         if (!res?.data?.length) {
           await createRemoteAccess({ device_id, ra_type, token })
-          return await ctx.dnaClient.findAll({
+          await new Promise((resolve) => setTimeout(resolve, 1000)); 
+          const data = await ctx.dnaClient.findAll({
             entity,
             token: ctx.token.value,
             query: {
@@ -297,6 +300,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             },
           })
           .execute()
+          console.log("%c Line:288 🥚 data", "color:#33a5ff", data);
         }
 
         return res
@@ -304,23 +308,26 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
   disconnectDeviceRemoteAccess: privateProcedure
     .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const { id, device_id, remote_access_type } = input
-      const ra_type = remote_access_type === 'Console' ? 'Shell' : 'UI'
+      const {  device_id, remote_access_type } = input
+      console.log("%c Line:311 🍿 remote_access_type", "color:#fca650", remote_access_type);
+      
+      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
+
       await disconnectRemoteAccess({ device_id, ra_type })
-      const res = await ctx.dnaClient
-        .update(id, {
-          entity,
-          token: ctx.token.value,
-          mutation: {
-            params: {
-              remote_access_status: 'Closed',
-              status: 'Active',
-            },
-            pluck: ['id', 'device_id', 'remote_access_type'],
-          },
-        })
-        .execute()
-      return res
+      // const res = await ctx.dnaClient
+      //   .update(id, {
+      //     entity,
+      //     token: ctx.token.value,
+      //     mutation: {
+      //       params: {
+      //         // remote_access_status: 'Closed',
+      //         status: 'Active',
+      //       },
+      //       pluck: ['id', 'device_id', 'remote_access_type'],
+      //     },
+      //   })
+      //   .execute()
+      // return res
     }
     ),
 

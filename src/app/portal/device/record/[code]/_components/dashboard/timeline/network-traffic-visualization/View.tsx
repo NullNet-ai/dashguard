@@ -11,76 +11,64 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { useFetchNetworkFlow } from './Provider'
 import { cn } from '~/lib/utils'
 
-
 function generateTimeSeriesData(sampleData: any) {
+  const secondMap: any = {};
 
-  const minuteMap: any = {};
-  
-  // Handle the case when there's only a single data point
   if (sampleData.length === 1) {
-    // Extract hour from the single data point
-    const bucketTime = sampleData[0].bucket.split(' ')[1]; // Extract "HH:mm:ss"
-    const hour = bucketTime.substring(0, 2); // Extract hour
+    const bucketTime = sampleData[0].bucket.split(' ')[1]; 
+    const hour = bucketTime.substring(0, 2); 
+    const minute = bucketTime.substring(3, 5); 
 
-    // Initialize minuteMap with all minutes in the hour set to 0
     for (let i = 0; i < 60; i++) {
-      const minutes = i.toString().padStart(2, '0');
-      const timeKey = `${hour}:${minutes}:00`;
-      minuteMap[timeKey] = 0;
+      const seconds = i.toString().padStart(2, '0');
+      const timeKey = `${hour}:${minute}:${seconds}`;
+      secondMap[timeKey] = 0;
     }
-    
-    // Set the bandwidth value for the specific minute from the data point
-    const minute = bucketTime.substring(3, 5); // Extract minute
-    const dataTimeKey = `${hour}:${minute}:00`;
-    minuteMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
+
+    const second = bucketTime.substring(6, 8);
+    const dataTimeKey = `${hour}:${minute}:${second}`;
+    secondMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
   } else {
-    // Original logic for multiple data points
-    // Dynamically determine the hour from the first data point
-    const firstBucket = sampleData[0]?.bucket.split(' ')[1]; // Extract "HH:mm:ss"
-    const hour = firstBucket ? firstBucket.substring(0, 2) : '00'; // Extract "HH" or default to "00"
-
-    // Initialize the minuteMap with all minutes in the determined hour set to 0
+    const firstBucket = sampleData[0]?.bucket.split(' ')[1];
+    const hour = firstBucket ? firstBucket.substring(0, 2) : '00'; 
+    const minute = firstBucket ? firstBucket.substring(3, 5) : '00'; 
     for (let i = 0; i < 60; i++) {
-      const minutes = i.toString().padStart(2, '0');
-      const timeKey = `${hour}:${minutes}:00`; // Use the determined hour
-      minuteMap[timeKey] = 0;
+      const seconds = i.toString().padStart(2, '0'); 
+      const timeKey = `${hour}:${minute}:${seconds}`;
+      secondMap[timeKey] = 0;
     }
 
-    // Populate the minuteMap with sample data
     sampleData.forEach((item: Record<string, any>) => {
-      const bucketTime = item.bucket.split(' ')[1]; // Extract "HH:mm:ss"
-      const timeKey = bucketTime.substring(0, 5) + ':00'; // Format as "HH:mm:00"
-      if (minuteMap[timeKey] !== undefined) {
-        minuteMap[timeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
+      const bucketTime = item.bucket.split(' ')[1]; 
+      const timeKey = bucketTime; 
+      if (secondMap[timeKey] !== undefined) {
+        secondMap[timeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
       }
     });
   }
 
-  // Generate the result array
   const result = [];
-  // Sort the keys to ensure chronological order
-  const sortedKeys = Object.keys(minuteMap).sort();
+  const sortedKeys = Object.keys(secondMap).sort();
   for (const timeKey of sortedKeys) {
     result.push({
       time: timeKey,
-      bandwidth: minuteMap[timeKey],
+      bandwidth: secondMap[timeKey],
     });
   }
 
   return result;
 }
 
+
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0
   if (!data) return
-  data?.forEach((entry) => {
-    entry.result.forEach((record: Record<string, any>) => {
-      const bandwidth = parseInt(record.bandwidth, 10)
+    data?.forEach((record: Record<string, any>) => {
+      const bandwidth = parseInt(record?.bandwidth, 10)
       if (bandwidth > maxBandwidth) {
         maxBandwidth = bandwidth
       }
     })
-  })
 
   return maxBandwidth
 }
@@ -90,27 +78,25 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
   return (value / maxValue) * maxPixels
 }
 
-const getColorForValue = (value: number) => {
-  const maxBandwidth = 1000000
+const getColorForValue = (value: number, maxBandwidth: number) => {
+  const range = maxBandwidth / 3; // Divide the max value into 3 ranges
+
   if (value >= maxBandwidth) {
-    return '#00364b'
+    return '#00364b'; // Darkest color for the highest range
   }
-  else if (value > maxBandwidth / 100) {
-    return '#1d576e'
+  else if (value > 2 * range) {
+    return '#1d576e'; // Second range
   }
-  else if (value > maxBandwidth / 200) {
-    return '#325e6f'
+  else if (value > range) {
+    return '#325e6f'; // Third range
   }
-  else if (value > maxBandwidth / 500) {
-    return '#556971'
-  }
-  else if (value === 0) {
-    return ''
+  else if (value > 0) {
+    return '#556971'; // Lowest range
   }
   else {
-    return '#dadddf'
+    return ''; // No color for zero or undefined values
   }
-}
+};
 
 const maxWidth = 300
 
@@ -130,9 +116,13 @@ export default function NetworkFlowView() {
   return (
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
       {flowData?.map((el, index) => {
-        const { flag, name, result, lastBandwidth } = el
+        const { flag, name, result, lastBandwidth, resolution, time_count, time_unit } = el
+        
+        const unit = time_unit
 
+        // const formattedTimeFrame = generateTimeSeriesData(result, resolution, time_count, time_unit)
         const formattedTimeFrame = generateTimeSeriesData(result)
+        const maxBandwidth: any = getMaxBandwidth(formattedTimeFrame)
 
         return (
           <div className='flex-row flex items-center' key={index}>
@@ -196,7 +186,7 @@ export default function NetworkFlowView() {
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger>
                       <div className={cn(`size-4`)}
-                          style={{backgroundColor: getColorForValue(item.bandwidth)}}
+                          style={{backgroundColor: getColorForValue(item.bandwidth, maxBandwidth)}}
                           key={`timeframe-${index}`}
                         />
                         <TooltipContent side="top">

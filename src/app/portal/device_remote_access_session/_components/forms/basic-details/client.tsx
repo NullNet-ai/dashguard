@@ -35,7 +35,6 @@ export default function RemoteAccessDetails(props: IFormProps) {
         remote_access_type,
         category: remote_access_type?.toLowerCase() === 'console' ? 'Console' : 'Web',
       })
-
       if (res?.success && res) {
         const { remote_access_session } = res?.data[0] as Record<string, any>
 

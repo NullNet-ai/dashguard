@@ -134,6 +134,7 @@
     "react-popper": "^2.3.0",
     "react-resizable-panels": "^2.1.4",
     "react-responsive": "^10.0.0",
+    "react-window": "^1.8.11",
     "react-xtermjs": "^1.0.9",
     "recharts": "^2.13.0",
     "server-only": "^0.0.1",
