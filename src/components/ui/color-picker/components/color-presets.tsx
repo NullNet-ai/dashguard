@@ -76,7 +76,7 @@ export function ColorPresets({
         {/* Tailwind Colors Section */}
         <div className="space-y-2">
           <h5 className="text-xs font-medium">Tailwind Colors</h5>
-          <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {Object.entries(tailwindColors).map(([colorName, shades]) => (
               <div key={colorName} className="space-y-1">
                 <div className="text-xs font-medium capitalize">{colorName}</div>

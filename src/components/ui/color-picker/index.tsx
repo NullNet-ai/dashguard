@@ -355,7 +355,7 @@ export function ColorPicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-4">
+        <PopoverContent className="w-[280px] p-4 max-h-96 sm:max-h-[32rem] md:max-h-max overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex flex-col gap-4">
             {/* Color preview */}
             {colorPreviewComponent}
