@@ -48,7 +48,7 @@ export default function WebTerminal() {
 
   return (
     <div className="container-terminal" style={{ width: '100vw', height: '100vh' }}>
-      <div ref={ref} />
+      <div ref={ref as React.RefObject<HTMLDivElement>} />
     </div>
   )
 }
