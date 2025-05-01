@@ -11,29 +11,62 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { useFetchNetworkFlow } from './Provider'
 import { cn } from '~/lib/utils'
 
+
 function generateTimeSeriesData(sampleData: any) {
-  const hourMap: any = {};
+
+  const minuteMap: any = {};
   
-  for (let i = 0; i < 24; i++) {
-      const hour = i.toString().padStart(2, '0');
-      hourMap[hour] = 0;
+  // Handle the case when there's only a single data point
+  if (sampleData.length === 1) {
+    // Extract hour from the single data point
+    const bucketTime = sampleData[0].bucket.split(' ')[1]; // Extract "HH:mm:ss"
+    const hour = bucketTime.substring(0, 2); // Extract hour
+
+    // Initialize minuteMap with all minutes in the hour set to 0
+    for (let i = 0; i < 60; i++) {
+      const minutes = i.toString().padStart(2, '0');
+      const timeKey = `${hour}:${minutes}:00`;
+      minuteMap[timeKey] = 0;
+    }
+    
+    // Set the bandwidth value for the specific minute from the data point
+    const minute = bucketTime.substring(3, 5); // Extract minute
+    const dataTimeKey = `${hour}:${minute}:00`;
+    minuteMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
+  } else {
+    // Original logic for multiple data points
+    // Dynamically determine the hour from the first data point
+    const firstBucket = sampleData[0]?.bucket.split(' ')[1]; // Extract "HH:mm:ss"
+    const hour = firstBucket ? firstBucket.substring(0, 2) : '00'; // Extract "HH" or default to "00"
+
+    // Initialize the minuteMap with all minutes in the determined hour set to 0
+    for (let i = 0; i < 60; i++) {
+      const minutes = i.toString().padStart(2, '0');
+      const timeKey = `${hour}:${minutes}:00`; // Use the determined hour
+      minuteMap[timeKey] = 0;
+    }
+
+    // Populate the minuteMap with sample data
+    sampleData.forEach((item: Record<string, any>) => {
+      const bucketTime = item.bucket.split(' ')[1]; // Extract "HH:mm:ss"
+      const timeKey = bucketTime.substring(0, 5) + ':00'; // Format as "HH:mm:00"
+      if (minuteMap[timeKey] !== undefined) {
+        minuteMap[timeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
+      }
+    });
   }
-  
-  sampleData.forEach((item: Record<string, any>) => {
-      // Extract hour from the bucket timestamp (format: "2025-04-24 23:00:00")
-      const hour = item.bucket.split(' ')[1].substring(0, 2);
-      hourMap[hour] = item?.bandwidth ? parseInt(item?.bandwidth) : 0
-  });
-  
+
+  // Generate the result array
   const result = [];
-  for (let i = 0; i < 24; i++) {
-      const hour = i.toString().padStart(2, '0');
-      result.push({
-          time: `${hour}:00:00`,
-          bandwidth: hourMap[hour]
-      });
+  // Sort the keys to ensure chronological order
+  const sortedKeys = Object.keys(minuteMap).sort();
+  for (const timeKey of sortedKeys) {
+    result.push({
+      time: timeKey,
+      bandwidth: minuteMap[timeKey],
+    });
   }
-  
+
   return result;
 }
 
@@ -97,7 +130,7 @@ export default function NetworkFlowView() {
   return (
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
       {flowData?.map((el, index) => {
-        const { flag, name, result, source_ip, lastBandwidth } = el
+        const { flag, name, result, lastBandwidth } = el
 
         const formattedTimeFrame = generateTimeSeriesData(result)
 
@@ -171,7 +204,6 @@ export default function NetworkFlowView() {
                             <span className='font-bold text-justify'>{'Time: '}</span>
                             {' '}
                             {item?.time}
-                            {/* Mars & Ray hanggang sa huli  */}
                           </div>
                           <div className="text-lg">
                             <span className='font-bold text-justify'>{'Total Bandwidth: '}</span>
@@ -235,3 +267,4 @@ export default function NetworkFlowView() {
     </div>
   )
 }
+

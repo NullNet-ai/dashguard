@@ -314,11 +314,8 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         name: `${prefix}.${field.field}`,
                         placeholder: 'Select a value',
                         selectSearchable: true,
+                        selectEnableCreate: true,
                         isAlphabetical: false,
-
-                        // multiSelectEnableCreate: true,
-                        // multiSelectShowCreatableItem: false,
-                        // multiSelectUseStringValues: true,
                       },
                     ]}
                     form={form}

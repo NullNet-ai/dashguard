@@ -146,7 +146,7 @@ export const cachedFilterRouter = createTRPCRouter({
             time_count: 1,
             time_unit: 'day'
           },
-          resolution: '5m'
+          resolution: '1s'
         }
       }
       
@@ -160,7 +160,7 @@ export const cachedFilterRouter = createTRPCRouter({
       
 
       const {'Time Range': time_unit = '1d', Resolution: resolution = '1h', 'Graph Type': graph_type = 'area' } = extracted
-
+      
       const time_string = parseTimeString(time_unit as string)
       
       return {

@@ -22,15 +22,31 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         limit: z.number().optional(),
       }),
     )
-
     .query(async ({ input, ctx }) => {
       const { limit } = input
+
+      const remote_access_res = await ctx.dnaClient
+      .findAll({
+        entity: 'device_remote_access_sessions',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'device_id', 'remote_access_status'],
+          advance_filters: createAdvancedFilter({ status: 'Active' }),
+          order: {
+            limit: limit || 10,
+            by_field: 'created_date',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+      })
+      .execute()
+
       const res = await ctx.dnaClient
         .findAll({
           entity: 'devices',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'instance_name'],
+            pluck: ['id', 'instance_name', 'device_status'],
             advance_filters: createAdvancedFilter({ status: 'Active' }),
             order: {
               limit: limit || 10,
@@ -40,13 +56,22 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           },
         })
         .execute()
-
-      return res?.data?.map((item: Record<string, any>) => {
+      
+      const remote_access_ids = remote_access_res?.data?.map((item: Record<string, any>) => item.device_id)
+    
+      const filtered_res = res?.data?.filter((item: Record<string, any>) => {
+        return !remote_access_ids?.includes(item.id)
+      })
+      
+      const res_data = res?.data?.map((item: Record<string, any>) => {
         return {
           label: item.instance_name,
           value: item.id,
+          device_status: item.device_status
         }
       })
+      
+      return res_data
     }
     ),
   mainGrid: privateProcedure
@@ -237,69 +262,44 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string(), category: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
-      const { id, device_id, remote_access_type, category } = input
-
-      if (!id) {
-        const res = await ctx.dnaClient
-          .create({
-            entity,
-            token: ctx.token.value,
-            mutation: {
-              params: {
-                device_id,
-                entity_prefix: 'RA',
-                remote_access_type,
-                remote_access_category: category,
-                remote_access_status: 'Active',
-                status: 'Active',
-              },
-              pluck: ['id', 'device_id', 'remote_access_type', 'code'],
+      const { device_id, remote_access_type } = input
+        const res = await ctx.dnaClient.findAll({
+          entity,
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'status', 'remote_access_session'],
+            advance_filters: createAdvancedFilter({ device_id }),
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
             },
-          })
-          .execute()
+          },
+        })
+        .execute()
+        
 
         const ra_type = remote_access_type.toLowerCase() === 'console' ? 'Shell' : 'UI'
 
-        let remote_access = await getRemoteAccess({ device_id, ra_type, token })
-
-        if (!remote_access?.session) {
+        if (!res?.data?.length) {
           await createRemoteAccess({ device_id, ra_type, token })
-          remote_access = await getRemoteAccess({ device_id, ra_type, token })
-          return { ...res, data: res?.data?.map((item) => {
-            return { ...item, remote_access }
-          }) }
+          return await ctx.dnaClient.findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: ['id', 'status', 'remote_access_session'],
+              advance_filters: createAdvancedFilter({ device_id }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
         }
 
-        return { ...res, data: res?.data?.map((item) => {
-          return { ...item, remote_access }
-        }) }
-      }
-      else {
-        const res = await ctx.dnaClient
-          .update(id, {
-            entity,
-            token: ctx.token.value,
-            mutation: {
-              params: {
-                device_id,
-                remote_access_type,
-                remote_access_status: 'Active',
-                remote_access_category: category,
-                status: 'Active',
-              },
-              pluck: ['id', 'device_id', 'remote_access_type'],
-            },
-          })
-          .execute()
-
-        const ra_type = remote_access_type.toLowerCase() === 'console' ? 'Shell' : 'UI'
-
-        const remote_access = await getRemoteAccess({ device_id, ra_type, token })
-
-        return { ...res, data: res?.data?.map((item) => {
-          return { ...item, remote_access }
-        }) }
-      }
+        return res
     }),
   disconnectDeviceRemoteAccess: privateProcedure
     .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))

@@ -669,7 +669,7 @@ export const packetRouter = createTRPCRouter({
     }
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, bucket_size = '1h', source_ips } = input
+    const { device_id, time_range, bucket_size = '1s', source_ips } = input
     // return []
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
