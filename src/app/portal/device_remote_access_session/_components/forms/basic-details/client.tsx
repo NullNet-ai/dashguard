@@ -33,7 +33,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
         id: record_data?.id || '',
         device_id,
         remote_access_type,
-        category: remote_access_type.toLowerCase() === 'console' ? 'Console' : 'Web',
+        category: remote_access_type?.toLowerCase() === 'console' ? 'Console' : 'Web',
       })
 
       if (res?.success && res) {
@@ -41,7 +41,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
         toast.success('Remote Access submitted successfully')
 
-        if (remote_access_type.toLowerCase() === 'console') {
+        if (remote_access_type?.toLowerCase() === 'console') {
           const wsUrl = `ws://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/ws/`
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)

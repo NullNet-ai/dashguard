@@ -55,9 +55,9 @@ export const CustomRowActions = ({ row }: { row: any }) => {
 
   const reconnect_status = ['active', 'idle']
 
-  const disableReconnect = reconnect_status.includes(remote_access_status.toLowerCase())
+  const disableReconnect = reconnect_status?.includes(remote_access_status?.toLowerCase())
 
-  const disableDisconnect = !reconnect_status.includes(remote_access_status.toLowerCase())
+  const disableDisconnect = !reconnect_status?.includes(remote_access_status?.toLowerCase())
 
   return (
     <div className="flex gap-2">
