@@ -109,7 +109,7 @@ const GridTabItem = forwardRef<HTMLDivElement, InnerTabitemProps>(({
   // }
 
 
-  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-').toLowerCase()
+  const tabNameRole = tab.name === 'user_role'? 'role' : tab.name.split(' ').join('-')
   return (
     <div
       ref={ref}
