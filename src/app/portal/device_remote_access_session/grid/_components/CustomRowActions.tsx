@@ -11,8 +11,10 @@ export const CustomRowActions = ({ row }: { row: any }) => {
   const { id, device_id, remote_access_type, remote_access_status, remote_access_session } = original ?? {}
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
 
+  const remote_access = ['console', 'shell']
+
   const handleOpenSideDrawer = async () => {
-    if(remote_access_type?.toLowerCase() === 'shell') {
+    if(remote_access?.includes(remote_access_type?.toLowerCase())) {
     const wsUrl = `ws://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/ws/`
     const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
       .substring(2, 9)}`
