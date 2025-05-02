@@ -102,7 +102,7 @@ const getSessionTabs = async () => {
   }
   
 
-  if (application === 'record' && hasIdentifier && identifier) {
+  if (application === 'record' && !hasIdentifier && identifier) {
     newTabs.splice(1, 0, {
       name: identifier,
       href: `${pathname}?${fullSearchQueryParams}`,
