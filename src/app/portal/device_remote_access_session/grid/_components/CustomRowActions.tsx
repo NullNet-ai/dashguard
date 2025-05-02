@@ -2,40 +2,29 @@
 import { PlugZapIcon, UnplugIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
-import BasicDetails from '~/app/portal/device_remote_access_session/_components/forms/basic-details/client'
-import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 import { api } from '~/trpc/react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 
 export const CustomRowActions = ({ row }: { row: any }) => {
   const { original } = row
-  const { id, device_id, remote_access_type, remote_access_status } = original ?? {}
-  const { actions } = useSideDrawer()
+  const { id, device_id, remote_access_type, remote_access_status, remote_access_session } = original ?? {}
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
 
-  const config = {
-    header: original?.code,
-    title: `ID: ${original?.code}`,
-    sideDrawerWidth: '760px',
-    body: {
-      component: BasicDetails,
-      componentProps: {
-        record_data: original,
-        entity: 'device_remote_access_session',
-        actions,
-        metadata: {},
-      },
-    },
-    resizable: true,
-    showResizeHandle: true,
-    onCloseSideDrawer() {
-
-    },
-  }
-
   const handleOpenSideDrawer = async () => {
-    actions.openSideDrawer(config as any)
+    if(remote_access_type?.toLowerCase() === 'shell') {
+    const wsUrl = `ws://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/ws/`
+    const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
+      .substring(2, 9)}`
+    localStorage.setItem(sessionKey, wsUrl)
+
+    localStorage.setItem('current_terminal_session', sessionKey)
+    
+    window.open(`/terminal`, '_blank')
+  } else {
+    window.open(`http://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/`, '_blank')
   }
+}
 
   const handleDisconnect = async () => {
     await disconnectRemoteAccess.mutateAsync({
@@ -53,20 +42,39 @@ export const CustomRowActions = ({ row }: { row: any }) => {
       )
   }
 
-  const reconnect_status = ['active', 'idle']
+  const reconnect_status = ['timeout', 'disconnected', 'inactive', 'closed', 'terminated']
 
-  const disableReconnect = reconnect_status?.includes(remote_access_status?.toLowerCase())
-
-  const disableDisconnect = !reconnect_status?.includes(remote_access_status?.toLowerCase())
+  const disabled = reconnect_status?.includes(remote_access_status?.toLowerCase())
 
   return (
     <div className="flex gap-2">
-      <Button disabled={disableReconnect} variant="ghost" onClick={() => handleOpenSideDrawer()}>
-        <PlugZapIcon className='h-4 w-4 text-success' />
-      </Button>
-      <Button disabled={disableDisconnect} variant="ghost" onClick={() => handleDisconnect()}>
-        <UnplugIcon className='h-4 w-4 text-danger' />
-      </Button>
+      <TooltipProvider >
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger>
+            <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer()}>
+            <PlugZapIcon className='h-4 w-4 text-success' />
+          </Button>
+            <TooltipContent side="top">
+              <div className="text-sm">
+                <span className='text-justify'>{'Reconnect'}</span>
+              </div>
+            </TooltipContent>
+          </TooltipTrigger>
+        </Tooltip>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger>
+          
+              <Button disabled={disabled} variant="ghost" onClick={() => handleDisconnect()}>
+                <UnplugIcon className='h-4 w-4 text-danger' />
+              </Button>
+            <TooltipContent side="top">
+              <div className="text-sm">
+                <span className='text-justify'>{'Disconnect'}</span>
+              </div>
+            </TooltipContent>
+          </TooltipTrigger>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   )
 }
