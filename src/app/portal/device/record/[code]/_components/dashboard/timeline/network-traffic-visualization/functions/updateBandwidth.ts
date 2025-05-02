@@ -43,6 +43,7 @@ export async function updateBandwidth(data: SourceData[], packet: Packet, time: 
   const packetTimestamp = new Date(packet.timestamp);
   const exactBucketTime = packetTimestamp.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:MM:SS"
   const currentHour = packetTimestamp.toISOString().slice(11, 13); // "HH"
+  const currentMinute = packetTimestamp.toISOString().slice(14, 16); // "MM"
 
   // Find the index of existing source_ip, if it exists
   const existingIndex = updatedData.findIndex(entry => entry.source_ip === packet.source_ip);
@@ -56,10 +57,11 @@ export async function updateBandwidth(data: SourceData[], packet: Packet, time: 
       existingEntry.result = [];
     }
 
-    // Remove entries that do not belong to the current hour
+    // Remove entries that do not belong to the current hour and minute
     existingEntry.result = existingEntry.result.filter((r: BandwidthEntry) => {
       const bucketHour = r.bucket.slice(11, 13); // Extract "HH" from the bucket
-      return bucketHour === currentHour;
+      const bucketMinute = r.bucket.slice(14, 16); // Extract "MM" from the bucket
+      return bucketHour === currentHour && bucketMinute === currentMinute;
     });
 
     // Append the new time bucket to the result array
@@ -81,9 +83,9 @@ export async function updateBandwidth(data: SourceData[], packet: Packet, time: 
     // Update in place - maintain the original position in the list
     updatedData[existingIndex] = existingEntry;
   } else {
-    const flagDetails = await getFlagDetails(packet?.ip_info?.country)
+    const flagDetails = await getFlagDetails(packet?.ip_info?.country);
     // This is a new source IP - add it to the top of the list
-    const { name, flag} = flagDetails || {}
+    const { name, flag } = flagDetails || {};
     const newEntry = {
       source_ip: packet.source_ip,
       result: [{
@@ -103,6 +105,5 @@ export async function updateBandwidth(data: SourceData[], packet: Packet, time: 
     updatedData.unshift(newEntry);
   }
 
-  console.log("%c Line:107 🍋 updatedData", "color:#2eafb0", updatedData);
   return updatedData;
 }

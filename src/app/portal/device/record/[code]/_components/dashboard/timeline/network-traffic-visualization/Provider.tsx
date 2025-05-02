@@ -208,7 +208,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(current_index + 20)
     setNewBandwidth([])
-    fetchBandwidth(1)
+    fetchBandwidth(20)
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
