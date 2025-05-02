@@ -3,7 +3,6 @@ import { z } from 'zod'
 
 import { createRemoteAccess } from '~/app/api/device_remote_access_session/create_remote_access'
 import { disconnectRemoteAccess } from '~/app/api/device_remote_access_session/disconnect_remote_access'
-import { getRemoteAccess } from '~/app/api/device_remote_access_session/get_remote_access'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
 import { formatString } from '~/server/utils/formatString'
@@ -32,7 +31,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         token: ctx.token.value,
         query: {
           pluck: ['id', 'device_id', 'remote_access_status'],
-          advance_filters: createAdvancedFilter({ status: 'Active', remote_access_status: 'active' }),
+          advance_filters: createAdvancedFilter({ status: 'Active' }),
           order: {
             limit: limit || 10,
             by_field: 'created_date',
@@ -83,8 +82,8 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         limit = 50,
         current = 1,
         advance_filters: _advance_filters = [],
-        entity,
         pluck = [],
+        sorting = [],
         is_case_sensitive_sorting = 'false',
       } = input
 
@@ -100,53 +99,45 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       const query = ctx.dnaClient.findAll({
         entity: input?.entity,
         token: ctx.token.value,
-        // @ts-expect-error - To be determined
         query: {
-          pluck: input.pluck,
           track_total_records: true,
+          pluck: input.pluck,
           pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
           order: {
             starts_at:
-            // current 5 *  input.limit 50 = 250
-            (input.current || 0) === 0
-              ? 0
-              : (input.current || 1) * (input.limit || 100)
-                - (input.limit || 100),
+              // current 5 *  input.limit 50 = 250
+              (input.current || 0) === 0
+                ? 0
+                : (input.current || 1) * (input.limit || 100)
+                  - (input.limit || 100),
             limit: input.limit || 1,
-            by_field:
-            input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
-            by_direction:
-            input?.sorting?.length === 1
-              ? input.sorting[0]?.desc
-                ? EOrderDirection.DESC
-                : EOrderDirection.ASC
-              : EOrderDirection.DESC,
+            by_field: 'code',
+            by_direction: EOrderDirection.DESC,
           },
-          ...(pluck_object
-            ? {
-                multiple_sort:
-                input.sorting?.length && input?.sorting.length > 1
-                  ? formatSorting(input.sorting, entity, is_case_sensitive_sorting)
-                  : [],
-                concatenate_fields: [
-                // {
-                //   fields: ['first_name', 'last_name'],
-                //   field_name: 'full_name',
-                //   separator: ' ',
-                //   entity: 'contacts',
-                //   aliased_entity: 'created_by',
-                // },
-                // {
-                //   fields: ['first_name', 'last_name'],
-                //   field_name: 'full_name',
-                //   separator: ' ',
-                //   entity: 'contacts',
-                //   aliased_entity: 'updated_by',
-                // },
-                ],
-              }
-            : {}),
+          //@ts-expect-error - multiple sort
+            multiple_sort:
+            sorting?.length
+              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+              : [],
+            date_format: 'YYYY/MM/DD',
+            concatenate_fields: [
+            {
+              fields: ['first_name', 'last_name'],
+              field_name: 'contact_created_by',
+              separator: ' ',
+              entity: 'contacts',
+              aliased_entity: 'created_by',
+            },
+            {
+              fields: ['first_name', 'last_name'],
+              field_name: 'contact_updated_by',
+              separator: ' ',
+              entity: 'contacts',
+              aliased_entity: 'updated_by',
+            },
+            ],
+              
         },
       })
 
@@ -229,15 +220,15 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           devices,
           updated_by,
           remote_access_type,
-          remote_access_category,
           ...rest
         } = item
 
         return {
           ...entity_data,
           ...rest,
-          remote_access_type,
-          remote_access_category: formatString(remote_access_category),
+          remote_access_type: remote_access_type.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
+          remote_access_category: formatString(remote_access_type),
+          remote_access_status: formatString(item?.remote_access_status),
           // type: formatString(remote_access_type),
           device_name: formatString(devices?.[0]?.instance_name),
           created_by: !!contacts?.[0]?.first_name || !!contacts?.[0]?.last_name
@@ -269,7 +260,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: ['id', 'status', 'remote_access_session'],
-            advance_filters: createAdvancedFilter({ device_id }),
+            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active' }),
             order: {
               limit: 1,
               by_field: 'created_date',
@@ -282,11 +273,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
         const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
 
-        console.log("%c Line:285 🍧 res", "color:#fca650", res);
         if (!res?.data?.length) {
           await createRemoteAccess({ device_id, ra_type, token })
           await new Promise((resolve) => setTimeout(resolve, 1000)); 
-          const data = await ctx.dnaClient.findAll({
+          return await ctx.dnaClient.findAll({
             entity,
             token: ctx.token.value,
             query: {
@@ -300,7 +290,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             },
           })
           .execute()
-          console.log("%c Line:288 🥚 data", "color:#33a5ff", data);
         }
 
         return res
@@ -309,25 +298,12 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const {  device_id, remote_access_type } = input
-      console.log("%c Line:311 🍿 remote_access_type", "color:#fca650", remote_access_type);
       
       const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
 
-      await disconnectRemoteAccess({ device_id, ra_type })
-      // const res = await ctx.dnaClient
-      //   .update(id, {
-      //     entity,
-      //     token: ctx.token.value,
-      //     mutation: {
-      //       params: {
-      //         // remote_access_status: 'Closed',
-      //         status: 'Active',
-      //       },
-      //       pluck: ['id', 'device_id', 'remote_access_type'],
-      //     },
-      //   })
-      //   .execute()
-      // return res
+
+      const res = await disconnectRemoteAccess({ device_id, ra_type, token: ctx.token.value })
+        
     }
     ),
 

@@ -40,7 +40,9 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
         toast.success('Remote Access submitted successfully')
 
-        if (remote_access_type?.toLowerCase() === 'console') {
+        const remote_access = ['console', 'shell']
+
+        if (remote_access?.includes(remote_access_type)) {
           const wsUrl = `ws://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/ws/`
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
@@ -48,11 +50,11 @@ export default function RemoteAccessDetails(props: IFormProps) {
           localStorage.setItem(sessionKey, wsUrl)
 
           localStorage.setItem('current_terminal_session', sessionKey)
-
+          
           window.open(`/terminal`, '_blank')
+          
         }
         else {
-          // For web interface, open directly
           window.open(`http://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/`, '_blank')
         }
       }

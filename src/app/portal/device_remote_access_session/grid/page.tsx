@@ -17,14 +17,16 @@ export default async function Page() {
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity] = pathname.split('/')
 
-  const _pluck = ['id', 'code', 'status', 'remote_access_type', 'remote_access_status', 'remote_access_category', 'device_id', 'created_date', 'updated_date', 'created_by', 'updated_by']
+  const _pluck = ['id', 'code', 'status', 'remote_access_type', 'remote_access_status', 'remote_access_session', 'device_id', 'created_date', 'updated_date', 'created_by', 'updated_by', 'created_time', 'updated_time']
+
+  const default_sort = [ { id: 'code', desc: true, sort_key: 'code' } ]
 
   const { items = [], totalCount } = await api.deviceRemoteAccessSession.mainGrid({
     entity: main_entity!,
     pluck: _pluck,
     current: +(pagination?.current_page ?? '0'),
     limit: +(pagination?.limit_per_page ?? '100'),
-    sorting: sorts?.defaultSorting?.length ? sorts.defaultSorting : defaultSorting,
+    sorting: sorts?.defaultSorting?.length ? sorts.defaultSorting : default_sort,
     advance_filters: filters?.advanceFilter?.length
       ? filters?.advanceFilter
       : [],
@@ -40,6 +42,7 @@ export default async function Page() {
           entity_prefix: 'RA',
         },
         disableDefaultAction: true,
+        enableRowClick: false,
         customRowAction: CustomRowActions,
         searchConfig: {
           router: 'deviceRemoteAccessSession',
@@ -54,6 +57,7 @@ export default async function Page() {
         <CustomNewButton />
       }
       data={items}
+      
       defaultSorting={defaultSorting}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
