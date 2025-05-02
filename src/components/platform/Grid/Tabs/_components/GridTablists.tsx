@@ -175,7 +175,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists]);
+  }, [tablists, isClient]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
@@ -295,8 +295,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           })}
         </Sortable>
         {!!copyTab?.length &&
-          !copyTab.some((item) => item.hidden) &&
-          isWindowLoaded && <CreateNewFilter />}
+          !copyTab.some((item) => item.hidden) && <CreateNewFilter />}
       </div>
       {copyTab?.some((tab: any) => tab.hidden) && isWindowLoaded && (
         <>

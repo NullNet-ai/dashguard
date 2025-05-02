@@ -37,6 +37,7 @@ export const authRouter = createTRPCRouter({
         }
 
         const token = response?.data?.[0]?.token;
+
         // ctx.redisClient.cacheData(
         //   `account_token:${input.username}`,
         //   token,
@@ -97,29 +98,23 @@ export const authRouter = createTRPCRouter({
     }),
 
   getAccountData: privateProcedure
-    .input(
-      z
-        .object({
-          username: z.string().min(1),
-        })
-        .optional(),
-    )
     .mutation(async ({ ctx }) => {
       try {
         const account = ctx.session.account;
-        const accountId = account?.organization_account_id;
+
+        const accountId = account?.account_organization_id;
 
         const response = await ctx.dnaClient
           .findOne(accountId, {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             token: ctx.token.value,
             query: {
               pluck: [
                 'id',
-                'is_new_user',
                 'contact_id',
-                'account_status',
+                'account_organization_status',
                 'status',
+                'account_id'
               ],
             },
           })
@@ -172,7 +167,7 @@ export const authRouter = createTRPCRouter({
 
         if (session) {
           ctx.storeCookies.set(
-            session.account.organization_account_id,
+            session.account.account_organization_id,
             newOrganization?.data?.[0]?.token,
           );
           return {
@@ -198,7 +193,7 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const response = await ctx.dnaClient
         .update(input.id, {
-          entity: 'organization_accounts',
+          entity: 'account',
           token: ctx.token.value,
           mutation: {
             params: {
@@ -226,45 +221,30 @@ export const authRouter = createTRPCRouter({
     const rootAccountToken = rootAccount?.data?.[0]?.token;
     const accountDetails = await ctx.dnaClient
       .findAll({
-        entity: 'organization_accounts',
+        entity: 'account_organizations',
         token: rootAccountToken,
         as_root: asRoot,
         query: {
           advance_filters: [
             {
               type: 'criteria',
-              field: 'account_id',
+              field: 'email',
               operator: EOperator.EQUAL,
               values: [response?.account_id],
             },
           ],
           pluck_object: {
-            organization_accounts: [
+            account_organizations: [
               'id',
               'organization_id',
               'account_id',
               'contact_id',
+              'email',
               'status',
+              'account_organization_status'
             ],
             organizations: ['id', 'name'],
-            organization_contacts: [
-              'id',
-              'contact_organization_id',
-              'is_primary',
-            ],
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'organization_contacts',
-            field: 'contact_organization_id',
-          },
-          from: {
-            entity: 'organization_accounts',
-            field: 'organization_id',
+            accounts: ['id', 'account_id', 'is_new_user'],
           },
         },
       })
@@ -276,14 +256,37 @@ export const authRouter = createTRPCRouter({
             field: 'id',
           },
           from: {
-            entity: 'organization_accounts',
+            entity: 'account_organizations',
             field: 'organization_id',
           },
         },
       })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'accounts',
+            field: 'id',
+          },
+          from: {
+            entity: 'account_organizations',
+            field: 'account_id',
+          },
+        },
+      })
       .execute();
-
-    return accountDetails;
+    const organizations = accountDetails?.data?.map((item) => {
+      const { id, name } = item?.organizations ?? {};
+      return {
+        value: id,
+        label: name,
+      };
+    });
+    return {
+      account_organization: accountDetails?.data?.[0]?.account_organizations,
+      is_new_user: accountDetails?.data?.[0]?.accounts?.is_new_user,
+      organizations
+    };
   }),
   fetchAccountDataById: privateProcedure
     .input(
@@ -295,7 +298,7 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const response = await ctx.dnaClient
         .findOne(input.id, {
-          entity: 'organization_account',
+          entity: 'account',
           token: ctx.token.value,
           query: {
             pluck: input.pluck_fields,
@@ -371,23 +374,23 @@ export const authRouter = createTRPCRouter({
       const rootAccountToken = rootAccount?.data?.[0]?.token;
       const accountDetails = await ctx.dnaClient
         .findAll({
-          entity: 'organization_accounts',
+          entity: 'account_organizations',
           token: rootAccountToken,
           as_root: asRoot,
           query: {
             advance_filters: [
               {
                 type: 'criteria',
-                field: 'account_id',
+                field: 'email',
                 operator: EOperator.EQUAL,
-                values: [input.email],
+                values: [input.email.toLowerCase()],
               },
             ],
             pluck_object: {
-              organization_accounts: [
+              account_organizations: [
                 'id',
                 'organization_id',
-                'account_id',
+                'email',
                 'contact_id',
                 'status',
               ],
@@ -406,7 +409,7 @@ export const authRouter = createTRPCRouter({
               field: 'id',
             },
             from: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'contact_id',
             },
           },
@@ -419,6 +422,7 @@ export const authRouter = createTRPCRouter({
       expirationDate.setDate(
         expirationDate.getDate() + INVITATION_LINK_EXPIRED,
       );
+
       const record = await ctx.dnaClient
         .create({
           entity: 'invitations',
@@ -428,7 +432,8 @@ export const authRouter = createTRPCRouter({
             params: {
               status: 'Active',
               expiration_date: formatDate(expirationDate).date,
-              account_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+              expiration_time: formatDate(expirationDate).time,
+              account_organization_id: accountDetails?.data?.[0]?.account_organizations?.id,
               categories: ['Reset Password'],
             },
             pluck: ['id', 'code', 'status'],
@@ -445,7 +450,7 @@ export const authRouter = createTRPCRouter({
       const invitationRecord = record?.data?.[0] ?? {};
 
       return {
-        account_record_id: accountDetails?.data?.[0]?.organization_accounts?.id,
+        account_record_id: accountDetails?.data?.[0]?.account_organizations?.id,
         invitationRecord,
       };
     }),
@@ -472,6 +477,88 @@ export const authRouter = createTRPCRouter({
       if (!response?.success) {
         return null;
       }
+
+      return response;
+    }),
+
+    deviceRegisterAccount: privateProcedure
+    .input(
+      z.object({
+        account: z.object({
+          account_id: z.string().min(1),
+          account_secret: z.string().min(1),
+          role_id : z.string().min(1),
+          account_organization_status : z.string().min(1),
+          account_organization_categories : z.array(z.string()).min(1),
+          device_categories : z.array(z.string()),
+          account_type : z.string().min(1),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account } = input;
+
+      const organization = {
+        organization_id : ctx.session.account.organization_id
+      }
+      const result = await ctx.dnaClient
+        .register(organization, account)
+        .execute();
+
+      // Save account id and secret in redis
+
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account.account_id}`,
+        {
+          account_id: input.account.account_id,
+          account_secret: input.account.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      );
+
+
+      return result
+    }),
+
+
+    resetDeviceAppSecret: privateProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+        account_id : z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot, {
+          previously_logged_in_token : ctx.token.value,
+        })
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+
+      const response = await ctx.dnaClient
+      .rootUpdateAccountPassword(input.id, input.account_secret, {
+        token: rootAccountToken,
+      })
+      .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+
+      // update redis app secret
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account_id}`,
+        {
+          account_id: input.account_id,
+          account_secret: input.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      )
 
       return response;
     }),

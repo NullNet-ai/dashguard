@@ -63,7 +63,8 @@ export default function GridProvider({
   parentType,
   gridLevel = 1,
   grouping: initialGrouping = [],
-  gridKey
+  gridKey,
+  customCreateButton
 }: IProps) {
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
@@ -248,6 +249,7 @@ export default function GridProvider({
         data,
         field,
         entity,
+        accessorKey: columnConfig?.accessorKey,
       });
     }
     return isMobileOrTablet && config.isInfinite ? infiniteData : data;
@@ -297,7 +299,7 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
-    if (parentType === 'form') {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: updatedSorting,
       });
@@ -399,7 +401,7 @@ export default function GridProvider({
         desc: typeof sortBy === 'boolean' ? sortBy : false,
       };
     });
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
@@ -609,7 +611,8 @@ export default function GridProvider({
     initial_columns: config?.columns,
     grouping,
     groupConfigs: initialGrouping,
-    gridKey
+    gridKey,
+    customCreateButton
   } as IState;
   const actions = {
     handleCreate,

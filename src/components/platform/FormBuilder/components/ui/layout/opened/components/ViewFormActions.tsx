@@ -3,18 +3,19 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
-import { EllipsisVertical, XIcon } from "lucide-react";
-import React, { useContext } from "react";
-import SubmitForm from "../../../Buttons/Submit";
-import CancelFormButton from "../../../Buttons/Cancel";
-import { camelCase } from "lodash";
+} from '~/components/ui/dropdown-menu';
+import { EllipsisVertical, XIcon } from 'lucide-react';
+import React, { useContext } from 'react';
+import SubmitForm from '../../../Buttons/Submit';
+import CancelFormButton from '../../../Buttons/Cancel';
+import { camelCase, isUndefined } from 'lodash';
 import {
+  IFormProperties,
   type ICustomActions,
   type IFeatures,
-} from "~/components/platform/FormBuilder/types";
-import { testIDFormatter } from "~/utils/formatter";
-import { WizardContext } from "~/components/platform/Wizard/Provider";
+} from '~/components/platform/FormBuilder/types';
+import { testIDFormatter } from '~/utils/formatter';
+import { WizardContext } from '~/components/platform/Wizard/Provider';
 
 const ViewFormActions = ({
   saveForm,
@@ -25,6 +26,7 @@ const ViewFormActions = ({
   features,
   formProps,
   customFormHostViewFormActions = [],
+  properties,
 }: {
   saveForm: any;
   form: any;
@@ -34,17 +36,22 @@ const ViewFormActions = ({
   features: IFeatures | undefined;
   formProps?: any;
   customFormHostViewFormActions: ICustomActions[] | undefined;
+  properties?: IFormProperties;
 }) => {
+  const { hasActions = true } = properties ?? {};
   const { enableFormHostViewActions = true } = features ?? {};
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   if (!enableFormHostViewActions) return null;
+
+  if (!hasActions) return null;
+
   return (
     <div className="flex flex-row gap-2">
       <SubmitForm
         saveForm={saveForm}
         data-test-id={testIDFormatter(
-          `${entityName ?? "no_entity"}-wzrd-${formKey}-save-form-btn`,
+          `${entityName ?? 'no_entity'}-wzrd-${formKey}-save-form-btn`,
         )}
         form={form}
         formSchema={formSchema}
@@ -54,7 +61,7 @@ const ViewFormActions = ({
         saveForm={saveForm}
         form={form}
         data-test-id={testIDFormatter(
-          `${entityName ?? "no_entity"}-wzrd-${formKey}-cancel-form-btn`,
+          `${entityName ?? 'no_entity'}-wzrd-${formKey}-cancel-form-btn`,
         )}
         formSchema={formSchema}
         isLoading={isButtonLoading}
@@ -62,7 +69,7 @@ const ViewFormActions = ({
       <DropdownMenu>
         <DropdownMenuTrigger
           data-test-id={testIDFormatter(
-            `${entityName ?? "no_entity"}-wzrd-${formKey}-more-actions-menu`,
+            `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-menu`,
           )}
         >
           <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
@@ -70,37 +77,41 @@ const ViewFormActions = ({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             data-test-id={testIDFormatter(
-              `${entityName ?? "no_entity"}-wzrd-${formKey}-more-actions-clear-form`,
+              `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-clear-form`,
             )}
             onClick={() => {
               const currentValues = form.getValues();
               Object.keys(currentValues).forEach((key) => {
                 const value = currentValues[key];
-      
+
                 if (Array.isArray(value)) {
-                  if (["email", "emails"].includes(key.toLowerCase())) {
+                  if (['email', 'emails'].includes(key.toLowerCase())) {
                     currentValues[key] = [
                       {
                         ...value,
-                        email: "",
-                      }
+                        email: '',
+                      },
                     ];
-                  } else if (["phone_numbers", "phones", "phone"].includes(key.toLowerCase())) {
+                  } else if (
+                    ['phone_numbers', 'phones', 'phone'].includes(
+                      key.toLowerCase(),
+                    )
+                  ) {
                     currentValues[key] = [
                       {
                         ...value,
-                        raw_phone_number: "",
-                        iso_code: "us",
-                        country_code: "+1",
+                        raw_phone_number: '',
+                        iso_code: 'us',
+                        country_code: '+1',
                         is_primary: true,
                       },
                     ];
                   } else {
                     currentValues[key] = [];
                   }
-                } else if (typeof value === "string") {
-                  currentValues[key] = "";
-                } else if (typeof value === "object" && value !== null) {
+                } else if (typeof value === 'string') {
+                  currentValues[key] = '';
+                } else if (typeof value === 'object' && value !== null) {
                   currentValues[key] = {};
                 } else {
                   currentValues[key] = null;
@@ -120,7 +131,7 @@ const ViewFormActions = ({
               <DropdownMenuItem
                 key={index}
                 data-test-id={testIDFormatter(
-                  `${entityName ?? "no_entity"}-wzrd-${formKey}-more-actions-${camelCase(action.label)}`,
+                  `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-${camelCase(action.label)}`,
                 )}
                 onClick={action.onClick}
                 className="flex gap-2"

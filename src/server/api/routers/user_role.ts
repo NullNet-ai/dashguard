@@ -187,4 +187,26 @@ export const userRolesRouter = createTRPCRouter({
 
       return res;
     }),
+
+  getRoleByName : privateProcedure
+   .input(z.object({ role_name: z.string().min(1) }))
+  .query(async ({ input, ctx }) => {
+    const { role_name } = input;
+    const role = await ctx.dnaClient
+     .findAll({
+        entity: 'user_roles',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id','status'],
+          advance_filters: createAdvancedFilter({ role: role_name }),
+          order: {
+            limit: 1,
+            by_field: 'created_date',
+            by_direction: EOrderDirection.DESC,
+          },
+        }
+     })
+    .execute();
+    return role;
+  })
 });

@@ -24,17 +24,17 @@ const ContactAccountDetailSchema = z
     id: z.string().optional(),
     contact_id: z.string(),
     role_id: z.string().min(1, { message: 'Role is required.' }),
-    account_id: z
+    email: z
       .string()
       .min(1, { message: 'Email is required.' })
       .email('Please enter a valid email.'),
-    account_secret: account_secret,
+    // account_secret: account_secret,
   })
   .superRefine(async (data, ctx) => {
     try {
       // Call the tRPC validation endpoint
       const response = await checkUsernameExist({
-        username: data.account_id as string,
+        username: data.email as string,
         id: data.id ?? '',
         contact_id: data.contact_id ?? '',
       });
@@ -95,9 +95,9 @@ export default function AccountDetails({
       handleSubmit={handleSave}
       fields={[
         {
-          id: 'account_id',
+          id: 'email',
           formType: 'input',
-          name: 'account_id',
+          name: 'email',
           label: 'Email',
           required: true,
           placeholder: 'Enter your email',
@@ -110,16 +110,16 @@ export default function AccountDetails({
           required: true,
           placeholder: 'Example: Admin',
         },
-        {
-          id: 'account_secret',
-          formType: 'password',
-          name: 'account_secret',
-          label: 'Password',
-          required: true,
-          placeholder: 'Enter your password',
-          showPasswordStrengthBar: true,
-          hasComplexValidation: true,
-        },
+        // {
+        //   id: 'account_secret',
+        //   formType: 'password',
+        //   name: 'account_secret',
+        //   label: 'Password',
+        //   required: true,
+        //   placeholder: 'Enter your password',
+        //   showPasswordStrengthBar: true,
+        //   hasComplexValidation: true,
+        // },
       ]}
     />
   );

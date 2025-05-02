@@ -19,7 +19,6 @@ export default async function Page() {
     "first_name",
     "middle_name",
     "last_name",
-    "email_address",
     "status",
     "created_date",
     "updated_date",

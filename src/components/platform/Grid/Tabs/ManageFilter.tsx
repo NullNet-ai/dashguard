@@ -54,7 +54,10 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
           <ManageFilterProvider 
             tab={tab}
             columns={gridColumns}
-            searchConfig={searchConfig}
+            searchConfig={{
+              ...searchConfig,
+              entity: defaultEntity
+            }}
           >
             <GridManageFilter />
           </ManageFilterProvider>

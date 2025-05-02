@@ -1,14 +1,7 @@
-import { Loader } from '~/components/ui/loader'
-
-export default function Loading () {
+export default function TabLoader() {
   return (
-   <div className='w-full flex items-center justify-center h-full min-h-[calc(100dvh-160px)]'>
-         <Loader
-            className="bg-primary text-primary"
-            label="Fetching data..."
-            size="lg"
-            variant='spinner'
-          />
-   </div>
-  )
+    <div className="relative h-2 overflow-hidden">
+      <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+    </div>
+  );
 }

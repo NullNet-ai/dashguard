@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { checkUsernameExist } from '~/app/portal/organization_account/_components/forms/account_details/actions';
+import { checkUsernameExist } from '~/app/portal/account_organization/_components/forms/account_details/actions';
 
 export const EmailSchema = z.object({
   id: z.string().optional(),

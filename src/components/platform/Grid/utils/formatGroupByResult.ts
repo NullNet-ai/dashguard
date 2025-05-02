@@ -7,10 +7,12 @@ export const formatGroupByResult = ({
   data,
   entity,
   field,
+  accessorKey
 }: {
   data: any[];
   entity: string;
   field: string;
+  accessorKey?: string;
 }) => {
   return data.map((item) => {
     const { [pluralize(entity)]: entity_data } = item;
@@ -19,7 +21,7 @@ export const formatGroupByResult = ({
       id: ulid(),
       is_group_by: true,
       value: sourceData?.[field],
-      formatted_value: formatValue(sourceData, field),
+      formatted_value: formatValue(sourceData, accessorKey || field),
       field,
       entity,
       ...item,

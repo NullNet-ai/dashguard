@@ -369,7 +369,6 @@ export const searchFilterValues = async ({
     const response = await searchRecords({
       value: searchTerm,
       field: field_name,
-      entity: 'contact',
       searchConfig,
       fieldConfig,
     });

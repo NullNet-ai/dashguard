@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
-import { IButtonConfig, IFeatures, IFilterGridConfig } from "../global/interfaces";
+import { IButtonConfig, IFeatures, IFilterGridConfig, IFormProperties } from "../global/interfaces";
 import { TDisplayType, TFormSchema } from "../global/types";
 
 interface IFormHeaderProps {
@@ -27,6 +27,7 @@ interface IFormHeaderProps {
   formKey: string,
   features : IFeatures | undefined;
   formProps?: any
+  properties?: IFormProperties
 }
 
 export type {

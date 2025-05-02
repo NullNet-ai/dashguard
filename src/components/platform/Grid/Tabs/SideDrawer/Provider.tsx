@@ -6,6 +6,7 @@ import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { useRouter } from 'next/navigation';
 import { AppRouterKeys } from '../../types';
 import { ISearchParams } from '../../Search/types';
+import { api } from '~/trpc/react';
 
 interface ManageFilterContextType {
   state: {
@@ -40,10 +41,12 @@ export function ManageFilterProvider({
     router?: AppRouterKeys;
     resolver?: string;
     query_params?: ISearchParams;
+    entity?: string;
   };
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
+  const utils = api.useUtils()
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>({
     ...tab,
@@ -97,8 +100,9 @@ export function ManageFilterProvider({
     setCreateFilterLoading(true);
     await updateGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false);
-    closeSideDrawer();
+    await utils.invalidate()
     router.refresh();
+    closeSideDrawer();
   };
 
   const handleCreateNewFilter = async () => {
@@ -133,8 +137,10 @@ export function ManageFilterProvider({
     setCreateFilterLoading(true);
     await saveGridFilter(modifyFilterDetails);
     setCreateFilterLoading(false);
-    closeSideDrawer();
+    await utils.invalidate()
     router.refresh();
+    closeSideDrawer();
+
   };
 
   return (

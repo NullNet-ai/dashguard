@@ -1,7 +1,10 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import type React from 'react';
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 // eslint-disable-next-line no-duplicate-imports
 import {
+  DetailedHTMLProps,
+  ImgHTMLAttributes,
   type ElementType,
   type HTMLAttributes,
   type HTMLInputTypeAttribute,
@@ -40,6 +43,11 @@ import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 import { type ComboSelectProps } from '~/components/ui/combo-select';
+import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
+import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
+import { BadgeProps } from '~/components/ui/badge';
+import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
+import { MessageThreadProps } from '~/components/ui/message';
 
 interface OptionType {
   label: string;
@@ -261,6 +269,22 @@ interface IField {
 		minHeight: string;
 		maxHeight?: string;
 	};
+  imageConfig?: DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
+  buttonConfig?: ButtonProps & IconProps & TooltipProps & React.RefAttributes<HTMLButtonElement>
+  avatarConfig?: {
+    avatar: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+      statusProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarStatus>, "containerRef">;
+      badgeProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarBadge>, "containerRef">;
+      size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+    },
+    image?: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+    fallback?:   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
+    fallbackText?: string
+  }
+  badgeConfig?: BadgeProps
+  adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps & React.RefAttributes<HTMLDivElement>
+  messageThreadConfig?: MessageThreadProps
+
 }
 
 interface ISelectOptions {
@@ -437,6 +461,56 @@ export interface ISearchParams {
   sorting?: any[];
 }
 
+
+export interface IFormProperties {
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All actions inside the form will displayed in the form header
+   * Main variable if false all properties will not display
+   * @default true
+   */
+  hasActions?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * All fields will be disabled
+   * @default true
+   */
+  isEditable?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * No create button will be shown
+   * @default false
+   */
+  selectOnly?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * If false Form filter can update record in grid
+   * @default true
+   */
+  allowUpdateRecord?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * copy will not show in form
+   * @default true
+   */ 
+  allowCopyPaste?: boolean;
+  /**
+   * @description
+   * This prop is used to determine the entity and field that will be used for the form.
+   * This prop is use only in form filter
+   * @default true
+   */
+  allowRemoveSelection?: boolean;
+}
+
 interface IPropsForms {
   customDesign?: {
     formClassName?: string;
@@ -494,6 +568,7 @@ interface IPropsForms {
    * Else, the form filter will not override the current wizard record.
    */
   create_mode?: boolean;
+  properties?: IFormProperties;
 }
 
 interface IFieldFilterActions {

@@ -1,10 +1,10 @@
 import Grid from '~/components/platform/Grid/';
 import { api } from '~/trpc/server';
-import { resolveGridParams } from '~/utils/grid-params-resolver';
 import AccountGridExpansion from '../_components/grids/AccountGridExpansion';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { resolveGridParams } from '~/components/platform/Grid/hooks/grid-params-resolver';
 
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page() {
@@ -16,8 +16,7 @@ export default async function Page() {
     'first_name',
     'middle_name',
     'last_name',
-    'email_address',
-    'contact_status',
+    // 'contact_status',
     'status',
     'created_date',
     'updated_date',
@@ -69,7 +68,7 @@ export default async function Page() {
         columns: gridColumns,
         defaultValues: {
           categories: ['Contact', 'Employee'],
-          id: 'code'
+          id: 'code',
         },
         paginationType: 'default',
         defaultShownColumns: ['raw_phone_number', 'email'],

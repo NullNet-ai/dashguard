@@ -39,8 +39,14 @@ const StepOneOrganizationForm = async () => {
           entity: main_entity,
         }}
         selectOptions={{
-          categories: [{ label: 'User', value: 'User' }],
-          entity: [{ label: 'Contact', value: 'Contact' }],
+          categories: [
+            { label: 'User', value: 'User' },
+            { label: 'Device', value: 'Device' },
+          ],
+          entity: [
+            { label: 'Contact', value: 'Contact' },
+            { label: 'Device', value: 'Device' },
+          ],
         }}
       />
     </div>

@@ -6,30 +6,9 @@ import LoginOrganizationForm from './_components/LoginOrganizationForm';
 const LoginOrganization = async () => {
   /* fetch organizations from contact_id */
   const fetchedAccountDetails = await api.auth.fetchAccountDetailsThruEmail();
-  const organization_list = fetchedAccountDetails?.data?.map((org: Record<string, any>) => {
-    const { id, name } = org?.organizations ?? {};
-    return {
-      value: id,
-      label: name,
-    };
-  });
-
-  /* fetch the primary organization and pre-populate the organization field with its name */
-  const primary_org = fetchedAccountDetails?.data?.find(
-    (item: Record<'organizations' | 'organization_contacts', any>) => {
-      const { organizations, organization_contacts } = item;
-
-      if (
-        organizations?.id === organization_contacts?.contact_organization_id
-      ) {
-        return organization_contacts?.is_primary;
-      }
-      return false;
-    },
-  );
 
   const default_values = {
-    organization: primary_org?.organizations?.id,
+    organization: fetchedAccountDetails?.organizations?.[0]?.value,
   }
 
   return (
@@ -58,7 +37,7 @@ const LoginOrganization = async () => {
               <LoginOrganizationForm
                 defaultValues={default_values}
                 selectOptions={{
-                  organization: organization_list,
+                  organization: fetchedAccountDetails?.organizations,
                 }}
               />
             </div>

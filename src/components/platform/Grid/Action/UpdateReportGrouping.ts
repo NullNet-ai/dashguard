@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '~/trpc/server';
 import { headers } from 'next/headers';
 import type { IGroupBy } from '../Category/type';
+import { revalidatePath } from 'next/cache';
 
 export async function UpdateReportGrouping({
   grouping,
@@ -17,7 +18,7 @@ export async function UpdateReportGrouping({
   const searchParams = headerList.get('x-full-search-query-params') || '';
   const urlSearchParams = new URLSearchParams(searchParams);
 
-  api.grid.updateReportGrouping({
+  await api.grid.updateReportGrouping({
     grouping,
     gridKey
   });
@@ -25,6 +26,6 @@ export async function UpdateReportGrouping({
   const groupParams = grouping.map((item) => item.value).join(',');
 
   urlSearchParams.set('grouping', groupParams);
-
+  revalidatePath(`${pathName}?${urlSearchParams}`)
   redirect(`${pathName}?${urlSearchParams}`);
 }

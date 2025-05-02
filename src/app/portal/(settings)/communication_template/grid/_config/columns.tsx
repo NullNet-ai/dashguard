@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { type ColumnDef } from "@tanstack/react-table";
-import StatusCell from "~/components/ui/status-cell";
+import { type ColumnDef } from '@tanstack/react-table';
+import StatusCell from '~/components/ui/status-cell';
 
 const gridColumns = [
   {
-    header: "State",
-    accessorKey: "status",
+    header: 'State',
+    accessorKey: 'status',
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.status;
@@ -14,16 +14,16 @@ const gridColumns = [
     },
   },
   {
-    header: "ID",
-    accessorKey: "code",
+    header: 'ID',
+    accessorKey: 'code',
   },
   {
-    header: "Name",
-    accessorKey: "name",
+    header: 'Name',
+    accessorKey: 'name',
   },
   {
-    header: "Category",
-    accessorKey: "categories",
+    header: 'Category',
+    accessorKey: 'categories',
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
       return categories?.map((category: string, index: number) => {
@@ -31,27 +31,27 @@ const gridColumns = [
       });
     },
     search_config: {
-      operator: "contains"
-    }
+      operator: 'contains',
+    },
   },
   {
-    header: "Event",
-    accessorKey: "event",
+    header: 'Event',
+    accessorKey: 'event',
   },
   {
     header: 'Status',
     accessorKey: 'communication_template_status',
     enableResizing: false,
     cell: ({ row }) => {
-      const value = row?.original?.communication_template_status
-      if (!value) return null
-      return <StatusCell key={value} value={ value } />
+      const value = row?.original?.communication_template_status;
+      if (!value) return null;
+      return <StatusCell key={value} value={value} />;
     },
   },
   {
-    header: "Updated Date",
-    accessorKey: "updated_date",
-    sortKey: ["updated_date", "updated_time"],
+    header: 'Updated Date',
+    accessorKey: 'updated_date',
+    sortKey: ['updated_date', 'updated_time'],
     cell: ({ row }) => {
       const date = row?.original?.updated_date;
       const time = row?.original?.updated_time;
@@ -64,19 +64,19 @@ const gridColumns = [
     },
   },
   {
-    header: "Updated By",
-    accessorKey: "updated_by",
-    sortKey: "updated_by.full_name",
+    header: 'Updated By',
+    accessorKey: 'updated_by',
+    sortKey: 'updated_by.full_name',
     search_config: {
-      entity: "updated_by",
-      field: "full_name",
-      operator: 'like'
-    }
+      entity: 'updated_by',
+      field: 'full_name',
+      operator: 'like',
+    },
   },
   {
-    header: "Created Date",
-    accessorKey: "created_date",
-    sortKey: ["created_date", "created_time"],
+    header: 'Created Date',
+    accessorKey: 'created_date',
+    sortKey: ['created_date', 'created_time'],
     cell: ({ row }) => {
       const date = row?.original?.created_date;
       const time = row?.original?.created_time;
@@ -89,15 +89,15 @@ const gridColumns = [
     },
   },
   {
-    header: "Created By",
-    accessorKey: "created_by",
-    sortKey: "created_by.full_name",
+    header: 'Created By',
+    accessorKey: 'created_by',
+    sortKey: 'created_by.full_name',
     search_config: {
-      entity: "created_by",
-      field: "full_name",
-      operator: 'like'
-    }
-  }
+      entity: 'created_by',
+      field: 'full_name',
+      operator: 'like',
+    },
+  },
 ] as ColumnDef<any>[];
 
 export default gridColumns;

@@ -26,13 +26,13 @@ const gridColumns = [
     data_type: 'array',
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
-
       return categories?.map((category: string, index: number) => {
         return <StatusCell key={index} value={category} renderType="value" />;
       });
     },
     search_config: {
-      operator: 'contains',
+      operator: 'like',
+      parse_as: 'text'
     },
   },
   {
@@ -95,6 +95,7 @@ const gridColumns = [
     accessorKey: 'updated_by',
     data_type: 'string',
     sortKey: 'updated_by.full_name',
+    isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -116,6 +117,7 @@ const gridColumns = [
     accessorKey: 'created_by',
     data_type: 'string',
     sortKey: 'created_by.full_name',
+    isSearchable: false,
     search_config: {
       entity: 'created_by',
       field: 'full_name',

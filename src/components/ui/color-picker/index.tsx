@@ -53,6 +53,10 @@ export interface ColorPickerProps {
    * Additional class names
    */
   className?: string
+
+
+  onClose?: () => void
+  defaultShow?: boolean
 }
 
 
@@ -61,20 +65,48 @@ export function ColorPicker({
   format = 'hex',
   defaultAlpha = 100,
   onColorChange,
-  className
+  className,
+  onClose,
+  defaultShow
 }: ColorPickerProps) {
-  // State for the current color value
-  const [color, setColor] = React.useState<string>(defaultColor)
+  // Add ref for color to prevent re-renders
+  const colorRef = React.useRef<string>(defaultColor);
+  const [color, setColor] = React.useState<string>(colorRef.current);
+
+  // Update colorRef when defaultColor prop changes
+  React.useEffect(() => {
+    if (colorRef.current !== defaultColor) {
+      colorRef.current = defaultColor;
+      setColor(defaultColor);
+    }
+  }, [defaultColor]);
 
   // State for the current color format
-  const [activeFormat, setActiveFormat] = React.useState<ColorFormat>(format)
+  const formatRef = React.useRef<ColorFormat>(format);
+  const [activeFormat, setActiveFormat] = React.useState<ColorFormat>(formatRef.current);
 
-  // State for alpha/opacity value (0-100)
-  const [alpha, setAlpha] = React.useState<number>(defaultAlpha)
+  // Add ref for alpha to prevent re-renders
+  const alphaRef = React.useRef<number>(defaultAlpha);
+  const [alpha, setAlpha] = React.useState<number>(alphaRef.current);
 
+  // Update formatRef when format prop changes
+  React.useEffect(() => {
+    if (formatRef.current !== format) {
+      formatRef.current = format;
+      setActiveFormat(format);
+    }
+  }, [format]);
+
+  // Update alphaRef when defaultAlpha prop changes
+  React.useEffect(() => {
+    if (alphaRef.current !== defaultAlpha) {
+      alphaRef.current = defaultAlpha;
+      setAlpha(defaultAlpha);
+    }
+  }, [defaultAlpha]);
 
   // State for the popover
-  const [open, setOpen] = React.useState<boolean>(false)
+  const [open, setOpen] = React.useState<boolean>(defaultShow ?? false)
 
   // State for eyedropper active status
   const [eyeDropperActive, setEyeDropperActive] = React.useState<boolean>(false)
@@ -231,6 +263,23 @@ export function ColorPicker({
     }
   }, [handleColorChange, isEyeDropperSupported]);
 
+  // Create a ref to track first render
+  const isFirstRender = React.useRef(true);
+
+  React.useEffect(() => {
+    // Skip the effect on first render
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
+    if (!open) {
+      // Reset alpha when closing the popover
+      onClose?.()
+    }
+  }, [open, onClose])
+
+
   // Memoize the color preview component to prevent unnecessary re-renders
   const colorPreviewComponent = useMemo(() => (
     <ColorPreview
@@ -306,7 +355,7 @@ export function ColorPicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-4">
+        <PopoverContent className="w-[280px] p-4 max-h-96 sm:max-h-[32rem] md:max-h-max overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex flex-col gap-4">
             {/* Color preview */}
             {colorPreviewComponent}

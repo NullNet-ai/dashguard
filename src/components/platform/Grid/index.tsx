@@ -19,6 +19,7 @@ function MainServer({
   parentType = 'grid',
   grouping,
   gridKey,
+  customCreateButton
 }: IPropsGrid) {
   return (
     <GridProvider
@@ -32,6 +33,7 @@ function MainServer({
       pagination={pagination}
       grouping={grouping}
       gridKey={gridKey}
+      customCreateButton={customCreateButton}
     >
       <GridScrollView className="hidden lg:block">
         <GridDesktop parentType={parentType} gridKey={gridKey} />

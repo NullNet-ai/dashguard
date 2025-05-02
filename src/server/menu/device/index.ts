@@ -1,0 +1,12 @@
+import { getGridLink } from '~/components/platform/Grid/utils/grid-get-link';
+import { ISidebarMenu } from "~/components/platform/SideBar/type";
+
+const menu = {
+  title: "Device",
+  url: getGridLink({
+    mainEntity: "device",
+  }),
+  icon: "QuestionMarkCircle",
+} as ISidebarMenu;
+
+export default menu;

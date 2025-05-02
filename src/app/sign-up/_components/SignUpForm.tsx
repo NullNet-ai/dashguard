@@ -16,7 +16,7 @@ import registerAccount from '../_actions/registerAccount';
 
 import SignUpFormField from './SignUpFormField';
 import { platformPasswordValidator } from '~/components/platform/FormBuilder/Utils/platformPasswordValidation';
-import registerAccountFromInvite from '~/app/invite/[id]/_actions/registerAccountFromInvite';
+import registerAccountFromInvite from '~/app/sign-up/_actions/registerAccountFromInvite';
 
 const SignUpSchema = z
   .object({
@@ -46,10 +46,11 @@ interface SignUpFormProps {
   recordData?: Record<string, any>;
   account_id?: string;
   invitation_id?: string;
+  is_invited?: boolean;
 }
 
 const SignUpForm = (props: SignUpFormProps) => {
-  const { recordData, account_id, invitation_id } = props;
+  const { recordData, account_id, invitation_id, is_invited } = props;
   const form = useForm({
     defaultValues: {
       organization_name: recordData?.organization_name,
@@ -76,7 +77,7 @@ const SignUpForm = (props: SignUpFormProps) => {
     };
 
     try {
-      if (account_id) {
+      if (account_id && is_invited) {
         registerAccountFromInvite({
           ...registrationData,
           account_id,

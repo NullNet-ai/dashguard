@@ -1,4 +1,4 @@
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 
 const {
   ROOM = 'portal-template',
@@ -8,11 +8,15 @@ const {
 } = process.env;
 
 class SocketClient {
-  public socket;
+  public socket: Socket<any, any> | null = null;
   public token = '';
 
   constructor() {
-    this.socket = io(SOCKET_URL, {
+    if (!SOCKET_URL) {
+      console.info('SOCKET_URL is not set');
+      return;
+    }
+    this.socket = io('pubsub.events.dnamicro.net', {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
@@ -24,10 +28,14 @@ class SocketClient {
   }
 
   private initializeEventListeners() {
-    this.socket.on('connect', this.onConnect.bind(this));
-    this.socket.on('disconnect', this.onDisconnect.bind(this));
-    this.socket.on('MESSAGE', this.onMessage.bind(this));
-    this.socket.on('AUTHENTICATED', this.onAuthenticated.bind(this));
+    this.socket?.on('connect', this.onConnect.bind(this));
+    this.socket?.on('disconnect', this.onDisconnect.bind(this));
+    // this.socket?.on('connect_error', (error) => {
+    //   console.info('Connection error:', error);
+    //   this.socket?.connect();
+    // });
+    this.socket?.on('MESSAGE', this.onMessage.bind(this));
+    this.socket?.on('AUTHENTICATED', this.onAuthenticated.bind(this));
   }
 
   private onAuthenticated(token: string) {
@@ -36,7 +44,7 @@ class SocketClient {
   }
 
   private joinRoom() {
-    this.socket.emit(
+    this.socket?.emit(
       'JOIN_ROOM',
       {
         type: 'JOIN_ROOM',
@@ -52,7 +60,12 @@ class SocketClient {
 
   public onDisconnect() {
     console.info('Socket disconnected');
-    this.socket.connect();
+    setTimeout(() => {
+      if (!this.socket?.connected) {
+        console.info('Attempting to reconnect...');
+        this.socket?.connect();
+      }
+    }, 100);
   }
 
   private onConnect() {
@@ -61,21 +74,21 @@ class SocketClient {
   }
 
   private authenticate() {
-    this.socket.emit('AUTHENTICATE', SOCKET_USERNAME, SOCKET_PASSWORD);
+    this.socket?.emit('AUTHENTICATE', SOCKET_USERNAME, SOCKET_PASSWORD);
   }
 
   private onMessage(args: Record<string, any>) {
     console.info('Received message:', args);
   }
 
-  public publish({ payload, type }: { payload: unknown; type: string }) {
-    if (!this.socket.connected) {
+  public publish({ payload, type }: { type: string; payload?: unknown }) {
+    if (!this.socket?.connected) {
       console.info('Socket not connected');
-      this.socket.connect();
+      this.socket?.connect();
       return;
     }
 
-    this.socket.emit(
+    this.socket?.emit(
       'PUBLISH',
       {
         type,
@@ -88,7 +101,6 @@ class SocketClient {
       },
     );
   }
-
 }
 
 const client = new SocketClient();

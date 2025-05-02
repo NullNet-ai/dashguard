@@ -13,7 +13,7 @@ import FormPassword from '~/components/platform/FormBuilder/FormType/FormPasswor
 import { Button } from '~/components/ui/button'
 import { Form, FormMessage } from '~/components/ui/form'
 
-import registerAccountFromInvite from '../_actions/registerAccountFromInvite'
+import registerAccountFromInvite from '../../../sign-up/_actions/registerAccountFromInvite'
 
 const SignUpSchema = z
   .object({

@@ -1,5 +1,6 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { api } from '~/trpc/server';
@@ -23,8 +24,11 @@ export default async function LoginSubmit({
   password: string;
   invitation_id?: string;
 }) {
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , id] = pathname.split('/');
   const loginDetailsResponse = await api.auth.login({
-    username,
+    username: username.toLowerCase(),
     password,
   });
 
@@ -36,19 +40,21 @@ export default async function LoginSubmit({
   /**
    * fetch organizations from contact_id
    */
-  const fetchedOrganizations = await api.auth.fetchAccountDetailsThruEmail();
+  const fetchedAccountOrganizations =
+  await api.auth.fetchAccountDetailsThruEmail();
   // get account data
-  const accountDataResponse = await api.auth.getAccountData({ username });
+  const accountDataResponse = await api.auth.getAccountData();
 
-  const { id, is_new_user, status, account_status } = accountDataResponse ?? {};
+  const { is_new_user, status, account_organization_status, account_id } =
+    accountDataResponse ?? {};
 
   if (
     (status !== 'Active' ||
-      (account_status &&
+      (account_organization_status &&
         !['Active', 'Pending Setup', 'Invited'].includes(
-          account_status ?? '',
+          account_organization_status ?? '',
         ))) &&
-    fetchedOrganizations?.data?.length < 2
+    fetchedAccountOrganizations?.organizations?.length === 1
   ) {
     const errorMessages = {
       Deactivated:
@@ -63,27 +69,45 @@ export default async function LoginSubmit({
       errorMessage:
         status === 'Archived'
           ? errorMessages.Archived
-          : (errorMessages[account_status as keyof typeof errorMessages] ??
+          : (errorMessages[
+              account_organization_status as keyof typeof errorMessages
+            ] ??
             'Your account is no longer active. Contact your administrator for assistance.'),
     };
   }
 
   // archive invitation
-  if (invitation_id) {
-    await api.record.updateDynamicRecord({
-      entity: 'invitation',
-      id: invitation_id,
-      data: {
-        status: 'Archived',
-      },
-    });
+  if (invitation_id && id) {
+    await Promise.all([
+      api.record.updateDynamicRecord({
+        entity: 'invitation',
+        id: invitation_id,
+        data: {
+          status: 'Archived',
+        },
+      }),
+      api.record.updateDynamicRecord({
+        entity: 'account_organization',
+        id,
+        data: {
+          account_organization_status: 'Active',
+        },
+      }),
+    ]);
+    // await api.record.updateDynamicRecord({
+    //   entity: 'invitation',
+    //   id: invitation_id,
+    //   data: {
+    //     status: 'Archived',
+    //   },
+    // });
   }
 
   if (is_new_user) {
-    return redirect(`/setup-password?filter_id=${id ?? ''}`);
+    return redirect(`/setup-password?filter_id=${account_id ?? ''}`);
   }
 
-  if (fetchedOrganizations?.data?.length > 1) {
+  if (fetchedAccountOrganizations?.organizations?.length > 1) {
     return redirect('/login-organization');
   }
 

@@ -4,6 +4,7 @@ import { SortingState } from "@tanstack/react-table";
 import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
+import { revalidatePath } from 'next/cache';
 
 export async function UpdateReportSorting({
   sorting,
@@ -21,7 +22,7 @@ export async function UpdateReportSorting({
   const searchParams = headerList.get("x-full-search-query-params") || "";
   const urlSearchParams = new URLSearchParams(searchParams);
 
-  api.grid.updateReportSorting({
+  await api.grid.updateReportSorting({
     sorting,
     gridKey
   });
@@ -32,5 +33,6 @@ export async function UpdateReportSorting({
 
   urlSearchParams.set("sorting", sortingParams);
 
+  revalidatePath(`${pathName}?${urlSearchParams}`)
   redirect(`${pathName}?${urlSearchParams}`);
 }

@@ -179,10 +179,13 @@ export const contactRouter = createTRPCRouter({
           pluck_group_object: {
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
+            // organization_contacts: ['id', 'contact_organization_id'],
+            // organizations: ['id', 'name', 'categories'],
           },
+
           pluck_object: {
+            created_by: ['id', 'status'],
+            updated_by: ['id', 'status'],
             contact_emails: ['email', 'is_primary'],
             contact_phone_numbers: [
               'raw_phone_number',
@@ -191,8 +194,9 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name'],
+            account_organizations: ['contact_id', 'id'],
+            // organization_contacts: ['id', 'contact_organization_id'],
+            // organizations: ['id', 'name'],
           },
           track_total_records: true,
           advance_filters: input?.advance_filters as IAdvanceFilters[],
@@ -269,43 +273,16 @@ export const contactRouter = createTRPCRouter({
         },
       })
       .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'created_by',
-          },
-          from: {
-            alias: 'created_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'self',
-        field_relation: {
-          to: {
-            entity: 'contact',
-            field: 'updated_by',
-          },
-          from: {
-            alias: 'updated_by',
-            entity: 'contact',
-            field: 'id',
-          },
-        },
-      })
-      .join({
         type: 'left',
         field_relation: {
           to: {
-            entity: 'organization_contacts',
-            field: 'contact_id',
+            alias: 'created_by',
+            entity: 'account_organizations',
+            field: 'id',
           },
           from: {
             entity: 'contacts',
-            field: 'id',
+            field: 'created_by',
           },
         },
       })
@@ -313,33 +290,36 @@ export const contactRouter = createTRPCRouter({
         type: 'left',
         field_relation: {
           to: {
-            entity: 'organizations',
+            alias: 'updated_by',
+            entity: 'account_organizations',
             field: 'id',
           },
           from: {
-            entity: 'organization_contacts',
-            field: 'contact_organization_id',
+            entity: 'contacts',
+            field: 'updated_by',
           },
         },
       });
+
     if (input.grouping?.length) {
       query.groupBy({
         query: {
           fields: input.grouping,
-          has_count: true
+          has_count: true,
         },
       });
     }
 
     const { total_count: totalCount = 1, data: items } = await query.execute();
+
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
-    if(input.grouping?.length) {
+    if (input.grouping?.length) {
       return {
         totalCount,
         items: items,
         currentPage: 0,
         totalPages,
-      }
+      };
     }
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
@@ -360,6 +340,7 @@ export const contactRouter = createTRPCRouter({
           'country_code',
           'is_primaries',
         ]);
+
         const existing_contact = acc?.find(
           (acc_item: any) => acc_item?.id === contacts?.id,
         );
@@ -372,11 +353,12 @@ export const contactRouter = createTRPCRouter({
           is_primaries: p_is_primaries,
         } = phones;
         const { emails: _emails, is_primaries: e_is_primaries } = emails;
-        const filterPrimary = (li: string[], is_primaries: number[]) => {
+        const filterPrimary = (li: string[], is_primaries: number[] | boolean[]) => {
           if (!li || !is_primaries) return null;
           const index = is_primaries?.findIndex(
-            (is_primary) => is_primary === 1,
+            (is_primary) => is_primary === 1 || is_primary === true,
           );
+
           return index !== -1 ? li[index] : null;
         };
         const _primary_phone_number = filterPrimary(
@@ -398,7 +380,7 @@ export const contactRouter = createTRPCRouter({
           return names.filter((_, index) => {
             try {
               const category = JSON.parse(categories[index] || '[]');
-              return category.includes('Department');
+              return category?.includes('Department');
             } catch {
               return true;
             }
@@ -406,8 +388,8 @@ export const contactRouter = createTRPCRouter({
         };
         const organizationNames = organizations?.names
           ? filterDepartmentNames(
-              organizations.names,
-              organizations.categories ?? [],
+              organizations?.names,
+              organizations?.categories ?? [],
             )
           : [];
 
@@ -419,8 +401,8 @@ export const contactRouter = createTRPCRouter({
             ...contacts,
             ...emails,
             ...phones,
-            created_by: `${created_by?.first_name ?? ''} ${created_by?.last_name ?? ''}`,
-            updated_by: `${updated_by?.first_name ?? ''} ${updated_by?.last_name ?? ''}`,
+            created_by: created_by?.full_name ?? '',
+            updated_by: updated_by?.full_name ?? '',
             raw_phone_number: primary_phone_number,
             email: primary_email,
           },
@@ -577,7 +559,7 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, emails, phones, code } = input
+      const { id, emails, phones, code } = input;
 
       const email_pluck = ['email', 'id', 'contact_id', 'is_primary'];
       const phone_pluck = [
@@ -592,8 +574,8 @@ export const contactRouter = createTRPCRouter({
 
       const phone_data = phones?.find((phone) => phone.is_primary);
 
-      let contact_id = id
-      let contact_code = code
+      let contact_id = id;
+      let contact_code = code;
 
       // Validate phone and email exists
       const fetchRecordData = async (
@@ -700,7 +682,7 @@ export const contactRouter = createTRPCRouter({
             mutation: {
               params: {
                 status: 'Draft',
-                categories: ['Contact'],
+                categories: ['Contact', 'User'],
               },
               pluck: ['id', 'code'],
             },
@@ -827,7 +809,7 @@ export const contactRouter = createTRPCRouter({
             pluck: pluck_fields,
             pluck_object: {
               contacts: pluck_fields,
-              organization_accounts: ['id', 'role_id', 'account_id'],
+              account_organizations: ['id', 'role_id', 'email'],
               user_roles: ['id', 'role'],
             },
             advance_filters: [
@@ -843,7 +825,7 @@ export const contactRouter = createTRPCRouter({
           type: 'left',
           field_relation: {
             to: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'contact_id',
             },
             from: {
@@ -860,7 +842,7 @@ export const contactRouter = createTRPCRouter({
               field: 'id',
             },
             from: {
-              entity: 'organization_accounts',
+              entity: 'account_organizations',
               field: 'role_id',
             },
           },
@@ -918,7 +900,7 @@ export const contactRouter = createTRPCRouter({
         address_id,
         account: {
           role: contact?.user_roles?.role,
-          account_id: contact?.organization_accounts?.account_id,
+          account_id: contact?.organization_accounts?.email,
         },
       };
     }),

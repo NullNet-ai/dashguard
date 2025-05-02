@@ -91,6 +91,17 @@ export default function CodeEditor({
 		}
 	}, [displayTools]);
 
+	useEffect(() => {
+		const meta = document.createElement('meta');
+		meta.name = 'viewport';
+		meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+		document.head.appendChild(meta);
+
+		return () => {
+			document.head.removeChild(meta);
+		};
+	}, []);
+
 	const handleCodeChange = useCallback((value: string | undefined) => {
     onCodeChange?.(value || '');
 }, [onCodeChange]);
@@ -223,11 +234,11 @@ export default function CodeEditor({
 				disabled ? "pointer-events-none cursor-not-allowed" : "",
 				hasError ? "border-destructive": "border-input "
 			)}>
-			{disabled && <div className="absolute z-50 top-0 opacity-40 bg-secondary w-full h-full"></div>}
 			<div className={cn(
 				'flex gap-2 justify-between p-2',
 				themeClass,
-				readOnly || isReadOnly ? 'absolute z-10 right-0' : ''
+				readOnly || isReadOnly ? 'absolute z-10 right-0' : '',
+				disabled && 'hidden'
 			)}>
 				{!readOnly && !isReadOnly &&
 					<div className={cn(

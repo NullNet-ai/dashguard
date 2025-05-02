@@ -1,6 +1,6 @@
 import { EyeSlashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Loader2 } from 'lucide-react';
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { Button as Button2 } from '@headlessui/react';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
@@ -9,12 +9,14 @@ import FormFilterOpenedActions from './FormFilterOpenedActions';
 import { AccordionTrigger } from '~/components/ui/accordion';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import {
+  IFormProperties,
   type ICustomActions,
   type IFeatures,
 } from '~/components/platform/FormBuilder/types';
 import { Separator } from '~/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import { WizardContext } from '~/components/platform/Wizard/Provider';
+import { isUndefined } from 'lodash';
 
 const FormBodyMainActions = ({
   isListLoading,
@@ -34,6 +36,9 @@ const FormBodyMainActions = ({
   features,
   searchActive,
   formProps,
+  properties = {
+    hasActions: true,
+  },
 }: {
   isListLoading: boolean;
   displayType: string;
@@ -52,10 +57,18 @@ const FormBodyMainActions = ({
   customFormFilterLockFormActions: ICustomActions[] | undefined;
   searchActive: boolean;
   formProps?: any;
+  properties?: IFormProperties;
 }) => {
+  const { hasActions = true } = properties;
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   const { enableFormFilterCreate = true } = features ?? {};
+
+  if (!hasActions) {
+    return (
+      <div className="me-4 ms-auto mt-4 flex justify-end gap-2 md:mb-3 lg:mb-0"></div>
+    );
+  }
 
   return (
     <div className="me-4 ms-auto mt-4 flex justify-end gap-2 md:mb-3 lg:mb-0">
@@ -78,29 +91,36 @@ const FormBodyMainActions = ({
             </Button>
           )}
           {!formProps?.isOpenSearch && enableFormFilterCreate && (
-            <>
-              <Button
-                variant={'default'}
-                name={
-                  formLabel.split(' ').join('') +
-                  `${selectedRecords.length ? 'FormUpdateButton' : 'FormCreateButton'}`
-                }
-                data-test-id={
-                  selectedRecords.length
-                    ? entityName + '-wzrd' + '-update-btn'
-                    : entityName + '-wzrd' + '-create-btn'
-                }
-                onClick={form.handleSubmit(onSubmitFormGrid)}
-                type="button"
-                loading={isButtonLoading}
-                size={'xs'}
-                className="items-center gap-1 text-sm"
-              >
-                <PlusIcon className="h-4 w-4" />
-                {selectedRecords.length ? 'Update' : 'Create'}
-              </Button>
-              <Separator orientation="vertical" className="mr-1 py-3" />
-            </>
+            <Fragment>
+              {!!properties?.selectOnly ? null : (
+                <>
+                  {isUndefined(properties?.allowUpdateRecord) ||
+                  properties?.allowUpdateRecord ? (
+                    <Button
+                      variant={'default'}
+                      name={
+                        formLabel.split(' ').join('') +
+                        `${selectedRecords.length ? 'FormUpdateButton' : 'FormCreateButton'}`
+                      }
+                      data-test-id={
+                        selectedRecords.length
+                          ? entityName + '-wzrd' + '-update-btn'
+                          : entityName + '-wzrd' + '-create-btn'
+                      }
+                      onClick={form.handleSubmit(onSubmitFormGrid)}
+                      type="button"
+                      loading={isButtonLoading}
+                      size={'xs'}
+                      className="items-center gap-1 text-sm"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      {selectedRecords.length ? 'Update' : 'Create'}
+                    </Button>
+                  ) : null}
+                  <Separator orientation="vertical" className="mr-1 py-3" />
+                </>
+              )}
+            </Fragment>
           )}
 
           <div>
@@ -153,6 +173,7 @@ const FormBodyMainActions = ({
             handleRemovedSelectedRecords={handleRemovedSelectedRecords}
             form={form}
             filterGridConfig={filterGridConfig}
+            properties={properties}
           />
         )}
     </div>

@@ -16,7 +16,7 @@ export const gridCacheId = async ({
   const headerList = headers();
   const pathName = headerList.get('x-pathname') || '';
   const gridTabId = headerList.get('x-grid-tab-id') || '';
-  const _id = context.session.account.contact.id;
+  const _id = context.session.account.account_organization_id;
   const [, , mainEntity, application, identifier] = pathName.split('/');
   const mainAppId = `${_id}:${mainEntity}:${application}`;
 

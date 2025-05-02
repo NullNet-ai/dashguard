@@ -99,7 +99,7 @@ export default function MyVerticalStepper() {
       >
         <div
           className={cn(
-            "relative hidden  after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
+            "relative hidden after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
             { "text-center sm:p-0": !isSummOpen },
             `${isSummOpen ? "w-full" : "w-[30px]"}`,
           )}
@@ -222,7 +222,7 @@ export default function MyVerticalStepper() {
                               <AccordionItem
                                 key={idx + label}
                                 value={idx + label}
-                                className="flex flex-col pt-2"
+                                className="flex flex-col pt-2 border-none"
                               >
                                 <AccordionTrigger
                                   data-test-id={testIDFormatter(
