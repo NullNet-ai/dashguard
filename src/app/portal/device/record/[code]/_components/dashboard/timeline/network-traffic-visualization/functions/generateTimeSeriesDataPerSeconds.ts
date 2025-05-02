@@ -137,7 +137,7 @@ export function generateTimeSeriesData(sampleData: any, resolution: string, time
   }
   
   // Convert map to array and sort by time
-  const result = [];
+  const result: any = [];
   const sortedKeys = Object.keys(timeMap).sort();
   for (const timeKey of sortedKeys) {
     result.push({
@@ -152,13 +152,13 @@ export function generateTimeSeriesData(sampleData: any, resolution: string, time
   } else if (result.length < boxCount) {
     // Fill with empty data if needed
     const lastTime = result.length > 0 ? result[result.length - 1].time : '00:00:00';
-    const [hour, minute, second] = lastTime.split(':').map(t => parseInt(t));
+    const [hour, minute, second] = lastTime.split(':').map((t: any) => parseInt(t));
     
     for (let i = result.length; i < boxCount; i++) {
       // Add additional time slots based on the last time and resolution
-      let newHour = hour;
-      let newMinute = minute;
-      let newSecond = second;
+      let newHour: any = hour;
+      let newMinute: any = minute;
+      let newSecond: any = second;
       
       if (_resolution === '1h') {
         newHour = (newHour + 1) % 24;
@@ -190,7 +190,7 @@ export function generateNestedTimeSeriesData(sampleData: any, parentResolution: 
   const parentTimeSeries = generateTimeSeriesData(sampleData, parentResolution, parentCount);
   
   // For each parent time slot, generate child-level time series (e.g., 60 seconds in each minute)
-  return parentTimeSeries.map(parentSlot => {
+  return parentTimeSeries.map((parentSlot: any) => {
     const [hour, minute] = parentSlot.time.split(':');
     
     // Filter sample data relevant to this parent time slot
