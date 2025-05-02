@@ -308,7 +308,7 @@ const handleResizeEnd = () => {
         {config && (
           <>
             <CardHeader className="flex items-center gap-4 p-3 pb-0 justify-between">
-              {header}
+              {state?.dynamicHeader}
               <div className="flex items-center gap-2">
                 <TooltipProvider>
                   {isPinnable && !isMobile && (

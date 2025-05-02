@@ -6,6 +6,7 @@ export interface ISideDrawerContextProps {
     config: ISideDrawerConfig | null
     isPinned: boolean // Add isPinned to state
     width: string | null // Add width to state
+    dynamicHeader: React.ReactNode | null;
   }
   actions: IActions
 }
@@ -17,6 +18,7 @@ export interface IActions {
   togglePinSideDrawer: () => void;
   saveCurrentState: (config: ISideDrawerConfig) => void; // Add this line
   setwidth: (width: any) => void;
+  setHeader: (header: React.ReactNode) => void;
 }
 
 export interface ISideDrawerConfig {
