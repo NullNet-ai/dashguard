@@ -8,7 +8,8 @@ const RecordSummaryContent = async () => {
     const headerList = headers()
     const username = cookies().get('username')?.value || ''
     const pathname = headerList.get('x-pathname') || ''
-    const [, , mainEntity, , identifier] = pathname.split('/')
+    const mainEntity = headerList.get('x-main-entity') || '';
+    const [, , , , identifier] = pathname.split('/')
 
     if (!identifier || !mainEntity) {
       throw new Error('Invalid URL parameters')
