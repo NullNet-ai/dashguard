@@ -84,8 +84,8 @@ export default function RemoteAccessDetails(props: IFormProps) {
         localStorage.removeItem('reload_previous_tab'); // Remove the flag
         window.location.reload(); // Reload the current tab
       }
+      localStorage.removeItem('reload_previous_tab'); // Remove the flag
     }
-    localStorage.removeItem('reload_previous_tab'); // Remove the flag
   });
 
   return (
