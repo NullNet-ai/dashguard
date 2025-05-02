@@ -51,10 +51,18 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
           localStorage.setItem('current_terminal_session', sessionKey)
           
+          // Set a flag in localStorage to reload the previous tab
+          localStorage.setItem('reload_previous_tab', 'true');
+
+
           window.open(`/terminal`, '_blank')
+
           
         }
         else {
+          // Set a flag in localStorage to reload the previous tab
+          localStorage.setItem('reload_previous_tab', 'true');
+
           window.open(`http://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/`, '_blank')
         }
       }
@@ -67,6 +75,18 @@ export default function RemoteAccessDetails(props: IFormProps) {
       toast.error(`Failed to submit Remote Access: ${error.message || 'Unknown error'}`)
     }
   }
+
+  // Add this code to reload the current tab if the flag is set
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const shouldReload = localStorage.getItem('reload_previous_tab');
+      if (shouldReload === 'true') {
+        localStorage.removeItem('reload_previous_tab'); // Remove the flag
+        window.location.reload(); // Reload the current tab
+      }
+    }
+    localStorage.removeItem('reload_previous_tab'); // Remove the flag
+  });
 
   return (
     <FormBuilder
