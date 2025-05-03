@@ -83,6 +83,7 @@ const getSessionTabs = async () => {
   }
 
   if (application === 'wizard' && !hasIdentifier && identifier) {
+
     newTabs.splice(1, 0, {
       name: identifier,
       href: pathname,
@@ -92,17 +93,21 @@ const getSessionTabs = async () => {
   }
 
   if (application === 'wizard' && hasIdentifier && step) {
-  
-    const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`
-    const currentTab = newTabs.findIndex(item => item.name === identifier)
-    if (currentTab !== -1) {
-      newTabs[currentTab].href = modifiedHref
+    //check first if the last character is a number
+    const lastChar = hasIdentifier.href.slice(-1)
+
+    if (/\d/.exec(step) &&  /\d/.exec(lastChar)) {
+      const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`
+      const currentTab = newTabs.findIndex(item => item.name === identifier)
+      if (currentTab !== -1) {
+        newTabs[currentTab].href = modifiedHref
+      }
     }
 
   }
   
 
-  if (application === 'record' && hasIdentifier && identifier) {
+  if (application === 'record' && !hasIdentifier && identifier) {
     newTabs.splice(1, 0, {
       name: identifier,
       href: `${pathname}?${fullSearchQueryParams}`,
@@ -141,6 +146,7 @@ const InnerTabs = async ({
       id: tab.name,
       }
     }) 
+
 
   return <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant}/>
 }

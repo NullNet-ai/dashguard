@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { mainEntities } from './middleware-alias-entities'
 
 export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
@@ -9,6 +10,19 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set(
     'x-record-tab-id', request.nextUrl.searchParams.get('tab') || '',
   )
+
+  //? This is where we change the alias entity to a main entity
+  //? e.g. student to contact
+  const [, , entity] = request.nextUrl.pathname.split('/')
+
+  let mainEntity  = entity || ''
+  if (entity && mainEntities[entity]) {
+    mainEntity = mainEntities[entity] || entity
+  }
+  requestHeaders.set(
+    'x-main-entity', mainEntity,
+  )
+  //? end
 
   requestHeaders.set(
     'x-categories', request.nextUrl.searchParams.get('categories') || '',
