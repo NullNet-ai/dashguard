@@ -1,22 +1,23 @@
 "use client";
 
 import { cn } from "~/lib/utils";
-import { useCallback, useRef, useState } from "react";
-import { ImageIcon, ImagePlus } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ImageIcon, ImagePlus, Loader2 } from "lucide-react";
 import { PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImageViewer from '../image-viewer';
 import Image from 'next/image';
+import axios from 'axios';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../dropdown-menu"
-
-
+import { api } from '~/trpc/react';
+import { getImageData } from '~/components/platform/Record/Summary/Header/action/getImageData';
 
 type ImageUploadProps = {
-  onImageUpload?: (fileUrl: string) => void;
+  onImageUpload?: (data: any) => void;
   withImageViewer?: boolean;
   width?: number;
   height?: number;
@@ -24,6 +25,7 @@ type ImageUploadProps = {
   borderless?: boolean;
   avatarSize?: number;
   variant?: "default" | "cover" | "avatar" | "full";
+  value?: string;
 }
 
 export function ImageUpload({
@@ -34,17 +36,81 @@ export function ImageUpload({
   height,
   className,
   variant = "default",
+  value: _file
 }: ImageUploadProps) {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Only run the query if _file has a value
+  const { data } = _file 
+    ? api.files.getFileById.useQuery({
+        ids: [_file],
+        pluck_fields: [
+          "filename",
+          "filepath",
+          "mimetype",
+          "download_path",
+          "size",
+          "originalname",
+        ],
+      })
+    : { data: undefined };
+
+  useEffect(() => {
+
+    const getFileData = async (path: string) => {
+      try {
+        const response = await fetch(`${path}`)
+        const blob = await response.blob()
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setUploadedUrl(reader.result as string)
+          setIsLoading(false)
+        }
+        reader.readAsDataURL(blob)
+      } catch (error) {
+        console.error("Error fetching file:", error);
+      }
+    }
+
+    if (data?.length) {
+      const {download_path} = data[0] as any;
+      if (download_path) {
+        getFileData(download_path)
+      }
+    }
+  }, [data]);
+
+  const handleUpload = async (file: File) => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const {data} = await axios.post("/api/upload", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+      });
+      onImageUpload?.(data);
+      const url = URL.createObjectURL(file);
+      setUploadedUrl(url);
+
+    }
+    catch (error) {
+      console.error("Error uploading file:", error);
+    }
+    finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-        const url = URL.createObjectURL(file);
-        setUploadedUrl(url);
-        onImageUpload?.(url);
+        handleUpload(file);
       }
     },
     [onImageUpload]
@@ -128,7 +194,12 @@ export function ImageUpload({
             !uploadedUrl && "cursor-pointer"
           )}
         >
-          {uploadedUrl ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="mt-2 text-sm">Uploading image...</p>
+            </div>
+          ) : uploadedUrl ? (
             <div className="relative h-full w-full">
               {withImageViewer ? (
                 <ImageViewer
@@ -165,7 +236,7 @@ export function ImageUpload({
             </>
           )}
         </div>
-        {editButton()}
+        {!isLoading && editButton()}
       </div>
     </div>
   );
