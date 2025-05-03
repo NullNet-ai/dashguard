@@ -5,21 +5,16 @@ export interface TabItem {
   label: string
   content: React.ReactNode
   icon?: React.ReactNode
-  iconPosition?: 'left' | 'right'
   disabled?: boolean
   forceMount?: boolean
 }
 
 export interface StateTabContextType {
   tabs: TabItem[]
-  variant?: 'default' | 'pills' | 'underline'|'shadow'
+  variant?: 'default' | 'pills' | 'underline'
   size?: 'sm' | 'md' | 'lg'
   orientation?: 'horizontal' | 'vertical'
-  position?: 'left' | 'right'
   defaultValue?: string
-  rotateText?: boolean
-  activeTab?: string  // New property to track active tab
-  setActiveTab?: (value: string) => void  // Function to update active tab
 }
 
 export interface StateTabProps extends StateTabContextType {

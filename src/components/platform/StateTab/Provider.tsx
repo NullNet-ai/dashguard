@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, ReactNode, useState } from 'react'
+import React, { createContext, useContext, ReactNode } from 'react'
 import { StateTabContextType } from './types'
 
 const StateTabContext = createContext<StateTabContextType | undefined>(
@@ -14,23 +14,8 @@ export function StateTabProvider({
   children: ReactNode
   value: StateTabContextType
 }) {
-  // Initialize activeTab state with defaultValue or first tab
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    if (value.defaultValue) {
-      return value.defaultValue;
-    }
-    return value.tabs[0]?.id || '';
-  });
-
-  // Create enhanced context value with activeTab state
-  const contextValue = {
-    ...value,
-    activeTab,
-    setActiveTab,
-  };
-
   return (
-    <StateTabContext.Provider value={contextValue}>
+    <StateTabContext.Provider value={value}>
       {children}
     </StateTabContext.Provider>
   )
