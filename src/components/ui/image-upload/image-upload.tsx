@@ -7,39 +7,48 @@ import { PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImageViewer from '../image-viewer';
 import Image from 'next/image';
 import axios from 'axios';
+import { api } from '~/trpc/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../dropdown-menu"
-import { api } from '~/trpc/react';
-import { getImageData } from '~/components/platform/Record/Summary/Header/action/getImageData';
 
-type ImageUploadProps = {
-  onImageUpload?: (data: any) => void;
+type BaseImageUploadProps = {
+  onImageUpload?: (data: string) => void;
   withImageViewer?: boolean;
   width?: number;
   height?: number;
   className?: string;
   borderless?: boolean;
-  avatarSize?: number;
-  variant?: "default" | "cover" | "avatar" | "full";
+  objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   value?: string;
 }
 
-export function ImageUpload({
+type ImageUploadProps = BaseImageUploadProps & {
+  variant?: "default" | "cover" | "box" | "avatar" | "vertical" | "full";
+}
+
+function BaseImageUpload({
   onImageUpload,
   withImageViewer = true,
   borderless = false,
   width,
   height,
   className,
-  variant = "default",
+  containerClassName,
+  placeholderText,
+  iconClassName,
+  objectFit = "cover",
   value: _file
-}: ImageUploadProps) {
+}: BaseImageUploadProps & {
+  containerClassName: string;
+  placeholderText: string;
+  iconClassName?: string;
+}) {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(_file ? true : false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Only run the query if _file has a value
@@ -58,9 +67,9 @@ export function ImageUpload({
     : { data: undefined };
 
   useEffect(() => {
-
     const getFileData = async (path: string) => {
       try {
+        setIsLoading(true);
         const response = await fetch(`${path}`)
         const blob = await response.blob()
         const reader = new FileReader()
@@ -71,6 +80,7 @@ export function ImageUpload({
         reader.readAsDataURL(blob)
       } catch (error) {
         console.error("Error fetching file:", error);
+        setIsLoading(false);
       }
     }
 
@@ -78,6 +88,8 @@ export function ImageUpload({
       const {download_path} = data[0] as any;
       if (download_path) {
         getFileData(download_path)
+      } else {
+        setIsLoading(false);
       }
     }
   }, [data]);
@@ -138,19 +150,6 @@ export function ImageUpload({
     }
   };
 
-  const containerVariant = () => {
-    switch (variant) {
-      case "cover":
-        return "rounded-lg w-full aspect-[21/9] max-w-full";
-      case "avatar":
-        return `rounded-full size-32`;
-        case "full":
-          return "w-full";
-      default:
-        return "rounded-lg aspect-[3/2]";
-    }
-  };
-
   const editButton = () => {
     if (!uploadedUrl) return
 
@@ -158,7 +157,7 @@ export function ImageUpload({
     <div className="absolute bottom-4 right-4 z-10 flex gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-1 rounded-full text-primary border-primary bg-accent hover:text-primary-foreground hover:border-primary hover:bg-primary/90">
-          <ImagePlus className="size-7 p-1" />
+          <ImagePlus className="size-8 p-1" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem className='flex items-start gap-x-1' onClick={handleUploadClick}><PhotoIcon className='size-4' /> Change image</DropdownMenuItem>
@@ -170,74 +169,153 @@ export function ImageUpload({
   };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn(
+      "relative w-full",
+      className
+    )}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <div
+        onClick={uploadedUrl ? undefined : handleContainerClick}
         className={cn(
+          "absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500 transition-all group-hover:text-primary",
+          !uploadedUrl && "cursor-pointer",
           "group relative overflow-hidden transition-all hover:border-primary",
           borderless ? "border-none" : "border-2 border-solid border-gray-30",
-          containerVariant()
+          containerClassName
         )}
         style={{height: height, width: width }}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-
-        <div
-          onClick={uploadedUrl ? undefined : handleContainerClick}
-          className={cn(
-            "absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500 transition-all group-hover:text-primary",
-            !uploadedUrl && "cursor-pointer"
-          )}
-        >
-          {isLoading ? (
+        {isLoading ? (
             <div className="flex flex-col items-center justify-center">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
               <p className="mt-2 text-sm">Uploading image...</p>
             </div>
           ) : uploadedUrl ? (
-            <div className="relative h-full w-full">
-              {withImageViewer ? (
-                <ImageViewer
-                  src={uploadedUrl}
-                  alt=""
-                  width={width || 100}
-                  height={height || 100}
-                  className={cn(
-                    "h-full w-full rounded-none"
-                  )}
-                  style={{ width: variant ? '100%' : 'auto', height: '100%', margin: 'auto', objectFit: 'cover' }}
-                />
-              ) : (
-                <Image
-                  src={uploadedUrl}
-                  alt=""
-                  width={width || 100}
-                  height={height || 100}
-                  className={cn(
-                    "h-full w-full",
-                    variant === "cover" && "object-cover",
-                    variant === "avatar" && "object-cover"
-                  )}
-                  style={{ margin: 'auto' }}
-                />
-              )}
+          <div className="relative h-full w-full">
+            {withImageViewer ? (
+              <ImageViewer
+                src={uploadedUrl}
+                alt=""
+                width={width || 100}
+                height={height || 100}
+                className="h-full w-full rounded-none"
+                style={{ width: '100%', height: '100%', margin: 'auto', objectFit: objectFit }}
+              />
+            ) : (
+              <Image
+                src={uploadedUrl}
+                alt=""
+                width={width || 100}
+                height={height || 100}
+                className={`h-full w-full object-${objectFit}`}
+                style={{ margin: 'auto' }}
+              />
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center justify-center gap-2">
+              <ImageIcon className={cn("size-10", iconClassName)} />
+              <p className="text-sm text-center">{placeholderText}</p>
             </div>
-          ) : (
-            <>
-              <div className="flex flex-col items-center justify-center gap-2">
-                <ImageIcon className={cn("h-10 w-10", variant === "avatar" && "h-8 w-8")} />
-                <p className="text-sm">{variant === "avatar" ? "Add photo" : "Click to upload an image"}</p>
-              </div>
-            </>
-          )}
-        </div>
-        {!isLoading && editButton()}
+          </>
+        )}
       </div>
+      {!isLoading && editButton()}
     </div>
   );
+}
+
+export function DefaultImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn(props.className)}
+      containerClassName="rounded-lg aspect-[3/2]"
+      placeholderText="Click to upload an image"
+    />
+  );
+}
+
+export function BoxImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn(props.className)}
+      containerClassName="rounded-lg aspect-square"
+      placeholderText="Click to upload an images"
+    />
+  );
+}
+
+export function VerticalImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn(props.className)}
+      containerClassName="rounded-lg aspect-[3/4]"
+      placeholderText="Click to upload an images"
+    />
+  );
+}
+
+export function CoverImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn(props.className)}
+      containerClassName="rounded-lg w-full aspect-[21/9] max-w-full"
+      placeholderText="Click to upload an image"
+    />
+  );
+}
+
+export function AvatarImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn('max-w-min', props.className)}
+      containerClassName="rounded-full size-32"
+      placeholderText="Add photo"
+      iconClassName="size-8"
+    />
+  );
+}
+
+export function FullImageUpload(props: BaseImageUploadProps) {
+  return (
+    <BaseImageUpload
+      {...props}
+      className={cn(props.className)}
+      containerClassName="w-full"
+      placeholderText="Click to upload an image"
+    />
+  );
+}
+
+export function ImageUpload({
+  variant = "default",
+  ...props
+}: ImageUploadProps) {
+  switch (variant) {
+    case "cover":
+      return <CoverImageUpload {...props} />;
+    case "avatar":
+      return <AvatarImageUpload {...props} />;
+    case "box":
+      return <BoxImageUpload {...props} />;
+    case "vertical":
+      return <VerticalImageUpload {...props} />;
+    case "full":
+      return <FullImageUpload {...props} />;
+    default:
+      return <DefaultImageUpload {...props} />;
+  }
 }
