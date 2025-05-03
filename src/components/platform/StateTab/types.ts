@@ -17,7 +17,9 @@ export interface StateTabContextType {
   orientation?: 'horizontal' | 'vertical'
   position?: 'left' | 'right'
   defaultValue?: string
-  rotateText?:boolean
+  rotateText?: boolean
+  activeTab?: string  // New property to track active tab
+  setActiveTab?: (value: string) => void  // Function to update active tab
 }
 
 export interface StateTabProps extends StateTabContextType {

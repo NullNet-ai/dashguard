@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs'
 import { StateTabProvider, useStateTab } from './Provider'
 import { type StateTabProps } from './types'
@@ -16,12 +16,13 @@ function StateTabList({
 }) {
   const {
     tabs,
-    defaultValue,
     variant = 'default',
     size = 'md',
     orientation = 'horizontal',
     position = 'right',
     rotateText = false,
+    activeTab,
+    setActiveTab,
   } = useStateTab()
   
   // Get sidebar state if this is being used in the sidebar
@@ -29,24 +30,16 @@ function StateTabList({
   const isSidebarTab = persistKey === 'sidebar-tabs';
   // Only collapse tabs on desktop when sidebar is closed, not on mobile
   const shouldCollapse = isSidebarTab && !sidebarState.open && !sidebarState.openMobile;
-  // const open = isSidebarTab ? sidebarState.open : true;
 
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    // Check for saved tab first, regardless of defaultValue
-    if (typeof window !== 'undefined' && persistKey) {
+  // Initialize from localStorage if needed
+  useEffect(() => {
+    if (typeof window !== 'undefined' && persistKey && setActiveTab) {
       const savedTab = localStorage.getItem(`tab-${persistKey}`)
-      if (savedTab && tabs.some((tab) => tab.id === savedTab)) {
-        return savedTab
+      if (savedTab && tabs.some((tab) => tab.id === savedTab) && savedTab !== activeTab) {
+        setActiveTab(savedTab)
       }
     }
-    
-    // Fall back to defaultValue or first tab
-    if (defaultValue) {
-      return defaultValue;
-    }
-    
-    return tabs[0]?.id || '';
-  })
+  }, [persistKey, tabs, setActiveTab, activeTab])
 
   // Persist active tab
   useEffect(() => {
@@ -63,12 +56,18 @@ function StateTabList({
     return tabs;
   }, [tabs, activeTab, shouldCollapse]);
 
+  const handleTabChange = (value: string) => {
+    if (setActiveTab) {
+      setActiveTab(value);
+    }
+  };
+
   return (
     <Tabs
       defaultValue={activeTab}
       value={activeTab}
       className={cn('w-full', className)}
-      onValueChange={setActiveTab}
+      onValueChange={handleTabChange}
     >
       <div className={cn(
         'flex flex-1',
@@ -83,7 +82,6 @@ function StateTabList({
           className={cn(
             orientation === "horizontal" && "mb-4",
             orientation === 'vertical' && 'flex-col h-auto min-w-fit',
-            // Improved centering for collapsed sidebar (desktop only)
             shouldCollapse && 'justify-center items-center w-full'
           )}
         >
@@ -101,7 +99,6 @@ function StateTabList({
                 "w-full",
                 orientation === 'vertical' && 'justify-start w-full',
                 orientation === 'vertical' && rotateText && 'writing-mode-vertical-rl',
-                // Improved centering for collapsed sidebar (desktop only)
                 shouldCollapse && 'justify-center items-center mx-auto flex-1 flex'
               )}
             >
@@ -109,7 +106,6 @@ function StateTabList({
                 <span className={cn(
                   orientation === 'vertical' && rotateText && position === 'right' && '-rotate-90 transform',
                   orientation === 'vertical' && rotateText && position === 'left' && 'rotate-90 transform',
-                  // Center icon when sidebar is collapsed (desktop only)
                   shouldCollapse && 'mx-auto flex justify-center items-center'
                 )}>
                   {tab.icon}
@@ -118,7 +114,6 @@ function StateTabList({
               <span className={cn(
                 orientation === 'vertical' && rotateText && position === 'right' && 'rotate-180 transform',
                 orientation === 'vertical' && rotateText && position === 'left' && 'rotate-0 transform',
-                // Center text when sidebar is collapsed (desktop only)
                 shouldCollapse && 'mx-auto text-center'
               )}>
                 {tab.label}
@@ -127,7 +122,6 @@ function StateTabList({
           ))}
         </TabsList>
         
-        {/* Content section remains the same */}
         <div className={cn(
           orientation === 'vertical' ? 'flex-1' : 'w-full',
           orientation === 'vertical' && position === 'left' && 'mr-2',
