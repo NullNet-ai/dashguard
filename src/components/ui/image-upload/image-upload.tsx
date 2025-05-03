@@ -8,7 +8,6 @@ import ImageViewer from '../image-viewer';
 import Image from 'next/image';
 import axios from 'axios';
 import { api } from '~/trpc/react';
-import { getImageData } from '~/components/platform/Record/Summary/Header/action/getImageData';
 import {
   DropdownMenu,
   DropdownMenuContent,
