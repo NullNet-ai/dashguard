@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "~/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ImageIcon, ImagePlus, Loader2 } from "lucide-react";
+import { cn } from '~/lib/utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ImageIcon, ImagePlus, Loader2 } from 'lucide-react';
 import { PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ImageViewer from '../image-viewer';
 import Image from 'next/image';
@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../dropdown-menu"
+} from '../dropdown-menu';
 
 type BaseImageUploadProps = {
   onImageUpload?: (data: string) => void;
@@ -22,13 +22,13 @@ type BaseImageUploadProps = {
   height?: number;
   className?: string;
   borderless?: boolean;
-  objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   value?: string;
-}
+};
 
 type ImageUploadProps = BaseImageUploadProps & {
-  variant?: "default" | "cover" | "box" | "avatar" | "vertical" | "full";
-}
+  variant?: 'default' | 'cover' | 'box' | 'avatar' | 'vertical' | 'full';
+};
 
 function BaseImageUpload({
   onImageUpload,
@@ -40,8 +40,8 @@ function BaseImageUpload({
   containerClassName,
   placeholderText,
   iconClassName,
-  objectFit = "cover",
-  value: _file
+  objectFit = 'cover',
+  value: _file,
 }: BaseImageUploadProps & {
   containerClassName: string;
   placeholderText: string;
@@ -52,16 +52,16 @@ function BaseImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Only run the query if _file has a value
-  const { data } = _file 
+  const { data } = _file
     ? api.files.getFileById.useQuery({
         ids: [_file],
         pluck_fields: [
-          "filename",
-          "filepath",
-          "mimetype",
-          "download_path",
-          "size",
-          "originalname",
+          'filename',
+          'filepath',
+          'mimetype',
+          'download_path',
+          'size',
+          'originalname',
         ],
       })
     : { data: undefined };
@@ -70,24 +70,24 @@ function BaseImageUpload({
     const getFileData = async (path: string) => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${path}`)
-        const blob = await response.blob()
-        const reader = new FileReader()
+        const response = await fetch(`${path}`);
+        const blob = await response.blob();
+        const reader = new FileReader();
         reader.onloadend = () => {
-          setUploadedUrl(reader.result as string)
-          setIsLoading(false)
-        }
-        reader.readAsDataURL(blob)
+          setUploadedUrl(reader.result as string);
+          setIsLoading(false);
+        };
+        reader.readAsDataURL(blob);
       } catch (error) {
-        console.error("Error fetching file:", error);
+        console.error('Error fetching file:', error);
         setIsLoading(false);
       }
-    }
+    };
 
     if (data?.length) {
-      const {download_path} = data[0] as any;
+      const { download_path } = data[0] as any;
       if (download_path) {
-        getFileData(download_path)
+        getFileData(download_path);
       } else {
         setIsLoading(false);
       }
@@ -98,25 +98,22 @@ function BaseImageUpload({
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append("file", file);
-      
-      const {data} = await axios.post("/api/upload", formData, {
+      formData.append('file', file);
+
+      const { data } = await axios.post('/api/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
         },
       });
       onImageUpload?.(data);
       const url = URL.createObjectURL(file);
       setUploadedUrl(url);
-
-    }
-    catch (error) {
-      console.error("Error uploading file:", error);
-    }
-    finally {
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +122,7 @@ function BaseImageUpload({
         handleUpload(file);
       }
     },
-    [onImageUpload]
+    [onImageUpload],
   );
 
   const handleContainerClick = (e: React.MouseEvent) => {
@@ -151,28 +148,35 @@ function BaseImageUpload({
   };
 
   const editButton = () => {
-    if (!uploadedUrl) return
+    if (!uploadedUrl) return;
 
     return (
-    <div className="absolute bottom-4 right-4 z-10 flex gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-1 rounded-full text-primary border-primary bg-accent hover:text-primary-foreground hover:border-primary hover:bg-primary/90">
-          <ImagePlus className="size-8 p-1" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem className='flex items-start gap-x-1' onClick={handleUploadClick}><PhotoIcon className='size-4' /> Change image</DropdownMenuItem>
-          <DropdownMenuItem className='flex items-start gap-x-1' onClick={handleRemoveImage}><TrashIcon className='size-4' /> Remove image</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-    )
+      <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-1 rounded-full border-primary bg-accent text-primary hover:border-primary hover:bg-primary/90 hover:text-primary-foreground">
+            <ImagePlus className="size-8 p-1" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              className="flex items-start gap-x-1"
+              onClick={handleUploadClick}
+            >
+              <PhotoIcon className="size-4" /> Change image
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-start gap-x-1"
+              onClick={handleRemoveImage}
+            >
+              <TrashIcon className="size-4" /> Remove image
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
   };
 
   return (
-    <div className={cn(
-      "relative w-full",
-      className
-    )}>
+    <div className={cn('relative w-full', className)}>
       <input
         ref={fileInputRef}
         type="file"
@@ -184,20 +188,20 @@ function BaseImageUpload({
       <div
         onClick={uploadedUrl ? undefined : handleContainerClick}
         className={cn(
-          "absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500 transition-all group-hover:text-primary",
-          !uploadedUrl && "cursor-pointer",
-          "group relative overflow-hidden transition-all hover:border-primary",
-          borderless ? "border-none" : "border-2 border-solid border-gray-30",
-          containerClassName
+          'absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-50 text-gray-500 transition-all group-hover:text-primary',
+          !uploadedUrl && 'cursor-pointer',
+          'group relative overflow-hidden transition-all hover:border-primary',
+          borderless ? 'border-none' : 'border-gray-30 border-2 border-solid',
+          containerClassName,
         )}
-        style={{height: height, width: width }}
+        style={{ height: height, width: width }}
       >
         {isLoading ? (
-            <div className="flex flex-col items-center justify-center">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="mt-2 text-sm">Uploading image...</p>
-            </div>
-          ) : uploadedUrl ? (
+          <div className="flex flex-col items-center justify-center">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="mt-2 text-sm">Uploading image...</p>
+          </div>
+        ) : uploadedUrl ? (
           <div className="relative h-full w-full">
             {withImageViewer ? (
               <ImageViewer
@@ -206,7 +210,12 @@ function BaseImageUpload({
                 width={width || 100}
                 height={height || 100}
                 className="h-full w-full rounded-none"
-                style={{ width: '100%', height: '100%', margin: 'auto', objectFit: objectFit }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  margin: 'auto',
+                  objectFit: objectFit,
+                }}
               />
             ) : (
               <Image
@@ -220,12 +229,10 @@ function BaseImageUpload({
             )}
           </div>
         ) : (
-          <>
-            <div className="flex flex-col items-center justify-center gap-2">
-              <ImageIcon className={cn("size-10", iconClassName)} />
-              <p className="text-sm text-center">{placeholderText}</p>
-            </div>
-          </>
+          <div className="flex flex-col items-center justify-center gap-2 p-4">
+            <ImageIcon className={cn('size-10', iconClassName)} />
+            <p className="text-center text-sm">{placeholderText}</p>
+          </div>
         )}
       </div>
       {!isLoading && editButton()}
@@ -301,19 +308,19 @@ export function FullImageUpload(props: BaseImageUploadProps) {
 }
 
 export function ImageUpload({
-  variant = "default",
+  variant = 'default',
   ...props
 }: ImageUploadProps) {
   switch (variant) {
-    case "cover":
+    case 'cover':
       return <CoverImageUpload {...props} />;
-    case "avatar":
+    case 'avatar':
       return <AvatarImageUpload {...props} />;
-    case "box":
+    case 'box':
       return <BoxImageUpload {...props} />;
-    case "vertical":
+    case 'vertical':
       return <VerticalImageUpload {...props} />;
-    case "full":
+    case 'full':
       return <FullImageUpload {...props} />;
     default:
       return <DefaultImageUpload {...props} />;
