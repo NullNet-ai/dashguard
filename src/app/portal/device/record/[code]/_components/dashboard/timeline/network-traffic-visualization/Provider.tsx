@@ -107,7 +107,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [])
 
   useEffect(() => {
-    if (!socket || !org_acc_id) return;
+    if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return;
   
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
     socket.on(eventKey, async (data: any) => {

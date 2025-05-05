@@ -23,9 +23,10 @@ const gridColumns = [
   },
   {
     header: 'Category',
-    accessorKey: 'remote_access_category',
+    accessorKey: 'categories',
     search_config: {
       operator: 'like',
+      parse_as: "text"
     },
   },
   {

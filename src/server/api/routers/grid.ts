@@ -761,7 +761,8 @@ export const gridRouter = createTRPCRouter({
             label: z.string().optional(),
             default: z.boolean().optional(),
             display_value: z.string().optional(),
-            filters: z.array(z.any()).optional()
+            filters: z.array(z.any()).optional(),
+            parse_as: z.string().optional()
           }),
         ),
       }),
@@ -788,10 +789,11 @@ export const gridRouter = createTRPCRouter({
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
       const defaultFilter = filter_id
-        ? tabDetails?.find((tab) => tab.id === filter_id)
-        : tabDetails?.find((tab) => tab.current);
+      ? tabDetails?.find((tab) => tab.id === filter_id)
+      : tabDetails?.find((tab) => tab.current);
+      
       const newTabs = tabDetails?.map((tab) => {
-        if (tab.id === defaultFilter.id) {
+        if (tab.id === defaultFilter?.id ) {
           return {
             ...tab,
             group_advance_filters:
@@ -806,20 +808,20 @@ export const gridRouter = createTRPCRouter({
         return tab;
       });
 
-      if (!defaultFilter.is_default) {
+      if (!defaultFilter?.is_default) {
         // update the grid filter entity on database
         await ctx.dnaClient
-          .update(defaultFilter.id, {
+          .update(defaultFilter?.id, {
             entity: 'grid_filter',
             token: ctx.token.value,
             mutation: {
               params: {
                 advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? []
                     : filters,
                 group_advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? filters
                     : [],
               },
@@ -909,6 +911,7 @@ export const gridRouter = createTRPCRouter({
         field: item.field,
         values: item.values,
         default: item.default,
+        ...(item.parse_as ? { parse_as: item.parse_as } : {}),
       };
     });
 
