@@ -47,7 +47,8 @@ export const searchRecords = async ({
         field : fieldConfig?.field || field,
         operator: fieldConfig?.operator || 'like',
         values: Array.isArray(value) ? value : [value],
-        entity: fieldConfig?.entity || 'contact'
+        entity: fieldConfig?.entity || 'contact',
+        ...(fieldConfig?.parse_as ? { parse_as: fieldConfig?.parse_as } : {}),
       }]
   });
 

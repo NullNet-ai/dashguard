@@ -23,6 +23,7 @@ const ZodItems = z.object({
         entity: z.string().optional(),
         operator: z.string(),
         values: z.array(z.string()).optional(),
+        parse_as: z.string().optional(),
       }),
     )
     .optional(), // Optional advance filters

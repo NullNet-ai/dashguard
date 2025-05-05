@@ -54,12 +54,13 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
-      ({ entity, operator, type, field, values }) => ({
+      ({ entity, operator, type, field, values, parse_as }) => ({
         entity: entity || defaultEntity,
         operator,
         type,
         field,
         values,
+        ...parse_as ? {parse_as} : {}
       }),
     ) as ISearchItem[];
     const searchResolver =  searchableFields.reduce(

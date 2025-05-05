@@ -59,6 +59,7 @@ const gridColumns = [
       operator: 'like',
       entity: 'device_interface_addresses',
       field: 'address',
+      parse_as: 'text',
     },
     cell: ({ row }) => {
       const wan_addresses = row?.original?.wan_addresses

@@ -21,7 +21,7 @@ export const resolveSearchItem = ({
         ? [rest?.values?.[0]?.replace(/[^\d]/g, '')]
         : [rest?.values?.[0]],
     display_value: rest?.values?.[0],
-    operator: rest?.operator === 'like' ? 'equal' : rest?.operator,
+    operator: rest?.operator === 'like' && !rest?.parse_as ? 'equal' : rest?.operator, //? 'equal' : rest?.operator,
     default: false,
   }
   if (hasFilters) {
