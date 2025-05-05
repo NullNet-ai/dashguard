@@ -82,6 +82,9 @@ function getPercentage(value: number, maxValue: number, maxPixels = 300) {
 const getColorForValue = (value: number, maxBandwidth: number) => {
   const range = maxBandwidth / 3; // Divide the max value into 3 ranges
 
+  if(value === undefined) return '#fff'
+  if (value < 0) return '#fff'
+  if (value === 0) return '#fff' // No color for zero or undefined values
   if (value >= maxBandwidth) {
     return '#00364b'; // Darkest color for the highest range
   }

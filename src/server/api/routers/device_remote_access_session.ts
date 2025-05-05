@@ -227,7 +227,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           ...entity_data,
           ...rest,
           remote_access_type: remote_access_type.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
-          remote_access_category: formatString(remote_access_type),
+          // remote_access_category: formatString(remote_access_type),
           remote_access_status: formatString(item?.remote_access_status),
           // type: formatString(remote_access_type),
           device_name: formatString(devices?.[0]?.instance_name),

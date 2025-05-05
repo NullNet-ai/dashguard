@@ -17,7 +17,7 @@ export default async function Page() {
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity] = pathname.split('/')
 
-  const _pluck = ['id', 'code', 'status', 'remote_access_type', 'remote_access_status', 'remote_access_session', 'device_id', 'created_date', 'updated_date', 'created_by', 'updated_by', 'created_time', 'updated_time']
+  const _pluck = ['id', 'code', 'status', 'remote_access_type','categories', 'remote_access_status', 'remote_access_session', 'device_id', 'created_date', 'updated_date', 'created_by', 'updated_by', 'created_time', 'updated_time']
 
   const default_sort = [ { id: 'code', desc: true, sort_key: 'code' } ]
 
@@ -28,10 +28,10 @@ export default async function Page() {
     limit: +(pagination?.limit_per_page ?? '100'),
     sorting: sorts?.defaultSorting?.length ? sorts.defaultSorting : default_sort,
     advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : [],
+    ? filters?.advanceFilter
+    : [],
   })
-
+  
   return (
     <Grid
       config={{
