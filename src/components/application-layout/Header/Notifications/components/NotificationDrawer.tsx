@@ -168,7 +168,7 @@ const NotificationDrawer = () => {
             </div>
           ),
         }))}
-        variant="shadow"
+        variant="default"
       />
     </div>
   );
