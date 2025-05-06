@@ -10,7 +10,7 @@ export const searchableFields = [
     accessorKey: 'source_ip',
     field: 'source_ip',
     label: 'Source IP',
-    entity: 'packets',
+    entity: 'connections',
     operator: 'equal',
   },
   // {
@@ -67,7 +67,7 @@ export const searchableFields = [
 export const searchConfig = {
   router: 'packet',
   resolver: 'filterConnections',
-  defaultEntity: 'packets',
+  defaultEntity: 'connections',
 }
 
 export const timeDuration = {

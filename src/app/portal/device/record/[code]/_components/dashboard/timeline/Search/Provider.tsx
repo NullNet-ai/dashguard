@@ -38,7 +38,7 @@ interface IProps extends PropsWithChildren {
 }
 
 export default function GraphSearchProvider({ children, params, filter_type }: IProps) {
-  const {id: device_id, router = 'packet', resolver = 'filterPackets'} = params || {}
+  const {id: device_id, router = 'packet', resolver = 'filterConnections'} = params || {}
   
   const { defaultEntity } = searchConfig ?? {}
 
@@ -117,7 +117,8 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
   } = time || {}
   
 
-  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
+  // @ts-expect-error - Types error
+  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterConnections'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
     refetchOnWindowFocus: false,
     gcTime: 0,
     enabled: false,

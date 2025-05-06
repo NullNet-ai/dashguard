@@ -107,10 +107,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [])
 
   useEffect(() => {
-    if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return;
+    if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' ) return;
   
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
     socket.on(eventKey, async (data: any) => {
+      if((searchBy ?? [])?.length && !(searchBy as any)?.[0]?.values?.includes(data?.source_ip)) return
       const updated_bandwidth = await updateBandwidth(new_bandwidth, data, time);
       setNewBandwidth([...updated_bandwidth])
     });

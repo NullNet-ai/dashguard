@@ -5,6 +5,9 @@ import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } fr
 import { formatNumber, modifyAxis } from './LineChart';
 import { graphColors, sortInterface } from './graph-color';
 
+
+
+
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
 
   const sorted = sortInterface(interfaces)
@@ -17,14 +20,13 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
 
 
    const yticks = useMemo(() => {
-    if(!yAxisMax) return [0]
-    // Create an array with 0 as first tick and evenly distribute the rest
-    const ticks = [0];
+    if (!yAxisMax || !yAxisMin) return [];
+    const ticks = [yAxisMin]; // Start from yAxisMin
     for (let i = 1; i < number_of_ticks; i++) {
-      ticks.push(Math.round(i * (yAxisMax / (number_of_ticks - 1))));
+      ticks.push(Math.round(yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1))));
     }
     return ticks;
-  },[yAxisMax, number_of_ticks])
+  }, [yAxisMin, yAxisMax, number_of_ticks]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -85,22 +87,21 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           minTickGap={150}
           // padding={{ left: 10, right: 10 }}
       />
-   <YAxis
-    allowDataOverflow={true}
-    axisLine={false}
-    domain={[0, yAxisMax]} // Force starting from 0
-    tickCount={number_of_ticks}
-    tickFormatter={(value) => value === 0 ? '0' : formatNumber(value)} // Explicitly format 0
-    tickLine={false}
-    tickMargin={8}
-    ticks={yticks}
-    includeHidden={true}
-    minTickGap={0}
-    allowDecimals={false}
-    scale="linear"
-    padding={{ bottom: 10 }} // Add padding to ensure 0 is visible
-    // label={{ value: '0', position: 'insideBottom', offset: -5, fill: '#666' }} // Add explicit 0 label
-  />
+      <YAxis
+        allowDataOverflow={true}
+        axisLine={false}
+        domain={[yAxisMin || 'auto', yAxisMax || 'auto']} // Dynamically adjust the domain
+        tickCount={number_of_ticks}
+        tickFormatter={(value) => formatNumber(value)} // Format all values dynamically
+        tickLine={false}
+        tickMargin={8}
+        ticks={yticks} // Dynamically generated ticks
+        includeHidden={true}
+        minTickGap={0}
+        allowDecimals={false}
+        scale="linear"
+        // padding={{ bottom: 10 }} // Add padding to ensure the lowest value is visible
+      />
       <ChartTooltip
         content={(
           <ChartTooltipContent

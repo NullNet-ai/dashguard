@@ -112,14 +112,14 @@ function mergeCriteria(filters: IAdvanceFilter[]) {
 }
 
 export const packetRouter = createTRPCRouter({
-  ...createDefineRoutes('packets'),
+  ...createDefineRoutes('connections'),
   getBandwithPerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()), timezone: z.string(),
   })).query(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone } = input
 
     const res = await ctx.dnaClient.aggregate({
       query: {
-        entity: 'packets',
+        entity: 'connections',
         aggregations: [
           {
             aggregation: 'SUM',
@@ -131,7 +131,7 @@ export const packetRouter = createTRPCRouter({
           {
             type: 'criteria' as const,
             field: 'device_id',
-            entity: 'packets',
+            entity: 'connections',
             operator: EOperator.EQUAL,
             values: [
               device_id,
@@ -184,7 +184,7 @@ export const packetRouter = createTRPCRouter({
 
       const res = await ctx.dnaClient
         .findAll({
-          entity: 'packets',
+          entity: 'connections',
           token: ctx.token.value,
           query: {
             pluck: ['source_ip', 'timestamp'],
@@ -193,7 +193,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria',
                 field: 'status',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.EQUAL,
                 values: ['Active', 'active'],
               },
@@ -204,7 +204,7 @@ export const packetRouter = createTRPCRouter({
               {
                 type: 'criteria',
                 field: 'timestamp',
-                entity: 'packets',
+                entity: 'connections',
                 operator: EOperator.GREATER_THAN_OR_EQUAL,
                 values: [formattedDate],
               },
@@ -505,7 +505,7 @@ export const packetRouter = createTRPCRouter({
       const res = await ctx.dnaClient.aggregate({
       // @ts-expect-error - entity is not defined in the type
         query: {
-          entity: 'packets',
+          entity: 'connections',
           aggregations: [
             {
               aggregation: 'SUM',
@@ -517,7 +517,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'source_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [
                 source_ip,
@@ -530,7 +530,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'destination_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [
                 destination_ip,
@@ -557,7 +557,7 @@ export const packetRouter = createTRPCRouter({
       const res = await ctx.dnaClient.aggregate({
       // @ts-expect-error - entity is not defined in the type
         query: {
-          entity: 'packets',
+          entity: 'connections',
           aggregations: [
             {
               aggregation: 'SUM',
@@ -569,7 +569,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'source_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [
                 source_ip,
@@ -582,7 +582,7 @@ export const packetRouter = createTRPCRouter({
             {
               type: 'criteria',
               field: 'destination_ip',
-              entity: 'packets',
+              entity: 'connections',
               operator: EOperator.EQUAL,
               values: [
                 destination_ip,

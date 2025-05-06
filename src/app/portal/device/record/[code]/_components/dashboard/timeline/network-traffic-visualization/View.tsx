@@ -12,6 +12,7 @@ import { useFetchNetworkFlow } from './Provider'
 import { cn } from '~/lib/utils'
 // import { generateTimeSeriesData } from './functions/generateTimeSeriesDataPerSeconds'
 
+
 function generateTimeSeriesData(sampleData: any) {
   const secondMap: any = {};
 
@@ -121,7 +122,7 @@ export default function NetworkFlowView() {
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
        <InfiniteScroll
         dataLength={ (flowData || []).length }
-        endMessage={ <p style={ { textAlign: 'center' } }><b>{"Yay! You have seen it all"}</b></p> }
+        endMessage={ <p style={ { textAlign: 'center' } }></p> }
         hasMore={ unique_source_ips?.length !== flowData?.length }
         loader={unique_source_ips?.length == flowData?.length ? null : <h4>{"Loading..."}</h4> }
         next={ fetchMoreData as any }

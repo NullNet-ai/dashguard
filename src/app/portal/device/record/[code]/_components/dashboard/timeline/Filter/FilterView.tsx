@@ -10,13 +10,14 @@ import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provide
 import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import FilterProperty from './FilterProperty'
 import { FilterContext } from './FilterProvider'
+import { useRouter } from 'next/navigation'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
   const { filters = [], _setRefetchTrigger, setFilterQuery, filter_type } = state ?? {}
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
-
+  const router = useRouter();
   const defaultTab = filters.find(tab => tab.label === '1 Day')?.id || ''
 
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)

@@ -35,7 +35,7 @@ export default function View() {
     if(!debouncedSearchInput)return
    return handleSearchQuery!(
       {
-        entity: 'packets',
+        entity: 'connections',
         current: 0,
         limit: 100,
         pluck: [
