@@ -246,7 +246,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
           {tablists.map((tab: any, index: number) => {
             const isHidden = copyTab?.[index]?.hidden;
 
-            if(lowerCase(tab.name) === 'dashboard') {
+            if(lowerCase(tab.name) === 'grid') {
               return (
                 <InnerTabitem
                   className={cn({ 'opacity-0': isHidden })}
