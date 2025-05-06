@@ -22,6 +22,7 @@ import { organizationAccountsRouter } from './routers/organization_accounts';
 import { gridFilterRouter } from './routers/grid_filter';
 import { communicationTemplateRouter } from './routers/communication_template';
 import { deviceRouter } from './routers/device';
+import { locationRouter } from './routers/location';
 
 /**
  * This is the primary router for your server.
@@ -52,6 +53,7 @@ export const appRouter = createTRPCRouter({
   gridFilter: gridFilterRouter,
   communicationTemplate: communicationTemplateRouter,
   device: deviceRouter,
+  location: locationRouter,
 });
 
 // export type definition of API
