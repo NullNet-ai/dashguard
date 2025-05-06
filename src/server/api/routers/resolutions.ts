@@ -48,7 +48,7 @@ export const resolutionsRouter = createTRPCRouter({
       return res?.data?.map((item) => {
         return {
           label: item.resolution_type,
-          value: item.id,
+          value: item.resolution_type,
         }
       })
     }

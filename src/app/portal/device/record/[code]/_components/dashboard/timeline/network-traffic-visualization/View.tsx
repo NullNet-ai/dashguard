@@ -119,6 +119,16 @@ export default function NetworkFlowView() {
 
   return (
     <div id="scrollableDiv" style={{ height: '80vh', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
+       <InfiniteScroll
+        dataLength={ (flowData || []).length }
+        endMessage={ <p style={ { textAlign: 'center' } }><b>{"Yay! You have seen it all"}</b></p> }
+        hasMore={ unique_source_ips?.length !== flowData?.length }
+        loader={unique_source_ips?.length == flowData?.length ? null : <h4>{"Loading..."}</h4> }
+        next={ fetchMoreData as any }
+        scrollableTarget="scrollableDiv"
+        scrollThreshold={ 0.5 }
+      >
+
       {flowData?.map((el, index) => {
         const { flag, name, result, lastBandwidth, resolution, time_count, time_unit } = el
         
@@ -133,7 +143,7 @@ export default function NetworkFlowView() {
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger>
-                  <div className='min-w-[250px] flex'>
+                <div className='min-w-[250px] flex'>
                     <div
                       className={`
                         flex gap-1 text-xs mr-4 font-semibold p-1 py-[3px] rounded-md self-start mb-[3px] items-center h-5
@@ -258,6 +268,7 @@ export default function NetworkFlowView() {
           </div>
         )
       })}
+      </InfiniteScroll>
     </div>
   )
 }
