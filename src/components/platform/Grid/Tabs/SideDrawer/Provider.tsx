@@ -125,7 +125,6 @@ export function ManageFilterProvider({
     ); // Deep copy to prevent modifications
 
     const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
-
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,

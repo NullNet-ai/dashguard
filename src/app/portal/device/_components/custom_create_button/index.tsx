@@ -4,12 +4,14 @@ import { PlusIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { createDraftDevice } from '../actions/createDeviceDraft'
 import { CredentialsGenerator } from '../actions/credentialGenerator'
+import { useToast } from '~/context/ToastProvider';
 
 const CustomCreateButton = ({
   entity
 } : {
   entity: string
 }) => {
+  const toast = useToast();
 
   const handleCreate = async() => {
     try {
@@ -24,8 +26,11 @@ const CustomCreateButton = ({
         app_secret 
       });
 
-    } catch (error) {
+    } catch (error : any) {
       console.error('Failed to create draft record:', error);
+      if(error.message === "Device Role not found") {
+        toast.error('Device Role not found. Please create a device role first.');
+      }
     }
   }
 

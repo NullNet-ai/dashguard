@@ -25,7 +25,20 @@ export default async function Page() {
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity] = pathname.split("/");
 
-  const _pluck = ["id", "code", "status", "created_date", "updated_date"];
+  const _pluck = [
+    'id',
+    'code',
+    'name',
+    'categories',
+    'status',
+    'created_date',
+    'created_time',
+    'created_by',
+    'updated_date',
+    'updated_time',
+    'updated_by',
+  ];
+
   const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
     resolveGridParams({
       sorts,
@@ -62,6 +75,7 @@ export default async function Page() {
         },
         paginationType: 'default',
         enableAutoCreate: true,
+        defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
           router: 'grid',

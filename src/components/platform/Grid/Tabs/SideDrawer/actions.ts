@@ -71,9 +71,9 @@ export const transformFilterGroups = async(filterDetails : FilterDetails, column
             }
             if (
                 !acc.length &&
-                curr.filters.length &&
                 !curr.filters[0]?.field &&
-                !curr.filters[0]?.values?.length
+                !curr.filters[0]?.values?.length &&
+                curr.filters.length
             ) {
                 return acc;
             }
