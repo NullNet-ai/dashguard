@@ -104,7 +104,7 @@ export default function SearchDialog() {
   return (
     <>
       <Button
-        className={cn('flex gap-x-1')}
+        className={cn('flex gap-x-1 focus:outline-none focus-visible:outline-none focus-visible:ring-0')}
         size="md"
         variant="softPrimary"
         onClick={() => handleOpenDialog()}
@@ -201,10 +201,9 @@ export default function SearchDialog() {
                             name="removeSortingButton"
                             size="xs"
                             variant="ghost"
-                            // onClick={() => {
-                            //   if (isHidden) return;
-                            //   actions?.handleRemoveSearchItem(item);
-                            // }}
+                            onClick={() => {
+                              actions?.handleRemoveSearchItem(item);
+                            }}
                           >
                             <X className="h-3 w-3" />
                           </Button>

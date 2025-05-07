@@ -116,7 +116,7 @@ const SearchList = ({parentType} : any) => {
       ref={conref}
     >
       <div className='flex flex-row justify-between flex-1 items-center'>
-        <div className="flex flex-row items-center flex-1 max-w-[578px]">
+        <div className="flex flex-row items-center flex-1 max-w-[387px]">
           <span
             className={cn(
               `whitespace-nowrap text-xs text-black`,
@@ -196,7 +196,7 @@ const SearchList = ({parentType} : any) => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" side="bottom">
-                      <div className="flex flex-col gap-1 gap-y-2 py-1">
+                      <div className="flex flex-col gap-1 gap-y-2 py-2 px-2">
                         {data?.map((item, index) => {
                           if (
                             !item.hidden ||

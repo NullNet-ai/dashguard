@@ -1,17 +1,19 @@
+  import account_organization from "./account_organization";
   import contact from "./contact";
   import dashboard from "./dashboard";
-  import organization from "./organization";
-  import account_organization from "./account_organization";
-  import settings from "./settings";
   import device from "./device";
+  import organization from "./organization";
+  import settings from "./settings";
+  import location from "./location";
 
 const menu = [
+  account_organization,
   contact,
   dashboard,
-  organization,
-  account_organization,
-  settings,
   device,
+  organization,
+  settings,
+  location,
 ];
 
 export default menu;

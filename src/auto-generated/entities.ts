@@ -5,4 +5,5 @@ export default [
   "communication_template",
   "account_organization",
   "device",
+  "location",
 ];

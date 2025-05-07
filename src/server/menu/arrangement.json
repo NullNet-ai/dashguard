@@ -5,6 +5,7 @@
     "accounts",
     "organization",
     "device",
+    "location",
     "settings"
   ]
 }

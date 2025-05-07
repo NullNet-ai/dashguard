@@ -1,7 +1,7 @@
 {
   "app_name": "platform__StateTab",
-  "tag": "2.0.0",
-  "branch": "released/2.0.0",
-  "message": "Update packages",
+  "tag": "2.1.0",
+  "branch": "released/PLATFORM7-4106/2.1.0",
+  "message": "Added activeTab state",
   "publish_name": "Bryan Jay Mabuan"
 }
