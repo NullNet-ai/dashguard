@@ -2,8 +2,7 @@ import * as React from 'react';
 
 import { cn } from '~/lib/utils';
 import { handleEdit } from '../platform/Grid/DefaultRow/Actions';
-import { useSideDrawer } from '../platform/SideDrawer';
-import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
+
 
 type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
@@ -13,18 +12,21 @@ const Table = React.forwardRef<
     withStripedRows?: boolean;
     withVerticalLines?: boolean;
     zebra?: boolean;
+    responsive?: boolean;
   }
->(({ className, withStripedRows, withVerticalLines, zebra, ...props }, ref) => (
-  <table 
-    ref={ref} 
-    className={cn(
-      'min-w-full',
-      (withStripedRows || zebra) && '[&_tbody_tr:nth-child(even)]:bg-slate-50',
-      withVerticalLines && '[&_td]:border-r [&_td:last-child]:border-r-0 [&_th]:border-r [&_th:last-child]:border-r-0 [&_td]:border-gray-200 [&_th]:border-gray-200',
-      className
-    )} 
-    {...props} 
-  />
+>(({ className, withStripedRows, withVerticalLines, zebra, responsive = true, ...props }, ref) => (
+  <div className={responsive ? "w-full overflow-auto" : undefined}>
+    <table 
+      ref={ref} 
+      className={cn(
+        responsive ? "w-full" : "min-w-full",
+        (withStripedRows || zebra) && '[&_tbody_tr:nth-child(even)]:bg-slate-50',
+        withVerticalLines && '[&_td]:border-r [&_td:last-child]:border-r-0 [&_th]:border-r [&_th:last-child]:border-r-0 [&_td]:border-gray-200 [&_th]:border-gray-200',
+        className
+      )} 
+      {...props} 
+    />
+  </div>
 ));
 Table.displayName = 'Table';
 
@@ -117,38 +119,32 @@ const TableCell = React.forwardRef<
     row?: any;
     config?: any;
     column_id?: any;
+    nowrap?: boolean;
   }
->(({ className, row, config, column_id, ...props }, ref) => {
-  const { actions } = useSideDrawer();
-
-  return (
-    <td
-      ref={ref}
-      onClick={() => {
-        if (
-          !['select', 'action', 'expand'].includes(column_id) &&
-          config?.enableRowClick && !row.original.is_group_by
-        ) {
-          if (config?.rowClickCustomAction) {
-            if (typeof config?.rowClickCustomAction === 'function') {
-              config?.rowClickCustomAction({ row, config });
-              return;
-            }
-            handleCustomAction({ config, row, actions });
-            return;
-          }
-          handleEdit({ row, config });
+>(({ className, row, config, column_id, nowrap = false, ...props }, ref) => (
+  <td
+    ref={ref}
+    onClick={() => {
+      if (
+        !['select', 'action', 'expand'].includes(column_id) &&
+        config?.enableRowClick && !row?.original?.is_group_by
+      ) {
+        if (config?.rowClickCustomAction) {
+          config.rowClickCustomAction({ row, config });
+          return;
         }
-      }}
-      className={cn(
-        'whitespace-nowrap px-2 py-1 text-sm text-gray-500' +
-          (config?.enableRowClick && !row.original.is_group_by ? ' cursor-pointer' : ''),
-        className,
-      )}
-      {...props}
-    />
-  )
-});
+        handleEdit({ row, config });
+      }
+    }}
+    className={cn(
+      'px-2 py-1 text-sm text-gray-500',
+      nowrap ? 'whitespace-nowrap' : 'break-words',
+      (config?.enableRowClick && !row?.original?.is_group_by ? ' cursor-pointer' : ''),
+      className,
+    )}
+    {...props}
+  />
+));
 TableCell.displayName = 'TableCell';
 
 // Add SummaryRow component
