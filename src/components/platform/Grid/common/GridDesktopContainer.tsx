@@ -10,9 +10,13 @@ import MyTableBody from '../TableBody'
 import MyTableHead from '../TableHead'
 
 import GridCardView from './GridCardview'
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 const GridDesktopContainer = ({ parentType }: any) => {
   const { state } = useContext(GridContext)
+  const path =  usePathname()
+  const [, , entity] = path.split('/')
 
   if (state?.viewMode === 'card') {
     return (
@@ -33,8 +37,9 @@ const GridDesktopContainer = ({ parentType }: any) => {
   return (
     <Table
       style={{ width: state?.table?.getCenterTotalSize() }}
+      data-test-id={`${testIDFormatter(`${entity}-grd-tbl`)}`}
     >
-      <TableHeader>
+      <TableHeader data-test-id={`${testIDFormatter(`${entity}-grd-tbl-hdr`)}`}>
         <MyTableHead />
       </TableHeader>
       <MyTableBody />
