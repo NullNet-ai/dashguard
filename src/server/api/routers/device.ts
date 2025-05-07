@@ -130,6 +130,7 @@ export const deviceRouter = createTRPCRouter({
       })
       .execute();
       const deviceRecord = deviceInfo?.data?.[0];
+      console.log("🔍 ~ mutation() callback ~ src/server/api/routers/device.ts:132 ~ deviceRecord:", deviceRecord)
       // fetch account organization via device_id
       const accountOrganization = await ctx.dnaClient
       .findAll({
@@ -167,7 +168,9 @@ export const deviceRouter = createTRPCRouter({
       .execute();
 
       const accountOrganizationRecord = accountOrganization?.data?.[0]?.account_organizations;
+      console.log("🔍 ~ mutation() callback ~ src/server/api/routers/device.ts:170 ~ accountOrganizationRecord:", accountOrganizationRecord)
       const accountRecord = accountOrganization?.data?.[0]?.accounts;
+      console.log("🔍 ~ mutation() callback ~ src/server/api/routers/device.ts:172 ~ accountRecord:", accountRecord)
       
       try {
         const [device, account, accountOrg] = await Promise.all([
@@ -211,6 +214,9 @@ export const deviceRouter = createTRPCRouter({
             .execute(),
         ]);
 
+        console.log("UPDATED RECORDS", {
+          device, account, accountOrg
+        })
         // Return the updated records
         return {
           device,
