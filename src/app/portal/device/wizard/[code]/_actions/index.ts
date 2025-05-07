@@ -4,7 +4,7 @@ import { api } from '~/trpc/server'
 
 export const updateAccountStatus = async (data: any) => {
   try {
-    console.log("🔍 ~  ~ src/app/portal/device/wizard/[code]/_actions/index.ts:5 ~ data:", {
+    console.info("🔍 ~  ~ src/app/portal/device/wizard/[code]/_actions/index.ts:5 ~ data:", {
       data,
       params : {
         device_id: data.identifier,
