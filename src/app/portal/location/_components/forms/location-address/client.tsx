@@ -61,7 +61,7 @@ export default function FormLabel({ params, defaultValues }: IFormProps) {
       formProps={params}
       formLabel="Form Label"
       handleSubmit={handleSave}
-      formKey="formlabel"
+      formKey="LocationAddress"
       formSchema={FormSchema}
       defaultValues={defaultValues}
       fields={[

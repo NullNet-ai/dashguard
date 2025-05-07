@@ -12,7 +12,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     error,
   } = api.record.getByCode.useQuery({
     id: identifier!,
-    pluck_fields: ["id", "code", "status"],
+    pluck_fields: ["id", "code", "status", "categories"],
     main_entity: entity!,
   });
 
@@ -22,10 +22,26 @@ const Summary = ({ form_key }: { form_key: string }) => {
   });
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div>
+        <h3 className="text-red-800 font-medium mb-2">Error Loading Data</h3>
+        <p className="text-red-600 text-sm">
+          Something went wrong in fetching record summary
+        </p>
+      </div>
+    );
   }
-  // TODO: Implement Summary component UI manually
-  return <pre>{JSON.stringify(record, null, 2)}</pre>;
+  
+  return (
+    <div>
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center">
+          <span className="font-medium mr-2">Category:</span>
+          <span>{record?.data?.categories?.[0] || 'Not specified'}</span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const SummaryConfig = {
@@ -33,8 +49,8 @@ const SummaryConfig = {
   required: true,
   components: [
     {
-      label: "Record Details",
-      component: <Summary form_key={"BasicDetails"} />,
+      label: "Location Category",
+      component: <Summary form_key={"locationcategory"} />,
     },
   ],
 };
