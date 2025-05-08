@@ -1,12 +1,14 @@
 'use client'
 
 import { AttachAddon } from '@xterm/addon-attach'
+import { FitAddon } from '@xterm/addon-fit'
 import { useEffect, useState } from 'react'
 import { useXTerm } from 'react-xtermjs'
 import { api } from '~/trpc/react'
 
 export default function WebTerminal() {
   const { instance, ref } = useXTerm()
+  const fitAddon = new FitAddon()
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
@@ -80,8 +82,28 @@ export default function WebTerminal() {
     }
   }, [instance])
 
+
+  useEffect(() => {
+    // Load the fit addon
+    instance?.loadAddon(fitAddon)
+
+    const handleResize = () => fitAddon.fit()
+
+
+    // Fit terminal when component mounts
+    if (ref.current) {
+      handleResize()
+    }
+
+    // Handle resize event
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [ref, instance])
+
   return (
-    <div className="relative" style={{ width: '100vw', height: '100vh' }}>
+    <div className="relative h-screen w-screen">
       {(devices?.[0]?.device_status?.toLowerCase() === 'offline' || isConnectionClosed) ? (
         <div
           className="absolute inset-0 bg-gray-800 bg-opacity-50 flex flex-col justify-center items-center"
@@ -101,7 +123,7 @@ export default function WebTerminal() {
           </button>
         </div>
       ) : (
-        <div ref={ref as React.RefObject<HTMLDivElement>} />
+        <div ref={ref as React.RefObject<HTMLDivElement>}  style={{ width: '100%', height: '100%' }}/>
       )}
     </div>
   )
