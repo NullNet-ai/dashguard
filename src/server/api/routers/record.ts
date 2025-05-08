@@ -381,7 +381,8 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return ctx.dnaClient
+
+      const result = await ctx.dnaClient
         .update(input.id, {
           entity: input.entity,
           token: ctx.token.value,
@@ -390,6 +391,8 @@ export const recordRouter = createTRPCRouter({
           },
         })
         .execute();
+  
+      return result;
     }),
   updateRecordStatus: privateProcedure
     .input(
