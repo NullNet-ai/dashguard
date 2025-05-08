@@ -42,6 +42,7 @@ export default async function Page() {
       pagination,
       pluck: _pluck,
       entity: 'contact',
+      defaultSorting
     });
 
   const { items = [], totalCount } = await api.contact.mainGrid({

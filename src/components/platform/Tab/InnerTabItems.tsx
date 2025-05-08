@@ -142,7 +142,11 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps ) => {
         updatecachedItems(items);
         if(activeTab) {
           const href= items?.find((item) => item.current)?.href;
-          router.push(href);
+          if (href) {
+            router.push(href);
+          } else {
+            console.warn('No href found for active tab');
+          }
         }
       }
 

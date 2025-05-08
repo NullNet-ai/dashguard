@@ -170,7 +170,7 @@ export default function FormFilterGrid({
                 });
 
                 handleSelectedGridRecords(
-                  Object.keys(data?.rows).length ? [data?.rows] : [],
+                  Array.isArray(data?.rows) ? data?.rows : [data?.rows],
                 );
                 handleCloseGrid();
               });

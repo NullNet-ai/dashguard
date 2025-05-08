@@ -72,7 +72,7 @@ export default async function LoginSubmit({
           : (errorMessages[
               account_organization_status as keyof typeof errorMessages
             ] ??
-            'Your account is no longer active. Contact your administrator for assistance.'),
+            'Something went wrong. Contact your administrator for assistance.'),
     };
   }
 
