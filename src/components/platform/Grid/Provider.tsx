@@ -64,7 +64,7 @@ export default function GridProvider({
   gridLevel = 1,
   grouping: initialGrouping = [],
   gridKey,
-  customCreateButton
+  customCreateButton,
 }: IProps) {
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
@@ -103,8 +103,10 @@ export default function GridProvider({
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
-  
-  const [viewMode, setViewMode] = useState<'table' | 'card'>(_propsConfig?.viewMode ?? 'table');
+
+  const [viewMode, setViewMode] = useState<'table' | 'card'>(
+    _propsConfig?.viewMode ?? 'table',
+  );
 
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
     return {
@@ -231,7 +233,6 @@ export default function GridProvider({
       }) ?? [],
     ..._propsConfig,
   };
-
 
   const columnConfig = useMemo(() => {
     if (!grouping.length) return null;
@@ -576,7 +577,6 @@ export default function GridProvider({
     handleMergeBufferInfinite,
   };
 
-
   const state_context = {
     config: {
       ...config,
@@ -612,7 +612,7 @@ export default function GridProvider({
     grouping,
     groupConfigs: initialGrouping,
     gridKey,
-    customCreateButton
+    customCreateButton,
   } as IState;
   const actions = {
     handleCreate,
@@ -631,7 +631,7 @@ export default function GridProvider({
     infiniteActions: {
       ...infinite_actions,
     },
-    handleUpdateGrouping
+    handleUpdateGrouping,
   } as IAction;
 
   return (

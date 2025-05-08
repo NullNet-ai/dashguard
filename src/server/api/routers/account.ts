@@ -169,12 +169,18 @@ export const accountRouter = createTRPCRouter({
           },
         })
         .execute();
+      const accountData = {
+        ...(accounts.data[0] ?? {}),
+        email: accounts.data[0]?.email
+          ? accounts.data[0]?.email
+          : contactData?.data?.[0]?.contact_emails?.email,
+      };
 
       return {
         contact: {
           ...contactData?.data?.[0]?.contacts,
         },
-        account: accounts.data[0] ?? {},
+        account: accountData
       };
     }),
   fetchOrganizationRolesOptions: privateProcedure
@@ -711,7 +717,7 @@ export const accountRouter = createTRPCRouter({
           phone: phoneNumber ? formatPhoneNumber(phoneNumber) : '',
           email: email?.email,
         },
-        account: accountRecord?.account_organizations,
+        account: { ...accountRecord?.account_organizations },
       };
     }),
   updateUserAccountRecord: privateProcedure

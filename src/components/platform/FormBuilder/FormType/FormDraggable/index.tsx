@@ -74,12 +74,19 @@ const FormDraggable = ({
     control: form.control,
     name: formRenderProps.field.name,
   });
+
   const { register } = form;
   const { error }: any = useFormField();
   const timePickerRef = useRef(null);
   const timePickerProps = fieldConfig.timePickerProps;
   const is24Hour = timePickerProps?.is24Hour;
   const timeFormat = is24Hour ? "HH:mm" : "hh:mm a";
+
+  const isDraggable = fieldConfig?.isDraggable ?? true;
+  const draggableRowClassName = fieldConfig?.draggableRowClassName ?? "";
+  const canAddRow = fieldConfig?.draggableCanAddRow ?? true;
+  const canRemoveRow = fieldConfig?.draggableCanRemoveRow ?? true;
+
   const parseTimeString = (timeStr: string): Date | null => {
     // Try parsing as 24-hour format first
     let date = parse(timeStr, "HH:mm", new Date());
@@ -338,7 +345,7 @@ const FormDraggable = ({
                   </SelectTrigger>
                 )}
 
-                {!ISDisabled && (
+                {/* {!ISDisabled && ( */}
                   <SelectContent>
                     {Array.isArray(field.selectOptions) &&
                       field.selectOptions.map((option) => (
@@ -347,7 +354,7 @@ const FormDraggable = ({
                         </SelectItem>
                       ))}
                   </SelectContent>
-                )}
+                {/* )} */}
               </Select>
             </FormControl>
             {error?.[index] && (
@@ -758,7 +765,7 @@ const FormDraggable = ({
             {fields.map((field, index) => (
               <SortableItem key={field.id} value={field.id} asChild>
                 <div
-                  className={cn(
+                  className={draggableRowClassName ? draggableRowClassName : cn(
                     `relative grid items-end gap-2`,
                     fieldLength === 1
                       ? "grid-cols-[auto_1fr_auto]"
@@ -767,13 +774,21 @@ const FormDraggable = ({
                         : "grid-cols-[auto_1fr_1fr_1fr_auto]",
                   )}
                 >
-                  <SortableDragHandle
+                  {fieldConfig?.draggableRowCustomAction ? React.createElement(fieldConfig.draggableRowCustomAction, {
+                    index,
+                    field,
+                    formRenderProps,
+                    formKey,
+                    form,
+                  }) : null}
+                  {isDraggable ? <SortableDragHandle
                     variant="ghost"
                     size="icon"
                     className="mb-1 size-8 shrink-0 text-muted-foreground"
                   >
                     <GripVerticalIcon className="size-6" aria-hidden="true" />
-                  </SortableDragHandle>
+                  </SortableDragHandle> : null }
+                  
                   {fieldConfig.draggableConfig?.map((config) => (
                     <FormField
                       key={config?.fields?.id ?? index}
@@ -788,7 +803,7 @@ const FormDraggable = ({
                       }
                     />
                   ))}
-                  {!isDisabled && (
+                  {!isDisabled && canRemoveRow && (
                     <Button
                       type="button"
                       variant="softDestructive"
@@ -828,7 +843,7 @@ const FormDraggable = ({
                 </div>
               </SortableItem>
             ))}
-            {!isDisabled && (
+            {!isDisabled && canAddRow &&  (
               <Button
                 className="mr-auto ms-7 gap-1 text-md text-primary hover:bg-transparent hover:opacity-70"
                 variant="ghost"

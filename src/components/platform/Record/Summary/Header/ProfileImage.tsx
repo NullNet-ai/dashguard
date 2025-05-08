@@ -34,18 +34,18 @@ function UploadComponent(props: any) {
       if ((!details.data?.id || !entity || !data?.upload?.length) && !data?.edited_files?.length) {
         return await Promise.resolve([]);
       }
-      const image_url = data?.edited_files?.[0] ? data?.edited_files[0] : data?.upload[0]
+      const image_id = data?.edited_files?.[0] ? data?.edited_files[0] : data?.upload[0]
 
       const formData = {
         id: details?.data?.id,
         entity,
         params: {
-          image_url,
+          //get the host and contact the image_url
+          image_url: typeof window !== 'undefined' ? `${window.location.origin}/api/file/${image_id}/download` : ''
         },
       }
-
       await handleSaveUrl(formData)
-      metadata?.setImageId(image_url)
+      metadata?.setImageId(image_id)
 
       actions?.closeSideDrawer()
       return await Promise.resolve([]);
@@ -121,7 +121,7 @@ export default function ProfileImage({ details, entity, token }: any) {
         if ((token && details?.data?.image_url) || (imageId && token)) {
           const stringID = imageId ? imageId : details?.data?.image_url
           setLoading(true)
-          const response = await fetch(`/api/file/${stringID}/download`)
+          const response = await fetch(stringID)
 
           const imgInfo = await getImageData([stringID])
           setImageInfo(imgInfo ? imgInfo[0] : {})

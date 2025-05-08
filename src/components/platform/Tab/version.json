@@ -1,7 +1,7 @@
 {
   "app_name": "platform__Tab",
-  "tag": "2.0.1",
-  "branch": "released/3374/2.0.1",
-  "message": "added draggble and fixed issue",
+  "tag": "2.0.2-rc.2<unreleased>",
+  "branch": "unreleased/fix4026/2.0.2-rc.2<unreleased>",
+  "message": "fix draggable",
   "publish_name": "Juphet Vitualla"
 }

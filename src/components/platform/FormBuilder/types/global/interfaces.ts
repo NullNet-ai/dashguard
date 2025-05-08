@@ -124,6 +124,11 @@ interface IField {
   fieldClassName?: HTMLAttributes<HTMLDivElement>['className'];
   fieldStyle?: React.CSSProperties;
   formType?: TFormType;
+  isDraggable?: boolean;
+  draggableRowCustomAction?: (args?: any) => React.JSX.Element;
+  draggableRowClassName?: string;
+  draggableCanAddRow?: boolean;
+  draggableCanRemoveRow?: boolean;
   creatable?: boolean;
   name: string;
   label?: string;
