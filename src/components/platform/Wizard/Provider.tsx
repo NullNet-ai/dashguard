@@ -15,7 +15,7 @@ import { omit } from 'lodash';
 import { SaveAndContinue } from './Action/SaveAndContinue';
 import { SaveAndNew } from './Action/SaveAndNew';
 import { SaveAndClose } from './Action/SaveAndClose';
-import { PrevPage } from './Action/PrevPage';
+// import { PrevPage } from './Action/PrevPage';
 // import { NextPage } from "./Action/NextPage";
 
 import { api } from '~/trpc/react';
@@ -114,9 +114,12 @@ export default function WizardProvider({
     config?.callbackHandlers || {},
   );
 
-  const socketClient = useSocket()
+  const socketClient = useSocket();
 
   /** @STATES */
+  // const activator = api.wizard.activator.useMutation();
+  // const closeCurrentInnerClassTab =
+  //   api.tab.closeCurrentInnerClassTab.useMutation();
   const nextStep = api.wizard.wizardCreateStep.useMutation();
   const prevStep = api.wizard.wizardCreateStep.useMutation();
   /** @USE_EFFECT */
@@ -176,47 +179,76 @@ export default function WizardProvider({
 
   const handleIncrementStep = async (setLoading: (loading: any) => void) => {
     setLoading(true);
-    // const steps = currentStep + 1;
-    // nextStep.mutateAsync({
-    //   entity: mainEntity!,
-    //   identifier: identifier!,
-    //   step: steps.toString(),
-    // }).then(() => {
-    //   setLoading(false)
-    //   router.push()
-    // });
+    const step = currentStep + 1;
 
-    NextPage()
-      .then(() => {
-        setLoading(false);
-        setFormSave({});
-      })
-      .catch(() => {
-        setLoading(false);
-        toast.error('Previous step failed');
-      });
+    // Call the API to create the step
+    await nextStep.mutateAsync({
+      entity: mainEntity!,
+      identifier: identifier!,
+      step: step.toString(),
+    });
+
+    // Get search params if any
+    const fullSearchQueryParams = searchParams.toString();
+
+    // Construct the URL based on environment
+    let nextUrl = '';
+    if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
+      const version = '1'; // Default version
+      nextUrl = `/portal/wizard/version/${version}/${identifier}/${step}`;
+    } else {
+      nextUrl = `/portal/${mainEntity}/wizard/${identifier}/${step}`;
+    }
+
+    // Add search params if they exist
+    if (fullSearchQueryParams) {
+      nextUrl += `?${fullSearchQueryParams}`;
+    }
+
+    // Navigate to the next step
+    router.push(nextUrl);
+    setLoading(false);
+    setFormSave({});
   };
 
   const handleDecrementStep = async () => {
     setPrevLoading(true);
-    // ! CLIENT ACTIONS
-    // prevStep.mutateAsync({
-    //   entity: mainEntity!,
-    //   identifier: identifier!,
-    //   step: (currentStep - 1).toString(),
-    // });
-    // router.push(
-    //   `/portal/${mainEntity}/wizard/${identifier}/${currentStep - 1}`,
-    // );
-    // ! SERVER ACTIONS
-    PrevPage()
-      .then(() => {
-        setPrevLoading(false);
-      })
-      .catch(() => {
-        setPrevLoading(false);
-        toast.error('Previous step failed');
+    try {
+      const step = currentStep - 1;
+
+      // Call the API to create the step
+      await prevStep.mutateAsync({
+        entity: mainEntity!,
+        identifier: identifier!,
+        step: step.toString(),
       });
+
+      // Get search params if any
+      const fullSearchQueryParams = searchParams.toString();
+
+      // Construct the URL based on environment
+      let prevUrl = '';
+      if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
+        const version = '1'; // Default version
+        prevUrl = `/portal/wizard/version/${version}/${identifier}/${step}`;
+      } else {
+        prevUrl = `/portal/${mainEntity}/wizard/${identifier}/${step}`;
+      }
+
+      // Add search params if they exist
+      if (fullSearchQueryParams) {
+        prevUrl += `?${fullSearchQueryParams}`;
+      }
+
+      // Navigate to the previous step
+      router.push(prevUrl);
+      setPrevLoading(false);
+      setFormSave({});
+    } catch (error) {
+      console.error('An error occurred while decrementing the step', error);
+      setPrevLoading(false);
+      toast.error('Previous step failed');
+    }
   };
 
   const handleNext = async () => {
@@ -323,21 +355,33 @@ export default function WizardProvider({
         if (toastMessage) {
           toast.success(toastMessage);
         }
-        await SaveAndContinue({...data, defaultRecordTab: config?.defaultRecordTab});
+        const redirectUrl = await SaveAndContinue({
+          ...data,
+          defaultRecordTab: config?.defaultRecordTab,
+        });
+        router.push(redirectUrl);
       };
       setSaveContinueLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
-        await callbackHandlers?.onClickWizardSave({
-          data,
-          action_type: 'save_continue',
-          socketClient,
-          next,
-        });
-        setSaveContinueLoading(false);
+        await callbackHandlers
+          ?.onClickWizardSave({
+            data,
+            action_type: 'save_continue',
+            socketClient,
+            next,
+          })
+          .catch((error) => {
+            console.error(
+              'An error occurred while saving and continuing',
+              error,
+            );
+            setSaveContinueLoading(false);
+          });
+        // setSaveContinueLoading(false);
         return;
       }
       await next();
-      setSaveContinueLoading(false);
+      // setSaveContinueLoading(false);
     } catch (error) {
       console.error('An error occurred while saving and continuing', error);
       setSaveContinueLoading(false);
