@@ -891,6 +891,8 @@ export const gridRouter = createTRPCRouter({
       z
         .object({
           gridKey: z.string().optional(),
+          application: z.string().optional(),
+          mainEntity: z.string().optional(),
         })
         .optional(),
     )
@@ -901,19 +903,14 @@ export const gridRouter = createTRPCRouter({
         headerList.get('x-full-search-query-params') || '';
       const searchParams = new URLSearchParams(searchQueryParams);
       const filter_id = searchParams.get('filter_id');
-      const [, , mainEntity, application] = pathName.split('/');
+      const [, , _mainEntity, _application] = pathName.split('/');
+
+      const application = input?.application || _application;
+      const mainEntity = input?.mainEntity || _mainEntity;
+
       if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
         return [];
-      // const cacheTypes: TReportDataType[] = ['pagination', 'grid_tabs'];
-      // const cacheIds = await Promise.all(
-      //   cacheTypes.map((type) => gridCacheId({ context: ctx, type })),
-      // );
-
-      // const [pagination, grid_tabs] = await Promise.all(
-      //   cacheIds
-      //     .map((id) => (id ? ctx.redisClient.getCachedData(id) : null))
-      //     .filter(Boolean),
-      // );
+  
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
@@ -975,8 +972,9 @@ export const gridRouter = createTRPCRouter({
         sort_key: item.field,
       }));
       return {
+        grid_tabs,
         filters: {
-          reportFilter: defaultFilters,
+          reportFilter: filter,
           advanceFilter,
           defaultFilters,
           groupAdvanceFilters,

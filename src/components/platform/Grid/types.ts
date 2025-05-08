@@ -210,7 +210,7 @@ export interface IState {
     hasMore?: boolean;
     infiniteData?: any[];
     infiniteCount?: number;
-    bufferData?: any[];                                                                                                                                                                                                                                                                                                                                                                                                                  
+    bufferData?: any[];
   };
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
@@ -271,6 +271,7 @@ export interface IPropsGrid {
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  grid_tabs?: any[];
 }
 
 export interface IExpandedRow {

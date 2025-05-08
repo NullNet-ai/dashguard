@@ -32,6 +32,7 @@ export default async function Page() {
     filters,
     columns: columnOrder,
     groups,
+    grid_tabs
   } = (await getGridCacheData()) ?? {};
 
   const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
@@ -51,6 +52,7 @@ export default async function Page() {
 
   return (
     <Grid
+    grid_tabs={grid_tabs}
       totalCount={totalCount || 0}
       data={items}
       defaultSorting={

@@ -13,12 +13,13 @@ import GridDesktopContainer from '../common/GridDesktopContainer'
 interface IProps {
   gridKey?: string;
   parentType?: string;
+  grid_tabs?: any[];
 }
-function GridDesktop({ parentType, gridKey }: IProps) {
+function GridDesktop({ parentType, gridKey, grid_tabs }: IProps) {
   return (
     <Card className="col-span-full border-0 shadow-none">
       <CardHeader>
-        <Header gridKey={gridKey} />
+        <Header gridKey={gridKey} grid_tabs={grid_tabs}/>
       </CardHeader>
       <ScrollContainer parentType={parentType}>
         <GridDesktopContainer parentType={parentType} />

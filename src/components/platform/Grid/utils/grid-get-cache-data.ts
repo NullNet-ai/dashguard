@@ -21,6 +21,7 @@ export interface IGridCacheDataResponse {
   pagination: IPagination;
   columns: Record<string, any>[];
   groups: IGroupBy[];
+  grid_tabs: any[];
 }
 interface IGridCacheData {
   gridKey?: string;
@@ -34,6 +35,7 @@ export const getGridCacheData = async (
   return typeof cachedData === 'object'
     ? cachedData
     : ({
+        grid_tabs: [],
         sorts: {
           sorting: [],
           defaultSorting: [],
