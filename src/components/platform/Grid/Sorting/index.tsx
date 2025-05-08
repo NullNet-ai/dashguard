@@ -105,7 +105,12 @@ const Sorting = ({ className }: { className?: string }) => {
       )}
       ref={conref}
     >
-      <span className="text-nowrap text-xs text-foreground">Sort By</span>
+      <span 
+        className="text-nowrap text-xs text-foreground" 
+        data-test-id={testIDFormatter(`${entity}-sort-by-lbl`)}
+      >
+        Sort By
+      </span>
       {sortingFields?.map((item: ColumnSort, index) => {
         const isHidden = data?.[index]?.hidden;
         return (
@@ -115,6 +120,7 @@ const Sorting = ({ className }: { className?: string }) => {
               { 'opacity-0': isHidden },
             )}
             key={item.id}
+            data-test-id={testIDFormatter(`${entity}-sort-by-badge`)}
             ref={(el) => {
               if (el) {
                 itemsRef.current[index] = el;

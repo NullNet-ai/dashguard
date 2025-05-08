@@ -177,16 +177,15 @@ export default function FormFilterOpenedActions({
   if (!enableViewFormEllipsis) return null;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger data-test-id={entityName + '-wzrd-form-filter-ddn-trg'}>
         <EllipsisVertical
           className="h-4 w-4 text-muted-foreground"
-          data-test-id={entityName + '-wzrd-form-filter-ddn-trg'}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {actions.map((action, index) => {
-         
-       
+
+
           if (
             (action.label === 'Copy' || action.label === 'Paste') &&
             !allowCopyPaste
@@ -202,7 +201,7 @@ export default function FormFilterOpenedActions({
               key={index}
               onClick={() => action.onClick()}
               className="flex gap-2"
-              data-tes-id={
+              data-test-id={
                 entityName + '-wzrd-form-filter-ddn-itm-' + action.label
               }
             >

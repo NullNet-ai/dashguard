@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
 export async function SaveAndContinue({
@@ -15,7 +14,6 @@ export async function SaveAndContinue({
   currentContext: string;
   defaultRecordTab?: string;
 }) {
-
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
 
@@ -29,10 +27,12 @@ export async function SaveAndContinue({
   await api.tab.closeCurrentInnerClassTab({
     href: updatedPath,
     current_context: currentContext,
-  })
+  });
+  
+  // Return the URL instead of redirecting
   if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-    redirect(`/portal/record/version/1/${identifier}/?current_tab=dashboard`);
+    return `/portal/record/version/1/${identifier}/?current_tab=dashboard`;
   } else {
-    redirect(`/portal/${entity}/record/${identifier}/?current_tab=${defaultRecordTab ?? entity}`);
+    return `/portal/${entity}/record/${identifier}/?current_tab=${defaultRecordTab ?? entity}`;
   }
 }

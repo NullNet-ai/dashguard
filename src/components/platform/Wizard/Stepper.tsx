@@ -208,7 +208,12 @@ export default function MyVerticalStepper() {
                       >
                         {/* Hidden on mobile, visible from small screens (sm) and up */}
                         {/* this is the title */}
-                        <span className="text-xs sm:block text-primary">
+                        <span 
+                          className="text-xs sm:block text-primary" 
+                          data-test-id={testIDFormatter(
+                            `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-lbl`,
+                          )}
+                        >
                           {summaryTitle
                             ? summaryTitle
                             : "Description of Step " + stepIndex}

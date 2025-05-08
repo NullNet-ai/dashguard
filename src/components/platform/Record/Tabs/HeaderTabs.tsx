@@ -1,5 +1,3 @@
-import { capitalize } from "lodash";
-import { cn } from "~/lib/utils";
 import { type PropsWithChildren } from "react";
 import { headers } from "next/headers";
 import { type ITabs } from "../types";
