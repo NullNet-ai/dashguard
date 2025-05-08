@@ -11,7 +11,7 @@ const getSessionTabs = async () => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const fullSearchQueryParams = headerList.get('x-full-search-query-params') || ''
-  const [, portal, mainEntity, application, identifier]
+  const [, portal, mainEntity, application, identifier, step]
     = pathname.split('/') || 'New Tab'
   const currentContext = '/' + portal + '/' + mainEntity
   const stateTabs = (await api.tab
@@ -33,7 +33,7 @@ const getSessionTabs = async () => {
     case 'user_role':
       entity = 'role'
       break
-    case 'organization_account':
+    case 'account_organization':
       entity = 'account'
       break
     default:
@@ -83,6 +83,7 @@ const getSessionTabs = async () => {
   }
 
   if (application === 'wizard' && !hasIdentifier && identifier) {
+
     newTabs.splice(1, 0, {
       name: identifier,
       href: pathname,
@@ -90,6 +91,21 @@ const getSessionTabs = async () => {
       label : identifier,
     })
   }
+
+  if (application === 'wizard' && hasIdentifier && step) {
+    //check first if the last character is a number
+    const lastChar = hasIdentifier.href.slice(-1)
+
+    if (/\d/.exec(step) &&  /\d/.exec(lastChar)) {
+      const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`
+      const currentTab = newTabs.findIndex(item => item.name === identifier)
+      if (currentTab !== -1) {
+        newTabs[currentTab].href = modifiedHref
+      }
+    }
+
+  }
+  
 
   if (application === 'record' && !hasIdentifier && identifier) {
     newTabs.splice(1, 0, {
@@ -130,6 +146,7 @@ const InnerTabs = async ({
       id: tab.name,
       }
     }) 
+
 
   return <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant}/>
 }
