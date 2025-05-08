@@ -17,6 +17,8 @@ import Sorting from '../../Sorting';
 import MyTableBody from '../../TableBody';
 import MyTableHead from '../../TableHead';
 import { type IExpandedRow } from '../../types';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 interface IGridDesktopProps {
   parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
@@ -51,6 +53,8 @@ function GridDesktop({
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
   const _width = sidebarOpen ? newWidth - remToPx(17) : newWidth - remToPx(6);
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
 
   const [isEndReached, setIsEndReached] = useState(false);
 
@@ -162,8 +166,8 @@ function GridDesktop({
                   }
             }
           >
-            <Table>
-              <TableHeader parentType={parentType}>
+            <Table data-test-id={`${testIDFormatter(`${path1}-${path2}-tbl`)}`}>
+              <TableHeader parentType={parentType} data-test-id={`${testIDFormatter(`${path1}-${path2}-tbl-hdr`)}`}>
                 <MyTableHead />
               </TableHeader>
               <MyTableBody
