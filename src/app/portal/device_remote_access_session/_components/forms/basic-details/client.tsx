@@ -47,9 +47,11 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
+          
           localStorage.setItem(sessionKey, wsUrl)
 
           localStorage.setItem('current_terminal_session', sessionKey)
+          localStorage.setItem('device_id', device_id)
           
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');

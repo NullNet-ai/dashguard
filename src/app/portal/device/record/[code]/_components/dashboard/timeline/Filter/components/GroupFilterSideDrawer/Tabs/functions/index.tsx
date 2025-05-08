@@ -226,15 +226,12 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         selectSearchable: true,
                         isAlphabetical: false,
                         selectEnableCreate: true,
-                        // selectOnCreateValidate(text) {
-                        //   const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
-                        //   const isValid = options?.some((option: any) => option.label === text)
-                        //   if (!isValid) {
-                        //     return 'Please select a valid option'
-                        //   }
-                        //   return true
-
-                        // },
+                        selectOnCreateValidate: async (text: string): Promise<{ valid: boolean; message?: string }> => {
+                          if (text.length > 0 && !isNaN(Number(text))) {
+                            return Promise.resolve({ valid: false, message: 'Resolution must be a number' });
+                          }
+                          return Promise.resolve({ valid: true });
+                        },
                         selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
                           const response: any = await createResolutionOptions.mutateAsync({
                             resolution_type: text,
@@ -245,9 +242,13 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                           }
                           return { label: '', value: '' }
                         },
-                        multiSelectEnableCreate: true,
-                        multiSelectShowCreatableItem: false,
-                        multiSelectUseStringValues: true,
+                      },
+                      {
+                        id: `${prefix}.units`,
+                        formType: 'select',
+                        name: `${prefix}.units`,
+                        placeholder: 'Select units',
+                        selectSearchable: true,
                       },
                     ]}
                     form={form}
@@ -261,11 +262,17 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                             value: column.accessorKey,
                           })) || [],
                         [`${prefix}.operator`]: OPERATORS,
+                        [`${prefix}.units`]: [
+                          { label: 'Seconds', value: 's' },
+                          { label: 'Minutes', value: 'm' },
+                          { label: 'Hours', value: 'h' },
+                          { label: 'Days', value: 'd' },
+                        ],
                         [`${prefix}.Time Range`]: [
                           // { label: '30 Days', value: '30d' },
-                          { label: '12 Hours', value: '12h' },
-                          { label: '1 Day', value: '1d' },
-                          { label: '7 Days', value: '7d' },
+                          { label: '12', value: '12h' },
+                          { label: '1', value: '1d' },
+                          { label: '7', value: '7d' },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,
                         [`${prefix}.Resolution`]: resolutionOptions,
@@ -305,7 +312,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                           multiSelectEnableCreate: true,
                           multiSelectShowCreatableItem: false,
                           multiSelectUseStringValues: true,
-                        },
+                        }
                       ]}
                       form={form}
                       formKey="filters"

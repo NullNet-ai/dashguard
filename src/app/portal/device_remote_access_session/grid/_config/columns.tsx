@@ -3,12 +3,14 @@
 import { type ColumnDef } from '@tanstack/react-table'
 
 import StatusCell from '~/components/ui/status-cell'
+import { formatString } from '~/server/utils/formatString'
 
 const gridColumns = [
   {
     header: 'ID',
     accessorKey: 'code',
     search_config: {
+      entity: 'device_remote_access_sessions',
       operator: 'like',
     },
   },
@@ -20,20 +22,27 @@ const gridColumns = [
       const value = row?.original?.status
       return <StatusCell value={value} />
     },
+    search_config: {
+      entity: 'device_remote_access_sessions',
+      operator: 'like',
+    },
   },
   {
     header: 'Category',
     accessorKey: 'categories',
     search_config: {
+      entity: 'device_remote_access_sessions',
       operator: 'like',
       parse_as: "text"
     },
   },
   {
     header: 'Type',
-    accessorKey: 'remote_access_type',
+    accessorKey: 'device_remote_access_type',
     search_config: {
+      entity: 'device_remote_access_sessions',
       operator: 'like',
+      field: 'remote_access_type',
     },
   },
   {
@@ -52,10 +61,11 @@ const gridColumns = [
     accessorKey: 'remote_access_status',
     cell: ({ row }) => {
       const value = row?.original?.remote_access_status
-      return <StatusCell value={value} />
+      return <StatusCell value={formatString(value)} />
     },
     search_config: {
-      operator: 'like',
+      entity: 'device_remote_access_sessions',
+      operator: 'like'
     },
   },
   {

@@ -123,7 +123,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'total_length',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],

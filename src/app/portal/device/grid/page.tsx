@@ -47,7 +47,7 @@ export default async function Page() {
 
   return (
     <Grid
-      advanceFilter={filters?.reportFilters || []}
+      advanceFilter={filters?.advanceFilter || []}
       config={{
         entity: main_entity!,
         title: 'Device',

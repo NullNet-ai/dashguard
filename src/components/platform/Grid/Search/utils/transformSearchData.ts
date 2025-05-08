@@ -30,11 +30,12 @@ export const transformSearchData = (
       if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
-          values: [foundValue],
+          values: searchableField?.accessorKey !== searchableField?.field && obj[searchableField?.field] ? [obj[searchableField.field]] : [foundValue],
           operator: searchableField?.operator || "equal",
           type: "criteria",
           ...searchableField,
           label: searchableField?.label || formatAndCapitalize(key),
+          display_value: foundValue
         });
       }
     }

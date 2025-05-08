@@ -20,7 +20,7 @@ export const resolveSearchItem = ({
       rest?.field === 'raw_phone_number'
         ? [rest?.values?.[0]?.replace(/[^\d]/g, '')]
         : [rest?.values?.[0]],
-    display_value: rest?.values?.[0],
+    display_value: rest.display_value ? rest?.display_value : rest?.values?.[0],
     operator: rest?.operator === 'like' && !rest?.parse_as ? 'equal' : rest?.operator, //? 'equal' : rest?.operator,
     default: false,
   }
