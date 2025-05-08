@@ -4,8 +4,7 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-// Remove ArrowLeft and ArrowRight from the import
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
@@ -27,7 +26,6 @@ type CarouselProps = {
   showPartialSlides?: boolean
 }
 
-// Update the CarouselContextProps type to include visibleSlides
 type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0]
   api: ReturnType<typeof useEmblaCarousel>[1]
@@ -35,8 +33,6 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-  selectedIndex?: number
-  visibleSlides: number
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -55,7 +51,7 @@ const CarouselIndicators = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  const { api, indicatorStyle, visibleSlides } = useCarousel()
+  const { api, indicatorStyle } = useCarousel()
   const [selectedIndex, setSelectedIndex] = React.useState(0)
 
   React.useEffect(() => {
@@ -71,20 +67,7 @@ const CarouselIndicators = React.forwardRef<
   }, [api])
 
   if (!api) return null
-  
-  // Calculate how many page indicators we need based on visible slides
-  const totalSlides = api.slideNodes().length;
-  const pageCount = Math.ceil(totalSlides / visibleSlides);
-  
-  // Create an array of page indices
-  const pageIndices = Array.from({ length: pageCount }, (_, i) => 
-    i * visibleSlides
-  );
-  
-  // Determine which page is active
-  const activePage = Math.floor(selectedIndex / visibleSlides);
 
-  // Render indicators based on pages instead of individual slides
   if (indicatorStyle === 'line') {
     return (
       <div
@@ -95,20 +78,20 @@ const CarouselIndicators = React.forwardRef<
         )}
         {...props}
       >
-        {pageIndices.map((pageStartIndex, pageIndex) => {
-          const isActive = pageIndex === activePage;
+        {[...Array(api.scrollSnapList().length)].map((_, index) => {
+          const isActive = index === selectedIndex;
           
           return (
             <button
-              key={pageIndex}
+              key={index}
               className={cn(
                 "h-1 w-6 transition-all duration-300",
                 isActive 
                   ? "bg-primary" 
                   : "bg-slate-300/60"
               )}
-              onClick={() => scrollTo(pageStartIndex)}
-              aria-label={`Go to page ${pageIndex + 1}`}
+              onClick={() => scrollTo(index)}
+              aria-label={`Go to slide ${index + 1}`}
             />
           );
         })}
@@ -206,32 +189,6 @@ const Carousel = React.forwardRef<
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
-    const [selectedIndex, setSelectedIndex] = React.useState(0)
-    const [visibleSlides, setVisibleSlides] = React.useState(1)
-
-    // Calculate visible slides based on container width and slide width
-    React.useEffect(() => {
-      if (!api) return;
-      
-      const calculateVisibleSlides = () => {
-        const containerWidth = api.containerNode().getBoundingClientRect().width;
-        const slideWidth = api.slideNodes()[0]?.getBoundingClientRect().width || 0;
-        
-        if (slideWidth === 0) return 1;
-        
-        // Calculate how many slides fit in the container
-        const visibleCount = Math.floor(containerWidth / slideWidth);
-        setVisibleSlides(Math.max(1, visibleCount));
-      };
-      
-      // Calculate on init and resize
-      calculateVisibleSlides();
-      window.addEventListener('resize', calculateVisibleSlides);
-      
-      return () => {
-        window.removeEventListener('resize', calculateVisibleSlides);
-      };
-    }, [api]);
 
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
@@ -240,7 +197,6 @@ const Carousel = React.forwardRef<
 
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-      setSelectedIndex(api.selectedScrollSnap())
     }, [])
 
     const scrollPrev = React.useCallback(() => {
@@ -302,8 +258,6 @@ const Carousel = React.forwardRef<
           navButtonStyle,
           indicatorStyle,
           showPartialSlides,
-          selectedIndex,
-          visibleSlides, // Add the visibleSlides to the context
         }}
       >
         <div
@@ -354,49 +308,21 @@ CarouselContent.displayName = "CarouselContent" // Add display name
 const CarouselItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, forwardedRef) => {
-  const { orientation, showPartialSlides, selectedIndex } = useCarousel()
-  const [index, setIndex] = React.useState<number | null>(null)
-  const itemRef = React.useRef<HTMLDivElement>(null);
-  
-  // Combine refs
-  React.useImperativeHandle(forwardedRef, () => itemRef.current as HTMLDivElement);
-  
-  // Determine if this slide is the active one
-  React.useEffect(() => {
-    if (!showPartialSlides || !itemRef.current) return
-    
-    // We need to find the index of this slide among its siblings
-    const parent = itemRef.current.parentElement
-    if (!parent) return
-    
-    const children = Array.from(parent.children)
-    const thisIndex = children.indexOf(itemRef.current)
-    setIndex(thisIndex)
-  }, [showPartialSlides])
-  
-  // Check if this is the active slide
-  const isActive = index !== null && index === selectedIndex
+>(({ className, ...props }, ref) => {
+  const { orientation, showPartialSlides } = useCarousel()
   
   return (
     <div
-      ref={itemRef}
+      ref={ref}
       role="group"
       aria-roledescription="slide"
       className={cn(
         "min-w-0 shrink-0 grow-0",
-        showPartialSlides ? "basis-[85%] md:basis-[90%] transition-all duration-300 px-2" : "basis-full",
+        showPartialSlides ? "basis-[85%] md:basis-[90%] px-2" : "basis-full",
+        showPartialSlides && "transition-opacity duration-300", // Only transition opacity, not layout
         orientation === "horizontal" ? "pl-0" : "pt-0",
-        showPartialSlides && isActive && "z-10",
         className
       )}
-      style={{
-        ...(showPartialSlides && {
-          transform: isActive ? "scale(1.05)" : "scale(1)",
-          transition: "transform 300ms ease, box-shadow 300ms ease",
-          boxShadow: isActive ? "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" : "none"
-        })
-      }}
       {...props}
     />
   )
@@ -415,11 +341,11 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full !flex items-center justify-center",
         orientation === "horizontal"
           ? navButtonStyle === 'outside' 
-            ? "-left-12 top-1/2 -translate-y-1/2"
-            : "left-4 top-1/2 -translate-y-1/2"
+            ? "-left-12 top-1/2 -translate-y-1/2 md:block hidden"
+            : "left-2 top-1/2 -translate-y-1/2 z-10"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
@@ -432,7 +358,7 @@ const CarouselPrevious = React.forwardRef<
     </Button>
   )
 })
-CarouselPrevious.displayName = "CarouselPrevious" 
+CarouselPrevious.displayName = "CarouselPrevious"
 
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
@@ -446,11 +372,11 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full !flex items-center justify-center",
         orientation === "horizontal"
           ? navButtonStyle === 'outside' 
-            ? "-right-12 top-1/2 -translate-y-1/2"
-            : "right-4 top-1/2 -translate-y-1/2"
+            ? "-right-12 top-1/2 -translate-y-1/2 md:block hidden"
+            : "right-2 top-1/2 -translate-y-1/2 z-10"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
