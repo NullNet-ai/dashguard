@@ -12,6 +12,8 @@ import { getDefaultMenuOptionConfig } from "../../constants";
 import RecursiveMenuItem from "./RecursiveMenuItem";
 import useScreenType from '~/hooks/use-screen-type';
 import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 export interface IMemoizedRecordData {
   entityName?: string;
@@ -36,6 +38,8 @@ export default function DefaultSummaryMenuOptions({
   menuOptionConfig,
 }: IDefaultSummaryMenuOptionsProps) {
   const { recordId, entityName } = memoizedRecordData;
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
   const screenType = useScreenType()
   const isMobile = screenType === "md" || screenType === "sm" || screenType === "xs";
   const { menu_items
@@ -52,7 +56,7 @@ export default function DefaultSummaryMenuOptions({
   return (
     <DropdownMenu
     >
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild data-test-id={`${testIDFormatter(`${path1}-${path2}-change-rcrd-state`)}`}>
         <div className="flex items-center gap-2 px-1 z-50 py-1.5 text-left text-sm cursor-pointer">
           <EllipsisVertical className={`h-4 w-4`} aria-hidden="true" />
         </div>

@@ -14,6 +14,8 @@ import ViewFormActions from '../layout/opened/components/ViewFormActions';
 import SelectedViewLayout from '../layout/selected';
 import { Fragment } from 'react';
 import { isUndefined } from 'lodash';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 const FormBuilderLayout = ({
   displayType,
@@ -71,6 +73,8 @@ const FormBuilderLayout = ({
   },
 }: IAccordionLayoutProps) => {
   const searchActive = isOpenSearch || false;
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
 
   return (
     <Accordion
@@ -80,7 +84,7 @@ const FormBuilderLayout = ({
       type="single"
       onValueChange={handleAccordionChange}
     >
-      <AccordionItem value="item-1">
+      <AccordionItem value="item-1" data-test-id={`${testIDFormatter(`${path1}-${path2}-${formKey}-slctd-view`)}`}>
         <FormHeader
           buttonConfig={buttonConfig!}
           buttonHeaderRender={buttonHeaderRender}

@@ -16,11 +16,15 @@ import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
 import { type ISearchItemResult } from './types';
 import { transformSearchData } from './utils/transformSearchData';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 export default function Search({ gridType }: any) {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
 
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
   const { width } = useWindowSize();
   const screenSize = useScreenType();
   const isMobile =
@@ -96,6 +100,7 @@ export default function Search({ gridType }: any) {
               : width - (screenSize === 'md' ? 100 : 16)
             : 'auto',
         }}
+        data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-inpt`)}`}
       >
         <div className="flex items-center rounded-md border px-2 ps-3 focus-within:border-primary md:flex-wrap md:gap-2 lg:flex-nowrap">
           <MagnifyingGlassIcon

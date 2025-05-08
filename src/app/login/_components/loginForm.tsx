@@ -112,7 +112,11 @@ export default function LoginForm(props: any) {
           {error && <FormMessage>{error}</FormMessage>}
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center">
-              <Checkbox id="rememberMe" name="rememberMe" />
+              <Checkbox 
+                id="rememberMe" 
+                name="rememberMe" 
+                data-test-id="login-rmmbr-me-chkbx"
+              />
               <label
                 className="ml-2 block text-md font-semibold text-foreground"
                 htmlFor="rememberMe"
@@ -121,7 +125,11 @@ export default function LoginForm(props: any) {
               </label>
             </div>
             <div className="text-md">
-              <a className="font-semibold text-primary" href="forgot-password">
+              <a 
+                className="font-semibold text-primary" 
+                href="forgot-password" 
+                data-test-id="login-frgt-pswrd-link"
+              >
                 Forgot Password?
               </a>
             </div>
