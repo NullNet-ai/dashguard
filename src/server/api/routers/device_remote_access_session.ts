@@ -233,12 +233,13 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
       const { device_id, remote_access_type } = input
+      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
         const res = await ctx.dnaClient.findAll({
           entity,
           token: ctx.token.value,
           query: {
             pluck: ['id', 'status', 'remote_access_session'],
-            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active'}),
+            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active', remote_access_type: ra_type }),
             order: {
               limit: 1,
               by_field: 'created_date',
@@ -249,7 +250,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         .execute()
         
         
-        const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
         
         if (!res?.data?.length) {
           await createRemoteAccess({ device_id, ra_type, token })

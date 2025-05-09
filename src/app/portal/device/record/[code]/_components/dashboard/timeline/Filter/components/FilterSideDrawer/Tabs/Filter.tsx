@@ -332,7 +332,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         [`${prefix}.Time Range`]: [
                           // { label: '30 Days', value: '30d' },
                           { label: '12 Hours', value: '12h' },
-                          { label: '1 Day', value: '1d' },
+                          { label: 'Live Data', value: '1d' },
                           { label: '7 Days', value: '7d' },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,

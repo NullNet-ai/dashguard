@@ -25,7 +25,7 @@ interface OutputData {
 }
 
 export function cleanFilter(filters: any) {
-  const extracted = {
+  const extracted: { 'Time Range': string | null; 'Resolution': string | null; 'Graph Type': string | null } = {
     'Time Range': null,
     'Resolution': null,
     'Graph Type': null,
@@ -47,7 +47,7 @@ export function cleanFilter(filters: any) {
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Resolution') {
-      extracted.Resolution = filter.Resolution
+      extracted.Resolution = `${filter.Resolution}${filter.units}`
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Graph Type') {

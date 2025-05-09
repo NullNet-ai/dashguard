@@ -28,8 +28,8 @@ const FilterProvider = ({ children, params, type }: any) => {
     [
       {
         id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
-        name: '1 Day',
-        label: '1 Day',
+        name: 'Live Data',
+        label: 'Live Data',
         default_filter: [],
       },
     ]
@@ -86,9 +86,7 @@ const FilterProvider = ({ children, params, type }: any) => {
     const handleRefresh = () => {
       return shouldRefresh;
     };
-  
-    
-  
+
     eventEmitter.emit(`should_refresh_${type}`, shouldRefresh);
   
     return () => {

@@ -729,6 +729,7 @@ export const deviceRouter = createTRPCRouter({
           mutation: {
             params: {
               is_connection_established: true,
+              device_status: 'Online'
             },
             pluck: ['id', 'is_connection_established'],
           },

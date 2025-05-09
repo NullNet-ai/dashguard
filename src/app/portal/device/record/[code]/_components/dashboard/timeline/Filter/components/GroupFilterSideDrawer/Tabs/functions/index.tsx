@@ -70,58 +70,20 @@ const time_resolution_options: { [key: string]: string[] } = {
 export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunctionOperator }: {
   onRemoveFilter: (index: number) => void, form: any, filter_type: string, groupIndex: number
   onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
-  const { actions, state } = useManageFilter()
+  const { state } = useManageFilter()
   const { columns, errors } = state ?? {}
   const [resolutionOptions, setResolutionOptions] = useState<any>([])
-  // console.log("%c Line:72 🥓 resolutionOptions", "color:#465975", resolutionOptions);
 
-  const {
-    refetch: refetchResolution,
-    error,
-  } = api.resolution.fetchResolutions.useQuery({
-  });
-  
+
   const fields = form.getValues().filterGroups
 
-  // const getResolutionOptions = async (selectedTimeRange: string): Promise<IDropdown[]> => {
-  //   const resolutionOptions: { [key: string]: string[] } = time_resolution_options
-
-  //   const options = resolutionOptions?.[selectedTimeRange]?.map((res: string) => ({ label: res, value: res })) || []
-
-  //   const { data }: any = await refetchResolution()
-  //   console.log("%c Line:92 🍢 data", "color:#93c0a4", data);
-
-  //   return [...options, ...data]
-  // }
-  
-  const selectedTimeRange = form.watch(`filterGroups.${groupIndex}.filters.[0].Time Range`) // Get selected value
-
-  // const _resolutionOptions = useMemo(() => getResolutionOptions(selectedTimeRange), [selectedTimeRange])
-
-  // setResolutionOptions(_resolutionOptions)
-
-  const createResolutionOptions = api.resolution.createResolution.useMutation()
-  // form.watch((fields: Record<string, any>) => {
-  //   
-  //   handleUpdateFilter({ filterGroups: fields.filterGroups })
-  // })
-
   // useEffect(() => {
-  //   const fetchExistingResolutionOptions = async () => {
-  //   const _resolution_options = await getResolutionOptions(selectedTimeRange)
-  //   console.log("%c Line:111 🍓 _resolution_options", "color:#2eafb0", _resolution_options);
-  //   setResolutionOptions(_resolution_options)
+  //   const fetchResolutionType = async () => {
+  //     const { data } = await refetchResolution()
+  //     setResolutionOptions(data)
   //   }
-  //   fetchExistingResolutionOptions()
-  // },[selectedTimeRange])
-
-  useEffect(() => {
-    const fetchResolutionType = async () => {
-      const { data } = await refetchResolution()
-      setResolutionOptions(data)
-    }
-    fetchResolutionType()
-  },[resolutionOptions])
+  //   fetchResolutionType()
+  // },[resolutionOptions])
 
   useEffect(() => {
     if (Object.keys(errors || {}).length > 0) { // Avoids unnecessary renders
@@ -171,6 +133,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
             = form.getValues().filterGroups?.[groupIndex]?.filters[index]
 
             if (!filterData) return null
+
 
             return (
               <div
@@ -225,31 +188,20 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         isAlphabetical: false,
-                        selectEnableCreate: true,
-                        selectOnCreateValidate: async (text: string): Promise<{ valid: boolean; message?: string }> => {
-                          if (text.length > 0 && !isNaN(Number(text))) {
-                            return Promise.resolve({ valid: false, message: 'Resolution must be a number' });
-                          }
-                          return Promise.resolve({ valid: true });
-                        },
-                        selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
-                          const response: any = await createResolutionOptions.mutateAsync({
-                            resolution_type: text,
-                          })
-                          if (response) {
-                            setResolutionOptions([response])
-                            return response
-                          }
-                          return { label: '', value: '' }
-                        },
+                        ...(field?.field === 'Resolution' ? { selectEnableCreate: true,
+                          selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
+                            setResolutionOptions([{label: text, value: text}])
+                            return { label: text, value: text }
+                          }} : {})
                       },
-                      {
+                      // @ts-expect-error - type error
+                      ...( field?.field === 'Resolution' ? [{
                         id: `${prefix}.units`,
                         formType: 'select',
                         name: `${prefix}.units`,
                         placeholder: 'Select units',
                         selectSearchable: true,
-                      },
+                      }] : [])
                     ]}
                     form={form}
                     formKey={`filterGroups.${groupIndex}.filters`}
@@ -266,13 +218,12 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                           { label: 'Seconds', value: 's' },
                           { label: 'Minutes', value: 'm' },
                           { label: 'Hours', value: 'h' },
-                          { label: 'Days', value: 'd' },
                         ],
                         [`${prefix}.Time Range`]: [
                           // { label: '30 Days', value: '30d' },
-                          { label: '12', value: '12h' },
-                          { label: '1', value: '1d' },
-                          { label: '7', value: '7d' },
+                          { label: '12h', value: '12h' },
+                          { label: '1d', value: '1d' },
+                          { label: '7d', value: '7d' },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,
                         [`${prefix}.Resolution`]: resolutionOptions,

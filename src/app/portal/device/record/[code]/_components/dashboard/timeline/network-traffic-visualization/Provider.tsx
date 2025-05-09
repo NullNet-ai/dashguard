@@ -15,6 +15,7 @@ import { api } from '~/trpc/react'
 import { type INetworkFlowContext } from './types'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection';
 import { updateBandwidth } from './functions/updateBandwidth';
+import { useRouter } from 'next/navigation'
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -39,6 +40,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
   const [token, setToken] = React.useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+
+  const router = useRouter()
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -148,11 +151,35 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setSearchBy(data)
     }
 
+    // const handleRefresh = (data: boolean) => {
+    //   if(!!data) {
+    //     setLoading(true)
+    //     const fetchTimeUnitandResolution = async () => {
+    //       const {
+    //         data: time_unit_resolution,
+    //       } = await refetchTimeUnitandResolution()
+          
+    //       const { time, resolution = '1s' } = time_unit_resolution || {}
+    //       const { time_count = 12, time_unit = 'hour' } = time || {}
+    //       console.log("%c Line:164 🎂 time", "color:#fca650", time);
+          
+    //       setTime({
+    //         time_count,
+    //         time_unit: time_unit as 'hour',
+    //         resolution: resolution as '1h',
+    //       })
+    //     }
+    //     fetchTimeUnitandResolution()
+    //   }
+    // }
+
     eventEmitter.on(`timeline_filter_id`, setFID)
     eventEmitter.on('timeline_search', setSBy)
+    // eventEmitter.on('should_refresh_timeline_filter', handleRefresh)
     return () => {
       eventEmitter.off(`timeline_filter_id`, setFID)
       eventEmitter.off(`timeline_search`, setSBy)
+      // eventEmitter.off('should_refresh_timeline_filter', handleRefresh)
     }
   }, [eventEmitter])
 
@@ -210,7 +237,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(current_index + 20)
     setNewBandwidth([])
-    fetchBandwidth(20)
+   filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE' ? fetchBandwidth(1) : fetchBandwidth(20)
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
