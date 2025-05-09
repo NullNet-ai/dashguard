@@ -1,7 +1,7 @@
 {
   "app_name": "platform__FormBuilder",
-  "tag": "2.0.1-rc.1<unreleased>",
-  "branch": "unreleased/fix/2.0.1-rc.1<unreleased>",
-  "message": "no ticket #, fixed draggable",
-  "publish_name": "Juphet Vitualla"
+  "tag": "2.0.1-rc.2<unreleased>",
+  "branch": "unreleased/test3898/2.0.1-rc.2<unreleased>",
+  "message": "Add Data Test ID to applications",
+  "publish_name": "Save Ducto"
 }

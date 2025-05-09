@@ -121,11 +121,10 @@ export default function ProfileImage({ details, entity, token }: any) {
         if ((token && details?.data?.image_url) || (imageId && token)) {
           const stringID = imageId ? imageId : details?.data?.image_url
           setLoading(true)
-          const response = await fetch(stringID)
 
+          const response = await fetch(typeof window !== 'undefined' ? `${window.location.origin}/api/file/${stringID}/download` : '')
           const imgInfo = await getImageData([stringID])
           setImageInfo(imgInfo ? imgInfo[0] : {})
-
           const blob = await response.blob()
           const reader = new FileReader()
           reader.onloadend = () => {
