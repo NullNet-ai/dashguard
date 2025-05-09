@@ -15,7 +15,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
 
   const handleOpenSideDrawer = async () => {
     if(remote_access?.includes(remote_access_type?.toLowerCase())) {
-    const wsUrl = `ws://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/ws/`
+    const wsUrl = `ws://${remote_access_session}.wallguard-proxy.nullnet.dnaqa.net:4444/ws/`
     const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
       .substring(2, 9)}`
     localStorage.setItem(sessionKey, wsUrl)
@@ -25,7 +25,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
     
     window.open(`/terminal`, '_blank')
   } else {
-    window.open(`http://${remote_access_session}.wallguard.proxy.nullnetqa.net:4444/`, '_blank')
+    window.open(`http://${remote_access_session}.wallguard-proxy.nullnet.dnaqa.net:4444/`, '_blank')
   }
 }
 
