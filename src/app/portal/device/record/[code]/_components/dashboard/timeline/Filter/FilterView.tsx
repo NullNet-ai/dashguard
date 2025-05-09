@@ -18,7 +18,7 @@ const FilterView = () => {
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
   const router = useRouter();
-  const defaultTab = filters.find(tab => tab.label === '1 Day')?.id || ''
+  const defaultTab = filters.find(tab => tab.label === 'Live Data')?.id || ''
 
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
 
@@ -72,7 +72,7 @@ const FilterView = () => {
                   <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
                     {tab.label}
                   </span>
-                  {tab?.label !== '1 Day' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
+                  {tab?.label !== 'Live Data' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
                 </Button>
               </Fragment>
             )

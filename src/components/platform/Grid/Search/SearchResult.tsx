@@ -38,7 +38,7 @@ export default function SearchResult({
               >
                 <div className="mb-2 ml-3">
                   <span className="text-sm font-semibold text-muted-foreground">
-                    {result.values?.[0]}
+                    {result?.display_value ? result?.display_value : result.values?.[0]}
                   </span>
                 </div>
                 <Badge

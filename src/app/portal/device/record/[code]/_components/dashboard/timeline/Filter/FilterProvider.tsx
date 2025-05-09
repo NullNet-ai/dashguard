@@ -22,19 +22,19 @@ export const useFilter = (): IFilterContext => {
 const FilterProvider = ({ children, params, type }: any) => {
   const eventEmitter = useEventEmitter()
   const { router, resolver } = params || {}
+  const [shouldRefresh, setShouldRefresh] = useState(false)
 
   const [filters, setFilters] = useState<Record<string, any>[]>(
     [
       {
         id: '01JNQ9WPA2JWNTC27YCTCYC1FE',
-        name: '1 Day',
-        label: '1 Day',
+        name: 'Live Data',
+        label: 'Live Data',
         default_filter: [],
       },
     ]
   )
 
-  console.log("%c Line:27 🍩 filters", "color:#4fff4B", filters);
   const {
     data: cached_filter_items = [],
   } = api.cachedFilter.fetchCachedFilter.useQuery({
@@ -62,6 +62,7 @@ const FilterProvider = ({ children, params, type }: any) => {
           : f
         ),
       })
+      setShouldRefresh(prev => !prev)
 
       return [...updatedFilters.values()]
     })
@@ -78,6 +79,20 @@ const FilterProvider = ({ children, params, type }: any) => {
       eventEmitter.off(`${type}_manage_filter`, fetchDetails)
     }
   }, [eventEmitter, JSON.stringify(filters), filterQuery])
+
+  useEffect(() => {
+    if (!eventEmitter || shouldRefresh === undefined) return;
+  
+    const handleRefresh = () => {
+      return shouldRefresh;
+    };
+
+    eventEmitter.emit(`should_refresh_${type}`, shouldRefresh);
+  
+    return () => {
+      eventEmitter.off(`should_refresh_${type}`, handleRefresh);
+    };
+  }, [shouldRefresh, eventEmitter]);
 
   const [query, setQuery] = useState('')
 

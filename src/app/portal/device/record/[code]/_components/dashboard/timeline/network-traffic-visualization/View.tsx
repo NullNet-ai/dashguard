@@ -13,54 +13,123 @@ import { cn } from '~/lib/utils'
 // import { generateTimeSeriesData } from './functions/generateTimeSeriesDataPerSeconds'
 
 
-function generateTimeSeriesData(sampleData: any) {
-  const secondMap: any = {};
+function generateTimeSeriesData(sampleData: any, resolution: string) {
+  const timeMap: any = {};
 
   if (sampleData.length === 1) {
-    const bucketTime = sampleData[0].bucket.split(' ')[1]; 
-    const hour = bucketTime.substring(0, 2); 
-    const minute = bucketTime.substring(3, 5); 
+    const bucketTime = sampleData[0].bucket.split(' ')[1];
+    const hour = bucketTime.substring(0, 2);
+    const minute = bucketTime.substring(3, 5);
 
-    for (let i = 0; i < 60; i++) {
-      const seconds = i.toString().padStart(2, '0');
-      const timeKey = `${hour}:${minute}:${seconds}`;
-      secondMap[timeKey] = 0;
+    let timePoints = 0;
+    const unit = resolution.slice(-1); // Get the last character (unit: 's', 'm', or 'h')
+
+    switch (unit) {
+      case 's': // Seconds
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const seconds = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minute}:${seconds}`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'm': // Minutes
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const minutes = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minutes}:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'h': // Hours
+        timePoints = 24;
+        for (let i = 0; i < timePoints; i++) {
+          const hours = i.toString().padStart(2, '0');
+          const timeKey = `${hours}:00:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      default:
+        console.error("Invalid resolution unit");
+        return [];
     }
 
     const second = bucketTime.substring(6, 8);
-    const dataTimeKey = `${hour}:${minute}:${second}`;
-    secondMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
+    const dataTimeKey =
+      unit === 's'
+        ? `${hour}:${minute}:${second}`
+        : unit === 'm'
+        ? `${hour}:${minute}:00`
+        : `${hour}:00:00`;
+
+    timeMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
   } else {
     const firstBucket = sampleData[0]?.bucket.split(' ')[1];
-    const hour = firstBucket ? firstBucket.substring(0, 2) : '00'; 
-    const minute = firstBucket ? firstBucket.substring(3, 5) : '00'; 
-    for (let i = 0; i < 60; i++) {
-      const seconds = i.toString().padStart(2, '0'); 
-      const timeKey = `${hour}:${minute}:${seconds}`;
-      secondMap[timeKey] = 0;
+    const hour = firstBucket ? firstBucket.substring(0, 2) : '00';
+    const minute = firstBucket ? firstBucket.substring(3, 5) : '00';
+
+    let timePoints = 0;
+    const unit = resolution.slice(-1);
+
+    switch (unit) {
+      case 's': // Seconds
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const seconds = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minute}:${seconds}`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'm': // Minutes
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const minutes = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minutes}:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'h': // Hours
+        timePoints = 24;
+        for (let i = 0; i < timePoints; i++) {
+          const hours = i.toString().padStart(2, '0');
+          const timeKey = `${hours}:00:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      default:
+        console.error("Invalid resolution unit");
+        return [];
     }
 
     sampleData.forEach((item: Record<string, any>) => {
-      const bucketTime = item.bucket.split(' ')[1]; 
-      const timeKey = bucketTime; 
-      if (secondMap[timeKey] !== undefined) {
-        secondMap[timeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
+      const bucketTime = item.bucket.split(' ')[1];
+      const dataTimeKey =
+        unit === 's'
+          ? bucketTime
+          : unit === 'm'
+          ? `${bucketTime.substring(0, 5)}:00`
+          : `${bucketTime.substring(0, 2)}:00:00`;
+
+      if (timeMap[dataTimeKey] !== undefined) {
+        timeMap[dataTimeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
       }
     });
   }
 
-  const result = [];
-  const sortedKeys = Object.keys(secondMap).sort();
-  for (const timeKey of sortedKeys) {
-    result.push({
-      time: timeKey,
-      bandwidth: secondMap[timeKey],
-    });
-  }
+  // Convert timeMap to an array
+  const timeSeriesArray = Object.keys(timeMap).map((timeKey) => ({
+    time: timeKey,
+    bandwidth: timeMap[timeKey],
+  }));
 
-  return result;
+  return timeSeriesArray;
 }
-
 
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0
@@ -135,8 +204,8 @@ export default function NetworkFlowView() {
         
         const unit = time_unit
 
-        // const formattedTimeFrame = generateTimeSeriesData(result, resolution, time_count, time_unit)
-        const formattedTimeFrame = generateTimeSeriesData(result)
+        const formattedTimeFrame = generateTimeSeriesData(result, resolution)
+        // const formattedTimeFrame = generateTimeSeriesData(result)
         const maxBandwidth: any = getMaxBandwidth(formattedTimeFrame)
 
         return (

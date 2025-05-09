@@ -20,34 +20,18 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         id: z.string().optional(),
         code: z.string().optional(),
         limit: z.number().optional(),
+        device_id: z.string().optional()
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { limit } = input
-
-      const remote_access_res = await ctx.dnaClient
-      .findAll({
-        entity: 'device_remote_access_sessions',
-        token: ctx.token.value,
-        query: {
-          pluck: ['id', 'device_id', 'remote_access_status'],
-          advance_filters: createAdvancedFilter({ status: 'Active' }),
-          order: {
-            limit: limit || 10,
-            by_field: 'created_date',
-            by_direction: EOrderDirection.DESC,
-          },
-        },
-      })
-      .execute()
-
+      const { limit, device_id } = input
       const res = await ctx.dnaClient
         .findAll({
           entity: 'devices',
           token: ctx.token.value,
           query: {
             pluck: ['id', 'instance_name', 'device_status'],
-            advance_filters: createAdvancedFilter({ status: 'Active' }),
+            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : { status: 'Active' , device_status: 'Online'}),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -56,12 +40,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           },
         })
         .execute()
-      
-      const remote_access_ids = remote_access_res?.data?.map((item: Record<string, any>) => item.device_id)
-    
-      const filtered_res = res?.data?.filter((item: Record<string, any>) => {
-        return !remote_access_ids?.includes(item.id)
-      })
       
       const res_data = res?.data?.map((item: Record<string, any>) => {
         return {
@@ -226,9 +204,9 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          remote_access_type: remote_access_type.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
+          device_remote_access_type: remote_access_type.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
+          remote_access_type,
           // remote_access_category: formatString(remote_access_type),
-          remote_access_status: formatString(item?.remote_access_status),
           // type: formatString(remote_access_type),
           device_name: formatString(devices?.[0]?.instance_name),
           created_by: !!contacts?.[0]?.first_name || !!contacts?.[0]?.last_name
@@ -251,16 +229,17 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     }),
 
   createUpdateDeviceRemoteAccessSessions: privateProcedure
-    .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string(), category: z.string() }))
+    .input(z.object({ id: z.string().optional(), device_id: z.string(), remote_access_type: z.string(), category: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
       const { device_id, remote_access_type } = input
+      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
         const res = await ctx.dnaClient.findAll({
           entity,
           token: ctx.token.value,
           query: {
             pluck: ['id', 'status', 'remote_access_session'],
-            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active'}),
+            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active', remote_access_type: ra_type }),
             order: {
               limit: 1,
               by_field: 'created_date',
@@ -271,7 +250,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         .execute()
         
         
-        const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
         
         if (!res?.data?.length) {
           await createRemoteAccess({ device_id, ra_type, token })
