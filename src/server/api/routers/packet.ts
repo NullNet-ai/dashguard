@@ -25,7 +25,7 @@ interface OutputData {
 }
 
 export function cleanFilter(filters: any) {
-  const extracted = {
+  const extracted: { 'Time Range': string | null; 'Resolution': string | null; 'Graph Type': string | null } = {
     'Time Range': null,
     'Resolution': null,
     'Graph Type': null,
@@ -47,7 +47,7 @@ export function cleanFilter(filters: any) {
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Resolution') {
-      extracted.Resolution = filter.Resolution
+      extracted.Resolution = `${filter.Resolution}${filter.units}`
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Graph Type') {
@@ -123,7 +123,7 @@ export const packetRouter = createTRPCRouter({
         aggregations: [
           {
             aggregation: 'SUM',
-            aggregate_on: 'total_length',
+            aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
         ],

@@ -9,6 +9,7 @@ import { CustomNewButton } from './_components/CustomNewButton'
 import { CustomRowActions } from './_components/CustomRowActions'
 import gridColumns from './_config/columns'
 import defaultSorting from './_config/sorting'
+import defaultAdvanceFilter from './_config/advanceFilter'
 
 export default async function Page() {
   const { sorts, pagination, filters } = (await getGridCacheData()) ?? {}
@@ -34,6 +35,7 @@ export default async function Page() {
   
   return (
     <Grid
+      advanceFilter={filters?.advanceFilter || []}
       config={{
         entity: main_entity!,
         title: 'Remote Access',
@@ -57,8 +59,9 @@ export default async function Page() {
         <CustomNewButton />
       }
       data={items}
-      
+      defaultAdvanceFilter={defaultAdvanceFilter || []}
       defaultSorting={defaultSorting}
+      pagination={pagination}
       sorting={sorts?.sorting?.length ? sorts?.sorting : []}
       totalCount={totalCount || 0}
     />

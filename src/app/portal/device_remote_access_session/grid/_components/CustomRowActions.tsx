@@ -21,6 +21,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
     localStorage.setItem(sessionKey, wsUrl)
 
     localStorage.setItem('current_terminal_session', sessionKey)
+    localStorage.setItem('device_id', device_id)
     
     window.open(`/terminal`, '_blank')
   } else {

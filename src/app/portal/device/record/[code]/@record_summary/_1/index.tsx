@@ -49,14 +49,14 @@ const RecordShellSummary = ({
     version: data?.device_version,
   }
 
-  if (error) {
-    return (
-      <div>
-        {"Error:"}
-        {error.message}
-      </div>
-    )
-  }
+  // if (error) {
+  //   return (
+  //     <div>
+  //       {"Error:"}
+  //       {error.message}
+  //     </div>
+  //   )
+  // }
 
   return (
     <div>
