@@ -16,19 +16,12 @@ export async function UpdateReportPagination({
   gridKey?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get('x-pathname') || '';
-  const searchParams = headerList.get('x-full-search-query-params') || '';
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
 
   await api.grid.updateReportPagination({
     pagination,
     gridKey,
   });
-  urlSearchParams.set(
-    'pagination',
-    `page=${pagination.current_page}&perPage=${pagination.limit_per_page}`,
-  );
 
-  revalidatePath(`${pathName}?${urlSearchParams}`)
-  redirect(`${pathName}?${urlSearchParams}`);
+  revalidatePath(fullUrl)
 }

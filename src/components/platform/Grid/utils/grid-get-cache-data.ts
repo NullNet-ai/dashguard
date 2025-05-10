@@ -25,33 +25,41 @@ export interface IGridCacheDataResponse {
 }
 interface IGridCacheData {
   gridKey?: string;
+  entity?: string;
+  application?: string;
+  identifier?: string;
 }
+
+const defaultValues = {
+  grid_tabs: [],
+  sorts: {
+    sorting: [],
+    defaultSorting: [],
+    groupSorts: [],
+  },
+  pagination: {
+    current_page: 1,
+    limit_per_page: 100,
+  },
+  filters: {
+    advanceFilter: [],
+    reportFilters: [],
+    defaultFilters: [],
+    groupAdvanceFilters: [],
+  },
+  columns: [],
+  groups: [],
+} as IGridCacheDataResponse;
 export const getGridCacheData = async (
   args?: IGridCacheData,
 ): Promise<IGridCacheDataResponse> => {
+  await api.grid.initializeGridTabs({ ...args });
   const cachedData = (await api.grid.getReportCachedData({
-    gridKey: args?.gridKey,
+    ...args,
   })) as unknown as IGridCacheDataResponse;
-  return typeof cachedData === 'object'
-    ? cachedData
-    : ({
-        grid_tabs: [],
-        sorts: {
-          sorting: [],
-          defaultSorting: [],
-          groupSorts: [],
-        },
-        pagination: {
-          current_page: 1,
-          limit_per_page: 100,
-        },
-        filters: {
-          advanceFilter: [],
-          reportFilters: [],
-          defaultFilters: [],
-          groupAdvanceFilters: [],
-        },
-        columns: [],
-        groups: [],
-      } as IGridCacheDataResponse);
+
+  const gridCachedData =
+    typeof cachedData === 'object' ? cachedData : defaultValues;
+
+  return gridCachedData;
 };

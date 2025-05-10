@@ -50,8 +50,19 @@ export type AppRouterKeys = keyof typeof appRouter;
 
 export type TArchiveType = 'warning' | 'archive';
 
-type CustomColumnDef<TData> = ColumnDef<TData> & {
+export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sortKey?: string | Array<string>;
+  sort_config?: {
+    is_case_sensitive_sorting?: boolean;
+  };
+  data_type?: string
+  search_config?: {
+    field?: string;
+    operator?: string;
+    parse_as?: 'text',
+    entity?: string;
+  };
+  isSearchable?: boolean;
 };
 interface IActionConditionItem {
   accessor: string;

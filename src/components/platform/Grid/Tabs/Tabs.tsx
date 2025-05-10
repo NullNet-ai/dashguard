@@ -12,7 +12,6 @@ interface IProps {
 const GridTabs = ({ gridKey, grid_tabs }: IProps) => {
   // const [tabs, setTabs] = useState<any>([]);
   // const [isLoading, setIsLoading] = useState<boolean>(true);
-  // console.log("🚀 ~ GridTabs ~ isLoading:", isLoading)
 
   // useEffect(() => {
     
@@ -23,8 +22,6 @@ const GridTabs = ({ gridKey, grid_tabs }: IProps) => {
   //     });
   //     const endTime = performance.now();
   //     const elapsedTime = endTime - startTime;
-  //     console.log("🚀 ~ fetchGridTabs ~ data:", data);
-  //     console.log(`🚀 ~ fetchGridTabs ~ elapsed time: ${elapsedTime.toFixed(2)}ms`);
 
   //     setIsLoading(false);
   //     setTabs(data);

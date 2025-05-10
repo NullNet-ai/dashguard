@@ -14,7 +14,6 @@ export async function UpdateReportFilter({
   gridKey?: string;
 }) {
   const headerList = headers();
-  const searchParams = headerList.get("x-full-search-query-params") || "";
   const fullUrl = headerList.get("x-full-pathname") || "";
   await api.grid.updateReportFilter({
     filters,

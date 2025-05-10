@@ -60,17 +60,44 @@ const gridFilterSchema = z.object({
 export const gridFilterRouter = createTRPCRouter({
   ...createDefineRoutes(ENTITY),
   createGridFilter: privateProcedure
-    .input(gridFilterSchema)
+    .input(
+      gridFilterSchema.extend({
+        gridKey: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
       const account_org_id = ctx?.session?.account?.account_organization_id;
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
-      const [, , mainEntity, application] = pathName.split('/');
+      const [, , mainEntity, application, identifier] = pathName.split('/');
+      const { gridKey, ...rest } = input ?? {};
       const filter_id = ulid();
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.account_organization_id,
+        _gridKey: gridKey,
+        _identifier: identifier,
+      });
+      const gridTabFilterList = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
 
-      const { data, message, success, errors } = await ctx.dnaClient
+      const href = `${pathName}?filter_id=${filter_id}`;
+      const additionalTab = {
+        ...rest,
+        id: filter_id,
+        entity: mainEntity,
+        is_current: false,
+        is_default: false,
+        href,
+      };
+
+      const updatedGridTabs = [...gridTabFilterList, additionalTab];
+      await ctx.redisClient.cacheData(_tabMenuId, updatedGridTabs);
+      ctx.dnaClient
         .create({
           entity: ENTITY,
           token,
@@ -81,7 +108,7 @@ export const gridFilterRouter = createTRPCRouter({
               grid_id: '',
               contact_id: id,
               account_organization_id: account_org_id,
-              link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
+              link: href,
               is_current: false,
               is_default: false,
               entity: mainEntity,
@@ -112,10 +139,7 @@ export const gridFilterRouter = createTRPCRouter({
         })
         .execute();
 
-      if (!success) {
-        throw new Error(message);
-      }
-      return data;
+      return updatedGridTabs;
     }),
 
   updateGridAllFilter: privateProcedure
@@ -126,6 +150,10 @@ export const gridFilterRouter = createTRPCRouter({
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
+      const searchQueryParams =
+        headerList.get('x-full-search-query-params') || '';
+      const searchParams = new URLSearchParams(searchQueryParams);
+      const filter_id = searchParams.get('filter_id');
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
@@ -133,6 +161,25 @@ export const gridFilterRouter = createTRPCRouter({
       });
 
       await ctx.redisClient.cacheData(_tabMenuId, input?.tabs);
+      const currentTab = filter_id
+        ? input?.tabs?.find((tab: any) => tab.id === filter_id)
+        : input?.tabs?.find((tab: any) => tab.current);
+
+      // update the grid filter entity on database
+      const promise = input?.tabs?.map(async (tab: any) => {
+        return ctx.dnaClient
+          .update(tab.id, {
+            entity: ENTITY,
+            token,
+            mutation: {
+              params: {
+                is_current: tab.current,
+              },
+            },
+          })
+          .execute();
+      });
+      Promise.all(promise);
     }),
   updateGridFilter: privateProcedure
     .input(gridFilterSchema)
@@ -143,7 +190,7 @@ export const gridFilterRouter = createTRPCRouter({
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
 
-      const { data, message, success } = await ctx.dnaClient
+      ctx.dnaClient
         .update(input.id!, {
           entity: ENTITY,
           token,
@@ -177,9 +224,9 @@ export const gridFilterRouter = createTRPCRouter({
         })
         .execute();
 
-      if (!success) {
-        throw new Error(message);
-      }
+      // if (!success) {
+      //   throw new Error(message);
+      // }
 
       // update data on redis
       if (application !== 'grid' || !mainEntity) return [];
@@ -210,20 +257,21 @@ export const gridFilterRouter = createTRPCRouter({
         return tab;
       });
       await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
-      return data;
+      return updatedTab;
     }),
 
   removeGridFilter: privateProcedure
     .input(
       z.object({
         id: z.string(),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const headerList = headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
-      const [, , mainEntity, application] = pathName.split('/');
+      const [, , mainEntity, application, indentifier] = pathName.split('/');
 
       const token = ctx?.token.value;
 
@@ -247,6 +295,8 @@ export const gridFilterRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.account_organization_id,
+        _gridKey: input.gridKey,
+        _identifier: indentifier,
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
@@ -273,15 +323,16 @@ export const gridFilterRouter = createTRPCRouter({
     .input(
       z.object({
         tab: z.any(),
+        gridKey: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
-      
+
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
-      const [, , mainEntity, application] = pathName.split('/');
+      const [, , mainEntity, application, identifier] = pathName.split('/');
 
       const filter_id = ulid();
 
@@ -299,7 +350,8 @@ export const gridFilterRouter = createTRPCRouter({
                 name: `${input.tab.name} (Copy)`,
                 grid_id: '',
                 contact_id: id,
-                account_organization_id: ctx.session.account.account_organization_id,
+                account_organization_id:
+                  ctx.session.account.account_organization_id,
                 link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
                 is_current: false,
                 is_default: false,
@@ -384,7 +436,8 @@ export const gridFilterRouter = createTRPCRouter({
                 name: `${grid_filter.name} (Copy)`,
                 grid_id: '',
                 contact_id: id,
-                account_organization_id: ctx.session.account.account_organization_id,
+                account_organization_id:
+                  ctx.session.account.account_organization_id,
                 link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
                 is_current: false,
                 is_default: false,
@@ -428,6 +481,8 @@ export const gridFilterRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.account_organization_id,
+        _gridKey: input.gridKey,
+        _identifier: identifier,
       });
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,

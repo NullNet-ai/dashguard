@@ -444,34 +444,6 @@ export const accountRouter = createTRPCRouter({
             },
           },
         });
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'created_by',
-      //       entity: 'contact',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'created_by',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'updated_by',
-      //       entity: 'contact',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'updated_by',
-      //     },
-      //   },
-      // });
 
       if (input.grouping?.length) {
         query.groupBy({
@@ -508,12 +480,8 @@ export const accountRouter = createTRPCRouter({
           ...rest,
           first_name: contacts?.first_name || external_contacts?.first_name,
           last_name: contacts?.last_name || external_contacts?.last_name,
-          created_by: created_by
-            ? `${created_by.first_name} ${created_by.last_name}`
-            : null,
-          updated_by: updated_by
-            ? `${updated_by.first_name} ${updated_by.last_name}`
-            : null,
+          created_by: created_by.full_name || '',
+          updated_by: updated_by.full_name || '',
         };
       });
 
