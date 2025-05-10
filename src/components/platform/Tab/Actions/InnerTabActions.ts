@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { api } from '~/trpc/server';
 
 export const closeInnerClassTab = async ({
   pathname,
@@ -13,32 +13,33 @@ export const closeInnerClassTab = async ({
   current?: any;
   tabs?: any;
 }) => {
-
-    const [, portal, mainEntity, application, identifier] =
-    pathname.split("/") || "New Tab";
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const [newPath] = pathname?.split('?');
+  const [, portal, mainEntity] = pathname.split('/') || 'New Tab';
+  const currentContext = '/' + portal + '/' + mainEntity;
 
   const headerList = headers();
-  const currentPathname = headerList.get("x-pathname") || "";
+  const currentPathname = headerList.get('x-pathname') || '';
 
-  const tab = await api.tab.closeCurrentInnerClassTab({
-    href: pathname,
+  await api.tab.closeCurrentInnerClassTab({
+    href: newPath!,
     current_context: currentContext,
   });
 
   if (!current) {
-    redirect(currentPathname);
+    // redirect(currentPathname);
+    return currentPathname;
   }
 
-  const index = tabs.findIndex((tab: any) => tab.href === pathname);
+  const index = tabs.findIndex((tab: any) => tab.href === newPath);
   if (index !== -1) {
     tabs.splice(index, 1);
   }
   const previousTab = index > 0 ? tabs[index - 1] : null;
 
-  redirect(previousTab?.href || "/portal/dashboard");
-};
+  // redirect(previousTab?.href || "/portal/dashboard");
 
+  return previousTab?.href || '/portal/dashboard';
+};
 
 export const closeAllInnerClassTabs = async ({
   pathname,
@@ -49,20 +50,17 @@ export const closeAllInnerClassTabs = async ({
   current?: any;
   tabs?: any;
 }) => {
-  const [, portal, mainEntity, application, identifier] =
-    pathname.split("/") || "New Tab";
-  const currentContext = "/" + portal + "/" + mainEntity;
-
-  const headerList = headers();
-  const currentPathname = headerList.get("x-pathname") || "";
+  const [, portal, mainEntity] = pathname.split('/') || 'New Tab';
+  const currentContext = '/' + portal + '/' + mainEntity;
 
   await api.tab.closeAllInnerClassTabs({
     href: pathname,
     current_context: currentContext,
   });
 
-  redirect(`/portal/${mainEntity}/grid`);
-}
+  // redirect(`/portal/${mainEntity}/grid`);
+  return `/portal/${mainEntity}/grid`;
+};
 
 export const closeOtherInnerClassTabs = async ({
   pathname,
@@ -73,16 +71,13 @@ export const closeOtherInnerClassTabs = async ({
   current?: any;
   tabs?: any;
 }) => {
-  const [, portal, mainEntity, application, identifier] =
-    pathname.split("/") || "New Tab";
-  const currentContext = "/" + portal + "/" + mainEntity;
-
-  const headerList = headers();
+  const [, portal, mainEntity] = pathname.split('/') || 'New Tab';
+  const currentContext = '/' + portal + '/' + mainEntity;
 
   await api.tab.closeOtherInnerClassTabs({
     href: pathname,
     current_context: currentContext,
   });
 
-  redirect(pathname)
-}
+  return pathname;
+};

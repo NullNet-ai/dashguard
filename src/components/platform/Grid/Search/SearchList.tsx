@@ -14,11 +14,15 @@ import { cn, formatAndCapitalize } from '~/lib/utils';
 
 import { SearchGridContext } from './Provider';
 import SearchDialog from './SearchDialog';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 const SearchList = ({parentType} : any) => {
   const conref = useRef<any>(null);
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(SearchGridContext);
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
 
   const { searchItems = [] } = state ?? {};
   const displaySearchItemResolver = searchItems.reduce((acc: any, item) => {
@@ -122,6 +126,7 @@ const SearchList = ({parentType} : any) => {
               `whitespace-nowrap text-xs text-black`,
               `${selectedSearchItems.length ? '' : 'mt-[4px]'}`,
             )}
+            data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-by-lbl`)}`}
           >
             Search By:
           </span>

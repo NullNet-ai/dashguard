@@ -15,6 +15,7 @@ const SignUpLabel = () => {
           onClick={async () => {
             await redirectToSignUp()
           }}
+          data-test-id="login-sign-up-link"
         >
           Sign Up
         </span>

@@ -1,20 +1,22 @@
-'use client'
+'use client';
 
 import { lowerCase } from 'lodash';
-import { EllipsisVertical, FileX, FileX2, StarIcon } from 'lucide-react'
+import { EllipsisVertical, FileX, FileX2, StarIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import {
   closeAllInnerClassTabs,
   closeInnerClassTab,
   closeOtherInnerClassTabs,
-} from '~/components/platform/Tab/Actions/InnerTabActions'
+} from '~/components/platform/Tab/Actions/InnerTabActions';
+import { IArgs } from '~/components/platform/Tab/InnerTabItems';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuItem,
-} from '~/components/ui/dropdown-menu'
+} from '~/components/ui/dropdown-menu';
 import { testIDFormatter } from '~/utils/formatter';
 
 const TabMenu = ({
@@ -22,42 +24,49 @@ const TabMenu = ({
   href,
   tabs,
   name,
-  entity
+  entity,
+  tabsAction,
 }: {
-  current: boolean
-  href: string
-  tabs: any
-  name: string
-  entity: string
+  current: boolean;
+  href: string;
+  tabs: any;
+  name: string;
+  entity: string;
+  tabsAction?: {
+    handleCloseTab?: (args: IArgs) => void;
+    handleCloseOtherTabs: ({ pathname, current, tabs }: IArgs) => void;
+    handleCloseAllTabs: () => void;
+  };
 }) => {
-  if (name === 'Grid') return null
+  const router = useRouter();
+  if (name === 'Grid') return null;
   return (
     <DropdownMenu data-test-id={testIDFormatter(`${entity}-tab-menu`)}>
       <DropdownMenuTrigger asChild>
-        <div 
-          className="flex items-center gap-2 py-1.5 pr-[2px] text-left text-sm opacity-1 lg:opacity-0 group-hover:opacity-100 cursor-pointer" 
+        <div
+          className="opacity-1 flex cursor-pointer items-center gap-2 py-1.5 pr-[2px] text-left text-sm group-hover:opacity-100 lg:opacity-0"
           data-test-id={testIDFormatter(`${entity}-tab-menu-trigger`)}
         >
           <EllipsisVertical
-            className="h-3.5 w-3.5 font-semibold text-default/60 cursor-pointer"
+            className="h-3.5 w-3.5 cursor-pointer font-semibold text-default/60"
             aria-hidden="true"
             data-test-id={testIDFormatter(`${entity}-tab-menu-trigger-icon`)}
           />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
+      <DropdownMenuContent
         align="start"
         data-test-id={testIDFormatter(`${entity}-tab-menu-content`)}
       >
         <DropdownMenuItem
-          className="relative flex gap-2 cursor-pointer"
-          onSelect={(event) => {
-            event.preventDefault()
-            void closeInnerClassTab({
+          className="relative flex cursor-pointer gap-2"
+          onSelect={async (event) => {
+            event.preventDefault();
+            tabsAction?.handleCloseTab?.({
               pathname: href,
               current,
               tabs,
-            })
+            });
           }}
           data-test-id={testIDFormatter(`${entity}-tab-menu-close-tab`)}
         >
@@ -65,14 +74,14 @@ const TabMenu = ({
           <span>Close Tab</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2 cursor-pointer"
-          onSelect={(event) => {
-            event.preventDefault()
-            void closeOtherInnerClassTabs({
+          className="flex cursor-pointer gap-2"
+          onSelect={async (event) => {
+            event.preventDefault();
+            tabsAction?.handleCloseOtherTabs({
               pathname: href,
               current,
               tabs,
-            })
+            });
           }}
           data-test-id={testIDFormatter(`${entity}-tab-menu-close-other-tabs`)}
         >
@@ -80,24 +89,20 @@ const TabMenu = ({
           <span>Close Other Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex gap-2 cursor-pointer"
-          onSelect={(event) => {
-            event.preventDefault()
-            void closeAllInnerClassTabs({
-              pathname: href,
-              current,
-              tabs,
-            })
+          className="flex cursor-pointer gap-2"
+          onSelect={async (event) => {
+            event.preventDefault();
+            tabsAction?.handleCloseAllTabs();
           }}
           data-test-id={testIDFormatter(`${entity}-tab-menu-close-all-tabs`)}
         >
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
           <span>Close All Tabs</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator 
-          data-test-id={testIDFormatter(`${entity}-tab-menu-separator`)} 
+        <DropdownMenuSeparator
+          data-test-id={testIDFormatter(`${entity}-tab-menu-separator`)}
         />
-        <DropdownMenuItem 
+        <DropdownMenuItem
           className="flex gap-2"
           data-test-id={testIDFormatter(`${entity}-tab-menu-add-favorites`)}
         >
@@ -106,7 +111,7 @@ const TabMenu = ({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 };
 
-export default TabMenu
+export default TabMenu;

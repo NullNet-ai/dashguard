@@ -65,7 +65,7 @@ export default function MyTableBody({
       (leafColumn) => leafColumn.columnDef.header === column.header,
     ),
   );
-
+  
   return (
     <>
       <TableBody
@@ -151,7 +151,10 @@ export default function MyTableBody({
                               />
                             </>
                           ) : (
-                            <div className="flex flex-row flex-wrap gap-y-1">
+                            <div 
+                              className="flex flex-row flex-wrap gap-y-1"
+                              data-test-id={cell.column.id === 'expand' && `${testIDFormatter(`${state?.config.entity}-grd-expd`)}`}
+                            >
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext(),

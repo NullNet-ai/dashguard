@@ -205,7 +205,7 @@ export const FileUploader = React.forwardRef<
 
           return newProgressStates;
         });
-      }, 1000);
+      }, 300);
     };
 
     const handleKeyDown = useCallback(

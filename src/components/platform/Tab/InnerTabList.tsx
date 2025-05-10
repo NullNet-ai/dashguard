@@ -1,125 +1,121 @@
-import { headers } from 'next/headers'
+import { headers } from 'next/headers';
 
-import { api } from '~/trpc/server'
+import { api } from '~/trpc/server';
 
-import { toCapitalize } from '~/lib/capitalize'
-import InnerTabItems from './InnerTabItems'
-import { type IPropsTabList, type InnerTabsProps } from './type'
-import { pluralize } from '~/server/utils/pluralize'
+import { toCapitalize } from '~/lib/capitalize';
+import InnerTabItems from './InnerTabItems';
+import { type IPropsTabList, type InnerTabsProps } from './type';
+import { pluralize } from '~/server/utils/pluralize';
 
 const getSessionTabs = async () => {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const fullSearchQueryParams = headerList.get('x-full-search-query-params') || ''
-  const [, portal, mainEntity, application, identifier, step]
-    = pathname.split('/') || 'New Tab'
-  const currentContext = '/' + portal + '/' + mainEntity
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const fullSearchQueryParams =
+    headerList.get('x-full-search-query-params') || '';
+  const [, portal, mainEntity, application, identifier, step] =
+    pathname.split('/') || 'New Tab';
+  const currentContext = '/' + portal + '/' + mainEntity;
   const stateTabs = (await api.tab
     .getSubTabs({
       current_context: currentContext,
     })
     .then((res) => {
-
-      return res?.tabs ?? []
+      return res?.tabs ?? [];
     })
     .catch(() => {
-      return []
-    })) as any[]
-  const grid = stateTabs.find(item => item.name === 'Grid')
-  const hasIdentifier = stateTabs?.find(item => item.name === identifier)
+      return [];
+    })) as any[];
+  const grid = stateTabs.find((item) => item.name === 'Grid');
+  const hasIdentifier = stateTabs?.find((item) => item.name === identifier);
 
-  let entity
-  switch(mainEntity) {
+  let entity;
+  switch (mainEntity) {
     case 'user_role':
-      entity = 'role'
-      break
+      entity = 'role';
+      break;
     case 'account_organization':
-      entity = 'account'
-      break
+      entity = 'account';
+      break;
     default:
-      entity = mainEntity
+      entity = mainEntity;
   }
 
-
   const newTabs = stateTabs.map((tab) => {
-    let path
-    let href
-    const main = `/${portal}/${mainEntity}/${application}/${identifier}`
-    const [, , , _application, _current] = tab.href.split('/')
+    let path;
+    let href;
+    const main = `/${portal}/${mainEntity}/${application}/${identifier}`;
+    const [, , , _application, _current] = tab.href.split('/');
 
     if (tab?.name === 'Grid') {
-      path = pathname
-      href = tab.href.replace(/\/\d+$/, '')
-    }
-    else if (
-      _application === 'record'
-      && !_current?.includes('current_tab')
+      path = pathname;
+      href = tab.href.replace(/\/\d+$/, '');
+    } else if (
+      _application === 'record' &&
+      !_current?.includes('current_tab')
     ) {
       path = `${main}/${fullSearchQueryParams}`;
       href = `${tab.href}/${fullSearchQueryParams}`;
-    }
-    else {
-      path = `${main}`
-      href = tab.href
+    } else {
+      path = `${main}`;
+      href = tab.href;
     }
 
     return {
       ...tab,
       name: tab.name,
       href,
-      label: tab.name === 'Grid' ? `All ${toCapitalize(pluralize(entity || ''))}` : tab.name,
+      label:
+        tab.name === 'Grid'
+          ? `All ${toCapitalize(pluralize(entity || ''))}`
+          : tab.name,
       current: href.match(path) ? true : false,
-    }
-  })
+    };
+  });
 
   if (application === 'grid' && !grid) {
     newTabs.unshift({
       name: 'Grid',
       href: pathname,
       current: true,
-      label : `All ${toCapitalize(pluralize(entity || ''))}s`,
-
-    })
+      label: `All ${toCapitalize(pluralize(entity || ''))}s`,
+    });
   }
 
   if (application === 'wizard' && !hasIdentifier && identifier) {
-
     newTabs.splice(1, 0, {
       name: identifier,
       href: pathname,
       current: true,
-      label : identifier,
-    })
+      label: identifier,
+    });
   }
 
   if (application === 'wizard' && hasIdentifier && step) {
     //check first if the last character is a number
-    const lastChar = hasIdentifier.href.slice(-1)
+    const lastChar = hasIdentifier.href.slice(-1);
 
-    if (/\d/.exec(step) &&  /\d/.exec(lastChar)) {
-      const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`
-      const currentTab = newTabs.findIndex(item => item.name === identifier)
+    if (/\d/.exec(step) && /\d/.exec(lastChar)) {
+      const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`;
+      const currentTab = newTabs.findIndex((item) => item.name === identifier);
       if (currentTab !== -1) {
-        newTabs[currentTab].href = modifiedHref
+        newTabs[currentTab].href = modifiedHref;
       }
     }
-
   }
-  
 
   if (application === 'record' && !hasIdentifier && identifier) {
     newTabs.splice(1, 0, {
       name: identifier,
       href: `${pathname}?${fullSearchQueryParams}`,
       current: true,
-      label : identifier,
-    })
+      label: identifier,
+    });
   }
 
   await api.tab.insertSubTabs({
     current_context: currentContext,
     tabs: newTabs,
-  })
+  });
 
   // await api.grid.defaultGridTab({
   //   application: application || '',
@@ -133,25 +129,32 @@ const getSessionTabs = async () => {
   return newTabs.filter(Boolean)
 }
 
-const InnerTabs = async ({
-  variant = 'dropdown'
-} : InnerTabsProps ) => {
-  const newTabs = await getSessionTabs()
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
+const InnerTabs = async ({ variant = 'dropdown' }: InnerTabsProps) => {
+  const newTabs = await getSessionTabs();
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
 
   const withIDTabs = newTabs.map((tab) => {
-      return {
-        ...tab,
+    return {
+      ...tab,
       id: tab.name,
-      }
-    }) 
+    };
+  });
 
+  if (!withIDTabs?.length) {
+    return (
+      <div className="relative h-2 overflow-hidden">
+        <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+      </div>
+    );
+  }
 
-  return <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant}/>
-}
+  return (
+    <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant} />
+  );
+};
 
-export default InnerTabs
+export default InnerTabs;
 
 // const pathname = headerList.get('x-pathname') || ''
 
@@ -159,7 +162,7 @@ export default InnerTabs
 //   = pathname.split('/') || 'New Tab'
 
 // const withIDTabs = newTabs.map((tab) => {
-  
+
 //   if(lowerCase(tab.name) === 'grid') {
 //     return {
 //      ...tab,
@@ -171,4 +174,4 @@ export default InnerTabs
 //     ...tab,
 //    id: tab.name,
 //   }
-// }) 
+// })
