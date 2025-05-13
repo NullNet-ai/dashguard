@@ -16,6 +16,9 @@ master_build:
     - 'docker tag $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
     - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
     - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+  only:
+    - 'qa'
+
 
 #------------------------------------ Update Portainer -------------------------------------------#
 update_stack:
