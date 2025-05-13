@@ -12,7 +12,7 @@ export function useSocketConnection({channel_name, token}: {channel_name?: strin
   useEffect(() => {
     if (!token) return;
 
-    const socket: any = io(`${process.env.NEXT_PUBLIC_SOCKET_URL}:5001`, {
+    const socket: any = io(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
       transports: ['websocket'],
       auth: { token: token },
       autoConnect: true,
