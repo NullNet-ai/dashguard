@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export async function disconnectRemoteAccess({ device_id, ra_type, token }: { device_id: string, ra_type: string, token: string }) {
-  await axios.delete('http://wallguard.proxy.nullnetqa.net/v1/api/remote_access', {
+  await axios.delete(`https://${process.env.REMOTE_ACCESS_URL}/v1/api/remote_access`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
