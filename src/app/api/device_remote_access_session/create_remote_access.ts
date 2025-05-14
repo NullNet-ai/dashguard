@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export async function createRemoteAccess({ device_id, ra_type, token }: { device_id: string, ra_type: string, token: string }) {
-  await axios.post(`https://${process.env.REMOTE_ACCESS_URL}/v1/api/remote_access`, { device_id, ra_type }, {
+  await axios.post(`${process.env.REMOTE_ACCESS_URL}/v1/api/remote_access`, { device_id, ra_type }, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
