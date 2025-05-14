@@ -1,14 +1,14 @@
 export const addCommonGridPluckObject = () => {
   const pluck_object = {
-    created_by_account_organizations: ['id'],
+    created_by_account_organizations: ['id', 'contact_id'],
     created_by: ['id', 'first_name', 'last_name'],
-    updated_by_account_organizations: ['id'],
-    update_by: ['id', 'first_name', 'last_name'],
+    updated_by_account_organizations: ['id', 'contact_id'],
+    updated_by: ['id', 'first_name', 'last_name'],
   }
   return pluck_object
 }
 
-export const addCommonGridConcatenates = () => {
+export const addCommonGridConcatenates = ( ENTITY: string) => {
   const concatenate_fields = [
     {
       fields: ['first_name', 'last_name'],
@@ -28,13 +28,13 @@ export const addCommonGridConcatenates = () => {
       fields: ['created_date', 'created_time'],
       field_name: 'created_date_time',
       separator: ' ',
-      entity: 'contacts',
+      entity: ENTITY,
     },
     {
       fields: ['updated_date', 'updated_time'],
       field_name: 'updated_date_time',
       separator: ' ',
-      entity: 'contacts',
+      entity: ENTITY,
     },
   ]
   return concatenate_fields
@@ -67,8 +67,8 @@ export const addCommonGridJoins = (query: any, ENTITY: string) => {
           field: 'id',
         },
         from: {
-          entity: 'account_organizations',
-          field: 'created_by',
+          entity: 'created_by_account_organizations',
+          field: 'contact_id',
         },
       },
     })
@@ -96,8 +96,8 @@ export const addCommonGridJoins = (query: any, ENTITY: string) => {
           field: 'id',
         },
         from: {
-          entity: 'account_organizations',
-          field: 'updated_by',
+          entity: 'updated_by_account_organizations',
+          field: 'contact_id',
         },
       },
     })

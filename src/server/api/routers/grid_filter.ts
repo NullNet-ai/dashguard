@@ -229,7 +229,7 @@ export const gridFilterRouter = createTRPCRouter({
       // }
 
       // update data on redis
-      if (application !== 'grid' || !mainEntity) return [];
+      // if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
@@ -290,7 +290,7 @@ export const gridFilterRouter = createTRPCRouter({
         .execute();
 
       // remove from redis
-      if (application !== 'grid' || !mainEntity) return [];
+      // if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
@@ -476,7 +476,7 @@ export const gridFilterRouter = createTRPCRouter({
       }
 
       // insert to redis
-      if (application !== 'grid' || !mainEntity) return [];
+      // if (application !== 'grid' || !mainEntity) return [];
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',

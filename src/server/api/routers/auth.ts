@@ -534,7 +534,7 @@ export const authRouter = createTRPCRouter({
       const asRoot = true;
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot, {
-          previously_logged_in_token : ctx.token.value,
+          previously_logged_in_account_id: ctx.session.account.id,
         })
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;

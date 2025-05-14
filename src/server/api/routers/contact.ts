@@ -217,7 +217,7 @@ export const contactRouter = createTRPCRouter({
           multiple_sort: input.sorting?.length
             ? formatSorting(input.sorting)
             : [],
-          concatenate_fields: [...addCommonGridConcatenates()],
+          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
       })
       .join({

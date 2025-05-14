@@ -18,6 +18,7 @@ import ZodItems from '~/server/zodSchema/grid/items';
 import { formatPhoneNumber } from '~/utils/formatter';
 import { createDefineRoutes } from '../baseCrud';
 import { EStatus } from '../types';
+import { addCommonGridPluckObject } from '~/server/utils/queryBuilder';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -43,7 +44,7 @@ export const accountRouter = createTRPCRouter({
       } = input ?? {};
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, true, {
-          previously_logged_in_token: ctx.token.value,
+          previously_logged_in_account_id: ctx.session.account.id,
         })
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
@@ -180,7 +181,7 @@ export const accountRouter = createTRPCRouter({
         contact: {
           ...contactData?.data?.[0]?.contacts,
         },
-        account: accountData
+        account: accountData,
       };
     }),
   fetchOrganizationRolesOptions: privateProcedure
@@ -321,6 +322,7 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck_object: {
+              ...addCommonGridPluckObject(),
               account_organizations: [
                 'id',
                 'email',
@@ -337,10 +339,6 @@ export const accountRouter = createTRPCRouter({
                 'contact_id',
               ],
               contacts: ['id', 'first_name', 'last_name'],
-              created_by_account_organizations: ['id'],
-              created_by: ['id', 'first_name', 'last_name'],
-              updated_by_account_organizations: ['id'],
-              update_by: ['id', 'first_name', 'last_name'],
             },
             track_total_records: true,
             advance_filters: input.advance_filters as IAdvanceFilters[],
@@ -411,7 +409,7 @@ export const accountRouter = createTRPCRouter({
             },
             from: {
               entity: 'account_organizations',
-              field: 'created_by',
+              field: 'contact_id',
             },
           },
         })
@@ -440,7 +438,7 @@ export const accountRouter = createTRPCRouter({
             },
             from: {
               entity: 'account_organizations',
-              field: 'updated_by',
+              field: 'contact_id',
             },
           },
         });
