@@ -240,17 +240,17 @@ export default function NetworkFlowView() {
                       )} */}
                     </div>
                     <TooltipContent side="top">
-                      <div className="text-lg">
+                      <div className="text-sm flex justify-between">
                         <span className='font-bold text-justify'>{'Country: '}</span>
                         {' '}
                         {name}
                       </div>
-                      <div className="text-lg">
+                      <div className="text-sm flex justify-between">
                         <span className='font-bold text-justify'>{'Source IP: '}</span>
                         {el?.source_ip}
                       </div>
                       {el.active && lastBandwidth && (
-                        <div className="text-lg">
+                        <div className="text-sm flex justify-between">
                           <span className='font-bold text-justify'>{'New Bandwidth: '}</span>
                           {' '}
                           {lastBandwidth}
@@ -274,13 +274,13 @@ export default function NetworkFlowView() {
                           key={`timeframe-${index}`}
                         />
                         <TooltipContent side="top">
-                          <div className="text-lg">
-                            <span className='font-bold text-justify'>{'Time: '}</span>
+                          <div className="text-sm flex justify-between">
+                            <span className='font-bold'>{'Time: '}</span>
                             {' '}
                             {item?.time}
                           </div>
-                          <div className="text-lg">
-                            <span className='font-bold text-justify'>{'Total Bandwidth: '}</span>
+                          <div className="text-sm flex justify-between">
+                            <span className='font-bold'>{'Total Bandwidth: '}</span>
                             {' '}
                             {item.bandwidth}
                           </div>
