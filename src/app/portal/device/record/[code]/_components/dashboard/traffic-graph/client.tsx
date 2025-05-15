@@ -174,18 +174,18 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     // };
   },[socket, filteredData, orgID, defaultValues?.id])
 
-  // useEffect(() => {
-  //   refetch()
-  //   setLoading(false)
+  useEffect(() => {
+    refetch()
+    setLoading(false)
 
-  //   const interval = setInterval(() => {
-  //     refetch()
-  //   }, 1000)
-  //   return () => {
-  //     clearInterval(interval)
-  //   }
-  // }
-  // , [resolution, time_unit, time_count, graphType])
+    // const interval = setInterval(() => {
+    //   refetch()
+    // }, 1000)
+    // return () => {
+    //   clearInterval(interval)
+    // }
+  }
+  , [resolution, time_unit, time_count, graphType])
 
 
   return (
