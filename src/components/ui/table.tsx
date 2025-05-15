@@ -32,7 +32,7 @@ const Table = React.forwardRef<
       <table
         ref={ref}
         className={cn(
-          responsive ? 'w-full min-w-full' : 'min-w-full',
+          responsive ? 'w-full' : 'min-w-full',
           (withStripedRows || zebra) &&
             '[&_tbody_tr:nth-child(even)]:bg-slate-50',
           withVerticalLines &&
