@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.8.0",
-  "branch": "released/3844,3845,3846,3848,3954,3958,3983,3984,3985,4075,4099,4101,403/2.8.0",
-  "message": "components ui publish release ",
+  "tag": "2.8.1-rc.1<unreleased>",
+  "branch": "unreleased/fix4210-4211/2.8.1-rc.1<unreleased>",
+  "message": "Grid clipped dropdowns",
   "publish_name": "Save Ducto"
 }

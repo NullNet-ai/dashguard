@@ -77,6 +77,9 @@ const TabsTrigger = React.forwardRef<
           'py-4 px-1.5 text-sm': size === 'md' && rotateText,
           'py-6 px-2 text-base': size === 'lg' && rotateText,
 
+          // Sidebar menu tabs
+          'w-full': ['menu', 'favorites', 'history'].includes(props.value),
+
           // Style variants for horizontal orientation or non-rotated text
           'border-b-[3px] border-transparent hover:border-gray-300 hover:text-gray-700 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600':
             ['default', 'shadow'].includes(variant) && (!rotateText || (rotateText && !position)),
