@@ -146,19 +146,9 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       return {...item, bucket: date.format('MM/DD')}
     })
     setFilteredData(_data)
-  },[packetsIP])
-
-  useEffect(() => {
-        if (!socket || !defaultValues?.id || !orgID) return
-        socket.on( `traffic_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
-         const updated_filtered_data =  updateFilteredData(filteredData, data)
-         setFilteredData(updated_filtered_data)
-         
-        })
-      },[socket, filteredData, orgID, defaultValues?.id])
-
-    useEffect(() => {
-      const _getAccount = async () => {
+  },[packetsIP])   
+   useEffect(() => {
+      const _getAccount = async () => { 
         const res = await getAccount.mutateAsync()
         const { organization_id, token } = res || {}
         setOrgID(organization_id)
@@ -168,17 +158,32 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       _getAccount()
       
     }, [])
-  
+
+
+  useEffect(() => {
+    if (!socket || !defaultValues?.id || !orgID) return
+   
+    socket.on( `traffic_graph_connection-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+      const updated_filtered_data =  updateFilteredData(filteredData, data)
+      setFilteredData(updated_filtered_data)
+      
+    })
+
+    // return () => {
+    //   socket.off(`traffic_graph_connection-${defaultValues?.id}-${orgID}`); // Clean up the listener
+    // };
+  },[socket, filteredData, orgID, defaultValues?.id])
+
   useEffect(() => {
     refetch()
     setLoading(false)
 
-    const interval = setInterval(() => {
-      refetch()
-    }, 1000)
-    return () => {
-      clearInterval(interval)
-    }
+    // const interval = setInterval(() => {
+    //   refetch()
+    // }, 1000)
+    // return () => {
+    //   clearInterval(interval)
+    // }
   }
   , [resolution, time_unit, time_count, graphType])
 
