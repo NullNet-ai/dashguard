@@ -36,7 +36,7 @@ const GridDesktopContainer = ({ parentType }: any) => {
 
   return (
     <Table
-      style={{ width: state?.table?.getCenterTotalSize() }}
+      style={{ width: state?.table?.getCenterTotalSize(), minWidth: '100%' }}
       data-test-id={`${testIDFormatter(`${entity}-grd-tbl`)}`}
     >
       <TableHeader data-test-id={`${testIDFormatter(`${entity}-grd-tbl-hdr`)}`}>
