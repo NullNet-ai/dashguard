@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.8.1-rc.1<unreleased>",
-  "branch": "unreleased/fix4210-4211/2.8.1-rc.1<unreleased>",
-  "message": "Grid clipped dropdowns",
+  "tag": "2.8.1-rc.2<unreleased>",
+  "branch": "unreleased/fix4208/2.8.1-rc.2<unreleased>",
+  "message": "width must be equally divided on the whole navigation bar.",
   "publish_name": "Save Ducto"
 }
