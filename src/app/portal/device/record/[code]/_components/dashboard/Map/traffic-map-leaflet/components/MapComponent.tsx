@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.heat'
 import 'leaflet-arc'
+import * as turf from '@turf/turf';
 
 // Function to fetch country and US state borders
 const fetchCountryBorders = async () => {
@@ -190,44 +191,44 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
     return coordinates;
   }, [isPointOnLand]);
 
-  // Find country by coordinates
-  const findCountryByCoordinates = useCallback((lat: any, lng: any) => {
-    if (!countriesGeoJSON.current) return null;
-    
-    const point = L.latLng(lat, lng);
-    
-    for (const feature of countriesGeoJSON.current.features) {
-      const countryName = feature.properties.name;
-      
-      if (feature.geometry.type === 'Polygon') {
-        const polygon = L.polygon(feature.geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]]));
-        if (polygon.getBounds().contains(point)) {
-          return { name: countryName, feature };
-        }
-      } else if (feature.geometry.type === 'MultiPolygon') {
-        for (const polygonCoords of feature.geometry.coordinates) {
-          const polygon = L.polygon(polygonCoords[0].map((coord: any) => [coord[1], coord[0]]));
-          if (polygon.getBounds().contains(point)) {
-            return { name: countryName, feature };
-          }
-        }
-      }
-    }
-    
-    return null;
-  }, []);
+// Find country by coordinates
+const findCountryByCoordinates = useCallback((lat: number, lng: number) => {
+  if (!countriesGeoJSON.current) return null;
 
-  // Highlight a country on the map
-  const highlightCountry = useCallback((mapInstance: any, countryName: any, coordinates: any) => {
+  const point = turf.point([lng, lat]); // Create a GeoJSON point
+
+  for (const feature of countriesGeoJSON.current.features) {
+    const polygon = turf.feature(feature.geometry); // Convert the feature geometry to a turf feature
+
+    if (turf.booleanPointInPolygon(point, polygon)) {
+      return {
+        name: feature.properties.name,
+        feature,
+      };
+    }
+  }
+
+  return null;
+}, []);
+
+const highlightCountry = useCallback(
+  (mapInstance: any, countryName: string, coordinates: LatLngExpression | any) => {
     // Skip if it's Ocean or No IP Info
     if (countryName === 'Ocean' || countryName === 'No IP Info') return;
-    
-    // If we already highlighted this country, return
+
+    // Remove highlights for countries not in the current connection
+    Object.keys(countryHighlights.current).forEach((highlightedCountry) => {
+      if (highlightedCountry !== countryName) {
+        mapInstance.removeLayer(countryHighlights.current[highlightedCountry].highlight);
+        delete countryHighlights.current[highlightedCountry];
+      }
+    });
+
+    // If the country is already highlighted, return
     if (countryHighlights.current[countryName]) return;
-    
-    // First try to find the country feature by name
+
     let countryFeature = null;
-    
+
     if (countriesGeoJSON.current) {
       // Find country by exact name match
       for (const feature of countriesGeoJSON.current.features) {
@@ -236,7 +237,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           break;
         }
       }
-      
+
       // If not found by exact match, try case-insensitive match
       if (!countryFeature) {
         for (const feature of countriesGeoJSON.current.features) {
@@ -247,7 +248,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           }
         }
       }
-      
+
       // If we still couldn't find by name, try to find by coordinates
       if (!countryFeature && coordinates) {
         const country = findCountryByCoordinates(coordinates[0], coordinates[1]);
@@ -256,46 +257,46 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           countryName = country.name; // Update country name in case it was different
         }
       }
-      
+
       // If we found the country, highlight it
       if (countryFeature) {
-        
         // Generate a unique color for this country for visual distinction
-      const hue = Math.floor(Math.random() * 360);
-      const highlightColor = `hsla(${hue}, 70%, 50%, 0.3)`;
-      const borderColor = `hsla(${hue}, 70%, 40%, 0.7)`;
+        const hue = Math.floor(Math.random() * 360);
+        const highlightColor = `hsla(${hue}, 70%, 50%, 0.3)`;
+        const borderColor = `hsla(${hue}, 70%, 40%, 0.7)`;
 
-      const highlight = L.geoJSON(countryFeature, {
-        style: {
-          fillColor: highlightColor,
-          weight: 2,
-          opacity: 1,
-          color: borderColor,
-          fillOpacity: 0.3,
-        },
-      }).addTo(mapInstance);
+        const highlight = L.geoJSON(countryFeature, {
+          style: {
+            fillColor: highlightColor,
+            weight: 2,
+            opacity: 1,
+            color: borderColor,
+            fillOpacity: 0.3,
+          },
+        }).addTo(mapInstance);
 
-      // Add a country label
-      const bounds = highlight.getBounds();
-      const center = bounds.getCenter();
+        // Add a simple text label for the country
+        const bounds = highlight.getBounds();
+        const center = bounds.getCenter();
 
-      // Create a simple label using a div element
-      const labelDiv = L.divIcon({
-        className: 'country-label', // Custom class for styling
-        html: `<div class="country-name">${countryName}</div>`, // Set the country name as content
-        iconSize: [0, 0], // No icon size, just the label
-        iconAnchor: [0, 0], // Anchor point for the label
-      });
+        const labelDiv = L.divIcon({
+          className: 'country-label', // Custom class for styling
+          html: `<div class="country-name">${countryName}</div>`, // Set the country name as content
+          iconSize: [0, 0], // No icon size, just the label
+          iconAnchor: [0, 0], // Anchor point for the label
+        });
 
-      L.marker(center, { icon: labelDiv }).addTo(mapInstance);
+        L.marker(center, { icon: labelDiv }).addTo(mapInstance);
 
-      // Store the highlight for future reference
-      countryHighlights.current[countryName] = { highlight };
+        // Store the highlight for future reference
+        countryHighlights.current[countryName] = { highlight };
       } else {
         console.warn(`Could not find GeoJSON data for country: ${countryName}`);
       }
     }
-  }, [findCountryByCoordinates]);
+  },
+  [findCountryByCoordinates]
+);
 
   // Process IP data to create connection data
   const processIpData = useCallback(async () => {
@@ -731,14 +732,23 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           }
 
           .custom-tooltip {
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 8px;
-            font-family: geist, sans-serif;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            max-width: 200px;
+            background-color: rgba(255, 255, 255, 0.9); /* White background for better readability */
+            border: 1px solid #ccc; /* Light gray border */
+            border-radius: 4px; /* Rounded corners */
+            padding: 8px; /* Padding for spacing */
+            font-family: geist, sans-serif; /* Consistent font */
+            font-size: 12px; /* Font size */
+            color: #333; /* Dark text color */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for better visibility */
+            max-width: 200px; /* Limit tooltip width */
+          }
+
+          .custom-tooltip strong {
+            color: #000; /* Ensure strong text is black */
+          }
+
+          .custom-tooltip span {
+            color: #333; /* Ensure all text is dark gray */
           }
           
           .loading-overlay {
@@ -772,24 +782,22 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
             font-size: 12px;
             font-weight: bold;
             color: #333;
-            background: none;
-            border: none;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            background: none; /* Remove background */
+            border: none; /* Remove border */
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* Optional: Add text shadow for better visibility */
             pointer-events: none; /* Prevent interaction with the label */
           }
-          
+
           .country-name {
-            padding: 3px 8px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 4px;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            font-weight: bold;
             font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            background: none; /* Remove background */
+            border: none; /* Remove border */
             text-align: center;
-            white-space: nowrap;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-            pointer-events: none;
-            text-shadow: 0 0 2px white;
+            white-space: nowrap; /* Prevent text wrapping */
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* Optional: Add text shadow for better visibility */
+            pointer-events: none; /* Prevent interaction with the label */
           }
           
           .ocean-label {
