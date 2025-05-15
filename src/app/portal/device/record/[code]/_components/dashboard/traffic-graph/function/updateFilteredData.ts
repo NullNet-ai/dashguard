@@ -3,14 +3,14 @@ export function updateFilteredData(
   newData: Record<string, any>,
 ): Record<string, any>[] {
   const newTimestamp = new Date(newData.timestamp);
-  const bucketHour = newTimestamp.toISOString().slice(0, 13); // "YYYY-MM-DDTHH"
+  const bucketSecond = newTimestamp.toISOString().slice(0, 19); // "YYYY-MM-DDTHH:mm:ss"
   const byteData = typeof newData.total_byte === 'string' 
     ? parseInt(newData.total_byte, 10) 
     : newData.total_byte;
 
   // Clone the original array to avoid mutation
   const updatedBuckets = [...buckets];
-  const existingIndex = updatedBuckets.findIndex(b => b.bucket === bucketHour);
+  const existingIndex = updatedBuckets.findIndex(b => b.bucket === bucketSecond);
 
   if (existingIndex !== -1) {
     // Bucket exists — update the bandwidth
@@ -23,7 +23,7 @@ export function updateFilteredData(
     const template = buckets[0] ? { ...buckets[0] } : {};
     const newBucket = {
       ...template,
-      bucket: bucketHour,
+      bucket: bucketSecond,
       bandwidth: byteData.toString(),
     };
 

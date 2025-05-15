@@ -24,6 +24,20 @@ interface OutputData {
   bandwidth: number
 }
 
+function interchangeResolution(resolution: string): string {
+  if (!resolution) return resolution;
+
+  // Match the pattern (e.g., 'm3', 'h1') and rearrange it
+  const match = resolution.match(/^([a-zA-Z]+)(\d+)$/);
+  if (match) {
+    const [, unit, value] = match; // Extract unit (e.g., 'm') and value (e.g., '3')
+    return `${value}${unit}`; // Rearrange to '3m'
+  }
+
+  return resolution; // Return as-is if it doesn't match the pattern
+}
+
+
 export function cleanFilter(filters: any) {
   const extracted: { 'Time Range': string | null; 'Resolution': string | null; 'Graph Type': string | null } = {
     'Time Range': null,
@@ -47,7 +61,7 @@ export function cleanFilter(filters: any) {
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Resolution') {
-      extracted.Resolution = `${filter.Resolution}${filter.units}`
+      extracted.Resolution = interchangeResolution(filter.Resolution)
       skipNext = filters[i + 1]?.operator === 'and' // Mark next operator for removal
     }
     else if (filter.field === 'Graph Type') {
@@ -894,6 +908,7 @@ export const packetRouter = createTRPCRouter({
       // 209.58.181.171
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
       if (countryFilters?.length) {
+        console.log("%c Line:897 🍢 countryFilters", "color:#f5ce50", countryFilters);
         const _res = await Bluebird.map(source_ips, async (source_ip: string) => {
           const res = await ctx.dnaClient
             .findAll({

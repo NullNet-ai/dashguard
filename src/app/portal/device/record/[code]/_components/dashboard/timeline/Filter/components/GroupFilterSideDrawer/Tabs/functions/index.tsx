@@ -183,25 +183,21 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                       },
                       {
                         id: `${prefix}.${field.field}`,
-                        formType: 'select',
+                        formType: field?.field === 'Resolution' ? 'combobox' : 'select',
                         name: `${prefix}.${field.field}`,
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         isAlphabetical: false,
-                        ...(field?.field === 'Resolution' ? { selectEnableCreate: true,
-                          selectOnCreateRecord: async (text: string): Promise<{label: string, value: string}> => {
-                            setResolutionOptions([{label: text, value: text}])
-                            return { label: text, value: text }
-                          }} : {})
+                        ...(field?.field === 'Resolution' ? {
+                          comboboxConfig: {
+                            selectOptions: [
+                              { label: 'Seconds', value: 's' },
+                              { label: 'Minutes', value: 'm' },
+                              { label: 'Hours', value: 'h' },
+                            ]
+                          }
+                        } : {})
                       },
-                      // @ts-expect-error - type error
-                      ...( field?.field === 'Resolution' ? [{
-                        id: `${prefix}.units`,
-                        formType: 'select',
-                        name: `${prefix}.units`,
-                        placeholder: 'Select units',
-                        selectSearchable: true,
-                      }] : [])
                     ]}
                     form={form}
                     formKey={`filterGroups.${groupIndex}.filters`}
