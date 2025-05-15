@@ -184,6 +184,7 @@ export interface IConfigGrid {
     summaryWidth?: number;
   };
   CustomRenderCardView?: (args: any) => JSX.Element;
+  enableCheckboxOnChange?: boolean;
 }
 
 interface IRowToArchive extends Row<any> {
@@ -266,6 +267,7 @@ export interface IPagination {
   limit_per_page: number;
 }
 
+export type IParentType = 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer'
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
@@ -278,7 +280,7 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[];
   advanceFilter?: ISearchItem[];
   parentExpanded?: IExpandedRow[];
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'record';
+  parentType?: IParentType
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
