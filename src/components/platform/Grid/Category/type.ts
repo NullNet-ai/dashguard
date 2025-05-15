@@ -37,6 +37,7 @@ export interface IGroupBy {
   value: string;
   field: string
   desc: boolean;
+  is_case_sensitive_sorting?: boolean;
 }
 
 export interface IStoreUnSaveSorts {

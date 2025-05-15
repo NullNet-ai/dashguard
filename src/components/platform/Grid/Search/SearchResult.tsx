@@ -37,7 +37,9 @@ export default function SearchResult({
           >
             <div className="mb-2 ml-3">
               <span className="text-sm font-semibold text-muted-foreground">
-                {result.values?.join(', ')}
+                {result?.display_value
+                  ? result?.display_value
+                  : result.values?.join(', ')}
               </span>
             </div>
             <Badge

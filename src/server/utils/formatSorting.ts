@@ -6,6 +6,7 @@ export const formatSorting = (sorting: SortingState) => {
     return {
       by_field: sort.field || sort.sort_key || sort.id,
       by_direction: sort.order || sort.desc ? EOrderDirection.DESC : EOrderDirection.ASC,
+      is_case_sensitive_sorting: sort.is_case_sensitive_sorting || false,
     };
   });
 };

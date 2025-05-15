@@ -18,6 +18,7 @@ import ZodItems from '~/server/zodSchema/grid/items';
 import { formatPhoneNumber } from '~/utils/formatter';
 import { createDefineRoutes } from '../baseCrud';
 import { EStatus } from '../types';
+import { addCommonGridPluckObject } from '~/server/utils/queryBuilder';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -43,7 +44,7 @@ export const accountRouter = createTRPCRouter({
       } = input ?? {};
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, true, {
-          previously_logged_in_token: ctx.token.value,
+          previously_logged_in_account_id: ctx.session.account.id,
         })
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
@@ -180,7 +181,7 @@ export const accountRouter = createTRPCRouter({
         contact: {
           ...contactData?.data?.[0]?.contacts,
         },
-        account: accountData
+        account: accountData,
       };
     }),
   fetchOrganizationRolesOptions: privateProcedure
@@ -321,6 +322,7 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck_object: {
+              ...addCommonGridPluckObject(),
               account_organizations: [
                 'id',
                 'email',
@@ -337,10 +339,6 @@ export const accountRouter = createTRPCRouter({
                 'contact_id',
               ],
               contacts: ['id', 'first_name', 'last_name'],
-              created_by_account_organizations: ['id'],
-              created_by: ['id', 'first_name', 'last_name'],
-              updated_by_account_organizations: ['id'],
-              update_by: ['id', 'first_name', 'last_name'],
             },
             track_total_records: true,
             advance_filters: input.advance_filters as IAdvanceFilters[],
@@ -411,7 +409,7 @@ export const accountRouter = createTRPCRouter({
             },
             from: {
               entity: 'account_organizations',
-              field: 'created_by',
+              field: 'contact_id',
             },
           },
         })
@@ -440,38 +438,10 @@ export const accountRouter = createTRPCRouter({
             },
             from: {
               entity: 'account_organizations',
-              field: 'updated_by',
+              field: 'contact_id',
             },
           },
         });
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'created_by',
-      //       entity: 'contact',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'created_by',
-      //     },
-      //   },
-      // })
-      // .join({
-      //   type: 'left',
-      //   field_relation: {
-      //     to: {
-      //       alias: 'updated_by',
-      //       entity: 'contact',
-      //       field: 'id',
-      //     },
-      //     from: {
-      //       entity: 'account_organizations',
-      //       field: 'updated_by',
-      //     },
-      //   },
-      // });
 
       if (input.grouping?.length) {
         query.groupBy({
@@ -508,12 +478,8 @@ export const accountRouter = createTRPCRouter({
           ...rest,
           first_name: contacts?.first_name || external_contacts?.first_name,
           last_name: contacts?.last_name || external_contacts?.last_name,
-          created_by: created_by
-            ? `${created_by.first_name} ${created_by.last_name}`
-            : null,
-          updated_by: updated_by
-            ? `${updated_by.first_name} ${updated_by.last_name}`
-            : null,
+          created_by: created_by.full_name || '',
+          updated_by: updated_by.full_name || '',
         };
       });
 

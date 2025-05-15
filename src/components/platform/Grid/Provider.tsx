@@ -152,6 +152,7 @@ export default function GridProvider({
         accessorKey: item.accessorKey,
         search_config: item.search_config,
         data_type: item.data_type,
+        sort_config: item.sort_config,
       };
     }),
   );
@@ -330,7 +331,9 @@ export default function GridProvider({
               processedSortKeys.set(key, true);
               return {
                 ...sort,
+                ...sortFields?.sort_config ?? {},
                 sort_key: sortKey,
+
               };
             })
           : (() => {
@@ -342,6 +345,7 @@ export default function GridProvider({
               return [
                 {
                   ...sort,
+                  ...sortFields?.sort_config ?? {},
                   sort_key: sortFields?.sortKey || sort.id,
                 },
               ];
@@ -394,12 +398,12 @@ export default function GridProvider({
       const entity = columnConfig?.search_config?.entity || config.entity;
       const field = columnConfig?.search_config?.field || item;
       const sortBy = initialSorting?.find((sort) => sort.id === item)?.desc;
-
       return {
         value: item,
         field: `${entity}.${field}`,
         label,
         desc: typeof sortBy === 'boolean' ? sortBy : false,
+        ...columnConfig?.sort_config ?? {},
       };
     });
     if (config?.onFetchRecords) {

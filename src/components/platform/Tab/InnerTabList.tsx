@@ -117,17 +117,17 @@ const getSessionTabs = async () => {
     tabs: newTabs,
   });
 
-  await api.grid.defaultGridTab({
-    application: application || '',
-    entity: mainEntity || '',
-  });
+  // await api.grid.defaultGridTab({
+  //   application: application || '',
+  //   entity: mainEntity || '',
+  // })
 
-  await api.grid.getCustomGridTabs({
-    application: application || '',
-    entity: mainEntity || '',
-  });
-  return newTabs.filter(Boolean);
-};
+  // await api.grid.getCustomGridTabs({
+  //   application: application || '',
+  //   entity: mainEntity || '',
+  // })
+  return newTabs.filter(Boolean)
+}
 
 const InnerTabs = async ({ variant = 'dropdown' }: InnerTabsProps) => {
   const newTabs = await getSessionTabs();

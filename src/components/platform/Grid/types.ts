@@ -50,8 +50,19 @@ export type AppRouterKeys = keyof typeof appRouter;
 
 export type TArchiveType = 'warning' | 'archive';
 
-type CustomColumnDef<TData> = ColumnDef<TData> & {
+export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sortKey?: string | Array<string>;
+  sort_config?: {
+    is_case_sensitive_sorting?: boolean;
+  };
+  data_type?: string
+  search_config?: {
+    field?: string;
+    operator?: string;
+    parse_as?: 'text',
+    entity?: string;
+  };
+  isSearchable?: boolean;
 };
 interface IActionConditionItem {
   accessor: string;
@@ -210,7 +221,7 @@ export interface IState {
     hasMore?: boolean;
     infiniteData?: any[];
     infiniteCount?: number;
-    bufferData?: any[];                                                                                                                                                                                                                                                                                                                                                                                                                  
+    bufferData?: any[];
   };
   initial_columns: CustomColumnDef<any>[];
   grouping?: GroupingState;
@@ -271,6 +282,7 @@ export interface IPropsGrid {
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  grid_tabs?: any[];
 }
 
 export interface IExpandedRow {

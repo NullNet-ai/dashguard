@@ -8,6 +8,7 @@ import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function UserRoleGridPage({
   searchParams = {},
@@ -35,35 +36,30 @@ export default async function UserRoleGridPage({
     'updated_by',
   ];
 
-  const {
-    sorts,
-    filters,
-    pagination,
-    columns: columnOrder,
-    groups,
-  } = (await getGridCacheData()) ?? {};
+  const gridCacheData = (await getGridCacheData()) ?? {};
 
-  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
-    resolveGridParams({
-      sorts,
-      filters,
-      groups,
-      pagination,
-      pluck: _pluck,
+    const { gridParams, gridProps } = gridDataResolver({
       entity: main_entity!,
+      pluck: _pluck,
+      gridCacheData,
+      defaults: {
+        defaultSorting,
+      },
     });
-
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });
 
   return (
     <Grid
+      {...gridProps}
+      data={items}
+      totalCount={totalCount || 0}
       config={{
         entity: main_entity!,
         title: 'User Roles',
         columns: gridColumns,
-        columnsOrder: columnOrder,
+        columnsOrder: gridCacheData?.columns,
         enableAutoCreate: false,
         searchConfig: {
           router: 'grid',
@@ -74,16 +70,6 @@ export default async function UserRoleGridPage({
           },
         },
       }}
-      data={items}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={
-        sorts.defaultSorting?.length ? sorts.defaultSorting : defaultSorting
-      }
-      sorting={sorts.sorting?.length ? sorts.sorting : defaultSorting}
-      advanceFilter={filters?.advanceFilter || []}
-      pagination={pagination}
-      totalCount={totalCount || 0}
-      grouping={groups || []}
     />
   );
 }

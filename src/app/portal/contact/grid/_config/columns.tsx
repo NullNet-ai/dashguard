@@ -34,6 +34,9 @@ const gridColumns = [
       operator: 'like',
       parse_as: 'text'
     },
+    sort_config: {
+      is_case_sensitive_sorting: true
+    },
   },
   {
     header: 'First Name',
@@ -85,7 +88,7 @@ const gridColumns = [
     accessorKey: "updated_date_time",
     data_type: "datetime",
     sortKey: ["updated_date", "updated_time"],
-    search: {
+    search_config: {
       field: "updated_date_time",
       operator: 'like'
     }
