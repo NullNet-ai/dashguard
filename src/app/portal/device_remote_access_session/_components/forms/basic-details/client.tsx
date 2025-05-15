@@ -43,7 +43,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
         const remote_access = ['console', 'shell']
 
         if (remote_access?.includes(remote_access_type)) {
-          const wsUrl = `ws://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}:4444/ws/`
+          const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/wss/`
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
@@ -65,7 +65,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');
 
-          window.open(`http://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}:4444/`, '_blank')
+          window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/`, '_blank')
         }
       }
       else {

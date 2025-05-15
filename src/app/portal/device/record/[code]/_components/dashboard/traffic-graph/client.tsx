@@ -51,12 +51,12 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const [orgID, setOrgID] = React.useState<string | null>(null)
   const [filteredData, setFilteredData] = React.useState<any[]>([])
   const {socket} = useSocketConnection({channel_name, token})
- const [{
+  const [{
     time_count,
     time_unit,
     resolution
   }, setTime] = useState<any>(timeDuration)
-   const [searchBy, setSearchBy] = useState()
+  const [searchBy, setSearchBy] = useState()
   const cardTitle = React.useMemo(() => {
     return graphType === 'bar' ? 'Bar Chart' : graphType === 'line' ? 'Line Chart' : 'Area Chart'
   }, [graphType])
@@ -120,8 +120,11 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   
   const timeRangeFormat = React.useMemo(() => {
     setResolution(null)
+    if(filterId === '01JP0WDHVNQAVZN14AA') {
+      return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()})
+    }
     return getLastTimeStamp({count: time_count, unit: time_unit})
-  }, [ time_count, time_unit])
+  }, [ time_count, time_unit, filterId])
   
 
 
@@ -135,6 +138,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   
 
     useEffect(() => {
+      if(!packetsIP?.length) return
       const _data = packetsIP?.map((item) => {
         const date = moment(item.bucket)
         if((time_count === 12 && time_unit === 'hour' || time_count === 1 && time_unit === 'day')) {
@@ -147,6 +151,8 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     })
     setFilteredData(_data)
   },[packetsIP])   
+
+
    useEffect(() => {
       const _getAccount = async () => { 
         const res = await getAccount.mutateAsync()
@@ -156,12 +162,17 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       }
       
       _getAccount()
+
+      // Eviction: Keep only the last 100 records
+      return () => {
+        setFilteredData([])
+      }
       
     }, [])
 
 
   useEffect(() => {
-    if (!socket || !defaultValues?.id || !orgID) return
+    if (!socket || !defaultValues?.id || !orgID || filterId !== '01JP0WDHVNQAVZN14AA') return
    
     socket.on( `traffic_graph_connection-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
       const updated_filtered_data =  updateFilteredData(filteredData, data)
@@ -169,10 +180,10 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       
     })
 
-    // return () => {
-    //   socket.off(`traffic_graph_connection-${defaultValues?.id}-${orgID}`); // Clean up the listener
-    // };
-  },[socket, filteredData, orgID, defaultValues?.id])
+    return () => {
+      socket.off(`traffic_graph_connection-${defaultValues?.id}-${orgID}`); // Clean up the listener
+    };
+  },[socket, filteredData, orgID, defaultValues?.id, filterId])
 
   useEffect(() => {
     refetch()
@@ -185,7 +196,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     //   clearInterval(interval)
     // }
   }
-  , [resolution, time_unit, time_count, graphType])
+  , [resolution, time_unit, time_count, graphType, filterId])
 
 
   return (

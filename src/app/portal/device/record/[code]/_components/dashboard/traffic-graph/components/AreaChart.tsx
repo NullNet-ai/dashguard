@@ -135,7 +135,8 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         fill="url(#fillBandwidth)"
         stackId="a"
         stroke="var(--color-bandwidth)"
-        type="natural"
+        type="monotone"
+        isAnimationActive={false}
       />
       {/* <Area
         dataKey="static_bandwidth"
