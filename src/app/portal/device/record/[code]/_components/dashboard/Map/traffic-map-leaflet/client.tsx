@@ -234,8 +234,7 @@ export default function TrafficMaps({ params }: IFormProps) {
   const [searchBy, setSearchBy] = useState()
   const [mapData, setMapData] = useState({
     countryTrafficData: {
-      sourceData: {},
-      destinationData: {},
+      ipData: []
     },
     additionCityConnections: [],
     regionToRegionConnections: [],
@@ -288,102 +287,128 @@ export default function TrafficMaps({ params }: IFormProps) {
   )
 
   // Process data and update map
-  const processMapData = useCallback(async (ipData: Record<string, any>) => {
-    // Use ref to get current mapData value for merging
-    const currentMapData = mapDataRef.current
+  // Process data and update map
+const processMapData = useCallback(async (ipData: Record<string, any>) => {
+  // Use ref to get current mapData value for merging
+  const currentMapData = mapDataRef.current
 
-    try {
-      // Get country details for all entries that have them
-      const ipDataWithFlags = await Promise.all(ipData.map(async (entry: Record<string, any>) => {
-        const updatedEntry = { ...entry }
+  try {
+    // Get country details for all entries that have them
+    const ipDataWithFlags = await Promise.all(ipData.map(async (entry: Record<string, any>) => {
+      const updatedEntry = { ...entry }
 
-        try {
-          // Get source country flag if available
-          if (entry.source_country?.country) {
-            const sourceFlagDetails = await getFlagDetails(entry.source_country.country)
-            if (sourceFlagDetails?.name) {
-              updatedEntry.source_country = {
-                ...updatedEntry.source_country,
-                country: sourceFlagDetails.name,
-              }
-            }
-          }
-
-          // Get destination country flag if available
-          if (entry.destination_country?.country) {
-            const destFlagDetails = await getFlagDetails(entry.destination_country.country)
-            if (destFlagDetails?.name) {
-              updatedEntry.destination_country = {
-                ...updatedEntry.destination_country,
-                country: destFlagDetails.name,
-              }
+      try {
+        // Get source country flag if available
+        if (entry.source_country?.country) {
+          const sourceFlagDetails = await getFlagDetails(entry.source_country.country)
+          if (sourceFlagDetails?.name) {
+            updatedEntry.source_country = {
+              ...updatedEntry.source_country,
+              country: sourceFlagDetails.name,
             }
           }
         }
-        catch (error) {
-          console.error(`Error fetching flag details:`, error)
-        }
 
-        return updatedEntry
-      }))
-
-      // Format the data with our improved utilities
-      const formattedData = formatIpCountryConnections(ipDataWithFlags)
-      const newMapData = prepareMapComponentData(formattedData)
-
-      // Helper to merge arrays of connection objects
-      const mergeConnections = (existing: Record<string, any>, newConnections: Record<string, any>) => {
-        if (!Array.isArray(existing) || !Array.isArray(newConnections)) {
-          return existing || newConnections || []
-        }
-
-        const merged = [...existing]
-        const existingKeys = new Set(merged.map(item => JSON.stringify(item)))
-
-        newConnections.filter(Boolean).forEach((item) => {
-          const itemKey = JSON.stringify(item)
-          if (!existingKeys.has(itemKey)) {
-            merged.push(item)
-            existingKeys.add(itemKey)
+        // Get destination country flag if available
+        if (entry.destination_country?.country) {
+          const destFlagDetails = await getFlagDetails(entry.destination_country.country)
+          if (destFlagDetails?.name) {
+            updatedEntry.destination_country = {
+              ...updatedEntry.destination_country,
+              country: destFlagDetails.name,
+            }
           }
+        }
+      }
+      catch (error) {
+        console.error(`Error fetching flag details:`, error)
+      }
+
+      return updatedEntry
+    }))
+
+    // Format the data with our improved utilities
+    const formattedData = formatIpCountryConnections(ipDataWithFlags)
+    const newMapData = prepareMapComponentData(formattedData)
+
+    // Helper to merge arrays of connection objects
+    const mergeConnections = (existing: Record<string, any>, newConnections: Record<string, any>) => {
+      if (!Array.isArray(existing) || !Array.isArray(newConnections)) {
+        return existing || newConnections || []
+      }
+
+      const merged = [...existing]
+      const existingKeys = new Set(merged.map(item => JSON.stringify(item)))
+
+      newConnections.filter(Boolean).forEach((item) => {
+        const itemKey = JSON.stringify(item)
+        if (!existingKeys.has(itemKey)) {
+          merged.push(item)
+          existingKeys.add(itemKey)
+        }
+      })
+
+      return merged
+    }
+
+    // Merge the IP data arrays instead of source/destination data objects
+    const existingIpData = currentMapData.countryTrafficData?.ipData || []
+    const newIpData = ipDataWithFlags || []
+    
+    // Create a set of existing data keys to avoid duplicates
+    const existingIpKeys = new Set(
+      existingIpData.map((item: Record<string, any>) => 
+        JSON.stringify({
+          source_ip: item.source_ip,
+          destination_ip: item.destination_ip
         })
-
-        return merged
-      }
-
-      // Merge country traffic data
-      const mergedSourceData: Record<string, any> = { ...currentMapData.countryTrafficData?.sourceData || {} }
-      const mergedDestData: Record<string, any> = { ...currentMapData.countryTrafficData?.destinationData || {} }
-
-      // For source data, keep each No IP Info entry separate
-      Object.entries(newMapData.countryTrafficData?.sourceData || {}).forEach(([key, data]) => {
-        // If this is a No IP Info entry or a country entry, add it directly (no merging)
-        mergedSourceData[key] = data
+      )
+    )
+    
+    // Filter and merge new IP data
+    const mergedIpData: Array<{
+      source_ip: any;
+      destination_ip: any;
+      source_country: any;
+      destination_country: any;
+      source_coordinates: any;
+      destination_coordinates: any;
+    }> = [...existingIpData]
+    newIpData.forEach(item => {
+      const itemKey = JSON.stringify({
+        source_ip: item.source_ip,
+        destination_ip: item.destination_ip
       })
-
-      // For destination data, keep each No IP Info entry separate
-      Object.entries(newMapData.countryTrafficData?.destinationData || {}).forEach(([key, data]) => {
-        // If this is a No IP Info entry or a country entry, add it directly (no merging)
-        mergedDestData[key] = data
-      })
-
-      // Return merged data
-      return {
-        countryTrafficData: {
-          sourceData: mergedSourceData,
-          destinationData: mergedDestData,
-        },
-        additionCityConnections: mergeConnections(currentMapData.additionCityConnections, newMapData.additionCityConnections),
-        regionToRegionConnections: mergeConnections(currentMapData.regionToRegionConnections, newMapData.regionToRegionConnections),
-        regionToCityConnections: mergeConnections(currentMapData.regionToCityConnections, newMapData.regionToCityConnections),
-        cityToCityConnections: mergeConnections(currentMapData.cityToCityConnections, newMapData.cityToCityConnections),
+      
+      if (!existingIpKeys.has(itemKey)) {
+        mergedIpData.push({
+          source_ip: item.source_ip,
+          destination_ip: item.destination_ip,
+          source_country: item.source_country,
+          destination_country: item.destination_country,
+          source_coordinates: item.source_coordinates,
+          destination_coordinates: item.destination_coordinates
+        })
+        existingIpKeys.add(itemKey)
       }
+    })
+
+    // Return merged data with the updated structure
+    return {
+      countryTrafficData: {
+        ipData: mergedIpData
+      },
+      additionCityConnections: mergeConnections(currentMapData.additionCityConnections, newMapData.additionCityConnections),
+      regionToRegionConnections: mergeConnections(currentMapData.regionToRegionConnections, newMapData.regionToRegionConnections),
+      regionToCityConnections: mergeConnections(currentMapData.regionToCityConnections, newMapData.regionToCityConnections),
+      cityToCityConnections: mergeConnections(currentMapData.cityToCityConnections, newMapData.cityToCityConnections),
     }
-    catch (error) {
-      console.error('Error processing map data:', error)
-      return currentMapData
-    }
-  }, [])
+  }
+  catch (error) {
+    console.error('Error processing map data:', error)
+    return currentMapData
+  }
+}, [])
 
   // Fetch time settings
   useEffect(() => {
@@ -444,8 +469,7 @@ export default function TrafficMaps({ params }: IFormProps) {
       if (reset) {
         setMapData({
           countryTrafficData: {
-            sourceData: {},
-            destinationData: {},
+            ipData: []
           },
           additionCityConnections: [],
           regionToRegionConnections: [],
@@ -627,8 +651,7 @@ export default function TrafficMaps({ params }: IFormProps) {
       {isMapDataReady
         ? (
             <div>
-            {Object.keys(mapData.countryTrafficData.sourceData).length > 0
-              || Object.keys(mapData.countryTrafficData.destinationData).length > 0
+            {Object.keys(mapData.countryTrafficData.ipData).length > 0
                 ? (
                     <>
                     <MapComponent
@@ -678,11 +701,11 @@ export default function TrafficMaps({ params }: IFormProps) {
 
                         <p className='text-sm text-gray-500 mt-2'>
                         {'Showing '}
-                        {Object.keys(mapData.countryTrafficData.sourceData).filter(k => !k.startsWith('No IP Info_')).length}
+                        {Object.keys(mapData.countryTrafficData.ipData).filter(k => !k.startsWith('No IP Info_')).length}
                         {' '}
                         {'source countries '}
                         {'and'}
-                        {Object.keys(mapData.countryTrafficData.destinationData).filter(k => !k.startsWith('No IP Info_')).length}
+                        {/* {Object.keys(mapData.countryTrafficData.destinationData).filter(k => !k.startsWith('No IP Info_')).length} */}
                         {' '}
                         {'destination countries'}
                         {batchInfo.total_records > 0 && ` (${Math.min(batchInfo.next_offset, batchInfo.total_records)} of ${batchInfo.total_records} records)`}

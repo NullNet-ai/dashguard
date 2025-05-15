@@ -18,8 +18,11 @@ const fetchUSStatesBorders = async () => {
 }
 
 // Function to get coordinates of a city
-const geocodeAddress = async (address: any) => {
-  const url = `https://nominatim.openstreetmap.org/search?q=${address}&format=json`
+const geocodeAddress = async (address: string) => {
+  // Don't try to geocode "No IP Info"
+  if (address === "No IP Info") return null;
+  
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`
   try {
     const response = await fetch(url)
     const data = await response.json()
@@ -59,9 +62,10 @@ const getConditionColor = (condition: string) => {
 }
 
 // Default coordinates for "No IP Info" (in the sea)
-const DEFAULT_SEA_COORDINATES: LatLngExpression = [0, -30]
+const DEFAULT_SEA_COORDINATES = [0, -30]
+
 // Function to create a **curved** traffic flow line using Bezier curves
-const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<string, any>, trafficLevel: number, name: string, condition = null) => {
+const createCurvedFlowLine = (fromCoord: any, toCoord: any, trafficLevel: any, name: any, condition = null) => {
   if (!fromCoord && !toCoord) {
     console.error(`Missing coordinates for connection: ${name}`)
     return null
@@ -94,17 +98,18 @@ const createCurvedFlowLine = (fromCoord: Record<string, any>, toCoord: Record<st
   })
 }
 
-const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
+const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
   const { ipData = [] } = countryTrafficData ?? {};
   const [loadedConnections, setLoadedConnections] = useState(0);
-  const [map, setMap] = useState<L.Map | null>(null);
+  const [map, setMap] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [initialHighPriorityDisplayed, setInitialHighPriorityDisplayed] = useState(false);
-  const cityCoordinatesCache = useRef<Record<string, any>>({});
-  const priorityConnections = useRef<any[]>([]);
-  const sourceCoordinatesCache = useRef<Record<string, any>>({});
+  const cityCoordinatesCache: any = useRef({});
+  const priorityConnections: any = useRef([]);
   // Reference to maintain country GeoJSON data
-  const countriesGeoJSON = useRef<any>(null);
+  const countriesGeoJSON: any = useRef(null);
+  // Reference to maintain country highlights
+  const countryHighlights: any = useRef({});
 
   // Get traffic color based on level
   const getTrafficColor = (trafficLevel: number) => {
@@ -132,7 +137,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     ];
 
     // Select a random ocean region
-    const region:any = oceanRegions[Math.floor(Math.random() * oceanRegions.length)];
+    const region: any = oceanRegions[Math.floor(Math.random() * oceanRegions.length)];
     
     // Generate random coordinates within the selected region
     const lat = region.lat[0] + Math.random() * (region.lat[1] - region.lat[0]);
@@ -142,7 +147,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
   };
 
   // Check if a point is on land using the GeoJSON data
-  const isPointOnLand = useCallback((lat: number, lng: number) => {
+  const isPointOnLand = useCallback((lat: any, lng: any) => {
     if (!countriesGeoJSON.current) return false;
     
     const point = L.latLng(lat, lng);
@@ -150,13 +155,13 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     // Check if the point is inside any country polygon
     for (const feature of countriesGeoJSON.current.features) {
       if (feature.geometry.type === 'Polygon') {
-        const polygon = L.polygon(feature.geometry.coordinates[0].map((coord: Record<string, any>) => [coord[1], coord[0]]));
+        const polygon = L.polygon(feature.geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]]));
         if (polygon.getBounds().contains(point)) {
           return true;
         }
       } else if (feature.geometry.type === 'MultiPolygon') {
         for (const polygonCoords of feature.geometry.coordinates) {
-          const polygon = L.polygon(polygonCoords[0].map((coord: Record<string, any>) => [coord[1], coord[0]]));
+          const polygon = L.polygon(polygonCoords[0].map((coord: any) => [coord[1], coord[0]]));
           if (polygon.getBounds().contains(point)) {
             return true;
           }
@@ -170,7 +175,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
   // Generate coordinates that are guaranteed to be in the ocean
   const getGuaranteedOceanCoordinates = useCallback(() => {
     let attempts = 0;
-    let coordinates: any;
+    let coordinates;
     
     do {
       coordinates = generateOceanCoordinates();
@@ -185,11 +190,120 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     return coordinates;
   }, [isPointOnLand]);
 
+  // Find country by coordinates
+  const findCountryByCoordinates = useCallback((lat: any, lng: any) => {
+    if (!countriesGeoJSON.current) return null;
+    
+    const point = L.latLng(lat, lng);
+    
+    for (const feature of countriesGeoJSON.current.features) {
+      const countryName = feature.properties.name;
+      
+      if (feature.geometry.type === 'Polygon') {
+        const polygon = L.polygon(feature.geometry.coordinates[0].map((coord: any) => [coord[1], coord[0]]));
+        if (polygon.getBounds().contains(point)) {
+          return { name: countryName, feature };
+        }
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        for (const polygonCoords of feature.geometry.coordinates) {
+          const polygon = L.polygon(polygonCoords[0].map((coord: any) => [coord[1], coord[0]]));
+          if (polygon.getBounds().contains(point)) {
+            return { name: countryName, feature };
+          }
+        }
+      }
+    }
+    
+    return null;
+  }, []);
+
+  // Highlight a country on the map
+  const highlightCountry = useCallback((mapInstance: any, countryName: any, coordinates: any) => {
+    // Skip if it's Ocean or No IP Info
+    if (countryName === 'Ocean' || countryName === 'No IP Info') return;
+    
+    // If we already highlighted this country, return
+    if (countryHighlights.current[countryName]) return;
+    
+    // First try to find the country feature by name
+    let countryFeature = null;
+    
+    if (countriesGeoJSON.current) {
+      // Find country by exact name match
+      for (const feature of countriesGeoJSON.current.features) {
+        if (feature.properties.name === countryName) {
+          countryFeature = feature;
+          break;
+        }
+      }
+      
+      // If not found by exact match, try case-insensitive match
+      if (!countryFeature) {
+        for (const feature of countriesGeoJSON.current.features) {
+          if (feature.properties.name.toLowerCase() === countryName.toLowerCase()) {
+            countryFeature = feature;
+            countryName = feature.properties.name; // Use the proper case from GeoJSON
+            break;
+          }
+        }
+      }
+      
+      // If we still couldn't find by name, try to find by coordinates
+      if (!countryFeature && coordinates) {
+        const country = findCountryByCoordinates(coordinates[0], coordinates[1]);
+        if (country) {
+          countryFeature = country.feature;
+          countryName = country.name; // Update country name in case it was different
+        }
+      }
+      
+      // If we found the country, highlight it
+      if (countryFeature) {
+        
+        // Generate a unique color for this country for visual distinction
+      const hue = Math.floor(Math.random() * 360);
+      const highlightColor = `hsla(${hue}, 70%, 50%, 0.3)`;
+      const borderColor = `hsla(${hue}, 70%, 40%, 0.7)`;
+
+      const highlight = L.geoJSON(countryFeature, {
+        style: {
+          fillColor: highlightColor,
+          weight: 2,
+          opacity: 1,
+          color: borderColor,
+          fillOpacity: 0.3,
+        },
+      }).addTo(mapInstance);
+
+      // Add a country label
+      const bounds = highlight.getBounds();
+      const center = bounds.getCenter();
+
+      // Create a simple label using a div element
+      const labelDiv = L.divIcon({
+        className: 'country-label', // Custom class for styling
+        html: `<div class="country-name">${countryName}</div>`, // Set the country name as content
+        iconSize: [0, 0], // No icon size, just the label
+        iconAnchor: [0, 0], // Anchor point for the label
+      });
+
+      L.marker(center, { icon: labelDiv }).addTo(mapInstance);
+
+      // Store the highlight for future reference
+      countryHighlights.current[countryName] = { highlight };
+      } else {
+        console.warn(`Could not find GeoJSON data for country: ${countryName}`);
+      }
+    }
+  }, [findCountryByCoordinates]);
+
   // Process IP data to create connection data
-  const processIpData = useCallback(() => {
+  const processIpData = useCallback(async () => {
     if (!ipData || !Array.isArray(ipData)) return [];
 
-    return ipData.map((connection) => {
+    const processedData = [];
+    
+    for (const connection of ipData) {
       const { 
         source_ip, 
         destination_ip, 
@@ -199,34 +313,69 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
         destination_coordinates
       } = connection;
 
-      // Use provided coordinates if available
+      // Use provided coordinates if available, otherwise geocode the country
       let sourceCoordinates = source_coordinates;
       let destCoordinates = destination_coordinates;
+      let sourceIsNoIpInfo = false;
+      let destIsNoIpInfo = false;
       
-      // For IPs with country data but no coordinates, use the provided coordinates
-      // For IPs without country data, generate ocean coordinates
-      if (!sourceCoordinates) {
-        if (!source_country || !source_country.country) {
-          sourceCoordinates = getGuaranteedOceanCoordinates();
+      // Check if source is "No IP Info"
+      if (source_country && source_country.country === "No IP Info") {
+        sourceIsNoIpInfo = true;
+      }
+      
+      // Check if destination is "No IP Info"
+      if (destination_country && destination_country.country === "No IP Info") {
+        destIsNoIpInfo = true;
+      }
+      
+      // For source: geocode if we have country info but no coordinates
+      if (!sourceCoordinates && source_country && source_country.country && !sourceIsNoIpInfo) {
+        // Check cache first
+        const cacheKey = `${source_country.country}${source_country.city ? '-' + source_country.city : ''}`;
+        if (cityCoordinatesCache.current[cacheKey]) {
+          sourceCoordinates = cityCoordinatesCache.current[cacheKey];
         } else {
-          // Use provided coordinates for IPs with country data
-          sourceCoordinates = source_coordinates || [
-            -30 + Math.random() * 60,
-            -100 + Math.random() * 200
-          ];
+          // Try to geocode with city if available
+          const addressToGeocode = source_country.city 
+            ? `${source_country.city}, ${source_country.country}`
+            : source_country.country;
+          
+          const geocodedCoords = await geocodeAddress(addressToGeocode);
+          if (geocodedCoords) {
+            sourceCoordinates = geocodedCoords;
+            cityCoordinatesCache.current[cacheKey] = geocodedCoords;
+          }
         }
       }
       
-      if (!destCoordinates) {
-        if (!destination_country || !destination_country.country) {
-          destCoordinates = getGuaranteedOceanCoordinates();
+      // For destination: geocode if we have country info but no coordinates
+      if (!destCoordinates && destination_country && destination_country.country && !destIsNoIpInfo) {
+        // Check cache first
+        const cacheKey = `${destination_country.country}${destination_country.city ? '-' + destination_country.city : ''}`;
+        if (cityCoordinatesCache.current[cacheKey]) {
+          destCoordinates = cityCoordinatesCache.current[cacheKey];
         } else {
-          // Use provided coordinates for IPs with country data
-          destCoordinates = destination_coordinates || [
-            -30 + Math.random() * 60,
-            -100 + Math.random() * 200
-          ];
+          // Try to geocode with city if available
+          const addressToGeocode = destination_country.city 
+            ? `${destination_country.city}, ${destination_country.country}`
+            : destination_country.country;
+          
+          const geocodedCoords = await geocodeAddress(addressToGeocode);
+          if (geocodedCoords) {
+            destCoordinates = geocodedCoords;
+            cityCoordinatesCache.current[cacheKey] = geocodedCoords;
+          }
         }
+      }
+      
+      // For IPs without country data or "No IP Info", generate ocean coordinates
+      if (!sourceCoordinates || sourceIsNoIpInfo) {
+        sourceCoordinates = getGuaranteedOceanCoordinates();
+      }
+      
+      if (!destCoordinates || destIsNoIpInfo) {
+        destCoordinates = getGuaranteedOceanCoordinates();
       }
 
       // Calculate traffic level if not provided
@@ -240,24 +389,28 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
       else if (trafficLevel > 20) condition = 'Normal';
       else condition = 'Stable';
 
-      return {
+      processedData.push({
         source_ip,
         destination_ip,
-        sourceLocation: source_country?.country || 'Ocean',
-        destinationLocation: destination_country?.country || 'Ocean',
+        sourceLocation: sourceIsNoIpInfo ? 'Ocean' : (source_country && source_country.country) || 'Ocean',
+        destinationLocation: destIsNoIpInfo ? 'Ocean' : (destination_country && destination_country.country) || 'Ocean',
         sourceCoordinates,
         destinationCoordinates: destCoordinates,
         trafficLevel,
         condition,
         source_country,
-        destination_country
-      };
-    });
+        destination_country,
+        sourceIsNoIpInfo,
+        destIsNoIpInfo
+      });
+    }
+    
+    return processedData;
   }, [ipData, getGuaranteedOceanCoordinates]);
 
   // Identify high priority connections to show first
-  const identifyHighPriorityConnections = useCallback(() => {
-    const ipConnections = processIpData();
+  const identifyHighPriorityConnections = useCallback(async () => {
+    const ipConnections = await processIpData();
     if (!ipConnections || ipConnections.length === 0) return [];
 
     // Get top connections by traffic level
@@ -268,15 +421,19 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
 
   // Initialize high priority connections
   useEffect(() => {
-    priorityConnections.current = identifyHighPriorityConnections();
+    const initPriorityConnections = async () => {
+      priorityConnections.current = await identifyHighPriorityConnections();
+    };
+    
+    initPriorityConnections();
   }, [identifyHighPriorityConnections]);
 
   // Create source marker
   const createSourceMarker = (
-    mapInstance: L.Map,
-    coordinates: LatLngExpression,
-    locationName: string,
-    source_ip: string
+    mapInstance: any,
+    coordinates: any,
+    locationName: any,
+    source_ip: any
   ) => {
     const dotColor = '#00BFFF';
     
@@ -307,11 +464,11 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
 
   // Create destination marker
   const createDestinationMarker = (
-    mapInstance: L.Map, 
-    coordinates: LatLngExpression, 
-    locationName: string, 
-    trafficLevel: number, 
-    destination_ip: string
+    mapInstance: any, 
+    coordinates: any, 
+    locationName: any, 
+    trafficLevel: any, 
+    destination_ip: any
   ) => {
     const dotColor = getTrafficColor(trafficLevel);
     
@@ -342,12 +499,12 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     return marker;
   };
 
-  // Create straight flow line between points
+  // Create flow line between points
   const createFlowLine = (
-    from: LatLngExpression, 
-    to: LatLngExpression, 
-    trafficLevel: number, 
-    condition: string | null = null
+    from: any,
+    to: any,
+    trafficLevel: any,
+    condition = null
   ) => {
     // Determine line color based on condition or traffic level
     let lineColor = getTrafficColor(trafficLevel);
@@ -365,12 +522,25 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     // Calculate line width based on traffic level (1-3px)
     const lineWidth = 1 + Math.floor(trafficLevel / 30);
     
-    // Create straight line
-    const line = L.polyline([from, to], {
+    // Create curved line between points
+    const curvePoints: any = [];
+    const segments = 50;
+    
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      // Create a curved path using sine function for curvature
+      const lng = from[1] * (1 - t) + to[1] * t;
+      const lat = from[0] * (1 - t) + to[0] * t + Math.sin(Math.PI * t) * 5;
+      
+      curvePoints.push([lat, lng]);
+    }
+    
+    // Create the curved line
+    const line = L.polyline(curvePoints, {
       color: lineColor,
       weight: lineWidth,
       opacity: 0.8,
-      dashArray: condition === 'High Latency' ? '5, 5' : null as any,
+      dashArray: '5, 5',
       className: 'traffic-flow-line',
     });
     
@@ -378,9 +548,9 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
   };
 
   // Fetch country borders
-  const fetchCountryBorders = async () => {
+  const fetchGeoJSON = async () => {
     try {
-      const response = await fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson');
+      const response = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
       const data = await response.json();
       countriesGeoJSON.current = data; // Store the GeoJSON data for later use
       return data;
@@ -393,7 +563,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
   // Initialize map
   useEffect(() => {
     const initializeMap = async () => {
-      const mapInstance = L.map('map', {
+      const mapInstance: any = L.map('map', {
         center: [20, 0], // Center on equator
         zoom: 2,
         minZoom: 2,
@@ -410,7 +580,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
       }).addTo(mapInstance);
       
       // Add world borders
-      const countries = await fetchCountryBorders();
+      const countries = await fetchGeoJSON();
       L.geoJSON(countries, {
         style: {
           fillColor: 'transparent',
@@ -429,8 +599,9 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     };
     
     // Add legend to map
-    const addLegend = (mapInstance: L.Map) => {
-      const legend = (L as any).control({ position: 'bottomright' });
+    const addLegend = (mapInstance: any) => {
+      // @ts-expect-error - Leaflet control
+      const legend = L.control({ position: 'bottomright' });
       legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
         div.innerHTML = `
@@ -442,6 +613,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
             <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 255, 0, 0.7); border-radius:50%;"></span> Normal (30-50%)</div>
             <div><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%;"></span> Stable (<30%)</div>
             <div><span style="display:inline-block; width:15px; height:15px; background:#00BFFF; border-radius:50%;"></span> Source IP</div>
+            <div><span style="display:inline-block; width:15px; height:15px; background:#3388ff; opacity:0.2; border:1px solid #3388ff;"></span> Highlighted Country</div>
           </div>
         `;
         return div;
@@ -461,33 +633,51 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     if (!map || isLoading) return;
     
     const loadAllConnections = async () => {
-      const allConnections = processIpData();
+      const allConnections = await processIpData();
       
       for (const conn of allConnections) {
-        createSourceMarker(map, conn.sourceCoordinates, conn.sourceLocation === 'Unknown' ? 'Ocean' : conn.sourceLocation, conn.source_ip);
+        // Create markers with appropriate info
+        const sourceLabel = conn.sourceIsNoIpInfo ? 'Ocean (No IP Info)' : conn.sourceLocation;
+        const destLabel = conn.destIsNoIpInfo ? 'Ocean (No IP Info)' : conn.destinationLocation;
+        
+        // Create source marker
+        createSourceMarker(
+          map, 
+          conn.sourceCoordinates, 
+          sourceLabel, 
+          conn.source_ip
+        );
+        
+        // Create destination marker
         createDestinationMarker(
           map, 
           conn.destinationCoordinates, 
-          conn.destinationLocation === 'Unknown' ? 'Ocean' : conn.destinationLocation, 
+          destLabel, 
           conn.trafficLevel, 
           conn.destination_ip
         );
         
+        // Create flow line between points
         const line = createFlowLine(
           conn.sourceCoordinates,
           conn.destinationCoordinates,
           conn.trafficLevel,
+          //@ts-expect-error - condition is optional
           conn.condition
         );
         
         if (line) {
+          // Create detailed tooltip for the connection
           line.bindTooltip(
             `<div style="text-align: center;">
               <strong>Network Connection</strong><br/>
               <span style="color: #00BFFF;">From: ${conn.source_ip}</span><br/>
               <span style="color: ${getTrafficColor(conn.trafficLevel)};">To: ${conn.destination_ip}</span><br/>
-              Traffic: ${conn.trafficLevel}%<br/>
-              ${conn.condition ? `Condition: ${conn.condition}` : ''}
+              <hr style="margin: 4px 0;">
+              <span>Source: ${sourceLabel}</span><br/>
+              <span>Destination: ${destLabel}</span><br/>
+              <span>Traffic: ${conn.trafficLevel.toFixed(1)}%</span><br/>
+              ${conn.condition ? `<span>Status: ${conn.condition}</span>` : ''}
             </div>`, {
               permanent: false,
               direction: 'center',
@@ -496,6 +686,15 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
           );
           line.addTo(map);
         }
+        
+        // Highlight countries if they have valid locations (not Ocean or No IP Info)
+        if (!conn.sourceIsNoIpInfo && conn.sourceLocation && conn.sourceLocation !== 'Ocean') {
+          highlightCountry(map, conn.sourceLocation, conn.sourceCoordinates);
+        }
+        
+        if (!conn.destIsNoIpInfo && conn.destinationLocation && conn.destinationLocation !== 'Ocean') {
+          highlightCountry(map, conn.destinationLocation, conn.destinationCoordinates);
+        }
       }
       
       setLoadedConnections(allConnections.length);
@@ -503,7 +702,7 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
     };
     
     loadAllConnections();
-  }, [map, isLoading, processIpData]);
+  }, [map, isLoading, processIpData, highlightCountry]);
 
   return (
     <>
@@ -535,10 +734,11 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
             background-color: rgba(255, 255, 255, 0.9);
             border: 1px solid #ccc;
             border-radius: 4px;
-            padding: 5px;
+            padding: 8px;
             font-family: geist, sans-serif;
             font-size: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            max-width: 200px;
           }
           
           .loading-overlay {
@@ -552,6 +752,51 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
             z-index: 1000;
             font-family: geist, sans-serif;
             font-size: 14px;
+          }
+          
+          .stats-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-family: geist, sans-serif;
+            font-size: 14px;
+            max-width: 250px;
+          }
+
+          .country-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            background: none;
+            border: none;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            pointer-events: none; /* Prevent interaction with the label */
+          }
+          
+          .country-name {
+            padding: 3px 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+            pointer-events: none;
+            text-shadow: 0 0 2px white;
+          }
+          
+          .ocean-label {
+            font-style: italic;
+            color: #0077be;
+            font-size: 10px;
+            text-shadow: 0 0 2px white;
           }
           
           @keyframes twinkle {
@@ -576,12 +821,27 @@ const MapComponent = ({ countryTrafficData }: { countryTrafficData: any }) => {
       
       {isLoading && (
         <div className="loading-overlay">
-          Initializing map...
+          <div>Initializing map...</div>
+          <div>Loading country data...</div>
         </div>
       )}
+      
+      {/* {!isLoading && loadedConnections > 0 && (
+        <div className="stats-panel">
+          <h3 style={{ margin: '0 0 8px 0', borderBottom: '1px solid #ccc' }}>Connection Statistics</h3>
+          <div>Connections: {loadedConnections}</div>
+          <div>Countries: {Object.keys(countryHighlights.current).length}</div>
+          <div style={{ fontSize: '12px', marginTop: '8px', color: '#666' }}>
+            <div>• Source IPs shown in blue</div>
+            <div>• Destination IPs colored by traffic level</div>
+            <div>• "No IP Info" coordinates placed in ocean</div>
+            <div>• Hover over connections for details</div>
+          </div>
+        </div>
+      )} */}
     </>
-  );
-};
+  )
+}
 
 export default MapComponent
 

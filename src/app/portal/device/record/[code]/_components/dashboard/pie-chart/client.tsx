@@ -76,6 +76,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       setTrafficData({ traffic: currentTraffic, maxTraffic })
       currentTime = data?.timestamp
     })
+
+    return () => {
+      socket.off(`pie_chart-${defaultValues?.id}-${org_acc_id}`); // Clean up the listener
+    };
   },[socket, org_acc_id])
     
 

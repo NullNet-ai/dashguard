@@ -68,6 +68,9 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           }}
           tickLine={false}
           tickMargin={8}
+          tickCount={4} // Ensure only four ticks are displayed
+          interval="preserveStartEnd" // Ensure ticks are evenly distributed
+          minTickGap={150} // Add spacing between ticks
         />
         <YAxis
           allowDataOverflow={true}

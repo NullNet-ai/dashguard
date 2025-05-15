@@ -119,6 +119,10 @@ const InteractiveGraph = ({
        const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
        setFilteredData(updated_filtered_data)
       })
+
+      return () => {
+        socket.off(`connection_multi_graph-${defaultValues?.id}-${orgID}`); // Clean up the listener
+      };
     },[socket, filteredData, orgID, defaultValues?.id])
     
 
