@@ -90,6 +90,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       field: `${entity}.${field}`,
       label,
       desc: typeof groupSort?.desc === 'boolean' ? groupSort?.desc : false,
+      ...(columnConfig?.sort_config ?? {}),
     };
   });
   const groupSort = parentGroupFields?.find(
@@ -101,12 +102,15 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
           id: groupSort?.value,
           desc: groupSort?.desc,
           sort_key: groupSort?.field,
+          is_case_sensitive_sorting:
+            groupSort?.is_case_sensitive_sorting ?? false,
         },
       ]
     : [];
 
   const { fetchData, data, error, isLoading } = useFetchGridData(
     {
+      ...(config.searchConfig?.query_params || {}),
       current: pagination?.current_page,
       limit: groupFields?.[0]?.field ? 500 : pagination?.limit_per_page,
       entity: config.entity,

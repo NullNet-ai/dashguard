@@ -10,10 +10,10 @@ import { headers } from 'next/headers';
 import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
-import { resolveGridParams } from '~/components/platform/Grid/hooks/grid-params-resolver';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const { sorts, pagination, filters, groups } =
+  const gridCacheData =
     (await getGridCacheData()) ?? {};
 
   const headerList = headers();
@@ -35,31 +35,25 @@ export default async function Page() {
     'updated_time',
     'updated_by',
   ];
-  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
-    resolveGridParams({
-      sorts,
-      filters,
-      groups,
-      pagination,
-      pluck: _pluck,
+  
+    const { gridParams, gridProps } = gridDataResolver({
       entity: main_entity!,
+      pluck: _pluck,
+      gridCacheData,
+      defaults: {
+        defaultSorting,
+      },
     });
+  
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });
 
   return (
     <Grid
+      {...gridProps}
       totalCount={totalCount || 0}
       data={items}
-      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
-      advanceFilter={filters?.advanceFilter || []}
-      defaultSorting={
-        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
-      }
-      pagination={pagination}
-      grouping={groups || []}
       config={{
         entity: main_entity!,
         title: 'Communication Templates',

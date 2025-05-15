@@ -6,11 +6,15 @@ import CreateButton from "../Header/ButtonHeader";
 import MobileHeader from "../Header/MobileHeader";
 import InfiniteScrollContainer from '../common/InfiniteScroll';
 
-function GridMobile() {
+function GridMobile({
+  gridKey,
+  grid_tabs,
+
+} : any) {
   return (
     <Card className="col-span-full border-0 shadow-none py-2 pt-0">
       <CardHeader>
-        <MobileHeader />
+        <MobileHeader gridKey={gridKey} grid_tabs={grid_tabs}/>
       </CardHeader>
         <section className="px-2 lg:px-0"
         >

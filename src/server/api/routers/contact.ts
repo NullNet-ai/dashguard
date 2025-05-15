@@ -23,6 +23,11 @@ import {
   type PhoneNumberSchema,
 } from '../../zodSchema/contact/contactPhoneEmail';
 import { EStatus } from '../types';
+import {
+  addCommonGridConcatenates,
+  addCommonGridJoins,
+  addCommonGridPluckObject,
+} from '~/server/utils/queryBuilder';
 
 const ENTITY = 'contact';
 
@@ -184,8 +189,7 @@ export const contactRouter = createTRPCRouter({
           },
 
           pluck_object: {
-            created_by: ['id', 'status'],
-            updated_by: ['id', 'status'],
+            ...addCommonGridPluckObject(),
             contact_emails: ['email', 'is_primary'],
             contact_phone_numbers: [
               'raw_phone_number',
@@ -194,9 +198,6 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
-            account_organizations: ['contact_id', 'id'],
-            // organization_contacts: ['id', 'contact_organization_id'],
-            // organizations: ['id', 'name'],
           },
           track_total_records: true,
           advance_filters: input?.advance_filters as IAdvanceFilters[],
@@ -216,34 +217,7 @@ export const contactRouter = createTRPCRouter({
           multiple_sort: input.sorting?.length
             ? formatSorting(input.sorting)
             : [],
-          concatenate_fields: [
-            {
-              fields: ['first_name', 'last_name'],
-              field_name: 'full_name',
-              separator: ' ',
-              entity: 'contacts',
-              aliased_entity: 'created_by',
-            },
-            {
-              fields: ['first_name', 'last_name'],
-              field_name: 'full_name',
-              separator: ' ',
-              entity: 'contacts',
-              aliased_entity: 'updated_by',
-            },
-            {
-              fields: ['created_date', 'created_time'],
-              field_name: 'created_date_time',
-              separator: ' ',
-              entity: 'contacts',
-            },
-            {
-              fields: ['updated_date', 'updated_time'],
-              field_name: 'updated_date_time',
-              separator: ' ',
-              entity: 'contacts',
-            },
-          ],
+          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
       })
       .join({
@@ -271,35 +245,9 @@ export const contactRouter = createTRPCRouter({
             field: 'id',
           },
         },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            alias: 'created_by',
-            entity: 'account_organizations',
-            field: 'id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'created_by',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            alias: 'updated_by',
-            entity: 'account_organizations',
-            field: 'id',
-          },
-          from: {
-            entity: 'contacts',
-            field: 'updated_by',
-          },
-        },
       });
+
+    addCommonGridJoins(query, 'contacts');
 
     if (input.grouping?.length) {
       query.groupBy({
@@ -353,7 +301,10 @@ export const contactRouter = createTRPCRouter({
           is_primaries: p_is_primaries,
         } = phones;
         const { emails: _emails, is_primaries: e_is_primaries } = emails;
-        const filterPrimary = (li: string[], is_primaries: number[] | boolean[]) => {
+        const filterPrimary = (
+          li: string[],
+          is_primaries: number[] | boolean[],
+        ) => {
           if (!li || !is_primaries) return null;
           const index = is_primaries?.findIndex(
             (is_primary) => is_primary === 1 || is_primary === true,

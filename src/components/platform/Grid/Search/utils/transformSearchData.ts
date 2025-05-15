@@ -19,7 +19,9 @@ const findTextInValue = (
       const resultValue = value.find((v) =>
         v.toLowerCase().includes(searchText.toLowerCase()),
       );
-      return resultValue
+      return resultValue;
+    } else if (typeof value === 'number') {
+      return value.toString().includes(searchText) ? value : null;
     }
   }
   return value === searchText ? value : null;
@@ -45,11 +47,12 @@ export const transformSearchData = (
       if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
-          values: [foundValue],
+          values: searchableField.accessorKey !== searchableField.field && obj[searchableField.field] ? [obj[searchableField.field]] : [foundValue],
           operator: searchableField?.operator || 'equal',
           type: 'criteria',
           ...searchableField,
           label: searchableField?.label || formatAndCapitalize(key),
+          display_value: foundValue,
         });
       }
     }

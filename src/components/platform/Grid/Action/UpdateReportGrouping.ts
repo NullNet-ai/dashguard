@@ -8,24 +8,18 @@ import { revalidatePath } from 'next/cache';
 
 export async function UpdateReportGrouping({
   grouping,
-  gridKey
+  gridKey,
 }: {
   grouping: IGroupBy[];
-  gridKey? : string
+  gridKey?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get('x-pathname') || '';
-  const searchParams = headerList.get('x-full-search-query-params') || '';
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
 
   await api.grid.updateReportGrouping({
     grouping,
-    gridKey
+    gridKey,
   });
 
-  const groupParams = grouping.map((item) => item.value).join(',');
-
-  urlSearchParams.set('grouping', groupParams);
-  revalidatePath(`${pathName}?${urlSearchParams}`)
-  redirect(`${pathName}?${urlSearchParams}`);
+  revalidatePath(fullUrl);
 }

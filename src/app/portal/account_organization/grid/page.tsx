@@ -6,16 +6,17 @@ import gridColumns from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const { sorts, filters, pagination, columns : columnOrder,   groups } = (await getGridCacheData()) ?? {}
-  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
-  resolveGridParams({
-    sorts,
-    filters,
-    groups,
-    pagination,
+  const gridCacheData = (await getGridCacheData()) ?? {}
+ 
+  const { gridParams, gridProps } = gridDataResolver({
     entity: 'account_organization',
+    gridCacheData,
+    defaults: {
+      defaultSorting,
+    },
   });
   const {
     items = [],
@@ -27,7 +28,9 @@ export default async function Page() {
 
   return (
     <Grid
-      advanceFilter={filters?.advanceFilter || []}
+      {...gridProps}
+      totalCount={totalCount || 0}
+      data={items}
       config={{
         entity: 'account_organization',
         title: 'Accounts',
@@ -35,25 +38,19 @@ export default async function Page() {
         rowExpansionOptions:{
           expandPosition: 'left',
           rowExpansionComponent: ExpandedDefaultRow,
-          // icons: {
-          //   expandIcon: <ArrowBigDown className='h-6 w-6 text-default/40'/>,
-          //   collapseIcon: <ArrowBigDownDash className='h-6 w-6 text-default/40'/>,
-          // }
         },
         defaultShownColumns: [
           "first_name",
           "last_name",
         ],
-        // statusColumn: 'account_organization_status',
         columns: gridColumns,
-        columnsOrder: columnOrder,
-        // enableAutoCreate: false,
+        columnsOrder: gridCacheData?.columns,
         searchConfig: {
           router: 'account',
           resolver: 'fetchGridData',
           query_params: {
             entity: 'account_organization',
-            group_advance_filters: filters?.groupAdvanceFilters,
+            group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
         additionalData: {
@@ -76,15 +73,6 @@ export default async function Page() {
         },
         customRowAction: AccountCustomRowAction,
       }}
-      data={items}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
-      defaultSorting={
-        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
-      }
-      pagination={pagination}
-      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
-      totalCount={totalCount || 0}
-      grouping={groups || []}
     />
   );
 }

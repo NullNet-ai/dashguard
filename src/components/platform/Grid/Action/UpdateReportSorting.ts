@@ -14,25 +14,17 @@ export async function UpdateReportSorting({
     id: string;
     desc: boolean;
     sort_key?: string;
+    is_case_sensitive_sorting?: boolean;
   }[];
   gridKey?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get("x-pathname") || "";
-  const searchParams = headerList.get("x-full-search-query-params") || "";
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
 
   await api.grid.updateReportSorting({
     sorting,
     gridKey
   });
 
-  const sortingParams = sorting
-    .map((item) => `${item.id}:${item.desc ? "desc" : "asc"}`) // Map each object to the desired string format
-    .join("=");
-
-  urlSearchParams.set("sorting", sortingParams);
-
-  revalidatePath(`${pathName}?${urlSearchParams}`)
-  redirect(`${pathName}?${urlSearchParams}`);
+  revalidatePath(fullUrl)
 }

@@ -19,7 +19,8 @@ function MainServer({
   parentType = 'grid',
   grouping,
   gridKey,
-  customCreateButton
+  customCreateButton,
+  grid_tabs
 }: IPropsGrid) {
   return (
     <GridProvider
@@ -36,10 +37,10 @@ function MainServer({
       customCreateButton={customCreateButton}
     >
       <GridScrollView className="hidden lg:block">
-        <GridDesktop parentType={parentType} gridKey={gridKey} />
+        <GridDesktop parentType={parentType} gridKey={gridKey} grid_tabs={grid_tabs} />
       </GridScrollView>
       <div className="my-0 h-full md:my-8 md:mb-12 md:mt-0 lg:my-8 lg:mb-0 lg:hidden">
-        <GridMobile />
+        <GridMobile gridKey={gridKey} grid_tabs={grid_tabs}/>
       </div>
     </GridProvider>
   );

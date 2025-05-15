@@ -13,6 +13,7 @@ import { customArchive } from './customArchiveAction';
 import ArchiveComponent from './customDefaultActions/Archive';
 import DeleteComponent from './customDefaultActions/Delete';
 import { resolveGridParams } from '~/utils/grid-params-resolver';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function OrganizationGridPage(): Promise<React.ReactElement | null> {
   const _pluck = [
@@ -29,22 +30,15 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     'updated_by',
   ];
 
-  const {
-    sorts,
-    pagination,
-    filters,
-    columns: columnOrder,
-    groups,
-  } = (await getGridCacheData()) ?? {};
+  const gridCacheData = (await getGridCacheData()) ?? {};
 
-  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
-    resolveGridParams({
-      sorts,
-      filters,
-      groups,
-      pagination,
-      pluck: _pluck,
+    const { gridParams, gridProps } = gridDataResolver({
       entity: 'organization',
+      pluck: _pluck,
+      gridCacheData,
+      defaults: {
+        defaultSorting,
+      },
     });
 
   const { items = [], totalCount } = await api.grid.items({
@@ -53,12 +47,15 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
 
   return (
     <Grid
+      {...gridProps}
+      totalCount={totalCount || 0}
+      data={items}
       config={{
         entity: 'organization',
         paginationType:'simple-card',
         title: 'Organizations',
         columns: gridColumns,
-        columnsOrder: columnOrder,
+        columnsOrder: gridCacheData?.columns,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
         archiveCustomAction: customArchive,
@@ -70,18 +67,10 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
           query_params: {
             entity: 'organization',
             pluck: _pluck,
-            group_advance_filters: filters?.groupAdvanceFilters,
+            group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
       }}
-      data={items}
-      defaultSorting={sorts?.defaultSorting || defaultSorting}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
-      advanceFilter={filters?.advanceFilter || []}
-      sorting={sorts?.sorting?.length ? sorts?.sorting : defaultSorting}
-      pagination={pagination}
-      totalCount={totalCount || 0}
-      grouping={groups || []}
     />
   );
 }

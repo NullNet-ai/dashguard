@@ -33,6 +33,7 @@ export function ManageFilterProvider({
   tab,
   columns,
   searchConfig,
+  gridKey
 }: {
   children: React.ReactNode;
   tab: any;
@@ -43,6 +44,7 @@ export function ManageFilterProvider({
     query_params?: ISearchParams;
     entity?: string;
   };
+  gridKey?: string;
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
@@ -63,7 +65,7 @@ export function ManageFilterProvider({
 
   const handleSaveFilter = async () => {
     setCreateFilterLoading(true);
-    const saveFilter = await saveGridFilter(filterDetails);
+    const saveFilter = await saveGridFilter(filterDetails, gridKey);
 
     setCreateFilterLoading(false);
     return saveFilter;
@@ -98,7 +100,7 @@ export function ManageFilterProvider({
     };
 
     setCreateFilterLoading(true);
-    await updateGridFilter(modifyFilterDetails);
+    await updateGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
     router.refresh();
@@ -134,7 +136,7 @@ export function ManageFilterProvider({
       group_advance_filters: resolveGroupFilter,
     };
     setCreateFilterLoading(true);
-    await saveGridFilter(modifyFilterDetails);
+    await saveGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
     router.refresh();
