@@ -23,7 +23,6 @@ export default async function Page() {
   const _pluck = [
     'id',
     'code',
-    'name',
     'categories',
     'status',
     'created_date',
