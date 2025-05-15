@@ -118,11 +118,13 @@ export const account_secret = z
 export const AccountDetailSchema = z
   .object({
     id: z.string().optional(),
-    role_id: z.string().min(1, { message: 'Role is required.' }),
+    role_id: z
+      .string({ message: 'Role is required.' })
+      .min(1, { message: 'Role is required.' }),
     email: z
-    .string()
-    .min(1, { message: 'Email is required.' })
-    .email('Please enter a valid email.'),
+      .string({ message: 'Email is required.' })
+      .min(1, { message: 'Email is required.' })
+      .email('Please enter a valid email.'),
   })
   .superRefine(async (data, ctx) => {
     try {
@@ -134,7 +136,7 @@ export const AccountDetailSchema = z
       if (!response?.isValid) {
         ctx.addIssue({
           path: ['email'],
-          message:  'Email already exists.',
+          message: 'Email already exists.',
           code: 'custom',
         });
       }

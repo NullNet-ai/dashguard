@@ -1110,6 +1110,7 @@ export const gridRouter = createTRPCRouter({
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
+      if (tabs.length > 1) return tabs
       const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',
@@ -1153,7 +1154,7 @@ export const gridRouter = createTRPCRouter({
       });
       const { data: items } = await query.execute();
 
-      if (tabs.length !== items.length) {
+      if (tabs.length - 1 !== items.length) {
         const uniqueTabsMap = new Map();
 
         tabs.forEach((tab) => {
@@ -1166,7 +1167,8 @@ export const gridRouter = createTRPCRouter({
               ...item,
               href: item.link,
               default_filter: item.advance_filters,
-              current: item.is_current,
+              current: false,
+              is_current: false,
             });
           }
         });

@@ -150,10 +150,6 @@ export const gridFilterRouter = createTRPCRouter({
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
-      const searchQueryParams =
-        headerList.get('x-full-search-query-params') || '';
-      const searchParams = new URLSearchParams(searchQueryParams);
-      const filter_id = searchParams.get('filter_id');
       const _tabMenuId = tabMenuId({
         _mainEntity: mainEntity || '',
         _application: application || '',
@@ -161,10 +157,7 @@ export const gridFilterRouter = createTRPCRouter({
       });
 
       await ctx.redisClient.cacheData(_tabMenuId, input?.tabs);
-      const currentTab = filter_id
-        ? input?.tabs?.find((tab: any) => tab.id === filter_id)
-        : input?.tabs?.find((tab: any) => tab.current);
-
+  
       // update the grid filter entity on database
       const promise = input?.tabs?.map(async (tab: any) => {
         return ctx.dnaClient
