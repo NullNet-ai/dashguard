@@ -212,7 +212,7 @@ const findCountryByCoordinates = useCallback((lat: number, lng: number) => {
 }, []);
 
 const highlightCountry = useCallback(
-  (mapInstance: any, countryName: string, coordinates: LatLngExpression | any) => {
+  (mapInstance: any, countryName: string, coordinates: LatLngExpression) => {
     // Skip if it's Ocean or No IP Info
     if (countryName === 'Ocean' || countryName === 'No IP Info') return;
 
@@ -251,6 +251,7 @@ const highlightCountry = useCallback(
 
       // If we still couldn't find by name, try to find by coordinates
       if (!countryFeature && coordinates) {
+        //@ts-expect-error - coordinates is LatLngExpression
         const country = findCountryByCoordinates(coordinates[0], coordinates[1]);
         if (country) {
           countryFeature = country.feature;
