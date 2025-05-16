@@ -43,7 +43,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer';
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';
@@ -291,6 +291,10 @@ export default function GridProvider({
       return rowSelection[item.id];
     });
 
+    if (onSelectRecords) {
+      onSelectRecords(selectedData);
+    }
+
     setRowSelectedRecord(selectedData);
   };
 
@@ -439,6 +443,27 @@ export default function GridProvider({
     groupByColumn,
   );
 
+  const handleCheckboxChange = (updater: Updater<RowSelectionState>) => {
+    // Update the internal row selection state
+    const newRowSelection =
+      typeof updater === 'function' ? updater(rowSelection) : updater;
+
+    setRowSelection(newRowSelection);
+
+    // Get the selected data based on the new selection
+    const selectedData = (data as any[])?.filter((item) => {
+      return newRowSelection[item.id];
+    });
+
+    // Call your custom handler or the provided onSelectRecords
+    if (onSelectRecords) {
+      onSelectRecords(selectedData);
+    }
+
+    // Update the selected record state
+    setRowSelectedRecord(selectedData);
+  };
+
   const table = useReactTable({
     data: newData,
     getRowId: (row: any) => row.id,
@@ -451,7 +476,9 @@ export default function GridProvider({
     columnResizeMode: 'onChange',
     getCoreRowModel: getCoreRowModel(),
     onColumnSizingChange: setColSizing,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: !!_propsConfig?.enableCheckboxOnChange
+      ? handleCheckboxChange
+      : setRowSelection,
     enableMultiRowSelection: config?.enableMultiRowSelection,
     enableHiding: true,
     state: {
@@ -611,7 +638,7 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
-    advanceFilter,
+    advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
     defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,

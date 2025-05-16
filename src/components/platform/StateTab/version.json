@@ -1,7 +1,7 @@
 {
   "app_name": "platform__StateTab",
-  "tag": "2.1.0",
-  "branch": "released/PLATFORM7-4106/2.1.0",
-  "message": "Added activeTab state",
-  "publish_name": "Bryan Jay Mabuan"
+  "tag": "2.1.1-rc.1<unreleased>",
+  "branch": "unreleased/fix4208/2.1.1-rc.1<unreleased>",
+  "message": "width must be equally divided on the whole navigation bar.",
+  "publish_name": "Save Ducto"
 }
