@@ -300,6 +300,8 @@ interface ISelectOptions {
 interface IRadioOptions {
   value: string | boolean;
   label: string;
+  with_input?: boolean
+  inputPlaceholder?: string
 }
 
 interface ICheckboxOptions {

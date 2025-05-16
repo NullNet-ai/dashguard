@@ -465,8 +465,8 @@ export const FormBuilder = (props: IPropsForms) => {
         form_key: formKey,
       });
       setFormGridSelected(response);
-      setDisplayType('selected');
       setIsSaveLoading(false);
+      setDisplayType('selected');
     } catch (error) {
       setIsSaveLoading(false);
       console.error('[Form-Filter] Failed to create new record', error);

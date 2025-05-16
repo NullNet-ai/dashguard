@@ -21,7 +21,7 @@ export const getStateTabStyles = (
   ),
   trigger: (isActive: boolean) =>
     cn(
-      'inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5',
+      'inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 gap-2',
       'text-sm font-medium transition-all',
       {
         'border-b-2 border-transparent hover:border-primary/30':
@@ -37,5 +37,5 @@ export const getStateTabStyles = (
       }
     ),
   content: cn('mt-4'),
-  icon: cn('mr-2 inline-flex items-center'),
+  icon: cn('inline-flex items-center'),
 })

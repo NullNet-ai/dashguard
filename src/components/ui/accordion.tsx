@@ -13,7 +13,7 @@ const Accordion = AccordionPrimitive.Root;
 const accordionItemVariants = cva("", {
   variants: {
     variant: {
-      default: "border-b transition-all duration-200", // Added border-bottom
+      default: "transition-all duration-200", // Added border-bottom
       bordered: "border border-input rounded-lg mb-3 overflow-hidden transition-all duration-200 hover:border-primary/50",
       minimal: "mb-3 transition-all duration-200", // No border, completely minimal
       shadow: "rounded-lg mb-3 shadow-sm hover:shadow-md transition-shadow duration-200 bg-background",
