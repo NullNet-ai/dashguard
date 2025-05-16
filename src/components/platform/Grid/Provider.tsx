@@ -630,7 +630,7 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
-    advanceFilter,
+    advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
     defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,

@@ -23,7 +23,7 @@ export default async function Page() {
   const _pluck = [
     'id',
     'code',
-    'name',
+    // 'name',
     'categories',
     'status',
     'created_date',
@@ -60,7 +60,7 @@ export default async function Page() {
         defaultValues: {
           id: 'code',
         },
-        paginationType: 'default',
+        // paginationType: 'default',
         enableAutoCreate: true,
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
