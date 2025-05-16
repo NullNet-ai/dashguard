@@ -34,6 +34,7 @@ import {
 } from './types';
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
+import { useRouter } from 'next/navigation';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -66,6 +67,8 @@ export default function GridProvider({
   gridKey,
   customCreateButton,
 }: IProps) {
+  const router = useRouter();
+
   const _defaultSorting = defaultSorting?.length
     ? defaultSorting
     : [
@@ -507,12 +510,17 @@ export default function GridProvider({
         setCreateLoading(false);
         return;
       }
-      await Create({
+      const route = await Create({
         entity: config?.entity,
         defaultValues: config?.defaultValues,
         enableAutoCreate: config?.enableAutoCreate,
         is_from_grid: true,
       });
+
+      if(!config?.enableAutoCreate) {
+        router.push(route)
+        return;
+      }
     } catch (error) {
       console.error('An error occurred while creating a record', error);
       setCreateLoading(false);
