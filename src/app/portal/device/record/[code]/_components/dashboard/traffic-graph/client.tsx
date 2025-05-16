@@ -45,8 +45,8 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const [_resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
   const [loading, setLoading] = useState<boolean>(false)
-  const [filterId, setFilterID] = useState('01JP0WDHVNQAVZN14AA')
-  const [filterUpdateId, setFilterUpdateId] = useState("01JP0WDHVNQAVZN14AA")
+  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
+  // const [filterUpdateId, setFilterUpdateId] = useState("01JNQ9WPA2JWNTC27YCTCYC1FE")
   const [token, setToken] = React.useState<string | null>(null)
   const [orgID, setOrgID] = React.useState<string | null>(null)
   const [filteredData, setFilteredData] = React.useState<any[]>([])
@@ -98,7 +98,6 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
           if(typeof data !== 'string')return
     
           setFilterID(data)
-    
       
           }
         const setSBy = (data:any) => {
@@ -106,21 +105,25 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
         }
     
         eventEmitter.on(`traffic_graph_filter_id`, data => setFID(data))
-        eventEmitter.on('traffic_graph_filter_manage_filter', data => 
-          setFilterUpdateId(data?.modifyFilterDetails?.id)
-        )
+        // eventEmitter.on('traffic_graph_filter_manage_filter', data => 
+        //   setFilterUpdateId(data?.modifyFilterDetails?.id)
+        // )
         
         eventEmitter.on('traffic_graph_search', setSBy)
         return () => {
           eventEmitter.off(`traffic_graph_filter_id`, setFID)
-          eventEmitter.off(`traffic_graph_filter_manage_filter`, setFID)
+          // eventEmitter.off(`traffic_graph_filter_manage_filter`, setFID)
           eventEmitter.off(`traffic_graph_search`, setSBy)
         }
       }, [eventEmitter])
-  
+
+      useEffect(() => {
+        setFilterID(filterId)
+      }, [filterId]);
+
   const timeRangeFormat = React.useMemo(() => {
     setResolution(null)
-    if(filterId === '01JP0WDHVNQAVZN14AA') {
+    if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
       return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()})
     }
     return getLastTimeStamp({count: time_count, unit: time_unit})
@@ -172,7 +175,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
 
   useEffect(() => {
-    if (!socket || !defaultValues?.id || !orgID || filterId !== '01JP0WDHVNQAVZN14AA') return
+    if (!socket || !defaultValues?.id || !orgID || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return
    
     socket.on( `traffic_graph_connection-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
       const updated_filtered_data =  updateFilteredData(filteredData, data)
