@@ -76,6 +76,31 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
 
+
+  // Define the query with proper options
+  const { data, isSuccess } = api.tab.getSubTabs.useQuery(
+    {
+      current_context: `/${portal}/${entity}`,
+    },
+    {
+      refetchOnMount: true
+    }
+  );
+
+  useEffect(() => {
+    if (isSuccess) {
+      const newTablist = data?.tabs?.map((tab: any) => {
+        return {
+        ...tab,
+          current: tab.href === newPathname,
+          is_current: tab.href === newPathname,
+        };
+      });
+
+      setTablists(newTablist);
+    }
+  }, [isSuccess, data, newPathname])
+
   const conWidth = useMemo(
     () => ({
       width: `calc(100vw - ${open ? '320px' : '140px'} ${width && isOpen && isPinned ? `- ${width} ` : ''})`,
@@ -179,6 +204,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
       (tab) => tab.href === newPathname + queryParams,
     );
     if (!pathExist && application !== 'grid') {
+      
       const newTablist = [...tablists];
       const newTab = {
         name: code || 'New Tab',
