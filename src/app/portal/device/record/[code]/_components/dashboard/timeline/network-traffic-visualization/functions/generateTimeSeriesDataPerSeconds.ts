@@ -1,219 +1,162 @@
-export function generateTimeSeriesData(sampleData: any, resolution: string, timeCount: number = 60) {
-  const _resolution = ['1h', '1m', '1s'].includes(resolution) ? resolution : '1h';
-  const timeUnit = _resolution === '1h' ? 3600 : _resolution === '1m' ? 60 : 1; // seconds
-  // Create a map to store data points by time key
+export function generateTimeSeriesDataForLiveData(sampleData: any, resolution: string, time_count: number, time_unit: string) {
+
   const timeMap: any = {};
-  
-  // Use the provided timeCount (e.g., 12 for hours)
-  const boxCount = timeCount > 0 ? timeCount : 60;
-  
-  if (sampleData.length === 0) {
-    // Handle empty data case
-    const currentDate = new Date();
-    const hour = currentDate.getHours().toString().padStart(2, '0');
-    const minute = currentDate.getMinutes().toString().padStart(2, '0');
-    
-    // Generate empty time slots based on resolution
-    for (let i = 0; i < boxCount; i++) {
-      let timeKey;
-      if (_resolution === '1h') {
-        // For hourly resolution, use hour slots
-        const hourVal = ((parseInt(hour) + i) % 24).toString().padStart(2, '0');
-        timeKey = `${hourVal}:00:00`;
-      } else if (_resolution === '1m') {
-        // For minute resolution, use minute slots
-        const minuteVal = ((parseInt(minute) + i) % 60).toString().padStart(2, '0');
-        timeKey = `${hour}:${minuteVal}:00`;
-      } else {
-        // For second resolution, use second slots
-        const secondVal = i.toString().padStart(2, '0');
-        timeKey = `${hour}:${minute}:${secondVal}`;
-      }
-      timeMap[timeKey] = 0;
-    }
-  } else if (sampleData.length === 1) {
-    // Handle single data point case
-    const bucketTime = sampleData[0].bucket.split(' ')[1]; 
-    const hour = bucketTime.substring(0, 2); 
+
+  if (sampleData.length === 1) {
+    const bucketTime = sampleData[0].bucket.split(' ')[1];
+    const hour = bucketTime.substring(0, 2);
     const minute = bucketTime.substring(3, 5);
+
+    let timePoints = 0;
+    const unit = resolution.slice(-1); // Get the last character (unit: 's', 'm', or 'h')
+
+    switch (unit) {
+      case 's': // Seconds
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const seconds = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minute}:${seconds}`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'm': // Minutes
+        timePoints = 60;
+        for (let i = 0; i < timePoints; i++) {
+          const minutes = i.toString().padStart(2, '0');
+          const timeKey = `${hour}:${minutes}:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      case 'h': // Hours
+        timePoints = 24;
+        for (let i = 0; i < timePoints; i++) {
+          const hours = i.toString().padStart(2, '0');
+          const timeKey = `${hours}:00:00`;
+          timeMap[timeKey] = 0;
+        }
+        break;
+
+      default:
+        console.error("Invalid resolution unit");
+        return [];
+    }
+
     const second = bucketTime.substring(6, 8);
-    
-    if (_resolution === '1h') {
-      // For hourly resolution, create hour slots
-      for (let i = 0; i < boxCount; i++) {
-        const hourVal = ((parseInt(hour) + i) % 24).toString().padStart(2, '0');
-        const timeKey = `${hourVal}:00:00`;
-        timeMap[timeKey] = 0;
-      }
-      
-      // Set the actual data point in the hourly resolution
-      const dataTimeKey = `${hour}:00:00`;
-      if (timeMap[dataTimeKey] !== undefined) {
-        timeMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
-      }
-    } else if (_resolution === '1m') {
-      // For minute resolution, create minute slots
-      for (let i = 0; i < boxCount; i++) {
-        const minuteVal = ((parseInt(minute) + i) % 60).toString().padStart(2, '0');
-        const timeKey = `${hour}:${minuteVal}:00`;
-        timeMap[timeKey] = 0;
-      }
-      
-      // Set the actual data point
-      const dataTimeKey = `${hour}:${minute}:00`;
-      if (timeMap[dataTimeKey] !== undefined) {
-        timeMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
-      }
-    } else {
-      // For second resolution
-      for (let i = 0; i < boxCount; i++) {
-        const secondVal = ((parseInt(second) + i) % 60).toString().padStart(2, '0');
-        const timeKey = `${hour}:${minute}:${secondVal}`;
-        timeMap[timeKey] = 0;
-      }
-      
-      // Set the actual data point
-      const dataTimeKey = `${hour}:${minute}:${second}`;
-      if (timeMap[dataTimeKey] !== undefined) {
-        timeMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
-      }
-    }
+    const dataTimeKey =
+      unit === 's'
+        ? `${hour}:${minute}:${second}`
+        : unit === 'm'
+        ? `${hour}:${minute}:00`
+        : `${hour}:00:00`;
+
+    timeMap[dataTimeKey] = sampleData[0]?.bandwidth ? parseInt(sampleData[0].bandwidth) : 0;
   } else {
-    // Handle multiple data points
-    // First, establish the time range based on first data point
     const firstBucket = sampleData[0]?.bucket.split(' ')[1];
-    const hour = firstBucket ? firstBucket.substring(0, 2) : '00'; 
+    const hour = firstBucket ? firstBucket.substring(0, 2) : '00';
     const minute = firstBucket ? firstBucket.substring(3, 5) : '00';
-    const second = firstBucket ? firstBucket.substring(6, 8) : '00';
-    
-    // Create the appropriate time slots based on resolution
-    if (_resolution === '1h') {
-      // For hourly resolution, create hour slots
-      for (let i = 0; i < boxCount; i++) {
-        const hourVal = ((parseInt(hour) + i) % 24).toString().padStart(2, '0');
-        const timeKey = `${hourVal}:00:00`;
-        timeMap[timeKey] = 0;
-      }
-    } else if (_resolution === '1m') {
-      // For minute resolution, create minute slots
-      for (let i = 0; i < boxCount; i++) {
-        const minuteVal = ((parseInt(minute) + i) % 60).toString().padStart(2, '0');
-        const timeKey = `${hour}:${minuteVal}:00`;
-        timeMap[timeKey] = 0;
-      }
-    } else {
-      // For second resolution
-      for (let i = 0; i < boxCount; i++) {
-        const secondVal = ((parseInt(second) + i) % 60).toString().padStart(2, '0');
-        const timeKey = `${hour}:${minute}:${secondVal}`;
+
+    let timePoints = 0;
+    const unit = resolution.slice(-1);
+
+    if(unit === 's') {
+      timePoints = 60;
+      for (let i = 0; i < timePoints; i++) {
+        const seconds = i.toString().padStart(2, '0');
+        const timeKey = `${hour}:${minute}:${seconds}`;
         timeMap[timeKey] = 0;
       }
     }
-    
-    // Fill in the actual data points
+
     sampleData.forEach((item: Record<string, any>) => {
-      if (!item.bucket) return;
-      
       const bucketTime = item.bucket.split(' ')[1];
-      if (!bucketTime) return;
-      
-      // Determine the appropriate key based on resolution
-      let timeKey;
-      if (_resolution === '1h') {
-        const hour = bucketTime.substring(0, 2);
-        timeKey = `${hour}:00:00`;
-      } else if (_resolution === '1m') {
-        const hour = bucketTime.substring(0, 2);
-        const minute = bucketTime.substring(3, 5);
-        timeKey = `${hour}:${minute}:00`;
-      } else {
-        timeKey = bucketTime;
-      }
-      
-      if (timeMap[timeKey] !== undefined) {
-        timeMap[timeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
+      const dataTimeKey =
+        unit === 's'
+          ? bucketTime
+          : unit === 'm'
+          ? `${bucketTime.substring(0, 5)}:00`
+          : `${bucketTime.substring(0, 2)}:00:00`;
+
+      if (timeMap[dataTimeKey] !== undefined) {
+        timeMap[dataTimeKey] = item?.bandwidth ? parseInt(item?.bandwidth) : 0;
       }
     });
   }
-  
-  // Convert map to array and sort by time
-  const result: any = [];
-  const sortedKeys = Object.keys(timeMap).sort();
-  for (const timeKey of sortedKeys) {
-    result.push({
+
+  // Convert timeMap to an array
+  const timeSeriesArray = Object.keys(timeMap).map((timeKey) => ({
+    time: timeKey,
+    bandwidth: timeMap[timeKey],
+  }));
+
+  return timeSeriesArray;
+}
+
+
+export function generateTimeSeriesData(sampleData: any, resolution: string, time_count: number, time_unit: string) {
+  const timeMap: any = {};
+
+  const resolution_value = parseInt(resolution.slice(0, -1)); // Extract the numeric value of the resolution
+  const resolution_unit = resolution.slice(-1); // Extract the unit ('h', 'm', 's')
+
+  if (isNaN(resolution_value) || !['h', 'm', 's'].includes(resolution_unit)) {
+    throw new Error('Invalid resolution format. Expected format: <number><unit> (e.g., 4h, 30m, 1s)');
+  }
+
+  // Calculate total intervals dynamically based on time_unit and resolution
+  let totalIntervals = (() => {
+    if (time_unit === 'day') {
+      return (24 * 60 * 60) / resolution_value; // Total seconds in a day divided by resolution
+    } else if (time_unit === 'hour') {
+      return (60 * 60) / resolution_value; // Total seconds in an hour divided by resolution
+    } else if (time_unit === 'minute') {
+      return 60 / resolution_value; // Total seconds in a minute divided by resolution
+    }
+    return 1; // Default fallback
+  })();
+
+  // Special case: Limit to 60 time points if time_count = 1, time_unit = day, and resolution = 1s
+  if (time_count === 1 && time_unit === 'day' && resolution_unit === 's') {
+    totalIntervals = 60; // Limit to 60 time points
+  }
+
+  // Start from the most recent time in sampleData or the current date
+  let currentDate = sampleData.length > 0
+    ? new Date(sampleData[0].bucket) // Use the first bucket time if sampleData exists
+    : new Date(); // Otherwise, use the current time
+  currentDate.setSeconds(0, 0); // Reset seconds and milliseconds to 0
+
+  // Generate the full range of time intervals
+  for (let i = 0; i < totalIntervals; i++) {
+    const formattedDate = currentDate.toISOString().replace('T', ' ').slice(0, 19); // Format as YYYY-MM-DD HH:mm:ss
+    timeMap[formattedDate] = 0; // Initialize with 0 bandwidth
+
+    // Decrement the time by the resolution
+    if (resolution_unit === 's') {
+      currentDate.setSeconds(currentDate.getSeconds() - resolution_value);
+    } else if (resolution_unit === 'm') {
+      currentDate.setMinutes(currentDate.getMinutes() - resolution_value);
+    } else if (resolution_unit === 'h') {
+      currentDate.setHours(currentDate.getHours() - resolution_value);
+    }
+  }
+
+  // Fill in the sample data into the timeMap
+  sampleData.forEach((item: Record<string, any>) => {
+    const bucketTime = item.bucket; // Use bucket time directly as it is already in UTC
+    if (timeMap[bucketTime] !== undefined) {
+      timeMap[bucketTime] = item?.bandwidth ? parseInt(item?.bandwidth, 10) : 0;
+    }
+  });
+
+  // Convert timeMap to an array
+  const timeSeriesArray = Object.keys(timeMap)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime()) // Sort by time
+    .map((timeKey) => ({
       time: timeKey,
       bandwidth: timeMap[timeKey],
-    });
-  }
-  
-  // Ensure we have exactly the requested number of boxes
-  if (result.length > boxCount) {
-    return result.slice(0, boxCount);
-  } else if (result.length < boxCount) {
-    // Fill with empty data if needed
-    const lastTime = result.length > 0 ? result[result.length - 1].time : '00:00:00';
-    const [hour, minute, second] = lastTime.split(':').map((t: any) => parseInt(t));
-    
-    for (let i = result.length; i < boxCount; i++) {
-      // Add additional time slots based on the last time and resolution
-      let newHour: any = hour;
-      let newMinute: any = minute;
-      let newSecond: any = second;
-      
-      if (_resolution === '1h') {
-        newHour = (newHour + 1) % 24;
-      } else if (_resolution === '1m') {
-        newMinute = (newMinute + 1) % 60;
-        if (newMinute === 0) newHour = (newHour + 1) % 24;
-      } else {
-        newSecond = (newSecond + 1) % 60;
-        if (newSecond === 0) {
-          newMinute = (newMinute + 1) % 60;
-          if (newMinute === 0) newHour = (newHour + 1) % 24;
-        }
-      }
-      
-      const timeKey = `${newHour.toString().padStart(2, '0')}:${newMinute.toString().padStart(2, '0')}:${newSecond.toString().padStart(2, '0')}`;
-      result.push({
-        time: timeKey,
-        bandwidth: 0,
-      });
-    }
-  }
-  
-  return result;
-}
+    }));
 
-// Function to generate nested time series data for hierarchical visualization
-export function generateNestedTimeSeriesData(sampleData: any, parentResolution: string, childResolution: string, parentCount: number = 12, childCount: number = 60) {
-  // First generate the parent-level time series (e.g., 12 hours)
-  const parentTimeSeries = generateTimeSeriesData(sampleData, parentResolution, parentCount);
-  
-  // For each parent time slot, generate child-level time series (e.g., 60 seconds in each minute)
-  return parentTimeSeries.map((parentSlot: any) => {
-    const [hour, minute] = parentSlot.time.split(':');
-    
-    // Filter sample data relevant to this parent time slot
-    const relevantSampleData = sampleData.filter((item: Record<string, any>) => {
-      if (!item.bucket) return false;
-      const bucketTime = item.bucket.split(' ')[1];
-      if (!bucketTime) return false;
-      
-      if (parentResolution === '1h') {
-        return bucketTime.startsWith(`${hour}:`);
-      } else if (parentResolution === '1m') {
-        return bucketTime.startsWith(`${hour}:${minute}`);
-      }
-      return false;
-    });
-    
-    // Generate child time series for this parent slot
-    const childTimeSeries = generateTimeSeriesData(relevantSampleData, childResolution, childCount);
-    
-    return {
-      ...parentSlot,
-      children: childTimeSeries
-    };
-  });
+  return timeSeriesArray;
 }
-
