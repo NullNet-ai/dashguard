@@ -785,8 +785,9 @@ export const contactRouter = createTRPCRouter({
             },
           },
         })
-        .join({
+        .nestedJoin({
           type: 'left',
+          nested: true,
           field_relation: {
             to: {
               entity: 'user_roles',
