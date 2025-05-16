@@ -233,9 +233,10 @@ export default function MyVerticalStepper() {
                                   data-test-id={testIDFormatter(
                                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
                                   )}
+                                  className='p-0 gap-2'
                                   iconPosition='right'
                                 >
-                                  <span className="text-sm font-medium sm:block">
+                                  <span className="text-sm font-bold sm:block">
                                     {label
                                       ? label
                                       : "Description of Step " + stepIndex}

@@ -32,7 +32,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div>
       <p>
-        <strong> Department: </strong>
+        <span className='text-slate-400'> Department: </span>
         &nbsp;{" "}
         {organizations?.length
           ? organizations
