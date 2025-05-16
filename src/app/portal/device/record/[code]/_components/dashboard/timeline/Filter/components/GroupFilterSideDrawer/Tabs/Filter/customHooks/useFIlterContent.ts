@@ -109,7 +109,6 @@ const useFilterContentActions = (filter_type: string) => {
 
   // Watch for changes and update filter
   form.watch((data: any, {name}) => {
-    console.log('%c Line:145 🍏 data', 'color:#42b983', data);
     if (data.filterGroups) {
       // Check if the changed field is either 'field' or 'operator'
       // if (name?.includes('.field') || name?.includes('.operator')) {

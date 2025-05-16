@@ -43,7 +43,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
         const remote_access = ['console', 'shell']
 
         if (remote_access?.includes(remote_access_type)) {
-          const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/wss/`
+          const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/ws/`
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`

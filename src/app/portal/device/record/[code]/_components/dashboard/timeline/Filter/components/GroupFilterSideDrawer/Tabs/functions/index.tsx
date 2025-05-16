@@ -219,7 +219,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                           // { label: '30 Days', value: '30d' },
                           { label: '12h', value: '12h' },
                           { label: '1d', value: '1d' },
-                          { label: '7d', value: '7d' },
+                          // { label: '7d', value: '7d' },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,
                         [`${prefix}.Resolution`]: resolutionOptions,
