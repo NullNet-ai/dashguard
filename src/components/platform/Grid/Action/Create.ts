@@ -42,7 +42,7 @@ export async function Create({
 
   // await api.contacts.generateTestContact();
   if (!enableAutoCreate) {
-    redirect(`/portal/${entity}/wizard/new/1`);
+    return `/portal/${entity}/wizard/new/1`
   }
   const response = await api.wizard.createEntity({
     entity,
@@ -53,6 +53,7 @@ export async function Create({
     // redirect(`/portal/${entity}/wizard/${response?.data?.[0]?.id}/1`);
     redirect(`/portal/${entity}/wizard/${response?.data?.[0]?.code}/1`);
   }
+
   redirect(
     // `/portal/${mainEntity}/${entity}/wizard/${response?.data?.[0]?.id}/1`,
     `/portal/${mainEntity}/${entity}/wizard/${response?.data?.[0]?.code}/1`,
