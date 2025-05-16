@@ -16,7 +16,7 @@ class SocketClient {
       console.info('SOCKET_URL is not set');
       return;
     }
-    this.socket = io('pubsub.events.dnamicro.net', {
+    this.socket = io(SOCKET_URL, {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
@@ -60,12 +60,12 @@ class SocketClient {
 
   public onDisconnect() {
     console.info('Socket disconnected');
-    setTimeout(() => {
-      if (!this.socket?.connected) {
-        console.info('Attempting to reconnect...');
-        this.socket?.connect();
-      }
-    }, 100);
+    // setTimeout(() => {
+    //   if (!this.socket?.connected) {
+    //     console.info('Attempting to reconnect...');
+    //     this.socket?.connect();
+    //   }
+    // }, 100);
   }
 
   private onConnect() {
