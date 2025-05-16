@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '~/lib/utils';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
 import {
@@ -113,7 +113,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
       const newData = params || tabs;
 
       // clear width, more width, and search by
-      let totalWidth = 32;
+      let totalWidth = 0;
       const containerWidth = parentRef.current?.offsetWidth || 0;
 
       for (let index = 0; index < newData?.length; index++) {
@@ -152,30 +152,19 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
 
       if (JSON.stringify(tablists) !== JSON.stringify(items)) {
         if (items?.length) {
-          // setTablists(items);
           updatecachedItems(items);
-          if (activeTab) {
-            const href = items?.find((item) => item.current)?.href;
-            router.push(href);
-          }
         }
       } else {
         updatecachedItems(items);
-        if (activeTab) {
-          const href = items?.find((item) => item.current)?.href;
-          router.push(href);
-        }
       }
     };
-    if (isClient) {
-      handleResize();
-    }
+    handleResize();
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists, isClient]);
+  }, [tablists]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
@@ -210,10 +199,6 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     }
     return false;
   }, [tablists, searchValue]);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   return (
     <div
