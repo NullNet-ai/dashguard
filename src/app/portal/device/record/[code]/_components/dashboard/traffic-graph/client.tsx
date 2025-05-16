@@ -117,10 +117,6 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
         }
       }, [eventEmitter])
 
-      useEffect(() => {
-        setFilterID(filterId)
-      }, [filterId]);
-
   const timeRangeFormat = React.useMemo(() => {
     setResolution(null)
     if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
