@@ -41,10 +41,13 @@ export default function FormRadio({
 
   useEffect(() => {
     const formValue = form.getValues(fieldConfig.name);
-    if (formValue && (!selectedValue || selectedValue !== String(formValue))) {
-      setSelectedValue(String(formValue));
+    if (formValue) {
+      const stringFormValue = String(formValue);
+      if (!selectedValue || selectedValue !== stringFormValue) {
+        setSelectedValue(stringFormValue);
+      }
     }
-  }, [form, fieldConfig.name, selectedValue]);
+  }, [form, fieldConfig.name]);
 
   const withInput = radioOptions?.[fieldConfig?.id]?.find((option) => option.with_input);
 
@@ -83,7 +86,8 @@ export default function FormRadio({
                   <div key={index} className={`flex gap-2 ${fieldConfig.radioOrientation === "vertical" && withInput && "flex-col"}`}>
                     <FormItem
                       className={cn('flex items-center gap-2 space-y-0', {
-                        'items-baseline': fieldConfig.radioOrientation === "vertical" && option.with_input
+                        'items-center': fieldConfig.radioOrientation === "vertical" && option.with_input && selectedValue !== String(option.value),
+                        'items-baseline': fieldConfig.radioOrientation === "vertical" && option.with_input && selectedValue === String(option.value)
                       })}
                     >
                       <FormControl>
@@ -114,7 +118,7 @@ export default function FormRadio({
                                 placeholder={option.inputPlaceholder || 'Please specify'}
                                 data-test-id={`${formKey}-input-${option.value}-${fieldConfig.name}`}
                                 disabled={formRenderProps.field.disabled}
-                                className="max-w-max h-full"
+                                className="max-w-max h-full rounded-none border-t-0 border-x-0 focus-visible:ring-transparent"
                                 onFocus={() => {
                                   if (selectedValue !== String(option.value)) {
                                     setSelectedValue(String(option.value));
