@@ -1,7 +1,7 @@
 {
   "app_name": "components__ui",
-  "tag": "2.8.1-rc.2<unreleased>",
-  "branch": "unreleased/fix4208/2.8.1-rc.2<unreleased>",
-  "message": "width must be equally divided on the whole navigation bar.",
+  "tag": "2.8.1-rc.3<unreleased>",
+  "branch": "unreleased/fix4265/2.8.1-rc.3<unreleased>",
+  "message": "fix:  Select - the dropdown won't close after selecting an option",
   "publish_name": "Save Ducto"
 }

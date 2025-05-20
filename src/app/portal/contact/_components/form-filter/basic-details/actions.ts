@@ -95,10 +95,8 @@ export const closeCurrentInnerClassTab = async ({
       entity: mainEntity!,
       code: code,
     })
-    redirect(`/portal/contact/wizard/${code}/2`);
   }
-
-  redirect(`/portal/contact/wizard/${code}/1`);
+ return;
 };
 
 export const fetchRecords = async ({

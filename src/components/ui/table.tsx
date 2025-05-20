@@ -28,7 +28,7 @@ const Table = React.forwardRef<
     },
     ref,
   ) => (
-    <div className={responsive ? 'w-full overflow-auto' : undefined}>
+    <div className={responsive ? 'w-full' : undefined}>
       <table
         ref={ref}
         className={cn(

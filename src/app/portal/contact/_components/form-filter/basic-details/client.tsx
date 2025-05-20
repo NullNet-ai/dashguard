@@ -57,37 +57,45 @@ export default function ContactDetails({
 }: IFormProps) {
   const toast = useToast();
   const router = useRouter();
+  const utils = api.useUtils();
   const handleSave = async ({
     data,
     action_type,
     form,
-  }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
-    any[]
-  > => {
+  }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<any[]> => {
     try {
       const response = await saveContactDetails(data);
+      
+      // Handle validation errors
       if (response?.existing) {
-        form?.setError('phones', {
-          type: 'manual',
-          message: 'Phone Number already exists.',
-        });
-        form?.setError('emails', {
-          type: 'manual',
-          message: 'Email already exists.',
+        ['phones', 'emails'].forEach(field => {
+          form?.setError(field, {
+            type: 'manual',
+            message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
+          });
         });
         return [];
       }
-
-      if(action_type === "Next") {
-        router.replace(`/portal/contact/wizard/${response.code}/1`);
-      }
-
-      if(action_type && ['Create', 'Next', 'Paste'].includes(action_type) && response?.code) {
+      
+      // Early return if no code in response
+      if (!response?.code) return [response];
+      
+      const wizardPath = `/portal/contact/wizard/${response.code}`;
+      
+      // Handle navigation based on action type
+      if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
         await closeCurrentInnerClassTab({
-          customPathname : `/portal/contact/wizard/${response.code}/1`,
-          code: response.code!,
+          customPathname: `${wizardPath}/1`,
+          code: response.code,
           action_type,
         });
+        
+        await utils.invalidate() // use to ignore the cache
+        const targetPath = action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
+        router.push(targetPath);
+        
+        // For Next action, we've already navigated, so return empty array
+        if (action_type === 'Next') return [];
       }
       
       return [response];
