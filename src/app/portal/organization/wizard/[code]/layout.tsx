@@ -1,22 +1,27 @@
-import { headers } from "next/headers";
+import { headers } from 'next/headers'
 
-import PlatformWizard from "~/components/platform/Wizard";
-import { type IWizardLayoutProps } from "../types";
-import organizationWizardSummary from "../(summary)/wizard-summary-config";
+import PlatformWizard from '~/components/platform/Wizard'
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
 
-const WizardLayout = (props: IWizardLayoutProps) => {
-  const { children } = props;
+import stepLabels from '../_config/stepLabels'
+import totalSteps from '../_config/totalSteps'
+import WizardSummaryComponent from '../_config/wizardSummaryConfig'
+import { type IWizardLayoutProps } from '../types'
 
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
+const WizardLayout = async (props: IWizardLayoutProps) => {
+  const { children } = props
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
+  const wizard_summary = WizardSummaryComponent()
 
-  const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
-
-  const _params = {
-    identifier: identifier!,
-    mainEntity: mainEntity!,
-  };
-  const wizard_summary = organizationWizardSummary(_params);
+  await stepValidator(
+    {
+      currentStep: currentStep!,
+      identifier: identifier!,
+      mainEntity: mainEntity!,
+    },
+  )
 
   return (
     <div>
@@ -24,20 +29,17 @@ const WizardLayout = (props: IWizardLayoutProps) => {
         config={{
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
-          totalSteps: 2,
-          enableAutoCreate: true,
+          totalSteps,
+          enableAutoCreate: false,
           entityName: mainEntity,
-          stepLabels: {
-            1: "Organization",
-            2: "Confirmation",
-          },
+          stepLabels,
         }}
         summary={wizard_summary}
       >
         {children}
       </PlatformWizard>
     </div>
-  );
-};
+  )
+}
 
-export default WizardLayout;
+export default WizardLayout

@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormBuilder }  from "~/components/platform/FormBuilder";
+import { FormBuilder } from "~/components/platform/FormBuilder";
 
 const FormSchema = z.object({
   multi_select_with_options: z
@@ -53,14 +53,44 @@ const sampleMultiSelectOptions = [
   { label: "Banana", value: "banana" },
   { label: "Elderberry", value: "elderberry" },
   { label: "Cherry", value: "cherry" },
+  { label: "Fig", value: "fig" },
+  { label: "Grape", value: "grape" },
+  { label: "Honeydew", value: "honeydew" },
+  { label: "Kiwi", value: "kiwi" },
+  { label: "Lemon", value: "lemon" },
+  { label: "Mango", value: "mango" },
+  { label: "Nectarine", value: "nectarine" },
+  { label: "Orange", value: "orange" },
+  { label: "Papaya", value: "papaya" },
+  { label: "Quince", value: "quince" },
+  { label: "Raspberry", value: "raspberry" },
+  { label: "Strawberry", value: "strawberry" },
+  { label: "Tomato", value: "tomato" },
+  { label: "Ugli Fruit", value: "ugli_fruit" },
+  { label: "Watermelon", value: "watermelon" },
 ];
 
 const sampleMultiSelectOptionsAlphabetical = [
-  { label: "Date", value: "date" },
   { label: "Apple", value: "apple" },
   { label: "Banana", value: "banana" },
-  { label: "Elderberry", value: "elderberry" },
   { label: "Cherry", value: "cherry" },
+  { label: "Date", value: "date" },
+  { label: "Elderberry", value: "elderberry" },
+  { label: "Fig", value: "fig" },
+  { label: "Grape", value: "grape" },
+  { label: "Honeydew", value: "honeydew" },
+  { label: "Kiwi", value: "kiwi" },
+  { label: "Lemon", value: "lemon" },
+  { label: "Mango", value: "mango" },
+  { label: "Nectarine", value: "nectarine" },
+  { label: "Orange", value: "orange" },
+  { label: "Papaya", value: "papaya" },
+  { label: "Quince", value: "quince" },
+  { label: "Raspberry", value: "raspberry" },
+  { label: "Strawberry", value: "strawberry" },
+  { label: "Tomato", value: "tomato" },
+  { label: "Ugli Fruit", value: "ugli_fruit" },
+  { label: "Watermelon", value: "watermelon" },
 ];
 export default function MultiSelectDetails({}) {
   return (
@@ -81,6 +111,25 @@ export default function MultiSelectDetails({}) {
         }}
         fields={[
           {
+            id: "multi_select_single",
+            formType: "multi-select",
+            name: "multi_select_single",
+            label: "Multi Select Single",
+            required: true,
+            isMultiSelectAlphabetical: false,
+            multiSelectMaxSelected: 1,
+            multiSelectOnMaxSelected: () => {
+              toast.error("Only one value can be selected");
+            },
+          },
+          {
+            id: "text",
+            formType: "input",
+            name: "text",
+            label: "Text",
+          },
+
+          {
             id: "single_select_options",
             formType: "select",
             name: "single_select_options",
@@ -94,18 +143,6 @@ export default function MultiSelectDetails({}) {
             name: "multi_select_with_options",
             label: "Multi Select with Options",
             required: true,
-          },
-          {
-            id: "multi_select_single",
-            formType: "multi-select",
-            name: "multi_select_single",
-            label: "Multi Select Single",
-            required: true,
-            isMultiSelectAlphabetical: false,
-            multiSelectMaxSelected: 1,
-            multiSelectOnMaxSelected: () => {
-              toast.error("Only one value can be selected");
-            },
           },
         ]}
       />

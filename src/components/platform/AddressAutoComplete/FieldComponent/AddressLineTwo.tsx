@@ -4,6 +4,7 @@ import { type IFieldComponentProps } from "./type";
 
 export default function AddressLineTwo({
   form,
+  fieldConfig,
   formKey,
 }: IFieldComponentProps) {
   const address_values = form.getValues("details.address_line_two");
@@ -18,7 +19,7 @@ export default function AddressLineTwo({
               data-test-id={formKey + "-" +  "inp-" + formRenderProps.field.name }
               formKey={formKey}
               fieldConfig={{
-                ...formRenderProps?.field,
+                ...fieldConfig,
                 placeholder: "Suite, Floor and Landmarks.",
                 label: "Address Line 2",
                 id: `details.address_line_two`,

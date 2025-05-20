@@ -1,19 +1,53 @@
-"use client";
+'use client';
 
-import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { ulid } from 'ulid';
+import { type z } from 'zod';
 
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { ContactPhoneEmailSchema, MultipleContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
-import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { closeCurrentInnerClassTab, removeRecord, saveContactDetails, selectRecord } from "./actions";
-import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from "./_config/columns";
-import SelectedView from "./components/SelectedView";
-import { api } from "~/trpc/react";
-import { StepOneUpdateCategory } from "../../forms/category-details/actions/updateCategory";
-import MultipleFormBuilder from "~/components/platform/FormBuilder/components/custom/FormFilter/MultipleFormBuilder";
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
+import { api } from '~/trpc/react';
+
+import { type IFormProps } from '../types';
+
+import gridColumns, { FIELD_FILTER_GRID_COLUMNS } from './_config/columns';
+import {
+  closeCurrentInnerClassTab,
+  removeRecord,
+  saveContactDetails,
+  selectRecord,
+} from './actions';
+import SelectedView from './components/SelectedView';
+import { useRouter } from 'next/navigation';
+
+const defaultAdvanceFilter = [
+  {
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Active'],
+    default: true,
+  },
+  {
+    operator: 'or',
+    type: 'operator',
+    default: true,
+  },
+  {
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Draft'],
+    default: true,
+  },
+];
 
 export default function ContactDetails({
   params,
@@ -21,38 +55,52 @@ export default function ContactDetails({
   selectedRecords,
   grid_data,
 }: IFormProps) {
-  const router = useRouter();
   const toast = useToast();
-
+  const router = useRouter();
+  const utils = api.useUtils();
   const handleSave = async ({
     data,
     action_type,
     form,
-  }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<
-    any[]
-  > => {
+  }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<any[]> => {
     try {
       const response = await saveContactDetails(data);
+      
+      // Handle validation errors
       if (response?.existing) {
-        form?.setError("phones", {
-          type: "manual",
-          message: "Phone Number already exists.",
-        });
-        form?.setError("emails", {
-          type: "manual",
-          message: "Email already exists.",
+        ['phones', 'emails'].forEach(field => {
+          form?.setError(field, {
+            type: 'manual',
+            message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
+          });
         });
         return [];
       }
-
-      if (action_type === "Create") {
+      
+      // Early return if no code in response
+      if (!response?.code) return [response];
+      
+      const wizardPath = `/portal/contact/wizard/${response.code}`;
+      
+      // Handle navigation based on action type
+      if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
         await closeCurrentInnerClassTab({
-          code: response.code!,
-        })
+          customPathname: `${wizardPath}/1`,
+          code: response.code,
+          action_type,
+        });
+        
+        await utils.invalidate() // use to ignore the cache
+        const targetPath = action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
+        router.push(targetPath);
+        
+        // For Next action, we've already navigated, so return empty array
+        if (action_type === 'Next') return [];
       }
+      
       return [response];
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
       return [];
     }
   };
@@ -65,14 +113,14 @@ export default function ContactDetails({
     filter_entity: string;
   }) => {
     try {
-      // await removeRecord();
+      await removeRecord();
       return {
         rows: [],
         filter_entity,
-        main_entity_id: "",
+        main_entity_id: '',
       };
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
     }
   };
 
@@ -93,37 +141,81 @@ export default function ContactDetails({
         main_entity_id,
       };
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
     }
   };
 
   return (
-    // <MultipleFormBuilder
     <FormBuilder
+      defaultValues={defaultValues}
+      enableFormRegisterToParent
+      fields={[
+        {
+          id: 'phones',
+          formType: 'phone-input',
+          placeholder: 'Phone Number',
+          name: 'phones',
+          label: 'Phone Number',
+          required: true,
+          gridPosition: 'left',
+          withGridFilter: true,
+          filterFieldConfig: {
+            entity: 'contact_phone_numbers',
+            field: 'raw_phone_number',
+          },
+        },
+        {
+          id: 'emails',
+          formType: 'email-input',
+          placeholder: 'Email',
+          name: 'emails',
+          label: 'Email',
+          required: true,
+          withGridFilter: true,
+          gridPosition: 'right',
+          filterFieldConfig: {
+            entity: 'contact_emails',
+            field: 'email',
+          },
+        },
+      ]}
       filterGridConfig={{
         selectedRecords,
-        statusesIncluded: ["Draft"], // Enable Selectable Record Status
-        actionType: "single-select",
-        // actionType: "multi-select",
+        statusesIncluded: ['Draft'],
+        actionType: 'single-select',
+        hideSearch: false,
         pluck: params?.pluck_fields,
-        filter_entity: "contact",
+        filter_entity: 'contact',
         is_same_entity_id: true,
         main_entity_id: params.id,
-        gridColumns: gridColumns,
+        gridColumns,
         fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
-        label: "Contacts",
-        // onClipboardPaste: (data, form, onSubmitFormGrid) => { // to modify pasting data
-        //   form.reset(data, {
-        //     keepDefaultValues: true,
-        //   });
-
-        //   form.handleSubmit((data: any) =>
-        //     onSubmitFormGrid(data, { action_type: "Paste" }),
-        //   )();
-        // },
-        async onSelectRecords({ filter_entity, main_entity_id, rows }) {
+        label: 'Contacts',
+        searchConfig: {
+          router: 'contact',
+          resolver: 'mainGrid',
+          query_params: {
+            entity: 'contact',
+            pluck: params?.pluck_fields,
+            default_advance_filters: defaultAdvanceFilter as {
+              entity: string;
+              operator: string;
+              type: string;
+              field: string;
+              values: string[];
+            }[],
+            default_sorting: [
+              {
+                id: 'created_date',
+                desc: true,
+                sort_key: 'created_date',
+              },
+            ],
+          },
+        },
+        onSelectRecords: async ({ filter_entity, main_entity_id, rows }) => {
           const response = (await handleSelectRecord({
             rows,
             filter_entity,
@@ -140,7 +232,11 @@ export default function ContactDetails({
             main_entity_id: response.main_entity_id,
           };
         },
-        async onRemoveSelectedRecords({ filter_entity, main_entity_id, rows }) {
+        onRemoveSelectedRecords: async ({
+          filter_entity,
+          main_entity_id,
+          rows,
+        }) => {
           const response = (await handleRemoveRecord({
             rows,
             filter_entity,
@@ -168,91 +264,36 @@ export default function ContactDetails({
             data ?? {};
           const resolvedData = {
             ...rest,
-            phone: [
+            phones: [
               {
                 raw_phone_number,
                 iso_code,
                 country_code,
               },
             ],
-            email: [
+            emails: [
               {
                 email,
               },
             ],
           };
+
           return resolvedData;
         },
         renderComponentSelected: (record) => {
-          // Selected View Component
           return <SelectedView record={record} />;
         },
-        grid_data: grid_data,
+        grid_data,
       }}
-      myParent={params.shell_type}
-      enableFormRegisterToParent
-      formProps={params}
-      formLabel="Basic Details"
-      handleSubmitFormGrid={handleSave}
       formKey="basicDetails"
-      // formSchema={MultipleContactPhoneEmailSchema}
+      formLabel="Basic Details"
+      formProps={params}
       formSchema={ContactPhoneEmailSchema}
-      defaultValues={defaultValues}
-      fields={[
-        {
-          id: "phones",
-          formType: "phone-input",
-          placeholder: "Phone Number",
-          name: "phones",
-          label: "Phone Number",
-          required: true,
-          gridPosition: "left",
-          withGridFilter: true,
-          filterFieldConfig: {
-            entity: "contact_phone_numbers",
-            field: "raw_phone_number",
-          },
-        },
-        {
-          id: "emails",
-          formType: "email-input",
-          placeholder: "Email",
-          name: "emails",
-          label: "Email",
-          required: true,
-          withGridFilter: true,
-          gridPosition: "right",
-          filterFieldConfig: {
-            entity: "contact_emails",
-            field: "email",
-          },
-        },
-      ]}
-      // customFormFilterViewFormActions={[
-      //
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // customFormFilterLockFormActions={[
-      //   {
-      //     label: "Custom Action",
-      //     onClick: () => {
-      //       console.log("Custom Action Clicked");
-      //     },
-      //     icon: <XIcon className="h-3 w-3 text-slate-500" strokeWidth={3} />,
-      //     disabled: false,
-      //     hidden: false,
-      //   },
-      // ]}
-      // features={{
-      //   enableAutoSelect : true
-      // }}
+      handleSubmitFormGrid={handleSave}
+      myParent={params.shell_type}
+      features={{
+        enableAutoSelect : true
+      }}
     />
   );
 }

@@ -1,28 +1,23 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField, type ISelectOptions } from "../../types";
+
 import {
   FormItem,
   FormLabel,
   FormMessage,
   useFormField,
 } from "~/components/ui/form";
-import {
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from "@headlessui/react";
-import { usePopper } from "react-popper";
-import { CheckIcon } from "@heroicons/react/20/solid";
 import { Badge } from "~/components/ui/badge";
-import React, { useMemo, useState } from "react";
-import { cn, formatFormTestID } from "~/lib/utils";
-import { ChevronDownIcon } from "lucide-react";
+import { useToast } from "~/context/ToastProvider";
+import { formatFormTestID } from "~/lib/utils";
+import { ComboSelect, type ComboSelectOption } from "~/components/ui/combo-select";
+
+import { createRecord } from "../../Actions/CreateRecord";
+import { type IField, type ISelectOptions } from "../../types";
 
 interface IProps {
   fieldConfig: IField;
@@ -45,63 +40,155 @@ export default function FormSelect({
   form,
 }: IProps) {
   form.watch(fieldConfig?.name);
+  const toast = useToast();
   const { error } = useFormField();
 
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
+  // Initialize options with useMemo to avoid unnecessary re-renders
+  const initialOptions = useMemo(() =>
+    selectOptions?.[fieldConfig?.name] ?? [],
+    [selectOptions, fieldConfig?.name]);
 
-  const isDisabled = fieldConfig.disabled || formRenderProps.field.disabled;
-  const isReadOnly = fieldConfig.readonly;
+  const [options, setOptions] = useState<ComboSelectOption[]>(initialOptions);
+  const [isCreateLoading, setIsCreateLoading] = useState(false);
+  const [, setUpdateCounter] = useState(0); // Counter to force re-render
 
-  const [referenceElement, setReferenceElement] = useState<any>(null);
-  const [popperElement, setPopperElement] = useState<any>(null);
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: "bottom-start", // Default placement
-    modifiers: [
-      {
-        name: "preventOverflow",
-        options: {
-          rootBoundary: "viewport",
-        },
-      },
-      {
-        name: "flip",
-        options: {
-          fallbackPlacements: ["top-start"],
-        },
-      },
-    ],
-  });
+  const isDisabled = fieldConfig.disabled ?? false;
+  const isReadOnly = fieldConfig.isCustomFormField
+    ? fieldConfig.readonly
+    : formRenderProps.field.disabled || fieldConfig.readonly;
 
   const SelectIcon = fieldConfig.selectIcon;
-  const filteredOptions = useMemo(() => {
-    return query === ""
-      ? selectOptions?.[fieldConfig?.name]
-          ?.sort((a, b) => a.label.localeCompare(b.label))
-          ?.slice(0, 250)
-          ?.filter((opt) => {
-            return !!opt?.label;
-          })
-      : selectOptions?.[fieldConfig?.name]
-          ?.filter((opt) => {
-            return opt.value.toLowerCase().includes(query.toLowerCase());
-          })
-          ?.sort((a, b) => a.label.localeCompare(b.label))
-          .slice(0, 5)
-          ?.filter((opt) => {
-            return !!opt?.label;
-          });
-  }, [fieldConfig?.name, query, selectOptions]);
 
-  const label = useMemo(() => {
-    return selectOptions?.[fieldConfig?.name]?.find(
-      (opt) => opt.value === formRenderProps?.field.value,
-    );
-  }, [formRenderProps?.field.value]);
+  // Helper function to sort options
+  const sortOptions = useCallback((opts: ISelectOptions[]) => {
+    const isNumeric = (str: string) => {
+      if (typeof str !== "string") return false;
+      return !isNaN(parseFloat(str)) && isFinite(Number(str));
+    };
 
-  const inputReadOnly = useMemo(() => {
-    return !fieldConfig?.selectSearchable || isReadOnly || isDisabled;
-  }, [fieldConfig?.selectSearchable, isReadOnly, isDisabled]);
+    return [...opts].sort((a, b) => {
+      // Check if both values are numeric strings
+      if (isNumeric(a.value) && isNumeric(b.value)) {
+        return Number(a.value) - Number(b.value);
+      }
+      // Fall back to alphabetical sorting if not numeric
+      return a.label?.localeCompare(b.label) ?? 0;
+    });
+  }, []);
+
+  useEffect(() => {
+    setOptions(initialOptions);
+  }, [initialOptions]);
+
+  // Convert ISelectOptions to ComboSelectOption
+  const comboOptions: ComboSelectOption[] = useMemo(() => {
+    return options.map(opt => ({
+      label: opt.label,
+      value: opt.value,
+      // Add any additional mappings needed
+      status: opt.status,
+      avatar: opt.avatar,
+      avatarFallback: opt.avatarFallback,
+      secondaryText: opt.secondaryText
+    }));
+  }, [options]);
+
+  // Find the selected value
+  const selectedValue = useMemo(() => {
+    const selectedOption = options?.find((opt) => opt.value === formRenderProps?.field.value);
+    return selectedOption ? {
+      label: selectedOption.label,
+      value: selectedOption.value,
+      // Add any additional properties needed for ComboSelectOption
+      status: selectedOption.status,
+      avatar: selectedOption.avatar,
+      avatarFallback: selectedOption.avatarFallback,
+      secondaryText: selectedOption.secondaryText
+    } : null;
+  }, [formRenderProps?.field.value, options]);
+
+  const createNewRecord = async () => {
+    if (!fieldConfig?.selectOnCreateRecord) {
+      toast.error("selectOnCreateRecord is not defined in fieldConfig");
+      return;
+    }
+
+    // Check if already creating to prevent multiple calls
+    if (isCreateLoading) {
+      return;
+    }
+
+    if (fieldConfig?.selectOnCreateValidate) {
+      const validation = await fieldConfig?.selectOnCreateValidate(query);
+      if (!validation?.valid) {
+        toast.error(validation?.message || "Invalid Input");
+        return;
+      }
+    }
+
+    setIsCreateLoading(true);
+    try {
+      let createdData = null;
+      if (typeof fieldConfig?.selectOnCreateRecord === "function") {
+        createdData = await fieldConfig?.selectOnCreateRecord(query);
+      } else {
+        const { entity, fieldIdentifier, customParams } =
+          fieldConfig?.selectOnCreateRecord ?? {};
+        createdData = (await createRecord({
+          entity,
+          fieldIdentifier,
+          data: {
+            ...(customParams ?? {}),
+            [fieldIdentifier]: query,
+          },
+        })) as ISelectOptions;
+      }
+
+      // Check if the option already exists in the options array to prevent duplicates
+      const alreadyExists = options.some(opt => opt.value === createdData?.value);
+      if (!alreadyExists && createdData) {
+        const newOptions = sortOptions([...options, createdData]);
+        setOptions(newOptions);
+        formRenderProps?.field.onChange(createdData?.value || "");
+        setQuery(""); // Clear the query
+        setUpdateCounter(prev => prev + 1); // Force re-render of ComboSelect
+      }
+    } catch (error) {
+      toast.error("Failed to create new record");
+      console.error("Error creating record:", error);
+    } finally {
+      setIsCreateLoading(false);
+    }
+  };
+
+  const isOptionsExist = options?.find(p => p.label?.toLowerCase() === query?.trim().toLowerCase());
+
+  // Create custom render functions for ComboSelect
+  const renderCreateOption = fieldConfig?.selectEnableCreate && query && !isOptionsExist ? (
+    <button
+      value={query}
+      className="block text-md w-full cursor-pointer truncate bg-primary text-white px-3 py-2 font-bold text-secondary-foreground hover:bg-primary hover:text-primary-foreground text-start"
+      data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+      onClick={() => {
+        createNewRecord();
+      }}
+    >
+      {isCreateLoading ? "Creating..." : `Create "${query}"`}
+    </button>
+  ) : null;
+
+
+  // Only show empty state when not creatable or when there's no query
+  const renderEmptyState = !fieldConfig?.selectEnableCreate || (fieldConfig?.selectEnableCreate && !query) ? (
+    <span
+      className="ms-3 text-md block truncate group-data-[selected]:font-semibold"
+      data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+    >
+      {fieldConfig?.label ? `No ${fieldConfig?.label} found.`
+        : "No more options."}
+    </span>
+  ) : null;
 
   return (
     <FormItem>
@@ -112,7 +199,7 @@ export default function FormSelect({
         >
           {fieldConfig?.label}
         </FormLabel>
-        {!!pillOptions?.length ? (
+        {pillOptions?.length ? (
           <>
             {pillOptions.map((option, index) => (
               <Badge
@@ -126,131 +213,44 @@ export default function FormSelect({
           </>
         ) : null}
       </div>
-      <Combobox
-        as="div"
-        value={
-          label || {
-            label: "",
-            value: "",
-          }
-        }
-        onChange={(value) => {
-          setTimeout(() => setOpen(false), 100);
-          setQuery("");
-          formRenderProps?.field.onChange(value?.value || "");
+
+      <ComboSelect
+        options={comboOptions}
+        value={selectedValue}
+        onChange={(newValue) => {
+          formRenderProps?.field?.onChange(newValue?.value || "");
         }}
+        placeholder={fieldConfig.placeholder}
         disabled={isDisabled}
-      >
-        <div className="relative mt-2">
-          {SelectIcon && (
-            <SelectIcon
-              className={cn(
-                "absolute left-2 top-2.5 size-5 text-muted-foreground",
-                {
-                  "opacity-50": isDisabled,
-                },
-              )}
-              aria-hidden="true"
-            />
-          )}
-          <ComboboxInput
-            placeholder={fieldConfig.placeholder}
-            readOnly={inputReadOnly}
-            disabled={isDisabled}
-            ref={setReferenceElement}
-            className={cn(
-              "block w-full rounded-md border-border  focus:border-primary focus:ring-primary py-1.5 pl-8 pr-12 text-base text-foreground placeholder:text-muted-foreground sm:text-sm/6",
-              {
-                "outline-destructive": error,
-                "border-destructive": error,
-                "cursor-not-allowed": isDisabled,
-                "cursor-text": isReadOnly,
-              },
-            )}
-            onClick={() => {
-              if (isDisabled || isReadOnly) return;
-              setOpen(true);
-            }}
-            onChange={(event) => setQuery(event.target.value)}
-            onBlur={() => {
-              setTimeout(() => setOpen(false), 100);
-              setQuery("");
-            }}
-            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
-            // @ts-expect-error - Type 'string' is not assignable to type 'undefined'.
-            displayValue={(value) => value?.label}
-          />
-          <ComboboxButton
-            disabled={isDisabled}
-            className={cn(
-              "inset-y-0 right-0 flex w-full items-center rounded-r-md focus:outline-none",
-              {
-                "cursor-not-allowed": isDisabled,
-                "cursor-default": isReadOnly,
-              },
-            )}
-            data-test-id={`${formKey}-btn-${fieldConfig.name}`}
-          >
-            <ChevronDownIcon
-              className={cn("absolute right-2 top-2.5 size-5 text-muted-foreground", {
-                "opacity-50": isDisabled || isReadOnly,
-              })}
-              aria-hidden="true"
-            />
-          </ComboboxButton>
-          {!(isDisabled || isReadOnly) &&
-            (filteredOptions?.length ? (
-              <ComboboxOptions
-                static={open}
-                ref={setPopperElement}
-                style={styles.popper}
-                {...attributes.popper}
-                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-background py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-                data-test-id={`${formKey}-opts-${fieldConfig.name}`}
-              >
-                {filteredOptions?.slice(0, 700).map((opt) => (
-                  <ComboboxOption
-                    key={opt?.value}
-                    value={opt}
-                    disabled={isDisabled || isReadOnly}
-                    className={cn(
-                      "group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none",
-                      {
-                        "cursor-not-allowed": isDisabled,
-                        "cursor-default": isReadOnly,
-                      },
-                    )}
-                    data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-${fieldConfig.name}`}
-                  >
-                    <span
-                      className="block truncate group-data-[selected]:font-semibold"
-                      data-test-id={`${formKey}-opt-${formatFormTestID(opt.value)}-lbl-${fieldConfig.name}`}
-                    >
-                      {opt.label}
-                    </span>
+        readOnly={isReadOnly}
+        searchable={fieldConfig.selectSearchable !== false}
+        icon={SelectIcon}
+        className="w-full"
+        error={!!error}
+        showCheckmarks={fieldConfig.selectConfig?.showCheckmarks !== false}
+        checkmarkPosition={fieldConfig.selectConfig?.checkmarkPosition || 'right'}
+        showStatus={fieldConfig.selectConfig?.showStatus || false}
+        showAvatars={fieldConfig.selectConfig?.showAvatars || false}
+        avatarSize={fieldConfig.selectConfig?.avatarSize || "xs"}
+        renderCreateOption={renderCreateOption}
+        renderEmptyState={renderEmptyState}
+        onQueryChange={setQuery}
+        testId={formatFormTestID(`${formKey}-select-${fieldConfig.name}`)}
+        infiniteScroll={fieldConfig.selectConfig?.infiniteScroll ? {
+          enabled: true,
+          initialLimit: fieldConfig.selectConfig?.infiniteScroll.initialLimit || 50,
+          loadMoreStep: fieldConfig.selectConfig?.infiniteScroll.loadMoreStep || 50,
+          hasMore: fieldConfig.selectConfig?.infiniteScroll.hasMore !== false,
+          loadingIndicator: fieldConfig.selectConfig?.infiniteScroll.loadingIndicator || (
+            <div className="p-2 text-center sm:text-sm md:text-md text-muted-foreground">
+              Loading more options...
+            </div>
+          )
+        } : undefined}
+        onCreateRecord={fieldConfig?.selectEnableCreate ? createNewRecord : undefined}
+      />
 
-                    <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary group-data-[selected]:flex group-data-[focus]:text-white">
-                      <CheckIcon className="size-5" aria-hidden="true" />
-                    </span>
-                  </ComboboxOption>
-                ))}
-              </ComboboxOptions>
-            ) : (
-              <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-md">
-                <div className="group relative cursor-default select-none py-2 pl-3 pr-9 text-foreground data-[focus]:bg-primary data-[focus]:text-white data-[focus]:outline-none">
-                  <span
-                    className="block truncate group-data-[selected]:font-semibold"
-                    data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
-                  >
-                    No {fieldConfig?.label} found.
-                  </span>
-                </div>
-              </div>
-            ))}
-        </div>
-      </Combobox>
-
-      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+      <FormMessage className='text-md' data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
     </FormItem>
   );
 }

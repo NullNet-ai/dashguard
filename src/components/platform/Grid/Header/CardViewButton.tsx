@@ -11,8 +11,8 @@ export default function CardViewButton() {
   return (
     <Button
     variant={active ? 'default' : 'outline'}
-      loading={state?.createLoading}
-      className="rounded-l-none"
+      size='md'
+      className="rounded-l-none hidden lg:block"
       onClick={() => actions?.handleSwitchViewMode("card")}
       data-test-id={testIDFormatter(`${state?.config.entity}-grd-card-view-btn`)}
     >

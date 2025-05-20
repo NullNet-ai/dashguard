@@ -1,25 +1,27 @@
-"use server";
+'use server';
 
-import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
-import { headers } from "next/headers";
+import { redirect } from 'next/navigation';
+import { api } from '~/trpc/server';
+import { headers } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 export async function UpdateReportPagination({
-  current_page,
-  limit_per_page,
+  pagination,
+  gridKey,
 }: {
-  current_page: number;
-  limit_per_page: number;
+  pagination: {
+    current_page: number;
+    limit_per_page: number;
+  };
+  gridKey?: string;
 }) {
   const headerList = headers();
-  const pathName = headerList.get("x-pathname") || "";
-  const searchParams = headerList.get("x-full-search-query-params") || "";
-  const urlSearchParams = new URLSearchParams(searchParams);
+  const fullUrl = headerList.get("x-full-pathname") || "";
 
-  api.grid.updateReportPagination({
-    current_page,
-    limit_per_page,
+  await api.grid.updateReportPagination({
+    pagination,
+    gridKey,
   });
-  urlSearchParams.set("pagination", `page=${current_page}&perPage=${limit_per_page}`);
-  redirect(`${pathName}?${urlSearchParams}`);
+
+  revalidatePath(fullUrl)
 }

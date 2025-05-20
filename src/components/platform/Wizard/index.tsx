@@ -1,23 +1,12 @@
 "use client";
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerTrigger,
-} from "~/components/ui/drawer";
 import Header from "./Header";
 import WizardProvider from "./Provider";
-import { type Summary, type TStepsNavigationButtons, type IState } from "./type";
+import { type IState, type Summary, type TStepsNavigationButtons } from "./type";
 
-import WizardNavigator from "./BreadCrumbs";
 import SummaryComponent from "./Summary";
 import SummaryMobile from "./SummaryMobile";
 
-const FORM_HEADER_HEIGHT = "3.5rem";
 
 interface Wizard {
   children: React.ReactNode;
@@ -36,21 +25,18 @@ export default function Wizard(props: Wizard) {
       config={config}
       stepsNavigation={stepsNavigation}
     >
-     <section className="overflow-hidden wizard-section relative  lg:mt-0">
-        <div className="hidden lg:block  p-4 pt-10 border-b ">
-            <WizardNavigator />
-        </div>
-        <div className="flex  lg:0">
+     <section className="overflow-hidden wizard-section relative  lg:mt-[0px]">
+        <div className="flex ">
           {/* Left side: Stepper */}
             <div className="hidden sm:block">
             <SummaryComponent />
             </div>
 
           <div className="flex-grow bg-transparent">
-            <div className="border-b flex items-center" style={{ height: FORM_HEADER_HEIGHT }}>
+            <div className="border-b flex items-center md:h-[2.72rem]">
               <Header />
             </div>
-            <div className="h-[calc(100vh-10rem)] overflow-auto">
+            <div className="md:h-[calc(100vh-10rem)] h-[calc(100vh-14rem)] overflow-auto">
               {children}
             </div>
           </div>
@@ -60,4 +46,3 @@ export default function Wizard(props: Wizard) {
     </WizardProvider>
   );
 }
-

@@ -1,6 +1,6 @@
 import { type Field, type UseFormReturn } from "react-hook-form";
 import { type z } from "zod";
-import { IFeatures, IField, type IPropsForms } from "../global/interfaces";
+import { IFeatures, IField, IFormProperties, type IPropsForms } from "../global/interfaces";
 import { type TDisplayType, type TFormSchema } from "../global/types";
 import { type SetState } from "./types";
 
@@ -27,6 +27,7 @@ interface IAccordionLayoutProps extends IPropsForms {
   handleAccordionExpand: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onSubmitFormGrid: (data: z.infer<TFormSchema>) => Promise<void>;
   handleNewRecordFormFilterGrid: () => void;
+  handleSelectedGridRecords: (data : Record<string,any>[]) => void;
   handleAppendForm: () => void;
   handleUpdateDisplayType: (type: TDisplayType) => void;
   handleRemovedSelectedRecords: (records: any[]) => void;
@@ -35,6 +36,7 @@ interface IAccordionLayoutProps extends IPropsForms {
   onSelectFieldFilterGrid:  (data: z.infer<TFormSchema>) => Promise<void>;
   handleSearchOpen: () => void;
   isOpenSearch?: boolean;
+  properties?: IFormProperties; 
 }
 
 export type {

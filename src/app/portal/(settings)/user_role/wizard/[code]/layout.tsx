@@ -1,20 +1,23 @@
-import { headers } from "next/headers";
+import { headers } from 'next/headers'
+import React from 'react'
 
-import PlatformWizard from "~/components/platform/Wizard";
-import { type IWizardLayoutProps } from "../types";
-import roleWizardSummary from "../(summary)/wizard-summary-config";
+import PlatformWizard from '~/components/platform/Wizard'
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
 
-const WizardLayout = async (props: IWizardLayoutProps) => {
-  const { children } = props;
+import roleWizardSummary from '../(summary)/wizard-summary-config'
+import { type IWizardLayoutProps } from '../types'
 
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , main_entity, , identifier, currentStep] = pathname.split("/");
-  const _params = {
+const WizardLayout = async ({ children }: IWizardLayoutProps) => {
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
+  const wizard_summary = roleWizardSummary()
+
+  await stepValidator({
+    currentStep: currentStep!,
     identifier: identifier!,
-    mainEntity: main_entity!,
-  };
-  const wizard_summary = roleWizardSummary(_params);
+    mainEntity: mainEntity!,
+  })
 
   return (
     <div className="p-1">
@@ -22,12 +25,13 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
         config={{
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
-          totalSteps: 2,
+          totalSteps: 3,
           enableAutoCreate: true,
-          entityName: main_entity,
+          entityName: mainEntity,
           stepLabels: {
-            1: "Basic Details",
-            2: "Confirmation",
+            1: 'Basic Details',
+            2: 'Category Details',
+            3: 'Confirmation',
           },
         }}
         summary={wizard_summary}
@@ -35,7 +39,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
         {children}
       </PlatformWizard>
     </div>
-  );
-};
+  )
+}
 
-export default WizardLayout;
+export default WizardLayout

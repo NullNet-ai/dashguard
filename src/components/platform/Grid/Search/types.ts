@@ -1,68 +1,66 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
-import { EOrderDirection } from "@dna-platform/common-orm";
+import { EOrderDirection, IAdvanceFilters } from '@dna-platform/common-orm';
 
 export interface IState {
-  open: boolean;
-  searchItems: ISearchItem[];
-  query: string;
-  advanceFilterItems: ISearchItem[];
+  open: boolean
+  searchItems: ISearchItem[]
+  query: string
+  advanceFilterItems: ISearchItem[]
 }
 
 export interface IAction {
-  handleQuery: (data: React.SetStateAction<string>) => void;
-  handleOpen: (open: boolean) => void;
+  // eslint-disable-next-line no-undef
+  handleQuery: (data: React.SetStateAction<string>) => void
+  handleOpen: (open: boolean) => void
   handleSearchQuery: (
     search_params: ISearchParams,
     options: Record<string, any>,
-  ) => ISearchResult | undefined;
-  handleAddSearchItem: (filterItem: ISearchItemResult) => void;
-  handleRemoveSearchItem: (filterItem: ISearchItem) => void;
+  ) => ISearchResult | undefined
+  handleAddSearchItem: (filterItem: ISearchItemResult) => Promise<void>
+  handleRemoveSearchItem: (filterItem: ISearchItem) => Promise<void>
+  handleClearSearchItems: () => Promise<void>
 }
 
 export interface ICreateContext {
-  state?: IState;
-  actions?: IAction;
+  state?: IState
+  actions?: IAction
 }
 
 export interface ISearchParams {
-  entity: string;
-  pluck?: any;
-  pluck_object?: any;
-  current?: number;
-  limit?: number;
-  advance_filters?: {
-    type: string;
-    values?: string[];
-    field?: string;
-    operator: string;
-    entity?: string;
-  }[];
-  sorting?: any[];
+  entity: string
+  pluck?: any
+  pluck_object?: any
+  current?: number
+  limit?: number
+  advance_filters?: IAdvanceFilters[]
+  sorting?: any[],
+  group_advance_filters?: any[]
 }
-
 export interface ISearchResult {
-  totalCount: number;
-  items: Record<string, any>[];
-  currentPage: number;
-  totalPages: number;
+  totalCount: number
+  items: Record<string, any>[]
+  currentPage: number
+  totalPages: number
 }
 
 export interface ISearchItem {
-  type: string;
-  operator: string;
-  entity: string;
-  id?: string;
-  values?: string[];
-  field?: string;
-  label?: string;
-  default?: boolean;
-  display_value?: string;
+  type: string
+  operator: string
+  entity: string
+  id?: string
+  values?: string[]
+  field?: string
+  label?: string
+  default?: boolean
+  display_value?: string
+  filters?: ISearchItem[]
+  parse_as?: string
 }
 
-export interface  ISortItem {
-  by_field: string;
-  by_direction: EOrderDirection;
+export interface ISortItem {
+  by_field: string
+  by_direction: EOrderDirection
 }
 
 export interface ISearchItemResult extends ISearchItem {
@@ -70,9 +68,23 @@ export interface ISearchItemResult extends ISearchItem {
 }
 
 export interface ISearchableField {
-  field: string;
-  label: string;
-  operator?: string;
-  entity?: string;
+  field: string
+  label: string
+  operator?: string
+  entity?: string
+  accessorKey?: string
 }
 
+export interface IPagination {
+  current_page: number
+  limit_per_page: number
+}
+
+export interface IAdvanceFilter {
+  type: string
+  operator: string
+  field?: string
+  entity?: string
+  values?: any[]
+  default?: boolean
+}

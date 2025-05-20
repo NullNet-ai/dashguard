@@ -12,7 +12,15 @@ export interface ITabGrid {
   current: boolean;
   href: string;
   default?: boolean;
+  columns?: any[]
   sorting?: SortingState;
+  groups?: any[];
+  sorts?: any[];
+  advance_filters?: IGridFilterBy[];
+  default_sorts? : any[];
+  default_filter?: IGridFilterBy[];
+  filter_groups?: any[];
+  group_advance_filters?: any[];
 }
 
 export interface IGridFilterBy {
@@ -27,6 +35,10 @@ interface Account {
   contact: Contact;
   organization: Organization;
   organization_id: string;
+  account_id: string
+  account_organization_id: string;
+  profile: Record<string, any>; // Adjust type based on the expected structure of the profile info
+  id: string;
 }
 
 interface Contact {
@@ -75,6 +87,7 @@ interface Organization {
 
 export interface TokenData {
   account: Account;
+  accounts?: Account[];
   iat: number;
   exp: number;
 }

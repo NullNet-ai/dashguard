@@ -14,8 +14,8 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 239 84% 67 ;
-    --ring: 239 84% 67 ;
+    --primary: 239 84% 67% ;
+    --ring: 239 84% 67%;
 
     --primary-foreground: 210 40% 98%;
     --destructive-foreground: 210 40% 98%;
@@ -108,7 +108,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
+    --border: 213 27% 84%; 
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
 
@@ -158,17 +158,34 @@ footer {
 
 /* Aesthetic minimalist scrollbar styles */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px; /* Smaller height for horizontal scrollbar */
+}
+
+/* Apply to specific elements */
+.main-grid-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* Smaller height for horizontal scrollbar */
+}
+
+.main-grid-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #c5c5c5;
+  border-radius: 10px;
+  border: 2px solid #f0f0f0;
+}
+
+.main-grid-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #888888; /* Changed to a medium grey color */
+  background-color: #888888;
   border-radius: 10px;
-  border: 2px solid #f0f0f0; /* Changed to match the track color */
+  border: 2px solid #f0f0f0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #555555; /* Changed to a darker grey color */
+  background-color: #555555;
 }
 
 .accordion-content-enter {
@@ -204,6 +221,10 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
+a {
+  touch-action: manipulation;
+}
+
 /* Remove number input spinner for Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
@@ -221,4 +242,75 @@ input[type="number"] {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, and Opera */
+}
+
+
+
+body {
+  touch-action: none; /* Prevents scrolling on touch devices */
+  overscroll-behavior: none !important;
+}
+
+.writing-mode-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+@keyframes slide {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+.animate-slide {
+  animation: slide 1.5s infinite linear;
+}
+
+
+/* Remove focus styles from rich text editor */
+.ProseMirror-focused {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
+}
+
+.minimal-tiptap-editor:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: hsl(var(--input)) !important;
+}
+
+
+
+.emoji-picker-wrapper {
+  width: 320px;
+  height: 400px;
+}
+
+.emoji-picker-react {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: white !important;
+}
+
+.EmojiPickerReact {
+  --epr-emoji-size: 24px;
+  --epr-category-label-height: 30px;
+  --epr-header-padding: 10px;
+}
+
+.dropdown-wrapper {
+	[data-radix-popper-content-wrapper] {
+		min-width: min-content !important;
+		padding-left: .5rem !important;
+		padding-right: .5rem !important;
+	}
+}
+
+textarea.iPadShowKeyboard {
+  display: none !important;
 }

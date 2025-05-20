@@ -4,6 +4,7 @@ export interface IMenuOptionConfig {
   label: string;
   onClick: (recordId: string, entityName: string, ...args: any[]) => void;
   children?: IMenuOptionConfig[];
+  disabled?: boolean;
 }
 
 export interface RecordContextProps {
@@ -24,6 +25,7 @@ export interface ConfigProps {
   identifierOption?: IMenuOptionConfig[];
   categories?: string[];
   recordId?: string;
+  recordDetails?: Record<string, any>;
 }
 export interface RecordProps extends PropsWithChildren {
   config: ConfigProps;

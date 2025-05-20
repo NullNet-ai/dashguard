@@ -6,15 +6,17 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
-import { dnaClient } from "../dnaOrm";
-import redisClient from "~/server/redis/cache";
+import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
+import { dnaClient } from '../dnaOrm';
+import redisClient from '~/server/redis/cache';
 
-import { cookies } from "next/headers";
-import { TokenData } from "./types";
-import { ulid } from "ulid";
+import { cookies, headers } from 'next/headers';
+import { TokenData } from './types';
+import { ulid } from 'ulid';
+import { colors } from '../utils/choychoy';
+import socketClient from '../socketClient';
 
 /**
  * 1. CONTEXT
@@ -33,14 +35,31 @@ export const createTRPCContext = async (opts: {
   token?: string;
 }) => {
   const storeCookies = cookies();
+
   return {
     redisClient,
     dnaClient,
+    socketClient,
     transaction_id: ulid(),
     storeCookies,
     ...opts,
   };
 };
+
+/**
+ *
+ * @param timing
+ * @returns
+ */
+function legend(timing: number): string {
+  if (timing >= 10000) {
+    return `${colors.red}${timing}ms${colors.reset}`;
+  } else if (timing >= 3000) {
+    return `${colors.yellow}${timing}ms${colors.reset}`;
+  } else {
+    return `${colors.green}${timing}ms${colors.reset}`;
+  }
+}
 
 /**
  * 2. INITIALIZATION
@@ -92,7 +111,6 @@ export const createTRPCRouter = t.router;
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
-
   // if (t._config.isDev) {
   //   // artificial delay in dev
   //   const waitMs = Math.floor(Math.random() * 400) + 100;
@@ -102,7 +120,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-  console.info(`[TRPC] ${path} took ${end - start}ms to execute`);
+  const timing = end - start;
+  console.info(
+    `[${new Date().toISOString()}]-[TRPC] ${path} took ${legend(timing)} to execute`,
+  );
 
   return result;
 });
@@ -118,11 +139,11 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 
 const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   const cookiesStore = cookies();
-  const token = cookiesStore.get("token");
+  const token = cookiesStore.get('token');
 
   if (!token) {
     throw new TRPCError({
-      code: "UNAUTHORIZED",
+      code: 'UNAUTHORIZED',
     });
   }
 
@@ -134,12 +155,15 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   });
 });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
-  const storeCookies = cookies();
-  const token = storeCookies.get("token");
+  // const token = {
+  //   value: ctx.token!,
+  // };
+  const cookiesStore = cookies();
+  const token = cookiesStore.get('token');
 
   if (!token) {
     throw new TRPCError({
-      code: "UNAUTHORIZED",
+      code: 'UNAUTHORIZED',
     });
   }
 
@@ -152,17 +176,20 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const cachedSessionClient = ctx.redisClient;
 
   const cachedSession = await cachedSessionClient.getCachedData(token.value);
+  const endTimeInit = Date.now();
+  const timingInit = endTimeInit - startTime;
   console.info(
-    "[CacheSession Get]: ",
-    Date.now() - startTime + "ms ",
-    "path: " + path,
+    `[${new Date().toISOString()}]-` + '[CacheSession Get]: ',
+    legend(timingInit),
+    'path: ' + path,
   );
   if (cachedSession) {
     const endTime = Date.now();
+    const timing = endTime - startTime;
     console.info(
-      "[TOKEN-CACHE-HIT]: ",
-      endTime - startTime + "ms",
-      "path: " + path,
+      `[${new Date().toISOString()}]-` + '[TOKEN-CACHE-HIT]: ',
+      legend(timing),
+      'path: ' + path,
     );
     return next({
       ctx: {
@@ -181,10 +208,15 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
     })
     .catch(() => null);
   const endTime = Date.now();
-  console.info("[TOKEN-CACHE-MISS]: ", endTime - startTime + "ms");
+  const timing = endTime - startTime;
+  console.info(
+    `[${new Date().toISOString()}]-` + '[TOKEN-CACHE-MISS]: ',
+    legend(timing),
+  );
+
   if (!session) {
     throw new TRPCError({
-      code: "UNAUTHORIZED",
+      code: 'UNAUTHORIZED',
     });
   }
   cachedSessionClient.cacheData(token.value, session, 50000);
@@ -193,6 +225,22 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
       ...ctx,
       token,
       session,
+    },
+  });
+});
+
+const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
+  const storeCookies = cookies();
+  const username = storeCookies.get('username')?.value;
+
+  const token = await ctx.redisClient.getCachedData(
+    `account_token:${username}`,
+  );
+
+  return next({
+    ctx: {
+      ...ctx,
+      token,
     },
   });
 });

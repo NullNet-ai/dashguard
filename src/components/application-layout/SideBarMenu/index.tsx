@@ -1,43 +1,54 @@
-import AppSideBar from "~/components/platform/SideBar";
-
+import { cookies } from "next/headers";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import React from "react";
+
+import AppSideBar from "~/components/platform/SideBar";
 import { api } from "~/trpc/server";
+
 import Clock from "./Clock";
 import { MainMenuConfig } from "./config";
 import SideUserInfo from "./UserInfo";
 
 const getInitials = (name: string) => {
-  const matches = name.match(/\b\w/g) || [];
+  const matches = name?.match(/\b\w/g) || [];
   return ((matches.shift() || "") + (matches.pop() || "")).toUpperCase();
 };
 
 export default async function SideBarMenu() {
   const mainConfig = await MainMenuConfig();
+  const accountOrganization =  await api.record.getSessionInfo();
+  const { account_name, username, organization } = accountOrganization?.current_organization ?? {}
+  const initials = getInitials(account_name);
+  const cookieStore = cookies(); // Access cookies
+  const screenType = cookieStore.get("screen-type");
 
-  const { contact } = await api.record.getSessionInfo();
-  const { first_name, last_name, email } = contact;
-  const initials = getInitials(first_name + " " + last_name);
-  const user_name = first_name + " " + last_name;
   return (
     <AppSideBar
-      mainMenuConfig={mainConfig}
+      footerComponent={
+        <SideUserInfo
+          user_name={account_name}
+          initials={initials}
+          email={username}
+          screenType={screenType?.value}
+          organization={organization}
+          other_organizations={accountOrganization?.other_organizations ?? []}
+        />
+      }
       headerComponent={
         <div className="flex items-center justify-start py-1.5 text-sm lg:justify-center">
           <Image
-            width={50}
-            height={50}
             alt="Company Logo"
-            src="/tailwindLogo.svg"
             className="h-8 w-auto"
+            height={50}
+            src="/tailwindLogo.svg"
+            width={50}
           />
           <Clock />
         </div>
       }
-      footerComponent={
-        <SideUserInfo user_name={user_name} initials={initials} email={email} />
-      }
-      // footerMenuConfig={FooterMenuConfig}
+      mainMenuConfig={mainConfig}
+      screenType={screenType?.value}
+      tabsDisplayVariant="icon-only" 
     />
   );
 }

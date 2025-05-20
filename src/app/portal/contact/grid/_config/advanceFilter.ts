@@ -27,5 +27,5 @@ export const defaultAdvanceFilter = [
     label: "Status",
     values: ["Draft"],
     default: true,
-  }
+  },
 ] as ISearchItem[];

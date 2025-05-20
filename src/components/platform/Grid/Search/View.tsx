@@ -1,30 +1,44 @@
-"use client";
+'use client';
 
-import { Combobox, ComboboxInput, ComboboxOptions } from "@headlessui/react";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { useDebounce } from "~/components/ui/multi-select";
-// import RecentSearch from "./RecentSearch";
-import { useContext } from "react";
-import { SearchGridContext } from "./Provider";
-import { GridContext } from "../Provider";
-import SearchResult from "./SearchResult";
-import { cn, formatAndCapitalize } from "~/lib/utils";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { X } from "lucide-react";
-import { ISearchItemResult } from "./types";
-import { transformSearchData } from "./utils/transformSearchData";
+import { type IAdvanceFilters } from '@dna-platform/common-orm';
+import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { useContext } from 'react';
 
-export default function Search() {
+import { useDebounce } from '~/components/ui/multi-select';
+import useWindowSize from '~/hooks/use-resize';
+import useScreenType from '~/hooks/use-screen-type';
+import { cn } from '~/lib/utils';
+
+import { GridContext } from '../Provider';
+
+import { SearchGridContext } from './Provider';
+import SearchResult from './SearchResult';
+import { type ISearchItemResult } from './types';
+import { transformSearchData } from './utils/transformSearchData';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
+
+export default function Search({ gridType }: any) {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
+  const { width } = useWindowSize();
+  const screenSize = useScreenType();
+  const isMobile =
+    screenSize !== '2xl' && screenSize !== 'xl' && screenSize !== 'lg';
+
   const {
     searchableFields = [],
-    entity = "",
+    entity = '',
     searchConfig,
   } = gridState?.config ?? {};
+
+  const { group_advance_filters = [] } = searchConfig?.query_params ?? {};
   const { advanceFilterItems = [] } = state ?? {};
-  const { query = "", searchItems = [] } = state ?? {};
+  const { query = '' } = state ?? {};
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
@@ -35,130 +49,99 @@ export default function Search() {
       current: 0,
       limit: 100,
       pluck: [
-        "id",
-        "code",
-        "categories",
-        "organization_id",
-        "first_name",
-        "middle_name",
-        "last_name",
-        "email_address",
-        "contact_status",
-        "status",
-        "created_date",
-        "updated_date",
-        "created_time",
-        "updated_time",
+        'id',
+        'code',
+        'categories',
+        'status',
+        'created_date',
+        'updated_date',
+        'created_time',
+        'updated_time',
       ],
-      advance_filters: advanceFilterItems,
+      advance_filters: group_advance_filters?.length
+        ? []
+        : (advanceFilterItems as IAdvanceFilters[]),
+      group_advance_filters: group_advance_filters?.length
+        ? []
+        : !group_advance_filters?.length
+          ? []
+          : group_advance_filters.map((item) => {
+              if (item.filters) {
+                return {
+                  ...item,
+                  filters: [
+                    ...item.filters,
+                    { type: 'operator', operator: 'and' },
+                    advanceFilterItems, // Corrected this line
+                  ],
+                };
+              }
+              return item; // Keep operator objects unchanged
+            }),
       ...(searchConfig?.query_params ?? {}),
     },
     {
       refetchOnWindowFocus: false,
       gcTime: 0,
-      enabled: debouncedSearchInput?.length > 3,
+      enabled: !!debouncedSearchInput,
     },
   );
 
   const { items } = data ?? {};
 
-  // Filter and log search items to debug any unintended data
-  const selectedSearchItems = searchItems?.filter((item) => !item?.default);
-  const defaultSearchItems = searchItems?.filter((item) => item?.default);
-
   return (
-    <>
-      <Combobox>
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 ps-3 focus-within:border-primary">
-            <MagnifyingGlassIcon
-              className="h-5 w-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            {selectedSearchItems.length > 0 && (
-              <div className="flex flex-wrap gap-1 py-1">
-                {selectedSearchItems?.map((item, index) => {
-                  if (item.type === "operator" && index === 0) {
-                    return null;
-                  }
-                  return (
-                    <Badge
-                      key={item.id}
-                      variant="primary"
-                      className="m-1 flex items-center gap-1"
-                    >
-                      {item.type === "criteria"
-                        ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value ? item?.display_value : item?.values?.[0]}`
-                        : item?.operator}
-                      {item.type === "criteria" && !item.default && (
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          name="removeSortingButton"
-                          key={`${item.id}-remove`}
-                          className="h-auto w-auto p-0 text-primary hover:bg-transparent focus:outline-none"
-                          onClick={() => {
-                            actions?.handleRemoveSearchItem(item);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </Badge>
-                  );
-                })}
-              </div>
-            )}
-            <ComboboxInput
-              className="flex-grow border-none bg-transparent outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm"
-              placeholder="Search..."
-              value={query}
-              onChange={(event) => {
-                actions?.handleQuery(event.target.value);
-              }}
-              onBlur={() => {
-                actions?.handleOpen(false);
-              }}
-              onFocus={() => {
-                actions?.handleOpen(true);
-              }}
-            />
-          </div>
-          {state?.open && debouncedSearchInput.length > 3 && (
-            <ComboboxOptions
-              static
-              as="ul"
-              className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg"
-            >
-              <li className="p-2">
-                <SearchResult
-                  results={
-                    (transformSearchData(
-                      items,
-                      debouncedSearchInput,
-                      searchableFields,
-                    ) as ISearchItemResult[]) || null
-                  }
-                />
-              </li>
-            </ComboboxOptions>
-          )}
-        </div>
-      </Combobox>
+    <Combobox>
       <div
-        className={cn(
-          `${!gridState?.sorting?.length ? "mt-[20px]" : "absolute -bottom-[50px]"}`,
-        )}
+        className={cn(`relative`)}
+        style={{
+          width: isMobile
+            ? gridType === 'card-list'
+              ? '100%'
+              : width - (screenSize === 'md' ? 100 : 16)
+            : 'auto',
+        }}
+        data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-inpt`)}`}
       >
-        <span className="text-xs text-black">Filtered By: </span>
-        {defaultSearchItems?.map((item) => (
-          <Badge key={item.id} variant="primary" className="m-2 mx-1">
-            {item.type === "criteria"
-              ? `${item?.label || formatAndCapitalize(item?.field ?? "")} is ${item?.display_value || item?.values?.[0]}`
-              : item?.operator}
-          </Badge>
-        ))}
+        <div className="flex items-center rounded-md border px-2 ps-3 focus-within:border-primary md:flex-wrap md:gap-2 lg:flex-nowrap">
+          <MagnifyingGlassIcon
+            aria-hidden="true"
+            className="h-5 w-5 text-muted-foreground"
+          />
+          <ComboboxInput
+            className="h-[35px] flex-grow border-none bg-transparent px-1.5 pl-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-sm md:px-3 md:pl-0 lg:text-md"
+            placeholder="Search..."
+            value={query}
+            onBlur={() => {
+              actions?.handleOpen(false);
+            }}
+            onChange={(event) => {
+              actions?.handleQuery(event.target.value);
+            }}
+            onFocus={() => {
+              actions?.handleOpen(true);
+            }}
+          />
+        </div>
+        {state?.open && !!debouncedSearchInput && (
+          <ComboboxOptions
+            as="ul"
+            className="absolute z-[100] mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg"
+            static={true}
+          >
+            <li className="p-2">
+              <SearchResult
+                results={
+                  (transformSearchData(
+                    items,
+                    debouncedSearchInput,
+                    searchableFields,
+                  ) as ISearchItemResult[]) || null
+                }
+              />
+            </li>
+          </ComboboxOptions>
+        )}
       </div>
-    </>
+    </Combobox>
   );
 }

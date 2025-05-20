@@ -1,7 +1,7 @@
-import ComingSoon from "./_components/coming_soon";
+import NewComingSoon from '~/components/ui/coming-soon';
 
 export default function Page() {
     return (
-        <ComingSoon/>
+        <NewComingSoon type="page"/>
     );
 }

@@ -1,22 +1,36 @@
+import { EOperator } from '@dna-platform/common-orm';
+import argon2 from 'argon2';
+import { z } from 'zod';
+
+import { TRPCError } from '@trpc/server';
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
-} from "~/server/api/trpc";
-import { z } from "zod";
+} from '~/server/api/trpc';
+import { formatDate } from '~/server/utils/formatDate';
+import type { TokenData } from '../types';
+
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
+const INVITATION_LINK_EXPIRED = parseInt(
+  process.env.INVITATION_LINK_EXPIRED || '1',
+  10,
+);
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
-        password: z.string().min(8),
+        username: z.string().min(1),
+        password: z.string().min(1),
+        organization_id: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const { password, username } = input;
       try {
         const response = await ctx.dnaClient
-          .login(input.email, input.password)
+          .login(username, password)
           .execute();
         if (!response.success) {
           throw response;
@@ -24,21 +38,24 @@ export const authRouter = createTRPCRouter({
 
         const token = response?.data?.[0]?.token;
 
-        ctx.storeCookies.set("token", token);
-        return { token };
-      } catch (error: any) {
-        let errorMessage = "Something went wrong please try again";
-        let errorType = "unknown";
+        // ctx.redisClient.cacheData(
+        //   `account_token:${input.username}`,
+        //   token,
+        //   60 * 60 * 24,
+        // );
+        ctx.storeCookies.set('username', input.username);
+        ctx.storeCookies.set('token', token);
 
-        switch (error?.message) {
-          case "Invalid Credentials":
-            errorMessage = "The email or password you entered is incorrect.";
-            errorType = "invalid";
-            break;
-          case "Account not found":
-            errorMessage = "No account was found with this email address.";
-            errorType = " notfound";
-            break;
+        return response;
+      } catch (error: any) {
+        let errorMessage = 'Something went wrong please try again';
+        let errorType = 'unknown';
+        if (error.errors?.[0]?.message.includes('Invalid Credentials')) {
+          errorMessage = 'The email or password you entered is incorrect.';
+          errorType = 'invalid';
+        } else if (error.errors?.[0]?.message.includes('Account not found')) {
+          errorMessage = 'No account was found with this email address.';
+          errorType = 'notfound';
         }
 
         return {
@@ -49,9 +66,500 @@ export const authRouter = createTRPCRouter({
         };
       }
     }),
+  registerAccount: publicProcedure
+    .input(
+      z.object({
+        account: z.record(z.any()),
+        organization: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account, organization } = input;
+      const result = await ctx.dnaClient
+        .register(organization, account)
+        .execute();
+      return result;
+    }),
 
-  logout: privateProcedure.mutation(async ({ ctx }) => {
-    ctx.storeCookies.delete("token");
-    return { message: "User logged out" };
+  getToken: privateProcedure
+    .input(
+      z
+        .object({
+          username: z.string().min(1),
+        })
+        .optional(),
+    )
+    .mutation(async ({ ctx }) => {
+      // const token = await ctx.redisClient.getCachedData(
+      //   `account_token:${input.username}`,
+      // );
+      const token = ctx.storeCookies.get('token')?.value;
+      return token;
+    }),
+
+  getAccountData: privateProcedure
+    .mutation(async ({ ctx }) => {
+      try {
+        const account = ctx.session.account;
+
+        const accountId = account?.account_organization_id;
+
+        const response = await ctx.dnaClient
+          .findOne(accountId, {
+            entity: 'account_organizations',
+            token: ctx.token.value,
+            query: {
+              pluck: [
+                'id',
+                'contact_id',
+                'account_organization_status',
+                'status',
+                'account_id'
+              ],
+            },
+          })
+          .execute();
+        if (!response.success) {
+          return null;
+        }
+
+        return {
+          ...(response?.data?.[0] ?? {}),
+          organization: account.organization,
+        } as Record<string, any>;
+      } catch (error: any) {
+        return {
+          message: 'Something went wrong please try again',
+          statusCode: error?.status_code || 500,
+          error: error?.errors || error,
+        };
+      }
+    }),
+  loginOrganization: privateProcedure
+    .input(
+      z.object({
+        organization_id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const asRoot = true;
+        const currentToken = ctx.token.value;
+        const rootAccount = await ctx.dnaClient
+          .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+          .execute();
+        const rootAccountToken = rootAccount?.data?.[0]?.token;
+        const newOrganization = await ctx.dnaClient
+          .rootSwitchAccount(currentToken, input.organization_id, {
+            token: rootAccountToken,
+          })
+          .execute();
+
+        const session = await ctx.dnaClient
+          .verifyToken(newOrganization?.data?.[0]?.token)
+          .execute()
+          .then((res) => {
+            return res.data?.[0] as TokenData;
+          })
+          .catch(() => {
+            throw new Error('Invalid Token');
+          });
+
+        if (session) {
+          ctx.storeCookies.set(
+            session.account.account_organization_id,
+            newOrganization?.data?.[0]?.token,
+          );
+          return {
+            session,
+            token: newOrganization?.data?.[0]?.token,
+          };
+        }
+      } catch (error: any) {
+        return {
+          message: error?.message ?? 'Something went wrong please try again',
+          statusCode: 500,
+          error,
+        };
+      }
+    }),
+  setNewPassword: privateProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const response = await ctx.dnaClient
+        .update(input.id, {
+          entity: 'account',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              is_new_user: false,
+              account_secret: await argon2.hash(input.account_secret),
+              account_status: 'Active',
+            },
+            pluck: ['id', 'account_secret', 'is_new_user'],
+          },
+        })
+        .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+      return response?.data?.[0];
+    }),
+  fetchAccountDetailsThruEmail: privateProcedure.query(async ({ ctx }) => {
+    const asRoot = true;
+    const response = ctx.session.account;
+    const rootAccount = await ctx.dnaClient
+      .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+      .execute();
+    const rootAccountToken = rootAccount?.data?.[0]?.token;
+    const accountDetails = await ctx.dnaClient
+      .findAll({
+        entity: 'account_organizations',
+        token: rootAccountToken,
+        as_root: asRoot,
+        query: {
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'email',
+              operator: EOperator.EQUAL,
+              values: [response?.account_id],
+            },
+          ],
+          pluck_object: {
+            account_organizations: [
+              'id',
+              'organization_id',
+              'account_id',
+              'contact_id',
+              'email',
+              'status',
+              'account_organization_status'
+            ],
+            organizations: ['id', 'name'],
+            accounts: ['id', 'account_id', 'is_new_user'],
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'account_organizations',
+            field: 'organization_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'accounts',
+            field: 'id',
+          },
+          from: {
+            entity: 'account_organizations',
+            field: 'account_id',
+          },
+        },
+      })
+      .execute();
+    const organizations = accountDetails?.data?.map((item) => {
+      const { id, name } = item?.organizations ?? {};
+      return {
+        value: id,
+        label: name,
+      };
+    });
+    return {
+      account_organization: accountDetails?.data?.[0]?.account_organizations,
+      is_new_user: accountDetails?.data?.[0]?.accounts?.is_new_user,
+      organizations
+    };
   }),
+  fetchAccountDataById: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        pluck_fields: z.array(z.string()).optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const response = await ctx.dnaClient
+        .findOne(input.id, {
+          entity: 'account',
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck_fields,
+          },
+        })
+        .execute();
+      if (!response?.success) {
+        return null;
+      }
+      return response?.data?.[0];
+    }),
+  logout: privateProcedure.mutation(async ({ ctx }) => {
+    ctx.storeCookies.delete('username');
+    ctx.storeCookies.delete('token');
+    return { message: 'User logged out' };
+  }),
+  verify: privateProcedure.mutation(async () => {
+    return true;
+  }),
+  switchOrganization: privateProcedure
+    .input(
+      z.object({
+        organization_id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const asRoot = true;
+        const currentToken = ctx.token.value;
+        const rootAccount = await ctx.dnaClient
+          .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+          .execute();
+        const rootAccountToken = rootAccount?.data?.[0]?.token;
+        const newOrganization = await ctx.dnaClient
+          .rootSwitchAccount(currentToken, input.organization_id, {
+            token: rootAccountToken,
+          })
+          .execute();
+        ctx.storeCookies.set('token', newOrganization?.data?.[0]?.token);
+
+        return {
+          token: newOrganization?.data?.[0]?.token,
+        };
+      } catch (error) {
+        throw error;
+      }
+    }),
+  updateOrganizationAccount: publicProcedure
+    .input(
+      z.object({
+        account: z.record(z.any()),
+        organization: z.record(z.any()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account, organization } = input;
+      const result = await ctx.dnaClient
+        .updateOrganizationAccount(organization, account)
+        .execute();
+      return result;
+    }),
+  sendForgotPasswordEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+      const accountDetails = await ctx.dnaClient
+        .findAll({
+          entity: 'account_organizations',
+          token: rootAccountToken,
+          as_root: asRoot,
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'email',
+                operator: EOperator.EQUAL,
+                values: [input.email.toLowerCase()],
+              },
+            ],
+            pluck_object: {
+              account_organizations: [
+                'id',
+                'organization_id',
+                'email',
+                'contact_id',
+                'status',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+            },
+            order: {
+              limit: 1,
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        })
+        .execute();
+      if (!accountDetails?.success) {
+        return null;
+      }
+      const expirationDate = new Date();
+      expirationDate.setDate(
+        expirationDate.getDate() + INVITATION_LINK_EXPIRED,
+      );
+
+      const record = await ctx.dnaClient
+        .create({
+          entity: 'invitations',
+          token: rootAccountToken,
+          as_root: asRoot,
+          mutation: {
+            params: {
+              status: 'Active',
+              expiration_date: formatDate(expirationDate).date,
+              expiration_time: formatDate(expirationDate).time,
+              account_organization_id: accountDetails?.data?.[0]?.account_organizations?.id,
+              categories: ['Reset Password'],
+            },
+            pluck: ['id', 'code', 'status'],
+          },
+        })
+        .execute();
+      if (!record) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: `Invitation creation failed`,
+        });
+      }
+      console.info('[Create Invitation]', record?.data);
+      const invitationRecord = record?.data?.[0] ?? {};
+
+      return {
+        account_record_id: accountDetails?.data?.[0]?.account_organizations?.id,
+        invitationRecord,
+      };
+    }),
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+   
+      const response = await ctx.dnaClient
+        .rootUpdateAccountPassword(input.id, input.account_secret, {
+          token: rootAccountToken,
+        })
+        .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+      return response;
+    }),
+
+    deviceRegisterAccount: privateProcedure
+    .input(
+      z.object({
+        account: z.object({
+          account_id: z.string().min(1),
+          account_secret: z.string().min(1),
+          role_id : z.string().min(1),
+          account_organization_status : z.string().min(1),
+          account_organization_categories : z.array(z.string()).min(1),
+          device_categories : z.array(z.string()),
+          account_type : z.string().min(1),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { account } = input;
+
+      const organization = {
+        organization_id : ctx.session.account.organization_id
+      }
+      const result = await ctx.dnaClient
+        .register(organization, account)
+        .execute();
+
+      // Save account id and secret in redis
+
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account.account_id}`,
+        {
+          account_id: input.account.account_id,
+          account_secret: input.account.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      );
+
+
+      return result
+    }),
+
+
+    resetDeviceAppSecret: privateProcedure
+    .input(
+      z.object({
+        account_secret: z.string().min(1),
+        id: z.string().min(1),
+        account_id : z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+
+      const asRoot = true;
+      const rootAccount = await ctx.dnaClient
+        .login('root', ROOT_ACCOUNT_PASSWORD, asRoot, {
+          previously_logged_in_account_id: ctx.session.account.id,
+        })
+        .execute();
+      const rootAccountToken = rootAccount?.data?.[0]?.token;
+
+      const response = await ctx.dnaClient
+      .rootUpdateAccountPassword(input.id, input.account_secret, {
+        token: rootAccountToken,
+      })
+      .execute();
+
+      if (!response?.success) {
+        return null;
+      }
+
+
+      // update redis app secret
+      await ctx.redisClient.cacheData(
+        `account_id:${input.account_id}`,
+        {
+          account_id: input.account_id,
+          account_secret: input.account_secret,
+        },
+        60, // 1 hour 60 * 60 - 1 minute 60
+      )
+
+      return response;
+    }),
 });

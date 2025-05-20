@@ -3,7 +3,6 @@ import {
   type ControllerFieldState,
   type ControllerRenderProps,
 } from "react-hook-form";
-import { type IField } from "../../types";
 import {
   FormControl,
   FormItem,
@@ -11,9 +10,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/rich-text-editor/minimal-tiptap";
-import { useState } from "react";
+import { cn } from "~/lib/utils";
+import { type IField } from '../../types/global/interfaces';
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { type Content } from "@tiptap/react";
-
 interface IProps {
   fieldConfig: IField;
   formRenderProps: {
@@ -31,29 +31,108 @@ export default function FormRichTextEditor({
   formRenderProps,
   form,
   formKey,
-  // value,
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled;
-  let defaultValue: string = Array.isArray(formRenderProps.field.value)
-    ? formRenderProps.field.value.join("")
-    : formRenderProps.field.value;
-  const isToFormat = true; // Set to true if to include like how the tipTapEditor is formatted
-  if (isToFormat) {
-    defaultValue = `<p class="text-node">${defaultValue}</p>`;
-  } else {
-    defaultValue;
-  }
-  const [content, setContent] = useState<Content>(defaultValue);
-  function handleChange(newValue: Content) {
-    form.setValue(`${fieldConfig?.name}`, newValue, {
+
+  // Initialize content state from form value
+  const [content, setContent] = useState<Content>(() => {
+    const fieldValue = formRenderProps.field.value;
+    if (!fieldValue) return "";
+
+    const stringValue = Array.isArray(fieldValue)
+      ? fieldValue.join("")
+      : (fieldValue as string).toString();
+
+    // Only wrap in p tag if it doesn't already contain HTML
+    return !stringValue.includes('<')
+      ? `<p class="text-node">${stringValue}</p>`
+      : stringValue;
+  });
+
+  // Memoize the disabled state to prevent unnecessary recalculations
+  const isDisabled = useMemo(() => 
+    fieldConfig.disabled || formRenderProps.field.disabled, 
+    [fieldConfig.disabled, formRenderProps.field.disabled]
+  );
+
+  // Track editor instance key to force re-render
+  const [editorKey, setEditorKey] = useState(0);
+
+  // Sync content state with form value changes
+  useEffect(() => {
+    const fieldValue = formRenderProps.field.value;
+    // Check if fieldValue is empty or undefined and reset content accordingly
+    if (!fieldValue && fieldValue !== content) {
+      setContent("");
+      setEditorKey(prev => prev + 1); // Force re-render of editor when content is cleared
+    } else if (fieldValue !== content) {
+      setContent(fieldValue || "");
+    }
+  }, [formRenderProps.field.value, content]);
+
+  // Reset content when form is no longer dirty
+  useEffect(() => {
+    if (!form.formState.isDirty) {
+      setContent("");
+      setEditorKey(prev => prev + 1); // Force re-render of editor
+    }
+  }, [form.formState.isDirty]);
+
+  // Force re-render of editor when disabled state changes
+  useEffect(() => {
+    setEditorKey(prev => prev + 1);
+  }, [isDisabled]);
+
+  // Memoize the handleChange function to prevent recreation on each render
+  const handleChange = useCallback((newValue: Content) => {
+    if (
+      formRenderProps.field.disabled ||
+      fieldConfig?.readonly ||
+      fieldConfig?.disabled
+    ) {
+      return;
+    }
+
+    setContent(newValue);
+    form.setValue(fieldConfig?.name, newValue, {
       shouldDirty: true,
       shouldValidate: true,
       shouldTouch: true,
     });
-    setContent(newValue);
-  }
+  }, [formRenderProps.field.disabled, fieldConfig?.readonly, fieldConfig?.disabled, fieldConfig?.name, form]);
 
-  form.watch()
+  // Memoize rich text config to prevent unnecessary recalculations
+  const richTextConfig = useMemo(() => {
+    const { richTextConfig } = fieldConfig;
+    return {
+      plainTextMode: richTextConfig?.plainTextMode,
+      customDropdowns: richTextConfig?.customDropdowns?.map(dropdown => ({
+        ...dropdown,
+        disabled: isDisabled,
+      }))
+    };
+  }, [fieldConfig.richTextConfig, isDisabled]);
+
+  const { plainTextMode: isPlainTextMode, customDropdowns } = richTextConfig;
+
+  // Memoize editor props to prevent unnecessary recreations
+  const editorProps = useMemo(() => ({
+    editable: () => !isDisabled,
+    attributes: {
+      "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
+    },
+  }), [isDisabled, formKey, fieldConfig.name]);
+
+  // Memoize class names to prevent unnecessary string concatenations
+  const className = useMemo(() => 
+    cn(
+      "w-full",
+      form.formState.errors[fieldConfig?.name] &&
+      "ring-1 ring-destructive ring-offset-0",
+      fieldConfig.className,
+    ), 
+    [form.formState.errors, fieldConfig?.name, fieldConfig.className]
+  );
+
   return (
     <FormItem>
       <FormLabel
@@ -64,38 +143,29 @@ export default function FormRichTextEditor({
       </FormLabel>
       <FormControl>
         <MinimalTiptapEditor
-          {...form.register(fieldConfig?.name)}
-          editorProps={{
-            editable: () =>
-              !(formRenderProps.field.disabled || fieldConfig?.readonly),
-            attributes: {
-              "data-test-id": `${formKey}-editor-${fieldConfig.name}`,
-            },
-          }}
+          key={editorKey}
+          editorProps={editorProps}
+          disabled={isDisabled}
+          readOnly={fieldConfig.readonly || isDisabled}
           throttleDelay={0}
+          immediatelyRender={false}
           value={content}
-          onChange={handleChange} // Use handleChange to synchronize both states
-          className="w-full"
+          onChange={handleChange}
+          onBlur={formRenderProps.field.onBlur}
+          editorClassName="focus:outline-none"
+          placeholder={fieldConfig?.placeholder ?? "Type your description here..."}
+          autofocus={true}
+          className={className}
           editorContentClassName="p-5"
           output={fieldConfig?.richTextOutput ?? "html"}
-          placeholder={
-            fieldConfig?.placeholder ?? "Type your description here..."
-          }
-          autofocus={true}
-          editable={
-            formRenderProps.field.disabled ||
-            fieldConfig?.readonly ||
-            fieldConfig?.disabled
-          }
-          editorClassName="focus:outline-none"
-          onBlur={() => {
-            formRenderProps.field.onBlur();
+          plainTextMode={isPlainTextMode}
+          plainTextConfig={{
+            ...fieldConfig?.richTextConfig?.plainTextConfig,
           }}
+          customDropdowns={customDropdowns}
         />
       </FormControl>
       <FormMessage data-test-id={`${formKey}-error-msg-${fieldConfig.name}`} />
-
-      {/* <span>{JSON.stringify(content, null, 2)}</span> */}
     </FormItem>
   );
 }

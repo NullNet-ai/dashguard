@@ -1,5 +1,5 @@
-import { z } from "zod";
-import Entities from "~/auto-generated/entities";
+import { z } from 'zod';
+import Entities from '~/auto-generated/entities';
 
 const ZodItems = z.object({
   entity: z.string().refine(
@@ -7,7 +7,7 @@ const ZodItems = z.object({
       return Entities.includes(value);
     },
     {
-      message: "Invalid entity name. It must be one of the DnaOrm models.",
+      message: 'Invalid entity name. It must be one of the DnaOrm models.',
     },
   ), // Optional entity filter if needed
   limit: z.number().min(1).optional(), // Limit of items per page
@@ -21,7 +21,8 @@ const ZodItems = z.object({
         field: z.string().optional(),
         entity: z.string().optional(),
         operator: z.string(),
-        values: z.array(z.string()).optional(),
+        values: z.array(z.any()).optional(),
+        parse_as: z.string().optional(),
       }),
     )
     .optional(), // Optional advance filters
@@ -31,9 +32,23 @@ const ZodItems = z.object({
         id: z.string(),
         desc: z.boolean(),
         sort_key: z.string().optional(),
+        is_case_sensitive_sorting: z.boolean().optional(),
       }),
     )
     .optional(), // Optional sorting
+  group_advance_filters: z
+    .array(
+      z.object({
+        type: z.string(),
+        filters: z.array(z.any()).optional(),
+        field: z.string().optional(),
+        entity: z.string().optional(),
+        operator: z.string().or(z.any()).optional(),
+        values: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(), // Optional group advance filters
+  grouping: z.array(z.string()).optional(), // Optional groupings
 });
 
 export default ZodItems;

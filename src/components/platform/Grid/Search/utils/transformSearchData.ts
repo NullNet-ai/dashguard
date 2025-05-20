@@ -1,32 +1,58 @@
-import { formatAndCapitalize } from "~/lib/utils";
-import { ISearchableField } from "../types";
-import { ulid } from "ulid";
+import { formatAndCapitalize } from '~/lib/utils';
+import { ISearchableField } from '../types';
+import { ulid } from 'ulid';
+
+const findTextInValue = (
+  value: unknown,
+  searchText: string,
+  operator: string,
+) => {
+  if (['contains', 'like'].includes(operator)) {
+    if (typeof value === 'string') {
+      return value.toLowerCase().includes(searchText.toLowerCase())
+        ? value
+        : null;
+    } else if (
+      Array.isArray(value) &&
+      value.every((v) => typeof v === 'string')
+    ) {
+      const resultValue = value.find((v) =>
+        v.toLowerCase().includes(searchText.toLowerCase()),
+      );
+      return resultValue;
+    } else if (typeof value === 'number') {
+      return value.toString().includes(searchText) ? value : null;
+    }
+  }
+  return value === searchText ? value : null;
+};
 
 export const transformSearchData = (
-  array: Record<string, any>[] | undefined,
+  items: Record<string, any>[] | undefined,
   searchText: string,
   searchableFields: ISearchableField[],
 ) => {
-  if (!array) return null;
+  if (!items) return null;
 
-  const transformedData = array.reduce((acc: any, obj: any) => {
+  const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
-        (field) => field.field === key,
+        (field) => field.accessorKey === key,
       );
-      const isTextFound =
-        searchableField?.operator === "contains"
-          ? (value as any)?.includes(searchText)
-          : value === searchText
-      if (isTextFound) {
+      const foundValue = findTextInValue(
+        value,
+        searchText,
+        searchableField?.operator ?? 'like',
+      );
+      if (foundValue && searchableField) {
         acc.push({
           id: ulid(),
-          field: key,
-          values: Array.isArray(value) ? value : [value],
-          operator: searchableField?.operator || "equal",
-          type: "criteria",
-          label: searchableField?.label || formatAndCapitalize(key),
+          values: searchableField.accessorKey !== searchableField.field && obj[searchableField.field] ? [obj[searchableField.field]] : [foundValue],
+          operator: searchableField?.operator || 'equal',
+          type: 'criteria',
           ...searchableField,
+          label: searchableField?.label || formatAndCapitalize(key),
+          display_value: foundValue,
         });
       }
     }
@@ -34,7 +60,7 @@ export const transformSearchData = (
   }, []);
   const consolidated: Record<string, any> = {};
   transformedData.forEach((result: any) => {
-    const key = `${result.field}_${JSON.stringify(result.values)}`;
+    const key = `${result.field}_${JSON.stringify(result.values)}_${result.entity}`;
     if (!consolidated[key]) {
       consolidated[key] = { ...result, count: 1 };
     } else {
@@ -42,5 +68,6 @@ export const transformSearchData = (
     }
   });
   const searchResults = Object.values(consolidated) || null;
+
   return searchResults;
 };

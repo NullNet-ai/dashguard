@@ -4,9 +4,19 @@ import { UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
+import { useState } from "react";
+import { ISelectOptions } from '~/components/platform/FormBuilder/types/global/interfaces';
+
 const FormSchema = z.object({
     select_with_options: z.string({ message: "Select with Options is required" }),
     select_single: z.string({ message: "Select Single is required" }),
+    select_creatable: z.string({ message: "Select Creatable is required" }),
+    multi_select_creatable: z.array(
+        z.object({
+            label: z.string(),
+            value: z.string(),
+        })
+    ).min(1, { message: "Multi Select Creatable is required" }),
 });
 
 function handleSubmit(values: {
@@ -46,7 +56,15 @@ const sampleSelectOptionsAlphabetical = [
     { label: "Cherry", value: "cherry" },
 ];
 
-export default function SelectDetails({}) {
+const initialCreatableOptions = [
+    { label: "Option 1", value: "option_1" },
+    { label: "Option 2", value: "option_2" },
+    { label: "Option 3", value: "option_3" },
+];
+
+export default function SelectDetails({ }) {
+    const [creatableOptions, setCreatableOptions] = useState(initialCreatableOptions);
+
     return (
         <>
             {/* FormBuilder 3: Select */}
@@ -59,6 +77,11 @@ export default function SelectDetails({}) {
                 selectOptions={{
                     select_with_options: sampleSelectOptionsAlphabetical,
                     select_single: sampleSelectOptions,
+                    select_creatable: creatableOptions,
+                    multi_select_creatable: creatableOptions,
+                }}
+                multiSelectOptions={{
+                    multi_select_creatable: creatableOptions,
                 }}
                 fields={[
                     {
@@ -80,6 +103,51 @@ export default function SelectDetails({}) {
                         selectIcon: UserIcon,
                         selectSearchable: true,
                         // disabled:true
+                    },
+                    {
+                        id: "select_creatable",
+                        formType: "select",
+                        name: "select_creatable",
+                        label: "Select Creatable",
+                        placeholder: "Select or create...",
+                        required: true,
+                        selectSearchable: true,
+                        selectEnableCreate: true,
+                        selectOnCreateRecord: async (query: string): Promise<ISelectOptions> => {
+                            // Check if option already exists to prevent duplicates
+                            const exists = creatableOptions.some(
+                                option => option.value === query || option.label === query
+                            );
+
+                            if (!exists) {
+                                const newOption = { label: query, value: query };
+                                setCreatableOptions(prev => [...prev, newOption]);
+                                return Promise.resolve(newOption);
+                            }
+
+                            // Return existing option if it already exists
+                            const existingOption = creatableOptions.find(
+                                option => option.value === query || option.label === query
+                            );
+                            return Promise.resolve(existingOption || { label: query, value: query });
+                        }
+                    },
+                    {
+                        id: "multi_select_creatable",
+                        formType: "multi-select",
+                        name: "multi_select_creatable",
+                        label: "Multiple Select Creatable",
+                        placeholder: "Select multiple or create...",
+                        required: true,
+                        selectSearchable: true,
+                        selectEnableCreate: true,
+                        selectOnCreateRecord: async (query: string) => {
+                            creatableOptions.push({ label: query, value: query });
+                            return Promise.resolve({
+                                label: query,
+                                value: query,
+                            });
+                        }
                     },
                 ]}
             />

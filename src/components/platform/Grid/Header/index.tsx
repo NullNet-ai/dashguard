@@ -1,37 +1,29 @@
-import React, { useContext } from "react";
-import GridTabs from "../Tabs/Tabs";
-import Search from "../Search";
-import CreateButton from "./ButtonHeader";
-import TableViewButton from "./TableViewButton";
-import CardViewButton from "./CardViewButton";
-import FilterButton from "./FilterButton";
-import BulkActionButton from "./BulkActionButton";
-import Sorting from "../Sorting";
+'use client';
 
-export default function Header() {
+import React, { useContext } from 'react';
+import GridTabs from '../Tabs/Tabs';
+import Search from '../Search';
+import BulkActionButton from './BulkActionButton';
+import Sorting from '../Sorting';
+interface IProps {
+  gridKey?: string;
+  grid_tabs?: any[];
+}
+export default function Header({ gridKey, grid_tabs}: IProps) {
   return (
     <>
-      <div className="flex flex-col-reverse gap-y-4 py-2 lg:flex-row">
-        <div className="flex flex-col justify-between sm:flex-auto lg:flex-row">
-          <div className="flex h-[40px] justify-between">
-            <GridTabs />
+      <div className="flex flex-col-reverse gap-y-4 py-2 pb-0 lg:flex-row lg:justify-between">
+        <div className="flex flex-col justify-between sm:flex-auto md:max-w-[43%] lg:flex-row">
+          <div className="flex w-full flex-1 flex-col">
+            <div className="flex h-[36px] justify-between">
+              <GridTabs gridKey={gridKey} grid_tabs={grid_tabs}/>
+            </div>
+            <Sorting />
           </div>
         </div>
-        <div className="ml-0 mt-4 flex w-full flex-row justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:w-1/2 relative">
-          <div className="my-2 w-full md:my-0 lg:w-[472px]"> 
-            <Search />
-          </div>
-          <div className="flex flex-row items-center flex-shrink-0 h-[40px]">
-            <TableViewButton />
-            <CardViewButton />
-            <div className="mx-2 h-full w-[1px] bg-tertiary" />
-            <FilterButton />
-          </div>
-          <CreateButton className="hidden lg:inline-flex" title="New" />
-        </div>
+        <Search />
       </div>
       <BulkActionButton />
-      <Sorting />
     </>
   );
 }

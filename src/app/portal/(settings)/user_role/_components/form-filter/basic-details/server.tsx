@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import RoleDetails from "./client";
 import { defaultSorting } from "../../../grid/_config/sorting";
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 const FormServerFetch = async () => {
   const headerList = headers();
@@ -28,12 +29,12 @@ const FormServerFetch = async () => {
     "updated_by",
   ];
 
-  const sorting = await api.grid.getReportSorting();
+  const { sorts } = (await getGridCacheData()) ?? {};
 
   const { items = [], totalCount } = await api.grid.items({
     entity: main_entity!,
     pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
     current: 0,
     limit: 100,
   });
@@ -55,7 +56,7 @@ const FormServerFetch = async () => {
           pluck_fields: _pluck,
         }}
         selectedRecords={user_role_id ? [default_values] : []}
-        grid_data={{ items, totalCount }}
+        // grid_data={{ items, totalCount }}
       />
     </div>
   );

@@ -1,14 +1,20 @@
-import { headers } from "next/headers";
-import { api } from "~/trpc/server";
-import { type IPropsTabList } from "./type";
-import InnerTabItems from "./InnerTabItems";
+import { headers } from 'next/headers';
+
+import { api } from '~/trpc/server';
+
+import { toCapitalize } from '~/lib/capitalize';
+import InnerTabItems from './InnerTabItems';
+import { type IPropsTabList, type InnerTabsProps } from './type';
+import { pluralize } from '~/server/utils/pluralize';
 
 const getSessionTabs = async () => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity, application, identifier] =
-    pathname.split("/") || "New Tab";
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = headerList.get('x-pathname') || '';
+  const fullSearchQueryParams =
+    headerList.get('x-full-search-query-params') || '';
+  const [, portal, mainEntity, application, identifier, step] =
+    pathname.split('/') || 'New Tab';
+  const currentContext = '/' + portal + '/' + mainEntity;
   const stateTabs = (await api.tab
     .getSubTabs({
       current_context: currentContext,
@@ -18,80 +24,154 @@ const getSessionTabs = async () => {
     })
     .catch(() => {
       return [];
-    })) as IPropsTabList[];
-
-  const grid = stateTabs.find((item) => item.name === "Grid");
+    })) as any[];
+  const grid = stateTabs.find((item) => item.name === 'Grid');
   const hasIdentifier = stateTabs?.find((item) => item.name === identifier);
+
+  let entity;
+  switch (mainEntity) {
+    case 'user_role':
+      entity = 'role';
+      break;
+    case 'account_organization':
+      entity = 'account';
+      break;
+    default:
+      entity = mainEntity;
+  }
+
   const newTabs = stateTabs.map((tab) => {
     let path;
     let href;
     const main = `/${portal}/${mainEntity}/${application}/${identifier}`;
-    const [, , , _application, _current] = tab.href?.split("/");
+    const [, , , _application, _current] = tab.href.split('/');
 
-    if (tab?.name === "Grid") {
+    if (tab?.name === 'Grid') {
       path = pathname;
-      href = tab.href.replace(/\/\d+$/, "");
+      href = tab.href.replace(/\/\d+$/, '');
     } else if (
-      _application === "record" &&
-      !_current?.includes("current_tab")
+      _application === 'record' &&
+      !_current?.includes('current_tab')
     ) {
-      const curr_tab = "?current_tab=dashboard";
-      path = `${main}/${curr_tab}`;
-      href = `${tab.href}/${curr_tab}`;
+      path = `${main}/${fullSearchQueryParams}`;
+      href = `${tab.href}/${fullSearchQueryParams}`;
     } else {
       path = `${main}`;
       href = tab.href;
     }
 
     return {
+      ...tab,
       name: tab.name,
       href,
+      label:
+        tab.name === 'Grid'
+          ? `All ${toCapitalize(pluralize(entity || ''))}`
+          : tab.name,
       current: href.match(path) ? true : false,
     };
   });
 
-  if (application === "grid" && !grid) {
-    newTabs.push({
-      name: "Grid",
+  if (application === 'grid' && !grid) {
+    newTabs.unshift({
+      name: 'Grid',
       href: pathname,
       current: true,
+      label: `All ${toCapitalize(pluralize(entity || ''))}s`,
     });
   }
 
-  if (application === "wizard" && !hasIdentifier && identifier) {
-    newTabs.push({
+  if (application === 'wizard' && !hasIdentifier && identifier) {
+    newTabs.splice(1, 0, {
       name: identifier,
       href: pathname,
       current: true,
+      label: identifier,
     });
   }
 
-  if (application === "record" && !hasIdentifier && identifier) {
-    newTabs.push({
+  if (application === 'wizard' && hasIdentifier && step) {
+    //check first if the last character is a number
+    const lastChar = hasIdentifier.href.slice(-1);
+
+    if (/\d/.exec(step) && /\d/.exec(lastChar)) {
+      const modifiedHref = hasIdentifier.href.slice(0, -1) + `${step}`;
+      const currentTab = newTabs.findIndex((item) => item.name === identifier);
+      if (currentTab !== -1) {
+        newTabs[currentTab].href = modifiedHref;
+      }
+    }
+  }
+
+  if (application === 'record' && !hasIdentifier && identifier) {
+    newTabs.splice(1, 0, {
       name: identifier,
-      href: `${pathname}?current_tab=dashboard`,
+      href: `${pathname}?${fullSearchQueryParams}`,
       current: true,
+      label: identifier,
     });
   }
 
-  api.tab.insertSubTabs({
+  await api.tab.insertSubTabs({
     current_context: currentContext,
     tabs: newTabs,
   });
 
-  return newTabs;
-};
+  // await api.grid.defaultGridTab({
+  //   application: application || '',
+  //   entity: mainEntity || '',
+  // })
 
-const InnerTabs = async () => {
+  // await api.grid.getCustomGridTabs({
+  //   application: application || '',
+  //   entity: mainEntity || '',
+  // })
+  return newTabs.filter(Boolean)
+}
+
+const InnerTabs = async ({ variant = 'dropdown' }: InnerTabsProps) => {
   const newTabs = await getSessionTabs();
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  if (!newTabs?.length) return null;
+  const pathname = headerList.get('x-pathname') || '';
 
-  // const mainTabs = newTabs.slice(0, 6);
-  // const dropdownTabs = newTabs.slice(6);
+  const withIDTabs = newTabs.map((tab) => {
+    return {
+      ...tab,
+      id: tab.name,
+    };
+  });
 
-  return <InnerTabItems tabs={newTabs} pathname={pathname} />;
+  if (!withIDTabs?.length) {
+    return (
+      <div className="relative h-2 overflow-hidden">
+        <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant} />
+  );
 };
 
 export default InnerTabs;
+
+// const pathname = headerList.get('x-pathname') || ''
+
+// const [, , entity, , ]
+//   = pathname.split('/') || 'New Tab'
+
+// const withIDTabs = newTabs.map((tab) => {
+
+//   if(lowerCase(tab.name) === 'grid') {
+//     return {
+//      ...tab,
+//      id: tab.name,
+//      label: `All ${capitalize(pluralize(entity || ''))}`
+//     }
+//   }
+//   return {
+//     ...tab,
+//    id: tab.name,
+//   }
+// })

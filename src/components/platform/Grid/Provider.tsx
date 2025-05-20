@@ -1,42 +1,40 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
+'use client';
+
 import {
-  type IConfigGrid,
-  type IAction,
-  type ICreateContext,
-  type IState,
-  type IPropsGrid,
-  type TActionType,
-} from "./types";
-import {
-  type ColumnDef,
-  type ColumnSizingState,
+  // eslint-disable-next-line import/named
   getCoreRowModel,
+  useReactTable,
+  type ColumnSizingState,
+  type GroupingState,
   type Row,
   type RowSelectionState,
   type SortingState,
   type Updater,
-  useReactTable,
-} from "@tanstack/react-table";
-import { Checkbox } from "~/components/ui/checkbox";
-import { useToast } from "~/context/ToastProvider";
+} from '@tanstack/react-table';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { useMediaQuery } from "react-responsive";
-import { Create } from "./Action/Create";
-import { Button } from "~/components/ui/button";
-import { Button as Button2 } from "@headlessui/react";
-import { FileIcon } from "lucide-react";
+import { useToast } from '~/context/ToastProvider';
 
+import { formatGroupByResult } from '~/components/platform/Grid/utils/formatGroupByResult';
+import { BulkArchive } from './Action/BulkArchive';
+import { Create } from './Action/Create';
+import { UpdateReportGrouping } from './Action/UpdateReportGrouping';
+import { UpdateReportSorting } from './Action/UpdateReportSorting';
+import type { IGroupBy } from './Category/type';
+import { type ISearchItem } from './Search/types';
+import { useActionColumns } from './hooks/actionColumns';
+import { useColumnConditions } from './hooks/useColumnConditions';
 import {
-  EditComponent,
-  ArchiveComponent,
-  DeleteComponent,
-  RestoreComponent,
-} from "./DefatultRow/Actions";
-import { BulkArchive } from "./Action/BulkArchive";
-import { UpdateReportSorting } from "./Action/UpdateReportSorting";
-import { constructSearchableFields } from "./utils/constructSearchableFields";
+  type IAction,
+  type IConfigGrid,
+  type ICreateContext,
+  type IPropsGrid,
+  type IState,
+} from './types';
+import { constructSearchableFields } from './utils/constructSearchableFields';
+import { sortColumns } from './utils/sortColumns';
+import { useRouter } from 'next/navigation';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -45,6 +43,10 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
+  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer';
+  onRefetch?: (gridData: any) => void;
+  gridLevel?: number;
+  gridType?: 'card-list' | 'table';
 }
 
 export default function GridProvider({
@@ -59,17 +61,35 @@ export default function GridProvider({
   advanceFilter = [],
   defaultAdvanceFilter = [],
   pagination,
+  parentType,
+  gridLevel = 1,
+  grouping: initialGrouping = [],
+  gridKey,
+  customCreateButton,
 }: IProps) {
-  const _defaultSorting = defaultSorting
+  const router = useRouter();
+
+  const _defaultSorting = defaultSorting?.length
     ? defaultSorting
     : [
         {
-          id: "created_date",
+          id: 'created_date',
           desc: true,
         },
       ];
 
-  const isMobileOrTablet = useMediaQuery({ query: "(max-width: 728px)" });
+  const resolvedGroupings = useMemo(() => {
+    if (!initialGrouping?.length) return [];
+    if (typeof initialGrouping[0] === 'string') return initialGrouping;
+    return (initialGrouping as IGroupBy[])?.reduce(
+      (acc: GroupingState, curr) => {
+        return [...acc, curr.value];
+      },
+      [],
+    );
+  }, [initialGrouping]) as GroupingState;
+
+  const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
   /** @HOOKS */
   const toast = useToast();
@@ -80,56 +100,200 @@ export default function GridProvider({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
   );
+
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
   const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "card">("table");
+
+  const [viewMode, setViewMode] = useState<'table' | 'card'>(
+    _propsConfig?.viewMode ?? 'table',
+  );
+
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {};
+    return {
+      ...resolvedGroupings?.reduce((acc: any, curr) => {
+        return {
+          ...acc,
+          [curr]: false,
+        };
+      }, {}),
+    };
   });
+
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
   );
+  const [grouping, setGrouping] = React.useState<GroupingState>(
+    resolvedGroupings?.length ? resolvedGroupings : [],
+  );
+
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
   const [bulkActionType, setBulkActionType] = useState<string | null>(null);
+  const [
+    playgroundGridIsShowCreateButton,
+    setPlaygroundGridIsShowCreateButton,
+  ] = useState<string | null>(null);
+  const [playgroundGridIsShowRowAction, setPlaygroundGridIsShowRowAction] =
+    useState<string | null>(null);
+
+  // infinite data options
+  const [infiniteData, setInfiniteData] = useState<any[]>(data);
+  const [bufferData, setBufferData] = useState<any[]>([]);
+  const [current, setCurrent] = useState(1);
+  const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 100);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
+
+  const [gridColumns] = useState<any[]>(
+    _propsConfig?.columns?.map((item: any) => {
+      return {
+        header: item.header,
+        accessorKey: item.accessorKey,
+        search_config: item.search_config,
+        data_type: item.data_type,
+        sort_config: item.sort_config,
+      };
+    }),
+  );
+  const resolvedDefaultFilter = defaultAdvanceFilter?.map((filter) => ({
+    ...filter,
+    default: true,
+  })) as ISearchItem[];
+
+  if (!!_propsConfig?.columnsOrder?.length) {
+    _propsConfig.columns = sortColumns(
+      _propsConfig?.columnsOrder,
+      _propsConfig?.columns,
+    );
+  }
+
+  const resolvedAdvanceFilter = advanceFilter?.reduce(
+    (acc, curr) => {
+      if (curr?.default) return acc;
+      return [...acc, curr];
+    },
+    [...resolvedDefaultFilter],
+  );
+
+  // use effects
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const createButton = localStorage.getItem(
+        'playground_grid_is_show_create_button',
+      );
+      const rowAction = localStorage.getItem(
+        'playground_grid_is_show_row_action',
+      );
+
+      setPlaygroundGridIsShowCreateButton(createButton);
+      setPlaygroundGridIsShowRowAction(rowAction);
+    }
+  }, []);
+
+  // use effect for sorting if there is a change in props sorting it should set the sorting
+  useEffect(() => {
+    if (initialSorting?.length) {
+      setSorting(initialSorting);
+    }
+  }, [initialSorting]);
+
+  useEffect(() => {
+    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
+      setGrouping(resolvedGroupings);
+      setColumnVisibility(() => {
+        const newVisibility: any = {};
+        resolvedGroupings?.forEach((curr) => {
+          newVisibility[curr] = false;
+        });
+        return newVisibility;
+      });
+    }
+  }, [resolvedGroupings]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
     enableAutoCreate: true,
     enableRowClick: true,
-    hideCreateButton: false,
+    enableRowExpansion: false,
+    enableRowSelection: true,
+    enableGridGrouping: true,
+    hideCreateButton:
+      playgroundGridIsShowCreateButton != null
+        ? !(playgroundGridIsShowCreateButton == 'true')
+        : false,
+    disableDefaultAction:
+      playgroundGridIsShowRowAction != null
+        ? !(playgroundGridIsShowRowAction == 'true')
+        : false,
     searchableFields:
       constructSearchableFields({
         columns: _propsConfig?.columns ?? [],
-        entity: _propsConfig?.entity ?? "",
+        entity: _propsConfig?.entity ?? '',
       }) ?? [],
     ..._propsConfig,
   };
 
-  const handleSwitchViewMode = (mode: "table" | "card") => {
+  const columnConfig = useMemo(() => {
+    if (!grouping.length) return null;
+    const configColumns = config?.group_by_initial_columns || config?.columns;
+    return configColumns?.find(
+      (col: any) => col.accessorKey === grouping[0],
+    ) as any;
+  }, [grouping, config?.group_by_initial_columns, config?.columns]);
+
+  const newData = useMemo(() => {
+    if (grouping.length && columnConfig) {
+      const entity = columnConfig?.search_config?.entity || config.entity;
+      const field = columnConfig?.search_config?.field || grouping[0];
+      return formatGroupByResult({
+        data,
+        field,
+        entity,
+        accessorKey: columnConfig?.accessorKey,
+      });
+    }
+    return isMobileOrTablet && config.isInfinite ? infiniteData : data;
+  }, [
+    grouping,
+    columnConfig,
+    data,
+    isMobileOrTablet,
+    config.isInfinite,
+    infiniteData,
+  ]);
+
+  const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
   };
 
   const handleSingleSelect = async (row: any) => {
     if (!row) {
-      toast.error("Row is required");
+      toast.error('Row is required');
       return;
+    }
+    if (onSelectRecords) {
+      onSelectRecords([row]);
     }
     setRowSelectedRecord([row]);
   };
   const handleMultiSelect = () => {
     if (!Object.keys(rowSelection).length) {
-      toast.error("Row Selected is required");
+      toast.error('Row Selected is required');
       return;
     }
 
     const selectedData = (data as any[])?.filter((item) => {
       return rowSelection[item.id];
     });
+
+    if (onSelectRecords) {
+      onSelectRecords(selectedData);
+    }
 
     setRowSelectedRecord(selectedData);
   };
@@ -144,21 +308,70 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
+    if (config?.onFetchRecords) {
+      return config?.onFetchRecords?.({
+        sorting: updatedSorting,
+      });
+    }
     handleUpdateReportSorting(updatedSorting);
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
-    const _sorting = typeof updater === "function" ? updater(sorting) : updater;
-    const resolvedSorting = _sorting?.map((sort) => {
-      const sort_key =
-        config?.columns?.find((column: any) => column?.accessorKey === sort.id)
-          ?.sortKey || sort.id;
-      return {
-        ...sort,
-        sort_key,
-      };
-    });
-    UpdateReportSorting({ sorting: resolvedSorting });
+    const updatedSorting =
+      typeof updater === 'function' ? updater(sorting) : updater;
+
+    const processedSortKeys = new Map();
+
+    const resolvedSorting = updatedSorting?.reduce(
+      (acc: SortingState, sort) => {
+        const sortFields = config?.columns?.find(
+          (column: any) => column?.accessorKey === sort.id,
+        );
+
+        const resolvedSortFields = Array.isArray(sortFields?.sortKey)
+          ? sortFields?.sortKey.map((sortKey) => {
+              const key = `${sort.id}_${sortKey}`;
+              // If we've already processed this combination, skip it
+              if (processedSortKeys.has(key)) {
+                return null;
+              }
+              processedSortKeys.set(key, true);
+              return {
+                ...sort,
+                ...sortFields?.sort_config ?? {},
+                sort_key: sortKey,
+
+              };
+            })
+          : (() => {
+              const key = `${sort.id}_${sortFields?.sortKey || sort.id}`;
+              if (processedSortKeys.has(key)) {
+                return null;
+              }
+              processedSortKeys.set(key, true);
+              return [
+                {
+                  ...sort,
+                  ...sortFields?.sort_config ?? {},
+                  sort_key: sortFields?.sortKey || sort.id,
+                },
+              ];
+            })();
+
+        return [
+          ...acc,
+          ...(resolvedSortFields?.filter(Boolean) as SortingState),
+        ];
+      },
+      [],
+    );
+
+    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+      return config?.onFetchRecords?.({
+        sorting: resolvedSorting,
+      });
+    }
+    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
@@ -166,200 +379,150 @@ export default function GridProvider({
     handleUpdateReportSorting(updater);
   };
 
-  /** @REFS */
-  const selectTableRow = useRef<ColumnDef<any>>({
-    id: "select",
-    size: 50,
-    enableResizing: false,
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        className="border-foreground"
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        className="border-foreground"
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => {
-          row.toggleSelected(!!value);
-        }}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: true,
-  });
+  const handleUpdateGrouping = async (updater: Updater<GroupingState>) => {
+    const newGrouping =
+      typeof updater === 'function' ? updater(grouping) : updater;
 
-  const actionRow = useRef<ColumnDef<any>>({
-    id: "action",
-    size: 1,
-    enableResizing: false,
-    header: "Actions",
-    cell: ({ row }) => {
-      // Check if the row has either 'draft' or desired accessor
-      const showActions = [
-        "draft",
-        "active",
-        "Draft",
-        "Active",
-        "Archived",
-        "archived",
-      ].includes(row.original?.status);
-
-      if (!showActions) return null;
-
-      const statusesIncluded = config?.statusesIncluded || [];
-      const selectedRecords = Object.keys(rowSelection);
-      const disableActions =
-        selectedRecords.includes(row.original.id) ||
-        !statusesIncluded?.includes(row.original?.status);
-
-      if (config?.actionType === "single-select") {
-        return (
-          <Button2
-            disabled={disableActions}
-            className="mx-auto flex cursor-pointer"
-            type="button"
-            onClick={() => handleSingleSelect(row.original)}
-          >
-            <PlusCircleIcon className="h-5 w-5 text-primary" />
-          </Button2>
-        );
-      }
-
-      if (config?.actionType === "multi-select") {
-        return (
-          <Button
-            disabled={disableActions}
-            className="mx-auto flex"
-            variant={"ghost"}
-            type="button"
-            onClick={() => handleSingleSelect(row.original)}
-          >
-            <FileIcon className="h-5 w-5 text-primary" />
-          </Button>
-        );
-      }
-
-      return (
-        <>
-          <EditComponent row={row} config={config!} />
-          {!["Archived", "Delete"].includes(row.original?.status) && (
-            <ArchiveComponent
-              row={row}
-              config={config!}
-              open={showArchiveConfirmationModal}
-              setOpen={setShowArchiveConfirmationModal}
-              record={row}
-              setRecord={setRowToArchive}
-            />
-          )}
-          {row.original?.status === "Archived" && (
-            <>
-              <RestoreComponent row={row} config={config!} />
-              <DeleteComponent row={row} config={config!} />
-            </>
-          )}
-        </>
-      );
-    },
-    enableSorting: false,
-    enableHiding: true,
-  });
-
-  const actionTypeColumnCondition = (
-    actionsType: TActionType,
-    viewMode: string,
-  ) => {
-    // Exclude selectTableRow and actionRow if view mode is 'card'
-    if (viewMode === "card") {
-      return [...config?.columns];
+    // Update column visibility to hide grouped columns
+    // setColumnVisibility((prev: any) => {
+    //   const visibility: any = { ...prev };
+    //   // Show all previously grouped columns
+    //   grouping.forEach((columnId) => {
+    //     visibility[columnId] = true;
+    //   });
+    //   // Hide newly grouped columns
+    //   newGrouping.forEach((columnId) => {
+    //     visibility[columnId] = false;
+    //   });
+    //   return visibility;
+    // });
+    // setGrouping(newGrouping);
+    const groupings = newGrouping?.map((item) => {
+      const columnConfig = config?.columns?.find(
+        (column: any) => column?.accessorKey === item,
+      ) as any;
+      const label = (columnConfig?.header as string) ?? '';
+      const entity = columnConfig?.search_config?.entity || config.entity;
+      const field = columnConfig?.search_config?.field || item;
+      const sortBy = initialSorting?.find((sort) => sort.id === item)?.desc;
+      return {
+        value: item,
+        field: `${entity}.${field}`,
+        label,
+        desc: typeof sortBy === 'boolean' ? sortBy : false,
+        ...columnConfig?.sort_config ?? {},
+      };
+    });
+    if (config?.onFetchRecords) {
+      return config?.onFetchRecords?.({
+        grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
+      });
     }
-
-    switch (actionsType) {
-      case "single-select":
-        if (config?.disableDefaultAction) {
-          return [...config?.columns];
-        }
-
-        return [...config?.columns, actionRow?.current];
-      case "default":
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...config?.columns];
-        }
-        return [
-          selectTableRow?.current,
-          ...config?.columns,
-          actionRow?.current,
-        ];
-
-      default:
-        if (config?.disableDefaultAction) {
-          return [selectTableRow?.current, ...config?.columns];
-        }
-
-        return [
-          selectTableRow?.current,
-          ...config?.columns,
-          actionRow?.current,
-        ];
-    }
+    UpdateReportGrouping({ grouping: groupings, gridKey });
   };
 
   /** @HOOKS */
-  const table = useReactTable({
-    data,
-    getRowId: (row) => row.id,
-    columns: actionTypeColumnCondition(
-      config?.actionType || "default",
+  const { selectTableRow, expandTableRow, actionRow, groupByColumn } =
+    useActionColumns(
+      config,
+      rowSelection,
+      showArchiveConfirmationModal,
+      setShowArchiveConfirmationModal,
+      setRowToArchive,
+      handleSingleSelect,
       viewMode,
+    );
+
+  const { actionTypeColumnCondition } = useColumnConditions(
+    config,
+    grouping,
+    newData,
+    selectTableRow,
+    expandTableRow,
+    actionRow,
+    groupByColumn,
+  );
+
+  const handleCheckboxChange = (updater: Updater<RowSelectionState>) => {
+    // Update the internal row selection state
+    const newRowSelection =
+      typeof updater === 'function' ? updater(rowSelection) : updater;
+
+    setRowSelection(newRowSelection);
+
+    // Get the selected data based on the new selection
+    const selectedData = (data as any[])?.filter((item) => {
+      return newRowSelection[item.id];
+    });
+
+    // Call your custom handler or the provided onSelectRecords
+    if (onSelectRecords) {
+      onSelectRecords(selectedData);
+    }
+
+    // Update the selected record state
+    setRowSelectedRecord(selectedData);
+  };
+
+  const table = useReactTable({
+    data: newData,
+    getRowId: (row: any) => row.id,
+    columns: actionTypeColumnCondition(
+      viewMode,
+      defaultAdvanceFilter,
+      config?.actionType,
     ),
     enableColumnResizing: true,
-    columnResizeMode: "onChange",
+    columnResizeMode: 'onChange',
     getCoreRowModel: getCoreRowModel(),
-    // getSortedRowModel: getSortedRowModel(),
     onColumnSizingChange: setColSizing,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: !!_propsConfig?.enableCheckboxOnChange
+      ? handleCheckboxChange
+      : setRowSelection,
     enableMultiRowSelection: config?.enableMultiRowSelection,
     enableHiding: true,
     state: {
       sorting,
+      grouping,
       columnSizing: colSizing,
       rowSelection,
-      columnVisibility: config?.hideColumnsOnMobile?.reduce((acc, curr) => {
-        // @ts-expect-error - No need to check for acc
-        acc[curr] = !isMobileOrTablet;
-        return acc;
-      }, columnVisibility),
+      columnVisibility: (config?.hideColumnsOnMobile ?? []).reduce(
+        (acc, curr) => {
+          acc[curr] = !isMobileOrTablet;
+          return acc;
+        },
+        columnVisibility,
+      ),
     },
     enableMultiSort: true,
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: handleAddSorting,
+    onGroupingChange: handleUpdateGrouping,
+    enableGrouping: true,
   });
-
   /** @ACTIONS */
+
   const handleCreate = async () => {
     try {
       setCreateLoading(true);
       if (!config?.entity) {
-        toast.error("Entity is required");
+        toast.error('Entity is required');
         setCreateLoading(false);
         return;
       }
-      await Create({
+      const route = await Create({
         entity: config?.entity,
         defaultValues: config?.defaultValues,
         enableAutoCreate: config?.enableAutoCreate,
         is_from_grid: true,
       });
+
+      if(!config?.enableAutoCreate) {
+        router.push(route)
+        return;
+      }
     } catch (error) {
-      console.error("An error occurred while creating a record", error);
+      console.error('An error occurred while creating a record', error);
       setCreateLoading(false);
     }
   };
@@ -382,30 +545,92 @@ export default function GridProvider({
       setShowBulkActionConfirmationModal(false);
       setBulkActionType(null);
     } catch (error) {
-      console.error("An error occurred while creating a record", error);
+      console.error('An error occurred while creating a record', error);
       setArchiveBulkLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!onSelectRecords) return;
-    if (rowSelectedRecord?.length === 0) return;
-    onSelectRecords(rowSelectedRecord);
-  }, [onSelectRecords, rowSelectedRecord]);
+  const handleMergeBufferInfinite = React.useMemo(
+    () => () => {
+      if (!bufferData?.length) {
+        return;
+      }
+      setInfiniteData((prev) => {
+        return [...prev, ...bufferData];
+      });
+      setBufferData([]);
+    },
+    [bufferData],
+  );
+
+  const handleUpdateInfiniteData = async ({
+    items,
+    totalCount,
+    storageType,
+    curr,
+  }: {
+    items: any[];
+    totalCount: number;
+    storageType: 'buffer' | 'items';
+    curr?: number;
+  }) => {
+    if (storageType === 'buffer') {
+      setBufferData(items);
+      setCurrent((prev) => {
+        return curr ? curr : prev + 1;
+      });
+
+      return;
+    }
+    setInfiniteData((prev) => {
+      if (current === 1) {
+        return items;
+      }
+      return [...prev, ...items];
+    });
+    setCurrent((prev) => {
+      return curr ? curr : prev + 1;
+    });
+    setInfiniteCount(totalCount);
+  };
+
+  const infinite_state = {
+    current,
+    limit,
+    page,
+    hasMore,
+    infiniteData,
+    bufferData,
+    infiniteCount,
+  };
+
+  const infinite_actions = {
+    setCurrent,
+    setLimit,
+    setPage,
+    setHasMore,
+    setInfiniteData,
+    setBufferData,
+    setInfiniteCount,
+    handleUpdateInfiniteData,
+    handleMergeBufferInfinite,
+  };
 
   const state_context = {
     config: {
       ...config,
       columns: [
         selectTableRow?.current,
-        ...config?.columns,
         actionRow?.current,
+        ...(config?.columns ?? []),
       ],
+      gridColumns,
     },
-    data,
+    parentType,
+    data: newData,
     table,
     selectTableRow,
-    totalCount: totalCount,
+    totalCount,
     createLoading,
     archiveBulkLoading,
     showArchiveConfirmationModal,
@@ -413,11 +638,20 @@ export default function GridProvider({
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
-    advanceFilter: advanceFilter.length ? advanceFilter : defaultAdvanceFilter,
+    advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
+    defaultAdvanceFilter,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
     pagination,
+    hasMore,
+    gridLevel,
+    infinite_options: infinite_state,
+    initial_columns: config?.columns,
+    grouping,
+    groupConfigs: initialGrouping,
+    gridKey,
+    customCreateButton,
   } as IState;
   const actions = {
     handleCreate,
@@ -432,16 +666,29 @@ export default function GridProvider({
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
+    setHasMore,
+    infiniteActions: {
+      ...infinite_actions,
+    },
+    handleUpdateGrouping,
   } as IAction;
 
   return (
     <GridContext.Provider
       value={{
         state: state_context,
-        actions: actions,
+        actions,
       }}
     >
       {children}
     </GridContext.Provider>
   );
+}
+
+export function useGrid() {
+  const context = useContext(GridContext);
+  if (!context) {
+    throw new Error('useGrid must be used within a GridProvider');
+  }
+  return context;
 }

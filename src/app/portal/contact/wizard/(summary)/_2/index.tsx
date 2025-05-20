@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
@@ -10,14 +11,9 @@ const fields = {
   Address: "address",
 };
 
-const ContactDetailsSummary = ({
-  form_key,
-  identifier,
-}: {
-  form_key: string;
-  identifier: string;
-  main_entity: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , _, identifier] = pathName.split("/");
   const { data, refetch, error } = api.contact.getContactWithAddress.useQuery({
     code: identifier!,
     pluck_fields: [
@@ -42,8 +38,8 @@ const ContactDetailsSummary = ({
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key} className="mb-[8px]">
-          <strong> {key}: </strong>
+        <p key={key} className="mb-[8px] no-underline">
+          <span className='text-slate-400'> {key}: </span>
           &nbsp; {data?.[value] || "None"}
         </p>
       ))}
@@ -51,4 +47,15 @@ const ContactDetailsSummary = ({
   );
 };
 
-export default ContactDetailsSummary;
+const SummaryConfig = {
+  label: "Step 2",
+  required: true,
+  components: [
+    {
+      label: "Contact Details",
+      component: <Summary form_key={"contact_details"} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

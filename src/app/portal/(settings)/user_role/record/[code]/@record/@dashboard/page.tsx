@@ -1,8 +1,8 @@
-import ComingSoon from "~/app/portal/coming-soon/_components/coming_soon";
+import NewComingSoon from '~/components/ui/coming-soon';
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 const RecordTabContainer = async () => {
-  return <ComingSoon />;
+  return <NewComingSoon type="inner-component"/>
 };
 
 export default RecordTabContainer;

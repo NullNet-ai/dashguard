@@ -1,98 +1,53 @@
-import RecordWrapperProvider from "~/components/platform/Record/providers/RecordWrapperProvider";
-import HeaderTabs from "~/components/platform/Record/Tabs/HeaderTabs";
-import MainContent from "~/components/platform/Record/MainContent";
-import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSummaryMobile";
-import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
-import type { IProps } from "./types";
-import RecordProvider from "~/components/platform/Record/Provider";
-import Options from "../../../_components/IdentifierOption";
-import { handleChangeStatus } from "../../../_actions";
+import MainContent from '~/components/platform/Record/MainContent'
+import RecordProvider from '~/components/platform/Record/Provider'
+import RecordWrapperProvider from '~/components/platform/Record/providers/RecordWrapperProvider'
+import RecordSummaryMobile from '~/components/platform/Record/Summary/RecordSummaryMobile'
+import HeaderTabs from '~/components/platform/Record/Tabs/HeaderTabs'
+import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable'
 
-const Wrapper = (props: IProps) => {
-  const { record, record_summary, entity_code, entity_name, is_applicant } =
-    props;
+import statusOptions from '../../../_actions/statusOptions'
+import tabs from '../../../_config/tabs'
 
-  const tabs = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      tabName: "dashboard?categories=",
-    },
-    {
-      id: "contact",
-      name: "Contact",
-      tabName: "contact?categories=",
-    },
-    {
-      id: "organization",
-      name: "Organization",
-      tabName: "organization?categories=",
-    },
-  ];
+import type { IProps } from './types'
+import RecordContainer from './_component/RecordContainer'
 
+const Wrapper = ({
+  record,
+  record_summary,
+  entity_code,
+  entity_name,
+  is_applicant,
+}: IProps) => {
   return (
     <RecordProvider
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: is_applicant
-          ? [
-              {
-                label: "Screening",
-                onClick: handleChangeStatus.bind(null, "Screening"),
-              },
-              {
-                label: "Assessment Test",
-                onClick: handleChangeStatus.bind(null, "Assessment Test"),
-              },
-              {
-                label: "Interview",
-                onClick: handleChangeStatus.bind(null, "Interview"),
-              },
-              {
-                label: "Pending",
-                onClick: handleChangeStatus.bind(null, "Pending"),
-              },
-              {
-                label: "Hired",
-                onClick: handleChangeStatus.bind(null, "Hired"),
-              },
-              {
-                label: "Failed",
-                onClick: handleChangeStatus.bind(null, "Failed"),
-              },
-              {
-                label: "On Hold",
-                onClick: handleChangeStatus.bind(null, "On Hold"),
-              },
-              {
-                label: "Job",
-                onClick: handleChangeStatus.bind(null, "Job Offered"),
-              },
-            ]
-          : undefined,
+        identifierOption: is_applicant ? statusOptions : undefined,
       }}
     >
-      <section className="mt-8 min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem]">
-        <ResizablePanelGroup direction="horizontal" className="flex">
-          <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
-            <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
-          </div>
-          <ResizablePanel
-            defaultSize={95}
-            minSize={25}
-            className="min-h-60 flex-grow-[6] bg-transparent"
-          >
-            <HeaderTabs tabs={tabs} />
-            <MainContent className="p-4">{record}</MainContent>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </section>
-      {/* <Tabs>{tabs} </Tabs>
-      <MainContent>{children}</MainContent> */}
-      <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      <RecordWrapperProvider>
+        <section className="up mt-0 min-h-[calc(100vh-110px)] lg:mt-[0rem]">
+          <ResizablePanelGroup direction="horizontal" className="flex">
+            <RecordContainer>
+              {record_summary}
+            </RecordContainer>
+            <ResizablePanel
+              defaultSize={95}
+              minSize={25}
+              className="min-h-60 flex-grow-[6] bg-transparent"
+            >
+              <HeaderTabs tabs={tabs} />
+              <MainContent className="p-4" application="record">
+                {record}
+              </MainContent>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </section>
+        <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      </RecordWrapperProvider>
     </RecordProvider>
-  );
+  )
 };
 
-export default Wrapper;
+export default Wrapper

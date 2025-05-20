@@ -1,78 +1,79 @@
-import { api } from "~/trpc/server";
-import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "./_config/columns";
-import Grid from "~/components/platform/Grid/Server";
-import { defaultSorting } from "./_config/sorting";
-import { defaultAdvanceFilter } from "./_config/advanceFilter";
-import { getGridCacheData } from "~/lib/grid-get-cache-data";
+import Grid from '~/components/platform/Grid/';
+import { api } from '~/trpc/server';
+import AccountGridExpansion from '../_components/grids/AccountGridExpansion';
+import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
+import { defaultSorting } from './_config/sorting';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { resolveGridParams } from '~/components/platform/Grid/hooks/grid-params-resolver';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
+import { defaultAdvanceFilter } from './_config/advanceFilter';
 
 // import EditComponent from "./customDefaultActions/Edit";
-export default async function Page({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-}) {
+export default async function Page() {
   const _pluck = [
-    "id",
-    "code",
-    "categories",
-    "organization_id",
-    "first_name",
-    "middle_name",
-    "last_name",
-    "email_address",
-    "contact_status",
-    "status",
-    "created_date",
-    "updated_date",
-    "created_time",
-    "updated_time",
-    "created_by",
-    "updated_by",
+    'id',
+    'code',
+    'categories',
+    'organization_id',
+    'first_name',
+    'middle_name',
+    'last_name',
+    // 'contact_status',
+    'status',
+    'created_date',
+    'updated_date',
+    'created_time',
+    'updated_time',
+    'created_by',
+    'updated_by',
   ];
 
-  const { sorting, pagination, filters } = await getGridCacheData();
+  const gridCacheData = (await getGridCacheData()) ?? {};
 
-  // ! JOIN AVAILABLE KINDLY USE and Transform the data ( Map Reduce)
-  const { items = [], totalCount } = await api.contact.mainGrid({
-    current: +(pagination.current_page ?? "0"),
-    limit: +(pagination.limit_per_page ?? "100"),
-    entity: "contact",
+  const { gridParams, gridProps } = gridDataResolver({
+    entity: 'contact',
     pluck: _pluck,
-    sorting: sorting?.length ? sorting : defaultSorting,
-    advance_filters: filters?.advanceFilter?.length
-      ? filters?.advanceFilter
-      : defaultAdvanceFilter,
+    gridCacheData,
+    defaults: {
+      defaultSorting,
+      defaultAdvanceFilter
+    },
+  });
+
+  const { items = [], totalCount } = await api.contact.mainGrid({
+    ...gridParams,
   });
 
   return (
     <Grid
+      {...gridProps}
       totalCount={totalCount || 0}
       data={items}
-      defaultSorting={defaultSorting}
-      defaultAdvanceFilter={defaultAdvanceFilter}
-      advanceFilter={filters.reportFilters || []}
-      sorting={sorting || []}
-      pagination={pagination}
       config={{
-        entity: "contact",
-        title: "Contacts",
+        isInfinite: true,
+        entity: 'contact',
+        title: 'Contacts',
+        columnsOrder: gridCacheData?.columns,
         columns: gridColumns,
         defaultValues: {
-          categories: ["Contact", "Employee"],
+          categories: ['Contact', 'Employee'],
+          id: 'code',
         },
+        paginationType: 'default',
+        defaultShownColumns: ['raw_phone_number', 'email'],
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: "contact",
-          resolver: "mainGrid",
+          router: 'contact',
+          resolver: 'mainGrid',
           query_params: {
-            entity: "contact",
+            entity: 'contact',
             pluck: _pluck,
+            group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
+        enableRowExpansion: true,
+        rowExpansionBuilder: <AccountGridExpansion />,
       }}
     />
   );

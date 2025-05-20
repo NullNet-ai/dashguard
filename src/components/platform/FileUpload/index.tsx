@@ -20,9 +20,33 @@ const FileUpload = ({
   formRenderProps,
   fileUploaderProps,
   fileInputProps,
+  fieldConfig,
   fileUploaderContentProps,
+  form,
   ...props
+
+
+
 }: FileProps) => {
+
+  
+
+  const getAcceptedFileTypesText = (dropzoneOptions: any) => {
+    const acceptedTypes = dropzoneOptions?.accept
+      ? `${Object.keys(dropzoneOptions.accept)
+          .map(type => {
+            if (type.includes('/*')) {
+              return dropzoneOptions?.accept?.[type]?.map((subType: string) => subType.toUpperCase()).join(', ').replace('.', '') ?? '';
+            }
+            return type.split('/')[1]?.toUpperCase().replace('.', '') ?? '';
+          })
+          .join(', ')}`
+      : 'PDF, Doc, JPG or GIF';
+
+    const maxSize = dropzoneOptions?.maxSize ? ` up to ${dropzoneOptions.maxSize / (1024 * 1024)}MB` : ' up to 10MB';
+
+    return `${acceptedTypes}${maxSize}`;
+  };
   return (
     <FileUploader
       dropzoneOptions={dropzoneOptions}
@@ -30,12 +54,15 @@ const FileUpload = ({
       orientation={orientation}
       onUploadFile={onUploadFile}
       formRenderProps={formRenderProps}
+      fieldConfig={fieldConfig}
       {...fileUploaderProps}
     >
       <FileInput
         id="fileInput"
-        className="h-full content-center border border-dashed border-border/75"
-        disabled={formRenderProps?.field.disabled}
+        className={!Object.keys(form?.formState?.errors ?? {}).length ?`h-full content-center border border-dashed border-border/75`
+           : 'h-full content-center border border-dashed border-destructive'
+        }
+        disabled={formRenderProps?.field.disabled || fieldConfig?.readonly}
         {...fileInputProps}
       >
         <div className="flex w-full flex-col items-center justify-center p-8">
@@ -43,12 +70,15 @@ const FileUpload = ({
           <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
             <span className="font-semibold text-primary">Upload Document</span>
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            PDF, Doc, JPG or GIF up to 10MB
-          </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+              {getAcceptedFileTypesText(dropzoneOptions)}
+              </p>
         </div>
       </FileInput>
-      <FileUploaderContent {...fileUploaderContentProps} />
+      <FileUploaderContent 
+        {...fileUploaderContentProps} 
+        form={form}
+      />
     </FileUploader>
   );
 };

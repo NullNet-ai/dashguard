@@ -1,0 +1,11 @@
+{
+  "order": [
+    "dashboard",
+    "contact",
+    "accounts",
+    "organization",
+    "device",
+    "location",
+    "settings"
+  ]
+}

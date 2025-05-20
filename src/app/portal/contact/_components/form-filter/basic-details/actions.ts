@@ -1,9 +1,41 @@
-"use server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { z } from "zod";
-import { api } from "~/trpc/server";
-import { ContactPhoneEmailSchema } from "~/server/zodSchema/contact/contactPhoneEmail";
+'use server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { ulid } from 'ulid';
+import { z } from 'zod';
+import { ISearchItem } from '~/components/platform/Grid/Search/types';
+import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
+import { api } from '~/trpc/server';
+import { defaultSorting } from '../../../grid/_config/sorting';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+
+const defaultAdvanceFilter = [
+  {
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Active'],
+    default: true,
+  },
+  {
+    operator: 'or',
+    type: 'operator',
+    default: true,
+  },
+  {
+    entity: 'contacts',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Draft'],
+    default: true,
+  },
+] as ISearchItem[];
 
 export const saveContactDetails = async (
   data: z.infer<typeof ContactPhoneEmailSchema>,
@@ -18,9 +50,9 @@ export const saveContactDetails = async (
 
 export const selectRecord = async (rows: any[]) => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
   await api.tab.closeCurrentInnerClassTab({
     href: pathname,
     current_context: currentContext,
@@ -30,9 +62,9 @@ export const selectRecord = async (rows: any[]) => {
 
 export const removeRecord = async () => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
   await api.tab.closeCurrentInnerClassTab({
     href: pathname,
     current_context: currentContext,
@@ -41,19 +73,58 @@ export const removeRecord = async () => {
 };
 
 export const closeCurrentInnerClassTab = async ({
-  code
-} : {
+  code,
+  action_type,
+  customPathname,
+}: {
   code: string;
+  action_type: string;
+  customPathname: string;
 }) => {
   const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
-  const [, portal, mainEntity] = pathname.split("/");
-  const currentContext = "/" + portal + "/" + mainEntity;
+  const pathname = customPathname || headerList.get('x-pathname') || '';
+  const [, portal, mainEntity] = pathname.split('/');
+  const currentContext = '/' + portal + '/' + mainEntity;
 
-  await api.tab.closeCurrentInnerClassTab({
-    href: pathname,
+  await api.tab.removeNewInnerClassTab({
     current_context: currentContext,
   });
 
-  redirect(`/portal/contact/wizard/${code}/1`);
-}
+  if (action_type === 'Next') {
+    await api.wizard.createRedisRecordsForFormFilter({
+      entity: mainEntity!,
+      code: code,
+    })
+  }
+ return;
+};
+
+export const fetchRecords = async ({
+  advance_filters = [],
+  pluck_fields,
+}: {
+  pluck_fields: string[];
+  advance_filters: {
+    type: string;
+    operator: string;
+    values?: string[] | undefined;
+    entity?: string | undefined;
+    field?: string | undefined;
+  }[];
+}) => {
+  const { sorts } = (await getGridCacheData()) ?? {};
+  const { items = [], totalCount } = await api.contact.mainGrid({
+    current: 0,
+    limit: 100,
+    entity: 'contact',
+    pluck: pluck_fields,
+    sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,
+    advance_filters: advance_filters?.length
+      ? advance_filters
+      : defaultAdvanceFilter,
+  });
+  return {
+    items,
+    totalCount,
+  };
+};

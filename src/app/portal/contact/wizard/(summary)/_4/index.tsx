@@ -1,15 +1,11 @@
 "use client";
 import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
+import { usePathname } from "next/navigation";
 
-const ContactOrganizationSummary = ({
-  form_key,
-  identifier,
-}: {
-  form_key: string;
-  identifier: string;
-  main_entity: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , entity, _, identifier] = pathName.split("/");
   const {
     data: record = {
       data: {
@@ -23,7 +19,7 @@ const ContactOrganizationSummary = ({
     code: identifier!,
   });
 
-  const { organizations, user_roles } = record?.data || {};
+  const { organizations } = record?.data || {};
 
   useRefetchRecord({
     refetch,
@@ -36,7 +32,7 @@ const ContactOrganizationSummary = ({
   return (
     <div>
       <p>
-        <strong> Organization: </strong>
+        <span className='text-slate-400'> Department: </span>
         &nbsp;{" "}
         {organizations?.length
           ? organizations
@@ -44,15 +40,20 @@ const ContactOrganizationSummary = ({
               .join(", ")
           : "None"}
       </p>
-      <p>
-        <strong> Role: </strong>
-        &nbsp;{" "}
-        {user_roles?.length
-          ? user_roles?.map(({ label }: { label: string }) => label).join(", ")
-          : "None"}
-      </p>
     </div>
   );
 };
 
-export default ContactOrganizationSummary;
+const SummaryConfig = {
+  label: "Step 4",
+  required: false,
+  show_summary: true,
+  components: [
+    {
+      label: "Department Details",
+      component: <Summary form_key={"organization_details"} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

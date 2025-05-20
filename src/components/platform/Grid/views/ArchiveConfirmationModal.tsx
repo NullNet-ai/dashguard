@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
-import { handleArchive } from "../DefatultRow/Actions";
+import { handleArchive } from "../DefaultRow/Actions";
 import { ArchiveX } from "lucide-react";
 import ArchiveDialog from "./custom/Archive/Dialog";
 import { TArchiveType } from "../types";

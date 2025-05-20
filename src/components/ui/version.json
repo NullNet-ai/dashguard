@@ -1,0 +1,7 @@
+{
+  "app_name": "components__ui",
+  "tag": "2.8.1-rc.3<unreleased>",
+  "branch": "unreleased/fix4265/2.8.1-rc.3<unreleased>",
+  "message": "fix:  Select - the dropdown won't close after selecting an option",
+  "publish_name": "Save Ducto"
+}

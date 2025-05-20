@@ -1,24 +1,22 @@
-"use client";
-import { useMemo } from "react";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
-import { api } from "~/trpc/react";
-import { formatPhoneNumber } from "~/utils/formatter";
+'use client';
+import { useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { api } from '~/trpc/react';
+import { formatPhoneNumber } from '~/utils/formatter';
 
-const BasicDetailsSummary = ({
-  form_key,
-  identifier,
-}: {
-  form_key: string;
-  identifier: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , _, identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.contact.fetchContactPhoneEmail.useQuery({
     code: identifier!,
-    pluck_fields: [],
+    pluck_fields: ['id', 'code', 'status'],
   });
+
   const { emails: _email, phones: _phone } = record as unknown as Record<
     string,
     any
@@ -28,7 +26,7 @@ const BasicDetailsSummary = ({
     const primary_email = _email?.find(
       ({ is_primary }: { is_primary: boolean }) => is_primary,
     );
-    return primary_email?.email || "None";
+    return primary_email?.email || 'None';
   }, [_email]);
 
   const phone = useMemo(() => {
@@ -40,7 +38,7 @@ const BasicDetailsSummary = ({
       raw_phone_number,
       iso_code,
     });
-    return format_phone || "None";
+    return format_phone || 'None';
   }, [_phone]);
 
   useRefetchRecord({
@@ -54,16 +52,27 @@ const BasicDetailsSummary = ({
 
   return (
     <div>
-      <p className="mb-[8px]">
-        <strong> Phone Number: </strong>
+      <p className="mb-[8px] no-underline">
+        <span className='text-slate-400'> Phone Number: </span>
         &nbsp; {phone}
       </p>
       <p>
-        <strong> Email: </strong>
+        <span className='text-slate-400'> Email: </span>
         &nbsp; {email}
       </p>
     </div>
   );
 };
 
-export default BasicDetailsSummary;
+const SummaryConfig = {
+  label: 'Step 1',
+  required: true,
+  components: [
+    {
+      label: 'Basic Details',
+      component: <Summary form_key={'basicDetails'} />,
+    },
+  ],
+};
+
+export default SummaryConfig;

@@ -1,17 +1,31 @@
-import "../styles/globals.css";
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { TRPCReactProvider } from "~/trpc/react";
-import { ThemeProvider } from "~/context/ThemeProvider";
-import { ToastProvider } from "../context/ToastProvider";
-import config from "~/styles/config/config.json";
-import { EventEmitterProvider } from "~/context/EventEmitterProvider";
-import { TooltipProvider } from "~/components/ui/tooltip";
+import '../styles/globals.css';
+// eslint-disable-next-line import/no-unresolved
+import { GeistSans } from 'geist/font/sans';
+import type { Metadata } from 'next';
+import React, { Suspense } from 'react';
+
+import { TooltipProvider } from '~/components/ui/tooltip';
+import { EventEmitterProvider } from '~/context/EventEmitterProvider';
+import { ThemeProvider } from '~/context/ThemeProvider';
+import config from '~/styles/config/config.json';
+import { TRPCReactProvider } from '~/trpc/react';
+
+import { ToastProvider } from '../context/ToastProvider'
+import { SidebarProvider } from '~/components/ui/sidebar'
+import { OpenReplayProvider } from "~/context/OpenReplay";
+import { Loader } from '~/components/ui/loader'
+import { SocketProvider } from '~/context/SocketProvider';
 
 export const metadata: Metadata = {
-  title: "Platform",
-  description: "All in one platform for recruitment",
+  title: 'Platform',
+  description: 'All in one platform for recruitment',
 };
+
+const LoadingScreen = () => {
+  return <div className='flex justify-center items-center h-screen w-screen'>
+      <Loader variant='circularShadow' size={'lg'} />
+    </div>
+}
 
 export default function RootLayout({
   children,
@@ -20,28 +34,41 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
       className={`${GeistSans.className}`}
-      suppressHydrationWarning
+      lang="en"
+      suppressHydrationWarning={true}
     >
+      <head>
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+      </head>
       <body>
-        <TRPCReactProvider>
-          <EventEmitterProvider>
-            <TooltipProvider>
-              <ToastProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="light"
-                  enableSystem
-                  disableTransitionOnChange
-                  layout={config.ApplicationLayout}
-                >
-                  {children}
-                </ThemeProvider>
-              </ToastProvider>
-            </TooltipProvider>
-          </EventEmitterProvider>
-        </TRPCReactProvider>
+        <Suspense fallback={LoadingScreen()}>
+          <OpenReplayProvider>
+            <TRPCReactProvider>
+              <SocketProvider>
+                <EventEmitterProvider>
+                  {/** TODO: put side bar inside the portal */}
+                  <SidebarProvider defaultOpen={false} className="block">
+                    <TooltipProvider>
+                      <ToastProvider>
+                        <ThemeProvider
+                          attribute="class"
+                          defaultTheme="light"
+                          disableTransitionOnChange={true}
+                          enableSystem={true}
+                          layout={config.ApplicationLayout}
+                        >
+                          {children}
+                        </ThemeProvider>
+                      </ToastProvider>
+                    </TooltipProvider>
+                  </SidebarProvider>
+                </EventEmitterProvider>
+              </SocketProvider>
+            </TRPCReactProvider>
+          </OpenReplayProvider>
+        </Suspense>
       </body>
     </html>
   );

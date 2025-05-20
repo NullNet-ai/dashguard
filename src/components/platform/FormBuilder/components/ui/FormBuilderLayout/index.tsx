@@ -1,23 +1,23 @@
-'use client'
-import {
-  Accordion,
-  AccordionItem,
-} from "~/components/ui/accordion";
-import { type IAccordionLayoutProps } from "../../../types/ui/interfaces";
-import FormHeader from "../../controls/FormHeader";
-import FormFilterGridLayout from "../FormFilterGridLayout";
-import OpenedFormLayout from "../layout/opened";
-import SelectedViewLayout from "../layout/selected";
-import { CardContent } from "~/components/ui/card";
-import ViewFormActions from "../layout/opened/components/ViewFormActions";
+'use client';
+import { AccordionContent } from '@radix-ui/react-accordion';
 
-import FormBodyMainActions from "../layout/opened/components/FormBodyMainActions";
-import LockFormActions from "../layout/opened/components/LockFormActions";
-import { AccordionContent } from "@radix-ui/react-accordion";
+import { Accordion, AccordionItem } from '~/components/ui/accordion';
+import { CardContent } from '~/components/ui/card';
+
+import { type IAccordionLayoutProps } from '../../../types/ui/interfaces';
+import FormHeader from '../../controls/FormHeader';
+import FormFilterGridLayout from '../FormFilterGridLayout';
+import OpenedFormLayout from '../layout/opened';
+import FormBodyMainActions from '../layout/opened/components/FormBodyMainActions';
+import LockFormActions from '../layout/opened/components/LockFormActions';
+import ViewFormActions from '../layout/opened/components/ViewFormActions';
+import SelectedViewLayout from '../layout/selected';
+import { Fragment } from 'react';
+import { isUndefined } from 'lodash';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 const FormBuilderLayout = ({
-  //* data
-  isOpenGrid,
   displayType,
   formLabel,
   form,
@@ -43,188 +43,192 @@ const FormBuilderLayout = ({
   formProps,
   features,
   myParent,
-  //* actions
-  handleAccordionChange,
   enableAppendForm,
+  customFormFilterLockFormActions,
+  customFormFilterViewFormActions,
+  customFormHostLockFormActions,
+  customFormHostViewFormActions,
+  buttonHeaderRender,
+  customDesign,
+  isOpenSearch,
+  handleAccordionChange,
   saveForm,
   handleListLoading,
   handleDebug,
   handleLock,
-  handleAccordionExpand,
   handleRemovedSelectedRecords,
   onSubmitFormGrid,
   handleNewRecordFormFilterGrid,
+  handleSelectedGridRecords,
   handleAppendForm,
   handleUpdateDisplayType,
   handleOpenForm,
   handleCloseGrid,
   setShowFormActions,
-  //* other
-  buttonHeaderRender,
-  customDesign,
   customRender,
-  customFormFilterLockFormActions,
-  customFormFilterViewFormActions,
-  customFormHostLockFormActions,
-  customFormHostViewFormActions,
   onSelectFieldFilterGrid,
   handleSearchOpen,
-  isOpenSearch,
+  properties = {
+    isEditable: true,
+  },
 }: IAccordionLayoutProps) => {
-
   const searchActive = isOpenSearch || false;
-  
-  return (
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
 
-      <Accordion
-      type="single"
-      collapsible
+  return (
+    <Accordion
       className="w-full"
-      // value={isOpenGrid}
-      onValueChange={handleAccordionChange}
+      collapsible={true}
       defaultValue="item-1"
+      type="single"
+      onValueChange={handleAccordionChange}
     >
-      <AccordionItem value="item-1">
+      <AccordionItem value="item-1" data-test-id={`${testIDFormatter(`${path1}-${path2}-${formKey}-slctd-view`)}`}>
         <FormHeader
-          formProps={
-            {...formProps, 
-              handleSearchOpen,
-            isOpenSearch,}
-          }
-          enableAppendForm={enableAppendForm}
-          displayType={displayType}
-          buttonHeaderRender={buttonHeaderRender}
-          headerClassName={customDesign?.headerClassName}
           buttonConfig={buttonConfig!}
-          formLabel={formLabel!}
-          form={form}
-          formSchema={formSchema}
-          isButtonLoading={isSaveLoading}
-          open={isFormOpened}
+          buttonHeaderRender={buttonHeaderRender}
+          displayType={displayType}
+          enableAppendForm={enableAppendForm}
+          features={features}
           filterGridConfig={filterGridConfig}
-          isListLoading={isListLoading}
-          saveForm={saveForm}
+          form={form}
+          formKey={formKey}
+          formLabel={formLabel!}
+          formProps={{ ...formProps, handleSearchOpen, isOpenSearch }}
+          formSchema={formSchema}
+          handleAppendForm={handleAppendForm}
           handleDebug={handleDebug}
           handleLock={handleLock}
-          handleOpen={handleOpenForm}
-          features={features}
           handleNewRecordFormFilterGrid={handleNewRecordFormFilterGrid}
-          handleAppendForm={handleAppendForm}
-          selectedRecords={formGridSelected}
+          handleOpen={handleOpenForm}
           handleUpdateDisplayType={handleUpdateDisplayType}
-          formKey={formKey}
+          headerClassName={customDesign?.headerClassName}
+          isButtonLoading={isSaveLoading}
+          isListLoading={isListLoading}
+          open={isFormOpened}
+          saveForm={saveForm}
+          selectedRecords={formGridSelected}
+          properties={properties}
         />
         <AccordionContent className="relative">
-        {filterGridConfig && (
-          <>
-            <FormBodyMainActions
-              formProps={   {...formProps, 
-                handleSearchOpen,
-              isOpenSearch,}}
-              searchActive={searchActive}
-              isListLoading={isListLoading}
-              displayType={displayType}
-              filterGridConfig={filterGridConfig}
-              formGridSelected={formGridSelected}
-              handleUpdateDisplayType={handleUpdateDisplayType}
-              handleAppendForm={handleAppendForm}
-              form={form}
-              formLabel={formLabel!}
-              isButtonLoading={isSaveLoading}
-              features={features}
-              onSubmitFormGrid={onSubmitFormGrid}
-              selectedRecords={formGridSelected}
-              handleRemovedSelectedRecords={handleRemovedSelectedRecords}
-              customFormFilterViewFormActions={customFormFilterViewFormActions}
-              customFormFilterLockFormActions={customFormFilterLockFormActions}
-            />
-            {
-              searchActive && (
-            <FormFilterGridLayout
-              isFormOpen={isFormOpened}
-              handleListLoading={handleListLoading}
-              handleSelectedGridRecords={handleNewRecordFormFilterGrid}
-              handleCloseGrid={handleCloseGrid}
-              filterGridConfig={filterGridConfig}
-            />
-              )
-            }
-          </>
-        )}
-          {displayType === "form" && !searchActive && (
+          {filterGridConfig && !customRender && (
             <>
-              {!form?.formState?.disabled && !filterGridConfig  ? (
-                <CardContent className="absolute right-2">
-                  <ViewFormActions
-                    formProps={formProps}
-                    saveForm={saveForm}
-                    isButtonLoading={isSaveLoading}
-                    form={form}
-                    formSchema={formSchema}
-                    formKey={formKey}
-                    features={features}
-                    customFormHostViewFormActions={customFormHostViewFormActions}
-                  />
-                </CardContent>
-              ) : (
-                <>
-                 {!filterGridConfig && (
-                <CardContent className="absolute right-2">
-                  <LockFormActions
-                    formProps={formProps}
-                    saveForm={saveForm}
-                    isButtonLoading={isSaveLoading}
-                    form={form}
-                    formSchema={formSchema}
-                    formKey={formKey}
-                    features={features}
-                    customFormHostLockFormActions={customFormHostLockFormActions}
-                  />
-                </CardContent>
-                 )}
-                  
-                </>
-              )}
-
-              <OpenedFormLayout
-                fieldConfig={fieldConfig}
-                myParent={myParent}
-                customDesign={customDesign}
-                customRender={customRender}
-                fields={fields}
-                form={form}
-                formKey={formKey}
-                appendFormKey={appendFormKey!}
-                checkboxOptions={checkboxOptions}
-                multiSelectOptions={multiSelectOptions}
-                multiSelectOnSearch={multiSelectOnSearch}
-                radioOptions={radioOptions}
-                selectOptions={selectOptions}
-                currencyInputOptions={currencyInputOptions}
-                showFormActions={showFormActions}
-                setShowFormActions={setShowFormActions}
-                debugOn={debugOn}
-                formProps={formProps}
-                handleDebug={handleDebug}
-                handleLock={handleLock}
+              <FormBodyMainActions
+                customFormFilterLockFormActions={
+                  customFormFilterLockFormActions
+                }
+                customFormFilterViewFormActions={
+                  customFormFilterViewFormActions
+                }
+                displayType={displayType}
+                features={features}
                 filterGridConfig={filterGridConfig}
-                onSelectFieldFilterGrid={onSelectFieldFilterGrid}
-                formSchema={formSchema}
+                form={form}
+                formGridSelected={formGridSelected}
+                formLabel={formLabel!}
+                formProps={{ ...formProps, handleSearchOpen, isOpenSearch }}
+                handleAppendForm={handleAppendForm}
+                handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+                handleUpdateDisplayType={handleUpdateDisplayType}
+                isButtonLoading={isSaveLoading}
+                isListLoading={isListLoading}
+                searchActive={searchActive}
+                selectedRecords={formGridSelected}
+                onSubmitFormGrid={onSubmitFormGrid}
+                properties={properties}
               />
+              {searchActive && (
+                <FormFilterGridLayout
+                  filterGridConfig={filterGridConfig}
+                  formKey={formKey}
+                  handleCloseGrid={handleCloseGrid}
+                  handleListLoading={handleListLoading}
+                  handleSelectedGridRecords={handleSelectedGridRecords}
+                  isFormOpen={isFormOpened}
+                />
+              )}
             </>
           )}
-          {displayType === "selected" && (
+          {/* accommodate customRender for multiple form filters first */}
+          {(displayType === 'form' || (filterGridConfig && customRender)) &&
+            !searchActive && (
+              <>
+                {!form?.formState?.disabled && !filterGridConfig ? (
+                  <CardContent className="absolute right-2">
+                    <ViewFormActions
+                      customFormHostViewFormActions={
+                        customFormHostViewFormActions
+                      }
+                      features={features}
+                      form={form}
+                      formKey={formKey}
+                      formProps={formProps}
+                      formSchema={formSchema}
+                      isButtonLoading={isSaveLoading}
+                      saveForm={saveForm}
+                      properties={properties}
+                    />
+                  </CardContent>
+                ) : (
+                  !filterGridConfig && (
+                    <CardContent className="absolute right-2">
+                      <LockFormActions
+                        customFormHostLockFormActions={
+                          customFormHostLockFormActions
+                        }
+                        features={features}
+                        form={form}
+                        formKey={formKey}
+                        formProps={formProps}
+                        formSchema={formSchema}
+                        isButtonLoading={isSaveLoading}
+                        saveForm={saveForm}
+                      />
+                    </CardContent>
+                  )
+                )}
+
+                <OpenedFormLayout
+                  appendFormKey={appendFormKey!}
+                  checkboxOptions={checkboxOptions}
+                  currencyInputOptions={currencyInputOptions}
+                  customDesign={customDesign}
+                  customRender={customRender}
+                  debugOn={debugOn}
+                  displayType={displayType}
+                  fieldConfig={fieldConfig}
+                  fields={fields}
+                  filterGridConfig={filterGridConfig}
+                  form={form}
+                  formKey={formKey}
+                  formProps={formProps}
+                  formSchema={formSchema}
+                  handleDebug={handleDebug}
+                  handleLock={handleLock}
+                  handleUpdateDisplayType={handleUpdateDisplayType}
+                  multiSelectOnSearch={multiSelectOnSearch}
+                  multiSelectOptions={multiSelectOptions}
+                  myParent={myParent}
+                  radioOptions={radioOptions}
+                  selectOptions={selectOptions}
+                  setShowFormActions={setShowFormActions}
+                  showFormActions={showFormActions}
+                  onSelectFieldFilterGrid={onSelectFieldFilterGrid}
+                />
+              </>
+            )}
+          {displayType === 'selected' && (
             <SelectedViewLayout
-              formGridSelected={formGridSelected}
-              handleUpdateDisplayType={handleUpdateDisplayType}
               filterGridConfig={filterGridConfig}
+              formGridSelected={formGridSelected}
               handleRemovedSelectedRecords={handleRemovedSelectedRecords}
+              handleUpdateDisplayType={handleUpdateDisplayType}
             />
           )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-
   );
 };
 

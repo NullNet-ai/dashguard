@@ -1,26 +1,35 @@
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
-import { z } from "zod"; // Zod is used for input validation
-import ZodItems from "~/server/zodSchema/grid/items";
 import {
   EOperator,
   EOrderDirection,
-  IAdvanceFilters,
-} from "@dna-platform/common-orm";
-import { formatSorting } from "~/server/utils/formatSorting";
-import { get, pick } from "lodash";
-import { ContactCategoryDetailsSchema } from "~/server/zodSchema/contact/categoryDetails";
-import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
+  IGroupAdvanceFilters,
+  type IAdvanceFilters,
+} from '@dna-platform/common-orm';
+import Bluebird from 'bluebird';
+import { pick } from 'lodash';
+import { z } from 'zod';
+
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { formatSorting } from '~/server/utils/formatSorting';
+import { ContactCategoryDetailsSchema } from '~/server/zodSchema/contact/categoryDetails';
+import { contactDetailsSchema } from '~/server/zodSchema/contact/contactDetails';
+import ZodItems from '~/server/zodSchema/grid/items';
+import { formatPhoneNumber } from '~/utils/formatter';
+
+import { getContactsWithPhoneAndEmail } from '../../../utils/phone-email-validation';
+import { createAdvancedFilter } from '../../utils/transformAdvanceFilter';
 import {
   ContactPhoneEmailSchema,
-  EmailSchema,
-  PhoneNumberSchema,
-} from "../../zodSchema/contact/contactPhoneEmail";
-import { EStatus } from "../types";
-import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
-import { getContactsWithPhoneAndEmail } from "../../../utils/phone-email-validation";
-import { formatPhoneNumber } from "~/utils/formatter";
+  type EmailSchema,
+  type PhoneNumberSchema,
+} from '../../zodSchema/contact/contactPhoneEmail';
+import { EStatus } from '../types';
+import {
+  addCommonGridConcatenates,
+  addCommonGridJoins,
+  addCommonGridPluckObject,
+} from '~/server/utils/queryBuilder';
 
-const ENTITY = "contact";
+const ENTITY = 'contact';
 
 export const contactRouter = createTRPCRouter({
   updateContactDetails: privateProcedure
@@ -40,11 +49,11 @@ export const contactRouter = createTRPCRouter({
             entity,
             token: ctx.token.value,
             query: {
-              pluck: ["id", ...(pluck || [])],
+              pluck: ['id', ...(pluck || [])],
               advance_filters,
               order: {
                 limit: 1,
-                by_field: "created_date",
+                by_field: 'created_date',
                 by_direction: EOrderDirection.DESC,
               },
             },
@@ -62,8 +71,8 @@ export const contactRouter = createTRPCRouter({
         if (!address_id) {
           // Double check if contact has no address_id
           const advance_filters = createAdvancedFilter({ id: contact_id });
-          const response = await getRecord("contact", advance_filters, [
-            "address_id",
+          const response = await getRecord('contact', advance_filters, [
+            'address_id',
           ]);
           _address_id = response?.address_id;
           if (_address_id) {
@@ -73,7 +82,7 @@ export const contactRouter = createTRPCRouter({
         }
 
         const advance_filters = createAdvancedFilter({ address_id });
-        const response = await getRecord("address", advance_filters);
+        const response = await getRecord('address', advance_filters);
         return response;
       };
 
@@ -89,7 +98,7 @@ export const contactRouter = createTRPCRouter({
             mutation: {
               params: {
                 ...data,
-                status: "Active",
+                status: 'Active',
               },
               pluck,
             },
@@ -122,34 +131,34 @@ export const contactRouter = createTRPCRouter({
         const address = await getAddressByContactId(_address_id, id);
 
         if (address?.id) {
-          await updateAddress("address", { ...details, id: address?.id }, [
-            "id",
-            "address",
-            "address_line_one",
-            "address_line_two",
-            "latitude",
-            "longitude",
-            "place_id",
-            "street_number",
-            "street",
-            "region",
-            "region_code",
-            "country_code",
+          await updateAddress('address', { ...details, id: address?.id }, [
+            'id',
+            'address',
+            'address_line_one',
+            'address_line_two',
+            'latitude',
+            'longitude',
+            'place_id',
+            'street_number',
+            'street',
+            'region',
+            'region_code',
+            'country_code',
           ]);
         } else {
-          const address = await insertAddress("address", details, [
-            "id",
-            "address",
-            "address_line_one",
-            "address_line_two",
-            "latitude",
-            "longitude",
-            "place_id",
-            "street_number",
-            "street",
-            "region",
-            "region_code",
-            "country_code",
+          const address = await insertAddress('address', details, [
+            'id',
+            'address',
+            'address_line_one',
+            'address_line_two',
+            'latitude',
+            'longitude',
+            'place_id',
+            'street_number',
+            'street',
+            'region',
+            'region_code',
+            'country_code',
           ]);
           if (address) _address_id = address?.id;
         }
@@ -161,52 +170,39 @@ export const contactRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: { ...rest, address_id: _address_id },
-            pluck: ["id", "address_id"],
+            pluck: ['id', 'address_id'],
           },
         })
         .execute();
     }),
   mainGrid: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
-    const hasAdvanceFilters = input?.advance_filters?.length
-      ? [
-          // {
-          //   type: "operator",
-          //   operator: EOperator.AND,
-          // },
-          ...(input?.advance_filters ?? []),
-        ]
-      : [...(input?.advance_filters ?? [])];
-
-    const { total_count: totalCount = 1, data: items } = await ctx.dnaClient
+    const query = ctx.dnaClient
       .findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           pluck_group_object: {
-            contact_phone_numbers: ["raw_phone_number", "is_primary"],
-            contact_emails: ["email", "is_primary"],
+            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
+            contact_emails: ['email', 'is_primary'],
+            // organization_contacts: ['id', 'contact_organization_id'],
+            // organizations: ['id', 'name', 'categories'],
           },
+
           pluck_object: {
-            contact_emails: ["email", "is_primary"],
+            ...addCommonGridPluckObject(),
+            contact_emails: ['email', 'is_primary'],
             contact_phone_numbers: [
-              "raw_phone_number",
-              "iso_code",
-              "country_code",
-              "is_primary",
+              'raw_phone_number',
+              'iso_code',
+              'country_code',
+              'is_primary',
             ],
-            contacts: input.pluck,
+            contacts: [...input.pluck, 'previous_status'],
           },
           track_total_records: true,
-          advance_filters: [
-            // {
-            //   type: "criteria",
-            //   field: "id",
-            //   operator: EOperator.NOT_EQUAL,
-            //   // ! TODO ENV
-            //   values: ["01JCSAG79KQ1WM0F9B47Q700P1"],
-            // },
-            ...hasAdvanceFilters,
-          ] as IAdvanceFilters[],
+          advance_filters: input?.advance_filters as IAdvanceFilters[],
+          group_advance_filters: (input.group_advance_filters ||
+            []) as IGroupAdvanceFilters<string | number>[],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -221,65 +217,58 @@ export const contactRouter = createTRPCRouter({
           multiple_sort: input.sorting?.length
             ? formatSorting(input.sorting)
             : [],
+          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
       })
       .join({
-        type: "left",
+        type: 'left',
         field_relation: {
           to: {
-            entity: "contact_email",
-            field: "contact_id",
+            entity: 'contact_email',
+            field: 'contact_id',
           },
           from: {
             entity: ENTITY,
-            field: "id",
+            field: 'id',
           },
         },
       })
       .join({
-        type: "left",
+        type: 'left',
         field_relation: {
           to: {
-            entity: "contact_phone_number",
-            field: "contact_id",
+            entity: 'contact_phone_number',
+            field: 'contact_id',
           },
           from: {
             entity: ENTITY,
-            field: "id",
+            field: 'id',
           },
         },
-      })
-      .join({
-        type: "self",
-        field_relation: {
-          to: {
-            entity: "contact",
-            field: "created_by",
-          },
-          from: {
-            alias: "created_by",
-            entity: "contact",
-            field: "id",
-          },
-        },
-      })
-      .join({
-        type: "self",
-        field_relation: {
-          to: {
-            entity: "contact",
-            field: "updated_by",
-          },
-          from: {
-            alias: "updated_by",
-            entity: "contact",
-            field: "id",
-          },
-        },
-      })
-      .execute();
+      });
 
-    //TODO: Transform the data - temporary
+    addCommonGridJoins(query, 'contacts');
+
+    if (input.grouping?.length) {
+      query.groupBy({
+        query: {
+          fields: input.grouping,
+          has_count: true,
+        },
+      });
+    }
+
+    const { total_count: totalCount = 1, data: items } = await query.execute();
+
+    const totalPages = Math.ceil(totalCount / (input.limit || 100));
+    if (input.grouping?.length) {
+      return {
+        totalCount,
+        items: items,
+        currentPage: 0,
+        totalPages,
+      };
+    }
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
         const {
@@ -288,15 +277,18 @@ export const contactRouter = createTRPCRouter({
           contact_phone_numbers,
           created_by,
           updated_by,
+          roles,
+          organizations,
         } = item;
 
-        const emails = pick(contact_emails, ["emails", "is_primaries"]);
+        const emails = pick(contact_emails, ['emails', 'is_primaries']);
         const phones = pick(contact_phone_numbers, [
-          "raw_phone_numbers",
-          "iso_code",
-          "country_code",
-          "is_primaries",
+          'raw_phone_numbers',
+          'iso_code',
+          'country_code',
+          'is_primaries',
         ]);
+
         const existing_contact = acc?.find(
           (acc_item: any) => acc_item?.id === contacts?.id,
         );
@@ -309,11 +301,15 @@ export const contactRouter = createTRPCRouter({
           is_primaries: p_is_primaries,
         } = phones;
         const { emails: _emails, is_primaries: e_is_primaries } = emails;
-        const filterPrimary = (li: string[], is_primaries: number[]) => {
+        const filterPrimary = (
+          li: string[],
+          is_primaries: number[] | boolean[],
+        ) => {
           if (!li || !is_primaries) return null;
           const index = is_primaries?.findIndex(
-            (is_primary) => is_primary === 1,
+            (is_primary) => is_primary === 1 || is_primary === true,
           );
+
           return index !== -1 ? li[index] : null;
         };
         const _primary_phone_number = filterPrimary(
@@ -326,15 +322,38 @@ export const contactRouter = createTRPCRouter({
           raw_phone_number: _primary_phone_number as string,
           iso_code,
         });
+        // Filter out department names
+        const filterDepartmentNames = (
+          names: string[],
+          categories: string[],
+        ) => {
+          if (!names || !categories) return [];
+          return names.filter((_, index) => {
+            try {
+              const category = JSON.parse(categories[index] || '[]');
+              return category?.includes('Department');
+            } catch {
+              return true;
+            }
+          });
+        };
+        const organizationNames = organizations?.names
+          ? filterDepartmentNames(
+              organizations?.names,
+              organizations?.categories ?? [],
+            )
+          : [];
 
         return [
           ...acc,
           {
+            roles,
+            organization: organizationNames,
             ...contacts,
             ...emails,
             ...phones,
-            created_by: `${created_by?.first_name ?? ""} ${created_by?.last_name ?? ""}`,
-            updated_by: `${updated_by?.first_name ?? ""} ${updated_by?.last_name ?? ""}`,
+            created_by: created_by?.full_name ?? '',
+            updated_by: updated_by?.full_name ?? '',
             raw_phone_number: primary_phone_number,
             email: primary_email,
           },
@@ -342,13 +361,12 @@ export const contactRouter = createTRPCRouter({
       },
       [],
     );
-    const totalPages = Math.ceil(totalCount / (input.limit || 100));
 
     return {
-      totalCount, // Total number of users
-      items: formatted_items, // Paginated users
-      currentPage: 0, // The current page
-      totalPages, // Total number of pages
+      totalCount,
+      items: formatted_items,
+      currentPage: 0,
+      totalPages,
     };
   }),
   formFilterGrid: privateProcedure
@@ -357,7 +375,7 @@ export const contactRouter = createTRPCRouter({
       const hasAdvanceFilters = input?.advance_filters?.length
         ? [
             {
-              type: "operator",
+              type: 'operator',
               operator: EOperator.AND,
             },
             ...(input?.advance_filters ?? []),
@@ -370,21 +388,21 @@ export const contactRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck_object: {
-              contact_emails: ["email", "is_primary"],
+              contact_emails: ['email', 'is_primary'],
               contact_phone_numbers: [
-                "raw_phone_number",
-                "iso_code",
-                "country_code",
-                "is_primary",
+                'raw_phone_number',
+                'iso_code',
+                'country_code',
+                'is_primary',
               ],
               contacts: input.pluck,
             },
             advance_filters: [
               {
-                type: "criteria",
-                field: "id",
+                type: 'criteria',
+                field: 'id',
                 operator: EOperator.NOT_EQUAL,
-                values: ["01JCSAG79KQ1WM0F9B47Q700P1"],
+                values: ['01JCSAG79KQ1WM0F9B47Q700P1'],
               },
               ...hasAdvanceFilters,
             ] as IAdvanceFilters[],
@@ -405,42 +423,41 @@ export const contactRouter = createTRPCRouter({
           },
         })
         .join({
-          type: "left",
+          type: 'left',
           field_relation: {
             to: {
-              entity: "contact_email",
-              field: "contact_id",
+              entity: 'contact_email',
+              field: 'contact_id',
             },
             from: {
               entity: ENTITY,
-              field: "id",
+              field: 'id',
             },
           },
         })
         .join({
-          type: "left",
+          type: 'left',
           field_relation: {
             to: {
-              entity: "contact_phone_number",
-              field: "contact_id",
+              entity: 'contact_phone_number',
+              field: 'contact_id',
             },
             from: {
               entity: ENTITY,
-              field: "id",
+              field: 'id',
             },
           },
         })
         .execute();
 
-      //TODO: Transform the data - temporary
       const formatted_items = items.reduce(
         (acc: Record<string, string>[], item) => {
           const { contacts, contact_emails, contact_phone_numbers } = item;
-          const emails = pick(contact_emails, ["email"]);
+          const emails = pick(contact_emails, ['email']);
           const phones = pick(contact_phone_numbers, [
-            "raw_phone_number",
-            "iso_code",
-            "country_code",
+            'raw_phone_number',
+            'iso_code',
+            'country_code',
           ]);
           const existing_contact = acc?.find(
             (acc_item: any) => acc_item?.id === contacts?.id,
@@ -463,10 +480,10 @@ export const contactRouter = createTRPCRouter({
       const totalPages = Math.ceil(totalCount / 100);
 
       return {
-        totalCount, // Total number of users
-        items: formatted_items, // Paginated users
-        currentPage: 0, // The current page
-        totalPages, // Total number of pages
+        totalCount,
+        items: formatted_items,
+        currentPage: 0,
+        totalPages,
       };
     }),
   updateCategoryDetails: privateProcedure
@@ -484,7 +501,7 @@ export const contactRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              categories: [...new Set([categories, "Contact"])],
+              categories: [...new Set([categories, 'Contact'])],
             },
           },
         })
@@ -493,23 +510,23 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, emails, phones } = input;
+      const { id, emails, phones, code } = input;
 
-      const email_pluck = ["email", "id", "contact_id", "is_primary"];
+      const email_pluck = ['email', 'id', 'contact_id', 'is_primary'];
       const phone_pluck = [
-        "raw_phone_number",
-        "id",
-        "contact_id",
-        "is_primary",
-        "iso_code",
-        "country_code",
+        'raw_phone_number',
+        'id',
+        'contact_id',
+        'is_primary',
+        'iso_code',
+        'country_code',
       ];
       const email_data = emails?.find((email) => email.is_primary);
 
       const phone_data = phones?.find((phone) => phone.is_primary);
 
       let contact_id = id;
-      let contact_code = "";
+      let contact_code = code;
 
       // Validate phone and email exists
       const fetchRecordData = async (
@@ -545,18 +562,18 @@ export const contactRouter = createTRPCRouter({
         const filters = [
           ...createAdvancedFilter({
             [fieldKey]: field_value,
-            status: "Active",
+            status: 'Active',
           }),
           ...(contact_id
             ? [
                 {
                   operator: EOperator.AND,
-                  type: "operator",
+                  type: 'operator',
                 },
                 {
-                  field: "contact_id",
+                  field: 'contact_id',
                   operator: EOperator.NOT_EQUAL,
-                  type: "criteria",
+                  type: 'criteria',
                   values: [contact_id],
                 },
               ]
@@ -569,26 +586,25 @@ export const contactRouter = createTRPCRouter({
       const [phones_exist, email_exist] = await Promise.all([
         getContactData(
           phone_data as z.infer<typeof PhoneNumberSchema>,
-          "contact_phone_numbers",
-          "raw_phone_number",
+          'contact_phone_numbers',
+          'raw_phone_number',
           [
-            "id",
-            "raw_phone_number",
-            "is_primary",
-            "contact_id",
-            "country_code",
-            "iso_code",
+            'id',
+            'raw_phone_number',
+            'is_primary',
+            'contact_id',
+            'country_code',
+            'iso_code',
           ],
         ),
         getContactData(
           email_data as z.infer<typeof EmailSchema>,
-          "contact_emails",
-          "email",
-          ["id", "email", "is_primary", "contact_id"],
+          'contact_emails',
+          'email',
+          ['id', 'email', 'is_primary', 'contact_id'],
         ),
       ]);
 
-      //AND condition for now.
       const contact_ids = getContactsWithPhoneAndEmail({
         phones_exist: phones_exist || [],
         email_exist: email_exist || [],
@@ -596,7 +612,7 @@ export const contactRouter = createTRPCRouter({
 
       if (contact_ids?.length) {
         return {
-          message: "",
+          message: '',
           data: {
             phones: phones_exist,
             emails: email_exist,
@@ -612,14 +628,14 @@ export const contactRouter = createTRPCRouter({
       if (!contact_id) {
         const record = await ctx.dnaClient
           .create({
-            entity: "contact",
+            entity: 'contact',
             token: ctx.token.value,
             mutation: {
               params: {
-                status: "Draft",
-                categories: ["Contact"],
+                status: 'Draft',
+                categories: ['Contact', 'User'],
               },
-              pluck: ["id", "code"],
+              pluck: ['id', 'code'],
             },
           })
           .execute();
@@ -639,7 +655,7 @@ export const contactRouter = createTRPCRouter({
               params: {
                 ...data,
                 contact_id,
-                status: "Active",
+                status: 'Active',
               },
               pluck,
             },
@@ -686,20 +702,20 @@ export const contactRouter = createTRPCRouter({
       if (!contact_id)
         return {
           status_code: 500,
-          message: "Contact ID is required.",
+          message: 'Contact ID is required.',
         };
 
       const email_records = await Promise.all(
         emails.map(async (email) => {
           const existing_email = await getRecordByContactId(
-            "contact_email",
+            'contact_email',
             contact_id!,
             email.id!,
           );
           if (existing_email) {
-            return update("contact_email", email, email_pluck);
+            return update('contact_email', email, email_pluck);
           } else {
-            return insert("contact_email", email, email_pluck);
+            return insert('contact_email', email, email_pluck);
           }
         }),
       );
@@ -707,13 +723,13 @@ export const contactRouter = createTRPCRouter({
       const phone_records = await Promise.all(
         phones.map(async (phone) => {
           const existing_phone = await getRecordByContactId(
-            "contact_phone_number",
+            'contact_phone_number',
             contact_id!,
             phone.id!,
           );
           return existing_phone
-            ? update("contact_phone_number", phone, phone_pluck)
-            : insert("contact_phone_number", phone, phone_pluck);
+            ? update('contact_phone_number', phone, phone_pluck)
+            : insert('contact_phone_number', phone, phone_pluck);
         }),
       );
 
@@ -728,8 +744,8 @@ export const contactRouter = createTRPCRouter({
     .input(
       z.object({
         code: z
-          .string({ message: "Contact Code is required." })
-          .min(1, { message: "Contact Code is required." }),
+          .string({ message: 'Contact Code is required.' })
+          .min(1, { message: 'Contact Code is required.' }),
         pluck_fields: z.array(z.string()),
         is_multiple: z.boolean().optional(),
       }),
@@ -738,17 +754,49 @@ export const contactRouter = createTRPCRouter({
       const { code: contact_code, pluck_fields, is_multiple } = input;
       const { data: items } = await ctx.dnaClient
         .findAll({
-          entity: "contact",
+          entity: 'contact',
           token: ctx.token.value,
           query: {
             pluck: pluck_fields,
+            pluck_object: {
+              contacts: pluck_fields,
+              account_organizations: ['id', 'role_id', 'email'],
+              user_roles: ['id', 'role'],
+            },
             advance_filters: [
               {
-                field: "code",
+                field: 'code',
                 operator: EOperator.EQUAL,
                 values: [contact_code],
               },
             ] as IAdvanceFilters[],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+            from: {
+              entity: 'contact',
+              field: 'id',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'role_id',
+            },
           },
         })
         .execute();
@@ -777,31 +825,35 @@ export const contactRouter = createTRPCRouter({
 
       const [contact] = items || [];
       const {
-        id: contact_id = "",
-        code = "",
+        id: contact_id = '',
+        code = '',
         address_id,
         ...rest
-      } = contact || {};
+      } = contact?.contacts || {};
 
       const phones = await getRecordByContactId(
-        "contact_phone_number",
+        'contact_phone_number',
         contact_id!,
-        ["id", "raw_phone_number", "iso_code", "country_code", "is_primary"],
+        ['id', 'raw_phone_number', 'iso_code', 'country_code', 'is_primary'],
       );
 
-      const emails = await getRecordByContactId("contact_email", contact_id!, [
-        "id",
-        "email",
-        "is_primary",
+      const emails = await getRecordByContactId('contact_email', contact_id!, [
+        'id',
+        'email',
+        'is_primary',
       ]);
 
       return {
         ...rest,
         id: contact_id,
-        code: code,
+        code,
         emails,
         phones,
-        address_id: address_id,
+        address_id,
+        account: {
+          role: contact?.user_roles?.role,
+          account_id: contact?.organization_accounts?.email,
+        },
       };
     }),
   getBasicDetails: privateProcedure
@@ -815,18 +867,18 @@ export const contactRouter = createTRPCRouter({
 
       const record = await ctx.dnaClient
         .findAll({
-          entity: "contact",
+          entity: 'contact',
           token: ctx.token.value,
           query: {
             advance_filters: [
               {
-                type: "criteria",
-                field: "code",
+                type: 'criteria',
+                field: 'code',
                 operator: EOperator.EQUAL,
                 values: [input.code],
               },
             ],
-            pluck: ["id", "first_name", "middle_name", "last_name", "goes_by"],
+            pluck: ['id', 'first_name', 'middle_name', 'last_name', 'goes_by'],
           },
         })
         .execute();
@@ -839,35 +891,35 @@ export const contactRouter = createTRPCRouter({
       const order = {
         starts_at: 0,
         limit: 1,
-        by_field: "created_date",
+        by_field: 'created_date',
         by_direction: EOrderDirection.DESC,
       };
       const [contact_emails, contact_phone_numbers] = await Promise.all([
         ctx.dnaClient
           .findAll({
-            entity: "contact_email",
+            entity: 'contact_email',
             token: ctx.token.value,
             query: {
               advance_filters,
               order,
-              pluck: ["email", "contact_id", "is_primary", "id"],
+              pluck: ['email', 'contact_id', 'is_primary', 'id'],
             },
           })
           .execute(),
         ctx.dnaClient
           .findAll({
-            entity: "contact_phone_number",
+            entity: 'contact_phone_number',
             token: ctx.token.value,
             query: {
               advance_filters,
               order,
               pluck: [
-                "raw_phone_number",
-                "id",
-                "contact_id",
-                "is_primary",
-                "iso_code",
-                "country_code",
+                'raw_phone_number',
+                'id',
+                'contact_id',
+                'is_primary',
+                'iso_code',
+                'country_code',
               ],
             },
           })
@@ -901,22 +953,22 @@ export const contactRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck_object: {
-              addresses: input.address_pluck_fields || ["address"],
+              addresses: input.address_pluck_fields || ['address'],
               contacts: input.pluck_fields,
             },
             advance_filters,
           },
         })
         .join({
-          type: "left",
+          type: 'left',
           field_relation: {
             to: {
-              entity: "address",
-              field: "id",
+              entity: 'address',
+              field: 'id',
             },
             from: {
               entity: ENTITY,
-              field: "address_id",
+              field: 'address_id',
             },
           },
         })

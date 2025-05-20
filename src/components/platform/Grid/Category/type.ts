@@ -32,6 +32,13 @@ export interface ISortBy {
   sort_by_field: string;
   sort_by_direction: EOrderDirection;
 }
+export interface IGroupBy {
+  label: string;
+  value: string;
+  field: string
+  desc: boolean;
+  is_case_sensitive_sorting?: boolean;
+}
 
 export interface IStoreUnSaveSorts {
   entity: string;

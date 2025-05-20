@@ -14,14 +14,6 @@ console.table({
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // rewrites: async () => {
-  //   return [
-  //     {
-  //       source: "/api/file/:path*",
-  //       destination: "http://localhost:5001/api/file/:path*",
-  //     },
-  //   ];
-  // },
   env: {
     NEXT_NODE_ENV: process.env.NODE_ENV,
   },
@@ -44,6 +36,10 @@ const config = {
       {
         protocol: "https",
         hostname: "images.pexels.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.shopify.com",
       },
     ],
   },

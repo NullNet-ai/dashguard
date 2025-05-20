@@ -1,21 +1,21 @@
 "use client";
 
-import { forwardRef, useRef, useState, useEffect } from "react";
-import { Trash2 as RemoveIcon, CropIcon } from "lucide-react";
-import { cn } from "~/lib/utils";
-import { Button, buttonVariants } from "~/components/ui/button";
-import { useFileUpload } from "./Provider";
-import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
-import { FileCrop } from "./FileCrop";
 import {
-  CropState,
-  PixelCrop,
-  blobToFile,
-  canvasPreview,
-  createImage,
-} from "./canvasUtils";
+  AlertTriangleIcon,
+  CropIcon,
+  Trash2 as RemoveIcon,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
+import { cn } from "~/lib/utils";
+import { FileCrop } from "./FileCrop";
+import { FILE_TYPES, FilePreview, getFileTypeIcon } from "./FilePreview";
+import { useFileUpload } from "./Provider";
+import type { CropState, PixelCrop } from "./canvasUtils";
+import { blobToFile, canvasPreview, createImage } from "./canvasUtils";
+import axios from 'axios';
 
 export enum UploadState {
   IDLE = "idle",
@@ -24,24 +24,49 @@ export enum UploadState {
   ERROR = "error",
 }
 
-export const FileUploaderItem = forwardRef<
+export const FileUploaderItem = React.forwardRef<
   HTMLDivElement,
   {
     index: number;
-    file: File;
+    file: File & { download_path?: string };
+    form?: any
     onRemove?: (index: number) => void;
     progressState?: { [key: number]: number };
+    uploadError?: string;
   } & React.HTMLAttributes<HTMLDivElement>
 >(
   (
-    { className, index, file, onRemove, children, progressState, ...props },
+    {
+      className,
+      index,
+      file,
+      onRemove: _onRemove,
+      children: _children,
+      progressState,
+      uploadError,
+      form,
+      ...props
+    },
     ref,
   ) => {
+    const {
+      removeFileFromSet,
+      activeIndex,
+      direction,
+      formRenderProps,
+      fieldConfig,
+      state,
+    } = useFileUpload();
+
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [imageSrc, setImageSrc] = useState<string | null>(
+      file?.download_path || null,
+    );
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [croppedFile, setCroppedFile] = useState<File>(file);
-    const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+    const [previewSrc, setPreviewSrc] = useState<string | null>(
+      file?.download_path || null,
+    );
     const isImageFile = FILE_TYPES.IMAGE.includes(file.type);
     const isPdfFile = FILE_TYPES.PDF.includes(file.type);
     const isGifImageFIle = FILE_TYPES.GIF.includes(file.type);
@@ -54,14 +79,6 @@ export const FileUploaderItem = forwardRef<
       `${fileSizeInMB >= 1 ? fileSizeInMB.toFixed(2) + " MB" : fileSizeInMB.toFixed(2) + " KB"}`,
     );
 
-    const {
-      removeFileFromSet,
-      activeIndex,
-      direction,
-      formRenderProps,
-      state,
-    } = useFileUpload();
-
     const isSelected = index === activeIndex;
 
     const [cropState, setCropState] = useState<CropState>({
@@ -71,14 +88,15 @@ export const FileUploaderItem = forwardRef<
       croppedAreaPixels: null,
     });
 
-    const isDisabled = formRenderProps?.field?.disabled;
+    const isDisabled =
+      formRenderProps?.field?.disabled || fieldConfig?.readonly;
 
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const readFile = (file: File) => {
+    const readFile = (file: File & { download_path?: string }) => {
+      if (file?.download_path) return;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        // const result = reader.result?.toString() || null;
         let resultString: string;
 
         if (typeof reader.result === "object") {
@@ -94,11 +112,16 @@ export const FileUploaderItem = forwardRef<
 
     // Load initial image
     useEffect(() => {
-      readFile(file);
+      if (!file?.download_path) {
+        readFile(file);
+      }
+      return;
     }, [file]);
 
     const handleOpenCropModal = () => {
-      readFile(croppedFile);
+      if (!file?.download_path) {
+        readFile(croppedFile);
+      }
       setIsCropModalOpen(true);
       setCropState({
         crop: { x: 0, y: 0 },
@@ -115,10 +138,11 @@ export const FileUploaderItem = forwardRef<
         });
       }
     };
+
     const rotateImage = (newRotation: number[]) => {
       setCropState((prev) => ({
         ...prev,
-        rotation: newRotation, // (prev.rotation + 90) % 360,
+        rotation: newRotation,
       }));
     };
 
@@ -139,7 +163,6 @@ export const FileUploaderItem = forwardRef<
           previewCanvasRef.current,
           cropState.croppedAreaPixels,
           cropState.rotation[0],
-          // cropState.zoom,
         );
 
         // Create a new file from the Blob
@@ -156,15 +179,60 @@ export const FileUploaderItem = forwardRef<
         setCroppedFile(newCroppedFile);
 
         const reader = new FileReader();
-        reader.onloadend = () => {
-          // const result = reader.result?.toString() || null;
+        reader.onloadend = async () => {
           let resultString: string;
+          let resultId: string
 
           if (typeof reader.result === "object") {
             resultString = JSON.stringify(reader.result);
+          } else if (reader.result) {
+            const base64String = reader.result as string;
+            const base64Data = base64String.split(',')[1];
+            const binaryData = atob(base64Data as string);
+            const byteArray = new Uint8Array(binaryData.length);
+            for (let i = 0; i < binaryData.length; i++) {
+                byteArray[i] = binaryData.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray], { type: file.type });
+            const newFile = new File([blob], file.name, { type: file.type });
+
+            const formData = new FormData();
+            formData.append('file', newFile);
+
+            try {
+              const response = await axios.post('/api/upload', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              });
+              if (!response.data.success) {
+                throw new Error(response.data.message || 'Upload failed');
+              }
+              const uploadedFileId = response.data.data[0].id;
+              resultId = uploadedFileId;
+              resultString =  URL.createObjectURL(blob);
+              //set id
+              form.setValue('edited_files', [
+                resultId
+              ], {
+                shouldDirty: true,
+                shouldTouch: true,
+              });
+              toast.success('File uploaded successfully');
+            } catch (error) {
+              console.error('Upload error:', error);
+              toast.error('Failed to upload file');
+              resultString = URL.createObjectURL(blob);
+            }
+            
+            
           } else {
-            resultString = reader.result as string;
+            throw new Error("FileReader result is undefined");
           }
+          
+
+         
+          
           setImageSrc(resultString);
           setPreviewSrc(resultString);
         };
@@ -203,13 +271,15 @@ export const FileUploaderItem = forwardRef<
     };
 
     useEffect(() => {
-      if (isImageFile || isPdfFile) {
+      if ((isImageFile && !file?.download_path) || isPdfFile) {
         readFile(file);
       }
     }, [file, isImageFile, isPdfFile]);
 
     const handleOpenInNewTab = () => {
-      const url = URL.createObjectURL(file);
+      const url = file?.download_path
+        ? file?.download_path
+        : URL.createObjectURL(file);
       const a = document.createElement("a");
       a.href = url;
       a.target = "_blank";
@@ -224,13 +294,16 @@ export const FileUploaderItem = forwardRef<
       }, 1000);
     };
 
-    const currentProgressState =
-      progressState && progressState[index] !== undefined
+    const currentProgressState = file.download_path
+      ? 100
+      : progressState && progressState[index] !== undefined
         ? progressState[index]
         : 0;
 
     const stillInProgress =
       currentProgressState !== undefined && currentProgressState !== 100;
+
+    const hasUploadError = state === "error";
 
     return (
       <>
@@ -242,34 +315,48 @@ export const FileUploaderItem = forwardRef<
             className,
             isSelected ? "bg-muted" : "",
             stillInProgress ? "cursor-not-allowed" : "cursor-pointer",
+            hasUploadError ? "bg-destructive/10" : "",
           )}
+          onClick={() => {
+            if (!stillInProgress && !hasUploadError) {
+              !isImageFile ? handleOpenInNewTab() : setIsPreviewModalOpen(true);
+            }
+          }}
           {...props}
         >
           <div className="mr-4">
-            {!!isImageFile && !!imageSrc ? (
+            {hasUploadError ? (
+              <div className="text-destructive">
+                <AlertTriangleIcon className="h-12 w-12" />
+              </div>
+            ) : !!isImageFile && !!imageSrc ? (
               <img
                 src={imageSrc}
                 alt="Preview"
-                className={`h-16 w-16 rounded object-cover`}
-                onClick={() => {
-                  if (!isDisabled && !stillInProgress) {
-                    setIsPreviewModalOpen(true);
-                  }
-                }}
+                className={`h-16 w-16 rounded object-cover ${hasUploadError ? "opacity-50" : ""}`}
               />
             ) : (
               <button
                 type="button"
-                disabled={isDisabled}
-                onClick={handleOpenInNewTab}
+                disabled={isDisabled || hasUploadError}
+                onClick={hasUploadError ? undefined : handleOpenInNewTab}
+                className={hasUploadError ? "opacity-50" : ""}
               >
                 {getFileTypeIcon(file)}
               </button>
             )}
           </div>
           <div className="flex-grow">
-            <div className="text-sm font-medium">{croppedFile.name}</div>
-            {stillInProgress ? (
+            <div
+              className={`text-sm font-medium ${hasUploadError ? "text-destructive" : ""}`}
+            >
+              {croppedFile.name}
+            </div>
+            {hasUploadError ? (
+              <div className="text-sm text-destructive">
+                Upload Failed: {uploadError}
+              </div>
+            ) : stillInProgress ? (
               <Progress className="mt-2" value={currentProgressState} />
             ) : (
               <div className="text-sm font-medium">
@@ -280,13 +367,19 @@ export const FileUploaderItem = forwardRef<
             )}
           </div>
           <div className="flex items-center space-x-2">
-            {!!isImageFile && !isGifImageFIle && !isDisabled ? (
+            {!!isImageFile &&
+            !isGifImageFIle &&
+            !isDisabled &&
+            !hasUploadError ? (
               <Button
                 size={"xs"}
                 variant={"softPrimary"}
                 type="button"
-                onClick={handleOpenCropModal}
-                disabled={stillInProgress || isDisabled}
+                onClick={(e) => {
+                  handleOpenCropModal();
+                  e.stopPropagation();
+                }}
+                disabled={stillInProgress || isDisabled || hasUploadError}
                 className="rounded-full"
               >
                 <CropIcon className="h-4 w-4 text-primary" strokeWidth={2} />
@@ -299,7 +392,11 @@ export const FileUploaderItem = forwardRef<
                 type="button"
                 size={"xs"}
                 variant={"softDestructive"}
-                onClick={() => removeFileFromSet(index)}
+                onClick={(e) => {
+                  form.setValue('edited_files', [])
+                  removeFileFromSet(index);
+                  e.stopPropagation();
+                }}
                 className={cn(
                   direction === "rtl" ? "left-1 top-1" : "right-1 top-1",
                   "rounded-full",

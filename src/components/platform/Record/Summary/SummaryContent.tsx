@@ -1,97 +1,68 @@
-import React from "react";
-
-import IdentifierComponent from "./Header/IdentifierComponent";
-import SummaryRecordTab from "./Header/SummaryTab";
-import ProfileImage from "./Header/ProfileImage";
-import SystemDates from "./Header/SystemDate";
-import { headers } from "next/headers";
-import { api } from "~/trpc/server";
-import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
+import { cookies, headers } from 'next/headers'
+import React from 'react'
+import { api } from '~/trpc/server'
+import SummaryClientContent from './SummaryClientContent'
 
 const RecordSummaryContent = async () => {
-  const headerList = headers();
+  try {
+    const headerList = headers()
+    const username = cookies().get('username')?.value || ''
+    const pathname = headerList.get('x-pathname') || ''
+    const mainEntity = headerList.get('x-main-entity') || '';
+    const [, , , , identifier] = pathname.split('/')
 
-  const pathname = headerList.get("x-pathname") || "";
-  const [, , mainEntity, , identifier] = pathname.split("/");
+    if (!identifier || !mainEntity) {
+      throw new Error('Invalid URL parameters')
+    }
 
-  const recordDetails = await api.record.getByCodeWithJoin({
-    id: identifier!,
-    pluck_fields: [
-      "id",
-      "code",
-      "first_name",
-      "last_name",
-      "status",
-      "created_date",
-      "created_time",
-      "updated_date",
-      "updated_time",
-      "categories",
-      "updated_by"
-    ],
-    main_entity: mainEntity!,
-  });
+    const [recordDetails, token] = await Promise.all([
+      api.record.getByCodeWithJoin({
+        id: identifier,
+        pluck_fields: [
+          'id',
+          'code',
+          'status',
+          'created_date',
+          'created_time',
+          'updated_date',
+          'updated_time',
+          'categories',
+          'updated_by',
+          'image_url',
+        ],
+        main_entity: mainEntity,
+      }),
+      api.auth.getToken({
+        username: username,
+      })
+    ]).catch((error) => {
+      throw new Error(`Failed to fetch data: ${error.message}`)
+    })
 
-  if (recordDetails?.status_code === 500) {
-    throw recordDetails.message;
-  }
+    if (recordDetails?.status_code === 500) {
+      throw recordDetails.message
+    }
 
-  return (
-    <div className="">
-      {/* <Separator /> */}
-      <IdentifierComponent
-        code={recordDetails?.data?.code!}
-        status={recordDetails?.data?.status!}
+    if (!recordDetails || !token) {
+      throw new Error('Failed to fetch required data')
+    }
+
+    return (
+      <SummaryClientContent 
+        recordDetails={recordDetails} 
+        mainEntity={mainEntity} 
+        token={token}
       />
-      <SummaryRecordTab />
-      <ProfileImage />
-      <SystemDates
-        created_date={recordDetails?.data?.created_date!}
-        created_time={recordDetails?.data?.created_time!}
-        updated_date={recordDetails?.data?.updated_date!}
-        updated_time={recordDetails?.data?.updated_time!}
-        created_by_first_name={
-          recordDetails?.data?.created_by_data?.first_name || ""
-        }
-        created_by_last_name={
-          recordDetails?.data?.created_by_data?.last_name || ""
-        }
-        updated_by_first_name={
-          recordDetails?.data?.updated_by_data?.first_name || ""
-        }
-        updated_by_last_name={
-          recordDetails?.data?.updated_by_data?.last_name || ""
-        }
-      />
-      <Separator />
-      <div className="p-2 px-4 text-sm">
-        <div className="mb-2 px-2">
-          <span className="text-slate-400">Category</span>
-          <div>
-            {recordDetails &&
-              recordDetails.data?.categories?.map((e: string) => {
-                return (
-                  <Badge
-                    key={e}
-                    className="m-1"
-                    variant="primary"
-                    data-test-id={
-                      mainEntity +
-                      "-rcrd-category-" +
-                      e.split(" ").join("-").toLowerCase()
-                    }
-                  >
-                    {e}
-                  </Badge>
-                );
-              })}
-          </div>
+    )
+  } catch (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500">
+          {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </div>
       </div>
-      <Separator />
-    </div>
-  );
-};
+    )
+  }
+}
 
-export default RecordSummaryContent;
+export default RecordSummaryContent

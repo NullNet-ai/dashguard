@@ -10,16 +10,20 @@ import FilePPTIcon from "../../../../public/fileIcons/Outline/file-ppt-outline.s
 import FileXLSIcon from "../../../../public/fileIcons/Outline/file-xls-outline.svg";
 import Image from "next/image";
 import { cn } from "~/lib/utils";
-import { forwardRef, useRef } from "react";
+import {  useRef } from "react";
 
 import { Paperclip } from "lucide-react";
 import { useFileUpload } from "./Provider";
 import { FileUploaderItem } from "./FileUploaderItem";
+import React from "react";
 
-export const FileUploaderContent = forwardRef<
+export const FileUploaderContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ children, className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    form?: any;
+    fileUploaderContentProps?: Record<string, any>;
+  }
+>(({ children, className, form, fileUploaderContentProps, ...props }, ref) => {
   const {
     orientation,
     value: files,
@@ -27,6 +31,7 @@ export const FileUploaderContent = forwardRef<
     progressState,
   } = useFileUpload();
   const containerRef = useRef<HTMLDivElement>(null);
+
 
   return (
     <div
@@ -75,12 +80,15 @@ export const FileUploaderContent = forwardRef<
 
             return (
               <FileUploaderItem
+                form={form}
                 file={file}
                 className="flex items-center justify-center rounded-lg border px-2 py-8"
                 key={file.name}
                 index={i}
                 progressState={progressState}
-                onRemove={() => removeFileFromSet(i)}
+                onRemove={() => {
+                  removeFileFromSet(i)
+                }}
                 {...props}
               >
                 <Image src={ImagePath} width={40} height={40} alt="FileImage" />

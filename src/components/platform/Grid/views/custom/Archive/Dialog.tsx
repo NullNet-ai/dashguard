@@ -4,7 +4,7 @@ import { config } from "process";
 import React from "react";
 import { record } from "zod";
 import { DialogContent, DialogFooter, Dialog } from "~/components/ui/dialog";
-import { handleArchive } from "../../../DefatultRow/Actions";
+import { handleArchive } from "../../../DefaultRow/Actions";
 import { Button } from "~/components/ui/button";
 import FooterButton from "./FooterButton";
 

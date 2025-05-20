@@ -8,7 +8,14 @@ const useTraverseSteppedSaved = (traverseSteps: Record<string, "Stepped">) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
-  const [, , mainEntity, , identifier, step] = pathname.split("/");
+  const path = pathname.split("/");
+  let [, , mainEntity, , identifier, step] = path;
+  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
+    const [, , , , , playgroundIdentifier, playgroundStep] = path
+    identifier = playgroundIdentifier
+    step = playgroundStep
+    mainEntity = "contact";
+  }
   useEffect(() => {
     saveTraverse.mutate({
       key: `${mainEntity}:wizard:${identifier}`,

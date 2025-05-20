@@ -1,13 +1,11 @@
-import React from "react";
-import RecordSummaryContent from "./SummaryContent";
+import React from 'react';
+import RecordSummaryContent from './SummaryContent';
 
 const RecordSummary = async () => {
-
   return (
-    <div className="hidden md:block">
-        <RecordSummaryContent />
+    <div>
+      <RecordSummaryContent />
     </div>
-
   );
 };
 

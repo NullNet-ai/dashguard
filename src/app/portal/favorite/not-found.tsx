@@ -1,5 +1,5 @@
 import Image from "next/image";
-import NewComingSoon from "~/app/coming-soon";
+import NewComingSoon from '~/components/ui/coming-soon';
 export default function Example() {
   return (
     

@@ -1,60 +1,43 @@
-"use client";
+'use client';
 
-import { type ColumnDef } from "@tanstack/react-table";
-import StatusCell from "~/components/ui/status-cell";
-import Archive from "../customDefaultActions/Archive";
-import Edit from "../customDefaultActions/Edit";
+import { type ColumnDef } from '@tanstack/react-table';
+import StatusCell from '~/components/ui/status-cell';
 
 const gridColumns = [
   {
-    header: "ID",
-    accessorKey: "code",
-  },
-  {
-    header: "Name",
-    accessorKey: "name",
-  },
-  {
-    header: "Parent Organization",
-    accessorKey: "parent_organization_name",
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    enableResizing: false,
-    cell: ({
-      // ? You can use get Value to get the value of the cell
-      // getValue,
-      // ? You can use row to get the row data ( row.original )
-      row,
-    }) => {
-      // ? You can use the row to get the original data
-      // ? But make sure to check if the row is not null
+    header: 'State',
+    accessorKey: 'status',
+    cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
     },
   },
   {
-    header: "Created Date",
-    accessorKey: "created_date",
+    header: 'ID',
+    accessorKey: 'code',
+  },
+  {
+    header: 'Category',
+    accessorKey: 'categories',
+    data_type: 'array',
     cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
+      const categories = row?.original?.categories || [];
+      return categories?.map((category: string, index: number) => {
+        return <StatusCell key={index} value={category} />;
+      });
+    },
+    search_config: {
+      operator: 'contains',
     },
   },
   {
-    header: "Created By",
-    accessorKey: "created_by",
+    header: 'Name',
+    accessorKey: 'name',
   },
   {
     header: "Updated Date",
     accessorKey: "updated_date",
+    sortKey: ["updated_date", "updated_time"],
     cell: ({ row }) => {
       const date = row?.original?.updated_date;
       const time = row?.original?.updated_time;
@@ -69,48 +52,38 @@ const gridColumns = [
   {
     header: "Updated By",
     accessorKey: "updated_by",
+    sortKey: "updated_by.full_name",
+    search_config: {
+      entity: "updated_by",
+      field: "full_name",
+      operator: 'like'
+    }
   },
-  // {
-  //   id: "action",
-  //   size: 1,
-  //   enableResizing: false,
-  //   header: "Actions",
-  //   cell: ({ row }) => {
-  //     const { original } = row;
-  //     const { id, name, status } = original;
-  //     // const handleEdit = async () => {
-  //     //   if (!id) return;
-  //     //   await Edit({
-  //     //     row,
-  //     //     config: row.original,
-  //     //     // entity: "organizations",
-  //     //     // id: row.original?.id,
-  //     //     // status: row.original?.status,
-  //     //   });
-  //     // };
-  //     const handleArchive = async () => {
-  //       if (!row.original?.id) return;
-  //       await Archive({ row, config: row.original });
-  //     };
-  //     const handleActivate = () => {};
-
-  //     return (
-  //       <div>
-  //         {/* <button onClick={handleEdit}>Edit</button> */}
-  //         {/* {status?.toLowerCase() !== "archive" ||
-  //         name === "global-organization" ? (
-
-  //         ) : (
-
-  //         )} */}{" "}
-  //         <button onClick={handleActivate}>Edit</button>
-  //         <button onClick={handleArchive}>Archived</button>
-  //       </div>
-  //     );
-  //   },
-  //   enableSorting: false,
-  //   enableHiding: true,
-  // },
+  {
+    header: "Created Date",
+    accessorKey: "created_date",
+    sortKey: ["created_date", "created_time"],
+    cell: ({ row }) => {
+      const date = row?.original?.created_date;
+      const time = row?.original?.created_time;
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      );
+    },
+  },
+  {
+    header: "Created By",
+    accessorKey: "created_by",
+    sortKey: "created_by.full_name",
+    search_config: {
+      entity: "created_by",
+      field: "full_name",
+      operator: 'like'
+    }
+  }
 ] as ColumnDef<any>[];
 
 export default gridColumns;

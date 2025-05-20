@@ -95,11 +95,13 @@ export default function MyVerticalStepper() {
         data-test-id={testIDFormatter(
           `${entityName}-wzrdsum-stepper-accordion`,
         )}
+        className="flex flex-col items-center"
       >
         <div
           className={cn(
-            "relative hidden w-[-50px] after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[10px]",
+            "relative hidden after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
             { "text-center sm:p-0": !isSummOpen },
+            `${isSummOpen ? "w-full" : "w-[30px]"}`,
           )}
         >
           <ol role="list" className="overflow-hidden">
@@ -145,7 +147,7 @@ export default function MyVerticalStepper() {
                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}`,
                   )}
                   className={cn(
-                    stepIdx !== stepsArray.length - 1 ? "relative pb-[16px]" : "",
+                    stepIdx !== stepsArray.length - 1 ? "relative pb-[24px]" : "",
                   )}
                 >
                   {isStepped || isCurrent ? (
@@ -206,7 +208,12 @@ export default function MyVerticalStepper() {
                       >
                         {/* Hidden on mobile, visible from small screens (sm) and up */}
                         {/* this is the title */}
-                        <span className="text-xs sm:block text-primary">
+                        <span 
+                          className="text-xs sm:block text-primary" 
+                          data-test-id={testIDFormatter(
+                            `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-lbl`,
+                          )}
+                        >
                           {summaryTitle
                             ? summaryTitle
                             : "Description of Step " + stepIndex}
@@ -220,21 +227,28 @@ export default function MyVerticalStepper() {
                               <AccordionItem
                                 key={idx + label}
                                 value={idx + label}
-                                className="flex flex-col pt-2"
+                                className="flex flex-col pt-2 border-none"
                               >
                                 <AccordionTrigger
                                   data-test-id={testIDFormatter(
                                     `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-trigger-${label}`,
                                   )}
+                                  className='p-0 gap-2'
+                                  iconPosition='right'
                                 >
-                                  <span className="text-sm font-medium sm:block">
+                                  <span className="text-sm font-bold sm:block">
                                     {label
                                       ? label
                                       : "Description of Step " + stepIndex}
                                   </span>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="text-sm font-medium sm:block mt-[16px]">
+                                  <div 
+                                    data-test-id={testIDFormatter(
+                                      `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-content-${label}`
+                                    )}
+                                    className="text-sm font-medium sm:block mt-[8px]"
+                                  >
                                     {component}
                                   </div>
                                 </AccordionContent>

@@ -1,6 +1,8 @@
-import { headers } from "next/headers";
-import { z } from "zod";
-import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import { ta } from 'date-fns/locale'
+import { headers } from 'next/headers'
+import { z } from 'zod'
+
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 export const tabRouter = createTRPCRouter({
   insertMainTabs: privateProcedure
@@ -10,221 +12,358 @@ export const tabRouter = createTRPCRouter({
           name: z.string().min(1),
           href: z.string().min(1),
           current: z.boolean(),
-        }),
-      ),
+        })
+      )
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `main-tabs:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .cacheData(key, input, 90000000)
         .then(() => {
-          return "Ok";
+          return 'Ok'
         })
         .catch((e) => {
-          console.error("@ ERROR", e);
-          return null;
-        });
+          console.error('@ ERROR', e)
+          return null
+        })
 
-      return response;
+      return response
     }),
   getMainTabs: privateProcedure.query(async ({ ctx }) => {
-    const tabs = ctx.redisClient;
-    const key = `main-tabs:${ctx.session.account.contact?.id}`;
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
     const response = await tabs
       .getCachedData(key)
       .then((res) => {
-        return res || [];
+        return res || []
       })
       .catch(() => {
-        return [];
-      });
+        return []
+      })
 
-    return response;
+    return response
   }),
+  updateMainTabItem: privateProcedure
+   .input(
+      z.object({
+        tab: z.any(),
+        entity: z.string().min(1),
+      })
+    )
+   .mutation(async ({ input, ctx }) => {
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
+      const response = await ctx.redisClient.getCachedData(key)
+
+      const update_tabs = response?.map((tab: Record<string, any>) => {
+        if (tab.name === input.entity || tab.id === input.entity) {
+          return {
+          ...tab,
+           href: input.tab.href,
+          }
+        }
+        return tab
+      })
+      await ctx.redisClient.cacheData(key, update_tabs, 90000000)
+      
+   }),
   insertSubTabs: privateProcedure
     .input(
       z.object({
         current_context: z.string().min(1),
-        tabs: z.array(
-          z.object({
-            name: z.string().min(1),
-            href: z.string().min(1),
-            current: z.boolean(),
-          }),
-        ),
-      }),
+        tabs: z.array(z.any()),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .cacheData(key, input, 90000000)
         .then(() => {
-          return "Ok";
+          return 'Ok'
         })
         .catch((e) => {
-          console.error("@ ERROR", e);
-          return null;
-        });
+          console.error('@ ERROR', e)
+          return null
+        })
 
-      return response;
+      return response
+    }),
+  updateAllSubTabs: privateProcedure
+  .input(
+    z.object({
+      current_context: z.string().min(1),
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
+    const response = await tabs
+      .cacheData(key, input, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
+  updateAllMainTabs: privateProcedure
+  .input(
+    z.object({
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
+
+    const response = await tabs
+      .cacheData(key, input.tabs, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
+  updateAllMainTabs2: privateProcedure
+  .input(
+    z.object({
+      tabs: z.array(z.any()),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
+
+    const response = await tabs
+      .cacheData(key, input.tabs, 90000000)
+      .then(() => {
+        return 'Ok'
+      })
+      .catch((e) => {
+        console.error('@ ERROR', e)
+        return null
+      })
+
+    return response
+  }),
+  updateSubTabs: privateProcedure
+    .input(
+      z.object({
+        current_context: z.string().min(1),
+        tab_name: z.string().min(1),
+        is_active: z.boolean(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
+      const response = await ctx.redisClient.getCachedData(key)
+
+      // If we're setting a tab to active, ensure only one tab is active
+      if (input.is_active) {
+        const update_sub_tabs = response?.tabs?.map((tab: Record<string, any>) => ({
+          ...tab,
+          current: tab?.name === input.tab_name,
+        }))
+
+        await ctx.redisClient.cacheData(key, {
+          current_context: input.current_context,
+          tabs: update_sub_tabs,
+        }, 90000000)
+      }
     }),
   getSubTabs: privateProcedure
     .input(
       z.object({
         current_context: z.string().min(1),
-      }),
+      })
     )
     .query(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .getCachedData(key)
         .then((res) => {
-          return res || [];
+          return res || []
         })
         .catch(() => {
-          return [];
-        });
+          return []
+        })
 
-      return response;
+      return response
     }),
 
   closeCurrentClassTab: privateProcedure
     .input(
       z.object({
         href: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `main-tabs:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = (await tabs
         .getCachedData(key)
         .then((res) => {
-          return res || [];
+          return res || []
         })
         .catch(() => {
-          return [];
+          return []
         })) as {
-        href: string;
-      }[];
+        href: string
+      }[]
 
-      const tab = response?.find((tab) => tab.href === input.href);
-      const index = response?.findIndex((tab) => tab.href === input.href);
+      const tab = response?.find(tab => tab.href === input.href)
+      const index = response?.findIndex(tab => tab.href === input.href)
 
       if (tab) {
-        response?.splice(index, 1);
+        response?.splice(index, 1)
       }
 
-      await tabs.cacheData(key, response, 90000000);
+      await tabs.cacheData(key, response, 90000000)
 
       // return left tab
-      return response?.[index - 1];
+      return response?.[index - 1]
     }),
-  closeAllClassTabs: privateProcedure.mutation(async ({ input, ctx }) => {
-    const tabs = ctx.redisClient;
-    const key = `main-tabs:${ctx.session.account.contact?.id}`;
+  closeAllClassTabs: privateProcedure.mutation(async ({ ctx }) => {
+    const tabs = ctx.redisClient
+    const key = `main-tabs:${ctx.session.account.account_organization_id}`
     const response = await tabs
       .getCachedData(key)
       .then((res) => {
-        return res || [];
+        return res || []
       })
       .catch(() => {
-        return [];
-      });
+        return []
+      })
 
-    const update_tabs = response?.filter(
-      (tab: any) => tab.name === "dashboard",
-    );
-    await tabs.cacheData(key, update_tabs, 90000000);
+    const update_tabs = response?.filter((tab: any) => tab.name === 'dashboard')
+    await tabs.cacheData(key, update_tabs, 90000000)
   }),
 
   closeOtherClassTabs: privateProcedure
     .input(
       z.object({
         href: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `main-tabs:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
       const response = await tabs
         .getCachedData(key)
         .then((res) => {
-          return res || [];
+          return res || []
         })
         .catch(() => {
-          return [];
-        });
+          return []
+        })
 
       const update_tabs = response?.filter(
-        (tab: any) => tab.name === "dashboard" || tab.href === input.href,
-      );
+        (tab: any) => tab.name === 'dashboard' || tab.href === input.href
+      )
 
-      await tabs.cacheData(key, update_tabs, 90000000);
+      await tabs.cacheData(key, update_tabs, 90000000)
     }),
   closeCurrentInnerClassTab: privateProcedure
     .input(
       z.object({
         href: z.string().min(1),
         current_context: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then((res) => {
-          return res || [];
+          return res || []
         })
         .catch(() => {
-          return [];
-        });
+          return []
+        })
 
       const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) => tab.href !== input.href,
-      );
+        (tab: Record<string, any>) => tab.href !== input.href
+      )
 
       response = {
         ...response,
         tabs: update_tabs,
-      };
+      }
 
-      await tabs.cacheData(key, response, 90000000);
+      await tabs.cacheData(key, response, 90000000)
     }),
+
+    removeNewInnerClassTab: privateProcedure
+    .input(
+      z.object({
+        current_context: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
+      let response = await tabs
+        .getCachedData(key)
+        .then((res) => {
+          return res || []
+        })
+        .catch(() => {
+          return []
+        })
+
+      const update_tabs = response?.tabs?.filter(
+        (tab: Record<string, any>) => tab.name !== "new" && tab.id !== "new"
+      )
+
+      response = {
+        ...response,
+        tabs: update_tabs,
+      }
+
+      await tabs.cacheData(key, response, 90000000)
+    }),
+
 
   closeAllInnerClassTabs: privateProcedure
     .input(
       z.object({
         href: z.string().min(1),
         current_context: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
         .then((res) => {
-          return res || [];
+          return res || []
         })
         .catch(() => {
-          return [];
-        });
+          return []
+        })
 
       const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) => tab.name === "Grid",
-      );
+        (tab: Record<string, any>) => tab?.name === 'Grid'
+      )
 
       response = {
         ...response,
         tabs: update_tabs,
-      };
+      }
 
-      await tabs.cacheData(key, response, 90000000);
+      await tabs.cacheData(key, response, 90000000)
     }),
 
   closeOtherInnerClassTabs: privateProcedure
@@ -232,59 +371,77 @@ export const tabRouter = createTRPCRouter({
       z.object({
         href: z.string().min(1),
         current_context: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const tabs = ctx.redisClient;
-      const key = `sub-tabs:${input.current_context}:${ctx.session.account.contact?.id}`;
+      const tabs = ctx.redisClient
+      const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`
       let response = await tabs
         .getCachedData(key)
-        .then((res) => {
-          return res || [];
-        })
-        .catch(() => {
-          return [];
-        });
+        .then(res => res || [])
+        .catch(() => [])
 
-      const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) =>
-          tab.name === "Grid" || tab.href === input.href,
-      );
+      const update_tabs = response?.tabs?.filter((tab: any) => tab?.name === 'Grid' || tab?.href === input.href)
 
       response = {
         ...response,
         tabs: update_tabs,
-      };
+      }
 
-      await tabs.cacheData(key, response, 90000000);
+      await tabs.cacheData(key, response, 90000000)
     }),
   updateCurrentSubTab: privateProcedure
     .input(
       z.object({
         tab_name: z.string().min(1),
-      }),
+      })
     )
     .query(async ({ input, ctx }) => {
-      const headerList = headers();
-      const pathName = headerList.get("x-pathname") || "";
-      const [, portal, mainEntity] =
-        pathName.split("/");
-      const current_context = "/" + portal + "/" + mainEntity;
-      const key = `sub-tabs:${current_context}:${ctx.session.account.contact?.id}`;
+      const headerList = headers()
+      const pathName = headerList.get('x-pathname') || ''
+      const [, portal, mainEntity] = pathName.split('/')
+      const current_context = '/' + portal + '/' + mainEntity
+      const key = `sub-tabs:${current_context}:${ctx.session.account.account_organization_id}`
 
-      const response = await ctx.redisClient.getCachedData(key);
-      const isTabExist = response?.tabs?.find((tab: any) => tab.name === input.tab_name);
+      const response = await ctx.redisClient.getCachedData(key)
+      const isTabExist = response?.tabs?.find(
+        (tab: any) => tab.name === input.tab_name
+      )
       const tabs = response?.tabs?.map((tab: Record<string, any>) => {
         if (tab.current && !isTabExist) {
           return {
             ...tab,
             name: input.tab_name,
             href: tab.href.replace(tab.name, input.tab_name),
-          };
+          }
         }
-        return tab;
-      });
+        return tab
+      })
 
-      await ctx.redisClient.cacheData(key, { current_context, tabs }, 90000000);
+      await ctx.redisClient.cacheData(key, { current_context, tabs }, 90000000)
     }),
-});
+  updateMainTabs: privateProcedure
+    .input(
+      z.object({
+        tab_name: z.string().min(1),
+        is_active: z.boolean(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const key = `main-tabs:${ctx.session.account.account_organization_id}`
+      const response = await ctx.redisClient.getCachedData(key)
+      const update_tabs = response?.map((tab: Record<string, any>) => {
+        if (tab.name === input.tab_name) {
+          return {
+            ...tab,
+            current: input.is_active,
+          }
+        }
+        return {
+          ...tab,
+          current: false,
+        }
+      })
+      await ctx.redisClient.cacheData(key, update_tabs, 90000000)
+    }),
+})

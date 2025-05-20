@@ -1,31 +1,48 @@
-import { toCapitalize } from "~/lib/capitalize";
-import GridMenu from "./GridMenu";
-import { cn } from "~/lib/utils";
-import { api } from "~/trpc/server";
+'use client';
 
-const GridTabs = async () => {
-  const gridTabsData = await api.grid.getSessionGridTabs();
-  return (
-    <div className="flex flex-row gap-2">
-      {gridTabsData?.map((tab) => {
-        const active = tab.current ? "text-primary" : "text-foreground";
-        const entity = tab?.href?.split("/").at(2);
-        const applicationType = tab?.href?.split("/").at(3)?.split("?")[0];
+import GridTabLists from './_components/GridTablists';
+import { useEffect, useState } from 'react';
+import { getGridTabs } from '../Action/tabs';
+import { Loader } from '~/components/ui/loader';
+interface IProps {
+  gridKey?: string;
+  grid_tabs?: any[];
+}
 
-        return (
-          <a
-            href={tab?.href}
-            key={tab.id}
-            data-test-id={(entity+"-"+applicationType + "-tab-" + tab.name.split(" ").join("-").toLowerCase() ) || "tab"}
-            className="flex min-w-24 items-center justify-between rounded-md bg-tertiary p-2 px-3 py-2 pr-1 text-sm"
-          >
-            <span className={cn(active, "")}>{toCapitalize(tab.name)}</span>
-            <GridMenu tab={tab} filter_id={tab?.id} />
-          </a>
-        );
-      })}
-    </div>
-  );
+const GridTabs = ({ gridKey, grid_tabs }: IProps) => {
+  // const [tabs, setTabs] = useState<any>([]);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // useEffect(() => {
+    
+  //   const fetchGridTabs = async () => {
+  //     const startTime = performance.now();
+  //     const data = await getGridTabs({
+  //       gridKey: gridKey!,
+  //     });
+  //     const endTime = performance.now();
+  //     const elapsedTime = endTime - startTime;
+
+  //     setIsLoading(false);
+  //     setTabs(data);
+  //   };
+  //   fetchGridTabs();
+  // }, []);
+
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex h-full items-center pl-3">
+  //       <Loader
+  //         className="bg-primary text-default"
+  //         label=""
+  //         size="sm"
+  //         variant="spinner"
+  //       />
+  //     </div>
+  //   );
+  // }
+
+  return <GridTabLists tabs={grid_tabs ?? []} />;
 };
 
 export default GridTabs;

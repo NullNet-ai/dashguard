@@ -1,3 +1,4 @@
+import { isUndefined } from 'lodash';
 import {
   ClipboardIcon,
   Copy,
@@ -6,19 +7,20 @@ import {
   Eye,
   MinusCircleIcon,
   XIcon,
-} from "lucide-react";
-import React, { useContext } from "react";
+} from 'lucide-react';
+import React, { useContext } from 'react';
 import {
+  IFormProperties,
   type ICustomActions,
   type IFeatures,
-} from "~/components/platform/FormBuilder/types";
-import { WizardContext } from "~/components/platform/Wizard/Provider";
+} from '~/components/platform/FormBuilder/types';
+import { WizardContext } from '~/components/platform/Wizard/Provider';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
 export default function FormFilterOpenedActions({
   form,
@@ -28,6 +30,9 @@ export default function FormFilterOpenedActions({
   customFormFilterViewFormActions = [],
   selectedRecords,
   filterGridConfig,
+  properties = {
+    allowCopyPaste: true,
+  },
 }: {
   form: any;
   selectedRecords: any;
@@ -36,7 +41,11 @@ export default function FormFilterOpenedActions({
   handleRemovedSelectedRecords: (records: any[]) => void;
   customFormFilterViewFormActions: ICustomActions[] | undefined;
   filterGridConfig: any;
+  properties?: IFormProperties;
 }) {
+  const {
+    allowCopyPaste = true,
+  } = properties ?? {}
   const {
     enableViewFormClear = true,
     enableViewFormCopy = true,
@@ -49,7 +58,7 @@ export default function FormFilterOpenedActions({
   const actions = [
     {
       icon: <Copy className="h-4 w-4 text-muted-foreground" />,
-      label: "Copy",
+      label: 'Copy',
       onClick: async () => {
         await navigator.clipboard.writeText(
           JSON.stringify({
@@ -60,7 +69,7 @@ export default function FormFilterOpenedActions({
     },
     {
       icon: <ClipboardIcon className="h-4 w-4 text-muted-foreground" />,
-      label: "Paste",
+      label: 'Paste',
       onClick: async () => {
         if (navigator.clipboard && navigator.clipboard.readText) {
           const clipboardText = await navigator.clipboard.readText();
@@ -84,13 +93,13 @@ export default function FormFilterOpenedActions({
               });
 
               form.handleSubmit((data: any) =>
-                onSubmitFormGrid(data, { action_type: "Paste" }),
+                onSubmitFormGrid(data, { action_type: 'Paste' }),
               )();
             } else {
               // defaults to removing id, code, status from the clipboard data
               //  and prefilling the form with the rest of the data
-              ["id", "code", "status"].forEach((key: any) => {
-                if (parsed_clipboard && typeof parsed_clipboard === "object") {
+              ['id', 'code', 'status'].forEach((key: any) => {
+                if (parsed_clipboard && typeof parsed_clipboard === 'object') {
                   delete parsed_clipboard[key];
                 }
               });
@@ -100,41 +109,47 @@ export default function FormFilterOpenedActions({
               });
             }
           } catch (error) {
-            console.warn("Clipboard content is not a valid JSON", error);
+            console.warn('Clipboard content is not a valid JSON', error);
             return;
           }
         } else {
-          console.warn("Clipboard API not supported in this browser.");
+          console.warn('Clipboard API not supported in this browser.');
         }
       },
     },
     {
       icon: <XIcon className="h-4 w-4 text-muted-foreground" strokeWidth={3} />,
-      label: "Clear",
+      label: 'Clear',
       onClick: () => {
-        console.info("I am clearing the form");
         const currentValues = form.getValues();
         Object.keys(currentValues).forEach((key) => {
           const value = currentValues[key];
-
           if (Array.isArray(value)) {
-            if (key === "email") {
-              currentValues[key] = [{ email: "" }];
-            } else if (key === "phone") {
+            if (['email', 'emails'].includes(key.toLowerCase())) {
               currentValues[key] = [
                 {
-                  raw_phone_number: "",
-                  iso_code: "us",
-                  country_code: "+1",
+                  ...value,
+                  email: '',
+                },
+              ];
+            } else if (
+              ['phone_numbers', 'phones', 'phone'].includes(key.toLowerCase())
+            ) {
+              currentValues[key] = [
+                {
+                  ...value,
+                  raw_phone_number: '',
+                  iso_code: 'us',
+                  country_code: '+1',
                   is_primary: true,
                 },
               ];
             } else {
               currentValues[key] = [];
             }
-          } else if (typeof value === "string") {
-            currentValues[key] = "";
-          } else if (typeof value === "object" && value !== null) {
+          } else if (typeof value === 'string') {
+            currentValues[key] = '';
+          } else if (typeof value === 'object' && value !== null) {
             currentValues[key] = {};
           } else {
             currentValues[key] = null;
@@ -147,7 +162,7 @@ export default function FormFilterOpenedActions({
     },
     {
       icon: <Eraser className="h-4 w-4 text-muted-foreground" />,
-      label: "Remove Selection",
+      label: 'Remove Selection',
       onClick: () => {
         const currentValues = form.formState.defaultValues;
         handleRemovedSelectedRecords([currentValues]);
@@ -162,25 +177,32 @@ export default function FormFilterOpenedActions({
   if (!enableViewFormEllipsis) return null;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger data-test-id={entityName + '-wzrd-form-filter-ddn-trg'}>
         <EllipsisVertical
           className="h-4 w-4 text-muted-foreground"
-          data-test-id={entityName + "-wzrd-form-filter-ddn-trg"}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {actions.map((action, index) => {
-          if (action.label === "Copy" && !enableViewFormCopy) return null;
-          if (action.label === "Paste" && !enableViewFormPaste) return null;
-          if (action.label === "Clear" && !enableViewFormClear) return null;
+
+
+          if (
+            (action.label === 'Copy' || action.label === 'Paste') &&
+            !allowCopyPaste
+          )
+            return null;
+
+          if (action.label === 'Copy' && !enableViewFormCopy) return null;
+          if (action.label === 'Paste' && !enableViewFormPaste) return null;
+          if (action.label === 'Clear' && !enableViewFormClear) return null;
           if (action.hidden) return null;
           return (
             <DropdownMenuItem
               key={index}
               onClick={() => action.onClick()}
               className="flex gap-2"
-              data-tes-id={
-                entityName + "-wzrd-form-filter-ddn-itm-" + action.label
+              data-test-id={
+                entityName + '-wzrd-form-filter-ddn-itm-' + action.label
               }
             >
               {action.icon}

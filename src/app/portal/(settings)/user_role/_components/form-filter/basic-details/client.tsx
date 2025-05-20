@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { z } from "zod";
+import { z } from 'zod';
 
-import { FormBuilder } from "~/components/platform/FormBuilder";
-import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
-import { useToast } from "~/context/ToastProvider";
-import { type IFormProps } from "../types";
-import { removeRecord, savedRecord, selectRecord } from "./actions";
-import gridColumns from "./_config/columns";
-import SelectedView from "./components/SelectedView";
-import { api } from "~/trpc/react";
-import { UserRoleFormSchema } from "~/server/zodSchema/user_role/basicDetails";
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { removeRecord, savedRecord, selectRecord } from './actions';
+import gridColumns from './_config/columns';
+import SelectedView from './components/SelectedView';
+import { api } from '~/trpc/react';
+import { UserRoleFormSchema } from '~/server/zodSchema/user_role/basicDetails';
 
 export default function RoleDetails({
   params,
@@ -33,19 +33,18 @@ export default function RoleDetails({
         ...data,
       });
 
-      //@ts-expect-error - Need to fix type for this
-      const { existing = false, message } = res;
+      const { existing = false, message } = res as any;
 
       if (existing) {
-        form?.setError("role", {
-          type: "manual",
+        form?.setError('role', {
+          type: 'manual',
           message,
         });
       }
       if (res?.status_code == 200) {
         const [user_role_data] = res?.data;
-        toast.success("Basic Details submit sucessfully");
-        if (action_type === "Create") {
+        toast.success('Basic Details submit sucessfully');
+        if (action_type === 'Create') {
           savedRecord({ code: user_role_data?.code });
         }
         return res.data;
@@ -53,7 +52,7 @@ export default function RoleDetails({
 
       return [];
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
       return [];
     }
   };
@@ -70,10 +69,10 @@ export default function RoleDetails({
       return {
         rows: [],
         filter_entity,
-        main_entity_id: "",
+        main_entity_id: '',
       };
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
     }
   };
 
@@ -94,7 +93,7 @@ export default function RoleDetails({
         main_entity_id,
       };
     } catch (error) {
-      toast.error("Failed to submit Basic Details");
+      toast.error('Failed to submit Basic Details');
     }
   };
 
@@ -102,16 +101,16 @@ export default function RoleDetails({
     <FormBuilder
       filterGridConfig={{
         selectedRecords,
-        statusesIncluded: ["Draft"], // Enable Selectable Record Status
-        actionType: "single-select",
+        statusesIncluded: ['Draft'], // Enable Selectable Record Status
+        actionType: 'single-select',
         pluck: params?.pluck_fields,
-        filter_entity: "user_role",
+        filter_entity: 'user_role',
         main_entity_id: params.id,
         gridColumns: gridColumns,
         // fieldFilterGridColumns: FIELD_FILTER_GRID_COLUMNS,
         current: 1,
         limit: 1000,
-        label: "Roles",
+        label: 'Role',
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,
@@ -152,7 +151,7 @@ export default function RoleDetails({
           // Selected View Component
           return <SelectedView record={record} />;
         },
-        grid_data: grid_data,
+        // grid_data: grid_data,
       }}
       myParent={params.shell_type}
       enableFormRegisterToParent
@@ -164,16 +163,16 @@ export default function RoleDetails({
       defaultValues={defaultValues}
       fields={[
         {
-          id: "role",
-          formType: "input",
-          name: "role",
-          label: "Role",
+          id: 'role',
+          formType: 'input',
+          name: 'role',
+          label: 'Role',
           required: true,
-          placeholder: "Role",
+          placeholder: 'Role',
           withGridFilter: true,
           filterFieldConfig: {
-            entity: "user_roles",
-            field: "role",
+            entity: 'user_roles',
+            field: 'role',
           },
         },
       ]}

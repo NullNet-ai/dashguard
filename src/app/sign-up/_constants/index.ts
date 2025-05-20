@@ -1,0 +1,62 @@
+import FormInput from '~/components/platform/FormBuilder/FormType/FormInput'
+import FormPassword from '~/components/platform/FormBuilder/FormType/FormPassword'
+
+export const FIELDS = [
+  {
+    FormComponent: FormInput,
+    name: 'organization_name',
+    id: 'organization_name',
+    label: 'Organization Name',
+    placeholder: 'Example: DNA Micro',
+    type: 'text',
+  },
+  {
+    FormComponent: FormInput,
+    name: 'first_name',
+    id: 'first_name',
+    label: 'First Name',
+    placeholder: 'Example: John',
+    type: 'text',
+    required: true,
+  },
+  {
+    FormComponent: FormInput,
+    name: 'last_name',
+    id: 'last_name',
+    label: 'Last Name',
+    placeholder: 'Example: Doe',
+    type: 'text',
+    required: true,
+  },
+  {
+    FormComponent: FormInput,
+    name: 'email',
+    id: 'email',
+    label: 'Email Address',
+    placeholder: 'Example: john@example.com',
+    type: 'email',
+    required: true,
+  },
+  {
+    FormComponent: FormPassword,
+    name: 'password',
+    id: 'password',
+    label: 'New Password',
+    placeholder: 'Enter your password',
+    type: 'text',
+    required: true,
+    showPasswordStrengthBar: true,
+    hasComplexValidation: true,
+  },
+  {
+    FormComponent: FormPassword,
+    name: 'confirmed_password',
+    id: 'confirmed_password',
+    label: 'Confirm Password',
+    placeholder: 'Enter your password',
+    type: 'text',
+    required: true,
+    showPasswordStrengthBar: true,
+    hasComplexValidation: true,
+  },
+]

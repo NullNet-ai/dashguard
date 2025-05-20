@@ -1,107 +1,75 @@
-"use server";
-import { api } from "~/trpc/server";
-import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from "./_config/columns";
-import Grid from "~/components/platform/Grid/Server";
-import Bluebird from "bluebird";
-import React from "react"; // Import React if needed
-import DeleteComponent from "./customDefaultActions/Delete";
-import { defaultSorting } from "./_config/sorting";
-import { customArchive } from "./customArchiveAction";
-import ArchiveDialog from "../_components/controls/ArchiveDialog";
-import ArchiveComponent from "./customDefaultActions/Archive";
-export default async function OrganizationGridPage({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-  params?: {
-    id: string;
-  };
-}): Promise<React.ReactElement | null> {
+'use server';
+import React from 'react';
+
+import Grid from '~/components/platform/Grid';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { api } from '~/trpc/server';
+
+import ArchiveDialog from '../_components/controls/ArchiveDialog';
+
+import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
+import { defaultSorting } from './_config/sorting';
+import { customArchive } from './customArchiveAction';
+import ArchiveComponent from './customDefaultActions/Archive';
+import DeleteComponent from './customDefaultActions/Delete';
+import { resolveGridParams } from '~/utils/grid-params-resolver';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
+
+export default async function OrganizationGridPage(): Promise<React.ReactElement | null> {
   const _pluck = [
-    "id",
-    "code",
-    "name",
-    "parent_organization_id",
-    "status",
-    "created_date",
-    "created_time",
-    "created_by",
-    "updated_date",
-    "updated_time",
-    "updated_by",
+    'id',
+    'code',
+    'name',
+    'categories',
+    'status',
+    'created_date',
+    'created_time',
+    'created_by',
+    'updated_date',
+    'updated_time',
+    'updated_by',
   ];
 
-  const sorting = await api.grid.getReportSorting();
+  const gridCacheData = (await getGridCacheData()) ?? {};
 
-  const { items = [], totalCount } = await api.grid
-    .items({
-      current: +(searchParams.page ?? "0"),
-      limit: +(searchParams.perPage ?? "100"),
-      entity: "organization",
+    const { gridParams, gridProps } = gridDataResolver({
+      entity: 'organization',
       pluck: _pluck,
-      advance_filters: [],
-      sorting: sorting?.length ? sorting : defaultSorting,
-    })
-    .then(async (res) => {
-      const final_items = await Bluebird.map(res.items, async (item) => {
-        const final_item = await api.organization
-          .getById({
-            id: item.parent_organization_id ?? "",
-            pluck_fields: ["name"],
-          })
-          .then((res) => {
-            return {
-              ...item,
-              parent_organization_name: res?.data?.name,
-            };
-          });
-
-        return final_item;
-      });
-
-      // disable archiving of parent organizations with children
-      const updated_final_items = final_items.reduce(
-        (acc: Record<string, any>[], item: Record<string, any>) => {
-          const parent = final_items.find(
-            (parent: Record<string, any>) =>
-              parent.parent_organization_id === item.id,
-          );
-          const isItemDisabled = !!parent;
-
-          return [
-            ...acc,
-            {
-              ...item,
-              disabled: isItemDisabled,
-            },
-          ];
-        },
-        [] as Record<string, any>[],
-      );
-      return {
-        items: updated_final_items,
-        totalCount: res.totalCount,
-      };
+      gridCacheData,
+      defaults: {
+        defaultSorting,
+      },
     });
+
+  const { items = [], totalCount } = await api.grid.items({
+    ...gridParams,
+  });
 
   return (
     <Grid
+      {...gridProps}
       totalCount={totalCount || 0}
-      defaultSorting={defaultSorting}
-      sorting={sorting?.length ? sorting : []}
       data={items}
       config={{
-        entity: "organization",
-        title: "Organizations",
+        entity: 'organization',
+        paginationType:'simple-card',
+        title: 'Organizations',
         columns: gridColumns,
+        columnsOrder: gridCacheData?.columns,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         deleteCustomComponent: DeleteComponent,
         archiveCustomAction: customArchive,
         archiveCustomComponent: ArchiveComponent,
         archiveDialogCustomComponent: ArchiveDialog,
+        searchConfig: {
+          router: 'grid',
+          resolver: 'items',
+          query_params: {
+            entity: 'organization',
+            pluck: _pluck,
+            group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
+          },
+        },
       }}
     />
   );

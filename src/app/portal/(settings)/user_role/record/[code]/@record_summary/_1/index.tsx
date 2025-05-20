@@ -1,60 +1,81 @@
-"use client";
+'use client'
+import React from 'react'
 
-import { api } from "~/trpc/react";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
+import StatusCell from '~/components/ui/status-cell'
+import { api } from '~/trpc/react'
+
+import useRefetchRecord from '../hooks/useFetchMainRecord'
 
 const fields = {
-  Name: "role",
-};
+  Role: 'role',
+  Category: 'categories',
+  Entity: 'entity',
+}
 
 const RecordShellSummary = ({
   form_key,
   identifier,
   main_entity,
 }: {
-  form_key: string;
-  identifier: string;
-  main_entity: string;
+  form_key: string
+  identifier: string
+  main_entity: string
 }) => {
-  const {
-    data: record = { data: { id: null } },
-    refetch,
-    error,
-  } = api.record.getByCode.useQuery({
+  const queryResult = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ["id", "role"],
-  });
+    pluck_fields: ['id', 'role', 'categories', 'entity'],
+  })
 
-  const { data } = record ?? {};
+  const record = queryResult.data ?? { data: { id: null } }
+  const data = record.data ?? {}
+  const { error } = queryResult
 
   useRefetchRecord({
-    refetch,
+    refetch: queryResult.refetch,
     form_key,
-  });
+  })
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div>
+        Error:
+        {error.message}
+      </div>
+    )
   }
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {(data as { [key: string]: any })?.[value] || "None"}
-                </span>
+      {Object.entries(fields).map(([key, value], index) => {
+        const dataValue = (data as { [key: string]: any })?.[value]
+        return (
+          <div className='pt-2' key={index}>
+            <div className='px-5'>
+              <div className='p-1 text-sm'>
+                <div>
+                  <span className='text-slate-400'>
+                    {key}
+                    :
+                    {' '}
+                  </span>
+                  <span>
+                    {key === 'Category'
+                      ? (dataValue?.length
+                        && dataValue.map((item: string) => {
+                          return <StatusCell key={item} value={item} />
+                        }))
+                        || 'None'
+                      : dataValue || 'None'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
-  );
-};
+  )
+}
 
-export default RecordShellSummary;
+export default RecordShellSummary

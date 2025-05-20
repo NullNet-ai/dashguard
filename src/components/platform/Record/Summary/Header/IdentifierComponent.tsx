@@ -1,32 +1,18 @@
 "use client";
 
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  StarIcon,
-} from "@heroicons/react/24/outline";
-import { Badge } from "~/components/ui/badge";
-import { Button as Button2 } from "@headlessui/react";
-import { StatusPoint } from "~/components/ui/StatusPoint";
-import MenuButton from "../MenuButton";
-import { capitalize } from "lodash";
+import { ChevronLeftIcon } from "lucide-react";
 import { useContext, useMemo } from "react";
-import { RecordContext } from "../../Provider";
-import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
-import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
+import { Badge } from "~/components/ui/badge";
+import { StatusPoint } from "~/components/ui/StatusPoint";
 import useScreenType from "~/hooks/use-screen-type";
-import { SmartContext } from "~/components/ui/smart-component";
-import { ChevronDownIcon, EllipsisVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import RecursiveMenuItem from "../Menu/RecursiveMenuItem";
-import { DEFAULT_MENU_OPTION_CONFIG } from "../../constants";
+import { RecordContext } from "../../Provider";
+import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
+import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
+import capitalize from 'lodash/capitalize';
+import { Button } from '@headlessui/react';
+
 const ellipsis = (str: string, length: number) => {
-  const sanitizedStr = str?.replace(/["']/g, ""); // Remove both single and double quotes
+  const sanitizedStr = str?.replace(/["']/g, "");
   return sanitizedStr?.length > length
     ? sanitizedStr.substring(0, length) + "..."
     : sanitizedStr;
@@ -44,47 +30,53 @@ export default function IdentifierComponent({
     useContext(RecordWrapperContext);
   const size = useScreenType();
 
-  const memoizedRecordData = useMemo(() => {
-    return {
-      status: status,
-      recordId: state?.entityCode ?? "",
-      entityName: state?.entityName,
-    };
-  }, [state?.entityCode, state?.entityName, code, status]);
+  const memoizedRecordData = useMemo(() => ({
+    status: status,
+    recordId: state?.entityCode ?? "",
+    entityName: state?.entityName,
+    recordDetails: state?.recordDetails,
+  }), [state?.entityCode, state?.entityName, code, status]);
 
-  const handleClickCollapseButton = () => {
-    if (onClickCollapseButton) {
-      onClickCollapseButton();
-    }
-  };
+  const handleClickCollapseButton = () => onClickCollapseButton?.();
 
   const entityName = state?.entityName;
+
   return (
     <div className="flex flex-row items-center justify-between p-2 px-4 text-sm">
       <div className="flex flex-row items-center gap-x-1">
         <StatusPoint variant={status === "Archived" ? "secondary" : "success"} />
-        <span data-test-id={entityName + "-rcrd-code"}>
+        <span data-test-id={entityName + "-rcrd-code"} className='font-semibold me-2'>
           {ellipsis(JSON.stringify(code), 8)}
-        </span>{" "}
-        <Badge variant={status === "Archived" ? "secondary" : "success"}>{capitalize(status)}</Badge>
+        </span>
+        <Badge 
+          variant={status === "Archived" ? "secondary" : "success"}
+          data-test-id={entityName + "-rcrd-status"}
+        >
+          {capitalize(status)}
+        </Badge>
       </div>
       <div className="flex flex-row items-center gap-x-1">
-        {/* <Button2>
-          <StarIcon className="h-5 w-5 text-yellow-400" />
-        </Button2> */}
-        {/* <Button2 className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary hover:opacity-70" onClick={handleClickCollapseButton}>
-          {
-            isCollapseRecordSummary ? <ChevronRightIcon className="h-4 w-4 text-slate-500" />
-            : <ChevronLeftIcon className="h-4 w-4 text-slate-500" />
-          }
-        </Button2> */}
-        <ChevronLeftIcon className="hidden h-4 w-4 text-slate-500 md:block" />
-        <ChevronDownIcon className="h-4 w-4 text-slate-500 md:hidden" />
+
+        <Button 
+          className='hidden md:flex bg-primary/10 rounded-full size-5 items-center justify-center'
+            onClick={handleClickCollapseButton}
+        >
+        <ChevronLeftIcon
+          className={`hidden h-4 w-4 text-primary md:block cursor-pointer transition-transform
+            }`}
+        
+        />
+        </Button>
+        {/* <ChevronDownIcon
+          className={`h-4 w-4 text-slate-500 md:hidden cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
+            }`}
+          onClick={handleClickCollapseButton}
+        /> */}
         <DefaultSummaryMenuOptions
-            key={Math.random()}
-            menuOptionConfig={state?.identifierOption}
-            memoizedRecordData={memoizedRecordData}
-          />
+          key={state?.recordId}
+          menuOptionConfig={state?.identifierOption}
+          memoizedRecordData={memoizedRecordData}
+        />
       </div>
     </div>
   );

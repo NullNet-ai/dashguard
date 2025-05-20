@@ -2,20 +2,18 @@ export interface ISideBarProps {
   headerComponent?: React.ReactNode;
   footerComponent?: React.ReactNode;
   mainMenuConfig?: ISidebarMenu[];
+  favoritesMenuConfig?: ISidebarMenu[];
+  historyMenuConfig?: ISidebarMenu[];
   footerMenuConfig?: ISidebarMenu[];
   headerMenuConfig?: ISidebarMenu[];
-  className?:string;
+  className?: string;
+  screenType?: string;
+  tabsDisplayVariant?:  'icon-only' | 'label-only'
 }
 
 export interface ISidebarMenu {
   groupTitle?: string;
   title?: string;
-  // icon?: ForwardRefExoticComponent<
-  //   Omit<SVGProps<SVGSVGElement>, "ref"> & {
-  //     title?: string;
-  //     titleId?: string;
-  //   } & RefAttributes<SVGSVGElement>
-  // >;
   icon?: string;
   isActive?: boolean;
   url?: string;

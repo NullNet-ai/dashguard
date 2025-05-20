@@ -7,10 +7,11 @@ export const constructSearchableFields = ({columns, entity}: {columns: ColumnDef
 		const { isSearchable = true, accessorKey, search_config, header } = column as any;
     if (isSearchable && accessorKey && header) {
       return {
+        accessorKey,
         field: accessorKey,
         label: header,
         entity,
-        operator: "equal",
+        operator: "like",
         ...(search_config ?? {}),
       } as ISearchableField;
     }

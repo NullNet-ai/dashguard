@@ -3,7 +3,7 @@ import { type IFieldComponentProps } from "./type";
 import CountryToCities from "../countriesToCities.json";
 import { FormField } from "~/components/ui/form";
 
-export default function CountryName({ form, formKey }: IFieldComponentProps) {
+export default function CountryName({ form, formKey,fieldConfig }: IFieldComponentProps) {
   const handleSelect = (value: string) => {
     form.setValue(`details.country`, value);
     form.setValue(`details.city`, "");
@@ -23,8 +23,9 @@ export default function CountryName({ form, formKey }: IFieldComponentProps) {
             data-test-id={formKey + "-" + "sel-" + formRenderProps.field.name}
             formKey={formKey}
             fieldConfig={{
+              ...fieldConfig,
+              name: formRenderProps.field.name,
               selectSearchable: true,
-              ...formRenderProps?.field,
               required: true,
               placeholder: "Select Country",
               label: "Country",

@@ -13,17 +13,20 @@ import { Fragment, SetStateAction } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { TDisplayType } from "../../../types";
+import { capitalize } from 'lodash';
 
 export default function SelectedView({
   records,
   handleRemovedSelectedRecords,
   handleUpdateDisplayType,
   renderComponentSelected,
+  entity
 }: {
   renderComponentSelected?: (record: any) => JSX.Element;
   handleRemovedSelectedRecords: (records: any[]) => void;
   handleUpdateDisplayType: (type: SetStateAction<TDisplayType>) => void;
   records: any;
+  entity?: string
 }) {
   return (
     <Fragment>
@@ -33,7 +36,7 @@ export default function SelectedView({
             <CardHeader
               className={"flex flex-row items-center justify-between"}
             >
-              <CardTitle className="text-sm">{record.code}</CardTitle>
+              <CardTitle className="text-sm"><span className='text-primary'>{entity ? `${capitalize(entity ?? '')} ID:` : '' }</span> {record.code}</CardTitle>
               
             </CardHeader>
             <CardContent>

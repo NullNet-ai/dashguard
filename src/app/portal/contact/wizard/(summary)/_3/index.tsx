@@ -1,22 +1,17 @@
 "use client";
+import { usePathname } from "next/navigation";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 
-const CategoryDetailsSummary = ({
-  form_key,
-  identifier,
-  main_entity,
-}: {
-  form_key: string;
-  identifier: string;
-  main_entity: string;
-}) => {
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , entity, _, identifier] = pathName.split("/");
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
   } = api.record.getByCode.useQuery({
-    main_entity: main_entity!,
+    main_entity: entity!,
     id: identifier!,
     pluck_fields: ["id", "code", "categories"],
   });
@@ -38,8 +33,8 @@ const CategoryDetailsSummary = ({
 
   return (
     <div>
-      <p className="mb-[8px]">
-        <strong> Category: </strong>
+      <p className="mb-[8px] no-underline">
+        <span className='text-slate-400'> Category: </span>
         &nbsp;{" "}
         {filtered_categories?.length ? filtered_categories.join(", ") : "None"}
       </p>
@@ -47,4 +42,15 @@ const CategoryDetailsSummary = ({
   );
 };
 
-export default CategoryDetailsSummary;
+const SummaryConfig = {
+  label: "Step 3",
+  required: true,
+  show_summary: true,
+  components: [
+    {
+      label: "Category Details",
+      component: <Summary form_key={"ContactCategoryDetails"} />,
+    },
+  ],
+};
+export default SummaryConfig;

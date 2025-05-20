@@ -1,12 +1,18 @@
+'use client'
 import { Fragment } from "react";
+import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 import { DropdownMenuItem, DropdownMenuSeparator } from "~/components/ui/dropdown-menu";
 
 interface IMenuItemProps {
   children: React.ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 export default function MenuItem({ children, onClick,...props  }: IMenuItemProps) {
+  
+
+ 
   const handleClick = () => {
     // ? Feel free to add your logic here
     onClick();
@@ -14,7 +20,7 @@ export default function MenuItem({ children, onClick,...props  }: IMenuItemProps
 
   return (
     <Fragment>
-      <DropdownMenuItem onClick={handleClick} {...props}>{children}</DropdownMenuItem>
+      <DropdownMenuItem className="w-full flex-1" onClick={handleClick} {...props}>{children}</DropdownMenuItem>
       {/* TODO: add item separator */}
     </Fragment>
   );

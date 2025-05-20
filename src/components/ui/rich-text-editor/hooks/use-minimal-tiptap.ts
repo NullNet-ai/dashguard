@@ -17,7 +17,7 @@ import {
   UnsetAllMarks,
   ResetMarksOnEnter,
   FileHandler,
-} from "../extensions";
+   } from "../extensions";
 import { cn } from "~/lib/utils";
 import { fileToBase64, getOutput, randomId } from "../utils";
 import { useThrottle } from "../hooks/use-throttle";
@@ -140,6 +140,7 @@ const createExtensions = (placeholder: string) => [
   HorizontalRule,
   ResetMarksOnEnter,
   CodeBlockLowlight,
+  EntityVariable, // Add this line
   Placeholder.configure({ placeholder: () => placeholder }),
 ];
 
@@ -200,6 +201,7 @@ export default useMinimalTiptapEditor;
 
 import { Extension } from "@tiptap/react";
 import { ControllerFieldState, ControllerRenderProps } from "react-hook-form";
+import { EntityVariable } from '../extensions/entity-variable/entity-variable';
 
 /**
  * FontSize - Custom Extension
