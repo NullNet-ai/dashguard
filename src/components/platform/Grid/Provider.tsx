@@ -151,6 +151,7 @@ export default function GridProvider({
   const [gridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
       return {
+        ...item,
         header: item.header,
         accessorKey: item.accessorKey,
         search_config: item.search_config,

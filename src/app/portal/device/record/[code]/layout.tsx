@@ -1,17 +1,12 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { api } from "~/trpc/server";
 import RecordWrapper from "./_components/RecordWrapper";
+import ContentLoading from './loading'
+import RecordSummaryPage from './_record_summary';
 
-const Layout = async ({
-  record,
-  record_summary,
-}: {
-  record: React.ReactNode;
-  record_summary: React.ReactNode;
-  children: React.ReactNode;
-}) => {
+const Layout = async ({ children }: { children: React.ReactNode }) => {
   const headerList = headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
@@ -58,11 +53,15 @@ const Layout = async ({
 
   return (
     <RecordWrapper
-      record={record}
-      record_summary={record_summary}
-      entity_code={identifier!}
-      entity_name={main_entity!}
-    />
+    entity_code={identifier!}
+    entity_name={main_entity!}
+    record={<Suspense fallback={<ContentLoading />}>{children}</Suspense>}
+    record_summary={
+      <Suspense fallback={<ContentLoading />}>
+        <RecordSummaryPage />
+      </Suspense>
+    }
+  />
   );
 };
 
