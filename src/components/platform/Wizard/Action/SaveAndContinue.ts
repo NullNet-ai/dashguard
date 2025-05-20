@@ -33,6 +33,6 @@ export async function SaveAndContinue({
   if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
     return `/portal/record/version/1/${identifier}/?current_tab=dashboard`;
   } else {
-    return `/portal/${entity}/record/${identifier}/?current_tab=${defaultRecordTab ?? entity}`;
+    return `/portal/${entity}/record/${identifier}/${defaultRecordTab ?? entity}`;
   }
 }

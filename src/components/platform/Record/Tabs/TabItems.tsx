@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon } from 'lucide-react';
 import { useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,8 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
   let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   const router = useRouter();
+  const _Pathname = usePathname();
+  const [, , , , , tabName] = _Pathname.split('/');
   const searchParams = useSearchParams();
   if (size === 'xs' || size === 'sm' || size === 'md') {
     sidebar_width = 0;
@@ -63,7 +65,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
               className="group relative flex cursor-pointer items-center px-4"
             >
               <Link
-                href={`?current_tab=${tab.id}`}
+                href={`${tab.id}`}
                 data-test-id={
                   entityName +
                   '-rcrdtab-' +
@@ -73,13 +75,9 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                 // onClick={() => {
                 //   router.push(`?current_tab=${tab.id}`);
                 // }}
-                aria-current={
-                  searchParams.get('current_tab') === tab.id
-                    ? 'page'
-                    : undefined
-                }
+                aria-current={tabName === tab.id ? 'page' : undefined}
                 className={cn(
-                  searchParams.get('current_tab') === tab.id
+                  tabName === tab.id
                     ? 'border-primary text-primary'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                   'whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium md:py-3',

@@ -183,7 +183,7 @@ const TableCell = React.forwardRef<
               });
             return;
           }
-          router.push(`/portal/${edit?.entity}/record/${edit?.code}?current_tab=${edit?.entity}`);
+          router.push(`/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`);
         }
       }}
       className={cn(

@@ -28,6 +28,7 @@ interface GroupItem {
 export default function GroupContent() {
   const { actions, state } = useManageFilter();
   const { columns } = state ?? {};
+  const groupColumns = columns?.filter((column: any) => column?.enableGrouping);
   const { handleUpdateFilter } = actions;
 
   const form = useForm<{ groups: GroupItem[] }>({
@@ -172,7 +173,7 @@ export default function GroupContent() {
                     <SelectValue placeholder="Select a Field" />
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
-                    {columns?.map((column: any, index: any) => (
+                    {groupColumns?.map((column: any, index: any) => (
                       <SelectItem key={index} value={column.accessorKey}>
                         {column.header}
                       </SelectItem>

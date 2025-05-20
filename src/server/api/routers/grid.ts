@@ -925,8 +925,14 @@ export const gridRouter = createTRPCRouter({
         is_case_sensitive_sorting: item.is_case_sensitive_sorting ?? false,
       }));
 
+      const gridtabs = tabDetails?.map((tab) => ({
+        ...tab,
+         current: tab.id === filter_id,
+         is_current: tab.id === filter_id,
+       }));
+
       return {
-        grid_tabs,
+        grid_tabs: gridtabs,
         filters: {
           reportFilters: filter,
           advanceFilter,

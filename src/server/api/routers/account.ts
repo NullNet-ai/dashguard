@@ -584,7 +584,7 @@ export const accountRouter = createTRPCRouter({
                 'is_primary',
               ],
               contact_emails: ['email', 'is_primary'],
-              // external_contacts: ['id', 'first_name', 'last_name'],
+              _contact: ['id', 'first_name', 'last_name', 'middle_name'],
             },
           },
         })
@@ -601,8 +601,9 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .join({
+        .nestedJoin({
           type: 'left',
+          nested: true,
           field_relation: {
             to: {
               entity: 'contact_phone_numbers',
@@ -618,11 +619,26 @@ export const accountRouter = createTRPCRouter({
           type: 'left',
           field_relation: {
             to: {
+              alias: '_contact',
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
               entity: 'contact_emails',
               field: 'contact_id',
             },
             from: {
-              entity: 'contacts',
+              entity: '_contact',
               field: 'id',
             },
           },
