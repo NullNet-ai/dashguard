@@ -15,7 +15,7 @@ import {
 export default function CreateNewFilter() {
   const { actions } = useSideDrawer();
   const { state } = useGrid();
-  const { config, gridKey} = state ?? {};
+  const { config, gridKey, defaultAdvanceFilter} = state ?? {};
 
   const {
     gridColumns: _columns = [],
@@ -48,6 +48,7 @@ export default function CreateNewFilter() {
             columns={gridColumns as Record<string, any>[]}
             searchConfig={{ ...searchConfig, entity: defaultEntity }}
             gridKey={gridKey}
+            defaultAdvanceFilter={defaultAdvanceFilter}
           >
             <GridManageFilter />
           </ManageFilterProvider>
@@ -71,7 +72,7 @@ export default function CreateNewFilter() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Create New Filter</p>
+          <p>New Filter</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

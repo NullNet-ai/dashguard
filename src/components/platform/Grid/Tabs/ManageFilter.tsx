@@ -29,7 +29,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
   const router = useRouter();
   const { actions } = useSideDrawer();
   const { state } = useGrid();
-  const { config, gridKey } = state ?? {}; 
+  const { config, gridKey, defaultAdvanceFilter } = state ?? {}; 
 
   const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity } = config ?? {};
 
@@ -58,6 +58,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
               ...searchConfig,
               entity: defaultEntity
             }}
+            defaultAdvanceFilter={defaultAdvanceFilter}
             gridKey={gridKey}
           >
             <GridManageFilter />
@@ -90,7 +91,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
 
   const handleDuplicateFilter = async() => {
     try {
-      const url = await duplicateFilterTab(tab, gridKey);
+      const url = await duplicateFilterTab(tab, gridKey, defaultEntity);
       if (url && typeof url === 'string') {
         router.push(url);
         router.refresh(); 

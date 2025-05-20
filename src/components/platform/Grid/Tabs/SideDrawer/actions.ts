@@ -46,10 +46,12 @@ export const removeGridFilter = async (id: string, gridKey?: string) => {
 export const duplicateFilterTab = async (
   tab: Record<string, any>,
   gridKey?: string,
+  entity?: string,
 ) => {
   const url = await api.gridFilter.duplicateGridFilter({
     tab,
     gridKey,
+    entity
   });
   const headerList = headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
@@ -83,6 +85,7 @@ interface TransformedFilters {
 export const transformFilterGroups = async (
   filterDetails: FilterDetails,
   columns: any[],
+  defaultAdvanceFilter: any,
 ): Promise<TransformedFilters> => {
   if (!filterDetails?.filter_groups?.length)
     return { resolveDefaultFilter: [], resolveGroupFilter: [] };
@@ -132,10 +135,17 @@ export const transformFilterGroups = async (
       },
       [],
     );
-    return { resolveDefaultFilter, resolveGroupFilter: [] };
+
+    const mergeFilter = [...resolveDefaultFilter, 
+      ...(defaultAdvanceFilter?.length ? [
+        { operator : 'and', type : 'operator', default: true },
+        ...defaultAdvanceFilter
+      ] : [])
+    ];
+    return { resolveDefaultFilter : mergeFilter, resolveGroupFilter: [] };
   }
 
-  const resolveGroupFilter = filterDetails.filter_groups.reduce(
+  let resolveGroupFilter = filterDetails.filter_groups.reduce(
     (acc: any, group, index) => {
       if (index > 0) {
         acc.push({ type: 'operator', operator: group.groupOperator });
@@ -180,5 +190,22 @@ export const transformFilterGroups = async (
     },
     [],
   );
+
+  if(defaultAdvanceFilter.length) {
+    resolveGroupFilter = resolveGroupFilter.map((group: any) => {
+    if (group.type === 'criteria') {
+    return {
+        type: 'criteria',
+        filters: [
+        ...group.filters,
+        { operator: 'and', type: 'operator', default: true },
+        ...defaultAdvanceFilter,
+        ],
+    };
+    }
+    return group;
+})
+}
+
   return { resolveDefaultFilter: [], resolveGroupFilter };
 };
