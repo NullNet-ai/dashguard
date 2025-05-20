@@ -199,6 +199,7 @@ export function ComboSelect({
             onChange={(newValue) => {
                 setQuery("");
                 onChange(newValue);
+                setOpen(false);
             }}
             disabled={disabled}
         >

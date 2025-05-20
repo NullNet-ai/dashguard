@@ -44,6 +44,7 @@ function UploadComponent(props: any) {
           image_url: typeof window !== 'undefined' ? `${window.location.origin}/api/file/${image_id}/download` : ''
         },
       }
+
       await handleSaveUrl(formData)
       metadata?.setImageId(image_id)
 
@@ -122,8 +123,9 @@ export default function ProfileImage({ details, entity, token }: any) {
           const stringID = imageId ? imageId : details?.data?.image_url
           setLoading(true)
 
-          const response = await fetch(typeof window !== 'undefined' ? `${window.location.origin}/api/file/${stringID}/download` : '')
+          const response = await fetch(typeof window !== 'undefined' ? `${imageId ?  `window.location.origin}/api/file/${stringID}/download` : stringID }` : '')
           const imgInfo = await getImageData([stringID])
+
           setImageInfo(imgInfo ? imgInfo[0] : {})
           const blob = await response.blob()
           const reader = new FileReader()
