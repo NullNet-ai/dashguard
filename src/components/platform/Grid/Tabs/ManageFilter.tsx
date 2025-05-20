@@ -43,6 +43,8 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
     data_type: column.data_type,
     entity: column.entity || defaultEntity,
     search_config: column.search_config,
+    enableGrouping:
+      typeof column.enableGrouping === 'boolean' ? column.enableGrouping : true,
   }));
 
   const handleManageFilter = () => {

@@ -138,7 +138,7 @@ export const HeaderGroupWrapper = ({
       </div>
 
       {/* dropdown */}
-      {!!newItems?.length && newItems.some((item) => item.hidden) && (
+      {!!newItems?.length && newItems.some((item) => item?.hidden) && (
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
             className="fborder absolute flex min-h-[24px] items-center gap-1 rounded-md border-transparent bg-primary/10 px-2 py-0.5 text-sm font-normal text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"

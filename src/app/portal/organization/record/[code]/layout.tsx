@@ -1,21 +1,18 @@
-import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
+import { api } from '~/trpc/server';
+import RecordWrapper from './_components/RecordWrapper';
+import { Suspense } from 'react';
+import RecordSummaryPage from './_record_summary';
+import ContentLoading from './loading';
 
-import { type IPlatformRecordLayoutProps } from '~/components/platform/Record/types'
-import { api } from '~/trpc/server'
-
-import RecordWrapper from './_components/RecordWrapper'
-
-const Layout = async ({
-  record,
-  record_summary,
-}: IPlatformRecordLayoutProps) => {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity, , identifier] = pathname.split('/')
+const Layout = async ({ children }: { children: React.ReactNode }) => {
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , main_entity, , identifier] = pathname.split('/');
 
   if (identifier === 'new') {
-    return notFound()
+    return notFound();
   }
 
   const organization_details = await api.organization.getByCode({
@@ -33,27 +30,31 @@ const Layout = async ({
       'updated_date',
       'updated_time',
     ],
-  })
+  });
 
   if (organization_details?.errors?.length || !organization_details?.data) {
-    return notFound()
+    return notFound();
   }
 
-  const { status } = organization_details?.data || {}
+  const { status } = organization_details?.data || {};
 
   // Record Shell Guard for Draft Records
   if (typeof status === 'string' && status.toLowerCase() === 'draft') {
-    return notFound()
+    return notFound();
   }
 
   return (
     <RecordWrapper
       entity_code={identifier!}
       entity_name={main_entity!}
-      record={record}
-      record_summary={record_summary}
+      record={<Suspense fallback={<ContentLoading />}>{children}</Suspense>}
+      record_summary={
+        <Suspense fallback={<ContentLoading />}>
+          <RecordSummaryPage />
+        </Suspense>
+      }
     />
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

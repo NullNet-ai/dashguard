@@ -32,6 +32,8 @@ export default function CreateNewFilter() {
     search_config: column.search_config,
     entity: column.entity || defaultEntity,
     data_type: column.data_type,
+    enableGrouping:
+      typeof column.enableGrouping === 'boolean' ? column.enableGrouping : true,
   }));
 
   const handleManageFilter = () => {
