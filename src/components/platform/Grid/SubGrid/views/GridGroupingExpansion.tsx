@@ -1,16 +1,20 @@
+
 'use client';
 
 import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
 import { CardFooter } from '~/components/ui/card';
 import { Loader } from '~/components/ui/loader';
 import Pagination from '../../Pagination';
-import GridProvider from '../../Provider';
+import GridProvider, { GridContext } from '../../Provider';
 import MyTableBody from '../../TableBody';
 import ErrorPage from '../../common/ErrorPage';
 import { useSidebar } from '~/components/ui/sidebar';
 import { cn } from '~/lib/utils';
 import { resolveAdvanceFilter } from '../../Search/utils/advanceFilterResolver';
 import useFetchGridData from '../../hooks/useFetchGridData';
+import GridGroupRows from './GridGroupRows';
+import { TableRow } from '~/components/ui/table';
+import { useContext } from 'react';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -22,9 +26,11 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     parentGroupData,
     gridState,
     parentGroupFields,
+    metadata,
   } = props ?? {};
 
   const { open } = useSidebar();
+  const { state, actions } = useContext(GridContext);
 
   const pagination = {
     current_page: 1,
@@ -131,16 +137,33 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
 
   const { items = [], totalCount = 0 } = data ?? {};
 
+  const newVisibleColumns = [...visibleColumns].some(
+    (col: any) => col?.accessorKey === 'group_by',
+  )
+    ? [...visibleColumns]
+    : [
+        {
+          header: 'group_by',
+          accessorKey: 'group_by',
+          data_type: 'string',
+        },
+        ...visibleColumns,
+      ];
+
   if (isLoading && !items?.length) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader
-          className="bg-primary text-primary"
-          label="Fetching data..."
-          size="md"
-          variant="circularShadow"
-        />
-      </div>
+      <tr>
+        <td   colSpan={state?.table.getVisibleLeafColumns().length}>
+         <div className="flex h-full items-center justify-center">
+            <Loader
+              className="bg-primary text-primary"
+              label="Fetching data..."
+              size="md"
+              variant="circularShadow"
+            />
+          </div>
+        </td>
+      </tr>
     );
   }
   if (error) {
@@ -164,7 +187,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       {...gridQueryConfigs}
       config={{
         ...config,
-        columns: visibleColumns,
+        columns: newVisibleColumns,
         group_by_initial_columns: initialColumns,
         parentGroupData: [...(parentGroupData ?? []), { ...rowData }],
         onFetchRecords: fetchData,
@@ -175,14 +198,25 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       totalCount={totalCount}
       grouping={grouping}
     >
-      <div className={cn(`hidden lg:grid`)}>
-        <MyTableBody />
+      {/* <div className={cn(`hidden lg:grid`)}> */}
+      <GridGroupRows />
+      {/* <MyTableBody 
+          parentMeta={metadata?.parentRow}
+        /> */}
+      <TableRow
+      >
+        <td
+          colSpan={state?.table.getVisibleLeafColumns().length}
+        >
         {!grouping?.length && (
-          <CardFooter style={_width}>
-            <Pagination />
-          </CardFooter>
-        )}
-      </div>
+            <CardFooter style={_width}>
+              <Pagination />
+            </CardFooter>
+          )}
+        </td>
+       
+      </TableRow>
+      {/* </div> */}
     </GridProvider>
   );
 };
