@@ -887,7 +887,7 @@ export const gridRouter = createTRPCRouter({
             ?.group_advance_filters ?? [])
         : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
 
-      const defaultFilters = (filter ?? []).filter(
+      const defaultFilter = (tabDetails ?? []).find(
         (item) => item.default === true,
       );
       const sorts: ISortBy = filter_id
@@ -924,12 +924,13 @@ export const gridRouter = createTRPCRouter({
         sort_key: item.field,
         is_case_sensitive_sorting: item.is_case_sensitive_sorting ?? false,
       }));
+      const currentTab = filterDetails ? filterDetails : defaultFilter;
 
       const gridtabs = tabDetails?.map((tab) => ({
         ...tab,
-         current: tab.id === filter_id,
-         is_current: tab.id === filter_id,
-       }));
+        current: tab.id === currentTab?.id,
+        is_current: tab.id === currentTab?.id,
+      }));
 
       return {
         grid_tabs: gridtabs,
@@ -1116,7 +1117,7 @@ export const gridRouter = createTRPCRouter({
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
-      if (tabs.length > 1) return tabs
+      if (tabs.length > 1) return tabs;
       const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',
