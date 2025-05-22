@@ -946,17 +946,17 @@ const DateTimeLocalInput = (props: DateTimeLocalInputProps & {
 
   const validMonths = React.useMemo(() => getValidMonths(), [getValidMonths])
 
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && !isOpen) {
-        e.preventDefault()
-        buttonRef.current?.click()
-      }
-    }
+  // React.useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === 'Enter' && !isOpen) {
+  //       e.preventDefault()
+  //       buttonRef.current?.click()
+  //     }
+  //   }
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
+  //   document.addEventListener('keydown', handleKeyDown)
+  //   return () => document.removeEventListener('keydown', handleKeyDown)
+  // }, [isOpen])
 
 
   const handleTimePickerChange = (date: Date | undefined) => {
