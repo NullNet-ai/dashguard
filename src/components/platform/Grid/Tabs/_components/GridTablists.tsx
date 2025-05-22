@@ -96,7 +96,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
 
     if (typeof window !== 'undefined') {
       if (document.readyState === 'complete') {
-        setIsWindowLoaded(true);
+        setTimeout(() => {
+          setIsWindowLoaded(true);
+        }, 1000);
       } else {
         window.addEventListener('load', handleLoad);
       }
@@ -175,7 +177,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists, isClient]);
+  }, [tablists, isClient, open, winWidth, isWindowLoaded]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
