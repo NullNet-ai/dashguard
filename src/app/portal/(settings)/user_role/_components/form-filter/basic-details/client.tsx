@@ -11,6 +11,7 @@ import gridColumns from './_config/columns';
 import SelectedView from './components/SelectedView';
 import { api } from '~/trpc/react';
 import { UserRoleFormSchema } from '~/server/zodSchema/user_role/basicDetails';
+import { useRouter } from 'next/navigation';
 
 export default function RoleDetails({
   params,
@@ -19,6 +20,8 @@ export default function RoleDetails({
   grid_data,
 }: IFormProps) {
   const toast = useToast();
+  const utils = api.useUtils();
+  const router = useRouter();
 
   const saveUserRole = api.user_role.saveUserRole.useMutation();
 
@@ -43,9 +46,19 @@ export default function RoleDetails({
       }
       if (res?.status_code == 200) {
         const [user_role_data] = res?.data;
+        const wizardPath = `/portal/user_role/wizard/${user_role_data?.code}`;
+
         toast.success('Basic Details submit sucessfully');
-        if (action_type === 'Create') {
-          savedRecord({ code: user_role_data?.code });
+        if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
+          await savedRecord({ code: user_role_data?.code, action_type });
+
+          await utils.invalidate(); // use to ignore the cache
+          const targetPath =
+            action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
+          router.push(targetPath);
+
+          // For Next action, we've already navigated, so return empty array
+          if (action_type === 'Next') return [];
         }
         return res.data;
       }
