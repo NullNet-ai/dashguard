@@ -95,6 +95,7 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
     );
     const foundCity = cities?.find((_city: string) => _city === city);
 
+
     form.setValue("details.country", foundCountry || "");
     form.setValue("details.state", foundState ? foundState?.name : "");
     form.setValue("details.city", foundCity ? foundCity : "");
