@@ -43,8 +43,8 @@ export const gridDataResolver = ({
       : defaultAdvanceFilter
 
   const gridDefaultAdvanceFilter = filters?.groupAdvanceFilters?.length
-    ? filters.groupAdvanceFilters
-    : gridAdvanceFilter
+  ? filters.groupAdvanceFilters
+  : gridAdvanceFilter
   const gridProps = {
     grid_tabs,
     defaultSorting: sorts?.defaultSorting.length

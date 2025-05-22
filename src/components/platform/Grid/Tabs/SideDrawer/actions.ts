@@ -136,16 +136,10 @@ export const transformFilterGroups = async (
       [],
     );
 
-    const mergeFilter = [...resolveDefaultFilter, 
-      ...(defaultAdvanceFilter?.length ? [
-        { operator : 'and', type : 'operator', default: true },
-        ...defaultAdvanceFilter
-      ] : [])
-    ];
-    return { resolveDefaultFilter : mergeFilter, resolveGroupFilter: [] };
+    return { resolveDefaultFilter : resolveDefaultFilter, resolveGroupFilter: [] };
   }
 
-  let resolveGroupFilter = filterDetails.filter_groups.reduce(
+  const resolveGroupFilter = filterDetails.filter_groups.reduce(
     (acc: any, group, index) => {
       if (index > 0) {
         acc.push({ type: 'operator', operator: group.groupOperator });
@@ -191,21 +185,6 @@ export const transformFilterGroups = async (
     [],
   );
 
-  if(defaultAdvanceFilter.length) {
-    resolveGroupFilter = resolveGroupFilter.map((group: any) => {
-    if (group.type === 'criteria') {
-    return {
-        type: 'criteria',
-        filters: [
-        ...group.filters,
-        { operator: 'and', type: 'operator', default: true },
-        ...defaultAdvanceFilter,
-        ],
-    };
-    }
-    return group;
-})
-}
 
   return { resolveDefaultFilter: [], resolveGroupFilter };
 };

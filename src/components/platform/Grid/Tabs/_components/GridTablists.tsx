@@ -155,14 +155,14 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           // setTablists(items);
           updatecachedItems(items);
           if (activeTab) {
-            const href = items?.find((item) => item.current)?.href;
+            const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
             router.push(href);
           }
         }
       } else {
         updatecachedItems(items);
         if (activeTab) {
-          const href = items?.find((item) => item.current)?.href;
+          const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
           router.push(href);
         }
       }

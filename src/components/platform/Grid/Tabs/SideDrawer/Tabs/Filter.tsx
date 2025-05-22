@@ -29,6 +29,17 @@ export default function FilterContent() {
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
+
+    if(!filterDetails?.filter_groups?.length) {
+      // If no filter groups, create from advance_filters
+      return [
+        {
+          id: '1',
+          groupOperator: 'and',
+          filters: filterDetails?.default_filter?.length ? filterDetails?.default_filter : filterDetails?.advance_filters,
+        },
+      ]
+    }
     return (
       filterDetails.filter_groups || [
         {

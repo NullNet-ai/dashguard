@@ -18,7 +18,7 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   };
 };
 
-export const SetIdTab = (mainEntity: string, href?: string) => {
+export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: any[]) => {
   const modified_entity = tabName[mainEntity] || mainEntity;
 
   const additional_tabs = GRIDTABS[mainEntity] || [];
@@ -56,15 +56,22 @@ export const SetIdTab = (mainEntity: string, href?: string) => {
       ],
     },
     ...additional_tabs,
+    ...(defaultGridTabs || []),
   ];
 
-  return tabs.map((tab) => {
-    const _id = ulid();
+  const modifiedTabs =  tabs.map((tab) => {
+    const _id = tab.id || ulid();
+    
+    // Check if href already has a filter_id with a value
+    const hasFilterId = tab.href.includes('/grid?filter_id=') && 
+    tab.href.split('/grid?filter_id=')[1].length > 0;
 
     return {
       ...tab,
       id: _id,
-      href: `${tab.href}${_id}`,
+      href: hasFilterId ? tab.href : `${tab.href}${_id}`,
     };
   });
+
+  return modifiedTabs;
 };

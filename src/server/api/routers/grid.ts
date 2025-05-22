@@ -1086,6 +1086,7 @@ export const gridRouter = createTRPCRouter({
         entity: z.string().optional(),
         application: z.string().optional(),
         identifier: z.string().optional(),
+        defaultGridTabs: z.array(z.any()).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -1112,7 +1113,7 @@ export const gridRouter = createTRPCRouter({
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
         const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
-        const defaultTab = SetIdTab(entity!, href);
+        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs);
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
