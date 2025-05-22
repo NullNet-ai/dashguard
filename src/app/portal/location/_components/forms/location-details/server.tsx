@@ -12,7 +12,10 @@ const LocationDetailsServer = async () => {
     id: identifier!,
     pluck_fields: ["id", "code", "location_name"],
   });
-  const defaultValues = record?.data;
+  const defaultValues = {
+    ...record?.data ?? {},
+    location_name: record?.data?.location_name || "",
+  };
   return (
     <div className="space-y-2">
       <BasicDetails

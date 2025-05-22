@@ -4,25 +4,23 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
 export const saveGridFilter = async (data: any, gridKey?: string) => {
-  const saveGridFilter = await api.gridFilter.createGridFilter({
+  const createdCustomFilter = await api.gridFilter.createGridFilter({
     ...data,
     gridKey,
   });
-  const headerList = headers();
-  const fullUrl = headerList.get('x-full-pathname') || '';
-  revalidatePath(fullUrl);
-  return saveGridFilter;
+  revalidatePath(createdCustomFilter?.href);
+  return createdCustomFilter;
 };
 
 export const updateGridFilter = async (data: any, gridKey?: string) => {
-  const updateGridFilter = await api.gridFilter.updateGridFilter({
+  const updatedGridFilter = await api.gridFilter.updateGridFilter({
     ...data,
     gridKey,
   });
   const headerList = headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
-  revalidatePath(fullUrl);
-  return updateGridFilter;
+  revalidatePath(updatedGridFilter?.href || fullUrl);
+  return updatedGridFilter;
 };
 
 export const updateAllFilterdata = async (tabs: any[]) => {
@@ -46,10 +44,12 @@ export const removeGridFilter = async (id: string, gridKey?: string) => {
 export const duplicateFilterTab = async (
   tab: Record<string, any>,
   gridKey?: string,
+  entity?: string,
 ) => {
   const url = await api.gridFilter.duplicateGridFilter({
     tab,
     gridKey,
+    entity
   });
   const headerList = headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
@@ -83,6 +83,7 @@ interface TransformedFilters {
 export const transformFilterGroups = async (
   filterDetails: FilterDetails,
   columns: any[],
+  defaultAdvanceFilter: any,
 ): Promise<TransformedFilters> => {
   if (!filterDetails?.filter_groups?.length)
     return { resolveDefaultFilter: [], resolveGroupFilter: [] };
@@ -132,7 +133,8 @@ export const transformFilterGroups = async (
       },
       [],
     );
-    return { resolveDefaultFilter, resolveGroupFilter: [] };
+
+    return { resolveDefaultFilter : resolveDefaultFilter, resolveGroupFilter: [] };
   }
 
   const resolveGroupFilter = filterDetails.filter_groups.reduce(
@@ -180,5 +182,7 @@ export const transformFilterGroups = async (
     },
     [],
   );
+
+
   return { resolveDefaultFilter: [], resolveGroupFilter };
 };

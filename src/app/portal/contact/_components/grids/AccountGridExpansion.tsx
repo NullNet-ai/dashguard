@@ -11,13 +11,16 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
   const _pluck = [
     'id',
     'code',
-    'account_id',
-    'organization_id',
-    'role_id',
+    'email',
+    'account_organization_status',
     'status',
   ];
 
   const gridColumns = [
+    {
+      header: 'ID',
+      accessorKey: 'code',
+    },
     {
       header: 'State',
       accessorKey: 'status',
@@ -28,16 +31,13 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
       },
     },
     {
-      header: 'Username',
-      accessorKey: 'account_id',
+      header: 'Email',
+      accessorKey: 'email',
     },
+    
     {
-      header: 'Organization',
-      accessorKey: 'organization_id',
-    },
-    {
-      header: 'Role',
-      accessorKey: 'role_id',
+      header: 'Status',
+      accessorKey: 'account_organization_status',
     },
   ];
 
@@ -58,7 +58,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
       type: 'criteria',
       field: 'contact_id',
       operator: 'equal',
-      entity: 'organization_account',
+      entity: 'account_organization',
       values: [rowData?.id],
     },
   ];
@@ -66,7 +66,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
   const { fetchData, data, error, isLoading } = useFetchGridData({
     current: pagination?.current_page,
     limit: pagination?.limit_per_page,
-    entity: 'organization_account',
+    entity: 'account_organization',
     pluck: _pluck,
     sorting: defaultSorting,
     advance_filters: defaultFilter,
@@ -79,7 +79,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
     <Grid
       parentExpanded={props.parentExpanded}
       config={{
-        entity: 'organization_account',
+        entity: 'account_organization',
         title: 'Accounts',
         columns: gridColumns,
         disableDefaultAction: true,
@@ -98,7 +98,7 @@ const AccountGridExpansion = (props: IExpansionComponentProps ) => {
           router: 'grid',
           resolver: 'items',
           query_params: {
-            entity: 'organization_account',
+            entity: 'account_organization',
             pluck: _pluck,
           },
         },

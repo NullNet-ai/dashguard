@@ -128,7 +128,7 @@ const Sorting = ({ className }: { className?: string }) => {
             }}
             variant="secondary"
           >
-            {getLabel(item.id) as string} ({item.desc ? 'Desc' : 'Asce'})
+            {getLabel(item.id) as string} ({item.desc ? 'Desc' : 'Asc'})
             {sortingFields && sortingFields.length > 1 && (
               <Button
                 className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
@@ -192,7 +192,7 @@ const Sorting = ({ className }: { className?: string }) => {
                       variant="secondary"
                     >
                       {getLabel(item.id) as string} (
-                      {item.desc ? 'Desc' : 'Asce'})
+                      {item.desc ? 'Desc' : 'Asc'})
                       <Button
                         className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
                         key={`${item.id}-remove`}

@@ -63,6 +63,7 @@ export const gridFilterRouter = createTRPCRouter({
     .input(
       gridFilterSchema.extend({
         gridKey: z.string().optional(),
+        entity: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -111,7 +112,7 @@ export const gridFilterRouter = createTRPCRouter({
               link: href,
               is_current: false,
               is_default: false,
-              entity: mainEntity,
+              entity: input.entity || mainEntity,
               columns: input.columns,
               groups: input.groups,
               sorts: input.sorts,
@@ -139,7 +140,7 @@ export const gridFilterRouter = createTRPCRouter({
         })
         .execute();
 
-      return updatedGridTabs;
+      return additionalTab;
     }),
 
   updateGridAllFilter: privateProcedure
@@ -250,7 +251,7 @@ export const gridFilterRouter = createTRPCRouter({
         return tab;
       });
       await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
-      return updatedTab;
+      return updatedTab?.find((tab) => tab.id === input.id);
     }),
 
   removeGridFilter: privateProcedure
@@ -317,6 +318,7 @@ export const gridFilterRouter = createTRPCRouter({
       z.object({
         tab: z.any(),
         gridKey: z.string().optional(),
+        entity: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -348,7 +350,7 @@ export const gridFilterRouter = createTRPCRouter({
                 link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
                 is_current: false,
                 is_default: false,
-                entity: mainEntity,
+                entity:  input.entity || mainEntity,
                 columns: input.tab.columns || [],
                 groups: input.tab.groups || [],
                 sorts: input.tab.sorts || [],
@@ -434,7 +436,7 @@ export const gridFilterRouter = createTRPCRouter({
                 link: `/portal/${mainEntity}/${application}?filter_id=${filter_id}`,
                 is_current: false,
                 is_default: false,
-                entity: mainEntity,
+                entity: grid_filter.entity || mainEntity,
                 columns: grid_filter.columns,
                 groups: grid_filter.groups,
                 sorts: grid_filter.sorts,
