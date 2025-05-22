@@ -16,9 +16,11 @@ import { Alert, AlertContent } from '~/components/ui/alert';
 
 const formSchema = z.object({
   username: z
-    .string({ required_error: 'Please enter your email.' })
+    .string({ required_error: 'Email is required.' })
     .email('Please enter a valid email.'),
-  password: z.string().min(1, { message: 'Please enter your password.' }),
+  password: z
+    .string({ required_error: 'Password is required.' })
+    .min(1, { message: 'Please enter your password.' }),
 });
 
 export default function LoginForm(props: any) {
@@ -112,9 +114,9 @@ export default function LoginForm(props: any) {
           {error && <FormMessage>{error}</FormMessage>}
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center">
-              <Checkbox 
-                id="rememberMe" 
-                name="rememberMe" 
+              <Checkbox
+                id="rememberMe"
+                name="rememberMe"
                 data-test-id="login-rmmbr-me-chkbx"
               />
               <label
@@ -125,9 +127,9 @@ export default function LoginForm(props: any) {
               </label>
             </div>
             <div className="text-md">
-              <a 
-                className="font-semibold text-primary" 
-                href="forgot-password" 
+              <a
+                className="font-semibold text-primary"
+                href="forgot-password"
                 data-test-id="login-frgt-pswrd-link"
               >
                 Forgot Password?

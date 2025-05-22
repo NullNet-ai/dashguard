@@ -13,6 +13,7 @@ import { usePopper } from "react-popper";
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { ulid } from 'ulid';
 
 export interface ComboSelectOption {
     label: string;
@@ -62,6 +63,7 @@ export interface ComboSelectProps {
         scrollableTarget?: string;
         scrollThreshold?: number;
         endMessage?: React.ReactNode;
+        dataLength?: number;
     };
         // New prop to directly call the create record function
         onCreateRecord?: (query?: string) => Promise<void>;
@@ -93,14 +95,21 @@ export function ComboSelect({
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
 
+
+
     // InfiniteScroll state
     const initialLimit = infiniteScroll?.initialLimit || 50;
     const loadMoreStep = infiniteScroll?.loadMoreStep || 50;
     const [displayLimit, setDisplayLimit] = useState(initialLimit);
-    const hasMore = infiniteScroll?.hasMore !== false;
+    // const hasMore = infiniteScroll?.hasMore !== false;
+    const [hasMoreData, setHasMoreData] = useState(true);
 
     const [referenceElement, setReferenceElement] = useState<any>(null);
     const [popperElement, setPopperElement] = useState<any>(null);
+
+    const [newItems , setNewItems] = useState<ComboSelectOption[]>(
+        options.slice(0, displayLimit)
+    );
 
     const { styles, attributes, update } = usePopper(referenceElement, popperElement, {
         placement: "bottom-start",
@@ -144,6 +153,30 @@ export function ComboSelect({
         }
     }, [open, update]);
 
+    // Reset displayLimit when the combobox is opened
+    useEffect(() => {
+        if (open) {
+            setDisplayLimit(initialLimit);
+            setQuery("");
+            //reset all
+            setNewItems(
+                options.slice(0, initialLimit)
+            );
+            setHasMoreData(true);
+            setDisplayLimit(initialLimit);  
+
+        } else {
+            setQuery("");
+            //reset all
+            setNewItems(
+                options.slice(0, initialLimit)
+            );
+            setHasMoreData(true);
+            setDisplayLimit(initialLimit);  
+
+        }
+    }, [open, initialLimit]);
+
     // Call onQueryChange callback when query changes
     useEffect(() => {
         if (onQueryChange) {
@@ -156,6 +189,9 @@ export function ComboSelect({
         : options.filter((option) =>
             option.label.toLowerCase().includes(query.toLowerCase().trim())
         );
+
+
+    const uniqueKey = ulid()
 
     const inputReadOnly = !searchable || readOnly || disabled;
 
@@ -348,16 +384,27 @@ export function ComboSelect({
                     >
                         {infiniteScroll?.enabled ? (
                             <div
-                                id={infiniteScroll.scrollableTarget || "select-scrollable-div"}
+                                id={`select-scrollable-div-${uniqueKey}`}
                                 className="max-h-60 overflow-auto"
                             >
                                 {/* Import InfiniteScroll at the top of the file if using this feature */}
                                 <InfiniteScroll
-                                    dataLength={Math.min(filteredOptions.length, displayLimit)}
-                                    next={() => setDisplayLimit(prev => prev + loadMoreStep)}
-                                    hasMore={hasMore && filteredOptions.length > displayLimit}
+                                    dataLength={newItems?.length}
+                                    next={() => {
+                                        if (newItems?.length >= filteredOptions.length) {
+                                            setHasMoreData(false);
+                                            return 
+                                        }
+                                        else {
+                                            setNewItems(prev => {
+                                                return [...prev, ...filteredOptions.slice(prev.length, prev.length + loadMoreStep)];
+                                            })
+                                        }
+
+                                    }}
+                                    hasMore={hasMoreData}
                                     loader={infiniteScroll.loadingIndicator || <div className="p-2">Loading...</div>}
-                                    scrollableTarget={infiniteScroll.scrollableTarget || "select-scrollable-div"}
+                                    scrollableTarget={`select-scrollable-div-${uniqueKey}`}
                                     scrollThreshold={infiniteScroll.scrollThreshold || 0.8}
                                     endMessage={
                                         infiniteScroll.endMessage || (
@@ -371,7 +418,7 @@ export function ComboSelect({
                                         )
                                     }
                                 >
-                                    {filteredOptions.slice(0, displayLimit).map((option) => (
+                                    {newItems.map((option) => (
                                         <ComboboxOption
                                             key={option.value}
                                             value={option}
