@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { type ISortBy } from '~/components/platform/Grid/Category/type';
 import {
   EOperator,
+  IGroupAdvanceFilters,
   type IAdvanceFilters,
   type IResponse,
 } from '@dna-platform/common-orm';
@@ -217,6 +218,7 @@ export const gridRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         entity,
         sorting,
+        group_advance_filters : _group_advance_filters = [],
       } = input;
 
       const pluck_object = {
@@ -232,6 +234,7 @@ export const gridRouter = createTRPCRouter({
           track_total_records: true,
           pluck_object: pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+          group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<string | number>[],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -267,7 +270,7 @@ export const gridRouter = createTRPCRouter({
         });
       }
       const { total_count: totalCount = 1, data: items } =
-        await query.execute();
+      await query.execute();
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
