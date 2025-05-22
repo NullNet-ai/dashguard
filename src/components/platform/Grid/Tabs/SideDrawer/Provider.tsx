@@ -140,10 +140,10 @@ export function ManageFilterProvider({
       entity : searchConfig?.entity,
     };
     setCreateFilterLoading(true);
-    await saveGridFilter(modifyFilterDetails, gridKey);
+    const createdCustomFilter = await saveGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
-    router.refresh();
+    router.push(createdCustomFilter?.href);
     closeSideDrawer();
 
   };

@@ -29,16 +29,28 @@ export default function FilterContent() {
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
-
-    if(!filterDetails?.filter_groups?.length) {
+    if (!filterDetails?.filter_groups?.length) {
       // If no filter groups, create from advance_filters
       return [
         {
           id: '1',
           groupOperator: 'and',
-          filters: filterDetails?.default_filter?.length ? filterDetails?.default_filter : filterDetails?.advance_filters,
+          filters: filterDetails?.default_filter?.length
+            ? filterDetails?.default_filter
+            : filterDetails?.advance_filters?.length
+              ? filterDetails?.advance_filters
+              : [
+                  {
+                    field: '',
+                    operator: 'equal',
+                    label: '',
+                    values: [],
+                    type: 'criteria',
+                    default: true,
+                  },
+                ],
         },
-      ]
+      ];
     }
     return (
       filterDetails.filter_groups || [
@@ -83,20 +95,37 @@ export default function FilterContent() {
   form.watch((data, { name, type }) => {
     if (data.filterGroups) {
       // Only reset values when field or operator changes for the specific filter
-      if (type === 'change' && (name?.includes('.field') || name?.includes('.operator'))) {
-        const [_, groupIndex, __, filterIndex, fieldType] = name?.split('.') || [];
-        
+      if (
+        type === 'change' &&
+        (name?.includes('.field') || name?.includes('.operator'))
+      ) {
+        const [_, groupIndex, __, filterIndex, fieldType] =
+          name?.split('.') || [];
+
         // Only clear values if it's a field or operator change for a criteria type filter
-        if (groupIndex && filterIndex && (fieldType === 'field' || fieldType === 'operator')) {
-          const currentFilter = data.filterGroups[Number(groupIndex)]?.filters?.[Number(filterIndex)];
-          
+        if (
+          groupIndex &&
+          filterIndex &&
+          (fieldType === 'field' || fieldType === 'operator')
+        ) {
+          const currentFilter =
+            data.filterGroups[Number(groupIndex)]?.filters?.[
+              Number(filterIndex)
+            ];
+
           // Skip clearing values for junction operator changes
-          if (currentFilter?.type === 'criteria' && !name?.includes('groupOperator')) {
-            form.setValue(`filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`, []);
+          if (
+            currentFilter?.type === 'criteria' &&
+            !name?.includes('groupOperator')
+          ) {
+            form.setValue(
+              `filterGroups.${Number(groupIndex)}.filters.${Number(filterIndex)}.values`,
+              [],
+            );
           }
         }
       }
-      
+
       handleUpdateFilter({ filter_groups: data.filterGroups });
     }
   });

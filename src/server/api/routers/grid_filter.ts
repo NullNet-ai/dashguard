@@ -140,7 +140,7 @@ export const gridFilterRouter = createTRPCRouter({
         })
         .execute();
 
-      return updatedGridTabs;
+      return additionalTab;
     }),
 
   updateGridAllFilter: privateProcedure

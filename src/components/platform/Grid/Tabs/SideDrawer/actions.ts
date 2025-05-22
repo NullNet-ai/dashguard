@@ -4,14 +4,12 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
 export const saveGridFilter = async (data: any, gridKey?: string) => {
-  const saveGridFilter = await api.gridFilter.createGridFilter({
+  const createdCustomFilter = await api.gridFilter.createGridFilter({
     ...data,
     gridKey,
   });
-  const headerList = headers();
-  const fullUrl = headerList.get('x-full-pathname') || '';
-  revalidatePath(fullUrl);
-  return saveGridFilter;
+  revalidatePath(createdCustomFilter?.href);
+  return createdCustomFilter;
 };
 
 export const updateGridFilter = async (data: any, gridKey?: string) => {
