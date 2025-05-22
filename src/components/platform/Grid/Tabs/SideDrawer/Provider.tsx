@@ -103,10 +103,15 @@ export function ManageFilterProvider({
     };
 
     setCreateFilterLoading(true);
-    await updateGridFilter(modifyFilterDetails, gridKey);
+    const updatedCustomFilter = await updateGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
-    router.refresh();
+
+    if(updatedCustomFilter?.href) {
+      router.push(updatedCustomFilter.href);
+    }else{
+      router.refresh()
+    }
     closeSideDrawer();
   };
 

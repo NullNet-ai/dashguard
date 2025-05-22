@@ -251,7 +251,7 @@ export const gridFilterRouter = createTRPCRouter({
         return tab;
       });
       await ctx.redisClient.cacheData(_tabMenuId, updatedTab);
-      return updatedTab;
+      return updatedTab?.find((tab) => tab.id === input.id);
     }),
 
   removeGridFilter: privateProcedure
