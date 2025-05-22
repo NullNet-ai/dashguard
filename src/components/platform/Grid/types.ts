@@ -1,3 +1,4 @@
+
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
@@ -184,7 +185,9 @@ export interface IConfigGrid {
     summaryWidth?: number;
   };
   CustomRenderCardView?: (args: any) => JSX.Element;
+  CustomRenderCardParent?: (args: any) => JSX.Element;
   enableCheckboxOnChange?: boolean;
+  metadata?: any
 }
 
 interface IRowToArchive extends Row<any> {
@@ -308,4 +311,5 @@ export interface IGridGroupingExpansionProps {
   parentGroupData?: Record<string, any>[];
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
+  metadata?: any
 }
