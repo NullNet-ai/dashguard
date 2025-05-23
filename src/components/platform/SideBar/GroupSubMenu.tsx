@@ -21,6 +21,7 @@ interface IProps {
   subItem: ISidebarMenu;
   item: ISidebarMenu;
   index: number;
+  visitedLinks?: Record<string, string>;
 }
 
 function GroupSubMenu(props: IProps) {
@@ -61,6 +62,21 @@ function GroupSubMenu(props: IProps) {
     return entityName === entity;
   }, [entity, application]);
 
+
+  const getMenuLink = (item: any) => {
+    // Extract entity from item.url
+    const pathParts = item.url?.split('/');
+    const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
+
+    // Check if visitedLinks exists and has an entry for this entity
+    if (props?.visitedLinks && entityName && props?.visitedLinks[entityName]) {
+      return props?.visitedLinks[entityName];
+    }
+
+    // Otherwise, return the original item.url
+    return item.url || '#';
+  };
+
   return (
     <SidebarMenuSubItem
       key={subItem?.title}
@@ -73,7 +89,7 @@ function GroupSubMenu(props: IProps) {
       >
         <Link
           className={`group/item flex items-center gap-2`}
-          href={subItem?.url || "#"}
+          href={getMenuLink(subItem)}
           data-test-id={testIDFormatter(
             `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`,
           )}

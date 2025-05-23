@@ -35,9 +35,10 @@ interface IProps {
   groups: ISidebarMenu[];
   title?: string;
   screenType: string;
+  visitedLinks?: Record<string, string>
 }
 
-export default function GroupMenu({ groups, screenType }: IProps) {
+export default function GroupMenu({ groups, screenType,visitedLinks }: IProps) {
   // State to track favorites for each submenu item
 
   const isMobile =
@@ -84,7 +85,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
   //   }
 
   // }, [groups ]);
-
+    
   return (
     <SidebarGroup className={`${!open ? "px-0" : ""}`}>
       <Separator className="my-2" />
@@ -140,6 +141,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
                           index={index}
                           subItem={subItem}
                           item={item}
+                          visitedLinks={visitedLinks}
                         />
                       );
                     })}

@@ -86,6 +86,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
       refetchOnMount: true
     }
   );
+  const savingEntityLastPath = api.tab.saveEntityLastPath.useMutation();
 
   useEffect(() => {
     if (isSuccess) {
@@ -96,6 +97,10 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
           is_current: tab.href === newPathname,
         };
       });
+      savingEntityLastPath.mutate({
+        entity: entity!,
+        pathname: newPathname,
+      })
 
       setTablists(newTablist);
     }
