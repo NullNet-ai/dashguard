@@ -82,7 +82,7 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token }: any) => {
             }
             data-test-id={testIDFormatter('rcrd-sum-system-dates')}
           />
-          <Separator data-test-id={testIDFormatter('rcrd-sum-separator')} />
+          <Separator className="max-w-[17.3em] mx-auto" data-test-id={testIDFormatter('rcrd-sum-separator')} />
         </>
       )}
     </div>

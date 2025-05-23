@@ -2,7 +2,7 @@ import { Socket, io } from 'socket.io-client';
 
 const {
   ROOM = 'portal-template',
-  SOCKET_URL = 'pubsub.events.dnamicro.net',
+  SOCKET_URL = 'http://pubsub.events.dnamicro.net',
   SOCKET_USERNAME = 'admin@dnamicro.com',
   SOCKET_PASSWORD = 'ch@ng3m3Pl3@s3!!',
 } = process.env;
@@ -10,18 +10,20 @@ const {
 class SocketClient {
   public socket: Socket<any, any> | null = null;
   public token = '';
+  public reconnectionAttempts = 5;
 
   constructor() {
     if (!SOCKET_URL) {
       console.info('SOCKET_URL is not set');
       return;
     }
+    console.info(`Connecting to socket at: ${SOCKET_URL}`);
+    
     this.socket = io(SOCKET_URL, {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
     });
 
     this.initializeEventListeners();
@@ -30,10 +32,9 @@ class SocketClient {
   private initializeEventListeners() {
     this.socket?.on('connect', this.onConnect.bind(this));
     this.socket?.on('disconnect', this.onDisconnect.bind(this));
-    // this.socket?.on('connect_error', (error) => {
-    //   console.info('Connection error:', error);
-    //   this.socket?.connect();
-    // });
+    this.socket?.on('connect_error', (error) => {
+      console.info('Connection error:', error);
+    });
     this.socket?.on('MESSAGE', this.onMessage.bind(this));
     this.socket?.on('AUTHENTICATED', this.onAuthenticated.bind(this));
   }
@@ -60,12 +61,15 @@ class SocketClient {
 
   public onDisconnect() {
     console.info('Socket disconnected');
-    // setTimeout(() => {
-    //   if (!this.socket?.connected) {
-    //     console.info('Attempting to reconnect...');
-    //     this.socket?.connect();
-    //   }
-    // }, 100);
+    setTimeout(() => {
+      if (!this.socket?.connected && this.reconnectionAttempts > 0) {
+        console.info('Attempting to reconnect...');
+        this.socket?.connect();
+        this.reconnectionAttempts--;
+      } else {
+        console.info('Reconnection attempts exceeded');
+      }
+    }, 100);
   }
 
   private onConnect() {
