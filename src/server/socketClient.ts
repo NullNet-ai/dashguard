@@ -2,9 +2,9 @@ import { Socket, io } from 'socket.io-client';
 
 const {
   ROOM = 'portal-template',
-  SOCKET_URL = 'http://pubsub.events.dnamicro.net',
   SOCKET_USERNAME = 'admin@dnamicro.com',
   SOCKET_PASSWORD = 'ch@ng3m3Pl3@s3!!',
+  NEXT_PUBLIC_SOCKET_URL: SOCKET_URL = 'http://pubsub.events.dnamicro.net',
 } = process.env;
 
 class SocketClient {
@@ -18,7 +18,7 @@ class SocketClient {
       return;
     }
     console.info(`Connecting to socket at: ${SOCKET_URL}`);
-    
+
     this.socket = io(SOCKET_URL, {
       transports: ['websocket'],
       autoConnect: true,
