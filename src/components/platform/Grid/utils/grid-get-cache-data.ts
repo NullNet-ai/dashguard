@@ -29,6 +29,7 @@ interface IGridCacheData {
   application?: string;
   identifier?: string;
   defaultGridTabs?: any[];
+  pathname?: string;
 }
 
 const defaultValues = {
