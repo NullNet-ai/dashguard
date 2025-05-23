@@ -270,7 +270,7 @@ export const gridRouter = createTRPCRouter({
         });
       }
       const { total_count: totalCount = 1, data: items } =
-      await query.execute();
+        await query.execute();
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
@@ -881,7 +881,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
 
-      const filter: ISearchItem[] = filterDetails?.default
+      const filter: ISearchItem[] = (filterDetails?.default || !filterDetails?.is_default)
         ? filterDetails?.advance_filters
         : filterDetails?.default_filter;
 
@@ -1121,7 +1121,8 @@ export const gridRouter = createTRPCRouter({
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
-      if (tabs.length > 1) return tabs;
+      const isAllDefault = tabs.every((tab) => tab.default);
+      if (!isAllDefault) return tabs;
       const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',
