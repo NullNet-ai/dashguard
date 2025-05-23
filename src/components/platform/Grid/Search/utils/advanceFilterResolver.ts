@@ -1,15 +1,15 @@
-import { type ISearchItem } from '../types'
+import { type ISearchItem } from '../types';
 
 export const resolveAdvanceFilter = ({
   currentAdvanceFilter,
   additionalFilter,
 }: {
-  currentAdvanceFilter: ISearchItem[]
-  additionalFilter: ISearchItem[]
+  currentAdvanceFilter: ISearchItem[];
+  additionalFilter: ISearchItem[];
 }) => {
   const hasFilters = currentAdvanceFilter.some(
-    item => item.filters && item.filters.length > 0,
-  )
+    (item) => item.filters && item.filters.length > 0,
+  );
 
   if (hasFilters) {
     const searchItemResolver = currentAdvanceFilter.map((item: any) => {
@@ -28,27 +28,26 @@ export const resolveAdvanceFilter = ({
               : []),
             ...additionalFilter,
           ],
-        }
+        };
       }
-      return item
-    }) as ISearchItem[]
+      return item;
+    }) as ISearchItem[];
     return {
       group_advance_filters: searchItemResolver,
       advance_filters: [],
-    }
+    };
   }
 
-  // If `filters` key does not exists
   const searchItemResolver = [
-    ...additionalFilter,
-    ...(currentAdvanceFilter.length
+    ...currentAdvanceFilter,
+    ...(additionalFilter.length
       ? [{ type: 'operator', operator: 'and', default: false }]
       : []),
-    ...currentAdvanceFilter,
-  ] as ISearchItem[]
+    ...additionalFilter,
+  ] as ISearchItem[];
 
   return {
     group_advance_filters: [],
     advance_filters: searchItemResolver,
-  }
-}
+  };
+};

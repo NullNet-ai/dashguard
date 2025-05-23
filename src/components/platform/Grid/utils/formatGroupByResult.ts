@@ -7,21 +7,23 @@ export const formatGroupByResult = ({
   data,
   entity,
   field,
-  accessorKey
+  accessorKey,
 }: {
   data: any[];
   entity: string;
   field: string;
-  accessorKey?: string;
+  accessorKey: string;
 }) => {
   return data.map((item) => {
     const { [pluralize(entity)]: entity_data } = item;
     const sourceData = entity_data ? entity_data : item[entity];
+    const formatted_value =
+      formatValue(sourceData, accessorKey) || formatValue(sourceData, field);
     return {
       id: ulid(),
       is_group_by: true,
       value: sourceData?.[field],
-      formatted_value: formatValue(sourceData, accessorKey || field),
+      formatted_value,
       field,
       entity,
       ...item,
@@ -29,7 +31,7 @@ export const formatGroupByResult = ({
   });
 };
 
-const formatValue = (entity_data: any, field: string) => {
+export const formatValue = (entity_data: any, field: string) => {
   if (!entity_data) return null;
   switch (field) {
     case 'raw_phone_number': {
