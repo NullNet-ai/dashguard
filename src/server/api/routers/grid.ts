@@ -844,7 +844,7 @@ export const gridRouter = createTRPCRouter({
         .object({
           gridKey: z.string().optional(),
           application: z.string().optional(),
-          mainEntity: z.string().optional(),
+          entity: z.string().optional(),
           identifier: z.string().optional(),
         })
         .optional(),
@@ -859,7 +859,7 @@ export const gridRouter = createTRPCRouter({
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
 
       const application = input?.application || _application;
-      const mainEntity = input?.mainEntity || _mainEntity;
+      const mainEntity = input?.entity || _mainEntity;
       const identifier = input?.identifier || _identifier;
 
       if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
@@ -1091,12 +1091,13 @@ export const gridRouter = createTRPCRouter({
         application: z.string().optional(),
         identifier: z.string().optional(),
         defaultGridTabs: z.array(z.any()).optional(),
+        pathname: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
-      const pathName = headerList.get('x-pathname') || '';
+      const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const searchParams = headerList.get('x-full-search-query-params') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;
