@@ -17,6 +17,8 @@ class SocketClient {
       console.info('SOCKET_URL is not set');
       return;
     }
+    console.info(`Connecting to socket at: ${SOCKET_URL}`);
+    
     this.socket = io(SOCKET_URL, {
       transports: ['websocket'],
       autoConnect: true,
