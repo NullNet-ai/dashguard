@@ -77,7 +77,7 @@ const getSessionTabs = async () => {
       name: 'Grid',
       href: pathname,
       current: true,
-      label: `All ${toCapitalize(pluralize(entity || ''))}s`,
+      label: `All ${toCapitalize(pluralize(entity || ''))}`,
     });
   }
 

@@ -238,9 +238,10 @@ export default function FormSelect({
         testId={formatFormTestID(`${formKey}-select-${fieldConfig.name}`)}
         infiniteScroll={fieldConfig.selectConfig?.infiniteScroll ? {
           enabled: true,
+          dataLength: fieldConfig.selectConfig?.infiniteScroll.dataLength || 100,
           initialLimit: fieldConfig.selectConfig?.infiniteScroll.initialLimit || 50,
           loadMoreStep: fieldConfig.selectConfig?.infiniteScroll.loadMoreStep || 50,
-          hasMore: fieldConfig.selectConfig?.infiniteScroll.hasMore !== false,
+          hasMore: fieldConfig.selectConfig?.infiniteScroll.hasMore ?? true,
           loadingIndicator: fieldConfig.selectConfig?.infiniteScroll.loadingIndicator || (
             <div className="p-2 text-center sm:text-sm md:text-md text-muted-foreground">
               Loading more options...

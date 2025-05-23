@@ -157,8 +157,8 @@ const RecordShellSummary = ({
             key={key}
             data-test-id={testIDFormatter(`rcrd-sum-details-${value}`)}
           >
-            <div className="px-5">
-              <div className="p-1 text-sm">
+            <div className="px-4">
+              <div className="py-1 px-2 text-sm">
                 <div>
                   <span 
                     className="text-slate-400"
@@ -191,7 +191,7 @@ const RecordShellSummary = ({
               </div>
             </div>
             {value === 'categories' && fieldValue && (
-              <Separator data-test-id={testIDFormatter('rcrd-sum-details-separator')} />
+              <Separator className="max-w-[17.3em] mx-auto" data-test-id={testIDFormatter('rcrd-sum-details-separator')} />
             )}
           </div>
         );

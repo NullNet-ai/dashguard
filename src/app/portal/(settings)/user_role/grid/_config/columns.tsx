@@ -59,6 +59,7 @@ const gridColumns = [
     header: 'Updated By',
     accessorKey: 'updated_by',
     sortKey: 'updated_by.full_name',
+    isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -84,6 +85,7 @@ const gridColumns = [
     header: 'Created By',
     accessorKey: 'created_by',
     sortKey: 'created_by.full_name',
+    isSearchable: false,
     search_config: {
       entity: 'created_by',
       field: 'full_name',

@@ -33,7 +33,8 @@ export function ManageFilterProvider({
   tab,
   columns,
   searchConfig,
-  gridKey
+  gridKey,
+  defaultAdvanceFilter = [],
 }: {
   children: React.ReactNode;
   tab: any;
@@ -45,6 +46,7 @@ export function ManageFilterProvider({
     entity?: string;
   };
   gridKey?: string;
+  defaultAdvanceFilter?: ISearchParams[];
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
@@ -89,7 +91,7 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, defaultAdvanceFilter);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -97,13 +99,19 @@ export function ManageFilterProvider({
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
+      entity : searchConfig?.entity,
     };
 
     setCreateFilterLoading(true);
-    await updateGridFilter(modifyFilterDetails, gridKey);
+    const updatedCustomFilter = await updateGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
-    router.refresh();
+
+    if(updatedCustomFilter?.href) {
+      router.push(updatedCustomFilter.href);
+    }else{
+      router.refresh()
+    }
     closeSideDrawer();
   };
 
@@ -126,7 +134,7 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
 
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, defaultAdvanceFilter);
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -134,12 +142,13 @@ export function ManageFilterProvider({
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
+      entity : searchConfig?.entity,
     };
     setCreateFilterLoading(true);
-    await saveGridFilter(modifyFilterDetails, gridKey);
+    const createdCustomFilter = await saveGridFilter(modifyFilterDetails, gridKey);
     setCreateFilterLoading(false);
     await utils.invalidate()
-    router.refresh();
+    router.push(createdCustomFilter?.href);
     closeSideDrawer();
 
   };

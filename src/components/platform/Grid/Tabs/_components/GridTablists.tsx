@@ -96,7 +96,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
 
     if (typeof window !== 'undefined') {
       if (document.readyState === 'complete') {
-        setIsWindowLoaded(true);
+        setTimeout(() => {
+          setIsWindowLoaded(true);
+        }, 1000);
       } else {
         window.addEventListener('load', handleLoad);
       }
@@ -155,14 +157,14 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           // setTablists(items);
           updatecachedItems(items);
           if (activeTab) {
-            const href = items?.find((item) => item.current)?.href;
+            const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
             router.push(href);
           }
         }
       } else {
         updatecachedItems(items);
         if (activeTab) {
-          const href = items?.find((item) => item.current)?.href;
+          const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
           router.push(href);
         }
       }
@@ -175,7 +177,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists, isClient]);
+  }, [tablists, isClient, open, winWidth, isWindowLoaded]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;

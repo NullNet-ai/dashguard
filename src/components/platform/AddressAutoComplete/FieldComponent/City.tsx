@@ -22,6 +22,7 @@ export default function CityName({
     );
   }, [address_values_country]);
 
+
   return (
     <div className="w-full">
       <FormField
@@ -40,7 +41,16 @@ export default function CityName({
                 placeholder: "Select City",
                 label: "City",
                 id: `details.city`,
+                selectConfig: {
+                  infiniteScroll: {
+                    enabled: true,
+                    dataLength: city_list.length,
+                    hasMore: true,
+                    initialLimit: 100,
+                  },
+                }
               }}
+              
               form={form}
               formRenderProps={formRenderProps}
               selectOptions={{
