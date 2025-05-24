@@ -83,7 +83,7 @@ interface TransformedFilters {
 export const transformFilterGroups = async (
   filterDetails: FilterDetails,
   columns: any[],
-  defaultAdvanceFilter: any,
+  grid_entity: string,
 ): Promise<TransformedFilters> => {
   if (!filterDetails?.filter_groups?.length)
     return { resolveDefaultFilter: [], resolveGroupFilter: [] };
@@ -112,8 +112,9 @@ export const transformFilterGroups = async (
             );
             const modifyValue = {
               ...item,
-              entity: column?.search_config?.entity || column?.entity,
+              entity: column?.search_config?.entity || grid_entity || column?.entity,
               field: column?.search_config?.field || item.field,
+              operator : column?.search_config?.operator || item.operator,
               default: item.default || true,
               values:
                 item.field === 'raw_phone_number'
@@ -152,7 +153,7 @@ export const transformFilterGroups = async (
             filtersAcc.push({
               type: 'criteria',
               operator: filter.operator,
-              entity: column?.search_config?.entity || column?.entity,
+              entity: column?.search_config?.entity || grid_entity || column?.entity,
               field: column?.search_config?.field || filter.field,
               values:
                 filter.field === 'raw_phone_number'

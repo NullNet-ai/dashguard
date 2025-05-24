@@ -881,10 +881,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
 
-      const filter: ISearchItem[] = (filterDetails?.default || filterDetails?.is_default)
-      ? filterDetails?.advance_filters
-      : filterDetails?.default_filter;
-
+      const filter = filterDetails?.advance_filters;
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])
@@ -1114,6 +1111,7 @@ export const gridRouter = createTRPCRouter({
       const grid_tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
       )) as ITabGrid[];
+      console.log("🔍 ~ query() callback ~ src/server/api/routers/grid.ts:1116 ~ grid_tabs:", grid_tabs)
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
