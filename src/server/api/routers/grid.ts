@@ -1098,7 +1098,6 @@ export const gridRouter = createTRPCRouter({
       const headerList = headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
-      const searchParams = headerList.get('x-full-search-query-params') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;
       const application = input?.application || _application;
@@ -1117,7 +1116,7 @@ export const gridRouter = createTRPCRouter({
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
-        const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
+        const href = `${pathName}?filter_id=`;
         const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs);
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;

@@ -128,7 +128,7 @@ export default function GridSearchProvider({ children }: IProps) {
     })
     setSearchItems(updateSearchItems);
 
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updateSearchItems,
       });
@@ -144,7 +144,7 @@ export default function GridSearchProvider({ children }: IProps) {
     setQuery('');
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });
@@ -164,7 +164,7 @@ export default function GridSearchProvider({ children }: IProps) {
     const updatedSearchItems = clearAllSearchItems(defaultFilters);
     setSearchItems(updatedSearchItems);
     
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });

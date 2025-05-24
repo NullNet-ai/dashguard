@@ -52,9 +52,10 @@ const gridColumns = [
   },
   {
     header: 'Primary Phone Number',
-    accessorKey: 'raw_phone_number',
+    accessorKey: 'formatted_raw_phone_number',
     sortKey: 'contact_phone_number.raw_phone_number',
     search_config: {
+      field: 'raw_phone_number',
       entity: 'contact_phone_numbers',
     },
   },
@@ -88,7 +89,7 @@ const gridColumns = [
     accessorKey: "updated_date_time",
     data_type: "datetime",
     sortKey: ["updated_date", "updated_time"],
-    isSearchable: false,
+    // isSearchable: false,
     search_config: {
       field: "updated_date_time",
       operator: 'like'
@@ -99,7 +100,7 @@ const gridColumns = [
     accessorKey: 'updated_by',
     data_type: 'string',
     sortKey: 'updated_by.full_name',
-    isSearchable: false,
+    // isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -111,7 +112,7 @@ const gridColumns = [
     accessorKey: 'created_date_time',
     data_type: 'datetime',
     sortKey: ['created_date', 'created_time'],
-    isSearchable: false,
+    // isSearchable: false,
     search: {
       field: 'created_date_time',
       operator: 'like',
@@ -122,7 +123,7 @@ const gridColumns = [
     accessorKey: 'created_by',
     data_type: 'string',
     sortKey: 'created_by.full_name',
-    isSearchable: false,
+    // isSearchable: false,
     search_config: {
       entity: 'created_by',
       field: 'full_name',
