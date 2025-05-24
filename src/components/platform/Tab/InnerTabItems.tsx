@@ -97,10 +97,32 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
           is_current: tab.href === newPathname,
         };
       });
+
+      // save to redis
       savingEntityLastPath.mutate({
         entity: entity!,
         pathname: newPathname,
       })
+
+      // get last path from session storage
+      const lastPath = localStorage.getItem('entity-last-paths');
+      if (lastPath) {
+        const lastPathObj = JSON.parse(lastPath);
+        localStorage.setItem(
+          'entity-last-paths',
+          JSON.stringify({
+          ...lastPathObj,
+            [entity!]: newPathname,
+          }),
+        );
+      }else {
+        localStorage.setItem(
+          'entity-last-paths',
+          JSON.stringify({
+            [entity!]: newPathname,
+          }),
+        );
+      }
 
       setTablists(newTablist);
     }

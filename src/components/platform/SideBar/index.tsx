@@ -62,7 +62,6 @@ export default function AppSideBar(config: ISideBarProps) {
     historyMenuConfig,
   } = config
   const apiAuth = api.auth.logout.useMutation()
-  const { data: getVisitedLinks } = api.tab.getEntityLastPaths.useQuery()
   const navigate = useRouter()
   const currentYear = new Date().getFullYear()
   const { open, openMobile } = useSidebar()
@@ -112,14 +111,13 @@ export default function AppSideBar(config: ISideBarProps) {
                 <Fragment key={index}>
                   {!item?.groups?.length
                     ? (
-                      <Menu item={item} screenType={screen || screenType} visitedLinks={getVisitedLinks || {}} />
+                      <Menu item={item} screenType={screen || screenType} />
                     )
                     : (
                       <GroupMenu
                         title={item?.groupTitle || ''}
                         groups={item.groups}
                         screenType={screen || screenType || ''}
-                        visitedLinks={getVisitedLinks || {}}
                       />
                     )}
                   {item?.separator && <Separator className="my-2" />}

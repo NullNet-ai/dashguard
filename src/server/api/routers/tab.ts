@@ -472,7 +472,42 @@ export const tabRouter = createTRPCRouter({
     
   getEntityLastPaths: privateProcedure.query(async ({ ctx }) => {
     const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
+
+    // get from cookie
+    let cookieVisitedLinks = ctx.storeCookies.get('entity_last_paths')?.value;
+    if(cookieVisitedLinks) {
+      cookieVisitedLinks = JSON.parse(cookieVisitedLinks);
+    }
+
     const response = await ctx.redisClient.getCachedData(key)
-    return response;
+    return {
+      redis : response,
+      cookies : cookieVisitedLinks
+    };
   }),
+
+  getEntityLastPath: privateProcedure
+   .input(
+      z.object({
+        entity: z.string().min(1),
+      })
+    )
+   .query(async ({ input, ctx }) => {
+      const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
+      const response = await ctx.redisClient.getCachedData(key);
+      let cookieVisitedUrl;
+      // get from cookie
+      let cookieVisitedLinks = ctx.storeCookies.get('entity_last_paths')?.value;
+      if(cookieVisitedLinks) {
+        cookieVisitedLinks = JSON.parse(cookieVisitedLinks);
+      }
+      if(cookieVisitedLinks && typeof cookieVisitedLinks === 'object' && input.entity in cookieVisitedLinks) {
+        cookieVisitedUrl = cookieVisitedLinks[input.entity];
+      }
+
+      return {
+        redis : response?.[input.entity],
+        cookies : cookieVisitedUrl
+      };
+   })
 });
