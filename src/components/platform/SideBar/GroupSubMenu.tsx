@@ -14,7 +14,7 @@ import { StarIcon } from "@heroicons/react/24/outline";
 import { testIDFormatter } from "~/utils/formatter";
 import useScreenType from "~/hooks/use-screen-type";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
 interface IProps {
@@ -28,7 +28,7 @@ function GroupSubMenu(props: IProps) {
 
   const { open, openMobile } = useSidebar();
   const sType = useScreenType();
-
+  const router = useRouter();
   const pathname = usePathname();
   const [, , entity, application] = pathname?.split("/");
 
@@ -61,6 +61,29 @@ function GroupSubMenu(props: IProps) {
     return entityName === entity;
   }, [entity, application]);
 
+
+  const getMenuLink = async(item: any) => {
+    // Extract entity from item.url
+    const pathParts = item.url?.split('/');
+    const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
+  
+    // Check if entityName exists
+    if (entityName) {
+      // get from local storage
+      const entity_last_paths = localStorage.getItem('entity-last-paths');
+      const entity_last_paths_obj = entity_last_paths? JSON.parse(entity_last_paths) : {};
+      const lastPath = entity_last_paths_obj[entityName];
+      
+      // If we have a last path for this entity, return it
+      if (lastPath) {
+        return lastPath;
+      }
+    }
+  
+    // Otherwise, return the original item.url
+    return item.url || '#';
+  };
+
   return (
     <SidebarMenuSubItem
       key={subItem?.title}
@@ -73,10 +96,15 @@ function GroupSubMenu(props: IProps) {
       >
         <Link
           className={`group/item flex items-center gap-2`}
-          href={subItem?.url || "#"}
+          href={'#'}
           data-test-id={testIDFormatter(
             `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`,
           )}
+          onClick={async(e) => {
+            e.preventDefault();
+            const redirectedUrl = await getMenuLink(subItem || '');
+            router.push(redirectedUrl);
+          }}
         >
           {subItem?.icon && (
             <SUB_ICON className={`h-5 w-5 mr-2 ml-4  ${isActive && "text-primary"}`} />

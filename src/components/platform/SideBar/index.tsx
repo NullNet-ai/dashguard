@@ -59,7 +59,7 @@ export default function AppSideBar(config: ISideBarProps) {
     screenType,
     tabsDisplayVariant = 'label-only',
     favoritesMenuConfig, 
-    historyMenuConfig,   
+    historyMenuConfig,
   } = config
   const apiAuth = api.auth.logout.useMutation()
   const navigate = useRouter()

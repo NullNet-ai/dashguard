@@ -134,11 +134,17 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    await UpdateReportFilter({
+    const updatedFilterUrl = await UpdateReportFilter({
       filters: updateSearchItems,
       gridKey
     });
-    router.refresh()
+
+    if(updatedFilterUrl) {
+      router.push(updatedFilterUrl);
+      return;
+    }else{
+      router.refresh()
+    }
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery('');

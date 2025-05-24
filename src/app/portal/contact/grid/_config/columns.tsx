@@ -49,6 +49,7 @@ const gridColumns = [
   {
     header: 'Middle Name',
     accessorKey: 'middle_name',
+    data_type: 'string',
   },
   {
     header: 'Primary Phone Number',
@@ -113,7 +114,7 @@ const gridColumns = [
     data_type: 'datetime',
     sortKey: ['created_date', 'created_time'],
     // isSearchable: false,
-    search: {
+    search_config: {
       field: 'created_date_time',
       operator: 'like',
     },

@@ -270,7 +270,7 @@ export const gridRouter = createTRPCRouter({
         });
       }
       const { total_count: totalCount = 1, data: items } =
-      await query.execute();
+        await query.execute();
 
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
@@ -881,10 +881,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
 
-      const filter: ISearchItem[] = filterDetails?.default
-        ? filterDetails?.advance_filters
-        : filterDetails?.default_filter;
-
+      const filter = filterDetails?.advance_filters;
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])
@@ -1113,6 +1110,7 @@ export const gridRouter = createTRPCRouter({
       const grid_tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
       )) as ITabGrid[];
+      console.log("🔍 ~ query() callback ~ src/server/api/routers/grid.ts:1116 ~ grid_tabs:", grid_tabs)
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
@@ -1121,7 +1119,8 @@ export const gridRouter = createTRPCRouter({
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
-      if (tabs.length > 1) return tabs;
+      const isAllDefault = tabs.every((tab) => tab.default);
+      if (!isAllDefault) return tabs;
       const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',

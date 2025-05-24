@@ -444,4 +444,70 @@ export const tabRouter = createTRPCRouter({
       })
       await ctx.redisClient.cacheData(key, update_tabs, 90000000)
     }),
-})
+  saveEntityLastPath: privateProcedure
+    .input(
+      z.object({
+        entity: z.string().min(1),
+        pathname: z.string().min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { entity, pathname } = input;
+      const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
+      
+      // Get existing paths object or create a new one
+      const existingPaths = await ctx.redisClient.getCachedData(key) || {};
+      
+      // Update the path for this entity
+      const updatedPaths = {
+        ...existingPaths,
+        [entity]: pathname
+      };
+      
+      // Save back to Redis
+      await ctx.redisClient.cacheData(key, updatedPaths, 90000000);
+      
+      return { success: true };
+    }),
+    
+  getEntityLastPaths: privateProcedure.query(async ({ ctx }) => {
+    const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
+
+    // get from cookie
+    let cookieVisitedLinks = ctx.storeCookies.get('entity_last_paths')?.value;
+    if(cookieVisitedLinks) {
+      cookieVisitedLinks = JSON.parse(cookieVisitedLinks);
+    }
+
+    const response = await ctx.redisClient.getCachedData(key)
+    return {
+      redis : response,
+      cookies : cookieVisitedLinks
+    };
+  }),
+
+  getEntityLastPath: privateProcedure
+   .input(
+      z.object({
+        entity: z.string().min(1),
+      })
+    )
+   .query(async ({ input, ctx }) => {
+      const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
+      const response = await ctx.redisClient.getCachedData(key);
+      let cookieVisitedUrl;
+      // get from cookie
+      let cookieVisitedLinks = ctx.storeCookies.get('entity_last_paths')?.value;
+      if(cookieVisitedLinks) {
+        cookieVisitedLinks = JSON.parse(cookieVisitedLinks);
+      }
+      if(cookieVisitedLinks && typeof cookieVisitedLinks === 'object' && input.entity in cookieVisitedLinks) {
+        cookieVisitedUrl = cookieVisitedLinks[input.entity];
+      }
+
+      return {
+        redis : response?.[input.entity],
+        cookies : cookieVisitedUrl
+      };
+   })
+});

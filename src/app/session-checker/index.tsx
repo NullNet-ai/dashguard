@@ -43,7 +43,7 @@ export default function SessionChecker() {
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      router.replace('/login');
+      router.push('/login');
       Cookies.remove('token');
       sessionStorage.setItem('sessionExpired', 'true');
     }
