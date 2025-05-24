@@ -169,7 +169,7 @@ export default function Menu({ item, screenType }: IProps) {
               >
                 <ICON className="mr-2 h-5 w-5" />
                 {open || stype === 'sm' || stype === 'md' || stype === 'xs' ? (
-                  <span className="font-semibold">{item.title}aaaa</span>
+                  <span className="font-semibold">{item.title}</span>
                 ) : null}
                 <>
                   {' '}
