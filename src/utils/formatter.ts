@@ -38,7 +38,7 @@ export function formatPhoneNumber({
   if (!phoneNumber.isValid()) {
     return "Invalid phone number";
   }
-  // Format the phone number in international format
-  const formatted_number = phoneNumber.formatInternational();
+  // Format the phone number in national format with country code
+  const formatted_number = `+${phoneNumber.countryCallingCode} ${phoneNumber.formatNational()}`;
   return formatted_number;
 }

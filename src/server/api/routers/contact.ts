@@ -354,8 +354,9 @@ export const contactRouter = createTRPCRouter({
             ...phones,
             created_by: created_by?.full_name ?? '',
             updated_by: updated_by?.full_name ?? '',
-            raw_phone_number: primary_phone_number,
+            raw_phone_number: _primary_phone_number,
             email: primary_email,
+            formatted_raw_phone_number: primary_phone_number,
           },
         ];
       },
