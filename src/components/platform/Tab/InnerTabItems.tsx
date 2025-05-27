@@ -100,19 +100,17 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
   
       // Save to Redis
       const { data : {
-        organization_id,
         updatedPaths
       } } = await savingEntityLastPath.mutateAsync({
         entity: entity!,
         pathname: newPathname,
       });
-  
-      // !LIFEHACKS
-      const lastPath = localStorage.getItem(`${organization_id}-entity-last-paths`);
+
+      const lastPath = localStorage.getItem(`entity-last-paths`);
       if (lastPath) {
         const lastPathObj = JSON.parse(lastPath);
         localStorage.setItem(
-          'entity-last-paths',
+          `entity-last-paths`,
           JSON.stringify({
             ...lastPathObj,
             [entity!]: newPathname,
@@ -120,7 +118,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
         );
       } else {
         localStorage.setItem(
-          `${organization_id}-entity-last-paths`,
+          `entity-last-paths`,
           JSON.stringify(updatedPaths),
         );
       }

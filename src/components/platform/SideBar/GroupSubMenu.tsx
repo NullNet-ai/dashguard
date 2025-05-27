@@ -70,7 +70,7 @@ function GroupSubMenu(props: IProps) {
     // Check if entityName exists
     if (entityName) {
       // get from local storage
-      const entity_last_paths = localStorage.getItem('entity-last-paths');
+      const entity_last_paths = localStorage.getItem(`entity-last-paths`);
       const entity_last_paths_obj = entity_last_paths? JSON.parse(entity_last_paths) : {};
       const lastPath = entity_last_paths_obj[entityName];
       
