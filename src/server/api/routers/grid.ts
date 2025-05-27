@@ -1110,7 +1110,6 @@ export const gridRouter = createTRPCRouter({
       const grid_tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
       )) as ITabGrid[];
-      console.log("🔍 ~ query() callback ~ src/server/api/routers/grid.ts:1116 ~ grid_tabs:", grid_tabs)
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;

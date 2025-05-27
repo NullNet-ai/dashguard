@@ -184,8 +184,8 @@ export const contactRouter = createTRPCRouter({
           pluck_group_object: {
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
-            // organization_contacts: ['id', 'contact_organization_id'],
-            // organizations: ['id', 'name', 'categories'],
+            organization_contacts: ['id', 'contact_organization_id'],
+            organizations: ['id', 'name', 'categories'],
           },
 
           pluck_object: {
@@ -198,6 +198,8 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
+            organizations: ['id', 'name', 'categories'],
+            organization_contacts: ['id', 'contact_organization_id'],
           },
           track_total_records: true,
           advance_filters: input?.advance_filters as IAdvanceFilters[],
@@ -243,6 +245,33 @@ export const contactRouter = createTRPCRouter({
           from: {
             entity: ENTITY,
             field: 'id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organization_contacts',
+            field: 'contact_id',
+          },
+          from: {
+            entity: ENTITY,
+            field: 'id',
+          },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        nested:true,
+        field_relation: {
+          to: {
+            entity: 'organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_contacts',
+            field: 'contact_organization_id',
           },
         },
       });
@@ -348,7 +377,7 @@ export const contactRouter = createTRPCRouter({
           ...acc,
           {
             roles,
-            organization: organizationNames,
+            organization: [...new Set(organizationNames)],
             ...contacts,
             ...emails,
             ...phones,
