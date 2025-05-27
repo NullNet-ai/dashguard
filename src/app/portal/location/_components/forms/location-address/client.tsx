@@ -25,7 +25,7 @@ const FormSchema = z.object({
     country: z.string().optional(),
     state: z.string().optional(),
     city: z.string().optional(),
-  }).optional(),
+  }),
 });
 
 export default function FormLabel({ params, defaultValues }: IFormProps) {
@@ -59,7 +59,7 @@ export default function FormLabel({ params, defaultValues }: IFormProps) {
       }}
       myParent={params.shell_type}
       formProps={params}
-      formLabel="Form Label"
+      formLabel="Form Address"
       handleSubmit={handleSave}
       formKey="LocationAddress"
       formSchema={FormSchema}

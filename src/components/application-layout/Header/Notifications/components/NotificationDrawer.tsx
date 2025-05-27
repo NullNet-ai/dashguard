@@ -13,7 +13,7 @@ import Skeleton from '~/components/platform/Grid/Skeleton';
 import { Fragment } from 'react';
 
 const sortOptions = [
-  { id: 'timestamp', label: 'Date' },
+  { id: 'event_timestamp', label: 'Date' },
   { id: 'priority_level', label: 'Priority' },
   { id: 'source', label: 'source' },
 ];
