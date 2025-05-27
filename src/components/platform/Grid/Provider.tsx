@@ -641,6 +641,7 @@ export default function GridProvider({
     sorting,
     advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
     defaultAdvanceFilter,
+    defaultSorting : _defaultSorting,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,

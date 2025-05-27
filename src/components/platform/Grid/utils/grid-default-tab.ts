@@ -18,17 +18,24 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   };
 };
 
-export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: any[]) => {
+export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: any[], defaultSorting?: any[]) => {
   const modified_entity = tabName[mainEntity] || mainEntity;
 
   const additional_tabs = GRIDTABS[mainEntity] || [];
 
+  const modifyDefaultSorting = defaultSorting?.map((sort) => {
+    return {
+      id: sort.id,
+      desc : sort.desc,
+    };
+  }) || [];
   const tabs = [
     {
       name: `All ${modified_entity}`,
       current: true,
       href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
       default: true,
+      sorts : modifyDefaultSorting,
       default_filter: [
         {
           operator: 'equal',

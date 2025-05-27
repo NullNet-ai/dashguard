@@ -187,6 +187,8 @@ export interface IConfigGrid {
   CustomRenderCardView?: (args: any) => JSX.Element;
   CustomRenderCardParent?: (args: any) => JSX.Element;
   enableCheckboxOnChange?: boolean;
+  enableCreateCustomGridFilter?: boolean,
+  enableManageCustomGridFilter?: boolean,
   metadata?: any
 }
 
@@ -215,6 +217,7 @@ export interface IState {
   showBulkActionConfirmationModal: boolean;
   pagination?: IPagination;
   defaultAdvanceFilter?: ISearchItem[];
+  defaultSorting?: SortingState;
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   hasMore?: boolean;
   gridLevel?: number;

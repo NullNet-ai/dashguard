@@ -15,13 +15,16 @@ import {
 export default function CreateNewFilter() {
   const { actions } = useSideDrawer();
   const { state } = useGrid();
-  const { config, gridKey, defaultAdvanceFilter} = state ?? {};
+  const { config, gridKey, defaultAdvanceFilter, defaultSorting } = state ?? {};
 
   const {
     gridColumns: _columns = [],
     searchConfig,
     entity: defaultEntity,
+    enableCreateCustomGridFilter = true,
   } = config ?? {};
+
+  if(!enableCreateCustomGridFilter) return null;
 
   const gridColumns = _columns.map((column: any, index: number) => ({
     header: column.header,
@@ -51,6 +54,7 @@ export default function CreateNewFilter() {
             searchConfig={{ ...searchConfig, entity: defaultEntity }}
             gridKey={gridKey}
             defaultAdvanceFilter={defaultAdvanceFilter}
+            defaultSorting={defaultSorting}
           >
             <GridManageFilter />
           </ManageFilterProvider>

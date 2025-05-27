@@ -31,7 +31,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
   const { state } = useGrid();
   const { config, gridKey, defaultAdvanceFilter } = state ?? {}; 
 
-  const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity } = config ?? {};
+  const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity, enableManageCustomGridFilter = true } = config ?? {};
 
 
   const gridColumns = _gridColumns?.map((column: any, index : number) => ({
@@ -109,7 +109,8 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
   return (
     <div className="flex flex-col">
       {ACTIONS.filter(action => 
-        !(tab.default && action.id === 'delete_filter')
+        !(tab.default && action.id === 'delete_filter') && 
+        !(action.id === 'manage_filter' && !enableManageCustomGridFilter)
       ).map((action) => (
         <button
           key={action.id}
