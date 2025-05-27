@@ -467,7 +467,14 @@ export const tabRouter = createTRPCRouter({
       // Save back to Redis
       await ctx.redisClient.cacheData(key, updatedPaths, 90000000);
       
-      return { success: true };
+      return { 
+          success: true,
+          message: 'Path saved successfully',
+          data: {
+            updatedPaths : updatedPaths || {},
+            organization_id : ctx.session.account.account_organization_id,
+          }
+       };
     }),
     
   getEntityLastPaths: privateProcedure.query(async ({ ctx }) => {
