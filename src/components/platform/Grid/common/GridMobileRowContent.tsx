@@ -17,8 +17,8 @@ const GridMobileRowContent = ({
   flexRender, 
   parent, 
   config, 
-  showArchiveConfirmationModal, 
-  setShowArchiveConfirmationModal, 
+  showActionConfirmationModal, 
+  setShowActionConfirmationModal, 
   setRowToArchive, 
   visibleCells, 
   codecell, 
@@ -116,10 +116,10 @@ const GridMobileRowContent = ({
                     {!['Archived', 'Delete'].includes(row.original?.status) && (
                       <ArchiveComponent
                         config={config!}
-                        open={showArchiveConfirmationModal}
+                        open={showActionConfirmationModal}
                         record={row}
                         row={row}
-                        setOpen={setShowArchiveConfirmationModal}
+                        setOpen={setShowActionConfirmationModal}
                         setRecord={setRowToArchive}
                         viewMode="card"
                       />

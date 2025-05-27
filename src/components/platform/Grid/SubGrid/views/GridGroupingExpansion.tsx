@@ -66,11 +66,9 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         operator:
           value === null || value === undefined
             ? 'is_null'
-            : Array.isArray(value)
-              ? 'like'
-              : 'equal',
+            : 'equal',
         entity: entity || config.entity,
-        values: Array.isArray(value) ? [JSON.stringify(value)] : [value],
+        values: Array.isArray(value) ? value : [value],
       };
       if (index > 0) {
         return [...acc, { type: 'operator', operator: 'and' }, filterItem];

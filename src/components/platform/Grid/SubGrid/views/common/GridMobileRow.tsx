@@ -18,8 +18,8 @@ export default function GridMobileRow({
   gridLevel?: number
 }) {
   const { state, actions } = useContext(GridContext);
-  const { config, showArchiveConfirmationModal } = state ?? {};
-  const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
+  const { config, showActionConfirmationModal } = state ?? {};
+  const { setRowToArchive, setShowActionConfirmationModal } = actions ?? {};
   const size = useScreenType();
 
   const level = state?.gridLevel || 1;
@@ -73,8 +73,8 @@ export default function GridMobileRow({
                   flexRender={flexRender}
                   parent={parent}
                   config={config}
-                  showArchiveConfirmationModal={showArchiveConfirmationModal}
-                  setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
+                  showActionConfirmationModal={showActionConfirmationModal}
+                  setShowActionConfirmationModal={setShowActionConfirmationModal}
                   setRowToArchive={setRowToArchive}
                   visibleCells={visibleCells}
                   gridLevel={level}
@@ -87,13 +87,13 @@ export default function GridMobileRow({
               <div className="lg:h-24 text-sm lg:text-base  text-center text-foreground">No results.</div>
             </div>
           )}
-      {state?.showArchiveConfirmationModal && (
+      {state?.showActionConfirmationModal && (
         <ArchiveConfirmationModal
           config={state?.config}
-          open={state?.showArchiveConfirmationModal}
+          open={state?.showActionConfirmationModal}
           record={state?.rowToArchive}
           // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-          setOpen={actions?.setShowArchiveConfirmationModal!}
+          setOpen={actions?.setShowActionConfirmationModal!}
         />
       )}
     </div>

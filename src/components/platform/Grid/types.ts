@@ -1,4 +1,3 @@
-
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
@@ -19,6 +18,12 @@ import { type appRouter } from '../../../server/api/root';
 import { type ISearchItem, type ISearchParams } from './Search/types';
 import { IGroupBy } from './Category/type';
 import { ISideDrawerConfig } from '../SideDrawer/types';
+import {
+  ButtonIconProps,
+  ButtonProps,
+  TooltipProps,
+} from '~/components/ui/button';
+import * as Lucide from 'lucide-react';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -33,7 +38,7 @@ export interface DefaultRowActions {
 }
 
 export interface DefaultBulkActions {
-  config: IConfigGrid;
+  entity: string;
   selected_rows: Row<any>[];
 }
 
@@ -56,11 +61,11 @@ export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sort_config?: {
     is_case_sensitive_sorting?: boolean;
   };
-  data_type?: string
+  data_type?: string;
   search_config?: {
     field?: string;
     operator?: string;
-    parse_as?: 'text',
+    parse_as?: 'text';
     entity?: string;
   };
   isSearchable?: boolean;
@@ -187,7 +192,20 @@ export interface IConfigGrid {
   CustomRenderCardView?: (args: any) => JSX.Element;
   CustomRenderCardParent?: (args: any) => JSX.Element;
   enableCheckboxOnChange?: boolean;
-  metadata?: any
+  metadata?: any;
+  customBulkButtonConfig?: ButtonProps &
+    ButtonIconProps &
+    TooltipProps & {
+      label?: string;
+      action_type: 'archive' | 'custom' | null; // additional action_type here;
+      icon?: keyof typeof Lucide
+    };
+  customBulkDialogConfig?: {
+    title?: string;
+    message?: string;
+    button_title?: string;
+  };
+  customBulkAction?: (args: DefaultBulkActions) => void;
 }
 
 interface IRowToArchive extends Row<any> {
@@ -202,8 +220,8 @@ export interface IState {
   selectTableRow: React.MutableRefObject<ColumnDef<any>>;
   createLoading?: boolean;
   totalCountSelected?: number;
-  archiveBulkLoading?: boolean;
-  showArchiveConfirmationModal: boolean;
+  actionBulkLoading?: boolean;
+  showActionConfirmationModal: boolean;
   statusColumn?: string;
   defaultShownColumns?: string[];
   rowToArchive: IRowToArchive;
@@ -243,7 +261,7 @@ export interface IAction {
   handleRemoveSorting: (id: string) => void;
   handleAddSorting: OnChangeFn<SortingState>;
   handleSingleSelect: (row: any) => Promise<void>;
-  setShowArchiveConfirmationModal: (show: boolean) => void;
+  setShowActionConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
   setBulkActionType: (type: string | null) => void;
   setShowBulkActionConfirmationModal: (show: boolean) => void;
@@ -258,6 +276,7 @@ export interface IAction {
     handleMergeBufferInfinite?: () => void;
   };
   handleUpdateGrouping: (updater: Updater<GroupingState>) => Promise<void>;
+  handleCustomBulkAction: () => Promise<void>;
 }
 
 export interface ICreateContext {
@@ -270,7 +289,12 @@ export interface IPagination {
   limit_per_page: number;
 }
 
-export type IParentType = 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer'
+export type IParentType =
+  | 'grid'
+  | 'form'
+  | 'field'
+  | 'grid_expansion'
+  | 'side_drawer';
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
@@ -283,7 +307,7 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[];
   advanceFilter?: ISearchItem[];
   parentExpanded?: IExpandedRow[];
-  parentType?: IParentType
+  parentType?: IParentType;
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
@@ -311,5 +335,5 @@ export interface IGridGroupingExpansionProps {
   parentGroupData?: Record<string, any>[];
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
-  metadata?: any
+  metadata?: any;
 }
