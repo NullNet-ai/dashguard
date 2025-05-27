@@ -18,8 +18,8 @@ import type { IConfigGrid } from '../types';
 export const useActionColumns = (
   config: IConfigGrid,
   rowSelection: RowSelectionState,
-  showArchiveConfirmationModal: boolean,
-  setShowArchiveConfirmationModal: (value: boolean) => void,
+  showActionConfirmationModal: boolean,
+  setShowActionConfirmationModal: (value: boolean) => void,
   setRowToArchive: (value: any) => void,
   handleSingleSelect: (row: any) => void,
   viewMode: 'table' | 'card',
@@ -160,10 +160,10 @@ export const useActionColumns = (
           {!['Archived', 'Delete'].includes(row.original?.status) && (
             <ArchiveComponent
               config={config!}
-              open={showArchiveConfirmationModal}
+              open={showActionConfirmationModal}
               record={row}
               row={row}
-              setOpen={setShowArchiveConfirmationModal}
+              setOpen={setShowActionConfirmationModal}
               setRecord={setRowToArchive}
             />
           )}

@@ -291,11 +291,11 @@ export default function MyTableBody({
           </TableRow>
         )}
       </TableBody>
-      {state?.showArchiveConfirmationModal && (
+      {state?.showActionConfirmationModal && (
         <ArchiveConfirmationModal
-          open={state?.showArchiveConfirmationModal}
+          open={state?.showActionConfirmationModal}
           // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-          setOpen={actions?.setShowArchiveConfirmationModal!}
+          setOpen={actions?.setShowActionConfirmationModal!}
           record={state?.rowToArchive}
           config={state?.config}
         />

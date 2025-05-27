@@ -96,14 +96,14 @@ export default function GridProvider({
 
   /** @STATES */
   const [createLoading, setCreateLoading] = useState<boolean>(false);
-  const [archiveBulkLoading, setArchiveBulkLoading] = useState<boolean>(false);
+  const [actionBulkLoading, setActionBulkLoading] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
   );
 
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
-  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
+  const [showActionConfirmationModal, setShowActionConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
 
@@ -339,9 +339,8 @@ export default function GridProvider({
               processedSortKeys.set(key, true);
               return {
                 ...sort,
-                ...sortFields?.sort_config ?? {},
+                ...(sortFields?.sort_config ?? {}),
                 sort_key: sortKey,
-
               };
             })
           : (() => {
@@ -353,7 +352,7 @@ export default function GridProvider({
               return [
                 {
                   ...sort,
-                  ...sortFields?.sort_config ?? {},
+                  ...(sortFields?.sort_config ?? {}),
                   sort_key: sortFields?.sortKey || sort.id,
                 },
               ];
@@ -411,7 +410,7 @@ export default function GridProvider({
         field: `${entity}.${field}`,
         label,
         desc: typeof sortBy === 'boolean' ? sortBy : false,
-        ...columnConfig?.sort_config ?? {},
+        ...(columnConfig?.sort_config ?? {}),
       };
     });
     if (config?.onFetchRecords) {
@@ -427,8 +426,8 @@ export default function GridProvider({
     useActionColumns(
       config,
       rowSelection,
-      showArchiveConfirmationModal,
-      setShowArchiveConfirmationModal,
+      showActionConfirmationModal,
+      setShowActionConfirmationModal,
       setRowToArchive,
       handleSingleSelect,
       viewMode,
@@ -518,8 +517,8 @@ export default function GridProvider({
         is_from_grid: true,
       });
 
-      if(!config?.enableAutoCreate) {
-        router.push(route)
+      if (!config?.enableAutoCreate) {
+        router.push(route);
         return;
       }
     } catch (error) {
@@ -529,28 +528,48 @@ export default function GridProvider({
   };
   const handleArchiveBulkRecord = async () => {
     try {
-      setArchiveBulkLoading(true);
+      setActionBulkLoading(true);
       const selectedRows = table?.getSelectedRowModel().rows;
       if (!selectedRows?.length) return;
       if (config?.archiveBulkRecordCustomAction) {
         config?.archiveBulkRecordCustomAction({
-          config,
+          entity: config?.entity,
           selected_rows: selectedRows,
         });
         return;
       }
       const record_ids = selectedRows.map((row) => row?.id);
       await BulkArchive({ entity: config?.entity, record_ids });
-      setArchiveBulkLoading(false);
+      setActionBulkLoading(false);
       table?.resetRowSelection();
       setShowBulkActionConfirmationModal(false);
       setBulkActionType(null);
     } catch (error) {
       console.error('An error occurred while creating a record', error);
-      setArchiveBulkLoading(false);
+      setActionBulkLoading(false);
     }
   };
-
+  const handleCustomBulkAction = async () => {
+    try {
+      setActionBulkLoading(true);
+      const selectedRows = table?.getSelectedRowModel().rows;
+      if (!selectedRows?.length) return;
+      if (config?.customBulkAction) {
+        config?.customBulkAction({
+          entity: config?.entity,
+          selected_rows: selectedRows,
+        });
+        return;
+      }
+      setActionBulkLoading(false);
+      table?.resetRowSelection();
+      setShowBulkActionConfirmationModal(false);
+      setBulkActionType(null);
+    } catch (error) {
+      console.error('An error occurred:', error);
+      setActionBulkLoading(false);
+    }
+  };
   const handleMergeBufferInfinite = React.useMemo(
     () => () => {
       if (!bufferData?.length) {
@@ -633,8 +652,8 @@ export default function GridProvider({
     selectTableRow,
     totalCount,
     createLoading,
-    archiveBulkLoading,
-    showArchiveConfirmationModal,
+    actionBulkLoading,
+    showActionConfirmationModal,
     rowToArchive,
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
@@ -664,7 +683,7 @@ export default function GridProvider({
     handleRemoveSorting,
     handleAddSorting,
     handleSingleSelect,
-    setShowArchiveConfirmationModal,
+    setShowActionConfirmationModal,
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
@@ -673,6 +692,7 @@ export default function GridProvider({
       ...infinite_actions,
     },
     handleUpdateGrouping,
+    handleCustomBulkAction,
   } as IAction;
 
   return (
