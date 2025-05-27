@@ -34,6 +34,7 @@ const FormServerFetch = async () => {
           type: 'criteria',
           field: 'categories',
           operator: EOperator.CONTAINS,
+          parse_as: 'text',
           values: ['Department'],
         },
       ],
