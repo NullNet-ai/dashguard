@@ -91,6 +91,7 @@ export const gridFilterRouter = createTRPCRouter({
         ...rest,
         id: filter_id,
         entity: mainEntity,
+        advance_filters : input?.default_filter,
         is_current: false,
         is_default: false,
         href,

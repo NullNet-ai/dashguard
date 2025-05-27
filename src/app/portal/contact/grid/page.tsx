@@ -31,6 +31,7 @@ export default async function Page() {
   const gridCacheData =
     (await getGridCacheData({
       defaultGridTabs: customTabs,
+      defaultSorting,
     })) ?? {};
 
   const { gridParams, gridProps } = gridDataResolver({

@@ -4,7 +4,7 @@ import * as _ICON from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { Fragment, useMemo, useState } from 'react';
 
 import {
@@ -25,15 +25,16 @@ import useScreenType from '~/hooks/use-screen-type';
 import { testIDFormatter } from '~/utils/formatter';
 
 import { type ISidebarMenu } from './type';
+import { getPathLink } from './actions';
 interface IProps {
   item: ISidebarMenu;
   screenType?: string;
-  visitedLinks?: Record<string, string>;
 }
 
-export default function Menu({ item, screenType, visitedLinks }: IProps) {
+export default function Menu({ item, screenType }: IProps) {
   const pathname = usePathname();
   // eslint-disable-next-line no-unsafe-optional-chaining
+  const router = useRouter();
   const [, , entity, application] = pathname?.split('/');
   const [isFavorite, setIsFavorite] = useState(false);
   const { open, setOpenMobile } = useSidebar();
@@ -61,16 +62,24 @@ export default function Menu({ item, screenType, visitedLinks }: IProps) {
     return entityName === entity;
   }, [entity, application]);
 
-  const getMenuLink = (item: any) => {
+  const getMenuLink = async(item: any) => {
     // Extract entity from item.url
     const pathParts = item.url?.split('/');
     const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
-
-    // Check if visitedLinks exists and has an entry for this entity
-    if (visitedLinks && entityName && visitedLinks[entityName]) {
-      return visitedLinks[entityName];
+  
+    // Check if entityName exists
+    if (entityName) {
+      // Call the query to get the last visited path for this entity
+      const entity_last_paths = localStorage.getItem('entity-last-paths');
+      const entity_last_paths_obj = entity_last_paths? JSON.parse(entity_last_paths) : {};
+      const lastPath = entity_last_paths_obj[entityName];
+      
+      // If we have a last path for this entity, return it
+      if (lastPath) {
+        return lastPath;
+      }
     }
-
+  
     // Otherwise, return the original item.url
     return item.url || '#';
   };
@@ -90,9 +99,15 @@ export default function Menu({ item, screenType, visitedLinks }: IProps) {
                   <ICON className="mr-2 h-5 w-5" />
                   <span>{item.title}</span>
                   <Link
-                    href={getMenuLink(item || '')}
+                    href={'#'}
                     className="flex items-center gap-2"
                     data-test-id={testIDFormatter(`sidebar-menu-${item.title}`)}
+                    onClick={async(e) => {
+                      e.preventDefault();
+                      const redirectedUrl = await getMenuLink(item || '');
+                      router.push(redirectedUrl);
+                      setOpenMobile(false);
+                    }}
                   >
                     <span className="font-semibold">{item.title}</span>
                   </Link>
@@ -113,11 +128,14 @@ export default function Menu({ item, screenType, visitedLinks }: IProps) {
                           )}
                         >
                           <Link
-                            href={getMenuLink(subItem || '')}
+                            href={'#'}
                             data-test-id={testIDFormatter(
                               `sidebar-menu-${item.title ?? 'default'}-${subItem.title}-link`,
                             )}
-                            onClick={() => {
+                            onClick={async(e) => {
+                              e.preventDefault();
+                              const redirectedUrl = await getMenuLink(item || '');
+                              router.push(redirectedUrl);
                               setOpenMobile(false);
                             }}
                           >
@@ -132,10 +150,14 @@ export default function Menu({ item, screenType, visitedLinks }: IProps) {
             </>
           ) : (
             <Link
-              href={getMenuLink(item || '')}
+              // href={getMenuLink(item || '')}
+              href={'#'}
               className={`group/item flex items-center gap-2 ${isActive && 'bg-muted text-primary'} ${open ? '' : 'justify-center bg-transparent'} `}
               data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
-              onClick={() => {
+              onClick={async(e) => {
+                e.preventDefault();
+                const redirectedUrl = await getMenuLink(item || '');
+                router.push(redirectedUrl);
                 setOpenMobile(false);
               }}
             >

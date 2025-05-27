@@ -1,4 +1,3 @@
-
 'use client';
 
 import { type IGridGroupingExpansionProps } from '~/components/platform/Grid/types';
@@ -49,6 +48,15 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     sorting: gridState?.sorting,
     pagination: pagination,
   };
+  const advanceFilterItems = gridState?.advanceFilter?.map((item) => {
+    if (item?.type === 'criteria') {
+      return {
+        ...item,
+        entity: item?.entity || config?.entity,
+      };
+    }
+    return item;
+  });
   const constructGridFilter = (data: Record<string, any>[]) => {
     const gridFilter = data?.reduce((acc, item, index) => {
       const { field, value, entity } = item ?? {};
@@ -58,11 +66,9 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         operator:
           value === null || value === undefined
             ? 'is_null'
-            : Array.isArray(value)
-              ? 'like'
-              : 'equal',
+            : 'equal',
         entity: entity || config.entity,
-        values: Array.isArray(value) ? [JSON.stringify(value)] : [value],
+        values: Array.isArray(value) ? value : [value],
       };
       if (index > 0) {
         return [...acc, { type: 'operator', operator: 'and' }, filterItem];
@@ -77,7 +83,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const gridFilters = resolveAdvanceFilter({
     currentAdvanceFilter: groupAdvanceFilters?.length
       ? groupAdvanceFilters
-      : (gridState?.advanceFilter ?? []),
+      : (advanceFilterItems ?? []),
     additionalFilter: constructGridFilter([
       ...(parentGroupData ?? []),
       rowData,
@@ -153,8 +159,8 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   if (isLoading && !items?.length) {
     return (
       <tr>
-        <td   colSpan={state?.table.getVisibleLeafColumns().length}>
-         <div className="flex h-full items-center justify-center">
+        <td colSpan={state?.table.getVisibleLeafColumns().length}>
+          <div className="flex h-full items-center justify-center">
             <Loader
               className="bg-primary text-primary"
               label="Fetching data..."
@@ -203,18 +209,14 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       {/* <MyTableBody 
           parentMeta={metadata?.parentRow}
         /> */}
-      <TableRow
-      >
-        <td
-          colSpan={state?.table.getVisibleLeafColumns().length}
-        >
-        {!grouping?.length && (
+      <TableRow>
+        <td colSpan={state?.table.getVisibleLeafColumns().length}>
+          {!grouping?.length && (
             <CardFooter style={_width}>
               <Pagination />
             </CardFooter>
           )}
         </td>
-       
       </TableRow>
       {/* </div> */}
     </GridProvider>

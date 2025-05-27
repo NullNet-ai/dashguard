@@ -14,8 +14,8 @@ import GridCardViewContent from './GridCardViewContent';
 
 export default function GridCardView({parentType} : any) {
   const { state, actions } = useContext(GridContext);
-  const { config, showArchiveConfirmationModal } = state ?? {};
-  const { setRowToArchive, setShowArchiveConfirmationModal } = actions ?? {};
+  const { config, showActionConfirmationModal } = state ?? {};
+  const { setRowToArchive, setShowActionConfirmationModal } = actions ?? {};
   const size = useScreenType();
   const { defaultShownColumns, statusColumn, CustomRenderCardView  } = state?.config ?? {}
 
@@ -84,8 +84,8 @@ export default function GridCardView({parentType} : any) {
                 flexRender={flexRender}
                 parent={parentType}
                 config={config}
-                showArchiveConfirmationModal={showArchiveConfirmationModal}
-                setShowArchiveConfirmationModal={setShowArchiveConfirmationModal}
+                showActionConfirmationModal={showActionConfirmationModal}
+                setShowActionConfirmationModal={setShowActionConfirmationModal}
                 setRowToArchive={setRowToArchive}
                 visibleCells={visibleCells}
                 selectedDefaultCells={selectedDefaultCells}
@@ -97,13 +97,13 @@ export default function GridCardView({parentType} : any) {
           <div className="h-24 text-center text-foreground">No results.</div>
         </div>
       )}
-      {state?.showArchiveConfirmationModal && (
+      {state?.showActionConfirmationModal && (
         <ArchiveConfirmationModal
           config={state?.config}
-          open={state?.showArchiveConfirmationModal}
+          open={state?.showActionConfirmationModal}
           record={state?.rowToArchive}
           // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-          setOpen={actions?.setShowArchiveConfirmationModal!}
+          setOpen={actions?.setShowActionConfirmationModal!}
         />
       )}
     </div>

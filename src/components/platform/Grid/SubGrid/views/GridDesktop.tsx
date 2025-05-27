@@ -93,7 +93,7 @@ function GridDesktop({
           `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`,
         )}
         style={{
-          width: isExpandedTable ? expandedWidth : 'calc(100vw - 37rem)',
+          width: isExpandedTable ? expandedWidth : 'calc(100vw - 34rem)',
         }}
       >
         {!hideSearch && <Search parentType={parentType} />}

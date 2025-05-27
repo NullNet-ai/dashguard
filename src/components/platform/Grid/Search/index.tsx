@@ -79,13 +79,13 @@ export default function Main({
           <SearchDialog />
         </div>
       ) : (
-        <div className="ml-0 mt-0 flex w-full max-w-[100%] md:max-w-[40%]  flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">
+        <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0">
           <div className="relative flex flex-1 flex-row gap-x-2">
             <div className="my-2 h-[40px] w-full md:my-0">
               <Search />
             </div>
           </div>
-          <div className="hidden min-h-[40px] lg:block">
+          <div className="hidden my-2 lg:block">
             <SearchList />
           </div>
           <div className="min-h-[40px] lg:hidden">

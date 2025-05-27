@@ -145,7 +145,7 @@ export const notificationsRouter = createTRPCRouter({
                 'id',
                 'title',
                 'description',
-                'timestamp',
+                'event_timestamp',
                 'link',
                 'categories',
                 'icon',
@@ -317,7 +317,7 @@ export const notificationsRouter = createTRPCRouter({
   //         id: ulid(),
   //         title: 'New message',
   //         description: 'You have a new message from a user',
-  //         timestamp: new Date().toString(),
+  //         event_timestamp: new Date().toString(),
   //         link: '#',
   //         categories: ['Test'],
   //         actions: [

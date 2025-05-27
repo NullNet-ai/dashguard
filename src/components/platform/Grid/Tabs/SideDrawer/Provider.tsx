@@ -35,6 +35,7 @@ export function ManageFilterProvider({
   searchConfig,
   gridKey,
   defaultAdvanceFilter = [],
+  defaultSorting = [],
 }: {
   children: React.ReactNode;
   tab: any;
@@ -47,12 +48,20 @@ export function ManageFilterProvider({
   };
   gridKey?: string;
   defaultAdvanceFilter?: ISearchParams[];
+  defaultSorting?: any[];
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
   const utils = api.useUtils()
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>({
+    sorts: defaultSorting?.map(( item) => {
+      return {
+        id: item.value || item.id,
+        value: item.value || item.id,
+        desc: item.desc,
+      };
+    }),
     ...tab,
     columns,
   });
@@ -91,7 +100,7 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, defaultAdvanceFilter);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, (searchConfig?.entity ?? ''));
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -134,7 +143,7 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
 
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, defaultAdvanceFilter);
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, (searchConfig?.entity ?? ''));
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,

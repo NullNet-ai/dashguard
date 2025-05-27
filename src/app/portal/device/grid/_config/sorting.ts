@@ -1,8 +1,8 @@
 const defaultSorting = [
   {
-    id: "created_date",
+    id: "code",
     desc: true,
-    sort_key: "created_date",
+    sort_key: "code",
   },
 ];
 

@@ -30,6 +30,7 @@ interface IGridCacheData {
   identifier?: string;
   defaultGridTabs?: any[];
   pathname?: string;
+  defaultSorting?: SortingState;
 }
 
 const defaultValues = {

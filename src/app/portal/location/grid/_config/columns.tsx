@@ -34,6 +34,9 @@ const gridColumns = [
       operator: 'like',
       parse_as: 'text'
     },
+    sort_config: {
+      is_case_sensitive_sorting: true
+    },
   },
   {
     header: 'Location Name',

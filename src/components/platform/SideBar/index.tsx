@@ -62,12 +62,18 @@ export default function AppSideBar(config: ISideBarProps) {
     historyMenuConfig,
   } = config
   const apiAuth = api.auth.logout.useMutation()
-  const { data: getVisitedLinks } = api.tab.getEntityLastPaths.useQuery()
   const navigate = useRouter()
   const currentYear = new Date().getFullYear()
   const { open, openMobile } = useSidebar()
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.endsWith('entity-last-paths')) {
+          localStorage.removeItem(key);
+          i--;
+        }
+      }
       navigate.push('/login')
     })
   };
@@ -112,14 +118,13 @@ export default function AppSideBar(config: ISideBarProps) {
                 <Fragment key={index}>
                   {!item?.groups?.length
                     ? (
-                      <Menu item={item} screenType={screen || screenType} visitedLinks={getVisitedLinks || {}} />
+                      <Menu item={item} screenType={screen || screenType} />
                     )
                     : (
                       <GroupMenu
                         title={item?.groupTitle || ''}
                         groups={item.groups}
                         screenType={screen || screenType || ''}
-                        visitedLinks={getVisitedLinks || {}}
                       />
                     )}
                   {item?.separator && <Separator className="my-2" />}

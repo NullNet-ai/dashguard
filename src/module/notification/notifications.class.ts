@@ -81,7 +81,7 @@ export default class Notifications {
           'id',
           'title',
           'description',
-          'timestamp',
+          'event_timestamp',
           'link',
           'categories',
           'actions',

@@ -89,22 +89,47 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
   const savingEntityLastPath = api.tab.saveEntityLastPath.useMutation();
 
   useEffect(() => {
-    if (isSuccess) {
-      const newTablist = data?.tabs?.map((tab: any) => {
-        return {
+    if (!isSuccess) return;
+  
+    const runEffect = async () => {
+      const newTablist = data?.tabs?.map((tab: any) => ({
         ...tab,
-          current: tab.href === newPathname,
-          is_current: tab.href === newPathname,
-        };
-      });
-      savingEntityLastPath.mutate({
+        current: tab.href === newPathname,
+        is_current: tab.href === newPathname,
+      }));
+  
+      // Save to Redis
+      const { data : {
+        organization_id,
+        updatedPaths
+      } } = await savingEntityLastPath.mutateAsync({
         entity: entity!,
         pathname: newPathname,
-      })
-
+      });
+  
+      // !LIFEHACKS
+      const lastPath = localStorage.getItem(`${organization_id}-entity-last-paths`);
+      if (lastPath) {
+        const lastPathObj = JSON.parse(lastPath);
+        localStorage.setItem(
+          'entity-last-paths',
+          JSON.stringify({
+            ...lastPathObj,
+            [entity!]: newPathname,
+          }),
+        );
+      } else {
+        localStorage.setItem(
+          `${organization_id}-entity-last-paths`,
+          JSON.stringify(updatedPaths),
+        );
+      }
+  
       setTablists(newTablist);
-    }
-  }, [isSuccess, data, newPathname])
+    };
+  
+    runEffect();
+  }, [isSuccess, data, newPathname]);
 
   const conWidth = useMemo(
     () => ({

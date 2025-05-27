@@ -44,7 +44,8 @@ export const handleCustomAction = ({
   const { application_config, action_type } =
     config?.rowClickCustomAction as IRowClickCustomConfig;
 
-  const actionHandlers: Record<string, any> = {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  const actionHandlers: Record<string, Function> = {
     'open-sidedrawer': () =>
       handleSideDrawer({ application_config, row, actions }),
     // Add more action types here

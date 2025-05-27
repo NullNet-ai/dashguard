@@ -881,10 +881,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
 
-      const filter: ISearchItem[] = (filterDetails?.default || !filterDetails?.is_default)
-        ? filterDetails?.advance_filters
-        : filterDetails?.default_filter;
-
+      const filter = filterDetails?.advance_filters;
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])
@@ -910,7 +907,7 @@ export const gridRouter = createTRPCRouter({
         ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
         : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
 
-      const advanceFilter = filter?.map((item) => {
+      const advanceFilter = filter?.map((item : any) => {
         return {
           entity: item.entity,
           operator: item.operator,
@@ -1092,13 +1089,13 @@ export const gridRouter = createTRPCRouter({
         identifier: z.string().optional(),
         defaultGridTabs: z.array(z.any()).optional(),
         pathname: z.string().optional(),
+        defaultSorting: z.array(z.any()).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
-      const searchParams = headerList.get('x-full-search-query-params') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;
       const application = input?.application || _application;
@@ -1117,8 +1114,8 @@ export const gridRouter = createTRPCRouter({
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
-        const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
-        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs);
+        const href = `${pathName}?filter_id=`;
+        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs, input.defaultSorting);
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
