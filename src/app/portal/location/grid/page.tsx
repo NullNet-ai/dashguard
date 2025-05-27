@@ -21,8 +21,10 @@ export default async function Page() {
     'updated_by',
   ];
 
-  const gridCacheData = (await getGridCacheData()) ?? {};
-
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
+  
   const { gridParams, gridProps } = gridDataResolver({
     entity: 'location',
     pluck: _pluck,

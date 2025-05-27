@@ -30,8 +30,10 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     'updated_by',
   ];
 
-  const gridCacheData = (await getGridCacheData()) ?? {};
-
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
+  
     const { gridParams, gridProps } = gridDataResolver({
       entity: 'organization',
       pluck: _pluck,

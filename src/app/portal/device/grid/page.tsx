@@ -43,8 +43,7 @@ export default async function Page() {
       defaultSorting,
     },
   });
-  console.log("🔍 ~ Page ~ src/app/portal/device/grid/page.tsx:36 ~ gridProps:", gridProps)
-  console.log("🔍 ~ Page ~ src/app/portal/device/grid/page.tsx:45 ~ gridParams:", gridParams)
+  
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });
