@@ -36,8 +36,9 @@ export default async function UserRoleGridPage({
     'updated_by',
   ];
 
-  const gridCacheData = (await getGridCacheData()) ?? {};
-
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
     const { gridParams, gridProps } = gridDataResolver({
       entity: main_entity!,
       pluck: _pluck,

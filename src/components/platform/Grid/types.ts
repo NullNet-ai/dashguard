@@ -206,6 +206,8 @@ export interface IConfigGrid {
     button_title?: string;
   };
   customBulkAction?: (args: DefaultBulkActions) => void;
+  enableCreateCustomGridFilter?: boolean,
+  enableManageCustomGridFilter?: boolean,
 }
 
 interface IRowToArchive extends Row<any> {
@@ -233,6 +235,7 @@ export interface IState {
   showBulkActionConfirmationModal: boolean;
   pagination?: IPagination;
   defaultAdvanceFilter?: ISearchItem[];
+  defaultSorting?: SortingState;
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   hasMore?: boolean;
   gridLevel?: number;

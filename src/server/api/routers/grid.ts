@@ -907,7 +907,7 @@ export const gridRouter = createTRPCRouter({
         ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
         : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
 
-      const advanceFilter = filter?.map((item: any) => {
+      const advanceFilter = filter?.map((item : any) => {
         return {
           entity: item.entity,
           operator: item.operator,
@@ -1089,6 +1089,7 @@ export const gridRouter = createTRPCRouter({
         identifier: z.string().optional(),
         defaultGridTabs: z.array(z.any()).optional(),
         pathname: z.string().optional(),
+        defaultSorting: z.array(z.any()).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -1114,7 +1115,7 @@ export const gridRouter = createTRPCRouter({
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
         const href = `${pathName}?filter_id=`;
-        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs);
+        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs, input.defaultSorting);
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }

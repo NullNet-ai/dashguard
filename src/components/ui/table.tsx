@@ -1,10 +1,12 @@
 'use client';
 import * as React from 'react';
 
-import { cn } from '~/lib/utils';
 import { useRouter } from 'next/navigation';
-import { api } from '~/trpc/react';
 import { useToast } from '~/context/ToastProvider';
+import { cn } from '~/lib/utils';
+import { api } from '~/trpc/react';
+import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
+import { useSideDrawer } from '../platform/SideDrawer';
 
 type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
@@ -139,6 +141,7 @@ const TableCell = React.forwardRef<
   }
 >(({ className, row, config, column_id, nowrap = false, ...props }, ref) => {
   const router = useRouter();
+  const { actions } = useSideDrawer();
   const _navigate = api.wizard.getCurrentStep.useMutation();
   const toast = useToast();
   return (
@@ -151,7 +154,11 @@ const TableCell = React.forwardRef<
           !row?.original?.is_group_by
         ) {
           if (config?.rowClickCustomAction) {
-            config.rowClickCustomAction({ row, config });
+            if (typeof config?.rowClickCustomAction === 'function') {
+              config?.rowClickCustomAction({ row, config });
+              return;
+            }
+            handleCustomAction({ config, row, actions });
             return;
           }
           if (!row.original?.id) return;
@@ -183,7 +190,9 @@ const TableCell = React.forwardRef<
               });
             return;
           }
-          router.push(`/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`);
+          router.push(
+            `/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`,
+          );
         }
       }}
       className={cn(
@@ -276,13 +285,13 @@ const TableCaption = React.forwardRef<
 TableCaption.displayName = 'TableCaption';
 
 export {
+  SummaryRow,
   Table,
-  TableHeader,
   TableBody,
+  TableCaption,
+  TableCell,
   TableFooter,
   TableHead,
+  TableHeader,
   TableRow,
-  TableCell,
-  TableCaption,
-  SummaryRow,
 };

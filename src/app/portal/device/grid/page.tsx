@@ -15,7 +15,9 @@ import CustomCreateButton from '../_components/custom_create_button';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const gridCacheData = (await getGridCacheData()) ?? {};
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity] = pathname.split('/');
@@ -41,6 +43,7 @@ export default async function Page() {
       defaultSorting,
     },
   });
+  
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });

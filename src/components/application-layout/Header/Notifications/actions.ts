@@ -15,7 +15,7 @@ export const getNotifications = async ({
   isLoadMore = false,
   filters = [],
   order = {
-    sortBy: 'timestamp',
+    sortBy: 'event_timestamp',
     sortOrder: 'desc',
     limit: 50,
     starts_at: 0,

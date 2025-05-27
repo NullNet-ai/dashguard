@@ -61,9 +61,9 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
 
 
 
-  // Function to format the timestamp
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
+  // Function to format the event_timestamp
+  const formatTimestamp = (event_timestamp: string) => {
+    const date = new Date(event_timestamp)
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
     const diffSec = Math.floor(diffMs / 1000)
@@ -264,7 +264,7 @@ const NotificationItem = ({ type }: { type: TNotificationType }) => {
             <div className='flex items-center gap-2 text-[10px] text-gray-500 ms-6 mt-2'>
               <span className='!text-gray-500'>
                 {' '}
-                {formatTimestamp(notification.timestamp)}
+                {formatTimestamp(notification.event_timestamp)}
               </span>
               <span className='!text-gray-500'>
                 {`| ${notification.source} |`}

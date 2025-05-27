@@ -25,6 +25,7 @@ import type {
   TNotificationType,
 } from './types'
 import { buildNotificationFilters } from './utils/buildNotificationFilters'
+import { useRouter } from 'next/navigation'
 
 const NotificationContext = createContext<INotificationContext | undefined>(
   undefined,
@@ -33,6 +34,9 @@ const NotificationContext = createContext<INotificationContext | undefined>(
 const PAGE_SIZE = 10
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
+
+  const router = useRouter();
+
   const [notifications, setNotifications] = useState<INotificationSchema[]>([]);
   const [totalNotificationCount, setTotalNotificationCount] = useState(0);
   const [totalUnreadNotificationCount, setTotalUnreadNotificationCount] =
@@ -42,7 +46,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [type, setType] = useState<TNotificationType>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-  const [selectedSort, setSelectedSort] = useState<string>('timestamp');
+  const [selectedSort, setSelectedSort] = useState<string>('event_timestamp');
   const [selectedOrder, setSelectedOrder] = useState<'asc' | 'desc'>('desc');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState<number>(1);
@@ -98,7 +102,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             starts_at: isLoadMore ? (page + 2) * PAGE_SIZE : 0,
           },
         })
-
         if (isLoadMore) {
           setBuffer((prev) => [...prev, ...data]);
           setPage((prev) => prev + 1);
@@ -320,10 +323,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     setType(type);
     setPage(1); // Reset page
     setNotifications([]);
-    setSelectedSort('timestamp');
+    setSelectedSort('event_timestamp');
     setSelectedOrder('desc');
     await fetchNotifications({ type: type as TNotificationType, order : {
-      sortBy: 'timestamp',
+      sortBy: 'event_timestamp',
       sortOrder: 'desc',
     } });
 

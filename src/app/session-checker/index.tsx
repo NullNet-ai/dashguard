@@ -43,6 +43,13 @@ export default function SessionChecker() {
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.endsWith('entity-last-paths')) {
+          localStorage.removeItem(key);
+          i--;
+        }
+      }
       router.push('/login');
       Cookies.remove('token');
       sessionStorage.setItem('sessionExpired', 'true');

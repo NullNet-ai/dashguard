@@ -67,6 +67,13 @@ export default function AppSideBar(config: ISideBarProps) {
   const { open, openMobile } = useSidebar()
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.endsWith('entity-last-paths')) {
+          localStorage.removeItem(key);
+          i--;
+        }
+      }
       navigate.push('/login')
     })
   };
