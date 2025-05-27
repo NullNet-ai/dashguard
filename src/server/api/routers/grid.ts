@@ -907,7 +907,7 @@ export const gridRouter = createTRPCRouter({
         ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
         : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
 
-      const advanceFilter = filter?.map((item) => {
+      const advanceFilter = filter?.map((item: any) => {
         return {
           entity: item.entity,
           operator: item.operator,
