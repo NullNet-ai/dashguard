@@ -37,7 +37,7 @@ export const transformSearchData = (
   const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
-        (field) => field.accessorKey === key,
+        (field) => field.accessorKey === key || field.field === key,
       );
       const foundValue = findTextInValue(
         value,

@@ -367,7 +367,7 @@ export default function GridProvider({
       [],
     );
 
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: resolvedSorting,
       });
