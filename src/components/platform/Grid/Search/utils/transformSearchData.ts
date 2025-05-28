@@ -52,7 +52,11 @@ export const transformSearchData = (
           type: 'criteria',
           ...searchableField,
           label: searchableField?.label || formatAndCapitalize(key),
-          display_value: foundValue,
+          display_value:
+            searchableField.accessorKey !== searchableField.field &&
+            obj[searchableField.accessorKey!]
+              ? obj[searchableField.accessorKey!]
+              : foundValue,
         });
       }
     }
