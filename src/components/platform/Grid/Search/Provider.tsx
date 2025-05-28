@@ -127,6 +127,10 @@ export default function GridSearchProvider({ children }: IProps) {
       rest
     })
     setSearchItems(updateSearchItems);
+    const updatedFilterUrl = await UpdateReportFilter({
+      filters: updateSearchItems,
+      gridKey
+    });
 
     if (onFetchRecords) {
       onFetchRecords?.({
@@ -134,11 +138,6 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    const updatedFilterUrl = await UpdateReportFilter({
-      filters: updateSearchItems,
-      gridKey
-    });
-
     if(updatedFilterUrl) {
       router.push(updatedFilterUrl);
       return;
@@ -150,16 +149,16 @@ export default function GridSearchProvider({ children }: IProps) {
     setQuery('');
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
+    await UpdateReportFilter({
+      filters: updatedSearchItems,
+      gridKey
+    });
     if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });
       return;
     }
-    await UpdateReportFilter({
-      filters: updatedSearchItems,
-      gridKey
-    });
     router.refresh()
   };
 
@@ -169,18 +168,17 @@ export default function GridSearchProvider({ children }: IProps) {
     const defaultFilters = gridState?.defaultAdvanceFilter || [];
     const updatedSearchItems = clearAllSearchItems(defaultFilters);
     setSearchItems(updatedSearchItems);
-    
+
+    await UpdateReportFilter({
+      filters: updatedSearchItems,
+      gridKey
+    });
     if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });
       return;
     }
-
-    await UpdateReportFilter({
-      filters: updatedSearchItems,
-      gridKey
-    });
 
     router.refresh()
   };
