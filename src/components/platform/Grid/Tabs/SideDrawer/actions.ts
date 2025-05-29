@@ -124,7 +124,7 @@ export const transformFilterGroups = async ({
               operator: column?.search_config?.operator || item.operator,
               default: item.default || true,
               values:
-                item.field === 'raw_phone_number'
+                item.field.includes('phone_number')
                   ? item.values.map((obj: any) => obj?.replace(/[^\d]/g, ''))
                   : Array.isArray(item.values) &&
                       item.values.length > 0 &&
@@ -174,7 +174,7 @@ export const transformFilterGroups = async ({
                 column?.search_config?.entity || grid_entity || column?.entity,
               field: column?.search_config?.field || filter.field,
               values:
-                filter.field === 'raw_phone_number'
+                filter.field?.includes('phone_number')
                   ? (filter.values ?? []).map((obj: any) =>
                       obj?.replace(/[^\d]/g, ''),
                     )

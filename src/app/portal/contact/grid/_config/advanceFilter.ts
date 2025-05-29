@@ -10,22 +10,7 @@ export const defaultAdvanceFilter = [
     field: "status",
     id: ulid(),
     label: "Status",
-    values: ["Active"],
+    values: ["Active", "Draft"],
     default: true,
-  },
-  {
-    operator: "or",
-    type: "operator",
-    default: true,
-  },
-  {
-    entity: "contacts",
-    operator: "equal",
-    type: "criteria",
-    field: "status",
-    id: ulid(),
-    label: "Status",
-    values: ["Draft"],
-    default: true,
-  },
+  }
 ] as ISearchItem[];
