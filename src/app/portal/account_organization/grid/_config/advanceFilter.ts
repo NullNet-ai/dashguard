@@ -11,22 +11,7 @@ const defaultAdvanceFilter = [
     field: 'status',
     id: ulid(),
     label: 'Status',
-    values: ['Active'],
-    default: true,
-  },
-  {
-    operator: 'or',
-    type: 'operator',
-    default: true,
-  },
-  {
-    entity: 'account_organization',
-    operator: 'equal',
-    type: 'criteria',
-    field: 'status',
-    id: ulid(),
-    label: 'Status',
-    values: ['Draft'],
+    values: ["Active", "Draft"],
     default: true,
   }
 ] as ISearchItem[]
