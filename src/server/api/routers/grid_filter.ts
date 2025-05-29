@@ -55,6 +55,7 @@ const gridFilterSchema = z.object({
   id: z.string().optional(),
   filter_groups: z.array(filterGroupSchema),
   group_advance_filters: z.array(filterCriteriaSchema).or(z.array(z.any())),
+  gridKey: z.string().optional(),
 });
 
 export const gridFilterRouter = createTRPCRouter({
@@ -183,7 +184,7 @@ export const gridFilterRouter = createTRPCRouter({
 
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
-      const [, , mainEntity, application] = pathName.split('/');
+      const [, , mainEntity, application, identifier] = pathName.split('/');
 
       ctx.dnaClient
         .update(input.id!, {
@@ -229,7 +230,10 @@ export const gridFilterRouter = createTRPCRouter({
         _mainEntity: mainEntity || '',
         _application: application || '',
         _id: ctx.session.account.account_organization_id,
+        _gridKey: input?.gridKey || '',
+        _identifier: identifier || '',
       });
+
       const tabs = (await ctx.redisClient.getCachedData(
         _tabMenuId,
       )) as ITabGrid[];
