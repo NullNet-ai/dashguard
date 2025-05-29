@@ -123,11 +123,22 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
         );
       }
   
-      setTablists(newTablist);
+      // merge newTablist with tablists
+      const mergedTablist = [...newTablist, ...tablists];
+      // Using reduce
+      const uniqueTabs = mergedTablist.filter(
+        (tab, index, self) =>
+          index ===
+          self.findIndex(
+            t => t.name === tab.name && t.href === tab.href
+          )
+      );
+      
+      setTablists(uniqueTabs);
     };
   
     runEffect();
-  }, [isSuccess, data, newPathname]);
+  }, [isSuccess, data, newPathname, tablists.length]);
 
   const conWidth = useMemo(
     () => ({
