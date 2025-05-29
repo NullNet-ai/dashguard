@@ -208,6 +208,7 @@ export interface IConfigGrid {
   customBulkAction?: (args: DefaultBulkActions) => void;
   enableCreateCustomGridFilter?: boolean,
   enableManageCustomGridFilter?: boolean,
+  customTabDefaults?: Record<string, any>;
 }
 
 interface IRowToArchive extends Row<any> {

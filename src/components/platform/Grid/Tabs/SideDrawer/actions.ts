@@ -49,7 +49,7 @@ export const duplicateFilterTab = async (
   const url = await api.gridFilter.duplicateGridFilter({
     tab,
     gridKey,
-    entity
+    entity,
   });
   const headerList = headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
@@ -80,16 +80,22 @@ interface TransformedFilters {
   resolveGroupFilter: any[];
 }
 
-export const transformFilterGroups = async (
-  filterDetails: FilterDetails,
-  columns: any[],
-  grid_entity: string,
-): Promise<TransformedFilters> => {
+export const transformFilterGroups = async ({
+  filterDetails,
+  columns,
+  grid_entity,
+  customDefaultFilter = [],
+}: {
+  filterDetails: FilterDetails;
+  columns: any[];
+  grid_entity: string;
+  customDefaultFilter?: any[];
+}): Promise<TransformedFilters> => {
   if (!filterDetails?.filter_groups?.length)
     return { resolveDefaultFilter: [], resolveGroupFilter: [] };
 
   if (filterDetails.filter_groups.length === 1) {
-    const resolveDefaultFilter = filterDetails.filter_groups.reduce(
+    let resolveDefaultFilter = filterDetails.filter_groups.reduce(
       (acc: any, curr) => {
         if (acc.length) {
           curr.filters = [
@@ -112,9 +118,10 @@ export const transformFilterGroups = async (
             );
             const modifyValue = {
               ...item,
-              entity: column?.search_config?.entity || grid_entity || column?.entity,
+              entity:
+                column?.search_config?.entity || grid_entity || column?.entity,
               field: column?.search_config?.field || item.field,
-              operator : column?.search_config?.operator || item.operator,
+              operator: column?.search_config?.operator || item.operator,
               default: item.default || true,
               values:
                 item.field === 'raw_phone_number'
@@ -134,11 +141,21 @@ export const transformFilterGroups = async (
       },
       [],
     );
+    if (customDefaultFilter?.length) {
+      resolveDefaultFilter = [
+        ...resolveDefaultFilter,
+        { type: 'operator', operator: 'and', default: true },
+        ...customDefaultFilter,
+      ];
+    }
 
-    return { resolveDefaultFilter : resolveDefaultFilter, resolveGroupFilter: [] };
+    return {
+      resolveDefaultFilter: resolveDefaultFilter,
+      resolveGroupFilter: [],
+    };
   }
 
-  const resolveGroupFilter = filterDetails.filter_groups.reduce(
+  let resolveGroupFilter = filterDetails.filter_groups.reduce(
     (acc: any, group, index) => {
       if (index > 0) {
         acc.push({ type: 'operator', operator: group.groupOperator });
@@ -153,7 +170,8 @@ export const transformFilterGroups = async (
             filtersAcc.push({
               type: 'criteria',
               operator: filter.operator,
-              entity: column?.search_config?.entity || grid_entity || column?.entity,
+              entity:
+                column?.search_config?.entity || grid_entity || column?.entity,
               field: column?.search_config?.field || filter.field,
               values:
                 filter.field === 'raw_phone_number'
@@ -184,6 +202,21 @@ export const transformFilterGroups = async (
     [],
   );
 
+  if (customDefaultFilter?.length) {
+    resolveGroupFilter = resolveGroupFilter.map((item: any) => {
+      if (item?.type === 'criteria') {
+        return {
+          ...item,
+          filters: [
+            ...item.filters,
+            { type: 'operator', operator: 'and', default: true },
+            ...customDefaultFilter,
+          ],
+        };
+      }
+      return item;
+    });
+  }
 
   return { resolveDefaultFilter: [], resolveGroupFilter };
 };
