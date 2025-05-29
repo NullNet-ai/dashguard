@@ -20,14 +20,17 @@ import {
   type ISearchParams,
   type IState,
 } from './types';
-import { clearAllSearchItems, removeSearchItems } from './utils/removeSearchItems';
+import {
+  clearAllSearchItems,
+  removeSearchItems,
+} from './utils/removeSearchItems';
 import { resolveSearchItem } from './utils/resolveSearchItem';
 import { useRouter } from 'next/navigation';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
 
 interface IProps extends PropsWithChildren {
-  test?: any
+  test?: any;
 }
 
 export default function GridSearchProvider({ children }: IProps) {
@@ -49,7 +52,7 @@ export default function GridSearchProvider({ children }: IProps) {
   const [_query, setQuery] = useState<string>('');
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     gridState?.advanceFilter || [],
-  ); 
+  );
   const [open, setOpen] = useState(false);
 
   const advanceFilterItems = useMemo(() => {
@@ -60,27 +63,27 @@ export default function GridSearchProvider({ children }: IProps) {
         type,
         field,
         values,
-        ...parse_as ? { parse_as }: {},
+        ...(parse_as ? { parse_as } : {}),
       }),
     ) as ISearchItem[];
-    const searchResolver =  searchableFields.reduce(
+    const searchResolver = searchableFields.reduce(
       // eslint-disable-next-line no-unused-vars
       (acc: any, { accessorKey: _, ...item }: any, index) => {
+        const resolveValue =
+          item?.field === 'raw_phone_number'
+            ? _query?.replace(/[^\d]/g, '')
+            : _query;
+
+        if (!resolveValue) return acc;
         return [
           {
             type: 'criteria',
             operator: 'equal',
-            values:
-              item?.field === 'raw_phone_number'
-                ? [_query?.replace(/[^\d]/g, '')]
-                : [_query],
-            // if entity is not provided, the default entity will be the entity of the grid
+            values: [resolveValue],
             entity: defaultEntity,
             ...item,
           },
-          ...(index !== 0
-            ? [{ type: 'operator', operator: 'or' }]
-            : []),
+          ...(index !== 0 ? [{ type: 'operator', operator: 'or' }] : []),
           ...acc,
         ];
       },
@@ -121,15 +124,15 @@ export default function GridSearchProvider({ children }: IProps) {
       ...rest,
     })) as ISearchItem[];
     setQuery('');
- 
+
     const updateSearchItems = resolveSearchItem({
       advanceFilter,
-      rest
-    })
+      rest,
+    });
     setSearchItems(updateSearchItems);
     const updatedFilterUrl = await UpdateReportFilter({
       filters: updateSearchItems,
-      gridKey
+      gridKey,
     });
 
     if (onFetchRecords) {
@@ -138,11 +141,11 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    if(updatedFilterUrl) {
+    if (updatedFilterUrl) {
       router.push(updatedFilterUrl);
       return;
-    }else{
-      router.refresh()
+    } else {
+      router.refresh();
     }
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
@@ -151,7 +154,7 @@ export default function GridSearchProvider({ children }: IProps) {
     setSearchItems(updatedSearchItems);
     await UpdateReportFilter({
       filters: updatedSearchItems,
-      gridKey
+      gridKey,
     });
     if (onFetchRecords) {
       onFetchRecords?.({
@@ -159,19 +162,19 @@ export default function GridSearchProvider({ children }: IProps) {
       });
       return;
     }
-    router.refresh()
+    router.refresh();
   };
 
   const handleClearSearchItems = async () => {
     setQuery('');
-    
+
     const defaultFilters = gridState?.defaultAdvanceFilter || [];
     const updatedSearchItems = clearAllSearchItems(defaultFilters);
     setSearchItems(updatedSearchItems);
 
     await UpdateReportFilter({
       filters: updatedSearchItems,
-      gridKey
+      gridKey,
     });
     if (onFetchRecords) {
       onFetchRecords?.({
@@ -180,7 +183,7 @@ export default function GridSearchProvider({ children }: IProps) {
       return;
     }
 
-    router.refresh()
+    router.refresh();
   };
 
   // @use effects
