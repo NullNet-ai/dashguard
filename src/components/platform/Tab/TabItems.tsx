@@ -199,6 +199,19 @@ const TabItems = ({ items = [] }: TabItemsProps) => {
     });
 
     setTablists(newTablist);
+
+    const pathParts = selectedTab?.href?.split('/');
+    const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
+
+    // get from local storage
+    const entity_last_paths = localStorage.getItem(
+      `last_visited_url:${entityName}`,
+    );
+    // If we have a last path for this entity, return it
+    if (entity_last_paths) {
+      router.push(entity_last_paths);
+      return entity_last_paths;
+    }
     // setTimeout(() => {
     router.push(selectedTab.href);
     // }, 500);

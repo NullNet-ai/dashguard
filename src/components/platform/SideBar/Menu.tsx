@@ -62,24 +62,22 @@ export default function Menu({ item, screenType }: IProps) {
     return entityName === entity;
   }, [entity, application]);
 
-  const getMenuLink = async(item: any) => {
+  const getMenuLink = async (item: any) => {
     // Extract entity from item.url
     const pathParts = item.url?.split('/');
     const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
-  
+
     // Check if entityName exists
-    if (entityName) {
-      // Call the query to get the last visited path for this entity
-      const entity_last_paths = localStorage.getItem('entity-last-paths');
-      const entity_last_paths_obj = entity_last_paths? JSON.parse(entity_last_paths) : {};
-      const lastPath = entity_last_paths_obj[entityName];
-      
-      // If we have a last path for this entity, return it
-      if (lastPath) {
-        return lastPath;
-      }
+    // get from local storage
+    const entity_last_paths = localStorage.getItem(
+      `last_visited_url:${entityName}`,
+    );
+
+    // If we have a last path for this entity, return it
+    if (entity_last_paths) {
+      return entity_last_paths;
     }
-  
+
     // Otherwise, return the original item.url
     return item.url || '#';
   };
@@ -102,7 +100,7 @@ export default function Menu({ item, screenType }: IProps) {
                     href={'#'}
                     className="flex items-center gap-2"
                     data-test-id={testIDFormatter(`sidebar-menu-${item.title}`)}
-                    onClick={async(e) => {
+                    onClick={async (e) => {
                       e.preventDefault();
                       const redirectedUrl = await getMenuLink(item || '');
                       router.push(redirectedUrl);
@@ -132,9 +130,11 @@ export default function Menu({ item, screenType }: IProps) {
                             data-test-id={testIDFormatter(
                               `sidebar-menu-${item.title ?? 'default'}-${subItem.title}-link`,
                             )}
-                            onClick={async(e) => {
+                            onClick={async (e) => {
                               e.preventDefault();
-                              const redirectedUrl = await getMenuLink(item || '');
+                              const redirectedUrl = await getMenuLink(
+                                item || '',
+                              );
                               router.push(redirectedUrl);
                               setOpenMobile(false);
                             }}
@@ -154,7 +154,7 @@ export default function Menu({ item, screenType }: IProps) {
               href={'#'}
               className={`group/item flex items-center gap-2 ${isActive && 'bg-muted text-primary'} ${open ? '' : 'justify-center bg-transparent'} `}
               data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
-              onClick={async(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
                 const redirectedUrl = await getMenuLink(item || '');
                 router.push(redirectedUrl);
