@@ -170,8 +170,13 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
       }
     };
     if (isClient) {
-      handleResize();
+      
+      setTimeout(() => {
+        handleResize();
+      }, 500);
     }
+
+
     window.addEventListener('resize', handleResize);
 
     return () => {
