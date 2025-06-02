@@ -31,7 +31,14 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
   const { state } = useGrid();
   const { config, gridKey, defaultAdvanceFilter } = state ?? {}; 
 
-  const { columns = [], gridColumns : _gridColumns = [], searchConfig, entity : defaultEntity, enableManageCustomGridFilter = true } = config ?? {};
+  const { 
+    columns = [],
+    gridColumns : _gridColumns = [],
+    searchConfig,
+    entity : defaultEntity,
+    enableManageCustomGridFilter = true,
+    customTabDefaults = {}
+  } = config ?? {};
 
 
   const gridColumns = _gridColumns?.map((column: any, index : number) => ({
@@ -60,7 +67,7 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
               ...searchConfig,
               entity: defaultEntity
             }}
-            defaultAdvanceFilter={defaultAdvanceFilter}
+            customTabDefaults={customTabDefaults}
             gridKey={gridKey}
           >
             <GridManageFilter />

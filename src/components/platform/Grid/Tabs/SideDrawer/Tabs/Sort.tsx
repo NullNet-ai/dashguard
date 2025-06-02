@@ -43,11 +43,11 @@ export default function SortContent() {
   const form = useForm<{ sorts: SortItem[] }>({
     resolver: zodResolver(ZodSchema),
     defaultValues: {
-      sorts: state?.filterDetails?.sorts?.map((sort: any) => ({
+      sorts: state?.filterDetails?.sorts?.length ? state?.filterDetails?.sorts?.map((sort: any) => ({
         id: sort.id,
         value: sort.value || sort.id,
         desc: sort.desc,
-      })) ?? [
+      })) : [
         {
           id: '',
           value: '',

@@ -22,6 +22,7 @@ export default function CreateNewFilter() {
     searchConfig,
     entity: defaultEntity,
     enableCreateCustomGridFilter = true,
+    customTabDefaults = {}
   } = config ?? {};
 
   if(!enableCreateCustomGridFilter) return null;
@@ -53,8 +54,7 @@ export default function CreateNewFilter() {
             columns={gridColumns as Record<string, any>[]}
             searchConfig={{ ...searchConfig, entity: defaultEntity }}
             gridKey={gridKey}
-            defaultAdvanceFilter={defaultAdvanceFilter}
-            defaultSorting={defaultSorting}
+            customTabDefaults={customTabDefaults}
           >
             <GridManageFilter />
           </ManageFilterProvider>

@@ -34,8 +34,7 @@ export function ManageFilterProvider({
   columns,
   searchConfig,
   gridKey,
-  defaultAdvanceFilter = [],
-  defaultSorting = [],
+  customTabDefaults = {},
 }: {
   children: React.ReactNode;
   tab: any;
@@ -47,21 +46,20 @@ export function ManageFilterProvider({
     entity?: string;
   };
   gridKey?: string;
-  defaultAdvanceFilter?: ISearchParams[];
-  defaultSorting?: any[];
+  customTabDefaults?: Record<string, any>;
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
   const utils = api.useUtils()
   const { closeSideDrawer } = actions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>({
-    sorts: defaultSorting?.map(( item) => {
+    sorts: customTabDefaults?.defaultSorting?.map((item : any) => {
       return {
         id: item.value || item.id,
         value: item.value || item.id,
         desc: item.desc,
       };
-    }),
+    }) || [],
     ...tab,
     columns,
   });
@@ -100,7 +98,12 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, (searchConfig?.entity ?? ''));
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups({
+      filterDetails,
+      columns,
+      grid_entity: (searchConfig?.entity?? ''),
+      customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
+    });
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -143,7 +146,12 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
 
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups(filterDetails, columns, (searchConfig?.entity ?? ''));
+    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups({
+      filterDetails,
+      columns,
+      grid_entity: (searchConfig?.entity ?? ''), 
+      customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
+    });
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,

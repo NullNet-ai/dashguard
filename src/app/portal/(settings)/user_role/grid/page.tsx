@@ -6,18 +6,10 @@ import { api } from '~/trpc/server';
 
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
-import { resolveGridParams } from '~/utils/grid-params-resolver';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
-export default async function UserRoleGridPage({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-}) {
+export default async function UserRoleGridPage() {
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, ,] = pathname.split('/');
@@ -36,17 +28,18 @@ export default async function UserRoleGridPage({
     'updated_by',
   ];
 
-  const gridCacheData = (await getGridCacheData({
-    defaultSorting: defaultSorting,
-  })) ?? {};
-    const { gridParams, gridProps } = gridDataResolver({
-      entity: main_entity!,
-      pluck: _pluck,
-      gridCacheData,
-      defaults: {
-        defaultSorting,
-      },
-    });
+  const gridCacheData =
+    (await getGridCacheData({
+      defaultSorting: defaultSorting,
+    })) ?? {};
+  const { gridParams, gridProps } = gridDataResolver({
+    entity: main_entity!,
+    pluck: _pluck,
+    gridCacheData,
+    defaults: {
+      defaultSorting,
+    },
+  });
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });

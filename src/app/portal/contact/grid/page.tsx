@@ -78,6 +78,10 @@ export default async function Page() {
         },
         enableRowExpansion: true,
         rowExpansionBuilder: <AccountGridExpansion />,
+        customTabDefaults: {
+          defaultAdvanceFilter,
+          defaultSorting,
+        }
       }}
     />
   );

@@ -76,61 +76,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
 
-
-  // Define the query with proper options
-  const { data, isSuccess } = api.tab.getSubTabs.useQuery(
-    {
-      current_context: `/${portal}/${entity}`,
-    },
-    {
-      refetchOnMount: true
-    }
-  );
-  const savingEntityLastPath = api.tab.saveEntityLastPath.useMutation();
-
-  useEffect(() => {
-    if (!isSuccess) return;
-  
-    const runEffect = async () => {
-      const newTablist = data?.tabs?.map((tab: any) => ({
-        ...tab,
-        current: tab.href === newPathname,
-        is_current: tab.href === newPathname,
-      }));
-  
-      // Save to Redis
-      const { data : {
-        organization_id,
-        updatedPaths
-      } } = await savingEntityLastPath.mutateAsync({
-        entity: entity!,
-        pathname: newPathname,
-      });
-  
-      // !LIFEHACKS
-      const lastPath = localStorage.getItem(`${organization_id}-entity-last-paths`);
-      if (lastPath) {
-        const lastPathObj = JSON.parse(lastPath);
-        localStorage.setItem(
-          'entity-last-paths',
-          JSON.stringify({
-            ...lastPathObj,
-            [entity!]: newPathname,
-          }),
-        );
-      } else {
-        localStorage.setItem(
-          `${organization_id}-entity-last-paths`,
-          JSON.stringify(updatedPaths),
-        );
-      }
-  
-      setTablists(newTablist);
-    };
-  
-    runEffect();
-  }, [isSuccess, data, newPathname]);
-
   const conWidth = useMemo(
     () => ({
       width: `calc(100vw - ${open ? '320px' : '140px'} ${width && isOpen && isPinned ? `- ${width} ` : ''})`,
@@ -140,6 +85,14 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
 
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
+
+  useEffect(() => {
+    if (!application) return;
+    // Build full URL with search params
+    const fullUrl = `${newPathname}${fullSearchQueryParams.toString() ? `?${fullSearchQueryParams.toString()}` : ''}`;
+    // Save the full URL to localStorage
+    localStorage.setItem('last_visited_url:' + entity, fullUrl);
+  }, [newPathname, fullSearchQueryParams, tablists]);
 
   useEffect(() => {
     const handleLoad = () => setIsWindowLoaded(true);
@@ -234,7 +187,6 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
       (tab) => tab.href === newPathname + queryParams,
     );
     if (!pathExist && application !== 'grid') {
-      
       const newTablist = [...tablists];
       const newTab = {
         name: code || 'New Tab',
