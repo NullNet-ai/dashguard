@@ -1,3 +1,4 @@
+'use server'
 import { SortingState } from '@tanstack/react-table';
 import { IGroupBy } from '~/components/platform/Grid/Category/type';
 import {

@@ -17,7 +17,7 @@ const ACTIONS = [
   {
     label: 'Duplicate Filter',
     id: 'duplicate_filter',
-    icon : CopyPlus
+    icon: CopyPlus,
   },
   {
     label: 'Delete Filter',
@@ -25,27 +25,41 @@ const ACTIONS = [
     icon: Trash,
   },
 ];
-export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: any, tabs : any[] }) {
+export default function ManageFilter({
+  tab,
+  tabs,
+  entity,
+  actions: tabActions,
+}: {
+  tab: any;
+  entity: any;
+  tabs: any[];
+  actions?: {
+    handleDeleteTabs: (tab: any) => void;
+  };
+}) {
   const router = useRouter();
   const { actions } = useSideDrawer();
-  const { state } = useGrid();
-  const { config, gridKey, defaultAdvanceFilter } = state ?? {}; 
+  const { state, actions: gridActions } = useGrid();
+  const { config, gridKey } = state ?? {};
 
-  const { 
+  const {
     columns = [],
-    gridColumns : _gridColumns = [],
+    gridColumns: _gridColumns = [],
     searchConfig,
-    entity : defaultEntity,
+    entity: defaultEntity,
     enableManageCustomGridFilter = true,
-    customTabDefaults = {}
+    customTabDefaults = {},
+    onFetchRecords,
   } = config ?? {};
 
-
-  const gridColumns = _gridColumns?.map((column: any, index : number) => ({
+  const gridColumns = _gridColumns?.map((column: any, index: number) => ({
     header: column.header,
     accessorKey: column.accessorKey,
     label: column.header,
-    isShow: columns.some((col: any) => col.accessorKey === column.accessorKey) || false,
+    isShow:
+      columns.some((col: any) => col.accessorKey === column.accessorKey) ||
+      false,
     order: column.order || index,
     data_type: column.data_type,
     entity: column.entity || defaultEntity,
@@ -60,15 +74,18 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider 
+          <ManageFilterProvider
             tab={tab}
             columns={gridColumns}
             searchConfig={{
               ...searchConfig,
-              entity: defaultEntity
+              entity: defaultEntity,
             }}
             customTabDefaults={customTabDefaults}
             gridKey={gridKey}
+            onFetchRecords={onFetchRecords}
+            gridActions={gridActions}
+            tabActions={tabActions}
           >
             <GridManageFilter />
           </ManageFilterProvider>
@@ -78,14 +95,16 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
     });
   };
 
-  const handleDeleteFilter = async() => {
-
+  const handleDeleteFilter = async () => {
     try {
+      if (onFetchRecords) {
+        tabActions?.handleDeleteTabs(tab);
+        return;
+      }
       const url = await removeGridFilter(tab.id, gridKey);
 
       //@temp fix
-      router.refresh()
-      
+      router.refresh();
 
       if (url && typeof url === 'string') {
         router.replace(url);
@@ -98,12 +117,12 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
     }
   };
 
-  const handleDuplicateFilter = async() => {
+  const handleDuplicateFilter = async () => {
     try {
       const url = await duplicateFilterTab(tab, gridKey, defaultEntity);
       if (url && typeof url === 'string') {
         router.push(url);
-        router.refresh(); 
+        router.refresh();
       } else {
         router.refresh();
       }
@@ -115,23 +134,24 @@ export default function ManageFilter({ tab, tabs, entity }: { tab: any, entity: 
 
   return (
     <div className="flex flex-col">
-      {ACTIONS.filter(action => 
-        !(tab.default && action.id === 'delete_filter') && 
-        !(action.id === 'manage_filter' && !enableManageCustomGridFilter)
+      {ACTIONS.filter(
+        (action) =>
+          !(tab.default && action.id === 'delete_filter') &&
+          !(action.id === 'manage_filter' && !enableManageCustomGridFilter),
       ).map((action) => (
         <button
           key={action.id}
-            onClick={
-              action.id === 'manage_filter'
-                ? handleManageFilter
-                : action.id === 'delete_filter'
+          onClick={
+            action.id === 'manage_filter'
+              ? handleManageFilter
+              : action.id === 'delete_filter'
                 ? handleDeleteFilter
                 : handleDuplicateFilter
-            }
-            className='text-sm flex items-center gap-2 gap-x-3 p-2 py-1.5 hover:bg-gray-100 rounded-md transition duration-100'
-          >
-            <action.icon className='size-4 text-gray-500'/>
-            {action.label}
+          }
+          className="flex items-center gap-2 gap-x-3 rounded-md p-2 py-1.5 text-sm transition duration-100 hover:bg-gray-100"
+        >
+          <action.icon className="size-4 text-gray-500" />
+          {action.label}
         </button>
       ))}
     </div>
