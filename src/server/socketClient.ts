@@ -3,10 +3,19 @@ import { Socket, io } from 'socket.io-client';
 
 const {
   ROOM = 'portal-template',
-  SOCKET_URL = 'http://pubsub.events.dnamicro.net',
-  SOCKET_USERNAME = 'admin@dnamicro.com',
-  SOCKET_PASSWORD = 'ch@ng3m3Pl3@s3!!',
+  SOCKET_URL =  'http://pubsub.events.dnamicro.net',
+  SOCKET_USERNAME = '',
+  SOCKET_PASSWORD = '',
+  NEXT_PUBLIC_ROOM = '',
+  NEXT_PUBLIC_SOCKET_URL = '',
+  NEXT_PUBLIC_SOCKET_USERNAME = '',
+  NEXT_PUBLIC_SOCKET_PASSWORD = '',
 } = process.env;
+
+const _SOCKET_URL = NEXT_PUBLIC_SOCKET_URL || SOCKET_URL;
+const _SOCKET_USERNAME = NEXT_PUBLIC_SOCKET_USERNAME || SOCKET_USERNAME;
+const _SOCKET_PASSWORD = NEXT_PUBLIC_SOCKET_PASSWORD || SOCKET_PASSWORD;
+const _ROOM = NEXT_PUBLIC_ROOM || ROOM;
 
 class SocketClient {
   public socket: Socket<any, any> | null = null;
@@ -14,13 +23,13 @@ class SocketClient {
   public reconnectionAttempts = 5;
 
   constructor() {
-    if (!SOCKET_URL) {
-      console.info('SOCKET_URL is not set');
+    if (!_SOCKET_URL) {
+      console.debug('SOCKET_URL is not set');
       return;
     }
-    console.info(`Connecting to socket at: ${SOCKET_URL}`);
+    console.debug(`Connecting to socket at: ${_SOCKET_URL}`);
 
-    this.socket = io(SOCKET_URL, {
+    this.socket = io(_SOCKET_URL, {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
@@ -51,24 +60,24 @@ class SocketClient {
       {
         type: 'JOIN_ROOM',
         token: this.token,
-        payload: { room: ROOM },
+        payload: { room: _ROOM },
       },
       (...args: any) => {
-        console.info(`@JOIN_ROOM: ${ROOM}`);
+        console.info(`@JOIN_ROOM: ${_ROOM}`);
         console.info('@Callback', args);
       },
     );
   }
 
   public onDisconnect() {
-    console.info('Socket disconnected');
+    console.debug('Socket disconnected');
     setTimeout(() => {
       if (!this.socket?.connected && this.reconnectionAttempts > 0) {
-        console.info('Attempting to reconnect...');
+        console.debug('Attempting to reconnect...');
         this.socket?.connect();
         this.reconnectionAttempts--;
       } else {
-        console.info('Reconnection attempts exceeded');
+        console.debug('Reconnection attempts exceeded');
       }
     }, 100);
   }
@@ -79,7 +88,7 @@ class SocketClient {
   }
 
   private authenticate() {
-    this.socket?.emit('AUTHENTICATE', SOCKET_USERNAME, SOCKET_PASSWORD);
+    this.socket?.emit('AUTHENTICATE', _SOCKET_USERNAME, _SOCKET_PASSWORD);
   }
 
   private onMessage(args: Record<string, any>) {
@@ -88,7 +97,7 @@ class SocketClient {
 
   public publish({ payload, type }: { type: string; payload?: unknown }) {
     if (!this.socket?.connected) {
-      console.info('Socket not connected');
+      console.debug('Socket not connected');
       this.socket?.connect();
       return;
     }
@@ -98,7 +107,7 @@ class SocketClient {
       {
         type,
         token: this.token,
-        room_name: ROOM,
+        room_name: _ROOM,
         payload,
       },
       (...args: any) => {
