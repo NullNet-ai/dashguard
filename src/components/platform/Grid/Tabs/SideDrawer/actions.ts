@@ -80,6 +80,45 @@ interface TransformedFilters {
   resolveGroupFilter: any[];
 }
 
+// Helper function to get entity from column or fallback
+const getEntityFromColumn = (column: any, grid_entity: string) => {
+  return column?.search_config?.entity || grid_entity || column?.entity;
+};
+
+// Helper function to transform values based on field type
+const transformValues = (field: string, values: any[]) => {
+  // Handle phone numbers
+  if (field.includes('phone_number')) {
+    return values.map((obj: any) => obj?.replace(/[^\d]/g, ''));
+  }
+  
+  // Handle object values with 'value' property
+  if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'object') {
+    return values.map((obj: any) => obj.value);
+  }
+  
+  // Handle regular array values
+  if (Array.isArray(values)) {
+    return values;
+  }
+  
+  // Handle single value
+  return [values];
+};
+
+// Helper function to transform a criteria filter
+const transformCriteriaFilter = (filter: Filter, column: any, grid_entity: string) => {
+  return {
+    ...filter,
+    entity: getEntityFromColumn(column, grid_entity),
+    field: column?.search_config?.field || filter.field,
+    operator: column?.search_config?.operator || filter.operator,
+    parse_as: column?.search_config?.parse_as,
+    default: filter.default || true,
+    values: transformValues(filter.field!, filter.values || [])
+  };
+};
+
 export const transformFilterGroups = async ({
   filterDetails,
   columns,
@@ -91,56 +130,47 @@ export const transformFilterGroups = async ({
   grid_entity: string;
   customDefaultFilter?: any[];
 }): Promise<TransformedFilters> => {
-  if (!filterDetails?.filter_groups?.length)
+  // Handle empty filter groups
+  if (!filterDetails?.filter_groups?.length) {
     return { resolveDefaultFilter: [], resolveGroupFilter: [] };
+  }
 
+  // Handle single filter group
   if (filterDetails.filter_groups.length === 1) {
     let resolveDefaultFilter = filterDetails.filter_groups.reduce(
       (acc: any, curr) => {
+        // Add group operator if accumulator already has items
         if (acc.length) {
           curr.filters = [
             { operator: curr.groupOperator, type: 'operator', default: true },
             ...curr.filters,
           ];
         }
+        
+        // Skip empty filters
+        const firstFilter = curr.filters[0];
         if (
           !acc.length &&
-          !curr.filters[0]?.field &&
-          !curr.filters[0]?.values?.length &&
+          !firstFilter?.field &&
+          !firstFilter?.values?.length &&
           curr.filters.length
         ) {
           return acc;
         }
+        
+        // Transform each filter
         return [...acc, ...curr.filters].map((item) => {
           if (item.type === 'criteria') {
-            const column = columns.find(
-              (col) => col.accessorKey === item.field,
-            );
-            const modifyValue = {
-              ...item,
-              entity:
-                column?.search_config?.entity || grid_entity || column?.entity,
-              field: column?.search_config?.field || item.field,
-              operator: column?.search_config?.operator || item.operator,
-              default: item.default || true,
-              values:
-                item.field.includes('phone_number')
-                  ? item.values.map((obj: any) => obj?.replace(/[^\d]/g, ''))
-                  : Array.isArray(item.values) &&
-                      item.values.length > 0 &&
-                      typeof item.values[0] === 'object'
-                    ? item.values.map((obj: any) => obj.value)
-                    : Array.isArray(item.values)
-                      ? item.values
-                      : [item.values],
-            };
-            return modifyValue;
+            const column = columns.find(col => col.accessorKey === item.field);
+            return transformCriteriaFilter(item, column, grid_entity);
           }
           return item;
         });
       },
-      [],
+      []
     );
+    
+    // Add custom default filters if provided
     if (customDefaultFilter?.length) {
       resolveDefaultFilter = [
         ...resolveDefaultFilter,
@@ -150,43 +180,26 @@ export const transformFilterGroups = async ({
     }
 
     return {
-      resolveDefaultFilter: resolveDefaultFilter,
+      resolveDefaultFilter,
       resolveGroupFilter: [],
     };
   }
 
+  // Handle multiple filter groups
   let resolveGroupFilter = filterDetails.filter_groups.reduce(
     (acc: any, group, index) => {
+      // Add group operator for groups after the first one
       if (index > 0) {
         acc.push({ type: 'operator', operator: group.groupOperator });
       }
+      
+      // Process filters in the current group
       acc.push({
         type: 'criteria',
         filters: group.filters.reduce((filtersAcc: any, filter) => {
           if (filter.type === 'criteria') {
-            const column = columns.find(
-              (col) => col.accessorKey === filter.field,
-            );
-            filtersAcc.push({
-              type: 'criteria',
-              operator: filter.operator,
-              entity:
-                column?.search_config?.entity || grid_entity || column?.entity,
-              field: column?.search_config?.field || filter.field,
-              values:
-                filter.field?.includes('phone_number')
-                  ? (filter.values ?? []).map((obj: any) =>
-                      obj?.replace(/[^\d]/g, ''),
-                    )
-                  : Array.isArray(filter.values) &&
-                      filter.values.length > 0 &&
-                      typeof filter.values[0] === 'object'
-                    ? filter.values.map((obj: any) => obj.value)
-                    : Array.isArray(filter.values)
-                      ? filter.values
-                      : [filter.values],
-              default: filter.default || true,
-            });
+            const column = columns.find(col => col.accessorKey === filter.field);
+            filtersAcc.push(transformCriteriaFilter(filter, column, grid_entity));
           } else if (filter.type === 'operator') {
             filtersAcc.push({
               type: 'operator',
@@ -199,9 +212,10 @@ export const transformFilterGroups = async ({
       });
       return acc;
     },
-    [],
+    []
   );
 
+  // Add custom default filters to each criteria group if provided
   if (customDefaultFilter?.length) {
     resolveGroupFilter = resolveGroupFilter.map((item: any) => {
       if (item?.type === 'criteria') {
