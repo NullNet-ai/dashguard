@@ -128,6 +128,8 @@ export default function GridProvider({
   const [grouping, setGrouping] = React.useState<GroupingState>(
     resolvedGroupings?.length ? resolvedGroupings : [],
   );
+  const [temoporaryGrouping, setTemporaryGrouping] =
+    React.useState<GroupingState>([]);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -147,6 +149,9 @@ export default function GridProvider({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
+  const [columnsOrder, setColumnsOrder] = useState<any[]>(
+    _propsConfig?.columnsOrder ?? [],
+  );
 
   const [gridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
@@ -165,11 +170,8 @@ export default function GridProvider({
     default: true,
   })) as ISearchItem[];
 
-  if (!!_propsConfig?.columnsOrder?.length) {
-    _propsConfig.columns = sortColumns(
-      _propsConfig?.columnsOrder,
-      _propsConfig?.columns,
-    );
+  if (!!columnsOrder?.length) {
+    _propsConfig.columns = sortColumns(columnsOrder, _propsConfig?.columns);
   }
 
   const resolvedAdvanceFilter = advanceFilter?.reduce(
@@ -193,6 +195,20 @@ export default function GridProvider({
       setPlaygroundGridIsShowCreateButton(createButton);
       setPlaygroundGridIsShowRowAction(rowAction);
     }
+    if (grouping?.length) {
+      setColumnVisibility(() => {
+        const newVisibility: any = {};
+        grouping.forEach((curr) => {
+          newVisibility[curr] = false;
+        });
+        return newVisibility;
+      });
+      if (config?.onFetchRecords) {
+        config?.onFetchRecords({
+          grouping: grouping[0] ? [grouping[0]] : [],
+        });
+      }
+    }
   }, []);
 
   // use effect for sorting if there is a change in props sorting it should set the sorting
@@ -203,7 +219,10 @@ export default function GridProvider({
   }, [initialSorting]);
 
   useEffect(() => {
-    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
+    if (
+      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings) &&
+      !config?.onFetchRecords
+    ) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {
         const newVisibility: any = {};
@@ -212,8 +231,32 @@ export default function GridProvider({
         });
         return newVisibility;
       });
+      config?.onFetchRecords?.({
+        grouping: resolvedGroupings[0] ? resolvedGroupings[0] : [],
+      });
     }
   }, [resolvedGroupings]);
+
+  useEffect(() => {
+    if (
+      !!temoporaryGrouping?.length &&
+      !!JSON.parse(data?.[0].total_group_count || '0')
+    ) {
+      setColumnVisibility((prev: any) => {
+        const visibility: any = { ...prev };
+        // Show all previously grouped columns
+        grouping.forEach((columnId) => {
+          visibility[columnId] = true;
+        });
+        // Hide newly grouped columns
+        temoporaryGrouping.forEach((columnId) => {
+          visibility[columnId] = false;
+        });
+        return visibility;
+      });
+      setGrouping(temoporaryGrouping);
+    }
+  }, [temoporaryGrouping, data]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -309,12 +352,13 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
+    handleUpdateReportSorting(updatedSorting);
+
     if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: updatedSorting,
       });
     }
-    handleUpdateReportSorting(updatedSorting);
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
@@ -365,13 +409,13 @@ export default function GridProvider({
       },
       [],
     );
+    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
 
     if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: resolvedSorting,
       });
     }
-    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
@@ -413,12 +457,32 @@ export default function GridProvider({
         ...(columnConfig?.sort_config ?? {}),
       };
     });
+    UpdateReportGrouping({ grouping: groupings, gridKey });
+
     if (config?.onFetchRecords) {
-      return config?.onFetchRecords?.({
+      const resolvedGroupings = groupings?.map((item) => item?.value);
+      config?.onFetchRecords?.({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
+      if (!groupings.length) {
+        setGrouping(resolvedGroupings);
+        // Update column visibility to hide grouped columns
+        setColumnVisibility((prev: any) => {
+          const visibility: any = { ...prev };
+          // Show all previously grouped columns
+          grouping.forEach((columnId) => {
+            visibility[columnId] = true;
+          });
+          // Hide newly grouped columns
+          newGrouping.forEach((columnId) => {
+            visibility[columnId] = false;
+          });
+          return visibility;
+        });
+      }
+      setTemporaryGrouping(resolvedGroupings);
+      return;
     }
-    UpdateReportGrouping({ grouping: groupings, gridKey });
   };
 
   /** @HOOKS */
@@ -660,7 +724,7 @@ export default function GridProvider({
     sorting,
     advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
     defaultAdvanceFilter,
-    defaultSorting : _defaultSorting,
+    defaultSorting: _defaultSorting,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
@@ -693,6 +757,7 @@ export default function GridProvider({
     },
     handleUpdateGrouping,
     handleCustomBulkAction,
+    setColumnsOrder,
   } as IAction;
 
   return (

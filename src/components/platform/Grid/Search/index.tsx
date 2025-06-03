@@ -18,7 +18,7 @@ import { useGrid } from '../Provider';
 export default function Main({
   parentType = 'grid',
   creatable = true,
-  switchable = true,
+  switchable = false,
   gridType = 'table',
   viewMode = 'table',
 }: any) {
@@ -52,8 +52,8 @@ export default function Main({
                   <CardViewButton />
                 </>
               ) : null}
-              <div className="mx-2 h-full w-[1px] bg-tertiary" />
-              <FilterButton />
+              {/* <div className="mx-2 h-full w-[1px] bg-tertiary" />
+              <FilterButton /> */}
             </div>
             {/* Replace the existing create button with this logic */}
             {renderedCreateButton()}

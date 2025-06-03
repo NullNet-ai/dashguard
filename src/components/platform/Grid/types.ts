@@ -281,6 +281,7 @@ export interface IAction {
   };
   handleUpdateGrouping: (updater: Updater<GroupingState>) => Promise<void>;
   handleCustomBulkAction: () => Promise<void>;
+  setColumnsOrder?: React.Dispatch<any>;
 }
 
 export interface ICreateContext {

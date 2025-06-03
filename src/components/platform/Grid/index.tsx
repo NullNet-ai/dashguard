@@ -20,8 +20,9 @@ function MainServer({
   grouping,
   gridKey,
   customCreateButton,
-  grid_tabs
+  grid_tabs = []
 }: IPropsGrid) {
+  if(!grid_tabs.length) return null
   return (
     <GridProvider
       totalCount={totalCount}

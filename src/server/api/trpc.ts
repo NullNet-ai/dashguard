@@ -16,7 +16,6 @@ import { cookies, headers } from 'next/headers';
 import { TokenData } from './types';
 import { ulid } from 'ulid';
 import { colors } from '../utils/choychoy';
-import socketClient from '../socketClient';
 
 /**
  * 1. CONTEXT
@@ -39,7 +38,6 @@ export const createTRPCContext = async (opts: {
   return {
     redisClient,
     dnaClient,
-    socketClient,
     transaction_id: ulid(),
     storeCookies,
     ...opts,

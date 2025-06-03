@@ -1,3 +1,4 @@
+import pluralize from 'pluralize';
 import { ulid } from 'ulid';
 import GRIDTABS from '~/server/default-grid-tab';
 
@@ -31,7 +32,7 @@ export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: an
   }) || [];
   const tabs = [
     {
-      name: `All ${modified_entity}`,
+      name: `All ${pluralize(modified_entity)}`,
       current: true,
       href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
       default: true,

@@ -190,7 +190,23 @@ export default function GridSearchProvider({ children }: IProps) {
   useEffect(() => {
     setSearchItems(gridState?.advanceFilter || []);
     setQuery('');
-  }, [gridState?.advanceFilter]);
+    const advanceFilter = gridState?.advanceFilter?.map(
+      ({ entity, operator, type, field, values, parse_as }) => ({
+        entity: entity || defaultEntity,
+        operator,
+        type,
+        field,
+        values,
+        ...(parse_as ? { parse_as } : {}),
+      }),
+    ) as ISearchItem[];
+    if (onFetchRecords) {
+      onFetchRecords?.({
+        advance_filters: advanceFilter || [],
+      });
+      return;
+    }
+  }, [gridState?.advanceFilter?.length]);
 
   const state_context = {
     open,
