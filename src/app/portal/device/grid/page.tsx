@@ -10,7 +10,6 @@ import { headers } from 'next/headers';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
-import { resolveGridParams } from '~/utils/grid-params-resolver';
 import CustomCreateButton from '../_components/custom_create_button';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
@@ -32,6 +31,8 @@ export default async function Page() {
     'created_by',
     'updated_date',
     'updated_time',
+    'instance_name',
+    'model',
     'updated_by',
   ];
 
@@ -44,9 +45,10 @@ export default async function Page() {
     },
   });
   
-  const { items = [], totalCount } = await api.grid.items({
+  const { items = [], totalCount } = await api.device.mainGrid({
     ...gridParams,
-  });
+    is_case_sensitive_sorting: "false",
+  })
 
   return (
     <Grid
@@ -67,8 +69,8 @@ export default async function Page() {
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'grid',
-          resolver: 'items',
+          router: 'device',
+          resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,

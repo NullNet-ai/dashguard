@@ -3,7 +3,7 @@ import { TabItem } from './tab'
 export interface StateTabContextType {
   tabs: TabItem[]
   variant?: 'default' | 'pills' | 'underline'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   orientation?: 'horizontal' | 'vertical'
   defaultValue?: string
 }

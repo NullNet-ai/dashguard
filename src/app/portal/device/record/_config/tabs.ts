@@ -9,5 +9,10 @@ const tabs = [
     name: "Device",
     tabName: "device?categories=",
   },
+  {
+    id: "configuration",
+    name: "Configuration",
+    tabName: "configuration?categories=",
+  },
 ];
 export default tabs;

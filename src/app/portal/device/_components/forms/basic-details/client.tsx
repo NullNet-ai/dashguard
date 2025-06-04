@@ -1,57 +1,83 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { type UseFormReturn } from 'react-hook-form';
-import { z } from 'zod';
+import React, { useEffect } from 'react'
+import { type z } from 'zod'
 
-import { FormBuilder } from '~/components/platform/FormBuilder';
-import { useToast } from '~/context/ToastProvider';
-import { api } from '~/trpc/react';
+import { FormBuilder } from '~/components/platform/FormBuilder'
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
+import { useToast } from '~/context/ToastProvider'
+import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicDetails'
+import { api } from '~/trpc/react'
 
-import CustomSetupDetails from '../_custom/SetupDetails';
-import { type IFormProps } from '../types';
+import CustomBasicDetails from '../_custom/CustomBasicDetails'
+import { type IFormProps } from '../types'
 
-export default function SetupDetails({ params, defaultValues }: IFormProps) {
-  const form = useForm();
+export default function BasicDetails({
+  params,
+  defaultValues,
+  selectOptions,
+}: IFormProps) {
+  console.log("%c Line:19 🍓 selectOptions", "color:#33a5ff", selectOptions);
+  const toast = useToast()
+  const [disabledModel, setDisabledModel] = React.useState(false)
 
-  const handleSave = async () => {
-    form.setValue('app_secret', '', {
-      shouldDirty: true,
-      shouldValidate: true,
-      shouldTouch: true,
-    });
-  };
+  const updateBasicDetails = api.device.updateBasicDetails.useMutation()
+
+  const handleSave = async ({
+    data,
+  }: IHandleSubmit<z.infer<typeof DeviceBasicDetailsSchema>>) => {
+    try {
+      console.log("%c Line:32 🍔 data", "color:#465975", {data, params});
+      const res = await updateBasicDetails.mutateAsync({
+        id: params.id,
+        ...data,
+      })
+      console.log("%c Line:30 🍰 res", "color:#fca650", res);
+      if (res.status_code == 200) {
+        setDisabledModel(true)
+        toast.success('Basic Details submit sucessfully')
+      }
+      return res
+    }
+    catch (error) {
+      console.log("%c Line:41 🥑 error", "color:#4fff4B", error);
+      toast.error('Failed to submit Basic Details')
+    }
+  }
+  useEffect(() => {
+    if (defaultValues?.model) {
+      setDisabledModel(true)
+    }
+  }, [defaultValues?.model])
 
   return (
     <FormBuilder
       customDesign={{
-        formClassName: 'lg:grid-cols-1 grid-cols-1',
+        formClassName: 'grid-cols-1 lg:grid-cols-1',
       }}
-      customRender={(
-        form: UseFormReturn<Record<string, any>, any, undefined>,
-      ) => (
-        <CustomSetupDetails
-          form={form}
-          params={params}
-          defaultValues={defaultValues}
-        />
-      )}
-      buttonConfig={{
-        hideLockButton: params?.shell_type === 'record' ? false : true,
+      customRender={(form, options) => {
+        return (
+          <CustomBasicDetails
+            defaultValues={defaultValues}
+            disabledModel={disabledModel}
+            form={form}
+            options={{
+              ...options,
+              appendFormKey: options?.appendButtonKey || '' }}
+            selectOptions={selectOptions}
+          />
+        )
       }}
       defaultValues={defaultValues}
       enableFormRegisterToParent={true}
       fields={[]}
-      formKey="setup_details"
-      formLabel="Setup"
+      formKey="device_basic_details"
+      formLabel="Basic Details"
       formProps={params}
-      formSchema={z.object({})}
+      formSchema={DeviceBasicDetailsSchema}
       handleSubmit={handleSave}
       myParent={params.shell_type}
-      features={{
-        enableFormHostViewActions: false
-      }}
+      selectOptions={selectOptions}
     />
-  );
+  )
 }

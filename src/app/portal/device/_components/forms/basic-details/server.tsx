@@ -2,36 +2,41 @@ import { headers } from 'next/headers'
 
 import { api } from '~/trpc/server'
 
-import SetupDetails from './client'
+import DeviceBasicDetails from './client'
+
+const model_options = ['PfSense', 'OpenSense'].map(model => ({
+  label: model,
+  value: model,
+}))
 
 const FormServerFetch = async () => {
   const headerList = headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
-  const getSetupDetails = await api.device.getAccountSetUpDetailsByDeviceCode({
-    device_code: identifier!
+  const fetched_device = await api.device.fetchBasicDetails({
+    code: identifier!,
   })
-  
-  if(!getSetupDetails.success) {
-    throw new Error(getSetupDetails.message)
-  }
-  
-  const defaultValues = {
-    id : getSetupDetails.data?.[0]?.devices?.id,
-    app_id : getSetupDetails.data?.[0]?.account_organizations?.email,
-    app_secret : getSetupDetails.data?.[0]?.account_organizations?.app_secret || "",
-    account_id : getSetupDetails.data?.[0]?.account_organizations?.account_id,
-  }
+  console.log("%c Line:17 🥝 fetched_device", "color:#7f2b82", fetched_device);
+
+  const group_options = await api.deviceGroupSetting.getDeviceGroupSettings()
+
+  const defaultValues = fetched_device?.data
 
   return (
-    <SetupDetails
-      defaultValues={{...defaultValues}}
-      params={{
-        id: defaultValues?.id || '',
-        shell_type: application! as 'record' | 'wizard',
-        entity: main_entity,
-      }}
-    />
+    <div className="space-y-2">
+      <DeviceBasicDetails
+        defaultValues={defaultValues ?? {}}
+        params={{
+          id: defaultValues?.id as string,
+          shell_type: application! as 'record' | 'wizard',
+          entity: main_entity,
+        }}
+        selectOptions={{
+          model: model_options,
+          grouping: group_options,
+        }}
+      />
+    </div>
   )
 }
 

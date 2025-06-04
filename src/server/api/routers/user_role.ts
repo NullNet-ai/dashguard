@@ -14,6 +14,7 @@ export const userRolesRouter = createTRPCRouter({
     .input(UserRoleFormSchema.extend({ id: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
       const { role, id: user_role_id } = input;
+      console.log("%c Line:17 🥕 input", "color:#42b983", input);
 
       const roles = await ctx.dnaClient
         .findAll({
@@ -73,21 +74,24 @@ export const userRolesRouter = createTRPCRouter({
       }
 
       if (!user_role_id) {
-        const record = await ctx.dnaClient
+          const record = await ctx.dnaClient
           .create({
             entity: 'user_role',
             token: ctx.token.value,
             mutation: {
               params: {
                 status: 'Draft',
-                role,
+                role
               },
               pluck: ['id', 'code', 'role'],
             },
           })
           .execute();
 
+          console.log("%c Line:93 🍉 record", "color:#b03734", record);
         return record;
+        
+        
       }
 
       const res = await ctx.dnaClient

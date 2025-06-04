@@ -2,6 +2,10 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import StatusCell from "~/components/ui/status-cell";
+import GridDeviceLastHeartbeat from '../GridDeviceLastHeartbeat';
+import GridDeviceStatus from '../GridDeviceStatus';
+import Connectivity from '../GridDeviceConnectivity';
+import { Badge } from '~/components/ui/badge';
 
 const gridColumns = [
   {
@@ -15,6 +19,105 @@ const gridColumns = [
     cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
+    },
+  },
+  {
+    header: 'Instance Name',
+    accessorKey: 'instance_name',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Type',
+    accessorKey: 'model',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Hierarchy',
+    accessorKey: 'hierarchy',
+    sortKey: 'device_group_settings.name',
+    search_config: {
+      operator: 'like',
+      entity: 'device_group_settings',
+      field: 'name',
+    },
+  },
+  {
+    header: 'WAN Address',
+    accessorKey: 'ip_address',
+    sortKey: 'device_interface_addresses.address',
+    search_config: {
+      operator: 'like',
+      entity: 'device_interface_addresses',
+      field: 'address',
+      parse_as: 'text',
+    },
+    cell: ({ row }) => {
+      const wan_addresses = row?.original?.wan_addresses
+      return (
+        <div className = 'flex flex-wrap gap-2'>
+
+          {wan_addresses?.map((address: string, idx: string) => {
+            return (
+              <Badge key = { idx } variant = 'primary'>
+                {address}
+              </Badge>
+            )
+          }) }
+        </div>
+      )
+    },
+  },
+  {
+    header: 'Connectivity',
+    cell: ({ row }) => {
+      return (
+        <Connectivity device_id={row?.original?.id as string} />
+      )
+    },
+  },
+  {
+    header: 'Status',
+    enableResizing: false,
+    cell: ({ row }) => {
+      return <GridDeviceStatus device_id={ row?.original?.id } />
+    },
+    accessorKey: 'device_status',
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'device_status',
+    },
+  },
+  {
+    header: 'UUID',
+    accessorKey: 'system_id',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Version',
+    accessorKey: 'device_version',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Last Heartbeat',
+    accessorKey: 'last_heartbeat',
+    cell: ({ row }) => {
+      const device_id = row?.original?.id
+
+      return <GridDeviceLastHeartbeat device_id={device_id} />
+    },
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'last_heartbeat',
     },
   },
   {
