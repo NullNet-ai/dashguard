@@ -12,8 +12,8 @@ import { ZodError } from 'zod';
 import { dnaClient } from '../dnaOrm';
 import redisClient from '~/server/redis/cache';
 
-import { cookies, headers } from 'next/headers';
-import { TokenData } from './types';
+import { cookies } from 'next/headers';
+import { type TokenData } from './types';
 import { ulid } from 'ulid';
 import { colors } from '../utils/choychoy';
 
@@ -135,23 +135,23 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
 
-const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-  const cookiesStore = cookies();
-  const token = cookiesStore.get('token');
+// const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+//   const cookiesStore = cookies();
+//   const token = cookiesStore.get('token');
 
-  if (!token) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-    });
-  }
+//   if (!token) {
+//     throw new TRPCError({
+//       code: 'UNAUTHORIZED',
+//     });
+//   }
 
-  return next({
-    ctx: {
-      ...ctx,
-      token,
-    },
-  });
-});
+//   return next({
+//     ctx: {
+//       ...ctx,
+//       token,
+//     },
+//   });
+// });
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   // const token = {
   //   value: ctx.token!,
@@ -227,21 +227,21 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   });
 });
 
-const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
-  const storeCookies = cookies();
-  const username = storeCookies.get('username')?.value;
+// const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
+//   const storeCookies = cookies();
+//   const username = storeCookies.get('username')?.value;
 
-  const token = await ctx.redisClient.getCachedData(
-    `account_token:${username}`,
-  );
+//   const token = await ctx.redisClient.getCachedData(
+//     `account_token:${username}`,
+//   );
 
-  return next({
-    ctx: {
-      ...ctx,
-      token,
-    },
-  });
-});
+//   return next({
+//     ctx: {
+//       ...ctx,
+//       token,
+//     },
+//   });
+// });
 
 /**
  * Private (authenticated) procedure

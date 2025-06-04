@@ -6,4 +6,6 @@ export default [
   "account_organization",
   "device",
   "location",
+  "remote_access",
+  "device_remote_access_session",
 ];

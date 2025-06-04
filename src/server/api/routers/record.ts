@@ -1,6 +1,6 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { z } from 'zod';
-import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
+import {  type IAdvanceFilters } from '@dna-platform/common-orm';
 import { TRPCError } from '@trpc/server';
 import Entities from '~/auto-generated/entities';
 import { headers } from 'next/headers';

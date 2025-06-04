@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { tabMenuId } from '~/lib/tab-menu-id';
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
-import { ITabGrid } from '../types';
+import { type ITabGrid } from '../types';
 
 const ENTITY = 'grid_filter';
 
@@ -149,7 +149,7 @@ export const gridFilterRouter = createTRPCRouter({
     .input(z.any())
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
-      const id = ctx?.session?.account?.contact?.id;
+      // const id = ctx?.session?.account?.contact?.id;
       const headerList = headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
@@ -340,7 +340,7 @@ export const gridFilterRouter = createTRPCRouter({
       // if the tab duplicated is default it should not fetch from database and create
       // new record
       if (input.tab.default) {
-        const { data, message, success, errors } = await ctx.dnaClient
+        const { data, message, success } = await ctx.dnaClient
           .create({
             entity: ENTITY,
             token,
@@ -424,8 +424,7 @@ export const gridFilterRouter = createTRPCRouter({
         const {
           data: newData,
           message,
-          success,
-          errors,
+          success
         } = await ctx.dnaClient
           .create({
             entity: ENTITY,

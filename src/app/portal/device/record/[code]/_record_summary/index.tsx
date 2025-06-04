@@ -1,8 +1,8 @@
 import { Fragment } from 'react';
 import RecordSummary from '~/components/platform/Record/Summary/RecordSummary';
-import BasicRecordContent from './components/basic_content';
 import { headers } from 'next/headers';
 import NotFound from '~/app/not-found';
+import RecordShellSummary from './_1';
 export default function Page() {
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
@@ -15,10 +15,10 @@ export default function Page() {
   return (
     <Fragment>
       <RecordSummary />
-      <BasicRecordContent
-        form_key={main_entity}
-        identifier={identifier}
-        main_entity={main_entity}
+      <RecordShellSummary
+        form_key={"contact_details"}
+        identifier={identifier!}
+        main_entity={main_entity!}
       />
     </Fragment>
   );

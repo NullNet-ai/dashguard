@@ -16,7 +16,6 @@ const FormServerFetch = async () => {
   const fetched_device = await api.device.fetchBasicDetails({
     code: identifier!,
   })
-  console.log("%c Line:17 🥝 fetched_device", "color:#7f2b82", fetched_device);
 
   const group_options = await api.deviceGroupSetting.getDeviceGroupSettings()
 

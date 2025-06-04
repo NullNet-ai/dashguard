@@ -1,4 +1,4 @@
-import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
+import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
 import Bluebird from 'bluebird';
 import { z } from 'zod';
 import {
@@ -350,8 +350,9 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+            // @ts-expect-error - multiple_sort is not defined in the type
+          multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
               : [],
             concatenate_fields: [
               {
@@ -1059,8 +1060,9 @@ export const accountRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+            // @ts-expect-error - multiple_sort is not defined in the type
+          multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
               : [],
           },
         })

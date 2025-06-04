@@ -2,18 +2,20 @@
   import contact from "./contact";
   import dashboard from "./dashboard";
   import device from "./device";
+  import location from "./location";
   import organization from "./organization";
   import settings from "./settings";
-  import location from "./location";
+  import device_remote_access_session from "./device_remote_access_session";
 
 const menu = [
   account_organization,
   contact,
   dashboard,
   device,
+  location,
   organization,
   settings,
-  location,
+  device_remote_access_session,
 ];
 
 export default menu;

@@ -4,19 +4,17 @@ import { z } from 'zod';
 import { type ISortBy } from '~/components/platform/Grid/Category/type';
 import {
   EOperator,
-  IGroupAdvanceFilters,
+  type IGroupAdvanceFilters,
   type IAdvanceFilters,
   type IResponse,
 } from '@dna-platform/common-orm';
 import { EOrderDirection } from '@dna-platform/common-orm/build/enums/model';
 
 import {
-  type IPagination,
   type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
 import {
   gridCacheId,
-  type TReportDataType,
 } from '~/components/platform/Grid/utils/grid-cache-id';
 import {
   SetIdTab,
@@ -121,9 +119,9 @@ export const gridRouter = createTRPCRouter({
         application: z.string(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({  ctx }) => {
       const headerList = headers();
-      const gridTabId = headerList.get('x-grid-tab-id') || '';
+      // const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
 
@@ -218,6 +216,7 @@ export const gridRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         entity,
         sorting,
+        is_case_sensitive_sorting = 'false',
         group_advance_filters : _group_advance_filters = [],
       } = input;
 
@@ -252,9 +251,10 @@ export const gridRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
+          //@ts-expect-error - multiple sort
           multiple_sort:
             sorting?.length && sorting?.length > 1
-              ? formatSorting(sorting)
+              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
               : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
@@ -1095,7 +1095,7 @@ export const gridRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
-      const gridTabId = headerList.get('x-grid-tab-id') || '';
+      // const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;

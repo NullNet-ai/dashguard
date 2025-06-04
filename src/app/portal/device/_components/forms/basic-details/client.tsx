@@ -17,7 +17,6 @@ export default function BasicDetails({
   defaultValues,
   selectOptions,
 }: IFormProps) {
-  console.log("%c Line:19 🍓 selectOptions", "color:#33a5ff", selectOptions);
   const toast = useToast()
   const [disabledModel, setDisabledModel] = React.useState(false)
 
@@ -27,12 +26,10 @@ export default function BasicDetails({
     data,
   }: IHandleSubmit<z.infer<typeof DeviceBasicDetailsSchema>>) => {
     try {
-      console.log("%c Line:32 🍔 data", "color:#465975", {data, params});
       const res = await updateBasicDetails.mutateAsync({
         id: params.id,
         ...data,
       })
-      console.log("%c Line:30 🍰 res", "color:#fca650", res);
       if (res.status_code == 200) {
         setDisabledModel(true)
         toast.success('Basic Details submit sucessfully')
@@ -40,7 +37,7 @@ export default function BasicDetails({
       return res
     }
     catch (error) {
-      console.log("%c Line:41 🥑 error", "color:#4fff4B", error);
+      console.error('Error submitting Basic Details:', error)
       toast.error('Failed to submit Basic Details')
     }
   }
@@ -64,6 +61,7 @@ export default function BasicDetails({
             options={{
               ...options,
               appendFormKey: options?.appendButtonKey || '' }}
+            //@ts-expect-error - selectOptions is not typed correctly
             selectOptions={selectOptions}
           />
         )

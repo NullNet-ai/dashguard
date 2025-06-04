@@ -24,9 +24,12 @@ import { communicationTemplateRouter } from './routers/communication_template';
 import { deviceRouter } from './routers/device';
 import { locationRouter } from './routers/location';
 import { deviceGroupSettingsRouter } from './routers/device_group_settings';
-import { deviceHeartbeatsRouter } from './routers/device_heartbeats';
+import { deviceHeartbeatsRouter } from './routers/device_heartbeat';
 import { deviceRuleRouter } from './routers/configuration_rule';
 import { deviceAliasRouter } from './routers/configuration_alias';
+import { deviceConfigurationRouter } from './routers/device_configuration';
+import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session';
+import { packetRouter } from './routers/packet';
 
 /**
  * This is the primary router for your server.
@@ -62,6 +65,9 @@ export const appRouter = createTRPCRouter({
   deviceHeartbeat: deviceHeartbeatsRouter,
   deviceRule: deviceRuleRouter,
   deviceAlias: deviceAliasRouter,
+  deviceConfiguration: deviceConfigurationRouter,
+  deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
+  packet: packetRouter
 });
 
 // export type definition of API
