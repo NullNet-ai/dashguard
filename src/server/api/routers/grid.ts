@@ -846,12 +846,13 @@ export const gridRouter = createTRPCRouter({
           application: z.string().optional(),
           entity: z.string().optional(),
           identifier: z.string().optional(),
+          pathname: z.string().optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
-      const pathName = headerList.get('x-pathname') || '';
+      const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
       const searchParams = new URLSearchParams(searchQueryParams);

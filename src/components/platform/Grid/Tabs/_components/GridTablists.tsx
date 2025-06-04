@@ -28,11 +28,14 @@ import { calculateMainTabItems } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
+import { GridContext } from '../../Provider';
+import { removeGridFilter } from '../SideDrawer/actions';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
   const { open } = useSidebar();
   const router = useRouter();
+  const { state: gridState, actions: gridActions } = useContext(GridContext);
   const [portal, entity, application, code] = (newPathname || '')
     .split('/')
     .slice(1);
@@ -47,6 +50,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
+  const { config, gridKey } = gridState ?? {};
 
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -73,6 +77,16 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     });
 
     setTablists(newTablist);
+    if (gridState?.config?.onFetchRecords) {
+      const { advance_filters, sorts = [], grouping = [] } = selectedTab;
+      gridState?.config?.onFetchRecords?.({
+        advance_filters,
+        sorting: sorts?.length ? sorts : gridState?.sorting,
+        grouping: grouping ?? [],
+      });
+      updatecachedItems(newTablist);
+    }
+    router?.push(selectedTab.href);
   };
 
   const handleTabClickDropdown = (selectedTab: any) => {
@@ -157,25 +171,25 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           // setTablists(items);
           updatecachedItems(items);
           if (activeTab) {
-            const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
-            router.push(href);
+            const href =
+              items?.find((item) => item.current)?.href || items?.[0]?.href;
+            // router.push(href);
           }
         }
       } else {
         updatecachedItems(items);
         if (activeTab) {
-          const href = items?.find((item) => item.current)?.href || items?.[0]?.href;
-          router.push(href);
+          const href =
+            items?.find((item) => item.current)?.href || items?.[0]?.href;
+          // router.push(href);
         }
       }
     };
     if (isClient) {
-      
       setTimeout(() => {
         handleResize();
-      }, 500);
+      }, 200);
     }
-
 
     window.addEventListener('resize', handleResize);
 
@@ -217,6 +231,36 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     }
     return false;
   }, [tablists, searchValue]);
+
+  const handleDeleteTabs = (tab: any) => {
+    const newTabs = tablists.filter((item: any) => item.id !== tab.id);
+    setTablists(newTabs);
+    // Background update
+    removeGridFilter(tab?.id, gridKey);
+    // updatecachedItems(newTabs);
+    // TODO
+    setActiveTab(newTabs?.[0]?.id);
+    router?.push(newTabs?.[0]?.href);
+  };
+
+  const handleUpdateTab = async (tab: any) => {
+    const newTabs = tablists.map((item: any) => {
+      if (item.id === tab.id) {
+        return {
+          ...item,
+          ...tab,
+        };
+      }
+      return item;
+    });
+    gridActions?.setColumnsOrder?.(tab?.columns);
+    setTablists(newTabs);
+  };
+
+  const actions = {
+    handleDeleteTabs,
+    handleUpdateTab,
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -261,6 +305,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             ) {
               return (
                 <GridTabItem
+                  actions={actions}
                   className={cn({ 'opacity-0': isHidden })}
                   isHidden={isHidden}
                   ref={(el) => {
@@ -282,6 +327,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             return (
               <SortableItem key={tab.id} value={tab.id} className="relative">
                 <GridTabItem
+                  actions={actions}
                   className={cn({ 'opacity-0': isHidden })}
                   isHidden={isHidden}
                   ref={(el) => {
@@ -372,6 +418,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
                         className="group relative flex items-center justify-between py-1"
                       >
                         <GridtabDropItem
+                          actions={actions}
                           tab={itm}
                           shownItems={tablists}
                           dropItems={copyTab?.filter((dta) => dta.hidden)}

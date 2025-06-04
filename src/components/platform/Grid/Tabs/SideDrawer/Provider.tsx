@@ -1,10 +1,14 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
-import { saveGridFilter, transformFilterGroups, updateGridFilter } from './actions';
+import {
+  saveGridFilter,
+  transformFilterGroups,
+  updateGridFilter,
+} from './actions';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { useRouter } from 'next/navigation';
-import { AppRouterKeys } from '../../types';
+import { AppRouterKeys, IAction } from '../../types';
 import { ISearchParams } from '../../Search/types';
 import { api } from '~/trpc/react';
 
@@ -14,7 +18,7 @@ interface ManageFilterContextType {
     filterDetails: any;
     columns: Record<string, any>[];
     createFilterLoading: boolean;
-    searchConfig: any
+    searchConfig: any;
   };
   actions: {
     handleUpdateFilter: (data: any) => void;
@@ -35,6 +39,9 @@ export function ManageFilterProvider({
   searchConfig,
   gridKey,
   customTabDefaults = {},
+  onFetchRecords,
+  gridActions,
+  tabActions,
 }: {
   children: React.ReactNode;
   tab: any;
@@ -47,19 +54,24 @@ export function ManageFilterProvider({
   };
   gridKey?: string;
   customTabDefaults?: Record<string, any>;
+  onFetchRecords?: (args: any) => void;
+  gridActions?: IAction;
+  tabActions?: any
 }) {
   const { actions } = useSideDrawer();
   const router = useRouter();
-  const utils = api.useUtils()
+  const utils = api.useUtils();
   const { closeSideDrawer } = actions ?? {};
+  const { handleUpdateTab } = tabActions ?? {};
   const [filterDetails, setFilterDetails] = useState<any>({
-    sorts: customTabDefaults?.defaultSorting?.map((item : any) => {
-      return {
-        id: item.value || item.id,
-        value: item.value || item.id,
-        desc: item.desc,
-      };
-    }) || [],
+    sorts:
+      customTabDefaults?.defaultSorting?.map((item: any) => {
+        return {
+          id: item.value || item.id,
+          value: item.value || item.id,
+          desc: item.desc,
+        };
+      }) || [],
     ...tab,
     columns,
   });
@@ -81,6 +93,7 @@ export function ManageFilterProvider({
   };
 
   const saveUpdatedFilter = async () => {
+    await utils.invalidate();
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map((item: any) => {
           return {
@@ -98,12 +111,13 @@ export function ManageFilterProvider({
     const rawFilterGroup = JSON.parse(
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups({
-      filterDetails,
-      columns,
-      grid_entity: (searchConfig?.entity?? ''),
-      customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
-    });
+    const { resolveDefaultFilter, resolveGroupFilter } =
+      await transformFilterGroups({
+        filterDetails,
+        columns,
+        grid_entity: searchConfig?.entity ?? '',
+        customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
+      });
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -111,18 +125,40 @@ export function ManageFilterProvider({
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
-      entity : searchConfig?.entity,
+      entity: searchConfig?.entity,
+      advance_filters: resolveDefaultFilter
     };
 
     setCreateFilterLoading(true);
-    const updatedCustomFilter = await updateGridFilter(modifyFilterDetails, gridKey);
+    const updatedCustomFilter = await updateGridFilter(
+      modifyFilterDetails,
+      gridKey,
+    );
     setCreateFilterLoading(false);
-    await utils.invalidate()
+    if (onFetchRecords) {
+      gridActions?.handleUpdateGrouping(
+        modifyFilterDetails?.groups?.map((item: any) => item.value),
+      );
+      onFetchRecords({
+        grouping: modifyFilterDetails?.groups?.map((item: any) => item.field),
+        advance_filters: resolveDefaultFilter,
+        sorting: modifyFilterDetails?.sorts?.length
+          ? modifyFilterDetails?.sorts
+          : (modifyFilterDetails?.default_sorts ?? []),
+        group_advance_filters: modifyFilterDetails?.group_advance_filters ?? [],
+      });
+      handleUpdateTab(modifyFilterDetails);
+      router.refresh();
+      closeSideDrawer();
+      return;
+    }
+    await utils.invalidate();
 
-    if(updatedCustomFilter?.href) {
+    if (updatedCustomFilter?.href) {
       router.push(updatedCustomFilter.href);
-    }else{
-      router.refresh()
+      router.refresh();
+    } else {
+      router.refresh();
     }
     closeSideDrawer();
   };
@@ -146,12 +182,13 @@ export function ManageFilterProvider({
       JSON.stringify(filterDetails?.filter_groups || []),
     ); // Deep copy to prevent modifications
 
-    const { resolveDefaultFilter, resolveGroupFilter } = await transformFilterGroups({
-      filterDetails,
-      columns,
-      grid_entity: (searchConfig?.entity ?? ''), 
-      customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
-    });
+    const { resolveDefaultFilter, resolveGroupFilter } =
+      await transformFilterGroups({
+        filterDetails,
+        columns,
+        grid_entity: searchConfig?.entity ?? '',
+        customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
+      });
     const modifyFilterDetails = {
       ...filterDetails,
       default_filter: resolveDefaultFilter,
@@ -159,15 +196,19 @@ export function ManageFilterProvider({
       default_sorts: sorting,
       filter_groups: rawFilterGroup,
       group_advance_filters: resolveGroupFilter,
-      entity : searchConfig?.entity,
+      entity: searchConfig?.entity,
+      groups: filterDetails?.groups?.length ? filterDetails.groups : [],
+      advance_filters: resolveDefaultFilter,
     };
     setCreateFilterLoading(true);
-    const createdCustomFilter = await saveGridFilter(modifyFilterDetails, gridKey);
+    const createdCustomFilter = await saveGridFilter(
+      modifyFilterDetails,
+      gridKey,
+    );
     setCreateFilterLoading(false);
-    await utils.invalidate()
+    await utils.invalidate();
     router.push(createdCustomFilter?.href);
     closeSideDrawer();
-
   };
 
   return (

@@ -23,7 +23,7 @@ export default async function Page() {
     'created_date',
     'updated_date',
     'created_time',
-    'updated_time',
+  'updated_time',
     'created_by',
     'updated_by',
   ];
@@ -79,7 +79,6 @@ export default async function Page() {
         enableRowExpansion: true,
         rowExpansionBuilder: <AccountGridExpansion />,
         customTabDefaults: {
-          defaultAdvanceFilter,
           defaultSorting,
         }
       }}

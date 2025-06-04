@@ -14,7 +14,7 @@ import {
 
 export default function CreateNewFilter() {
   const { actions } = useSideDrawer();
-  const { state } = useGrid();
+  const { state, actions: gridActions } = useGrid();
   const { config, gridKey, defaultAdvanceFilter, defaultSorting } = state ?? {};
 
   const {
@@ -22,7 +22,8 @@ export default function CreateNewFilter() {
     searchConfig,
     entity: defaultEntity,
     enableCreateCustomGridFilter = true,
-    customTabDefaults = {}
+    customTabDefaults = {},
+    onFetchRecords,
   } = config ?? {};
 
   if(!enableCreateCustomGridFilter) return null;
@@ -55,6 +56,8 @@ export default function CreateNewFilter() {
             searchConfig={{ ...searchConfig, entity: defaultEntity }}
             gridKey={gridKey}
             customTabDefaults={customTabDefaults}
+            onFetchRecords={onFetchRecords}
+            gridActions={gridActions}
           >
             <GridManageFilter />
           </ManageFilterProvider>
