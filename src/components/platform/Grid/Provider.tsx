@@ -623,10 +623,15 @@ export default function GridProvider({
       const selectedRows = table?.getSelectedRowModel().rows;
       if (!selectedRows?.length) return;
       if (config?.archiveBulkRecordCustomAction) {
-        config?.archiveBulkRecordCustomAction({
+        await config?.archiveBulkRecordCustomAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });
+        setActionBulkLoading(false);
+        table?.resetRowSelection();
+        setShowBulkActionConfirmationModal(false);
+        setBulkActionType(null);
         return;
       }
       const record_ids = selectedRows.map((row) => row?.id);
@@ -647,6 +652,7 @@ export default function GridProvider({
       if (!selectedRows?.length) return;
       if (config?.customBulkAction) {
         config?.customBulkAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });

@@ -39,6 +39,7 @@ export interface DefaultRowActions {
 
 export interface DefaultBulkActions {
   entity: string;
+  config?: IConfigGrid;
   selected_rows: Row<any>[];
 }
 
@@ -124,7 +125,9 @@ export interface IConfigGrid {
     args: Record<string, any>,
   ) => void | Promise<string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
-  archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
+  archiveBulkRecordCustomAction?: (
+    args: DefaultBulkActions,
+  ) => Promise<any> | void;
   layer?: TLayerType;
   enableAutoCreate?: boolean;
   // toggle for single and multi select
