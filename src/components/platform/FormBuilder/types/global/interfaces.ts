@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import type React from 'react';
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
 // eslint-disable-next-line no-duplicate-imports
 import {
   DetailedHTMLProps,
@@ -43,7 +43,12 @@ import { type ComponentType } from 'react'; // Add this import at the top
 import { type ComboBoxProps } from '~/components/ui/combobox';
 import { EntityVariableOption } from '~/components/ui/rich-text-editor/components/entity-variable';
 import { type ComboSelectProps } from '~/components/ui/combo-select';
-import { ButtonIconProps, ButtonProps, IconProps, TooltipProps } from '~/components/ui/button';
+import {
+  ButtonIconProps,
+  ButtonProps,
+  IconProps,
+  TooltipProps,
+} from '~/components/ui/button';
 import { AvatarBadge, AvatarStatus } from '~/components/ui/avatar';
 import { BadgeProps } from '~/components/ui/badge';
 import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
@@ -55,8 +60,8 @@ interface OptionType {
   value: string;
 }
 interface RichTextConfig {
-  output?:'html' | 'json' | 'text'
-  plainTextMode?:boolean
+  output?: 'html' | 'json' | 'text';
+  plainTextMode?: boolean;
   plainTextConfig?: {
     multiline?: boolean;
     maxHeight?: string;
@@ -72,8 +77,8 @@ interface RichTextConfig {
     }>;
     formatInsertedValue?: (option: { label: string; value: string }) => string;
     onSelect?: (option: { label: string; value: string }) => void;
-    disabled?:boolean;
-    isFilterMode?:boolean;
+    disabled?: boolean;
+    isFilterMode?: boolean;
   }>;
 }
 interface DraggableConfig {
@@ -83,14 +88,14 @@ interface DraggableConfig {
     radioOptions?: IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
     formType?:
-    | 'input'
-    | 'select'
-    | 'radio'
-    | 'checkbox'
-    | 'textarea'
-    | 'number-input'
-    | 'smart-date'
-    | 'time-picker';
+      | 'input'
+      | 'select'
+      | 'radio'
+      | 'checkbox'
+      | 'textarea'
+      | 'number-input'
+      | 'smart-date'
+      | 'time-picker';
   };
 }
 
@@ -148,41 +153,41 @@ interface IField {
   dateMinDate?: Date;
   dateMaxDate?: Date;
   timePickerProps?: TimePickerProps;
-  dateRangeConfig?: DateRangeConfig;  
+  dateRangeConfig?: DateRangeConfig;
   dateTimePickerProps?: DateTimeLocalInputProps & {
-    granularity?: DateGranularity
-    minDate?: Date
-    maxDate?: Date
-    disablePastDates?: boolean
-    disableFutureDates?: boolean
-    includeTime?: boolean
-    useTimePicker?: boolean
-    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD'
-    is24Hour?: boolean
-    enableFormattedDate?:boolean
-    transformValuesToArray?:boolean
-  }
-  dateInputProps?: NaturalLanguageInputProps
-  description?: string
-  switchConfig?: SwitchProps
-  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?]
-  multiFieldConfig?: MultiFieldConfig
-  comboboxConfig?: ComboBoxProps
-  selectConfig?:Partial<ComboSelectProps>
-  required?: boolean
-  type?: HTMLInputTypeAttribute | undefined
-  customRender?: React.JSX.Element
-  min?: number
-  max?: number
-  step?: number
-  hasFormMessage?: boolean
-  render?: (props: CustomFieldProps) => React.ReactNode
-  checkboxOrientation?: 'horizontal' | 'vertical'
-  radioOrientation?: 'horizontal' | 'vertical'
-  sliderLabel?: (value: number | undefined) => ReactNode
-  sliderLabelPosition?: 'top' | 'bottom'
-  fileDropzoneOptions?: DropzoneOptions
-  selectIcon?: ElementType
+    granularity?: DateGranularity;
+    minDate?: Date;
+    maxDate?: Date;
+    disablePastDates?: boolean;
+    disableFutureDates?: boolean;
+    includeTime?: boolean;
+    useTimePicker?: boolean;
+    displayFormat?: 'MM/DD/YYYY' | 'YYYY-MM-DD';
+    is24Hour?: boolean;
+    enableFormattedDate?: boolean;
+    transformValuesToArray?: boolean;
+  };
+  dateInputProps?: NaturalLanguageInputProps;
+  description?: string;
+  switchConfig?: SwitchProps;
+  draggableConfig?: [DraggableConfig?, DraggableConfig?, DraggableConfig?];
+  multiFieldConfig?: MultiFieldConfig;
+  comboboxConfig?: ComboBoxProps;
+  selectConfig?: Partial<ComboSelectProps>;
+  required?: boolean;
+  type?: HTMLInputTypeAttribute | undefined;
+  customRender?: React.JSX.Element;
+  min?: number;
+  max?: number;
+  step?: number;
+  hasFormMessage?: boolean;
+  render?: (props: CustomFieldProps) => React.ReactNode;
+  checkboxOrientation?: 'horizontal' | 'vertical';
+  radioOrientation?: 'horizontal' | 'vertical';
+  sliderLabel?: (value: number | undefined) => ReactNode;
+  sliderLabelPosition?: 'top' | 'bottom';
+  fileDropzoneOptions?: DropzoneOptions;
+  selectIcon?: ElementType;
   // InfiniteScroll configuration for select options
   selectInfiniteScroll?: {
     enabled?: boolean;
@@ -193,22 +198,28 @@ interface IField {
     loadingIndicator?: ReactNode;
     endMessage?: ReactNode;
     scrollableTarget?: string;
-  }
+  };
   multiSelectMaxSelected?: number;
   multiSelectDelay?: number;
-  multiSelectHidePlaceholderWhenSelected?: boolean
-  multiSelectTriggerSearchOnFocus?: boolean
-  multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined
-  multiSelectLoadingIndicator?: ReactNode
-  multiSelectEmptyIndicator?: ReactNode
-  multiSelectHideClearAllButton?: boolean
-  multiSelectShowCreatableItem?: boolean
-  multiSelectUseStringValues?: boolean
-  richTextConfig?: RichTextConfig
+  multiSelectHidePlaceholderWhenSelected?: boolean;
+  multiSelectTriggerSearchOnFocus?: boolean;
+  multiSelectOnMaxSelected?: ((maxLimit: number) => void) | undefined;
+  multiSelectLoadingIndicator?: ReactNode;
+  multiSelectEmptyIndicator?: ReactNode;
+  multiSelectHideClearAllButton?: boolean;
+  multiSelectShowCreatableItem?: boolean;
+  multiSelectUseStringValues?: boolean;
+  richTextConfig?: RichTextConfig;
   multiSelectRenderOption?: (option: OptionType) => React.ReactNode;
-  multiSelectRenderBadge?: (option: OptionType, handleUnselect: (option: OptionType) => void) => React.ReactNode;
-  multiSelectOnSearch?: Record<string, (search: string) => Promise<OptionType[]>>;
-  richTextOutput?: 'html' | 'json' | 'text'
+  multiSelectRenderBadge?: (
+    option: OptionType,
+    handleUnselect: (option: OptionType) => void,
+  ) => React.ReactNode;
+  multiSelectOnSearch?: Record<
+    string,
+    (search: string) => Promise<OptionType[]>
+  >;
+  richTextOutput?: 'html' | 'json' | 'text';
   richTextEntityOptions?: Array<{
     label: string;
     value: string;
@@ -217,9 +228,9 @@ interface IField {
     label: string;
     value: string;
   }>;
-  inputRightAddOns?: ReactNode | string
-  inputLeftAddOns?: ReactNode | string
-  isMultiSelectAlphabetical?: boolean
+  inputRightAddOns?: ReactNode | string;
+  inputLeftAddOns?: ReactNode | string;
+  isMultiSelectAlphabetical?: boolean;
   options?: {
     phoneNumberType?: TSelectionType;
     phoneEmailType?: TSelectionType;
@@ -250,12 +261,12 @@ interface IField {
   selectEnableCreate?: boolean;
   multiSelectEnableCreate?: boolean;
   selectOnCreateRecord?:
-  | {
-    fieldIdentifier: string;
-    entity: string;
-    customParams?: Record<string, any>;
-  }
-  | ((text: string) => Promise<ISelectOptions>);
+    | {
+        fieldIdentifier: string;
+        entity: string;
+        customParams?: Record<string, any>;
+      }
+    | ((text: string) => Promise<ISelectOptions>);
   selectOnCreateValidate?: (
     text: string,
   ) => Promise<{ valid: boolean; message?: string }>;
@@ -268,30 +279,53 @@ interface IField {
     components?: ComponentType<any>[] | JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
-	codeEditorProps?: ICodeEditor & {
-		enable_editor_tools?: boolean;
-		enable_auto_height?: boolean; 
-		defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
-		minHeight: string;
-		maxHeight?: string;
-	};
-  imageConfig?: DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
-  buttonConfig?: ButtonProps & IconProps & TooltipProps & React.RefAttributes<HTMLButtonElement>
+  codeEditorProps?: ICodeEditor & {
+    enable_editor_tools?: boolean;
+    enable_auto_height?: boolean;
+    defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
+    minHeight: string;
+    maxHeight?: string;
+  };
+  imageConfig?: DetailedHTMLProps<
+    ImgHTMLAttributes<HTMLImageElement>,
+    HTMLImageElement
+  >;
+  buttonConfig?: ButtonProps &
+    IconProps &
+    TooltipProps &
+    React.RefAttributes<HTMLButtonElement>;
   avatarConfig?: {
     avatar: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
-      statusProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarStatus>, "containerRef">;
-      badgeProps?: Omit<React.ComponentPropsWithoutRef<typeof AvatarBadge>, "containerRef">;
-      size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-    },
-    image?: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
-    fallback?:   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
-    fallbackText?: string
-  }
-  badgeConfig?: BadgeProps
-  colorPickerConfig?: ColorPickerProps
-  adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps & React.RefAttributes<HTMLDivElement>
-  messageThreadConfig?: MessageThreadProps
-
+      statusProps?: Omit<
+        React.ComponentPropsWithoutRef<typeof AvatarStatus>,
+        'containerRef'
+      >;
+      badgeProps?: Omit<
+        React.ComponentPropsWithoutRef<typeof AvatarBadge>,
+        'containerRef'
+      >;
+      size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    };
+    image?: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>;
+    fallback?: React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>;
+    fallbackText?: string;
+  };
+  badgeConfig?: BadgeProps;
+  colorPickerConfig?: ColorPickerProps;
+  adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps &
+    React.RefAttributes<HTMLDivElement>;
+  messageThreadConfig?: MessageThreadProps;
+  selectOnChange?: (
+    value: string,
+    form?: UseFormReturn<
+      {
+        [x: string]: any;
+      },
+      any,
+      undefined
+    >,
+  ) => void;
+  inputOnChange?: (value: string) => void;
 }
 
 interface ISelectOptions {
@@ -302,8 +336,8 @@ interface ISelectOptions {
 interface IRadioOptions {
   value: string | boolean;
   label: string;
-  with_input?: boolean
-  inputPlaceholder?: string
+  with_input?: boolean;
+  inputPlaceholder?: string;
 }
 
 interface ICheckboxOptions {
@@ -443,11 +477,11 @@ interface IFilterGridConfig {
     options: Record<string, any>,
   ) =>
     | {
-      totalCount: number;
-      items: any[];
-      currentPage: number;
-      totalPages: number;
-    }
+        totalCount: number;
+        items: any[];
+        currentPage: number;
+        totalPages: number;
+      }
     | undefined;
   handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
   fieldFilterGridColumns?: string[];
@@ -469,7 +503,6 @@ export interface ISearchParams {
 
   sorting?: any[];
 }
-
 
 export interface IFormProperties {
   /**
@@ -509,7 +542,7 @@ export interface IFormProperties {
    * This prop is use only in form filter
    * copy will not show in form
    * @default true
-   */ 
+   */
   allowCopyPaste?: boolean;
   /**
    * @description
@@ -595,11 +628,11 @@ interface IGridData {
 }
 
 interface ICodeEditor {
-	enable_editor_tools?: boolean;
-	enable_auto_height?: boolean; 
-	defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
-	minHeight: string;
-	maxHeight?: string;
+  enable_editor_tools?: boolean;
+  enable_auto_height?: boolean;
+  defaultTheme?: 'vs-light' | 'vs-dark' | 'hc-black' | 'hc-light';
+  minHeight: string;
+  maxHeight?: string;
 }
 
 export type {
@@ -617,5 +650,5 @@ export type {
   OptionType,
   IFieldFilterActions,
   IGridData,
-	ICodeEditor
+  ICodeEditor,
 };
