@@ -36,6 +36,16 @@ export default function ManageFilter({
   tabs: any[];
   actions?: {
     handleDeleteTabs: (tab: any) => void;
+    handleDuplicateTab: ({
+      tab,
+      gridKey,
+      entity,
+    }:{
+      tab :any,
+      gridKey : string,
+      entity : string, 
+    }) => void;
+
   };
 }) {
   const router = useRouter();
@@ -119,13 +129,11 @@ export default function ManageFilter({
 
   const handleDuplicateFilter = async () => {
     try {
-      const url = await duplicateFilterTab(tab, gridKey, defaultEntity);
-      if (url && typeof url === 'string') {
-        router.push(url);
-        router.refresh();
-      } else {
-        router.refresh();
-      }
+      tabActions?.handleDuplicateTab({
+        tab,
+        gridKey : gridKey || '',
+        entity: defaultEntity || '',
+      })
     } catch (error) {
       console.error('Error duplicating filter:', error);
       router.refresh();

@@ -25,6 +25,7 @@ export const searchRecords = async ({
   value,
   searchConfig,
   fieldConfig,
+  customTabDefaults
 }: {
   entity?: string;
   field?: string;
@@ -32,6 +33,7 @@ export const searchRecords = async ({
   value: string;
   searchConfig: any;
   fieldConfig: any;
+  customTabDefaults: Record<string, any>;
 }) => {
   const {
     router = 'search',
@@ -56,6 +58,16 @@ export const searchRecords = async ({
         is_search: true,
         ...(fieldConfig?.parse_as ? { parse_as: fieldConfig?.parse_as } : {}),
       },
+      ...(customTabDefaults?.defaultAdvanceFilter?.length
+        ? [
+            {
+              type: 'operator',
+              operator: 'and',
+              default: true,
+            },
+            ...customTabDefaults?.defaultAdvanceFilter,
+          ]
+        : []),
     ],
   });
 

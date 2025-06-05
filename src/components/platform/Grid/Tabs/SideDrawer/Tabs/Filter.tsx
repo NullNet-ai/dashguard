@@ -25,7 +25,7 @@ import { ZodSchema } from './schemas/filter';
 export default function FilterContent() {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
-  const { filterDetails, columns, searchConfig } = state ?? {};
+  const { filterDetails, columns, searchConfig, customTabDefaults } = state ?? {};
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
@@ -347,6 +347,7 @@ export default function FilterContent() {
                             accessorKey: string;
                           }>
                         }
+                        customTabDefaults={customTabDefaults}
                         onRemoveFilter={(index) =>
                           handleRemoveFilter(groupIndex, index)
                         }

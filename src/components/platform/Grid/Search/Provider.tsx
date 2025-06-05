@@ -190,9 +190,14 @@ export default function GridSearchProvider({ children }: IProps) {
 
   // @use effects
   useEffect(() => {
-    setSearchItems(gridState?.advanceFilter || []);
+    const currentAdvanceFilter = gridState?.advanceFilter || [];
+    if (JSON.stringify(currentAdvanceFilter) === JSON.stringify(searchItems))
+      return;
+
+    setSearchItems(currentAdvanceFilter);
     setQuery('');
-    const advanceFilter = gridState?.advanceFilter?.map(
+
+    const mappedAdvanceFilter = currentAdvanceFilter.map(
       ({ entity, operator, type, field, values, parse_as }) => ({
         entity: entity || defaultEntity,
         operator,
@@ -202,13 +207,13 @@ export default function GridSearchProvider({ children }: IProps) {
         ...(parse_as ? { parse_as } : {}),
       }),
     ) as ISearchItem[];
+
     if (onFetchRecords) {
-      onFetchRecords?.({
-        advance_filters: advanceFilter || [],
+      onFetchRecords({
+        advance_filters: mappedAdvanceFilter,
       });
-      return;
     }
-  }, [gridState?.advanceFilter?.length]);
+  }, [gridState?.advanceFilter?.length, gridState?.advanceFilter]);
 
   const state_context = {
     open,
