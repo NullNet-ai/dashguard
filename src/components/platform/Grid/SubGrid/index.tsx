@@ -9,7 +9,7 @@ import { remToPx } from '~/utils/fetcher'
 
 import ErrorPage from '../common/ErrorPage'
 import GridProvider from '../Provider'
-import { type IPropsGrid } from '../types'
+import { type IParentType, type IPropsGrid } from '../types'
 
 import { GridDesktop, GridMobile } from './views'
 import GridCardLists from './views/GridCardLists'
@@ -19,7 +19,7 @@ import { useIsMobile } from '~/hooks/use-mobile'
 import GridCardViewClient from './views/common/GridCardViewClient'
 
 interface IClientProps extends IPropsGrid {
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion'
+  parentType?:  IParentType
   height?: string
   showPagination?: boolean
   hideSearch?: boolean

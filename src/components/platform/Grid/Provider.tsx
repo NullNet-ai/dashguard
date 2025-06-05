@@ -26,6 +26,7 @@ import { type ISearchItem } from './Search/types';
 import { useActionColumns } from './hooks/actionColumns';
 import { useColumnConditions } from './hooks/useColumnConditions';
 import {
+  type IParentType,
   type IAction,
   type IConfigGrid,
   type ICreateContext,
@@ -43,7 +44,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer';
+  parentType?: IParentType
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';

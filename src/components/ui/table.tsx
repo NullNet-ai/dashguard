@@ -7,6 +7,7 @@ import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
 import { useSideDrawer } from '../platform/SideDrawer';
+import { type IParentType } from '../platform/Grid/types';
 
 type GridParentType = 'grid' | 'form' | 'field' | 'grid_expansion';
 
@@ -51,8 +52,8 @@ Table.displayName = 'Table';
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<
-    HTMLTableSectionElement & { parentType?: GridParentType }
-  > & { parentType?: GridParentType }
+    HTMLTableSectionElement & { parentType?: IParentType }
+  > & { parentType?: IParentType }
 >(
   (
     {
@@ -60,7 +61,7 @@ const TableHeader = React.forwardRef<
       parentType,
       ...props
     }: React.HTMLAttributes<HTMLTableSectionElement> & {
-      parentType?: GridParentType;
+      parentType?: IParentType;
     },
     ref,
   ) => (

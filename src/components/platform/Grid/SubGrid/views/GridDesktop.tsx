@@ -16,12 +16,12 @@ import Search from '../../Search';
 import Sorting from '../../Sorting';
 import MyTableBody from '../../TableBody';
 import MyTableHead from '../../TableHead';
-import { type IExpandedRow } from '../../types';
+import { type IParentType, type IExpandedRow } from '../../types';
 import { usePathname } from 'next/navigation'
 import { testIDFormatter } from '~/utils/formatter'
 
 interface IGridDesktopProps {
-  parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
+  parentType: IParentType
   hideSearch?: boolean;
   height?: string;
   showAction?: boolean;
