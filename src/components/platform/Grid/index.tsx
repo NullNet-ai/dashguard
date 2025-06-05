@@ -39,7 +39,7 @@ function MainServer({
       customCreateButton={customCreateButton}
       customCreateActionButton={customCreateActionButton}
     >
-      <GridScrollView className="hidden lg:block">
+      <GridScrollView parentType={parentType} className="hidden lg:block">
         <GridDesktop
           parentType={parentType}
           gridKey={gridKey}
