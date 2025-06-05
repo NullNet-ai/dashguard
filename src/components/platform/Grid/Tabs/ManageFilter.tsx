@@ -36,7 +36,7 @@ export default function ManageFilter({
   tabs: any[];
   actions?: {
     handleDeleteTabs: (tab: any) => void;
-    handleDuplicateTab: ({
+    handleDuplicateTab?: ({
       tab,
       gridKey,
       entity,
@@ -129,7 +129,7 @@ export default function ManageFilter({
 
   const handleDuplicateFilter = async () => {
     try {
-      tabActions?.handleDuplicateTab({
+      tabActions?.handleDuplicateTab?.({
         tab,
         gridKey : gridKey || '',
         entity: defaultEntity || '',
