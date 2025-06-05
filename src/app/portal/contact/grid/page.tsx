@@ -68,8 +68,8 @@ export default async function Page() {
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'contact',
-          resolver: 'mainGrid',
+          router: 'search',
+          resolver: 'contactSearch',
           query_params: {
             entity: 'contact',
             pluck: _pluck,

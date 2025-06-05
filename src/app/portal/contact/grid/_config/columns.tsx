@@ -71,7 +71,7 @@ const gridColumns = [
   {
     header: 'Department',
     accessorKey: 'organization',
-    isSearchable: false,
+    // isSearchable: false,
     cell: ({ row }) => {
       const departments = row?.original?.organization || [];
       if (!Array.isArray(departments)) return;
@@ -90,7 +90,6 @@ const gridColumns = [
     accessorKey: "updated_date_time",
     data_type: "datetime",
     sortKey: ["updated_date", "updated_time"],
-    // isSearchable: false,
     search_config: {
       field: "updated_date_time",
       operator: 'like'
@@ -101,7 +100,6 @@ const gridColumns = [
     accessorKey: 'updated_by',
     data_type: 'string',
     sortKey: 'updated_by.full_name',
-    // isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -113,7 +111,6 @@ const gridColumns = [
     accessorKey: 'created_date_time',
     data_type: 'datetime',
     sortKey: ['created_date', 'created_time'],
-    // isSearchable: false,
     search_config: {
       field: 'created_date_time',
       operator: 'like',
@@ -124,7 +121,6 @@ const gridColumns = [
     accessorKey: 'created_by',
     data_type: 'string',
     sortKey: 'created_by.full_name',
-    // isSearchable: false,
     search_config: {
       entity: 'created_by',
       field: 'full_name',

@@ -1,28 +1,29 @@
-import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { gridRouter } from "./routers/grid";
-import { wizardRouter } from "./routers/wizard";
-import { authRouter } from "./routers/auth";
-import { tabRouter } from "./routers/tab";
-import { menuRouter } from "./routers/menu";
-import { recordRouter } from "./routers/record";
-import { userRolesRouter } from "./routers/user_role";
-import { notificationsRouter } from "./routers/notification";
-import { validatorRouter } from "./routers/validator";
-import { degreeLevelRouter } from "./routers/degree_level";
-import { countryRouter } from "./routers/country";
-import { googleRouter } from "./routers/google";
-import { contactRouter } from "./routers/contact";
-import { organizationRouter } from "./routers/organization";
-import { dashboardRouter } from "./routers/dashboard";
-import { organizationContactsRouter } from "./routers/organization_contact";
-import { filesRouter } from "./routers/files";
-import { formRouter } from "./routers/form";
-import { accountRouter } from "./routers/account";
+import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
+import { gridRouter } from './routers/grid';
+import { wizardRouter } from './routers/wizard';
+import { authRouter } from './routers/auth';
+import { tabRouter } from './routers/tab';
+import { menuRouter } from './routers/menu';
+import { recordRouter } from './routers/record';
+import { userRolesRouter } from './routers/user_role';
+import { notificationsRouter } from './routers/notification';
+import { validatorRouter } from './routers/validator';
+import { degreeLevelRouter } from './routers/degree_level';
+import { countryRouter } from './routers/country';
+import { googleRouter } from './routers/google';
+import { contactRouter } from './routers/contact';
+import { organizationRouter } from './routers/organization';
+import { dashboardRouter } from './routers/dashboard';
+import { organizationContactsRouter } from './routers/organization_contact';
+import { filesRouter } from './routers/files';
+import { formRouter } from './routers/form';
+import { accountRouter } from './routers/account';
 import { organizationAccountsRouter } from './routers/organization_accounts';
 import { gridFilterRouter } from './routers/grid_filter';
 import { communicationTemplateRouter } from './routers/communication_template';
 import { deviceRouter } from './routers/device';
 import { locationRouter } from './routers/location';
+import { searchRouter } from './routers/search';
 
 /**
  * This is the primary router for your server.
@@ -54,6 +55,7 @@ export const appRouter = createTRPCRouter({
   communicationTemplate: communicationTemplateRouter,
   device: deviceRouter,
   location: locationRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

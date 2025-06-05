@@ -15,16 +15,15 @@ import { GridContext } from '../Provider';
 import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
 import { type ISearchItemResult } from './types';
-import { transformSearchData } from './utils/transformSearchData';
-import { usePathname } from 'next/navigation'
-import { testIDFormatter } from '~/utils/formatter'
+import { usePathname } from 'next/navigation';
+import { testIDFormatter } from '~/utils/formatter';
 
 export default function Search({ gridType }: any) {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
 
-  const path =  usePathname()
-  const [, , path1, path2] = path.split('/')
+  const path = usePathname();
+  const [, , path1, path2] = path.split('/');
   const { width } = useWindowSize();
   const screenSize = useScreenType();
   const isMobile =
@@ -35,6 +34,7 @@ export default function Search({ gridType }: any) {
     entity = '',
     searchConfig,
   } = gridState?.config ?? {};
+
 
   const { group_advance_filters = [] } = searchConfig?.query_params ?? {};
   const { advanceFilterItems = [] } = state ?? {};
@@ -79,6 +79,7 @@ export default function Search({ gridType }: any) {
               return item; // Keep operator objects unchanged
             }),
       ...(searchConfig?.query_params ?? {}),
+      searchable_fields: searchableFields,
     },
     {
       refetchOnWindowFocus: false,
@@ -131,11 +132,12 @@ export default function Search({ gridType }: any) {
             <li className="p-2">
               <SearchResult
                 results={
-                  (transformSearchData(
-                    items,
-                    debouncedSearchInput,
-                    searchableFields,
-                  ) as ISearchItemResult[]) || null
+                  (items as ISearchItemResult[]) || null
+                  // (transformSearchData(
+                  //   items,
+                  //   debouncedSearchInput,
+                  //   searchableFields,
+                  // ) as ISearchItemResult[]) || null
                 }
               />
             </li>
