@@ -209,6 +209,16 @@ export interface IConfigGrid {
   enableCreateCustomGridFilter?: boolean,
   enableManageCustomGridFilter?: boolean,
   customTabDefaults?: Record<string, any>;
+  archiveBulkDialogConfiguration?: {
+    title?: string;
+    message: string;
+  };
+  archiveButtonConfiguration?: {
+    label?: string;
+    icon?: React.JSX.Element;
+    hide?: boolean;
+    disabled?: boolean;
+  };
 }
 
 interface IRowToArchive extends Row<any> {
@@ -254,6 +264,12 @@ export interface IState {
   groupConfigs?: IGroupBy[];
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
 }
 
 export interface IAction {
@@ -317,6 +333,12 @@ export interface IPropsGrid {
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
   grid_tabs?: any[];
 }
 

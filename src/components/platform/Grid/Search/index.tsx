@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { cn } from '~/lib/utils';
 
@@ -22,11 +22,24 @@ export default function Main({
   gridType = 'table',
   viewMode = 'table',
 }: any) {
-  const { state } = useGrid(); // Add this hook to get grid context
+  const { state , actions } = useGrid(); // Add this hook to get grid context
   const renderedCreateButton = () => {
     if (creatable && state?.customCreateButton) {
       return state?.customCreateButton
-    }else if (creatable) {
+    }
+    else if (creatable && state?.customCreateActionButton) {
+      const selectedRows = state?.table?.getSelectedRowModel().rows;
+      return (
+        <Fragment>
+          {state?.customCreateActionButton({
+            config: state?.config,
+            selected_rows: selectedRows,
+            actions,
+          })}
+        </Fragment>
+      );
+    } 
+    else if (creatable) {
       return <CreateButton className="hidden lg:inline-flex" title="New"  />
     }else {
       return null;
