@@ -1,10 +1,10 @@
 "use client";
 
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import Image from "next/image";
 
 const ErrorContainer = ({
   error,
@@ -14,7 +14,7 @@ const ErrorContainer = ({
   reset: () => void;
 }) => {
   const router = useRouter();
-
+  
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -24,7 +24,7 @@ const ErrorContainer = ({
       router.refresh();
       reset();
     });
-  };
+  }
 
   return (
     <div className="flex justify-center p-4 py-6">
@@ -35,19 +35,12 @@ const ErrorContainer = ({
           width={100}
           height={120}
         />
-        <h2 className="mt-2 text-sm font-bold">Something Went Wrong!</h2>
+        <h2 className="text-sm font-bold mt-2">Something Went Wrong!</h2>
         <div className="mt-3">
-          <Button
-            onClick={clearError}
-            className="border border-primary text-primary"
-            size={"xs"}
-            variant={"outline"}
-          >
-            Try again
-          </Button>
+          <Button onClick={clearError} className="border border-primary text-primary" size={'xs'} variant={'outline'}>Try again</Button>
         </div>
       </div>
-    </div>
+  </div>
   );
 };
 

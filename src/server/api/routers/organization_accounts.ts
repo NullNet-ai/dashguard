@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import {
   createTRPCRouter,
+  privateProcedure,
   publicProcedure,
   // privateProcedure
 } from '~/server/api/trpc'
@@ -36,5 +37,10 @@ export const organizationAccountsRouter = createTRPCRouter({
         data: record?.data?.[0],
       }
     }),
+  getAccountID: privateProcedure.mutation(async ({ ctx }) => {
+
+    const {organization_id} = ctx.session.account || {}
+    return { account_id: '', organization_id , token: ctx.token.value };
+  })
 
 })

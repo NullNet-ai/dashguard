@@ -1,12 +1,5 @@
 import { api } from '~/trpc/server';
 import Grid from '~/components/platform/Grid';
-import { headers } from 'next/headers';
-
-/**
- *
- * @Default Grid Features
- *
- */
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
@@ -17,9 +10,6 @@ export default async function Page() {
   const gridCacheData = (await getGridCacheData({
     defaultSorting: defaultSorting,
   })) ?? {};
-  const headerList = headers();
-  const pathname = headerList.get('x-pathname') || '';
-  const [, , main_entity] = pathname.split('/');
 
   const _pluck = [
     'id',
@@ -37,7 +27,7 @@ export default async function Page() {
   ];
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: main_entity!,
+    entity: 'device',
     pluck: _pluck,
     gridCacheData,
     defaults: {
@@ -57,7 +47,7 @@ export default async function Page() {
       data={items}
       config={{
         isInfinite: true,
-        entity: main_entity!,
+        entity: 'device',
         title: 'Devices',
         columnsOrder: gridCacheData?.columns,
         columns: gridColumns,
@@ -72,13 +62,13 @@ export default async function Page() {
           router: 'device',
           resolver: 'mainGrid',
           query_params: {
-            entity: main_entity!,
+            entity: 'device',
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
       }}
-      customCreateButton={<CustomCreateButton entity={main_entity!} />}
+      customCreateButton={<CustomCreateButton entity={'device'} />}
     />
   );
 }

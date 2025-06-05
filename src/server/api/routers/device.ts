@@ -13,6 +13,7 @@ import { formatSorting } from '~/server/utils/formatSorting';
 import ZodItems from '~/server/zodSchema/grid/items';
 import { cookies } from 'next/headers';
 import Bluebird from 'bluebird';
+import { addCommonGridJoins, addCommonGridPluckObject } from '~/server/utils/queryBuilder';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -134,11 +135,13 @@ export const deviceRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      console.log("%c Line:138 🥐 input", "color:#ed9ec7", input);
       const asRoot = true;
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
+      console.log("%c Line:148 🍞 ctx.token.value", "color:#b03734", ctx.token.value);
       const deviceInfo = await ctx.dnaClient
       .findByCode(input.device_id, {
         entity: 'devices',
@@ -152,8 +155,10 @@ export const deviceRouter = createTRPCRouter({
         },
       })
       .execute();
+      console.log("%c Line:158 🍔 deviceInfo", "color:#ed9ec7", deviceInfo);
       const deviceRecord = deviceInfo?.data?.[0];
       // fetch account organization via device_id
+      console.log("%c Line:157 🥝 deviceRecord", "color:#7f2b82", deviceRecord);
       const accountOrganization = await ctx.dnaClient
       .findAll({
         entity: 'account_organizations',
@@ -193,25 +198,27 @@ export const deviceRouter = createTRPCRouter({
       const accountRecord = accountOrganization?.data?.[0]?.accounts;
       
       try {
-        const [device, account, accountOrg] = await Promise.all([
-          ctx.dnaClient
-            .update(deviceRecord?.id, {
-              entity: 'devices',
-              token: rootAccountToken,
-              as_root: true,
-              mutation: {
-                params: {
-                  status: 'Active',
-                },
-              },
-            })
-            .execute(),
+        const [account] = await Promise.all([
+          // ctx.dnaClient
+          //   .update(deviceRecord?.id, {
+          //     entity: 'devices',
+          //     token: rootAccountToken,
+          //     as_root: true,
+          //     mutation: {
+          //       pluck: ['id', 'code', 'status'],
+          //       params: {
+          //         status: 'Active',
+          //       },
+          //     },
+          //   })
+          //   .execute(),
           ctx.dnaClient
             .update(accountRecord?.id, {
               entity: 'accounts',
               token: rootAccountToken,
               as_root: true,
               mutation: {
+                pluck:  ['id', 'status', 'account_status', 'account_id'],
                 params: {
                   status: 'Active',
                   account_status: 'Active',
@@ -225,6 +232,12 @@ export const deviceRouter = createTRPCRouter({
               token: rootAccountToken,
               as_root: true,
               mutation: {
+                pluck:  [
+                  'id',
+                  'status',
+                  'account_id',
+                  'account_organization_status'
+                ],
                 params: {
                   status: 'Active',
                   account_organization_status: 'Active',
@@ -234,11 +247,16 @@ export const deviceRouter = createTRPCRouter({
             .execute(),
         ]);
 
+        const _account = account?.data?.[0];
+        console.log("%c Line:252 🍏 `${deviceRecord?.id}:${_account?.account_id}`", "color:#f5ce50", `account_id:${_account?.account_id}`);
+        const fetch_account_secret = await ctx.redisClient.getCachedData(`${deviceRecord?.id}:${_account?.account_id}`)
+        console.log("%c Line:252 🍖 fetch_account_secret", "color:#42b983", fetch_account_secret);
+      
+
+        const { account_secret } = fetch_account_secret ?? {}
         // Return the updated records
         return {
-          device,
-          account,
-          accountOrganization: accountOrg,
+          account: _account,
           success: true,
           message: 'Device activated successfully',
           status_code: 200
@@ -615,7 +633,8 @@ export const deviceRouter = createTRPCRouter({
       const { devices, account_organizations } = data?.[0] ?? {}
       const {id: device_id} = devices ?? {}
 
-      const fetch_account_secret = await ctx.redisClient.getCachedData(`${device_id}:${account_organizations?.email}`)
+      const fetch_account_secret = await ctx.redisClient.getCachedData(`account_id:${account_organizations?.email}`)
+      console.log("%c Line:637 🍇 fetch_account_secret", "color:#3f7cff", fetch_account_secret);
       
 
       const { account_secret } = fetch_account_secret ?? {}
@@ -811,9 +830,13 @@ export const deviceRouter = createTRPCRouter({
         is_case_sensitive_sorting = 'false',
       } = input
       const pluck_object = {
-        contacts: ['first_name', 'last_name', 'id'],
+        ...addCommonGridPluckObject(),
+        contacts: ['first_name', 'last_name', 'id', 'previous_status'],
         organization_accounts: ['contact_id', 'id', 'device_id'],
+        organizations: ['id', 'name', 'categories'],
+        organization_contacts: ['id', 'contact_organization_id'],
         devices: pluck,
+        device_group_devices: ['device_group_setting_id', 'device_id', 'id'],
         device_groups: ['device_group_setting_id', 'device_id', 'id'],
         device_group_settings: ['name', 'id'],
         device_interfaces: ['id', 'device_configuration_id', 'name'],
@@ -873,76 +896,54 @@ export const deviceRouter = createTRPCRouter({
       })
       if (pluck_object) {
         query
-          // .join({
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                alias: 'device_group_devices',
+                entity: 'device_groups',
+                field: 'device_id',
+              },
+              from: {
+                entity: input?.entity,
+                field: 'id',
+              },
+            },
+          })
+          .nestedJoin({
+            type: 'left',
+            nested: true,
+            field_relation: {
+              to: {
+                entity: 'device_group_settings',
+                field: 'id',
+              },
+              from: {
+                entity: 'device_group_devices',
+                field: 'device_group_setting_id',
+              },
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_configurations',
+                field: 'device_id',
+                order_by: 'timestamp',
+                limit: 1,
+                order_direction: EOrderDirection.DESC,
+              },
+              from: {
+                entity: input?.entity,
+                field: 'id',
+              },
+            },
+          })
+          //!! TO BE TESTED BY THE DB TEAM
+          // .nestedJoin({
           //   type: 'left',
-          //   field_relation: {
-          //     to: {
-          //       entity: 'organization_accounts',
-          //       field: 'id',
-          //     },
-          //     from: {
-          //       entity: 'devices',
-          //       field: 'created_by',
-          //     },
-          //   },
-          // })
-          // .join({
-          //   type: 'left',
-          //   field_relation: {
-          //     to: {
-          //       entity: 'contacts',
-          //       field: 'id',
-          //     },
-          //     from: {
-          //       entity: 'organization_accounts',
-          //       field: 'contact_id',
-          //     },
-          //   },
-          // })
-          // .join({
-          //   type: 'left',
-          //   field_relation: {
-          //     to: {
-          //       entity: 'device_groups',
-          //       field: 'device_id',
-          //     },
-          //     from: {
-          //       entity: input?.entity,
-          //       field: 'id',
-          //     },
-          //   },
-          // })
-          // .join({
-          //   type: 'left',
-          //   field_relation: {
-          //     to: {
-          //       entity: 'device_group_settings',
-          //       field: 'id',
-          //     },
-          //     from: {
-          //       entity: 'device_groups',
-          //       field: 'device_group_setting_id',
-          //     },
-          //   },
-          // })
-          // .join({
-          //   type: 'left',
-          //   field_relation: {
-          //     to: {
-          //       entity: 'device_configurations',
-          //       field: 'device_id',
-          //       order_by: 'timestamp',
-          //       limit: 1,
-          //       order_direction: EOrderDirection.DESC,
-          //     },
-          //     from: {
-          //       entity: 'devices',
-          //       field: 'id',
-          //     },
-          //   },
-          // })
-          // .join({
-          //   type: 'left',
+          //   nested: true,
           //   field_relation: {
           //     to: {
           //       entity: 'device_interfaces',
@@ -982,6 +983,8 @@ export const deviceRouter = createTRPCRouter({
           //   },
           // })
       }
+
+      addCommonGridJoins(query, 'devices')
       const { total_count: totalCount = 0, data: items }
       = await query.execute()
 

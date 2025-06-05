@@ -30,6 +30,7 @@ import { deviceAliasRouter } from './routers/configuration_alias';
 import { deviceConfigurationRouter } from './routers/device_configuration';
 import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session';
 import { packetRouter } from './routers/packet';
+import { cachedFilterRouter } from './routers/cache_filter';
 
 /**
  * This is the primary router for your server.
@@ -67,7 +68,8 @@ export const appRouter = createTRPCRouter({
   deviceAlias: deviceAliasRouter,
   deviceConfiguration: deviceConfigurationRouter,
   deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
-  packet: packetRouter
+  packet: packetRouter,
+  cachedFilter: cachedFilterRouter,
 });
 
 // export type definition of API

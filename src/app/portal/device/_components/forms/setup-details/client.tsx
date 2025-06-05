@@ -13,21 +13,21 @@ import CustomSetupDetails from '../_custom/SetupDetails'
 import { type IFormProps } from '../types'
 
 export default function SetupDetails({ params, defaultValues }: IFormProps) {
+  const { code } = defaultValues
   const form = useForm()
   const toast = useToast()
-  const createOrgAccount = api.device.createOrganizationAccount.useMutation()
+  const activateDeviceAcctOrganization = api.device.activateDevice.useMutation()
   const [orgAccount, setOrgAccount] = useState<Record<string, string> | null>()
 
-  const handleCreateOrgAccount = async () => {
+  const handleDeviceActivation = async () => {
     try {
-      const res = (await createOrgAccount.mutateAsync({
-        id: params.id,
-      })) as Record<string, string> | null
-
-      if (!!res && Object.keys(res).length) {
+      const res: { status_code: number; message: string; account: Record<string, any> | undefined } | null = await activateDeviceAcctOrganization.mutateAsync({
+        device_id: code
+      })
+      if (res && res.status_code === 200) {
         toast.success(`${res?.message}`)
       }
-      setOrgAccount(res)
+      setOrgAccount(res?.account)
       return res
     }
     catch (error) {
@@ -36,7 +36,7 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
   }
 
   useEffect(() => {
-    void handleCreateOrgAccount()
+    void handleDeviceActivation()
   }, [params.id])
 
   const handleSave = async () => {

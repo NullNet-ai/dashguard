@@ -93,7 +93,7 @@ export default async function DashboardTabs() {
     <div className="space-y-2">
       <div className="ml-[-13px]">
         <StateTab
-          defaultValue="overview"
+          defaultValue="configuration_rules"
           // orientation="horizontal"
           rotateText={true}
           persistKey={`configuration_rule-${identifier}`}
