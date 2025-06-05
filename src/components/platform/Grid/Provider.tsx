@@ -66,6 +66,7 @@ export default function GridProvider({
   grouping: initialGrouping = [],
   gridKey,
   customCreateButton,
+  customCreateActionButton
 }: IProps) {
   const router = useRouter();
 
@@ -762,6 +763,7 @@ export default function GridProvider({
     groupConfigs: initialGrouping,
     gridKey,
     customCreateButton,
+    customCreateActionButton,
   } as IState;
   const actions = {
     handleCreate,
