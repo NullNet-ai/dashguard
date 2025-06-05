@@ -299,7 +299,8 @@ export type IParentType =
   | 'form'
   | 'field'
   | 'grid_expansion'
-  | 'side_drawer';
+  | 'side_drawer'
+  | 'record';
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
