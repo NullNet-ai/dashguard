@@ -56,8 +56,8 @@ export default async function UserRoleGridPage() {
         columnsOrder: gridCacheData?.columns,
         enableAutoCreate: false,
         searchConfig: {
-          router: 'grid',
-          resolver: 'items',
+          router: 'search',
+          resolver: 'searchSuggestions',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,

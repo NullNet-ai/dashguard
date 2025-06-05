@@ -204,14 +204,164 @@ export const searchRouter = createTRPCRouter({
           raw_phone_number: suggestion.display_value as string,
           iso_code: 'us',
         });
-        if(suggestion.field === 'raw_phone_number') {
+        if (suggestion.field === 'raw_phone_number') {
           return {
-           ...suggestion,
+            ...suggestion,
             display_value: primary_phone_number,
-          }
+          };
         }
-         return suggestion
+        return suggestion;
       });
       return { items: resolvedSuggestions };
+    }),
+  accountSearch: privateProcedure
+    // Define input using zod for validation
+    .input(ZodSearchSuggestions)
+    .query(async ({ input, ctx }) => {
+      const {
+        advance_filters: _advance_filters = [],
+        entity,
+        sorting,
+        group_advance_filters: _group_advance_filters = [],
+        searchable_fields = [],
+      } = input;
+
+      const pluck_object = {
+        ...addCommonGridPluckObject(),
+        [pluralize(entity)]: input.pluck,
+      };
+
+      const query = ctx.dnaClient
+        .searchSuggestions({
+          entity: input?.entity,
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              ...addCommonGridPluckObject(),
+              account_organizations: [
+                'id',
+                'email',
+                'status',
+                'code',
+                'categories',
+                'account_organization_status',
+                'created_date',
+                'created_time',
+                'updated_date',
+                'updated_time',
+                'created_by',
+                'updated_by',
+                'contact_id',
+              ],
+              contacts: ['id', 'first_name', 'last_name'],
+            },
+            track_total_records: true,
+            advance_filters: input.advance_filters as IAdvanceFilters[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+            },
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
+              : [],
+            concatenate_fields: [
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'created_by',
+              },
+              {
+                fields: ['first_name', 'last_name'],
+                field_name: 'full_name',
+                separator: ' ',
+                entity: 'contacts',
+                aliased_entity: 'updated_by',
+              },
+            ],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'account_organizations',
+              field: 'id',
+            },
+            from: {
+              alias: 'created_by_account_organizations',
+              entity: 'account_organizations',
+              field: 'created_by',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
+              alias: 'created_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        })
+        .join({
+          type: 'self',
+          field_relation: {
+            to: {
+              entity: 'account_organizations',
+              field: 'id',
+            },
+            from: {
+              alias: 'updated_by_account_organizations',
+              entity: 'account_organizations',
+              field: 'updated_by',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
+              alias: 'updated_by',
+              entity: 'contact',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        });
+
+      const { data: items } = await query.execute();
+
+      // Calculate total number of pages
+      const suggestions = searchSuggestionTransformer(items, searchable_fields);
+      return { items: suggestions };
     }),
 });

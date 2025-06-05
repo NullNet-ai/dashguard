@@ -67,8 +67,8 @@ export default async function Page() {
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'grid',
-          resolver: 'items',
+          router: 'search',
+          resolver: 'searchSuggestions',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,

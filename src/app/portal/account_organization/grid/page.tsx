@@ -47,8 +47,8 @@ export default async function Page() {
         columns: gridColumns,
         columnsOrder: gridCacheData?.columns,
         searchConfig: {
-          router: 'account',
-          resolver: 'fetchGridData',
+          router: 'search',
+          resolver: 'accountSearch',
           query_params: {
             entity: 'account_organization',
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,

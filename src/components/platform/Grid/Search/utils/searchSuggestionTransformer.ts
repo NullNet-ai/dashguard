@@ -3,11 +3,16 @@ import { ISearchableField } from '../types';
 
 const valueResolver = (value: string): string | string[] => {
   if (/^\{.*\}$/.test(value)) {
-    return value
-      .slice(1, -1) // Remove the outer {}
-      .split(',') // Split by comma
-      .map((v) => v.trim()); // Trim whitespace from each item
+    const inner = value.slice(1, -1).trim();
+
+    // If it contains quoted strings, extract quoted or unquoted values
+    const matches = Array.from(inner.matchAll(/"([^"]+)"|([^,]+)/g)).map(
+      (match: any) => (match?.[1] || match?.[2]).trim(),
+    );
+
+    return matches;
   }
+
   return value;
 };
 

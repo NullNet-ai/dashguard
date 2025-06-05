@@ -64,8 +64,8 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
         archiveCustomComponent: ArchiveComponent,
         archiveDialogCustomComponent: ArchiveDialog,
         searchConfig: {
-          router: 'grid',
-          resolver: 'items',
+          router: 'search',
+          resolver: 'searchSuggestions',
           query_params: {
             entity: 'organization',
             pluck: _pluck,

@@ -76,7 +76,6 @@ const gridColumns = [
   {
     header: 'Status',
     accessorKey: 'account_organization_status',
-    enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.account_organization_status
       if (!value) return null
@@ -87,7 +86,6 @@ const gridColumns = [
     header: 'Updated By',
     accessorKey: 'updated_by',
     sortKey: 'updated_by.full_name',
-    isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -111,7 +109,6 @@ const gridColumns = [
   {
     header: 'Created By',
     accessorKey: 'created_by',
-    isSearchable: false,
     sortKey: 'created_by.full_name',
     search_config: {
       entity: 'created_by',
