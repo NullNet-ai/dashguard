@@ -170,10 +170,6 @@ export default function GridProvider({
     default: true,
   })) as ISearchItem[];
 
-  if (!!columnsOrder?.length) {
-    _propsConfig.columns = sortColumns(columnsOrder, _propsConfig?.columns);
-  }
-
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
       if (curr?.default) return acc;
@@ -210,6 +206,35 @@ export default function GridProvider({
       }
     }
   }, []);
+
+    // use effect for column order
+    useEffect(() => {
+      if(!_propsConfig?.columnsOrder?.length) {
+        setColumnsOrder([]);
+        return;
+      };
+  
+      if (!!_propsConfig?.columnsOrder?.length) {
+        const sortedColumns = sortColumns(_propsConfig?.columnsOrder, _propsConfig?.columns);
+        _propsConfig.columns = sortedColumns
+      }
+      
+      // Check if arrays have different lengths
+      if (columnsOrder.length !== _propsConfig.columnsOrder.length) {
+        setColumnsOrder(_propsConfig.columnsOrder ?? []);
+        return;
+      }
+      
+      const hasChanged = _propsConfig.columnsOrder.some((newCol, index) => {
+        const currentCol = columnsOrder[index];
+        return newCol.id !== currentCol.id || newCol.order !== currentCol.order;
+      });
+      
+      if (hasChanged) {
+        setColumnsOrder(_propsConfig.columnsOrder ?? []);
+      }
+    }, [_propsConfig?.columnsOrder]);
+  
 
   // use effect for sorting if there is a change in props sorting it should set the sorting
   useEffect(() => {

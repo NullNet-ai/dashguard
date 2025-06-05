@@ -1160,6 +1160,17 @@ export const gridRouter = createTRPCRouter({
               operator: EOperator.EQUAL,
               values: [mainEntity!],
             },
+            {
+              operator: EOperator.AND,
+              type: 'operator',
+              default: true,
+            },
+            {
+              type: 'criteria',
+              field: 'link',
+              operator: EOperator.LIKE,
+              values: [pathName],
+            }
           ] as IAdvanceFilters[],
         },
       });

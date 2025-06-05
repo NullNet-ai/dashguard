@@ -48,6 +48,7 @@ export function FilterGroup({
   onRemoveFilter,
   onUpdateJunctionOperator,
   searchConfig,
+  customTabDefaults,
 }: {
   groupIndex: number;
   form: any;
@@ -61,6 +62,7 @@ export function FilterGroup({
   onRemoveFilter: (index: number) => void;
   onUpdateJunctionOperator: (index: number, operator: string) => void;
   searchConfig: any;
+  customTabDefaults: Record<string, any>;
 }) {
   // Calculate the number of criteria filters to determine when to show delete button
   const criteriaFilters = fields.filter((filter) => filter.type === 'criteria');
@@ -289,6 +291,7 @@ export function FilterGroup({
                               searchTerm,
                               searchConfig,
                               field_name: formValues,
+                              customTabDefaults,
                               fieldConfig:
                                 columns.find(
                                   (item) => item.accessorKey === formValues,
@@ -359,11 +362,13 @@ export const searchFilterValues = async ({
   searchConfig,
   fieldConfig,
   field_name,
+  customTabDefaults,
 }: {
   searchTerm: string;
   searchConfig: any;
   fieldConfig: any;
   field_name: string;
+  customTabDefaults: Record<string, any>;
 }): Promise<Array<{ value: string; label: string }>> => {
   try {
     const response = await searchRecords({
@@ -371,6 +376,7 @@ export const searchFilterValues = async ({
       field: field_name,
       searchConfig,
       fieldConfig,
+      customTabDefaults: {},
     });
 
     return response;
