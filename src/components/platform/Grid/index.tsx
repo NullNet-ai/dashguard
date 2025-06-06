@@ -22,6 +22,7 @@ function MainServer({
   customCreateButton,
   customCreateActionButton,
   grid_tabs = [],
+  hideCreateNewFilter
 }: IPropsGrid) {
   if (!grid_tabs.length) return null;
   return (
@@ -38,6 +39,7 @@ function MainServer({
       gridKey={gridKey}
       customCreateButton={customCreateButton}
       customCreateActionButton={customCreateActionButton}
+      hideCreateNewFilter={hideCreateNewFilter}
     >
       <GridScrollView parentType={parentType} className="hidden lg:block">
         <GridDesktop
