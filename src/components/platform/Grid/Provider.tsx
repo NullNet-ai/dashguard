@@ -262,7 +262,9 @@ export default function GridProvider({
   }, [initialSorting]);
 
   useEffect(() => {
-    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
+    if (
+      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)
+    ) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {
         const newVisibility: any = {};
