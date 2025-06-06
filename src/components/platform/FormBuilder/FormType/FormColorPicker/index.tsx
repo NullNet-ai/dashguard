@@ -29,13 +29,20 @@ export default function FormColorPicker({
   fieldConfig,
   formRenderProps,
   formKey,
+  form
 }: IProps) {
-  const isDisabled = formRenderProps.field.disabled;
+  const isDisabled = form?.formState.disabled;
   const isHidden = fieldConfig.hidden;
 
   if (isHidden) {
     return null;
   }
+
+  const handleColorChange = (data: any) => {
+		formRenderProps.field.onChange(data.value);
+		formRenderProps.field.onBlur();
+    form.setValue(fieldConfig.name, data.value);
+	};
 
   return (
     <FormItem>
@@ -48,6 +55,8 @@ export default function FormColorPicker({
       <FormControl>
         <ColorPicker
            {...fieldConfig.colorPickerConfig}
+           onColorChange={handleColorChange}
+           disabled={isDisabled}
         />
       </FormControl>
       <FormMessage

@@ -54,9 +54,20 @@ export interface ColorPickerProps {
    */
   className?: string
 
-
+  /**
+   * Callback when color picker is closed
+   */
   onClose?: () => void
+  
+  /**
+   * Default show state
+   */
   defaultShow?: boolean
+  
+  /**
+   * Disabled state
+   */
+  disabled?: boolean
 }
 
 
@@ -67,7 +78,8 @@ export function ColorPicker({
   onColorChange,
   className,
   onClose,
-  defaultShow
+  defaultShow,
+  disabled = false
 }: ColorPickerProps) {
   // Add ref for color to prevent re-renders
   const colorRef = React.useRef<string>(defaultColor);
@@ -252,7 +264,6 @@ export function ColorPicker({
       // Show a more user-friendly error message
       if (error instanceof Error && error.name === 'AbortError') {
         // User canceled the eye dropper
-        // console.log('Eye dropper was canceled');
       } else {
         toast.error('Failed to use the eye dropper tool', {
           richColors: true
@@ -330,11 +341,12 @@ export function ColorPicker({
 
   return (
     <div className="flex items-center gap-2">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={disabled ? undefined : setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className={cn("w-[220px] justify-start text-left font-normal", className)}
+            // disabled={disabled}
           >
             <div className="flex items-center gap-2">
               <div
@@ -355,7 +367,7 @@ export function ColorPicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-4 max-h-96 sm:max-h-[32rem] md:max-h-max overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <PopoverContent className="w-[280px] p-4">
           <div className="flex flex-col gap-4">
             {/* Color preview */}
             {colorPreviewComponent}
