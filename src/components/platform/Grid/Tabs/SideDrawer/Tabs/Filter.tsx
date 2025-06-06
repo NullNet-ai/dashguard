@@ -367,7 +367,7 @@ export default function FilterContent() {
           })}
         </Sortable>
       </Form>
-
+{/* 
       <Button
         variant="ghost"
         size="sm"
@@ -376,7 +376,7 @@ export default function FilterContent() {
       >
         <Plus className="h-4 w-4" />
         Add Group Filter
-      </Button>
+      </Button> */}
     </div>
   );
 }

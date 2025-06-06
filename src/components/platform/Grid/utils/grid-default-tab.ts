@@ -56,14 +56,37 @@ export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: an
   const modifiedTabs =  tabs.map((tab) => {
     const _id = tab.id || ulid();
     
-    // Check if href already has a filter_id with a value
-    const hasFilterId = tab.href.includes('/grid?filter_id=') && 
-    tab.href.split('/grid?filter_id=')[1].length > 0;
+    // Fix the URL construction to prevent duplicate filter_id
+    let finalHref = tab.href;
+    
+    // If the URL already contains ?filter_id= (with or without a value)
+    if (finalHref.includes('?filter_id=')) {
+      // Check if it already has a value
+      if (finalHref.split('?filter_id=')[1].length > 0) {
+        // Already has a value, don't modify
+        return {
+          ...tab,
+          id: _id,
+          href: finalHref,
+        };
+      } else {
+        // Has ?filter_id= but no value, append the ID
+        finalHref = `${finalHref}${_id}`;
+      }
+    } else {
+      // Doesn't have filter_id parameter at all
+      // Check if it has other query parameters
+      if (finalHref.includes('?')) {
+        finalHref = `${finalHref}&filter_id=${_id}`;
+      } else {
+        finalHref = `${finalHref}?filter_id=${_id}`;
+      }
+    }
 
     return {
       ...tab,
       id: _id,
-      href: hasFilterId ? tab.href : `${tab.href}${_id}`,
+      href: finalHref,
     };
   });
 

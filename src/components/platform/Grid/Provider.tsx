@@ -248,8 +248,7 @@ export default function GridProvider({
 
   useEffect(() => {
     if (
-      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings) &&
-      !config?.onFetchRecords
+      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)
     ) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {

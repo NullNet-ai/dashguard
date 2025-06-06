@@ -109,14 +109,14 @@ export const searchRecords = async ({
           return [
             {
               label: value,
-              value: value,
+              value: record[fieldConfig?.field] ?? value,
             },
           ];
         default:
           return [
             {
               label: value,
-              value: value,
+              value: record[fieldConfig?.field] ?? value,
             },
           ];
       }
