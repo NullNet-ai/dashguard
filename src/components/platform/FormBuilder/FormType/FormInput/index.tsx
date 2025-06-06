@@ -2,15 +2,16 @@ import {
   type UseFormReturn,
   type ControllerFieldState,
   type ControllerRenderProps,
-} from "react-hook-form";
-import { type IFieldFilterActions, type IField } from "../../types";
+} from 'react-hook-form';
+import { type IFieldFilterActions, type IField } from '../../types';
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+} from '~/components/ui/form';
+import { Input } from '~/components/ui/input';
+import { useEffect } from 'react';
 
 interface IProps {
   fieldConfig: IField;
@@ -32,6 +33,7 @@ export default function FormInput({
   value,
   fieldFilterActions,
   formKey,
+  form,
 }: IProps) {
   const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
@@ -45,6 +47,14 @@ export default function FormInput({
   //     shouldTouch: true,
   //   });
   // };
+  const valueChange = form.getValues(fieldConfig?.name);
+
+  useEffect(() => {
+    if (!fieldConfig?.name) return;
+    if (!fieldConfig?.inputOnChange) return;
+    fieldConfig?.inputOnChange(valueChange);
+  }, [valueChange]);
+
   if (isHidden) {
     return null;
   }

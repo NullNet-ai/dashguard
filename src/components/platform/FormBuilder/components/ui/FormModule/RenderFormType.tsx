@@ -57,6 +57,7 @@ import FormAvatar from '../../../FormType/FormAvatar'
 import FormBadge from '../../../FormType/FormBadge'
 import FormAdaptiveBadge from '../../../FormType/FormAdaptiveBadge'
 import FormMessageInputBox from '../../../FormType/FormMessageInputBox'
+import FormColorPicker from '../../../FormType/FormColorPicker'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -202,6 +203,15 @@ export default function RenderFormType(
     case 'inputs':
       return (
         <FormTextInputs
+          fieldConfig={fieldConfig}
+          form={form}
+          formKey={formKey}
+          formRenderProps={formRenderProps}
+        />
+      )
+    case 'color-picker':
+      return (
+        <FormColorPicker
           fieldConfig={fieldConfig}
           form={form}
           formKey={formKey}

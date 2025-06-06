@@ -39,6 +39,7 @@ export interface DefaultRowActions {
 
 export interface DefaultBulkActions {
   entity: string;
+  config?: IConfigGrid;
   selected_rows: Row<any>[];
 }
 
@@ -124,7 +125,9 @@ export interface IConfigGrid {
     args: Record<string, any>,
   ) => void | Promise<string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
-  archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
+  archiveBulkRecordCustomAction?: (
+    args: DefaultBulkActions,
+  ) => Promise<any> | void;
   layer?: TLayerType;
   enableAutoCreate?: boolean;
   // toggle for single and multi select
@@ -214,6 +217,16 @@ export interface IConfigGrid {
     resolver?: string;
     query_params?: ISearchParams;
   };
+  archiveBulkDialogConfiguration?: {
+    title?: string;
+    message: string;
+  };
+  archiveButtonConfiguration?: {
+    label?: string;
+    icon?: React.JSX.Element;
+    hide?: boolean;
+    disabled?: boolean;
+  };
 }
 
 interface IRowToArchive extends Row<any> {
@@ -259,6 +272,12 @@ export interface IState {
   groupConfigs?: IGroupBy[];
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
 }
 
 export interface IAction {
@@ -305,7 +324,8 @@ export type IParentType =
   | 'field'
   | 'grid_expansion'
   | 'side_drawer'
-  | 'grouping_expansion';
+  | 'grouping_expansion'
+  | 'record';
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
@@ -322,6 +342,12 @@ export interface IPropsGrid {
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
   grid_tabs?: any[];
 }
 

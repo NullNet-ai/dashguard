@@ -1,6 +1,6 @@
-import { type ReactElement } from "react";
+import { type ReactElement } from 'react';
 
-export type IValidationType = "required" | "date" | "unique";
+export type IValidationType = 'required' | 'date' | 'unique';
 export interface IConfigValidationWizard {
   key: string;
   type: IValidationType[];
@@ -24,20 +24,21 @@ export interface IConfigWizard {
   saveCloseLoading?: boolean;
   formSave?: Record<string, string>;
   stepValidation?: Record<string, IConfigValidationWizard[]>;
-  defaultRecordTab?: string
+  customNavigation?: Record<string, boolean>;
+  defaultRecordTab?: string;
 }
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {
     data: Record<string, any>;
-    /** 
+    /**
      * action_type is just an identifier to determine which action is being performed
      */
-    action_type: "save_new" | "save_continue" | "save_close";
+    action_type: 'save_new' | 'save_continue' | 'save_close';
     /**
      * next() will continue to the default next step
      */
     next: () => Promise<void>;
-    socketClient: any // todo types
+    socketClient: any; // todo types
   }) => Promise<void>;
   customizeWizardButtonSave?: {
     label?: string;
@@ -51,36 +52,36 @@ export interface ICallbackHandler {
 }
 
 export type NumberWords =
-  | "one"
-  | "two"
-  | "three"
-  | "four"
-  | "five"
-  | "six"
-  | "seven"
-  | "eight"
-  | "nine"
-  | "ten"
-  | "eleven"
-  | "twelve"
-  | "thirteen"
-  | "fourteen"
-  | "fifteen"
-  | "sixteen"
-  | "seventeen"
-  | "eighteen"
-  | "nineteen"
-  | "twenty"
-  | "twenty-one"
-  | "twenty-two"
-  | "twenty-three"
-  | "twenty-four"
-  | "twenty-five"
-  | "twenty-six"
-  | "twenty-seven"
-  | "twenty-eight"
-  | "twenty-nine"
-  | "thirty";
+  | 'one'
+  | 'two'
+  | 'three'
+  | 'four'
+  | 'five'
+  | 'six'
+  | 'seven'
+  | 'eight'
+  | 'nine'
+  | 'ten'
+  | 'eleven'
+  | 'twelve'
+  | 'thirteen'
+  | 'fourteen'
+  | 'fifteen'
+  | 'sixteen'
+  | 'seventeen'
+  | 'eighteen'
+  | 'nineteen'
+  | 'twenty'
+  | 'twenty-one'
+  | 'twenty-two'
+  | 'twenty-three'
+  | 'twenty-four'
+  | 'twenty-five'
+  | 'twenty-six'
+  | 'twenty-seven'
+  | 'twenty-eight'
+  | 'twenty-nine'
+  | 'thirty';
 
 export type TStepsNavigationButtons = {
   [key in NumberWords]?: {
@@ -105,7 +106,7 @@ export type Summary = {
 export interface IState extends IConfigWizard {
   test?: any;
   summary?: Summary | undefined;
-  traverseSteps?: Record<string, "Stepped">;
+  traverseSteps?: Record<string, 'Stepped'>;
   isSummaryOpen?: boolean;
   stepsNavigation?: TStepsNavigationButtons;
   callbackHandlers?: ICallbackHandler;

@@ -25,7 +25,7 @@ function GridDesktop({ parentType, gridKey, grid_tabs }: IProps) {
         <GridDesktopContainer parentType={parentType} />
         {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollContainer>
-      <div className={cn(`sticky `, `${parentType === 'record' ? 'bottom-[-25px]' : 'bottom-0'}`)}>
+      <div className={cn(`sticky z-50`, `${parentType === 'record' ? 'bottom-[-34px]' : 'bottom-0'}`)}>
         <CardFooter>
           <Pagination />
         </CardFooter>

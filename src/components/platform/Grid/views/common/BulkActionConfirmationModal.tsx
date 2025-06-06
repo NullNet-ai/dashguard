@@ -56,9 +56,12 @@ const BulkActionConfirmationModal = ({
           )}
         </div>
         <div className="flex flex-1 gap-2 py-4 font-bold">
-          {action_type !== 'custom' ? title : customBulkDialogConfig?.title}
+          {state?.config?.customBulkDialogConfig?.title || title}
         </div>
-        <div className="flex flex-1 gap-2">{message[action_type]}</div>
+        <div className="flex flex-1 gap-2">
+          {state?.config?.customBulkDialogConfig?.message ||
+            message[action_type]}
+        </div>
         <Separator className="my-2" />
         <DialogFooter className="py-2">
           <Button

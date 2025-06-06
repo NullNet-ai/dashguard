@@ -26,6 +26,7 @@ import { type ISearchItem } from './Search/types';
 import { useActionColumns } from './hooks/actionColumns';
 import { useColumnConditions } from './hooks/useColumnConditions';
 import {
+  type IParentType,
   type IAction,
   type IConfigGrid,
   type ICreateContext,
@@ -43,13 +44,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?:
-    | 'grid'
-    | 'form'
-    | 'field'
-    | 'grid_expansion'
-    | 'side_drawer'
-    | 'grouping_expansion';
+  parentType?: IParentType
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';
@@ -72,6 +67,8 @@ export default function GridProvider({
   grouping: initialGrouping = [],
   gridKey,
   customCreateButton,
+  customCreateActionButton,
+  hideCreateNewFilter
 }: IProps) {
   const router = useRouter();
 
@@ -603,10 +600,15 @@ export default function GridProvider({
       const selectedRows = table?.getSelectedRowModel().rows;
       if (!selectedRows?.length) return;
       if (config?.archiveBulkRecordCustomAction) {
-        config?.archiveBulkRecordCustomAction({
+        await config?.archiveBulkRecordCustomAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });
+        setActionBulkLoading(false);
+        table?.resetRowSelection();
+        setShowBulkActionConfirmationModal(false);
+        setBulkActionType(null);
         return;
       }
       const record_ids = selectedRows.map((row) => row?.id);
@@ -627,6 +629,7 @@ export default function GridProvider({
       if (!selectedRows?.length) return;
       if (config?.customBulkAction) {
         config?.customBulkAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });
@@ -744,6 +747,8 @@ export default function GridProvider({
     groupConfigs: initialGrouping,
     gridKey,
     customCreateButton,
+    customCreateActionButton,
+    hideCreateNewFilter
   } as IState;
   const actions = {
     handleCreate,
