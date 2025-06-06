@@ -13,6 +13,7 @@ export interface IGridCacheDataResponse {
     reportFilters: [];
     defaultFilters: ISearchItem[];
     groupAdvanceFilters: ISearchItem[];
+    additionalFilters?: ISearchItem[];
   };
   sorts: {
     sorting: SortingState;
