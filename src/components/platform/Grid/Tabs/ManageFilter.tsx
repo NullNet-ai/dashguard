@@ -7,6 +7,7 @@ import { useGrid } from '../Provider';
 import { duplicateFilterTab, removeGridFilter } from './SideDrawer/actions';
 import { ManageFilterProvider } from './SideDrawer/Provider';
 import GridManageFilter from './SideDrawer/View';
+import { DropdownMenuItem } from '~/components/ui/dropdown-menu';
 
 const ACTIONS = [
   {
@@ -35,7 +36,7 @@ export default function ManageFilter({
   entity: any;
   tabs: any[];
   actions?: {
-    handleDeleteTabs: (tab: any) => void;
+    handleDeleteTabs?: (tab: any) => void;
     handleDuplicateTab?: ({
       tab,
       gridKey,
@@ -45,7 +46,6 @@ export default function ManageFilter({
       gridKey : string,
       entity : string, 
     }) => void;
-
   };
 }) {
   const router = useRouter();
@@ -79,6 +79,7 @@ export default function ManageFilter({
   }));
 
   const handleManageFilter = () => {
+
     actions?.openSideDrawer({
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
@@ -104,31 +105,19 @@ export default function ManageFilter({
       },
     });
   };
-
   const handleDeleteFilter = async () => {
-    try {
-      if (onFetchRecords) {
-        tabActions?.handleDeleteTabs(tab);
-        return;
-      }
-      const url = await removeGridFilter(tab.id, gridKey);
-
-      //@temp fix
-      router.refresh();
-
-      if (url && typeof url === 'string') {
-        router.replace(url);
-      } else {
-        router.refresh(); // Fallback: refresh the current page if no URL is returned
-      }
-    } catch (error) {
-      console.error('Error deleting filter:', error);
-      router.refresh(); // Fallback: refresh the current page on error
-    }
+    tabActions?.handleDeleteTabs?.(tab);
   };
 
   const handleDuplicateFilter = async () => {
     try {
+      // const url = await duplicateFilterTab(tab, gridKey, defaultEntity);
+      // if (url && typeof url === 'string') {
+      //   router.push(url);
+      //   router.refresh();
+      // } else {
+      //   router.refresh();
+      // }
       tabActions?.handleDuplicateTab?.({
         tab,
         gridKey : gridKey || '',
@@ -147,20 +136,23 @@ export default function ManageFilter({
           !(tab.default && action.id === 'delete_filter') &&
           !(action.id === 'manage_filter' && !enableManageCustomGridFilter),
       ).map((action) => (
-        <button
+        <DropdownMenuItem
           key={action.id}
           onClick={
-            action.id === 'manage_filter'
-              ? handleManageFilter
+            (e) => {
+              e.stopPropagation();
+              action.id === 'manage_filter'
+              ? handleManageFilter()
               : action.id === 'delete_filter'
-                ? handleDeleteFilter
-                : handleDuplicateFilter
+                ? handleDeleteFilter()
+                : handleDuplicateFilter()
+            }
           }
           className="flex items-center gap-2 gap-x-3 rounded-md p-2 py-1.5 text-sm transition duration-100 hover:bg-gray-100"
         >
           <action.icon className="size-4 text-gray-500" />
           {action.label}
-        </button>
+        </DropdownMenuItem>
       ))}
     </div>
   );

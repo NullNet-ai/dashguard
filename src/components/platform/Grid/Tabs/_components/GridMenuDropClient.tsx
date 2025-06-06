@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 
-import { api } from '~/trpc/server';
 import { type ITabGrid } from '~/server/api/types';
 import { useEffect, useState } from 'react';
 import { get_filter_by, get_sort_by } from '../Action/getFilterby';
@@ -19,8 +18,9 @@ interface IProps {
   entity?: any;
   current?: any;
   tabs?: any[];
-  actions?: {
+  actions: {
     handleDeleteTabs: (tab: any) => void;
+    handleDuplicateTab?: (tab: any) => void;
   };
 }
 
@@ -57,9 +57,9 @@ const GridMenuDropClient = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <div className="flex items-center gap-2 px-0 py-1.5 text-left text-sm">
           <EllipsisVertical
-            className={`h-4 w-4 font-semibold text-default/60`}
+            className={`h-3 w-3 font-semibold text-default/60`}
             aria-hidden="true"
           />
         </div>
