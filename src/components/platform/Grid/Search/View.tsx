@@ -15,15 +15,16 @@ import { GridContext } from '../Provider';
 import { SearchGridContext } from './Provider';
 import SearchResult from './SearchResult';
 import { type ISearchItemResult } from './types';
-import { usePathname } from 'next/navigation';
-import { testIDFormatter } from '~/utils/formatter';
+import { transformSearchData } from './utils/transformSearchData';
+import { usePathname } from 'next/navigation'
+import { testIDFormatter } from '~/utils/formatter'
 
 export default function Search({ gridType }: any) {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
 
-  const path = usePathname();
-  const [, , path1, path2] = path.split('/');
+  const path =  usePathname()
+  const [, , path1, path2] = path.split('/')
   const { width } = useWindowSize();
   const screenSize = useScreenType();
   const isMobile =
@@ -35,15 +36,14 @@ export default function Search({ gridType }: any) {
     searchConfig,
   } = gridState?.config ?? {};
 
-
   const { group_advance_filters = [] } = searchConfig?.query_params ?? {};
   const { advanceFilterItems = [] } = state ?? {};
   const { query = '' } = state ?? {};
-  const { handleSearchQuery } = actions ?? {};
+  const { handleOldSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
 
-  const data = handleSearchQuery!(
+  const data = handleOldSearchQuery!(
     {
       entity,
       current: 0,
@@ -79,7 +79,6 @@ export default function Search({ gridType }: any) {
               return item; // Keep operator objects unchanged
             }),
       ...(searchConfig?.query_params ?? {}),
-      searchable_fields: searchableFields,
     },
     {
       refetchOnWindowFocus: false,
@@ -132,12 +131,11 @@ export default function Search({ gridType }: any) {
             <li className="p-2">
               <SearchResult
                 results={
-                  (items as ISearchItemResult[]) || null
-                  // (transformSearchData(
-                  //   items,
-                  //   debouncedSearchInput,
-                  //   searchableFields,
-                  // ) as ISearchItemResult[]) || null
+                  (transformSearchData(
+                    items,
+                    debouncedSearchInput,
+                    searchableFields,
+                  ) as ISearchItemResult[]) || null
                 }
               />
             </li>

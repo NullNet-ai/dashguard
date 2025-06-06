@@ -68,13 +68,17 @@ export default async function Page() {
         enableAutoCreate: false,
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'search',
-          resolver: 'contactSearch',
+          router: 'contact',
+          resolver: 'mainGrid',
           query_params: {
             entity: 'contact',
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'contactSearch',
         },
         enableRowExpansion: true,
         rowExpansionBuilder: <AccountGridExpansion />,

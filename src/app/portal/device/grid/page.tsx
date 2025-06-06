@@ -67,13 +67,17 @@ export default async function Page() {
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'search',
-          resolver: 'searchSuggestions',
+          router: 'grid',
+          resolver: 'items',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'searchSuggestions',
         },
       }}
       customCreateButton={<CustomCreateButton entity={main_entity!} />}

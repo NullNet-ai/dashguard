@@ -19,7 +19,7 @@ export default function CreateNewFilter() {
 
   const {
     gridColumns: _columns = [],
-    searchConfig,
+    searchSuggestionConfig,
     entity: defaultEntity,
     enableCreateCustomGridFilter = true,
     customTabDefaults = {},
@@ -53,7 +53,7 @@ export default function CreateNewFilter() {
               name: 'New Filter',
             }}
             columns={gridColumns as Record<string, any>[]}
-            searchConfig={{ ...searchConfig, entity: defaultEntity }}
+            searchConfig={{ ...searchSuggestionConfig ?? {}, entity: defaultEntity }}
             gridKey={gridKey}
             customTabDefaults={customTabDefaults}
             onFetchRecords={onFetchRecords}

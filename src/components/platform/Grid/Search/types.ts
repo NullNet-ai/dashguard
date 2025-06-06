@@ -20,6 +20,10 @@ export interface IAction {
   handleAddSearchItem: (filterItem: ISearchItemResult) => Promise<void>
   handleRemoveSearchItem: (filterItem: ISearchItem) => Promise<void>
   handleClearSearchItems: () => Promise<void>
+  handleOldSearchQuery: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) => ISearchResult | undefined
 }
 
 export interface ICreateContext {

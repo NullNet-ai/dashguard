@@ -199,7 +199,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         onFetchRecords: fetchData,
         parentGroupFields: groupFields,
       }}
-      parentType="grid_expansion"
+      parentType="grouping_expansion"
       data={items}
       totalCount={totalCount}
       grouping={grouping}

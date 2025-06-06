@@ -47,12 +47,16 @@ export default async function Page() {
         columns: gridColumns,
         columnsOrder: gridCacheData?.columns,
         searchConfig: {
-          router: 'search',
-          resolver: 'accountSearch',
+          router: 'account',
+          resolver: 'fetchGridData',
           query_params: {
             entity: 'account_organization',
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'accountSearch',
         },
         additionalData: {
           accountEmail,

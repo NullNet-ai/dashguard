@@ -41,12 +41,13 @@ export default function GridSearchProvider({ children }: IProps) {
     entity: defaultEntity,
     searchableFields = [],
     searchConfig,
+    searchSuggestionConfig,
     onFetchRecords,
   } = gridState?.config ?? {};
 
   const { parentType, gridKey } = gridState ?? {};
 
-  const { query_params } = searchConfig ?? {};
+  const { query_params } = searchSuggestionConfig ?? {};
   const { group_advance_filters } = query_params ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
@@ -111,7 +112,20 @@ export default function GridSearchProvider({ children }: IProps) {
     options: Record<string, any>,
   ) => {
     const { router = 'search', resolver = 'searchSuggestions' } =
-      searchConfig ?? {};
+    searchSuggestionConfig ?? {};
+    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
+    const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
+    return data;
+  };
+
+  // TODO: Remove this function after the new search is implemented in form filter
+  const handleOldSearchQuery = (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) => {
+    const { router = 'grid', resolver = 'items' } =
+    searchConfig ?? {};
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
@@ -228,6 +242,7 @@ export default function GridSearchProvider({ children }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
+    handleOldSearchQuery
   } as IAction;
 
   return (

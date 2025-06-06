@@ -200,9 +200,10 @@ export const searchRouter = createTRPCRouter({
       // Calculate total number of pages
       const suggestions = searchSuggestionTransformer(items, searchable_fields);
       const resolvedSuggestions = suggestions.map((suggestion: any) => {
+        const iso_code = suggestion?.iso_code ?? 'us';
         const primary_phone_number = formatPhoneNumber({
           raw_phone_number: suggestion.display_value as string,
-          iso_code: 'us',
+          iso_code,
         });
         if (suggestion.field === 'raw_phone_number') {
           return {

@@ -72,7 +72,7 @@ export const searchRecords = async ({
   });
 
   // Create a Set to track unique values
-  const uniqueValues = new Set();
+  // const uniqueValues = new Set();
 
   const resolvedDropdownItems = items.map((record: any) => {
     const { values, display_value } = record ?? {};

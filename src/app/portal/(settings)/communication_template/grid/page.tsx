@@ -60,12 +60,16 @@ export default async function Page() {
         columns: gridColumns,
         enableAutoCreate: false,
         searchConfig: {
-          router: 'search',
-          resolver: 'searchSuggestions',
+          router: 'grid',
+          resolver: 'items',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver:'searchSuggestions',
         },
       }}
     />
