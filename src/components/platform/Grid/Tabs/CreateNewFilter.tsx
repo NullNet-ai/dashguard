@@ -15,7 +15,7 @@ import {
 export default function CreateNewFilter() {
   const { actions } = useSideDrawer();
   const { state, actions: gridActions } = useGrid();
-  const { config, gridKey, defaultAdvanceFilter, defaultSorting } = state ?? {};
+  const { config, gridKey } = state ?? {};
 
   const {
     gridColumns: _columns = [],
@@ -23,7 +23,7 @@ export default function CreateNewFilter() {
     entity: defaultEntity,
     enableCreateCustomGridFilter = true,
     customTabDefaults = {},
-    onFetchRecords,
+    onFetchRecords
   } = config ?? {};
 
   if(!enableCreateCustomGridFilter) return null;
@@ -75,7 +75,7 @@ export default function CreateNewFilter() {
             variant="ghost"
             size="icon"
             onClick={handleManageFilter}
-            className="mr-2 h-full w-8 text-primary"
+            className="mr-2 h-full min-h-[36px] w-8 text-primary"
           >
             <PlusCircle className="h-5 w-5 fill-blue-700 text-white" />
           </Button>

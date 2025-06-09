@@ -102,7 +102,9 @@ export const gridRouter = createTRPCRouter({
 
       if (hasTabMenu) return hasTabMenu;
       if (input?.application === 'grid') {
-        const setIdTab = SetIdTab(input.entity);
+        const setIdTab = SetIdTab({
+          mainEntity:input.entity
+        });
         ctx.redisClient.cacheData(
           getGridLink({
             mainEntity: input.entity,
@@ -336,7 +338,10 @@ export const gridRouter = createTRPCRouter({
         if (activeTab) return activeTab;
         if (input?.gridKey && application !== 'grid') {
           const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
-          const setIdTab = SetIdTab(input.gridKey, href);
+          const setIdTab = SetIdTab({
+            mainEntity: input.gridKey,
+            href: href,
+          });
           ctx.redisClient.cacheData(_tabMenuId, setIdTab);
           return setIdTab;
         }
@@ -1091,6 +1096,7 @@ export const gridRouter = createTRPCRouter({
         defaultGridTabs: z.array(z.any()).optional(),
         pathname: z.string().optional(),
         defaultSorting: z.array(z.any()).optional(),
+        additionalFilters: z.array(z.any()).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -1116,7 +1122,13 @@ export const gridRouter = createTRPCRouter({
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
         const href = `${pathName}?filter_id=`;
-        const defaultTab = SetIdTab(entity!, href, input.defaultGridTabs, input.defaultSorting);
+        const defaultTab = SetIdTab({
+          mainEntity: entity!,
+          href,
+          defaultGridTabs: input.defaultGridTabs,
+          defaultSorting: input.defaultSorting,
+          additionalFilters: input.additionalFilters,
+        });
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
@@ -1160,6 +1172,17 @@ export const gridRouter = createTRPCRouter({
               operator: EOperator.EQUAL,
               values: [mainEntity!],
             },
+            {
+              operator: EOperator.AND,
+              type: 'operator',
+              default: true,
+            },
+            {
+              type: 'criteria',
+              field: 'link',
+              operator: EOperator.LIKE,
+              values: [pathName],
+            }
           ] as IAdvanceFilters[],
         },
       });

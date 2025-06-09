@@ -39,8 +39,8 @@ const FilterView = () => {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-          <ManageFilterProvider columns = { columns } filter_type ={ filter_type as string } tab = { { name: 'New Filter' } }>
-            <GridManageFilter filter_type={filter_type as string} />
+           <ManageFilterProvider columns = { columns } filter_type ={ filter_type as string } tab = { { name: 'New Filter' } }>
+            <GridManageFilter filter_type={filter_type as string} /> 
           </ManageFilterProvider>
         ),
         componentProps: {},
@@ -54,6 +54,7 @@ const FilterView = () => {
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
             const isActive = activeLabel === tab.id
+            console.log("%c Line:57 🍩 isActive", "color:#e41a6a", isActive);
 
             return (
               <Fragment key={tab.id}>

@@ -93,7 +93,8 @@ const gridColumns = [
     // isSearchable: false,
     search_config: {
       field: "updated_date_time",
-      operator: 'like'
+      operator: 'like',
+      custom_filter_field: 'updated_date',
     }
   },
   {
@@ -117,6 +118,7 @@ const gridColumns = [
     search_config: {
       field: 'created_date_time',
       operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {

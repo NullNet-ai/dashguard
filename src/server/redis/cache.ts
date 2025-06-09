@@ -28,11 +28,8 @@ const cacheData = async (key: string, data: any, ttl = 900000) => {
 };
 
 const getCachedData = async (key: string) => {
-  console.log("%c Line:31 🍏 key", "color:#6ec1c2", key);
   if (redisClient) {
-    console.log("%c Line:33 🍿 redisClient", "color:#f5ce50", redisClient);
     const res = await redisClient.get(key);
-    console.log("%c Line:35 🍪 res", "color:#6ec1c2", res);
     return JSON.parse(res || "0");
   } else {
     // Retrieve from memory if Redis is not connected

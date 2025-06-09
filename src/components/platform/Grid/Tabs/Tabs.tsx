@@ -1,6 +1,6 @@
 'use client';
 
-import GridTabLists from './_components/GridTablists';
+import EnhanceGridTabs from './_components/EnhanceTabs';
 interface IProps {
   gridKey?: string;
   grid_tabs?: any[];
@@ -8,7 +8,8 @@ interface IProps {
 
 const GridTabs = ({ grid_tabs }: IProps) => {
 
-  return <GridTabLists tabs={grid_tabs ?? []} />;
+  return <EnhanceGridTabs tabs={grid_tabs?? []} />;
+  // return <GridTabLists tabs={grid_tabs ?? []} />;
 };
 
 export default GridTabs;

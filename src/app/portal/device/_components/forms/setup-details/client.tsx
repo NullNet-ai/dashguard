@@ -27,6 +27,7 @@ export default function SetupDetails({ params, defaultValues }: IFormProps) {
       if (res && res.status_code === 200) {
         toast.success(`${res?.message}`)
       }
+      console.log("%c Line:31 🍇 res", "color:#465975", res);
       setOrgAccount(res?.account)
       return res
     }

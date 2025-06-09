@@ -11,12 +11,12 @@ import { Button } from '~/components/ui/button';
 const DATE_FORMAT = {
     DISPLAY: {
       DEFAULT: "LLL dd, y",    // e.g. "Jan 01, 2023"
-      SHORT: "MM/dd/yy",       // e.g. "01/01/23"
+      SHORT: "MM/dd/yyyy",       // e.g. "01/01/23"
       MEDIUM: "MMM d, yyyy",   // e.g. "Jan 1, 2023"
       LONG: "MMMM d, yyyy",    // e.g. "January 1, 2023"
       ISO: "yyyy-MM-dd",       // e.g. "2023-01-01"
     },
-    FORM: "MM/dd/yy",          // Format for form data
+    FORM: "MM/dd/yyyy",          // Format for form data
   };
   
   // DateRangePicker component for filters

@@ -26,6 +26,7 @@ import { type ISearchItem } from './Search/types';
 import { useActionColumns } from './hooks/actionColumns';
 import { useColumnConditions } from './hooks/useColumnConditions';
 import {
+  type IParentType,
   type IAction,
   type IConfigGrid,
   type ICreateContext,
@@ -43,7 +44,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer';
+  parentType?: IParentType
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';
@@ -66,6 +67,8 @@ export default function GridProvider({
   grouping: initialGrouping = [],
   gridKey,
   customCreateButton,
+  customCreateActionButton,
+  hideCreateNewFilter
 }: IProps) {
   const router = useRouter();
 
@@ -112,15 +115,31 @@ export default function GridProvider({
   );
 
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {
-      ...resolvedGroupings?.reduce((acc: any, curr) => {
+    // First, hide grouped columns
+    const initialVisibility = resolvedGroupings?.reduce((acc: any, curr) => {
+      return {
+        ...acc,
+        [curr]: false,
+      };
+    }, {});
+    
+    // Then, also hide columns with is_hidden: true
+    const hiddenColumns = _propsConfig?.columns?.reduce((acc: any, column: any) => {
+      if (column.is_hidden) {
         return {
           ...acc,
-          [curr]: false,
+          [column.accessorKey]: false,
         };
-      }, {}),
+      }
+      return acc;
+    }, {});
+    
+    return {
+      ...initialVisibility,
+      ...hiddenColumns,
     };
   });
+
 
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
@@ -170,10 +189,6 @@ export default function GridProvider({
     default: true,
   })) as ISearchItem[];
 
-  if (!!columnsOrder?.length) {
-    _propsConfig.columns = sortColumns(columnsOrder, _propsConfig?.columns);
-  }
-
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
       if (curr?.default) return acc;
@@ -211,6 +226,35 @@ export default function GridProvider({
     }
   }, []);
 
+    // use effect for column order
+    useEffect(() => {
+      if(!_propsConfig?.columnsOrder?.length) {
+        setColumnsOrder([]);
+        return;
+      };
+  
+      if (!!_propsConfig?.columnsOrder?.length) {
+        const sortedColumns = sortColumns(_propsConfig?.columnsOrder, _propsConfig?.columns);
+        _propsConfig.columns = sortedColumns
+      }
+      
+      // Check if arrays have different lengths
+      if (columnsOrder.length !== _propsConfig.columnsOrder.length) {
+        setColumnsOrder(_propsConfig.columnsOrder ?? []);
+        return;
+      }
+      
+      const hasChanged = _propsConfig.columnsOrder.some((newCol, index) => {
+        const currentCol = columnsOrder[index];
+        return newCol.id !== currentCol.id || newCol.order !== currentCol.order;
+      });
+      
+      if (hasChanged) {
+        setColumnsOrder(_propsConfig.columnsOrder ?? []);
+      }
+    }, [_propsConfig?.columnsOrder]);
+  
+
   // use effect for sorting if there is a change in props sorting it should set the sorting
   useEffect(() => {
     if (initialSorting?.length) {
@@ -220,8 +264,7 @@ export default function GridProvider({
 
   useEffect(() => {
     if (
-      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings) &&
-      !config?.onFetchRecords
+      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)
     ) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {
@@ -596,10 +639,15 @@ export default function GridProvider({
       const selectedRows = table?.getSelectedRowModel().rows;
       if (!selectedRows?.length) return;
       if (config?.archiveBulkRecordCustomAction) {
-        config?.archiveBulkRecordCustomAction({
+        await config?.archiveBulkRecordCustomAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });
+        setActionBulkLoading(false);
+        table?.resetRowSelection();
+        setShowBulkActionConfirmationModal(false);
+        setBulkActionType(null);
         return;
       }
       const record_ids = selectedRows.map((row) => row?.id);
@@ -620,6 +668,7 @@ export default function GridProvider({
       if (!selectedRows?.length) return;
       if (config?.customBulkAction) {
         config?.customBulkAction({
+          config,
           entity: config?.entity,
           selected_rows: selectedRows,
         });
@@ -737,6 +786,8 @@ export default function GridProvider({
     groupConfigs: initialGrouping,
     gridKey,
     customCreateButton,
+    customCreateActionButton,
+    hideCreateNewFilter
   } as IState;
   const actions = {
     handleCreate,

@@ -210,7 +210,8 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   , [resolution, time_unit, time_count, graphType, filterId, refetch])
 
   return (
-    <>
+    <div className=" mx-auto">
+      <div className='sticky top-[29px] z-[50] bg-white'>
     <Filter params={params} type='traffic_graph_filter'  />
     <Search  params={{...params, router: 'packet', resolver: 'filterConnections' }} filter_type='traffic_graph_search' />
     {  loading ? <Loader
@@ -220,9 +221,11 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       variant="circularShadow"
     /> : <Card>
       
-      <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6">
+      
+      {/* <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6"> */}
+      <CardContent>
         <ChartContainer
-          className="aspect-auto h-full w-full p-5 overflow-x-auto"
+          className="aspect-auto h-full w-full overflow-x-auto"
           config={chartConfig}
         >
 
@@ -230,8 +233,8 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
         </ChartContainer>
       </CardContent>
-    </Card>}
-    </>
+    </Card>}</div>
+    </div>
   )
 }
 

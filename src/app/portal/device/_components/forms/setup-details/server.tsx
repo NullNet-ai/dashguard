@@ -16,15 +16,17 @@ const FormServerFetch = async () => {
     })
     : await api.device.getByCode({
       code: identifier!,
-      pluck_fields: ['id', 'code'],
+      pluck_fields: ['id', 'code', ],
     })
-  const defaultValues = fetched_device?.data
+  const defaultValues = fetched_device?.data 
+  const {devices, account_secret, account_id} = defaultValues || {}
+  console.log("%c Line:22 🥑 defaultValues", "color:#f5ce50", defaultValues);
 
   const server_url  = process.env.SERVER_URL
 
   return (
     <SetupDetails
-      defaultValues={{...defaultValues, server_url}}
+      defaultValues={{...defaultValues, ...devices,account_secret, account_id, server_url}}
       params={{
         id: defaultValues?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',

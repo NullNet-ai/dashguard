@@ -1,6 +1,6 @@
 'use client'
 import { MinusCircle } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
@@ -16,8 +16,6 @@ import {
 
 import { type IFilter } from '../../../../../types'
 import { useManageFilter } from '../../Provider'
-import { api } from '~/trpc/react'
-import { type IDropdown } from '~/app/portal/contact/_components/forms/category-details/types'
 
 const OPERATORS = [
   { value: 'equal', label: 'Equals' },

@@ -108,11 +108,16 @@ const transformValues = (field: string, values: any[]) => {
 
 // Helper function to transform a criteria filter
 const transformCriteriaFilter = (filter: Filter, column: any, grid_entity: string) => {
+  let operator = filter.operator;
+  if(filter.operator === "equal" && column?.search_config?.operator) {
+    operator = column?.search_config?.operator
+  }
+
   return {
     ...filter,
     entity: getEntityFromColumn(column, grid_entity),
-    field: column?.search_config?.field || filter.field,
-    operator: column?.search_config?.operator || filter.operator,
+    field: column?.search_config?.custom_filter_field || column?.search_config?.field || filter.field,
+    operator,
     parse_as: column?.search_config?.parse_as,
     default: filter.default || true,
     values: transformValues(filter.field!, filter.values || [])

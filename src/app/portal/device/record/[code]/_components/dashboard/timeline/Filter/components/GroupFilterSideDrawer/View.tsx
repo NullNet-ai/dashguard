@@ -17,7 +17,7 @@ export default function SideDrawer({ filter_type }: { filter_type: string }) {
   ]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4">
       <div className="flex justify-end space-x-2">
         {tab_props.id
           ? (

@@ -147,6 +147,7 @@ const FilterProvider = ({ children, params, type }: any) => {
     })
   }
 
+  console.log("%c Line:152 🥕 filters", "color:#7f2b82", filters);
   const state = {
     filters,
     query,

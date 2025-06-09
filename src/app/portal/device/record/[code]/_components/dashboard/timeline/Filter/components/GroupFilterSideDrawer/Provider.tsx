@@ -140,9 +140,10 @@ export function ManageFilterProvider({
 
     setUpdateFilterLoading(true)
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
-    await updateGridFilter(modifyFilterDetails, filter_type)
+    const {href} = await updateGridFilter(modifyFilterDetails, filter_type)
     setUpdateFilterLoading(false)
     closeSideDrawer()
+    router.push(href)
     router.refresh()
   }
 
@@ -181,11 +182,12 @@ export function ManageFilterProvider({
       group_advance_filters: resolveGroupFilter,
     }
     setCreateFilterLoading(true)
-    const filter_id = await saveGridFilter(modifyFilterDetails, filter_type)
+    const {id: filter_id, href} = await saveGridFilter(modifyFilterDetails, filter_type) as { id: string, href: string }
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
 
     setCreateFilterLoading(false)
     closeSideDrawer()
+    router.push(href)
     router.refresh()
   }
 

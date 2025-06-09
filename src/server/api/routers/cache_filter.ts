@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { cleanFilter } from './packet';
 import { getUnit, parseTimeString } from '~/app/portal/device/utils/timeRange';
+import { headers } from 'next/headers';
 
 export const cachedFilterRouter = createTRPCRouter({
   createFilter: privateProcedure
@@ -17,14 +18,18 @@ export const cachedFilterRouter = createTRPCRouter({
       const { account } = ctx.session
       const { contact } = account
 
+      const headerList = headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const [, , mainEntity, application, identifier] = pathName.split('/');
       let cached_data = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
 
       cached_data = !cached_data?.length ? [] : cached_data
 
       const id = ulid()
+      const href = `${pathName}?filter_id=${id}`;
 
        await ctx.redisClient.cacheData(`${type}_${contact.id}`, [...cached_data, { ...(data as Record<string,any>), id }])
-       return id
+       return {id, href}
     }
     ),
   updateFilter: privateProcedure
@@ -35,6 +40,9 @@ export const cachedFilterRouter = createTRPCRouter({
   .mutation(async ({ input, ctx }) => {
     const { type, data: input_data } = input as any
     
+    const headerList = headers();
+    const pathName = headerList.get('x-pathname') || '';
+    const [, , mainEntity, application, identifier] = pathName.split('/');
     const { account } = ctx.session
     const { contact } = account
     const cachedData = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
@@ -45,12 +53,15 @@ export const cachedFilterRouter = createTRPCRouter({
         if (data.id === input_data?.id) {
           return {
             ...data,
-            ...input_data, 
+            ...input_data,
+            href: `${pathName}?filter_id=${data.id}`, 
           }
         }
         return data
       })
-      return await ctx.redisClient.cacheData(`${type}_${contact.id}`, updatedData)
+      console.log("%c Line:53 🍎 updatedData", "color:#465975", updatedData);
+      await ctx.redisClient.cacheData(`${type}_${contact.id}`, updatedData)
+      return updatedData?.[0]
     }
   }),
     updateSearchFilter: privateProcedure

@@ -634,14 +634,13 @@ export const deviceRouter = createTRPCRouter({
       const {id: device_id} = devices ?? {}
 
       const fetch_account_secret = await ctx.redisClient.getCachedData(`account_id:${account_organizations?.email}`)
-      console.log("%c Line:637 🍇 fetch_account_secret", "color:#3f7cff", fetch_account_secret);
       
 
-      const { account_secret } = fetch_account_secret ?? {}
+      const { account_secret, account_id } = fetch_account_secret ?? {}
 
       return {
         ...rest,
-        data: { id: device_id, account_secret, ...data?.[0] },
+        data: { id: device_id, account_secret,account_id, ...data?.[0] },
       }
     }
     catch (error) {

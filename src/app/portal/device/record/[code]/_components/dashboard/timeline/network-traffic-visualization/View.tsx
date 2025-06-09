@@ -89,7 +89,7 @@ export default function NetworkFlowView() {
   if (loading) {
     return (
       <Loader
-        className="bg-primary text-primary"
+        className="bg-primary text-primary mt-4"
         label="Fetching unique ips..."
         size="md"
         variant="circularShadow"
@@ -107,7 +107,7 @@ export default function NetworkFlowView() {
         position: "relative",
         border: "1px solid #ddd",
       }}
-      className="custom-scrollbar"
+      className="custom-scrollbar mt-10"
     >
       <div style={{ height: `${totalHeight}px`, position: "relative", minWidth: "1000px" }}>
         {flowData?.map((el, index) => {

@@ -5,6 +5,7 @@ import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
 import {
   ChangeEvent,
+  Fragment,
   useContext,
   useEffect,
   useMemo,
@@ -29,7 +30,8 @@ import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
 import { GridContext } from '../../Provider';
-import { removeGridFilter } from '../SideDrawer/actions';
+import { duplicateFilterTab, removeGridFilter } from '../SideDrawer/actions';
+import { ulid } from 'ulid';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
@@ -50,6 +52,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
+  const { state } = useContext(GridContext);
   const { config, gridKey } = gridState ?? {};
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -232,11 +235,11 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     return false;
   }, [tablists, searchValue]);
 
-  const handleDeleteTabs = (tab: any) => {
+  const handleDeleteTabs = async (tab: any) => {
     const newTabs = tablists.filter((item: any) => item.id !== tab.id);
     setTablists(newTabs);
     // Background update
-    removeGridFilter(tab?.id, gridKey);
+    await removeGridFilter(tab?.id, gridKey);
     // updatecachedItems(newTabs);
     // TODO
     setActiveTab(newTabs?.[0]?.id);
@@ -257,8 +260,55 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     setTablists(newTabs);
   };
 
+  const handleDuplicateTab = async ({
+    tab,
+    gridKey,
+    defaultEntity,
+  }: {
+    tab: any;
+    gridKey: string;
+    defaultEntity: string;
+  }) => {
+    // const newTabs = tablists.filter((item:any) => item.id !== tab.id);
+    // setTablists(newTabs);
+
+    const tabToBeDuplicated = tablists?.find((item: any) => item.id === tab.id);
+    const filter_id = ulid();
+    const href = `${newPathname}?filter_id=${filter_id}`;
+
+    const newTab = {
+      ...tabToBeDuplicated,
+      id: filter_id,
+      name: `${tabToBeDuplicated?.name} (Copy)`,
+      link: href,
+      current: true,
+      is_current: true,
+      href: href,
+      default: false,
+      is_default: false,
+    };
+    const newTablist = [...tablists, newTab];
+    // Background update
+    await duplicateFilterTab(newTab, gridKey, defaultEntity);
+    // set current and is_current to false for other tabs
+    const updatedTabs = newTablist.map((item: any) => {
+      if (item.id !== newTab.id) {
+        return {
+          ...item,
+          current: false,
+          is_current: false,
+        };
+      }
+      return item;
+    });
+    setTablists(updatedTabs);
+    setActiveTab(newTab?.id);
+    router?.push(newTab?.href);
+  };
+
   const actions = {
     handleDeleteTabs,
+    handleDuplicateTab,
     handleUpdateTab,
   };
 
@@ -348,7 +398,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           })}
         </Sortable>
         {!!copyTab?.length && !copyTab.some((item) => item.hidden) && (
-          <CreateNewFilter />
+          <Fragment>
+            {!state?.hideCreateNewFilter && <CreateNewFilter />}
+          </Fragment>
         )}
       </div>
       {copyTab?.some((tab: any) => tab.hidden) && isWindowLoaded && (
@@ -357,7 +409,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             copyTab.some((item) => item.hidden) &&
             isWindowLoaded && (
               <div>
-                <CreateNewFilter />
+                <Fragment>
+                  {!state?.hideCreateNewFilter && <CreateNewFilter />}
+                </Fragment>
               </div>
             )}
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>

@@ -14,6 +14,7 @@ export const saveGridFilter = async (data: any, filter_type: string) => {
 
 export const updateGridFilter = async (data: any,  filter_type: string) => {
   const updateGridFilter = await api.cachedFilter.updateFilter({ type: filter_type, data})
+  console.log("%c Line:17 🥛 updateGridFilter", "color:#ea7e5c", updateGridFilter);
 
   return updateGridFilter
 }
