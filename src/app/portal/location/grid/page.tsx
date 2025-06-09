@@ -61,6 +61,10 @@ export default async function Page() {
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'searchSuggestions',
+        },
       }}
     />
   );

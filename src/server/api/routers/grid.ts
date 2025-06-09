@@ -220,7 +220,7 @@ export const gridRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         entity,
         sorting,
-        group_advance_filters : _group_advance_filters = [],
+        group_advance_filters: _group_advance_filters = [],
       } = input;
 
       const pluck_object = {
@@ -236,7 +236,9 @@ export const gridRouter = createTRPCRouter({
           track_total_records: true,
           pluck_object: pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
-          group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<string | number>[],
+          group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
+            string | number
+          >[],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -761,7 +763,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
       const newTabs = tabDetails?.map((tab) => {
-        if (tab.id === defaultFilter.id) {
+        if (tab.id === defaultFilter?.id) {
           return {
             ...tab,
             group_advance_filters:
@@ -774,20 +776,20 @@ export const gridRouter = createTRPCRouter({
         return tab;
       });
 
-      if (!defaultFilter.is_default) {
+      if (!defaultFilter?.is_default) {
         // update the grid filter entity on database
         await ctx.dnaClient
-          .update(defaultFilter.id, {
+          .update(defaultFilter?.id, {
             entity: 'grid_filter',
             token: ctx.token.value,
             mutation: {
               params: {
                 advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? []
                     : filters,
                 group_advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? filters
                     : [],
               },
@@ -883,8 +885,12 @@ export const gridRouter = createTRPCRouter({
       // const reportPagination: IPagination =
       //   typeof pagination === 'object' ? pagination : {};
 
-      const filterDetails = filter_id
+      const currentGridTab = filter_id
         ? tabDetails?.find((tab) => tab.id === filter_id)
+        : null;
+
+      const filterDetails = currentGridTab
+        ? currentGridTab
         : tabDetails?.find((tab) => tab.current);
 
       const filter = filterDetails?.advance_filters;
@@ -896,24 +902,13 @@ export const gridRouter = createTRPCRouter({
       const defaultFilter = (tabDetails ?? []).find(
         (item) => item.default === true,
       );
-      const sorts: ISortBy = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
-      const defaultSorts: ISortBy = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
+      const sorts: ISortBy = filterDetails?.sorts ?? [];
+      const defaultSorts: ISortBy = filterDetails?.default_sorts ?? [];
+      const gridColumns = filterDetails?.columns ?? [];
+      const groups = filterDetails?.groups ?? [];
+      const pagination = filterDetails?.pagination ?? [];
 
-      const gridColumns = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.columns ?? []);
-      const groups = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
-      const pagination = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
-
-      const advanceFilter = filter?.map((item : any) => {
+      const advanceFilter = filter?.map((item: any) => {
         return {
           entity: item.entity,
           operator: item.operator,
@@ -1057,8 +1052,12 @@ export const gridRouter = createTRPCRouter({
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
-      const defaultGroup = filter_id
+      const currentGridTab = filter_id
         ? tabDetails?.find((tab) => tab.id === filter_id)
+        : null;
+
+      const defaultGroup = currentGridTab
+        ? currentGridTab
         : tabDetails?.find((tab) => tab.current);
 
       const newTabs = tabDetails?.map((tab) => {
@@ -1182,7 +1181,7 @@ export const gridRouter = createTRPCRouter({
               field: 'link',
               operator: EOperator.LIKE,
               values: [pathName],
-            }
+            },
           ] as IAdvanceFilters[],
         },
       });

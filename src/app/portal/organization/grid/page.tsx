@@ -72,6 +72,10 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'searchSuggestions',
+        },
       }}
     />
   );

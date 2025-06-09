@@ -20,6 +20,10 @@ export interface IAction {
   handleAddSearchItem: (filterItem: ISearchItemResult) => Promise<void>
   handleRemoveSearchItem: (filterItem: ISearchItem) => Promise<void>
   handleClearSearchItems: () => Promise<void>
+  handleOldSearchQuery: (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) => ISearchResult | undefined
 }
 
 export interface ICreateContext {
@@ -36,6 +40,7 @@ export interface ISearchParams {
   advance_filters?: IAdvanceFilters[]
   sorting?: any[],
   group_advance_filters?: any[]
+  searchable_fields?: ISearchableField[]
 }
 export interface ISearchResult {
   totalCount: number
@@ -87,4 +92,13 @@ export interface IAdvanceFilter {
   entity?: string
   values?: any[]
   default?: boolean
+}
+
+export interface ISearchableField {
+  field: string
+  label: string
+  operator?: string
+  entity?: string
+  accessorKey?: string
+  parse_as?: string
 }

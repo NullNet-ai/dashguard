@@ -39,11 +39,11 @@ export default function Search({ gridType }: any) {
   const { group_advance_filters = [] } = searchConfig?.query_params ?? {};
   const { advanceFilterItems = [] } = state ?? {};
   const { query = '' } = state ?? {};
-  const { handleSearchQuery } = actions ?? {};
+  const { handleOldSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
 
-  const data = handleSearchQuery!(
+  const data = handleOldSearchQuery!(
     {
       entity,
       current: 0,

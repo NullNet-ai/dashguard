@@ -63,6 +63,10 @@ export default async function UserRoleGridPage() {
             pluck: _pluck,
           },
         },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver:'searchSuggestions',
+        },
       }}
     />
   );
