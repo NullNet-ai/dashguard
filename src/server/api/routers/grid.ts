@@ -105,7 +105,7 @@ export const gridRouter = createTRPCRouter({
       if (hasTabMenu) return hasTabMenu;
       if (input?.application === 'grid') {
         const setIdTab = SetIdTab({
-          mainEntity:input.entity
+          mainEntity: input.entity,
         });
         ctx.redisClient.cacheData(
           getGridLink({
@@ -893,7 +893,10 @@ export const gridRouter = createTRPCRouter({
         ? currentGridTab
         : tabDetails?.find((tab) => tab.current);
 
-      const filter = filterDetails?.advance_filters;
+      const filter = filterDetails?.advance_filters?.length
+        ? filterDetails.advance_filters
+        : filterDetails?.default_filter || [];
+        
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])

@@ -43,6 +43,13 @@ export const SetIdTab = ({
       desc : sort.desc,
     };
   }) || [];
+
+  const modifydefaultGridTabs = defaultGridTabs?.map((tab) => {
+    return {
+      ...tab,
+      sorts: tab?.sorts?.length ? tab.sorts : modifyDefaultSorting,
+    };
+  }) || [];
   const tabs = [
     {
       name: `All ${pluralize(modified_entity)}`,
@@ -72,7 +79,7 @@ export const SetIdTab = ({
       ],
     },
     ...additional_tabs,
-    ...(defaultGridTabs || []),
+    ...modifydefaultGridTabs,
   ];
 
   const modifiedTabs =  tabs.map((tab) => {
