@@ -126,15 +126,31 @@ export default function GridProvider({
   );
 
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {
-      ...resolvedGroupings?.reduce((acc: any, curr) => {
+    // First, hide grouped columns
+    const initialVisibility = resolvedGroupings?.reduce((acc: any, curr) => {
+      return {
+        ...acc,
+        [curr]: false,
+      };
+    }, {});
+    
+    // Then, also hide columns with is_hidden: true
+    const hiddenColumns = _propsConfig?.columns?.reduce((acc: any, column: any) => {
+      if (column.is_hidden) {
         return {
           ...acc,
-          [curr]: false,
+          [column.accessorKey]: false,
         };
-      }, {}),
+      }
+      return acc;
+    }, {});
+    
+    return {
+      ...initialVisibility,
+      ...hiddenColumns,
     };
   });
+
 
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,

@@ -19,7 +19,20 @@ export const SetTab = ({ name, entity }: { name: string; entity: string }) => {
   };
 };
 
-export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: any[], defaultSorting?: any[]) => {
+export const SetIdTab = ({
+  mainEntity,
+  href,
+  defaultGridTabs,
+  defaultSorting,
+  additionalFilters,
+}: {
+  mainEntity: string;
+  href?: string;
+  defaultGridTabs?: any[];
+  defaultSorting?: any[];
+  additionalFilters?: any[];
+}) => {
+
   const modified_entity = tabName[mainEntity] || mainEntity;
 
   const additional_tabs = GRIDTABS[mainEntity] || [];
@@ -46,7 +59,16 @@ export const SetIdTab = (mainEntity: string, href?: string, defaultGridTabs?: an
           label: 'Status',
           values: ['Active', 'Draft'],
           default: true,
-        }
+        },
+        ...(additionalFilters?.length? [
+          {
+            operator: 'and',
+            type: 'operator',
+            default: true,
+          },
+          ...additionalFilters,
+        ] : [])
+
       ],
     },
     ...additional_tabs,
