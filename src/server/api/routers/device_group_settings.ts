@@ -75,7 +75,7 @@ export const deviceGroupSettingsRouter = createTRPCRouter({
           
             multiple_sort: [
               {
-                  "by_field": "devices.status",
+                  "by_field": `${entity}.status`,
                   "by_direction": EOrderDirection.ASC
               }
           ] 

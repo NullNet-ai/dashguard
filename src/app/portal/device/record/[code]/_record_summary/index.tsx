@@ -16,7 +16,7 @@ export default function Page() {
     <Fragment>
       <RecordSummary />
       <RecordShellSummary
-        form_key={"contact_details"}
+        form_key={"device_basic_details"}
         identifier={identifier!}
         main_entity={main_entity!}
       />

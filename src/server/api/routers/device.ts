@@ -135,13 +135,11 @@ export const deviceRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log("%c Line:138 🥐 input", "color:#ed9ec7", input);
       const asRoot = true;
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
-      console.log("%c Line:148 🍞 ctx.token.value", "color:#b03734", ctx.token.value);
       const deviceInfo = await ctx.dnaClient
       .findByCode(input.device_id, {
         entity: 'devices',
@@ -155,10 +153,10 @@ export const deviceRouter = createTRPCRouter({
         },
       })
       .execute();
-      console.log("%c Line:158 🍔 deviceInfo", "color:#ed9ec7", deviceInfo);
+      
       const deviceRecord = deviceInfo?.data?.[0];
       // fetch account organization via device_id
-      console.log("%c Line:157 🥝 deviceRecord", "color:#7f2b82", deviceRecord);
+      
       const accountOrganization = await ctx.dnaClient
       .findAll({
         entity: 'account_organizations',
@@ -248,9 +246,8 @@ export const deviceRouter = createTRPCRouter({
         ]);
 
         const _account = account?.data?.[0];
-        console.log("%c Line:252 🍏 `${deviceRecord?.id}:${_account?.account_id}`", "color:#f5ce50", `account_id:${_account?.account_id}`);
         const fetch_account_secret = await ctx.redisClient.getCachedData(`${deviceRecord?.id}:${_account?.account_id}`)
-        console.log("%c Line:252 🍖 fetch_account_secret", "color:#42b983", fetch_account_secret);
+
       
 
         const { account_secret } = fetch_account_secret ?? {}
@@ -314,8 +311,7 @@ export const deviceRouter = createTRPCRouter({
               params: {
                 country,
                 city,
-                state,
-                entity_prefix: 'AD',
+                state
               },
             },
           })
@@ -331,11 +327,11 @@ export const deviceRouter = createTRPCRouter({
     // update to new grouoping id
     const modifyDeviceGroup = async () => {
       const filter_device_group = await ctx.dnaClient
-        .findAll({
-          entity: 'device_groups',
-          token: ctx.token.value,
-          query: {
-            pluck: ['id', 'status'],
+      .findAll({
+        entity: 'device_groups',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'status'],
             advance_filters: createAdvancedFilter({ device_id: id }),
             order: {
               limit: 1,
@@ -371,8 +367,7 @@ export const deviceRouter = createTRPCRouter({
               params: {
                 device_id: id,
                 device_group_setting_id: grouping,
-                status: 'Active',
-                entity_prefix: 'DG',
+                status: 'Active'
               },
             },
           })
@@ -436,10 +431,19 @@ export const deviceRouter = createTRPCRouter({
 
       const res = await Promise.all([
         ctx.dnaClient
-          .findAll({
+        .findAll({
             entity,
             token: ctx.token.value,
             query: {
+              pluck: [
+                'id',
+                'model',
+                'instance_name',
+                'address_id',
+                'created_date',
+                'updated_date',
+                'categories',
+              ],
               pluck_object: {
                 devices: [
                   'id',
@@ -463,17 +467,17 @@ export const deviceRouter = createTRPCRouter({
           .join({
             type: 'left',
             field_relation: {
-              to: {
-                entity: 'addresses',
+                to: {
+                    entity: 'addresses',
                 field: 'id',
               },
               from: {
-                entity,
-                field: 'address_id',
+                  entity,
+                  field: 'address_id',
+                },
               },
-            },
-          })
-          .execute(),
+            })
+            .execute(),
         await ctx.dnaClient
           .findAll({
             entity: 'device_groups',
@@ -507,22 +511,23 @@ export const deviceRouter = createTRPCRouter({
           .execute(),
       ])
 
-      // return res;
-      const { data } = res?.[0]
-      const {devices, address} = data?.[0] ?? {}
-      // const [devices, device_group] = res
+      const [deviceRes, groupRes] = res; // res is your array
 
-      // const { id: device_group_setting_id, name }
-      //   = device_group.data[0]?.device_group_settings?.[0] || {}
+      const deviceData = deviceRes?.data?.[0] ?? {};
+      const groupData = groupRes?.data?.[0] ?? {};
+
+      const { devices, addresses } = deviceData;
+      const { device_group_settings } = groupData;
 
       return {
         data: {
           ...devices,
-          ...address,
-          // grouping: device_group_setting_id,
-          // grouping_name: name,
+          ...addresses,
+          id: devices?.id,
+          grouping: device_group_settings?.id,
+          grouping_name: device_group_settings?.name,
         },
-      }
+      };
     }),
 
   fetchDownloadURL: privateProcedure
@@ -828,6 +833,7 @@ export const deviceRouter = createTRPCRouter({
         sorting = [],
         is_case_sensitive_sorting = 'false',
       } = input
+      
       const pluck_object = {
         ...addCommonGridPluckObject(),
         contacts: ['first_name', 'last_name', 'id', 'previous_status'],
@@ -1001,9 +1007,7 @@ export const deviceRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          hierarchy: device_group_settings
-            ?.map((setting: { name: string }) => setting.name)
-            .join(', '),
+          hierarchy: device_group_settings?.name,
           created_by: contacts?.length
             ? `${contacts?.[0].contact_created_by}`
             : null,
@@ -1238,7 +1242,7 @@ export const deviceRouter = createTRPCRouter({
         : null,
       }));
       const { id: device_group_setting_id, name }
-          = device_group.data[0]?.device_group_settings?.[0] || {}
+          = device_group.data[0]?.device_group_settings || {}
       // const { hostname } = device_configuration.data[0] || {}
       // const { device_interfaces } = device_configuration?.data?.[0] || {}
       const { addresses, ...rest } = device?.data?.[0] || {}

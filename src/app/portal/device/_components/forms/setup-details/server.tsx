@@ -20,7 +20,6 @@ const FormServerFetch = async () => {
     })
   const defaultValues = fetched_device?.data 
   const {devices, account_secret, account_id} = defaultValues || {}
-  console.log("%c Line:22 🥑 defaultValues", "color:#f5ce50", defaultValues);
 
   const server_url  = process.env.SERVER_URL
 

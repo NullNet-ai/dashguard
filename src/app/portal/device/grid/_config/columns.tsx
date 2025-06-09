@@ -49,10 +49,11 @@ const gridColumns = [
     header: 'WAN Address',
     accessorKey: 'ip_address',
     sortKey: 'device_interface_addresses.address',
+    // !! TO BE UNCOMMENT IF advance filter for this is working
     search_config: {
-      operator: 'like',
-      entity: 'device_interface_addresses',
-      field: 'address',
+      // operator: 'like',
+      // entity: 'device_interface_addresses',
+      // field: 'address',
       parse_as: 'text',
     },
     cell: ({ row }) => {
@@ -139,11 +140,12 @@ const gridColumns = [
     header: "Updated By",
     accessorKey: "updated_by",
     sortKey: "updated_by.full_name",
-    search_config: {
-      entity: "updated_by",
-      field: "full_name",
-      operator: 'like'
-    }
+    // !! TO BE UNCOMMENT IF advance filter for this is working
+    // search_config: {
+    //   entity: "updated_by",
+    //   field: "full_name",
+    //   operator: 'like'
+    // }
   },
   {
     header: "Created Date",
@@ -164,11 +166,12 @@ const gridColumns = [
     header: "Created By",
     accessorKey: "created_by",
     sortKey: "created_by.full_name",
-    search_config: {
-      entity: "created_by",
-      field: "full_name",
-      operator: 'like'
-    }
+    // !! TO BE UNCOMMENT IF advance filter for this is working
+    // search_config: {
+    //   entity: "created_by",
+    //   field: "full_name",
+    //   operator: 'like'
+    // }
   }
 ] as ColumnDef<any>[];
 
