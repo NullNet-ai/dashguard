@@ -71,6 +71,9 @@ export default async function Page() {
           router:'search',
           resolver:'searchSuggestions',
         },
+        customTabDefaults: {
+          defaultSorting,
+        }
       }}
     />
   );

@@ -67,6 +67,9 @@ export default async function UserRoleGridPage() {
           router:'search',
           resolver:'searchSuggestions',
         },
+        customTabDefaults: {
+          defaultSorting,
+        }
       }}
     />
   );

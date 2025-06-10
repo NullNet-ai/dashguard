@@ -61,6 +61,9 @@ export default async function Page() {
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
+        customTabDefaults: {
+          defaultSorting,
+        },
         searchSuggestionConfig: {
           router:'search',
           resolver: 'searchSuggestions',
