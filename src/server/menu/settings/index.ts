@@ -1,4 +1,3 @@
-import communication_template from './communication_template';
 import role from "./role";
 
 // Manual add menu to items
