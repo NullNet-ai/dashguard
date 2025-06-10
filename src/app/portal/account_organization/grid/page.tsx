@@ -35,11 +35,6 @@ export default async function Page() {
       config={{
         entity: 'account_organization',
         title: 'Accounts',
-        enableRowExpansion: true,
-        rowExpansionOptions:{
-          expandPosition: 'left',
-          rowExpansionComponent: ExpandedDefaultRow,
-        },
         defaultShownColumns: [
           "first_name",
           "last_name",
