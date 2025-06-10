@@ -26,10 +26,12 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     gridState,
     parentGroupFields,
     metadata,
+    parentType
   } = props ?? {};
 
   const { open } = useSidebar();
   const { state, actions } = useContext(GridContext);
+  const groups = state?.table.getState().grouping ?? [];
 
   const pagination = {
     current_page: 1,
@@ -63,14 +65,12 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       const filterItem = {
         type: 'criteria',
         field,
-        operator: value === null || value === undefined ? 'is_null' : 'equal',
-        entity: entity || config.entity,
-        values:
+        operator:
           value === null || value === undefined
-            ? []
-            : Array.isArray(value)
-              ? value
-              : [value],
+            ? 'is_null'
+            : 'equal',
+        entity: entity || config.entity,
+        values: Array.isArray(value) ? value : [value],
       };
       if (index > 0) {
         return [...acc, { type: 'operator', operator: 'and' }, filterItem];
@@ -144,8 +144,32 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   );
 
   const { items = [], totalCount = 0 } = data ?? {};
+    const newItems = items.map(item => {
+    return {...item, expand:'', group_by: ''}
+  })
 
-  const newVisibleColumns = [...visibleColumns].some(
+  const newColumnOrder =  config?.columnsOrder?.length ? [{
+    "header": "expand",
+    "accessorKey": "expand",
+    "label": "expand",
+    "isShow": true,
+    "order": 0
+  },
+  {
+    "header": "Group By",
+    "accessorKey": "group_by",
+    "label": "Group By",
+    "isShow": true,
+    "order": 1
+  },...config?.columnsOrder ?? []].map((col: any, index: number) => {
+    return {
+      ...col,
+      order: index 
+    }
+  }) : []
+
+
+  let newVisibleColumns = groups?.length <= 1 ? [...visibleColumns].some(
     (col: any) => col?.accessorKey === 'group_by',
   )
     ? [...visibleColumns]
@@ -156,7 +180,20 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
           data_type: 'string',
         },
         ...visibleColumns,
+      ] : [...visibleColumns];
+
+  newVisibleColumns = [...newVisibleColumns].some(
+    (col: any) => col?.accessorKey === 'expand',
+  )
+    ? [...newVisibleColumns]
+    : [
+        {
+          header: 'expand',
+          accessorKey: 'expand',
+        },
+        ...newVisibleColumns,
       ];
+
 
   if (isLoading && !items?.length) {
     return (
@@ -182,19 +219,22 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     );
   }
 
-  const _width = open
+  const _width = //{width: '100%'}; // TODO: Uncomment and adjust as needed
+  open
     ? {
-        width: 'calc(100vw - 330px)',
+        width: parentType === 'record' ?  'calc(100dvw - 635px)' : 'calc(100dvw - 264px)',
       }
     : {
-        width: '100%',
+       width: parentType === 'record' ?  'calc(100dvw - 450px)' : 'calc(100dvw - 98px)',
       };
 
+  
   return (
     <GridProvider
       {...gridQueryConfigs}
       config={{
         ...config,
+        columnsOrder: newColumnOrder,
         columns: newVisibleColumns,
         group_by_initial_columns: initialColumns,
         parentGroupData: [...(parentGroupData ?? []), { ...rowData }],
@@ -202,7 +242,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         parentGroupFields: groupFields,
       }}
       parentType="grouping_expansion"
-      data={items}
+      data={newItems}
       totalCount={totalCount}
       grouping={grouping}
     >
@@ -212,7 +252,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
           parentMeta={metadata?.parentRow}
         /> */}
       <TableRow>
-        <td colSpan={state?.table.getVisibleLeafColumns().length}>
+        <td colSpan={newVisibleColumns.length + 1}>
           {!grouping?.length && (
             <CardFooter style={_width}>
               <Pagination />

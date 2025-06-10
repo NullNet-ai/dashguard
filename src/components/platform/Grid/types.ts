@@ -373,4 +373,5 @@ export interface IGridGroupingExpansionProps {
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
   metadata?: any;
+  parentType?: string
 }
