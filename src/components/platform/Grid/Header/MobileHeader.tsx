@@ -13,8 +13,8 @@ export default function MobileHeader({  gridKey,
       <div className='mb-2 lg:mb-0'>
         <GridTabs gridKey={gridKey} grid_tabs={grid_tabs}/>
       </div>
-      <Search />
       <Sorting />
+      <Search />
     </div>
   )
 }

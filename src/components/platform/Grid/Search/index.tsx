@@ -51,14 +51,14 @@ export default function Main({
         <GridSearchContainer>
           <div
             className={cn(
-              `relative flex flex-1 flex-row justify-end`,
+              `relative flex flex-none flex-row justify-end 2xl:flex-1`,
               `${switchable ? 'gap-x-2' : ''}`,
             )}
           >
             {/* <div className="my-2 h-[40px] w-full md:my-0">
               <Search gridType={gridType} />
             </div> */}
-            <div className="hidden h-[36px] flex-shrink-0 flex-row items-center lg:flex">
+            <div className="hidden flex-shrink-0 flex-row items-center lg:flex">
               {switchable ? (
                 <>
                   <TableViewButton />
@@ -71,10 +71,10 @@ export default function Main({
             {/* Replace the existing create button with this logic */}
             {renderedCreateButton()}
           </div>
-          <div className="hidden min-h-[40px] lg:block">
+          <div className="hidden flex-1 2xl:flex-none lg:block">
             <SearchList parentType='grid'/>
           </div>
-          <div className="min-h-[40px] lg:hidden">
+          <div className="min-h-[40px] flex flex-row-reverse lg:hidden">
            <div className='flex justify-end'>
            <SearchDialog />
            </div>
