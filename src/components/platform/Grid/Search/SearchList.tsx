@@ -16,6 +16,15 @@ import { SearchGridContext } from './Provider';
 import SearchDialog from './SearchDialog';
 import { usePathname } from 'next/navigation'
 import { testIDFormatter } from '~/utils/formatter'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
+
+//funtion to ellipse the text if it is too long
+const shortentext = (text: string, maxLength: number) => {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + '...';
+  }
+  return text;
+}
 
 const SearchList = ({parentType} : any) => {
   const conref = useRef<any>(null);
@@ -55,60 +64,96 @@ const SearchList = ({parentType} : any) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    const debounce = <T extends (...args: any[]) => any>(
+      func: T,
+      delay: number
+    ): ((...args: Parameters<T>) => void) => {
+      let timeoutId: NodeJS.Timeout;
+      return (...args: Parameters<T>) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+      };
+    };
+  
+    const arraysEqual = (arr1: any[], arr2: any[]) => {
+      if (arr1.length !== arr2.length) return false;
+      return arr1.every((item, index) => 
+        item.id === arr2[index]?.id && item.hidden === arr2[index]?.hidden
+      );
+    };
+  
     const calc = (items?: any[]) => {
       const allItems: any[] = [];
-      const newData =
-        items ||
-        defaultSearchItems?.filter((item: any) => item.type !== 'operator');
-      // clear width, more width, and search by
-      const clearWidth = 65 + 63 + 61;
-      let totalWidth = 32 + newData?.length * 2 + 5 + clearWidth;
-      const containerWidth = conref.current?.offsetWidth || 0;
-
+      const newData = items || defaultSearchItems?.filter((item: any) => item.type !== 'operator');
+      
+      if (!newData?.length || !conref.current) return [];
+      
+      const containerWidth = conref.current.offsetWidth;
+      const clearWidth = 65 + 63 + 61 + 79;
+      let totalWidth = 32 + newData.length * 2 + 5 + clearWidth;
+      
+      const styleUpdates: Array<{ element: HTMLElement; styles: { position: string; left: string; pointerEvents: string } }> = [];
+      
       for (let index = 0; index < newData.length; index++) {
-        if (itemsRef.current[index]?.offsetWidth) {
-          totalWidth += itemsRef.current[index].offsetWidth || 0;
-          if (totalWidth > containerWidth) {
-            allItems?.push({
-              ...newData[index],
-              hidden: true,
-            });
-          } else {
-            allItems?.push({
-              ...newData[index],
-              hidden: false,
-            });
-          }
+        const element = itemsRef.current[index];
+        if (!element?.offsetWidth) continue;
+        
+        const isInMainContainer = element.closest('.container-ref');
+        if (!isInMainContainer) continue;
+        
+        totalWidth += element.offsetWidth;
+        const isHidden = totalWidth > containerWidth;
+        
+        allItems.push({
+          ...newData[index],
+          hidden: isHidden,
+        });
+        
+        if (element) {
+          styleUpdates.push({
+            element,
+            styles: isHidden
+              ? { position: 'absolute', left: '-150px', pointerEvents: 'none' }
+              : { position: 'relative', left: 'auto', pointerEvents: 'auto' }
+          });
         }
       }
+      
+      styleUpdates.forEach(({ element, styles }) => {
+        Object.assign(element.style, styles);
+      });
+      
+      const visibleCount = allItems.filter(item => !item.hidden).length;
+      if (visibleCount === 0 && allItems.length > 0) {
+        allItems[0].hidden = false;
+        const firstElement = itemsRef.current[0];
+        if (firstElement) {
+          Object.assign(firstElement.style, {
+            position: 'relative',
+            pointerEvents: 'auto',
+            left: 'auto'
+          });
+        }
+      }
+      
       return allItems;
     };
-
-    const handleResize = () => {
+  
+    const handleResize = debounce(() => {
       const items = calc();
-      if (JSON.stringify(items) !== JSON.stringify(data) && !open) {
+      if (!arraysEqual(items, data) && !open) {
         setData(items);
       }
-    };
+    }, 150);
+  
     handleResize();
+    
     window.addEventListener('resize', handleResize);
-
+  
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [defaultSearchItems, open]);
-
-  const lastHiddenIndexLeftPos = useMemo(() => {
-    const lastIndex = data?.findIndex((item) => item.hidden);
-    if (lastIndex === -1) {
-      return null;
-    }
-    return (
-      itemsRef.current[lastIndex - 1]?.offsetLeft +
-      itemsRef.current[lastIndex - 1]?.offsetWidth +
-      5
-    );
-  }, [data, defaultSearchItems, itemsRef.current]);
+  }, [defaultSearchItems, open, data]);
 
   if (parentType !== 'grid') {
     return null
@@ -120,7 +165,7 @@ const SearchList = ({parentType} : any) => {
       ref={conref}
     >
       <div className='flex flex-row justify-between flex-1 items-center'>
-        <div className="flex flex-row items-center flex-1 max-w-[387px]">
+        <div className="flex flex-row items-center flex-1 gap-x-[5px] max-w-[387px]">
           <span
             className={cn(
               `whitespace-nowrap text-xs text-black`,
@@ -128,53 +173,68 @@ const SearchList = ({parentType} : any) => {
             )}
             data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-by-lbl`)}`}
           >
-            Search By:
+            Search By: 
           </span>
           {defaultSearchItems.length ? (
-            <div className="flex flex-nowrap py-1">
+            <div className="relative flex flex-nowrap items-center gap-x-[5px]">
               {defaultSearchItems?.map((item: any, index: number) => {
                 const isHidden = data?.[index]?.hidden;
+                const searchText = shortentext(
+                  item.type === 'criteria'
+                  ?  `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
+                  : item?.operator, 
+                  (path2 === 'record' || path2 === 'wizard') ? 10 : 15,
+                )
                 return (
-                  <Badge
-                    className={cn(
-                      `item-ref m-1 flex items-center gap-1 whitespace-nowrap`,
-                      { 'opacity-0': isHidden },
-                    )}
-                    key={item.id}
-                    ref={(el) => {
-                      if (el) {
-                        itemsRef.current[index] = el;
-                      }
-                    }}
-                    variant="secondary"
-                  >
-                    {item.type === 'criteria'
-                      ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
-                      : item?.operator}
-                    {item.type === 'criteria' && !item.default && (
-                      <Button
-                        className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
-                        key={`${item.id}-remove`}
-                        name="removeSortingButton"
-                        size="xs"
-                        variant="ghost"
-                        onClick={() => {
-                          if (isHidden) return;
-                          actions?.handleRemoveSearchItem(item);
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </Badge>
+                      <TooltipProvider key={index}>
+                        <Tooltip delayDuration={100} defaultOpen={false}>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              className={cn(
+                                `item-ref my-1 flex items-center whitespace-nowrap`,
+                                { 'opacity-0': isHidden },
+                              )}
+                              key={item.id}
+                              ref={(el) => {
+                                if (el) {
+                                  itemsRef.current[index] = el;
+                                }
+                              }}
+                              variant="secondary"
+                            >
+                              {searchText}
+                              {item.type === 'criteria' && !item.default && (
+                                <Button
+                                  className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                                  key={`${item.id}-remove`}
+                                  name="removeSortingButton"
+                                  size="xs"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    if (isHidden) return;
+                                    actions?.handleRemoveSearchItem(item);
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" align='end'>
+                            {
+                              item.type === 'criteria'
+                              ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
+                              : item?.operator
+                            }
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                
                 );
               })}
               {!!data?.length && data.some((item) => item.hidden) && (
                 <div
-                  className="absolute max-w-[63px] py-1"
-                  style={{
-                    left: lastHiddenIndexLeftPos,
-                  }}
+                  className="max-w-[63px]"
                 >
                   <DropdownMenu
                     open={open}
@@ -251,14 +311,9 @@ const SearchList = ({parentType} : any) => {
               <Button
                 className={cn(
                   `h-[30px] text-default/60 underline hover:no-underline`,
-                  `${data?.length && data.some((item) => item.hidden) ? 'absolute mt-[2px]' : ''}`,
+                  `${data?.length && data.some((item) => item.hidden) ? 'mt-[2px]' : ''}`,
                 )}
                 name="resetSortButton"
-                style={{
-                  left: lastHiddenIndexLeftPos
-                    ? lastHiddenIndexLeftPos + 63
-                    : 0,
-                }}
                 variant="link"
                 onClick={() => {
                   actions?.handleClearSearchItems();
@@ -269,7 +324,7 @@ const SearchList = ({parentType} : any) => {
             </div>
           ) : null}
         </div>
-        <div className='mt-1'>
+        <div>
          <SearchDialog />
         </div>
       </div>

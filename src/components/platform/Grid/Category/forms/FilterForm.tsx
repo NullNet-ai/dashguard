@@ -90,14 +90,6 @@ export default function FilterForm() {
       fields={[]}
       formKey="filters"
       formSchema={formSchema}
-      // buttonHeaderRender={
-      //   <div>
-      //     <Button>
-      //       <PlusIcon className="h-5 w-5" />
-      //       Add filter
-      //     </Button>
-      //   </div>
-      // }
       onDataChange={handleChange}
       handleSubmit={onSubmit}
       defaultValues={{

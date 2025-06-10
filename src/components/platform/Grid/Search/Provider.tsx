@@ -41,12 +41,13 @@ export default function GridSearchProvider({ children }: IProps) {
     entity: defaultEntity,
     searchableFields = [],
     searchConfig,
+    searchSuggestionConfig,
     onFetchRecords,
   } = gridState?.config ?? {};
 
   const { parentType, gridKey } = gridState ?? {};
 
-  const { query_params } = searchConfig ?? {};
+  const { query_params } = searchSuggestionConfig ?? {};
   const { group_advance_filters } = query_params ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
@@ -82,6 +83,7 @@ export default function GridSearchProvider({ children }: IProps) {
             values: [resolveValue],
             entity: defaultEntity,
             ...item,
+            is_search: true,
           },
           ...(index !== 0 ? [{ type: 'operator', operator: 'or' }] : []),
           ...acc,
@@ -109,7 +111,21 @@ export default function GridSearchProvider({ children }: IProps) {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-    const { router = 'grid', resolver = 'items' } = searchConfig ?? {};
+    const { router = 'search', resolver = 'searchSuggestions' } =
+    searchSuggestionConfig ?? {};
+    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
+    const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
+    return data;
+  };
+
+  // TODO: Remove this function after the new search is implemented in form filter
+  const handleOldSearchQuery = (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) => {
+    const { router = 'grid', resolver = 'items' } =
+    searchConfig ?? {};
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
@@ -118,7 +134,7 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
-    const { count: _, ...rest } = filterItem ?? {};
+    const { count: _, parse_as, ...filter_item } = filterItem ?? {};
     const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
       entity: entity || defaultEntity,
       ...rest,
@@ -127,7 +143,7 @@ export default function GridSearchProvider({ children }: IProps) {
 
     const updateSearchItems = resolveSearchItem({
       advanceFilter,
-      rest,
+      filter_item,
     });
     setSearchItems(updateSearchItems);
     const updatedFilterUrl = await UpdateReportFilter({
@@ -226,6 +242,7 @@ export default function GridSearchProvider({ children }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
+    handleOldSearchQuery
   } as IAction;
 
   return (

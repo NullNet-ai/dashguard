@@ -13,6 +13,18 @@ import GridGroupingExpansion from './GridGroupingExpansion';
 import ArchiveConfirmationModal from '../../views/ArchiveConfirmationModal';
 import BulkActionConfirmationModal from '../../views/common/BulkActionConfirmationModal';
 
+
+const removeDuplicateColumnIds = (array: any) => {
+  const seen = new Set();
+  return array.filter(({ column } : any) => {
+    if (!seen.has(column?.id)) {
+      seen.add(column?.id);
+      return true;
+    }
+    return false;
+  });
+};
+
 const GridGroupRows = ({
     parentMeta,
     gridLevel,
@@ -64,11 +76,15 @@ const GridGroupRows = ({
       ),
     );
 
+
     return (
         <>
             {state?.table.getRowModel().rows?.length ? (
-              state?.table.getRowModel().rows.map((row, index) => (
-                <>
+              state?.table.getRowModel().rows.map((row, index) => {
+                //remove duplicate column id
+                const uniqueVisibleCells: any = removeDuplicateColumnIds([...row.getVisibleCells()])
+
+                return <>
                   <TableRow
                     className={cn(
                       `group relative border-b border-b-gray-100 hover:bg-border/50`,
@@ -80,8 +96,9 @@ const GridGroupRows = ({
                       `${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`,
                     )}
                   >
-                    {row.getVisibleCells().map((cell, index) => {
-    
+                    {uniqueVisibleCells.map((cell:any, index: number) => {
+
+
                       const parentCellSize = getParentCellSize(cell.column.id)
     
                       if (
@@ -92,8 +109,8 @@ const GridGroupRows = ({
                           <td
                             key={cell.id + index}
                             className={cn(
-                              'right-0',
-                              isEndReached || reachEnd ? '' : 'sticky',
+                              'right-0 sticky',
+                              // isEndReached || reachEnd ? '' : 'sticky',
                             )}
                           >
                             <div className="px-3">
@@ -101,9 +118,10 @@ const GridGroupRows = ({
                                 className={cn(
                                   'items-center',
                                   `${showAction ? 'opacity-100' : 'opacity-0'}`,
-                                  !isEndReached && !reachEnd
-                                    ? 'group-hover:opacity-100'
-                                    : 'opacity-100',
+                                  // !isEndReached && !reachEnd
+                                  //   ? 'group-hover:opacity-100'
+                                  //   : 'opacity-100',
+                                  'group-hover:opacity-100'
                                 )}
                               >
                                 <div className="flex h-8 items-center justify-center gap-x-4 rounded-xl bg-background px-4 shadow-md">
@@ -188,73 +206,73 @@ const GridGroupRows = ({
                   </TableRow>
                   {row.getIsExpanded() &&
                     (row.original.is_group_by ? (
-                          <GridGroupingExpansion
-                            rowData={row.original}
-                            config={state.config}
-                            initialColumns={
-                              state?.config?.group_by_initial_columns ||
-                              state?.initial_columns
-                            }
-                            metadata={{
-                              parentRow: row.getVisibleCells()
-                            }}
-                            grouping={state.grouping?.slice(1)}
-                            visibleColumns={visibleColumns ?? []}
-                            parentGroupData={state?.config?.parentGroupData || []}
-                            gridState={state}
-                            parentGroupFields={
-                              state?.config?.parentGroupFields ||
-                              state?.groupConfigs
-                            }
-                          />
-                    ) : (
-                      <TableRow className="group relative border-b hover:bg-border/50">
-                        <td
-                          colSpan={state?.table.getVisibleLeafColumns().length}
-                          className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
+                        <GridGroupingExpansion
+                          rowData={row.original}
+                          config={state.config}
+                          initialColumns={
+                            state?.config?.group_by_initial_columns ||
+                            state?.initial_columns
+                          }
+                          metadata={{
+                            parentRow: row.getVisibleCells()
+                          }}
+                          grouping={state.grouping?.slice(1)}
+                          visibleColumns={visibleColumns ?? []}
+                          parentGroupData={state?.config?.parentGroupData || []}
+                          gridState={state}
+                          parentGroupFields={
+                            state?.config?.parentGroupFields ||
+                            state?.groupConfigs
+                          }
+                        />
+                  ) : (
+                    <TableRow className="group relative border-b hover:bg-border/50">
+                      <td
+                        colSpan={state?.table.getVisibleLeafColumns().length}
+                        className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
+                      >
+                        <div
+                          style={{
+                            height:
+                              gridLevel === 2
+                                ? 'calc(100% - 30px) '
+                                : 'calc(100% - 85px)',
+                          }}
+                          className="absolute left-4 top-1 w-[1px] bg-primary"
                         >
-                          <div
-                            style={{
-                              height:
-                                gridLevel === 2
-                                  ? 'calc(100% - 30px) '
-                                  : 'calc(100% - 85px)',
-                            }}
-                            className="absolute left-4 top-1 w-[1px] bg-primary"
-                          >
-                            <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
-                              <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
-                            </div>
+                          <div className="absolute bottom-0 h-[1px] w-[20px] bg-primary">
+                            <div className="absolute bottom-[-3px] right-[-2px] h-2 w-2 rounded-full bg-primary" />
                           </div>
-                          <div>
-                            {state?.config?.rowExpansionBuilder ? (
-                              typeof state?.config?.rowExpansionBuilder ===
-                              'function' ? (
-                                state?.config?.rowExpansionBuilder({
-                                  rowData: row.original,
-                                  viewMode: 'table',
-                                })
-                              ) : (
-                                React.cloneElement(
-                                  state?.config?.rowExpansionBuilder,
-                                  {
-                                    rowData: row.original,
-                                    parentExpanded: allExpandedRows,
-                                    key: `expanded:${row.id ?? index}`,
-                                    grouping: state.grouping,
-                                    viewMode: 'table',
-                                  },
-                                )
-                              )
+                        </div>
+                        <div>
+                          {state?.config?.rowExpansionBuilder ? (
+                            typeof state?.config?.rowExpansionBuilder ===
+                            'function' ? (
+                              state?.config?.rowExpansionBuilder({
+                                rowData: row.original,
+                                viewMode: 'table',
+                              })
                             ) : (
-                              <span>Provide your expand component</span>
-                            )}
-                          </div>
-                        </td>
-                      </TableRow>
-                    ))}
-                </>
-              ))
+                              React.cloneElement(
+                                state?.config?.rowExpansionBuilder,
+                                {
+                                  rowData: row.original,
+                                  parentExpanded: allExpandedRows,
+                                  key: `expanded:${row.id ?? index}`,
+                                  grouping: state.grouping,
+                                  viewMode: 'table',
+                                },
+                              )
+                            )
+                          ) : (
+                            <span>Provide your expand component</span>
+                          )}
+                        </div>
+                      </td>
+                    </TableRow>
+                  ))}
+              </>
+              })
             ) : (
               <TableRow>
                 <TableCell

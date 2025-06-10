@@ -52,12 +52,14 @@ const FormHeader = (props: IFormHeaderProps) => {
         {formLabel}{' '}
       </CardDescription>
       <div className="flex flex-row space-x-2">
+      {process.env.NODE_ENV !== "production" && (
         <DebugButton
           handleDebug={handleDebug}
           dataTestID={testIDFormatter(
             `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-debug-btn`,
           )}
         />
+      )}
 
         {properties?.hasActions ? (
           <Fragment>

@@ -109,7 +109,7 @@ const Sorting = ({ className }: { className?: string }) => {
         className="text-nowrap text-xs text-foreground" 
         data-test-id={testIDFormatter(`${entity}-sort-by-lbl`)}
       >
-        Sort By
+        Sort By:
       </span>
       {sortingFields?.map((item: ColumnSort, index) => {
         const isHidden = data?.[index]?.hidden;

@@ -67,6 +67,13 @@ export default async function Page() {
             pluck: _pluck,
           },
         },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver:'searchSuggestions',
+        },
+        customTabDefaults: {
+          defaultSorting,
+        }
       }}
     />
   );

@@ -291,6 +291,22 @@ export const contactRouter = createTRPCRouter({
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
+      if(input.grouping[0] === 'organization.name') {
+        const resolvedItems = items?.map((item: any) => {
+          return {
+            ...item,
+            organizations: {
+              name: item?.organizations?.name ? [item?.organizations?.name]: null,
+            }
+          }
+        })
+        return {
+          totalCount,
+          items: resolvedItems,
+          currentPage: 0,
+          totalPages,
+        };
+      }
       return {
         totalCount,
         items: items,

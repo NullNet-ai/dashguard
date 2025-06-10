@@ -56,7 +56,7 @@ export default function ManageFilter({
   const {
     columns = [],
     gridColumns: _gridColumns = [],
-    searchConfig,
+    searchSuggestionConfig,
     entity: defaultEntity,
     enableManageCustomGridFilter = true,
     customTabDefaults = {},
@@ -89,7 +89,7 @@ export default function ManageFilter({
             tab={tab}
             columns={gridColumns}
             searchConfig={{
-              ...searchConfig,
+              ...searchSuggestionConfig ?? {},
               entity: defaultEntity,
             }}
             customTabDefaults={customTabDefaults}

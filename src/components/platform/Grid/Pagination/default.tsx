@@ -9,7 +9,7 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/react/20/solid';
 import { camelCase } from 'lodash';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
@@ -93,6 +93,11 @@ export default function PaginationDefault({
       gridKey: state?.gridKey,
     });
   };
+
+  useEffect(() => {
+    setPagination(state?.pagination);
+  }, [state?.pagination]);
+
 
   const generatePaginationText = (
     limit: number,

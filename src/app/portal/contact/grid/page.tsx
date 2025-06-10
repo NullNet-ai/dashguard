@@ -76,8 +76,10 @@ export default async function Page() {
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
         },
-        enableRowExpansion: true,
-        rowExpansionBuilder: <AccountGridExpansion />,
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'contactSearch',
+        },
         customTabDefaults: {
           defaultSorting,
         }

@@ -92,6 +92,17 @@ export default function GridProvider({
     );
   }, [initialGrouping]) as GroupingState;
 
+  const resolvedFieldGroupings = useMemo(() => {
+    if (!initialGrouping?.length) return [];
+    if (typeof initialGrouping[0] === 'string') return initialGrouping;
+    return (initialGrouping as IGroupBy[])?.reduce(
+      (acc: GroupingState, curr) => {
+        return [...acc, curr.field];
+      },
+      [],
+    );
+  }, [initialGrouping]) as GroupingState;
+
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
   /** @HOOKS */
@@ -218,42 +229,46 @@ export default function GridProvider({
         });
         return newVisibility;
       });
-      if (config?.onFetchRecords) {
+      if (config?.onFetchRecords && parentType !== 'grouping_expansion') {
         config?.onFetchRecords({
-          grouping: grouping[0] ? [grouping[0]] : [],
+          grouping: resolvedFieldGroupings[0]
+            ? [resolvedFieldGroupings[0]]
+            : [],
         });
       }
     }
   }, []);
 
-    // use effect for column order
-    useEffect(() => {
-      if(!_propsConfig?.columnsOrder?.length) {
-        setColumnsOrder([]);
-        return;
-      };
-  
-      if (!!_propsConfig?.columnsOrder?.length) {
-        const sortedColumns = sortColumns(_propsConfig?.columnsOrder, _propsConfig?.columns);
-        _propsConfig.columns = sortedColumns
-      }
-      
-      // Check if arrays have different lengths
-      if (columnsOrder.length !== _propsConfig.columnsOrder.length) {
-        setColumnsOrder(_propsConfig.columnsOrder ?? []);
-        return;
-      }
-      
-      const hasChanged = _propsConfig.columnsOrder.some((newCol, index) => {
-        const currentCol = columnsOrder[index];
-        return newCol.id !== currentCol.id || newCol.order !== currentCol.order;
-      });
-      
-      if (hasChanged) {
-        setColumnsOrder(_propsConfig.columnsOrder ?? []);
-      }
-    }, [_propsConfig?.columnsOrder]);
-  
+  // use effect for column order
+  useEffect(() => {
+    if (!_propsConfig?.columnsOrder?.length) {
+      setColumnsOrder([]);
+      return;
+    }
+
+    if (!!_propsConfig?.columnsOrder?.length) {
+      const sortedColumns = sortColumns(
+        _propsConfig?.columnsOrder,
+        _propsConfig?.columns,
+      );
+      _propsConfig.columns = sortedColumns;
+    }
+
+    // Check if arrays have different lengths
+    if (columnsOrder.length !== _propsConfig.columnsOrder.length) {
+      setColumnsOrder(_propsConfig.columnsOrder ?? []);
+      return;
+    }
+
+    const hasChanged = _propsConfig.columnsOrder.some((newCol, index) => {
+      const currentCol = columnsOrder[index];
+      return newCol.id !== currentCol.id || newCol.order !== currentCol.order;
+    });
+
+    if (hasChanged) {
+      setColumnsOrder(_propsConfig.columnsOrder ?? []);
+    }
+  }, [_propsConfig?.columnsOrder]);
 
   // use effect for sorting if there is a change in props sorting it should set the sorting
   useEffect(() => {
@@ -274,32 +289,15 @@ export default function GridProvider({
         });
         return newVisibility;
       });
-      config?.onFetchRecords?.({
-        grouping: resolvedGroupings[0] ? resolvedGroupings[0] : [],
-      });
+      if (config?.onFetchRecords && parentType !== 'grouping_expansion') {
+        config?.onFetchRecords({
+          grouping: resolvedFieldGroupings[0]
+            ? [resolvedFieldGroupings[0]]
+            : [],
+        });
+      }
     }
   }, [resolvedGroupings]);
-
-  useEffect(() => {
-    if (
-      !!temoporaryGrouping?.length &&
-      !!JSON.parse(data?.[0].total_group_count || '0')
-    ) {
-      setColumnVisibility((prev: any) => {
-        const visibility: any = { ...prev };
-        // Show all previously grouped columns
-        grouping.forEach((columnId) => {
-          visibility[columnId] = true;
-        });
-        // Hide newly grouped columns
-        temoporaryGrouping.forEach((columnId) => {
-          visibility[columnId] = false;
-        });
-        return visibility;
-      });
-      setGrouping(temoporaryGrouping);
-    }
-  }, [temoporaryGrouping, data]);
 
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
@@ -470,20 +468,6 @@ export default function GridProvider({
     const newGrouping =
       typeof updater === 'function' ? updater(grouping) : updater;
 
-    // Update column visibility to hide grouped columns
-    // setColumnVisibility((prev: any) => {
-    //   const visibility: any = { ...prev };
-    //   // Show all previously grouped columns
-    //   grouping.forEach((columnId) => {
-    //     visibility[columnId] = true;
-    //   });
-    //   // Hide newly grouped columns
-    //   newGrouping.forEach((columnId) => {
-    //     visibility[columnId] = false;
-    //   });
-    //   return visibility;
-    // });
-    // setGrouping(newGrouping);
     const groupings = newGrouping?.map((item) => {
       const columnConfig = config?.columns?.find(
         (column: any) => column?.accessorKey === item,
@@ -503,27 +487,22 @@ export default function GridProvider({
     UpdateReportGrouping({ grouping: groupings, gridKey });
 
     if (config?.onFetchRecords) {
-      const resolvedGroupings = groupings?.map((item) => item?.value);
+      setColumnVisibility((prev: any) => {
+        const visibility: any = { ...prev };
+        // Show all previously grouped columns
+        grouping.forEach((columnId) => {
+          visibility[columnId] = true;
+        });
+        // Hide newly grouped columns
+        newGrouping.forEach((columnId) => {
+          visibility[columnId] = false;
+        });
+        return visibility;
+      });
+      setGrouping(newGrouping);
       config?.onFetchRecords?.({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
-      if (!groupings.length) {
-        setGrouping(resolvedGroupings);
-        // Update column visibility to hide grouped columns
-        setColumnVisibility((prev: any) => {
-          const visibility: any = { ...prev };
-          // Show all previously grouped columns
-          grouping.forEach((columnId) => {
-            visibility[columnId] = true;
-          });
-          // Hide newly grouped columns
-          newGrouping.forEach((columnId) => {
-            visibility[columnId] = false;
-          });
-          return visibility;
-        });
-      }
-      setTemporaryGrouping(resolvedGroupings);
       return;
     }
   };

@@ -45,25 +45,21 @@ const gridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
     sortKey: ["updated_date", "updated_time"],
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
+    data_type: 'string',
     sortKey: 'updated_by.full_name',
-    isSearchable: false,
     search_config: {
       entity: 'updated_by',
       field: 'full_name',
@@ -72,24 +68,20 @@ const gridColumns = [
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
-    sortKey: ["created_date", "created_time"],
-    cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: ['created_date', 'created_time'],
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {
     header: 'Created By',
     accessorKey: 'created_by',
+    data_type: 'string',
     sortKey: 'created_by.full_name',
-    isSearchable: false,
     search_config: {
       entity: 'created_by',
       field: 'full_name',

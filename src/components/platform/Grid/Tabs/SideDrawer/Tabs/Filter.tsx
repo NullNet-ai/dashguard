@@ -25,7 +25,8 @@ import { ZodSchema } from './schemas/filter';
 export default function FilterContent() {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
-  const { filterDetails, columns, searchConfig, customTabDefaults } = state ?? {};
+  const { filterDetails, columns, searchConfig, customTabDefaults } =
+    state ?? {};
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
@@ -309,27 +310,6 @@ export default function FilterContent() {
                             </Select>
                           )}
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          {/* Add Filter button with simplified props */}
-                          <FilterGroupActions
-                            onAppendFilter={() =>
-                              handleAppendFilter(groupIndex)
-                            }
-                          />
-
-                          {filterGroups.length > 1 && (
-                            <Button
-                              onClick={() =>
-                                handleRemoveFilterGroup(groupIndex)
-                              }
-                              variant="ghost"
-                              size="sm"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          )}
-                        </div>
                       </div>
 
                       {/* Individual filter group content with simplified props */}
@@ -359,6 +339,21 @@ export default function FilterContent() {
                           )
                         }
                       />
+                      <div className="flex items-center gap-2">
+                        <FilterGroupActions
+                          onAppendFilter={() => handleAppendFilter(groupIndex)}
+                        />
+
+                        {filterGroups.length > 1 && (
+                          <Button
+                            onClick={() => handleRemoveFilterGroup(groupIndex)}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -367,7 +362,7 @@ export default function FilterContent() {
           })}
         </Sortable>
       </Form>
-{/* 
+      {/* 
       <Button
         variant="ghost"
         size="sm"

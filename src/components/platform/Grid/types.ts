@@ -201,7 +201,7 @@ export interface IConfigGrid {
     TooltipProps & {
       label?: string;
       action_type: 'archive' | 'custom' | null; // additional action_type here;
-      icon?: keyof typeof Lucide
+      icon?: keyof typeof Lucide;
     };
   customBulkDialogConfig?: {
     title?: string;
@@ -209,9 +209,14 @@ export interface IConfigGrid {
     button_title?: string;
   };
   customBulkAction?: (args: DefaultBulkActions) => void;
-  enableCreateCustomGridFilter?: boolean,
-  enableManageCustomGridFilter?: boolean,
+  enableCreateCustomGridFilter?: boolean;
+  enableManageCustomGridFilter?: boolean;
   customTabDefaults?: Record<string, any>;
+  searchSuggestionConfig?: {
+    router?: AppRouterKeys;
+    resolver?: string;
+    query_params?: ISearchParams;
+  };
   archiveBulkDialogConfiguration?: {
     title?: string;
     message: string;
@@ -320,6 +325,7 @@ export type IParentType =
   | 'record'
   | 'grid_expansion'
   | 'side_drawer'
+  | 'grouping_expansion'
   | 'record';
 export interface IPropsGrid {
   config: IConfigGrid;
@@ -368,4 +374,5 @@ export interface IGridGroupingExpansionProps {
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
   metadata?: any;
+  parentType?: string
 }

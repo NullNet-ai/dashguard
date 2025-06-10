@@ -86,6 +86,7 @@ export default function SearchDialog() {
         'created_time',
         'updated_time',
       ],
+      searchable_fields: searchableFields,
       advance_filters: advanceFilterItems as IAdvanceFilters[],
       ...(searchConfig?.query_params ?? {}),
     },
@@ -171,11 +172,12 @@ export default function SearchDialog() {
                     <h2 className="mb-2 mt-1 px-3 text-xs font-semibold text-gray-500">
                       <SearchResult
                         results={
-                          (transformSearchData(
-                            items,
-                            debouncedSearchInput,
-                            searchableFields,
-                          ) as ISearchItemResult[]) || null
+                          (items as ISearchItemResult[]) || null
+                          // (transformSearchData(
+                          //   items,
+                          //   debouncedSearchInput,
+                          //   searchableFields,
+                          // ) as ISearchItemResult[]) || null
                         }
                         closeDialog={handleCloseDialog}
                       />

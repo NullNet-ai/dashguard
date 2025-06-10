@@ -4,25 +4,27 @@ import { type ISearchItem } from '../types';
 
 export const resolveSearchItem = ({
   advanceFilter,
-  rest,
+  filter_item,
 }: {
   advanceFilter: ISearchItem[];
-  rest: ISearchItem;
+  filter_item: ISearchItem;
 }) => {
   const hasFilters = advanceFilter.some(
     (item) => item.filters && item.filters.length > 0,
   );
 
-  const resolveRest = {
-    ...rest,
+  const resolveFilterItem = {
+    ...filter_item,
     id: ulid(),
     values:
-      rest?.field === 'raw_phone_number'
-        ? [rest?.values?.[0]?.replace(/[^\d]/g, '')]
-        : [rest?.values?.[0]],
-    display_value: rest.display_value ? rest.display_value : rest?.values?.[0],
-    operator:
-      rest?.operator === 'like' && !rest?.parse_as ? 'equal' : rest?.operator,
+      filter_item?.field === 'raw_phone_number'
+        ? [filter_item?.values?.[0]?.replace(/[^\d]/g, '')]
+        : filter_item?.values,
+    display_value: filter_item.display_value
+      ? filter_item.display_value
+      : filter_item?.values?.[0],
+    operator: 'equal',
+    // filter_item?.operator === 'like' && !filter_item?.parse_as ? 'equal' : filter_item?.operator,
     default: false,
   };
   if (hasFilters) {
@@ -35,10 +37,10 @@ export const resolveSearchItem = ({
             {
               type: 'operator',
               operator: 'and',
-              entity: rest?.entity,
+              entity: filter_item?.entity,
               default: false,
             },
-            resolveRest, // Corrected this part
+            resolveFilterItem, // Corrected this part
           ],
         };
       }
@@ -54,7 +56,7 @@ export const resolveSearchItem = ({
       ? [{ type: 'operator', operator: 'and', default: false }]
       : []),
     {
-      ...resolveRest,
+      ...resolveFilterItem,
     },
   ] as ISearchItem[];
 

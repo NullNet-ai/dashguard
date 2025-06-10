@@ -972,8 +972,9 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .join({
+        .nestedJoin({
           type: 'left',
+          nested: true,
           field_relation: {
             to: {
               entity: 'organizations',
