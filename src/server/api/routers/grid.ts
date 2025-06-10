@@ -771,6 +771,10 @@ export const gridRouter = createTRPCRouter({
             advance_filters:
               tab?.group_advance_filters?.length > 0 ? [] : filters,
             default_filter: [],
+            pagination: {
+              ...tab?.pagination ?? {},
+              current_page: 1
+            }
           };
         }
         return tab;
