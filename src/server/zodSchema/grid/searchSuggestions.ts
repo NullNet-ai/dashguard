@@ -51,6 +51,8 @@ const ZodSearchSuggestions = z.object({
     .optional(), // Optional group advance filters
   grouping: z.array(z.string()).optional(), // Optional groupings
   searchable_fields: z.array(z.any()).optional(),
+  is_case_sensitive_sorting: z.string().optional(),
+
 });
 
 export default ZodSearchSuggestions;

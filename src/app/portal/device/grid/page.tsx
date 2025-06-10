@@ -73,7 +73,7 @@ export default async function Page() {
         },
         searchSuggestionConfig: {
           router:'search',
-          resolver: 'searchSuggestions',
+          resolver: 'deviceSearch',
         },
       }}
       customCreateButton={<CustomCreateButton entity={'device'} />}

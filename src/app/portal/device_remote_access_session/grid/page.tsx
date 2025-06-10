@@ -95,10 +95,15 @@ export default async function Page() {
           pluck: _pluck,
         },
       },
+      searchSuggestionConfig: {
+        router: 'search',
+        resolver: 'deviceRemoteAccessSessionSearch',
+      }
     }}
     customCreateButton={
       <CustomNewButton />
     }
+    
     data={items}
     // defaultAdvanceFilter={defaultAdvanceFilter || []}
     defaultSorting={defaultSorting}
