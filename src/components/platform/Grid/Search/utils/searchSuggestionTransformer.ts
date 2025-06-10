@@ -26,18 +26,13 @@ export const searchSuggestionTransformer = (
     Object.entries(item).forEach(([entity, fields]) => {
       Object.entries(fields).forEach(([field, value]) => {
         // Identify *_group fields and check if count > 0
-        if (
-          field.endsWith('_group') &&
-          (value as Record<string, any>).count > 0
-        ) {
-          const fieldName = field.replace('_group', '');
-          const actualValues = fields[fieldName];
-
+        if (!field.endsWith('_group')) {
+          const actualValues = fields[field];
           if (actualValues && typeof actualValues === 'object') {
             Object.entries(actualValues).forEach(([val, count]) => {
               const searchableField = searchableFields?.find(
                 (sf) =>
-                  sf.field === fieldName &&
+                  sf.field === field &&
                   (pluralize(sf.entity ?? '') === entity ||
                     sf.entity === entity),
               );
@@ -45,7 +40,7 @@ export const searchSuggestionTransformer = (
               result.push({
                 ...(searchableField ?? {}),
                 entity,
-                field: fieldName,
+                field,
                 values: Array.isArray(value) ? value : [value],
                 count,
                 type: 'criteria',
