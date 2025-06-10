@@ -10,7 +10,7 @@ const RecordContainer = ({ children }: any) => {
 
   return (
     <div className={cn(`hidden h-full min-h-[calc(100vh-84px)] w-full border-r border-slate-100 md:block`,
-        `${!isCollapseRecordSummary ? 'w-max' : 'w-12'}`
+        `${!isCollapseRecordSummary ? 'w-full min-w-[300px] max-w-min' : 'w-12'}`
     )}>
       {children}
     </div>
