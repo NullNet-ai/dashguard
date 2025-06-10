@@ -80,8 +80,6 @@ export default async function Page() {
           router:'search',
           resolver: 'contactSearch',
         },
-        enableRowExpansion: true,
-        rowExpansionBuilder: <AccountGridExpansion />,
         customTabDefaults: {
           defaultSorting,
         }
