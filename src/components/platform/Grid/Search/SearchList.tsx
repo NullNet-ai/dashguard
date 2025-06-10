@@ -186,7 +186,7 @@ const SearchList = ({parentType} : any) => {
                   (path2 === 'record' || path2 === 'wizard') ? 10 : 15,
                 )
                 return (
-                      <TooltipProvider>
+                      <TooltipProvider key={index}>
                         <Tooltip delayDuration={100} defaultOpen={false}>
                           <TooltipTrigger asChild>
                             <Badge

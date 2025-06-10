@@ -1,18 +1,11 @@
-import { api } from '~/trpc/server';
-import Grid from '~/components/platform/Grid';
 import { headers } from 'next/headers';
-
-/**
- *
- * @Default Grid Features
- *
- */
+import Grid from '~/components/platform/Grid';
+import { api } from '~/trpc/server';
+import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
+import CustomCreateButton from '../_components/custom_create_button';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
-import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
-import { resolveGridParams } from '~/utils/grid-params-resolver';
-import CustomCreateButton from '../_components/custom_create_button';
-import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
   const gridCacheData = (await getGridCacheData({
@@ -74,6 +67,9 @@ export default async function Page() {
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        customTabDefaults: {
+          defaultSorting,
         },
         searchSuggestionConfig: {
           router:'search',
