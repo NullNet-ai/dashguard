@@ -58,15 +58,16 @@ const gridColumns = [
     },
   },
   {
-    header: "Created By",
-    accessorKey: "created_by",
-    sortKey: "created_by.full_name",
+    header: 'Created By',
+    accessorKey: 'created_by',
+    data_type: 'string',
+    sortKey: 'created_by.full_name',
     search_config: {
-      entity: "created_by",
-      field: "full_name",
-      operator: 'like'
-    }
-  }
+      entity: 'created_by',
+      field: 'full_name',
+      operator: 'like',
+    },
+  },
 ] as ColumnDef<any>[];
 
 export default gridColumns;
