@@ -5,8 +5,7 @@
   import device_remote_access_session from "./device_remote_access_session";
   import location from "./location";
   import organization from "./organization";
-  import settings from "./settings";
-  import demo from "./demo";
+  import settings from "./settings"
 
 const menu = [
   account_organization,
@@ -16,8 +15,7 @@ const menu = [
   device_remote_access_session,
   location,
   organization,
-  settings,
-  demo,
+  settings
 ];
 
 export default menu;
