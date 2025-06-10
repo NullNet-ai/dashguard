@@ -7,6 +7,7 @@ import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
 import { formatString } from '~/server/utils/formatString'
 import { pluralize } from '~/server/utils/pluralize'
+import { addCommonGridJoins, addCommonGridPluckObject } from '~/server/utils/queryBuilder'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
@@ -66,12 +67,9 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       } = input
 
       const pluck_object = {
-        contacts: ['first_name', 'last_name', 'id'],
-        updated_by: ['first_name', 'last_name', 'id'],
-        created_by: ['first_name', 'last_name', 'id'],
+        ...addCommonGridPluckObject(),
         devices: ['instance_name', 'id'],
         [pluralize(input?.entity)]: pluck,
-        organization_accounts: ['contact_id', 'id', 'device_id'],
       }
 
       const query = ctx.dnaClient.findAll({
@@ -120,60 +118,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       })
 
       if (pluck_object) {
-        query.join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'organization_accounts',
-              field: 'id',
-            },
-            from: {
-              entity,
-              field: 'created_by',
-            },
-          },
-        })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'contacts',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_accounts',
-                field: 'contact_id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'organization_accounts',
-                alias: 'organization_accounts_updated_by',
-                field: 'id',
-              },
-              from: {
-                entity,
-                field: 'updated_by',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                alias: 'updated_by',
-                entity: 'contacts',
-                field: 'id',
-              },
-              from: {
-                entity: 'organization_accounts',
-                field: 'contact_id',
-              },
-            },
-          })
+        query
           .join({
             type: 'left',
             field_relation: {
@@ -188,32 +133,32 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             },
           })
       }
+
+      addCommonGridJoins(query, 'device_remote_access_sessions')
       const { total_count: totalCount = 1, data: items }
-    = await query.execute()
+      = await query.execute()
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
-          contacts,
+          created_by,
           devices,
           updated_by,
-          remote_access_type,
           ...rest
         } = item
 
         return {
           ...entity_data,
           ...rest,
-          device_remote_access_type: remote_access_type.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
-          remote_access_type,
+          device_remote_access_type: entity_data?.remote_access_type?.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
           // remote_access_category: formatString(remote_access_type),
           // type: formatString(remote_access_type),
-          device_name: formatString(devices?.[0]?.instance_name),
-          created_by: !!contacts?.[0]?.first_name || !!contacts?.[0]?.last_name
-            ? `${contacts?.[0]?.first_name} ${contacts?.[0]?.last_name}`
+          device_name: formatString(devices?.instance_name),
+          created_by: !!created_by?.first_name || !!created_by?.last_name
+            ? `${created_by?.first_name} ${created_by?.last_name}`
             : null,
-          updated_by: updated_by?.[0]?.first_name || updated_by?.[0]?.last_name
-            ? `${updated_by?.[0]?.first_name} ${updated_by?.[0]?.last_name}`
+          updated_by: updated_by?.first_name || updated_by?.last_name
+            ? `${updated_by?.first_name} ${updated_by?.last_name}`
             : null,
         }
       })

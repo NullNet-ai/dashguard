@@ -23,7 +23,13 @@ const FormServerFetch = async () => {
     <div className="space-y-2">
       <BasicDetails
         defaultValues={defaultValues ?? {}}
-        selectOptions={devices}
+        selectOptions={{
+          devices: {
+            label: 'Devices',
+            value: 'devices',
+            device_status: 'Online'
+          }
+        }}
         params={{
           id: defaultValues?.id!,
           shell_type: application! as "record" | "wizard",

@@ -8,4 +8,5 @@ export default [
   "location",
   "remote_access",
   "device_remote_access_session",
+  "device_rules"
 ];

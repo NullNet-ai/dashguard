@@ -39,6 +39,7 @@ const gridColumns = [
   {
     header: 'Type',
     accessorKey: 'device_remote_access_type',
+    sortKey: 'device_remote_access_sessions.remote_access_type',
     search_config: {
       entity: 'device_remote_access_sessions',
       operator: 'like',
@@ -86,11 +87,11 @@ const gridColumns = [
     header: 'Updated By',
     accessorKey: 'updated_by',
     sortKey: 'contacts.contact_updated_by',
-    search_config: {
-      entity: 'contacts',
-      field: 'contact_updated_by',
-      operator: 'like',
-    },
+    // search_config: {
+    //   entity: 'contacts',
+    //   field: 'contact_updated_by',
+    //   operator: 'like',
+    // },
   },
   {
     header: 'Created Date',
@@ -110,11 +111,11 @@ const gridColumns = [
     header: 'Created By',
     accessorKey: 'created_by',
     sortKey: 'contacts.contact_created_by',
-    search_config: {
-      entity: 'contacts',
-      field: 'contact_created_by',
-      operator: 'like',
-    },
+    // search_config: {
+    //   entity: 'contacts',
+    //   field: 'contact_created_by',
+    //   operator: 'like',
+    // },
   },
 ] as ColumnDef<any>[]
 

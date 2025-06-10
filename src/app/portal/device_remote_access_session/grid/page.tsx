@@ -9,6 +9,7 @@ import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cach
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 import { CustomNewButton } from './_components/CustomNewButton';
 import gridColumns from './_config/columns';
+import { CustomRowActions } from './_components/CustomRowActions';
 
 export default async function Page() {
   const headerList = headers();
@@ -19,6 +20,10 @@ export default async function Page() {
     'categories',
     'code',
     'status',
+    'remote_access_type',
+    'remote_access_category',
+    'remote_access_session',
+    'remote_access_status',
     'created_date',
     'created_time',
     'created_by',
@@ -39,34 +44,67 @@ export default async function Page() {
       defaultSorting,
     },
   });
-  const { items = [], totalCount } = await api.grid.items({
+  const { items = [], totalCount } = await api.deviceRemoteAccessSession.mainGrid({
     ...gridParams,
   });
 
   return (
+    // <Grid
+    //   {...gridProps}
+    //   data={items}
+    //   totalCount={totalCount || 0}
+    //   config={{
+    //     enableRowClick: false,
+    //     entity: main_entity!,
+    //     title: 'Remote Access',
+    //     columns: gridColumns,
+    //     columnsOrder: gridCacheData?.columns,
+    //     disableDefaultAction: true,
+    //     customRowAction: CustomRowActions,
+    //     searchConfig: {
+    //       router: 'deviceRemoteAccessSession',
+    //       resolver: 'mainGrid',
+    //       query_params: {
+    //         entity: main_entity!,
+    //         pluck: _pluck,
+    //       },
+    //     },
+    //   }}
+    //   customCreateButton={
+    //     <CustomNewButton />
+    //   }
+    // />
     <Grid
-      {...gridProps}
-      data={items}
-      totalCount={totalCount || 0}
-      config={{
-        enableRowClick: false,
-        entity: main_entity!,
-        title: 'New Grid',
-        columns: gridColumns,
-        columnsOrder: gridCacheData?.columns,
-        enableAutoCreate: false,
-        searchConfig: {
-          router: 'grid',
-          resolver: 'items',
-          query_params: {
-            entity: main_entity!,
-            pluck: _pluck,
-          },
+    // advanceFilter={filters?.advanceFilter || []}
+    {...gridProps}
+    config={{
+      entity: main_entity!,
+      title: 'Remote Access',
+      columns: gridColumns,
+      defaultValues: {
+        entity_prefix: 'RA',
+      },
+      disableDefaultAction: true,
+      enableRowClick: false,
+      customRowAction: CustomRowActions,
+      searchConfig: {
+        router: 'deviceRemoteAccessSession',
+        resolver: 'mainGrid',
+        query_params: {
+          entity: main_entity!,
+          pluck: _pluck,
         },
-      }}
-      customCreateButton={
-        <CustomNewButton />
-      }
-    />
+      },
+    }}
+    customCreateButton={
+      <CustomNewButton />
+    }
+    data={items}
+    // defaultAdvanceFilter={defaultAdvanceFilter || []}
+    defaultSorting={defaultSorting}
+    // pagination={pagination}
+    // sorting={sorts?.sorting?.length ? sorts?.sorting : []}
+    totalCount={totalCount || 0}
+  />
   );
 }

@@ -69,7 +69,7 @@ export const appRouter = createTRPCRouter({
   deviceConfiguration: deviceConfigurationRouter,
   deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
   packet: packetRouter,
-  cachedFilter: cachedFilterRouter,
+  cachedFilter: cachedFilterRouter
 });
 
 // export type definition of API

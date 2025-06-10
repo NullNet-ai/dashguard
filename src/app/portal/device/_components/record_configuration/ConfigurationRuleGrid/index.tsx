@@ -12,12 +12,14 @@ import { Label } from '~/components/ui/label';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
+import { api } from '~/trpc/react';
 
 const ConfigurationRuleGrid = ({
   code,
 }: {
   code: string;
 }) => {
+  console.log("%c Line:21 🥪 code", "color:#e41a6a", code);
   const pathname = usePathname();
   const searchTest = useSearchParams();
 
@@ -31,6 +33,20 @@ const ConfigurationRuleGrid = ({
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
   }), [pathname, searchTest, code]);
+
+  const {
+    data: record = { data: { id: null } },
+    refetch,
+    error,
+  } = api.record.getByCode.useQuery({
+    id: code,
+    pluck_fields: ['id'],
+    main_entity: 'devices',
+  });
+
+  useEffect(() => {
+    refetch()
+  }, [refetch])
 
   const [gridCachedData, setGridCachedData] = useState<IGridCacheDataResponse>(
     {} as IGridCacheDataResponse,
@@ -94,11 +110,14 @@ const ConfigurationRuleGrid = ({
       defaultAdvanceFilter: [],
     },
   });
+  
 
-  const { fetchData, data: grid_data } = useFetchGridData(gridParams, {
+
+  const { fetchData, data: grid_data } = useFetchGridData({...gridParams, device_id: record?.data?.id}, {
     resolver: 'mainGrid',
     router: 'deviceRule',
   });
+  
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
 
   return (

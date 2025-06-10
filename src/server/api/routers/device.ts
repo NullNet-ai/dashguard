@@ -684,16 +684,31 @@ export const deviceRouter = createTRPCRouter({
         })
         .execute()
 
+      const find_accounts = await ctx.dnaClient
+      .findAll({
+        entity: 'accounts',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'account_id'],
+          advance_filters: createAdvancedFilter({ id: find_res?.data[0]?.account_id }),
+          order: {
+            limit: 1,
+            by_field: 'created_date',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+      })
+      .execute()
+
       const hashed_account_secret = await argon2.hash(account_secret)
 
       const response = await ctx.dnaClient
-        .update(find_res?.data[0]?.id, {
-          entity: 'account_organizations',
+        .update(find_accounts?.data[0]?.id, {
+          entity: 'accounts',
           token: ctx.token.value,
           mutation: {
             params: {
               account_secret: hashed_account_secret,
-              device_id: id,
             },
             pluck: ['id', 'account_id'],
           },
@@ -701,7 +716,7 @@ export const deviceRouter = createTRPCRouter({
         .execute()
 
       return {
-        account_id: find_res?.data[0]?.account_id,
+        account_id: find_accounts?.data[0]?.account_id,
         message: transformResMessage(response?.message),
       }
     }),
@@ -996,7 +1011,8 @@ export const deviceRouter = createTRPCRouter({
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
-          contacts,
+          created_by,
+          updated_by,
           device_group_settings,
           device_interface_addresses,
           ...rest
@@ -1008,12 +1024,12 @@ export const deviceRouter = createTRPCRouter({
           ...entity_data,
           ...rest,
           hierarchy: device_group_settings?.name,
-          created_by: contacts?.length
-            ? `${contacts?.[0].contact_created_by}`
-            : null,
           wan_addresses,
-          updated_by: contacts?.length
-            ? `${contacts?.[0].contact_updated_by}`
+          created_by: !!created_by?.first_name || !!created_by?.last_name
+            ? `${created_by?.first_name} ${created_by?.last_name}`
+            : null,
+          updated_by: updated_by?.first_name || updated_by?.last_name
+            ? `${updated_by?.first_name} ${updated_by?.last_name}`
             : null,
         }
       })
