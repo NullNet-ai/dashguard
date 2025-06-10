@@ -9,7 +9,7 @@ const menu = {
     {
       title: "Settings",
       icon: "Cog8ToothIcon",
-      items: [role, communication_template],
+      items: [role],
     }
   ],
 };
