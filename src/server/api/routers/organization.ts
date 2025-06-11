@@ -603,8 +603,9 @@ export const organizationRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
+          //@ts-expect-error - multiple sort
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
+            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
             : [],
         },
       })

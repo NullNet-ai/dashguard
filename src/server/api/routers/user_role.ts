@@ -73,14 +73,14 @@ export const userRolesRouter = createTRPCRouter({
       }
 
       if (!user_role_id) {
-        const record = await ctx.dnaClient
+          const record = await ctx.dnaClient
           .create({
             entity: 'user_role',
             token: ctx.token.value,
             mutation: {
               params: {
                 status: 'Draft',
-                role,
+                role
               },
               pluck: ['id', 'code', 'role'],
             },
@@ -88,6 +88,8 @@ export const userRolesRouter = createTRPCRouter({
           .execute();
 
         return record;
+        
+        
       }
 
       const res = await ctx.dnaClient

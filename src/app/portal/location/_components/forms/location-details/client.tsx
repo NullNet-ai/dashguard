@@ -8,7 +8,7 @@ import { type IFormProps } from '../types';
 import { api } from '~/trpc/react';
 
 const FormSchema = z.object({
-  location_name: z.string(),
+  location_name: z.string().min(1, 'Location Name is required.'),
 });
 
 export default function LocationDetails({ params, defaultValues }: IFormProps) {

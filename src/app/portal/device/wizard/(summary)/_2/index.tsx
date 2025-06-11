@@ -1,19 +1,63 @@
 "use client";
 
-const Summary = () => {
-  return <></>;
+import { api } from "~/trpc/react";
+import useRefetchRecord from "../hooks/useFetchMainRecord";
+
+const fields = {
+  Package: "package",
+  "Installation Package": "installation_package",
+  "Installation Confirmation": "installation_confirmation",
 };
 
-const SummaryConfig = {
+const Summary =  ({form_key}: { form_key: string }) => {
+
+  const {
+      data: record,
+      refetch,
+      error,
+    } = api.device.fetchDownloadURL.useQuery({})
+
+    useRefetchRecord({
+      refetch,
+      form_key,
+    })
+
+    if (error) {
+      return (
+        <div>
+          {"Error:"}
+          {error.message}
+        </div>
+      )
+    }
+  const data = {
+    package: `curl -o pfSense-pkg-wallguard.pkg -L ${record || ''}`,
+    installation_package: "pkg add pfSense-pkg-wallguard.pkg",
+    installation_confirmation: "pkg info | grep wallguard",
+  };
+
+  return (
+    <div>
+      {Object.entries(fields).map(([key, value]) => (
+        <p key={key} className="mb-[8px]">
+          <strong> {key}: </strong>
+          &nbsp; {(data as { [key: string]: any })?.[value] || "None"}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const DeviceBasicDetailsSummary = {
   label: "Step 2",
   required: false,
   show_summary: true,
   components: [
     {
-      label: "Confirmation",
-      component: <Summary />,
+      label: "Install",
+      component: <Summary form_key={"installation_details"} />,
     },
   ],
 };
 
-export default SummaryConfig;
+export default DeviceBasicDetailsSummary;

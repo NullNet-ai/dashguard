@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { type ISidebarMenu } from "./type";
+import { type ISidebarMenu } from './type';
 import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   useSidebar,
-} from "~/components/ui/sidebar";
-import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
+} from '~/components/ui/sidebar';
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline';
 
-import * as _ICON from "@heroicons/react/24/outline";
-import { StarIcon as SolidStarIcon } from "@heroicons/react/24/solid";
-import { StarIcon } from "@heroicons/react/24/outline";
-import { testIDFormatter } from "~/utils/formatter";
-import useScreenType from "~/hooks/use-screen-type";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import * as _ICON from '@heroicons/react/24/outline';
+import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
+import { StarIcon } from '@heroicons/react/24/outline';
+import { testIDFormatter } from '~/utils/formatter';
+import useScreenType from '~/hooks/use-screen-type';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useMemo, useRef, useState } from 'react';
 
 interface IProps {
   subItem: ISidebarMenu;
@@ -28,9 +28,9 @@ function GroupSubMenu(props: IProps) {
 
   const { open, openMobile } = useSidebar();
   const sType = useScreenType();
-
+  const router = useRouter();
   const pathname = usePathname();
-  const [, , entity, application] = pathname?.split("/");
+  const [, , entity, application] = pathname?.split('/');
 
   const refs = useRef<any[]>([]);
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
@@ -39,13 +39,13 @@ function GroupSubMenu(props: IProps) {
     // @ts-expect-error - TS doesn't know about dynamic imports
     _ICON?.[subItem?.icon] ?? ChevronUpDownIcon;
 
-  const formattedTitle = (subItem.title ?? "")
-    .split(" ")
+  const formattedTitle = (subItem.title ?? '')
+    .split(' ')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join("");
+    .join('');
 
   // Determine if this submenu item is favorited
-  const isFavorite = favorites[subItem.title ?? ""] || false;
+  const isFavorite = favorites[subItem.title ?? ''] || false;
 
   // Toggle favorite for a specific submenu item
   const toggleFavorite = (e: React.MouseEvent, itemTitle: string) => {
@@ -57,9 +57,31 @@ function GroupSubMenu(props: IProps) {
   };
 
   const isActive = useMemo(() => {
-    const [, , entityName] = (subItem?.url || "")?.split("/");
+    const [, , entityName] = (subItem?.url || '')?.split('/');
     return entityName === entity;
   }, [entity, application]);
+
+  const getMenuLink = async (item: any) => {
+    // Extract entity from item.url
+    const pathParts = item.url?.split('/');
+    const entityName = pathParts?.length >= 3 ? pathParts[2] : null;
+
+    // Check if entityName exists
+    if (entityName) {
+      // get from local storage
+      const entity_last_paths = localStorage.getItem(
+        `last_visited_url:${entityName}`,
+      );
+
+      // If we have a last path for this entity, return it
+      if (entity_last_paths) {
+        return entity_last_paths;
+      }
+    }
+
+    // Otherwise, return the original item.url
+    return item.url || '#';
+  };
 
   return (
     <SidebarMenuSubItem
@@ -69,19 +91,26 @@ function GroupSubMenu(props: IProps) {
       <SidebarMenuSubButton
         open={open}
         asChild
-        className={`${isActive && "bg-muted text-primary"}`}
+        className={`${isActive && 'bg-muted text-primary'}`}
       >
         <Link
           className={`group/item flex items-center gap-2`}
-          href={subItem?.url || "#"}
+          href={'#'}
           data-test-id={testIDFormatter(
-            `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-link`,
+            `sdnavmenu-sub-menu-itm-${item.title ?? 'default'}-${formattedTitle}-link`,
           )}
+          onClick={async (e) => {
+            e.preventDefault();
+            const redirectedUrl = await getMenuLink(subItem || '');
+            router.push(redirectedUrl);
+          }}
         >
           {subItem?.icon && (
-            <SUB_ICON className={`h-5 w-5 mr-2 ml-4  ${isActive && "text-primary"}`} />
+            <SUB_ICON
+              className={`ml-4 mr-2 h-5 w-5 ${isActive && 'text-primary'}`}
+            />
           )}
-          {((open && (sType === "sm" || sType === "md" || sType === "xs")) ||
+          {((open && (sType === 'sm' || sType === 'md' || sType === 'xs')) ||
             openMobile ||
             (open && !openMobile)) && (
             <span className="grow text-nowrap font-semibold">
@@ -93,15 +122,15 @@ function GroupSubMenu(props: IProps) {
               <>
                 {isFavorite ? (
                   <SolidStarIcon
-                    onClick={(e) => toggleFavorite(e, subItem?.title ?? "")}
+                    onClick={(e) => toggleFavorite(e, subItem?.title ?? '')}
                     data-test-id={testIDFormatter(
-                      `sdnavmenu-sub-menu-itm-${item.title ?? "default"}-${formattedTitle}-fav-btn`,
+                      `sdnavmenu-sub-menu-itm-${item.title ?? 'default'}-${formattedTitle}-fav-btn`,
                     )}
                     className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                   />
                 ) : (
                   <StarIcon
-                    onClick={(e) => toggleFavorite(e, subItem?.title ?? "")}
+                    onClick={(e) => toggleFavorite(e, subItem?.title ?? '')}
                     className="cursor-pointer !text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
                   />
                 )}

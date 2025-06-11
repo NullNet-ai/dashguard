@@ -13,6 +13,7 @@ import ArchiveConfirmationModal from './views/ArchiveConfirmationModal';
 import BulkActionConfirmationModal from './views/common/BulkActionConfirmationModal';
 import StatusCell from '~/components/ui/status-cell';
 import { ScrollContainerContext } from './common/GridScrollContainer';
+import { isEmpty } from 'lodash';
 
 type MyTableBodyProps = {
   showAction?: boolean;
@@ -21,6 +22,7 @@ type MyTableBodyProps = {
   showPagination?: boolean;
   parentExpanded?: IExpandedRow[];
   reachEnd?: boolean;
+  parentMeta?: any
 };
 
 export default function MyTableBody({
@@ -28,10 +30,12 @@ export default function MyTableBody({
   gridLevel = 1,
   parentExpanded,
   reachEnd,
+  parentMeta,
 }: MyTableBodyProps) {
   const { state, actions } = useContext(GridContext);
   const context = useContext(ScrollContainerContext);
   const { isEndReached = false } = context ?? {};
+  const grouping = state?.table.getState().grouping ?? [];
   const expandedState = state?.table.getState().expanded as
     | Record<string, boolean>
     | undefined;
@@ -50,6 +54,12 @@ export default function MyTableBody({
     });
 
     return expandedRows;
+  };
+
+  const getParentCellSize = (id: string) => {
+    if(isEmpty(parentMeta)) return 0;
+    const size = parentMeta?.find?.((cell: any) => cell.column.id === id)
+    return size.column.getSize() ?? 0;
   };
 
   const expandedRows = getExpandedRows(
@@ -87,6 +97,9 @@ export default function MyTableBody({
                 )}
               >
                 {row.getVisibleCells().map((cell, index) => {
+
+                  const parentCellSize = getParentCellSize(cell.column.id)
+
                   if (
                     cell.column.id === 'action' &&
                     !row?.original?.is_group_by
@@ -135,7 +148,7 @@ export default function MyTableBody({
                         `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
                       )}
                       style={{
-                        width: cell.column.getSize(),
+                        width: parentCellSize !== 0 ? parentCellSize - 25 : cell.column.getSize(),
                         minWidth: cell.column.columnDef.minSize,
                         ...getCommonPinningStyles(cell.column).style,
                       }}
@@ -191,11 +204,13 @@ export default function MyTableBody({
               </TableRow>
               {row.getIsExpanded() &&
                 (row.original.is_group_by ? (
-                  <TableRow className="group relative border-b hover:bg-border/50">
-                    <td
-                      colSpan={state?.table.getVisibleLeafColumns().length}
-                      className="relative bg-gray-50 lg:p-2 lg:px-4 lg:pb-2 lg:pl-12"
-                    >
+                  // <TableRow className="group relative border-b hover:bg-border/50">
+                  //   <td
+                  //     colSpan={state?.table.getVisibleLeafColumns().length}
+                  //     className={cn(`relative bg-gray-50`,
+                  //       // `lg:p-2 lg:px-4 lg:pb-2 lg:pl-12`
+                  //     )}
+                  //   >
                       <GridGroupingExpansion
                         rowData={row.original}
                         config={state.config}
@@ -203,6 +218,9 @@ export default function MyTableBody({
                           state?.config?.group_by_initial_columns ||
                           state?.initial_columns
                         }
+                        metadata={{
+                          parentRow: row.getVisibleCells()
+                        }}
                         grouping={state.grouping?.slice(1)}
                         visibleColumns={visibleColumns ?? []}
                         parentGroupData={state?.config?.parentGroupData || []}
@@ -212,8 +230,8 @@ export default function MyTableBody({
                           state?.groupConfigs
                         }
                       />
-                    </td>
-                  </TableRow>
+                  //   </td>
+                  // </TableRow>
                 ) : (
                   <TableRow className="group relative border-b hover:bg-border/50">
                     <td
@@ -273,11 +291,11 @@ export default function MyTableBody({
           </TableRow>
         )}
       </TableBody>
-      {state?.showArchiveConfirmationModal && (
+      {state?.showActionConfirmationModal && (
         <ArchiveConfirmationModal
-          open={state?.showArchiveConfirmationModal}
+          open={state?.showActionConfirmationModal}
           // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-          setOpen={actions?.setShowArchiveConfirmationModal!}
+          setOpen={actions?.setShowActionConfirmationModal!}
           record={state?.rowToArchive}
           config={state?.config}
         />

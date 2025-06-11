@@ -16,12 +16,12 @@ import Search from '../../Search';
 import Sorting from '../../Sorting';
 import MyTableBody from '../../TableBody';
 import MyTableHead from '../../TableHead';
-import { type IExpandedRow } from '../../types';
-import { usePathname } from 'next/navigation'
-import { testIDFormatter } from '~/utils/formatter'
+import { type IParentType, type IExpandedRow } from '../../types';
+import { usePathname } from 'next/navigation';
+import { testIDFormatter } from '~/utils/formatter';
 
 interface IGridDesktopProps {
-  parentType: 'grid' | 'form' | 'field' | 'grid_expansion';
+  parentType: IParentType;
   hideSearch?: boolean;
   height?: string;
   showAction?: boolean;
@@ -29,7 +29,7 @@ interface IGridDesktopProps {
     width?: string;
     open?: boolean;
     summary?: boolean;
-     metadata?: any
+    metadata?: any;
   };
   showPagination?: boolean;
   gridLevel?: number;
@@ -46,15 +46,15 @@ function GridDesktop({
   showPagination = false,
   gridLevel = 1,
   isLoading,
-  parentExpanded
+  parentExpanded,
 }: IGridDesktopProps) {
   const { state, actions } = useContext(GridContext);
   const { open: sidebarOpen } = useSidebar();
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
   const _width = sidebarOpen ? newWidth - remToPx(17) : newWidth - remToPx(6);
-  const path =  usePathname()
-  const [, , path1, path2] = path.split('/')
+  const path = usePathname();
+  const [, , path1, path2] = path.split('/');
 
   const [isEndReached, setIsEndReached] = useState(false);
 
@@ -80,6 +80,17 @@ function GridDesktop({
     }
   }, [isExpandedTable, _width]);
 
+  const parentTypeCls = () => {
+    switch (parentType) {
+      case 'grid':
+        return 'w-[350px] md:w-[460px]';
+      case 'side_drawer':
+        return 'w-[350px] md:w-[100%] side-drawer-test';
+      default:
+        return 'w-[350px] md:w-[100%]';
+    }
+  };
+
   return (
     <>
       {/* <div>
@@ -93,7 +104,11 @@ function GridDesktop({
           `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`,
         )}
         style={{
-          width: isExpandedTable ? expandedWidth : 'calc(100vw - 37rem)',
+          width: isExpandedTable
+            ? expandedWidth
+            : parentType === 'side_drawer'
+              ? '100%'
+              : 'calc(100vw - 37rem)',
         }}
       >
         {!hideSearch && <Search parentType={parentType} />}
@@ -136,7 +151,9 @@ function GridDesktop({
         )}
         <div
           className={cn(`${parentType === 'form' ? 'px-4' : ''}`)}
-          style={{ width: expandedWidth }}
+          style={{
+            width: parentType === 'side_drawer' ? '100%' : expandedWidth,
+          }}
         >
           <ScrollArea
             onReachEnd={() => {
@@ -153,9 +170,7 @@ function GridDesktop({
               `scrollarea-container m-auto overflow-auto rounded-md border bg-card text-card-foreground lg:w-auto`,
               conWidth,
               `scroll-grid-aria-${parentType}`,
-              parentType === 'grid'
-                ? 'w-[350px] md:w-[460px]'
-                : 'w-[350px] md:w-[100%]',
+              parentTypeCls(),
             )}
             style={
               parentType === 'grid'
@@ -167,7 +182,10 @@ function GridDesktop({
             }
           >
             <Table data-test-id={`${testIDFormatter(`${path1}-${path2}-tbl`)}`}>
-              <TableHeader parentType={parentType} data-test-id={`${testIDFormatter(`${path1}-${path2}-tbl-hdr`)}`}>
+              <TableHeader
+                parentType={parentType}
+                data-test-id={`${testIDFormatter(`${path1}-${path2}-tbl-hdr`)}`}
+              >
                 <MyTableHead />
               </TableHeader>
               <MyTableBody

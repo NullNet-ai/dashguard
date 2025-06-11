@@ -14,14 +14,19 @@ import {
 
 export default function CreateNewFilter() {
   const { actions } = useSideDrawer();
-  const { state } = useGrid();
-  const { config, gridKey} = state ?? {};
+  const { state, actions: gridActions } = useGrid();
+  const { config, gridKey } = state ?? {};
 
   const {
     gridColumns: _columns = [],
-    searchConfig,
+    searchSuggestionConfig,
     entity: defaultEntity,
+    enableCreateCustomGridFilter = true,
+    customTabDefaults = {},
+    onFetchRecords
   } = config ?? {};
+
+  if(!enableCreateCustomGridFilter) return null;
 
   const gridColumns = _columns.map((column: any, index: number) => ({
     header: column.header,
@@ -32,6 +37,8 @@ export default function CreateNewFilter() {
     search_config: column.search_config,
     entity: column.entity || defaultEntity,
     data_type: column.data_type,
+    enableGrouping:
+      typeof column.enableGrouping === 'boolean' ? column.enableGrouping : true,
   }));
 
   const handleManageFilter = () => {
@@ -46,8 +53,11 @@ export default function CreateNewFilter() {
               name: 'New Filter',
             }}
             columns={gridColumns as Record<string, any>[]}
-            searchConfig={{ ...searchConfig, entity: defaultEntity }}
+            searchConfig={{ ...searchSuggestionConfig ?? {}, entity: defaultEntity }}
             gridKey={gridKey}
+            customTabDefaults={customTabDefaults}
+            onFetchRecords={onFetchRecords}
+            gridActions={gridActions}
           >
             <GridManageFilter />
           </ManageFilterProvider>
@@ -65,13 +75,13 @@ export default function CreateNewFilter() {
             variant="ghost"
             size="icon"
             onClick={handleManageFilter}
-            className="mr-2 h-full w-8 text-primary"
+            className="mr-2 h-full min-h-[36px] w-8 text-primary"
           >
             <PlusCircle className="h-5 w-5 fill-blue-700 text-white" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Create New Filter</p>
+          <p>New Filter</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

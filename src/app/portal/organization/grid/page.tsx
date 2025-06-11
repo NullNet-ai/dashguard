@@ -30,8 +30,10 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
     'updated_by',
   ];
 
-  const gridCacheData = (await getGridCacheData()) ?? {};
-
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
+  
     const { gridParams, gridProps } = gridDataResolver({
       entity: 'organization',
       pluck: _pluck,
@@ -69,6 +71,10 @@ export default async function OrganizationGridPage(): Promise<React.ReactElement
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'searchSuggestions',
         },
       }}
     />

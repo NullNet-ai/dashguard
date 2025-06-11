@@ -1,4 +1,7 @@
-import PageNotFound from '~/components/platform/PageNotFound'
-export default async function Page() {
-  return <PageNotFound />
+'use client';
+import { useMainPageEvaluator } from '~/hooks/useMainPageEvaluator';
+
+export default function Page() {
+  useMainPageEvaluator();
+  return null;
 }

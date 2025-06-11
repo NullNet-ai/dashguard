@@ -17,6 +17,10 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_ROOM: z.string().optional(),
+    NEXT_PUBLIC_SOCKET_URL: z.string().optional(),
+    NEXT_PUBLIC_SOCKET_USERNAME: z.string().optional(),
+    NEXT_PUBLIC_SOCKET_PASSWORD: z.string().optional(),
   },
 
   /**
@@ -25,6 +29,10 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_ROOM: process.env.NEXT_PUBLIC_ROOM,
+    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
+    NEXT_PUBLIC_SOCKET_USERNAME: process.env.NEXT_PUBLIC_SOCKET_USERNAME,
+    NEXT_PUBLIC_SOCKET_PASSWORD: process.env.NEXT_PUBLIC_SOCKET_PASSWORD,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

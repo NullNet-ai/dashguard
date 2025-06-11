@@ -41,6 +41,7 @@ type TDisplayType = 'form' | 'selected';
 	 | 'badge'
 	 | 'adaptive-badge'
 	 | 'message-input-box'
+	 | 'color-picker'
 	 | 'image-viewer';
 
 type TSelectionType = 'single' | 'multiple';

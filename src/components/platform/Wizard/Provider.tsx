@@ -26,6 +26,7 @@ import usePrefetchWizardTraverse from './Hooks/usePrefetchWizardTraverse';
 import { NextPage } from './Action/NextPage';
 import { Create } from '../Grid/Action/Create';
 import { useSocket } from '~/context/SocketProvider';
+import numberToWords from './Utils/steptoWords';
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -426,7 +427,10 @@ export default function WizardProvider({
       const form_values = Object.values(omitted_form_save).filter(
         (status) => status !== 'done',
       );
-      if (!form_values.length) {
+      const checkIfCustomNavigation =
+        config?.customNavigation?.[numberToWords(currentStep)] ?? false;
+
+      if (!form_values.length && !checkIfCustomNavigation) {
         handleIncrementStep(setNextLoading);
       }
     }
@@ -465,6 +469,7 @@ export default function WizardProvider({
     stepsNavigation,
     callbackHandlers,
     title: config?.title,
+    customNavigation: config?.customNavigation,
   } as IState;
 
   const actions = {

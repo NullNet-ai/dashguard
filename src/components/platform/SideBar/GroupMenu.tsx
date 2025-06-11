@@ -84,7 +84,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
   //   }
 
   // }, [groups ]);
-
+    
   return (
     <SidebarGroup className={`${!open ? "px-0" : ""}`}>
       <Separator className="my-2" />

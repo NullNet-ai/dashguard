@@ -4,9 +4,9 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 import { EOperator, type IAdvanceFilters } from "@dna-platform/common-orm";
 import {
-  EmailArraySchema,
+  type EmailArraySchema,
   EmailSchema,
-  PhoneArraySchema,
+  type PhoneArraySchema,
   PhoneSchemaValidation,
 } from "~/server/zodSchema/contact/contactPhoneEmail";
 

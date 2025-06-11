@@ -34,6 +34,9 @@ const gridColumns = [
       operator: 'like',
       parse_as: 'text'
     },
+    sort_config: {
+      is_case_sensitive_sorting: true
+    },
   },
   {
     header: 'Location Name',
@@ -41,54 +44,46 @@ const gridColumns = [
     dataType: 'string',
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    // dataType: 'string',
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: ["updated_date", "updated_time"],
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
-    // dataType: 'string',
-    sortKey: 'updated_by.first_name',
+    data_type: 'string',
+    sortKey: 'updated_by.full_name',
     search_config: {
       entity: 'updated_by',
-      field: 'first_name',
+      field: 'full_name',
       operator: 'like',
     },
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
-    // dataType: 'string',
-    cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: ['created_date', 'created_time'],
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {
     header: 'Created By',
     accessorKey: 'created_by',
-    // dataType: 'string',
-    sortKey: 'created_by.first_name',
+    data_type: 'string',
+    sortKey: 'created_by.full_name',
     search_config: {
       entity: 'created_by',
-      field: 'first_name',
+      field: 'full_name',
       operator: 'like',
     },
   },

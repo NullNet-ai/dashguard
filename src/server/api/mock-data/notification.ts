@@ -35,7 +35,7 @@ export const mockNotifications = [
           'Team collaboration request pending.',
           'Database optimization completed successfully.',
         ][Math.floor(Math.random() * 10)],
-        timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        event_timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
         link: [
           'https://google.com',
           'https://github.com',

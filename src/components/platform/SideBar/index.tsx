@@ -59,7 +59,7 @@ export default function AppSideBar(config: ISideBarProps) {
     screenType,
     tabsDisplayVariant = 'label-only',
     favoritesMenuConfig, 
-    historyMenuConfig,   
+    historyMenuConfig,
   } = config
   const apiAuth = api.auth.logout.useMutation()
   const navigate = useRouter()
@@ -67,6 +67,7 @@ export default function AppSideBar(config: ISideBarProps) {
   const { open, openMobile } = useSidebar()
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
+      localStorage.removeItem('entity-last-paths');
       navigate.push('/login')
     })
   };

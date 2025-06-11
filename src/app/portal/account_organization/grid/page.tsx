@@ -9,8 +9,9 @@ import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cach
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const gridCacheData = (await getGridCacheData()) ?? {}
- 
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {}; 
   const { gridParams, gridProps } = gridDataResolver({
     entity: 'account_organization',
     gridCacheData,
@@ -34,11 +35,6 @@ export default async function Page() {
       config={{
         entity: 'account_organization',
         title: 'Accounts',
-        enableRowExpansion: true,
-        rowExpansionOptions:{
-          expandPosition: 'left',
-          rowExpansionComponent: ExpandedDefaultRow,
-        },
         defaultShownColumns: [
           "first_name",
           "last_name",
@@ -52,6 +48,10 @@ export default async function Page() {
             entity: 'account_organization',
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
+        },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver: 'accountSearch',
         },
         additionalData: {
           accountEmail,

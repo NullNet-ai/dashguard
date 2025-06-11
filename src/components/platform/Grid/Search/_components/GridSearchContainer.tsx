@@ -10,7 +10,7 @@ const GridSearchContainer = ({ children }: any) => {
   const { isOpen, isPinned } = state
 
   return (
-    <div className={cn(`ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0 lg:ml-2 lg:mt-0 lg:w-[40%] `, `${(isOpen && isPinned) ? 'lg:max-w-[40%]' : 'lg:max-w-[40%]'} `)}>
+    <div className={cn(`ml-0 mt-0 flex w-full max-w-full flex-row-reverse justify-end gap-2 sm:mt-0 2xl:flex-col`)}>
       {children}
     </div>
   )

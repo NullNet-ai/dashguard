@@ -4,18 +4,17 @@ import { z } from 'zod';
 import { type ISortBy } from '~/components/platform/Grid/Category/type';
 import {
   EOperator,
+  type IGroupAdvanceFilters,
   type IAdvanceFilters,
   type IResponse,
 } from '@dna-platform/common-orm';
 import { EOrderDirection } from '@dna-platform/common-orm/build/enums/model';
 
 import {
-  type IPagination,
   type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
 import {
   gridCacheId,
-  type TReportDataType,
 } from '~/components/platform/Grid/utils/grid-cache-id';
 import {
   SetIdTab,
@@ -103,7 +102,9 @@ export const gridRouter = createTRPCRouter({
 
       if (hasTabMenu) return hasTabMenu;
       if (input?.application === 'grid') {
-        const setIdTab = SetIdTab(input.entity);
+        const setIdTab = SetIdTab({
+          mainEntity: input.entity,
+        });
         ctx.redisClient.cacheData(
           getGridLink({
             mainEntity: input.entity,
@@ -120,9 +121,9 @@ export const gridRouter = createTRPCRouter({
         application: z.string(),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({  ctx }) => {
       const headerList = headers();
-      const gridTabId = headerList.get('x-grid-tab-id') || '';
+      // const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
 
@@ -217,6 +218,8 @@ export const gridRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         entity,
         sorting,
+        is_case_sensitive_sorting = 'false',
+        group_advance_filters : _group_advance_filters = []
       } = input;
 
       const pluck_object = {
@@ -232,6 +235,9 @@ export const gridRouter = createTRPCRouter({
           track_total_records: true,
           pluck_object: pluck_object,
           advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+          group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
+            string | number
+          >[],
           order: {
             starts_at:
               // current 5 *  input.limit 50 = 250
@@ -249,9 +255,10 @@ export const gridRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
+          //@ts-expect-error - multiple sort
           multiple_sort:
             sorting?.length && sorting?.length > 1
-              ? formatSorting(sorting)
+              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
               : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
@@ -333,7 +340,10 @@ export const gridRouter = createTRPCRouter({
         if (activeTab) return activeTab;
         if (input?.gridKey && application !== 'grid') {
           const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
-          const setIdTab = SetIdTab(input.gridKey, href);
+          const setIdTab = SetIdTab({
+            mainEntity: input.gridKey,
+            href: href,
+          });
           ctx.redisClient.cacheData(_tabMenuId, setIdTab);
           return setIdTab;
         }
@@ -753,7 +763,7 @@ export const gridRouter = createTRPCRouter({
         ? tabDetails?.find((tab) => tab.id === filter_id)
         : tabDetails?.find((tab) => tab.current);
       const newTabs = tabDetails?.map((tab) => {
-        if (tab.id === defaultFilter.id) {
+        if (tab.id === defaultFilter?.id) {
           return {
             ...tab,
             group_advance_filters:
@@ -761,25 +771,29 @@ export const gridRouter = createTRPCRouter({
             advance_filters:
               tab?.group_advance_filters?.length > 0 ? [] : filters,
             default_filter: [],
+            pagination: {
+              ...tab?.pagination ?? {},
+              current_page: 1
+            }
           };
         }
         return tab;
       });
 
-      if (!defaultFilter.is_default) {
+      if (!defaultFilter?.is_default) {
         // update the grid filter entity on database
         await ctx.dnaClient
-          .update(defaultFilter.id, {
+          .update(defaultFilter?.id, {
             entity: 'grid_filter',
             token: ctx.token.value,
             mutation: {
               params: {
                 advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? []
                     : filters,
                 group_advance_filters:
-                  defaultFilter.group_advance_filters?.length > 0
+                  defaultFilter?.group_advance_filters?.length > 0
                     ? filters
                     : [],
               },
@@ -841,14 +855,15 @@ export const gridRouter = createTRPCRouter({
         .object({
           gridKey: z.string().optional(),
           application: z.string().optional(),
-          mainEntity: z.string().optional(),
+          entity: z.string().optional(),
           identifier: z.string().optional(),
+          pathname: z.string().optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
-      const pathName = headerList.get('x-pathname') || '';
+      const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
       const searchParams = new URLSearchParams(searchQueryParams);
@@ -856,7 +871,7 @@ export const gridRouter = createTRPCRouter({
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
 
       const application = input?.application || _application;
-      const mainEntity = input?.mainEntity || _mainEntity;
+      const mainEntity = input?.entity || _mainEntity;
       const identifier = input?.identifier || _identifier;
 
       if (!['grid', 'record'].includes(application ?? '') || !mainEntity)
@@ -874,40 +889,33 @@ export const gridRouter = createTRPCRouter({
       // const reportPagination: IPagination =
       //   typeof pagination === 'object' ? pagination : {};
 
-      const filterDetails = filter_id
+      const currentGridTab = filter_id
         ? tabDetails?.find((tab) => tab.id === filter_id)
+        : null;
+
+      const filterDetails = currentGridTab
+        ? currentGridTab
         : tabDetails?.find((tab) => tab.current);
 
-      const filter: ISearchItem[] = filterDetails?.default
-        ? filterDetails?.advance_filters
-        : filterDetails?.default_filter;
-
+      const filter = filterDetails?.advance_filters?.length
+        ? filterDetails.advance_filters
+        : filterDetails?.default_filter || [];
+        
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])
         : (tabDetails?.find((tab) => tab.current)?.group_advance_filters ?? []);
 
-      const defaultFilters = (filter ?? []).filter(
+      const defaultFilter = (tabDetails ?? []).find(
         (item) => item.default === true,
       );
-      const sorts: ISortBy = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.sorts ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.sorts ?? []);
-      const defaultSorts: ISortBy = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.default_sorts ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.default_sorts ?? []);
+      const sorts: ISortBy = filterDetails?.sorts ?? [];
+      const defaultSorts: ISortBy = filterDetails?.default_sorts ?? [];
+      const gridColumns = filterDetails?.columns ?? [];
+      const groups = filterDetails?.groups ?? [];
+      const pagination = filterDetails?.pagination ?? [];
 
-      const gridColumns = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.columns ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.columns ?? []);
-      const groups = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.groups ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.groups ?? []);
-      const pagination = filter_id
-        ? (tabDetails?.find((tab) => tab.id === filter_id)?.pagination ?? [])
-        : (tabDetails?.find((tab) => tab.current)?.pagination ?? []);
-
-      const advanceFilter = filter?.map((item) => {
+      const advanceFilter = filter?.map((item: any) => {
         return {
           entity: item.entity,
           operator: item.operator,
@@ -924,9 +932,16 @@ export const gridRouter = createTRPCRouter({
         sort_key: item.field,
         is_case_sensitive_sorting: item.is_case_sensitive_sorting ?? false,
       }));
+      const currentTab = filterDetails ? filterDetails : defaultFilter;
+
+      const gridtabs = tabDetails?.map((tab) => ({
+        ...tab,
+        current: tab.id === currentTab?.id,
+        is_current: tab.id === currentTab?.id,
+      }));
 
       return {
-        grid_tabs,
+        grid_tabs: gridtabs,
         filters: {
           reportFilters: filter,
           advanceFilter,
@@ -1044,8 +1059,12 @@ export const gridRouter = createTRPCRouter({
       });
       const menus = await ctx.redisClient.getCachedData(_tabMenuId);
       const tabDetails = Array.isArray(menus) ? menus : [];
-      const defaultGroup = filter_id
+      const currentGridTab = filter_id
         ? tabDetails?.find((tab) => tab.id === filter_id)
+        : null;
+
+      const defaultGroup = currentGridTab
+        ? currentGridTab
         : tabDetails?.find((tab) => tab.current);
 
       const newTabs = tabDetails?.map((tab) => {
@@ -1080,13 +1099,16 @@ export const gridRouter = createTRPCRouter({
         entity: z.string().optional(),
         application: z.string().optional(),
         identifier: z.string().optional(),
+        defaultGridTabs: z.array(z.any()).optional(),
+        pathname: z.string().optional(),
+        defaultSorting: z.array(z.any()).optional(),
+        additionalFilters: z.array(z.any()).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const headerList = headers();
-      const gridTabId = headerList.get('x-grid-tab-id') || '';
-      const pathName = headerList.get('x-pathname') || '';
-      const searchParams = headerList.get('x-full-search-query-params') || '';
+      // const gridTabId = headerList.get('x-grid-tab-id') || '';
+      const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;
       const application = input?.application || _application;
@@ -1105,12 +1127,19 @@ export const gridRouter = createTRPCRouter({
       const tabs = Array.isArray(grid_tabs) ? grid_tabs : [];
       if (!tabs.length) {
         const entity = input.gridKey || mainEntity;
-        const href = `${pathName}?${searchParams ? searchParams + '&filter_id=' : 'filter_id='}`;
-        const defaultTab = SetIdTab(entity!, href);
+        const href = `${pathName}?filter_id=`;
+        const defaultTab = SetIdTab({
+          mainEntity: entity!,
+          href,
+          defaultGridTabs: input.defaultGridTabs,
+          defaultSorting: input.defaultSorting,
+          additionalFilters: input.additionalFilters,
+        });
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
       }
-      if (tabs.length > 1) return tabs
+      const isAllDefault = tabs.every((tab) => tab.default);
+      if (!isAllDefault) return tabs;
       const contact_id = ctx.session.account.account_organization_id;
       const query = ctx.dnaClient.findAll({
         entity: 'grid_filter',
@@ -1148,6 +1177,17 @@ export const gridRouter = createTRPCRouter({
               field: 'entity',
               operator: EOperator.EQUAL,
               values: [mainEntity!],
+            },
+            {
+              operator: EOperator.AND,
+              type: 'operator',
+              default: true,
+            },
+            {
+              type: 'criteria',
+              field: 'link',
+              operator: EOperator.LIKE,
+              values: [pathName],
             },
           ] as IAdvanceFilters[],
         },

@@ -21,7 +21,7 @@ export const gridDataResolver = ({
   entity,
   pluck,
 }: IGridDataResolver) => {
-  const { grid_tabs, sorts, filters, groups } = gridCacheData ?? {}
+  const { grid_tabs, sorts, filters, groups, pagination } = gridCacheData ?? {}
   const { defaultSorting, defaultAdvanceFilter: _defaultAdvanceFilter } = defaults ?? {}
 
   const defaultAdvanceFilter = _defaultAdvanceFilter?.length
@@ -43,8 +43,8 @@ export const gridDataResolver = ({
       : defaultAdvanceFilter
 
   const gridDefaultAdvanceFilter = filters?.groupAdvanceFilters?.length
-    ? filters.groupAdvanceFilters
-    : gridAdvanceFilter
+  ? filters.groupAdvanceFilters
+  : gridAdvanceFilter
   const gridProps = {
     grid_tabs,
     defaultSorting: sorts?.defaultSorting.length
@@ -54,6 +54,7 @@ export const gridDataResolver = ({
     advanceFilter: gridAdvanceFilter,
     sorting: sorts?.sorting || [],
     grouping: groups || [],
+    pagination
   }
   return { gridParams, gridProps }
 }

@@ -136,7 +136,7 @@ const Button = React.forwardRef<
             iconPlacement === "left" &&
             variant !== "expandIcon" &&
             !loading && !isIconOnly && (
-              <div className={cn("w-5", hasChildren ? "lg:-translate-x-[50%] mr-1" : "")}>
+              <div className={cn("w-5", hasChildren ? "mr-1" : "")}>
                 <Icon className={cn("h-5 w-5", iconClassName)} />
               </div>
             )}
@@ -182,7 +182,7 @@ const Button = React.forwardRef<
             iconPlacement === "right" &&
             variant !== "expandIcon" &&
             !loading && !isIconOnly && (
-              <div className={cn("w-5", hasChildren ? "lg:translate-x-[50%] ml-1" : "")}>
+              <div className={cn("w-5", hasChildren ? "ml-1" : "")}>
                 <Icon className={cn("h-5 w-5", iconClassName)} />
               </div>
             )}

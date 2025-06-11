@@ -38,7 +38,6 @@ const CustomCreateButton = ({
     <div className="flex items-center justify-end">
       <Button 
         iconPlacement={'left'} 
-        iconClassName='ms-2' 
         Icon={PlusIcon}
         onClick={handleCreate}
       >

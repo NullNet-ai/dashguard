@@ -37,7 +37,7 @@ export const transformSearchData = (
   const transformedData = items.reduce((acc: any, obj: any) => {
     for (const [key, value] of Object.entries(obj)) {
       const searchableField = searchableFields.find(
-        (field) => field.accessorKey === key,
+        (field) => field.accessorKey === key || field.field === key,
       );
       const foundValue = findTextInValue(
         value,
@@ -52,7 +52,11 @@ export const transformSearchData = (
           type: 'criteria',
           ...searchableField,
           label: searchableField?.label || formatAndCapitalize(key),
-          display_value: foundValue,
+          display_value:
+            searchableField.accessorKey !== searchableField.field &&
+            obj[searchableField.accessorKey!]
+              ? obj[searchableField.accessorKey!]
+              : foundValue,
         });
       }
     }

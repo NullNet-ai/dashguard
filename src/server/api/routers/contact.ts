@@ -1,10 +1,9 @@
 import {
   EOperator,
   EOrderDirection,
-  IGroupAdvanceFilters,
+  type IGroupAdvanceFilters,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm';
-import Bluebird from 'bluebird';
 import { pick } from 'lodash';
 import { z } from 'zod';
 
@@ -184,8 +183,8 @@ export const contactRouter = createTRPCRouter({
           pluck_group_object: {
             contact_phone_numbers: ['raw_phone_number', 'is_primary'],
             contact_emails: ['email', 'is_primary'],
-            // organization_contacts: ['id', 'contact_organization_id'],
-            // organizations: ['id', 'name', 'categories'],
+            organization_contacts: ['id', 'contact_organization_id'],
+            organizations: ['id', 'name', 'categories'],
           },
 
           pluck_object: {
@@ -198,6 +197,8 @@ export const contactRouter = createTRPCRouter({
               'is_primary',
             ],
             contacts: [...input.pluck, 'previous_status'],
+            organizations: ['id', 'name', 'categories'],
+            organization_contacts: ['id', 'contact_organization_id'],
           },
           track_total_records: true,
           advance_filters: input?.advance_filters as IAdvanceFilters[],
@@ -214,8 +215,9 @@ export const contactRouter = createTRPCRouter({
             // by_field: "created_date",
             // by_direction: EOrderDirection.ASC,
           },
+          //@ts-expect-error - multiple sort types
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting)
+            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
             : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
@@ -245,6 +247,33 @@ export const contactRouter = createTRPCRouter({
             field: 'id',
           },
         },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'organization_contacts',
+            field: 'contact_id',
+          },
+          from: {
+            entity: ENTITY,
+            field: 'id',
+          },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        nested:true,
+        field_relation: {
+          to: {
+            entity: 'organizations',
+            field: 'id',
+          },
+          from: {
+            entity: 'organization_contacts',
+            field: 'contact_organization_id',
+          },
+        },
       });
 
     addCommonGridJoins(query, 'contacts');
@@ -262,6 +291,22 @@ export const contactRouter = createTRPCRouter({
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
+      if(input.grouping[0] === 'organization.name') {
+        const resolvedItems = items?.map((item: any) => {
+          return {
+            ...item,
+            organizations: {
+              name: item?.organizations?.name ? [item?.organizations?.name]: null,
+            }
+          }
+        })
+        return {
+          totalCount,
+          items: resolvedItems,
+          currentPage: 0,
+          totalPages,
+        };
+      }
       return {
         totalCount,
         items: items,
@@ -348,14 +393,15 @@ export const contactRouter = createTRPCRouter({
           ...acc,
           {
             roles,
-            organization: organizationNames,
+            organization: [...new Set(organizationNames)],
             ...contacts,
             ...emails,
             ...phones,
             created_by: created_by?.full_name ?? '',
             updated_by: updated_by?.full_name ?? '',
-            raw_phone_number: primary_phone_number,
+            raw_phone_number: _primary_phone_number,
             email: primary_email,
+            formatted_raw_phone_number: primary_phone_number,
           },
         ];
       },
@@ -417,8 +463,9 @@ export const contactRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
+            // @ts-expect-error - multiple sort types
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
               : [],
           },
         })

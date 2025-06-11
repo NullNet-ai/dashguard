@@ -13,9 +13,9 @@ import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cach
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const gridCacheData =
-    (await getGridCacheData()) ?? {};
-
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
   const headerList = headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity] = pathname.split('/');
@@ -67,6 +67,13 @@ export default async function Page() {
             pluck: _pluck,
           },
         },
+        searchSuggestionConfig: {
+          router:'search',
+          resolver:'searchSuggestions',
+        },
+        customTabDefaults: {
+          defaultSorting,
+        }
       }}
     />
   );

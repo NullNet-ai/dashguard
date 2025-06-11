@@ -5,6 +5,7 @@ import { Button } from '@headlessui/react';
 import CreateNewFilter from '../CreateNewFilter';
 import {
   ChangeEvent,
+  Fragment,
   useContext,
   useEffect,
   useMemo,
@@ -28,11 +29,15 @@ import { calculateMainTabItems } from '~/utils/sort-tab-items';
 import { useSidebar } from '~/components/ui/sidebar';
 import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { updateAllGridData } from '~/components/platform/Tab/Actions/actions';
+import { GridContext } from '../../Provider';
+import { duplicateFilterTab, removeGridFilter } from '../SideDrawer/actions';
+import { ulid } from 'ulid';
 
 const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const newPathname = usePathname();
   const { open } = useSidebar();
   const router = useRouter();
+  const { state: gridState, actions: gridActions } = useContext(GridContext);
   const [portal, entity, application, code] = (newPathname || '')
     .split('/')
     .slice(1);
@@ -47,6 +52,8 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
   const [activeTab, setActiveTab] = useState<string>(
     tabs?.length > 0 ? tabs.find((tab) => tab.current)?.id : 'dashboard',
   );
+  const { state } = useContext(GridContext);
+  const { config, gridKey } = gridState ?? {};
 
   const parentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<any[]>([]);
@@ -73,6 +80,16 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     });
 
     setTablists(newTablist);
+    if (gridState?.config?.onFetchRecords) {
+      const { advance_filters, sorts = [], grouping = [] } = selectedTab;
+      gridState?.config?.onFetchRecords?.({
+        advance_filters,
+        sorting: sorts?.length ? sorts : gridState?.sorting,
+        grouping: grouping ?? [],
+      });
+      updatecachedItems(newTablist);
+    }
+    router?.push(selectedTab.href);
   };
 
   const handleTabClickDropdown = (selectedTab: any) => {
@@ -96,7 +113,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
 
     if (typeof window !== 'undefined') {
       if (document.readyState === 'complete') {
-        setIsWindowLoaded(true);
+        setTimeout(() => {
+          setIsWindowLoaded(true);
+        }, 1000);
       } else {
         window.addEventListener('load', handleLoad);
       }
@@ -155,27 +174,32 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           // setTablists(items);
           updatecachedItems(items);
           if (activeTab) {
-            const href = items?.find((item) => item.current)?.href;
-            router.push(href);
+            const href =
+              items?.find((item) => item.current)?.href || items?.[0]?.href;
+            // router.push(href);
           }
         }
       } else {
         updatecachedItems(items);
         if (activeTab) {
-          const href = items?.find((item) => item.current)?.href;
-          router.push(href);
+          const href =
+            items?.find((item) => item.current)?.href || items?.[0]?.href;
+          // router.push(href);
         }
       }
     };
     if (isClient) {
-      handleResize();
+      setTimeout(() => {
+        handleResize();
+      }, 200);
     }
+
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [tablists, isClient]);
+  }, [tablists, isClient, open, winWidth, isWindowLoaded]);
 
   const handleSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
@@ -210,6 +234,83 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
     }
     return false;
   }, [tablists, searchValue]);
+
+  const handleDeleteTabs = async (tab: any) => {
+    const newTabs = tablists.filter((item: any) => item.id !== tab.id);
+    setTablists(newTabs);
+    // Background update
+    await removeGridFilter(tab?.id, gridKey);
+    // updatecachedItems(newTabs);
+    // TODO
+    setActiveTab(newTabs?.[0]?.id);
+    router?.push(newTabs?.[0]?.href);
+  };
+
+  const handleUpdateTab = async (tab: any) => {
+    const newTabs = tablists.map((item: any) => {
+      if (item.id === tab.id) {
+        return {
+          ...item,
+          ...tab,
+        };
+      }
+      return item;
+    });
+    gridActions?.setColumnsOrder?.(tab?.columns);
+    setTablists(newTabs);
+  };
+
+  const handleDuplicateTab = async ({
+    tab,
+    gridKey,
+    defaultEntity,
+  }: {
+    tab: any;
+    gridKey: string;
+    defaultEntity: string;
+  }) => {
+    // const newTabs = tablists.filter((item:any) => item.id !== tab.id);
+    // setTablists(newTabs);
+
+    const tabToBeDuplicated = tablists?.find((item: any) => item.id === tab.id);
+    const filter_id = ulid();
+    const href = `${newPathname}?filter_id=${filter_id}`;
+
+    const newTab = {
+      ...tabToBeDuplicated,
+      id: filter_id,
+      name: `${tabToBeDuplicated?.name} (Copy)`,
+      link: href,
+      current: true,
+      is_current: true,
+      href: href,
+      default: false,
+      is_default: false,
+    };
+    const newTablist = [...tablists, newTab];
+    // Background update
+    await duplicateFilterTab(newTab, gridKey, defaultEntity);
+    // set current and is_current to false for other tabs
+    const updatedTabs = newTablist.map((item: any) => {
+      if (item.id !== newTab.id) {
+        return {
+          ...item,
+          current: false,
+          is_current: false,
+        };
+      }
+      return item;
+    });
+    setTablists(updatedTabs);
+    setActiveTab(newTab?.id);
+    router?.push(newTab?.href);
+  };
+
+  const actions = {
+    handleDeleteTabs,
+    handleDuplicateTab,
+    handleUpdateTab,
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -254,6 +355,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             ) {
               return (
                 <GridTabItem
+                  actions={actions}
                   className={cn({ 'opacity-0': isHidden })}
                   isHidden={isHidden}
                   ref={(el) => {
@@ -275,6 +377,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             return (
               <SortableItem key={tab.id} value={tab.id} className="relative">
                 <GridTabItem
+                  actions={actions}
                   className={cn({ 'opacity-0': isHidden })}
                   isHidden={isHidden}
                   ref={(el) => {
@@ -295,7 +398,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
           })}
         </Sortable>
         {!!copyTab?.length && !copyTab.some((item) => item.hidden) && (
-          <CreateNewFilter />
+          <Fragment>
+            {!state?.hideCreateNewFilter && <CreateNewFilter />}
+          </Fragment>
         )}
       </div>
       {copyTab?.some((tab: any) => tab.hidden) && isWindowLoaded && (
@@ -304,7 +409,9 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             copyTab.some((item) => item.hidden) &&
             isWindowLoaded && (
               <div>
-                <CreateNewFilter />
+                <Fragment>
+                  {!state?.hideCreateNewFilter && <CreateNewFilter />}
+                </Fragment>
               </div>
             )}
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -365,6 +472,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
                         className="group relative flex items-center justify-between py-1"
                       >
                         <GridtabDropItem
+                          actions={actions}
                           tab={itm}
                           shownItems={tablists}
                           dropItems={copyTab?.filter((dta) => dta.hidden)}

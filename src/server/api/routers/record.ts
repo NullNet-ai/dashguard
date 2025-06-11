@@ -1,6 +1,6 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { z } from 'zod';
-import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
+import {  type IAdvanceFilters } from '@dna-platform/common-orm';
 import { TRPCError } from '@trpc/server';
 import Entities from '~/auto-generated/entities';
 import { headers } from 'next/headers';
@@ -47,15 +47,17 @@ export const recordRouter = createTRPCRouter({
       if (!input?.id) return null;
       try {
         const recordByCode = await ctx.dnaClient
-          .findByCode(input.id, {
-            entity: input.main_entity,
-            token: ctx.token.value,
-            query: {
-              pluck: input.pluck_fields,
-            },
-          })
-          .execute();
+        .findByCode(input.id, {
+          entity: input.main_entity,
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck_fields,
+          },
+        })
+        .execute();
+        
         const { data, ...rest } = recordByCode ?? {};
+        
         return {
           ...rest,
           data: data?.[0],

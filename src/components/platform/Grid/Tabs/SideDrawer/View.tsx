@@ -1,21 +1,41 @@
-import { useState } from 'react';
-import { cn } from '~/lib/utils';
 import StateTab from '~/components/platform/StateTab';
-import FilterContent from './Tabs/Filter';
-import Header from './Header';
-import NameInput from './NameInput';
-import ColumnContent from './Tabs/Columns';
-import SortContent from './Tabs/Sort';
-import GroupContent from './Tabs/Group';
-import { useSideDrawer } from '~/components/platform/SideDrawer';
-import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
 import { useManageFilter } from './Provider';
+import ColumnContent from './Tabs/Columns';
+import FilterContent from './Tabs/Filter';
+import GroupContent from './Tabs/Group';
+import SortContent from './Tabs/Sort';
+import { Alert, AlertContent, AlertTitle } from '~/components/ui/alert';
 
+const ErrorMessages = ({ messages }: { messages: string[] }) => {
+  if (!messages || messages.length === 0) return null;
+  
+  return (
+    <div className="mb-4">
+      <Alert 
+        variant="error" 
+        withAccentBorder 
+        className="border rounded-md shadow-sm"
+      >
+        <AlertTitle className="flex items-center gap-2 font-medium">
+          Validation Errors
+        </AlertTitle>
+        <AlertContent className="mt-2">
+          <ul className="list-disc pl-5 space-y-1">
+            {messages.map((message, index) => (
+              <li key={index} className="text-sm">{message}</li>
+            ))}
+          </ul>
+        </AlertContent>
+      </Alert>
+    </div>
+  );
+};
 
 export default function SideDrawer() {
   const { state, actions } = useManageFilter();
-  const { tab_props, filterDetails, createFilterLoading } = state ?? {};
+  const { tab_props, filterDetails, createFilterLoading, errorMessages } = state ?? {};
   const tabs = [
     {
       id: 'filter',
@@ -72,6 +92,9 @@ export default function SideDrawer() {
           </Button>
         )}
       </div>
+
+      {errorMessages && errorMessages.length > 0 && <ErrorMessages messages={errorMessages} />}
+
       <div className="space-y-2">
         <label htmlFor="filterName" className="text-sm font-bold text-gray-700">
           Name

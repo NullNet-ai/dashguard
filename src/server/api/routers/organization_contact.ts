@@ -160,6 +160,7 @@ export const organizationContactsRouter = createTRPCRouter({
                 field: 'categories',
                 operator: EOperator.CONTAINS,
                 values: ['Department'],
+                parse_as: 'text',
                 entity: 'organizations',
               },
             ],

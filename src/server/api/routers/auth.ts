@@ -502,7 +502,9 @@ export const authRouter = createTRPCRouter({
         organization_id : ctx.session.account.organization_id
       }
       const result = await ctx.dnaClient
-        .register(organization, account)
+        .register(organization, account, {
+          token: ctx.token.value,
+        })
         .execute();
 
       // Save account id and secret in redis
@@ -513,7 +515,8 @@ export const authRouter = createTRPCRouter({
           account_id: input.account.account_id,
           account_secret: input.account.account_secret,
         },
-        60, // 1 hour 60 * 60 - 1 minute 60
+        // 60, // 1 hour 60 * 60 - 1 minute 60
+        60 * 60 * 24 * 7 
       );
 
 
@@ -557,7 +560,8 @@ export const authRouter = createTRPCRouter({
           account_id: input.account_id,
           account_secret: input.account_secret,
         },
-        60, // 1 hour 60 * 60 - 1 minute 60
+        // 60, // 1 hour 60 * 60 - 1 minute 60
+        60 * 60 * 24 * 7 
       )
 
       return response;

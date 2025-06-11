@@ -17,7 +17,7 @@ export interface INotificationSchema {
   id: string
   title: string
   description: string
-  timestamp: string
+  event_timestamp: string
   link?: string
   categories?: string[]
   icon?: string

@@ -1,3 +1,4 @@
+'use server'
 import { SortingState } from '@tanstack/react-table';
 import { IGroupBy } from '~/components/platform/Grid/Category/type';
 import {
@@ -12,6 +13,7 @@ export interface IGridCacheDataResponse {
     reportFilters: [];
     defaultFilters: ISearchItem[];
     groupAdvanceFilters: ISearchItem[];
+    additionalFilters?: ISearchItem[];
   };
   sorts: {
     sorting: SortingState;
@@ -28,6 +30,9 @@ interface IGridCacheData {
   entity?: string;
   application?: string;
   identifier?: string;
+  defaultGridTabs?: any[];
+  pathname?: string;
+  defaultSorting?: SortingState;
 }
 
 const defaultValues = {

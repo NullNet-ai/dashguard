@@ -3,9 +3,10 @@ import { headers } from 'next/headers';
 import { api } from '~/trpc/server';
 
 import { toCapitalize } from '~/lib/capitalize';
-import InnerTabItems from './InnerTabItems';
-import { type IPropsTabList, type InnerTabsProps } from './type';
 import { pluralize } from '~/server/utils/pluralize';
+import InnerTabItems from './InnerTabItems';
+import RefreshButton from './RefreshButton';
+import { type InnerTabsProps } from './type';
 
 const getSessionTabs = async () => {
   const headerList = headers();
@@ -22,10 +23,12 @@ const getSessionTabs = async () => {
     .then((res) => {
       return res?.tabs ?? [];
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error('Error fetching tabs:', error);
       return [];
     })) as any[];
   const grid = stateTabs.find((item) => item.name === 'Grid');
+  const gridHref = `/${portal}/${mainEntity}/grid`;
   const hasIdentifier = stateTabs?.find((item) => item.name === identifier);
 
   let entity;
@@ -72,12 +75,12 @@ const getSessionTabs = async () => {
     };
   });
 
-  if (application === 'grid' && !grid) {
+  if (!grid) {
     newTabs.unshift({
       name: 'Grid',
-      href: pathname,
+      href: gridHref,
       current: true,
-      label: `All ${toCapitalize(pluralize(entity || ''))}s`,
+      label: `All ${toCapitalize(pluralize(entity || ''))}`,
     });
   }
 
@@ -91,7 +94,6 @@ const getSessionTabs = async () => {
   }
 
   if (application === 'wizard' && hasIdentifier && step) {
-    //check first if the last character is a number
     const lastChar = hasIdentifier.href.slice(-1);
 
     if (/\d/.exec(step) && /\d/.exec(lastChar)) {
@@ -117,61 +119,93 @@ const getSessionTabs = async () => {
     tabs: newTabs,
   });
 
-  // await api.grid.defaultGridTab({
-  //   application: application || '',
-  //   entity: mainEntity || '',
-  // })
-
-  // await api.grid.getCustomGridTabs({
-  //   application: application || '',
-  //   entity: mainEntity || '',
-  // })
   return newTabs.filter(Boolean)
 }
 
 const InnerTabs = async ({ variant = 'dropdown' }: InnerTabsProps) => {
-  const newTabs = await getSessionTabs();
-  const headerList = headers();
-  const pathname = headerList.get('x-pathname') || '';
+  try {
+    const headerList = headers();
+    const pathname = headerList.get('x-pathname') || '';
+    const [, portal, mainEntity, application, identifier] = pathname.split('/') || [];
+    
+    let newTabs = await getSessionTabs();
+    const copiedNewTabs = [...newTabs];
+    if (!newTabs?.length) {
+      console.error('No tabs found for path:', pathname);
+      
+      let entity = mainEntity;
+      switch (mainEntity) {
+        case 'user_role':
+          entity = 'role';
+          break;
+        case 'account_organization':
+          entity = 'account';
+          break;
+      }
+      
+      const gridHref = `/${portal}/${mainEntity}/grid`;
+      const gridTab = {
+        name: 'Grid',
+        href: gridHref,
+        current: application === 'grid',
+        label: `All ${toCapitalize(pluralize(entity || ''))}`,
+      };
+      
+      newTabs = [gridTab];
+      
+      if (application !== 'grid' && identifier) {
+        newTabs.push({
+          name: identifier,
+          href: pathname,
+          current: true,
+          label: identifier,
+        });
+      }
+      
+      try {
+        await api.tab.insertSubTabs({
+          current_context: '/' + portal + '/' + mainEntity,
+          tabs: newTabs,
+        });
+      } catch (error) {
+        console.error('Failed to save default tabs:', error);
+      }
+    }
 
-  const withIDTabs = newTabs.map((tab) => {
-    return {
-      ...tab,
-      id: tab.name,
-    };
-  });
+    const withIDTabs = newTabs.map((tab) => {
+      return {
+        ...tab,
+        id: tab.name,
+      };
+    });
 
-  if (!withIDTabs?.length) {
     return (
-      <div className="relative h-2 overflow-hidden">
-        <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+      <div className="relative">
+       {!copiedNewTabs?.length && <div className="absolute right-2 top-1 z-10">
+          <RefreshButton />
+        </div>}
+        
+        {!withIDTabs?.length ? (
+          <div className="relative h-2 overflow-hidden">
+            <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+          </div>
+        ) : (
+          <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant} />
+        )}
+      </div>
+    );
+  } catch (error) {
+    console.error('Error in InnerTabs:', error);
+    return (
+      <div className="relative">
+        <div className="absolute right-2 top-1 z-10">
+          <RefreshButton />
+        </div>
+        <div className="relative h-2 overflow-hidden">
+          <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
+        </div>
       </div>
     );
   }
-
-  return (
-    <InnerTabItems pathname={pathname} tabs={withIDTabs} variant={variant} />
-  );
 };
-
 export default InnerTabs;
-
-// const pathname = headerList.get('x-pathname') || ''
-
-// const [, , entity, , ]
-//   = pathname.split('/') || 'New Tab'
-
-// const withIDTabs = newTabs.map((tab) => {
-
-//   if(lowerCase(tab.name) === 'grid') {
-//     return {
-//      ...tab,
-//      id: tab.name,
-//      label: `All ${capitalize(pluralize(entity || ''))}`
-//     }
-//   }
-//   return {
-//     ...tab,
-//    id: tab.name,
-//   }
-// })

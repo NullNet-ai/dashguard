@@ -16,8 +16,8 @@ const GridCardViewContent = ({
     flexRender, 
     parent, 
     config, 
-    showArchiveConfirmationModal, 
-    setShowArchiveConfirmationModal, 
+    showActionConfirmationModal, 
+    setShowActionConfirmationModal, 
     setRowToArchive, 
     visibleCells, 
     codecell, 
@@ -109,10 +109,10 @@ const GridCardViewContent = ({
                     {!['Archived', 'Delete'].includes(row.original?.status) && (
                       <ArchiveComponent
                         config={config!}
-                        open={showArchiveConfirmationModal}
+                        open={showActionConfirmationModal}
                         record={row}
                         row={row}
-                        setOpen={setShowArchiveConfirmationModal}
+                        setOpen={setShowActionConfirmationModal}
                         setRecord={setRowToArchive}
                         viewMode='card'
                       />

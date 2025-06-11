@@ -20,14 +20,17 @@ import {
   type ISearchParams,
   type IState,
 } from './types';
-import { clearAllSearchItems, removeSearchItems } from './utils/removeSearchItems';
+import {
+  clearAllSearchItems,
+  removeSearchItems,
+} from './utils/removeSearchItems';
 import { resolveSearchItem } from './utils/resolveSearchItem';
 import { useRouter } from 'next/navigation';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
 
 interface IProps extends PropsWithChildren {
-  test?: any
+  test?: any;
 }
 
 export default function GridSearchProvider({ children }: IProps) {
@@ -38,18 +41,19 @@ export default function GridSearchProvider({ children }: IProps) {
     entity: defaultEntity,
     searchableFields = [],
     searchConfig,
+    searchSuggestionConfig,
     onFetchRecords,
   } = gridState?.config ?? {};
 
   const { parentType, gridKey } = gridState ?? {};
 
-  const { query_params } = searchConfig ?? {};
+  const { query_params } = searchSuggestionConfig ?? {};
   const { group_advance_filters } = query_params ?? {};
   /** @STATES */
   const [_query, setQuery] = useState<string>('');
   const [searchItems, setSearchItems] = useState<ISearchItem[]>(
     gridState?.advanceFilter || [],
-  ); 
+  );
   const [open, setOpen] = useState(false);
 
   const advanceFilterItems = useMemo(() => {
@@ -60,27 +64,28 @@ export default function GridSearchProvider({ children }: IProps) {
         type,
         field,
         values,
-        ...parse_as ? { parse_as }: {},
+        ...(parse_as ? { parse_as } : {}),
       }),
     ) as ISearchItem[];
-    const searchResolver =  searchableFields.reduce(
+    const searchResolver = searchableFields.reduce(
       // eslint-disable-next-line no-unused-vars
       (acc: any, { accessorKey: _, ...item }: any, index) => {
+        const resolveValue =
+          item?.field === 'raw_phone_number'
+            ? _query?.replace(/[^\d]/g, '')
+            : _query;
+
+        if (!resolveValue) return acc;
         return [
           {
             type: 'criteria',
             operator: 'equal',
-            values:
-              item?.field === 'raw_phone_number'
-                ? [_query?.replace(/[^\d]/g, '')]
-                : [_query],
-            // if entity is not provided, the default entity will be the entity of the grid
+            values: [resolveValue],
             entity: defaultEntity,
             ...item,
+            is_search: true,
           },
-          ...(index !== 0
-            ? [{ type: 'operator', operator: 'or' }]
-            : []),
+          ...(index !== 0 ? [{ type: 'operator', operator: 'or' }] : []),
           ...acc,
         ];
       },
@@ -106,7 +111,21 @@ export default function GridSearchProvider({ children }: IProps) {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-    const { router = 'grid', resolver = 'items' } = searchConfig ?? {};
+    const { router = 'search', resolver = 'searchSuggestions' } =
+    searchSuggestionConfig ?? {};
+    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
+    const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
+    return data;
+  };
+
+  // TODO: Remove this function after the new search is implemented in form filter
+  const handleOldSearchQuery = (
+    search_params: ISearchParams,
+    options: Record<string, any>,
+  ) => {
+    const { router = 'grid', resolver = 'items' } =
+    searchConfig ?? {};
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
@@ -115,75 +134,100 @@ export default function GridSearchProvider({ children }: IProps) {
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
-    const { count: _, ...rest } = filterItem ?? {};
+    const { count: _, parse_as, ...filter_item } = filterItem ?? {};
     const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
       entity: entity || defaultEntity,
       ...rest,
     })) as ISearchItem[];
     setQuery('');
- 
+
     const updateSearchItems = resolveSearchItem({
       advanceFilter,
-      rest
-    })
+      filter_item,
+    });
     setSearchItems(updateSearchItems);
+    const updatedFilterUrl = await UpdateReportFilter({
+      filters: updateSearchItems,
+      gridKey,
+    });
 
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updateSearchItems,
       });
       return;
     }
-    await UpdateReportFilter({
-      filters: updateSearchItems,
-      gridKey
-    });
-    router.refresh()
+    if (updatedFilterUrl) {
+      router.push(updatedFilterUrl);
+      return;
+    } else {
+      router.refresh();
+    }
   };
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery('');
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    await UpdateReportFilter({
+      filters: updatedSearchItems,
+      gridKey,
+    });
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });
       return;
     }
-    await UpdateReportFilter({
-      filters: updatedSearchItems,
-      gridKey
-    });
-    router.refresh()
+    router.refresh();
   };
 
   const handleClearSearchItems = async () => {
     setQuery('');
-    
+
     const defaultFilters = gridState?.defaultAdvanceFilter || [];
     const updatedSearchItems = clearAllSearchItems(defaultFilters);
     setSearchItems(updatedSearchItems);
-    
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+
+    await UpdateReportFilter({
+      filters: updatedSearchItems,
+      gridKey,
+    });
+    if (onFetchRecords) {
       onFetchRecords?.({
         advance_filters: updatedSearchItems,
       });
       return;
     }
 
-    await UpdateReportFilter({
-      filters: updatedSearchItems,
-      gridKey
-    });
-
-    router.refresh()
+    router.refresh();
   };
 
   // @use effects
   useEffect(() => {
-    setSearchItems(gridState?.advanceFilter || []);
+    const currentAdvanceFilter = gridState?.advanceFilter || [];
+    if (JSON.stringify(currentAdvanceFilter) === JSON.stringify(searchItems))
+      return;
+
+    setSearchItems(currentAdvanceFilter);
     setQuery('');
-  }, [gridState?.advanceFilter]);
+
+    const mappedAdvanceFilter = currentAdvanceFilter.map(
+      ({ entity, operator, type, field, values, parse_as }) => ({
+        entity: entity || defaultEntity,
+        operator,
+        type,
+        field,
+        values,
+        ...(parse_as ? { parse_as } : {}),
+      }),
+    ) as ISearchItem[];
+
+    if (onFetchRecords) {
+      onFetchRecords({
+        advance_filters: mappedAdvanceFilter,
+      });
+    }
+  }, [gridState?.advanceFilter?.length, gridState?.advanceFilter]);
 
   const state_context = {
     open,
@@ -198,6 +242,7 @@ export default function GridSearchProvider({ children }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
+    handleOldSearchQuery
   } as IAction;
 
   return (

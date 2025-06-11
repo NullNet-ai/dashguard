@@ -1,19 +1,11 @@
-  import account_organization from "./account_organization";
-  import contact from "./contact";
-  import dashboard from "./dashboard";
-  import device from "./device";
-  import organization from "./organization";
-  import settings from "./settings";
-  import location from "./location";
+import device from "./device";
+import device_remote_access_session from "./device_remote_access_session";
+import settings from "./settings"
 
 const menu = [
-  account_organization,
-  contact,
-  dashboard,
   device,
-  organization,
-  settings,
-  location,
+  device_remote_access_session,
+  settings
 ];
 
 export default menu;

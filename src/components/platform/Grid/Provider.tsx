@@ -26,6 +26,7 @@ import { type ISearchItem } from './Search/types';
 import { useActionColumns } from './hooks/actionColumns';
 import { useColumnConditions } from './hooks/useColumnConditions';
 import {
+  type IParentType,
   type IAction,
   type IConfigGrid,
   type ICreateContext,
@@ -43,7 +44,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer';
+  parentType?: IParentType
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';
@@ -66,6 +67,8 @@ export default function GridProvider({
   grouping: initialGrouping = [],
   gridKey,
   customCreateButton,
+  customCreateActionButton,
+  hideCreateNewFilter
 }: IProps) {
   const router = useRouter();
 
@@ -89,6 +92,17 @@ export default function GridProvider({
     );
   }, [initialGrouping]) as GroupingState;
 
+  const resolvedFieldGroupings = useMemo(() => {
+    if (!initialGrouping?.length) return [];
+    if (typeof initialGrouping[0] === 'string') return initialGrouping;
+    return (initialGrouping as IGroupBy[])?.reduce(
+      (acc: GroupingState, curr) => {
+        return [...acc, curr.field];
+      },
+      [],
+    );
+  }, [initialGrouping]) as GroupingState;
+
   const isMobileOrTablet = useMediaQuery({ query: '(max-width: 728px)' });
 
   /** @HOOKS */
@@ -96,14 +110,14 @@ export default function GridProvider({
 
   /** @STATES */
   const [createLoading, setCreateLoading] = useState<boolean>(false);
-  const [archiveBulkLoading, setArchiveBulkLoading] = useState<boolean>(false);
+  const [actionBulkLoading, setActionBulkLoading] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     initialSelectedRecords,
   );
 
   const [rowSelectedRecord, setRowSelectedRecord] = useState<any[]>([]);
   const [colSizing, setColSizing] = useState<ColumnSizingState>({});
-  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] =
+  const [showActionConfirmationModal, setShowActionConfirmationModal] =
     useState<boolean>(false);
   const [rowToArchive, setRowToArchive] = useState<Row<any> | null>(null);
 
@@ -112,15 +126,31 @@ export default function GridProvider({
   );
 
   const [columnVisibility, setColumnVisibility] = React.useState(() => {
-    return {
-      ...resolvedGroupings?.reduce((acc: any, curr) => {
+    // First, hide grouped columns
+    const initialVisibility = resolvedGroupings?.reduce((acc: any, curr) => {
+      return {
+        ...acc,
+        [curr]: false,
+      };
+    }, {});
+    
+    // Then, also hide columns with is_hidden: true
+    const hiddenColumns = _propsConfig?.columns?.reduce((acc: any, column: any) => {
+      if (column.is_hidden) {
         return {
           ...acc,
-          [curr]: false,
+          [column.accessorKey]: false,
         };
-      }, {}),
+      }
+      return acc;
+    }, {});
+    
+    return {
+      ...initialVisibility,
+      ...hiddenColumns,
     };
   });
+
 
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
@@ -128,6 +158,8 @@ export default function GridProvider({
   const [grouping, setGrouping] = React.useState<GroupingState>(
     resolvedGroupings?.length ? resolvedGroupings : [],
   );
+  const [temoporaryGrouping, setTemporaryGrouping] =
+    React.useState<GroupingState>([]);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -147,10 +179,14 @@ export default function GridProvider({
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [infiniteCount, setInfiniteCount] = useState(totalCount ?? 0);
+  const [columnsOrder, setColumnsOrder] = useState<any[]>(
+    _propsConfig?.columnsOrder ?? [],
+  );
 
   const [gridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
       return {
+        ...item,
         header: item.header,
         accessorKey: item.accessorKey,
         search_config: item.search_config,
@@ -163,13 +199,6 @@ export default function GridProvider({
     ...filter,
     default: true,
   })) as ISearchItem[];
-
-  if (!!_propsConfig?.columnsOrder?.length) {
-    _propsConfig.columns = sortColumns(
-      _propsConfig?.columnsOrder,
-      _propsConfig?.columns,
-    );
-  }
 
   const resolvedAdvanceFilter = advanceFilter?.reduce(
     (acc, curr) => {
@@ -192,7 +221,54 @@ export default function GridProvider({
       setPlaygroundGridIsShowCreateButton(createButton);
       setPlaygroundGridIsShowRowAction(rowAction);
     }
+    if (grouping?.length) {
+      setColumnVisibility(() => {
+        const newVisibility: any = {};
+        grouping.forEach((curr) => {
+          newVisibility[curr] = false;
+        });
+        return newVisibility;
+      });
+      if (config?.onFetchRecords && parentType !== 'grouping_expansion') {
+        config?.onFetchRecords({
+          grouping: resolvedFieldGroupings[0]
+            ? [resolvedFieldGroupings[0]]
+            : [],
+        });
+      }
+    }
   }, []);
+
+  // use effect for column order
+  useEffect(() => {
+    if (!_propsConfig?.columnsOrder?.length) {
+      setColumnsOrder([]);
+      return;
+    }
+
+    if (!!_propsConfig?.columnsOrder?.length) {
+      const sortedColumns = sortColumns(
+        _propsConfig?.columnsOrder,
+        _propsConfig?.columns,
+      );
+      _propsConfig.columns = sortedColumns;
+    }
+
+    // Check if arrays have different lengths
+    if (columnsOrder.length !== _propsConfig.columnsOrder.length) {
+      setColumnsOrder(_propsConfig.columnsOrder ?? []);
+      return;
+    }
+
+    const hasChanged = _propsConfig.columnsOrder.some((newCol, index) => {
+      const currentCol = columnsOrder[index];
+      return newCol.id !== currentCol.id || newCol.order !== currentCol.order;
+    });
+
+    if (hasChanged) {
+      setColumnsOrder(_propsConfig.columnsOrder ?? []);
+    }
+  }, [_propsConfig?.columnsOrder]);
 
   // use effect for sorting if there is a change in props sorting it should set the sorting
   useEffect(() => {
@@ -202,7 +278,9 @@ export default function GridProvider({
   }, [initialSorting]);
 
   useEffect(() => {
-    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
+    if (
+      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)
+    ) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {
         const newVisibility: any = {};
@@ -211,6 +289,13 @@ export default function GridProvider({
         });
         return newVisibility;
       });
+      if (config?.onFetchRecords && parentType !== 'grouping_expansion') {
+        config?.onFetchRecords({
+          grouping: resolvedFieldGroupings[0]
+            ? [resolvedFieldGroupings[0]]
+            : [],
+        });
+      }
     }
   }, [resolvedGroupings]);
 
@@ -308,12 +393,13 @@ export default function GridProvider({
       prevSorting.filter((sort) => sort.id !== columnId),
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
+    handleUpdateReportSorting(updatedSorting);
+
     if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: updatedSorting,
       });
     }
-    handleUpdateReportSorting(updatedSorting);
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
@@ -338,9 +424,8 @@ export default function GridProvider({
               processedSortKeys.set(key, true);
               return {
                 ...sort,
-                ...sortFields?.sort_config ?? {},
+                ...(sortFields?.sort_config ?? {}),
                 sort_key: sortKey,
-
               };
             })
           : (() => {
@@ -352,7 +437,7 @@ export default function GridProvider({
               return [
                 {
                   ...sort,
-                  ...sortFields?.sort_config ?? {},
+                  ...(sortFields?.sort_config ?? {}),
                   sort_key: sortFields?.sortKey || sort.id,
                 },
               ];
@@ -365,13 +450,13 @@ export default function GridProvider({
       },
       [],
     );
+    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
 
-    if (parentType && ['form', 'grid_expansion'].includes(parentType)) {
+    if (config?.onFetchRecords) {
       return config?.onFetchRecords?.({
         sorting: resolvedSorting,
       });
     }
-    UpdateReportSorting({ sorting: resolvedSorting, gridKey });
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
@@ -383,20 +468,6 @@ export default function GridProvider({
     const newGrouping =
       typeof updater === 'function' ? updater(grouping) : updater;
 
-    // Update column visibility to hide grouped columns
-    // setColumnVisibility((prev: any) => {
-    //   const visibility: any = { ...prev };
-    //   // Show all previously grouped columns
-    //   grouping.forEach((columnId) => {
-    //     visibility[columnId] = true;
-    //   });
-    //   // Hide newly grouped columns
-    //   newGrouping.forEach((columnId) => {
-    //     visibility[columnId] = false;
-    //   });
-    //   return visibility;
-    // });
-    // setGrouping(newGrouping);
     const groupings = newGrouping?.map((item) => {
       const columnConfig = config?.columns?.find(
         (column: any) => column?.accessorKey === item,
@@ -410,15 +481,30 @@ export default function GridProvider({
         field: `${entity}.${field}`,
         label,
         desc: typeof sortBy === 'boolean' ? sortBy : false,
-        ...columnConfig?.sort_config ?? {},
+        ...(columnConfig?.sort_config ?? {}),
       };
     });
+    UpdateReportGrouping({ grouping: groupings, gridKey });
+
     if (config?.onFetchRecords) {
-      return config?.onFetchRecords?.({
+      setColumnVisibility((prev: any) => {
+        const visibility: any = { ...prev };
+        // Show all previously grouped columns
+        grouping.forEach((columnId) => {
+          visibility[columnId] = true;
+        });
+        // Hide newly grouped columns
+        newGrouping.forEach((columnId) => {
+          visibility[columnId] = false;
+        });
+        return visibility;
+      });
+      setGrouping(newGrouping);
+      config?.onFetchRecords?.({
         grouping: groupings[0]?.field ? [groupings[0]?.field] : [],
       });
+      return;
     }
-    UpdateReportGrouping({ grouping: groupings, gridKey });
   };
 
   /** @HOOKS */
@@ -426,8 +512,8 @@ export default function GridProvider({
     useActionColumns(
       config,
       rowSelection,
-      showArchiveConfirmationModal,
-      setShowArchiveConfirmationModal,
+      showActionConfirmationModal,
+      setShowActionConfirmationModal,
       setRowToArchive,
       handleSingleSelect,
       viewMode,
@@ -517,8 +603,8 @@ export default function GridProvider({
         is_from_grid: true,
       });
 
-      if(!config?.enableAutoCreate) {
-        router.push(route)
+      if (!config?.enableAutoCreate) {
+        router.push(route);
         return;
       }
     } catch (error) {
@@ -528,28 +614,54 @@ export default function GridProvider({
   };
   const handleArchiveBulkRecord = async () => {
     try {
-      setArchiveBulkLoading(true);
+      setActionBulkLoading(true);
       const selectedRows = table?.getSelectedRowModel().rows;
       if (!selectedRows?.length) return;
       if (config?.archiveBulkRecordCustomAction) {
-        config?.archiveBulkRecordCustomAction({
+        await config?.archiveBulkRecordCustomAction({
           config,
+          entity: config?.entity,
           selected_rows: selectedRows,
         });
+        setActionBulkLoading(false);
+        table?.resetRowSelection();
+        setShowBulkActionConfirmationModal(false);
+        setBulkActionType(null);
         return;
       }
       const record_ids = selectedRows.map((row) => row?.id);
       await BulkArchive({ entity: config?.entity, record_ids });
-      setArchiveBulkLoading(false);
+      setActionBulkLoading(false);
       table?.resetRowSelection();
       setShowBulkActionConfirmationModal(false);
       setBulkActionType(null);
     } catch (error) {
       console.error('An error occurred while creating a record', error);
-      setArchiveBulkLoading(false);
+      setActionBulkLoading(false);
     }
   };
-
+  const handleCustomBulkAction = async () => {
+    try {
+      setActionBulkLoading(true);
+      const selectedRows = table?.getSelectedRowModel().rows;
+      if (!selectedRows?.length) return;
+      if (config?.customBulkAction) {
+        config?.customBulkAction({
+          config,
+          entity: config?.entity,
+          selected_rows: selectedRows,
+        });
+        return;
+      }
+      setActionBulkLoading(false);
+      table?.resetRowSelection();
+      setShowBulkActionConfirmationModal(false);
+      setBulkActionType(null);
+    } catch (error) {
+      console.error('An error occurred:', error);
+      setActionBulkLoading(false);
+    }
+  };
   const handleMergeBufferInfinite = React.useMemo(
     () => () => {
       if (!bufferData?.length) {
@@ -632,14 +744,15 @@ export default function GridProvider({
     selectTableRow,
     totalCount,
     createLoading,
-    archiveBulkLoading,
-    showArchiveConfirmationModal,
+    actionBulkLoading,
+    showActionConfirmationModal,
     rowToArchive,
     totalCountSelected: Object.keys(rowSelection ?? {}).length,
     viewMode,
     sorting,
     advanceFilter: advanceFilter?.length ? advanceFilter : defaultAdvanceFilter,
     defaultAdvanceFilter,
+    defaultSorting: _defaultSorting,
     rowSelection,
     showBulkActionConfirmationModal,
     bulkActionType,
@@ -652,6 +765,8 @@ export default function GridProvider({
     groupConfigs: initialGrouping,
     gridKey,
     customCreateButton,
+    customCreateActionButton,
+    hideCreateNewFilter
   } as IState;
   const actions = {
     handleCreate,
@@ -662,7 +777,7 @@ export default function GridProvider({
     handleRemoveSorting,
     handleAddSorting,
     handleSingleSelect,
-    setShowArchiveConfirmationModal,
+    setShowActionConfirmationModal,
     setRowToArchive,
     setShowBulkActionConfirmationModal,
     setBulkActionType,
@@ -671,6 +786,8 @@ export default function GridProvider({
       ...infinite_actions,
     },
     handleUpdateGrouping,
+    handleCustomBulkAction,
+    setColumnsOrder,
   } as IAction;
 
   return (

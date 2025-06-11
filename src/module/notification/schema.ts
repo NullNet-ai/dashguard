@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const zodNotificationSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  timestamp: z.string(),
+  event_timestamp: z.string(),
   link: z.string().optional(),
   categories: z.array(z.string()).optional(),
   icon: z.string().optional(),

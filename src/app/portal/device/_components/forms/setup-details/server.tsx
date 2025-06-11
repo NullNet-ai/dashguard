@@ -1,0 +1,38 @@
+import { headers } from 'next/headers'
+
+import { api } from '~/trpc/server'
+
+import SetupDetails from './client'
+
+const FormServerFetch = async () => {
+  const headerList = headers()
+  const pathname = headerList.get('x-pathname') || ''
+  const [, , main_entity, application, identifier] = pathname.split('/')
+  const fetched_device = application === 'wizard'
+    ? await api.device.getSetupDetails({
+      main_entity: main_entity!,
+      id: identifier!,
+      pluck_fields: ['id', 'code'],
+    })
+    : await api.device.getByCode({
+      code: identifier!,
+      pluck_fields: ['id', 'code', ],
+    })
+  const defaultValues = fetched_device?.data 
+  const {devices, account_secret, account_id} = defaultValues || {}
+
+  const server_url  = process.env.SERVER_URL
+
+  return (
+    <SetupDetails
+      defaultValues={{...defaultValues, ...devices,account_secret, account_id, server_url}}
+      params={{
+        id: defaultValues?.id! ?? '',
+        shell_type: application! as 'record' | 'wizard',
+        entity: main_entity,
+      }}
+    />
+  )
+}
+
+export default FormServerFetch

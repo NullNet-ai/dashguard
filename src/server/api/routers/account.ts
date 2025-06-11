@@ -1,4 +1,4 @@
-import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
+import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
 import Bluebird from 'bluebird';
 import { z } from 'zod';
 import {
@@ -350,8 +350,9 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+            // @ts-expect-error - multiple_sort is not defined in the type
+          multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
               : [],
             concatenate_fields: [
               {
@@ -584,7 +585,7 @@ export const accountRouter = createTRPCRouter({
                 'is_primary',
               ],
               contact_emails: ['email', 'is_primary'],
-              // external_contacts: ['id', 'first_name', 'last_name'],
+              _contact: ['id', 'first_name', 'last_name', 'middle_name'],
             },
           },
         })
@@ -601,8 +602,9 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .join({
+        .nestedJoin({
           type: 'left',
+          nested: true,
           field_relation: {
             to: {
               entity: 'contact_phone_numbers',
@@ -618,11 +620,26 @@ export const accountRouter = createTRPCRouter({
           type: 'left',
           field_relation: {
             to: {
+              alias: '_contact',
+              entity: 'contacts',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'contact_id',
+            },
+          },
+        })
+        .nestedJoin({
+          type: 'left',
+          nested: true,
+          field_relation: {
+            to: {
               entity: 'contact_emails',
               field: 'contact_id',
             },
             from: {
-              entity: 'contacts',
+              entity: '_contact',
               field: 'id',
             },
           },
@@ -955,8 +972,9 @@ export const accountRouter = createTRPCRouter({
             },
           },
         })
-        .join({
+        .nestedJoin({
           type: 'left',
+          nested: true,
           field_relation: {
             to: {
               entity: 'organizations',
@@ -1043,8 +1061,9 @@ export const accountRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting)
+            // @ts-expect-error - multiple_sort is not defined in the type
+          multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
               : [],
           },
         })

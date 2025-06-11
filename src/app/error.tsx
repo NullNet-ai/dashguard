@@ -20,6 +20,7 @@ export default function ErrorPage(props: {
         Cookies.remove('token');
         sessionStorage.setItem('sessionExpired', 'true');
         localStorage.removeItem('errorRetryCount');
+        localStorage.removeItem('entity-last-paths');
         router.replace('/login');
       }
     };

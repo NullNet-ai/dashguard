@@ -8,6 +8,7 @@ const gridColumns = [
     header: "Status",
     accessorKey: "status",
     enableResizing: false,
+    data_type: 'string',
     cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
@@ -21,11 +22,19 @@ const gridColumns = [
     header: "Category",
     accessorKey: "categories",
     enableResizing: false,
+    data_type: 'array',
     cell: ({ row }) => {
       const categories = row?.original?.categories || [];
       return categories?.map((category: string, index: number) => {
         return <StatusCell key={index} value={category} />;
       });
+    },
+    search_config: {
+      operator: 'like',
+      parse_as: 'text'
+    },
+    sort_config: {
+      is_case_sensitive_sorting: true
     },
   },
   {
@@ -45,6 +54,7 @@ const gridColumns = [
     accessorKey: "raw_phone_number",
     sortKey: "contact_phone_number.raw_phone_number",
     search_config: {
+      field: 'raw_phone_number',
       entity: "contact_phone_numbers"
     }
   },
@@ -58,52 +68,48 @@ const gridColumns = [
   },
   {
     header: "Updated Date",
-    accessorKey: "updated_date",
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date;
-      const time = row?.original?.updated_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
-    },
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: ["updated_date", "updated_time"],
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like'
+    }
   },
   {
     header: "Updated By",
     accessorKey: "updated_by",
-    sortKey: "updated_by.first_name",
+    data_type: 'string',
+    sortKey: 'updated_by.full_name',
     search_config: {
-      entity: "updated_by",
-      field: "first_name",
-      operator: 'like'
-    }
+      entity: 'updated_by',
+      field: 'full_name',
+      operator: 'like',
+    },
   },
 
   {
-    header: "Created Date",
-    accessorKey: "created_date",
-    cell: ({ row }) => {
-      const date = row?.original?.created_date;
-      const time = row?.original?.created_time;
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      );
+    header: 'Created Date',
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: ['created_date', 'created_time'],
+    // isSearchable: false,
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
     },
   },
   {
-    header: "Created By",
-    accessorKey: "created_by",
-    sortKey: "created_by.first_name",
+    header: 'Created By',
+    accessorKey: 'created_by',
+    data_type: 'string',
+    sortKey: 'created_by.full_name',
+    // isSearchable: false,
     search_config: {
-      entity: "created_by",
-      field: "first_name",
-      operator: 'like'
-    }
+      entity: 'created_by',
+      field: 'full_name',
+      operator: 'like',
+    },
   },
 ] as ColumnDef<any>[];
 

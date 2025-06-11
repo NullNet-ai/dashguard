@@ -17,7 +17,7 @@ export interface TNotificationSchema {
   id: string
   title: string
   description: string
-  timestamp: string
+  event_timestamp: string
   link?: string
   category?: string[]
   icon?: string

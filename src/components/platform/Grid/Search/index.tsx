@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { cn } from '~/lib/utils';
 
@@ -18,15 +18,28 @@ import { useGrid } from '../Provider';
 export default function Main({
   parentType = 'grid',
   creatable = true,
-  switchable = true,
+  switchable = false,
   gridType = 'table',
   viewMode = 'table',
 }: any) {
-  const { state } = useGrid(); // Add this hook to get grid context
+  const { state , actions } = useGrid(); // Add this hook to get grid context
   const renderedCreateButton = () => {
     if (creatable && state?.customCreateButton) {
       return state?.customCreateButton
-    }else if (creatable) {
+    }
+    else if (creatable && state?.customCreateActionButton) {
+      const selectedRows = state?.table?.getSelectedRowModel().rows;
+      return (
+        <Fragment>
+          {state?.customCreateActionButton({
+            config: state?.config,
+            selected_rows: selectedRows,
+            actions,
+          })}
+        </Fragment>
+      );
+    } 
+    else if (creatable) {
       return <CreateButton className="hidden lg:inline-flex" title="New"  />
     }else {
       return null;
@@ -38,30 +51,30 @@ export default function Main({
         <GridSearchContainer>
           <div
             className={cn(
-              `relative flex flex-1 flex-row justify-end`,
+              `relative flex flex-none flex-row justify-end 2xl:flex-1`,
               `${switchable ? 'gap-x-2' : ''}`,
             )}
           >
             {/* <div className="my-2 h-[40px] w-full md:my-0">
               <Search gridType={gridType} />
             </div> */}
-            <div className="hidden h-[36px] flex-shrink-0 flex-row items-center lg:flex">
+            <div className="hidden flex-shrink-0 flex-row items-center lg:flex">
               {switchable ? (
                 <>
                   <TableViewButton />
                   <CardViewButton />
                 </>
               ) : null}
-              <div className="mx-2 h-full w-[1px] bg-tertiary" />
-              <FilterButton />
+              {/* <div className="mx-2 h-full w-[1px] bg-tertiary" />
+              <FilterButton /> */}
             </div>
             {/* Replace the existing create button with this logic */}
             {renderedCreateButton()}
           </div>
-          <div className="hidden min-h-[40px] lg:block">
+          <div className="hidden flex-1 2xl:flex-none lg:block">
             <SearchList parentType='grid'/>
           </div>
-          <div className="min-h-[40px] lg:hidden">
+          <div className="min-h-[40px] flex flex-row-reverse lg:hidden">
            <div className='flex justify-end'>
            <SearchDialog />
            </div>
@@ -79,13 +92,13 @@ export default function Main({
           <SearchDialog />
         </div>
       ) : (
-        <div className="ml-0 mt-0 flex w-full max-w-[100%] md:max-w-[40%]  flex-col justify-end gap-x-2 sm:mt-0 lg:mt-4">
+        <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0">
           <div className="relative flex flex-1 flex-row gap-x-2">
             <div className="my-2 h-[40px] w-full md:my-0">
               <Search />
             </div>
           </div>
-          <div className="hidden min-h-[40px] lg:block">
+          <div className="hidden my-2 lg:block">
             <SearchList />
           </div>
           <div className="min-h-[40px] lg:hidden">

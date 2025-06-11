@@ -18,6 +18,12 @@ import { type appRouter } from '../../../server/api/root';
 import { type ISearchItem, type ISearchParams } from './Search/types';
 import { IGroupBy } from './Category/type';
 import { ISideDrawerConfig } from '../SideDrawer/types';
+import {
+  ButtonIconProps,
+  ButtonProps,
+  TooltipProps,
+} from '~/components/ui/button';
+import * as Lucide from 'lucide-react';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -32,7 +38,8 @@ export interface DefaultRowActions {
 }
 
 export interface DefaultBulkActions {
-  config: IConfigGrid;
+  entity: string;
+  config?: IConfigGrid;
   selected_rows: Row<any>[];
 }
 
@@ -55,11 +62,11 @@ export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sort_config?: {
     is_case_sensitive_sorting?: boolean;
   };
-  data_type?: string
+  data_type?: string;
   search_config?: {
     field?: string;
     operator?: string;
-    parse_as?: 'text',
+    parse_as?: 'text';
     entity?: string;
   };
   isSearchable?: boolean;
@@ -118,7 +125,9 @@ export interface IConfigGrid {
     args: Record<string, any>,
   ) => void | Promise<string | Record<string, any>>;
   restoreCustomAction?: (args: DefaultRowActions) => void;
-  archiveBulkRecordCustomAction?: (args: DefaultBulkActions) => void;
+  archiveBulkRecordCustomAction?: (
+    args: DefaultBulkActions,
+  ) => Promise<any> | void;
   layer?: TLayerType;
   enableAutoCreate?: boolean;
   // toggle for single and multi select
@@ -184,7 +193,40 @@ export interface IConfigGrid {
     summaryWidth?: number;
   };
   CustomRenderCardView?: (args: any) => JSX.Element;
+  CustomRenderCardParent?: (args: any) => JSX.Element;
   enableCheckboxOnChange?: boolean;
+  metadata?: any;
+  customBulkButtonConfig?: ButtonProps &
+    ButtonIconProps &
+    TooltipProps & {
+      label?: string;
+      action_type: 'archive' | 'custom' | null; // additional action_type here;
+      icon?: keyof typeof Lucide;
+    };
+  customBulkDialogConfig?: {
+    title?: string;
+    message?: string;
+    button_title?: string;
+  };
+  customBulkAction?: (args: DefaultBulkActions) => void;
+  enableCreateCustomGridFilter?: boolean;
+  enableManageCustomGridFilter?: boolean;
+  customTabDefaults?: Record<string, any>;
+  searchSuggestionConfig?: {
+    router?: AppRouterKeys;
+    resolver?: string;
+    query_params?: ISearchParams;
+  };
+  archiveBulkDialogConfiguration?: {
+    title?: string;
+    message: string;
+  };
+  archiveButtonConfiguration?: {
+    label?: string;
+    icon?: React.JSX.Element;
+    hide?: boolean;
+    disabled?: boolean;
+  };
 }
 
 interface IRowToArchive extends Row<any> {
@@ -199,8 +241,8 @@ export interface IState {
   selectTableRow: React.MutableRefObject<ColumnDef<any>>;
   createLoading?: boolean;
   totalCountSelected?: number;
-  archiveBulkLoading?: boolean;
-  showArchiveConfirmationModal: boolean;
+  actionBulkLoading?: boolean;
+  showActionConfirmationModal: boolean;
   statusColumn?: string;
   defaultShownColumns?: string[];
   rowToArchive: IRowToArchive;
@@ -212,6 +254,7 @@ export interface IState {
   showBulkActionConfirmationModal: boolean;
   pagination?: IPagination;
   defaultAdvanceFilter?: ISearchItem[];
+  defaultSorting?: SortingState;
   parentType?: 'grid' | 'form' | 'field' | 'grid_expansion';
   hasMore?: boolean;
   gridLevel?: number;
@@ -229,6 +272,12 @@ export interface IState {
   groupConfigs?: IGroupBy[];
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
 }
 
 export interface IAction {
@@ -240,7 +289,7 @@ export interface IAction {
   handleRemoveSorting: (id: string) => void;
   handleAddSorting: OnChangeFn<SortingState>;
   handleSingleSelect: (row: any) => Promise<void>;
-  setShowArchiveConfirmationModal: (show: boolean) => void;
+  setShowActionConfirmationModal: (show: boolean) => void;
   setRowToArchive: React.Dispatch<any>;
   setBulkActionType: (type: string | null) => void;
   setShowBulkActionConfirmationModal: (show: boolean) => void;
@@ -255,6 +304,8 @@ export interface IAction {
     handleMergeBufferInfinite?: () => void;
   };
   handleUpdateGrouping: (updater: Updater<GroupingState>) => Promise<void>;
+  handleCustomBulkAction: () => Promise<void>;
+  setColumnsOrder?: React.Dispatch<any>;
 }
 
 export interface ICreateContext {
@@ -267,7 +318,15 @@ export interface IPagination {
   limit_per_page: number;
 }
 
-export type IParentType = 'grid' | 'form' | 'field' | 'grid_expansion' | 'side_drawer'
+export type IParentType =
+  | 'grid'
+  | 'form'
+  | 'field'
+  | 'record'
+  | 'grid_expansion'
+  | 'side_drawer'
+  | 'grouping_expansion'
+  | 'record';
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
@@ -280,10 +339,16 @@ export interface IPropsGrid {
   defaultAdvanceFilter?: ISearchItem[];
   advanceFilter?: ISearchItem[];
   parentExpanded?: IExpandedRow[];
-  parentType?: IParentType
+  parentType?: IParentType;
   grouping?: IGroupBy[] | GroupingState;
   gridKey?: string;
   customCreateButton?: ReactNode | ReactElement;
+  customCreateActionButton?: (args: {
+    config: IConfigGrid;
+    selected_rows: Row<any>[];
+    actions: IAction | undefined;
+  }) => ReactNode | ReactElement;
+  hideCreateNewFilter?: boolean;
   grid_tabs?: any[];
 }
 
@@ -308,4 +373,6 @@ export interface IGridGroupingExpansionProps {
   parentGroupData?: Record<string, any>[];
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
+  metadata?: any;
+  parentType?: string
 }
