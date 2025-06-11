@@ -297,7 +297,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         name: `${prefix}.field`,
                         // placeholder: 'Select a Field',
                         // selectSearchable: true,
-                        value: field?.label,
+                        // value: field?.label,
                         disabled: true,
                       },
                       {
@@ -315,7 +315,7 @@ export default function FilterContent({filter_type}: {filter_type: string}) {
                         placeholder: 'Select a value',
                         selectSearchable: true,
                         selectEnableCreate: true,
-                        isAlphabetical: false,
+                        // isAlphabetical: false,
                       },
                     ]}
                     form={form}
