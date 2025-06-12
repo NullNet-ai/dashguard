@@ -1,4 +1,4 @@
-import { EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { EDateFormats, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
 import { z } from 'zod'
 
 import { createRemoteAccess } from '~/app/api/device_remote_access_session/create_remote_access'
@@ -96,7 +96,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             sorting?.length
               ? formatSorting(sorting, entity, is_case_sensitive_sorting)
               : [],
-            date_format: 'YYYY/MM/DD',
+            date_format: 'YYYY/mm/dd' as EDateFormats,
             concatenate_fields: [
             {
               fields: ['first_name', 'last_name'],

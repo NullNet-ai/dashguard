@@ -1,7 +1,7 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
-import { EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm';
+import { EDateFormats, EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicDetails';
 import { getActualDownloadURL } from '~/app/api/device/get_actual_download_url';
@@ -888,7 +888,7 @@ export const deviceRouter = createTRPCRouter({
           multiple_sort: sorting?.length
             ? formatSorting(sorting, entity, is_case_sensitive_sorting)
             : [],
-          date_format: 'YYYY/MM/DD',
+          date_format: 'YYYY/mm/dd' as EDateFormats,
           concatenate_fields: [
             {
               fields: [

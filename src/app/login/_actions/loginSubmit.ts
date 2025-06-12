@@ -113,6 +113,6 @@ export default async function LoginSubmit({
 
   const verificationResponse = await verifySession();
   if (verificationResponse) {
-    redirect('/portal/dashboard');
+    redirect('/portal/device/grid');
   }
 }
