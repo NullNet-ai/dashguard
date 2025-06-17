@@ -168,6 +168,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         id: `${prefix}.field`,
                         formType: 'input',
                         name: `${prefix}.field`,
+                        // @ts-expect-error - value is not a valid prop for input
                         value: field?.label,
                         readonly: true,
                       },
@@ -185,6 +186,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         name: `${prefix}.${field.field}`,
                         placeholder: 'Select a value',
                         selectSearchable: true,
+                        // @ts-expect-error - isAlphabetical is not a valid prop for input
                         isAlphabetical: false,
                         ...(field?.field === 'Resolution' ? {
                           comboboxConfig: {

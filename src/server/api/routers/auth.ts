@@ -502,9 +502,7 @@ export const authRouter = createTRPCRouter({
         organization_id : ctx.session.account.organization_id
       }
       const result = await ctx.dnaClient
-        .register(organization, account, {
-          token: ctx.token.value,
-        })
+        .register(organization, {...account, responsible_account_organization_id: ctx.session.account.account_organization_id})
         .execute();
 
       // Save account id and secret in redis

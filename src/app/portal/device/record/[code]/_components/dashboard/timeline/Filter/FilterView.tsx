@@ -34,7 +34,7 @@ const FilterView = () => {
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
-      title: 'Manage Filter',
+      // title: 'Manage Filter',
       header: <h1>Manage Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {
