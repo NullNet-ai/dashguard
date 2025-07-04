@@ -20,7 +20,6 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      alert(data.device_category)
       await updateDeviceCategory.mutateAsync({
         id: params.id,
         ...data,
@@ -37,9 +36,9 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
       }}
       myParent={params.shell_type}
       formProps={params}
-      formLabel="Form Label"
+      formLabel="Device Category"
       handleSubmit={handleSave}
-      formKey="formlabel"
+      formKey="deviceCategoryForm"
       formSchema={FormSchema}
       defaultValues={defaultValues}
       fields={[

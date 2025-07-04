@@ -1,3 +1,3 @@
-import BasicDetails from "../../../../../_components/forms/basic-details/server";
-const FormContainer = async () => <BasicDetails />;
+import DeviceCategory from "../../../../../_components/forms/device-category/server";
+const FormContainer = async () => <DeviceCategory />;
 export default FormContainer;
