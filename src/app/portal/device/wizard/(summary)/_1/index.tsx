@@ -7,12 +7,7 @@ import { api } from '~/trpc/react'
 import useRefetchRecord from '../hooks/useFetchMainRecord'
 
 const fields = {
-  model: 'model',
-  instance_name: 'instance_name',
-  grouping: 'grouping_name',
-  country: 'country',
-  state: 'state',
-  city: 'city',
+  device_category: 'device_category',
 }
 
 const Summary = ({ form_key }: { form_key: string }) => {
@@ -23,7 +18,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     data: record = { data: { id: null } },
     refetch,
     error,
-  } = api.device.fetchBasicDetails.useQuery({
+  } = api.device.fetchDeviceInfo.useQuery({
     code: identifier!,
   })
 
@@ -66,7 +61,7 @@ const DeviceBasicDetailsSummary = {
   required: false,
   components: [
     {
-      label: 'Basic Details',
+      label: 'Device Category',
       component: <Summary form_key={"device_basic_details"} />,
     },
   ],

@@ -398,6 +398,7 @@ export const deviceRouter = createTRPCRouter({
     }
   }),
 
+  // @todo: Remove
   fetchBasicDetails: privateProcedure
     .input(
       z.object({
@@ -528,6 +529,46 @@ export const deviceRouter = createTRPCRouter({
           grouping_name: device_group_settings?.name,
         },
       };
+    }),
+
+  fetchDeviceInfo: privateProcedure
+    .input(z.object({
+        code: z.string().min(1),
+    })).query(async ({ input, ctx }) => {
+          const { code } = input;
+
+        const response = await ctx.dnaClient
+          .findAll({
+            entity: "devices",
+            token: ctx.token.value,
+            query: {
+              pluck: [
+                'id', 
+                'device_uuid', 
+                'is_traffic_monitoring_enabled', 
+                'is_config_monitoring_enabled', 
+                'is_telemetry_monitoring_enabled', 
+                'is_device_authorized', 
+                'device_category', 
+                'device_model', 
+                'device_os', 
+                'is_device_online'
+              ],
+              advance_filters: createAdvancedFilter({ code: code! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
+        
+        if (!response.success) {
+          throw new Error(`Failed to fetch device info: ${response.errors?.join(", ") ?? 'Unkown error'}`)
+        }
+
+        return response.data[0];
     }),
 
   fetchDownloadURL: privateProcedure
@@ -1304,5 +1345,24 @@ export const deviceRouter = createTRPCRouter({
         ...res,
         data: res,
       }
+    }),
+
+  updateDeviceCategory: privateProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        device_category: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, device_category } = input;
+
+      return await ctx.dnaClient.update(id, {
+        entity: 'devices',
+        token: ctx.token.value,
+        mutation: {
+          params: { device_category },
+        },
+      });
     }),
 });

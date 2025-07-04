@@ -97,44 +97,43 @@ export const authRouter = createTRPCRouter({
       return token;
     }),
 
-  getAccountData: privateProcedure
-    .mutation(async ({ ctx }) => {
-      try {
-        const account = ctx.session.account;
+  getAccountData: privateProcedure.mutation(async ({ ctx }) => {
+    try {
+      const account = ctx.session.account;
 
-        const accountId = account?.account_organization_id;
+      const accountId = account?.account_organization_id;
 
-        const response = await ctx.dnaClient
-          .findOne(accountId, {
-            entity: 'account_organizations',
-            token: ctx.token.value,
-            query: {
-              pluck: [
-                'id',
-                'contact_id',
-                'account_organization_status',
-                'status',
-                'account_id'
-              ],
-            },
-          })
-          .execute();
-        if (!response.success) {
-          return null;
-        }
-
-        return {
-          ...(response?.data?.[0] ?? {}),
-          organization: account.organization,
-        } as Record<string, any>;
-      } catch (error: any) {
-        return {
-          message: 'Something went wrong please try again',
-          statusCode: error?.status_code || 500,
-          error: error?.errors || error,
-        };
+      const response = await ctx.dnaClient
+        .findOne(accountId, {
+          entity: 'account_organizations',
+          token: ctx.token.value,
+          query: {
+            pluck: [
+              'id',
+              'contact_id',
+              'account_organization_status',
+              'status',
+              'account_id',
+            ],
+          },
+        })
+        .execute();
+      if (!response.success) {
+        return null;
       }
-    }),
+
+      return {
+        ...(response?.data?.[0] ?? {}),
+        organization: account.organization,
+      } as Record<string, any>;
+    } catch (error: any) {
+      return {
+        message: 'Something went wrong please try again',
+        statusCode: error?.status_code || 500,
+        error: error?.errors || error,
+      };
+    }
+  }),
   loginOrganization: privateProcedure
     .input(
       z.object({
@@ -241,7 +240,7 @@ export const authRouter = createTRPCRouter({
               'contact_id',
               'email',
               'status',
-              'account_organization_status'
+              'account_organization_status',
             ],
             organizations: ['id', 'name'],
             accounts: ['id', 'account_id', 'is_new_user'],
@@ -285,7 +284,7 @@ export const authRouter = createTRPCRouter({
     return {
       account_organization: accountDetails?.data?.[0]?.account_organizations,
       is_new_user: accountDetails?.data?.[0]?.accounts?.is_new_user,
-      organizations
+      organizations,
     };
   }),
   fetchAccountDataById: privateProcedure
@@ -433,7 +432,8 @@ export const authRouter = createTRPCRouter({
               status: 'Active',
               expiration_date: formatDate(expirationDate).date,
               expiration_time: formatDate(expirationDate).time,
-              account_organization_id: accountDetails?.data?.[0]?.account_organizations?.id,
+              account_organization_id:
+                accountDetails?.data?.[0]?.account_organizations?.id,
               categories: ['Reset Password'],
             },
             pluck: ['id', 'code', 'status'],
@@ -467,7 +467,7 @@ export const authRouter = createTRPCRouter({
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot)
         .execute();
       const rootAccountToken = rootAccount?.data?.[0]?.token;
-   
+
       const response = await ctx.dnaClient
         .rootUpdateAccountPassword(input.id, input.account_secret, {
           token: rootAccountToken,
@@ -481,57 +481,33 @@ export const authRouter = createTRPCRouter({
       return response;
     }),
 
-    deviceRegisterAccount: privateProcedure
-    .input(
-      z.object({
-        account: z.object({
-          account_id: z.string().min(1),
-          account_secret: z.string().min(1),
-          role_id : z.string().min(1),
-          account_organization_status : z.string().min(1),
-          account_organization_categories : z.array(z.string()).min(1),
-          device_categories : z.array(z.string()),
-          account_type : z.string().min(1),
-        }),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const { account } = input;
+  draftDevice: privateProcedure.input(z.object({})).mutation(
+    async ({ ctx }) =>
+      await ctx.dnaClient
+        .create({
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              status: 'Draft',
+              categories: ['Device'],
+              is_device_online: false,
+            },
+            pluck: ['id', 'code'],
+          },
+        })
+        .execute(),
+  ),
 
-      const organization = {
-        organization_id : ctx.session.account.organization_id
-      }
-      const result = await ctx.dnaClient
-        .register(organization, {...account, responsible_account_organization_id: ctx.session.account.account_organization_id})
-        .execute();
-
-      // Save account id and secret in redis
-
-      await ctx.redisClient.cacheData(
-        `account_id:${input.account.account_id}`,
-        {
-          account_id: input.account.account_id,
-          account_secret: input.account.account_secret,
-        },
-        // 60, // 1 hour 60 * 60 - 1 minute 60
-        60 * 60 * 24 * 7 
-      );
-
-
-      return result
-    }),
-
-
-    resetDeviceAppSecret: privateProcedure
+  resetDeviceAppSecret: privateProcedure
     .input(
       z.object({
         account_secret: z.string().min(1),
         id: z.string().min(1),
-        account_id : z.string().min(1),
+        account_id: z.string().min(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
       const asRoot = true;
       const rootAccount = await ctx.dnaClient
         .login('root', ROOT_ACCOUNT_PASSWORD, asRoot, {
@@ -541,15 +517,14 @@ export const authRouter = createTRPCRouter({
       const rootAccountToken = rootAccount?.data?.[0]?.token;
 
       const response = await ctx.dnaClient
-      .rootUpdateAccountPassword(input.id, input.account_secret, {
-        token: rootAccountToken,
-      })
-      .execute();
+        .rootUpdateAccountPassword(input.id, input.account_secret, {
+          token: rootAccountToken,
+        })
+        .execute();
 
       if (!response?.success) {
         return null;
       }
-
 
       // update redis app secret
       await ctx.redisClient.cacheData(
@@ -559,8 +534,8 @@ export const authRouter = createTRPCRouter({
           account_secret: input.account_secret,
         },
         // 60, // 1 hour 60 * 60 - 1 minute 60
-        60 * 60 * 24 * 7 
-      )
+        60 * 60 * 24 * 7,
+      );
 
       return response;
     }),

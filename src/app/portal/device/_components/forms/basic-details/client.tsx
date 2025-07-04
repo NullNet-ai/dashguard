@@ -1,81 +1,79 @@
-'use client'
+'use client';
 
-import React, { useEffect } from 'react'
-import { type z } from 'zod'
+import { z } from 'zod';
+import { FormBuilder } from '~/components/platform/FormBuilder';
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
+import { useToast } from '~/context/ToastProvider';
+import { type IFormProps } from '../types';
+import { api } from "~/trpc/react";
 
-import { FormBuilder } from '~/components/platform/FormBuilder'
-import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
-import { useToast } from '~/context/ToastProvider'
-import { DeviceBasicDetailsSchema } from '~/server/zodSchema/device/deviceBasicDetails'
-import { api } from '~/trpc/react'
+const FormSchema = z.object({
+  device_category: z.string(),
+});
 
-import CustomBasicDetails from '../_custom/CustomBasicDetails'
-import { type IFormProps } from '../types'
+export default function DeviceCategory({ params, defaultValues }: IFormProps) {
+  const toast = useToast();
 
-export default function BasicDetails({
-  params,
-  defaultValues,
-  selectOptions,
-}: IFormProps) {
-  const toast = useToast()
-  const [disabledModel, setDisabledModel] = React.useState(false)
-
-  const updateBasicDetails = api.device.updateBasicDetails.useMutation()
+  const updateDeviceCategory = api.device.updateDeviceCategory.useMutation();
 
   const handleSave = async ({
     data,
-  }: IHandleSubmit<z.infer<typeof DeviceBasicDetailsSchema>>) => {
+  }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      const res = await updateBasicDetails.mutateAsync({
+      alert(data.device_category)
+      await updateDeviceCategory.mutateAsync({
         id: params.id,
         ...data,
-      })
-      if (res.status_code == 200) {
-        setDisabledModel(true)
-        toast.success('Basic Details submit sucessfully')
-      }
-      return res
+      });
+    } catch (error) {
+      toast.error('Failed to update device category');
     }
-    catch (error) {
-      console.error('Error submitting Basic Details:', error)
-      toast.error('Failed to submit Basic Details')
-    }
-  }
-  useEffect(() => {
-    if (defaultValues?.model) {
-      setDisabledModel(true)
-    }
-  }, [defaultValues?.model])
+  };
 
   return (
     <FormBuilder
       customDesign={{
-        formClassName: 'grid-cols-1 lg:grid-cols-1',
+        formClassName: 'grid !grid-cols-1 gap-4',
       }}
-      customRender={(form, options) => {
-        return (
-          <CustomBasicDetails
-            defaultValues={defaultValues}
-            disabledModel={disabledModel}
-            form={form}
-            options={{
-              ...options,
-              appendFormKey: options?.appendButtonKey || '' }}
-            //@ts-expect-error - selectOptions is not typed correctly
-            selectOptions={selectOptions}
-          />
-        )
-      }}
-      defaultValues={defaultValues}
-      enableFormRegisterToParent={true}
-      fields={[]}
-      formKey="device_basic_details"
-      formLabel="Basic Details"
-      formProps={params}
-      formSchema={DeviceBasicDetailsSchema}
-      handleSubmit={handleSave}
       myParent={params.shell_type}
-      selectOptions={selectOptions}
+      formProps={params}
+      formLabel="Form Label"
+      handleSubmit={handleSave}
+      formKey="formlabel"
+      formSchema={FormSchema}
+      defaultValues={defaultValues}
+      fields={[
+        {
+          id: 'device_category',
+          formType: 'radio',
+          name: 'device_category',
+          label: 'Device Category',
+          description: 'Field Description',
+          placeholder: '',
+          fieldClassName: '',
+          radioOrientation: 'vertical',
+          fieldStyle: {},
+        },
+      ]}
+      checkboxOptions={{}}
+      radioOptions={{
+        device_category: [
+          {
+            label: 'AppGuard Client',
+            value: 'AppGuard Client',
+          },
+          {
+            label: 'Firewall',
+            value: 'Firewall',
+          },
+          {
+            label: 'Load Balancer',
+            value: 'Load Balancer',
+          },
+        ],
+      }}
+      selectOptions={{}}
+      multiSelectOptions={{}}
     />
-  )
+  );
 }

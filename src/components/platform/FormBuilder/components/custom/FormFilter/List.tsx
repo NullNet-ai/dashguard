@@ -47,17 +47,17 @@ export default function FormFilterGrid({
   } = config;
   const eventEmitter = useEventEmitter();
   const path = usePathname();
-  const [, , , , versionNumber] = path.split('/');
+  // const [, , , , versionNumber] = path.split('/');
   const [dynamicWizardContext, setDynamicWizardContext] = useState();
   useEffect(() => {
     if (!!process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-      import(`~/components/platform/Wizard_${versionNumber}/Provider`).then(
-        (e) => {
+      import(`~/components/platform/Wizard/Provider`).then(
+        (e: any) => {
           setDynamicWizardContext(e.WizardContext);
         },
-      );
+      ).catch(() => {});
     }
-  }, [versionNumber]);
+  }, []);
   const { state } = useContext(dynamicWizardContext ?? WizardContext);
   const { open } = useSidebar();
  const updateSearchItem = useMemo(() => {
