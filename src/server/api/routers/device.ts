@@ -550,7 +550,8 @@ export const deviceRouter = createTRPCRouter({
                 'is_telemetry_monitoring_enabled', 
                 'is_device_authorized', 
                 'device_category', 
-                'device_model', 
+                'device_type',
+                'device_name', 
                 'device_os', 
                 'is_device_online'
               ],
@@ -1365,4 +1366,21 @@ export const deviceRouter = createTRPCRouter({
         },
       });
     }),
+  updateDeviceTypeAndName: privateProcedure
+    .input(z.object({
+        id: z.string().min(1),
+        device_name: z.string().min(1),
+        device_type: z.string().min(1),
+    }))
+    .mutation(async ({input, ctx}) => {
+      const {id, device_name, device_type} = input;
+
+      return await ctx.dnaClient.update(id, {
+        entity: 'devices',
+        token: ctx.token.value,
+        mutation: {
+          params: { device_name, device_type },
+        },
+      });
+    })
 });
