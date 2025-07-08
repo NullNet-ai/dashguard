@@ -1,38 +1,46 @@
-import { headers } from 'next/headers'
+import { headers } from 'next/headers';
+import { api } from '~/trpc/server';
+import SetupDetails from './client';
 
-import { api } from '~/trpc/server'
+const defaultMarkdownTemplate = `
+### Not Found
+No instructions have been found.
 
-import SetupDetails from './client'
+You installation code:
+\`\${INSTALLATION_KEY}\`
+`;
 
 const FormServerFetch = async () => {
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , main_entity, application, identifier] = pathname.split('/')
-  const fetched_device = application === 'wizard'
-    ? await api.device.getSetupDetails({
-      main_entity: main_entity!,
-      id: identifier!,
-      pluck_fields: ['id', 'code'],
-    })
-    : await api.device.getByCode({
-      code: identifier!,
-      pluck_fields: ['id', 'code', ],
-    })
-  const defaultValues = fetched_device?.data 
-  const {devices, account_secret, account_id} = defaultValues || {}
+  const headerList = headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , , , identifier] = pathname.split('/');
 
-  const server_url  = process.env.SERVER_URL
+  const device = await api.device.fetchDeviceInfo({ code: identifier! });
+
+  let installationCode = await api.device.fetchInstallationCodeByDeviceId({
+    device_id: device!.id,
+  });
+
+  if (installationCode === null) {
+    installationCode = await api.device.createInstallationCode({
+      device_id: device!.id,
+      device_code: device!.code,
+    });
+  }
+
+  const instructions = await api.device.fetchSetupInstructions({
+    device_category: device?.device_category,
+    device_type: device?.device_type,
+  });
+
+  // const server_url  = process.env.SERVER_URL
 
   return (
     <SetupDetails
-      defaultValues={{...defaultValues, ...devices,account_secret, account_id, server_url}}
-      params={{
-        id: defaultValues?.id! ?? '',
-        shell_type: application! as 'record' | 'wizard',
-        entity: main_entity,
-      }}
+      installationKey={installationCode?.code}
+      markdownTemplate={instructions?.markdown ?? defaultMarkdownTemplate}
     />
-  )
-}
+  );
+};
 
-export default FormServerFetch
+export default FormServerFetch;

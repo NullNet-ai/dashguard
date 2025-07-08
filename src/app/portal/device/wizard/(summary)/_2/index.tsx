@@ -1,63 +1,64 @@
-"use client";
+'use client';
 
-import { api } from "~/trpc/react";
-import useRefetchRecord from "../hooks/useFetchMainRecord";
+import { api } from '~/trpc/react';
+import { usePathname } from 'next/navigation';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
 
 const fields = {
-  Package: "package",
-  "Installation Package": "installation_package",
-  "Installation Confirmation": "installation_confirmation",
+  'Device Name': 'device_name',
+  'Device Type': 'device_type',
 };
 
-const Summary =  ({form_key}: { form_key: string }) => {
-
+const Summary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , , identifier] = pathName.split('/');
+  
   const {
-      data: record,
-      refetch,
-      error,
-    } = api.device.fetchDownloadURL.useQuery({})
+    data: record = { data: { id: null } },
+    refetch,
+    error,
+  } = api.device.fetchDeviceInfo.useQuery({
+    code: identifier!,
+  });
 
-    useRefetchRecord({
-      refetch,
-      form_key,
-    })
+  const { data } = record ?? {};
 
-    if (error) {
-      return (
-        <div>
-          {"Error:"}
-          {error.message}
-        </div>
-      )
-    }
-  const data = {
-    package: `curl -o pfSense-pkg-wallguard.pkg -L ${record || ''}`,
-    installation_package: "pkg add pfSense-pkg-wallguard.pkg",
-    installation_confirmation: "pkg info | grep wallguard",
-  };
+  useRefetchRecord({
+    refetch,
+    form_key,
+  });
+
+  if (error) {
+    return (
+      <div>
+        {'Error:'}
+        {error.message}
+      </div>
+    );
+  }
 
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
         <p key={key} className="mb-[8px]">
           <strong> {key}: </strong>
-          &nbsp; {(data as { [key: string]: any })?.[value] || "None"}
+          &nbsp; {(data as { [key: string]: any })?.[value] || 'None'}
         </p>
       ))}
     </div>
   );
 };
 
-const DeviceBasicDetailsSummary = {
-  label: "Step 2",
+const DeviceTypeDetailsSummary = {
+  label: 'Step 2',
   required: false,
   show_summary: true,
   components: [
     {
-      label: "Install",
-      component: <Summary form_key={"installation_details"} />,
+      label: 'Device Type',
+      component: <Summary form_key={'deviceType'} />,
     },
   ],
 };
 
-export default DeviceBasicDetailsSummary;
+export default DeviceTypeDetailsSummary;

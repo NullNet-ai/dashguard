@@ -1,55 +1,48 @@
-'use client'
-import { startCase } from 'lodash'
-import { usePathname } from 'next/navigation'
+'use client';
 
-import { api } from '~/trpc/react'
-
-import useRefetchRecord from '../hooks/useFetchMainRecord'
+import { startCase } from 'lodash';
+import { usePathname } from 'next/navigation';
+import { api } from '~/trpc/react';
+import useRefetchRecord from '../hooks/useFetchMainRecord';
 
 const fields = {
-  model: 'model',
-  instance_name: 'instance_name',
-  grouping: 'grouping_name',
-  country: 'country',
-  state: 'state',
-  city: 'city',
-}
+  device_category: 'device_category',
+};
 
 const Summary = ({ form_key }: { form_key: string }) => {
-  const pathName = usePathname()
+  const pathName = usePathname();
 
-  const [, , , , identifier] = pathName.split('/')
+  const [, , , , identifier] = pathName.split('/');
   const {
     data: record = { data: { id: null } },
     refetch,
     error,
-  } = api.device.fetchBasicDetails.useQuery({
+  } = api.device.fetchDeviceInfo.useQuery({
     code: identifier!,
-  })
+  });
 
-  const { data } = record ?? {}
+  const { data } = record ?? {};
 
   useRefetchRecord({
     refetch,
     form_key,
-  })
+  });
 
   if (error) {
     return (
       <div>
-        {"Error:"}
+        {'Error:'}
         {error.message}
       </div>
-    )
+    );
   }
 
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p className = "mb-[8px]" key = { key }>
+        <p className="mb-[8px]" key={key}>
           <strong data-test-id={`device_${key}-wzd_sumry-key-${key}`}>
-            {startCase(key)}
-            :
+            {startCase(key)}:
           </strong>
           &nbsp;
           <span data-test-id={`device_${key}-wzd_sumry-value-${key}`}>
@@ -58,17 +51,17 @@ const Summary = ({ form_key }: { form_key: string }) => {
         </p>
       ))}
     </div>
-  )
-}
+  );
+};
 
 const DeviceBasicDetailsSummary = {
   label: 'Step 1',
   required: false,
   components: [
     {
-      label: 'Basic Details',
-      component: <Summary form_key={"device_basic_details"} />,
+      label: 'Device Category',
+      component: <Summary form_key={'device_basic_details'} />,
     },
   ],
-}
-export default DeviceBasicDetailsSummary
+};
+export default DeviceBasicDetailsSummary;
