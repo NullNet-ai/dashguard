@@ -1,10 +1,11 @@
 "use client";
+
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { api } from "~/trpc/react";
 import { usePathname } from "next/navigation";
 
 const fields = {
-  "Server URL": "server_url",
+  "Installation Code": "installation_code",
 };
 
 const Summary = ({ form_key }: { form_key: string }) => {
@@ -12,19 +13,17 @@ const Summary = ({ form_key }: { form_key: string }) => {
 
   const [, , , , identifier] = pathName.split("/");
   const {
-    // data: record = { data: { id: null } },
     data: record,
     refetch,
     error,
-  } = api.device.fetchSetupDetails.useQuery({
-    code: identifier!,
+  } = api.device.fetchInstallationCodeByDeviceCode.useQuery({
+    device_code: identifier!,
   });
 
-  const {server_url } = record ?? {}
+  const { code } = record ?? {}
 
   const data = {
-    ...record,
-    server_url: server_url || "https://wallguard.ai/"
+    installation_code: code ?? "None"
   };
 
   useRefetchRecord({

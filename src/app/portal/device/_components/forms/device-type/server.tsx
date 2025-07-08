@@ -25,6 +25,10 @@ const FormServerFetch = async () => {
     code: identifier!,
   });
 
+  if (typeof fetched_device === "undefined") {
+    return <>FUCK YOU</>
+  }
+
   const options = optionsByCategory[fetched_device!.device_category]?.map(
     (value) => ({ label: value, value }),
   );
