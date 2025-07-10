@@ -906,52 +906,27 @@ export const deviceRouter = createTRPCRouter({
         message: transformResMessage(find_res?.message),
       };
     }),
-  mainGrid: privateProcedure
-    // Define input using zod for validation
-    .input(ZodItems)
-    .query(async ({ input, ctx }) => {
-      const {
-        limit = 50,
-        current = 1,
-        advance_filters: _advance_filters = [],
-        pluck,
-        sorting = [],
-        is_case_sensitive_sorting = 'false',
-      } = input;
 
-      const pluck_object = {
-        ...addCommonGridPluckObject(),
-        contacts: ['first_name', 'last_name', 'id', 'previous_status'],
-        organization_accounts: ['contact_id', 'id', 'device_id'],
-        organizations: ['id', 'name', 'categories'],
-        organization_contacts: ['id', 'contact_organization_id'],
-        devices: pluck,
-        device_group_devices: ['device_group_setting_id', 'device_id', 'id'],
-        device_groups: ['device_group_setting_id', 'device_id', 'id'],
-        device_group_settings: ['name', 'id'],
-        device_interfaces: ['id', 'device_configuration_id', 'name'],
-        device_interface_addresses: ['id', 'device_interface_id', 'address'],
-        device_configurations: [
-          'id',
-          'device_id',
-          'hostname',
-          'created_date',
-          'created_time',
-          'timestamp',
-        ],
-      };
+  mainGrid: privateProcedure.input(ZodItems).query(async ({ input, ctx }) => {
+    const {
+      limit = 50,
+      current = 1,
+      advance_filters,
+      pluck,
+      sorting = [],
+      is_case_sensitive_sorting = 'false',
+    } = input;
 
-      const query = ctx.dnaClient.findAll({
+    const response = await ctx.dnaClient
+      .findAll({
         entity: input?.entity,
         token: ctx.token.value,
         query: {
           track_total_records: true,
-          pluck: input.pluck,
-          pluck_object,
-          advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+          pluck,
+          advance_filters: advance_filters as IAdvanceFilters[],
           order: {
             starts_at:
-              // current 5 *  input.limit 50 = 250
               (input.current || 0) === 0
                 ? 0
                 : (input.current || 1) * (input.limit || 100) -
@@ -965,157 +940,24 @@ export const deviceRouter = createTRPCRouter({
             ? formatSorting(sorting, entity, is_case_sensitive_sorting)
             : [],
           date_format: 'YYYY/mm/dd' as EDateFormats,
-          concatenate_fields: [
-            {
-              fields: ['first_name', 'last_name'],
-              field_name: 'contact_created_by',
-              separator: ' ',
-              entity: 'contacts',
-              aliased_entity: 'contacts',
-            },
-            {
-              fields: ['first_name', 'last_name'],
-              field_name: 'contact_updated_by',
-              separator: ' ',
-              entity: 'contacts',
-              aliased_entity: 'contacts',
-            },
-          ],
         },
-      });
-      if (pluck_object) {
-        query
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                alias: 'device_group_devices',
-                entity: 'device_groups',
-                field: 'device_id',
-              },
-              from: {
-                entity: input?.entity,
-                field: 'id',
-              },
-            },
-          })
-          .nestedJoin({
-            type: 'left',
-            nested: true,
-            field_relation: {
-              to: {
-                entity: 'device_group_settings',
-                field: 'id',
-              },
-              from: {
-                entity: 'device_group_devices',
-                field: 'device_group_setting_id',
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'device_configurations',
-                field: 'device_id',
-                order_by: 'timestamp',
-                limit: 1,
-                order_direction: EOrderDirection.DESC,
-              },
-              from: {
-                entity: input?.entity,
-                field: 'id',
-              },
-            },
-          });
-        //!! TO BE TESTED BY THE DB TEAM
-        // .nestedJoin({
-        //   type: 'left',
-        //   nested: true,
-        //   field_relation: {
-        //     to: {
-        //       entity: 'device_interfaces',
-        //       field: 'device_configuration_id',
-        //       order_by: 'timestamp',
-        //       limit: 1,
-        //       order_direction: EOrderDirection.DESC,
-        //       filters: [
-        //         {
-        //           field: 'name',
-        //           type: 'criteria',
-        //           operator: EOperator.EQUAL,
-        //           values: ['wan'],
-        //         },
-        //       ],
-        //     },
-        //     from: {
-        //       entity: 'device_configurations',
-        //       field: 'id',
-        //     },
-        //   },
-        // })
-        // .join({
-        //   type: 'left',
-        //   field_relation: {
-        //     to: {
-        //       entity: 'device_interface_addresses',
-        //       field: 'device_interface_id',
-        //       order_by: 'timestamp',
-        //       limit: 50,
-        //       order_direction: EOrderDirection.DESC,
-        //     },
-        //     from: {
-        //       entity: 'device_interfaces',
-        //       field: 'id',
-        //     },
-        //   },
-        // })
-      }
+      })
+      .execute();
 
-      addCommonGridJoins(query, 'devices');
-      const { total_count: totalCount = 0, data: items } =
-        await query.execute();
+    if (!response.success) {
+      throw new Error(`Failed to fetch devices`);
+    }
 
-      const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
-          [pluralize(input?.entity)]: entity_data,
-          created_by,
-          updated_by,
-          device_group_settings,
-          device_interface_addresses,
-          ...rest
-        } = item;
+    const { total_count = 0, data } = response;
 
-        const wan_addresses = device_interface_addresses?.map(
-          ({ address = '' }: { address: string }) => address,
-        );
-
-        return {
-          ...entity_data,
-          ...rest,
-          hierarchy: device_group_settings?.name,
-          wan_addresses,
-          created_by:
-            !!created_by?.first_name || !!created_by?.last_name
-              ? `${created_by?.first_name} ${created_by?.last_name}`
-              : null,
-          updated_by:
-            updated_by?.first_name || updated_by?.last_name
-              ? `${updated_by?.first_name} ${updated_by?.last_name}`
-              : null,
-        };
-      });
-
-      // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / limit);
-      return {
-        totalCount,
-        items: formatted_items,
-        currentPage: current,
-        totalPages,
-      };
-    }),
+    return {
+      totalCount: total_count,
+      items: data,
+      currentPage: current,
+      totalPages: Math.ceil(total_count / limit),
+    };
+  }),
+  
   fetchDeviceConnectionStatus: privateProcedure
     .input(
       z.object({
@@ -1509,7 +1351,7 @@ export const deviceRouter = createTRPCRouter({
             params: {
               status: 'Active',
               device_id,
-              device_code
+              device_code,
             },
             pluck: ['id', 'code'],
           },

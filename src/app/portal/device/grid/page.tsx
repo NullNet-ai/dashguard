@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import Grid from '~/components/platform/Grid';
 import { api } from '~/trpc/server';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
@@ -8,9 +7,10 @@ import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
 
 export default async function Page() {
-  const gridCacheData = (await getGridCacheData({
-    defaultSorting: defaultSorting,
-  })) ?? {};
+  const gridCacheData =
+    (await getGridCacheData({
+      defaultSorting: defaultSorting,
+    })) ?? {};
 
   const _pluck = [
     'id',
@@ -22,9 +22,17 @@ export default async function Page() {
     'created_by',
     'updated_date',
     'updated_time',
-    'instance_name',
-    'model',
     'updated_by',
+
+    'device_name',
+    'device_type',
+    'device_category',
+    'device_uuid',
+    'device_os',
+    'is_device_online',
+    'is_traffic_monitoring_enabled',
+    'is_config_monitoring_enabled',
+    'is_telemetry_monitoring_enabled',
   ];
 
   const { gridParams, gridProps } = gridDataResolver({
@@ -35,11 +43,11 @@ export default async function Page() {
       defaultSorting,
     },
   });
-  
+
   const { items = [], totalCount } = await api.device.mainGrid({
     ...gridParams,
-    is_case_sensitive_sorting: "false",
-  })
+    is_case_sensitive_sorting: 'false',
+  });
 
   return (
     <Grid
@@ -55,7 +63,6 @@ export default async function Page() {
         defaultValues: {
           id: 'code',
         },
-        // paginationType: 'default',
         enableAutoCreate: true,
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
@@ -72,7 +79,7 @@ export default async function Page() {
           defaultSorting,
         },
         searchSuggestionConfig: {
-          router:'search',
+          router: 'search',
           resolver: 'deviceSearch',
         },
       }}
