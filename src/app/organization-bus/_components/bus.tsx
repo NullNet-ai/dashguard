@@ -51,7 +51,7 @@ const LoadingPage = () => {
         {[...Array(3)].map((_, index) => (
           <motion.div
             key={index}
-            variants={dotVariants}
+            variants={dotVariants as any}
             className="w-4 h-4 rounded-full bg-primary"
           />
         ))}

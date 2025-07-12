@@ -5,6 +5,7 @@ import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResol
 import CustomCreateButton from '../_components/custom_create_button';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
+import AuthorizeDeviceAction from './_components/AuthorizeDeviceAction';
 
 export default async function Page() {
   const gridCacheData =
@@ -82,6 +83,7 @@ export default async function Page() {
           router: 'search',
           resolver: 'deviceSearch',
         },
+        customRowAction: AuthorizeDeviceAction
       }}
       customCreateButton={<CustomCreateButton entity={'device'} />}
     />

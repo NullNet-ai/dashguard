@@ -22,6 +22,7 @@ import {
   addCommonGridJoins,
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
+import { authorizeDevice } from '~/app/api/device/authorize_device';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -265,270 +266,35 @@ export const deviceRouter = createTRPCRouter({
         throw new Error(`Failed to activate device: ${error.message}`);
       }
     }),
-  updateBasicDetails: privateProcedure
+
+  authorizeDevice: privateProcedure
     .input(
-      DeviceBasicDetailsSchema.extend({
-        id: z.string(),
+      z.object({
+        device_id: z.string().min(1),
+        device_name: z.string().min(1),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { id, grouping, model, country, city, state, ...rest } = input;
+      const { device_id, device_name } = input;
 
-      const modifyDeviceAddress = async () => {
-        const find_res = await ctx.dnaClient
-          .findOne(id!, {
-            entity,
-            token: ctx.token.value,
-            query: {
-              pluck: ['address_id'],
+      await authorizeDevice(device_id, ctx.token.value);
+
+      const response = await ctx.dnaClient
+        .update(device_id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              device_name,
+              is_device_authorized: true
             },
-          })
-          .execute();
+          },
+        })
+        .execute();
 
-        const { address_id } = find_res?.data[0] || {};
-
-        let address_res;
-
-        if (address_id) {
-          address_res = await ctx.dnaClient
-            .update(address_id, {
-              entity: 'addresses',
-              token: ctx.token.value,
-              mutation: {
-                params: {
-                  country,
-                  city,
-                  state,
-                },
-              },
-            })
-            .execute();
-        } else {
-          address_res = await ctx.dnaClient
-            .create({
-              entity: 'addresses',
-              token: ctx.token.value,
-              mutation: {
-                params: {
-                  country,
-                  city,
-                  state,
-                },
-              },
-            })
-            .execute();
-        }
-
-        return address_res?.data?.[0]?.id || address_id;
-      };
-
-      const address_id = await modifyDeviceAddress();
-
-      // filter all device_groups with device_id
-      // update to new grouoping id
-      const modifyDeviceGroup = async () => {
-        const filter_device_group = await ctx.dnaClient
-          .findAll({
-            entity: 'device_groups',
-            token: ctx.token.value,
-            query: {
-              pluck: ['id', 'status'],
-              advance_filters: createAdvancedFilter({ device_id: id }),
-              order: {
-                limit: 1,
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-            },
-          })
-          .execute();
-
-        if (filter_device_group.data.length) {
-          const { id: existing_id } = filter_device_group?.data[0] || {};
-          await ctx.dnaClient
-            .update(existing_id, {
-              entity: 'device_groups',
-              token: ctx.token.value,
-              mutation: {
-                params: {
-                  device_id: id,
-                  device_group_setting_id: grouping || null,
-                  status: 'Active',
-                },
-              },
-            })
-            .execute();
-        } else {
-          await ctx.dnaClient
-            .create({
-              entity: 'device_groups',
-              token: ctx.token.value,
-              mutation: {
-                params: {
-                  device_id: id,
-                  device_group_setting_id: grouping,
-                  status: 'Active',
-                },
-              },
-            })
-            .execute();
-        }
-      };
-
-      const res = await Promise.all([
-        await ctx.dnaClient
-          .update(id, {
-            entity,
-            token: ctx.token.value,
-            mutation: {
-              params: {
-                ...rest,
-                address_id,
-                model,
-              },
-            },
-          })
-          .execute(),
-        modifyDeviceGroup(),
-      ]);
-
-      return {
-        ...res?.[0],
-        data: res,
-      };
-    }),
-
-  // @todo: Remove
-  fetchBasicDetails: privateProcedure
-    .input(
-      z.object({
-        id: z.string().optional(),
-        code: z.string().optional(),
-      }),
-    )
-
-    .query(async ({ input, ctx }) => {
-      const { id: device_id, code } = input;
-      let id = device_id;
-      if (!device_id) {
-        const res = await ctx.dnaClient
-          .findAll({
-            entity,
-            token: ctx.token.value,
-            query: {
-              pluck: ['id'],
-              advance_filters: createAdvancedFilter({ code: code! }),
-              order: {
-                limit: 1,
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-            },
-          })
-          .execute();
-
-        id = res.data[0]?.id;
+      if (!response.success) {
+        throw new Error('Failed to update device')
       }
-
-      const res = await Promise.all([
-        ctx.dnaClient
-          .findAll({
-            entity,
-            token: ctx.token.value,
-            query: {
-              pluck: [
-                'id',
-                'model',
-                'instance_name',
-                'address_id',
-                'created_date',
-                'updated_date',
-                'categories',
-              ],
-              pluck_object: {
-                devices: [
-                  'id',
-                  'model',
-                  'instance_name',
-                  'address_id',
-                  'created_date',
-                  'updated_date',
-                  'categories',
-                ],
-                addresses: ['id', 'country', 'city', 'state'],
-              },
-              advance_filters: createAdvancedFilter({ id: id! }),
-              order: {
-                limit: 1,
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'addresses',
-                field: 'id',
-              },
-              from: {
-                entity,
-                field: 'address_id',
-              },
-            },
-          })
-          .execute(),
-        await ctx.dnaClient
-          .findAll({
-            entity: 'device_groups',
-            token: ctx.token.value,
-            query: {
-              pluck_object: {
-                device_group_settings: ['id', 'name'],
-                device_groups: ['id', 'device_group_setting_id'],
-              },
-              advance_filters: createAdvancedFilter({ device_id: id! }),
-              order: {
-                limit: 1,
-                by_field: 'created_date',
-                by_direction: EOrderDirection.DESC,
-              },
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'device_group_settings',
-                field: 'id',
-              },
-              from: {
-                entity: 'device_groups',
-                field: 'device_group_setting_id',
-              },
-            },
-          })
-          .execute(),
-      ]);
-
-      const [deviceRes, groupRes] = res; // res is your array
-
-      const deviceData = deviceRes?.data?.[0] ?? {};
-      const groupData = groupRes?.data?.[0] ?? {};
-
-      const { devices, addresses } = deviceData;
-      const { device_group_settings } = groupData;
-
-      return {
-        data: {
-          ...devices,
-          ...addresses,
-          id: devices?.id,
-          grouping: device_group_settings?.id,
-          grouping_name: device_group_settings?.name,
-        },
-      };
     }),
 
   fetchDeviceInfo: privateProcedure
@@ -552,11 +318,11 @@ export const deviceRouter = createTRPCRouter({
               'is_traffic_monitoring_enabled',
               'is_config_monitoring_enabled',
               'is_telemetry_monitoring_enabled',
-              'is_device_authorized',
               'device_category',
               'device_type',
               'device_name',
               'device_os',
+              'is_device_authorized',
               'is_device_online',
             ],
             advance_filters: createAdvancedFilter({ code: code! }),
@@ -597,123 +363,6 @@ export const deviceRouter = createTRPCRouter({
       }
 
       return '';
-    }),
-  fetchSetupDetails: privateProcedure
-    .input(
-      z.object({
-        code: z.string().optional(),
-      }),
-    )
-    .query(async ({}) => {
-      // const { code } = input
-
-      // const res = await ctx.dnaClient
-      // .findAll({
-      //   entity,
-      //   token: ctx.token.value,
-      //   query: {
-      //     // pluck: ["id", "instance_name"],
-      //     pluck_object: {
-      //       device: ['id', 'instance_name'],
-      //       organization_account: ['id', 'account_id', 'account_name'],
-      //     },
-      //     advance_filters: createAdvancedFilter({ code: code! }),
-      //     order: {
-      //       limit: 1,
-      //       by_field: 'created_date',
-      //       by_direction: EOrderDirection.DESC,
-      //     },
-      //   },
-      // })
-      // // .join({
-      // //   type: "left",
-      // //   field_relation: {
-      // //     to: {
-      // //       entity: "organization_account",
-      // //       field: "id",
-      // //     },
-      // //     from: {
-      // //       entity,
-      // //       field: "organization_account_id",
-      // //     },
-      // //   },
-      // // })
-      // .execute()
-
-      return {
-        server_url: process.env.SERVER_URL,
-      };
-    }),
-  getSetupDetails: privateProcedure
-    .input(
-      z.object({
-        id: z.string().min(1),
-        pluck_fields: z.array(z.string()),
-        main_entity: z.string().min(1),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      const { id, pluck_fields, main_entity: entity } = input;
-      if (!id) return null;
-      try {
-        const recordByCode = await ctx.dnaClient
-          .findAll({
-            entity,
-            token: ctx.token.value,
-            query: {
-              pluck: pluck_fields,
-              pluck_object: {
-                devices: pluck_fields,
-                account_organizations: [
-                  'contact_id',
-                  'id',
-                  'device_id',
-                  'account_id',
-                  'email',
-                ],
-                accounts: ['id', 'account_id'],
-              },
-              advance_filters: createAdvancedFilter({ code: id }),
-            },
-          })
-          .join({
-            type: 'left',
-            field_relation: {
-              to: {
-                entity: 'account_organizations',
-                field: 'device_id',
-              },
-              from: {
-                entity,
-                field: 'id',
-              },
-            },
-          })
-          .execute();
-
-        const { data, ...rest } = recordByCode ?? {};
-        const { devices, account_organizations } = data?.[0] ?? {};
-        const { id: device_id } = devices ?? {};
-
-        const fetch_account_secret = await ctx.redisClient.getCachedData(
-          `account_id:${account_organizations?.email}`,
-        );
-
-        const { account_secret, account_id } = fetch_account_secret ?? {};
-
-        return {
-          ...rest,
-          data: { id: device_id, account_secret, account_id, ...data?.[0] },
-        };
-      } catch (error) {
-        return {
-          data: undefined,
-          status_code: 404,
-          message: 'Record not found',
-          success: false,
-          error,
-        } as Record<string, any>;
-      }
     }),
   updateOrganizationAccount: privateProcedure
     .input(
@@ -957,7 +606,7 @@ export const deviceRouter = createTRPCRouter({
       totalPages: Math.ceil(total_count / limit),
     };
   }),
-  
+
   fetchDeviceConnectionStatus: privateProcedure
     .input(
       z.object({
