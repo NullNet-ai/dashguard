@@ -4,6 +4,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import StatusCell from '~/components/ui/status-cell';
 // import GridDeviceLastHeartbeat from '../GridDeviceLastHeartbeat';
 import GridDeviceOnlineBadge from '../GridDeviceOnlineBadge';
+import AuthorizationCell from '../_components/AuthorizationCell';
 
 const gridColumns = [
   {
@@ -17,6 +18,17 @@ const gridColumns = [
     cell: ({ row }) => {
       const value = row?.original?.status;
       return <StatusCell value={value} />;
+    },
+  },
+  {
+    header: 'Authorized',
+    accessorKey: 'is_device_authorized',
+    enableColumnFilter: false,
+    enableSorting: false,
+    enableResizing: false,
+    cell: ({ row }) => {
+      const authorized = row?.original?.is_device_authorized ?? false;
+      return <AuthorizationCell authorized={authorized} />;
     },
   },
   {

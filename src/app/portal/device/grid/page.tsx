@@ -34,6 +34,7 @@ export default async function Page() {
     'is_traffic_monitoring_enabled',
     'is_config_monitoring_enabled',
     'is_telemetry_monitoring_enabled',
+    'is_device_authorized'
   ];
 
   const { gridParams, gridProps } = gridDataResolver({
