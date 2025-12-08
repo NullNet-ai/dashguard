@@ -4,7 +4,7 @@ import BasicDetails from "./client";
 import { ulid } from 'ulid';
 
 const LocationAddressServer = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
   const record = await api.location.getLocationAddress({

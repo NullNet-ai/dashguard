@@ -1,15 +1,12 @@
 import { EOrderDirection } from "@dna-platform/common-orm";
-import { type SortingState } from "@tanstack/react-table";
+import { SortingState } from "@tanstack/react-table";
 
-export const formatSorting = (sorting: SortingState, main_entity: string, is_case_sensitive_sorting?: string) => {
+export const formatSorting = (sorting: SortingState) => {
   return sorting.map((sort: any) => {
-    const { id, sort_key, desc } = sort || {};
-    const field = sort_key?.split(".");
-    const by_field = field?.length >= 2 ? sort_key : `${main_entity}.${sort_key || id}`;
     return {
-      by_field: by_field,
-      by_direction: desc ? EOrderDirection.DESC : EOrderDirection.ASC,
-      is_case_sensitive_sorting,
+      by_field: sort.field || sort.sort_key || sort.id,
+      by_direction: sort.order || sort.desc ? EOrderDirection.DESC : EOrderDirection.ASC,
+      is_case_sensitive_sorting: sort.is_case_sensitive_sorting || false,
     };
   });
 };

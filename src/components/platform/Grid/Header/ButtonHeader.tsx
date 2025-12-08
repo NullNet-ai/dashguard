@@ -18,6 +18,7 @@ export default function CreateButton({
   title = '',
 }: CreateButtonProps) {
   const { state, actions } = React.useContext(GridContext);
+  const addNewButtonPosition = state?.config?.addNewButtonPosition ?? 'default';
 
   if (state?.config?.hideCreateButton) return null;
 
@@ -28,7 +29,7 @@ export default function CreateButton({
       className={cn('flex', className)}
       data-test-id={testIDFormatter(`${entity}-wzrd-grd-create-btn`)}
       loading={state?.createLoading}
-      size="md"
+      size={addNewButtonPosition === 'in-tabs' ? 'sm' : 'md'}
       onClick={() => {
         if (state?.config?.new_button_action) {
           state?.config?.new_button_action();

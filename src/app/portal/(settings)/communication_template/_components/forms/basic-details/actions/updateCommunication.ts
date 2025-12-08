@@ -13,7 +13,7 @@ export async function UpdateCommunicationTemplate({
     id,
     name,
   }: IProps) {
-    const headerList = headers()
+    const headerList = await headers()
     const pathname = headerList.get('x-pathname') || ''
     const [, portal, mainEntity, application] = pathname.split('/')
     const currentContext = "/" + portal + "/" + mainEntity;

@@ -1,22 +1,23 @@
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation';
 
-import { api } from '~/trpc/server'
+import { api } from '~/trpc/server';
+import numberToWords from '~/utils/number-to-words';
 
 export const stepValidator = async ({
   identifier,
   currentStep,
   mainEntity,
 }: {
-  identifier: string
-  currentStep: string
-  mainEntity: string
+  identifier: string;
+  currentStep: string;
+  mainEntity: string;
 }) => {
   if (!identifier || !currentStep || !mainEntity) {
-    return notFound()
+    return notFound();
   }
 
-  if (identifier === 'new' && (Number(currentStep) !== 1)) {
-    return notFound()
+  if (identifier === 'new' && Number(currentStep) !== 1) {
+    return notFound();
   }
 
   if (identifier !== 'new') {
@@ -24,23 +25,25 @@ export const stepValidator = async ({
       main_entity: mainEntity!,
       id: identifier!,
       pluck_fields: ['id', 'code', 'status'],
-    })
+    });
 
     if (!record_details?.data) {
-      return notFound()
+      return notFound();
     }
-    const { status, code } = record_details?.data || {}
+    const { status, code } = record_details?.data || {};
 
     if (status.toLowerCase() === 'active') {
-      return notFound()
+      return notFound();
     }
 
     const stepDetails = await api.wizard.getCurrentStep({
       entity: mainEntity!,
       identifier: code,
-    })
-    if (currentStep > stepDetails?.step) {
-      return notFound()
+    });
+    const alreadyTraverse =
+      stepDetails?.traverse?.[numberToWords(Number(currentStep))];
+    if (!alreadyTraverse) {
+      return notFound();
     }
   }
-}
+};

@@ -6,4 +6,6 @@ const WizardLayout: React.FC<any> = (props) => {
   return <div className="space-y-2">{Object.values(rest)}</div>;
 };
 
+export const dynamic = 'force-dynamic';
+
 export default WizardLayout;

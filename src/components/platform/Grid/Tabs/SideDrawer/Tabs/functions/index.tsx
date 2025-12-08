@@ -18,6 +18,9 @@ import DateRangePicker from '../components/date-range-picker';
 import { OPERATORS, USE_CUSTOM_RENDER } from '../constants';
 import { ZodSchema } from '../schemas/filter';
 import { searchRecords } from './search';
+import { removeFilterItemByIndex } from '~/components/platform/Grid/utils/removeFilterItemByIndex';
+import { NumberRangeSlider } from '../components/number-range-slider';
+import { useManageFilter } from '../../Provider';
 
 // Simplified component for the Add Filter button
 export function FilterGroupActions({
@@ -58,15 +61,23 @@ export function FilterGroup({
     accessorKey: string;
     search_config?: any;
     data_type?: string;
+    filter_config?: {
+      min?: number;
+      max?: number;
+    };
+    value_alias?: Record<string, string>;
   }>;
   onRemoveFilter: (index: number) => void;
   onUpdateJunctionOperator: (index: number, operator: string) => void;
   searchConfig: any;
   customTabDefaults: Record<string, any>;
 }) {
+
   // Calculate the number of criteria filters to determine when to show delete button
   const criteriaFilters = fields.filter((filter) => filter.type === 'criteria');
   const hasManyFilters = criteriaFilters.length > 1;
+   const { state: filter_state } = useManageFilter();
+  const { isTimeline } = filter_state ?? {};
 
   // Add state to track loading state for each filter's multi-select
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
@@ -80,6 +91,39 @@ export function FilterGroup({
       [fieldPath]: isLoading,
     }));
   };
+  const existingFilterFields =
+    fields
+      .filter(
+        (filter) =>
+          filter.type === 'criteria' && !filter.disabled && filter.field,
+      )
+      .map((field) => ({
+        label: field.label || field.field,
+        value: field.field,
+      })) ?? [];
+
+  const fieldOptions =
+    columns?.map(
+      (column) =>
+        ({
+          label: column.label,
+          value: column.accessorKey,
+        }) as ISelectOptions,
+    ) || [];
+
+  const resolvedFieldOptions = existingFilterFields?.reduce(
+    (acc: any, field) => {
+      const isExisting = acc?.find((item: any) => item.value === field.value);
+      if (!isExisting) {
+        acc.push({
+          label: field.label,
+          value: field.value,
+        });
+      }
+      return acc;
+    },
+    [...(fieldOptions ?? [])],
+  );
 
   return (
     <div className="space-y-1">
@@ -88,12 +132,28 @@ export function FilterGroup({
           const prefix = `filterGroups.${groupIndex}.filters.${index}`;
           const filterData =
             form.getValues().filterGroups[groupIndex]?.filters[index];
+
           const field_data_type =
             columns?.find((column) => column.accessorKey === filterData.field)
               ?.data_type || 'string';
+          const field_filter_config =
+            columns?.find((column) => column.accessorKey === filterData.field)
+              ?.filter_config || {};
 
           const valuesFieldPath = `${prefix}.values`;
           const isValuesLoading = loadingStates[valuesFieldPath] || false;
+
+          const isNotEditable =
+            typeof filterData?.disabled === 'boolean'
+              ? filterData.disabled
+              : false;
+
+          const customField = [
+            {
+              label: field.label,
+              value: field.field,
+            },
+          ];
 
           if (!filterData) return null;
 
@@ -124,6 +184,7 @@ export function FilterGroup({
                       onValueChange={(operator) =>
                         onUpdateJunctionOperator(index - 1, operator)
                       }
+                      disabled={isNotEditable}
                     >
                       <SelectTrigger className="h-9 border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
@@ -155,91 +216,155 @@ export function FilterGroup({
                           placeholder: 'Select an operator',
                           selectSearchable: true,
                         },
-                        ...(filterData.operator &&
-                          !['is_empty', 'is_not_empty'].includes(
-                            filterData.operator,
-                          ) &&
-                          // adjust this based on future scenarios currently string, array uses multi select.
-                          field_data_type !== 'datetime'
+                        ...(![
+                          'is_empty',
+                          'is_not_empty',
+                          'has_no_value',
+                          'is_between',
+                        ].includes(filterData.operator) &&
+                        // adjust this based on future scenarios currently string, array uses multi select.
+                        field_data_type !== 'datetime' &&
+                        field_data_type !== 'number'
                           ? [
-                            {
-                              id: `${prefix}.values`,
-                              formType: 'multi-select',
-                              name: `${prefix}.values`,
-                              placeholder: 'Enter the value',
-                              multiSelectUseStringValues: true,
-                              multiSelectShowCreatableItem: false,
-                              multiSelectDelay: 300,
-                              multiSelectEnableCreate: [
-                                'contains',
-                                'not_contains',
-                              ].includes(filterData.operator || ''),
-                              multiSelectLoadingIndicator: isValuesLoading ? (
-                                <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
-                                  Loading options...
-                                </p>
-                              ) : undefined,
-                              multiSelectEmptyIndicator: (
-                                <p className="w-full text-center text-sm leading-6 text-muted-foreground">
-                                  No matching options found
-                                </p>
-                              ),
-                              multiSelectRenderOption: USE_CUSTOM_RENDER
-                                ? renderOption
-                                : undefined,
-                              multiSelectRenderBadge: USE_CUSTOM_RENDER
-                                ? renderBadge
-                                : undefined,
-                            },
-                          ]
-                          : []),
-                        ...(filterData.field &&
-                          field_data_type === 'datetime' &&
-                          !['is_between', 'is_empty', 'is_not_empty'].includes(filterData.operator)
-                          ? [
-                            {
-                              id: `${prefix}.values`,
-                              formType: 'smart-date',
-                              name: `${prefix}.values`,
-                              placeholder: 'Enter the value',
-                              dateTimePickerProps: {
-                                transformValuesToArray: true,
-                                enableFormattedDate: false,
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'multi-select',
+                                name: `${prefix}.values`,
+                                metadata: {
+                                  columns: columns,
+                                  field: field,
+                                },
+                                placeholder: !isNotEditable
+                                  ? 'Enter the value'
+                                  : '',
+                                multiSelectUseStringValues: true,
+                                multiSelectShowCreatableItem: false,
+                                multiSelectDelay: 300,
+                                readonly: isNotEditable,
+                                multiSelectEnableCreate: [
+                                  'contains',
+                                  'not_contains',
+                                ].includes(filterData.operator || ''),
+                                multiSelectLoadingIndicator: isValuesLoading ? (
+                                  <p className="py-2 text-center text-sm leading-6 text-muted-foreground">
+                                    Loading options...
+                                  </p>
+                                ) : undefined,
+                                multiSelectEmptyIndicator: (
+                                  <p className="w-full text-center text-sm leading-6 text-muted-foreground">
+                                    No matching options found
+                                  </p>
+                                ),
+                                multiSelectRenderOption: USE_CUSTOM_RENDER
+                                  ? renderOption
+                                  : undefined,
+                                multiSelectRenderBadge: USE_CUSTOM_RENDER
+                                  ? renderBadge
+                                  : undefined,
                               },
-                            },
-                          ]
+                            ]
                           : []),
                         ...(filterData.field &&
-                          field_data_type === 'datetime' &&
-                          filterData.operator === 'is_between'
+                        field_data_type === 'number' &&
+                        filterData?.operator !== 'is_between'
                           ? [
-                            {
-                              id: `${prefix}.values`,
-                              formType: 'custom-field',
-                              name: `${prefix}.values`,
-                              placeholder: 'Select date range',
-                              render: ({ field }:any) => (
-                                <DateRangePicker
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  defaultDisplayFormat="SHORT"
-                                />
-                              ),
-                            }
-                          ]
+                              {
+                                id: `${prefix}.values.0`,
+                                formType: 'number-input',
+                                name: `${prefix}.values.0`,
+                                placeholder: 'Enter the value',
+                                readonly: isNotEditable,
+                              },
+                            ]
+                          : []),
+                        ...(filterData.operator &&
+                        filterData.field &&
+                        field_data_type === 'datetime' &&
+                        ![
+                          'is_between',
+                          'is_empty',
+                          'is_not_empty',
+                          'has_no_value',
+                        ].includes(filterData.operator)
+                          ? [
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'smart-date',
+                                name: `${prefix}.values`,
+                                placeholder: 'Enter the value',
+                                dateTimePickerProps: {
+                                  transformValuesToArray: true,
+                                  enableFormattedDate: false,
+                                },
+                              },
+                            ]
+                          : []),
+                        ...(filterData.operator &&
+                        filterData.field &&
+                        field_data_type === 'datetime' &&
+                        filterData.operator === 'is_between'
+                          ? [
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'custom-field',
+                                name: `${prefix}.values`,
+                                placeholder: 'Select date range',
+                                render: ({ field }: any) => (
+                                  <DateRangePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    defaultDisplayFormat="SHORT"
+                                  />
+                                ),
+                              },
+                            ]
+                          : []),
+                        ...(filterData.operator &&
+                        filterData.field &&
+                        field_data_type === 'number' &&
+                        filterData.operator === 'is_between'
+                          ? [
+                              {
+                                id: `${prefix}.values`,
+                                formType: 'custom-field',
+                                name: `${prefix}.values`,
+                                placeholder: 'Select number range',
+                                render: ({ field }: any) => {
+                                  return (
+                                    <NumberRangeSlider
+                                      value={
+                                        field?.value?.length
+                                          ? field.value
+                                          : [
+                                              field_filter_config?.min ??
+                                                undefined,
+                                              field_filter_config?.max ??
+                                                undefined,
+                                            ]
+                                      }
+                                      onChange={field.onChange}
+                                      min={
+                                        field_filter_config?.min ?? undefined
+                                      }
+                                      max={
+                                        field_filter_config?.max ?? undefined
+                                      }
+                                      step={1}
+                                      showInputs={true}
+                                      showSlider={false}
+                                    />
+                                  );
+                                },
+                              },
+                            ]
                           : []),
                       ] as IField[]
                     }
                     subConfig={{
                       selectOptions: {
-                        [`${prefix}.field`]:
-                          columns?.map(
-                            (column) =>
-                              ({
-                                label: column.label,
-                                value: column.accessorKey,
-                              }) as ISelectOptions,
-                          ) || [],
+                        [`${prefix}.field`]: filterData?.disabled
+                          ? customField
+                          : resolvedFieldOptions || [],
                         [`${prefix}.operator`]: (): ISelectOptions[] => {
                           const fieldValue = form.getValues(`${prefix}.field`);
 
@@ -283,15 +408,40 @@ export function FilterGroup({
                           setFieldLoading(valuesFieldPath, true);
 
                           const formValues = form.getValues(`${prefix}.field`);
-
+                          const filterItems = form.getValues(
+                            `filterGroups.${groupIndex}.filters`,
+                          );
+                          const updatedFilterItems = removeFilterItemByIndex(
+                            filterItems,
+                            index,
+                          )?.map((item) => {
+                            if (item.type === 'criteria') {
+                              const column = columns.find(
+                                (col) => col.accessorKey === item.field,
+                              );
+                              return {
+                                ...item,
+                                entity: item?.entity || searchConfig?.entity,
+                                ...(column?.search_config ?? {}),
+                              };
+                            }
+                            return item;
+                          });
                           if (!formValues) return [];
                           try {
                             // Use the unified search function
                             const results = await searchFilterValues({
                               searchTerm,
+                              isTimeline,
                               searchConfig,
                               field_name: formValues,
-                              customTabDefaults,
+                              customTabDefaults: {
+                                defaultAdvanceFilter: updatedFilterItems,
+                              },
+                              column_alias:
+                                columns.find(
+                                  (item) => item.accessorKey === formValues,
+                                )?.value_alias || {},
                               fieldConfig:
                                 columns.find(
                                   (item) => item.accessorKey === formValues,
@@ -307,7 +457,7 @@ export function FilterGroup({
                     }}
                   />
                   {/* Show delete button if there's more than one criteria filter */}
-                  {hasManyFilters && (
+                  {hasManyFilters && !field?.disabled && (
                     <Button
                       onClick={() => onRemoveFilter(criteriaIndex)}
                       variant="ghost"
@@ -363,12 +513,16 @@ export const searchFilterValues = async ({
   fieldConfig,
   field_name,
   customTabDefaults,
+  column_alias,
+  isTimeline = false,
 }: {
   searchTerm: string;
   searchConfig: any;
   fieldConfig: any;
   field_name: string;
   customTabDefaults: Record<string, any>;
+  column_alias: Record<string, string>;
+  isTimeline?: boolean;
 }): Promise<Array<{ value: string; label: string }>> => {
   try {
     const response = await searchRecords({
@@ -376,7 +530,9 @@ export const searchFilterValues = async ({
       field: field_name,
       searchConfig,
       fieldConfig,
-      customTabDefaults: {},
+      customTabDefaults,
+      column_alias,
+      isTimeline,
     });
 
     return response;

@@ -48,7 +48,7 @@ const Summary = (props: { form_key: string }) => {
         if (key === 'Categories' && data[value]) {
           return data[value].map((category: any) => {
             return (
-              <p className="mb-[8px] no-underline" key={key}>
+              <p className="mb-[8px] no-underline text-[#334155]" key={key}>
                 <strong>
                   {' '}
                   {key}
@@ -64,7 +64,7 @@ const Summary = (props: { form_key: string }) => {
         }
 
         return (
-          <p className="mb-[8px] no-underline" key={key}>
+          <p className="mb-[8px] no-underline text-[#334155]" key={key}>
             <strong>
               {' '}
               {key}

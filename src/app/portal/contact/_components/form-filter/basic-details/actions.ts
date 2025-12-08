@@ -49,7 +49,7 @@ export const saveContactDetails = async (
 };
 
 export const selectRecord = async (rows: any[]) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
@@ -57,11 +57,15 @@ export const selectRecord = async (rows: any[]) => {
     href: pathname,
     current_context: currentContext,
   });
+  // await api.tab.updateNewInnerTabs({
+  //   code: rows?.[0]?.code,
+  //   current_context: currentContext,
+  // });
   redirect(`/portal/${mainEntity}/wizard/${rows?.[0]?.code}/1`);
 };
 
 export const removeRecord = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
@@ -81,7 +85,7 @@ export const closeCurrentInnerClassTab = async ({
   action_type: string;
   customPathname: string;
 }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = customPathname || headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;

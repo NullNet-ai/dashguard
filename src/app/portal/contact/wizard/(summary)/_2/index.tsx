@@ -38,7 +38,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key} className="mb-[8px] no-underline">
+        <p key={key} className="mb-[8px] no-underline text-[#334155]">
           <span className='text-slate-400'> {key}: </span>
           &nbsp; {data?.[value] || "None"}
         </p>

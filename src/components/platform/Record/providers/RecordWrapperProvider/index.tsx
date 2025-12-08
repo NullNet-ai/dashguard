@@ -21,7 +21,7 @@ const RecordWrapperProvider = (props: IRecordWrapperProviderProps) => {
     isCollapseRecordSummary,
     onClickCollapseButton: handleClickCollapseButton
   }}>
-    <div className={`h-full border-r border-slate-100`}>
+    <div className={`h-full`}>
       {props.children}
       { !isCollapseRecordSummary ? props.summaryChildren : null}
     </div>

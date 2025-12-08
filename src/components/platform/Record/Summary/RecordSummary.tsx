@@ -1,10 +1,31 @@
 import React from 'react';
-import RecordSummaryContent from './SummaryContent';
+import { api } from '~/trpc/server';
+import { headers } from 'next/headers';
+import RecordClientWrapper from './RecordClientWrapper';
 
-const RecordSummary = async () => {
+const RecordSummary = async ({
+  image_placeholder,
+  children,
+}: any) => {
+    const headerList = await headers();
+    const pathname = headerList.get('x-pathname') || '';
+    const [, , , , identifier] = pathname.split('/');
+
+  const { first_name, last_name } = await api.contact.fetchContactPhoneEmail({
+    code: identifier!,
+    pluck_fields: ['id', 'first_name', 'last_name'],
+    is_multiple: true,
+  });
+
+  const textPlaceholder = `${first_name?.charAt(0) || ''}${last_name?.charAt(0) || ''}`;
+
   return (
     <div>
-      <RecordSummaryContent />
+      <RecordClientWrapper
+        image_placeholder={textPlaceholder ?? image_placeholder}
+      >
+        {children}
+      </RecordClientWrapper>
     </div>
   );
 };

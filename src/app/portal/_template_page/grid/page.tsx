@@ -1,27 +1,21 @@
-import { api } from '~/trpc/server';
-import Grid from '~/components/platform/Grid';
 import { headers } from 'next/headers';
 
-/**
- *
- * @Default Grid Features
- *
- */
+import Grid from '~/components/platform/Grid';
+
+import { api } from '~/trpc/server';
+
 import gridColumns from './_config/columns';
-import defaultSorting from './_config/sorting';
+import { defaultSorting } from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
-import { resolveGridParams } from '~/components/platform/Grid/hooks/grid-params-resolver';
+import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function Page() {
-  const { sorts, pagination, filters, groups } =
-    (await getGridCacheData()) ?? {};
-
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
-  const [, , main_entity] = pathname.split('/');
-
+  const [, , main_entity, ,] = pathname.split('/');
   const _pluck = [
     'id',
+    'categories',
     'code',
     'status',
     'created_date',
@@ -31,35 +25,33 @@ export default async function Page() {
     'updated_time',
     'updated_by',
   ];
-  const { gridAdvanceFilter, gridDefaultAdvanceFilter, ...gridParams } =
-    resolveGridParams({
-      sorts,
-      filters,
-      groups,
-      pagination,
-      pluck: _pluck,
-      entity: main_entity!,
-    });
+
+  const gridCacheData =
+    (await getGridCacheData({
+      defaultSorting: defaultSorting,
+    })) ?? {};
+  const { gridParams, gridProps } = gridDataResolver({
+    entity: main_entity!,
+    pluck: _pluck,
+    gridCacheData,
+    defaults: {
+      defaultSorting,
+    },
+  });
   const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
   });
 
   return (
     <Grid
-      totalCount={totalCount || 0}
+      {...gridProps}
       data={items}
-      sorting={sorts?.sorting?.length ? sorts?.sorting : []}
-      defaultAdvanceFilter={filters?.defaultFilters || []}
-      advanceFilter={filters?.advanceFilter || []}
-      defaultSorting={
-        sorts?.defaultSorting?.length ? sorts?.defaultSorting : defaultSorting
-      }
-      pagination={pagination}
-      grouping={groups || []}
+      totalCount={totalCount || 0}
       config={{
         entity: main_entity!,
         title: 'New Grid',
         columns: gridColumns,
+        columnsOrder: gridCacheData?.columns,
         enableAutoCreate: false,
         searchConfig: {
           router: 'grid',

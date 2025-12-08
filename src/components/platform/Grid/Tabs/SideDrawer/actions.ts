@@ -17,7 +17,7 @@ export const updateGridFilter = async (data: any, gridKey?: string) => {
     ...data,
     gridKey,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(updatedGridFilter?.href || fullUrl);
   return updatedGridFilter;
@@ -25,7 +25,7 @@ export const updateGridFilter = async (data: any, gridKey?: string) => {
 
 export const updateAllFilterdata = async (tabs: any[]) => {
   await api.gridFilter.updateGridAllFilter({ tabs });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
 };
@@ -35,7 +35,7 @@ export const removeGridFilter = async (id: string, gridKey?: string) => {
     id,
     gridKey,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
   return url;
@@ -51,10 +51,18 @@ export const duplicateFilterTab = async (
     gridKey,
     entity,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
   return url;
+};
+
+export const getTabData = async (tab_id: any, gridKey?: string) => {
+  const tabData = await api.gridFilter.getTabData({
+    tab_id,
+    gridKey,
+  });
+  return tabData;
 };
 
 interface Filter {
@@ -142,7 +150,7 @@ export const transformFilterGroups = async ({
 
   // Handle single filter group
   if (filterDetails.filter_groups.length === 1) {
-    let resolveDefaultFilter = filterDetails.filter_groups.reduce(
+    const resolveDefaultFilter = filterDetails.filter_groups.reduce(
       (acc: any, curr) => {
         // Add group operator if accumulator already has items
         if (acc.length) {
@@ -176,13 +184,14 @@ export const transformFilterGroups = async ({
     );
     
     // Add custom default filters if provided
-    if (customDefaultFilter?.length) {
-      resolveDefaultFilter = [
-        ...resolveDefaultFilter,
-        { type: 'operator', operator: 'and', default: true },
-        ...customDefaultFilter,
-      ];
-    }
+     // commented out because this causes duplicate issues in filter items
+    // if (customDefaultFilter?.length) {
+    //   resolveDefaultFilter = [
+    //     ...resolveDefaultFilter,
+    //     { type: 'operator', operator: 'and', default: true },
+    //     ...customDefaultFilter,
+    //   ];
+    // }
 
     return {
       resolveDefaultFilter,
@@ -228,8 +237,8 @@ export const transformFilterGroups = async ({
           ...item,
           filters: [
             ...item.filters,
-            { type: 'operator', operator: 'and', default: true },
-            ...customDefaultFilter,
+            // { type: 'operator', operator: 'and', default: true },
+            // ...customDefaultFilter,
           ],
         };
       }

@@ -8,6 +8,7 @@ import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { ContactPhoneEmailSchema } from '~/server/zodSchema/contact/contactPhoneEmail';
 import { api } from '~/trpc/react';
+import { useFormNavigationStateMachine } from '~/components/platform/FormBuilder/Utils/formNavigation';
 
 import { type IFormProps } from '../types';
 
@@ -43,47 +44,108 @@ export default function ContactDetails({
   const toast = useToast();
   const router = useRouter();
   const utils = api.useUtils();
+
+  const { handleFormSubmission } = useFormNavigationStateMachine();
+
   const handleSave = async ({
     data,
     action_type,
     form,
   }: IHandleSubmit<z.infer<typeof ContactPhoneEmailSchema>>): Promise<any[]> => {
     try {
-      const response = await saveContactDetails(data);
+
+      await handleFormSubmission({
+        action_type,
+        stateMachine: {
+          create: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await saveContactDetails(data);
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              if (response?.existing) {
+                ['phones', 'emails'].forEach(field => {
+                  form?.setError(field, {
+                    type: 'manual',
+                    message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
+                  });
+                });
+                return [];
+              }
+              return null
+            },
+            toast_message: 'Contact details submitted successfully',
+          },
+          update: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await saveContactDetails(data);
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              if (response?.existing) {
+                ['phones', 'emails'].forEach(field => {
+                  form?.setError(field, {
+                    type: 'manual',
+                    message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
+                  });
+                });
+                return [];
+              }
+              return null
+            },
+            toast_message: 'Contact details submitted successfully',
+          },
+          wizard: {
+            new: {},
+            code: {},
+          },
+          record: true,
+        },
+      });
+
+      return [];
+
+      // const response = await saveContactDetails(data);
       
-      // Handle validation errors
-      if (response?.existing) {
-        ['phones', 'emails'].forEach(field => {
-          form?.setError(field, {
-            type: 'manual',
-            message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
-          });
-        });
-        return [];
-      }
+      // // Handle validation errors
+      // if (response?.existing) {
+      //   ['phones', 'emails'].forEach(field => {
+      //     form?.setError(field, {
+      //       type: 'manual',
+      //       message: `${field === 'phones' ? 'Phone Number' : 'Email'} already exists.`,
+      //     });
+      //   });
+      //   return [];
+      // }
       
-      // Early return if no code in response
-      if (!response?.code) return [response];
+      // // Early return if no code in response
+      // if (!response?.code) return [response];
       
-      const wizardPath = `/portal/contact/wizard/${response.code}`;
+      // const wizardPath = `/portal/contact/wizard/${response.code}`;
       
-      // Handle navigation based on action type
-      if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
-        await closeCurrentInnerClassTab({
-          customPathname: `${wizardPath}/1`,
-          code: response.code,
-          action_type,
-        });
+      // // Handle navigation based on action type
+      // if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
+      //   await closeCurrentInnerClassTab({
+      //     customPathname: `${wizardPath}/1`,
+      //     code: response.code,
+      //     action_type,
+      //   });
         
-        await utils.invalidate() // use to ignore the cache
-        const targetPath = action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
-        router.push(targetPath);
+      //   await utils.invalidate() // use to ignore the cache
+      //   const targetPath = action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
+      //   router.push(targetPath);
         
-        // For Next action, we've already navigated, so return empty array
-        if (action_type === 'Next') return [];
-      }
+      //   // For Next action, we've already navigated, so return empty array
+      //   if (action_type === 'Next') return [];
+      // }
       
-      return [response];
+      // return [response];
     } catch (error) {
       toast.error('Failed to submit Basic Details');
       return [];
@@ -104,7 +166,8 @@ export default function ContactDetails({
         filter_entity,
         main_entity_id: '',
       };
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       toast.error('Failed to submit Basic Details');
     }
   };
@@ -125,7 +188,8 @@ export default function ContactDetails({
         filter_entity,
         main_entity_id,
       };
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       toast.error('Failed to submit Basic Details');
     }
   };
@@ -199,6 +263,10 @@ export default function ContactDetails({
               },
             ],
           },
+        },
+        searchSuggestionConfig: {
+          router: 'search',
+          resolver:'contactSearch',
         },
         onSelectRecords: async ({ filter_entity, main_entity_id, rows }) => {
           const response = (await handleSelectRecord({

@@ -12,6 +12,8 @@ import FormInput from '~/components/platform/FormBuilder/FormType/FormInput';
 import { sendForgotPasswordEmail } from '../_actions/sendForgotPasswordEmail';
 import { useSocket } from '~/context/SocketProvider';
 import { useRouter } from 'next/navigation';
+import { handleEvent } from '~/server/events';
+import { EEventType } from '~/server/events/types';
 
 const ForgotPasswordFormSchema = z.object({
   email: z
@@ -21,6 +23,7 @@ const ForgotPasswordFormSchema = z.object({
 });
 
 const ForgotPasswordForm = () => {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(ForgotPasswordFormSchema),
   });
@@ -35,10 +38,12 @@ const ForgotPasswordForm = () => {
         email: data.email,
       });
       if (response) {
-        socketClient.publish({
-          type: 'RESET_PASSWORD',
-          payload: response,
-        });
+        await handleEvent(EEventType.RESET_PASSWORD, response);
+        router.push('/forgot-password/submit-success');
+        // socketClient.publish({
+        //   type: 'RESET_PASSWORD',
+        //   payload: response,
+        // });
       }
       setIsSubmitting(false);
     } catch (error: unknown) {

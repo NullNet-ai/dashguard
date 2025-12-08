@@ -47,6 +47,7 @@ export default function LoginForm(props: any) {
     } catch (error: any) {
       console.error('Error Details:', error.message);
       setIsSubmitting(false);
+      if (error.message === 'NEXT_REDIRECT') return;
       try {
         const parsedError = JSON.parse(error.message);
         setError(parsedError?.[0]?.message);
@@ -102,7 +103,7 @@ export default function LoginForm(props: any) {
                     name: 'password',
                     label: 'Password',
                     required: true,
-                    placeholder: 'Enter at least 5 characters',
+                    placeholder: 'Enter your password',
                   }}
                   form={form}
                   formKey="Login"

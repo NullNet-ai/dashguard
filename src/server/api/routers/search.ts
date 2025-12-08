@@ -33,7 +33,6 @@ export const searchRouter = createTRPCRouter({
         sorting,
         group_advance_filters: _group_advance_filters = [],
         searchable_fields = [],
-        is_case_sensitive_sorting = 'false',
       } = input;
 
       const pluck_object = {
@@ -69,10 +68,9 @@ export const searchRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
-          //@ts-expect-error - multiple sort
           multiple_sort:
             sorting?.length && sorting?.length > 1
-              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+              ? formatSorting(sorting)
               : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
@@ -136,9 +134,8 @@ export const searchRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            // @ts-expect-error - multiple sort
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+              ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
           },
@@ -184,7 +181,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               entity: 'organizations',
@@ -269,9 +265,8 @@ export const searchRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            // @ts-expect-error - multiple sort
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+              ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
               {
@@ -320,7 +315,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'created_by',
@@ -349,7 +343,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'updated_by',
@@ -369,193 +362,4 @@ export const searchRouter = createTRPCRouter({
       const suggestions = searchSuggestionTransformer(items, searchable_fields);
       return { items: suggestions };
     }),
-  deviceSearch: privateProcedure
-  // Define input using zod for validation
-  .input(ZodSearchSuggestions)
-  .query(async ({ input, ctx }) => {
-    const {
-      advance_filters: _advance_filters = [],
-      entity,
-      group_advance_filters: _group_advance_filters = [],
-      searchable_fields = [],
-    } = input;
-
-    const query = ctx.dnaClient
-      .searchSuggestions({
-        entity: input?.entity,
-        token: ctx.token.value,
-        query: {
-          pluck_group_object: {
-            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
-            contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
-          },
-
-          pluck_object: {
-            ...addCommonGridPluckObject(),
-            contacts: ['first_name', 'last_name', 'id', 'previous_status'],
-            organization_accounts: ['contact_id', 'id', 'device_id'],
-            organizations: ['id', 'name', 'categories'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            devices: ['id', 'code', 'categories', 'status', 'created_date', 'created_time', 'created_by', 'updated_date', 'updated_time', 'instance_name', 'model', 'updated_by'],
-            device_group_devices: ['device_group_setting_id', 'device_id', 'id'],
-            device_groups: ['device_group_setting_id', 'device_id', 'id'],
-            device_group_settings: ['name', 'id'],
-            device_interfaces: ['id', 'device_configuration_id', 'name'],
-            device_interface_addresses: ['id', 'device_interface_id', 'address'],
-            device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
-          },
-          track_total_records: true,
-          advance_filters: input?.advance_filters as IAdvanceFilters[],
-          group_advance_filters: (input.group_advance_filters ||
-            []) as IGroupAdvanceFilters<string | number>[],
-          order: {
-            starts_at:
-              // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
-                ? 0
-                : (input.current || 1) * (input.limit || 100) -
-                  (input.limit || 100),
-            limit: input.limit || 1,
-            // by_field: "created_date",
-            // by_direction: EOrderDirection.ASC,
-          },
-          // @ts-expect-error - multiple sort
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
-            : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            alias: 'device_group_devices',
-            entity: 'device_groups',
-            field: 'device_id',
-          },
-          from: {
-            entity: input?.entity,
-            field: 'id',
-          },
-        },
-      })
-      .nestedJoin({
-        type: 'left',
-        nested: true,
-        field_relation: {
-          to: {
-            entity: 'device_group_settings',
-            field: 'id',
-          },
-          from: {
-            entity: 'device_group_devices',
-            field: 'device_group_setting_id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_configurations',
-            field: 'device_id',
-            order_by: 'timestamp',
-            limit: 1,
-            order_direction: EOrderDirection.DESC,
-          },
-          from: {
-            entity: input?.entity,
-            field: 'id',
-          },
-        },
-      })
-    addCommonGridJoins(query, entity);
-
-    const { data: items } = await query.execute();
-
-    // Calculate total number of pages
-    const suggestions = searchSuggestionTransformer(items, searchable_fields);
-    const resolvedSuggestions = suggestions.map((suggestion: any) => {
-      return suggestion;
-    });
-    return { items: resolvedSuggestions };
-  }),
-
-  deviceRemoteAccessSessionSearch: privateProcedure
-  // Define input using zod for validation
-  .input(ZodSearchSuggestions)
-  .query(async ({ input, ctx }) => {
-    const {
-      advance_filters: _advance_filters = [],
-      entity,
-      group_advance_filters: _group_advance_filters = [],
-      searchable_fields = [],
-    } = input;
-
-    const query = ctx.dnaClient
-      .searchSuggestions({
-        entity: input?.entity,
-        token: ctx.token.value,
-        query: {
-          pluck_group_object: {
-            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
-            contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
-          },
-
-          pluck_object: {
-            ...addCommonGridPluckObject(),
-            devices: ['instance_name', 'id'],
-            [pluralize(input?.entity)]: ['id', 'code', 'categories', 'status', 'created_date', 'created_time', 'created_by', 'updated_date', 'updated_time', 'remote_access_category', 'remote_access_type','remote_access_status', 'updated_by'],
-          },
-          track_total_records: true,
-          advance_filters: input?.advance_filters as IAdvanceFilters[],
-          group_advance_filters: (input.group_advance_filters ||
-            []) as IGroupAdvanceFilters<string | number>[],
-          order: {
-            starts_at:
-              // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
-                ? 0
-                : (input.current || 1) * (input.limit || 100) -
-                  (input.limit || 100),
-            limit: input.limit || 1,
-            // by_field: "created_date",
-            // by_direction: EOrderDirection.ASC,
-          },
-          // @ts-expect-error - multiple sort
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
-            : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'devices',
-            field: 'id',
-          },
-          from: {
-            entity,
-            field: 'device_id',
-          },
-        },
-      })
-    addCommonGridJoins(query, entity);
-
-    const { data: items } = await query.execute();
-
-    // Calculate total number of pages
-    const suggestions = searchSuggestionTransformer(items, searchable_fields);
-    const resolvedSuggestions = suggestions.map((suggestion: any) => {
-      return suggestion;
-    });
-    return { items: resolvedSuggestions };
-  }),
 });

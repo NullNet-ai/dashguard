@@ -62,7 +62,7 @@ function GridDesktop({
 
   const conWidth = useMemo(() => {
     if (open && summary) {
-      return 'lg:w-[calc(100vw-578px)]';
+      return 'lg:w-[calc(100vw-566px)]';
     } else if (!open && summary) {
       return 'w-auto';
     } else if (open && !summary) {
@@ -101,14 +101,14 @@ function GridDesktop({
       <div
         className={cn(
           `flex justify-between`,
-          `${isExpandedTable ? 'flex-row-reverse' : 'flex-col px-4'}`,
+          `${isExpandedTable ? 'flex-row-reverse' : 'flex-col '}`,
         )}
         style={{
           width: isExpandedTable
             ? expandedWidth
-            : parentType === 'side_drawer'
+            : parentType === 'side_drawer' || parentType ==='wizard'
               ? '100%'
-              : 'calc(100vw - 37rem)',
+              : summary ? '100%' : '100%',
         }}
       >
         {!hideSearch && <Search parentType={parentType} />}
@@ -150,7 +150,7 @@ function GridDesktop({
           </CardHeader>
         )}
         <div
-          className={cn(`${parentType === 'form' ? 'px-4' : ''}`)}
+          className={cn(`${parentType === 'form' ? '' : ''}`)}
           style={{
             width: parentType === 'side_drawer' ? '100%' : expandedWidth,
           }}
@@ -193,6 +193,7 @@ function GridDesktop({
                 showAction={showAction}
                 gridLevel={gridLevel}
                 isLoading={isLoading}
+                parentType={parentType}
                 showPagination={showPagination}
                 parentExpanded={parentExpanded}
               />

@@ -9,7 +9,7 @@ export default async function Page({
     code: string;
   };
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");
   const stepDetails = await api.wizard.getTraverseStepped(

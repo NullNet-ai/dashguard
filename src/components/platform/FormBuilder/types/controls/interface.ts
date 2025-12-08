@@ -12,7 +12,7 @@ interface IFormHeaderProps {
   isListLoading?: boolean;
   open: boolean;
   headerClassName?: string;
-  buttonHeaderRender?: JSX.Element;
+  buttonHeaderRender?: React.JSX.Element;
   filterGridConfig?: IFilterGridConfig;
   displayType: TDisplayType;
   enableAppendForm?: boolean;

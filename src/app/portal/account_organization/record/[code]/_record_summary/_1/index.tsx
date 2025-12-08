@@ -7,7 +7,8 @@ import { api } from '~/trpc/react';
 
 import useRefetchRecord from '../hooks/useFetchMainRecord';
 import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
-import { useContext } from 'react';
+import { Fragment, useContext } from 'react';
+import { CardComponent as Card } from '~/components/ui/card/index';
 
 const statuses = {
   Active: 'text-green-600 bg-green-400/10',
@@ -47,117 +48,113 @@ const RecordShellSummary = ({
   if(isCollapseRecordSummary) return null
 
   return (
-    <div>
-      <div className="p-1 px-5 text-sm">
-        <div>
-          <span className="text-slate-400">Category:</span>
-          <div className="inline-flex gap-2 p-1">
-            <Badge
-              className=""
-              key={record?.account?.categories?.[0]}
-              variant={'primary'}
-            >
-              {record?.account?.categories?.[0]}
-            </Badge>
-          </div>
-        </div>
-      </div>
-      <Separator />
-      <div className="p-1 px-5">
-        <span className="text-sm font-semibold text-foreground">
-          Account Details
-        </span>
-      </div>
-      <div className="p-1 px-5 text-sm">
-        <div>
-          <span className="text-slate-400">{'Role: '}</span>
-          <span>{record?.role || 'None'}</span>
-        </div>
-      </div>
-      <div className="p-1 px-5 text-sm">
-        <div>
-          <span className="text-slate-400">{'Email: '}</span>
-          <span>
-            {record?.account?.email || 'None'}
-          </span>
-        </div>
-      </div>
-      {record?.external_contact?.first_name &&
-        record?.account?.categories?.[0] === 'External User' && (
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'First Name: '}</span>
-              <span>{record?.external_contact?.first_name || 'None'}</span>
-            </div>
-          </div>
-        )}
-      {record?.external_contact?.last_name &&
-        record?.categories?.[0] === 'External User' && (
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'Last Name: '}</span>
-              <span>{record?.external_contact?.last_name || 'None'}</span>
-            </div>
-          </div>
-        )}
-      <div className="mb-2 p-1 px-5 text-sm">
-        <div>
-          <span className="text-slate-400">{'Status: '}</span>
-          <div
-            className={cn(
-              'bg-primary/10 text-primary',
-              // @ts-expect-error - TS doesn't know about statuses
-              statuses?.[record?.account?.account_organization_status],
-              'inline-flex items-center rounded-md px-2 py-1 text-xs font-normal',
-            )}
-          >
-            {record?.account?.account_organization_status || 'None'}
-          </div>
-        </div>
-      </div>
-      {record?.account?.categories?.[0] === 'Internal User' && (
-        <>
-          <Separator />
-          <div className="p-1 px-5">
-            <span className="text-sm font-semibold text-foreground">
-              Contact Details
+    <Fragment>
+      <Card className="p-3">
+        <div className="flex flex-col gap-y-2">
+          <div>
+            <span className="text-md font-medium text-foreground">
+              Account Details
             </span>
           </div>
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'Primary Phone Number: '}</span>
-              <span>{record?.contact?.phone || 'None'}</span>
+          <Separator />
+          <div className="flex flex-col gap-1">
+            <div className="text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-slate-400 whitespace-nowrap">{'Role: '}</span>
+                <span className='break-all text-slate-700'>{record?.role || 'None'}</span>
+              </div>
+            </div>
+            <div className="text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-slate-400 whitespace-nowrap">{'Email: '}</span>
+                <span className='break-all text-slate-700'>
+                  {record?.account?.email || 'None'}
+                </span>
+              </div>
+            </div>
+            {record?.external_contact?.first_name &&
+              record?.account?.categories?.[0] === 'External User' && (
+                <div className="text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-slate-400 whitespace-nowrap">{'First Name: '}</span>
+                    <span className='break-all text-slate-700'>{record?.external_contact?.first_name || 'None'}</span>
+                  </div>
+                </div>
+              )}
+            {record?.external_contact?.last_name &&
+              record?.categories?.[0] === 'External User' && (
+                <div className="text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-slate-400 whitespace-nowrap">{'Last Name: '}</span>
+                    <span className='break-all text-slate-700'>{record?.external_contact?.last_name || 'None'}</span>
+                  </div>
+                </div>
+              )}
+            <div className="text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-slate-400 whitespace-nowrap">{'Status: '}</span>
+                <div
+                  className={cn(
+                    'bg-primary/10 text-primary break-all',
+                    // @ts-expect-error - TS doesn't know about statuses
+                    statuses?.[record?.account?.account_organization_status],
+                    'inline-flex items-center rounded-md px-2 text-xs font-normal',
+                  )}
+                >
+                  {record?.account?.account_organization_status || 'None'}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="p-1 px-5 text-sm">
+        </div>
+      </Card>
+      {record?.account?.categories?.[0] === 'Internal User' && (
+        <Card className="p-3">
+          <div className="flex flex-col gap-y-2">
             <div>
-              <span className="text-slate-400">{'Primary Email: '}</span>
-              <span>
-                {record?.contact?.email || record?.account_email || 'None'}
+              <span className="text-md font-medium text-foreground">
+                Contact Details
               </span>
             </div>
-          </div>
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'First Name: '}</span>
-              <span>{record?.contact?.first_name || 'None'}</span>
+            <Separator />
+            <div className="flex flex-col gap-1">
+              <div className="text-sm">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400 whitespace-nowrap">{'Primary Phone Number: '}</span>
+                  <span className='break-all text-slate-700'>{record?.contact?.phone || 'None'}</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400 whitespace-nowrap">{'Primary Email: '}</span>
+                  <span className='break-all text-slate-700'>
+                    {record?.contact?.email || record?.account_email || 'None'}
+                  </span>
+                </div>
+              </div>
+              <div className="text-sm">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400 whitespace-nowrap">{'First Name: '}</span>
+                  <span className='break-all text-slate-700'>{record?.contact?.first_name || 'None'}</span>
+                </div>
+              </div>
+              <div className="text-sm whitespace-nowrap">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400">{'Last Name: '}</span>
+                  <span className='break-all text-slate-700'>{record?.contact?.last_name || 'None'}</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                <div className="flex justify-between gap-2">
+                  <span className="text-slate-400 whitespace-nowrap">{'Middle Name: '}</span>
+                  <span className='break-all text-slate-700'>{record?.contact?.middle_name || 'None'}</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'Last Name: '}</span>
-              <span>{record?.contact?.last_name || 'None'}</span>
-            </div>
-          </div>
-          <div className="p-1 px-5 text-sm">
-            <div>
-              <span className="text-slate-400">{'Middle Name: '}</span>
-              <span>{record?.contact?.middle_name || 'None'}</span>
-            </div>
-          </div>
-        </>
+        </Card>
       )}
-    </div>
+    </Fragment>
   );
 };
 

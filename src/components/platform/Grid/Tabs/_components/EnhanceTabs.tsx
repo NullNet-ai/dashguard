@@ -323,7 +323,7 @@ const EnhanceGridTabs: React.FC<BrowserTabProps> = ({
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           {/* //this is the add button */}
-              <CreateNewFilter />
+              <CreateNewFilter initialTab={tabs?.[0] ?? {}}/>
         </TooltipTrigger>
         <TooltipContent align='center' side='bottom' sideOffset={5} className="z-[9999]">
           <p>Open new tab</p>

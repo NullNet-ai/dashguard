@@ -1,54 +1,57 @@
-import { DevTool } from '@hookform/devtools'
-import { capitalize } from 'lodash'
-import { GripVerticalIcon, MinusIcon, PlusIcon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { DevTool } from '@hookform/devtools';
+import { capitalize } from 'lodash';
+import { GripVerticalIcon, MinusIcon, PlusIcon } from 'lucide-react';
+import React, { useEffect } from 'react';
 import {
   type ControllerFieldState,
   type ControllerRenderProps,
   useFieldArray,
   type UseFormReturn,
-} from 'react-hook-form'
+} from 'react-hook-form';
 
-import { ButtonWithDropdown } from '~/components/platform/ButtonWithDropdown'
-import { Button } from '~/components/ui/button'
+import { ButtonWithDropdown } from '~/components/platform/ButtonWithDropdown';
+import { Button } from '~/components/ui/button';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
+} from '~/components/ui/form';
+import { Input } from '~/components/ui/input';
+import MultipleSelector, { type Option } from '~/components/ui/multi-select';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~/components/ui/select'
+} from '~/components/ui/select';
+
+import SelectCreatable from './_component/select-creatable';
 import {
   Sortable,
   SortableDragHandle,
   SortableItem,
-} from '~/components/ui/sortable'
-import { cn } from '~/lib/utils'
+} from '~/components/ui/sortable';
+import { cn } from '~/lib/utils';
 
 import {
   type ICheckboxOptions,
   type IRadioOptions,
   type ISelectOptions,
   type IField,
-} from '../../types/global/interfaces'
+} from '../../types/global/interfaces';
 
 interface IProps {
-  fieldConfig: IField
+  fieldConfig: IField;
   formRenderProps: {
-    field: ControllerRenderProps<Record<string, any[]>>
-    fieldState: ControllerFieldState
-  }
-  form: UseFormReturn<Record<string, any>, any, undefined>
-  value?: string
-  formKey: string
+    field: ControllerRenderProps<Record<string, any[]>>;
+    fieldState: ControllerFieldState;
+  };
+  form: UseFormReturn<Record<string, any>, any, undefined>;
+  value?: string;
+  formKey: string;
 }
 
 const FormMultiField = ({
@@ -57,33 +60,44 @@ const FormMultiField = ({
   form,
   formKey,
 }: IProps) => {
-  const parentProps = fieldConfig?.multiFieldConfig?.parentProps
+  const parentProps = fieldConfig?.multiFieldConfig?.parentProps;
 
+  const fieldhook = !parentProps
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const fieldhook = !parentProps ? useFieldArray({
-    control: form.control,
-    name: formRenderProps.field.name,
-    shouldUnregister: true,
-  }) : null
+    ? useFieldArray({
+        control: form.control,
+        name: formRenderProps.field.name,
+        shouldUnregister: true,
+      })
+    : null;
 
-  const [customFields, setCustomFields] = React.useState([])
+  const [customFields, setCustomFields] = React.useState([]);
 
-  const register = parentProps ? parentProps?.customMeta?.register : form.register
+  const register = parentProps
+    ? parentProps?.customMeta?.register
+    : form.register;
 
-  const { fields, append, move, remove, update, replace } = parentProps?.customMeta || fieldhook
+  const { fields, append, move, remove, update, replace } =
+    parentProps?.customMeta || fieldhook;
 
-  const { form: newForm } = parentProps ?? {}
+  const { form: newForm } = parentProps ?? {};
 
-  const isDisabled = formRenderProps.field.disabled
-  const isHidden = fieldConfig.hidden
+  const isDisabled = formRenderProps.field.disabled;
+  const isHidden = fieldConfig.hidden;
 
   const defValue = fieldConfig.multiFieldConfig?.fields?.name
-    ? { [fieldConfig.multiFieldConfig.fields.name]: '', fieldType: 'input', order: 1 }
-    : { name: '', fieldType: 'input', order: 1 }
+    ? {
+        [fieldConfig.multiFieldConfig.fields.name]: '',
+        fieldType: 'input',
+        order: 1,
+      }
+    : { name: '', fieldType: 'input', order: 1 };
 
-    useEffect(() => {
-     if(!parentProps) {
-      if (fields.some((field: any, index: number) => field.order !== index + 1)) {
+  useEffect(() => {
+    if (!parentProps) {
+      if (
+        fields.some((field: any, index: number) => field.order !== index + 1)
+      ) {
         const newFields = fields.map((field: any, index: number) => {
           const { id, ...rest } = field;
           return {
@@ -93,15 +107,13 @@ const FormMultiField = ({
         });
         replace(newFields);
       }
-     }
-    }, [fields, parentProps]);
-  
+    }
+  }, [fields, parentProps]);
 
   useEffect(() => {
     if (!parentProps && !fields?.length) {
-      append(defValue)
-    }
-    else {
+      append(defValue);
+    } else {
       if (parentProps) {
         const items = parentProps.fields?.map((field: any, index: number) => {
           const newField = {
@@ -110,41 +122,45 @@ const FormMultiField = ({
             fieldType: field.fieldType,
             optionId: field.optionId,
             order: index + 1,
-          }
-          return newField
-        })
+          };
+          return newField;
+        });
 
-        setCustomFields(items)
+        setCustomFields(items);
       }
     }
-  }, [])
+  }, []);
   if (isHidden) {
-    return null
+    return null;
   }
 
   const renderFormControl = (
     field: IField & {
-      selectOptions?: ISelectOptions[]
-      radioOptions?: IRadioOptions[]
-      checkboxOptions?: ICheckboxOptions[]
+      selectOptions?: ISelectOptions[];
+      radioOptions?: IRadioOptions[];
+      checkboxOptions?: ICheckboxOptions[];
     },
     index: number,
     fieldType: string,
     selectOptions?: any,
-    customname?: string
+    customname?: string,
   ) => {
     const commonProps = {
       disabled: isDisabled,
       className: 'h-10 px-3',
-    }
+    };
 
     const handleChange = (e: string) => {
-      form.setValue(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`, e, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      })
-    }
+      form.setValue(
+        `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`,
+        e,
+        {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        },
+      );
+    };
 
     switch (fieldType) {
       case 'input':
@@ -152,19 +168,23 @@ const FormMultiField = ({
           <FormItem>
             <FormControl>
               <Input
-                {...register(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`)}
+                {...register(
+                  `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`,
+                )}
                 {...commonProps}
                 placeholder={field.placeholder}
               />
             </FormControl>
           </FormItem>
-        )
+        );
       case 'select':
         return (
           <FormItem>
             <FormControl>
               <Select
-                {...register(`${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`)}
+                {...register(
+                  `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`,
+                )}
                 defaultValue={form.getValues(
                   `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`,
                 )}
@@ -174,188 +194,312 @@ const FormMultiField = ({
                   <SelectValue placeholder={field.placeholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(selectOptions)
-                  && selectOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {Array.isArray(selectOptions) &&
+                    selectOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </FormControl>
           </FormItem>
-        )
+        );
+      case 'multi-select':
+        const fieldName = `${customname ? customname : `${fieldConfig.name}.${index}.${field.name}`}`;
+        const currentValue = form.getValues(fieldName);
+
+        // Handle default values - convert string to array format if needed
+        let defaultValue = currentValue || [];
+        if (typeof currentValue === 'string' && currentValue) {
+          // If it's a string, try to find matching option
+          const matchingOption = Array.isArray(selectOptions)
+            ? selectOptions.find((option: any) => option.value === currentValue)
+            : null;
+          if (matchingOption) {
+            defaultValue = [
+              { label: matchingOption.label, value: matchingOption.value },
+            ];
+          }
+        } else if (Array.isArray(currentValue)) {
+          // Ensure array items have proper format
+          defaultValue = currentValue.map((item: any) => {
+            if (typeof item === 'string') {
+              const matchingOption = Array.isArray(selectOptions)
+                ? selectOptions.find((option: any) => option.value === item)
+                : null;
+              return matchingOption
+                ? { label: matchingOption.label, value: matchingOption.value }
+                : { label: item, value: item };
+            }
+            return item;
+          });
+        }
+
+        return (
+          <FormItem>
+            <FormControl>
+              <MultipleSelector
+                {...register(fieldName)}
+                value={defaultValue}
+                onChange={(selectedOptions) => {
+                  form.setValue(fieldName, selectedOptions, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                    shouldValidate: true,
+                  });
+                }}
+                disabled={isDisabled}
+                className="flex items-center border border-input py-0 outline-offset-2 ring-ring ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring"
+                inputProps={{
+                  className:
+                    'flex w-full rounded-md border bg-background px-2 py-0 text-md file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-md/6 outline-none ring-0 border-0 focus:ring-transparent',
+                }}
+                options={
+                  Array.isArray(selectOptions)
+                    ? selectOptions.map((option: any) => ({
+                        label: option.label,
+                        value: option.value,
+                      }))
+                    : []
+                }
+                placeholder={field.placeholder || 'Select options...'}
+              />
+            </FormControl>
+          </FormItem>
+        );
+      case 'select-creatable':
+        return (
+          <SelectCreatable
+            field={{
+              ...field,
+              selectOptions: field.selectOptions,
+              selectEnableCreate: field.selectEnableCreate,
+              selectOnCreateRecord: field.selectOnCreateRecord as ((query: string) => Promise<any>) | undefined,
+              selectOnCreateValidate: field.selectOnCreateValidate,
+              selectSearchable: field.selectSearchable
+            }}
+            fieldConfig={fieldConfig}
+            index={index}
+            selectOptions={selectOptions}
+            customname={customname}
+            form={form}
+            register={register}
+            isDisabled={isDisabled ?? false}
+          />
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  const dropOptions
-  = fieldConfig.multiFieldConfig?.fieldOptions.map((option, index) => {
-    return {
-      label: option.label,
-      onClick: () => {
-        if (!parentProps) {
-          append({
-            name: option.label,
-            fieldType: option.fieldType,
-            optionId: index,
-            order: fields.length + 1,
-          })
-        }
-        else {
-          const parentFields = parentProps.metadata.fields
-          const parentIndex = parentProps.index
+  const dropOptions =
+    fieldConfig.multiFieldConfig?.fieldOptions.map((option, index) => {
+      return {
+        label: option.label,
+        onClick: () => {
+          if (!parentProps) {
+            append({
+              name: option.label,
+              fieldType: option.fieldType,
+              optionId: index,
+              order: fields.length + 1,
+            });
+          } else {
+            const parentFields = parentProps.metadata.fields;
+            const parentIndex = parentProps.index;
 
-          const newFields: any = [...parentFields, {
-            name: option.label,
-            fieldType: option.fieldType,
-            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            value: '',
-            order: customFields.length + 1,
-            optionId: index,
-          }]
-          setCustomFields(newFields)
-          update(parentIndex, {
-            id: parentProps.id,
-            metadata: {
-              fields: newFields,
-            },
-            order: newFields.length,
-            tabName: parentProps.tabName,
-            component: parentProps.component,
-            tabChildren: parentProps.tabChildren,
-          })
-        }
-      },
-    }
-  }) ?? []
-
+            const newFields: any = [
+              ...parentFields,
+              {
+                name: option.label,
+                fieldType: option.fieldType,
+                id:
+                  Math.random().toString(36).substring(2, 15) +
+                  Math.random().toString(36).substring(2, 15),
+                value: '',
+                order: customFields.length + 1,
+                optionId: index,
+              },
+            ];
+            setCustomFields(newFields);
+            update(parentIndex, {
+              id: parentProps.id,
+              metadata: {
+                fields: newFields,
+              },
+              order: newFields.length,
+              tabName: parentProps.tabName,
+              component: parentProps.component,
+              tabChildren: parentProps.tabChildren,
+            });
+          }
+        },
+      };
+    }) ?? [];
 
   return (
-    <FormItem>
-      <div className="py-2 h-[49px]">
-        <ButtonWithDropdown
-          entity='test'
-          buttonClassName=""
-          buttonVariant='default'
-          leftIcon={PlusIcon}
-          buttonLabel='Add'
-          dropdownOptions={dropOptions}
-          side="start"
-          disabled={
-            isDisabled
-          }
-        />
-      </div>
-      <div className="border-t-default-100 border-b border-t border-b-primary !m-0 h-[49px] flex items-center">
-        <FormLabel className="">{fieldConfig.label}</FormLabel>
-      </div>
-      <FormControl>
-        <Sortable
-          value={parentProps ? customFields : fields}
-          onMove={({ activeIndex, overIndex }) => {
-            if (!parentProps) {
-              move(activeIndex, overIndex)
-            }
-            else {
-              const parentFields = parentProps.metadata.fields
+    <div className='my-2'>
+      <FormItem>
+        {fieldConfig.multiFieldConfig?.showHeader ? (
+          <>
+            <div className="h-[49px] py-2">
+              <ButtonWithDropdown
+                entity="test"
+                buttonClassName=""
+                buttonVariant="default"
+                leftIcon={PlusIcon}
+                buttonLabel="Add"
+                dropdownOptions={dropOptions}
+                side="start"
+                disabled={isDisabled}
+              />
+            </div>
+            <div className="border-t-default-100 !m-0 flex h-[49px] items-center border-b border-t border-b-primary">
+              <FormLabel className="">{fieldConfig.label}</FormLabel>
+            </div>
+          </>
+        ) : null}
 
-          
-              const parentIndex = parentProps.index
-              const newFields: any = [...parentFields]
-              newFields.splice(overIndex, 0, newFields.splice(activeIndex, 1)[0])
+        <FormControl>
+          <Sortable
+            value={parentProps ? customFields : fields}
+            onMove={({ activeIndex, overIndex }) => {
+              if (!parentProps) {
+                move(activeIndex, overIndex);
+              } else {
+                const parentFields = parentProps.metadata.fields;
 
-              const withOrder = newFields.map((f: any, i: number) => ({
-                ...f,
-                order: i + 1,
-              }))
-              setCustomFields(withOrder)
-              update(parentIndex, {
-                id: parentProps.id,
-                metadata: {
-                  fields: withOrder,
-                },
-                order: withOrder.length - 1,
-                tabName: parentProps.tabName,
-                component: parentProps.component,
-                tabChildren: parentProps.tabChildren,
-              })
-            }
-          }}
-        >
-          <div className="!m-0 flex w-full flex-col">
-            {(parentProps ? customFields : fields).map((field: any, index: any) => {
-              return (
-                <SortableItem
-                  key={field.id}
-                  value={field.id}
-                  asChild
-                  draggable={isDisabled ? false : true}
-                >
-                  <div className="border-default-100 flex flex-row items-center gap-2 border-b py-2">
-                    <SortableDragHandle
-                      variant="link"
-                      size="icon"
-                      className={cn(`size-8 shrink-0 text-default/40`, `${isDisabled ? 'opacity-60' : ''}`)}
-                      disabled={isDisabled}
+                const parentIndex = parentProps.index;
+                const newFields: any = [...parentFields];
+                newFields.splice(
+                  overIndex,
+                  0,
+                  newFields.splice(activeIndex, 1)[0],
+                );
+
+                const withOrder = newFields.map((f: any, i: number) => ({
+                  ...f,
+                  order: i + 1,
+                }));
+                setCustomFields(withOrder);
+                update(parentIndex, {
+                  id: parentProps.id,
+                  metadata: {
+                    fields: withOrder,
+                  },
+                  order: withOrder.length - 1,
+                  tabName: parentProps.tabName,
+                  component: parentProps.component,
+                  tabChildren: parentProps.tabChildren,
+                });
+              }
+            }}
+          >
+            <div className="!m-0 flex w-full flex-col">
+              {(parentProps ? customFields : fields).map(
+                (field: any, index: any) => {
+                  return (
+                    <SortableItem
+                      key={field.id}
+                      value={field.id}
+                      asChild
+                      draggable={isDisabled ? false : true}
                     >
-                      <GripVerticalIcon />
-                    </SortableDragHandle>
-                    <div className="min-w-[150px]">
-                      <FormLabel className="font-normal">
-                        { parentProps
-                          ? capitalize(field?.name?.replace(/[-_]/g, ' '))
-                          : form.getValues(`${fieldConfig.name}.${index}.name`)
-                            ?? fieldConfig.multiFieldConfig?.fields?.label}
-                      </FormLabel>
-                    </div>
-                    <div
-                      className={cn(
-                        'flex-1', `${form.getValues(`${fieldConfig.name}.${index}.fieldType`) === 'input' ? '' : ''}`,
-                      )}
-                    >
-                      <FormField
-                        control={parentProps ? newForm.control : form.control}
-                        disabled={isDisabled}
-                        name={`${fieldConfig.multiFieldConfig?.fields.name}-${index}-${fieldConfig?.name ?? ''}`}
-                        render={() => {
-                          const fieldname = parentProps ? `${parentProps?.fieldConfig?.name}.${parentProps?.index}.metadata.fields.${index}.value` : undefined
-                          const optionsID = parentProps
-                            ? field?.optionId
-                            : form.getValues(
-                                `${fieldConfig.name}.${index}.optionId`,
-                              )
+                      <div className="border-default-100 flex flex-row items-center gap-2 py-2">
+                        <SortableDragHandle
+                          variant="link"
+                          size="icon"
+                          className={cn(
+                            `size-8 shrink-0 text-default/40`,
+                            `${isDisabled ? 'opacity-60' : ''}`,
+                          )}
+                          disabled={isDisabled}
+                        >
+                          <GripVerticalIcon />
+                        </SortableDragHandle>
+                        <div className="min-w-[200px]">
+                          <FormLabel className="font-normal">
+                            {field?.label
+                              ? field?.label
+                              : parentProps
+                                ? capitalize(field?.name?.replace(/[-_]/g, ' '))
+                                : (form.getValues(
+                                    `${fieldConfig.name}.${index}.name`,
+                                  ) ??
+                                  fieldConfig.multiFieldConfig?.fields?.label)}
+                          </FormLabel>
+                        </div>
+                        <div
+                          className={cn(
+                            'flex-1',
+                            `${form.getValues(`${fieldConfig.name}.${index}.fieldType`) === 'input' ? '' : ''}`,
+                          )}
+                        >
+                          <FormField
+                            control={
+                              parentProps ? newForm.control : form.control
+                            }
+                            disabled={isDisabled}
+                            name={`${fieldConfig.multiFieldConfig?.fields.name}-${index}-${fieldConfig?.name ?? ''}`}
+                            render={() => {
+                              const fieldname = parentProps
+                                ? `${parentProps?.fieldConfig?.name}.${parentProps?.index}.metadata.fields.${index}.value`
+                                : undefined;
+                              const optionsID = parentProps
+                                ? field?.optionId
+                                : form.getValues(
+                                    `${fieldConfig.name}.${index}.optionId`,
+                                  );
 
-                          return fieldConfig.multiFieldConfig
-                            ? (
+                              return fieldConfig.multiFieldConfig ? (
                                 (renderFormControl(
-                                  fieldConfig.multiFieldConfig.fields, index, field.fieldType, fieldConfig.multiFieldConfig?.fieldOptions[optionsID]?.options ?? [], fieldname
+                                  {
+                                    ...fieldConfig.multiFieldConfig.fields,
+                                    ...(fieldConfig.multiFieldConfig?.fieldOptions[optionsID] || {}),
+                                    selectOptions: Array.isArray(
+                                      fieldConfig.multiFieldConfig
+                                        ?.fieldOptions[optionsID]?.options,
+                                    )
+                                      ? fieldConfig.multiFieldConfig
+                                          ?.fieldOptions[optionsID]?.options
+                                      : [],
+                                  } as IField & {
+                                    selectOptions?: ISelectOptions[];
+                                    radioOptions?: IRadioOptions[];
+                                    checkboxOptions?: ICheckboxOptions[];
+                                  },
+                                  index,
+                                  field.fieldType,
+                                  fieldConfig.multiFieldConfig?.fieldOptions[
+                                    optionsID
+                                  ]?.options ?? [],
+                                  fieldname,
                                 ) ?? <div />)
-                              )
-                            : (
+                              ) : (
                                 <div />
-                              )
-                        }}
-                      />
-                    </div>
-                    {!isDisabled
-                      ? (
+                              );
+                            }}
+                          />
+                        </div>
+                        {!isDisabled ? (
                           <Button
                             disabled={isDisabled}
                             type="button"
                             variant="softDestructive"
                             size="icon"
-                            className=" size-6 shrink-0 rounded-full"
+                            className="size-6 shrink-0 rounded-full"
                             onClick={() => {
                               if (!parentProps) {
-                                remove(index)
-                              }
-                              else {
-                                const parentFields = parentProps.metadata.fields
-                                const parentIndex = parentProps.index
-                                const newItems = parentFields?.filter((f: any) => f.id !== field.id)
-                                setCustomFields(newItems)
+                                remove(index);
+                              } else {
+                                const parentFields =
+                                  parentProps.metadata.fields;
+                                const parentIndex = parentProps.index;
+                                const newItems = parentFields?.filter(
+                                  (f: any) => f.id !== field.id,
+                                );
+                                setCustomFields(newItems);
                                 update(parentIndex, {
                                   id: parentProps.id,
                                   metadata: {
@@ -365,7 +509,7 @@ const FormMultiField = ({
                                   tabName: parentProps.tabName,
                                   component: parentProps.component,
                                   tabChildren: parentProps.tabChildren,
-                                })
+                                });
                               }
                             }}
                           >
@@ -375,19 +519,19 @@ const FormMultiField = ({
                             />
                             <span className="sr-only">Remove</span>
                           </Button>
-                        )
-                      : null}
-                  </div>
-                </SortableItem>
-              )
-            })}
-          </div>
-        </Sortable>
-      </FormControl>
-      <DevTool control={form.control} />
-      <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
-    </FormItem>
-  )
-}
+                        ) : null}
+                      </div>
+                    </SortableItem>
+                  );
+                },
+              )}
+            </div>
+          </Sortable>
+        </FormControl>
+        <FormMessage data-test-id={`${formKey}-err-msg-${fieldConfig.name}`} />
+      </FormItem>
+    </div>
+  );
+};
 
-export default FormMultiField
+export default FormMultiField;

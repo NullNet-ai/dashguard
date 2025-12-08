@@ -1,6 +1,6 @@
 export interface IWizardLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     code: string;
-  };
+  }>;
 }

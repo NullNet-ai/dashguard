@@ -108,7 +108,7 @@ export default function FormEmailInput({
             <FormControl>
               <>
                 <div
-                  className={`flex h-[36px] items-center rounded-md border focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${
+                  className={`flex h-[36px] items-center rounded-md border border-slate-300 focus-within:border-primary focus-within:outline-none focus-within:ring-1 focus-within:ring-ring ${
                     error?.[index]?.email || error?.message ? 'border-destructive' : ''
                   } ${fieldConfig.disabled ? 'bg-secondary' : ''}`}
                 >

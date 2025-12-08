@@ -10,7 +10,7 @@ import { api } from '~/trpc/react';
 const FormSchema = z.object({
   location_id: z.string(),
   details: z.object({
-    address: z.string().optional(),
+    address: z.string(),
     address_line_one: z.string().optional(),
     address_line_two: z.string().optional(),
     latitude: z.number().optional(),

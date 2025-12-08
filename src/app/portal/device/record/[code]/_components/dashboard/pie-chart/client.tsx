@@ -85,7 +85,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
   // Fetch traffic data every second
   useEffect(() => {
-    if (!defaultValues?.id || defaultValues?.device_status.toLowerCase() === 'offline' || !interfaces?.length) return
+    if (!defaultValues?.id || defaultValues?.device_status?.toLowerCase() === 'offline' || !interfaces?.length) return
 
     const fetchChartData = async () => {
       try {

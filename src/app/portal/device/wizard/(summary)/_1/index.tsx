@@ -1,27 +1,29 @@
 'use client';
-
-import { startCase } from 'lodash';
 import { usePathname } from 'next/navigation';
+import { useMemo } from 'react';
 import { api } from '~/trpc/react';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
 
-const fields = {
-  device_category: 'device_category',
-};
-
 const Summary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-
-  const [, , , , identifier] = pathName.split('/');
+  const [, , , _, identifier] = pathName.split('/');
   const {
-    data: record = { data: { id: null } },
+    data: record,
     refetch,
     error,
-  } = api.device.fetchDeviceInfo.useQuery({
-    code: identifier!,
+  } = api.device.getAccountSetUpDetailsByDeviceCode.useQuery({
+    device_code: identifier!
   });
 
-  const { data } = record ?? {};
+  const deviceData = record?.data?.[0];
+  const accountOrg = deviceData?.account_organizations;
+
+  const memoizedAppId = useMemo(() => {
+    if (accountOrg?.email) {
+      return accountOrg?.email;
+    }
+    return 'None';
+  }, [accountOrg?.email]);
 
   useRefetchRecord({
     refetch,
@@ -29,39 +31,28 @@ const Summary = ({ form_key }: { form_key: string }) => {
   });
 
   if (error) {
-    return (
-      <div>
-        {'Error:'}
-        {error.message}
-      </div>
-    );
+    return <div>Error: {error.message}</div>;
   }
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value]) => (
-        <p className="mb-[8px]" key={key}>
-          <strong data-test-id={`device_${key}-wzd_sumry-key-${key}`}>
-            {startCase(key)}:
-          </strong>
-          &nbsp;
-          <span data-test-id={`device_${key}-wzd_sumry-value-${key}`}>
-            {(data as { [key: string]: any })?.[value] || 'None'}
-          </span>
-        </p>
-      ))}
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>App ID: </strong>
+        &nbsp; {memoizedAppId || 'None'}
+      </p>
     </div>
   );
 };
 
-const DeviceBasicDetailsSummary = {
+const SummaryConfig = {
   label: 'Step 1',
-  required: false,
+  required: true,
   components: [
     {
-      label: 'Device Category',
-      component: <Summary form_key={'device_basic_details'} />,
+      label: 'Setup',
+      component: <Summary form_key={'basicDetails'} />,
     },
   ],
 };
-export default DeviceBasicDetailsSummary;
+
+export default SummaryConfig;

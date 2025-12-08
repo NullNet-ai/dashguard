@@ -1,19 +1,18 @@
-'use client';
+"use client";
 
-import { type ColumnDef } from '@tanstack/react-table';
-import StatusCell from '~/components/ui/status-cell';
-// import GridDeviceLastHeartbeat from '../GridDeviceLastHeartbeat';
-import GridDeviceOnlineBadge from '../GridDeviceOnlineBadge';
+import { type ColumnDef } from "@tanstack/react-table";
+import StatusCell from "~/components/ui/status-cell";
 import AuthorizationCell from '../_components/AuthorizationCell';
+import GridDeviceOnlineBadge from '../GridDeviceOnlineBadge';
 
 const gridColumns = [
   {
-    header: 'ID',
-    accessorKey: 'code',
+    header: "ID",
+    accessorKey: "code",
   },
   {
-    header: 'Status',
-    accessorKey: 'status',
+    header: "Status",
+    accessorKey: "status",
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.status;
@@ -66,10 +65,15 @@ const gridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    data_type: 'datetime',
-    sortKey: ['updated_date', 'updated_time'],
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: "updated_date_time",
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
@@ -84,9 +88,14 @@ const gridColumns = [
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
+    accessorKey: 'created_date_time',
     data_type: 'datetime',
-    sortKey: ['created_date', 'created_time'],
+    sortKey: "created_date_time",
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
+    },
   },
   {
     header: 'Created By',

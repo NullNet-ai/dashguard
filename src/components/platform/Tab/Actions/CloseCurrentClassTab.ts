@@ -11,7 +11,7 @@ export const closeClassTab = async ({
   pathname: string;
   current?: boolean;
 }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const currentPathname = headerList.get("x-pathname") || "";
 
   const tab = await api.tab.closeCurrentClassTab({

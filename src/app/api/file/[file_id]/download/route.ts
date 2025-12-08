@@ -6,16 +6,15 @@ import { api } from "~/trpc/server";
 
 export async function GET(
   _: NextRequest,
-  {
-    params,
-  }: {
-    params: { file_id: string }
-  },
+  props: {
+    params: Promise<{ file_id: string }>
+  }
 ) {
+  const params = await props.params;
   const orm = ORM({
     storage_type: EClientDatabaseProvider.LOCAL,
   })
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const { value: email = '' } = cookieStore.get("username") || {};
 
   const token = await api.auth.getToken({

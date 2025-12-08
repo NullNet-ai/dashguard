@@ -35,7 +35,8 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
       if (response && !response.valid && response.errorMessage) {
         setErrorMessage(response.errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       if (error instanceof Error) {
         setError(error.message);
       } else {

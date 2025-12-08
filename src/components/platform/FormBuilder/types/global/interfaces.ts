@@ -54,6 +54,9 @@ import { BadgeProps } from '~/components/ui/badge';
 import { AdaptiveBadgeDisplayProps } from '~/components/ui/adaptive-badge-display';
 import { MessageThreadProps } from '~/components/ui/message';
 import { type ColorPickerProps } from '~/components/ui/color-picker';
+import { CreditCardProps } from '~/components/ui/credit-card/_components/types';
+import { SavedCard } from '~/components/ui/credit-card/_components/save-cards';
+import { OTPInputProps } from '~/components/ui/otp-input';
 
 interface OptionType {
   label: string;
@@ -84,9 +87,10 @@ interface RichTextConfig {
 interface DraggableConfig {
   parentProps?: any;
   fields: IField & {
-    selectOptions?: ISelectOptions[];
+    selectOptions?: ISelectOptions[] | ((data: any) => ISelectOptions[]);
     radioOptions?: IRadioOptions[];
     checkboxOptions?: ICheckboxOptions[];
+    draggableComponent?: any
     formType?:
       | 'input'
       | 'select'
@@ -95,12 +99,15 @@ interface DraggableConfig {
       | 'textarea'
       | 'number-input'
       | 'smart-date'
-      | 'time-picker';
+      | 'time-picker'
+      | 'code-editor'
+      | 'custom-component';
   };
 }
 
 type MultiFieldConfig = DraggableConfig & {
   fieldOptions: MultiFieldOption[];
+  showHeader?: boolean
 };
 export interface CustomFieldProps {
   field: ControllerRenderProps<Record<string, any>, string>;
@@ -113,9 +120,15 @@ export interface CustomFieldProps {
 interface MultiFieldOption {
   label: string;
   name?: string;
-  fieldType: 'input' | 'select' | 'radio' | 'checkbox';
+  fieldType: 'input' | 'select' | 'radio' | 'checkbox' | 'multi-select' | 'select-creatable';
   options?: OptionType[];
   placeholder?: string;
+  selectEnableCreate?: boolean;
+  selectOnCreateRecord?: (query: string) => Promise<any> | undefined;
+  selectOnCreateValidate?: (query: string) => Promise<{
+    valid: boolean;
+    message: string;
+  }> | undefined;
 }
 
 interface DateRangeConfig {
@@ -127,6 +140,7 @@ interface DateRangeConfig {
 interface IField {
   id: string;
   className?: HTMLAttributes<HTMLDivElement>['className'];
+  draggableTriggerClassname?: HTMLAttributes<HTMLDivElement>['className'];
   fieldClassName?: HTMLAttributes<HTMLDivElement>['className'];
   fieldStyle?: React.CSSProperties;
   formType?: TFormType;
@@ -140,9 +154,11 @@ interface IField {
   label?: string;
   detail?: string;
   placeholder?: string;
+  actionPosition?: 'center' | 'default'
   disabled?: boolean;
   hidden?: boolean;
   readonly?: boolean;
+  dropzoneLabel?: string;
   alertVariant?: 'error' | 'warning' | 'info' | 'success';
   alertTitle?: string;
   alertContent?: string;
@@ -209,6 +225,7 @@ interface IField {
   multiSelectHideClearAllButton?: boolean;
   multiSelectShowCreatableItem?: boolean;
   multiSelectUseStringValues?: boolean;
+  metadata?: Record<string, any>;
   richTextConfig?: RichTextConfig;
   multiSelectRenderOption?: (option: OptionType) => React.ReactNode;
   multiSelectRenderBadge?: (
@@ -276,7 +293,7 @@ interface IField {
   isCustomFormField?: boolean;
   groupConfig?: {
     prefix?: string;
-    components?: ComponentType<any>[] | JSX.Element[];
+    components?: ComponentType<any>[] | React.JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
   codeEditorProps?: ICodeEditor & {
@@ -290,6 +307,7 @@ interface IField {
     ImgHTMLAttributes<HTMLImageElement>,
     HTMLImageElement
   >;
+  otpInputConfig?: OTPInputProps;
   buttonConfig?: ButtonProps &
     IconProps &
     TooltipProps &
@@ -312,6 +330,7 @@ interface IField {
   };
   badgeConfig?: BadgeProps;
   colorPickerConfig?: ColorPickerProps;
+  creditCardConfig?: CreditCardProps;
   adaptiveBadgeConfig?: AdaptiveBadgeDisplayProps &
     React.RefAttributes<HTMLDivElement>;
   messageThreadConfig?: MessageThreadProps;
@@ -326,6 +345,8 @@ interface IField {
     >,
   ) => void;
   inputOnChange?: (value: string) => void;
+  onSetPrimary?: (cardId: string) => void;
+  onDeleteCard?: (cardId: string) => void;
 }
 
 interface ISelectOptions {
@@ -336,8 +357,12 @@ interface ISelectOptions {
 interface IRadioOptions {
   value: string | boolean;
   label: string;
-  with_input?: boolean;
   inputPlaceholder?: string;
+  renderComponent?: (props: {
+    form: UseFormReturn<Record<string, any>, any, undefined>;
+    field: ControllerRenderProps<Record<string, any>, string>;
+    fieldConfig: IField;
+  }) => React.ReactNode;
 }
 
 interface ICheckboxOptions {
@@ -350,7 +375,7 @@ interface IHandleSubmit<T = Record<string, any>> {
   form?: UseFormReturn<Record<string, any>, any, undefined>;
   main_entity_id?: string;
   filter_entity?: string;
-  action_type?: string;
+  action_type?: 'Create' | 'Paste' | 'Next' | 'Pristine:Next' | null | undefined;
 }
 
 interface IOnFormListen
@@ -369,6 +394,11 @@ interface IReturnOnSelectRecords {
   rows: any[];
   main_entity_id: string;
   filter_entity: string;
+  confirmation?: {
+    title?: string;
+    description?: string;
+    onConfirm?: any
+  }
 }
 
 interface IUserFormField {
@@ -485,6 +515,11 @@ interface IFilterGridConfig {
     | undefined;
   handleSelectFieldFilterGrid?: (args: any) => Promise<any>;
   fieldFilterGridColumns?: string[];
+  searchSuggestionConfig?: {
+    router?: AppRouterKeys;
+    resolver?: string;
+    query_params?: QueryParams;
+  };
 }
 
 export interface ISearchParams {
@@ -495,8 +530,8 @@ export interface ISearchParams {
   limit?: number;
   advance_filters?: {
     type: string;
-    values: string[];
-    field: string;
+    values?: string[];
+    field?: string;
     operator: string;
     entity?: string;
   }[];
@@ -577,6 +612,7 @@ interface IPropsForms {
   // multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>;
   multiSelectOnSearch?: Record<string, (search: string) => Promise<any[]>>;
   radioOptions?: Record<string, IRadioOptions[]>;
+  savedCardOptions?: SavedCard[];
   checkboxOptions?: Record<string, ICheckboxOptions[]>;
   fetching?: boolean;
   defaultDisplay?: 'expanded' | 'collapsed';
@@ -621,8 +657,8 @@ interface IFieldFilterActions {
 }
 
 interface IGridData {
-  items: any[];
-  totalCount: number;
+  items?: any[];
+  totalCount?: number;
   advance_filters?: any[];
   sorting?: any[];
 }

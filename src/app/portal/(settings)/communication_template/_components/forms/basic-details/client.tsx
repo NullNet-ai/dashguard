@@ -6,6 +6,8 @@ import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { UpdateCommunicationTemplate } from './actions/updateCommunication';
+import { api } from '~/trpc/react';
+import { useFormNavigationStateMachine } from '~/components/platform/FormBuilder/Utils/formNavigation';
 
 const FormSchema = z.object({
   id: z.string().optional(),
@@ -14,17 +16,62 @@ const FormSchema = z.object({
 
 export default function FormLabel({ params, defaultValues }: IFormProps) {
   const toast = useToast();
+  const updateCommunicationTemplate = api.communicationTemplate.updateDraftTemplate.useMutation();
+  const { handleFormSubmission } = useFormNavigationStateMachine();
 
   const handleSave = async ({
     data,
+    action_type
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      await UpdateCommunicationTemplate({
-        id: params.id,
-        name: data.name,
+      // await UpdateCommunicationTemplate({
+      //   id: params.id,
+      //   name: data.name,
+      // });
+      // toast.success('Basic Details submitted successfully.');
+      await handleFormSubmission({
+        action_type,
+        stateMachine: {
+          create: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await updateCommunicationTemplate.mutateAsync({
+                ...data
+              });
+
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              return null
+            },
+            toast_message: 'Basic Details submitted successfully.',
+          },
+          update: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await updateCommunicationTemplate.mutateAsync({
+                ...data
+              });
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              return null
+            },
+            toast_message: 'Basic Details submitted successfully.',
+          },
+          wizard: {
+            new: {},
+            code: {},
+          },
+          record: true,
+        },
       });
-      toast.success('Basic Details submitted successfully.');
-    } catch {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       toast.error('Failed to submit Basic Details');
     }
   };

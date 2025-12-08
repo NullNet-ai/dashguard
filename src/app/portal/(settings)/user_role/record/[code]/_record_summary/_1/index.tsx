@@ -1,14 +1,13 @@
 'use client'
 import React from 'react'
-
 import StatusCell from '~/components/ui/status-cell'
 import { api } from '~/trpc/react'
-
 import useRefetchRecord from '../hooks/useFetchMainRecord'
+import { CardComponent as Card } from '~/components/ui/card/index';
+import { Separator } from '~/components/ui/separator'
 
 const fields = {
   Role: 'role',
-  Category: 'categories',
   Entity: 'entity',
 }
 
@@ -46,20 +45,25 @@ const RecordShellSummary = ({
   }
 
   return (
-    <div>
-      {Object.entries(fields).map(([key, value], index) => {
-        const dataValue = (data as { [key: string]: any })?.[value]
-        return (
-          <div className='pt-2' key={index}>
-            <div className='px-5'>
-              <div className='p-1 text-sm'>
-                <div>
-                  <span className='text-slate-400'>
+    <Card className='p-3'>
+      <div className="flex flex-col gap-y-2">
+        <div>
+          <span className="text-md font-medium text-foreground">
+            User Role Details
+          </span>
+        </div>
+        <Separator />
+        <div className="flex flex-col gap-1">
+          {Object.entries(fields).map(([key, value], index) => {
+            const dataValue = (data as { [key: string]: any })?.[value]
+            return (
+              <div className='text-sm' key={index}>
+                <div className="flex justify-between gap-2">
+                  <span className='text-slate-400 whitespace-nowrap'>
                     {key}
-                    :
                     {' '}
                   </span>
-                  <span>
+                  <span className='break-all text-slate-700'>
                     {key === 'Category'
                       ? (dataValue?.length
                         && dataValue.map((item: string) => {
@@ -70,11 +74,11 @@ const RecordShellSummary = ({
                   </span>
                 </div>
               </div>
-            </div>
-          </div>
-        )
-      })}
-    </div>
+            )
+          })}
+        </div>
+      </div>
+    </Card>
   )
 }
 

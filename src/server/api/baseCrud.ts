@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { privateProcedure } from '~/server/api/trpc';
 import type Entities from '~/auto-generated/entities';
 type Entity = (typeof Entities)[number];
+import { get_meta_header } from '~/utils/request-header';
 
 export const createDefineRoutes = (entity: Entity) => ({
   createDraftRecord: privateProcedure
@@ -14,10 +15,12 @@ export const createDefineRoutes = (entity: Entity) => ({
         .optional(),
     )
     .mutation(async ({ ctx, input }) => {
+      const meta_header = await get_meta_header();
       const record = await ctx.dnaClient
         .create({
           entity,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: {
               status: 'Draft',
@@ -70,10 +73,12 @@ export const createDefineRoutes = (entity: Entity) => ({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
       const record = await ctx.dnaClient
         .update(input.id, {
           entity,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: {
               tombstone: 1,
@@ -138,10 +143,12 @@ export const createDefineRoutes = (entity: Entity) => ({
     )
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
+      const meta_header = await get_meta_header();
       const record = await ctx.dnaClient
         .update(id, {
           entity,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: {
               status: 'Archived',

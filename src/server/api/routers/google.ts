@@ -5,11 +5,11 @@ const authtoken = Buffer.from(
   `places-api:4lc0UxobR=DuyL4r?=uS`,
   "utf8",
 ).toString("base64");
-// const options = {
-//   headers: {
-//     Authorization: `Basic ${authtoken}`,
-//   },
-// };
+const options = {
+  headers: {
+    Authorization: `Basic ${authtoken}`,
+  },
+};
 
 // api.places.platform.dnadev.net
 

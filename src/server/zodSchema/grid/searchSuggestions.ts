@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import Entities from '~/auto-generated/entities';
 
-const ZodSearchSuggestions = z.object({
+export const ZodSearchSuggestions = z.object({
   entity: z.string().refine(
     (value) => {
       return Entities.includes(value);
@@ -18,6 +18,7 @@ const ZodSearchSuggestions = z.object({
     .array(
       z.object({
         type: z.string(),
+        is_case_sensitive_sorting: z.boolean().optional(),
         field: z.string().optional(),
         entity: z.string().optional(),
         operator: z.string(),
@@ -51,8 +52,6 @@ const ZodSearchSuggestions = z.object({
     .optional(), // Optional group advance filters
   grouping: z.array(z.string()).optional(), // Optional groupings
   searchable_fields: z.array(z.any()).optional(),
-  is_case_sensitive_sorting: z.string().optional(),
-
 });
 
 export default ZodSearchSuggestions;

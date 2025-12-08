@@ -113,6 +113,11 @@ export default function AddressAutoComplete(props: AddressAutoCompleteProps) {
           fieldConfig={fieldConfig}
           formRenderProps={formRenderProps}
         />
+        {!!Object.keys(form?.formState?.errors).length && fieldConfig?.required && (
+          <div className="text-sm font-medium text-destructive mt-1">
+            Address is required.
+          </div>
+        )}
         {address?.place_id ? (
           <div className="items-center">
             <AddressForm

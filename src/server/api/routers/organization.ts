@@ -8,11 +8,12 @@ import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
-import { pluralize } from '~/server/utils/pluralize'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import pluralize from 'pluralize'
+import { get_meta_header } from '~/utils/request-header';
 
 const ENTITY = 'organization'
 
@@ -90,6 +91,7 @@ export const organizationRouter = createTRPCRouter({
         })
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header(ENTITY);
       if (input.name) {
         const advance_filters = createAdvancedFilter({
           name: input.name,
@@ -138,6 +140,7 @@ export const organizationRouter = createTRPCRouter({
       const res = await ctx.dnaClient
         .update(input.id, {
           entity: 'organization',
+          ...meta_header,
           token: ctx.token.value,
           mutation: {
             params: {
@@ -223,10 +226,12 @@ export const organizationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header(ENTITY)
       return ctx.dnaClient
         .update(input.id, {
           entity: ENTITY,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: {
               status: 'Archive',
@@ -243,9 +248,11 @@ export const organizationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header(ENTITY)
       return ctx.dnaClient
         .update(input.id, {
           entity: ENTITY,
+          ...meta_header,
           token: ctx.token.value,
           mutation: {
             params: {
@@ -302,9 +309,11 @@ export const organizationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header(ENTITY)
       return ctx.dnaClient
         .update(input.id, {
           entity: ENTITY,
+          ...meta_header,
           token: ctx.token.value,
           mutation: {
             params: {
@@ -401,10 +410,12 @@ export const organizationRouter = createTRPCRouter({
   updateOrganizationsWithTags: privateProcedure
     .input(z.object({ id: z.string(), tags: z.array(z.string()).optional() }))
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header(ENTITY)
       const { tags } = input
 
       return ctx.dnaClient
         .update(input.id, {
+          ...meta_header,
           entity: ENTITY,
           token: ctx.token.value,
           mutation: {
@@ -603,9 +614,8 @@ export const organizationRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          //@ts-expect-error - multiple sort
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+            ? formatSorting(input.sorting)
             : [],
         },
       })

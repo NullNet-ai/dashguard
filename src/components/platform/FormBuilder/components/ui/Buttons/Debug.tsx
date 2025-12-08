@@ -14,7 +14,7 @@ export default function DebugButton({
       size={"icon"}
       variant={"ghost"}
       onClick={handleDebug}
-      className="m-auto h-6 w-6 rounded-full bg-destructive/10 hover:bg-destructive/20"
+      className="m-auto size-[22px] rounded-full bg-destructive/10 hover:bg-destructive/20"
       type="button"
     >
       <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-destructive" />

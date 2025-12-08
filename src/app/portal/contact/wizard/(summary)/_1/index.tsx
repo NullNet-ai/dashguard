@@ -52,11 +52,11 @@ const Summary = ({ form_key }: { form_key: string }) => {
 
   return (
     <div>
-      <p className="mb-[8px] no-underline">
+      <p className="mb-[8px] no-underline text-[#334155]">
         <span className='text-slate-400'> Phone Number: </span>
         &nbsp; {phone}
       </p>
-      <p>
+      <p className="text-[#334155]">
         <span className='text-slate-400'> Email: </span>
         &nbsp; {email}
       </p>

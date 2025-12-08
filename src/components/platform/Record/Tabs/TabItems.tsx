@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDownIcon } from 'lucide-react';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
@@ -15,6 +15,12 @@ import useScreenType from '~/hooks/use-screen-type';
 import { cn, formatTabName } from '~/lib/utils';
 import { remToPx } from '~/utils/fetcher';
 import Link from 'next/link';
+import { CardComponent as Card } from '~/components/ui/card/index';
+import { Button } from '~/components/ui/button';
+import { PresentationChartLineIcon } from '@heroicons/react/24/outline';
+import TimelineWizardRecord from '../TimelineRecord';
+import { RecordContext } from '../Provider';
+import { useSideDrawer } from '../../SideDrawer';
 
 type TabItemProps = {
   tabs: any[];
@@ -27,6 +33,22 @@ let SUMMARY_TAB_WIDTH = 300;
 const TabItems = ({ tabs, pathname }: TabItemProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
+  const { state } = useContext(RecordContext);
+  const { enableTimeline, metadata } = state ?? {};
+     const { actions: sideDrawerAction } = useSideDrawer();
+
+  const handleOpenTimeline = () => {
+    if (!enableTimeline) return;
+    sideDrawerAction?.openSideDrawer({
+      header: <h1 className='flex items-center gap-x-1'> <PresentationChartLineIcon className="size-5" /> <span>{metadata?.timeline_title ?? 'Timeline Records'} </span></h1>,
+      sideDrawerWidth: '800px',
+      body: {
+        component: TimelineWizardRecord
+      },
+    });
+  }
+
+
   let sidebar_width = remToPx(open ? 16 : 5);
   const size = useScreenType();
   const router = useRouter();
@@ -56,86 +78,104 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
 
   const entityName = pathname.split('/')[2];
   return (
-    <div className="flex items-center justify-between border-b border-slate-300">
-      <div className={cn('flex flex-row')}>
-        {newItems.map((tab, index: number) => {
-          return (
-            <div
-              key={tab.id}
-              className="group relative flex cursor-pointer items-center px-4"
-            >
-              <Link
-                href={`${tab.id}`}
-                data-test-id={
-                  entityName +
-                  '-rcrdtab-' +
-                  tab.name.split(' ').join('-').toLowerCase()
-                }
-                key={tab.name + index}
-                // onClick={() => {
-                //   router.push(`?current_tab=${tab.id}`);
-                // }}
-                aria-current={tabName === tab.id ? 'page' : undefined}
-                className={cn(
-                  tabName === tab.id
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                  'whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium md:py-3',
-                  'flex items-center space-x-2',
-                )}
-              >
-                {formatTabName(tab.name)}
-              </Link>
-            </div>
-          );
-        })}
-      </div>
-      {dropdownItems.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="flex items-center space-x-1 bg-muted px-4 py-2 text-sm font-medium text-gray-500 hover:text-primary md:py-3"
-            data-test-id={'rcrdtab-ddn-btn'}
-          >
-            <ChevronDownIcon
-              className="h-6 w-6 text-muted-foreground group-hover:text-primary"
-              aria-hidden="true"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="">
-            {dropdownItems.map((tab) => (
-              <DropdownMenuItem
-                key={tab.name}
-                className="group relative flex items-center p-2 py-3"
-              >
-                <a
-                  data-test-id={
-                    entityName +
-                    '-rcrdtab-' +
-                    tab.name.split(' ').join('-').toLowerCase()
-                  }
-                  href={tab.href}
-                  aria-current={
-                    searchParams.get('current_tab') === tab.id
-                      ? 'page'
-                      : undefined
-                  }
-                  className={cn(
-                    searchParams.get('current_tab') === tab.id
-                      ? 'text-primary'
-                      : 'text-gray-500',
-                    'whitespace-nowrap px-4 text-sm font-medium',
-                    'flex items-center space-x-2',
-                    'hover:border-t-primary hover:text-primary',
-                  )}
+    <Card>
+      <div className="flex items-center">
+        <div className="flex items-center justify-between flex-1">
+          <div className={cn('flex flex-row')}>
+            {newItems.map((tab, index: number) => {
+              return (
+                <div
+                  key={tab.id}
+                  className="group relative flex cursor-pointer items-center"
                 >
-                  {formatTabName(tab.name)}
-                </a>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </div>
+                  <Link
+                    href={`${tab.id}`}
+                    data-test-id={
+                      entityName +
+                      '-rcrdtab-' +
+                      tab.name.split(' ').join('-').toLowerCase()
+                    }
+                    key={tab.name + index}
+                    // onClick={() => {
+                    //   router.push(`?current_tab=${tab.id}`);
+                    // }}
+                    aria-current={tabName === tab.id ? 'page' : undefined}
+                    className={cn(
+                      tabName === tab.id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium md:py-3',
+                      'flex items-center space-x-2',
+                    )}
+                  >
+                    {formatTabName(tab.name)}
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+          {dropdownItems.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="flex items-center space-x-1 bg-muted px-4 py-2 text-sm font-medium text-gray-500 hover:text-primary md:py-3"
+                data-test-id={'rcrdtab-ddn-btn'}
+              >
+                <ChevronDownIcon
+                  className="h-6 w-6 text-muted-foreground group-hover:text-primary"
+                  aria-hidden="true"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="">
+                {dropdownItems.map((tab) => (
+                  <DropdownMenuItem
+                    key={tab.name}
+                    className="group relative flex items-center p-2 py-3"
+                  >
+                    <a
+                      data-test-id={
+                        entityName +
+                        '-rcrdtab-' +
+                        tab.name.split(' ').join('-').toLowerCase()
+                      }
+                      href={tab.href}
+                      aria-current={
+                        searchParams.get('current_tab') === tab.id
+                          ? 'page'
+                          : undefined
+                      }
+                      className={cn(
+                        searchParams.get('current_tab') === tab.id
+                          ? 'text-primary'
+                          : 'text-gray-500',
+                        'whitespace-nowrap px-4 text-sm font-medium',
+                        'flex items-center space-x-2',
+                        'hover:border-t-primary hover:text-primary',
+                      )}
+                    >
+                      {formatTabName(tab.name)}
+                    </a>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+        <div className='border-r border-gray-200'>
+              <Button
+                variant={"outline"}
+                className='flex gap-x-1 mr-2'
+                type={"button"} 
+                size={"xs"}
+                onClick={() => {
+                  handleOpenTimeline()
+                }}
+              >
+                <PresentationChartLineIcon className='size-4 text-primary'/>
+                <span className='text-primary'>Timeline Record</span>
+              </Button>
+        </div>
+      </div>
+    </Card>
   );
 };
 

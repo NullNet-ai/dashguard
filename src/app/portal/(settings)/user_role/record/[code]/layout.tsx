@@ -8,7 +8,7 @@ import RecordSummaryPage from './_record_summary';
 import ContentLoading from './loading';
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, , identifier] = pathname.split('/')
 
@@ -70,5 +70,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     />
   )
 }
+
+export const dynamic = 'force-dynamic'
 
 export default Layout

@@ -21,11 +21,13 @@ import {
   SidebarMenuSubButton,
   useSidebar,
 } from '~/components/ui/sidebar';
-import useScreenType from '~/hooks/use-screen-type';
 import { testIDFormatter } from '~/utils/formatter';
 
 import { type ISidebarMenu } from './type';
 import { getPathLink } from './actions';
+import { truncate } from 'lodash';
+import { cn } from '~/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 interface IProps {
   item: ISidebarMenu;
   screenType?: string;
@@ -37,8 +39,7 @@ export default function Menu({ item, screenType }: IProps) {
   const router = useRouter();
   const [, , entity, application] = pathname?.split('/');
   const [isFavorite, setIsFavorite] = useState(false);
-  const { open, setOpenMobile } = useSidebar();
-  const stype = useScreenType();
+  const { open, setOpenMobile, openMobile } = useSidebar();
   const isMobile =
     screenType !== 'lg' && screenType !== 'xl' && screenType !== '2xl';
 
@@ -81,20 +82,25 @@ export default function Menu({ item, screenType }: IProps) {
     // Otherwise, return the original item.url
     return item.url || '#';
   };
+
+  const sidebarIsOpen = isMobile ? openMobile : open;
+
   return (
-    <SidebarMenu className="px-2">
+    <SidebarMenu className="mb-2">
       <Collapsible
         key={item.title}
         asChild={true}
         defaultOpen={item.isActive}
-        className="group/collapsible"
+        className={cn('group/collapsible', {
+          'flex justify-center': !open
+        })}
       >
         <SidebarMenuItem>
           {item?.items?.length ? (
             <>
               <CollapsibleTrigger asChild={true}>
                 <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}>
-                  <ICON className="mr-2 h-5 w-5" />
+                  <ICON className="mr-1 !size-6" />
                   <span>{item.title}</span>
                   <Link
                     href={'#'}
@@ -107,7 +113,7 @@ export default function Menu({ item, screenType }: IProps) {
                       setOpenMobile(false);
                     }}
                   >
-                    <span className="font-semibold">{item.title}</span>
+                    <span className="font-medium text-md leading-6">{item.title}</span>
                   </Link>
                   {!!item?.items?.length && (
                     <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -152,7 +158,7 @@ export default function Menu({ item, screenType }: IProps) {
             <Link
               // href={getMenuLink(item || '')}
               href={'#'}
-              className={`group/item flex items-center gap-2 ${isActive && 'bg-muted text-primary'} ${open ? '' : 'justify-center bg-transparent'} `}
+              className={`group/item flex items-center rounded-[4px] gap-2 ${isActive ? 'bg-slate-50 text-primary lg:hover:text-primary' : 'text-slate-700'} ${open ? '' : 'justify-center w-full bg-transparent'} `}
               data-test-id={testIDFormatter(`sdnavmenu-itm-${item.title}`)}
               onClick={async (e) => {
                 e.preventDefault();
@@ -161,39 +167,51 @@ export default function Menu({ item, screenType }: IProps) {
                 setOpenMobile(false);
               }}
             >
-              <SidebarMenuButton
-                tooltip={!isMobile ? item.title : undefined}
-                data-test-id={testIDFormatter(
-                  `sdnavmenu-itm-${item.title}-btn`,
-                )}
-              >
-                <ICON className="mr-2 h-5 w-5" />
-                {open || stype === 'sm' || stype === 'md' || stype === 'xs' ? (
-                  <span className="font-semibold">{item.title}</span>
-                ) : null}
-                <>
-                  {' '}
-                  {!open ? (
-                    isFavorite ? (
-                      <SolidStarIcon
-                        onClick={toggleFavorite}
-                        data-test-id={testIDFormatter(
-                          `sdnavmenu-itm-${item.title}-fav-btn`,
-                        )}
-                        className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                      />
-                    ) : (
-                      <StarIcon
-                        onClick={toggleFavorite}
-                        data-test-id={testIDFormatter(
-                          `sdnavmenu-itm-${item.title}-fav-btn`,
-                        )}
-                        className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
-                      />
-                    )
-                  ) : null}
-                </>
-              </SidebarMenuButton>
+              {(() => {
+                const maxLength = 20;
+                const shouldShowTooltip = item?.title && item.title.length > maxLength;
+                const displayText = shouldShowTooltip ? truncate(item.title, { length: maxLength }) : item.title;
+
+                const menuButton = (
+                  <SidebarMenuButton
+                    className={cn(
+                      'flex',
+                      {
+                        'lg:hover:!text-primary': isActive,
+                        '!w-full justify-center': !open && !isMobile,
+                        'justify-center': !open,
+                        'justify-start': sidebarIsOpen
+                      }
+                    )}
+                    tooltip={!isMobile ? item.title : undefined}
+                    data-test-id={testIDFormatter(
+                      `sdnavmenu-itm-${item.title}-btn`,
+                    )}
+                  >
+                    <ICON className={cn('mr-1 !size-6 text-slate-400', {
+                        'text-primary': isActive,
+                        'mr-0': !open,
+                      })}
+                    />
+                    {sidebarIsOpen && (
+                      <span className={`font-medium text-md leading-6`}>{displayText}</span>
+                    )}
+                  </SidebarMenuButton>
+                );
+
+                return shouldShowTooltip ? (
+                  <TooltipProvider>
+                    <Tooltip delayDuration={100}>
+                      <TooltipTrigger asChild>
+                        {menuButton}
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {item.title}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : menuButton;
+              })()}
             </Link>
           )}
         </SidebarMenuItem>
@@ -201,3 +219,28 @@ export default function Menu({ item, screenType }: IProps) {
     </SidebarMenu>
   );
 }
+
+
+// favorite star button
+// <>
+//   {' '}
+//   {!open ? (
+//     isFavorite ? (
+//       <SolidStarIcon
+//         onClick={toggleFavorite}
+//         data-test-id={testIDFormatter(
+//           `sdnavmenu-itm-${item.title}-fav-btn`,
+//         )}
+//         className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
+//       />
+//     ) : (
+//       <StarIcon
+//         onClick={toggleFavorite}
+//         data-test-id={testIDFormatter(
+//           `sdnavmenu-itm-${item.title}-fav-btn`,
+//         )}
+//         className="ml-auto cursor-pointer text-yellow-400 opacity-0 transition-opacity duration-300 ease-in-out group-hover/item:opacity-100"
+//       />
+//     )
+//   ) : null}
+// </>

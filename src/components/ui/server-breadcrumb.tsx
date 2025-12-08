@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { headers, type UnsafeUnwrappedHeaders } from 'next/headers';
 import { Breadcrumb, type BreadcrumbItem } from './breadcrumb'
 
 // Re-implement the generateBreadcrumbItems function for server component
@@ -17,8 +17,8 @@ function generateBreadcrumbItemsServer(path: string): BreadcrumbItem[] {
       // Format the label: capitalize first letter and replace hyphens with spaces
       label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
       isCurrent: isLast
-    }
-  })
+    };
+  });
 }
 
 interface ServerBreadcrumbProps {
@@ -35,7 +35,7 @@ export function ServerBreadcrumb({
   customPath
 }: ServerBreadcrumbProps) {
   // Get the current path from headers
-  const headersList = headers()
+  const headersList = (headers() as unknown as UnsafeUnwrappedHeaders)
   const path = customPath || headersList.get('x-pathname') || ''
   
   // Generate breadcrumb items on the server

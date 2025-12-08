@@ -40,8 +40,8 @@ export const HeaderGroupWrapper = ({
       const allItems: any[] = [];
       const newData = param_items || items;
       // clear width, more width, and search by
-      let totalWidth = 0;
-      const containerWidth = parentRef.current?.offsetWidth || 0;
+      let totalWidth = 24;
+      const containerWidth = 200;
 
       for (let index = 0; index < newData?.length; index++) {
         if (itemsRef.current[index]?.offsetWidth) {
@@ -97,7 +97,7 @@ export const HeaderGroupWrapper = ({
       <div
         ref={parentRef}
         className={cn(
-          `header-table-grid flex w-[250px] flex-1 items-center gap-1`,
+          `header-table-grid flex max-w-[270px]  flex-1 items-center gap-1`,
           `overflow-hidden`,
         )}
       >
@@ -119,7 +119,7 @@ export const HeaderGroupWrapper = ({
               <Badge
                 borderRadius={'md'}
                 variant="primary"
-                className="flex items-center gap-1 px-2"
+                className="flex items-center justify-between gap-1 px-2 min-w-[60px]"
               >
                 {column?.columnDef?.header as string}
                 <X
@@ -155,7 +155,7 @@ export const HeaderGroupWrapper = ({
             </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="pt-2"
+            className="py-2 pb-1 px-2"
             align="end"
             alignOffset={10}
             side="bottom"

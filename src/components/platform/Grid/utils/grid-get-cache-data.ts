@@ -24,6 +24,7 @@ export interface IGridCacheDataResponse {
   columns: Record<string, any>[];
   groups: IGroupBy[];
   grid_tabs: any[];
+  current_tab_id: string;
 }
 interface IGridCacheData {
   gridKey?: string;
@@ -33,9 +34,15 @@ interface IGridCacheData {
   defaultGridTabs?: any[];
   pathname?: string;
   defaultSorting?: SortingState;
+  additionalFilters?: ISearchItem[];
+  defaultGrouping?: IGroupBy[];
+  gridEntity?: string;
+  defaultAdvanceFilter?: ISearchItem[];
+  hideDefaultAllTab?: boolean;
 }
 
 const defaultValues = {
+  current_tab_id: '',
   grid_tabs: [],
   sorts: {
     sorting: [],

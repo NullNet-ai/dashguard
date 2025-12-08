@@ -3,7 +3,6 @@
 import Header from "./Header";
 import WizardProvider from "./Provider";
 import { type IState, type Summary, type TStepsNavigationButtons } from "./type";
-
 import SummaryComponent from "./Summary";
 import SummaryMobile from "./SummaryMobile";
 
@@ -25,18 +24,18 @@ export default function Wizard(props: Wizard) {
       config={config}
       stepsNavigation={stepsNavigation}
     >
-     <section className="overflow-hidden wizard-section relative  lg:mt-[0px]">
-        <div className="flex ">
+     <section className="overflow-hidden wizard-section relative p-2 lg:mt-[0px]">
+        <div className="flex gap-2">
           {/* Left side: Stepper */}
-            <div className="hidden sm:block">
+          <div className="hidden sm:block">
             <SummaryComponent />
-            </div>
+          </div>
 
-          <div className="flex-grow bg-transparent">
-            <div className="border-b flex items-center md:h-[2.72rem]">
+          <div className="flex flex-col gap-2 flex-grow bg-transparent">
+            <div className="flex items-center md:h-[2.72rem]">
               <Header />
             </div>
-            <div className="md:h-[calc(100vh-10rem)] h-[calc(100vh-14rem)] overflow-auto">
+            <div className="rounded-t-[2px] rounded-b-[8px] md:h-[calc(100vh-10rem)] h-[calc(100vh-14rem)] overflow-auto">
               {children}
             </div>
           </div>

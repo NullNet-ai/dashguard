@@ -8,6 +8,7 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(["local", "development", "test", "production"]),
+    WG_SERVER_IP: z.string().url(),
   },
 
   /**
@@ -21,6 +22,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SOCKET_URL: z.string().optional(),
     NEXT_PUBLIC_SOCKET_USERNAME: z.string().optional(),
     NEXT_PUBLIC_SOCKET_PASSWORD: z.string().optional(),
+    NEXT_PUBLIC_ORIGIN_WEBSITE_URL: z.string().optional(),
   },
 
   /**
@@ -33,7 +35,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_SOCKET_USERNAME: process.env.NEXT_PUBLIC_SOCKET_USERNAME,
     NEXT_PUBLIC_SOCKET_PASSWORD: process.env.NEXT_PUBLIC_SOCKET_PASSWORD,
+    NEXT_PUBLIC_ORIGIN_WEBSITE_URL: process.env.NEXT_PUBLIC_ORIGIN_WEBSITE_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    WG_SERVER_IP: process.env.WG_SERVER_IP,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -56,7 +56,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             (op.direction === "down" && op.result instanceof Error),
         }),
         splitLink({
-          condition: (op) => op.type === "mutation",
+          condition: (op) => op.type === "mutation" || op.type === "query",
           true: httpBatchLink({
             transformer: SuperJSON,
             url: getBaseUrl() + "/api/trpc",

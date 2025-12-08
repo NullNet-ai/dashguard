@@ -20,6 +20,8 @@ import {
 } from '~/components/ui/tooltip';
 import { useSocket } from '~/context/SocketProvider';
 import { useToast } from '~/context/ToastProvider';
+import { handleEvent } from '~/server/events';
+import { EEventType } from '~/server/events/types';
 import { api } from '~/trpc/react';
 
 interface AccountCustomRowActionProps {
@@ -125,13 +127,19 @@ export function AccountCustomRowAction({
         account_code: code,
         manual_trigger: true,
       });
-      socketClient.publish({
-        type:
-          categories[0] === 'Internal User'
-            ? 'ACCOUNT_INVITE_INTERNAL'
-            : 'ACCOUNT_INVITE_EXTERNAL',
-        payload: response,
-      });
+      // socketClient.publish({
+      //   type:
+      //     categories[0] === 'Internal User'
+      //       ? 'ACCOUNT_INVITE_INTERNAL'
+      //       : 'ACCOUNT_INVITE_EXTERNAL',
+      //   payload: response,
+      // });
+      await handleEvent(
+        categories[0] === 'Internal User'
+          ? EEventType.ACCOUNT_INVITE_INTERNAL
+          : EEventType.ACCOUNT_INVITE_EXTERNAL,
+        response,
+      );
       pathName && router.push(pathName);
     } catch {
       toast.error('Failed to resend invitation');
@@ -140,7 +148,7 @@ export function AccountCustomRowAction({
 
   if (viewMode === 'card') {
     const renderDropdownItem = (
-      icon: JSX.Element,
+      icon: React.JSX.Element,
       label: string,
       onClick: () => void,
       color: string,
@@ -195,7 +203,7 @@ export function AccountCustomRowAction({
             <Button
               onClick={() => handleChangeStatus(action)}
               disabled={isDisable}
-              className={isDisable ? 'disabled:opacity-50' : ''}
+              className={`px-2 h-full hover:bg-slate-50 ${isDisable ? 'disabled:opacity-50' : ''}`}
             >
               <Icon className={`h-3 w-3 ${color}`} />
             </Button>
@@ -218,7 +226,7 @@ export function AccountCustomRowAction({
       ].includes(account_status) && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={handleResendInvite}>
+            <Button className="px-2 h-full hover:bg-slate-50" onClick={handleResendInvite}>
               <Send className="h-3 w-3 text-yellow-500" />
             </Button>
           </TooltipTrigger>

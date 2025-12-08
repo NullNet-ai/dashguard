@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type PropsWithChildren, useContext, useState } from "react";
+import { createContext, type PropsWithChildren, useContext, useEffect, useState } from "react";
 import { Transition } from "@headlessui/react";
 import { CheckCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -39,20 +39,31 @@ export const useToast = (): ToastContextType => {
 // ToastProvider component
 export function ToastProvider({ children }: PropsWithChildren) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
+  
   // Function to add a toast with a default position of "bottom-right"
   const addToast = (
     message: string,
     type: ToastType = "success",
     position: ToastPosition = "bottom-right",
   ) => {
-    setToasts([...toasts, { id: Date.now(), message, type, position }]);
-    setTimeout(() => removeToast(), 3000); // Automatically remove after 3s
+    const id = Date.now();
+    setToasts((prevToasts) => {
+      const newToasts = [...prevToasts, { id, message, type, position }];
+      return newToasts;
+    });
   };
 
-  // Function to remove a toast (removes the oldest one)
-  const removeToast = () => {
-    setToasts((prevToasts) => prevToasts.slice(1));
+  // Function to remove a specific toast by ID
+  const removeToast = (id?: number) => {
+    if (id) {
+      setToasts((prevToasts) => {
+        const filteredToasts = prevToasts.filter((toast) => toast.id !== id);
+        return filteredToasts;
+      });
+    } else {
+      // Fallback to the original behavior if no ID is provided
+      setToasts((prevToasts) => prevToasts.slice(1));
+    }
   };
 
   // Expose the toast functions (success and error) through the context
@@ -70,18 +81,20 @@ export function ToastProvider({ children }: PropsWithChildren) {
       {["top-left", "top-right", "bottom-left", "bottom-right"].map((pos) => (
         <div
           key={pos}
-          className={`pointer-events-none fixed flex w-full px-4 py-6 ${
+          className={`pointer-events-none fixed flex w-full px-4 py-6 z-50 ${
             pos.includes("bottom") ? "bottom-0" : "top-0"
           } ${pos.includes("right") ? "right-0" : "left-0"} px-4 py-6 sm:p-6`}
         >
           <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
             {toasts
               .filter((toast) => toast.position === pos)
-              .map((toast) => (
+              .map((toast, index) => (
                 <Toast
                   key={toast.id}
                   message={toast.message}
                   type={toast.type}
+                  onClose={() => removeToast(toast.id)}
+                  delay={index * 1000}
                 />
               ))}
           </div>
@@ -92,8 +105,44 @@ export function ToastProvider({ children }: PropsWithChildren) {
 }
 
 // Toast component to display each individual toast
-function Toast({ message, type }: { message: string; type: ToastType }) {
-  const [show, setShow] = useState(true);
+function Toast({ 
+  message, 
+  type, 
+  onClose,
+  delay = 0
+}: { 
+  message: string; 
+  type: ToastType; 
+  onClose: () => void;
+  delay?: number; 
+}) {
+  const [show, setShow] = useState(false);
+  
+  // First mount effect - show the toast after a brief delay
+  useEffect(() => {
+    const showTimer = setTimeout(() => {
+      setShow(true);
+    }, 50);
+
+    return () => clearTimeout(showTimer);
+  }, [message]);
+
+  useEffect(() => {
+    // Base timeout (3 seconds) plus any additional delay for staggered closing
+    const closeDelay = 800 + delay;
+
+    const timer = setTimeout(() => {
+      setShow(false);
+
+      setTimeout(() => {
+        onClose();
+      }, 300);
+    }, closeDelay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [message, onClose, delay]);
 
   return (
     <Transition
@@ -102,7 +151,7 @@ function Toast({ message, type }: { message: string; type: ToastType }) {
       enter="transition ease-out duration-300 transform"
       enterFrom="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
       enterTo="opacity-100 translate-y-0 sm:translate-x-0"
-      leave="transition ease-in duration-100"
+      leave="transition ease-in duration-300"
       leaveFrom="opacity-100"
       leaveTo="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
     >
@@ -122,7 +171,10 @@ function Toast({ message, type }: { message: string; type: ToastType }) {
             </div>
             <div className="ml-4 flex-shrink-0">
               <button
-                onClick={() => setShow(false)}
+                onClick={() => {
+                  setShow(false);
+                  setTimeout(onClose, 300);
+                }}
                 className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <span className="sr-only">Close</span>

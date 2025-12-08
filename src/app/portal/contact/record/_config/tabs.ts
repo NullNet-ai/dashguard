@@ -1,4 +1,9 @@
 const tabs = [
+  //   {
+  //   id: "timeline",
+  //   name: "Timeline",
+  //   tabName: "timeline?categories=",
+  // },
   {
     id: "dashboard",
     name: "Dashboard",

@@ -1,7 +1,8 @@
-"use server";
+'use server';
 
-import { headers } from "next/headers";
-import { api } from "~/trpc/server";
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { api } from '~/trpc/server';
 
 export async function SaveAndContinue({
   entity,
@@ -14,8 +15,8 @@ export async function SaveAndContinue({
   currentContext: string;
   defaultRecordTab?: string;
 }) {
-  const headerList = headers();
-  const pathname = headerList.get("x-pathname") || "";
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
 
   await api.wizard.activator({
     entity,
@@ -28,11 +29,11 @@ export async function SaveAndContinue({
     href: updatedPath,
     current_context: currentContext,
   });
-  
+
   // Return the URL instead of redirecting
-  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-    return `/portal/record/version/1/${identifier}/?current_tab=dashboard`;
-  } else {
-    return `/portal/${entity}/record/${identifier}/${defaultRecordTab ?? entity}`;
-  }
+
+    redirect(
+      `/portal/${entity}/record/${identifier}/${defaultRecordTab ?? entity}`,
+    );
+  
 }

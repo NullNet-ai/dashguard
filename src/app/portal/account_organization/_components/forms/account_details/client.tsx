@@ -9,6 +9,7 @@ import { AccountDetailSchema } from '~/server/zodSchema/account/internalUserDeta
 import { api } from '~/trpc/react'
 
 import { type IFormProps } from '../types'
+import { useFormNavigationStateMachine } from '~/components/platform/FormBuilder/Utils/formNavigation'
 
 export default function BasicDetails({
   params,
@@ -17,18 +18,63 @@ export default function BasicDetails({
 }: IFormProps) {
   const toast = useToast()
   const updateAccountDetails = api.account.updateAccountDetails.useMutation();
+  const { handleFormSubmission } = useFormNavigationStateMachine();
 
   const handleSave = async ({
     data,
+    action_type,
+    form,
   }: IHandleSubmit<z.infer<typeof AccountDetailSchema>>) => {
     try {
-      const response = await updateAccountDetails.mutateAsync({
-        ...data
+      // const response = await updateAccountDetails.mutateAsync({
+      //   ...data
+      // });
+      // if (response) {
+      //   toast.success('Account details submitted successfully')
+      //   return response
+      // }
+
+      await handleFormSubmission({
+        action_type,
+        stateMachine: {
+          create: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await updateAccountDetails.mutateAsync({
+                ...data
+              });
+
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              return null
+            },
+            toast_message: 'Account details submitted successfully',
+          },
+          update: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await updateAccountDetails.mutateAsync({
+                ...data
+              });
+              return {
+                code: response?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              return null
+            },
+            toast_message: 'Account details submitted successfully',
+          },
+          wizard: {
+            new: {},
+            code: {},
+          },
+          record: true,
+        },
       });
-      if (response) {
-        toast.success('Account details submitted successfully')
-        return response
-      }
     }
     catch (error) {
       toast.error('Failed to submit Account Details')

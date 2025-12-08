@@ -35,7 +35,7 @@ const ErrorMessages = ({ messages }: { messages: string[] }) => {
 
 export default function SideDrawer() {
   const { state, actions } = useManageFilter();
-  const { tab_props, filterDetails, createFilterLoading, errorMessages } = state ?? {};
+  const { tab_props, filterDetails, createFilterLoading, errorMessages, filterType } = state ?? {};
   const tabs = [
     {
       id: 'filter',
@@ -47,20 +47,22 @@ export default function SideDrawer() {
       label: 'Sort',
       content: <SortContent />,
     },
-    {
-      id: 'group',
-      label: 'Group',
-      content: <GroupContent />,
-    },
-    {
-      id: 'columns',
-      label: 'Columns',
-      content: <ColumnContent />,
-    },
+    ...(filterType !== 'timeline' ? [
+      {
+        id: 'group',
+        label: 'Group',
+        content: <GroupContent />,
+      },
+      {
+        id: 'columns',
+        label: 'Columns',
+        content: <ColumnContent />,
+      },
+    ] : []),
   ];
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       <div className="flex justify-end space-x-2">
         {tab_props.id ? (
           <>
@@ -73,12 +75,11 @@ export default function SideDrawer() {
               ✓ Update Filter
             </Button>
             <Button
-              variant="default"
-              className="bg-blue-600 text-white hover:bg-blue-700"
+              variant="secondary"
               onClick={actions.handleCreateNewFilter}
               loading={createFilterLoading}
             >
-              ✓ Create as New Filter
+              ✓ Apply as New Filter
             </Button>
           </>
         ) : (
@@ -88,7 +89,7 @@ export default function SideDrawer() {
             onClick={actions.handleCreateNewFilter}
             loading={createFilterLoading}
           >
-            ✓ Create New Filter
+            ✓ Apply Filter
           </Button>
         )}
       </div>
@@ -116,7 +117,6 @@ export default function SideDrawer() {
       <div className="flex-1 overflow-y-auto">
         <StateTab
           defaultValue="filter"
-          persistKey="side-drawer-tabs"
           tabs={tabs}
           variant="underline"
           size="sm"

@@ -47,7 +47,10 @@ export const useColumnConditions = (
     const column = {
       ...groupByColumn.current,
       cell: ({ row }: any) => {
-        const value = row?.original?.formatted_value || '';
+        const value =
+          typeof row?.original?.formatted_value === 'number'
+            ? row?.original?.formatted_value
+            : row?.original?.formatted_value || '';
         if (!value && !row?.original.count) {
          return null;
         }

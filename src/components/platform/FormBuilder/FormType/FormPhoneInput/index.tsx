@@ -167,7 +167,7 @@ export default function FormPhoneInput({
           <FormControl>
             <>
               <div
-                className={`flex items-center rounded-md border ${error?.[index] && "border-destructive"} ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 h-[36px] ${fieldConfig.disabled ? "bg-secondary" : ""}`}
+                className={`flex items-center rounded-md border border-slate-300 ${error?.[index] && "border-destructive"} ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0 h-[36px] ${fieldConfig.disabled ? "bg-secondary" : ""}`}
               >
                 <PhoneInput
                   data-test-id={`${formKey}-inp-${index > 0 ? `${index + 1}-` : ""}${fieldConfig.name}`}
@@ -211,7 +211,7 @@ export default function FormPhoneInput({
                     }
                   }}
                   className={cn(
-                    "mr-[1px]  rounded-md !border-input bg-transparent text-foreground ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
+                    "mr-[1px]  rounded-md !border-input bg-transparent text-slate-700 ring-offset-background placeholder:text-muted-foreground focus:border-l-transparent focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-[-4] disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-100",
                     `${isDisabled && " border-transparent opacity-100"}`,
                     `${field.is_primary && isMultiple ? 'w-[90%]' : 'w-full'} `
                   )}

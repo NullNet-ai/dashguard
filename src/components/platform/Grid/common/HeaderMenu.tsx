@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   ListFilter,
+  RotateCcw,
 } from 'lucide-react';
 import { useContext, useState } from 'react';
 
@@ -29,7 +30,7 @@ interface HeaderMenuProps {
 }
 
 const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
-  const { state } = useContext(GridContext);
+  const { state, actions } = useContext(GridContext);
   const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
   const sortingKey = Array.isArray(columnSortKey)
     ? columnSortKey[0]
@@ -121,6 +122,18 @@ const HeaderMenu = ({ header, defaultFilter }: HeaderMenuProps) => {
               <ListFilter className="h-4 w-4" />
               <span>{`Group by "${header.column.columnDef.header}"`} </span>
             </DropdownMenuItem>
+            {!!state?.defaultGrouping?.length && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="flex gap-2"
+                  onClick={() => actions?.handleResetGrouping?.()}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  <span>{'Reset Grouping'} </span>
+                </DropdownMenuItem>
+              </>
+            )}
           </>
         )}
       </DropdownMenuContent>

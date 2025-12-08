@@ -1,9 +1,9 @@
-const defaultSorting = [
-  {
-    id: "created_date",
-    desc: true,
-    sort_key: "created_date",
-  },
-];
+import { type ICustomSortKey } from './types';
 
-export default defaultSorting;
+export const defaultSorting = [
+  {
+    id: 'code',
+    desc: true,
+    sort_key: 'code',
+  },
+] as ICustomSortKey[];

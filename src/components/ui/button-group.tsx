@@ -27,6 +27,7 @@ interface CheckboxItemProps extends ButtonProps {
 // Dropdown button item
 interface DropdownItemProps extends ButtonProps {
   dropdownOptions: Array<{ label: string; onClick: () => void }>;
+  resultClassName?: string;
 }
 
 // Custom item that can accept any React node
@@ -41,15 +42,15 @@ const ButtonGroup = React.forwardRef<HTMLDivElement, ButtonGroupProps>(
     // Clone children to pass down variant, size, and borderRadius props
     const childrenWithProps = React.Children.map(children, (child) => {
       if (React.isValidElement(child)) {
-        return React.cloneElement(child, {
+        return React.cloneElement(child as any, {
           variant,
           size,
           borderRadius,
           className: cn(
             "rounded-none border-r border-border",
-            child.props.className
+            (child as any).props.className
           ),
-          ...child.props,
+          ...(child as any).props,
         });
       }
       return child;
@@ -129,7 +130,7 @@ CheckboxItem.displayName = "CheckboxItem";
 
 // Dropdown button item
 const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
-  ({ className, dropdownOptions, children, ...props }, ref) => {
+  ({ className, dropdownOptions, children, resultClassName, ...props }, ref) => {
     const [dropdownOpen, setDropdownOpen] = React.useState(false);
     
     return (
@@ -147,7 +148,7 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
         </Button>
         
         {dropdownOpen && (
-          <div className="absolute left-0 top-full z-10 mt-1 w-full min-w-[180px] rounded-md border border-input bg-background p-1 shadow-md">
+          <div className={cn("absolute left-0 top-full z-10 mt-1 w-full min-w-[180px] rounded-md border border-input bg-background p-1 shadow-md", resultClassName)}>
             {dropdownOptions.map((option, index) => (
               <button
                 key={index}

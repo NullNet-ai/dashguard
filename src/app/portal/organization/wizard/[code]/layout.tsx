@@ -1,27 +1,29 @@
-import { headers } from 'next/headers'
+import { headers } from 'next/headers';
 
-import PlatformWizard from '~/components/platform/Wizard'
-import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
+import PlatformWizard from '~/components/platform/Wizard';
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation';
 
-import stepLabels from '../_config/stepLabels'
-import totalSteps from '../_config/totalSteps'
-import WizardSummaryComponent from '../_config/wizardSummaryConfig'
-import { type IWizardLayoutProps } from '../types'
+import stepLabels from '../_config/stepLabels';
+import totalSteps from '../_config/totalSteps';
+import WizardSummaryComponent from '../_config/wizardSummaryConfig';
+import { type IWizardLayoutProps } from '../types';
+import { api } from '~/trpc/server';
 
 const WizardLayout = async (props: IWizardLayoutProps) => {
-  const { children } = props
-  const headerList = headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
-  const wizard_summary = WizardSummaryComponent()
+  const { children } = props;
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , mainEntity, , identifier, currentStep] = pathname.split('/');
+  const wizard_summary = WizardSummaryComponent();
 
-  await stepValidator(
-    {
-      currentStep: currentStep!,
-      identifier: identifier!,
-      mainEntity: mainEntity!,
-    },
-  )
+  const traverseData = await api.wizard.getTraverseStepped(
+    `${mainEntity}:wizard:${identifier}`,
+  );
+  await stepValidator({
+    currentStep: currentStep!,
+    identifier: identifier!,
+    mainEntity: mainEntity!,
+  });
 
   return (
     <div>
@@ -33,13 +35,16 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
           enableAutoCreate: false,
           entityName: mainEntity,
           stepLabels,
+          traverseSteps: traverseData?.traverse,
         }}
         summary={wizard_summary}
       >
         {children}
       </PlatformWizard>
     </div>
-  )
-}
+  );
+};
 
-export default WizardLayout
+export const dynamic = 'force-dynamic'
+
+export default WizardLayout;

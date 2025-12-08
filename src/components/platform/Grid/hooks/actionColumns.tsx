@@ -14,6 +14,7 @@ import {
   RestoreComponent,
 } from '../DefaultRow/Actions';
 import type { IConfigGrid } from '../types';
+import { testIDFormatter } from '~/utils/formatter';
 
 export const useActionColumns = (
   config: IConfigGrid,
@@ -58,30 +59,32 @@ export const useActionColumns = (
     size: 50,
     enableResizing: false,
     header: '',
-    cell: ({ row }: any) => (
-      <HeadlessBtn onClick={() => row.toggleExpanded()}>
-        {row.getIsExpanded() ? (
-          <>
-            {config?.rowExpansionOptions?.icons?.expandIcon ? (
-              config?.rowExpansionOptions?.icons?.expandIcon
-            ) : (
-              <ChevronDown className="h-6 w-6 text-primary" />
-            )}
-          </>
-        ) : (
-          <>
-            {config?.rowExpansionOptions?.icons?.collapseIcon ? (
-              config?.rowExpansionOptions?.icons?.collapseIcon
-            ) : config?.rowExpansionOptions?.expandPosition === 'left' ||
-              !config?.rowExpansionOptions?.expandPosition ? (
-              <ChevronRight className="h-6 w-6 text-default/40" />
-            ) : (
-              <ChevronLeft className="h-6 w-6 text-default/40" />
-            )}
-          </>
-        )}
-      </HeadlessBtn>
-    ),
+    cell: ({ row }: any) => {
+      return (
+        <HeadlessBtn onClick={() => row.toggleExpanded()}>
+          {row.getIsExpanded() ? (
+            <>
+              {config?.rowExpansionOptions?.icons?.expandIcon ? (
+                config?.rowExpansionOptions?.icons?.expandIcon
+              ) : (
+                <ChevronDown className="h-6 w-6 text-primary" />
+              )}
+            </>
+          ) : (
+            <>
+              {config?.rowExpansionOptions?.icons?.collapseIcon ? (
+                config?.rowExpansionOptions?.icons?.collapseIcon
+              ) : config?.rowExpansionOptions?.expandPosition === 'left' ||
+                !config?.rowExpansionOptions?.expandPosition ? (
+                <ChevronRight className="h-6 w-6 text-default/40" />
+              ) : (
+                <ChevronLeft className="h-6 w-6 text-default/40" />
+              )}
+            </>
+          )}
+        </HeadlessBtn>
+      );
+    },
     enableSorting: false,
     enableHiding: true,
   });
@@ -116,6 +119,9 @@ export const useActionColumns = (
       if (config?.actionType === 'single-select') {
         return (
           <Button2
+            data-test-id={testIDFormatter(
+              `${config.entity}-grd-tbl-tbody-row-cell-action-sngle-slct`,
+            )}
             className="mx-auto flex cursor-pointer"
             disabled={disableActions}
             type="button"
@@ -174,11 +180,11 @@ export const useActionColumns = (
             </>
           )}
           {config?.customRowAction &&
-            config?.customRowAction({
+            (config?.customRowAction({
               row,
               config,
               viewMode,
-            })}
+            }) as React.ReactNode)}
         </TooltipProvider>
       );
     },

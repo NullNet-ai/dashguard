@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { createContext, useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { type RecordContextProps, type RecordProps } from "./types";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -22,6 +22,9 @@ export default function RecordProvider({ children, config }: RecordProps) {
     entityCode,
     identifierOption: config?.identifierOption,
     recordDetails,
+    config,
+    enableTimeline: config?.enableTimeline,
+    metadata: config?.metadata,
   } as const;
 
   return (
@@ -30,3 +33,13 @@ export default function RecordProvider({ children, config }: RecordProps) {
     </RecordContext.Provider>
   );
 }
+
+export const useRecord = (): RecordContextProps => {
+  const context = useContext(RecordContext);
+  
+  if (!context) {
+    throw new Error('useRecord must be used within a RecordProvider');
+  }
+  
+  return context;
+};

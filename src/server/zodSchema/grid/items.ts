@@ -14,7 +14,6 @@ const ZodItems = z.object({
   current: z.number().optional(), // Current page number
   pluck: z.any().optional(), // Optional fields to pluck
   pluck_object: z.any().optional(), // Optional fields to pluck
-  is_case_sensitive_sorting: z.string().optional(),
   advance_filters: z
     .array(
       z.object({

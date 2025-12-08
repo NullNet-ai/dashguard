@@ -90,10 +90,10 @@ export default function CloseTab({ current, href, name, actions }: IProps) {
           <span>Close All Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-2">
+        {/* <DropdownMenuItem className="flex gap-2">
           <StarIcon className="h-4 w-4" />
           <span>Add to Favorites</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

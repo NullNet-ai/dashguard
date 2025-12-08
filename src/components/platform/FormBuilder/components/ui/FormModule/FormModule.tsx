@@ -20,6 +20,7 @@ import FormInputGridWrapper from '../../custom/FormFilter/FormInputGridWrapper'
 
 import RenderFormType from './RenderFormType'
 import FormCustom from '../../../FormType/FormCustom'
+import { SavedCard } from '~/components/ui/credit-card/_components/save-cards'
 
 export default function FormModule({
   fields,
@@ -41,6 +42,7 @@ export default function FormModule({
     checkboxOptions?: Record<string, ICheckboxOptions[]>
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>
     currencyInputOptions?: Record<string, Option[]>
+    savedCardOptions?: SavedCard[]
   }
   fieldConfig?: Field
   formKey: string
@@ -104,6 +106,7 @@ export default function FormModule({
                           multiSelectOnSearch: subConfig?.multiSelectOnSearch,
                           radioOptions: subConfig?.radioOptions,
                           selectOptions: subConfig?.selectOptions,
+                          savedCardOptions: subConfig?.savedCardOptions,
                           currencyInputOptions:
                             subConfig?.currencyInputOptions,
                         },
@@ -119,6 +122,7 @@ export default function FormModule({
                         radioOptions: subConfig?.radioOptions,
                         selectOptions: subConfig?.selectOptions,
                         currencyInputOptions: subConfig?.currencyInputOptions,
+                        savedCardOptions: subConfig?.savedCardOptions,
                       },
                       )
                     )}

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, easeInOut } from 'framer-motion';
 import { useEffect } from 'react';
 import { redirectToDashboard } from '../action';
 
@@ -35,7 +35,7 @@ const LoadingPage = () => {
       transition: {
         duration: 0.8,
         repeat: Infinity,
-        ease: 'easeInOut'
+        ease: easeInOut
       }
     }
   };
@@ -51,7 +51,7 @@ const LoadingPage = () => {
         {[...Array(3)].map((_, index) => (
           <motion.div
             key={index}
-            variants={dotVariants as any}
+            variants={dotVariants}
             className="w-4 h-4 rounded-full bg-primary"
           />
         ))}

@@ -31,6 +31,7 @@ const InteractiveGraph = ({
   multiSelectOptions,
 }: IFormProps) => {
 
+
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const [filteredData, setFilteredData] = React.useState<any[]>([])
@@ -40,7 +41,8 @@ const InteractiveGraph = ({
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
   const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
-  
+
+
   const form = useForm({
     defaultValues: {
       graph_type: 'area',

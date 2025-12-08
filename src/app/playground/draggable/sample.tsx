@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -81,7 +82,7 @@ export default function Draggable() {
     name: "tasks",
   });
 
-  const formFields: { name: "name" | "priority"; label: string; component: ({ field }: any) => JSX.Element }[] = [
+  const formFields: { name: "name" | "priority"; label: string; component: ({ field }: any) => React.JSX.Element }[] = [
     {
       name: "name",
       label: "Task Name",

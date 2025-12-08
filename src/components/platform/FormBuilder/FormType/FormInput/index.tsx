@@ -70,6 +70,7 @@ export default function FormInput({
       <FormControl>
         <Input
           // onChange={handleChange}
+          type='text'
           data-test-id={`${formKey}-inp-${fieldConfig.name}`}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"

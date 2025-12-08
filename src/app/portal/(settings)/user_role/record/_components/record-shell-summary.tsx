@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import React from "react";
 
 type TProps = Partial<{
@@ -10,7 +10,7 @@ const fields = {
 };
 
 export default function RecordShellSummary(props: TProps) {
-  const headerList = headers();
+  const headerList = (headers() as unknown as UnsafeUnwrappedHeaders);
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");
   return (

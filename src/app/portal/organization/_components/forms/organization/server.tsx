@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import Organization from "./client";
 
 const StepOneOrganizationForm = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , , application, identifier] = pathname.split("/");
 

@@ -42,7 +42,10 @@ type TDisplayType = 'form' | 'selected';
 	 | 'adaptive-badge'
 	 | 'message-input-box'
 	 | 'color-picker'
-	 | 'image-viewer';
+	 | 'image-viewer'
+	 | 'custom-component'
+	 | 'credit-card'
+   | 'otp-input';
 
 type TSelectionType = 'single' | 'multiple';
 

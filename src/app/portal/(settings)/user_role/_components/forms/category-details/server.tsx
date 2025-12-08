@@ -6,7 +6,7 @@ import { api } from '~/trpc/server';
 import CategoryDetails from './client';
 
 const StepOneOrganizationForm = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, application, identifier] = pathname.split('/');
 

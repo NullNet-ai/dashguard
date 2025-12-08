@@ -68,6 +68,11 @@ export default function AppSideBar(config: ISideBarProps) {
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
       localStorage.removeItem('entity-last-paths');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('grid_persistence')) {
+          localStorage.removeItem(key);
+        }
+      });
       navigate.push('/login')
     })
   };
@@ -80,7 +85,7 @@ export default function AppSideBar(config: ISideBarProps) {
     Cookies.set('screen-type', `${screen}`, { expires: 7 })
   }
 
-
+  const sidebarIsOpen = isMobile ? openMobile : open;
 
   // Use provided configs or fall back to static items
   const favoriteItems = favoritesMenuConfig || [];
@@ -128,70 +133,70 @@ export default function AppSideBar(config: ISideBarProps) {
           </>
         )
       },
-      {
-        id: 'favorites',
-        label: tabsDisplayVariant === 'label-only' ? "Favorites" : "",
-        icon: tabsDisplayVariant === 'icon-only' ? (
-          <TooltipProvider>
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <StarIcon className="h-5 w-5" />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Favorites</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : undefined,
-        content: (
-          <>
-            {favoriteItems.length > 0 ? (
-              favoriteItems.map((item, index) => (
-                <Fragment key={index}>
-                  <Menu item={item} screenType={screen || screenType} />
-                  {index % 5 === 4 && <Separator className="my-2" />}
-                </Fragment>
-              ))
-            ) : (
-              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
-                <p>Favorites Coming Soon</p>
-              </div>
-            )}
-          </>
-        )
-      },
-      {
-        id: 'history',
-        label: tabsDisplayVariant === 'label-only' ? "History" : "",
-        icon: tabsDisplayVariant === 'icon-only' ? (
-          <TooltipProvider>
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <ClipboardDocumentListIcon className="h-5 w-5" />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>History</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : undefined,
-        content: (
-          <>
-            {historyItems.length > 0 ? (
-              historyItems.map((item, index) => (
-                <Fragment key={index}>
-                  <Menu item={item} screenType={screen || screenType} />
-                  {index % 5 === 4 && <Separator className="my-2" />}
-                </Fragment>
-              ))
-            ) : (
-              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
-                <p>History Coming Soon</p>
-              </div>
-            )}
-          </>
-        )
-      }
+      // {
+      //   id: 'favorites',
+      //   label: tabsDisplayVariant === 'label-only' ? "Favorites" : "",
+      //   icon: tabsDisplayVariant === 'icon-only' ? (
+      //     <TooltipProvider>
+      //       <Tooltip delayDuration={100}>
+      //         <TooltipTrigger asChild>
+      //           <StarIcon className="h-5 w-5" />
+      //         </TooltipTrigger>
+      //         <TooltipContent side="top">
+      //           <p>Favorites</p>
+      //         </TooltipContent>
+      //       </Tooltip>
+      //     </TooltipProvider>
+      //   ) : undefined,
+      //   content: (
+      //     <>
+      //       {favoriteItems.length > 0 ? (
+      //         favoriteItems.map((item, index) => (
+      //           <Fragment key={index}>
+      //             <Menu item={item} screenType={screen || screenType} />
+      //             {index % 5 === 4 && <Separator className="my-2" />}
+      //           </Fragment>
+      //         ))
+      //       ) : (
+      //         <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+      //           <p>Favorites Coming Soon</p>
+      //         </div>
+      //       )}
+      //     </>
+      //   )
+      // },
+      // {
+      //   id: 'history',
+      //   label: tabsDisplayVariant === 'label-only' ? "History" : "",
+      //   icon: tabsDisplayVariant === 'icon-only' ? (
+      //     <TooltipProvider>
+      //       <Tooltip delayDuration={100}>
+      //         <TooltipTrigger asChild>
+      //           <ClipboardDocumentListIcon className="h-5 w-5" />
+      //         </TooltipTrigger>
+      //         <TooltipContent side="top">
+      //           <p>History</p>
+      //         </TooltipContent>
+      //       </Tooltip>
+      //     </TooltipProvider>
+      //   ) : undefined,
+      //   content: (
+      //     <>
+      //       {historyItems.length > 0 ? (
+      //         historyItems.map((item, index) => (
+      //           <Fragment key={index}>
+      //             <Menu item={item} screenType={screen || screenType} />
+      //             {index % 5 === 4 && <Separator className="my-2" />}
+      //           </Fragment>
+      //         ))
+      //       ) : (
+      //         <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+      //           <p>History Coming Soon</p>
+      //         </div>
+      //       )}
+      //     </>
+      //   )
+      // }
     ];
 
   return (
@@ -204,7 +209,7 @@ export default function AppSideBar(config: ISideBarProps) {
         <SidebarHeader className="group relative">
           <SidebarTrigger
             Icon={TriggerOpenCloseSidebarComponent}
-            className={`absolute right-2 top-10 z-50 flex group-hover:flex ${open || openMobile ? 'hidden' : 'lg:flex'}`}
+            className={`absolute right-2 top-10 z-50  flex group-hover:flex ${open || openMobile ? 'hidden' : 'lg:flex'}`}
             data-test-id="sdnavmenu-trigger-btn"
           />
           <SidebarMenu>
@@ -251,7 +256,10 @@ export default function AppSideBar(config: ISideBarProps) {
                     : (
                       <div
                         className={cn(
-                          `cursor-pointer ${!open ? 'w-full opacity-100' : 'h-0 w-0 opacity-0'}`,
+                          `cursor-pointer ${!open ? 'w-full opacity-100 flex' : 'h-0 w-0 opacity-0'}`,
+                          {
+                            'justify-center': !sidebarIsOpen
+                          }
                         )}
                       >
                         {footerComponent}

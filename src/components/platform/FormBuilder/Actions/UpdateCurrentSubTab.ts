@@ -8,7 +8,7 @@ export async function UpdateCurrentSubTab({ tab_name }: { tab_name: string }) {
   await api.tab.updateCurrentSubTab({
     tab_name,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const pathName = headerList.get("x-pathname") || "";
   const [, , , , identifier] = pathName.split("/");
   if (tab_name && identifier) {

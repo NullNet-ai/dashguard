@@ -7,7 +7,7 @@ import defaultSorting from "./_config/sorting";
 const form_filter_entity = "";
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const pluck_fields = ["id", "code", "email", "status"];
   const [, , main_entity, application, identifier] = pathname.split("/");

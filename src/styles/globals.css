@@ -72,6 +72,8 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --sidebar-white: 0 0% 100%;
   }
 
   .dark {
@@ -79,6 +81,7 @@
     --grid-footer: 222.2 84% 4.9%;
 
     --background: 222.2 84% 4.9%;
+    --sidebar-white: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
     --card: 222.2 84% 4.9%;

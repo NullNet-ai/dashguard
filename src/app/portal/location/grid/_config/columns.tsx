@@ -47,7 +47,7 @@ const gridColumns = [
     header: "Updated Date",
     accessorKey: "updated_date_time",
     data_type: "datetime",
-    sortKey: ["updated_date", "updated_time"],
+    sortKey: "updated_date_time",
     search_config: {
       field: "updated_date_time",
       operator: 'like',
@@ -69,7 +69,7 @@ const gridColumns = [
     header: 'Created Date',
     accessorKey: 'created_date_time',
     data_type: 'datetime',
-    sortKey: ['created_date', 'created_time'],
+    sortKey: "created_date_time",
     search_config: {
       field: 'created_date_time',
       operator: 'like',

@@ -290,7 +290,7 @@ export function ComboSelect({
                     autoComplete='off'
                     ref={setReferenceElement}
                     className={cn(
-                        "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
+                        "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-slate-700 placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
                         {
                             "outline-destructive": error,
                             "border-destructive": error,

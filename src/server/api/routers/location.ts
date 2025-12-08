@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   createTRPCRouter,
   privateProcedure,
+  publicProcedure,
 } from '~/server/api/trpc';
 
 /**
@@ -94,7 +95,7 @@ export const locationRouter = createTRPCRouter({
           },
         })
         .execute();
-      const { data } = recordByCode ?? {};
+      const { data, ...rest } = recordByCode ?? {};
 
       const record = await ctx.dnaClient
         .findAll({

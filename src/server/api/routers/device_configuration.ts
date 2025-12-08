@@ -213,6 +213,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
     }),
   )
   .query(async ({ input, ctx }) => {
+    console.log('@@@ input', input)
     const res = await ctx.dnaClient
       .findAll({
         entity,
@@ -233,7 +234,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
               "id"
             ]
           },
-          advance_filters: [{
+          advance_filters: [
+            {
             type: 'criteria',
             field: 'code',
             entity: 'devices',
@@ -254,7 +256,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
             values: [
               'Active',
             ],
-          }],
+          }
+        ],
           order: {
             limit: 1,
             by_field: 'timestamp',
@@ -290,6 +293,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
         },
       })
       .execute()
+
+      console.log('@@@ res', res)
 
       
       const data = res?.data?.[0]?.device_interfaces

@@ -103,7 +103,7 @@ export function SmartMobileComponent() {
   const {open} = useSidebar();
   const smart = React.useContext(SmartContext);
 
-  const widthClass = open ? "sm:w-[calc(100%-250px)]" : "sm:w-[calc(100%-50px)]";
+  const widthClass = open ? "sm:w-[calc(100%-250px)]" : "md:w-[calc(100%-50px)]";
 
   if(smart?.state === "wizard-summary") return null;
 

@@ -26,6 +26,15 @@ export interface IConfigWizard {
   stepValidation?: Record<string, IConfigValidationWizard[]>;
   customNavigation?: Record<string, boolean>;
   defaultRecordTab?: string;
+  customNextNavigationAction?: Record<
+    string,
+    (args: {
+      entity: string;
+      identifier: string;
+      next: () => void;
+      setNextLoading: (loading: boolean) => void;
+    }) => Promise<void>
+  >;
 }
 export interface ICallbackHandler {
   onClickWizardSave?: (args: {
@@ -91,7 +100,7 @@ export type TStepsNavigationButtons = {
   };
 };
 export type TSummaryComponents = {
-  component: JSX.Element;
+  component: React.JSX.Element;
   label: string;
 };
 
@@ -111,6 +120,8 @@ export interface IState extends IConfigWizard {
   stepsNavigation?: TStepsNavigationButtons;
   callbackHandlers?: ICallbackHandler;
   title?: string;
+  enableTimeline?: boolean;
+  metadata?: any
 }
 
 export interface IAction {

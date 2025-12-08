@@ -16,7 +16,7 @@ const isDateNotGreaterThanToday = (dateString: string): boolean => {
 };
 
 export const contactDetailsSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().optional(),
   first_name: z
     .string({
       message: "First Name is required.",

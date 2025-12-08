@@ -27,6 +27,7 @@ interface IOpenedFormLayoutProps {
   checkboxOptions: any;
   multiSelectOptions: any;
   multiSelectOnSearch: any;
+  savedCardOptions: any
   radioOptions: any;
   selectOptions: any;
   currencyInputOptions: any;
@@ -56,6 +57,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
     appendFormKey,
     checkboxOptions,
     multiSelectOptions,
+    savedCardOptions,
     multiSelectOnSearch,
     radioOptions,
     selectOptions,
@@ -113,6 +115,7 @@ const OpenedFormLayout = (props: IOpenedFormLayoutProps) => {
                 radioOptions,
                 selectOptions,
                 currencyInputOptions,
+                savedCardOptions
               }}
               formKey={formattedFormKey}
               gridConfig={filterGridConfig}

@@ -33,7 +33,7 @@ const Record = ({
         categories: categories,
       }}
     >
-      <section className="min-h-[calc(100vh-110px)] md:mt-[2.5rem] lg:mt-[0.5rem] mt-8">
+      <section className="h-[calc(100vh-85px)] md:mt-[2.5rem] lg:mt-[0.5rem] mt-8">
         <ResizablePanelGroup direction="horizontal" className="flex">
           <div className="h-full hidden md:block w-full md:w-[240px] lg:w-[300px] border-r border-slate-100 min-h-[calc(100vh-105px)]">
               <RecordWrapperProvider>

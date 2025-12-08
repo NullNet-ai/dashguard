@@ -12,4 +12,6 @@ const Layout = (props: ILayoutProps) => {
     );
 }
 
+export const dynamic = 'force-dynamic'
+
 export default Layout;

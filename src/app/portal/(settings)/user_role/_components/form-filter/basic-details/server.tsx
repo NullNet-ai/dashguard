@@ -5,7 +5,7 @@ import { defaultSorting } from "../../../grid/_config/sorting";
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const pluck_fields = ["id", "code", "role", "status"];
   const [, , main_entity, application, identifier] = pathname.split("/");

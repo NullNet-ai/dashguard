@@ -34,6 +34,7 @@ const FormBuilderLayout = ({
   appendFormKey,
   checkboxOptions,
   multiSelectOptions,
+  savedCardOptions,
   multiSelectOnSearch,
   radioOptions,
   selectOptions,
@@ -209,6 +210,7 @@ const FormBuilderLayout = ({
                   handleUpdateDisplayType={handleUpdateDisplayType}
                   multiSelectOnSearch={multiSelectOnSearch}
                   multiSelectOptions={multiSelectOptions}
+                  savedCardOptions={savedCardOptions}
                   myParent={myParent}
                   radioOptions={radioOptions}
                   selectOptions={selectOptions}

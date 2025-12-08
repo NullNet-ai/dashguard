@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import CategoryDetails from './client';
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, application, identifier] = pathname.split('/');
   const organizationRecord = await api.record.getByCode({

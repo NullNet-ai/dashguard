@@ -17,7 +17,7 @@ export interface IAction {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => ISearchResult | undefined
-  handleAddSearchItem: (filterItem: ISearchItemResult) => Promise<void>
+  handleAddSearchItem: (filterItem: ISearchItemResult, args?: any) => Promise<void>
   handleRemoveSearchItem: (filterItem: ISearchItem) => Promise<void>
   handleClearSearchItems: () => Promise<void>
   handleOldSearchQuery: (
@@ -61,6 +61,7 @@ export interface ISearchItem {
   display_value?: string
   filters?: ISearchItem[]
   parse_as?: string
+  raw_value?: any
 }
 
 export interface ISortItem {

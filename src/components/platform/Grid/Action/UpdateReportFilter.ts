@@ -13,7 +13,7 @@ export async function UpdateReportFilter({
   filters: ISearchItem[];
   gridKey?: string;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get("x-full-pathname") || "";
   await api.grid.updateReportFilter({
     filters,

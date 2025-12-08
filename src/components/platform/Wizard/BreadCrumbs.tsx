@@ -26,6 +26,7 @@ export default function WizardNavigator() {
       <nav
         aria-label="breadcrumb"
         data-testid={testIDFormatter(`${entityName}-breadcrumb-nav`)}
+        className="text-slate-800"
       >
         <ol 
           className="flex items-center gap-2 font-semibold" 
@@ -39,10 +40,10 @@ export default function WizardNavigator() {
               {wizard_step_title}
             </span>
           </li>
-          <BreadcrumbSeparator className="text-foreground" />
+          <BreadcrumbSeparator className="text-slate-800" />
           <li data-testid={testIDFormatter(`${entityName}-breadcrumb-step`)}>
             <span
-              className="text-md"
+              className="text-md text-slate-800"
               data-testid={testIDFormatter(`${entityName}-step-${currentStep}-${stepLabel}`)}
             >
               Step {currentStep} - {stepLabel}

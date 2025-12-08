@@ -19,7 +19,7 @@ export default async function SideBarMenu() {
   const accountOrganization =  await api.record.getSessionInfo();
   const { account_name, username, organization } = accountOrganization?.current_organization ?? {}
   const initials = getInitials(account_name);
-  const cookieStore = cookies(); // Access cookies
+  const cookieStore = await cookies(); // Access cookies
   const screenType = cookieStore.get("screen-type");
 
   return (

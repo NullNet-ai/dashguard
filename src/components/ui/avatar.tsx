@@ -168,12 +168,12 @@ const Avatar = React.forwardRef<
         {...props}
       />
       {statusProps && <AvatarStatus 
-        containerRef={containerRef} 
+        containerRef={containerRef as React.RefObject<HTMLElement>} 
         size={size} 
         {...statusProps} 
       />}
       {badgeProps && <AvatarBadge
-        containerRef={containerRef}
+        containerRef={containerRef as React.RefObject<HTMLElement>}
         size={size}
         {...badgeProps}
       />}
@@ -227,8 +227,8 @@ const AvatarPlaceholder = React.forwardRef<
     {icon ? (
       <div className="flex h-full w-full items-center justify-center p-0">
         {React.isValidElement(icon) 
-          ? React.cloneElement(icon as React.ReactElement, { 
-              className: cn("h-full w-full", (icon as React.ReactElement).props.className) 
+          ? React.cloneElement(icon as any, { 
+              className: cn("h-full w-full", (icon as any).props.className) 
             }) 
           : icon}
       </div>
@@ -331,10 +331,10 @@ const AvatarGroup = React.forwardRef<
             }}
             className="relative"
           >
-            {React.cloneElement(child as React.ReactElement, {
+            {React.cloneElement(child as any, {
               className: cn(
                 "border-[2.5px] border-white", 
-                (child as React.ReactElement).props.className
+                (child as any).props.className
               ),
               size: size
             })}

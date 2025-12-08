@@ -11,7 +11,7 @@ export default function Header() {
         Icon={Check}
         data-test-id={testIDFormatter('filter-create-btn')}
       >
-        Create New Filter
+        Apply Filter
       </Button>
     </div>
   );

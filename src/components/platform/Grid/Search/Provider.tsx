@@ -132,7 +132,7 @@ export default function GridSearchProvider({ children }: IProps) {
     return data;
   };
 
-  const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
+  const handleAddSearchItem = async (filterItem: ISearchItemResult, args?: any) => {
     // eslint-disable-next-line no-unused-vars
     const { count: _, parse_as, ...filter_item } = filterItem ?? {};
     const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
@@ -143,8 +143,9 @@ export default function GridSearchProvider({ children }: IProps) {
 
     const updateSearchItems = resolveSearchItem({
       advanceFilter,
-      filter_item,
+      filter_item: {...filter_item, ...args},
     });
+
     setSearchItems(updateSearchItems);
     const updatedFilterUrl = await UpdateReportFilter({
       filters: updateSearchItems,

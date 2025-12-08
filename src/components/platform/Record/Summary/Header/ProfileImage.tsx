@@ -101,6 +101,7 @@ function UploadComponent(props: any) {
           type: 'image',
           formType: 'file',
           label: ' ',
+          dropzoneLabel: 'Drag and drop your image here, or click to select it',
           placeholder: 'upload',
         },
       ]}
@@ -108,7 +109,7 @@ function UploadComponent(props: any) {
   )
 }
 
-export default function ProfileImage({ details, entity, token }: any) {
+export default function ProfileImage({ details, entity, token, image_placeholder }: any) {
   const [openDialog, setOpenDialog] = useState(false)
   const [imageUrl, setImageUrl] = useState<string>('')
   const [imageId, setImageId] = useState<string>('')
@@ -122,8 +123,9 @@ export default function ProfileImage({ details, entity, token }: any) {
         if ((token && details?.data?.image_url) || (imageId && token)) {
           const stringID = imageId ? imageId : details?.data?.image_url
           setLoading(true)
-
-          const response = await fetch(typeof window !== 'undefined' ? `${imageId ?  `${window.location.origin}/api/file/${stringID}/download` : stringID }` : '')
+          const img_url = typeof window !== 'undefined' ? `${imageId ?  `${window.location.origin}/api/file/${stringID}/download` : stringID }` : ''
+          console.info("Image fetch Data", details?.data)
+          const response = await fetch(img_url)
           const imgInfo = await getImageData([stringID])
 
           setImageInfo(imgInfo ? imgInfo[0] : {})
@@ -142,11 +144,11 @@ export default function ProfileImage({ details, entity, token }: any) {
     }
 
     void convertToBase64()
-  }, [token, imageId])
+  }, [token, imageId, details?.data])
 
   const { actions } = useSideDrawer()
   const config = {
-    header: 'Upload Image',
+    header: 'New Image',
     sideDrawerWidth: '30dvw',
     body: {
       component: UploadComponent,
@@ -180,11 +182,11 @@ export default function ProfileImage({ details, entity, token }: any) {
 
   return (
     <>
-      <div className="mt-1 px-4 flex justify-center">
+      <div className="flex justify-center">
         <div className='relative group w-full'>
           <div
             title="Record summary image"
-            className="bg-muted w-full md:w-[277px] h-[150px] flex items-center justify-center cursor-pointer"
+            className="bg-muted w-full h-[150px] flex items-center justify-center cursor-pointer rounded-md"
             onClick={() => {
               if(imageUrl)  {
                 setIsPreviewModalOpen(true)
@@ -205,7 +207,15 @@ export default function ProfileImage({ details, entity, token }: any) {
                     width={300}
                   />
                 )
-              : loading ? <Loader size='md' label='loading' variant='circularShadow' /> : <ImageIcon className="size-6 text-primary opacity-70" />}
+              : loading ? <Loader size='md' label='loading' variant='circularShadow' /> : image_placeholder ? 
+                <div className='flex flex-col items-center justify-center space-y-3 p-6'>
+                  <div className='w-16 h-16  flex items-center justify-center'>
+                    <span className='text-2xl font-semibold text-primary/80 select-none'>
+                      {image_placeholder}
+                    </span>
+                  </div>
+                </div> 
+                : <ImageIcon className="size-6 text-primary opacity-70" />}
 
           </div>
           {imageUrl
@@ -251,7 +261,7 @@ export default function ProfileImage({ details, entity, token }: any) {
                   onClick={() => {
                     actions?.openSideDrawer(config)
                   }}
-                  className='absolute bottom-1 right-1 text-primary text-sm bg-white size-6 p-1 flex items-center justify-center hover:opacity-70'
+                  className='absolute bottom-1 right-1 text-primary text-sm bg-white size-6 p-1 flex items-center justify-center hover:opacity-70 rounded-md'
                 >
                   <PencilIcon className='size-4' />
                 </button>

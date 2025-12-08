@@ -1,10 +1,11 @@
-'use client';
-import React from 'react';
-import { Badge } from '~/components/ui/badge';
+'use client'
+import React from 'react'
 
-type GridDeviceOnlineBadgeProps = {
-  online: boolean;
-};
+import { Badge } from '~/components/ui/badge'
+
+interface GridDeviceOnlineBadgeProps {
+  online: boolean
+}
 
 export default function GridDeviceOnlineBadge({
   online,
@@ -13,5 +14,5 @@ export default function GridDeviceOnlineBadge({
     <Badge variant={online ? 'success' : 'destructive'}>
       {online ? 'Online' : 'Offline'}
     </Badge>
-  );
+  )
 }

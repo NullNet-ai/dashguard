@@ -33,6 +33,8 @@ const GridMenuDropClient = ({
 }: IProps) => {
   const [sort_by, setSort_by] = useState<any>(null);
   const [filter_by, setFilter_by] = useState<any>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
 
   // if(tab?.name === `All ${main_entity?.toLowerCase()}`) return null
 
@@ -46,16 +48,19 @@ const GridMenuDropClient = ({
 
         setFilter_by(filterResult);
         setSort_by(sortResult);
+        setLoadedId(filter_id);
       } catch (error) {
         console.error('error fetching data', error);
       }
     };
 
-    fetchData();
-  }, [filter_id]);
+    if (isMenuOpen && filter_id && loadedId !== filter_id) {
+      void fetchData();
+    }
+  }, [isMenuOpen, filter_id, loadedId]);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 px-0 py-1.5 text-left text-sm">
           <EllipsisVertical

@@ -311,7 +311,15 @@ const FormGroupMultiField = ({
                                       render={ () => fieldConfig.multiFieldConfig
                                         ? (
                                             (renderFormControl(
-                                              fieldConfig.multiFieldConfig.fields, index, innerField.fieldType, fieldConfig.multiFieldConfig
+                                                {
+                                                  ...fieldConfig.multiFieldConfig.fields,
+                                                  selectOptions: Array.isArray(fieldConfig.multiFieldConfig.fields.selectOptions) 
+                                                    ? fieldConfig.multiFieldConfig.fields.selectOptions
+                                                    : []
+                                                }, 
+                                                index, 
+                                                innerField.fieldType, 
+                                                fieldConfig.multiFieldConfig
                                                 ?.fieldOptions[
                                                   form.getValues(
                                                     `tabs.${parentIdx}.fields.${index}.optionId`,

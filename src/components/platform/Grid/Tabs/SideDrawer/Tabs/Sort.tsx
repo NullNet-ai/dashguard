@@ -37,8 +37,13 @@ const ZodSchema = z.object({
 
 export default function SortContent() {
   const { actions, state } = useManageFilter();
-  const { columns } = state ?? {};
+  const { columns: _columns } = state ?? {};
   const { handleUpdateFilter } = actions;
+
+    const columns = state?.filterType !== 'timeline' ? _columns : _columns.filter(col => {
+    return ['action', 'record_created_date', 'record_updated_date'].includes(col.accessorKey)
+  })
+    
 
   const form = useForm<{ sorts: SortItem[] }>({
     resolver: zodResolver(ZodSchema),
@@ -108,7 +113,7 @@ export default function SortContent() {
   };
 
   return (
-    <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
+    <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4 border border-gray-100">
       <div className="grid gap-3">
         <Sortable
           value={fields}

@@ -14,7 +14,6 @@ export interface IFetchDataParams {
   group_advance_filters?: ISearchItem[];
   sorting?: any[]
   grouping?: string[]
-  device_id?:string
 }
 
 interface IData {
@@ -56,8 +55,6 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
   const [currentData, setCurrentData] = useState<IData>()
   const { router = 'grid', resolver = 'items' } = query_options ?? {}
   // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
-
-  
   const { data, isLoading, error, refetch } = api?.[router]?.[resolver].useQuery({
     current: 0,
     limit: 100,
@@ -66,7 +63,6 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
     advance_filters: advanceFilterResolver(args.advance_filters ?? []),
     ...args,
   }, queryConditions)
-  
 
   useEffect(() => {
     if (!isLoading) {

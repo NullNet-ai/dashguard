@@ -44,7 +44,7 @@ const FormHeader = (props: IFormHeaderProps) => {
       )}
     >
       <CardDescription
-        className="text-md font-semibold text-foreground"
+        className="text-md font-semibold text-slate-800"
         data-test-id={testIDFormatter(
           `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-name`,
         )}
@@ -65,7 +65,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           <Fragment>
             {displayType === 'selected' && enableUnlockFormFilter && (
               <Button
-                className="h-6 w-6 rounded-full bg-primary/10 hover:bg-primary/20"
+                className="size-[22px] rounded-full"
                 type="button"
                 variant="ghost"
                 onClick={() => handleUpdateDisplayType('form')}
@@ -74,7 +74,7 @@ const FormHeader = (props: IFormHeaderProps) => {
                   `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
                 )}
               >
-                <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-primary" />
+                <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-gray-700" />
               </Button>
             )}
           </Fragment>

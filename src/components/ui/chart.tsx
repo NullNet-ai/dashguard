@@ -42,10 +42,9 @@ const ChartContainer = React.forwardRef<
       typeof RechartsPrimitive.ResponsiveContainer
     >["children"];
   }
-  >(({ id, className, children, config, ...props }, ref) => {
-    const uniqueId = React.useId();
-    const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
-    console.log("%c Line:61 🥃 config", "color:#f5ce50", config);
+>(({ id, className, children, config, ...props }, ref) => {
+  const uniqueId = React.useId();
+  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -69,7 +68,7 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object?.entries(config).filter(
+  const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color,
   );
 

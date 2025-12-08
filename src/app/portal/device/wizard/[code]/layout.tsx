@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import PlatformWizard from "~/components/platform/Wizard";
 import { type IWizardLayoutProps } from "../types";
 //** Wizard Configuration */
@@ -10,12 +10,12 @@ import wizardCallbacks from './_actions/wizardCallbacks';
 
 const WizardLayout = (props: IWizardLayoutProps) => {
   const { children } = props;
-  const headerList = headers();
+  const headerList = (headers() as unknown as UnsafeUnwrappedHeaders);
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
   const wizard_summary = WizardSummaryComponent();
   return (
-    <div className="p-1">
+    <div>
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),
@@ -34,5 +34,7 @@ const WizardLayout = (props: IWizardLayoutProps) => {
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
 
 export default WizardLayout;

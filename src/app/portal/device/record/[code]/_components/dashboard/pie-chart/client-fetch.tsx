@@ -10,6 +10,7 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
   // const [, , main_entity, application, identifier] = pathname.split('/')
   const pathname = usePathname()
   const [, , main_entity, application, identifier] = pathname.split('/')
+  console.log("🚀 ~ FormClientFetch ~ identifier:", identifier)
 
   //This is an unnecessary fetching of data ??
   const {data: fetched_device} = api.record.getByCode.useQuery({
@@ -17,13 +18,15 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
     pluck_fields: ["id", "code", "status", "device_status"],
     main_entity: main_entity!,
   })
-
+  console.log("🚀 ~ FormClientFetch ~ fetched_device:", fetched_device)
+  
   const {
     data
   } = fetched_device?? {}
   const fetched_interfaces = api.deviceConfiguration.fetchInterfaceOptions.useQuery({
     code: identifier!,
-})
+  })
+  console.log("🚀 ~ FormClientFetch ~ fetched_interfaces:", fetched_interfaces.error)
 
   return (
     <PieChartComponent

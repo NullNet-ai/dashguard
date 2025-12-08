@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 import {
   type IActions,
   type ISideDrawerConfig,
   type ISideDrawerContextProps,
 } from './types';
+import { useDebounce } from '~/hooks/useDebounce';
+import useScreenType from '~/hooks/use-screen-type';
 
 const SideDrawerContext = createContext<ISideDrawerContextProps | undefined>(
   undefined,
@@ -38,6 +40,11 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
     null,
   );
 
+    const screenType = useScreenType();
+
+    // Window resize handler with debounce
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  const debouncedWindowSize = useDebounce(windowSize, 300);
   // Helper function to get the type-specific pinned state key
   const getPinnedKeyForType = (type: string) =>
     `${TYPE_PINNED_KEY_PREFIX}${type}`;
@@ -205,6 +212,8 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
     let config: ISideDrawerConfig;
     let newDrawerType: string;
 
+   
+
     // If configOrType is a string, look up the registered drawer
     if (typeof configOrType === 'string') {
       newDrawerType = configOrType;
@@ -228,10 +237,15 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
         return;
       }
 
-      // Always check for stored width for this drawer type using type-specific key
-      const storedWidth = localStorage.getItem(
-        getWidthKeyForType(newDrawerType),
-      );
+      let finalWidth = registeredConfig.sideDrawerWidth;
+      if (isTypePinned) {
+        const storedWidth = localStorage.getItem(
+          getWidthKeyForType(newDrawerType),
+        );
+        if (storedWidth) {
+          finalWidth = storedWidth;
+        }
+      }
 
       // Create a config from the registered drawer
       config = {
@@ -244,8 +258,8 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
         },
         // Apply registered config options
         ...registeredConfig,
-        // Use stored width if available, otherwise use registered width
-        sideDrawerWidth: storedWidth || registeredConfig.sideDrawerWidth,
+        // Use final width (stored only if pinned, otherwise use registered width)
+        sideDrawerWidth: finalWidth,
         // Always include the drawer type for persistence
         drawerType: newDrawerType,
       };
@@ -268,12 +282,15 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
           localStorage.getItem(getPinnedKeyForType(newDrawerType)) === 'true';
         setIsPinned(isTypePinned);
 
-        // Check for stored width for this drawer type
-        const storedWidth = localStorage.getItem(
-          getWidthKeyForType(newDrawerType),
-        );
-        if (storedWidth) {
-          config.sideDrawerWidth = storedWidth;
+        // Only use stored width if the drawer is pinned
+        // This allows dynamic width changes for unpinned drawers
+        if (isTypePinned) {
+          const storedWidth = localStorage.getItem(
+            getWidthKeyForType(newDrawerType),
+          );
+          if (storedWidth) {
+            config.sideDrawerWidth = storedWidth;
+          }
         }
       } else {
         // Generate a drawer type based on the component name
@@ -293,6 +310,15 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       }
     }
 
+    // Apply dynamicWidth override if provided - this takes precedence over all other width settings
+    if (config.dynamicWidth) {
+      config.sideDrawerWidth = config.dynamicWidth;
+      if(screenType === "4xl") {
+        config.sideDrawerWidth = "25%";
+        config.dynamicWidth = "25%";
+      }
+    }
+
     // Store component props
     if (config.body?.componentProps) {
       setComponentProps(config.body.componentProps);
@@ -308,7 +334,32 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
     }
   };
 
-  // Helper function to save current state
+  // Update window size on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    // Set initial size
+    if (typeof window !== 'undefined') {
+      handleResize();
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (debouncedWindowSize.width > 0 && isOpen && config) {
+      openSideDrawer(config);
+    }
+  }, [debouncedWindowSize, isOpen]);
+
+
+
   const saveCurrentState = (configToSave: ISideDrawerConfig) => {
     if (!drawerType) return;
 

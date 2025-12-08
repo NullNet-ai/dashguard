@@ -1,5 +1,5 @@
 import { Copy, EllipsisVertical, Eye } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import React from 'react';
 import type {
   ICustomActions,
@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
+import { testIDFormatter } from '~/utils/formatter';
 
 export default function SelectedActions({
   form,
@@ -23,6 +24,10 @@ export default function SelectedActions({
   features: IFeatures | undefined;
   customFormFilterLockFormActions: ICustomActions[] | undefined;
 }) {
+
+  const path = usePathname()
+  const [, , entity, app] = path.split('/');
+
   const {
     enableLockFormCopy = true,
     enableLockFormEllipsis = true,
@@ -33,7 +38,7 @@ export default function SelectedActions({
     return null;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger data-test-id={`${testIDFormatter(`${entity}-${app}-form-ellipses`)}`}>
         <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -53,6 +58,7 @@ export default function SelectedActions({
         )}
         {enableLockFormCopy && (
           <DropdownMenuItem
+            data-test-id={`${testIDFormatter(`${entity}-${app}-form-cpy-btn`)}`}
             onClick={async () => {
               await navigator.clipboard.writeText(
                 JSON.stringify({
@@ -62,7 +68,7 @@ export default function SelectedActions({
             }}
             className="flex gap-2"
           >
-            <Copy className="h-4 w-4 text-foreground" />
+            <Copy className="h-4 w-4 text-slate-800" />
             <span>Copy</span>
           </DropdownMenuItem>
         )}

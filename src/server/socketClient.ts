@@ -1,35 +1,65 @@
-import "dotenv/config";
+import 'dotenv/config';
 import { Socket, io } from 'socket.io-client';
-
-const {
-  ROOM = 'portal-template',
-  SOCKET_URL =  'http://pubsub.events.dnamicro.net',
-  SOCKET_USERNAME = 'admin@dnamicro.com',
-  SOCKET_PASSWORD = 'ch@ng3m3Pl3@s3!!',
-  NEXT_PUBLIC_ROOM = '',
-  NEXT_PUBLIC_SOCKET_URL = '',
-  NEXT_PUBLIC_SOCKET_USERNAME = '',
-  NEXT_PUBLIC_SOCKET_PASSWORD = '',
-} = process.env;
-
-const _SOCKET_URL = NEXT_PUBLIC_SOCKET_URL || SOCKET_URL;
-const _SOCKET_USERNAME = NEXT_PUBLIC_SOCKET_USERNAME || SOCKET_USERNAME;
-const _SOCKET_PASSWORD = NEXT_PUBLIC_SOCKET_PASSWORD || SOCKET_PASSWORD;
-const _ROOM = NEXT_PUBLIC_ROOM || ROOM;
+import { decryptCredentials } from '~/utils/socketAuth';
+import { handleEvent } from './events';
 
 class SocketClient {
   public socket: Socket<any, any> | null = null;
   public token = '';
   public reconnectionAttempts = 5;
+  private socketConfig: {
+    url: string;
+    room: string;
+    username: string;
+    password: string;
+  } | null = null;
+  private router: any;
 
   constructor() {
-    if (!_SOCKET_URL) {
-      console.debug('SOCKET_URL is not set');
+    this.initialize();
+  }
+
+  async initialize() {
+    try {
+      // Fetch socket credentials from secure API
+      const response = await fetch('/api/socket/socket-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get socket credentials');
+      }
+
+      const config = await response.json();
+
+      if (config?.socketUrl) {
+        // Decrypt credentials on client side
+        const { username, password } = decryptCredentials(config.credentials);
+
+        this.socketConfig = {
+          url: config.socketUrl,
+          room: config.room,
+          username,
+          password,
+        };
+        this.connect();
+      }
+    } catch (error) {
+      console.error('Socket initialization failed:', error);
+    }
+  }
+  private connect() {
+    if (!this.socketConfig) {
+      console.error('Socket config not available');
       return;
     }
-    console.debug(`Connecting to socket at: ${_SOCKET_URL}`);
 
-    this.socket = io(_SOCKET_URL, {
+    console.debug(`Connecting to socket at: ${this.socketConfig.url}`);
+
+    this.socket = io(this.socketConfig.url, {
       transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
@@ -60,10 +90,10 @@ class SocketClient {
       {
         type: 'JOIN_ROOM',
         token: this.token,
-        payload: { room: _ROOM },
+        payload: { room: this.socketConfig?.room },
       },
       (...args: any) => {
-        console.info(`@JOIN_ROOM: ${_ROOM}`);
+        console.info(`@JOIN_ROOM: ${this.socketConfig?.room}`);
         console.info('@Callback', args);
       },
     );
@@ -88,11 +118,24 @@ class SocketClient {
   }
 
   private authenticate() {
-    this.socket?.emit('AUTHENTICATE', _SOCKET_USERNAME, _SOCKET_PASSWORD);
+    this.socket?.emit(
+      'AUTHENTICATE',
+      this.socketConfig?.username,
+      this.socketConfig?.password,
+    );
+  }
+
+  private async handleEventAction(event: any) {
+    const response = await handleEvent(event?.type, event?.payload);
+    console.debug('🚀 ~ handleEventAction ~ response:', response);
+    if (response?.redirectTo) {
+      this.router.push(response.redirectTo);
+    }
   }
 
   private onMessage(args: Record<string, any>) {
-    console.info('Received message:', args);
+    console.debug('Received message:', args);
+    this.handleEventAction(args);
   }
 
   public publish({ payload, type }: { type: string; payload?: unknown }) {
@@ -107,13 +150,16 @@ class SocketClient {
       {
         type,
         token: this.token,
-        room_name: _ROOM,
+        room_name: this.socketConfig?.room,
         payload,
       },
       (...args: any) => {
         console.info('@Callback', args);
       },
     );
+  }
+  public setRouter(router: any) {
+    this.router = router;
   }
 }
 

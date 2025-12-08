@@ -48,8 +48,8 @@ export const resolveGridParams = ({
     limit: +(pagination?.limit_per_page ?? '100'),
     entity,
     pluck,
-    sorting: sorts.groupSorts?.length
-      ? sorts.groupSorts
+    sorting: sorts?.groupSorts?.length
+      ? sorts?.groupSorts
       : sorts?.sorting?.length
         ? sorts?.sorting
         : defaultSorting,

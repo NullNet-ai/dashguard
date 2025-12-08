@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Grid from '~/components/platform/Grid';
 import { api } from '~/trpc/server';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
@@ -8,10 +9,12 @@ import defaultSorting from './_config/sorting';
 import AuthorizeDeviceAction from './_components/AuthorizeDeviceAction';
 
 export default async function Page() {
-  const gridCacheData =
-    (await getGridCacheData({
-      defaultSorting: defaultSorting,
-    })) ?? {};
+  const gridCacheData = (await getGridCacheData({
+    defaultSorting: defaultSorting,
+  })) ?? {};
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , main_entity] = pathname.split('/');
 
   const _pluck = [
     'id',
@@ -24,31 +27,25 @@ export default async function Page() {
     'updated_date',
     'updated_time',
     'updated_by',
-
+    // Project Columns
+    'is_device_authorized',
     'device_name',
-    'device_type',
     'device_category',
+    'device_type',
     'device_uuid',
-    'device_os',
-    'is_device_online',
-    'is_traffic_monitoring_enabled',
-    'is_config_monitoring_enabled',
-    'is_telemetry_monitoring_enabled',
-    'is_device_authorized'
   ];
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: 'device',
+    entity: main_entity!,
     pluck: _pluck,
     gridCacheData,
     defaults: {
       defaultSorting,
     },
   });
-
-  const { items = [], totalCount } = await api.device.mainGrid({
+  
+  const { items = [], totalCount } = await api.grid.items({
     ...gridParams,
-    is_case_sensitive_sorting: 'false',
   });
 
   return (
@@ -58,21 +55,22 @@ export default async function Page() {
       data={items}
       config={{
         isInfinite: true,
-        entity: 'device',
+        entity: main_entity!,
         title: 'Devices',
         columnsOrder: gridCacheData?.columns,
         columns: gridColumns,
         defaultValues: {
           id: 'code',
         },
+        // paginationType: 'default',
         enableAutoCreate: true,
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         searchConfig: {
-          router: 'device',
-          resolver: 'mainGrid',
+          router: 'grid',
+          resolver: 'items',
           query_params: {
-            entity: 'device',
+            entity: main_entity!,
             pluck: _pluck,
             group_advance_filters: gridCacheData?.filters?.groupAdvanceFilters,
           },
@@ -81,12 +79,12 @@ export default async function Page() {
           defaultSorting,
         },
         searchSuggestionConfig: {
-          router: 'search',
-          resolver: 'deviceSearch',
+          router:'search',
+          resolver: 'searchSuggestions',
         },
-        customRowAction: AuthorizeDeviceAction
+        customRowAction: AuthorizeDeviceAction,
       }}
-      customCreateButton={<CustomCreateButton entity={'device'} />}
+      customCreateButton={<CustomCreateButton entity={main_entity!} />}
     />
   );
 }

@@ -2,6 +2,6 @@
 
 import { redirect } from 'next/navigation';
 
-export const redirectToDashboard = () => {
+export const redirectToDashboard = async () => {
   redirect('/portal/dashboard');
 };

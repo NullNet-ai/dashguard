@@ -14,7 +14,7 @@ export async function UpdateCategory({
   id,
   categories,
 }: IProps) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
 
   await api.contact.updateCategoryDetails({
@@ -30,7 +30,7 @@ export async function StepOneUpdateCategory({
   categories,
   code
 }: IProps) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, portal, mainEntity] = pathname.split("/");
   const currentContext = "/" + portal + "/" + mainEntity;

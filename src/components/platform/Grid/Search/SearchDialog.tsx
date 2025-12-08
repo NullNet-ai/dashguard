@@ -31,6 +31,7 @@ import { testIDFormatter } from '~/utils/formatter'
 export default function SearchDialog() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+  const { enableSearch = true } = gridState?.config ?? {};
   const [openDialog, setOpenDialog] = useState(false);
   const path =  usePathname()
   const [, , path1, path2] = path.split('/')
@@ -70,6 +71,10 @@ export default function SearchDialog() {
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
+
+  if (!enableSearch) {
+    return null;
+  }
 
   const data = handleSearchQuery!(
     {
@@ -224,7 +229,7 @@ export default function SearchDialog() {
                     className={cn(
                       `h-[30px] text-default/60 underline hover:no-underline`,
                     )}
-                    name="resetSortButton"
+                    name="resetSearchButton"
                     variant="link"
                     onClick={() => {
                       actions?.handleClearSearchItems();

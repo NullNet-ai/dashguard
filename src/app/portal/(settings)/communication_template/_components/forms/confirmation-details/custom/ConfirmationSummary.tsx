@@ -2,15 +2,15 @@
 
 import React from "react";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from "~/components/ui/card";
+import { CardComponent as Card } from '~/components/ui/card/index';
 
 const ConfirmationSummary = () => {
   return (
-    <Card className="border-none p-0 shadow-none sm:p-2">
+    <Card>
       <CardHeader
         className={"flex flex-row items-center justify-between bg-slate-100"}
       >

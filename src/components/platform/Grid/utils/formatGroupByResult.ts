@@ -20,7 +20,7 @@ export const formatGroupByResult = ({
     const formatted_value =
       formatValue(sourceData, accessorKey) || formatValue(sourceData, field);
     return {
-      id: ulid(),
+      id: sourceData?.[field] || 'null',
       is_group_by: true,
       value: sourceData?.[field],
       formatted_value,

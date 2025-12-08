@@ -1,7 +1,9 @@
 
 import { cn } from '~/lib/utils';
 
-export default function Layout(props: { children: React.ReactNode, params: any }) {
+export const dynamic = 'force-dynamic'
+
+export default function Layout(props: { children: React.ReactNode, params: Promise<any> }) {
 
     const { params, children, ...rest } = props
     return (

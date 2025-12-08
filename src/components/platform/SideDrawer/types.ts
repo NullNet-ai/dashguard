@@ -24,6 +24,7 @@ export interface IActions {
 export interface ISideDrawerConfig {
   header: ReactNode
   sideDrawerWidth?: string
+  dynamicWidth?: string
   body: {
     component: React.ComponentType<any> | Promise<() => Element>;
     componentProps?: Record<string, any>

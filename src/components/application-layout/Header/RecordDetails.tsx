@@ -6,7 +6,7 @@ import Notifications from "./Notifications/NotificationBadge";
 
 export default async function RecordDetails() {
   return (
-    <nav className="mr-0 flex items-center lg:mr-6 md:mr-2 sm:mr-4">
+    <div className="mr-0 flex items-center">
       <DropdownMenu>
         <div className="relative flex items-start">
           <div className="hidden  lg:block">
@@ -15,6 +15,6 @@ export default async function RecordDetails() {
           <Notifications />
         </div>
       </DropdownMenu>
-    </nav>
+    </div>
   );
 }

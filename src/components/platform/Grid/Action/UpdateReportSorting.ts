@@ -18,7 +18,7 @@ export async function UpdateReportSorting({
   }[];
   gridKey?: string;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get("x-full-pathname") || "";
 
   await api.grid.updateReportSorting({

@@ -1,4 +1,4 @@
-import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
+import { EOperator, IAdvanceFilters } from '@dna-platform/common-orm';
 import Bluebird from 'bluebird';
 import { z } from 'zod';
 import {
@@ -13,12 +13,12 @@ import { TRPCError } from '@trpc/server';
 import { pick } from 'lodash';
 import { formatDate } from '~/server/utils/formatDate';
 import { formatSorting } from '~/server/utils/formatSorting';
-import { pluralize } from '~/server/utils/pluralize';
 import ZodItems from '~/server/zodSchema/grid/items';
 import { formatPhoneNumber } from '~/utils/formatter';
 import { createDefineRoutes } from '../baseCrud';
 import { EStatus } from '../types';
-import { addCommonGridPluckObject } from '~/server/utils/queryBuilder';
+import { addCommonGridConcatenates, addCommonGridPluckObject } from '~/server/utils/queryBuilder';
+import pluralize from 'pluralize';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -95,7 +95,7 @@ export const accountRouter = createTRPCRouter({
                 categories: contactId ? ['Internal User'] : ['External User'],
                 contact_id: contactId,
               },
-              pluck: ['id', 'email', 'role_id', 'status'],
+              pluck: ['id', 'email', 'role_id', 'status', 'code'],
             },
           })
           .execute();
@@ -118,7 +118,7 @@ export const accountRouter = createTRPCRouter({
               account_id: account_id ? account_id : null,
               categories: contactId ? ['Internal User'] : ['External User'],
             },
-            pluck: ['id', 'email', 'role_id', 'status'],
+            pluck: ['id', 'email', 'role_id', 'status', 'code'],
           },
         })
         .execute();
@@ -350,25 +350,11 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            // @ts-expect-error - multiple_sort is not defined in the type
-          multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
-              {
-                fields: ['first_name', 'last_name'],
-                field_name: 'full_name',
-                separator: ' ',
-                entity: 'contacts',
-                aliased_entity: 'created_by',
-              },
-              {
-                fields: ['first_name', 'last_name'],
-                field_name: 'full_name',
-                separator: ' ',
-                entity: 'contacts',
-                aliased_entity: 'updated_by',
-              },
+              ...addCommonGridConcatenates(input?.entity)
             ],
           },
         })
@@ -401,7 +387,6 @@ export const accountRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'created_by',
@@ -430,7 +415,6 @@ export const accountRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'updated_by',
@@ -479,8 +463,8 @@ export const accountRouter = createTRPCRouter({
           ...rest,
           first_name: contacts?.first_name || external_contacts?.first_name,
           last_name: contacts?.last_name || external_contacts?.last_name,
-          created_by: created_by.full_name || '',
-          updated_by: updated_by.full_name || '',
+          created_by: created_by?.full_name || '',
+          updated_by: updated_by?.full_name || '',
         };
       });
 
@@ -604,7 +588,6 @@ export const accountRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               entity: 'contact_phone_numbers',
@@ -632,7 +615,6 @@ export const accountRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               entity: 'contact_emails',
@@ -974,7 +956,6 @@ export const accountRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               entity: 'organizations',
@@ -1061,9 +1042,8 @@ export const accountRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            // @ts-expect-error - multiple_sort is not defined in the type
-          multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+            multiple_sort: input.sorting?.length
+              ? formatSorting(input.sorting)
               : [],
           },
         })

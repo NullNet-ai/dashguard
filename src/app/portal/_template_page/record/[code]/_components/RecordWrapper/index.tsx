@@ -16,14 +16,12 @@ const Wrapper = ({
   record_summary,
   entity_code,
   entity_name,
-  is_applicant,
 }: IProps) => {
   return (
     <RecordProvider
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: is_applicant ? statusOptions : undefined,
       }}
     >
       <RecordWrapperProvider>

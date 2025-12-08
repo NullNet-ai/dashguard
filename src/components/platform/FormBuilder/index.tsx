@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { type z } from 'zod';
 
 import { isSuccessStatus } from '~/components/platform/FormBuilder/Utils/http';
-import { Card } from '~/components/ui/card';
+import { CardComponent as Card } from '~/components/ui/card/index';
 import { Collapsible } from '~/components/ui/collapsible';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 import { useToast } from '~/context/ToastProvider';
@@ -18,6 +18,8 @@ import { UpdateCurrentSubTab } from './Actions/UpdateCurrentSubTab';
 import { FormBuilderLayout } from './components/ui';
 import { type IPropsForms, type TDisplayType } from './types';
 import { isUndefined } from 'lodash';
+import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 export const FormBuilder = (props: IPropsForms) => {
   const {
@@ -54,6 +56,7 @@ export const FormBuilder = (props: IPropsForms) => {
   } = props;
   const { isEditable = true } = properties ?? {};
   const { actions } = useWizard();
+  const router = useRouter();
 
   const enableFormRegisterToParent =
     myParent === 'record' ? false : _enableFormRegisterToParent;
@@ -79,6 +82,9 @@ export const FormBuilder = (props: IPropsForms) => {
   );
   const [showFormActions, setShowFormActions] = useState(false);
   const [isOpenSearch, setIsOpenSearch] = useState(false);
+
+  const pathname = usePathname();
+  const [, , , app_type] = pathname.split('/');
 
   const { formHostInitialView } = features ?? {};
   //* EFFECTS
@@ -130,6 +136,12 @@ export const FormBuilder = (props: IPropsForms) => {
           setDisplayType('form');
         }
       });
+
+      // ! Testing
+      if (!create_mode && formGridSelected?.length) {
+        handleRemovedSelectedRecords(formGridSelected);
+        return;
+      }
     } else {
       setFormGridSelected(filterGridConfig?.selectedRecords);
       setDisplayType('selected');
@@ -158,7 +170,9 @@ export const FormBuilder = (props: IPropsForms) => {
     ) => {
       try {
         //
-        await form.handleSubmit(onSubmit)();
+        await form.handleSubmit((args) => {
+          return onSubmit(args, 'Next');
+        })();
 
         if (Object.keys(form?.formState?.errors).length > 0) {
           reject({
@@ -191,12 +205,30 @@ export const FormBuilder = (props: IPropsForms) => {
   }, [formHostInitialView, myParent, enableFormRegisterToParent]);
 
   useEffect(() => {
-    if (customConfig?.defaultState === 'unlock') {
-      setTimeout(() => {
-        form.control._disableForm(false);
-      }, 100);
+    if (!filterGridConfig) {
+      if (!formHostInitialView) {
+        setTimeout(() => {
+          const defaultLock = myParent === 'record' ? true : false;
+          form.control._disableForm(defaultLock);
+        }, 100);
+        return;
+      }
+
+      if (formHostInitialView === 'lock') {
+        setTimeout(() => {
+          form.control._disableForm(true);
+        }, 100);
+        return;
+      }
+
+      if (formHostInitialView === 'unlock') {
+        setTimeout(() => {
+          form.control._disableForm(false);
+        }, 100);
+        return;
+      }
     }
-  }, []);
+  }, [form.control, formHostInitialView, myParent]);
 
   //* HANDLERS
 
@@ -218,9 +250,11 @@ export const FormBuilder = (props: IPropsForms) => {
         filter_entity: filterGridConfig?.filter_entity,
       }),
     ).then(() => {
-      const newRecords = formGridSelected?.filter((item) => {
-        return !records.some((record) => record.id === item.id);
-      });
+      const newRecords = records.length
+        ? formGridSelected?.filter((item) => {
+            return !records.some((record) => record.id === item.id);
+          })
+        : [];
 
       eventEmitter.emit(`formStatus:${formKey}`, {
         status: 'done',
@@ -229,13 +263,14 @@ export const FormBuilder = (props: IPropsForms) => {
 
       setFormGridSelected(newRecords);
       setOpenGrid('');
+
       if (!newRecords.length) {
         const currentValues = form.getValues();
         Object.keys(currentValues).forEach((key) => {
           const value = currentValues[key];
 
           if (Array.isArray(value)) {
-            if (key === 'email') {
+            if (key === 'email' || key === 'emails') {
               currentValues[key] = [{ email: '' }];
             } else if (key === 'phone') {
               currentValues[key] = [
@@ -258,11 +293,13 @@ export const FormBuilder = (props: IPropsForms) => {
           }
         });
         form.reset(currentValues);
-
         setDisplayType('form');
+        router.refresh();
         return;
       }
+
       setDisplayType('selected');
+      router.refresh();
     });
   };
 
@@ -346,11 +383,15 @@ export const FormBuilder = (props: IPropsForms) => {
     await onSubmit(data);
   };
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (
+    data: z.infer<typeof formSchema>,
+    action_type?: string,
+  ) => {
     setIsSaveLoading(true);
     try {
       if (!form.formState.isDirty && !form.formState.defaultValues) {
-        return toast.error('Form is Unchanged');
+        console.debug('[Form Status]: Pristine and No default values');
+        return;
       }
       // Handle form validation and other checks
       // what's the use of this function???
@@ -361,19 +402,35 @@ export const FormBuilder = (props: IPropsForms) => {
         });
         setIsSaveLoading(false);
         form.control._disableForm(true);
+        console.debug('[Form Status]: Pristine');
+        console.debug('[Action Type]: ', action_type);
+        if (handleSubmit && action_type === 'Next') {
+          handleSubmit({
+            data,
+            form,
+            action_type: 'Pristine:Next',
+          }) as any;
+          return;
+        }
+
         return;
       }
+      console.debug('[Form Status]: Dirty');
 
       if (handleSubmitFormGrid) {
         await onSubmitFormGrid(data, {
-          action_type: 'Next',
+          action_type: action_type,
         });
         return;
       }
 
       // Trigger handleSubmit if it's defined
       if (handleSubmit) {
-        const res = (await handleSubmit({ data, form })) as any;
+        const res = (await handleSubmit({
+          data,
+          form,
+          action_type: action_type,
+        })) as any;
         const {
           errors = {},
           existing = false,
@@ -420,6 +477,7 @@ export const FormBuilder = (props: IPropsForms) => {
           status: 'done',
           form_key: formKey,
         });
+        eventEmitter.emit('record:summary_content');
 
         form.control._disableForm(true);
 
@@ -464,6 +522,8 @@ export const FormBuilder = (props: IPropsForms) => {
         status: 'done',
         form_key: formKey,
       });
+      eventEmitter.emit('record:summary_content');
+
       setFormGridSelected(response);
       setIsSaveLoading(false);
       setDisplayType('selected');
@@ -489,6 +549,8 @@ export const FormBuilder = (props: IPropsForms) => {
         status: 'done',
         form_key: formKey,
       });
+      eventEmitter.emit('record:summary_content');
+
       setDisplayType('selected');
     } catch (error) {
       console.error('[Form-Filter] Failed onSelectFieldFilterGrid', error);
@@ -507,7 +569,7 @@ export const FormBuilder = (props: IPropsForms) => {
       )}
     >
       <Collapsible className="space-y-2" open={defaultDisplay === 'expanded'}>
-        <Card className={cn('border-none shadow-none', `p-0 sm:p-2`)}>
+        <Card className="!rounded-b-[8px] !rounded-t-[2px] ![overflow:unset]">
           <FormBuilderLayout
             {...props}
             debugOn={debugOn}

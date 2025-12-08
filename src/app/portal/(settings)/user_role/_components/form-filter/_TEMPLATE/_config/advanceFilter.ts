@@ -1,7 +1,7 @@
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import { ulid } from "ulid";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
-const headerList = headers();
+const headerList = (headers() as unknown as UnsafeUnwrappedHeaders);
 const pathname = headerList.get("x-pathname") || "";
 const entity = pathname.split("/")[2];
 

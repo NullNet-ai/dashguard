@@ -6,7 +6,7 @@ import FormBuilderPage from './builder'
 import BasicDetails from './client'
 
 const FormServerFetch = async () => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const contact_pluck_fields = [
     'id',

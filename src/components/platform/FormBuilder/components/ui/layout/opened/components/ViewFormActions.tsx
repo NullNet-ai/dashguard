@@ -10,7 +10,7 @@ import SubmitForm from '../../../Buttons/Submit';
 import CancelFormButton from '../../../Buttons/Cancel';
 import { camelCase, isUndefined } from 'lodash';
 import {
-  IFormProperties,
+  type IFormProperties,
   type ICustomActions,
   type IFeatures,
 } from '~/components/platform/FormBuilder/types';
@@ -39,7 +39,7 @@ const ViewFormActions = ({
   properties?: IFormProperties;
 }) => {
   const { hasActions = true } = properties ?? {};
-  const { enableFormHostViewActions = true } = features ?? {};
+  const { enableFormHostViewActions = true, enableViewFormEllipsis = true} = features ?? {};
   const { state } = useContext(WizardContext);
   const { entityName } = state ?? {};
   if (!enableFormHostViewActions) return null;
@@ -66,7 +66,7 @@ const ViewFormActions = ({
         formSchema={formSchema}
         isLoading={isButtonLoading}
       />
-      <DropdownMenu>
+      {enableViewFormEllipsis && <DropdownMenu>
         <DropdownMenuTrigger
           data-test-id={testIDFormatter(
             `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-menu`,
@@ -85,21 +85,30 @@ const ViewFormActions = ({
                 const value = currentValues[key];
 
                 if (Array.isArray(value)) {
-                  if (['email', 'emails'].includes(key.toLowerCase())) {
+                  if (key.toLowerCase() === 'email') {
                     currentValues[key] = [
                       {
                         ...value,
                         email: '',
                       },
                     ];
-                  } else if (
+                  } 
+                  else if (key.toLowerCase() === 'emails') {
+                    currentValues[key] = [
+                      {
+                        ...value[0],
+                        email: '',
+                        is_primary: true,
+                      },
+                    ];
+                  }
+                  else if (
                     ['phone_numbers', 'phones', 'phone'].includes(
                       key.toLowerCase(),
                     )
                   ) {
                     currentValues[key] = [
                       {
-                        ...value,
                         raw_phone_number: '',
                         iso_code: 'us',
                         country_code: '+1',
@@ -142,7 +151,7 @@ const ViewFormActions = ({
               </DropdownMenuItem>
             ))}
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu>}
     </div>
   );
 };

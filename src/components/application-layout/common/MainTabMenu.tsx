@@ -114,10 +114,10 @@ const MainTabMenu = ({
           <span>Close All Tabs</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-2 cursor-pointer">
+        {/* <DropdownMenuItem className="flex gap-2 cursor-pointer">
           <StarIcon className="h-4 w-4" />
           <span>Add to Favorites</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

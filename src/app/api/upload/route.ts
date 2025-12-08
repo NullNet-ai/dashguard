@@ -4,7 +4,7 @@ import axios from "axios";
 import { api } from '~/trpc/server';
 
 export async function POST(req: NextRequest) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const { value: email = '' } = cookieStore.get("username") || {};
 
   const token = await api.auth.getToken({
@@ -24,6 +24,14 @@ export async function POST(req: NextRequest) {
       Cookie: `token=${token}`,
     },
   });
-  const response = await client.post("/", formData);
-  return NextResponse.json(response.data);
+  try {
+    const response = await client.post("/", formData);
+    return NextResponse.json(response.data);
+  } catch (error) {
+    console.error("Failed to upload file:", error);
+    return NextResponse.json(
+      { message: "Upload failed", error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
 }

@@ -285,7 +285,6 @@ export default function FormSelect({
       />
 
       <FormMessage
-        className="text-md"
         data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
       />
     </FormItem>

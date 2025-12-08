@@ -59,7 +59,6 @@ export const addCommonGridJoins = (query: any, ENTITY: string) => {
     })
     .nestedJoin({
       type: 'left',
-      nested: true,
       field_relation: {
         to: {
           alias: 'created_by',
@@ -88,7 +87,6 @@ export const addCommonGridJoins = (query: any, ENTITY: string) => {
     })
     .nestedJoin({
       type: 'left',
-      nested: true,
       field_relation: {
         to: {
           alias: 'updated_by',

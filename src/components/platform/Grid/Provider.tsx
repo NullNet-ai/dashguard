@@ -10,6 +10,7 @@ import {
   type RowSelectionState,
   type SortingState,
   type Updater,
+  ExpandedState,
 } from '@tanstack/react-table';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
@@ -36,6 +37,18 @@ import {
 import { constructSearchableFields } from './utils/constructSearchableFields';
 import { sortColumns } from './utils/sortColumns';
 import { useRouter } from 'next/navigation';
+import { formatSortingFields } from './utils/formatSortingFields';
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 export const GridContext = React.createContext<ICreateContext>({});
 
@@ -44,7 +57,7 @@ interface IProps extends IPropsGrid {
   config: IConfigGrid;
   data: any;
   totalCount: number;
-  parentType?: IParentType
+  parentType?: IParentType;
   onRefetch?: (gridData: any) => void;
   gridLevel?: number;
   gridType?: 'card-list' | 'table';
@@ -68,7 +81,9 @@ export default function GridProvider({
   gridKey,
   customCreateButton,
   customCreateActionButton,
-  hideCreateNewFilter
+  hideCreateNewFilter,
+  defaultGrouping,
+  current_tab_id,
 }: IProps) {
   const router = useRouter();
 
@@ -133,24 +148,26 @@ export default function GridProvider({
         [curr]: false,
       };
     }, {});
-    
+
     // Then, also hide columns with is_hidden: true
-    const hiddenColumns = _propsConfig?.columns?.reduce((acc: any, column: any) => {
-      if (column.is_hidden) {
-        return {
-          ...acc,
-          [column.accessorKey]: false,
-        };
-      }
-      return acc;
-    }, {});
-    
+    const hiddenColumns = _propsConfig?.columns?.reduce(
+      (acc: any, column: any) => {
+        if (column.is_hidden) {
+          return {
+            ...acc,
+            [column.accessorKey]: false,
+          };
+        }
+        return acc;
+      },
+      {},
+    );
+
     return {
       ...initialVisibility,
       ...hiddenColumns,
     };
   });
-
 
   const [sorting, setSorting] = useState<SortingState>(
     initialSorting?.length ? initialSorting : _defaultSorting,
@@ -158,8 +175,6 @@ export default function GridProvider({
   const [grouping, setGrouping] = React.useState<GroupingState>(
     resolvedGroupings?.length ? resolvedGroupings : [],
   );
-  const [temoporaryGrouping, setTemporaryGrouping] =
-    React.useState<GroupingState>([]);
 
   const [showBulkActionConfirmationModal, setShowBulkActionConfirmationModal] =
     useState<boolean | null>(false);
@@ -173,6 +188,7 @@ export default function GridProvider({
 
   // infinite data options
   const [infiniteData, setInfiniteData] = useState<any[]>(data);
+  
   const [bufferData, setBufferData] = useState<any[]>([]);
   const [current, setCurrent] = useState(1);
   const [limit, setLimit] = useState<number>(pagination?.limit_per_page ?? 100);
@@ -182,8 +198,12 @@ export default function GridProvider({
   const [columnsOrder, setColumnsOrder] = useState<any[]>(
     _propsConfig?.columnsOrder ?? [],
   );
+  const [expanded, setExpanded] = useState<ExpandedState>({});
 
-  const [gridColumns] = useState<any[]>(
+  const [reorderedData, setReorderedData] = useState<any[]>([]);
+  const [hasBeenReordered, setHasBeenReordered] = useState(false);
+
+  const [gridColumns, setGridColumns] = useState<any[]>(
     _propsConfig?.columns?.map((item: any) => {
       return {
         ...item,
@@ -236,12 +256,15 @@ export default function GridProvider({
             : [],
         });
       }
+      const { expanded = {} } = getGridPersistenceFromLocalStorage() ?? {};
+      setExpanded(expanded);
     }
   }, []);
 
   // use effect for column order
   useEffect(() => {
     if (!_propsConfig?.columnsOrder?.length) {
+      setGridColumns(_propsConfig?.columns ?? []);
       setColumnsOrder([]);
       return;
     }
@@ -251,7 +274,8 @@ export default function GridProvider({
         _propsConfig?.columnsOrder,
         _propsConfig?.columns,
       );
-      _propsConfig.columns = sortedColumns;
+      // _propsConfig.columns = sortedColumns;
+      setGridColumns(sortedColumns);
     }
 
     // Check if arrays have different lengths
@@ -274,13 +298,16 @@ export default function GridProvider({
   useEffect(() => {
     if (initialSorting?.length) {
       setSorting(initialSorting);
+      if (parentType === 'grouping_expansion' && !grouping?.length) {
+        config?.onFetchRecords?.({
+          sorting: initialSorting,
+        });
+      }
     }
-  }, [initialSorting]);
+  }, [JSON.stringify(initialSorting)]);
 
   useEffect(() => {
-    if (
-      JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)
-    ) {
+    if (JSON.stringify(grouping) !== JSON.stringify(resolvedGroupings)) {
       setGrouping(resolvedGroupings);
       setColumnVisibility(() => {
         const newVisibility: any = {};
@@ -289,7 +316,7 @@ export default function GridProvider({
         });
         return newVisibility;
       });
-      if (config?.onFetchRecords && parentType !== 'grouping_expansion') {
+      if (config?.onFetchRecords) {
         config?.onFetchRecords({
           grouping: resolvedFieldGroupings[0]
             ? [resolvedFieldGroupings[0]]
@@ -299,6 +326,28 @@ export default function GridProvider({
     }
   }, [resolvedGroupings]);
 
+  // Reset reordered state when data changes from props
+  useEffect(() => {
+    if (hasBeenReordered) {
+      setHasBeenReordered(false);
+      setReorderedData([]);
+    }
+  }, [data]);
+
+  // Reset reordered state when grouping changes
+  useEffect(() => {
+    if (hasBeenReordered && grouping.length > 0) {
+      setHasBeenReordered(false);
+      setReorderedData([]);
+    }
+  }, [grouping.length]);
+
+  useEffect(() => {
+    if (parentType === 'grouping_expansion') {
+      config?.onFetchRecords?.({});
+    }
+  }, [advanceFilter]);
+
   /** DEFAULT GRID CONFIGS */
   const config: IConfigGrid = {
     enableMultiRowSelection: true,
@@ -307,6 +356,7 @@ export default function GridProvider({
     enableRowExpansion: false,
     enableRowSelection: true,
     enableGridGrouping: true,
+    enableSearch: true,
     hideCreateButton:
       playgroundGridIsShowCreateButton != null
         ? !(playgroundGridIsShowCreateButton == 'true')
@@ -332,6 +382,10 @@ export default function GridProvider({
   }, [grouping, config?.group_by_initial_columns, config?.columns]);
 
   const newData = useMemo(() => {
+    if (hasBeenReordered && !grouping.length) {
+      return reorderedData;
+    }
+
     if (grouping.length && columnConfig) {
       const entity = columnConfig?.search_config?.entity || config.entity;
       const field = columnConfig?.search_config?.field || grouping[0];
@@ -342,7 +396,9 @@ export default function GridProvider({
         accessorKey: columnConfig?.accessorKey,
       });
     }
-    return isMobileOrTablet && config.isInfinite ? infiniteData : data;
+    return isMobileOrTablet && config.isInfinite && !grouping.length
+      ? infiniteData
+      : data;
   }, [
     grouping,
     columnConfig,
@@ -350,7 +406,19 @@ export default function GridProvider({
     isMobileOrTablet,
     config.isInfinite,
     infiniteData,
+    reorderedData,
+    hasBeenReordered,
   ]);
+
+  useEffect(() => {
+      if(config.isInfinite && config.entity ==='timeline')  {
+        setInfiniteData(data)
+        setCurrent(1)
+        setInfiniteCount(totalCount || 0)
+        setHasMore(false)
+      }
+  }, [config.isInfinite, config.entity, advanceFilter])
+  
 
   const handleSwitchViewMode = (mode: 'table' | 'card') => {
     setViewMode(mode);
@@ -386,6 +454,11 @@ export default function GridProvider({
   const handleResetSorting = () => {
     setSorting(_defaultSorting);
     handleUpdateReportSorting(_defaultSorting);
+    if (config?.onFetchRecords) {
+      return config?.onFetchRecords?.({
+        sorting: _defaultSorting,
+      });
+    }
   };
 
   const handleRemoveSorting = (columnId: string) => {
@@ -394,61 +467,15 @@ export default function GridProvider({
     );
     const updatedSorting = sorting.filter((sort) => sort.id !== columnId);
     handleUpdateReportSorting(updatedSorting);
-
-    if (config?.onFetchRecords) {
-      return config?.onFetchRecords?.({
-        sorting: updatedSorting,
-      });
-    }
   };
 
   const handleUpdateReportSorting = async (updater: Updater<SortingState>) => {
     const updatedSorting =
       typeof updater === 'function' ? updater(sorting) : updater;
 
-    const processedSortKeys = new Map();
-
-    const resolvedSorting = updatedSorting?.reduce(
-      (acc: SortingState, sort) => {
-        const sortFields = config?.columns?.find(
-          (column: any) => column?.accessorKey === sort.id,
-        );
-
-        const resolvedSortFields = Array.isArray(sortFields?.sortKey)
-          ? sortFields?.sortKey.map((sortKey) => {
-              const key = `${sort.id}_${sortKey}`;
-              // If we've already processed this combination, skip it
-              if (processedSortKeys.has(key)) {
-                return null;
-              }
-              processedSortKeys.set(key, true);
-              return {
-                ...sort,
-                ...(sortFields?.sort_config ?? {}),
-                sort_key: sortKey,
-              };
-            })
-          : (() => {
-              const key = `${sort.id}_${sortFields?.sortKey || sort.id}`;
-              if (processedSortKeys.has(key)) {
-                return null;
-              }
-              processedSortKeys.set(key, true);
-              return [
-                {
-                  ...sort,
-                  ...(sortFields?.sort_config ?? {}),
-                  sort_key: sortFields?.sortKey || sort.id,
-                },
-              ];
-            })();
-
-        return [
-          ...acc,
-          ...(resolvedSortFields?.filter(Boolean) as SortingState),
-        ];
-      },
-      [],
+    const resolvedSorting = formatSortingFields(
+      updatedSorting,
+      config?.columns,
     );
     UpdateReportSorting({ sorting: resolvedSorting, gridKey });
 
@@ -460,8 +487,23 @@ export default function GridProvider({
   };
 
   const handleAddSorting = (updater: Updater<SortingState>) => {
-    setSorting(updater);
-    handleUpdateReportSorting(updater);
+    const filteredSorting = sorting?.reduce((acc, curr) => {
+      if (!acc?.find((sort) => sort.id === curr.id)) {
+        acc.push(curr);
+      }
+      return acc;
+    }, [] as SortingState);
+
+    if (filteredSorting?.length === 1) {
+      const updatedSorting =
+      typeof updater === 'function' ? updater(sorting) : updater;
+      const lastSorting = [updatedSorting?.[updatedSorting?.length - 1]] as SortingState;
+      setSorting(lastSorting);
+      handleUpdateReportSorting(lastSorting);
+    } else {
+      setSorting(updater);
+      handleUpdateReportSorting(updater);
+    }
   };
 
   const handleUpdateGrouping = async (updater: Updater<GroupingState>) => {
@@ -507,10 +549,58 @@ export default function GridProvider({
     }
   };
 
+  const handleResetGrouping = () => {
+    if (defaultGrouping) {
+      UpdateReportGrouping({ grouping: defaultGrouping, gridKey });
+      if (config?.onFetchRecords) {
+        setColumnVisibility((prev: any) => {
+          const visibility: any = { ...prev };
+          defaultGrouping.forEach((group) => {
+            visibility[group.value] = false;
+          });
+          return visibility;
+        });
+        const groupings = defaultGrouping?.map((item) => item.value);
+        setGrouping(groupings);
+        config?.onFetchRecords?.({
+          grouping: defaultGrouping[0]?.field
+            ? [defaultGrouping[0]?.field]
+            : [],
+        });
+        return;
+      }
+    }
+  };
+
+  const saveGridPersistenceToLocalStorage = (
+    updater: Updater<ExpandedState>,
+  ) => {
+    const updatedExpanded =
+      typeof updater === 'function' ? updater(expanded) : updater;
+    setExpanded(updatedExpanded);
+    const gridData = {
+      expanded: updatedExpanded,
+    };
+    const key = `grid_persistence_${gridKey ?? config?.entity}_${current_tab_id}${grouping?.length ? `_${grouping[0]}` : ''}`;
+    localStorage.setItem(key, JSON.stringify(gridData));
+  };
+
+  const getGridPersistenceFromLocalStorage = () => {
+    const key = `grid_persistence_${gridKey ?? config?.entity}_${current_tab_id}${grouping?.length ? `_${grouping[0]}` : ''}`;
+    const gridData = localStorage.getItem(key);
+    if (gridData) {
+      const parsedData = JSON.parse(gridData);
+      return parsedData;
+    }
+  };
+
   /** @HOOKS */
   const { selectTableRow, expandTableRow, actionRow, groupByColumn } =
     useActionColumns(
-      config,
+      {
+        ...config,
+        columns: gridColumns,
+      },
       rowSelection,
       showActionConfirmationModal,
       setShowActionConfirmationModal,
@@ -520,7 +610,10 @@ export default function GridProvider({
     );
 
   const { actionTypeColumnCondition } = useColumnConditions(
-    config,
+    {
+      ...config,
+      columns: gridColumns,
+    },
     grouping,
     newData,
     selectTableRow,
@@ -568,6 +661,7 @@ export default function GridProvider({
     enableMultiRowSelection: config?.enableMultiRowSelection,
     enableHiding: true,
     state: {
+      expanded,
       sorting,
       grouping,
       columnSizing: colSizing,
@@ -585,8 +679,53 @@ export default function GridProvider({
     onSortingChange: handleAddSorting,
     onGroupingChange: handleUpdateGrouping,
     enableGrouping: true,
+    onExpandedChange: saveGridPersistenceToLocalStorage,
   });
   /** @ACTIONS */
+
+  // reorder rows after drag & drop
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (active && over && active.id !== over.id) {
+      // Get the current data source
+      const currentData = hasBeenReordered
+        ? reorderedData
+        : isMobileOrTablet && config.isInfinite && !grouping.length
+          ? infiniteData
+          : data;
+
+      // Find the old and new indices
+      const oldIndex = currentData.findIndex(
+        (item: any) => item.id === active.id,
+      );
+      const newIndex = currentData.findIndex(
+        (item: any) => item.id === over.id,
+      );
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        // Create a new array with reordered items
+        const newReorderedData = [...currentData];
+        const [movedItem] = newReorderedData.splice(oldIndex, 1);
+        newReorderedData.splice(newIndex, 0, movedItem);
+
+        // Update the reordered state
+        setReorderedData(newReorderedData);
+        setHasBeenReordered(true);
+
+        // If using infinite data, also update infinite data
+        if (isMobileOrTablet && config.isInfinite && !grouping.length) {
+          setInfiniteData(newReorderedData);
+        }
+      }
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {}),
+    useSensor(TouchSensor, {}),
+    useSensor(KeyboardSensor, {}),
+  );
 
   const handleCreate = async () => {
     try {
@@ -694,11 +833,14 @@ export default function GridProvider({
 
       return;
     }
+
     setInfiniteData((prev) => {
-      if (current === 1) {
+      if (current === 1 && config.entity !== 'timeline') {
         return items;
       }
-      return [...prev, ...items];
+      const mergeItems = [...prev, ...items]
+
+      return  mergeItems;
     });
     setCurrent((prev) => {
       return curr ? curr : prev + 1;
@@ -727,7 +869,6 @@ export default function GridProvider({
     handleUpdateInfiniteData,
     handleMergeBufferInfinite,
   };
-
   const state_context = {
     config: {
       ...config,
@@ -736,7 +877,7 @@ export default function GridProvider({
         actionRow?.current,
         ...(config?.columns ?? []),
       ],
-      gridColumns,
+      gridColumns: _propsConfig?.columns,
     },
     parentType,
     data: newData,
@@ -766,7 +907,9 @@ export default function GridProvider({
     gridKey,
     customCreateButton,
     customCreateActionButton,
-    hideCreateNewFilter
+    hideCreateNewFilter,
+    defaultGrouping,
+    current_tab_id,
   } as IState;
   const actions = {
     handleCreate,
@@ -788,17 +931,25 @@ export default function GridProvider({
     handleUpdateGrouping,
     handleCustomBulkAction,
     setColumnsOrder,
+    handleResetGrouping,
   } as IAction;
 
   return (
-    <GridContext.Provider
-      value={{
-        state: state_context,
-        actions,
-      }}
+    <DndContext
+      collisionDetection={closestCenter}
+      modifiers={[restrictToVerticalAxis]}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
     >
-      {children}
-    </GridContext.Provider>
+      <GridContext.Provider
+        value={{
+          state: state_context,
+          actions,
+        }}
+      >
+        {children}
+      </GridContext.Provider>
+    </DndContext>
   );
 }
 

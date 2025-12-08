@@ -41,6 +41,7 @@ export const SideDrawerView: React.FC = () => {
     header,
     body,
     sideDrawerWidth = '982px',
+    dynamicWidth,
     overlayEnabled = false,
     closeOnOutsideClick = true,
     resizable = false,
@@ -65,7 +66,15 @@ export const SideDrawerView: React.FC = () => {
       return;
     }
     
-    // Always check localStorage first with the unique key, then config
+    // Priority 1: dynamicWidth overrides everything if provided
+    if (dynamicWidth) {
+      setCurrentWidth(dynamicWidth);
+      setwidth(dynamicWidth);
+      lastSavedWidth.current = dynamicWidth;
+      return;
+    }
+    
+    // Priority 2: Check localStorage with the unique key
     const storedWidth = localStorage.getItem(uniqueDrawerWidthKey);
     if (storedWidth) {
       setCurrentWidth(storedWidth);
@@ -74,7 +83,7 @@ export const SideDrawerView: React.FC = () => {
       return;
     }
     
-    // Fallback to config width - handle viewport units properly
+    // Priority 3: Fallback to config width - handle viewport units properly
     if (sideDrawerWidth) {
       // For 100dvw, use the actual value without parsing
       if (sideDrawerWidth.includes('dvw') || sideDrawerWidth.includes('vw')) {
@@ -87,7 +96,7 @@ export const SideDrawerView: React.FC = () => {
         lastSavedWidth.current = sideDrawerWidth;
       }
     }
-  }, [sideDrawerWidth, isMobile, drawerType, setwidth, uniqueDrawerWidthKey]);
+  }, [sideDrawerWidth, dynamicWidth, isMobile, drawerType, setwidth, uniqueDrawerWidthKey]);
 
   const { component: BodyComponent, componentProps } = body || {}
 
@@ -275,7 +284,8 @@ const handleResizeEnd = () => {
           isBannerPresent ? 'md:h-[calc(100dvh-69px)]' : 'md:h-[calc(100dvh-37px)]',
           effectiveIsPinned && isOpen && 'lg:h-[calc(100dvh-50px)]',
           isMobile ? 'w-full h-[calc(100dvh-55px)]' : 'h-[calc(100dvh-48px)]',
-          isBannerPresent && effectiveIsPinned && isOpen && 'lg:translate-y-4'
+          isBannerPresent && effectiveIsPinned && isOpen && 'lg:translate-y-4',
+          'drop-shadow-[0_-4px_6px_rgba(148,163,184,0.1)]'
         )}
         style={{ 
           width: isMobile ? mobileWidth : 'var(--drawer-width)',
@@ -307,7 +317,7 @@ const handleResizeEnd = () => {
 
         {config && (
           <>
-            <CardHeader className="flex items-center gap-4 p-3 pb-0 justify-between">
+            <CardHeader className="flex items-center gap-4 p-3 justify-between">
               {state?.dynamicHeader}
               <div className="flex items-center gap-2">
                 <TooltipProvider>
@@ -353,7 +363,7 @@ const handleResizeEnd = () => {
 
             <Separator />
 
-            <CardContent className='flex flex-1 flex-col gap-2 h-full p-0'>
+            <CardContent className='flex flex-1 flex-col gap-2 h-full p-3 pt-0'>
               {BodyComponent && (typeof BodyComponent === 'function' ?
                 <BodyComponent {...componentProps} /> :
                 typeof BodyComponent.then === 'function' ?

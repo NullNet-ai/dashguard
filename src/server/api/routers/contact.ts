@@ -1,9 +1,11 @@
 import {
+  EDateFormats,
   EOperator,
   EOrderDirection,
-  type IGroupAdvanceFilters,
+  IGroupAdvanceFilters,
   type IAdvanceFilters,
 } from '@dna-platform/common-orm';
+import Bluebird from 'bluebird';
 import { pick } from 'lodash';
 import { z } from 'zod';
 
@@ -27,6 +29,12 @@ import {
   addCommonGridJoins,
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
+import { dnaClient } from '~/server/dnaOrm';
+import { headers } from 'next/headers';
+import { ulid } from 'ulid';
+import { get_meta_header } from '~/utils/request-header';
+import { metadata } from '~/app/layout';
+
 
 const ENTITY = 'contact';
 
@@ -34,7 +42,9 @@ export const contactRouter = createTRPCRouter({
   updateContactDetails: privateProcedure
     .input(contactDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, address_id, details = {}, ...rest } = input;
+      const meta_header = await get_meta_header()
+      const { id = '', address_id, details = {}, ...rest } = input;
+      
 
       let _address_id = address_id || null;
 
@@ -94,6 +104,7 @@ export const contactRouter = createTRPCRouter({
           .create({
             entity,
             token: ctx.token.value,
+            ...meta_header,
             mutation: {
               params: {
                 ...data,
@@ -116,6 +127,7 @@ export const contactRouter = createTRPCRouter({
           .update(data.id, {
             entity,
             token: ctx.token.value,
+            ...meta_header,
             mutation: {
               params: data,
               pluck,
@@ -167,6 +179,7 @@ export const contactRouter = createTRPCRouter({
         .update(id, {
           entity: ENTITY,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: { ...rest, address_id: _address_id },
             pluck: ['id', 'address_id'],
@@ -174,6 +187,43 @@ export const contactRouter = createTRPCRouter({
         })
         .execute();
     }),
+
+  timelineData: privateProcedure
+    .input(
+      z.object({
+        pluck: z.array(z.string()),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+       const results = ctx.dnaClient
+        .filterTimelineRecords({
+          entity: 'timeline',
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck,
+            advance_filters: [],
+            group_advance_filters: [],
+            order: {
+              limit: 100,
+              is_case_sensitive_sorting: true,
+              by_direction: EOrderDirection.DESC,
+              by_field: 'timestamp',
+            },
+            multiple_sort: [
+              // { by_direction: 'desc', by_field: 'created_date' },
+              // {
+              //   by_direction: 'desc',
+              //   by_field: 'created_time',
+              //   is_case_sensitive_sorting: false,
+              // },
+            ],
+          },
+        })
+        .execute();
+
+        return results;
+    }),
+
   mainGrid: privateProcedure.input(ZodItems).query(async ({ ctx, input }) => {
     const query = ctx.dnaClient
       .findAll({
@@ -215,9 +265,8 @@ export const contactRouter = createTRPCRouter({
             // by_field: "created_date",
             // by_direction: EOrderDirection.ASC,
           },
-          //@ts-expect-error - multiple sort types
           multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+            ? formatSorting(input.sorting)
             : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
@@ -263,7 +312,6 @@ export const contactRouter = createTRPCRouter({
       })
       .nestedJoin({
         type: 'left',
-        nested:true,
         field_relation: {
           to: {
             entity: 'organizations',
@@ -291,15 +339,17 @@ export const contactRouter = createTRPCRouter({
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
-      if(input.grouping[0] === 'organization.name') {
+      if (input.grouping[0] === 'organization.name') {
         const resolvedItems = items?.map((item: any) => {
           return {
             ...item,
             organizations: {
-              name: item?.organizations?.name ? [item?.organizations?.name]: null,
-            }
-          }
-        })
+              name: item?.organizations?.name
+                ? [item?.organizations?.name]
+                : null,
+            },
+          };
+        });
         return {
           totalCount,
           items: resolvedItems,
@@ -463,9 +513,8 @@ export const contactRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            // @ts-expect-error - multiple sort types
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+              ? formatSorting(input.sorting)
               : [],
           },
         })
@@ -540,12 +589,15 @@ export const contactRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+    
       const { categories } = input;
+      const meta_header = await get_meta_header();
 
       return ctx.dnaClient
         .update(input.id, {
           entity: ENTITY,
           token: ctx.token.value,
+          ...meta_header,
           mutation: {
             params: {
               categories: [...new Set([categories, 'Contact'])],
@@ -557,6 +609,7 @@ export const contactRouter = createTRPCRouter({
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header()
       const { id, emails, phones, code } = input;
 
       const email_pluck = ['email', 'id', 'contact_id', 'is_primary'];
@@ -676,7 +729,8 @@ export const contactRouter = createTRPCRouter({
         const record = await ctx.dnaClient
           .create({
             entity: 'contact',
-            token: ctx.token.value,
+            token: ctx.token.value, 
+           ...meta_header,
             mutation: {
               params: {
                 status: 'Draft',
@@ -694,10 +748,12 @@ export const contactRouter = createTRPCRouter({
 
       // Suppose to create once only
       const insert = async (entity: string, data: any, pluck: string[]) => {
+      
         const record = await ctx.dnaClient
           .create({
             entity,
             token: ctx.token.value,
+            ...meta_header,
             mutation: {
               params: {
                 ...data,
@@ -711,11 +767,12 @@ export const contactRouter = createTRPCRouter({
         return record?.data?.[0];
       };
 
-      const update = async (entity: string, data: any, pluck: string[]) => {
+      const update = async (entity: string, data: any, pluck: string[]) => { 
         const record = await ctx.dnaClient
           .update(data.id, {
             entity,
             token: ctx.token.value,
+            ...meta_header,
             mutation: {
               params: data,
               pluck,
@@ -834,7 +891,7 @@ export const contactRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
+
           field_relation: {
             to: {
               entity: 'user_roles',

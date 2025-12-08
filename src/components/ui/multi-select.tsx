@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Command as CommandPrimitive, useCommandState } from "cmdk";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import * as React from "react";
-import { forwardRef, useEffect } from "react";
-import { createPortal } from "react-dom"; // Add this import
+import { Command as CommandPrimitive, useCommandState } from 'cmdk';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import * as React from 'react';
+import { forwardRef, useEffect } from 'react';
+import { createPortal } from 'react-dom'; // Add this import
 
-import { Badge } from "~/components/ui/badge";
+import { Badge } from '~/components/ui/badge';
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
-} from "~/components/ui/command";
-import { cn } from "~/lib/utils";
+} from '~/components/ui/command';
+import { cn } from '~/lib/utils';
 import { toast } from 'sonner';
 import { Button } from './button';
 
@@ -82,7 +82,7 @@ interface MultipleSelectorProps {
   /** Props of `CommandInput` */
   inputProps?: Omit<
     React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
-    "value" | "placeholder" | "disabled"
+    'value' | 'placeholder' | 'disabled'
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
@@ -90,9 +90,13 @@ interface MultipleSelectorProps {
   /** Show/hide the creatable item in the dropdown */
   showCreatableItem?: boolean;
   /** Custom render function for the selected option badges */
-  renderBadge?: (option: Option, handleUnselect: (option: Option) => void) => React.ReactNode;
+  renderBadge?: (
+    option: Option,
+    handleUnselect: (option: Option) => void,
+  ) => React.ReactNode;
   /** Custom render function for dropdown options */
   renderOption?: (option: Option) => React.ReactNode;
+  keyAlias?: Record<string, any>;
 }
 
 export interface MultipleSelectorRef {
@@ -120,13 +124,13 @@ function transToGroupOption(options: Option[], groupBy?: string) {
   }
   if (!groupBy) {
     return {
-      "": options,
+      '': options,
     };
   }
 
   const groupOption: GroupOption = {};
   options.forEach((option) => {
-    const key = (option[groupBy] as string) || "";
+    const key = (option[groupBy] as string) || '';
     if (!groupOption[key]) {
       groupOption[key] = [];
     }
@@ -157,7 +161,11 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
 function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   for (const [, value] of Object.entries(groupOption)) {
     if (
-      value.some((option) => targetOption.find((p) => p?.label?.toLowerCase() === option?.label?.toLowerCase()))
+      value.some((option) =>
+        targetOption.find(
+          (p) => p?.label?.toLowerCase() === option?.label?.toLowerCase(),
+        ),
+      )
     ) {
       return true;
     }
@@ -182,7 +190,7 @@ const CommandEmpty = forwardRef<
   return (
     <div
       ref={forwardedRef}
-      className={cn("py-6 text-center text-sm", className)}
+      className={cn('py-6 text-center text-sm', className)}
       cmdk-empty=""
       role="presentation"
       {...props}
@@ -190,7 +198,7 @@ const CommandEmpty = forwardRef<
   );
 });
 
-CommandEmpty.displayName = "CommandEmpty";
+CommandEmpty.displayName = 'CommandEmpty';
 
 const MultipleSelector = React.forwardRef<
   MultipleSelectorRef,
@@ -227,6 +235,7 @@ const MultipleSelector = React.forwardRef<
       useStringValues = false,
       renderBadge,
       renderOption,
+      keyAlias,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -237,20 +246,37 @@ const MultipleSelector = React.forwardRef<
     const dropdownRef = React.useRef<HTMLDivElement>(null);
 
     // Convert string array to Option array if useStringValues is true
-    const convertToOptions = React.useCallback((stringArray: string[]): Option[] => {
-      return stringArray.map(str => ({ value: str, label: str }));
-    }, []);
+    const convertToOptions = React.useCallback(
+      (stringArray: string[], keyAlias?: Record<string, any>): Option[] => {
+        if (!keyAlias) {
+          return stringArray.map((str) => ({ value: str, label: str }));
+        }
+        const new_options = stringArray.map((str) => ({
+          value: str,
+          label: keyAlias[str] || str,
+        }));
+        return new_options;
+      },
+      [keyAlias],
+    );
 
     // Convert Option array to string array if useStringValues is true
-    const convertToStrings = React.useCallback((optionArray: Option[]): string[] => {
-      return optionArray.map(opt => opt.value);
-    }, []);
+    const convertToStrings = React.useCallback(
+      (optionArray: Option[]): string[] => {
+        return optionArray.map((opt) => opt.value);
+      },
+      [],
+    );
 
     // Initialize selected state based on value type
     const initialSelected = React.useMemo(() => {
       if (!value) return [];
-      if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
-        return convertToOptions(value as string[]);
+      if (
+        useStringValues &&
+        Array.isArray(value) &&
+        typeof value[0] === 'string'
+      ) {
+        return convertToOptions(value as string[], keyAlias);
       }
       return value as Option[];
     }, []);
@@ -259,28 +285,31 @@ const MultipleSelector = React.forwardRef<
     const [options, setOptions] = React.useState<GroupOption>(
       transToGroupOption(arrayDefaultOptions, groupBy),
     );
-    const [inputValue, setInputValue] = React.useState("");
+    const [inputValue, setInputValue] = React.useState('');
     const [isCreateLoading, setIsCreateLoading] = React.useState(false);
 
     const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
 
     // Update portal container state
-    const [portalElement, setPortalElement] = React.useState<HTMLElement | null>(null);
-    
+    const [portalElement, setPortalElement] =
+      React.useState<HTMLElement | null>(null);
+
     // Create portal container once on component mount
     useEffect(() => {
       if (typeof document !== 'undefined') {
         // Check if container already exists
-        let container = document.getElementById('multi-select-portal-container');
-        
+        let container = document.getElementById(
+          'multi-select-portal-container',
+        );
+
         if (!container) {
           container = document.createElement('div');
           container.id = 'multi-select-portal-container';
           document.body.appendChild(container);
         }
-        
+
         setPortalElement(container);
-        
+
         // Clean up on unmount
         return () => {
           // We don't remove the container as other instances might be using it
@@ -289,36 +318,43 @@ const MultipleSelector = React.forwardRef<
         };
       }
     }, []);
-    
+
     // Position calculation effect
-    const [position, setPosition] = React.useState({ top: 0, left: 0, width: 0, direction: 'bottom' });
-    
+    const [position, setPosition] = React.useState({
+      top: 0,
+      left: 0,
+      width: 0,
+      direction: 'bottom',
+    });
+
     useEffect(() => {
       if (open && dropdownRef.current) {
         const rect = dropdownRef.current.getBoundingClientRect();
         // Get the actual width of the Command element
         const commandWidth = dropdownRef.current.offsetWidth;
-        
+
         // Calculate available space below and above
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
-        
+
         // Estimated height of dropdown (can be adjusted)
         const estimatedDropdownHeight = 300;
-        
+
         // Determine if dropdown should appear above or below
-        const direction = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow 
-          ? 'top' 
-          : 'bottom';
-        
+        const direction =
+          spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow
+            ? 'top'
+            : 'bottom';
+
         setPosition({
           // If direction is 'top', position above the input, otherwise below
-          top: direction === 'top' 
-            ? rect.top + window.scrollY - 5 // 5px gap when above
-            : rect.bottom + window.scrollY + 5, // 5px gap when below
+          top:
+            direction === 'top'
+              ? rect.top + window.scrollY - 5 // 5px gap when above
+              : rect.bottom + window.scrollY + 5, // 5px gap when below
           left: rect.left + window.scrollX,
           width: commandWidth,
-          direction
+          direction,
         });
       }
     }, [open]);
@@ -352,7 +388,7 @@ const MultipleSelector = React.forwardRef<
         if (useStringValues) {
           onChange?.(convertToStrings(newOptions));
         } else {
-          onChange?.(newOptions);
+          onChange?.(newOptions); // ← Remove the length check
         }
       },
       [onChange, selected, useStringValues, convertToStrings],
@@ -362,8 +398,8 @@ const MultipleSelector = React.forwardRef<
       (e: React.KeyboardEvent<HTMLDivElement>) => {
         const input = inputRef.current;
         if (input) {
-          if (e.key === "Delete" || e.key === "Backspace") {
-            if (input.value === "" && selected.length > 0) {
+          if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (input.value === '' && selected.length > 0) {
               const lastSelectOption = selected[selected.length - 1];
               // If last item is fixed, we should not remove it.
               if (!lastSelectOption?.fixed) {
@@ -372,7 +408,7 @@ const MultipleSelector = React.forwardRef<
             }
           }
           // This is not a default behavior of the <input /> field
-          if (e.key === "Escape") {
+          if (e.key === 'Escape') {
             input.blur();
           }
         }
@@ -382,28 +418,32 @@ const MultipleSelector = React.forwardRef<
 
     useEffect(() => {
       if (open) {
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("touchend", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchend', handleClickOutside);
       } else {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.removeEventListener("touchend", handleClickOutside);
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchend', handleClickOutside);
       }
 
       return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.removeEventListener("touchend", handleClickOutside);
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchend', handleClickOutside);
       };
     }, [open]);
 
     useEffect(() => {
       if (value) {
-        if (useStringValues && Array.isArray(value) && typeof value[0] === 'string') {
-          setSelected(convertToOptions(value as string[]));
+        if (
+          useStringValues &&
+          Array.isArray(value) &&
+          typeof value[0] === 'string'
+        ) {
+          setSelected(convertToOptions(value as string[], keyAlias));
         } else {
           setSelected(value as Option[]);
         }
       }
-    }, [value, useStringValues, convertToOptions]);
+    }, [value, useStringValues, convertToOptions, keyAlias]);
 
     useEffect(() => {
       /** If `onSearch` is provided, do not trigger options updated. */
@@ -467,35 +507,38 @@ const MultipleSelector = React.forwardRef<
     }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
 
     const CreatableItem = () => {
-      if (!creatable) return undefined;  // Modified this line
+      if (!creatable) return undefined; // Modified this line
       if (isOptionsExist(options, [{ value: inputValue, label: inputValue }])) {
         return undefined;
       }
       const Item = (
         <CommandItem
           value={inputValue}
-          className={cn("cursor-pointer px-3 py-2  !bg-primary !text-primary-foreground  font-bold text-md",
-            showCreatableItem
-              ? "" : "hidden"
+          className={cn(
+            'cursor-pointer !bg-primary px-3 py-2 text-md font-bold !text-primary-foreground',
+            showCreatableItem ? '' : 'hidden',
           )}
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
           onSelect={async (value: string) => {
-            const optionExists = Object.values(options).some(group =>
-              group.some(opt => opt.label === inputValue)
+            const optionExists = Object.values(options).some((group) =>
+              group.some((opt) => opt.label === inputValue),
             );
 
-            const alreadySelected = selected.some(opt => opt.label === inputValue);
+            const alreadySelected = selected.some(
+              (opt) => opt.label === inputValue,
+            );
 
             if (optionExists || alreadySelected) {
-                toast.error("Value already exists or is already selected", {
+              toast.error('Value already exists or is already selected', {
                 richColors: true,
-                description: "Please select a different value or create a new one",
-                descriptionClassName: "text-sm !text-red-400",
-                className: "p-3",
-                });
+                description:
+                  'Please select a different value or create a new one',
+                descriptionClassName: 'text-sm !text-red-400',
+                className: 'p-3',
+              });
               return;
             }
 
@@ -515,11 +558,10 @@ const MultipleSelector = React.forwardRef<
               newRecord = result;
             }
 
-            setInputValue("");
+            setInputValue('');
             const newOptions = [...selected, newRecord];
             setSelected(newOptions);
 
-            
             // Handle useStringValues when creatable is true
             if (useStringValues) {
               onChange?.(convertToStrings(newOptions));
@@ -529,7 +571,7 @@ const MultipleSelector = React.forwardRef<
             setIsCreateLoading(false);
           }}
         >
-          {isCreateLoading ? "Creating..." : `Create "${inputValue}"`}
+          {isCreateLoading ? 'Creating...' : `Create "${inputValue}"`}
         </CommandItem>
       );
 
@@ -576,7 +618,6 @@ const MultipleSelector = React.forwardRef<
       return undefined;
     }, [creatable, commandProps?.filter]);
 
-
     return (
       <Command
         ref={dropdownRef}
@@ -586,7 +627,7 @@ const MultipleSelector = React.forwardRef<
           commandProps?.onKeyDown?.(e);
         }}
         className={cn(
-          "h-auto overflow-visible bg-background w-full",
+          'h-auto w-full overflow-visible bg-background',
           commandProps?.className,
         )}
         shouldFilter={
@@ -598,10 +639,10 @@ const MultipleSelector = React.forwardRef<
       >
         <div
           className={cn(
-            "min-h-[26px]  rounded-md border border-gray-300 text-sm relative flex items-center",
+            'relative flex min-h-[26px] items-center rounded-md border border-gray-300 text-sm',
             {
-              "px-2": selected.length !== 0,
-              "cursor-text": !disabled && selected.length !== 0,
+              'px-2': selected.length !== 0,
+              'cursor-text': !disabled && selected.length !== 0,
             },
             className,
           )}
@@ -610,7 +651,7 @@ const MultipleSelector = React.forwardRef<
             inputRef.current?.focus();
           }}
         >
-          <div className={"flex flex-wrap items-center gap-1 py-[5px]"}>
+          <div className={'flex flex-wrap items-center gap-1 py-[5px]'}>
             {selected.map((option) => {
               return renderBadge ? (
                 <React.Fragment key={option.value}>
@@ -620,33 +661,36 @@ const MultipleSelector = React.forwardRef<
                 <Badge
                   key={option.value}
                   className={cn(
-                    "data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground",
-                    "max-h-6 min-h-6 data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground ",
-                    "",
+                    'data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
+                    'max-h-6 min-h-6 data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
+                    '',
                     badgeClassName,
                   )}
                   data-fixed={option.fixed}
                   data-disabled={disabled || undefined}
                 >
                   {option.label}
-                  <Button
-                    className={cn(
-                      "ml-1 rounded-full outline-none bg-transparent !p-0 h-fit",
-                      (disabled || option.fixed) && "hidden",
-                    )}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleUnselect(option);
-                      }
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onClick={() => handleUnselect(option)}
-                  >
-                    <XMarkIcon className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                  </Button>
+                  {!readOnly && (
+                    <Button
+                      className={cn(
+                        'ml-1 h-fit rounded-full bg-transparent !p-0 outline-none',
+                        (disabled || option.fixed) && 'hidden',
+                      )}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleUnselect(option);
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={() => handleUnselect(option)}
+                      disabled={readOnly}
+                    >
+                      <XMarkIcon className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </Button>
+                  )}
                 </Badge>
               );
             })}
@@ -669,145 +713,162 @@ const MultipleSelector = React.forwardRef<
               }}
               onFocus={(event) => {
                 setOpen(true);
-                (triggerSearchOnFocus && onSearch?.(debouncedSearchTerm));
+                triggerSearchOnFocus && onSearch?.(debouncedSearchTerm);
                 inputProps?.onFocus?.(event);
               }}
               placeholder={
                 hidePlaceholderWhenSelected && selected.length !== 0
-                  ? ""
+                  ? ''
                   : placeholder
               }
               className={cn(
-                "flex-1 bg-transparent outline-none placeholder:text-muted-foreground static  !py-0",
+                'static flex-1 bg-transparent !py-0 outline-none placeholder:text-muted-foreground',
                 {
-                  "w-full": hidePlaceholderWhenSelected,
-                  "px-2": selected.length === 0,
-                  "ml-1": selected.length !== 0,
+                  'w-full': hidePlaceholderWhenSelected,
+                  'px-2': selected.length === 0,
+                  'ml-1': selected.length !== 0,
                 },
                 inputProps?.className,
+                `text-[16px] md:text-md`,
               )}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setSelected(selected.filter((s) => s.fixed));
-                onChange?.(selected.filter((s) => s.fixed));
-              }}
-              className={cn(
-                "absolute right-2 h-5 w-5 p-0",
-                (hideClearAllButton ||
-                  disabled ||
-                  selected.length < 1 ||
-                  selected.filter((s) => s.fixed).length === selected.length) &&
-                "hidden",
-              )}
-            >
-              <XMarkIcon />
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelected(selected.filter((s) => s.fixed));
+                  onChange?.(selected.filter((s) => s.fixed));
+                }}
+                className={cn(
+                  'absolute right-2 h-5 w-5 p-0',
+                  (hideClearAllButton ||
+                    disabled ||
+                    selected.length < 1 ||
+                    selected.filter((s) => s.fixed).length ===
+                      selected.length) &&
+                    'hidden',
+                )}
+              >
+                <XMarkIcon />
+              </button>
+            )}
           </div>
         </div>
         <div className={`relative`}>
-        {open && portalElement && createPortal(
-            <CommandList
-              className={cn(
-                "absolute z-[9999] w-full rounded-md bg-background text-sidebar-foreground outline-none animate-in py-0 text-base shadow-lg ring-1 ring-black/5 focus:outline-none px-0",
-              )}
-              onMouseLeave={() => {
-                setOnScrollbar(false);
-              }}
-              onMouseEnter={() => {
-                setOnScrollbar(true);
-              }}
-              onMouseUp={() => {
-                inputRef.current?.focus();
-              }}
-              style={{
-                width: `${position.width}px`, // Ensure exact width match
-                minWidth: `${position.width}px`, // Add minWidth to prevent shrinking
-                top: position.direction === 'top' 
-                  ? 'auto' // Use auto when positioned above
-                  : `${position.top}px`,
-                bottom: position.direction === 'top' 
-                  ? `${window.innerHeight - position.top}px` // Calculate from bottom when above
-                  : 'auto',
-                left: `${position.left}px`,
-                maxHeight: '240px',
-                overflowY: 'auto',
-                transformOrigin: position.direction === 'top' ? 'bottom' : 'top'
-              }}
-            >
-              {isLoading ? (
-                <>{loadingIndicator}</>
-              ) : (
-                <>
-                  {EmptyItem()}
-                  {CreatableItem()}
-                  {!selectFirstItem && (
-                    <CommandItem value="-" className="hidden" />
-                  )}
-                  {Object.entries(selectables).map(([key, dropdowns]) => (
-                    <CommandGroup
-                      key={key}
-                      heading={key}
-                      className=" max-h-60 w-full h-full overflow-auto "
-                    >
-                      <>
-                        {(dropdowns).map((option) => {
-                          return (
-                            <CommandItem
-                              key={option.value}
-                              value={option.label}
-                              disabled={option.disable}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              onSelect={() => {
-                                if (selected.some(s => s.value === option.value)) {
-                                  toast.error("Option already selected", {
-                                    className: "p-2",
-                                    description: "Please select another option",
-                                    richColors: true,
-                                  });
-                                  return;
-                                }
+          {open &&
+            !readOnly &&
+            portalElement &&
+            createPortal(
+              <CommandList
+                className={cn(
+                  'absolute z-[9999] w-full rounded-md bg-background px-0 py-0 text-base text-sidebar-foreground shadow-lg outline-none ring-1 ring-black/5 animate-in focus:outline-none',
+                )}
+                onMouseLeave={() => {
+                  setOnScrollbar(false);
+                }}
+                onMouseEnter={() => {
+                  setOnScrollbar(true);
+                }}
+                onMouseUp={() => {
+                  inputRef.current?.focus();
+                }}
+                style={{
+                  width: `${position.width}px`, // Ensure exact width match
+                  minWidth: `${position.width}px`, // Add minWidth to prevent shrinking
+                  top:
+                    position.direction === 'top'
+                      ? 'auto' // Use auto when positioned above
+                      : `${position.top}px`,
+                  bottom:
+                    position.direction === 'top'
+                      ? `${window.innerHeight - position.top}px` // Calculate from bottom when above
+                      : 'auto',
+                  left: `${position.left}px`,
+                  maxHeight: '240px',
+                  overflowY: 'auto',
+                  transformOrigin:
+                    position.direction === 'top' ? 'bottom' : 'top',
+                }}
+              >
+                {isLoading ? (
+                  <>{loadingIndicator}</>
+                ) : (
+                  <>
+                    {EmptyItem()}
+                    {CreatableItem()}
+                    {!selectFirstItem && (
+                      <CommandItem value="-" className="hidden" />
+                    )}
+                    {Object.entries(selectables).map(([key, dropdowns]) => (
+                      <CommandGroup
+                        key={key}
+                        heading={key}
+                        className="h-full max-h-60 w-full overflow-auto"
+                      >
+                        <>
+                          {dropdowns.map((option) => {
+                            return (
+                              <CommandItem
+                                key={option.value}
+                                value={option.label}
+                                disabled={option.disable}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                                onSelect={() => {
+                                  if (
+                                    selected.some(
+                                      (s) => s.value === option.value,
+                                    )
+                                  ) {
+                                    toast.error('Option already selected', {
+                                      className: 'p-2',
+                                      description:
+                                        'Please select another option',
+                                      richColors: true,
+                                    });
+                                    return;
+                                  }
 
-                                if (selected.length >= maxSelected) {
-                                  onMaxSelected?.(selected.length);
-                                  return;
-                                }
-                                setInputValue("");
-                                const newOptions = [...selected, option];
-                                setSelected(newOptions);
-                                if (useStringValues) {
-                                  onChange?.(convertToStrings(newOptions));
-                                } else {
-                                  onChange?.(newOptions);
-                                }
-                              }}
-                              className={cn(
-                                "cursor-pointer !text-md",
-                                option.disable &&
-                                "cursor-default text-sidebar-foreground ",
-                              )}
-                            >
-                              {renderOption ? renderOption(option) : option.label}
-                            </CommandItem>
-                          );
-                        })}
-                      </>
-                    </CommandGroup>
-                  ))}
-                </>
-              )}
-            </CommandList>,
-            portalElement
-          )}
+                                  if (selected.length >= maxSelected) {
+                                    onMaxSelected?.(selected.length);
+                                    return;
+                                  }
+                                  setInputValue('');
+                                  const newOptions = [...selected, option];
+                                  setSelected(newOptions);
+                                  if (useStringValues) {
+                                    onChange?.(convertToStrings(newOptions));
+                                  } else {
+                                    onChange?.(newOptions);
+                                  }
+                                }}
+                                className={cn(
+                                  'cursor-pointer !text-md',
+                                  option.disable &&
+                                    'cursor-default text-sidebar-foreground',
+                                )}
+                              >
+                                {renderOption
+                                  ? renderOption(option)
+                                  : option.label}
+                              </CommandItem>
+                            );
+                          })}
+                        </>
+                      </CommandGroup>
+                    ))}
+                  </>
+                )}
+              </CommandList>,
+              portalElement,
+            )}
         </div>
       </Command>
     );
   },
 );
 
-MultipleSelector.displayName = "MultipleSelector";
+MultipleSelector.displayName = 'MultipleSelector';
 export default MultipleSelector;

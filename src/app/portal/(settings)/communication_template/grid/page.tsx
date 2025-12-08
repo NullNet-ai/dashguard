@@ -16,7 +16,7 @@ export default async function Page() {
   const gridCacheData = (await getGridCacheData({
     defaultSorting: defaultSorting,
   })) ?? {};
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity] = pathname.split('/');
 
