@@ -63,6 +63,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         pluck = [],
         sorting = [],
+        // @ts-expect-error - No type yet
         is_case_sensitive_sorting = 'false',
       } = input
 
@@ -91,9 +92,9 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          //@ts-expect-error - multiple sort
             multiple_sort:
             sorting?.length
+          //@ts-expect-error - multiple sort
               ? formatSorting(sorting, entity, is_case_sensitive_sorting)
               : [],
             date_format: 'YYYY/mm/dd' as EDateFormats,

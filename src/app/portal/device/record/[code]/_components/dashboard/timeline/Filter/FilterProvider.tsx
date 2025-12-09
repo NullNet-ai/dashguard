@@ -37,6 +37,7 @@ const FilterProvider = ({ children, params, type }: any) => {
 
   const {
     data: cached_filter_items = [],
+    // @ts-expect-error - No type yet
   } = api.cachedFilter.fetchCachedFilter.useQuery({
     type,
   })
@@ -139,6 +140,7 @@ const FilterProvider = ({ children, params, type }: any) => {
     await removeFilter(id, type)
   }
 
+  // @ts-expect-error - No type yet
   const duplicateFilter = api.cachedFilter.duplicateFilter.useMutation()
   const handleDuplicateTab = async (tab: Record<string, any>) => {
     const response: Record<string, any> = await duplicateFilter.mutateAsync({ type, data: tab })

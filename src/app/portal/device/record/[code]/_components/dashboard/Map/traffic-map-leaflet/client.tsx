@@ -286,6 +286,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
   
   // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
+  // @ts-expect-error - No type yet
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'timeline_filter',

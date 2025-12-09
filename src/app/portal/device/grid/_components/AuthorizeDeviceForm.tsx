@@ -22,7 +22,6 @@ export default function AuthorizaDeviceForm({
   code,
 }: AuthorizaDeviceFormProps) {
   const { data, error, isLoading, isError }
-    // @ts-expect-error - eslint-disable-next-line @typescript-eslint/no-unsafe-assignment eslint-disable-next-line @typescript-eslint/no-unsafe-call
     = api.device.fetchDeviceInfo.useQuery({
       code,
     })

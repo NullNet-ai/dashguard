@@ -97,6 +97,7 @@ const ConfigurationRuleGrid = ({
   const { gridParams, gridProps } = gridDataResolver({
     entity: 'device_rules',
     pluck: _pluck,
+    // @ts-expect-error - No type yet
     gridCacheData: {
       grid_tabs,
       sorts,
@@ -113,7 +114,9 @@ const ConfigurationRuleGrid = ({
   
 
 
-  const { fetchData, data: grid_data } = useFetchGridData({...gridParams, device_id: record?.data?.id}, {
+  const { fetchData, data: grid_data } = useFetchGridData({...gridParams,
+    // @ts-expect-error - No type yet
+    device_id: record?.data?.id}, {
     resolver: 'mainGrid',
     router: 'deviceRule',
   });
@@ -152,6 +155,7 @@ const ConfigurationRuleGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
+            // @ts-expect-error - No type yet
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {

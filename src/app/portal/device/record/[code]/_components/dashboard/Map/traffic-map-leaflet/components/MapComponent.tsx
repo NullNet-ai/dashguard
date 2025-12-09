@@ -450,7 +450,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
     
     // Add legend to map
     const addLegend = (mapInstance: any) => {
-      // @ts-expect-error - Leaflet control
+      // @ts-expect-error - No type yet
       const legend = L.control({ position: 'bottomright' });
       legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');

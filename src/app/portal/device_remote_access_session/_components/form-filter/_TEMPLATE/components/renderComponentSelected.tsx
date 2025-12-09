@@ -5,6 +5,7 @@ import React from "react";
 function renderComponentSelected(
   /* eslint-disable react/display-name */
   Component: React.ComponentType<{ records: Record<string, any> }>,
+  // @ts-expect-error - No type yet
 ): (records: Record<string, any>) => JSX.Element {
   return (records: Record<string, any>) => {
     return <Component records={records} />;

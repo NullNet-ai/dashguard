@@ -54,6 +54,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     resolution = null,
   } = time || {}
   
+  // @ts-expect-error - No type yet
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'timeline_filter',
@@ -183,7 +184,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           const fetchUniqueSourceIP = async () => {
             const data = await getUniqueSourceActions.mutateAsync({
               device_id: params?.id || '',
-              //@ts-expect-error - Unit error
               time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
               filter_id: filterId,
             });

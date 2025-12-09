@@ -80,6 +80,7 @@ const ConfigurationAliasGrid = ({
   const { gridParams, gridProps } = gridDataResolver({
     entity: 'device_aliases',
     pluck: _pluck,
+    // @ts-expect-error - gridCacheData is not assignable to type IGridCacheDataResponse
     gridCacheData: {
       grid_tabs,
       sorts,
@@ -132,6 +133,7 @@ const ConfigurationAliasGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
+            // @ts-expect-error - No type yet
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {

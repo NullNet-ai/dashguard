@@ -16,6 +16,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
     data: record,
     refetch,
     error,
+    // @ts-expect-error - No type yet
   } = api.device.fetchInstallationCodeByDeviceCode.useQuery({
     device_code: identifier!,
   });
