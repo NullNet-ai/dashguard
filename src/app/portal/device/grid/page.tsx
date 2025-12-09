@@ -33,6 +33,7 @@ export default async function Page() {
     'device_category',
     'device_type',
     'device_uuid',
+    'is_device_online',
   ];
 
   const { gridParams, gridProps } = gridDataResolver({
