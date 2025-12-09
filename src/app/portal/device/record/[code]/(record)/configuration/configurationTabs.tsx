@@ -16,7 +16,7 @@ const ConfigurationRawData = lazy(
 );
 
 export default async function DashboardTabs() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , , , identifier] = pathname.split('/');
   // Should Refetch Every ??

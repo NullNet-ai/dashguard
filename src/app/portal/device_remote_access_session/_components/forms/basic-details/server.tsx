@@ -5,7 +5,7 @@ import BasicDetails from "./client";
 
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
   const record = await api.record.getByCode({

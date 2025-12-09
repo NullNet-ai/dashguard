@@ -17,7 +17,7 @@ export const updateGridFilter = async (data: any, gridKey?: string) => {
     ...data,
     gridKey,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(updatedGridFilter?.href || fullUrl);
   return updatedGridFilter;
@@ -25,7 +25,7 @@ export const updateGridFilter = async (data: any, gridKey?: string) => {
 
 export const updateAllFilterdata = async (tabs: any[]) => {
   await api.gridFilter.updateGridAllFilter({ tabs });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
 };
@@ -35,7 +35,7 @@ export const removeGridFilter = async (id: string, gridKey?: string) => {
     id,
     gridKey,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
   return url;
@@ -51,7 +51,7 @@ export const duplicateFilterTab = async (
     gridKey,
     entity,
   });
-  const headerList = headers();
+  const headerList = await headers();
   const fullUrl = headerList.get('x-full-pathname') || '';
   revalidatePath(fullUrl);
   return url;

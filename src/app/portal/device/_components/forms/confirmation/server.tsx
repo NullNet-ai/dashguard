@@ -5,7 +5,7 @@ import { api } from '~/trpc/server'
 
 import Confirmation from './client'
 const WizardContainer = async () => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , , application, identifier] = pathname.split('/')
 

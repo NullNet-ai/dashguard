@@ -5,7 +5,7 @@ import TimelineComponent from './client'
 import { api } from '~/trpc/server'
 
 const Timeline = async () => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
   const fetched_device = await api.record.getByCode({

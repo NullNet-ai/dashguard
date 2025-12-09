@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import RecordShellSummary from './components';
 
 export default async function Page() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, , identifier] = pathname.split('/');
 
