@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import Bluebird from 'bluebird'
+import { WallGuardApi } from '~/utils/wallguard-api';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -372,12 +373,118 @@ export const deviceRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        is_monitoring_enabled: z.boolean().optional(),
-        is_remote_access_enabled: z.boolean().optional(),
+        is_traffic_monitoring_enabled: z.boolean().optional(),
+        is_config_monitoring_enabled: z.boolean().optional(),
+        is_telemetry_monitoring_enabled: z.boolean().optional(),
+        // is_remote_access_enabled: z.boolean().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { id, is_monitoring_enabled, is_remote_access_enabled } = input;
+      const {
+        id,
+        is_traffic_monitoring_enabled,
+        is_config_monitoring_enabled,
+        is_telemetry_monitoring_enabled,
+        // is_remote_access_enabled
+       } = input;
+
+      const response = await ctx.dnaClient
+        .findAll({
+          entity: 'device_instances',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id'],
+            advance_filters: createAdvancedFilter({ device_id: id }),
+          },
+        })
+        .execute();
+        
+
+      const instanceId = response?.data?.[0]?.id; 
+
+       const wallguardApi = new WallGuardApi({
+        token: ctx.token.value,
+      })
+
+      try {
+        // Make parallel API calls for each monitoring setting with individual error handling
+        const apiResults = []
+  
+        if (is_traffic_monitoring_enabled !== undefined) {
+          apiResults.push(
+            wallguardApi.enableTrafficMonitoring({
+              device_id: id,
+              instance_id: instanceId,
+              enable: is_traffic_monitoring_enabled
+            }).then(response => ({
+              type: 'traffic_monitoring',
+              success: true,
+              data: response.data
+            })).catch(error => ({
+              type: 'traffic_monitoring',
+              success: false,
+              error: error.response?.data || error.message,
+              status: error.response?.status
+            }))
+          )
+        }
+  
+        if (is_config_monitoring_enabled !== undefined) {
+          apiResults.push(
+            wallguardApi.enableConfigurationMonitoring({
+              device_id: id,
+              instance_id: instanceId,
+              enable: is_config_monitoring_enabled
+            }).then(response => ({
+              type: 'config_monitoring',
+              success: true,
+              data: response.data
+            })).catch(error => ({
+              type: 'config_monitoring',
+              success: false,
+              error: error.response?.data || error.message,
+              status: error.response?.status
+            }))
+          )
+        }
+  
+        if (is_telemetry_monitoring_enabled !== undefined) {
+          apiResults.push(
+            wallguardApi.enableTelemetryMonitoring({
+              device_id: id,
+              instance_id: instanceId,
+              enable: is_telemetry_monitoring_enabled
+            }).then(response => ({
+              type: 'telemetry_monitoring',
+              success: true,
+              data: response.data
+            })).catch(error => ({
+              type: 'telemetry_monitoring',
+              success: false,
+              error: error.response?.data || error.message,
+              status: error.response?.status
+            }))
+          )
+        }
+  
+        // Execute all API calls in parallel and collect results
+        const apiResponses = await Promise.all(apiResults)
+  
+        // Check if any API calls failed and prepare error messages
+        const failedCalls = apiResponses.filter((response): response is { type: string; success: false; error: any; status: any } => !response.success)
+
+        if (failedCalls.length > 0) {
+          const errorMessages = failedCalls.map(failed => 
+            `${failed.type}: ${failed.error}${failed.status ? ` (Status: ${failed.status})` : ''}`
+          ).join(', ')
+          
+          throw new Error(`WallGuard API calls partially failed: ${errorMessages}`)
+        }
+  
+      } catch (error) {
+        console.error('Error updating device settings:', error)
+        throw error
+      }
 
       const res = await ctx.dnaClient
         .update(id, {
@@ -385,10 +492,18 @@ export const deviceRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              is_monitoring_enabled,
-              is_remote_access_enabled,
+              is_traffic_monitoring_enabled,
+              is_config_monitoring_enabled,
+              is_telemetry_monitoring_enabled,
+              // is_remote_access_enabled,
             },
-            pluck: ['id', 'is_monitoring_enabled', 'is_remote_access_enabled'],
+            pluck: [
+              'id',
+              'is_traffic_monitoring_enabled',
+              'is_config_monitoring_enabled',
+              'is_telemetry_monitoring_enabled',
+              // 'is_remote_access_enabled',
+            ],
           },
         })
         .execute();

@@ -9,7 +9,7 @@ const WizardContainer = async () => {
 
   const response = await api.record.getByCode({
     id: identifier!,
-    pluck_fields: ["id", "tags"],
+    pluck_fields: ["id", "is_traffic_monitoring_enabled", "is_config_monitoring_enabled", "is_telemetry_monitoring_enabled"],
     main_entity: "device"
   });
 

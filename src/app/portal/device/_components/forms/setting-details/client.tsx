@@ -11,8 +11,10 @@ import { api } from '~/trpc/react'
 import { type IFormProps } from '../types'
 
 const FormSchema = z.object({
-  is_monitoring_enabled: z.boolean().optional(),
-  is_remote_access_enabled: z.boolean().optional(),
+  is_traffic_monitoring_enabled: z.boolean().optional(),
+  is_config_monitoring_enabled: z.boolean().optional(),
+  is_telemetry_monitoring_enabled: z.boolean().optional(),
+  // is_remote_access_enabled: z.boolean().optional(),
 })
 const SettingDetails = ({ params, defaultValues }: IFormProps) => {
   const updateSetting = api.device.updateDeviceSetting.useMutation()
@@ -41,19 +43,33 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
       enableFormRegisterToParent = { true }
       fields={[
         {
-          id: 'is_monitoring_enabled',
+          id: 'is_traffic_monitoring_enabled',
           formType: 'switch',
-          name: 'is_monitoring_enabled',
-          label: 'Enable Monitoring',
-          placeholder: 'Enable Monitoring',
+          name: 'is_traffic_monitoring_enabled',
+          label: 'Enable Traffic Monitoring',
+          placeholder: 'Enable Traffic Monitoring',
         },
         {
-          id: 'is_remote_access_enabled',
+          id: 'is_config_monitoring_enabled',
           formType: 'switch',
-          name: 'is_remote_access_enabled',
-          label: 'Enable Remote Access',
-          placeholder: 'Enable Remote Access',
+          name: 'is_config_monitoring_enabled',
+          label: 'Enable Config Monitoring',
+          placeholder: 'Enable Config Monitoring',
         },
+        {
+          id: 'is_telemetry_monitoring_enabled',
+          formType: 'switch',
+          name: 'is_telemetry_monitoring_enabled',
+          label: 'Enable Telemetry Monitoring',
+          placeholder: 'Enable Telemetry Monitoring',
+        },
+        // {
+        //   id: 'is_remote_access_enabled',
+        //   formType: 'switch',
+        //   name: 'is_remote_access_enabled',
+        //   label: 'Enable Remote Access',
+        //   placeholder: 'Enable Remote Access',
+        // },
       ]}
       formKey="setting_details"
       formLabel="Setting"
