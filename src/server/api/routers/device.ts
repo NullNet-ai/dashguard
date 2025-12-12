@@ -417,4 +417,255 @@ export const deviceRouter = createTRPCRouter({
         },
       });
     }),
+    fetchInstallationCodeByDeviceCode: privateProcedure
+    .input(
+      z.object({
+        device_code: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { device_code } = input;
+
+      const response = await ctx.dnaClient
+        .findAll({
+          entity: 'installation_codes',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code'],
+            track_total_records: true,
+            advance_filters: createAdvancedFilter({ device_code }),
+          },
+        })
+        .execute();
+
+      return response.data.length > 0 ? response.data[0] : null;
+    }),
+    fetchRecordShellSummary: privateProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        code: z.string().optional(),
+      }),
+    )
+
+    .query(async ({ input, ctx }) => {
+      const { id: device_id, code } = input;
+      let id = device_id;
+      if (!device_id) {
+        const res = await ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: code! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute();
+
+        id = res.data[0]?.id;
+      }
+
+      const res = await Promise.all([
+        ctx.dnaClient
+          .findAll({
+            entity,
+            token: ctx.token.value,
+            query: {
+              pluck: [
+                'id',
+                'model',
+                'instance_name',
+                'address_id',
+                'created_date',
+                'updated_date',
+                'categories',
+                'host_name',
+                'device_version',
+                'updated_time',
+                'created_time',
+                'ip_address',
+              ],
+              pluck_object: {
+                device: [
+                  'id',
+                  'model',
+                  'instance_name',
+                  'address_id',
+                  'created_date',
+                  'updated_date',
+                  'categories',
+                  'host_name',
+                  'device_version',
+                  'ip_address',
+                ],
+                addresses: ['id', 'country', 'city', 'state'],
+                device_heartbeats: ['id', 'device_id', 'timestamp'],
+              },
+              advance_filters: createAdvancedFilter({ id: id! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                // by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute(),
+
+        await ctx.dnaClient
+          .findAll({
+            entity: 'device_groups',
+            token: ctx.token.value,
+            query: {
+              pluck_object: {
+                device_group_settings: ['id', 'name'],
+                device_groups: ['id', 'device_group_setting_id'],
+              },
+              advance_filters: createAdvancedFilter({ device_id: id! }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_group_settings',
+                field: 'id',
+              },
+              from: {
+                entity: 'device_groups',
+                field: 'device_group_setting_id',
+              },
+            },
+          })
+          .execute(),
+      ]);
+      const [device, device_group] = res;
+
+      const fetchConfiguration = await Bluebird.map(
+        device?.data,
+        async (item: Record<string, any>) => {
+          const configurations = await ctx.dnaClient
+            .findAll({
+              entity: 'device_configurations',
+              token: ctx.token.value,
+              query: {
+                advance_filters: createAdvancedFilter({ device_id: item?.id }),
+                pluck: [
+                  'id',
+                  'device_id',
+                  'created_date',
+                  'created_time',
+                  'hostname',
+                ],
+                order: {
+                  limit: 1,
+                  by_field: 'created_date',
+                  by_direction: EOrderDirection.DESC,
+                },
+              },
+            })
+            .execute();
+
+          // Sort configurations by created_date and created_time to get the latest one
+          const sortedConfigurations = configurations.data.sort(
+            (a: Record<string, any>, b: Record<string, any>) => {
+              const dateA = new Date(`${a.created_date}T${a.created_time}`);
+              const dateB = new Date(`${b.created_date}T${b.created_time}`);
+              return dateB.getTime() - dateA.getTime();
+            },
+          );
+
+          return sortedConfigurations[0]; // Return the latest configuration
+        },
+      )?.filter(Boolean);
+
+      const fetchDeviceInterfaces = await Bluebird.map(
+        fetchConfiguration,
+        async (item) => {
+          if (!item) return null; // Handle case where there is no configuration
+
+          const interfaces = await ctx.dnaClient
+            .findAll({
+              entity: 'device_interfaces',
+              token: ctx.token.value,
+              query: {
+                advance_filters: createAdvancedFilter({
+                  device_configuration_id: item.id,
+                }),
+                pluck: ['id', 'device_configuration_id', 'name'],
+                pluck_object: {
+                  device_interfaces: ['id', 'device_configuration_id', 'name'],
+                  device_interface_addresses: [
+                    'id',
+                    'device_interface_id',
+                    'address',
+                  ],
+                },
+              },
+            })
+            .join({
+              type: 'left',
+              field_relation: {
+                to: {
+                  entity: 'device_interface_addresses',
+                  field: 'device_interface_id',
+                  order_by: 'timestamp',
+                  limit: 50,
+                  order_direction: EOrderDirection.DESC,
+                },
+                from: {
+                  entity: 'device_interfaces',
+                  field: 'id',
+                },
+              },
+            })
+            .execute();
+
+          return {
+            configuration: item,
+            interfaces: interfaces.data,
+          };
+        },
+      );
+
+      const configuration: any = fetchDeviceInterfaces.find(
+        (config: any) =>
+          config.configuration.device_id === device?.data?.[0]?.id,
+      );
+
+      const transformed_device_interface_address =
+        configuration?.interfaces?.map((iface: Record<string, any>) => ({
+          name: iface.name,
+          address: iface.device_interface_addresses.length
+            ? iface.device_interface_addresses[0].address
+            : null,
+        }));
+      const { id: device_group_setting_id, name } =
+        device_group.data[0]?.device_group_settings || {};
+      // const { hostname } = device_configuration.data[0] || {}
+      // const { device_interfaces } = device_configuration?.data?.[0] || {}
+      const { addresses, ...rest } = device?.data?.[0] || {};
+      const { ...rest_address } = addresses?.[0] || {};
+
+      return {
+        data: {
+          ...rest,
+          ...rest_address,
+          hostname: configuration?.configuration?.hostname,
+          interfaces: transformed_device_interface_address,
+          grouping: device_group_setting_id,
+          grouping_name: name,
+        },
+      };
+    }),
 });
