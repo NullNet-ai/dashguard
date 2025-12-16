@@ -343,7 +343,9 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     };
     
     fetchAccount();
-  }, [getAccount]);
+  }, [
+    // getAccount
+  ]);
 
   // Fetch time settings
   useEffect(() => {

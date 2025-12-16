@@ -1009,6 +1009,7 @@ export const packetRouter = createTRPCRouter({
               limit: batch_size, // Use the batch_size parameter
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
             },
           },
         })

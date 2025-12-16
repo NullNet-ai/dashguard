@@ -12,7 +12,7 @@ const InteractiveGraph = lazy(
 );
 
 const TrafficMaps = lazy(
-  () => import('../../_components/dashboard/Map/traffic-map-leaflet/client'),
+  () => import('../../_components/dashboard/Map/traffic-map-leaflet/server'),
 );
 
 const PieChartComponent = lazy(
