@@ -7,6 +7,10 @@ import { Loader } from '~/components/ui/loader';
 const ConfigurationRule = lazy(
   () => import('../../../../_components/record_configuration/ConfigurationRuleGrid'),
 );
+
+const ConfigurationNatRule = lazy(
+  () => import('../../../../_components/record_configuration/ConfigurationNatRuleGrid'),
+);
 const ConfigurationAlias = lazy(
   () => import('../../../../_components/record_configuration/ConfigurationAliasGrid'),
 );
@@ -42,6 +46,27 @@ export default async function DashboardTabs() {
           }
         >
           <ConfigurationRule code={identifier || ""}/>
+        </Suspense>
+      ),
+    },
+    {
+      id: 'configuration_nat_rules',
+      label: 'Nat Rules',
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
+          <ConfigurationNatRule code={identifier || ""}/>
         </Suspense>
       ),
     },
