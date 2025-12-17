@@ -158,6 +158,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
           by_field: 'timestamp',
           limit: 1,
           by_direction: EOrderDirection.DESC,
+          is_case_sensitive_sorting: true,
         },
       },
     }).execute()
