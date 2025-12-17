@@ -9,4 +9,6 @@ export default [
   'timeline',
   // Project Entities
   "device_remote_access_session",
+  "device_configurations",
+  "device_filter_rules",
 ];

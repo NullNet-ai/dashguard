@@ -62,6 +62,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
               limit: 1,
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
             },
           },
         })

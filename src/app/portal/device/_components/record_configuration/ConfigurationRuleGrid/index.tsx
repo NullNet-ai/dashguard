@@ -95,7 +95,7 @@ const ConfigurationRuleGrid = ({
   ]
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: 'device_rules',
+    entity: 'device_filter_rules',
     pluck: _pluck,
     // @ts-expect-error - No type yet
     gridCacheData: {
@@ -123,6 +123,12 @@ const ConfigurationRuleGrid = ({
   
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
 
+  useEffect(() => {
+    if (record?.data?.id) {
+      fetchData({ device_id: record?.data?.id })
+    }
+  }, [record?.data?.id])
+
   return (
     <>
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
@@ -139,7 +145,7 @@ const ConfigurationRuleGrid = ({
             gridStartPosition: 348,
             summaryWidth: 320,
           },
-          entity: 'device_rules',
+          entity: 'device_filter_rules',
           title: 'Rules',
           columns: gridColumns,
           columnsOrder: columns,
