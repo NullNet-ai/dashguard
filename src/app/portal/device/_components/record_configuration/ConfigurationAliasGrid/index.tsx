@@ -133,7 +133,6 @@ const ConfigurationAliasGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
-            // @ts-expect-error - No type yet
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {

@@ -26,6 +26,7 @@ export const deviceNatRuleRouter = createTRPCRouter({
         pluck,
         device_id,
         sorting,
+        // @ts-expect-error - No type yet
         is_case_sensitive_sorting = "false"
       } = input
       const _sorting = sorting?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
@@ -101,8 +102,8 @@ export const deviceNatRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // @ts-expect-error - multiple_sort is not defined in the type
           multiple_sort: _sorting?.length
+          // @ts-expect-error - No type yet
             ? formatSorting(_sorting, 'device_nat_rules', is_case_sensitive_sorting)
             : [],
         },

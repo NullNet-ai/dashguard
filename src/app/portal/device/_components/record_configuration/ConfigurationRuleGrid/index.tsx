@@ -125,6 +125,7 @@ const ConfigurationRuleGrid = ({
 
   useEffect(() => {
     if (record?.data?.id) {
+      // @ts-expect-error - No type yet
       fetchData({ device_id: record?.data?.id })
     }
   }, [record?.data?.id])
@@ -161,7 +162,6 @@ const ConfigurationRuleGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
-            // @ts-expect-error - No type yet
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {
