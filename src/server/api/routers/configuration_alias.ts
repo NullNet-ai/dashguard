@@ -28,6 +28,7 @@ export const deviceAliasRouter = createTRPCRouter({
         pluck,
         device_id,
         sorting,
+        // @ts-expect-error - No type yet
         is_case_sensitive_sorting = "false"
       } = input
 

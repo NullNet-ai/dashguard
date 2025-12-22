@@ -62,7 +62,6 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   }, [graphType])
 
   const getAccount = api.organizationAccount.getAccountID.useMutation();
-  // @ts-expect-error - No type yet
 const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'traffic_graph_filter',

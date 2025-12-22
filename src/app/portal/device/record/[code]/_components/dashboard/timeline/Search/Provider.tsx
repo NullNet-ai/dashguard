@@ -56,7 +56,6 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
 
   // const [searchItems, setItems] = useState()
 
-  // @ts-expect-error - No type yet
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: filter_type,
@@ -217,7 +216,6 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
 
   const {
     data: cached_search_items = [],
-    // @ts-expect-error - No type yet
   } = api.cachedFilter.fetchCachedFilter.useQuery({
     type: filter_type,
   })

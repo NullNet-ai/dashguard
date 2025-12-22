@@ -350,7 +350,9 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
+            // @ts-expect-error - No type yet
             multiple_sort: input.sorting?.length
+            // @ts-expect-error - No type yet
               ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
@@ -1042,7 +1044,9 @@ export const accountRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
+            // @ts-expect-error - No type yet
             multiple_sort: input.sorting?.length
+            // @ts-expect-error - No type yet
               ? formatSorting(input.sorting)
               : [],
           },

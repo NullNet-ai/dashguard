@@ -21,7 +21,6 @@ export async function UpdateSearchFilter({
   const searchParams = headerList.get('x-full-search-query-params') || ''
   // const urlSearchParams = new URLSearchParams(searchParams)
   
-  // @ts-expect-error - No type yet
   await api.cachedFilter.updateSearchFilter({
     type: filter_type,
     data: filters,

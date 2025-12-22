@@ -102,8 +102,8 @@ export const deviceNatRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: _sorting?.length
           // @ts-expect-error - No type yet
+          multiple_sort: _sorting?.length
             ? formatSorting(_sorting, 'device_nat_rules', is_case_sensitive_sorting)
             : [],
         },
