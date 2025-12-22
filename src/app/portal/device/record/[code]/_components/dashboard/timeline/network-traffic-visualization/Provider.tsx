@@ -269,7 +269,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(prevIndex => prevIndex + 20)
     setNewBandwidth([])
-   filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(20)
+    //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(20)
+    fetchBandwidth(20)
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])

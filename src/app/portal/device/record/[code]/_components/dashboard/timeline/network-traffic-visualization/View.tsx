@@ -154,7 +154,8 @@ export default function NetworkFlowView() {
                 </TooltipProvider>
               </div>
               <div className="flex items-center]">
-                {formatted.map((item: Record<string, any>, i) => (
+                {/* TODO: Add pagination for long time series. Temporary, slice 0-1000 */}
+                {formatted.slice(0, 1000).map((item: Record<string, any>, i) => (
                   <TooltipProvider key={i}>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger>

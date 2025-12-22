@@ -878,6 +878,7 @@ export const packetRouter = createTRPCRouter({
               // limit: group_advance_filters?.length > 1? limit : 50,
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
             },
             //   multiple_sort: [
             //     {

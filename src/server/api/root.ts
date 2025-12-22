@@ -69,7 +69,7 @@ export const appRouter = createTRPCRouter({
   // Project Routers
   deviceConfiguration: deviceConfigurationRouter,
   packet: packetRouter,
-  cacheFilter: cachedFilterRouter,
+  cachedFilter: cachedFilterRouter,
   deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
   deviceHeartbeat: deviceHeartbeatsRouter,
   deviceRule: deviceRuleRouter,
