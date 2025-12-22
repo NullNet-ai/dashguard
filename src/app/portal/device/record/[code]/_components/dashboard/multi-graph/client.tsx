@@ -133,7 +133,7 @@ const InteractiveGraph = ({
   useEffect(() => {
     fetchBandWidth()
 
-  }, [interfaces, defaultValues?.id, defaultValues?.device_status])
+  }, [interfaces, defaultValues?.id, defaultValues?.is_device_online])
 
   useEffect(() => {
       fetchBandWidth()
@@ -149,7 +149,7 @@ const InteractiveGraph = ({
   return (
     <div className="mt-4 flex flex-col gap-2">
       {/* Display offline message if the device is offline */}
-      { defaultValues?.device_status.toLowerCase() === 'offline' && (
+      { !defaultValues?.is_device_online && (
         <Alert variant="warning" dismissible>
           {/* <AlertTitle>Device is offline.</AlertTitle> */}
           <AlertContent>

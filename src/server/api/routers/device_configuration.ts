@@ -263,6 +263,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
             limit: 1,
             by_field: 'timestamp',
             by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
           }
         },
       })
@@ -294,12 +295,9 @@ export const deviceConfigurationRouter = createTRPCRouter({
         },
       })
       .execute()
-
-      console.log('@@@ res', res)
-
       
       const data = res?.data?.[0]?.device_interfaces
-      const drpdwn_optn = data?.map((item: {
+      const drpdwn_optn = [data].map((item: {
         name: string
         device: string
       }) => {

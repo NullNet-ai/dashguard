@@ -8,7 +8,7 @@ const Timeline = lazy(
   () => import('../../_components/dashboard/timeline/server'),
 );
 const InteractiveGraph = lazy(
-  () => import('../../_components/dashboard/multi-graph/client'),
+  () => import('../../_components/dashboard/multi-graph/server'),
 );
 
 const TrafficMaps = lazy(
