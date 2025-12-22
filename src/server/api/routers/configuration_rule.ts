@@ -102,10 +102,9 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          multiple_sort: _sorting?.length
-            // @ts-expect-error - No type yet
-            ? formatSorting(_sorting, 'device_filter_rules', is_case_sensitive_sorting)
-            : [],
+          // multiple_sort: _sorting?.length
+          //   ? formatSorting(_sorting, 'device_filter_rules', is_case_sensitive_sorting)
+          //   : [],
         },
       })
         .execute()
