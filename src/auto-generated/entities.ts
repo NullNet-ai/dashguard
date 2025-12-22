@@ -12,4 +12,5 @@ export default [
   "device_configurations",
   "device_filter_rules",
   "device_nat_rules",
+  "aliases",
 ];

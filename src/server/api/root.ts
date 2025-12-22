@@ -32,6 +32,7 @@ import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_
 import { deviceHeartbeatsRouter } from './routers/device_heartbeat';
 import { deviceRuleRouter } from './routers/configuration_rule';
 import { deviceNatRuleRouter } from './routers/configuration_nat_rule';
+import { deviceAliasRouter } from './routers/configuration_alias';
 
 /**
  * This is the primary router for your server.
@@ -73,6 +74,7 @@ export const appRouter = createTRPCRouter({
   deviceHeartbeat: deviceHeartbeatsRouter,
   deviceRule: deviceRuleRouter,
   deviceNatRule: deviceNatRuleRouter,
+  deviceAlias: deviceAliasRouter,
 });
 
 // export type definition of API

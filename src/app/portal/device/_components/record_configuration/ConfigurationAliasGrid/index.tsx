@@ -12,6 +12,7 @@ import { Label } from '~/components/ui/label';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import { defaultSorting } from './_config/sorting';
 import gridColumns from './_config/columns';
+import { api } from '~/trpc/react';
 
 const ConfigurationAliasGrid = ({
   code,
@@ -31,6 +32,16 @@ const ConfigurationAliasGrid = ({
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
   };
+
+  const {
+      data: record = { data: { id: null } },
+      refetch,
+      error,
+    } = api.record.getByCode.useQuery({
+      id: code,
+      pluck_fields: ['id'],
+      main_entity: 'devices',
+    });
 
   const [gridCachedData, setGridCachedData] = useState<IGridCacheDataResponse>(
     {} as IGridCacheDataResponse,
@@ -54,31 +65,35 @@ const ConfigurationAliasGrid = ({
   const _pluck = [
     'id',
     'device_configuration_id',
-    'device_rule_status',
+    // 'device_rule_status',
     'status',
-    'type',
-    'policy',
-    'protocol',
-    'source_port',
-    'source_addr',
-    'source_type',
-    'source_inversed',
-    'destination_port',
-    'destination_addr',
-    'destination_type',
-    'destination_inversed',
-    'description',
+    // 'type',
+    // 'policy',
+    // 'protocol',
+    // 'source_port',
+    // 'source_addr',
+    // 'source_type',
+    // 'source_inversed',
+    // 'destination_port',
+    // 'destination_addr',
+    // 'destination_type',
+    // 'destination_inversed',
+    // 'description',
     'created_by',
     'updated_by',
     'created_date',
     'updated_date',
-    'disabled',
-    'interface',
-    'order'
+    // 'disabled',
+    // 'interface',
+    'order',
+    // New columns
+    'type',
+    'name',
+    'description'
   ]
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: 'device_aliases',
+    entity: 'aliases',
     pluck: _pluck,
     // @ts-expect-error - gridCacheData is not assignable to type IGridCacheDataResponse
     gridCacheData: {
@@ -97,9 +112,15 @@ const ConfigurationAliasGrid = ({
 
   const { fetchData, data: grid_data } = useFetchGridData(gridParams, {
     resolver: 'mainGrid',
-    router: 'deviceRule',
+    router: 'deviceAlias',
   });
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+    useEffect(() => {
+      if (record?.data?.id) {
+        // @ts-expect-error - No type yet
+        fetchData({ device_id: record?.data?.id })
+      }
+    }, [record?.data?.id])
 
   return (
     <>
@@ -117,7 +138,7 @@ const ConfigurationAliasGrid = ({
             gridStartPosition: 348,
             summaryWidth: 320,
           },
-          entity: 'device_aliases',
+          entity: 'aliases',
           title: 'Aliases',
           columns: gridColumns,
           columnsOrder: columns,
@@ -133,10 +154,10 @@ const ConfigurationAliasGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
-            router: 'deviceRule',
+            router: 'deviceAlias',
             resolver: 'mainGrid',
             query_params: {
-              entity: 'device_aliases',
+              entity: 'aliases',
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
