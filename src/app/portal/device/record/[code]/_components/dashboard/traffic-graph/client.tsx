@@ -120,9 +120,9 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
   const timeRangeFormat = React.useMemo(() => {
     setResolution(null)
-    if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
-      return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()})
-    }
+    // if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
+    //   return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()})
+    // }
     return getLastTimeStamp({count: time_count, unit: time_unit})
   }, [ time_count, time_unit, filterId])
   
