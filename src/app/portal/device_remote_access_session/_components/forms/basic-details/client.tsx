@@ -51,6 +51,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
           
+          // @ts-expect-error - No type yet
           localStorage.setItem(sessionKey, wsUrl)
 
           localStorage.setItem('current_terminal_session', sessionKey)

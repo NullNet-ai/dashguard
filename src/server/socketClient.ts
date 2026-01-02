@@ -20,6 +20,7 @@ class SocketClient {
   }
 
   async initialize() {
+    if (typeof window === 'undefined') return;
     try {
       // Fetch socket credentials from secure API
       const response = await fetch('/api/socket/socket-config', {

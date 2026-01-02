@@ -9,6 +9,7 @@ export async function createRemoteAccess({ device_id, ra_type, token, instanceId
   if (ra_type === 'ui') {
     params = {
       ...params,
+      // @ts-expect-error - No type yet
       data: {
         local_addr: "127.0.0.1",
         local_port: 443,
