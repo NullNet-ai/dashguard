@@ -49,11 +49,11 @@ const gridColumns = [
   {
     header: 'Device',
     accessorKey: 'device_name',
-    sortKey: 'devices.instance_name',
+    sortKey: 'devices.device_name',
     search_config: {
       operator: 'like',
       entity: 'devices',
-      field: 'instance_name',
+      field: 'device_name',
     },
   },
 

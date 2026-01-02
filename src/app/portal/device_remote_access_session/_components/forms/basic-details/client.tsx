@@ -33,17 +33,20 @@ export default function RemoteAccessDetails(props: IFormProps) {
         id: record_data?.id || '',
         device_id,
         remote_access_type,
-        category: remote_access_type?.toLowerCase() === 'console' ? 'Console' : 'Web',
+        category: remote_access_type,
       })
       if (res?.success && res) {
         const { remote_access_session } = res?.data[0] as Record<string, any>
 
         toast.success('Remote Access submitted successfully')
 
-        const remote_access = ['console', 'shell']
+        const remote_access = ['ssh', 'tty']
 
         if (remote_access?.includes(remote_access_type)) {
-          const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/ws/`
+          const wsUrl = {
+            ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+            tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+          }[remote_access_type]
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
@@ -65,7 +68,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');
 
-          window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/`, '_blank')
+          window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
         }
       }
       else {
@@ -160,12 +163,16 @@ export default function RemoteAccessDetails(props: IFormProps) {
         device_id: devices ?? [],
         remote_access_type: [
           {
-            label: 'Console',
-            value: 'console',
+            label: 'ssh',
+            value: 'ssh',
           },
           {
-            label: 'Web Interface',
-            value: 'web_interface',
+            label: 'tty',
+            value: 'tty',
+          },
+          {
+            label: 'ui',
+            value: 'ui',
           },
         ],
       }}

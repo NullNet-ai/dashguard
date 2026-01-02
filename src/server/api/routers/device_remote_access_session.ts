@@ -31,8 +31,8 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           entity: 'devices',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'instance_name', 'device_status'],
-            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : { status: 'Active' , device_status: 'Online'}),
+            pluck: ['id', 'device_name', 'is_device_online'],
+            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : { status: 'Active' , is_device_online: true}),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -44,9 +44,9 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       
       const res_data = res?.data?.map((item: Record<string, any>) => {
         return {
-          label: item.instance_name,
+          label: item.device_name,
           value: item.id,
-          device_status: item.device_status
+          is_device_online: item.is_device_online
         }
       })
       
@@ -69,7 +69,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
       const pluck_object = {
         ...addCommonGridPluckObject(),
-        devices: ['instance_name', 'id'],
+        devices: ['device_name', 'id'],
         [pluralize(input?.entity)]: pluck,
       }
 
@@ -92,11 +92,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // @ts-expect-error - No type yet
-          multiple_sort:
-            sorting?.length
-              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
-              : [],
+          // multiple_sort:
+          //   sorting?.length
+          //     ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+          //     : [],
             date_format: 'YYYY/mm/dd' as EDateFormats,
             concatenate_fields: [
             {
@@ -151,10 +150,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          device_remote_access_type: entity_data?.remote_access_type?.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
+          device_remote_access_type: entity_data?.remote_access_type,
           // remote_access_category: formatString(remote_access_type),
           // type: formatString(remote_access_type),
-          device_name: formatString(devices?.instance_name),
+          device_name: formatString(devices?.device_name),
           created_by: !!created_by?.first_name || !!created_by?.last_name
             ? `${created_by?.first_name} ${created_by?.last_name}`
             : null,
@@ -179,33 +178,35 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
       const { device_id, remote_access_type } = input
-      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
-        const res = await ctx.dnaClient.findAll({
-          entity,
+
+      const response = await ctx.dnaClient
+        .findAll({
+          entity: 'device_instances',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'status', 'remote_access_session'],
-            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active', remote_access_type: ra_type }),
-            order: {
-              limit: 1,
-              by_field: 'created_date',
-              by_direction: EOrderDirection.DESC,
-            },
+            pluck: ['id'],
+            advance_filters: createAdvancedFilter({ device_id, status: 'Active' }),
           },
         })
-        .execute()
+        .execute();
         
+
+      const instanceId = response?.data?.[response?.data?.length > 1 ? response?.data?.length - 1 : 0]?.id; 
+
+      const ra_type = remote_access_type
         
-        
-        if (!res?.data?.length) {
-          await createRemoteAccess({ device_id, ra_type, token })
+      const {
+        data: {
+          session_token
+        }
+      } = await createRemoteAccess({ device_id, ra_type, token, instanceId })
           
           return await ctx.dnaClient.findAll({
             entity,
             token: ctx.token.value,
             query: {
               pluck: ['id', 'status', 'remote_access_session'],
-              advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active' }),
+              advance_filters: createAdvancedFilter({ device_id, remote_access_session: session_token }),
               order: {
                 limit: 1,
                 by_field: 'created_date',
@@ -214,9 +215,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             },
           })
           .execute()
-        }
-
-        return res
     }),
   disconnectDeviceRemoteAccess: privateProcedure
     .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))
