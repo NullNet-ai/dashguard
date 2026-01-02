@@ -111,19 +111,19 @@ export default function WebTerminal() {
   }, [ref, instance])
 
   // If the remote session is terminated or WebSocket is closed, display a message and reconnect button
-  if (devices?.[0]?.device_status?.toLowerCase() === 'offline' || isConnectionClosed) {
+  if (!devices?.[0]?.is_device_online || isConnectionClosed) {
     localStorage.removeItem('device_id')
     return (
       <div className="relative h-screen w-screen flex flex-col justify-center items-center bg-gray-800">
         <p className="text-white text-lg mb-4">
-          {devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length
+          {devices?.[0]?.is_device_online?.toLowerCase() === 'offline' || !devices?.length
             ? `The remote session has been terminated. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.`
             : 'Connection is closed. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.'}
         </p>
         <button
           onClick={handleReconnect}
-          className={isReconnecting || isConnectionClosed || devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length ? "px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" :"px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
-          disabled={isReconnecting || isConnectionClosed || devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length}
+          className={isReconnecting || isConnectionClosed || !devices?.[0]?.is_device_online || !devices?.length ? "px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" :"px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
+          disabled={isReconnecting || isConnectionClosed || !devices?.[0]?.is_device_online || !devices?.length}
         >
           {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
         </button>
