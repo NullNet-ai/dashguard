@@ -116,7 +116,7 @@ export default async function DashboardTabs() {
 
   return (
     <div className="space-y-2">
-      <div className="ml-[-13px]">
+      <div className="">
         <StateTab
           defaultValue="configuration_rules"
           // orientation="horizontal"
