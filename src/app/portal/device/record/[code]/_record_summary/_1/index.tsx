@@ -9,10 +9,10 @@ import RecordDeviceLastHeartbeat from '../record_custom_query/RecordDeviceLastHe
 import RecordDeviceStatus from '../record_custom_query/RecordDeviceStatus'
 
 const fields = {
-  'Type': 'type',
+  'Type': 'device_type',
   'Status': 'status',
   'Last Heartbeat': 'last_heartbeat',
-  'Instance': 'instance_name',
+  'Instance': 'device_name',
   'Host Name': 'hostname',
   'Version': 'version',
   'Grouping': 'grouping',
@@ -120,6 +120,8 @@ const RecordShellSummary = ({
                                     </span>
                                   </div>
                                 ))
+                              ) : typeof _data[value] === 'string' ? (
+                                _data[value]
                               ) : 'None'}
                             </div>
                           ) 

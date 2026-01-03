@@ -596,7 +596,7 @@ export const deviceRouter = createTRPCRouter({
               pluck: [
                 'id',
                 'model',
-                'instance_name',
+                'device_name',
                 'address_id',
                 'created_date',
                 'updated_date',
@@ -606,6 +606,7 @@ export const deviceRouter = createTRPCRouter({
                 'updated_time',
                 'created_time',
                 'ip_address',
+                'device_type',
               ],
               pluck_object: {
                 device: [
@@ -754,6 +755,7 @@ export const deviceRouter = createTRPCRouter({
         },
       );
 
+      console.log('### fetchDeviceInterfaces', fetchDeviceInterfaces)
       const configuration: any = fetchDeviceInterfaces.find(
         (config: any) =>
           config.configuration.device_id === device?.data?.[0]?.id,
@@ -777,8 +779,8 @@ export const deviceRouter = createTRPCRouter({
         data: {
           ...rest,
           ...rest_address,
-          hostname: configuration?.configuration?.hostname,
-          interfaces: transformed_device_interface_address,
+          hostname: fetchConfiguration.length > 0 ? configuration?.configuration?.hostname : 'Need to Enable Config Monitoring',
+          interfaces: fetchConfiguration.length > 0 ? transformed_device_interface_address : 'Need to Enable Config Monitoring',
           grouping: device_group_setting_id,
           grouping_name: name,
         },
