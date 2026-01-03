@@ -214,7 +214,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
     }),
   )
   .query(async ({ input, ctx }) => {
-    console.log('@@@ input', input)
     const res = await ctx.dnaClient
       .findAll({
         entity,
@@ -296,7 +295,16 @@ export const deviceConfigurationRouter = createTRPCRouter({
       })
       .execute()
       
+      if (!res) {
+        return []
+      }
+
       const data = res?.data?.[0]?.device_interfaces
+
+      if (!data) {
+        return []
+      }
+
       const drpdwn_optn = [data].map((item: {
         name: string
         device: string

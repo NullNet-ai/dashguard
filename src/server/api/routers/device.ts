@@ -395,13 +395,13 @@ export const deviceRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: ['id'],
-            advance_filters: createAdvancedFilter({ device_id: id }),
+            advance_filters: createAdvancedFilter({ device_id: id, status: 'Active' }),
           },
         })
         .execute();
         
 
-      const instanceId = response?.data?.[0]?.id; 
+      const instanceId = response?.data?.[response?.data?.length > 1 ? response?.data?.length - 1 : 0]?.id; 
 
        const wallguardApi = new WallGuardApi({
         token: ctx.token.value,
