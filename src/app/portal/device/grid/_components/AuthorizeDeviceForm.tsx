@@ -26,7 +26,6 @@ export default function AuthorizaDeviceForm({
       code,
     })
 
-  // @ts-expect-error - eslint-disable-next-line @typescript-eslint/no-unsafe-assignment eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const authorizeDevice = api.device.authorizeDevice.useMutation()
 
   const handleSubmit = async (

@@ -42,7 +42,7 @@ export default function AuthorizeDeviceAction(
   } = useSideDrawer()
 
   const disabled = React.useMemo(
-    () => is_device_authorized
+    () => !is_device_authorized
       || !is_device_online, [is_device_authorized, is_device_online],
   )
 

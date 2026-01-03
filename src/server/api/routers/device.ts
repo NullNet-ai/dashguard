@@ -5,6 +5,7 @@ import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import Bluebird from 'bluebird'
 import { WallGuardApi } from '~/utils/wallguard-api';
+import { authorizeDevice } from '~/app/api/device/authorize_device';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -782,5 +783,34 @@ export const deviceRouter = createTRPCRouter({
           grouping_name: name,
         },
       };
+    }),
+    authorizeDevice: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string().min(1),
+        device_name: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { device_id, device_name } = input;
+
+      await authorizeDevice(device_id, ctx.token.value);
+
+      const response = await ctx.dnaClient
+        .update(device_id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              device_name,
+              is_device_authorized: true
+            },
+          },
+        })
+        .execute();
+
+      if (!response.success) {
+        throw new Error('Failed to update device')
+      }
     }),
 });
