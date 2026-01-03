@@ -25,7 +25,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
     
     window.open(`/terminal`, '_blank')
   } else {
-    window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/`, '_blank')
+    window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
   }
 }
 
