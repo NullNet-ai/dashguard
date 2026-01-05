@@ -1,14 +1,13 @@
 import axios from 'axios'
 
-export async function disconnectRemoteAccess({ device_id, ra_type, token }: { device_id: string, ra_type: string, token: string }) {
-  await axios.delete(`${process.env.REMOTE_ACCESS_URL}/v1/api/remote_access`, {
+export async function disconnectRemoteAccess({ remote_access_session, token }: { remote_access_session: string, token: string }) {
+  await axios.delete(`${process.env.REMOTE_ACCESS_URL}/wallguard/api/v1/remote_access`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
     data: {
-      device_id,
-      ra_type,
+      session: remote_access_session,
     },
   })  
     .then((response) => {

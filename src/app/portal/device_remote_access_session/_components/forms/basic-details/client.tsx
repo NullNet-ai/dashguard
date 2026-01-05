@@ -55,6 +55,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           localStorage.setItem(sessionKey, wsUrl)
 
           localStorage.setItem('current_terminal_session', sessionKey)
+          localStorage.setItem('current_terminal_session_type', remote_access_type)
           localStorage.setItem('device_id', device_id)
           
           // Set a flag in localStorage to reload the previous tab

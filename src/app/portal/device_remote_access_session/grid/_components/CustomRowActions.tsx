@@ -10,30 +10,40 @@ export const CustomRowActions = ({ row }: { row: any }) => {
   const { original } = row
   const { id, device_id, remote_access_type, remote_access_status, remote_access_session } = original ?? {}
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
+  const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
-  const remote_access = ['console', 'shell']
+  const remote_access = ['ssh', 'tty']
 
   const handleOpenSideDrawer = async () => {
-    if(remote_access?.includes(remote_access_type?.toLowerCase())) {
-    const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL}/ws/`
-    const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
-      .substring(2, 9)}`
-    localStorage.setItem(sessionKey, wsUrl)
+    const res = await createUpdate.mutateAsync({
+      device_id: device_id || '',
+      remote_access_type,
+      category: remote_access_type
+    })
 
-    localStorage.setItem('current_terminal_session', sessionKey)
-    localStorage.setItem('device_id', device_id)
-    
-    window.open(`/terminal`, '_blank')
-  } else {
-    window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
-  }
+    if (res.success) {
+      if(remote_access?.includes(remote_access_type?.toLowerCase())) {
+        const wsUrl = {
+          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+        }[remote_access_type]
+        const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
+          .substring(2, 9)}`
+        localStorage.setItem(sessionKey, wsUrl)
+
+        localStorage.setItem('current_terminal_session', sessionKey)
+        localStorage.setItem('device_id', device_id)
+        
+        window.open(`/terminal`, '_blank')
+      } else {
+        window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
+      }
+    }
 }
 
   const handleDisconnect = async () => {
     await disconnectRemoteAccess.mutateAsync({
-      id,
-      device_id,
-      remote_access_type,
+      remote_access_session
     }).then(() => {
       toast.success('Disconnected successfully')
       window.location.reload()

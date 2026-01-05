@@ -30,6 +30,7 @@ export default async function Page() {
     'updated_date',
     'updated_time',
     'updated_by',
+    'device_id'
   ];
 
   const gridCacheData =

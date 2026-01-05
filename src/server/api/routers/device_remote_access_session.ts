@@ -217,14 +217,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           .execute()
     }),
   disconnectDeviceRemoteAccess: privateProcedure
-    .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))
+    .input(z.object({ remote_access_session: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const {  device_id, remote_access_type } = input
+      const { remote_access_session } = input
       
-      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
-
-
-      await disconnectRemoteAccess({ device_id, ra_type, token: ctx.token.value })
+      await disconnectRemoteAccess({ remote_access_session, token: ctx.token.value })
         
     }
     ),

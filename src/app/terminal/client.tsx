@@ -23,37 +23,46 @@ export default function WebTerminal() {
 
   const handleReconnect = async () => {
     setIsReconnecting(true)
+
+    const remote_access_type = localStorage.getItem('current_terminal_session_type')
+
     const res = await createUpdate.mutateAsync({
       device_id: device_id || '',
-      remote_access_type: 'Shell',
-      category: 'Console'
+      remote_access_type,
+      category: remote_access_type
     })
     if (res.success) {
+
+      const { remote_access_session } = res?.data[0] as Record<string, any>
+
+      const wsUrl = {
+          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+        }[remote_access_type]
+      
       setIsConnectionClosed(false) // Reset connection status
       setIsReconnecting(false)
-      initializeWebSocket() // Reinitialize the WebSocket connection
+      initializeWebSocket(wsUrl) // Reinitialize the WebSocket connection
     }
   }
 
-  const initializeWebSocket = () => {
+  const initializeWebSocket = (wsUrl) => {
     const currentSessionKey = localStorage.getItem('current_terminal_session')
-    console.log("🚀 ~ initializeWebSocket ~ currentSessionKey:", currentSessionKey)
-    if (!currentSessionKey) {
+    if (!currentSessionKey && !wsUrl) {
       console.error('No active terminal session found')
       instance?.write('\x1b[31mError: No active terminal session found\x1b[0m\r\n')
       return
     }
 
     const websocketUrl = localStorage.getItem(currentSessionKey)
-    console.log("🚀 ~ initializeWebSocket ~ websocketUrl:", websocketUrl)
-    if (!websocketUrl) {
+    if (!websocketUrl && !wsUrl) {
       console.error('WebSocket URL not found')
       instance?.write('\x1b[31mError: Terminal session not found or expired\x1b[0m\r\n')
       return
     }
 
     try {
-      const newSocket = new WebSocket(websocketUrl)
+      const newSocket = new WebSocket(websocketUrl || wsUrl)
 
       newSocket.onopen = () => {
         instance?.write('\x1b[32mConnected to terminal server\x1b[0m\r\n')
@@ -110,31 +119,39 @@ export default function WebTerminal() {
     }
   }, [ref, instance])
 
-  // If the remote session is terminated or WebSocket is closed, display a message and reconnect button
-  if (!devices?.[0]?.is_device_online || isConnectionClosed) {
+  const isDeviceQueryLoaded = devices !== undefined
+  const isDeviceOfflineOrMissing = isDeviceQueryLoaded && (!devices?.length || !devices?.[0]?.is_device_online)
+  const shouldShowPopup = isConnectionClosed || isDeviceOfflineOrMissing
+
+  useEffect(() => {
+    if (!shouldShowPopup) return
     localStorage.removeItem('device_id')
-    return (
-      <div className="relative h-screen w-screen flex flex-col justify-center items-center bg-gray-800">
-        <p className="text-white text-lg mb-4">
-          {devices?.[0]?.is_device_online?.toLowerCase() === 'offline' || !devices?.length
-            ? `The remote session has been terminated. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.`
-            : 'Connection is closed. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.'}
-        </p>
-        <button
-          onClick={handleReconnect}
-          className={isReconnecting || isConnectionClosed || !devices?.[0]?.is_device_online || !devices?.length ? "px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" :"px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
-          disabled={isReconnecting || isConnectionClosed || !devices?.[0]?.is_device_online || !devices?.length}
-        >
-          {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
-        </button>
-      </div>
-    )
-  }
+  }, [shouldShowPopup])
 
   // Render the terminal if the session is active
   return (
     <div className="relative h-screen w-screen">
       <div ref={ref as React.RefObject<HTMLDivElement>} style={{ width: '100%', height: '100%' }} />
+      {shouldShowPopup ? (
+        <div className="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/95">
+          <p className="text-white text-lg mb-4">
+            {isDeviceOfflineOrMissing
+              ? `The remote session has been terminated. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.`
+              : 'Connection is closed. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.'}
+          </p>
+          <button
+            onClick={handleReconnect}
+            className={
+              isReconnecting || isDeviceOfflineOrMissing
+                ? 'px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600'
+                : 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+            }
+            disabled={isReconnecting || isDeviceOfflineOrMissing}
+          >
+            {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }
