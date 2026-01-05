@@ -1,7 +1,33 @@
 "use client";
 
+import { usePathname } from 'next/navigation';
+import { api } from '~/trpc/react';
+
 const Summary = () => {
-  return <></>;
+
+  const pathName = usePathname();
+    const [, , , _, identifier] = pathName.split('/');
+
+  const {
+      data: record,
+      refetch,
+      error,
+    } = api.device.fetchDeviceInfo.useQuery({
+      code: identifier!
+    });
+  
+  return (
+    <div>
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Device Name: </strong>
+        &nbsp; {record?.device_name || 'None'}
+      </p>
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Device Type: </strong>
+        &nbsp; {record?.device_type || 'None'}
+      </p>
+    </div>
+  );
 };
 
 const SummaryConfig = {
@@ -10,7 +36,7 @@ const SummaryConfig = {
   show_summary: true,
   components: [
     {
-      label: "Confirmation",
+      label: "Device Type",
       component: <Summary />,
     },
   ],

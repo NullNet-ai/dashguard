@@ -56,7 +56,7 @@ export const deviceRouter = createTRPCRouter({
               },
             ],
             pluck_object: {
-              devices: ['id', 'code'],
+              devices: ['id', 'code', 'device_category'],
               account_organizations: [
                 'id',
                 'email',
@@ -607,6 +607,7 @@ export const deviceRouter = createTRPCRouter({
                 'created_time',
                 'ip_address',
                 'device_type',
+                'device_category'
               ],
               pluck_object: {
                 device: [

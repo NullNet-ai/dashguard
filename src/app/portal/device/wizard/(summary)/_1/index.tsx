@@ -37,8 +37,8 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div>
       <p className="mb-[8px] no-underline text-[#334155]">
-        <strong>App ID: </strong>
-        &nbsp; {memoizedAppId || 'None'}
+        <strong>Category: </strong>
+        &nbsp; {deviceData?.devices?.device_category || 'None'}
       </p>
     </div>
   );

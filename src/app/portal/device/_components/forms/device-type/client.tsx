@@ -8,8 +8,8 @@ import { type IFormProps } from '../types';
 import { api } from '~/trpc/react';
 
 const FormSchema = z.object({
-  device_name: z.string(),
-  device_type: z.string(),
+  device_name: z.string().min(1, 'Device Name is required'),
+  device_type: z.string().min(1, 'Device Type is required'),
 });
 
 export default function DeviceType({

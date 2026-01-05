@@ -17,7 +17,7 @@ const fields = {
   'Version': 'version',
   'Grouping': 'grouping',
   'Interfaces': 'interfaces',
-  'Category': 'categories',
+  'Category': 'device_category',
 }
 
 const RecordShellSummary = ({
@@ -59,7 +59,7 @@ const RecordShellSummary = ({
         {Object.entries(fields).map(([key, value], index) => {
           if (key !== 'Category') return null // Only process the 'Category' field
 
-          const dataValue = (data as { [key: string]: any })?.[value as string]
+          const dataValue = [(data as { [key: string]: any })?.[value as string]]
           return (
             <div className='pt-2' key={index}>
               <div className='px-5'>

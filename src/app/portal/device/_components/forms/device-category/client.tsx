@@ -8,7 +8,7 @@ import { type IFormProps } from '../types';
 import { api } from "~/trpc/react";
 
 const FormSchema = z.object({
-  device_category: z.string(),
+  device_category: z.string().min(1, 'Device Category is required'),
 });
 
 export default function DeviceCategory({ params, defaultValues }: IFormProps) {
@@ -52,6 +52,7 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
           fieldClassName: '',
           radioOrientation: 'vertical',
           fieldStyle: {},
+          required: true,
         },
       ]}
       checkboxOptions={{}}
