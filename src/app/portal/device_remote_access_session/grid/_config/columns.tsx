@@ -15,19 +15,6 @@ const gridColumns = [
     },
   },
   {
-    header: 'State',
-    accessorKey: 'status',
-    enableResizing: false,
-    cell: ({ row }) => {
-      const value = row?.original?.status
-      return <StatusCell value={value} />
-    },
-    search_config: {
-      entity: 'device_remote_access_sessions',
-      operator: 'like',
-    },
-  },
-  {
     header: 'Category',
     accessorKey: 'categories',
     search_config: {
