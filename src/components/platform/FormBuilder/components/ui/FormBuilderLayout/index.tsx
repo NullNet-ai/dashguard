@@ -69,6 +69,7 @@ const FormBuilderLayout = ({
   customRender,
   onSelectFieldFilterGrid,
   handleSearchOpen,
+  formSaveButtonTitle,
   properties = {
     isEditable: true,
   },
@@ -169,6 +170,7 @@ const FormBuilderLayout = ({
                       isButtonLoading={isSaveLoading}
                       saveForm={saveForm}
                       properties={properties}
+                      formSaveButtonTitle={formSaveButtonTitle}
                     />
                   </CardContent>
                 ) : (

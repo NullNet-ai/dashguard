@@ -8,12 +8,14 @@ export default function SubmitForm({
   form,
   saveForm,
   formSchema,
+  formSaveButtonTitle,
   ...props
 }: {
   saveForm(data: z.infer<typeof formSchema>): Promise<void>;
   isLoading: boolean;
   form: any;
   formSchema: z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
+  formSaveButtonTitle?: string;
 }) {
   return (
     // <Button
@@ -41,7 +43,7 @@ export default function SubmitForm({
       {...props}
       >
       <SaveIcon className="h-4 w-4" />
-      Save
+      {formSaveButtonTitle ?? 'Save'}
     </Button>
 
     

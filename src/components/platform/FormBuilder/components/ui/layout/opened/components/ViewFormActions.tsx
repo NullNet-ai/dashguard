@@ -27,6 +27,7 @@ const ViewFormActions = ({
   formProps,
   customFormHostViewFormActions = [],
   properties,
+  formSaveButtonTitle,
 }: {
   saveForm: any;
   form: any;
@@ -37,6 +38,7 @@ const ViewFormActions = ({
   formProps?: any;
   customFormHostViewFormActions: ICustomActions[] | undefined;
   properties?: IFormProperties;
+  formSaveButtonTitle?: string;
 }) => {
   const { hasActions = true } = properties ?? {};
   const { enableFormHostViewActions = true, enableViewFormEllipsis = true} = features ?? {};
@@ -56,6 +58,7 @@ const ViewFormActions = ({
         form={form}
         formSchema={formSchema}
         isLoading={isButtonLoading}
+        formSaveButtonTitle={formSaveButtonTitle}
       />
       <CancelFormButton
         saveForm={saveForm}

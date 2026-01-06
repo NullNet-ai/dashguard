@@ -53,6 +53,7 @@ export const FormBuilder = (props: IPropsForms) => {
       allowUpdateRecord: true,
       selectOnly: false,
     },
+    formSaveButtonTitle,
   } = props;
   const { isEditable = true } = properties ?? {};
   const { actions } = useWizard();
@@ -605,6 +606,7 @@ export const FormBuilder = (props: IPropsForms) => {
             onSelectFieldFilterGrid={onSelectFieldFilterGrid}
             onSubmitFormGrid={onSubmitFormGrid}
             properties={properties}
+            formSaveButtonTitle={formSaveButtonTitle}
           />
         </Card>
       </Collapsible>

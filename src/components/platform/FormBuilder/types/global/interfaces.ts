@@ -647,6 +647,7 @@ interface IPropsForms {
    */
   create_mode?: boolean;
   properties?: IFormProperties;
+  formSaveButtonTitle?: string;
 }
 
 interface IFieldFilterActions {
