@@ -178,6 +178,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           },
         ],
       }}
+      formSaveButtonTitle='Connect'
     />
   )
 }
