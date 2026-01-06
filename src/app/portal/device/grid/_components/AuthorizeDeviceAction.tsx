@@ -13,6 +13,8 @@ import {
 } from '~/components/ui/tooltip'
 
 import AuthorizaDeviceForm from './AuthorizeDeviceForm'
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import SelectExistingRemoteAccess from '../../_components/forms/select-existing-remote-access'
 
 interface AuthorizeDeviceActionProps {
   row: {
@@ -32,6 +34,7 @@ export default function AuthorizeDeviceAction(
 ) {
   const { row: {
     original: {
+      id,
       code,
       is_device_online,
       is_device_authorized,
@@ -46,20 +49,28 @@ export default function AuthorizeDeviceAction(
       || !is_device_online, [is_device_authorized, is_device_online],
   )
 
-  const handleOpenSideDrawer = React.useCallback(() => {
+  const handleOpenSideDrawer = React.useCallback((type) => {
     openSideDrawer({
-      header: (
+      header: type === 'authorize_device' && (
         <h1>
-          Authorize device
+          Authorize Device
           {code}
         </h1>
       ),
       sideDrawerWidth: '500px',
       body: {
         component: () => (
-          <div>
-            <AuthorizaDeviceForm code={code} />
-          </div>
+          type === 'remote_access' ? (
+            <div>
+              <SelectExistingRemoteAccess record_data={{
+                id,
+              }} />
+            </div>
+          ) : (
+            <div>
+              <AuthorizaDeviceForm code={code} />
+            </div>
+          )
         ),
         componentProps: {},
       },
@@ -68,12 +79,24 @@ export default function AuthorizeDeviceAction(
 
   return (
     <TooltipProvider>
-      <Tooltip delayDuration={0}>
+      {is_device_online && <Tooltip delayDuration={0}>
+          <TooltipTrigger>
+          <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer('remote_access')}>
+          <ChevronUpDownIcon className='h-4 w-4 text-success' />
+        </Button>
+          <TooltipContent side="left">
+            <div className="text-sm">
+              <span className='text-justify'>{'Remote Access'}</span>
+            </div>
+          </TooltipContent>
+        </TooltipTrigger>
+      </Tooltip>}
+      {!is_device_authorized && <Tooltip delayDuration={0}>
         <TooltipTrigger>
           <Button
             disabled={disabled}
             variant='ghost'
-            onClick={() => handleOpenSideDrawer()}
+            onClick={() => handleOpenSideDrawer('authorize_device')}
           >
             <MonitorCheck className='h-4 w-4 text-success' />
           </Button>
@@ -83,7 +106,7 @@ export default function AuthorizeDeviceAction(
             </div>
           </TooltipContent>
         </TooltipTrigger>
-      </Tooltip>
+      </Tooltip>}
     </TooltipProvider>
   )
 }

@@ -1,0 +1,134 @@
+'use client'
+
+import { z } from 'zod'
+
+import { FormBuilder } from '~/components/platform/FormBuilder'
+import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
+import { useToast } from '~/context/ToastProvider'
+import { api } from '~/trpc/react'
+
+import { type IFormProps } from '../types'
+
+const FormSchema = z.object({
+  remote_access_id: z.string({ message: 'Remote Access is required' }).min(1, { message: 'Remote Access is required' }),
+})
+
+export default function SelectExistingRemoteAccess(props: IFormProps) {
+  const { record_data } = props ?? {}
+  const toast = useToast()
+  const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
+
+  const { data: remote_accesses } = api.deviceRemoteAccessSession.fetchDeviceRemoteAccess.useQuery({
+    limit: 100,
+    device_id: record_data?.id || '',
+  })
+
+  const handleSave = async ({
+    data,
+  }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
+    try {
+      const { remote_access_id } = data
+      const remote_access_type = remote_accesses?.find((item: Record<string, any>) => item.value === remote_access_id)?.remote_access_type || ''
+
+      const res = await createUpdate.mutateAsync({
+        id: remote_access_id || '',
+        device_id: record_data?.id || '',
+        remote_access_type,
+        category: remote_access_type,
+      })
+      if (res?.success && res) {
+        const { remote_access_session } = res?.data[0] as Record<string, any>
+
+        toast.success('Remote Access submitted successfully')
+
+        const remote_access = ['ssh', 'tty']
+
+        if (remote_access?.includes(remote_access_type)) {
+          const wsUrl = {
+            ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+            tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+          }[remote_access_type]
+
+          const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
+            .substring(2, 9)}`
+          
+          // @ts-expect-error - No type yet
+          localStorage.setItem(sessionKey, wsUrl)
+
+          localStorage.setItem('current_terminal_session', sessionKey)
+          localStorage.setItem('current_terminal_session_type', remote_access_type)
+          localStorage.setItem('device_id', record_data?.id || '')
+          
+          // Set a flag in localStorage to reload the previous tab
+          localStorage.setItem('reload_previous_tab', 'true');
+
+
+          window.open(`/terminal`, '_blank')
+
+          
+        }
+        else {
+          // Set a flag in localStorage to reload the previous tab
+          localStorage.setItem('reload_previous_tab', 'true');
+
+          window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
+        }
+      }
+      else {
+        toast.error('Failed to submit Remote Access: Invalid response')
+      }
+    }
+    catch (error: any) {
+      console.error('Remote Access Error:', error)
+      toast.error(`Failed to submit Remote Access: ${error.message || 'Unknown error'}`)
+    }
+  }
+
+  // Add this code to reload the current tab if the flag is set
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const shouldReload = localStorage.getItem('reload_previous_tab');
+      if (shouldReload === 'true') {
+        localStorage.removeItem('reload_previous_tab'); // Remove the flag
+        window.location.reload(); // Reload the current tab
+      }
+      localStorage.removeItem('reload_previous_tab'); // Remove the flag
+    }
+  });
+
+  return (
+    <FormBuilder
+      customDesign={{
+        formClassName: 'grid !grid-cols-2 gap-4',
+      }}
+      defaultValues={record_data}
+      fields={[
+        {
+          id: 'remote_access_id',
+          formType: 'select',
+          name: 'remote_access_id',
+          label: 'Remote Access',
+          description: 'Field Description',
+          placeholder: 'Enter value...',
+          fieldClassName: '',
+          required: true,
+          selectSearchable: true,
+          fieldStyle: {
+            gridColumn: '1 / span 2',
+            gridRow: '2 / span 1',
+          },
+        },
+      ]}
+      formKey="formlabel"
+      formLabel="Remote Access"
+      formProps={record_data}
+      formSchema={FormSchema}
+      handleSubmit={handleSave}
+      myParent='wizard'
+      selectOptions={{
+        remote_access_id: remote_accesses ?? [],
+      }}
+      formSaveButtonTitle='Connect'
+    />
+  )
+}
