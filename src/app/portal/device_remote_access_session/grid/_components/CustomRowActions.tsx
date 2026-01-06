@@ -67,7 +67,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
             <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer()}>
             <PlugZapIcon className='h-4 w-4 text-success' />
           </Button>
-            <TooltipContent side="top">
+            <TooltipContent side="left">
               <div className="text-sm">
                 <span className='text-justify'>{'Reconnect'}</span>
               </div>
@@ -80,7 +80,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
               <Button disabled={disabled} variant="ghost" onClick={() => handleDisconnect()}>
                 <UnplugIcon className='h-4 w-4 text-danger' />
               </Button>
-            <TooltipContent side="top">
+            <TooltipContent side="left">
               <div className="text-sm">
                 <span className='text-justify'>{'Disconnect'}</span>
               </div>

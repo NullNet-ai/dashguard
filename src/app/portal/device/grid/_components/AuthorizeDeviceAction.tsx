@@ -77,7 +77,7 @@ export default function AuthorizeDeviceAction(
           >
             <MonitorCheck className='h-4 w-4 text-success' />
           </Button>
-          <TooltipContent side='top'>
+          <TooltipContent side='left'>
             <div className='text-sm'>
               <span className='text-justify'>Authorize Device</span>
             </div>
