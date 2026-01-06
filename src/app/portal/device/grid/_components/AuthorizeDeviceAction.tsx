@@ -49,7 +49,7 @@ export default function AuthorizeDeviceAction(
       || !is_device_online, [is_device_authorized, is_device_online],
   )
 
-  const handleOpenSideDrawer = React.useCallback((type) => {
+  const handleOpenSideDrawer = React.useCallback((type: 'authorize_device' | 'remote_access') => {
     openSideDrawer({
       header: type === 'authorize_device' && (
         <h1>
@@ -62,6 +62,7 @@ export default function AuthorizeDeviceAction(
         component: () => (
           type === 'remote_access' ? (
             <div>
+              {/* @ts-expect-error - No type yet */}
               <SelectExistingRemoteAccess record_data={{
                 id,
               }} />

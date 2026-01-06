@@ -14,6 +14,7 @@ const FormSchema = z.object({
 })
 
 export default function SelectExistingRemoteAccess(props: IFormProps) {
+  // @ts-expect-error - No type yet
   const { record_data } = props ?? {}
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
@@ -30,7 +31,9 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
     try {
       const { remote_access_id } = data
       let remote_access = remote_accesses?.find((item: Record<string, any>) => item.value === remote_access_id) || {}
+      // @ts-expect-error - No type yet
       const remote_access_type = remote_access?.remote_access_type || ''
+      // @ts-expect-error - No type yet
       const device_id = record_data?.id || remote_access?.device_id || ''
 
       const res = await createUpdate.mutateAsync({
@@ -47,6 +50,7 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
         const remote_access = ['ssh', 'tty']
 
         if (remote_access?.includes(remote_access_type)) {
+          // @ts-expect-error - No type yet
           const wsUrl = {
             ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
             tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
@@ -55,7 +59,6 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
           
-          // @ts-expect-error - No type yet
           localStorage.setItem(sessionKey, wsUrl)
 
           localStorage.setItem('current_terminal_session', sessionKey)

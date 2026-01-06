@@ -23,6 +23,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
 
     if (res.success) {
       if(remote_access?.includes(remote_access_type?.toLowerCase())) {
+        // @ts-expect-error - No type yet
         const wsUrl = {
           ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
           tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,

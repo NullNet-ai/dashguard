@@ -28,7 +28,9 @@ export default function WebTerminal() {
 
     const res = await createUpdate.mutateAsync({
       device_id: device_id || '',
+      // @ts-expect-error - No type yet
       remote_access_type,
+      // @ts-expect-error - No type yet
       category: remote_access_type
     })
     if (res.success) {
@@ -38,6 +40,7 @@ export default function WebTerminal() {
       const wsUrl = {
           ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
           tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+          // @ts-expect-error - No type yet
         }[remote_access_type]
       
       setIsConnectionClosed(false) // Reset connection status
@@ -46,7 +49,7 @@ export default function WebTerminal() {
     }
   }
 
-  const initializeWebSocket = (wsUrl) => {
+  const initializeWebSocket = (wsUrl: string) => {
     const currentSessionKey = localStorage.getItem('current_terminal_session')
     if (!currentSessionKey && !wsUrl) {
       console.error('No active terminal session found')
@@ -54,6 +57,7 @@ export default function WebTerminal() {
       return
     }
 
+    // @ts-expect-error - No type yet
     const websocketUrl = localStorage.getItem(currentSessionKey)
     if (!websocketUrl && !wsUrl) {
       console.error('WebSocket URL not found')
@@ -93,6 +97,7 @@ export default function WebTerminal() {
   useEffect(() => {
     if (!instance) return
 
+    // @ts-expect-error - No type yet
     initializeWebSocket()
 
     return () => {
