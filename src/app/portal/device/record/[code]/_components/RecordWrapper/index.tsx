@@ -20,7 +20,7 @@ const Wrapper = ({
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: [],
+        identifierOption: statusOptions,
       }}
     >
       <RecordWrapperProvider>

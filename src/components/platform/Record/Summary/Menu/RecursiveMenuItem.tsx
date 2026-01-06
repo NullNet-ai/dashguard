@@ -4,6 +4,7 @@ import { Fragment, useState } from 'react';
 import {
   DropdownMenu
 } from '~/components/ui/dropdown-menu';
+import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { formatFormTestID } from '~/lib/utils';
 import { IMenuOptionConfig } from '../../types';
 import MenuItem from './MenuItem';
@@ -21,6 +22,7 @@ export default function RecursiveMenuItem({
   entityName,
   isMobile = false,
 }: IRecursiveMenuItemProps) {
+  const { actions: sideDrawerActions } = useSideDrawer()
   const [menuItemLoadingState, setMenuItemLoadingState] = useState<
     Record<string, boolean>
   >({});
@@ -53,6 +55,7 @@ export default function RecursiveMenuItem({
               recordId,
               entityName,
               handleLoadingStateChange,
+              sideDrawerActions,
             )}
             data-test-id={
               entityName + '-rcrd-menu-' + formatFormTestID(option.label ?? '')

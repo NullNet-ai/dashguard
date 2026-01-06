@@ -21,6 +21,7 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
   const { data: remote_accesses } = api.deviceRemoteAccessSession.fetchDeviceRemoteAccess.useQuery({
     limit: 100,
     device_id: record_data?.id || '',
+    device_code: record_data?.code,
   })
 
   const handleSave = async ({
@@ -28,11 +29,13 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
       const { remote_access_id } = data
-      const remote_access_type = remote_accesses?.find((item: Record<string, any>) => item.value === remote_access_id)?.remote_access_type || ''
+      let remote_access = remote_accesses?.find((item: Record<string, any>) => item.value === remote_access_id) || {}
+      const remote_access_type = remote_access?.remote_access_type || ''
+      const device_id = record_data?.id || remote_access?.device_id || ''
 
       const res = await createUpdate.mutateAsync({
         id: remote_access_id || '',
-        device_id: record_data?.id || '',
+        device_id,
         remote_access_type,
         category: remote_access_type,
       })
@@ -57,7 +60,7 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
 
           localStorage.setItem('current_terminal_session', sessionKey)
           localStorage.setItem('current_terminal_session_type', remote_access_type)
-          localStorage.setItem('device_id', record_data?.id || '')
+          localStorage.setItem('device_id', device_id || '')
           
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');

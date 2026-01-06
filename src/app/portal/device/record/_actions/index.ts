@@ -1,21 +1,33 @@
-"use server";
+"use client";
 
 import { TStatus } from "./types";
+import SelectExistingRemoteAccess from '../../_components/forms/select-existing-remote-access'
 
 const handleChangeStatus = (
   status: TStatus,
   recordId: string,
   entityName: string,
+  handleLoadingStateChange?: (itemName: string, isLoading: boolean) => void,
+  sideDrawerActions?: any,
 ) => {
+  const label = status === 'remote_access' ? 'Remote Access' : status
+  handleLoadingStateChange?.(label, true)
   try {
-    // const response = await changeContactStatus.mutateAsync({
-    //   id: contact_id!,
-    //   contact_status: status,
-    // });
-    // toast.success("Status changed sucessfully.");
-    // return response;
+    sideDrawerActions?.openSideDrawer?.({
+      sideDrawerWidth: '500px',
+      body: {
+        component: SelectExistingRemoteAccess,
+        componentProps: {
+          record_data: {
+            code: recordId,
+          },
+        },
+      },
+    })
   } catch (error) {
-    // toast.error("Failed to change status.");
+  }
+  finally {
+    handleLoadingStateChange?.(label, false)
   }
 };
 

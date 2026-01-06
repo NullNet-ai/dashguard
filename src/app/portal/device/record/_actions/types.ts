@@ -1,3 +1,3 @@
-type TStatus = "Test" | "Failed" | "Passed";
+type TStatus = "remote_access";
 
 export type { TStatus };

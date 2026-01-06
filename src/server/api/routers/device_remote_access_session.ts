@@ -57,18 +57,34 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .input(
       z.object({
         device_id: z.string(),
+        device_code: z.string().optional(),
         limit: z.number().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { limit, device_id } = input
+      const { limit, device_id, device_code } = input
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
       const res = await ctx.dnaClient
         .findAll({
           entity: 'device_remote_access_sessions',
           token: ctx.token.value,
           query: {
             pluck: ['id', 'code', 'remote_access_session', 'remote_access_type'],
-            advance_filters: createAdvancedFilter({ device_id }),
+            advance_filters: createAdvancedFilter({ device_id: realDeviceId }),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -82,6 +98,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         return {
           label: `${item.code} - ${item.remote_access_type}`,
           value: item.id,
+          device_id: realDeviceId,
           remote_access_session: item.remote_access_session,
           remote_access_type: item.remote_access_type
         }
