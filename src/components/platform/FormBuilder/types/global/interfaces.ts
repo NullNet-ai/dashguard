@@ -648,6 +648,7 @@ interface IPropsForms {
   create_mode?: boolean;
   properties?: IFormProperties;
   formSaveButtonTitle?: string;
+  formSaveIcon?: React.ReactNode;
 }
 
 interface IFieldFilterActions {

@@ -54,6 +54,7 @@ export const FormBuilder = (props: IPropsForms) => {
       selectOnly: false,
     },
     formSaveButtonTitle,
+    formSaveIcon,
   } = props;
   const { isEditable = true } = properties ?? {};
   const { actions } = useWizard();
@@ -607,6 +608,7 @@ export const FormBuilder = (props: IPropsForms) => {
             onSubmitFormGrid={onSubmitFormGrid}
             properties={properties}
             formSaveButtonTitle={formSaveButtonTitle}
+            formSaveIcon={formSaveIcon}
           />
         </Card>
       </Collapsible>
