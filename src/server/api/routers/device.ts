@@ -302,7 +302,7 @@ export const deviceRouter = createTRPCRouter({
           entity: 'installation_codes',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'code'],
+            pluck: ['id', 'token'],
             track_total_records: true,
             advance_filters: createAdvancedFilter({ device_id }),
           },
@@ -331,7 +331,7 @@ export const deviceRouter = createTRPCRouter({
               device_id,
               device_code,
             },
-            pluck: ['id', 'code'],
+            pluck: ['id', 'token'],
           },
         })
         .execute();
@@ -547,7 +547,7 @@ export const deviceRouter = createTRPCRouter({
           entity: 'installation_codes',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'code'],
+            pluck: ['id', 'token'],
             track_total_records: true,
             advance_filters: createAdvancedFilter({ device_code }),
           },

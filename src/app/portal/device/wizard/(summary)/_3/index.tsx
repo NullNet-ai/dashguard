@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { usePathname } from "next/navigation";
 
 const fields = {
-  "Installation Code": "installation_code",
+  "Installation Code": "token",
 };
 
 const Summary = ({ form_key }: { form_key: string }) => {
@@ -20,10 +20,10 @@ const Summary = ({ form_key }: { form_key: string }) => {
     device_code: identifier!,
   });
 
-  const { code } = record ?? {}
+  const { token } = record ?? {}
 
   const data = {
-    installation_code: code ?? "None"
+    token: token ?? "None"
   };
 
   useRefetchRecord({

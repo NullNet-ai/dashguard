@@ -92,7 +92,7 @@ const SetupDetails: React.FC<SetupDetailsProps & { identifier: string }> = ({
         device_category: device?.device_category,
         device_type: device?.device_type,
       });
-      setInstallationKey(installationCode?.code || '');
+      setInstallationKey(installationCode?.token || '');
       setMarkdownTemplate(fetchSetupInstructionsData?.markdown ?? defaultMarkdownTemplate);
     }
     fn();
