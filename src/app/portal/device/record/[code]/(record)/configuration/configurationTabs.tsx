@@ -91,27 +91,27 @@ export default async function DashboardTabs() {
         </Suspense>
       ),
     },
-    {
-      id: 'configuration_raw_data',
-      label: 'Raw Data',
-      content: (
-        <Suspense
-          fallback={
-            <div className="flex h-[500px] w-full items-center justify-center">
-              <div className="flex items-center justify-center">
-                <Loader
-                  className="h-8 w-8 bg-primary text-primary"
-                  label=""
-                  variant="spinner"
-                />
-              </div>
-            </div>
-          }
-        >
-          < ConfigurationRawData />
-        </Suspense>
-      ),
-    }
+    // {
+    //   id: 'configuration_raw_data',
+    //   label: 'Raw Data',
+    //   content: (
+    //     <Suspense
+    //       fallback={
+    //         <div className="flex h-[500px] w-full items-center justify-center">
+    //           <div className="flex items-center justify-center">
+    //             <Loader
+    //               className="h-8 w-8 bg-primary text-primary"
+    //               label=""
+    //               variant="spinner"
+    //             />
+    //           </div>
+    //         </div>
+    //       }
+    //     >
+    //       < ConfigurationRawData />
+    //     </Suspense>
+    //   ),
+    // }
   ];
 
   return (
