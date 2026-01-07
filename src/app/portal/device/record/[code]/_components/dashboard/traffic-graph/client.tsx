@@ -132,7 +132,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       bucket_size: resolution,
       time_range: timeRangeFormat as any,
       timezone,
-      device_id: defaultValues?.id,
+      device_id: params.id,
     }, { enabled:false })
   
 
@@ -213,7 +213,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     <div className=" mx-auto">
       <div className='sticky top-[29px] z-[50] bg-white'>
     <Filter params={params} type='traffic_graph_filter'  />
-    <Search  params={{...params, router: 'packet', resolver: 'filterConnections' }} filter_type='traffic_graph_search' />
+    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
     {  loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."

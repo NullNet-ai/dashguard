@@ -20,7 +20,7 @@ const PieChartComponent = lazy(
 );
 
 const TrafficGraph = lazy(
-  () => import('../../_components/dashboard/traffic-graph/client'),
+  () => import('../../_components/dashboard/traffic-graph/server'),
 );
 
 

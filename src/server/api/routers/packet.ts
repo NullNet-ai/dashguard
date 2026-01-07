@@ -638,7 +638,7 @@ export const packetRouter = createTRPCRouter({
         query: {
           track_total_records: true,
           pluck: [
-            'id', 'status', 'instance_name', 'source_ip', 'destination_ip',
+            'id', 'status', 'interface_name', 'source_ip', 'destination_ip', 'timestamp'
           ],
           advance_filters: [
 
