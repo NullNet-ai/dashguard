@@ -8,6 +8,7 @@ import { useToast } from '~/context/ToastProvider'
 import { api } from '~/trpc/react'
 
 import { type IFormProps } from '../types'
+import { PlugZapIcon } from 'lucide-react'
 
 const FormSchema = z.object({
   remote_access_id: z.string({ message: 'Remote Access is required' }).min(1, { message: 'Remote Access is required' }),
@@ -135,6 +136,7 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
         remote_access_id: remote_accesses ?? [],
       }}
       formSaveButtonTitle='Connect'
+      formSaveIcon={<PlugZapIcon className="h-4 w-4" />}
     />
   )
 }
