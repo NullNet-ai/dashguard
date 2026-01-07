@@ -132,6 +132,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       bucket_size: resolution,
       time_range: timeRangeFormat as any,
       timezone,
+      // @ts-expect-error - No type yet
       device_id: params.id,
     }, { enabled:false })
   
