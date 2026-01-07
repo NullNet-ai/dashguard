@@ -15,7 +15,7 @@ const fields = {
   'Instance': 'device_name',
   'Host Name': 'hostname',
   'Version': 'version',
-  'Grouping': 'grouping',
+  // 'Grouping': 'grouping',
   'Interfaces': 'interfaces',
   'Category': 'device_category',
 }

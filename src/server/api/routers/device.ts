@@ -756,7 +756,6 @@ export const deviceRouter = createTRPCRouter({
         },
       );
 
-      console.log('### fetchDeviceInterfaces', fetchDeviceInterfaces)
       const configuration: any = fetchDeviceInterfaces.find(
         (config: any) =>
           config.configuration.device_id === device?.data?.[0]?.id,
@@ -764,9 +763,9 @@ export const deviceRouter = createTRPCRouter({
 
       const transformed_device_interface_address =
         configuration?.interfaces?.map((iface: Record<string, any>) => ({
-          name: iface.name,
-          address: iface.device_interface_addresses.length
-            ? iface.device_interface_addresses[0].address
+          name: iface.device_interfaces?.name || '',
+          address: iface.device_interface_addresses?.length
+            ? iface.device_interface_addresses?.[0].address
             : null,
         }));
       const { id: device_group_setting_id, name } =
