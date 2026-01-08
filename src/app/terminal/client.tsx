@@ -81,7 +81,7 @@ export default function WebTerminal() {
       newSocket.onclose = () => {
         instance?.write('\x1b[33mConnection closed\x1b[0m\r\n')
         setIsConnectionClosed(true) // Set connection status to closed dynamically
-        localStorage.removeItem('current_terminal_session')
+        // localStorage.removeItem('current_terminal_session')
       }
 
       const addon = new AttachAddon(newSocket)
@@ -130,7 +130,7 @@ export default function WebTerminal() {
 
   useEffect(() => {
     if (!shouldShowPopup) return
-    localStorage.removeItem('device_id')
+    // localStorage.removeItem('device_id')
   }, [shouldShowPopup])
 
   // Render the terminal if the session is active

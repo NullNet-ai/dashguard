@@ -15,13 +15,6 @@ export const CustomRowActions = ({ row }: { row: any }) => {
   const remote_access = ['ssh', 'tty']
 
   const handleOpenSideDrawer = async () => {
-    const res = await createUpdate.mutateAsync({
-      device_id: device_id || '',
-      remote_access_type,
-      category: remote_access_type
-    })
-
-    if (res.success) {
       if(remote_access?.includes(remote_access_type?.toLowerCase())) {
         // @ts-expect-error - No type yet
         const wsUrl = {
@@ -39,7 +32,6 @@ export const CustomRowActions = ({ row }: { row: any }) => {
       } else {
         window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
       }
-    }
 }
 
   const handleDisconnect = async () => {
