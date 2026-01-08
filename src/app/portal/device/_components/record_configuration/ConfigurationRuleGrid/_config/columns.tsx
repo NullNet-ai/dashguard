@@ -69,7 +69,13 @@ const gridColumns = [
     search_config: {
       operator: 'like',
     },
-    cell: ({row}) => row.original?.protocol?.toUpperCase() ?? "*"
+    cell: ({row}) => {
+      const [first, second] = row.original?.protocol?.toUpperCase().split('/')
+      if (first)
+        return `${first.includes('6') ? 'IPv4' : 'IPv6'}/${second}`
+
+      return '*'
+    } 
   },
   {
     header: 'Source',
