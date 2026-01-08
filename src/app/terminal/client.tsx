@@ -38,8 +38,8 @@ export default function WebTerminal() {
       const { remote_access_session } = res?.data[0] as Record<string, any>
 
       const wsUrl = {
-          ssh: `wss://${remote_access_session}.${process.env.WG_SERVER_IP?.replace('https://', '')}/wallguard/gateway/ssh`,
-          tty: `wss://${remote_access_session}.${process.env.WG_SERVER_IP?.replace('https://', '')}/wallguard/gateway/tty`,
+          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
           // @ts-expect-error - No type yet
         }[remote_access_type]
       
