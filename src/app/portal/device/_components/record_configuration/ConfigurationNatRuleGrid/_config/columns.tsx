@@ -36,6 +36,13 @@ const gridColumns = [
     },
   },
   {
+    header: 'Type',
+    accessorKey: 'type',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
     header: 'Action',
     accessorKey: 'policy',
     search_config: {
@@ -78,7 +85,7 @@ const gridColumns = [
   },
   {
     header: 'Src Port',
-    accessorKey: 'source_port',
+    accessorKey: 'source_port_value',
     search_config: {
       operator: 'like',
     },
@@ -98,7 +105,7 @@ const gridColumns = [
   },
   {
     header: 'Dest Port',
-    accessorKey: 'destination_port',
+    accessorKey: 'destination_port_value',
     search_config: {
       operator: 'like',
     },
