@@ -1,7 +1,7 @@
 "use client";
 
 import { TStatus } from "./types";
-import SelectExistingRemoteAccess from '../../_components/forms/select-existing-remote-access'
+import DeviceRemoteAccessGrid from '../../_components/forms/device-remote-access-grid';
 
 const handleChangeStatus = (
   status: TStatus,
@@ -16,11 +16,9 @@ const handleChangeStatus = (
     sideDrawerActions?.openSideDrawer?.({
       sideDrawerWidth: '500px',
       body: {
-        component: SelectExistingRemoteAccess,
-        componentProps: {
-          record_data: {
-            code: recordId,
-          },
+        component: DeviceRemoteAccessGrid,
+        componentProps:   {
+          deviceCode: recordId,
         },
       },
     })

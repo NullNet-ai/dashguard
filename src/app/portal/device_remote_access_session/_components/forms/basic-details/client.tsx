@@ -15,12 +15,13 @@ const FormSchema = z.object({
 })
 
 export default function RemoteAccessDetails(props: IFormProps) {
-  const { record_data } = props ?? {}
+  const { record_data, deviceId, deviceCode } = props ?? {}
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
   const { data: devices } = api.deviceRemoteAccessSession.fetchDevices.useQuery({
     limit: 100,
+    device_code: deviceCode,
   })
 
   const handleSave = async ({
@@ -31,7 +32,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
       const res = await createUpdate.mutateAsync({
         id: record_data?.id || '',
-        device_id,
+        device_id: deviceId || (deviceCode && devices?.[0]?.value) || device_id,
         remote_access_type,
         category: remote_access_type,
       })
@@ -56,7 +57,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
           localStorage.setItem('current_terminal_session', sessionKey)
           localStorage.setItem('current_terminal_session_type', remote_access_type)
-          localStorage.setItem('device_id', device_id)
+          localStorage.setItem('device_id', deviceId || (deviceCode && devices?.[0]?.value) || device_id)
           
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');
@@ -122,7 +123,8 @@ export default function RemoteAccessDetails(props: IFormProps) {
           fieldClassName: '',
           fieldStyle: {},
         },
-        {
+        ...((deviceId || deviceCode) ?
+        [] : [{
           id: 'device_id',
           formType: 'select',
           name: 'device_id',
@@ -137,7 +139,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
             gridColumn: '1 / span 2',
             gridRow: '2 / span 1',
           },
-        },
+        }]),
         {
           id: 'remote_access_type',
           formType: 'select',
@@ -158,7 +160,9 @@ export default function RemoteAccessDetails(props: IFormProps) {
       formKey="formlabel"
       formLabel="Remote Access"
       formProps={record_data}
-      formSchema={FormSchema}
+      formSchema={(deviceId || deviceCode) ? z.object({
+      remote_access_type: z.string({ message: 'Connection Type is required' }).min(1, { message: 'Connection Type is required' }),
+      }) : FormSchema}
       handleSubmit={handleSave}
       myParent='wizard'
       selectOptions={{

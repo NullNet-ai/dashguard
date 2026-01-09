@@ -15,6 +15,7 @@ import {
 import AuthorizaDeviceForm from './AuthorizeDeviceForm'
 import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
 import SelectExistingRemoteAccess from '../../_components/forms/select-existing-remote-access'
+import DeviceRemoteAccessGrid from '../../_components/forms/device-remote-access-grid'
 
 interface AuthorizeDeviceActionProps {
   row: {
@@ -62,10 +63,7 @@ export default function AuthorizeDeviceAction(
         component: () => (
           type === 'remote_access' ? (
             <div>
-              {/* @ts-expect-error - No type yet */}
-              <SelectExistingRemoteAccess record_data={{
-                id,
-              }} />
+              <DeviceRemoteAccessGrid deviceId={id} />
             </div>
           ) : (
             <div>

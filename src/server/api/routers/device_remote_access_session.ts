@@ -1,4 +1,4 @@
-import { EDateFormats, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { EDateFormats, EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
 import { z } from 'zod'
 
 import { createRemoteAccess } from '~/app/api/device_remote_access_session/create_remote_access'
@@ -21,18 +21,19 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         id: z.string().optional(),
         code: z.string().optional(),
         limit: z.number().optional(),
-        device_id: z.string().optional()
+        device_id: z.string().optional(),
+        device_code: z.string().optional()
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { limit, device_id } = input
+      const { limit, device_id, device_code } = input
       const res = await ctx.dnaClient
         .findAll({
           entity: 'devices',
           token: ctx.token.value,
           query: {
             pluck: ['id', 'device_name', 'is_device_online'],
-            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : { status: 'Active' , is_device_online: true}),
+            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : !!device_code ? { code: device_code } : { status: 'Active' , is_device_online: true}),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -109,17 +110,69 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     ),
   mainGrid: privateProcedure
   // Define input using zod for validation
-    .input(ZodItems)
+    .input(ZodItems.merge(z.object({ device_code: z.string().optional() })))
     .query(async ({ input, ctx }) => {
       const {
         limit = 50,
         current = 1,
-        advance_filters: _advance_filters = [],
         pluck = [],
         sorting = [],
         // @ts-expect-error - No type yet
         is_case_sensitive_sorting = 'false',
+        device_code,
       } = input
+      let { advance_filters: _advance_filters = [] } = input
+      
+      if (device_code) {
+        const deviceRes = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
+
+        const deviceId = deviceRes?.data?.[0]?.id as string | undefined
+        if (!deviceId) {
+          return {
+            totalCount: 0,
+            items: [],
+            currentPage: current,
+            totalPages: 1,
+          }
+        }
+
+        let replacedDeviceIdFilter = false
+        _advance_filters = (_advance_filters as IAdvanceFilters[]).map((filter) => {
+          if (filter?.type === 'criteria' && filter?.field === 'device_id') {
+            replacedDeviceIdFilter = true
+            return {
+              ...filter,
+              values: [deviceId],
+            }
+          }
+          return filter
+        })
+
+        if (!replacedDeviceIdFilter) {
+          const hasExistingFilters = (_advance_filters as IAdvanceFilters[]).length > 0
+          _advance_filters = [
+            ...(_advance_filters as IAdvanceFilters[]),
+            ...(hasExistingFilters
+              ? [{ type: 'operator', operator: EOperator.AND } as IAdvanceFilters]
+              : []),
+            ...(createAdvancedFilter({ device_id: deviceId }) as IAdvanceFilters[]),
+          ]
+        }
+      }
 
       const pluck_object = {
         ...addCommonGridPluckObject(),
