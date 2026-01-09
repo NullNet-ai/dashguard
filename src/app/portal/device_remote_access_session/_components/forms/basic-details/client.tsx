@@ -15,6 +15,7 @@ const FormSchema = z.object({
 })
 
 export default function RemoteAccessDetails(props: IFormProps) {
+  // @ts-expect-error - No type yet
   const { record_data, deviceId, deviceCode } = props ?? {}
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
@@ -123,6 +124,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           fieldClassName: '',
           fieldStyle: {},
         },
+        // @ts-expect-error - No type yet
         ...((deviceId || deviceCode) ?
         [] : [{
           id: 'device_id',
@@ -142,6 +144,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
         }]),
         {
           id: 'remote_access_type',
+          // @ts-expect-error - No type yet
           formType: 'select',
           name: 'remote_access_type',
           label: 'Connection Type',

@@ -5,6 +5,7 @@ import BasicDetails from "~/app/portal/device_remote_access_session/_components/
 import { useSideDrawer } from "~/components/platform/SideDrawer";
 import { Button } from "~/components/ui/button";
 
+// @ts-expect-error - No type yet
 export const CustomNewButton = (props) => {
   const { deviceId, deviceCode } = props
   const { actions } = useSideDrawer();
@@ -13,6 +14,7 @@ export const CustomNewButton = (props) => {
     title: "New Remote Access",
     sideDrawerWidth: '760px',
     body: {
+      // @ts-expect-error - No type yet
       component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} />,
       componentProps: {
         entity: 'device_remote_access_session',

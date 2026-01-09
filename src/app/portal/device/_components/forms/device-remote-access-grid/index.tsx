@@ -13,6 +13,7 @@ import gridColumns from '~/app/portal/device_remote_access_session/grid/_config/
 import { CustomNewButton } from '~/app/portal/device_remote_access_session/grid/_components/CustomNewButton';
 import { CustomRowActions } from '~/app/portal/device_remote_access_session/grid/_components/CustomRowActions';
 
+// @ts-expect-error  - No type yet
 export default function DeviceRemoteAccessGrid(props) {
   const { deviceId, deviceCode } = props
   const pathname = usePathname();
