@@ -193,7 +193,7 @@ export default function Menu({ item, screenType }: IProps) {
                         'mr-0': !open,
                       })}
                     />
-                    {sidebarIsOpen && (
+                    {(open || openMobile) && (
                       <span className={`font-medium text-md leading-6`}>{displayText}</span>
                     )}
                   </SidebarMenuButton>
