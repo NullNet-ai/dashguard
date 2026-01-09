@@ -20,8 +20,8 @@ const AppLayout = async ({ children }: PropsWithChildren) => {
         </HeaderContainer>
         <AppContent>{children}
         </AppContent>
-        <SmartComponent />
-        <SmartMobileComponent />
+        {/* <SmartComponent /> */}
+        {/* <SmartMobileComponent /> */}
       </SidebarInset>
     </>
   )

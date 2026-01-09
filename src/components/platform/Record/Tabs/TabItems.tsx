@@ -160,7 +160,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
             </DropdownMenu>
           )}
         </div>
-        <div className='border-r border-gray-200'>
+        {/* <div className='border-r border-gray-200'>
               <Button
                 variant={"outline"}
                 className='flex gap-x-1 mr-2'
@@ -173,7 +173,7 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
                 <PresentationChartLineIcon className='size-4 text-primary'/>
                 <span className='text-primary'>Timeline Record</span>
               </Button>
-        </div>
+        </div> */}
       </div>
     </Card>
   );

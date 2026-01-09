@@ -101,9 +101,9 @@ export default function AppSideBar(config: ISideBarProps) {
         icon: tabsDisplayVariant === 'icon-only' ? (
           <TooltipProvider >
             <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
+              {/* <TooltipTrigger asChild>
                 <Bars3Icon className="h-5 w-5" />
-              </TooltipTrigger>
+              </TooltipTrigger> */}
               <TooltipContent side="top">
                 <p>Menu</p>
               </TooltipContent>
