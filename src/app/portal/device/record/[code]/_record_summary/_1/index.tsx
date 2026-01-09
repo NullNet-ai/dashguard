@@ -1,24 +1,12 @@
 'use client'
 
-import { Separator } from '~/components/ui/separator'
-import StatusCell from '~/components/ui/status-cell'
 import { api } from '~/trpc/react'
+import { useMemo } from 'react'
 
 import useRefetchRecord from '../hooks/useFetchMainRecord'
 import RecordDeviceLastHeartbeat from '../record_custom_query/RecordDeviceLastHeartbeat'
 import RecordDeviceStatus from '../record_custom_query/RecordDeviceStatus'
-
-const fields = {
-  'Type': 'device_type',
-  'Status': 'status',
-  'Last Heartbeat': 'last_heartbeat',
-  'Instance': 'device_name',
-  'Host Name': 'hostname',
-  'Version': 'version',
-  // 'Grouping': 'grouping',
-  'Interfaces': 'interfaces',
-  'Category': 'device_category',
-}
+import SummaryDetails from '~/components/platform/Record/Summary/SummaryDetails'
 
 const RecordShellSummary = ({
   form_key,
@@ -42,102 +30,92 @@ const RecordShellSummary = ({
     refetch,
     form_key,
   })
-  const _data = {
-    ...data,
-    type: data?.model,
-    grouping: data?.grouping_name,
-    version: data?.device_version,
-  }
+
+  const deviceData = useMemo(() => {
+    if (!data) return {}
+    
+    return {
+      ...data,
+      type: data?.model,
+      grouping: data?.grouping_name,
+      version: data?.device_version,
+      interfaces: data?.interfaces || [],
+      device_category: data?.device_category || 'None'
+    }
+  }, [data])
 
   if (error) {
     console.error("Error fetching record summary", error)
   }
 
   return (
-    <div>
-      <div>
-        {Object.entries(fields).map(([key, value], index) => {
-          if (key !== 'Category') return null // Only process the 'Category' field
-
-          const dataValue = [(data as { [key: string]: any })?.[value as string]]
-          return (
-            <div className='pt-2' key={index}>
-              <div className='px-5'>
-                <div className='p-1 text-sm'>
-                  <div>
-                    <span className='text-slate-400'>
-                      {key}
-                      {":"}
-                      {' '}
-                    </span>
-                    {' '}
-                    {/* Display the key 'Category' */}
-                    {dataValue?.length
-                      ? dataValue.map((item: string) => {
-                          return <StatusCell key={item} value={item} />
-                        })
-                      : 'None'}
+    <SummaryDetails
+      data={deviceData}
+      config={[
+        {
+          header_title: "Device Details",
+          items: [
+            {
+              key: "Type",
+              value: "device_type",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Status",
+              value: "status",
+              customValue: (data: any) => <RecordDeviceStatus device_id={data?.id} />
+            },
+            {
+              key: "Last Heartbeat",
+              value: "last_heartbeat",
+              customValue: (data: any) => <RecordDeviceLastHeartbeat device_id={data?.id} />
+            },
+            {
+              key: "Instance",
+              value: "device_name",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Host Name",
+              value: "hostname",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Version",
+              value: "version",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Interfaces",
+              value: "interfaces",
+              customValue: (data: any) => {
+                const interfaceData = data?.interfaces || [];
+                return (
+                  <div className="pl-4">
+                    {Array.isArray(interfaceData) && interfaceData.length > 0 ? (
+                      interfaceData.map((interfaceObj: { name: string; address: string }, index: number) => (
+                        <div key={index} className="mb-1">
+                          <span className="text-slate-400">
+                            {interfaceObj.name?.toUpperCase() || 'Unknown'}
+                            {':'}
+                            {' '}
+                          </span>
+                          <span>
+                            {interfaceObj.address || 'None'}
+                          </span>
+                        </div>
+                      ))
+                    ) : typeof interfaceData === 'string' ? (
+                      interfaceData
+                    ) : 'None'}
                   </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      <Separator />
-      <div>
-        {Object.entries(fields).map(([key, value], index) => {
-          if (key === 'Category') return null // Skip the 'Category' field as it is already processed
-
-          return (
-            <div className="pt-2" key={index}>
-              <div className="px-5">
-                <div className="p-1 text-sm">
-                  <div>
-                    <span className="text-slate-400">
-                      {key}
-                      {":"}
-                      {' '}
-                    </span>
-                    <span>
-                      {key === 'Status'
-                        ? (<RecordDeviceStatus device_id={ data?.id } />
-                          )
-                        : key === 'Last Heartbeat'
-                          ? (<RecordDeviceLastHeartbeat device_id={data?.id} />)
-                          : key === 'Interfaces' ? (
-                            <div className="pl-4" key={key}>
-                              {Array.isArray(_data[value]) && _data[value].length > 0 ? (
-                                _data[value].map((interfaceObj: { name: string; address: string }, index: number) => (
-                                  <div key={index}>
-                                    <span className="text-slate-400">
-                                      {interfaceObj.name.toUpperCase()}
-                                      {':'}
-                                      {' '}
-                                    </span>
-                                    <span>
-                                      {interfaceObj.address || 'None'}
-                                    </span>
-                                  </div>
-                                ))
-                              ) : typeof _data[value] === 'string' ? (
-                                _data[value]
-                              ) : 'None'}
-                            </div>
-                          ) 
-                            : (
-                                (_data as { [key: string]: any })?.[value as string]
-                                || 'None'
-                              )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+                );
+              }
+            }
+          ]
+        }
+      ]}
+    />
   )
 }
 
