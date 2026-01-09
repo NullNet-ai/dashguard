@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 
 import { useFetchNetworkFlow } from './Provider'
 import { generateTimeSeriesData, generateTimeSeriesDataForLiveData } from './functions/generateTimeSeriesDataPerSeconds'
+import { FlagIcon } from '@heroicons/react/20/solid'
 
 const rowHeight = 20
 const containerHeight = 600 // viewport height for virtualization
@@ -131,7 +132,14 @@ export default function NetworkFlowView() {
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger>
                       <div className="flex items-center gap-2">
-                        {el.flag && <img alt="Flag" src={el.flag} className="w-[30px] h-[15px]" />}
+                        {el.flag ? el.flag === '/unknown-flag.svg' ? <div
+                          className="flex size-4 items-center justify-center"
+                          style={{
+                            backgroundColor: '#efefef',
+                          }}
+                        >
+                          <FlagIcon className='size-2'/>
+                        </div> : <img alt="Flag" src={el.flag} className="w-[30px] h-[15px]" /> : null}
                         <span className={el.active ? "text-red-600" : "text-black"}>{el.source_ip}</span>
                       </div>
                     </TooltipTrigger>
