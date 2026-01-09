@@ -211,18 +211,18 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   , [resolution, time_unit, time_count, graphType, filterId, refetch])
 
   return (
-    <div className=" mx-auto">
+    <div className=" mx-auto max-w-[calc(100vw-39em)]">
       <div className='sticky top-[29px] z-[50] bg-white'>
-    <Filter params={params} type='traffic_graph_filter'  />
-    <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
+        <div className="px-2">
+          <Filter params={params} type='traffic_graph_filter'  />
+          <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
+        </div>
     {  loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."
       size="md"
       variant="circularShadow"
-    /> : <Card>
-      
-      
+    /> : <Card> 
       {/* <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6"> */}
       <CardContent>
         <ChartContainer
