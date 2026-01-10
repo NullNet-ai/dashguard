@@ -158,9 +158,11 @@ const InteractiveGraph = ({
     }, [])
 
     useEffect(() => {
+      console.debug('[socket] event - connection_multi_graph listener isnt created yet')
       if (!socket || !defaultValues?.id || !orgID) return
+      console.debug('[socket] event - connection_multi_graph listener created')
       socket.on( `connection_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
-        console.debug(`[socket] connection_multi_graph-${defaultValues?.id}-${orgID}`, data)
+        console.debug(`[socket] event connection_multi_graph-${defaultValues?.id}-${orgID} - data`, data)
         const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
         setFilteredData(updated_filtered_data)
       })

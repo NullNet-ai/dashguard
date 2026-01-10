@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
@@ -42,6 +42,7 @@ const channel_name = 'connection_traffic_graph'
 
 const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const eventEmitter = useEventEmitter()
+  const chartScrollRef = useRef<HTMLDivElement>(null)
   const [_resolution, setResolution] = React.useState<null | string>(null)
   const [graphType, setGraphType] = React.useState('default')
   const [loading, setLoading] = useState<boolean>(false)
@@ -62,6 +63,43 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   }, [graphType])
 
   const getAccount = api.organizationAccount.getAccountID.useMutation();
+  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
+  const isQueueWorkerRunningRef = useRef(false)
+  const isUnmountedRef = useRef(false)
+  const startQueueServiceRef = useRef<(() => void) | null>(null)
+
+  const startQueueService = useCallback(() => {
+    if (isQueueWorkerRunningRef.current) return
+    isQueueWorkerRunningRef.current = true
+
+    void (async () => {
+      try {
+        while (!isUnmountedRef.current) {
+          const next = taskQueueRef.current.shift()
+          if (!next) break
+          try {
+            await next()
+          } catch (err) {
+            console.error('[traffic-graph] queue task failed', err)
+          }
+        }
+      } finally {
+        isQueueWorkerRunningRef.current = false
+        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+          startQueueServiceRef.current?.()
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    startQueueServiceRef.current = startQueueService
+  }, [startQueueService])
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    taskQueueRef.current.push(task)
+    startQueueServiceRef.current?.()
+  }, [])
 const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'traffic_graph_filter',
@@ -136,6 +174,13 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       device_id: params.id,
     }, { enabled:false })
   
+  const enqueueRefetch = useCallback(() => {
+    enqueueTask(async () => {
+      setLoading(true)
+      await refetch()
+      setLoading(false)
+    })
+  }, [enqueueTask, refetch])
 
     useEffect(() => {
       if(!packetsIP?.length) return
@@ -168,6 +213,8 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
       // Eviction: Keep only the last 100 records
       return () => {
+        isUnmountedRef.current = true
+        taskQueueRef.current = []
         setFilteredData([])
       }
       
@@ -175,9 +222,11 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
 
 
   useEffect(() => {
+    console.debug('[socket] event - traffic_graph_connection listener isnt created yet')
     if (!socket || !defaultValues?.id || !orgID || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return
-   
+    console.debug('[socket] event - traffic_graph_connection listener created')
     socket.on( `traffic_graph_connection-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+      console.debug(`[socket] event - connection_multi_graph-${defaultValues?.id}-${orgID} - data`, data)
 
       const updated_filtered_data =  updateFilteredData(filteredData, data)
       setFilteredData(updated_filtered_data)
@@ -198,17 +247,31 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   },[socket, filteredData, orgID, defaultValues?.id, filterId])
 
   useEffect(() => {
-    refetch()
-    setLoading(false)
+    isUnmountedRef.current = false
+    enqueueRefetch()
+  }, [resolution, time_unit, time_count, graphType, filterId, enqueueRefetch])
 
-    // const interval = setInterval(() => {
-    //   refetch()
-    // }, 1000)
-    // return () => {
-    //   clearInterval(interval)
-    // }
-  }
-  , [resolution, time_unit, time_count, graphType, filterId, refetch])
+  useEffect(() => {
+    const twelveHoursMs = 12 * 60 * 60 * 1000
+    const interval = window.setInterval(() => {
+      enqueueRefetch()
+    }, twelveHoursMs)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [enqueueRefetch])
+
+  useEffect(() => {
+    const el = chartScrollRef.current
+    if (!el) return
+
+    const raf = requestAnimationFrame(() => {
+      el.scrollTo({ left: el.scrollWidth, behavior: 'auto' })
+    })
+
+    return () => cancelAnimationFrame(raf)
+  }, [filteredData])
 
   return (
     <div className=" mx-auto max-w-[calc(100vw-39em)]">
@@ -226,6 +289,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       {/* <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6"> */}
       <CardContent>
         <ChartContainer
+          ref={chartScrollRef}
           className="aspect-auto h-full w-full overflow-x-auto"
           config={chartConfig}
         >
