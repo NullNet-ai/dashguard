@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment-timezone'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -71,7 +71,12 @@ const InteractiveGraph = ({
     )
   }, [interfaces])
 
-  const fetchBandWidth = async () => {
+  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
+  const isQueueWorkerRunningRef = useRef(false)
+  const isUnmountedRef = useRef(false)
+  const startQueueServiceRef = useRef<(() => void) | null>(null)
+
+  const fetchBandWidth = useCallback(async () => {
     const res = await getChartData.mutateAsync({
       bucket_size: '1s',
       timezone,
@@ -85,7 +90,40 @@ const InteractiveGraph = ({
       const updatedData = [...prev, ...res].slice(-100) // Keep only last 100 records
       return updatedData
     })
-  }
+  }, [defaultValues?.id, getChartData, interfaces])
+
+  const startQueueService = useCallback(() => {
+    if (isQueueWorkerRunningRef.current) return
+    isQueueWorkerRunningRef.current = true
+
+    void (async () => {
+      try {
+        while (!isUnmountedRef.current) {
+          const next = taskQueueRef.current.shift()
+          if (!next) break
+          try {
+            await next()
+          } catch (err) {
+            console.error('[multi-graph] queue task failed', err)
+          }
+        }
+      } finally {
+        isQueueWorkerRunningRef.current = false
+        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+          startQueueServiceRef.current?.()
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    startQueueServiceRef.current = startQueueService
+  }, [startQueueService])
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    taskQueueRef.current.push(task)
+    startQueueServiceRef.current?.()
+  }, [])
 
     useEffect(() => {
       if (!packetsIP) return
@@ -112,6 +150,8 @@ const InteractiveGraph = ({
       _getAccount()
       // Eviction: Keep only the last 100 records
       return () => {
+        isUnmountedRef.current = true
+        taskQueueRef.current = []
         setPacketsIP([])
         setFilteredData([])
       }
@@ -120,6 +160,7 @@ const InteractiveGraph = ({
     useEffect(() => {
       if (!socket || !defaultValues?.id || !orgID) return
       socket.on( `connection_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+        console.debug(`[socket] connection_multi_graph-${defaultValues?.id}-${orgID}`, data)
         const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
         setFilteredData(updated_filtered_data)
       })
@@ -129,15 +170,22 @@ const InteractiveGraph = ({
       };
     },[socket, filteredData, orgID, defaultValues?.id])
     
-
   useEffect(() => {
-    fetchBandWidth()
+    isUnmountedRef.current = false
+    taskQueueRef.current = []
 
-  }, [interfaces, defaultValues?.id, defaultValues?.is_device_online])
+    const enqueueFetchBandwidth = () => {
+      enqueueTask(() => fetchBandWidth())
+    }
 
-  useEffect(() => {
-      fetchBandWidth()
-  }, [])
+    enqueueFetchBandwidth()
+    const interval = window.setInterval(enqueueFetchBandwidth, 2000)
+
+    return () => {
+      window.clearInterval(interval)
+      taskQueueRef.current = []
+    }
+  }, [enqueueTask, fetchBandWidth, interfaces, defaultValues?.id, defaultValues?.is_device_online])
 
   // packet_multi_graph-
 
