@@ -77,6 +77,7 @@ const InteractiveGraph = ({
   const startQueueServiceRef = useRef<(() => void) | null>(null)
 
   const fetchBandWidth = useCallback(async () => {
+    console.debug('[pooling] fetchBandWidth')
     const res = await getChartData.mutateAsync({
       bucket_size: '1s',
       timezone,

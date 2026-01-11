@@ -177,6 +177,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   const enqueueRefetch = useCallback(() => {
     enqueueTask(async () => {
       setLoading(true)
+      console.debug('[pooling] getBandwidth')
       await refetch()
       setLoading(false)
     })
@@ -252,7 +253,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   }, [resolution, time_unit, time_count, graphType, filterId, enqueueRefetch])
 
   useEffect(() => {
-    const twelveHoursMs = 12 * 60 * 60 * 1000
+    const twelveHoursMs = 2000 // 12 * 60 * 60 * 1000
     const interval = window.setInterval(() => {
       enqueueRefetch()
     }, twelveHoursMs)
