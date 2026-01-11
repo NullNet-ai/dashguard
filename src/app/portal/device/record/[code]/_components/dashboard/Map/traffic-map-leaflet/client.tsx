@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { getFlagDetails } from '~/app/api/device/get_flags'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
@@ -283,6 +283,10 @@ export default function TrafficMaps({ params }: Record<string, any>) {
   const channel_name = 'live_map'
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation()
+  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
+  const isQueueWorkerRunningRef = useRef(false)
+  const isUnmountedRef = useRef(false)
+  const startQueueServiceRef = useRef<(() => void) | null>(null)
   
   // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
@@ -294,6 +298,54 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       enabled: false,
     }
   )
+
+  const startQueueService = useCallback(() => {
+    if (isQueueWorkerRunningRef.current) return
+    isQueueWorkerRunningRef.current = true
+
+    void (async () => {
+      try {
+        while (!isUnmountedRef.current) {
+          const next = taskQueueRef.current.shift()
+          if (!next) break
+          try {
+            await next()
+          } catch (err) {
+            console.error('[traffic-map] queue task failed', err)
+          }
+        }
+      } finally {
+        isQueueWorkerRunningRef.current = false
+        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+          startQueueServiceRef.current?.()
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    startQueueServiceRef.current = startQueueService
+  }, [startQueueService])
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    taskQueueRef.current.push(task)
+    startQueueServiceRef.current?.()
+  }, [])
+  const fetchInitialDataRef = useRef<((isInitial: boolean) => Promise<void>) | null>(null)
+  const isFirstReloadRef = useRef(true)
+  
+  useEffect(() => {
+    isFirstReloadRef.current = true
+  }, [filterId, params?.id, searchBy])
+
+  const reloadData = useCallback(() => {
+    enqueueTask(() => {
+      if (!fetchInitialDataRef.current) return Promise.resolve()
+      const isInitial = isFirstReloadRef.current
+      isFirstReloadRef.current = false
+      return fetchInitialDataRef.current(isInitial)
+    })
+  }, [enqueueTask])
 
   // Process and enhance IP data with country flags
   const processIPData = useCallback(async (ipData: Record<string, any>) => {
@@ -363,17 +415,18 @@ export default function TrafficMaps({ params }: Record<string, any>) {
         });
         
         // After time settings are updated, fetch initial data
-        fetchInitialData();
+        reloadData();
       } catch (error) {
         console.error('Failed to fetch time settings:', error);
       }
     };
     
     fetchTimeSettings();
-  }, [filterId, searchBy, refetchTimeUnitandResolution]);
+  }, [filterId, searchBy, refetchTimeUnitandResolution, reloadData]);
 
   // Fetch initial data (just one record for initial display)
-  const fetchInitialData = useCallback(async () => {
+  const fetchInitialData = useCallback(async (isInitial: boolean) => {
+    console.debug(`[pooling] - fetchInitialData`)
     setIsLoading(true);
     
     try {
@@ -387,7 +440,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
         device_id: params?.id || '',
         time_range: timeRange,
         filter_id: filterId,
-        batch_size: 1, // Just fetch one record for initial display
+        batch_size: isInitial ? 1 : 100, // Just fetch one record for initial display
         batch_offset: 0,
       };
       
@@ -396,14 +449,20 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       if (ipData.length > 0) {
         // Process the IP data
-        const processedData = await processIPData(ipData[0]);
+        let processedDatas = []
+        if (isInitial) {
+          const processedData = await processIPData(ipData[0]);
+          processedDatas = [processedData]
+        } else {
+          processedDatas = await Promise.all(ipData.map(async (ip) => await processIPData(ip)))
+        }
         
         // Update map data with the processed data
         setMapData((prev: any) => {
           return ({
           ...prev,
           countryTrafficData: {
-            ipData: [processedData]
+            ipData: processedDatas
           }
         })});
       }
@@ -413,14 +472,20 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       setIsLoading(false);
     }
   }, [filterId, params?.id, getUniqueSourceAndDestinationIP, timeSettings, processIPData]);
+  
+  useEffect(() => {
+    fetchInitialDataRef.current = fetchInitialData
+  }, [fetchInitialData])
 
   // Listen for socket updates
   useEffect(() => {
+    console.debug(`[socket] event - ${channel_name} listener isnt created yet`)
     if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return;
-  
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
-  
+    
+    console.debug(`[socket] event - ${eventKey} listener created`)
     socket.on(eventKey, async (data: any) => {
+      console.debug(`[socket] event ${eventKey} - data`, data)
       // Format the incoming data
       const formattedData = {
         id: data.id,
@@ -478,10 +543,21 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     };
   }, [eventEmitter]);
 
-  // Function to reload data
-  const reloadData = () => {
-    fetchInitialData();
-  };
+  useEffect(() => {
+    isUnmountedRef.current = false
+    taskQueueRef.current = []
+
+    const twelveHoursMs = 2000 // 12 * 60 * 60 * 1000
+    const interval = window.setInterval(() => {
+      reloadData()
+    }, twelveHoursMs)
+
+    return () => {
+      window.clearInterval(interval)
+      isUnmountedRef.current = true
+      taskQueueRef.current = []
+    }
+  }, [reloadData])
 
   return (
     <div>
@@ -489,7 +565,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
       <h1>Traffic Flow</h1>
 
-      {isLoading ? (
+      {false ? (// isLoading ? (
         <div className='flex justify-center items-center h-64'>
           <div className='text-center'>
             <p className='mb-2'>Loading map data...</p>
