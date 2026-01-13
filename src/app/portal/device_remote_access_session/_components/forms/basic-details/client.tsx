@@ -172,15 +172,15 @@ export default function RemoteAccessDetails(props: IFormProps) {
         device_id: devices ?? [],
         remote_access_type: [
           {
-            label: 'ssh',
+            label: 'SSH',
             value: 'ssh',
           },
           {
-            label: 'tty',
+            label: 'TTY',
             value: 'tty',
           },
           {
-            label: 'ui',
+            label: 'UI',
             value: 'ui',
           },
         ],
