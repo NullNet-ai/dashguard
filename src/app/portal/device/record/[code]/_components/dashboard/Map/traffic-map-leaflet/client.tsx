@@ -273,7 +273,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [timeSettings, setTimeSettings] = useState<Record<string, any>>({
-    time_count: 12,
+    time_count: 1,
     time_unit: 'hour',
     resolution: '1h',
   })
@@ -406,7 +406,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       try {
         const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
         const { time, resolution = '1h' } = time_unit_resolution || {};
-        const { time_count = 12, time_unit = 'hour' } = time || {};
+        const { time_count = 1, time_unit = 'hour' } = time || {};
 
         setTimeSettings({
           time_count,
