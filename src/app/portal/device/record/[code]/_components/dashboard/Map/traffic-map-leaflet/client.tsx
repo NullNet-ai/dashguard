@@ -462,7 +462,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
           return ({
           ...prev,
           countryTrafficData: {
-            ipData: processedDatas
+            ipData: processedDatas.filter(e => e.source_country.country !== 'No IP Info')
           }
         })});
       }
