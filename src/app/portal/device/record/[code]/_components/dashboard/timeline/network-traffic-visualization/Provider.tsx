@@ -142,7 +142,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     let updated_new_bandwidth = new_bandwidth
 
+    // @ts-expect-error - No type yet
     _bandwidth.data.forEach(e => {
+      // @ts-expect-error - No type yet
       updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
         if(curr?.source_ip === e?.source_ip) {
           return [...acc, { ...curr, result: [...curr.result, ...e.result] }]

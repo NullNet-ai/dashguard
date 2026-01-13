@@ -305,12 +305,14 @@ export const deviceConfigurationRouter = createTRPCRouter({
           entity: 'device_interfaces',
           token: ctx.token.value,
           query: {
+            // @ts-expect-error - No type yet
             advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].device_configurations.id }),
             pluck: [
               'name',
               "device",
               "id"
             ],
+            // @ts-expect-error - No type yet
             order: {
               by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
@@ -327,6 +329,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
         return []
       }
 
+      // @ts-expect-error - No type yet
       const drpdwn_optn = data.map((item: {
         name: string
         device: string
