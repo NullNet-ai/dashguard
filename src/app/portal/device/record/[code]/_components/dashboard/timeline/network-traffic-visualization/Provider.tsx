@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react'
@@ -40,6 +41,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
   const [token, setToken] = React.useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+  const [isQueueEnabled, setIsQueueEnabled] = useState(false)
+  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
+  const isQueueWorkerRunningRef = useRef(false)
+  const isUnmountedRef = useRef(false)
+  const startQueueServiceRef = useRef<(() => void) | null>(null)
+  const currentIndexRef = useRef(0)
+  const uniqueSourceIpsRef = useRef<string[]>([])
 
   const router = useRouter()
 
@@ -67,17 +75,60 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
   const time_range = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true })
   
-  const fetchBandwidth = async (add_data_count: number) => {  
-    const _bandwidth: any = await getBandwidthActions.mutateAsync({
+  const startQueueService = useCallback(() => {
+    if (isQueueWorkerRunningRef.current) return
+    isQueueWorkerRunningRef.current = true
+
+    void (async () => {
+      try {
+        while (!isUnmountedRef.current) {
+          const next = taskQueueRef.current.shift()
+          if (!next) break
+          try {
+            await next()
+          } catch (err) {
+            console.error('[network-flow] queue task failed', err)
+          }
+        }
+      } finally {
+        isQueueWorkerRunningRef.current = false
+        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+          startQueueServiceRef.current?.()
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    startQueueServiceRef.current = startQueueService
+  }, [startQueueService])
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    taskQueueRef.current.push(task)
+    if (isQueueEnabled) startQueueServiceRef.current?.()
+  }, [isQueueEnabled])
+
+  useEffect(() => {
+    currentIndexRef.current = current_index
+  }, [current_index])
+
+  useEffect(() => {
+    uniqueSourceIpsRef.current = unique_source_ips
+  }, [unique_source_ips])
+
+  const fetchBandwidth = useCallback(async (startIndex: number, add_data_count: number, isInitial = false) => {  
+    const getBandwidthParams = {
       device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
+      time_range: getLastTimeStamp({ count: isInitial ? time_count: 2, unit: isInitial ? time_unit : 'second', add_remaining_time: isInitial }) as any,
       bucket_size: resolution,
-      source_ips: unique_source_ips?.slice(current_index, current_index + add_data_count) || [],
-    });
+      source_ips: uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || [],
+    }
 
+    const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
+    
     if (!_bandwidth) return; // Exit early if no bandwidth data is returned
-
-    if (current_index === 0) {
+    
+    if (startIndex === 0) {
       // If it's the first batch, replace the data
       setNewBandwidth(
         _bandwidth?.data?.map((item: Record<string, any>) => {
@@ -87,15 +138,22 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       return;
     }
 
-    // Append new data to the existing bandwidth data
-    setNewBandwidth((prev: any) => [
-      ...(prev || []),
-      ...(_bandwidth?.data?.map((item: Record<string, any>) => {
-        return { ...item, time_unit, time_count, resolution, time_range };
-      }) || []),
-    ]);
+    if (isInitial) return
+
+    let updated_new_bandwidth = new_bandwidth
+
+    _bandwidth.data.forEach(e => {
+      updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
+        if(curr?.source_ip === e?.source_ip) {
+          return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
+        }
+        return [...acc, curr]
+      }, [])
+    })
+
+    setNewBandwidth(updated_new_bandwidth)
    
-  };
+  }, [getBandwidthActions, params?.id, resolution, time_count, time_range, time_unit])
   
   
   useEffect(() => {
@@ -128,18 +186,39 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
   
 
-  const fetchMoreData = async () => {
+  const fetchMoreDataInternal = useCallback(async () => {
+    console.debug('[pooling] fetchMoreData')
     if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
-    if (!unique_source_ips || unique_source_ips.length === 0) {
+    const ips = uniqueSourceIpsRef.current
+    if (!ips || ips.length === 0) {
       console.warn('No source IPs available for fetching new_bandwidth')
       return
     }
 
-    if (current_index + 2 > unique_source_ips.length) return
-    setCurrentIndex(current_index + 2)
+    const startIndex = currentIndexRef.current
+    const addCount = 2
+    if (startIndex + addCount > ips.length) return
 
-    fetchBandwidth(2)
-  }
+    setCurrentIndex(startIndex + addCount)
+    currentIndexRef.current = startIndex + addCount
+
+    await fetchBandwidth(startIndex, addCount)
+  }, [fetchBandwidth, filterId])
+
+  const fetchMoreData = useCallback(async () => {
+    enqueueTask(fetchMoreDataInternal)
+  }, [enqueueTask, fetchMoreDataInternal])
+
+  useEffect(() => {
+    if (!isQueueEnabled) return
+    const interval = window.setInterval(() => {
+      enqueueTask(fetchMoreDataInternal)
+    }, 2000)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [enqueueTask, fetchMoreDataInternal, isQueueEnabled])
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -162,7 +241,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
             const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
         
             const { time, resolution = '1s' } = time_unit_resolution || {};
-            const { time_count = 12, time_unit = 'hour' } = time || {};
+            const { time_count = 1, time_unit = 'hour' } = time || {};
         
             setTime({
               time_count,
@@ -190,13 +269,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         
             setUniqueSourceIP(data as string[]);
             setCurrentIndex(0);
+            uniqueSourceIpsRef.current = data as string[]
+            currentIndexRef.current = 0
             setLoading(false);
           };
         
           await fetchUniqueSourceIP(); // Trigger fetchUniqueSourceIP directly after fetchTimeUnitandResolution
         
           // Fetch bandwidth data
-          fetchBandwidth(20); // Trigger fetchBandwidth
+          fetchBandwidth(0, 20); // Trigger fetchBandwidth
         } catch (error) {
           console.error('Error during handleRefresh:', error); // Log the error for debugging
         } finally {
@@ -225,7 +306,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       } = await refetchTimeUnitandResolution()
       
       const { time, resolution = '1s' } = time_unit_resolution || {}
-      const { time_count = 12, time_unit = 'hour' } = time || {}
+      const { time_count = 1, time_unit = 'hour' } = time || {}
       
       setTime({
         time_count,
@@ -250,6 +331,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       setUniqueSourceIP(data as string[])
       setCurrentIndex(0)
+      uniqueSourceIpsRef.current = data as string[]
+      currentIndexRef.current = 0
       setLoading(false)
     }
 
@@ -270,7 +353,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     setCurrentIndex(prevIndex => prevIndex + 20)
     setNewBandwidth([])
     //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(20)
-    fetchBandwidth(20)
+    setIsQueueEnabled(false)
+    taskQueueRef.current = []
+    void (async () => {
+      await fetchBandwidth(0, 20, true)
+      setIsQueueEnabled(true)
+      startQueueServiceRef.current?.()
+    })()
   }, [unique_source_ips])
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
