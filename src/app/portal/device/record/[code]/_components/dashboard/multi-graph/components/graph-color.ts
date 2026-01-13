@@ -1,6 +1,8 @@
 export  const graphColors: any = {
     'vtnet0': '#8EBAD9',
     'vtnet1': '#f97316',
+    'em0': '#8EBAD9',
+    'em1': '#f97316',
   }
 
 export  const sortInterface = (interfaces: any[]) => {

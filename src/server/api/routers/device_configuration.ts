@@ -9,6 +9,7 @@ import {
 } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 const entity = 'device_configurations'
 export const deviceConfigurationRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -228,11 +229,11 @@ export const deviceConfigurationRouter = createTRPCRouter({
             devices: [
               'id', 'code',
             ],
-            device_interfaces:[
-              'name',
-              "device",
-              "id"
-            ]
+            // device_interfaces:[
+            //   'name',
+            //   "device",
+            //   "id"
+            // ]
           },
           advance_filters: [
             {
@@ -248,15 +249,15 @@ export const deviceConfigurationRouter = createTRPCRouter({
             type: 'operator',
             operator: EOperator.AND,
           },
-          {
-            type: 'criteria',
-            field: 'status',
-            entity: 'device_configurations',
-            operator: EOperator.EQUAL,
-            values: [
-              'Active',
-            ],
-          }
+          // {
+          //   type: 'criteria',
+          //   field: 'status',
+          //   entity: 'device_configurations',
+          //   operator: EOperator.EQUAL,
+          //   values: [
+          //     'Active',
+          //   ],
+          // }
         ],
           order: {
             limit: 1,
@@ -280,32 +281,53 @@ export const deviceConfigurationRouter = createTRPCRouter({
           },
         },
       })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_interfaces',
-            field: 'device_configuration_id',
-          },
-          from: {
-            entity,
-            field: 'id',
-          },
-        },
-      })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       entity: 'device_interfaces',
+      //       field: 'device_configuration_id',
+      //     },
+      //     from: {
+      //       entity,
+      //       field: 'id',
+      //     },
+      //   },
+      // })
       .execute()
       
       if (!res) {
         return []
       }
 
-      const data = res?.data?.[0]?.device_interfaces
+      const deviceInterfaces = await ctx.dnaClient
+        .findAll({
+          entity: 'device_interfaces',
+          token: ctx.token.value,
+          query: {
+            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].device_configurations.id }),
+            pluck: [
+              'name',
+              "device",
+              "id"
+            ],
+            order: {
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute();
+        
+
+      console.log("### ~ deviceInterfaces:", deviceInterfaces.data)
+      const data = deviceInterfaces.data // res?.data?.[0]?.device_interfaces
 
       if (!data) {
         return []
       }
 
-      const drpdwn_optn = [data].map((item: {
+      const drpdwn_optn = data.map((item: {
         name: string
         device: string
       }) => {
