@@ -1,6 +1,7 @@
 'use client'
 
 import { z } from 'zod'
+import { useCallback, useState } from 'react'
 
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
@@ -12,11 +13,15 @@ import { type IFormProps } from '../types'
 const FormSchema = z.object({
   device_id: z.string({ message: 'Device is required' }).min(1, { message: 'Device is required' }),
   remote_access_type: z.string({ message: 'Connection Type is required' }).min(1, { message: 'Connection Type is required' }),
+  device_service_id: z.string().optional(),
 })
 
 export default function RemoteAccessDetails(props: IFormProps) {
   // @ts-expect-error - No type yet
   const { record_data, deviceId, deviceCode } = props ?? {}
+  const [remoteAccessType, setRemoteAccessType] = useState<string | undefined>(
+    record_data?.remote_access_type,
+  )
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
@@ -24,18 +29,24 @@ export default function RemoteAccessDetails(props: IFormProps) {
     limit: 100,
     device_code: deviceCode,
   })
+  const { data: deviceServices } = api.deviceRemoteAccessSession.fetchDeviceServices.useQuery({
+    limit: 100,
+    device_code: deviceCode,
+    device_id: deviceId,
+  })
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      const { device_id, remote_access_type } = data
+      const { device_id, remote_access_type, device_service_id } = data
 
       const res = await createUpdate.mutateAsync({
         id: record_data?.id || '',
         device_id: deviceId || (deviceCode && devices?.[0]?.value) || device_id,
         remote_access_type,
         category: remote_access_type,
+        device_service_id: device_service_id,
       })
       if (res?.success && res) {
         const { remote_access_session } = res?.data[0] as Record<string, any>
@@ -97,12 +108,17 @@ export default function RemoteAccessDetails(props: IFormProps) {
     }
   });
 
+  const handleDataChange = useCallback((values: any) => {
+    setRemoteAccessType(values?.remote_access_type)
+  }, [])
+
   return (
     <FormBuilder
       customDesign={{
         formClassName: 'grid !grid-cols-2 gap-4',
       }}
       defaultValues={record_data}
+      onDataChange={handleDataChange}
       fields={[
         {
           id: '',
@@ -159,6 +175,24 @@ export default function RemoteAccessDetails(props: IFormProps) {
             gridRow: '3 / span 1',
           },
         },
+        // @ts-expect-error - No type yet
+        ...(remoteAccessType === 'ui' ?
+        [{
+          id: 'device_service_id',
+          formType: 'select',
+          name: 'device_service_id',
+          label: 'Service',
+          description: 'Field Description',
+          placeholder: 'Enter value...',
+          fieldClassName: '',
+          readonly: false,
+          required: false,
+          selectSearchable: true,
+          fieldStyle: {
+            gridColumn: '1 / span 2',
+            gridRow: '4 / span 1',
+          },
+        }] : []),
       ]}
       formKey="formlabel"
       formLabel="Remote Access"
@@ -184,6 +218,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
             value: 'ui',
           },
         ],
+        device_service_id: deviceServices ?? [],
       }}
       formSaveButtonTitle='Connect'
     />

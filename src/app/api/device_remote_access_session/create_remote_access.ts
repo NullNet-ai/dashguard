@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export async function createRemoteAccess({ device_id, ra_type, token, instanceId }: { device_id: string, ra_type: string, token: string, instanceId: string }) {
+export async function createRemoteAccess({ device_id, ra_type, token, instanceId, device_service_id }: { device_id: string, ra_type: string, token: string, instanceId: string, device_service_id?: string }) {
   let params = {
     device_id,
     session_type: ra_type,
@@ -11,9 +11,7 @@ export async function createRemoteAccess({ device_id, ra_type, token, instanceId
       ...params,
       // @ts-expect-error - No type yet
       data: {
-        local_addr: "127.0.0.1",
-        local_port: 8443,
-        protocol: "https"
+        service_id: device_service_id
     }
     }
   }

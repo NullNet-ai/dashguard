@@ -1,4 +1,5 @@
 import { EDateFormats, EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { uniqBy } from 'lodash'
 import { z } from 'zod'
 
 import { createRemoteAccess } from '~/app/api/device_remote_access_session/create_remote_access'
@@ -106,6 +107,58 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       })
       
       return res_data
+    }
+    ),
+  fetchDeviceServices: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string(),
+        device_code: z.string().optional(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, device_id, device_code } = input
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: 'device_services',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'address', 'port', 'protocol', 'program'],
+            advance_filters: createAdvancedFilter({ device_id: realDeviceId }),
+            order: {
+              limit: limit || 10,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+      
+      const res_data = res?.data?.map((item: Record<string, any>) => {
+        return {
+          label: `${item.protocol}://${item.address}:${item.port}`,
+          value: item.id,
+          item
+        }
+      })
+      
+      return uniqBy(res_data, 'label')
     }
     ),
   mainGrid: privateProcedure
@@ -281,10 +334,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     }),
 
   createUpdateDeviceRemoteAccessSessions: privateProcedure
-    .input(z.object({ id: z.string().optional(), device_id: z.string(), remote_access_type: z.string(), category: z.string() }))
+    .input(z.object({ id: z.string().optional(), device_id: z.string(), remote_access_type: z.string(), category: z.string(), device_service_id: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
-      const { device_id, remote_access_type } = input
+      const { device_id, remote_access_type, device_service_id } = input
 
       const response = await ctx.dnaClient
         .findAll({
@@ -306,7 +359,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         data: {
           session_token
         }
-      } = await createRemoteAccess({ device_id, ra_type, token, instanceId })
+      } = await createRemoteAccess({ device_id, ra_type, token, instanceId , device_service_id })
           
           return await ctx.dnaClient.findAll({
             entity,
