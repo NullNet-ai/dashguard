@@ -251,6 +251,7 @@ export const deviceRouter = createTRPCRouter({
               'device_os',
               'is_device_authorized',
               'is_device_online',
+              'address_id'
             ],
             advance_filters: createAdvancedFilter({ code: code! }),
             order: {
@@ -268,23 +269,97 @@ export const deviceRouter = createTRPCRouter({
         );
       }
 
-      return response.data[0];
+      const device = response.data[0]
+
+      const responseAddresses = await ctx.dnaClient
+        .findAll({
+          entity: 'addresses',
+          token: ctx.token.value,
+          query: {
+            pluck: [
+              "address",
+              "address_line_one",
+              "address_line_two",
+              "latitude",
+              "longitude",
+              "place_id",
+              "street_number",
+              "street",
+              "region",
+              "region_code",
+              "country_code",
+              "postal_code",
+              "country",
+              "state",
+              "city",
+            ],
+            advance_filters: createAdvancedFilter({ id: device?.address_id }),
+          },
+        })
+        .execute();
+
+      return {
+        ...device,
+        address: responseAddresses.data?.[0]
+      }
     }),
   updateDeviceCategory: privateProcedure
     .input(
       z.object({
         id: z.string().min(1),
         device_category: z.string().min(1),
+        address_country: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const { id, device_category } = input;
+      let { address_id } = input;
+
+      const address = {
+        "country": input['address_country'],
+      }
+
+      // Create Address
+      if (!address_id) {
+        const response = await ctx.dnaClient
+          .create({
+            entity: 'addresses',
+            token: ctx.token.value,
+            mutation: {
+              params: {
+                ...address,
+                created_by: ctx.token.value,
+              },
+              pluck: ['id'],
+            },
+          })
+          .execute();
+
+        if (!response.success)
+          throw new Error(
+            `Failed to create address: ${response.errors?.map((errMap) => errMap.message).join(' ')}`,
+          );
+        address_id = response.data[0].id;
+      }
+      // Update Address
+      else {
+        await ctx.dnaClient.update(address_id, {
+          entity: 'addresses',
+          token: ctx.token.value,
+          mutation: {
+            params: address,
+          },
+        });
+      }
 
       return await ctx.dnaClient.update(id, {
         entity: 'devices',
         token: ctx.token.value,
         mutation: {
-          params: { device_category },
+          params: { 
+            device_category,
+            address_id,
+          },
         },
       });
     }),

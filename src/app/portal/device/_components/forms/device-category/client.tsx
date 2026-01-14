@@ -6,9 +6,18 @@ import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { api } from "~/trpc/react";
+import countries from 'public/countries.json';
+
+const addressCountryOptions = (countries as Array<{ name: string; code: string }>)
+  .map((country) => ({
+    label: country.name,
+    value: country.name,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 const FormSchema = z.object({
   device_category: z.string().min(1, 'Device Category is required'),
+  address_country: z.string().min(1, 'Country is required'),
 });
 
 export default function DeviceCategory({ params, defaultValues }: IFormProps) {
@@ -54,6 +63,22 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
           fieldStyle: {},
           required: true,
         },
+        {
+          id: 'address_country',
+          formType: 'select',
+          name: 'address_country',
+          label: 'Country',
+          description: 'Field Description',
+          placeholder: 'Enter value...',
+          fieldClassName: '',
+          readonly: false,
+          required: true,
+          selectSearchable: true,
+          fieldStyle: {
+            gridColumn: '1 / span 2',
+            gridRow: '3 / span 1',
+          },
+        },
       ]}
       checkboxOptions={{}}
       radioOptions={{
@@ -72,7 +97,9 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
           },
         ],
       }}
-      selectOptions={{}}
+      selectOptions={{
+        address_country: addressCountryOptions,
+      }}
       multiSelectOptions={{}}
     />
   );
