@@ -140,7 +140,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: ['id', 'address', 'port', 'protocol', 'program'],
-            advance_filters: createAdvancedFilter({ device_id: realDeviceId }),
+            advance_filters: createAdvancedFilter({ device_id: realDeviceId, status: 'Active' }),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -346,6 +346,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           query: {
             pluck: ['id'],
             advance_filters: createAdvancedFilter({ device_id, status: 'Active' }),
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
           },
         })
         .execute();
