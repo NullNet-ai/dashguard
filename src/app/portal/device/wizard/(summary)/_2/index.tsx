@@ -20,10 +20,12 @@ const Summary = () => {
     <div>
       <p className="mb-[8px] no-underline text-[#334155]">
         <strong>Device Name: </strong>
+        {/* @ts-expect-error - No type yet */}
         &nbsp; {record?.device_name || 'None'}
       </p>
       <p className="mb-[8px] no-underline text-[#334155]">
         <strong>Device Type: </strong>
+        {/* @ts-expect-error - No type yet */}
         &nbsp; {record?.device_type || 'None'}
       </p>
     </div>

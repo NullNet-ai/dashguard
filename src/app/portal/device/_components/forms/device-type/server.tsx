@@ -29,6 +29,7 @@ const FormServerFetch = async () => {
     return <>FUCK YOU</>
   }
 
+  // @ts-expect-error - No type yet
   const options = optionsByCategory[fetched_device!.device_category]?.map(
     (value) => ({ label: value, value }),
   );
@@ -38,6 +39,7 @@ const FormServerFetch = async () => {
       <DeviceCategory
         defaultValues={{ ...fetched_device }}
         params={{
+          // @ts-expect-error - No type yet
           id: fetched_device?.id!,
           shell_type: application! as 'record' | 'wizard',
           entity: main_entity,

@@ -266,6 +266,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
             now.setMinutes(0, 0, 0) // truncate to current hour
             const data = await getUniqueSourceActions.mutateAsync({
               device_id: params?.id || '',
+              // @ts-expect-error - No type yet
               time_range: getLastTimeStamp({ count: time_count, unit: time_unit, _now: now }) as any,
               filter_id: filterId,
             });

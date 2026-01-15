@@ -34,6 +34,7 @@ export default function AuthorizaDeviceForm({
     try {
       await authorizeDevice.mutateAsync({
         device_name: value.data.device_name,
+        // @ts-expect-error - No type yet
         device_id: data!.id,
       })
     }

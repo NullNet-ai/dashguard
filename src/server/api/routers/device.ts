@@ -313,6 +313,7 @@ export const deviceRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const { id, device_category } = input;
+      // @ts-expect-error - No type yet
       let { address_id } = input;
 
       const address = {
@@ -339,6 +340,7 @@ export const deviceRouter = createTRPCRouter({
           throw new Error(
             `Failed to create address: ${response.errors?.map((errMap) => errMap.message).join(' ')}`,
           );
+        // @ts-expect-error - No type yet
         address_id = response.data[0].id;
       }
       // Update Address
