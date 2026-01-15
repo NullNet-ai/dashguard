@@ -262,10 +262,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         
           // Fetch unique source IPs
           const fetchUniqueSourceIP = async () => {
+            const now = new Date()
+            now.setMinutes(0, 0, 0) // truncate to current hour
             const data = await getUniqueSourceActions.mutateAsync({
               device_id: params?.id || '',
-              // @ts-expect-error - No type yet
-              time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
+              time_range: getLastTimeStamp({ count: time_count, unit: time_unit, _now: now }) as any,
               filter_id: filterId,
             });
         
@@ -325,9 +326,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!filterId) return
 
     const fetchUniqueSourceIP = async () => {
+      const now = new Date()
+      now.setMinutes(0, 0, 0) // truncate to current hour
       const data = await getUniqueSourceActions.mutateAsync({
         device_id: params?.id || '',
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
+        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, _now: now }) as any,
         filter_id: filterId,
       })
 
@@ -338,7 +341,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setLoading(false)
     }
 
-    setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
+    // setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
+    fetchUniqueSourceIP()
   }, [filterId, time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {

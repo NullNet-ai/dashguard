@@ -87,18 +87,19 @@ export function generateTimeSeriesData(
 
   // Find the reference date
   let refDate = sampleData.length > 0 ? new Date(sampleData[0].bucket.replace(' ', 'T')) : new Date();
-  sampleData.forEach((item: any) => {
-    const d = new Date(item.bucket.replace(' ', 'T'));
-    if (d < refDate) refDate = d;
-  });
+  // sampleData.forEach((item: any) => {
+  //   const d = new Date(item.bucket.replace(' ', 'T'));
+  //   if (d < refDate) refDate = d;
+  // });
 
   let startDate = new Date(refDate);
-  if (resolution_unit === 'h') {
-    startDate.setHours(0, 0, 0, 0); // Start from 00:00:00 if hourly
-  } else {
-    // For minutes/seconds, start from the time of the earliest sample
-    startDate = new Date(refDate);
-  }
+  startDate.setMinutes(0, 0, 0); // Align to the top of the current hour (e.g., 8:14 PM -> 8:00 PM)
+  // if (resolution_unit === 'h') {
+  //   startDate.setHours(0, 0, 0, 0); // Start from 00:00:00 if hourly
+  // } else {
+  //   // For minutes/seconds, start from the time of the earliest sample
+  //   startDate = new Date(refDate);
+  // }
 
   // Build a map for fast lookup
   const bucketMap: Record<string, any> = {};

@@ -141,6 +141,13 @@ export const cachedFilterRouter = createTRPCRouter({
     fetchCachedFilterTimeUnitandResolution: privateProcedure
     .input(z.object({ type: z.string(), filter_id: z.string() }))
     .query(async ({ input, ctx }) => {
+      // return {
+      //     time: {
+      //       time_count: 1,
+      //       time_unit: 'hour'
+      //     },
+      //     resolution: '1s',
+      //   }
       const { type, filter_id } = input
       
       const { account } = ctx.session

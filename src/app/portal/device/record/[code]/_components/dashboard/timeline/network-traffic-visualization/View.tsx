@@ -14,6 +14,8 @@ import { FlagIcon } from '@heroicons/react/20/solid'
 const rowHeight = 20
 const containerHeight = 600 // viewport height for virtualization
 
+import TimelineV2 from './components/TimelineV2'
+
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0
   if (!data) return 0
@@ -97,6 +99,9 @@ export default function NetworkFlowView() {
       />
     );
   }
+
+
+  return <TimelineV2 flowData={flowData} formatted={formattedArr} />
 
   return (
     <div

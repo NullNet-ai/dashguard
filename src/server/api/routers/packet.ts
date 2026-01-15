@@ -776,7 +776,7 @@ export const packetRouter = createTRPCRouter({
 
     const filterConnections = async (starts_at: number) => {
       // const limit = 100000
-      const limit = 1000
+      const limit = 20 //1000
 
       const { account } = ctx.session
       const { contact } = account
@@ -898,7 +898,7 @@ export const packetRouter = createTRPCRouter({
 
       const _connections = connections?.data || []
       const _connections_length = _connections.length
-
+      
       const sourceIPs = new Set()
       for (let i = 0; i < _connections_length; i++) {
         if (_connections?.[i]) {
